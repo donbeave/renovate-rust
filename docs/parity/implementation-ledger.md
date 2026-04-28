@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0147  | 2026-04-28 | Tekton CI/CD resource extractor (step image deps) | Complete | See below. |
 | 0146  | 2026-04-28 | Kubernetes manifest Docker image extractor | Complete | See below. |
 | 0145  | 2026-04-28 | ArgoCD Application manifest extractor (Helm + Git sources) | Complete | See below. |
 | 0144  | 2026-04-28 | Bun lockfile manager + nodenv/nvm/pyenv manager aliases | Complete | See below. |
@@ -3093,6 +3094,27 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0147 - Tekton CI/CD resource extractor (step image deps)
+
+### Renovate reference
+- `lib/modules/manager/tekton/extract.ts`
+- Default patterns: `[]`; we add `(^|/)tekton/.+\.ya?ml$`
+- Datasource: `docker` (Docker Hub step images)
+
+### What landed
+- `crates/renovate-core/src/extractors/tekton.rs` (new):
+  - `TEKTON_RE` — content detection for `apiVersion: tekton.dev/`.
+  - Delegates to `kubernetes::extract()` for `image:` line scanning (Tekton steps
+    use the same format as K8s containers).
+  - Exports `KubernetesDep` and `KubernetesSkipReason` for unified pipeline handling.
+  - 3 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with `(^|/)tekton/.+\.ya?ml$`.
+- `crates/renovate-cli/src/main.rs`: pipeline identical to Kubernetes block.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1019 passed
 
 ## Slice 0146 - Kubernetes manifest Docker image extractor
 

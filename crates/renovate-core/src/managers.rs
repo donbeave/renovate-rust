@@ -534,6 +534,11 @@ const MANAGER_DEFS: &[ManagerDef] = &[
             r"(^|/)manifests/.+\.ya?ml$",
         ],
     },
+    ManagerDef {
+        // Tekton tasks/pipelines stored in tekton/ directory.
+        name: "tekton",
+        patterns: &[r"(^|/)tekton/.+\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
