@@ -2816,6 +2816,7 @@ async fn process_repo(
         "nvmrc",
         "bun-version",
         "bazelisk",
+        "ruby-version",
     ] {
         for vf_path in manager_files(&detected, manager_name) {
             match client.get_raw_file(owner, repo, &vf_path).await {
@@ -2866,7 +2867,13 @@ async fn process_repo(
 
                     let status = match tag_result {
                         Ok(Some(tag)) => {
-                            let latest_ver = tag.trim_start_matches(tag_strip).to_owned();
+                            let stripped = tag.trim_start_matches(tag_strip);
+                            // Ruby tags use underscores: `3_3_0` → `3.3.0`
+                            let latest_ver = if manager_name == "ruby-version" {
+                                stripped.replace('_', ".")
+                            } else {
+                                stripped.to_owned()
+                            };
                             let s =
                                 renovate_core::versioning::semver_generic::semver_update_summary(
                                     &dep.current_value,

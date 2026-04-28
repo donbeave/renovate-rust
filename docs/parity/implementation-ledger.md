@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0109  | 2026-04-28 | `.ruby-version` version file (GitHub Tags, underscore tag normalization) | Complete | See below. |
 | 0108  | 2026-04-28 | Clojure `deps.edn` / `bb.edn` extractor | Complete | See below. |
 | 0107  | 2026-04-28 | Azure Pipelines Tasks datasource (GitHub mirror JSON) | Complete | See below. |
 | 0106  | 2026-04-28 | Nix flakes `flake.lock` input extractor | Complete | See below. |
@@ -2830,6 +2831,27 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 895 passed
 
+## Slice 0109 - `.ruby-version` version file (GitHub Tags, underscore normalization)
+
+### Renovate reference
+- `lib/modules/manager/ruby-version/index.ts`
+- `lib/modules/datasource/ruby-version/index.ts`
+- Pattern: `/(^|/)\.ruby-version$/`
+- Datasource: GitHub Tags (`ruby/ruby`) — tags use `v3_3_0` format
+
+### What landed
+- `crates/renovate-core/src/extractors/version_file.rs`:
+  - Added `("ruby-version", "ruby", GithubTags { repo: "ruby/ruby", tag_strip: "v" })` entry.
+  - Added `.ruby-version` → `"ruby-version"` to `manager_for_file()`.
+  - 2 new unit tests.
+- `crates/renovate-core/src/managers.rs`: `ruby-version` manager with `(^|/)\.ruby-version$` pattern.
+- `crates/renovate-cli/src/main.rs`: Added `"ruby-version"` to the version-file manager list;
+  adds underscore→dot normalization (`v3_3_0` → `3.3.0`) for ruby tags.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 897 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2843,7 +2865,8 @@ Pick whichever can be completed in one loop:
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
 7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
-8. **`pixi`** — Pixi `pixi.toml` conda package extraction.
+8. **`conan`** — C/C++ Conan package manager (`conanfile.txt`/`conanfile.py`) extraction.
+9. **`pixi`** — Pixi `pixi.toml` conda package extraction.
 9. **`ruby-version`** — `.ruby-version` file version tracking (GitHub Releases).
 10. **`conan`** — C/C++ Conan package manager (`conanfile.txt`/`conanfile.py`).
 10. **`helm-requirements`** — `requirements.yaml` (Helm v2) chart dependencies.

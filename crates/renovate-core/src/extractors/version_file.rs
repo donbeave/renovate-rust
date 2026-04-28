@@ -109,6 +109,14 @@ static VERSION_FILE_DEFS: &[(&str, &str, AsdfDatasource)] = &[
             tag_strip: "",
         },
     ),
+    (
+        "ruby-version",
+        "ruby",
+        AsdfDatasource::GithubTags {
+            repo: "ruby/ruby",
+            tag_strip: "v",
+        },
+    ),
 ];
 
 /// Extract a single version dep from a version file.
@@ -159,6 +167,7 @@ pub fn manager_for_file(filename: &str) -> Option<&'static str> {
         ".node-version" => Some("node-version"),
         ".nvmrc" => Some("nvmrc"),
         ".bazelversion" => Some("bazelisk"),
+        ".ruby-version" => Some("ruby-version"),
         _ => None,
     }
 }
@@ -272,5 +281,24 @@ mod tests {
     #[test]
     fn manager_for_file_unknown() {
         assert_eq!(manager_for_file("Gemfile"), None);
+    }
+
+    #[test]
+    fn ruby_version_file() {
+        let dep = extract("3.3.0\n", "ruby-version").unwrap();
+        assert_eq!(dep.tool, "ruby");
+        assert_eq!(dep.current_value, "3.3.0");
+        assert_eq!(
+            dep.datasource,
+            AsdfDatasource::GithubTags {
+                repo: "ruby/ruby",
+                tag_strip: "v",
+            }
+        );
+    }
+
+    #[test]
+    fn manager_for_file_ruby_version() {
+        assert_eq!(manager_for_file(".ruby-version"), Some("ruby-version"));
     }
 }

@@ -222,6 +222,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Cargo\.toml$"],
     },
     ManagerDef {
+        name: "ruby-version",
+        patterns: &[r"(^|/)\.ruby-version$"],
+    },
+    ManagerDef {
         name: "sbt",
         patterns: &[
             r"\.sbt$",
