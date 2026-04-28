@@ -1217,10 +1217,46 @@ None. No network or credentials were required for this slice.
 
 Pick whichever can be completed in one loop:
 
+## Slice 0039 - Helm `Chart.yaml` extractor + Helm repository index.yaml datasource
+
+### Renovate reference
+- `lib/modules/manager/helmv3/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/helmv3/index.ts` — patterns `Chart.ya?ml`, `requirements.ya?ml`
+- `lib/modules/datasource/helm/index.ts` — `HelmDatasource`, index.yaml fetching
+
+### What landed
+- `crates/renovate-core/src/extractors/helm.rs` — line-scanner Chart.yaml extractor:
+  - Handles `dependencies:` YAML list with `name`, `version`, `repository` fields.
+  - `stable` alias resolved to `https://charts.helm.sh/stable`.
+  - Skip reasons: `OciRegistry` (`oci://`), `UnresolvableAlias` (`@alias`), `NoRepository`.
+  - Collapsible-if Clippy fix applied (Rust 2024 `&&` let-chain form).
+- `crates/renovate-core/src/datasources/helm.rs` — Helm index.yaml datasource:
+  - `GET {repoUrl}/index.yaml` → line-scanner to find chart's first (newest) version.
+  - State machine: `Entries` → `Chart` → `Version` (no external YAML library needed).
+  - Concurrent lookups via `JoinSet` + `Arc<Semaphore>`.
+- `crates/renovate-core/src/managers.rs` — added `helmv3` with patterns `Chart.ya?ml`,
+  `requirements.ya?ml`.
+- `crates/renovate-cli/src/main.rs` — wired helm pipeline section + helper.
+
+### What was intentionally deferred
+- `Chart.lock` lockfile parsing.
+- `values.yaml` image tag extraction (separate `helm-values` manager).
+- OCI registry chart lookups.
+- Custom `@alias` resolution from user config.
+- `requirements.yaml` (Helm v2) distinct handling.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 374 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
 1. **Maven versioning module**: implement the Maven qualifier ordering scheme
    (alpha < beta < milestone < rc < release < sp) for accurate update decisions.
 2. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 3. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
-4. **Helm chart extractor + ArtifactHub datasource**: parse `Chart.yaml` for chart deps.
+4. **Gradle `build.gradle` extractor**: parse Gradle build files for dependency declarations.

@@ -30,6 +30,7 @@ use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::datasources::docker_hub as docker_datasource;
 use renovate_core::datasources::github_tags as github_tags_datasource;
 use renovate_core::datasources::gomod as gomod_datasource;
+use renovate_core::datasources::helm as helm_datasource;
 use renovate_core::datasources::maven as maven_datasource;
 use renovate_core::datasources::npm as npm_datasource;
 use renovate_core::datasources::nuget as nuget_datasource;
@@ -43,6 +44,7 @@ use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::composer as composer_extractor;
 use renovate_core::extractors::github_actions as github_actions_extractor;
 use renovate_core::extractors::gomod as gomod_extractor;
+use renovate_core::extractors::helm as helm_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::extractors::nuget as nuget_extractor;
@@ -1226,6 +1228,44 @@ async fn process_repo(
         }
     }
 
+    // ── Helm (Chart.yaml / requirements.yaml) ────────────────────────────────
+    for helm_file_path in manager_files(&detected, "helmv3") {
+        match client.get_raw_file(owner, repo, &helm_file_path).await {
+            Ok(Some(raw)) => {
+                let deps = helm_extractor::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %helm_file_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted helm chart deps"
+                );
+                let dep_inputs: Vec<helm_datasource::HelmDepInput> = actionable
+                    .iter()
+                    .map(|d| helm_datasource::HelmDepInput {
+                        name: d.name.clone(),
+                        current_value: d.current_value.clone(),
+                        repository_url: d.repository.clone(),
+                    })
+                    .collect();
+                let updates = helm_datasource::fetch_updates_concurrent(http, &dep_inputs, 8).await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                repo_report.files.push(output::FileReport {
+                    path: helm_file_path.clone(),
+                    manager: "helmv3".into(),
+                    deps: build_dep_reports_helm(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%helm_file_path, "Chart.yaml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%helm_file_path, %err, "failed to fetch Chart.yaml");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 
@@ -1711,6 +1751,48 @@ fn build_dep_reports_terraform(
         Result<
             renovate_core::datasources::terraform::TerraformUpdateSummary,
             renovate_core::datasources::terraform::TerraformError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_value.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_helm(
+    all_deps: &[renovate_core::extractors::helm::HelmExtractedDep],
+    actionable: &[&renovate_core::extractors::helm::HelmExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::helm::HelmUpdateSummary,
+            renovate_core::datasources::helm::HelmError,
         >,
     >,
 ) -> Vec<output::DepReport> {

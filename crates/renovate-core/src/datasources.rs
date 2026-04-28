@@ -8,6 +8,7 @@ pub mod crates_io;
 pub mod docker_hub;
 pub mod github_tags;
 pub mod gomod;
+pub mod helm;
 pub mod maven;
 pub mod npm;
 pub mod nuget;
