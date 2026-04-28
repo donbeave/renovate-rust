@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0127  | 2026-04-28 | Typst `.typ` package extractor + Typst registry datasource | Complete | See below. |
 | 0126  | 2026-04-28 | TFLint plugin `.tflint.hcl` extractor (GitHub Releases) | Complete | See below. |
 | 0125  | 2026-04-28 | Crow CI `.crow/*.yml` Docker image extractor | Complete | See below. |
 | 0124  | 2026-04-28 | Rancher Fleet extractor (Helm + GitRepo CRD dual-mode) | Complete | See below. |
@@ -3073,6 +3074,34 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0127 - Typst `.typ` package extractor + Typst registry datasource
+
+### Renovate reference
+- `lib/modules/manager/typst/extract.ts`
+- `lib/modules/datasource/typst/index.ts`
+- Pattern: `/\.typ$/`
+- Datasource: `https://packages.typst.org/preview/index.json`
+
+### What landed
+- `crates/renovate-core/src/datasources/typst.rs` (new):
+  - `fetch_latest(http, package_name, current_value)` fetches the flat JSON index.
+  - Filters entries by package name, selects latest by semver comparison.
+  - Error variants: `Http`, `Parse`, `NotFound`.
+- `crates/renovate-core/src/extractors/typst.rs` (new):
+  - `TypstDep { package_name, namespace, current_value, skip_reason }`.
+  - `IMPORT_RE` matches `#import "@namespace/pkg:version"` patterns.
+  - `preview` namespace → actionable; `local` → skipped; other → unsupported.
+  - Line comments (`//`) are skipped.
+  - 7 unit tests.
+- `crates/renovate-core/src/datasources.rs`: added `pub mod typst`.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod typst`.
+- `crates/renovate-core/src/managers.rs`: added `typst` with `\.typ$`.
+- `crates/renovate-cli/src/main.rs`: pipeline block; skip non-preview deps.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 911 passed
 
 ## Slice 0126 - TFLint plugin `.tflint.hcl` extractor
 
