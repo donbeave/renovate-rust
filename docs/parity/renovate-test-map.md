@@ -89,6 +89,20 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` glob | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_glob` | ported |
 | `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` regex | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_regex` | ported |
 | `lib/util/package-rules/repositories.spec.ts` | — | empty `matchRepositories` matches all | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_empty_matches_all` | ported |
+| `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` set without timestamp → false | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_set_without_timestamp_returns_false` | ported |
+| `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` old dep matches `"> 3 days"` | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_old_dep_matches_gt_constraint` | ported |
+| `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` new dep does not match `"> 3 days"` | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_new_dep_does_not_match_gt_constraint` | ported |
+| `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` disables dep via DepContext | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_via_dep_context_disables_dep` | ported |
+| `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` no constraint matches all | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_none_unset_matches_all` | ported |
+| `lib/util/pretty-time.ts` | 50 | `satisfiesDateRange(old, "> 3 days")` → true | `crates/renovate-core/src/schedule.rs` | `date_range_gt_old_timestamp_is_true` | ported |
+| `lib/util/pretty-time.ts` | 50 | `satisfiesDateRange(future, "> 3 days")` → false | `crates/renovate-core/src/schedule.rs` | `date_range_gt_future_timestamp_is_false` | ported |
+| `lib/util/pretty-time.ts` | 50 | `satisfiesDateRange(recent, "< 3 days")` → true | `crates/renovate-core/src/schedule.rs` | `date_range_lt_recent_timestamp_is_true` | ported |
+| `lib/util/pretty-time.ts` | 50 | `satisfiesDateRange(old, "< 3 days")` → false | `crates/renovate-core/src/schedule.rs` | `date_range_lt_old_timestamp_is_false` | ported |
+| `lib/util/pretty-time.ts` | 50 | `satisfiesDateRange(old, ">= 1 week")` → true | `crates/renovate-core/src/schedule.rs` | `date_range_gte_old_is_true` | ported |
+| `lib/util/pretty-time.ts` | 50 | `satisfiesDateRange(recent, "<= 1 week")` → true | `crates/renovate-core/src/schedule.rs` | `date_range_lte_future_is_true` | ported |
+| `lib/util/pretty-time.ts` | 50 | invalid operator → false | `crates/renovate-core/src/schedule.rs` | `date_range_invalid_operator_returns_false` | ported |
+| `lib/util/pretty-time.ts` | 50 | invalid timestamp → false | `crates/renovate-core/src/schedule.rs` | `date_range_invalid_timestamp_returns_false` | ported |
+| `lib/modules/platform/local/index.ts` | — | `--platform=local` scans CWD | `crates/renovate-core/src/platform/local.rs` | (integration, verified via `renovate --platform=local --dry-run=full`) | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` exact hit | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_exact_hit` | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` any-of-many | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_any_of_many` | ported |
 | `lib/util/package-rules/categories.ts` | — | empty `matchCategories` matches all | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all` | ported |
@@ -200,7 +214,7 @@ for future slices:
 
 | Renovate spec file | Topic | Priority |
 |--------------------|-------|----------|
-| `lib/util/package-rules/repositories.ts` | `matchRepositories` matcher | medium |
+| `lib/util/package-rules/repositories.ts` | `matchRepositories` matcher | ported |
 | `lib/config/presets/index.spec.ts` | Remote preset resolution (`github>`) | high |
 | `lib/modules/manager/npm/extract.spec.ts` | npm dep extraction edge cases | high |
 | `lib/modules/manager/cargo/extract.spec.ts` | Cargo workspace dep extraction | high |
