@@ -89,6 +89,27 @@ the operator.
   Treat it as operator-owned configuration.
 - Never rewrite unrelated user changes.
 
+## Refactoring Philosophy (agent-only)
+
+**Large-scale refactoring is always acceptable.** Do not take the easiest path
+out of fear of fundamental change. The goal is a better technical solution, not
+the smallest possible diff.
+
+- Refactor internal implementation freely: module structure, data types,
+  pipeline architecture, abstraction layers, naming, error handling, async
+  design — anything internal may change if it improves correctness, clarity,
+  or performance.
+- Preserve external compatibility: CLI commands, flags, environment variables,
+  config file format, config semantics, exit codes, and machine-readable output
+  must remain consistent with the original Renovate CLI where it makes sense to
+  do so. Renovate compatibility is the external contract; internal design is
+  fully under our control.
+- Do not accumulate technical debt by avoiding refactors. If a prior design
+  decision turns out to be wrong, fix it completely rather than working around
+  it with hacks or compatibility shims.
+- When a refactor touches many files, commit it as a single atomic change with
+  a clear description of the motivation.
+
 ## Shared Conventions
 
 Rules in the files below apply to everyone working in the repo, human and
