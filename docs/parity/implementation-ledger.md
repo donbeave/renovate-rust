@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0132  | 2026-04-28 | Apache Ant `build.xml` Maven dependency extractor (XML, coords + attributes) | Complete | See below. |
 | 0131  | 2026-04-28 | Terragrunt `terragrunt.hcl` extractor (GitHub Tags + Terraform Registry) | Complete | See below. |
 | 0130  | 2026-04-28 | Puppet `Puppetfile` extractor + Puppet Forge datasource | Complete | See below. |
 | 0129  | 2026-04-28 | OSGi feature model Maven bundle extractor (JSON5, GAV parsing) | Complete | See below. |
@@ -3078,6 +3079,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0132 - Apache Ant `build.xml` Maven dependency extractor
+
+### Renovate reference
+- `lib/modules/manager/ant/extract.ts`
+- Pattern: `**/build.xml`
+- Datasource: Maven
+
+### What landed
+- `crates/renovate-core/src/extractors/ant.rs` (new):
+  - Uses `quick-xml` `Event::Empty | Event::Start` to scan all XML elements.
+  - `local_name()` strips namespace prefix (`artifact:dependency` → `dependency`).
+  - Handles two forms: `groupId`/`artifactId`/`version` attributes and `coords="g:a:v"`.
+  - Collects `<remoteRepository url="...">` registry URLs and attaches to all deps.
+  - Skip reasons: `PropertyRef`, `MissingVersion`.
+  - 6 unit tests.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod ant`.
+- `crates/renovate-core/src/managers.rs`: added `ant` with `(^|/)build\.xml$`.
+- `crates/renovate-cli/src/main.rs`: pipeline using `maven_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 943 passed
 
 ## Slice 0131 - Terragrunt `terragrunt.hcl` extractor
 

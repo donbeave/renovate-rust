@@ -5,6 +5,7 @@
 
 pub mod ansible;
 pub mod ansible_galaxy;
+pub mod ant;
 pub mod asdf;
 pub mod azure_pipelines;
 pub mod batect;
