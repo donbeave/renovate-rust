@@ -2,7 +2,8 @@
 //!
 //! Renovate reference:
 //! - `lib/config/app-strings.ts` `getConfigFileNames()`
-//! - `lib/config/options/index.ts` — `enabled`, `ignoreDeps`, `ignorePaths`
+//! - `lib/config/options/index.ts` — `enabled`, `ignoreDeps`, `ignorePaths`,
+//!   `packageRules`
 //!
 //! Renovate searches a fixed ordered list of paths inside the repository;
 //! the first one found wins. This module ports that list, wires it to the
@@ -10,6 +11,7 @@
 //! into a typed `RepoConfig` struct.
 
 use globset::{Glob, GlobSet, GlobSetBuilder};
+use regex::Regex;
 use serde::Deserialize;
 
 use crate::config::GlobalConfig;
@@ -35,11 +37,54 @@ pub const CONFIG_FILE_CANDIDATES: &[&str] = &[
     ".renovaterc.json5",
 ];
 
-/// Parsed per-repository Renovate configuration.
+/// A compiled `packageRules` entry.
 ///
-/// Only the fields that affect the local update scan are included here.
-/// Complex fields like `packageRules` and `extends` are deferred to later
-/// slices.
+/// Renovate reference: `lib/config/options/index.ts` — `packageRules`.
+///
+/// Each rule's name-matching conditions are OR-ed together
+/// (`matchPackageNames` ∪ `matchPackagePatterns`), while each condition field
+/// is only checked when non-empty.
+#[derive(Debug, Clone)]
+pub struct PackageRule {
+    /// Exact package names that this rule applies to.
+    pub match_package_names: Vec<String>,
+    /// Compiled regex patterns for package names.
+    pub match_package_patterns: Vec<Regex>,
+    /// Limit this rule to specific managers (empty = all managers).
+    pub match_managers: Vec<String>,
+    /// If `Some(false)`, matching packages are disabled (skipped).
+    pub enabled: Option<bool>,
+    /// `true` when the raw config specified at least one name or pattern
+    /// constraint (even if all patterns failed to compile).  Prevents
+    /// a fully-invalid `matchPackagePatterns` from silently matching all deps.
+    pub has_name_constraint: bool,
+}
+
+impl PackageRule {
+    /// Return `true` when this rule's name conditions match `dep_name`.
+    ///
+    /// If neither `matchPackageNames` nor `matchPackagePatterns` is set
+    /// (tracked via `has_name_constraint`), the rule matches any package.
+    pub fn name_matches(&self, dep_name: &str) -> bool {
+        if !self.has_name_constraint {
+            return true;
+        }
+        self.match_package_names.iter().any(|n| n == dep_name)
+            || self
+                .match_package_patterns
+                .iter()
+                .any(|re| re.is_match(dep_name))
+    }
+
+    /// Return `true` when this rule's manager condition matches `manager`.
+    ///
+    /// An empty `matchManagers` list matches all managers.
+    pub fn manager_matches(&self, manager: &str) -> bool {
+        self.match_managers.is_empty() || self.match_managers.iter().any(|m| m == manager)
+    }
+}
+
+/// Parsed per-repository Renovate configuration.
 ///
 /// Defaults match Renovate's option defaults.
 #[derive(Debug, Clone)]
@@ -53,6 +98,8 @@ pub struct RepoConfig {
     /// minimatch/globset syntax (`**/test/**`, `**/*.spec.ts`, etc.).  Plain
     /// paths (no glob characters) are treated as prefix matches.
     pub ignore_paths: Vec<String>,
+    /// Compiled package rules (from `packageRules` in `renovate.json`).
+    pub package_rules: Vec<PackageRule>,
 }
 
 /// Compiled path-ignore matcher built from a `RepoConfig`.
@@ -116,6 +163,17 @@ impl RepoConfig {
     /// empty or unparseable.
     pub fn parse(content: &str) -> Self {
         #[derive(Deserialize)]
+        struct RawPackageRule {
+            #[serde(rename = "matchPackageNames", default)]
+            match_package_names: Vec<String>,
+            #[serde(rename = "matchPackagePatterns", default)]
+            match_package_patterns: Vec<String>,
+            #[serde(rename = "matchManagers", default)]
+            match_managers: Vec<String>,
+            enabled: Option<bool>,
+        }
+
+        #[derive(Deserialize)]
         struct Raw {
             #[serde(default = "default_true")]
             enabled: bool,
@@ -123,6 +181,8 @@ impl RepoConfig {
             ignore_deps: Vec<String>,
             #[serde(rename = "ignorePaths", default)]
             ignore_paths: Vec<String>,
+            #[serde(rename = "packageRules", default)]
+            package_rules: Vec<RawPackageRule>,
         }
 
         fn default_true() -> bool {
@@ -137,16 +197,70 @@ impl RepoConfig {
             }
         };
 
+        let package_rules = raw
+            .package_rules
+            .into_iter()
+            .map(|r| {
+                let has_name_constraint =
+                    !r.match_package_names.is_empty() || !r.match_package_patterns.is_empty();
+                let match_package_patterns = r
+                    .match_package_patterns
+                    .iter()
+                    .filter_map(|pat| {
+                        Regex::new(pat)
+                            .map_err(|e| {
+                                tracing::warn!(
+                                    pattern = pat,
+                                    %e,
+                                    "invalid packageRules matchPackagePatterns regex"
+                                );
+                            })
+                            .ok()
+                    })
+                    .collect();
+                PackageRule {
+                    match_package_names: r.match_package_names,
+                    match_package_patterns,
+                    match_managers: r.match_managers,
+                    enabled: r.enabled,
+                    has_name_constraint,
+                }
+            })
+            .collect();
+
         Self {
             enabled: raw.enabled,
             ignore_deps: raw.ignore_deps,
             ignore_paths: raw.ignore_paths,
+            package_rules,
         }
     }
 
     /// Return `true` when a dependency name should be ignored.
+    ///
+    /// Checks both the `ignoreDeps` list (exact match) and any `packageRules`
+    /// that set `enabled: false`.  Manager-agnostic: rules with `matchManagers`
+    /// are treated as matching all managers.
     pub fn is_dep_ignored(&self, name: &str) -> bool {
-        self.ignore_deps.iter().any(|p| p == name)
+        if self.ignore_deps.iter().any(|p| p == name) {
+            return true;
+        }
+        self.package_rules
+            .iter()
+            .any(|rule| rule.name_matches(name) && rule.enabled == Some(false))
+    }
+
+    /// Like [`is_dep_ignored`] but also filters by manager name.
+    ///
+    /// Rules whose `matchManagers` list is non-empty are only applied when
+    /// `manager` appears in that list.
+    pub fn is_dep_ignored_for_manager(&self, name: &str, manager: &str) -> bool {
+        if self.ignore_deps.iter().any(|p| p == name) {
+            return true;
+        }
+        self.package_rules.iter().any(|rule| {
+            rule.name_matches(name) && rule.manager_matches(manager) && rule.enabled == Some(false)
+        })
     }
 }
 
@@ -156,6 +270,7 @@ impl Default for RepoConfig {
             enabled: true, // Renovate default is enabled
             ignore_deps: Vec::new(),
             ignore_paths: Vec::new(),
+            package_rules: Vec::new(),
         }
     }
 }
@@ -426,5 +541,100 @@ mod tests {
         assert!(m.is_ignored("src/test/unit.ts"));
         assert!(m.is_ignored("vendor/lib.js"));
         assert!(!m.is_ignored("src/main.ts"));
+    }
+
+    // ── packageRules tests ────────────────────────────────────────────────────
+
+    #[test]
+    fn package_rules_parsed_from_json() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [
+                    {
+                        "matchPackageNames": ["lodash"],
+                        "enabled": false
+                    }
+                ]
+            }"#,
+        );
+        assert_eq!(c.package_rules.len(), 1);
+        assert_eq!(c.package_rules[0].match_package_names, vec!["lodash"]);
+        assert_eq!(c.package_rules[0].enabled, Some(false));
+    }
+
+    #[test]
+    fn package_rules_disable_via_name() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "enabled": false}]}"#,
+        );
+        assert!(c.is_dep_ignored("lodash"));
+        assert!(!c.is_dep_ignored("react"));
+    }
+
+    #[test]
+    fn package_rules_disable_via_pattern() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackagePatterns": ["^@babel/"], "enabled": false}]}"#,
+        );
+        assert!(c.is_dep_ignored("@babel/core"));
+        assert!(c.is_dep_ignored("@babel/preset-env"));
+        assert!(!c.is_dep_ignored("babel-loader"));
+    }
+
+    #[test]
+    fn package_rules_enabled_true_does_not_ignore() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "enabled": true}]}"#,
+        );
+        assert!(!c.is_dep_ignored("lodash"));
+    }
+
+    #[test]
+    fn package_rules_match_managers_respected() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchPackageNames": ["lodash"],
+                    "matchManagers": ["npm"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        // With manager-aware check, only npm matches
+        assert!(c.is_dep_ignored_for_manager("lodash", "npm"));
+        assert!(!c.is_dep_ignored_for_manager("lodash", "cargo"));
+        // Generic check ignores manager constraint (all managers)
+        assert!(c.is_dep_ignored("lodash"));
+    }
+
+    #[test]
+    fn package_rules_multiple_names_match_any() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash", "moment"], "enabled": false}]}"#,
+        );
+        assert!(c.is_dep_ignored("lodash"));
+        assert!(c.is_dep_ignored("moment"));
+        assert!(!c.is_dep_ignored("dayjs"));
+    }
+
+    #[test]
+    fn package_rules_invalid_regex_skipped() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackagePatterns": ["[invalid"], "enabled": false}]}"#,
+        );
+        // Invalid pattern is silently skipped — rule has no patterns, matches nothing
+        assert!(!c.is_dep_ignored("anything"));
+    }
+
+    #[test]
+    fn package_rules_no_name_constraint_matches_all() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["cargo"], "enabled": false}]}"#,
+        );
+        // No name constraint — all packages are disabled for cargo
+        assert!(c.is_dep_ignored_for_manager("serde", "cargo"));
+        assert!(c.is_dep_ignored_for_manager("tokio", "cargo"));
+        // Different manager — not matched
+        assert!(!c.is_dep_ignored_for_manager("serde", "npm"));
     }
 }

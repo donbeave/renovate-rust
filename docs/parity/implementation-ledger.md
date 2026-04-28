@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0065  | 2026-04-28 | `packageRules` parsing + `enabled: false` filtering | Complete | See below. |
 | 0064  | 2026-04-28 | GitHub Actions `runs-on` runner version extraction | Complete | See below. |
 | 0063  | 2026-04-28 | GitHub Actions container/services Docker image extraction | Complete | See below. |
 | 0035  | 2026-04-28 | NuGet `.csproj`/`.props` extractor + NuGet API datasource | Complete | See below. |
@@ -1993,6 +1994,34 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 685 passed
 
+## Slice 0065 - `packageRules` parsing + `enabled: false` filtering
+
+### Renovate reference
+- `lib/config/options/index.ts` — `packageRules` option schema
+- `matchPackageNames`, `matchPackagePatterns`, `matchManagers`, `enabled`
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PackageRule { match_package_names, match_package_patterns, match_managers, enabled, has_name_constraint }` — compiled rule struct.
+  - `has_name_constraint` field: `true` when the raw config specified any name or pattern constraint (even if invalid patterns failed to compile). Prevents a fully-invalid `matchPackagePatterns` from accidentally matching all packages.
+  - `name_matches(dep_name) -> bool` — OR-s `matchPackageNames` (exact) and compiled `matchPackagePatterns` (regex).
+  - `manager_matches(manager) -> bool` — empty `matchManagers` matches all managers.
+  - `RepoConfig.package_rules: Vec<PackageRule>` — parsed from `packageRules` in `renovate.json`.
+  - `is_dep_ignored(name)` — extended to also check `packageRules` with `enabled: false`.
+  - `is_dep_ignored_for_manager(name, manager)` — manager-aware variant (respects `matchManagers`).
+  - Added `regex` crate import to `repo_config.rs` for pattern compilation.
+  - 8 new unit tests.
+
+### What was intentionally deferred
+- `matchUpdateTypes` (major/minor/patch filtering)
+- `allowedVersions` constraint filtering
+- `matchDepTypes` filtering
+- `extends` / preset expansion
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 693 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2000,8 +2029,8 @@ Pick whichever can be completed in one loop:
 1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
-2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
-3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
-4. **`tekton` extractor**: Tekton pipeline bundle references.
-5. **Maven `<parent>` POM dependency**: parent POM version tracking (already extracted, verify pipeline).
+2. **`packageRules` matchUpdateTypes**: filter major/minor/patch updates with rules.
+3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
+4. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
+5. **`tekton` extractor**: Tekton pipeline bundle references.
 6. **Gradle `build.gradle` DSL extraction** (beyond version catalog): detect `implementation` and `api` calls.
