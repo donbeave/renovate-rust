@@ -5,5 +5,6 @@
 //! compares against the current constraint.
 
 pub mod crates_io;
+pub mod docker_hub;
 pub mod npm;
 pub mod pypi;

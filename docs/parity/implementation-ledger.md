@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0021  | 2026-04-28 | Docker Hub datasource + Dockerfile pipeline complete | Complete | See below. |
 | 0020  | 2026-04-28 | Manager regex caching + Dockerfile FROM extractor | Complete | See below. |
 | 0019  | 2026-04-28 | Parallel repository processing (JoinSet + Semaphore) | Complete | See below. |
 | 0018  | 2026-04-28 | pip_requirements extractor + PyPI datasource | Complete | See below. |
@@ -41,6 +42,42 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0021 - Docker Hub datasource + Dockerfile pipeline complete
+
+### Renovate reference
+- `lib/modules/datasource/docker/index.ts` — `_getDockerHubTags`
+- `lib/modules/datasource/docker/schema.ts` — `DockerHubTagsPage`
+- `lib/modules/datasource/docker/common.ts` — `getRegistryRepository`
+
+### What landed
+- `crates/renovate-core/src/datasources/docker_hub.rs`:
+  - `parse_image_name` — resolves `ubuntu` → `library/ubuntu`, detects
+    non-Docker-Hub registries (any component with `.` or `:` prefix).
+  - `fetch_tags` — paginates `hub.docker.com/v2/repositories/{ns}/{repo}/tags`
+    up to 2 pages (200 tags) with `ordering=last_updated`.
+  - `split_version_tag` / `cmp_version` / `docker_update_summary` — variant-
+    suffix-aware component-wise version comparison: `"18-alpine"` only
+    competes with other `-alpine` tags; `"22.04.1"` > `"22.04"`.
+  - `fetch_updates_concurrent` — bounded JoinSet + Semaphore batch fetch.
+  - 15 unit tests + 3 wiremock-based integration tests.
+- `crates/renovate-core/src/datasources.rs` — `pub mod docker_hub` added.
+- `crates/renovate-cli/src/main.rs` — Dockerfile section upgraded: builds
+  `DockerDepInput` list, calls `fetch_updates_concurrent`, maps results to
+  `DepReport`.  Non-Docker-Hub images (GHCR, ECR, custom registries) are
+  surfaced as `Skipped { reason: "non-docker-hub registry" }`.
+
+### What was intentionally deferred
+- Docker registry v2 token auth (for private images / non-Hub registries).
+- ECR, GHCR, Google Artifact Registry datasources.
+- Digest pinning updates (`@sha256:…` detection).
+- `--platform` flag handling for multi-arch images.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (232 passed)
 
 ## Slice 0020 - Manager regex caching + Dockerfile FROM extractor
 

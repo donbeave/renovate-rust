@@ -27,6 +27,7 @@ use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::crates_io::{self, DepInput};
+use renovate_core::datasources::docker_hub as docker_datasource;
 use renovate_core::datasources::npm as npm_datasource;
 use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
@@ -438,8 +439,31 @@ async fn process_repo(
                             total = deps.len(), actionable = actionable.len(),
                             "extracted dockerfile images"
                         );
-                        // No Docker registry datasource yet — report as
-                        // UpToDate with no latest info (datasource slice follows).
+                        // Build Docker Hub dep inputs for images that have a tag.
+                        let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
+                            .iter()
+                            .filter_map(|d| {
+                                let tag = d.tag.as_deref()?;
+                                Some(docker_datasource::DockerDepInput {
+                                    dep_name: format!("{}:{tag}", d.image),
+                                    image: d.image.clone(),
+                                    tag: tag.to_owned(),
+                                })
+                            })
+                            .collect();
+
+                        let updates = docker_datasource::fetch_updates_concurrent(
+                            http,
+                            &dep_inputs,
+                            docker_datasource::DOCKER_HUB_API,
+                            10,
+                        )
+                        .await;
+                        let update_map: HashMap<_, _> = updates
+                            .into_iter()
+                            .map(|r| (r.dep_name, r.summary))
+                            .collect();
+
                         let mut file_deps: Vec<output::DepReport> = Vec::new();
                         for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                             file_deps.push(output::DepReport {
@@ -451,13 +475,33 @@ async fn process_repo(
                             });
                         }
                         for dep in &actionable {
-                            let name = match &dep.tag {
+                            let dep_name = match &dep.tag {
                                 Some(t) => format!("{}:{t}", dep.image),
                                 None => dep.image.clone(),
                             };
+                            let status = match update_map.get(&dep_name) {
+                                Some(Ok(s)) if s.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: s.current_tag.clone(),
+                                        latest: s.latest.clone().unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(s)) => output::DepStatus::UpToDate {
+                                    latest: s.latest.clone(),
+                                },
+                                Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
+                                    output::DepStatus::Skipped {
+                                        reason: "non-docker-hub registry".into(),
+                                    }
+                                }
+                                Some(Err(e)) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            };
                             file_deps.push(output::DepReport {
-                                name,
-                                status: output::DepStatus::UpToDate { latest: None },
+                                name: dep_name,
+                                status,
                             });
                         }
                         repo_report.files.push(output::FileReport {
