@@ -253,9 +253,14 @@ impl PackageRule {
 
     /// Return `true` when this rule's `matchDatasources` condition matches `datasource`.
     ///
-    /// An empty `matchDatasources` list matches all datasources.
+    /// An empty `matchDatasources` list matches all datasources.  When non-empty,
+    /// each entry may be an exact string, `/regex/`, glob, or `!negation`.
+    ///
+    /// Renovate reference: `lib/util/package-rules/datasources.ts`
     pub fn datasource_matches(&self, datasource: &str) -> bool {
-        self.match_datasources.is_empty() || self.match_datasources.iter().any(|d| d == datasource)
+        use crate::string_match::match_regex_or_glob_list;
+        self.match_datasources.is_empty()
+            || match_regex_or_glob_list(datasource, &self.match_datasources)
     }
 
     /// Return `true` when this rule's `matchSourceUrls` condition matches `source_url`.
@@ -343,9 +348,13 @@ impl PackageRule {
 
     /// Return `true` when this rule's dep type condition matches `dep_type`.
     ///
-    /// An empty `matchDepTypes` list matches all dep types.
+    /// An empty `matchDepTypes` list matches all dep types.  When non-empty,
+    /// each entry may be an exact string, `/regex/`, glob, or `!negation`.
+    ///
+    /// Renovate reference: `lib/util/package-rules/dep-types.ts`
     pub fn dep_type_matches(&self, dep_type: &str) -> bool {
-        self.match_dep_types.is_empty() || self.match_dep_types.iter().any(|t| t == dep_type)
+        use crate::string_match::match_regex_or_glob_list;
+        self.match_dep_types.is_empty() || match_regex_or_glob_list(dep_type, &self.match_dep_types)
     }
 
     /// Return `true` when `path` matches this rule's `matchFileNames` patterns.
@@ -2302,6 +2311,50 @@ mod tests {
         // No matchDepTypes → matches all dep types
         assert!(c.is_dep_ignored_with_dep_type("lodash", "npm", "dependencies"));
         assert!(c.is_dep_ignored_with_dep_type("lodash", "npm", "devDependencies"));
+    }
+
+    #[test]
+    fn match_dep_types_glob_pattern() {
+        // "dev*" should match "devDependencies" but not "dependencies" or "peerDependencies"
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["dev*"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.dep_type_matches("devDependencies"));
+        assert!(!rule.dep_type_matches("dependencies"));
+        assert!(!rule.dep_type_matches("peerDependencies"));
+    }
+
+    #[test]
+    fn match_dep_types_negation() {
+        // ["dependencies", "!devDependencies"] → matches production but not dev
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["dependencies", "!devDependencies"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.dep_type_matches("dependencies"));
+        assert!(!rule.dep_type_matches("devDependencies"));
+    }
+
+    #[test]
+    fn match_datasources_glob_pattern() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["npm*"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.datasource_matches("npm"));
+        assert!(!rule.datasource_matches("pypi"));
+    }
+
+    #[test]
+    fn match_datasources_negation() {
+        // ["npm", "!docker"] → matches npm but not docker
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["npm", "!docker"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.datasource_matches("npm"));
+        assert!(!rule.datasource_matches("docker"));
     }
 
     #[test]
