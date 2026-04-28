@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0120  | 2026-04-28 | Home Assistant `manifest.json` PyPI extractor | Complete | See below. |
 | 0119  | 2026-04-28 | Batect wrapper script version extractor (GitHub Releases) | Complete | See below. |
 | 0118  | 2026-04-28 | Haskell Cabal `*.cabal` extractor + Hackage datasource | Complete | See below. |
 | 0117  | 2026-04-28 | FVM `.fvmrc`/`.fvm/fvm_config.json` Flutter version extractor | Complete | See below. |
@@ -3066,6 +3067,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0120 - Home Assistant `manifest.json` PyPI extractor
+
+### Renovate reference
+- `lib/modules/manager/homeassistant-manifest/extract.ts`
+- Pattern: `/(^|/)manifest\.json$/`
+- Datasource: PyPI
+
+### What landed
+- `crates/renovate-core/src/extractors/homeassistant.rs` (new):
+  - Deserializes `HaManifest { requirements: Option<Vec<String>> }` via serde_json.
+  - Delegates to `pip::extract` by joining requirements with `\n` — reuses PEP 508 parser.
+  - 4 unit tests: exact version, range version, invalid JSON, empty requirements.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod homeassistant`.
+- `crates/renovate-core/src/managers.rs`: added `homeassistant-manifest` with pattern `(^|/)manifest\.json$`.
+- `crates/renovate-cli/src/main.rs`:
+  - Import `homeassistant as homeassistant_extractor`.
+  - Pipeline block: fetches `manifest.json`, extracts deps, fetches PyPI updates, pushes `FileReport`.
+  - Reuses `build_dep_reports_pip` since the extractor returns `Vec<PipExtractedDep>`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 871 passed
 
 ## Slice 0119 - Batect wrapper script version extractor
 

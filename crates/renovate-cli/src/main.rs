@@ -47,6 +47,7 @@ use renovate_core::extractors::github_actions as github_actions_extractor;
 use renovate_core::extractors::gomod as gomod_extractor;
 use renovate_core::extractors::gradle as gradle_extractor;
 use renovate_core::extractors::helm as helm_extractor;
+use renovate_core::extractors::homeassistant as homeassistant_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::extractors::nuget as nuget_extractor;
@@ -696,6 +697,54 @@ async fn process_repo(
             }
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%setup_cfg_path, %err, "failed to fetch setup.cfg");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── homeassistant-manifest ────────────────────────────────────────────────
+    for ha_path in manager_files(&detected, "homeassistant-manifest") {
+        match client.get_raw_file(owner, repo, &ha_path).await {
+            Ok(Some(raw)) => {
+                let deps = homeassistant_extractor::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %ha_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted homeassistant manifest dependencies"
+                );
+                let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                    .iter()
+                    .map(|d| pypi_datasource::PypiDepInput {
+                        dep_name: d.name.clone(),
+                        specifier: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = pypi_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    pypi_datasource::PYPI_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: ha_path.clone(),
+                    manager: "homeassistant-manifest".into(),
+                    deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%ha_path, "manifest.json not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%ha_path, %err, "failed to fetch manifest.json");
                 had_error = true;
             }
         }

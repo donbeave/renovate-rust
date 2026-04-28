@@ -182,6 +182,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Chart\.ya?ml$", r"(^|/)requirements\.ya?ml$"],
     },
     ManagerDef {
+        name: "homeassistant-manifest",
+        patterns: &[r"(^|/)manifest\.json$"],
+    },
+    ManagerDef {
         name: "jenkins",
         patterns: &[r"(^|/)plugins\.(txt|ya?ml)$"],
     },

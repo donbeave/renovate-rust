@@ -40,6 +40,7 @@ pub mod gradle_wrapper;
 pub mod helm;
 pub mod helm_values;
 pub mod helmfile;
+pub mod homeassistant;
 pub mod jenkins;
 pub mod jsonnet_bundler;
 pub mod kustomize;
