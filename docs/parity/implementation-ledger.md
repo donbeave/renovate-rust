@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0086  | 2026-04-28 | Maven Wrapper `.mvn/wrapper/maven-wrapper.properties` extractor | Complete | See below. |
 | 0085  | 2026-04-28 | Gradle Wrapper extractor + Gradle Version datasource | Complete | See below. |
 | 0084  | 2026-04-28 | Refactor: extract `docker_hub_reports` helper to eliminate Docker pipeline duplication | Complete | See below. |
 | 0083  | 2026-04-28 | Jenkins `plugins.txt` / `plugins.yml` extractor | Complete | See below. |
@@ -2486,6 +2487,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 784 passed
 
+## Slice 0086 - Maven Wrapper `.mvn/wrapper/maven-wrapper.properties` extractor
+
+### Renovate reference
+- `lib/modules/manager/maven-wrapper/extract.ts`
+- Pattern: `/(^|/)\.mvn/wrapper/maven-wrapper\.properties$/`
+- Datasource: Maven Central (reuses existing `datasources::maven::fetch_latest`)
+
+### What landed
+- `crates/renovate-core/src/extractors/maven_wrapper.rs`:
+  - `MavenWrapperDep { dep_name, package_name, version }` struct.
+  - `extract(content)` — scans for `distributionUrl=`, `wrapperUrl=`, `wrapperVersion=` keys.
+  - `extract_version_from_url()` — finds the version path segment (between artifact name and filename)
+    using `is_version_like()` (starts with digit, contains `.`).
+  - `is_version_like()` — simple heuristic for version segments.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `maven-wrapper` manager pattern.
+- `crates/renovate-core/src/extractors.rs`: `pub mod maven_wrapper`.
+- `crates/renovate-cli/src/main.rs`: Maven Wrapper pipeline — for each dep, calls
+  `maven_datasource::fetch_latest(&dep.package_name, http)` (no new datasource needed —
+  looks up `org.apache.maven:apache-maven` and `org.apache.maven.wrapper:maven-wrapper`).
+
+### What was intentionally deferred
+- `mvnw`/`mvnw.cmd` script parsing (shell/batch scripts with version in comment).
+- `.mvn/wrapper/MavenWrapperDownloader.java` parsing.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 789 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2500,4 +2530,4 @@ Pick whichever can be completed in one loop:
 6. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 8. **Jenkins plugins datasource** (Jenkins Update Center JSON).
-9. **Maven Wrapper** (`mvnw`/`maven-wrapper.properties`) extractor.
+9. **Travis CI** `.travis.yml` Node.js version extraction.

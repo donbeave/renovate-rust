@@ -259,6 +259,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/|\.)(pom\.xml)$", r"^((\.mvn|\.m2)/)?settings\.xml$"],
     },
     ManagerDef {
+        name: "maven-wrapper",
+        patterns: &[r"(^|/)\.mvn/wrapper/maven-wrapper\.properties$"],
+    },
+    ManagerDef {
         name: "github-actions",
         patterns: &[
             r"(^|/)(workflow-templates|\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\.ya?ml$",

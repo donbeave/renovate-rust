@@ -1766,6 +1766,56 @@ async fn process_repo(
         }
     }
 
+    // ── Maven Wrapper (.mvn/wrapper/maven-wrapper.properties) ────────────────
+    for mw_path in manager_files(&detected, "maven-wrapper") {
+        match client.get_raw_file(owner, repo, &mw_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::maven_wrapper::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %mw_path,
+                    total = deps.len(), "extracted maven-wrapper versions"
+                );
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = match maven_datasource::fetch_latest(&dep.package_name, http).await
+                    {
+                        Ok(Some(latest)) if latest != dep.version => {
+                            output::DepStatus::UpdateAvailable {
+                                current: dep.version.clone(),
+                                latest,
+                            }
+                        }
+                        Ok(Some(latest)) => output::DepStatus::UpToDate {
+                            latest: Some(latest),
+                        },
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !file_deps.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: mw_path.clone(),
+                        manager: "maven-wrapper".into(),
+                        deps: file_deps,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%mw_path, "maven-wrapper.properties not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%mw_path, %err, "failed to fetch maven-wrapper.properties");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Mix (mix.exs) ─────────────────────────────────────────────────────────
     for mix_file_path in manager_files(&detected, "mix") {
         match client.get_raw_file(owner, repo, &mix_file_path).await {

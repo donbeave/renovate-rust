@@ -28,6 +28,7 @@ pub mod helmfile;
 pub mod jenkins;
 pub mod kustomize;
 pub mod maven;
+pub mod maven_wrapper;
 pub mod mix;
 pub mod npm;
 pub mod nuget;
