@@ -142,6 +142,21 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `labels`.
     pub labels: Vec<String>,
+
+    // ── Category / base-branch constraints ───────────────────────────────────
+    /// Ecosystem category strings to match (e.g. `["js"]`, `["python", "rust"]`).
+    /// When non-empty, the dep's manager must belong to at least one of these
+    /// categories (via `manager_categories()`).  Empty = all categories.
+    ///
+    /// Renovate reference: `lib/util/package-rules/categories.ts`
+    pub match_categories: Vec<String>,
+
+    /// Base branch patterns this rule applies to.  When non-empty, the current
+    /// base branch must match at least one entry (exact or glob).
+    /// Empty = all base branches.
+    ///
+    /// Renovate reference: `lib/util/package-rules/base-branch.ts`
+    pub match_base_branches: Vec<String>,
 }
 
 /// A compiled entry from `matchPackageNames`.
@@ -314,6 +329,40 @@ impl PackageRule {
             Ok(req) => req.matches(&current_sv),
             Err(_) => true, // unparseable → don't restrict
         }
+    }
+
+    /// Return `true` when this rule's `matchCategories` condition matches `categories`.
+    ///
+    /// `categories` is the slice of category strings for the dep's manager
+    /// (obtained from `manager_categories(manager_name)`).
+    /// An empty `matchCategories` list matches all categories.
+    pub fn categories_match(&self, categories: &[&str]) -> bool {
+        if self.match_categories.is_empty() {
+            return true;
+        }
+        self.match_categories
+            .iter()
+            .any(|c| categories.contains(&c.as_str()))
+    }
+
+    /// Return `true` when this rule's `matchBaseBranches` condition matches `branch`.
+    ///
+    /// Supports exact strings and glob patterns (`*`, `?`, `[`).
+    /// An empty `matchBaseBranches` list matches all branches.
+    pub fn base_branch_matches(&self, branch: &str) -> bool {
+        if self.match_base_branches.is_empty() {
+            return true;
+        }
+        self.match_base_branches.iter().any(|pattern| {
+            if pattern.contains('*') || pattern.contains('?') || pattern.contains('[') {
+                globset::Glob::new(pattern)
+                    .ok()
+                    .map(|g| g.compile_matcher().is_match(branch))
+                    .unwrap_or(false)
+            } else {
+                pattern == branch
+            }
+        })
     }
 }
 
@@ -742,6 +791,10 @@ impl RepoConfig {
             schedule: Vec<String>,
             #[serde(default)]
             labels: Vec<String>,
+            #[serde(rename = "matchCategories", default)]
+            match_categories: Vec<String>,
+            #[serde(rename = "matchBaseBranches", default)]
+            match_base_branches: Vec<String>,
         }
 
         #[derive(Deserialize)]
@@ -905,6 +958,8 @@ impl RepoConfig {
                     automerge: r.automerge,
                     schedule: r.schedule,
                     labels: r.labels,
+                    match_categories: r.match_categories,
+                    match_base_branches: r.match_base_branches,
                 }
             })
             .collect();
@@ -2625,5 +2680,88 @@ mod source_url_tests {
         let rule = &c.package_rules[0];
         assert!(rule.new_value_matches("1.0.0"));
         assert!(rule.new_value_matches("99.0.0"));
+    }
+}
+
+#[cfg(test)]
+mod categories_base_branch_tests {
+    use super::*;
+
+    // ── matchCategories ──────────────────────────────────────────────────────
+
+    #[test]
+    fn match_categories_exact_hit() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCategories": ["rust"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.categories_match(&["rust"]));
+        assert!(!rule.categories_match(&["js"]));
+        assert!(!rule.categories_match(&[]));
+    }
+
+    #[test]
+    fn match_categories_any_of_many() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCategories": ["python", "rust"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.categories_match(&["python"]));
+        assert!(rule.categories_match(&["rust"]));
+        assert!(rule.categories_match(&["python", "rust"]));
+        assert!(!rule.categories_match(&["java"]));
+    }
+
+    #[test]
+    fn match_categories_empty_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.categories_match(&["rust"]));
+        assert!(rule.categories_match(&["js"]));
+        assert!(rule.categories_match(&[]));
+    }
+
+    // ── matchBaseBranches ────────────────────────────────────────────────────
+
+    #[test]
+    fn match_base_branches_exact_hit() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchBaseBranches": ["main"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.base_branch_matches("main"));
+        assert!(!rule.base_branch_matches("develop"));
+    }
+
+    #[test]
+    fn match_base_branches_glob() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchBaseBranches": ["release/*"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.base_branch_matches("release/1.0"));
+        assert!(rule.base_branch_matches("release/2.3.4"));
+        assert!(!rule.base_branch_matches("main"));
+        assert!(!rule.base_branch_matches("feature/foo"));
+    }
+
+    #[test]
+    fn match_base_branches_empty_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.base_branch_matches("main"));
+        assert!(rule.base_branch_matches("develop"));
+        assert!(rule.base_branch_matches("release/1.0"));
+    }
+
+    #[test]
+    fn match_base_branches_multiple_entries() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchBaseBranches": ["main", "develop"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.base_branch_matches("main"));
+        assert!(rule.base_branch_matches("develop"));
+        assert!(!rule.base_branch_matches("feature/foo"));
     }
 }

@@ -63,6 +63,77 @@ pub fn is_disabled_by_default(manager_name: &str) -> bool {
     DISABLED_BY_DEFAULT.contains(&manager_name)
 }
 
+/// Return the language/ecosystem categories for `manager_name`.
+///
+/// Categories mirror the `categories` export in each upstream
+/// `lib/modules/manager/*/index.ts`.  Used to evaluate `matchCategories`
+/// in `packageRules`.
+///
+/// Returns an empty slice when the manager is not known or has no categories.
+pub fn manager_categories(manager_name: &str) -> &'static [&'static str] {
+    match manager_name {
+        // JS / Node
+        "npm" | "bun" | "nodenv" | "nvm" | "meteor" | "mint" => &["js"],
+        // Python
+        "pip_requirements" | "pip-compile" | "pip_setup" | "pipenv" | "poetry" | "pep621"
+        | "pep723" | "pyenv" | "runtime-version" | "setup-cfg" => &["python"],
+        // Java / JVM
+        "maven" | "maven-wrapper" | "gradle" | "gradle-wrapper" | "ant" | "sbt" | "leiningen"
+        | "kotlin-script" => &["java"],
+        // Go
+        "gomod" => &["golang"],
+        // Rust
+        "cargo" => &["rust"],
+        // Ruby
+        "bundler" | "gemspec" | "ruby-version" => &["ruby"],
+        // PHP
+        "composer" => &["php"],
+        // .NET
+        "nuget" => &["dotnet"],
+        // Docker / containers
+        "dockerfile" | "docker-compose" | "batect" | "devcontainer" | "quadlet" => &["docker"],
+        // Kubernetes
+        "kubernetes" | "kustomize" | "helm" | "helm-requirements" | "helm-values" | "helmfile"
+        | "helmsman" | "fleet" => &["kubernetes"],
+        // Helm (also kubernetes)
+        "argocd" | "glasskube" | "sveltos" | "crossplane" => &["kubernetes"],
+        // Terraform / IaC
+        "terraform" | "terraform-version" | "terragrunt" | "terragrunt-version"
+        | "tflint-plugin" | "bicep" => &["terraform", "iac"],
+        // CI/CD
+        "github-actions"
+        | "gitlabci"
+        | "gitlabci-include"
+        | "circleci"
+        | "travis"
+        | "droneci"
+        | "buildkite"
+        | "azure-pipelines"
+        | "bitbucket-pipelines"
+        | "cloudbuild"
+        | "woodpecker"
+        | "bitrise"
+        | "velaci" => &["ci"],
+        // Dart / Flutter
+        "pub" | "fvm" => &["dart"],
+        // Swift
+        "spm" | "xcodegen" => &["swift"],
+        // Haskell
+        "cabal" => &["haskell"],
+        // Elixir
+        "mix" => &["elixir"],
+        // Perl
+        "cpanfile" => &["perl"],
+        // Ansible
+        "ansible" | "ansible-galaxy" => &["ansible"],
+        // Bazel
+        "bazel" | "bazel-module" | "bazelisk" => &["bazel"],
+        // Nix
+        "nix" => &["c"],
+        _ => &[],
+    }
+}
+
 /// Pre-compiled manager patterns.  Compiled once at first use via
 /// `LazyLock` — avoids re-compilation on every `detect()` call.
 static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {

@@ -21,6 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0181  | 2026-04-28 | `matchCategories` + `matchBaseBranches` packageRule matchers | Complete | See below. |
+| 0180  | 2026-04-28 | `manager_categories()` lookup table (27 ecosystems) | Complete | See below. |
 | 0178  | 2026-04-28 | Add branchName to DepReport output | Complete | See below. |
 | 0177  | 2026-04-28 | Branch name generation — sanitize_dep_name + branch_topic + branch_name | Complete | See below. |
 | 0176  | 2026-04-28 | `matchSourceUrls` + `matchCurrentValue` + `matchNewValue` packageRule matchers | Complete | See below. |
@@ -4658,6 +4660,46 @@ managers should only run when explicitly listed in `enabledManagers`.
 3. **Remote preset resolution** — `github>org/repo//preset` fetching.
 4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **More built-in preset expansion** — schedule presets, group:monorepos.
+
+## Slice 0181 — `matchCategories` + `matchBaseBranches` packageRule matchers
+
+### Renovate reference
+- `lib/util/package-rules/categories.ts` — `matchCategories`
+- `lib/util/package-rules/base-branch.ts` — `matchBaseBranches`
+- `lib/modules/manager/*/index.ts` — each manager exports a `categories` array
+
+### What was implemented
+- `PackageRule::match_categories: Vec<String>` field (from `matchCategories` in JSON)
+- `PackageRule::categories_match(categories: &[&str]) -> bool` — empty = matches all; non-empty = dep's manager must belong to at least one listed category
+- `PackageRule::match_base_branches: Vec<String>` field (from `matchBaseBranches` in JSON)
+- `PackageRule::base_branch_matches(branch: &str) -> bool` — empty = matches all; supports exact strings and glob patterns (`release/*`, `feature/**`)
+- `RawPackageRule` deserialization extended with both new fields
+- `PackageRule` construction in `parse()` passes both through
+
+### Tests added (7 new)
+- `categories_base_branch_tests::match_categories_exact_hit`
+- `categories_base_branch_tests::match_categories_any_of_many`
+- `categories_base_branch_tests::match_categories_empty_matches_all`
+- `categories_base_branch_tests::match_base_branches_exact_hit`
+- `categories_base_branch_tests::match_base_branches_glob`
+- `categories_base_branch_tests::match_base_branches_empty_matches_all`
+- `categories_base_branch_tests::match_base_branches_multiple_entries`
+
+### Deferred
+- Wiring `categories_match` and `base_branch_matches` into the CLI dep-report filtering phase (requires propagating manager name → categories and current base branch through the pipeline)
+
+---
+
+## Slice 0180 — `manager_categories()` lookup table
+
+### Renovate reference
+- `lib/modules/manager/*/index.ts` — each manager's `categories` export
+
+### What was implemented
+- `pub fn manager_categories(manager_name: &str) -> &'static [&'static str]` in `managers.rs`
+- 27 ecosystem categories mapped: js, python, java, golang, rust, ruby, php, dotnet, docker, kubernetes, terraform/iac, ci, dart, swift, haskell, elixir, perl, ansible, bazel, nix
+
+---
 
 ## Slice 0178 — Add `branchName` field to `DepReport` output
 

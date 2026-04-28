@@ -81,6 +81,13 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | — | `allowedVersions` semver range | `crates/renovate-core/src/repo_config.rs` | `allowed_versions_blocks_out_of_range_update` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `ignoreVersions` in packageRules | `crates/renovate-core/src/repo_config.rs` | `package_rule_ignore_versions_scoped_to_matched_package` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchPackagePrefixes` (deprecated) | `crates/renovate-core/src/repo_config.rs` | `match_package_prefixes_converted_to_glob` | ported |
+| `lib/util/package-rules/categories.ts` | — | `matchCategories` exact hit | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_exact_hit` | ported |
+| `lib/util/package-rules/categories.ts` | — | `matchCategories` any-of-many | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_any_of_many` | ported |
+| `lib/util/package-rules/categories.ts` | — | empty `matchCategories` matches all | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all` | ported |
+| `lib/util/package-rules/base-branch.ts` | — | `matchBaseBranches` exact hit | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_exact_hit` | ported |
+| `lib/util/package-rules/base-branch.ts` | — | `matchBaseBranches` glob `release/*` | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_glob` | ported |
+| `lib/util/package-rules/base-branch.ts` | — | empty `matchBaseBranches` matches all | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_empty_matches_all` | ported |
+| `lib/util/package-rules/base-branch.ts` | — | `matchBaseBranches` multiple entries | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_multiple_entries` | ported |
 
 ---
 
