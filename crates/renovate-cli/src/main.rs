@@ -2571,79 +2571,12 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &glci_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::gitlabci::extract(&raw.content);
-                let actionable: Vec<_> = deps
-                    .iter()
-                    .filter(|d| d.dep.skip_reason.is_none())
-                    .collect();
-                tracing::debug!(
-                    repo = %repo_slug, file = %glci_path,
-                    total = deps.len(), actionable = actionable.len(),
-                    "extracted gitlab-ci images"
-                );
-                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
-                    .iter()
-                    .filter_map(|d| {
-                        let tag = d.dep.tag.as_deref()?;
-                        Some(docker_datasource::DockerDepInput {
-                            dep_name: format!("{}:{tag}", d.dep.image),
-                            image: d.dep.image.clone(),
-                            tag: tag.to_owned(),
-                        })
-                    })
-                    .collect();
-                let updates = docker_datasource::fetch_updates_concurrent(
-                    http,
-                    &dep_inputs,
-                    docker_datasource::DOCKER_HUB_API,
-                    10,
-                )
-                .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.dep_name, r.summary))
-                    .collect();
-                let mut file_deps: Vec<output::DepReport> = Vec::new();
-                for d in deps.iter().filter(|d| d.dep.skip_reason.is_some()) {
-                    file_deps.push(output::DepReport {
-                        name: d.dep.image.clone(),
-                        status: output::DepStatus::Skipped {
-                            reason: format!("{:?}", d.dep.skip_reason.as_ref().unwrap())
-                                .to_lowercase(),
-                        },
-                    });
-                }
-                for d in &actionable {
-                    let dep_name = match &d.dep.tag {
-                        Some(t) => format!("{}:{t}", d.dep.image),
-                        None => d.dep.image.clone(),
-                    };
-                    let status = match update_map.get(&dep_name) {
-                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
-                            current: s.current_tag.clone(),
-                            latest: s.latest.clone().unwrap_or_default(),
-                        },
-                        Some(Ok(s)) => output::DepStatus::UpToDate {
-                            latest: s.latest.clone(),
-                        },
-                        Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
-                            output::DepStatus::Skipped {
-                                reason: "non-docker-hub registry".into(),
-                            }
-                        }
-                        Some(Err(e)) => output::DepStatus::LookupError {
-                            message: e.to_string(),
-                        },
-                        None => output::DepStatus::UpToDate { latest: None },
-                    };
-                    file_deps.push(output::DepReport {
-                        name: dep_name,
-                        status,
-                    });
-                }
+                let docker_deps: Vec<_> = deps.iter().map(|d| d.dep.clone()).collect();
+                tracing::debug!(repo = %repo_slug, file = %glci_path, total = deps.len(), "extracted gitlab-ci images");
                 repo_report.files.push(output::FileReport {
                     path: glci_path.clone(),
                     manager: "gitlabci".into(),
-                    deps: file_deps,
+                    deps: docker_hub_reports(http, &docker_deps).await,
                 });
             }
             Ok(None) => {
@@ -2661,79 +2594,12 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &cci_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::circleci::extract(&raw.content);
-                let actionable: Vec<_> = deps
-                    .iter()
-                    .filter(|d| d.dep.skip_reason.is_none())
-                    .collect();
-                tracing::debug!(
-                    repo = %repo_slug, file = %cci_path,
-                    total = deps.len(), actionable = actionable.len(),
-                    "extracted circleci images"
-                );
-                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
-                    .iter()
-                    .filter_map(|d| {
-                        let tag = d.dep.tag.as_deref()?;
-                        Some(docker_datasource::DockerDepInput {
-                            dep_name: format!("{}:{tag}", d.dep.image),
-                            image: d.dep.image.clone(),
-                            tag: tag.to_owned(),
-                        })
-                    })
-                    .collect();
-                let updates = docker_datasource::fetch_updates_concurrent(
-                    http,
-                    &dep_inputs,
-                    docker_datasource::DOCKER_HUB_API,
-                    10,
-                )
-                .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.dep_name, r.summary))
-                    .collect();
-                let mut file_deps: Vec<output::DepReport> = Vec::new();
-                for d in deps.iter().filter(|d| d.dep.skip_reason.is_some()) {
-                    file_deps.push(output::DepReport {
-                        name: d.dep.image.clone(),
-                        status: output::DepStatus::Skipped {
-                            reason: format!("{:?}", d.dep.skip_reason.as_ref().unwrap())
-                                .to_lowercase(),
-                        },
-                    });
-                }
-                for d in &actionable {
-                    let dep_name = match &d.dep.tag {
-                        Some(t) => format!("{}:{t}", d.dep.image),
-                        None => d.dep.image.clone(),
-                    };
-                    let status = match update_map.get(&dep_name) {
-                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
-                            current: s.current_tag.clone(),
-                            latest: s.latest.clone().unwrap_or_default(),
-                        },
-                        Some(Ok(s)) => output::DepStatus::UpToDate {
-                            latest: s.latest.clone(),
-                        },
-                        Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
-                            output::DepStatus::Skipped {
-                                reason: "non-docker-hub registry".into(),
-                            }
-                        }
-                        Some(Err(e)) => output::DepStatus::LookupError {
-                            message: e.to_string(),
-                        },
-                        None => output::DepStatus::UpToDate { latest: None },
-                    };
-                    file_deps.push(output::DepReport {
-                        name: dep_name,
-                        status,
-                    });
-                }
+                let docker_deps: Vec<_> = deps.iter().map(|d| d.dep.clone()).collect();
+                tracing::debug!(repo = %repo_slug, file = %cci_path, total = deps.len(), "extracted circleci images");
                 repo_report.files.push(output::FileReport {
                     path: cci_path.clone(),
                     manager: "circleci".into(),
-                    deps: file_deps,
+                    deps: docker_hub_reports(http, &docker_deps).await,
                 });
             }
             Ok(None) => {
@@ -2860,83 +2726,14 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &cb_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::cloudbuild::extract(&raw.content);
-                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                tracing::debug!(
-                    repo = %repo_slug, file = %cb_path,
-                    total = deps.len(), actionable = actionable.len(),
-                    "extracted cloudbuild images"
-                );
-                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
-                    .iter()
-                    .filter_map(|d| {
-                        let tag = d.tag.as_deref()?;
-                        Some(docker_datasource::DockerDepInput {
-                            dep_name: format!("{}:{tag}", d.image),
-                            image: d.image.clone(),
-                            tag: tag.to_owned(),
-                        })
-                    })
-                    .collect();
-                let updates = docker_datasource::fetch_updates_concurrent(
-                    http,
-                    &dep_inputs,
-                    docker_datasource::DOCKER_HUB_API,
-                    10,
-                )
-                .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.dep_name, r.summary))
-                    .collect();
-                let mut file_deps: Vec<output::DepReport> = Vec::new();
-                for dep in &deps {
-                    if let Some(reason) = &dep.skip_reason {
-                        file_deps.push(output::DepReport {
-                            name: dep.image.clone(),
-                            status: output::DepStatus::Skipped {
-                                reason: format!("{reason:?}").to_lowercase(),
-                            },
-                        });
-                    } else {
-                        let dep_name = match &dep.tag {
-                            Some(t) => format!("{}:{t}", dep.image),
-                            None => dep.image.clone(),
-                        };
-                        let status = match update_map.get(&dep_name) {
-                            Some(Ok(s)) if s.update_available => {
-                                output::DepStatus::UpdateAvailable {
-                                    current: s.current_tag.clone(),
-                                    latest: s.latest.clone().unwrap_or_default(),
-                                }
-                            }
-                            Some(Ok(s)) => output::DepStatus::UpToDate {
-                                latest: s.latest.clone(),
-                            },
-                            Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
-                                output::DepStatus::Skipped {
-                                    reason: "non-docker-hub registry".into(),
-                                }
-                            }
-                            Some(Err(e)) => output::DepStatus::LookupError {
-                                message: e.to_string(),
-                            },
-                            None => output::DepStatus::UpToDate { latest: None },
-                        };
-                        file_deps.push(output::DepReport {
-                            name: dep_name,
-                            status,
-                        });
-                    }
-                }
+                tracing::debug!(repo = %repo_slug, file = %cb_path, total = deps.len(), "extracted cloudbuild images");
                 repo_report.files.push(output::FileReport {
                     path: cb_path.clone(),
                     manager: "cloudbuild".into(),
-                    deps: file_deps,
+                    deps: docker_hub_reports(http, &deps).await,
                 });
             }
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%cb_path, "cloudbuild.yaml not found")
-            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%cb_path, "cloudbuild.yaml not found"),
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%cb_path, %err, "failed to fetch cloudbuild.yaml");
                 had_error = true;
@@ -2949,98 +2746,27 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &az_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::azure_pipelines::extract(&raw.content);
-                let images: Vec<_> = deps
+                tracing::debug!(repo = %repo_slug, file = %az_path, total = deps.len(), "extracted azure-pipelines deps");
+                // Separate containers (docker lookup) from tasks (pending datasource).
+                let container_images: Vec<_> = deps
                     .iter()
                     .filter_map(|d| match d {
                         renovate_core::extractors::azure_pipelines::AzPipelinesDep::Container(
                             c,
-                        ) => Some(c),
+                        ) => Some(c.clone()),
                         renovate_core::extractors::azure_pipelines::AzPipelinesDep::Task(_) => None,
                     })
                     .collect();
-                let actionable: Vec<_> =
-                    images.iter().filter(|d| d.skip_reason.is_none()).collect();
-                tracing::debug!(
-                    repo = %repo_slug, file = %az_path,
-                    total_images = images.len(), actionable = actionable.len(),
-                    "extracted azure-pipelines images"
-                );
-                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
-                    .iter()
-                    .filter_map(|d| {
-                        let tag = d.tag.as_deref()?;
-                        Some(docker_datasource::DockerDepInput {
-                            dep_name: format!("{}:{tag}", d.image),
-                            image: d.image.clone(),
-                            tag: tag.to_owned(),
-                        })
-                    })
-                    .collect();
-                let updates = docker_datasource::fetch_updates_concurrent(
-                    http,
-                    &dep_inputs,
-                    docker_datasource::DOCKER_HUB_API,
-                    10,
-                )
-                .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.dep_name, r.summary))
-                    .collect();
-                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                let mut file_deps = docker_hub_reports(http, &container_images).await;
                 for dep in &deps {
-                    match dep {
-                        renovate_core::extractors::azure_pipelines::AzPipelinesDep::Container(
-                            img,
-                        ) => {
-                            if let Some(reason) = &img.skip_reason {
-                                file_deps.push(output::DepReport {
-                                    name: img.image.clone(),
-                                    status: output::DepStatus::Skipped {
-                                        reason: format!("{reason:?}").to_lowercase(),
-                                    },
-                                });
-                            } else {
-                                let dep_name = match &img.tag {
-                                    Some(t) => format!("{}:{t}", img.image),
-                                    None => img.image.clone(),
-                                };
-                                let status = match update_map.get(&dep_name) {
-                                    Some(Ok(s)) if s.update_available => {
-                                        output::DepStatus::UpdateAvailable {
-                                            current: s.current_tag.clone(),
-                                            latest: s.latest.clone().unwrap_or_default(),
-                                        }
-                                    }
-                                    Some(Ok(s)) => output::DepStatus::UpToDate {
-                                        latest: s.latest.clone(),
-                                    },
-                                    Some(Err(docker_datasource::DockerHubError::NonDockerHub(
-                                        _,
-                                    ))) => output::DepStatus::Skipped {
-                                        reason: "non-docker-hub registry".into(),
-                                    },
-                                    Some(Err(e)) => output::DepStatus::LookupError {
-                                        message: e.to_string(),
-                                    },
-                                    None => output::DepStatus::UpToDate { latest: None },
-                                };
-                                file_deps.push(output::DepReport {
-                                    name: dep_name,
-                                    status,
-                                });
-                            }
-                        }
-                        renovate_core::extractors::azure_pipelines::AzPipelinesDep::Task(t) => {
-                            // azure-pipelines-tasks datasource not yet implemented;
-                            // emit as skipped so the dep is visible in output.
-                            file_deps.push(output::DepReport {
-                                name: format!("{}@{}", t.name, t.version),
-                                status: output::DepStatus::Skipped {
-                                    reason: "azure-pipelines-tasks datasource pending".into(),
-                                },
-                            });
-                        }
+                    if let renovate_core::extractors::azure_pipelines::AzPipelinesDep::Task(t) = dep
+                    {
+                        file_deps.push(output::DepReport {
+                            name: format!("{}@{}", t.name, t.version),
+                            status: output::DepStatus::Skipped {
+                                reason: "azure-pipelines-tasks datasource pending".into(),
+                            },
+                        });
                     }
                 }
                 repo_report.files.push(output::FileReport {
@@ -3064,78 +2790,11 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &bb_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::bitbucket_pipelines::extract(&raw.content);
-                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                tracing::debug!(
-                    repo = %repo_slug, file = %bb_path,
-                    total = deps.len(), actionable = actionable.len(),
-                    "extracted bitbucket-pipelines images"
-                );
-                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
-                    .iter()
-                    .filter_map(|d| {
-                        let tag = d.tag.as_deref()?;
-                        Some(docker_datasource::DockerDepInput {
-                            dep_name: format!("{}:{tag}", d.image),
-                            image: d.image.clone(),
-                            tag: tag.to_owned(),
-                        })
-                    })
-                    .collect();
-                let updates = docker_datasource::fetch_updates_concurrent(
-                    http,
-                    &dep_inputs,
-                    docker_datasource::DOCKER_HUB_API,
-                    10,
-                )
-                .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.dep_name, r.summary))
-                    .collect();
-                let mut file_deps: Vec<output::DepReport> = Vec::new();
-                for dep in &deps {
-                    if let Some(reason) = &dep.skip_reason {
-                        file_deps.push(output::DepReport {
-                            name: dep.image.clone(),
-                            status: output::DepStatus::Skipped {
-                                reason: format!("{reason:?}").to_lowercase(),
-                            },
-                        });
-                    } else {
-                        let dep_name = match &dep.tag {
-                            Some(t) => format!("{}:{t}", dep.image),
-                            None => dep.image.clone(),
-                        };
-                        let status = match update_map.get(&dep_name) {
-                            Some(Ok(s)) if s.update_available => {
-                                output::DepStatus::UpdateAvailable {
-                                    current: s.current_tag.clone(),
-                                    latest: s.latest.clone().unwrap_or_default(),
-                                }
-                            }
-                            Some(Ok(s)) => output::DepStatus::UpToDate {
-                                latest: s.latest.clone(),
-                            },
-                            Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
-                                output::DepStatus::Skipped {
-                                    reason: "non-docker-hub registry".into(),
-                                }
-                            }
-                            Some(Err(e)) => output::DepStatus::LookupError {
-                                message: e.to_string(),
-                            },
-                            None => output::DepStatus::UpToDate { latest: None },
-                        };
-                        file_deps.push(output::DepReport {
-                            name: dep_name,
-                            status,
-                        });
-                    }
-                }
+                tracing::debug!(repo = %repo_slug, file = %bb_path, total = deps.len(), "extracted bitbucket-pipelines images");
                 repo_report.files.push(output::FileReport {
                     path: bb_path.clone(),
                     manager: "bitbucket-pipelines".into(),
-                    deps: file_deps,
+                    deps: docker_hub_reports(http, &deps).await,
                 });
             }
             Ok(None) => {
@@ -3153,83 +2812,14 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &drone_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::droneci::extract(&raw.content);
-                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                tracing::debug!(
-                    repo = %repo_slug, file = %drone_path,
-                    total = deps.len(), actionable = actionable.len(),
-                    "extracted droneci images"
-                );
-                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
-                    .iter()
-                    .filter_map(|d| {
-                        let tag = d.tag.as_deref()?;
-                        Some(docker_datasource::DockerDepInput {
-                            dep_name: format!("{}:{tag}", d.image),
-                            image: d.image.clone(),
-                            tag: tag.to_owned(),
-                        })
-                    })
-                    .collect();
-                let updates = docker_datasource::fetch_updates_concurrent(
-                    http,
-                    &dep_inputs,
-                    docker_datasource::DOCKER_HUB_API,
-                    10,
-                )
-                .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.dep_name, r.summary))
-                    .collect();
-                let mut file_deps: Vec<output::DepReport> = Vec::new();
-                for dep in &deps {
-                    if let Some(reason) = &dep.skip_reason {
-                        file_deps.push(output::DepReport {
-                            name: dep.image.clone(),
-                            status: output::DepStatus::Skipped {
-                                reason: format!("{reason:?}").to_lowercase(),
-                            },
-                        });
-                    } else {
-                        let dep_name = match &dep.tag {
-                            Some(t) => format!("{}:{t}", dep.image),
-                            None => dep.image.clone(),
-                        };
-                        let status = match update_map.get(&dep_name) {
-                            Some(Ok(s)) if s.update_available => {
-                                output::DepStatus::UpdateAvailable {
-                                    current: s.current_tag.clone(),
-                                    latest: s.latest.clone().unwrap_or_default(),
-                                }
-                            }
-                            Some(Ok(s)) => output::DepStatus::UpToDate {
-                                latest: s.latest.clone(),
-                            },
-                            Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
-                                output::DepStatus::Skipped {
-                                    reason: "non-docker-hub registry".into(),
-                                }
-                            }
-                            Some(Err(e)) => output::DepStatus::LookupError {
-                                message: e.to_string(),
-                            },
-                            None => output::DepStatus::UpToDate { latest: None },
-                        };
-                        file_deps.push(output::DepReport {
-                            name: dep_name,
-                            status,
-                        });
-                    }
-                }
+                tracing::debug!(repo = %repo_slug, file = %drone_path, total = deps.len(), "extracted droneci images");
                 repo_report.files.push(output::FileReport {
                     path: drone_path.clone(),
                     manager: "droneci".into(),
-                    deps: file_deps,
+                    deps: docker_hub_reports(http, &deps).await,
                 });
             }
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%drone_path, ".drone.yml not found")
-            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%drone_path, ".drone.yml not found"),
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%drone_path, %err, "failed to fetch .drone.yml");
                 had_error = true;
@@ -3349,6 +2939,79 @@ fn manager_files(detected: &[renovate_core::managers::DetectedManager], name: &s
         .find(|m| m.name == name)
         .map(|m| m.matched_files.clone())
         .unwrap_or_default()
+}
+
+/// Fetch Docker Hub updates for `deps` and build a `DepReport` list.
+///
+/// Identical logic is shared across Cloud Build, Drone CI, Bitbucket Pipelines,
+/// GitLab CI, CircleCI, Dockerfile, Docker Compose, and similar managers.
+async fn docker_hub_reports(
+    http: &HttpClient,
+    deps: &[renovate_core::extractors::dockerfile::DockerfileExtractedDep],
+) -> Vec<output::DepReport> {
+    let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+    let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
+        .iter()
+        .filter_map(|d| {
+            let tag = d.tag.as_deref()?;
+            Some(docker_datasource::DockerDepInput {
+                dep_name: format!("{}:{tag}", d.image),
+                image: d.image.clone(),
+                tag: tag.to_owned(),
+            })
+        })
+        .collect();
+    let updates = docker_datasource::fetch_updates_concurrent(
+        http,
+        &dep_inputs,
+        docker_datasource::DOCKER_HUB_API,
+        10,
+    )
+    .await;
+    let update_map: HashMap<String, _> = updates
+        .into_iter()
+        .map(|r| (r.dep_name, r.summary))
+        .collect();
+
+    let mut reports = Vec::new();
+    for dep in deps {
+        if let Some(reason) = &dep.skip_reason {
+            reports.push(output::DepReport {
+                name: dep.image.clone(),
+                status: output::DepStatus::Skipped {
+                    reason: format!("{reason:?}").to_lowercase(),
+                },
+            });
+        } else {
+            let dep_name = match &dep.tag {
+                Some(t) => format!("{}:{t}", dep.image),
+                None => dep.image.clone(),
+            };
+            let status = match update_map.get(&dep_name) {
+                Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                    current: s.current_tag.clone(),
+                    latest: s.latest.clone().unwrap_or_default(),
+                },
+                Some(Ok(s)) => output::DepStatus::UpToDate {
+                    latest: s.latest.clone(),
+                },
+                Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
+                    output::DepStatus::Skipped {
+                        reason: "non-docker-hub registry".into(),
+                    }
+                }
+                Some(Err(e)) => output::DepStatus::LookupError {
+                    message: e.to_string(),
+                },
+                None => output::DepStatus::UpToDate { latest: None },
+            };
+            reports.push(output::DepReport {
+                name: dep_name,
+                status,
+            });
+        }
+    }
+    reports
 }
 
 fn build_dep_reports_cargo(

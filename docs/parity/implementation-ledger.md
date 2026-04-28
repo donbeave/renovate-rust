@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0084  | 2026-04-28 | Refactor: extract `docker_hub_reports` helper to eliminate Docker pipeline duplication | Complete | See below. |
 | 0083  | 2026-04-28 | Jenkins `plugins.txt` / `plugins.yml` extractor | Complete | See below. |
 | 0082  | 2026-04-28 | Bitbucket Pipelines `*-pipelines.yml` Docker image extractor | Complete | See below. |
 | 0081  | 2026-04-28 | Drone CI `.drone.yml` Docker image extractor | Complete | See below. |
@@ -2429,6 +2430,25 @@ Pick whichever can be completed in one loop:
 ### What was intentionally deferred
 - `jenkins-plugins` datasource (Jenkins Update Center JSON API).
 - `renovate.ignore: true` annotation in YAML format.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 778 passed
+
+## Slice 0084 - Refactor: `docker_hub_reports` helper eliminates Docker pipeline duplication
+
+### What landed
+- `crates/renovate-cli/src/main.rs`:
+  - Added `docker_hub_reports(http, deps) -> Vec<DepReport>` async helper that encapsulates the
+    full Docker Hub pipeline: filter actionable, build `DockerDepInput` list, `fetch_updates_concurrent`,
+    build update_map, iterate all deps mapping skip/update/up-to-date/error to `DepReport`.
+  - Replaced 6 identical inline Docker pipeline blocks (GitLab CI, CircleCI, Cloud Build, Drone CI,
+    Bitbucket Pipelines, Azure Pipelines containers) with `docker_hub_reports` calls.
+  - For GitLab CI and CircleCI (which wrap `DockerfileExtractedDep` in a type): map `.dep.clone()` before
+    calling the helper.
+  - For Azure Pipelines: separate container images from task deps, use helper for containers,
+    append task deps with "datasource pending" status.
+  - **Net: −437 lines / +100 lines = 337 fewer lines, 10→5 Docker pipeline call sites.**
 
 ### Verification
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
