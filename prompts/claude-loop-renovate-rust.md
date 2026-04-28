@@ -153,6 +153,10 @@ Quality gates:
 
 Parity tracking files:
 
+**IMPORTANT: These files are the primary progress-tracking tool.  Every loop
+iteration MUST keep them current — including adding entries for files you
+discovered but have not yet ported.**
+
 The following Markdown files track port coverage and must be kept current.
 They are the primary tool for understanding what is done and what remains.
 
@@ -161,12 +165,16 @@ They are the primary tool for understanding what is done and what remains.
 
 - `docs/parity/renovate-test-map.md` — maps Renovate TypeScript test cases
   (file + line + test name) to their Rust counterparts (file + line + test
-  name).  Update this file whenever you:
-  - Write a new Rust test that corresponds to a Renovate test case.
-  - Port a behavior that Renovate tests but whose test you skipped.
-  - Change an existing test's name or location.
-  Rules:
-  - List every test you write under the correct section.
+  name).  **IMPORTANT rules:**
+  - At the START of each loop iteration, scan the Renovate reference directory
+    for any `.spec.ts` files you referenced or read during this or the previous
+    iteration and add them to this file (even as `pending` with no Rust test yet).
+  - List every Rust test you write under the correct section, whether or not
+    it corresponds to a specific Renovate test case.
+  - When you read a `.spec.ts` file during implementation, immediately add all
+    test cases from that file to this map (with `pending` status if not yet
+    ported, `ported` if you are porting them now).
+  - Do NOT wait until the end of the loop to update this file.
   - One Renovate `it()` may map to multiple Rust tests; list each Rust test
     on its own row.
   - Include the line number in the Renovate file when you read it; use `—`
@@ -174,12 +182,15 @@ They are the primary tool for understanding what is done and what remains.
   - Use status values: `ported` · `partial` · `pending` · `not-applicable`.
 
 - `docs/parity/renovate-source-map.md` — maps Renovate TypeScript **source**
-  files (not test files) to their Rust counterparts.  Update this file
-  whenever you:
-  - Implement code from a TypeScript file you have read.
-  - Change the status of a partially-ported file to `full`.
-  - Add a new file to the mapping because you referenced it for the first time.
-  Rules:
+  files (not test files) to their Rust counterparts.  **IMPORTANT rules:**
+  - At the START of each loop iteration, scan the Renovate reference directory
+    for any non-test TypeScript files you reference and add them to this file
+    (even with `not-started` status if you have not implemented them yet).
+  - When you read a TypeScript source file to understand behavior, immediately
+    add it to this map with its current status.
+  - When you implement behavior from a TypeScript file, update its status.
+  - Never implement behavior from a TypeScript file without first recording
+    that file in the source map.
   - Use status: `full` · `partial` · `stub` · `not-started` · `out-of-scope`.
   - Status reflects observable behavior coverage, not line count.
   - One TypeScript file may map to many Rust files; one Rust file may cover
@@ -198,9 +209,12 @@ easy to review and revert independently.  Use a commit message like:
 
 Parity workflow:
 1. Inspect the current repo state and the latest commits.
-2. Inspect Renovate reference docs/tests/source for one missing behavior slice.
-3. Choose the highest-value slice that can be completed in this loop without breaking existing work.
-4. Add or update parity tracking docs before or during implementation:
+2. **Scan the Renovate reference for any new source or test files you will
+   reference this iteration; add them to `renovate-source-map.md` and
+   `renovate-test-map.md` before writing any Rust code.**
+3. Inspect Renovate reference docs/tests/source for one missing behavior slice.
+4. Choose the highest-value slice that can be completed in this loop without breaking existing work.
+5. Add or update parity tracking docs before or during implementation:
    - `docs/parity/implementation-ledger.md` — add a row for the new slice.
    - `docs/parity/renovate-source-map.md` — update status for any TypeScript
      source files you read or implement from.
@@ -208,10 +222,12 @@ Parity workflow:
      that corresponds to a Renovate test case.
    - `docs/parity/compatibility-decisions.md` — record any intentional divergence.
    Create any file that does not yet exist.
-5. Write Rust tests that encode Renovate-compatible behavior. When practical, translate Renovate test cases into Rust tests using original Rust test code and local fixtures.
-6. Implement the behavior in idiomatic Rust.
-7. Run checks, fix failures, and tighten the implementation.
-8. Commit the completed slice with a concise message.
+6. Write Rust tests that encode Renovate-compatible behavior. When practical, translate Renovate test cases into Rust tests using original Rust test code and local fixtures.
+7. Implement the behavior in idiomatic Rust.
+8. Run checks, fix failures, and tighten the implementation.
+9. Commit the completed slice with a concise message.
+10. After committing, verify that all parity tracking files reflect the new slice
+    (source map status updated, test map rows added, ledger row added).
 
 Iteration sizing:
 - Each 15 minute loop should leave the repository better than it started.
