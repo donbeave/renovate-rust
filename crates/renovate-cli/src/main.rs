@@ -152,6 +152,10 @@ async fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     };
 
+    // Shared HTTP client for all datasource calls — one connection pool for
+    // the entire run rather than one per dependency.
+    let http = renovate_core::http::HttpClient::new().expect("failed to create HTTP client");
+
     let mut had_error = false;
     for repo_slug in &config.repositories {
         let Some((owner, repo)) = repo_slug.split_once('/') else {
@@ -224,8 +228,7 @@ async fn main() -> ExitCode {
                             "extracted cargo dependencies"
                         );
 
-                        // Look up available versions for each actionable dep.
-                        let http = renovate_core::http::HttpClient::new().expect("HTTP client");
+                        // Look up available versions and determine update status.
                         for dep in &actionable {
                             match crates_io::fetch_versions(
                                 &http,
@@ -240,16 +243,21 @@ async fn main() -> ExitCode {
                                         .filter(|r| !r.yanked)
                                         .map(|r| r.vers.clone())
                                         .collect();
-                                    let latest = cargo_versioning::resolve_latest(
+                                    let summary = cargo_versioning::update_summary(
                                         &dep.current_value,
                                         &non_yanked,
                                     );
+                                    let status = if summary.update_available {
+                                        "update available"
+                                    } else {
+                                        "up to date"
+                                    };
                                     tracing::info!(
                                         repo = %repo_slug,
                                         dep = %dep.dep_name,
                                         constraint = %dep.current_value,
-                                        latest_compatible = ?latest,
-                                        "crate version info"
+                                        latest = ?summary.latest_compatible,
+                                        status,
                                     );
                                 }
                                 Err(err) => {

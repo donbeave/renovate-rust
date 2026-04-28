@@ -100,6 +100,98 @@ pub fn resolve_latest(constraint: &str, available_versions: &[String]) -> Option
         .map(|v| v.to_string())
 }
 
+/// Detailed update summary for a single dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UpdateSummary {
+    /// The current constraint string from Cargo.toml (e.g. `"1.0.100"`).
+    pub current_constraint: String,
+    /// The latest non-yanked version that satisfies the constraint, if any.
+    pub latest_compatible: Option<String>,
+    /// `true` when the constraint is a fully-specified three-part version
+    /// (e.g. `"1.0.100"` or `"=1.0.100"`) and `latest_compatible` is newer.
+    /// Range constraints like `"^1"` or `"1.52"` never set this — they already
+    /// cover future compatible versions by design.
+    pub update_available: bool,
+}
+
+/// Produce a full update summary for a dependency constraint.
+///
+/// This is the primary function for the update planner. It tells callers:
+/// - what the latest compatible version is
+/// - whether that version represents an actionable change (i.e. the user
+///   has a pinned exact version that could be bumped)
+///
+/// A "pinned" constraint is one where the raw string parses as a valid three-
+/// component `semver::Version` with no sigil (e.g. `"1.0.228"`), or an exact
+/// match with `=` prefix. Range constraints (`^`, `~`, `>=`, bare `1`, `1.52`)
+/// are NOT considered pinned — they automatically cover future compatible
+/// versions, so no update is suggested.
+pub fn update_summary(constraint: &str, available_versions: &[String]) -> UpdateSummary {
+    let latest = resolve_latest(constraint, available_versions);
+
+    // Determine whether the constraint is pinned (exact 3-component version).
+    let stripped = constraint.trim().trim_start_matches('=').trim();
+    let is_pinned = Version::parse(stripped).is_ok()
+        && !constraint.contains('^')
+        && !constraint.contains('~')
+        && !constraint.contains('>')
+        && !constraint.contains('<')
+        && !constraint.contains(',')
+        && !constraint.contains('*');
+
+    let update_available = is_pinned && latest.as_deref().map(|l| l != stripped).unwrap_or(false);
+
+    UpdateSummary {
+        current_constraint: constraint.to_owned(),
+        latest_compatible: latest,
+        update_available,
+    }
+}
+
+#[cfg(test)]
+mod update_summary_tests {
+    use super::*;
+
+    fn v(s: &[&str]) -> Vec<String> {
+        s.iter().map(|x| (*x).to_owned()).collect()
+    }
+
+    #[test]
+    fn pinned_version_with_newer_available_is_update() {
+        let avail = v(&["1.0.0", "1.0.100", "1.0.228"]);
+        let s = update_summary("1.0.100", &avail);
+        assert_eq!(s.latest_compatible.as_deref(), Some("1.0.228"));
+        assert!(s.update_available);
+    }
+
+    #[test]
+    fn pinned_version_already_latest_is_not_update() {
+        let avail = v(&["1.0.0", "1.0.228"]);
+        let s = update_summary("1.0.228", &avail);
+        assert!(!s.update_available);
+    }
+
+    #[test]
+    fn range_constraint_is_never_flagged_as_update() {
+        let avail = v(&["1.0.0", "1.0.228"]);
+        for constraint in &["1", "^1", "^1.0", "~1.0", ">=1.0", "1.0"] {
+            let s = update_summary(constraint, &avail);
+            assert!(
+                !s.update_available,
+                "expected no update for constraint {constraint:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn no_compatible_versions_is_not_update() {
+        let avail = v(&["1.0.0"]);
+        let s = update_summary("2.0.0", &avail);
+        assert!(s.latest_compatible.is_none());
+        assert!(!s.update_available);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
