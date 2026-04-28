@@ -1149,92 +1149,19 @@ async fn process_repo(
     // ── Dockerfile ────────────────────────────────────────────────────────────
     for df_file_path in manager_files(&detected, "dockerfile") {
         match client.get_raw_file(owner, repo, &df_file_path).await {
-            Ok(Some(raw)) => {
-                match renovate_core::extractors::dockerfile::extract(&raw.content) {
-                    Ok(deps) => {
-                        let actionable: Vec<_> =
-                            deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                        tracing::debug!(
-                            repo = %repo_slug, file = %df_file_path,
-                            total = deps.len(), actionable = actionable.len(),
-                            "extracted dockerfile images"
-                        );
-                        // Build Docker Hub dep inputs for images that have a tag.
-                        let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
-                            .iter()
-                            .filter_map(|d| {
-                                let tag = d.tag.as_deref()?;
-                                Some(docker_datasource::DockerDepInput {
-                                    dep_name: format!("{}:{tag}", d.image),
-                                    image: d.image.clone(),
-                                    tag: tag.to_owned(),
-                                })
-                            })
-                            .collect();
-
-                        let updates = docker_datasource::fetch_updates_concurrent(
-                            http,
-                            &dep_inputs,
-                            docker_datasource::DOCKER_HUB_API,
-                            10,
-                        )
-                        .await;
-                        let update_map: HashMap<_, _> = updates
-                            .into_iter()
-                            .map(|r| (r.dep_name, r.summary))
-                            .collect();
-
-                        let mut file_deps: Vec<output::DepReport> = Vec::new();
-                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
-                            file_deps.push(output::DepReport {
-                                name: dep.image.clone(),
-                                status: output::DepStatus::Skipped {
-                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
-                                        .to_lowercase(),
-                                },
-                            });
-                        }
-                        for dep in &actionable {
-                            let dep_name = match &dep.tag {
-                                Some(t) => format!("{}:{t}", dep.image),
-                                None => dep.image.clone(),
-                            };
-                            let status = match update_map.get(&dep_name) {
-                                Some(Ok(s)) if s.update_available => {
-                                    output::DepStatus::UpdateAvailable {
-                                        current: s.current_tag.clone(),
-                                        latest: s.latest.clone().unwrap_or_default(),
-                                    }
-                                }
-                                Some(Ok(s)) => output::DepStatus::UpToDate {
-                                    latest: s.latest.clone(),
-                                },
-                                Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
-                                    output::DepStatus::Skipped {
-                                        reason: "non-docker-hub registry".into(),
-                                    }
-                                }
-                                Some(Err(e)) => output::DepStatus::LookupError {
-                                    message: e.to_string(),
-                                },
-                                None => output::DepStatus::UpToDate { latest: None },
-                            };
-                            file_deps.push(output::DepReport {
-                                name: dep_name,
-                                status,
-                            });
-                        }
-                        repo_report.files.push(output::FileReport {
-                            path: df_file_path.clone(),
-                            manager: "dockerfile".into(),
-                            deps: file_deps,
-                        });
-                    }
-                    Err(err) => {
-                        tracing::warn!(repo=%repo_slug, file=%df_file_path, %err, "failed to parse Dockerfile")
-                    }
+            Ok(Some(raw)) => match renovate_core::extractors::dockerfile::extract(&raw.content) {
+                Ok(deps) => {
+                    tracing::debug!(repo = %repo_slug, file = %df_file_path, total = deps.len(), "extracted dockerfile images");
+                    repo_report.files.push(output::FileReport {
+                        path: df_file_path.clone(),
+                        manager: "dockerfile".into(),
+                        deps: docker_hub_reports(http, &deps).await,
+                    });
                 }
-            }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%df_file_path, %err, "failed to parse Dockerfile")
+                }
+            },
             Ok(None) => tracing::warn!(repo=%repo_slug, file=%df_file_path, "Dockerfile not found"),
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%df_file_path, %err, "failed to fetch Dockerfile");
