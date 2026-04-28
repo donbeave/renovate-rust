@@ -88,6 +88,7 @@ pub mod sbt;
 pub mod scalafmt;
 pub mod setup_cfg;
 pub mod spm;
+pub mod sveltos;
 pub mod tekton;
 pub mod terraform;
 pub mod terragrunt;

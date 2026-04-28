@@ -7168,6 +7168,67 @@ async fn process_repo(
         }
     }
 
+    // ── Sveltos ClusterProfile/Profile (sveltos/) ────────────────────────────
+    for sv_path in manager_files(&detected, "sveltos") {
+        match client.get_raw_file(owner, repo, &sv_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::sveltos::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %sv_path,
+                    total = deps.len(),
+                    "extracted sveltos helm chart deps"
+                );
+                let dep_inputs: Vec<helm_datasource::HelmDepInput> = deps
+                    .iter()
+                    .map(|d| helm_datasource::HelmDepInput {
+                        name: d.chart_name.clone(),
+                        current_value: d.current_value.clone(),
+                        repository_url: d.registry_url.clone(),
+                    })
+                    .collect();
+                let updates = helm_datasource::fetch_updates_concurrent(http, &dep_inputs, 8).await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                let dep_reports: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|d| {
+                        let status = match update_map.get(&d.chart_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_value.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: d.chart_name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: sv_path.clone(),
+                    manager: "sveltos".into(),
+                    deps: dep_reports,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%sv_path, "sveltos manifest not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%sv_path, %err, "failed to fetch sveltos manifest");
+                had_error = true;
+            }
+        }
+    }
+
     // ── helm-requirements (Helm v2 requirements.yaml) ─────────────────────────
     // Already handled by the helmv3 pipeline; register the manager name alias
     // so detection works, but skip files already captured by helmv3.

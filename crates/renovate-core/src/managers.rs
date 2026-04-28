@@ -571,6 +571,11 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "helm-requirements",
         patterns: &[r"(^|/)requirements\.ya?ml$"],
     },
+    ManagerDef {
+        // Sveltos ClusterProfile/Profile manifests stored in sveltos/ directory.
+        name: "sveltos",
+        patterns: &[r"(^|/)sveltos/.+\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

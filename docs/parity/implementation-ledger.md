@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0152  | 2026-04-28 | Sveltos `ClusterProfile`/`Profile` Helm chart extractor | Complete | See below. |
 | 0151  | 2026-04-28 | Renovate config presets extractor + `helm-requirements` alias | Complete | See below. |
 | 0150  | 2026-04-28 | Glasskube package manifest extractor + packages datasource | Complete | See below. |
 | 0149  | 2026-04-28 | Crossplane package manifest extractor | Complete | See below. |
@@ -3098,6 +3099,27 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0152 - Sveltos `ClusterProfile`/`Profile` Helm chart extractor
+
+### Renovate reference
+- `lib/modules/manager/sveltos/extract.ts`
+- Patterns: `sveltos/*.ya?ml` (local convention)
+- Datasources: Helm
+
+### What landed
+- `crates/renovate-core/src/extractors/sveltos.rs` (new):
+  - Detects `apiVersion: (config|lib).projectsveltos.io/` documents.
+  - Line-based state machine scans `helmCharts:` blocks for `repositoryURL`, `chartName`, `chartVersion`.
+  - Handles multi-document YAML (`---` separators) and inline `- key: value` list items.
+  - `SveltosDep { chart_name, current_value, registry_url }` maps directly to `HelmDepInput`.
+  - 3 unit tests: single chart, multiple charts, skip non-sveltos.
+- Registered in `extractors.rs`, `managers.rs` with `sveltos/*.ya?ml` pattern.
+- `crates/renovate-cli/src/main.rs`: pipeline uses `helm_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1039 passed
 
 ## Slice 0151 - Renovate config presets extractor + `helm-requirements` alias
 
