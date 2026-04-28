@@ -1400,8 +1400,8 @@ async fn process_repo(
                     total = deps.len(), actionable = actionable.len(),
                     "extracted swift package deps"
                 );
-                // Reuse github_tags datasource — SPM packages are GitHub repos.
-                let dep_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
+                // GitHub packages → github_tags datasource.
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
                     .iter()
                     .filter(|d| {
                         matches!(
@@ -1414,17 +1414,60 @@ async fn process_repo(
                         current_value: d.current_value.clone(),
                     })
                     .collect();
-                let updates = github_tags_datasource::fetch_updates_concurrent(
+                let gh_updates = github_tags_datasource::fetch_updates_concurrent(
                     http,
-                    &dep_inputs,
+                    &gh_inputs,
                     github_tags_datasource::GITHUB_API,
                     8,
                 )
                 .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.dep_name, r.summary))
-                    .collect();
+                // GitLab packages → gitlab_tags datasource.
+                let gl_inputs: Vec<renovate_core::datasources::gitlab_tags::GitlabTagsDepInput> =
+                    actionable
+                        .iter()
+                        .filter(|d| {
+                            matches!(
+                                d.git_host,
+                                Some(renovate_core::extractors::spm::GitHost::GitLab)
+                            )
+                        })
+                        .map(
+                            |d| renovate_core::datasources::gitlab_tags::GitlabTagsDepInput {
+                                dep_name: d.owner_repo.clone(),
+                                current_value: d.current_value.clone(),
+                            },
+                        )
+                        .collect();
+                let gl_updates = renovate_core::datasources::gitlab_tags::fetch_updates_concurrent(
+                    http,
+                    &gl_inputs,
+                    renovate_core::datasources::gitlab_tags::GITLAB_API,
+                    8,
+                )
+                .await;
+                // Unified map: dep_name → (update_available, latest, error_msg).
+                let mut spm_map: HashMap<String, (bool, Option<String>, Option<String>)> =
+                    HashMap::new();
+                for r in gh_updates {
+                    match r.summary {
+                        Ok(s) => {
+                            spm_map.insert(r.dep_name, (s.update_available, s.latest, None));
+                        }
+                        Err(e) => {
+                            spm_map.insert(r.dep_name, (false, None, Some(e.to_string())));
+                        }
+                    }
+                }
+                for r in gl_updates {
+                    match r.summary {
+                        Ok(s) => {
+                            spm_map.insert(r.dep_name, (s.update_available, s.latest, None));
+                        }
+                        Err(e) => {
+                            spm_map.insert(r.dep_name, (false, None, Some(e.to_string())));
+                        }
+                    }
+                }
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
@@ -1436,20 +1479,19 @@ async fn process_repo(
                     });
                 }
                 for dep in &actionable {
-                    let status = match update_map.get(&dep.owner_repo) {
-                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
-                            current: s.current_value.clone(),
-                            latest: s.latest.clone().unwrap_or_default(),
+                    let status = match spm_map.get(&dep.owner_repo) {
+                        Some((true, Some(latest), _)) => output::DepStatus::UpdateAvailable {
+                            current: dep.current_value.clone(),
+                            latest: latest.clone(),
                         },
-                        Some(Ok(s)) => output::DepStatus::UpToDate {
-                            latest: s.latest.clone(),
+                        Some((false, latest, None)) => output::DepStatus::UpToDate {
+                            latest: latest.clone(),
                         },
-                        Some(Err(e)) => output::DepStatus::LookupError {
-                            message: e.to_string(),
+                        Some((_, _, Some(err_msg))) => output::DepStatus::LookupError {
+                            message: err_msg.clone(),
                         },
-                        // GitLab or unknown host — mark skipped.
-                        None => output::DepStatus::Skipped {
-                            reason: "non-github".into(),
+                        _ => output::DepStatus::Skipped {
+                            reason: "lookup-pending".into(),
                         },
                     };
                     file_deps.push(output::DepReport {

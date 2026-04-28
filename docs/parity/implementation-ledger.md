@@ -1424,10 +1424,40 @@ Pick whichever can be completed in one loop:
 
 Pick whichever can be completed in one loop:
 
+## Slice 0045 - GitLab tags datasource + SPM GitLab package lookups
+
+### Renovate reference
+- `lib/modules/datasource/gitlab-tags/index.ts` — `GitlabTagsDatasource`
+- API: `GET {host}/api/v4/projects/{url_encoded_path}/repository/tags?per_page=100`
+
+### What landed
+- `crates/renovate-core/src/datasources/gitlab_tags.rs` — GitLab REST tags client:
+  - URL-encodes `owner/repo` path (`/` → `%2F`) for the GitLab API.
+  - Filters for version-like tags (starts with `v` + digit, or bare digit).
+  - Strips leading `v` from returned tag for comparison with `current_value`.
+  - Concurrent bounded lookups via `JoinSet` + `Arc<Semaphore>`.
+- `crates/renovate-core/src/datasources.rs` — added `pub mod gitlab_tags`.
+- `crates/renovate-core/src/datasources/github_tags.rs` — exported `GITHUB_API` constant.
+- `crates/renovate-cli/src/main.rs` — SPM pipeline updated to do concurrent GitHub
+  and GitLab lookups, merging results into a unified `spm_map` by `owner_repo`.
+
+### What was intentionally deferred
+- Self-hosted GitLab instance support (uses `GITLAB_API = https://gitlab.com`).
+- GitLab tags for GitHub Actions (separate pipeline from SPM).
+- Tag filtering by semver validity (currently passes any tag starting with v+digit).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 445 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
 1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 2. **`gemspec` extractor**: extend bundler manager to parse `.gemspec` files.
 3. **CocoaPods** (`Podfile` extractor + CocoaPods trunk datasource).
-4. **GitLab tags datasource**: add `gitlab_tags` datasource so SPM GitLab packages
-   and GitHub Actions on GitLab get version lookups.
+4. **`semver` versioning module**: improve update decisions for pub.dev, NuGet,
+   and composer using proper semver range matching (uses existing `semver` crate).
