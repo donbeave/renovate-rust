@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0018  | 2026-04-28 | pip_requirements extractor + PyPI datasource | Complete | See below. |
 | 0017  | 2026-04-28 | Human-readable update report output      | Complete | See below. |
 | 0016  | 2026-04-28 | npm registry datasource + npm versioning | Complete | See below. |
 | 0015  | 2026-04-28 | npm package.json extractor + ledger catchup | Complete | See below. |
@@ -38,6 +39,48 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0018 - pip_requirements extractor + PyPI datasource
+
+### Renovate reference
+- `lib/modules/manager/pip_requirements/extract.ts` — `extractPackageFile`
+- `lib/modules/datasource/pypi/index.ts` — `PypiDatasource`
+- `lib/modules/datasource/pypi/types.ts` — `PypiJSON`
+- `lib/modules/versioning/pep440/index.ts` — PEP 440 semantics
+
+### What landed
+- `crates/renovate-core/src/extractors/pip.rs` — parses `requirements.txt`
+  lines: strips comments, environment markers, hash directives; classifies
+  skip reasons (GitSource, UrlInstall, SubRequirement); normalizes package
+  names per PEP 503. 15 unit tests including real-world fixture cases.
+- `crates/renovate-core/src/versioning/pep440.rs` — `exact_pin_version` detects
+  `==X.Y.Z` pins; `pep440_update_summary` flags update when pin differs from
+  registry latest; ranges/unconstrained never flagged. 9 unit tests.
+- `crates/renovate-core/src/datasources/pypi.rs` — fetches from
+  `https://pypi.org/pypi/{name}/json`; uses `info.version` as latest stable;
+  filters yanked releases; bounded concurrent fetches via JoinSet + Semaphore.
+  6 wiremock-based tests.
+- `crates/renovate-core/src/extractors.rs`, `datasources.rs`, `versioning.rs`
+  — `pub mod pip/pep440/pypi` declarations added.
+- `crates/renovate-cli/src/main.rs` — pip_requirements processing wired into
+  the per-repo loop alongside Cargo and npm.
+
+### What was intentionally deferred
+- PEP 440 full range semantics (`~=`, `!=`, multiple specifiers) — currently
+  only exact pins (`==x.y.z`) are flagged as updatable; ranges report latest
+  without update_available.
+- Custom index-url support (`--index-url`, `--extra-index-url` in requirements
+  files) — registry always defaults to pypi.org.
+- `pip_setup` and `pipenv` managers — separate slices.
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (200 passed)
 
 ## Slice 0017 - Human-readable update report output
 

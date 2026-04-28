@@ -5,3 +5,4 @@
 
 pub mod cargo;
 pub mod npm;
+pub mod pep440;

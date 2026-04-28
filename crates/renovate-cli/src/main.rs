@@ -26,8 +26,10 @@ use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::datasources::npm as npm_datasource;
+use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::npm as npm_extractor;
+use renovate_core::extractors::pip as pip_extractor;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
@@ -409,6 +411,104 @@ async fn main() -> ExitCode {
                 }
                 Err(err) => {
                     tracing::error!(repo = %repo_slug, file = %npm_file_path, %err, "failed to fetch package.json");
+                    had_error = true;
+                }
+            }
+        }
+
+        // ── pip_requirements ─────────────────────────────────────────────────
+        let pip_files: Vec<_> = detected
+            .iter()
+            .find(|m| m.name == "pip_requirements")
+            .map(|m| m.matched_files.as_slice())
+            .unwrap_or_default()
+            .iter()
+            .collect();
+
+        for pip_file_path in pip_files {
+            match client.get_raw_file(owner, repo, pip_file_path).await {
+                Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
+                    Ok(deps) => {
+                        let actionable: Vec<_> =
+                            deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                        tracing::debug!(
+                            repo = %repo_slug,
+                            file = %pip_file_path,
+                            total = deps.len(),
+                            actionable = actionable.len(),
+                            "extracted pip dependencies"
+                        );
+
+                        let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                            .iter()
+                            .map(|d| pypi_datasource::PypiDepInput {
+                                dep_name: d.name.clone(),
+                                specifier: d.current_value.clone(),
+                            })
+                            .collect();
+
+                        let updates = pypi_datasource::fetch_updates_concurrent(
+                            &http,
+                            &dep_inputs,
+                            pypi_datasource::PYPI_API,
+                            10,
+                        )
+                        .await;
+
+                        let update_map: std::collections::HashMap<_, _> = updates
+                            .into_iter()
+                            .map(|r| (r.dep_name, r.summary))
+                            .collect();
+
+                        let mut file_deps: Vec<output::DepReport> = Vec::new();
+
+                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                            file_deps.push(output::DepReport {
+                                name: dep.name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
+                                        .to_lowercase(),
+                                },
+                            });
+                        }
+
+                        for dep in &actionable {
+                            let status = match update_map.get(&dep.name) {
+                                Some(Ok(summary)) if summary.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: summary.current_specifier.clone(),
+                                        latest: summary.latest.clone().unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(summary)) => output::DepStatus::UpToDate {
+                                    latest: summary.latest.clone(),
+                                },
+                                Some(Err(err)) => output::DepStatus::LookupError {
+                                    message: err.to_string(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            };
+                            file_deps.push(output::DepReport {
+                                name: dep.name.clone(),
+                                status,
+                            });
+                        }
+
+                        repo_report.files.push(output::FileReport {
+                            path: pip_file_path.clone(),
+                            manager: "pip_requirements".into(),
+                            deps: file_deps,
+                        });
+                    }
+                    Err(err) => {
+                        tracing::warn!(repo = %repo_slug, file = %pip_file_path, %err, "failed to parse requirements.txt");
+                    }
+                },
+                Ok(None) => {
+                    tracing::warn!(repo = %repo_slug, file = %pip_file_path, "requirements.txt not found");
+                }
+                Err(err) => {
+                    tracing::error!(repo = %repo_slug, file = %pip_file_path, %err, "failed to fetch requirements.txt");
                     had_error = true;
                 }
             }
