@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0115  | 2026-04-28 | Vendir `vendir.yml` Helm chart extractor | Complete | See below. |
 | 0114  | 2026-04-28 | Copier `.copier-answers.yml` template extractor | Complete | See below. |
 | 0113  | 2026-04-28 | Batect `batect.yml` Docker image extractor | Complete | See below. |
 | 0112  | 2026-04-28 | Meteor `package.js` `Npm.depends()` extractor (npm datasource) | Complete | See below. |
@@ -2970,6 +2971,30 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 924 passed
 
+## Slice 0115 - Vendir `vendir.yml` Helm chart extractor
+
+### Renovate reference
+- `lib/modules/manager/vendir/extract.ts` — `extractHelmChart`
+- Pattern: `/(^|/)vendir\.yml$/`
+- Datasource: Helm
+
+### What landed
+- `crates/renovate-core/src/extractors/vendir.rs` (new):
+  - `VendirHelmDep { chart_name, version, repo_url }` struct.
+  - `extract(content)` — state-machine scanner detecting `helmChart:` blocks; extracts
+    `name:`, `version:`, and `url:` (under `repository:`).
+  - 4 unit tests.
+- `crates/renovate-core/src/managers.rs`: `vendir` manager with `(^|/)vendir\.yml$` pattern.
+- `crates/renovate-cli/src/main.rs`: Vendir pipeline using Helm datasource.
+
+### What was intentionally deferred
+- Docker image deps in Vendir `contents` items (non-helmChart types).
+- Git refs (`type: git`) — requires a git-tags-with-URL datasource.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 928 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2982,6 +3007,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`pixi`** — Pixi `pixi.toml` package extraction (PyPI + Conda).
+8. **`renovate-config-presets`** — `renovate.json` extends preset version tracking.
+9. **`nodenv`** — `.node-version` tracking (already covered by node-version manager).
 7. **`vendir`** — Vendir `vendir.yml` Helm chart + Docker image sync tracking.
 8. **`osgi`** — OSGi `bnd.bnd` / `*.bndrun` Maven artifact extraction.
 9. **`pip-compile`** — `requirements.in` tracking upstream constraint files.

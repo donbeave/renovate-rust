@@ -93,6 +93,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.copier-answers(\..+)?\.ya?ml$"],
     },
     ManagerDef {
+        name: "vendir",
+        patterns: &[r"(^|/)vendir\.yml$"],
+    },
+    ManagerDef {
         name: "devbox",
         patterns: &[r"(^|/)devbox\.json$"],
     },
