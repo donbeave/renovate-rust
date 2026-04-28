@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0030  | 2026-04-28 | Maven POM property resolution (`<properties>`)  | Complete | See below. |
 | 0029  | 2026-04-28 | Glob-based `ignorePaths` matching (globset)     | Complete | See below. |
 | 0028  | 2026-04-28 | Run summary totals + `--quiet` mode            | Complete | See below. |
 | 0027  | 2026-04-28 | Maven pom.xml extractor + Maven Central datasource | Complete | See below. |
@@ -50,6 +51,42 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0030 - Maven POM property resolution (`<properties>`)
+
+### Renovate reference
+- `lib/modules/manager/maven/extract.ts` — `applyProps` / `applyPropsInternal`
+- Properties resolved before emitting each `PackageDependency`.
+
+### What landed
+- `crates/renovate-core/src/extractors/maven.rs`:
+  - `extract()` split into `parse_pom()` (SAX pass, returns raw deps + property
+    map) and a post-processing step that resolves `${key}` references.
+  - `parse_pom()` now collects `<project><properties><key>value</key>` entries
+    into a `HashMap<String, String>` alongside dep records.
+  - `apply_props(value, props)` — up to 3 substitution passes for recursive
+    property chains (e.g. `${alias}` → `${actual}` → `"1.2.3"`).
+  - `substitute_props(value, props)` — single-pass `${key}` substitution;
+    unknown keys are left as-is; unclosed `${` passed through.
+  - Post-processing resolves both `dep_name` (groupId/artifactId may be props)
+    and `current_value` (version). A dep whose version fully resolves loses
+    the `PropertyRef` skip reason and becomes actionable. A dep with
+    cross-file property refs keeps the skip reason.
+  - `property_ref_skipped_when_not_defined` — renamed to reflect new behavior.
+  - 6 new tests: resolved property, unresolved remains skipped, two-level
+    recursive resolution, PDM-style fixture (groupId+artifactId as props),
+    `substitute_props` unknown key, unclosed brace passthrough.
+
+### What was intentionally deferred
+- Cross-file (parent POM) property resolution.
+- `${project.version}` / `${pom.version}` built-in properties.
+- Profile-scoped `<properties>`.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (312 passed)
 
 ## Slice 0029 - Glob-based `ignorePaths` matching (globset)
 

@@ -20,10 +20,16 @@
 //!
 //! ## Property references
 //!
-//! Versions of the form `${property}` are skipped with
-//! `MavenSkipReason::PropertyRef`; the version cannot be updated without
-//! resolving cross-file property values (deferred).
+//! Versions of the form `${property}` are resolved against the POM's own
+//! `<properties>` section during extraction.  A version that fully resolves
+//! (no remaining `${…}` after substitution) is treated as actionable.
+//! Versions that reference properties not defined in this file are skipped
+//! with `MavenSkipReason::PropertyRef`; cross-file resolution is deferred.
+//!
+//! Renovate reference: `applyProps` / `applyPropsInternal` in
+//! `lib/modules/manager/maven/extract.ts`.
 
+use std::collections::HashMap;
 use std::io::BufReader;
 
 use quick_xml::Reader;
@@ -77,22 +83,55 @@ pub enum MavenExtractError {
 // ── Public API ─────────────────────────────────────────────────────────────
 
 /// Parse a `pom.xml` string and extract all Maven dependencies.
+///
+/// Property references in version strings (e.g. `${spring.version}`) are
+/// resolved against the POM's own `<properties>` section.  Unresolvable
+/// references remain marked with [`MavenSkipReason::PropertyRef`].
 pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractError> {
+    let (mut deps, properties) = parse_pom(content)?;
+
+    // Resolve ${property} references using the POM's own <properties> section.
+    // groupId and artifactId can also be property refs (e.g. ${quuxGroup}).
+    for dep in &mut deps {
+        // Resolve dep_name (${groupId}:${artifactId}).
+        if dep.dep_name.contains("${") {
+            dep.dep_name = apply_props(&dep.dep_name, &properties);
+        }
+        // Resolve version.
+        if dep.skip_reason == Some(MavenSkipReason::PropertyRef) {
+            let resolved = apply_props(&dep.current_value, &properties);
+            if !resolved.contains("${") {
+                dep.current_value = resolved;
+                dep.skip_reason = None;
+            }
+            // Otherwise leave as PropertyRef — cross-file resolution is deferred.
+        }
+    }
+
+    Ok(deps)
+}
+
+/// SAX parse a POM and return (deps, properties).
+fn parse_pom(
+    content: &str,
+) -> Result<(Vec<MavenExtractedDep>, HashMap<String, String>), MavenExtractError> {
     let cursor = BufReader::new(content.as_bytes());
     let mut reader = Reader::from_reader(cursor);
     reader.config_mut().trim_text(true);
 
     let mut deps: Vec<MavenExtractedDep> = Vec::new();
+    let mut properties: HashMap<String, String> = HashMap::new();
 
-    // Element name stack so we can track the current XML path.
+    // Element name stack — tracks current XML path.
     let mut stack: Vec<String> = Vec::new();
 
     // Currently accumulating a dep record.
     let mut current: Option<CurrentDep> = None;
-
-    // Track nesting depth at which we started collecting, so we know when the
-    // closing tag of the container is reached.
     let mut collect_start_depth: usize = 0;
+
+    // Currently accumulating a <properties> child value.
+    // `Some(key)` when we are inside <project><properties><key>.
+    let mut prop_key: Option<String> = None;
 
     let mut buf = Vec::new();
 
@@ -102,38 +141,53 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
                 let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
                 stack.push(name.clone());
 
-                match name.as_str() {
-                    "dependency" if current.is_none() => {
-                        if let Some(dep_type) = infer_dep_type(&stack) {
-                            current = Some(CurrentDep::new(dep_type));
+                // Detect entry into a <properties> child element.
+                // Stack must be exactly [project, properties, <key>].
+                if stack.len() == 3
+                    && stack[1] == "properties"
+                    && current.is_none()
+                    && prop_key.is_none()
+                {
+                    prop_key = Some(name.clone());
+                }
+
+                if current.is_none() && prop_key.is_none() {
+                    match name.as_str() {
+                        "dependency" => {
+                            if let Some(dep_type) = infer_dep_type(&stack) {
+                                current = Some(CurrentDep::new(dep_type));
+                                collect_start_depth = stack.len();
+                            }
+                        }
+                        "plugin" if is_plugin_context(&stack) => {
+                            current = Some(CurrentDep::new(MavenDepType::Plugin));
                             collect_start_depth = stack.len();
                         }
+                        "extension" if is_extension_context(&stack) => {
+                            current = Some(CurrentDep::new(MavenDepType::Extension));
+                            collect_start_depth = stack.len();
+                        }
+                        "parent" if stack.len() == 2 => {
+                            current = Some(CurrentDep::new(MavenDepType::Parent));
+                            collect_start_depth = stack.len();
+                        }
+                        _ => {}
                     }
-                    "plugin" if current.is_none() && is_plugin_context(&stack) => {
-                        current = Some(CurrentDep::new(MavenDepType::Plugin));
-                        collect_start_depth = stack.len();
-                    }
-                    "extension" if current.is_none() && is_extension_context(&stack) => {
-                        current = Some(CurrentDep::new(MavenDepType::Extension));
-                        collect_start_depth = stack.len();
-                    }
-                    "parent" if current.is_none() && stack.len() == 2 => {
-                        // <project><parent>
-                        current = Some(CurrentDep::new(MavenDepType::Parent));
-                        collect_start_depth = stack.len();
-                    }
-                    _ => {}
                 }
             }
 
             Event::End(e) => {
                 let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
 
-                // Check if we just closed the container we were collecting.
+                // Close of a <properties> child element.
+                if prop_key.is_some() && stack.len() == 3 && stack[1] == "properties" {
+                    prop_key = None;
+                }
+
+                // Check if we just closed the dep container.
                 if let Some(ref dep) = current
                     && stack.len() == collect_start_depth
                 {
-                    // Closing the container tag — emit if we have groupId + artifactId.
                     let container = match dep.dep_type {
                         MavenDepType::Plugin => "plugin",
                         MavenDepType::Extension => "extension",
@@ -153,19 +207,25 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
             }
 
             Event::Text(e) => {
-                if let Some(ref mut dep) = current {
-                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
-                    if text.is_empty() {
-                        continue;
-                    }
-                    // Only capture direct children of the container.
-                    if stack.len() == collect_start_depth + 1 {
-                        match stack.last().map(String::as_str) {
-                            Some("groupId") => dep.group_id = text,
-                            Some("artifactId") => dep.artifact_id = text,
-                            Some("version") => dep.version = text,
-                            _ => {}
-                        }
+                let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                if text.is_empty() {
+                    continue;
+                }
+
+                // Capture a <properties><key>value</key> entry.
+                if let Some(ref key) = prop_key {
+                    properties.insert(key.clone(), text.clone());
+                }
+
+                // Capture dep fields.
+                if let Some(ref mut dep) = current
+                    && stack.len() == collect_start_depth + 1
+                {
+                    match stack.last().map(String::as_str) {
+                        Some("groupId") => dep.group_id = text,
+                        Some("artifactId") => dep.artifact_id = text,
+                        Some("version") => dep.version = text,
+                        _ => {}
                     }
                 }
             }
@@ -177,7 +237,47 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
         buf.clear();
     }
 
-    Ok(deps)
+    Ok((deps, properties))
+}
+
+/// Substitute `${key}` references in `value` using `properties`.
+/// Applies up to 3 passes to handle one level of indirection.
+fn apply_props(value: &str, properties: &HashMap<String, String>) -> String {
+    let mut result = value.to_owned();
+    for _ in 0..3 {
+        let next = substitute_props(&result, properties);
+        if next == result {
+            break;
+        }
+        result = next;
+    }
+    result
+}
+
+fn substitute_props(value: &str, properties: &HashMap<String, String>) -> String {
+    let mut out = String::with_capacity(value.len());
+    let mut rest = value;
+    while let Some(start) = rest.find("${") {
+        out.push_str(&rest[..start]);
+        let after_open = &rest[start + 2..];
+        if let Some(close) = after_open.find('}') {
+            let key = &after_open[..close];
+            if let Some(val) = properties.get(key) {
+                out.push_str(val);
+            } else {
+                out.push_str("${");
+                out.push_str(key);
+                out.push('}');
+            }
+            rest = &after_open[close + 1..];
+        } else {
+            // Unclosed ${ — emit as-is and stop scanning.
+            out.push_str("${");
+            rest = after_open;
+        }
+    }
+    out.push_str(rest);
+    out
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -448,7 +548,8 @@ mod tests {
     }
 
     #[test]
-    fn property_ref_version_is_skipped() {
+    fn property_ref_skipped_when_not_defined() {
+        // No <properties> section — ${spring.version} cannot be resolved.
         let content = r#"<project>
   <dependencies>
     <dependency>
@@ -461,6 +562,132 @@ mod tests {
         let deps = extract_ok(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].skip_reason, Some(MavenSkipReason::PropertyRef));
+    }
+
+    #[test]
+    fn property_resolved_from_properties_section() {
+        let content = r#"<project>
+  <properties>
+    <spring.version>5.3.28</spring.version>
+    <junit.version>4.13.2</junit.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>unknown-dep</artifactId>
+      <version>${unknown.version}</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 3);
+
+        let spring = deps
+            .iter()
+            .find(|d| d.dep_name == "org.springframework:spring-core")
+            .unwrap();
+        assert_eq!(spring.current_value, "5.3.28");
+        assert!(
+            spring.skip_reason.is_none(),
+            "resolved property should have no skip reason"
+        );
+
+        let junit = deps.iter().find(|d| d.dep_name == "junit:junit").unwrap();
+        assert_eq!(junit.current_value, "4.13.2");
+        assert!(junit.skip_reason.is_none());
+
+        let unknown = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:unknown-dep")
+            .unwrap();
+        assert_eq!(unknown.skip_reason, Some(MavenSkipReason::PropertyRef));
+    }
+
+    #[test]
+    fn recursive_property_resolution() {
+        // ${alias} = ${actual}, ${actual} = 1.2.3 — two-level indirection.
+        let content = r#"<project>
+  <properties>
+    <alias.version>${actual.version}</alias.version>
+    <actual.version>1.2.3</actual.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>alias-dep</artifactId>
+      <version>${alias.version}</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "1.2.3");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    #[test]
+    fn pdm_style_pom_with_properties() {
+        // Based on the simple.pom.xml fixture from the Renovate test suite.
+        let content = r#"<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <properties>
+    <quuxGroup>org.example</quuxGroup>
+    <quuxId>quux</quuxId>
+    <quuxVersion>1.2.3.4</quuxVersion>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>${quuxGroup}</groupId>
+      <artifactId>${quuxId}</artifactId>
+      <version>${quuxVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>quuz</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        let deps = extract_ok(content);
+        // quux: groupId and artifactId are properties — dep_name will use resolved values.
+        let quux = deps.iter().find(|d| d.dep_name == "org.example:quux");
+        assert!(
+            quux.is_some(),
+            "quux should be extracted with resolved groupId/artifactId"
+        );
+        let quux = quux.unwrap();
+        assert_eq!(quux.current_value, "1.2.3.4");
+        assert!(quux.skip_reason.is_none());
+
+        let quuz = deps
+            .iter()
+            .find(|d| d.dep_name == "org.example:quuz")
+            .unwrap();
+        assert_eq!(quuz.current_value, "1.2.3");
+    }
+
+    #[test]
+    fn substitute_props_handles_unknown_key() {
+        let mut props = HashMap::new();
+        props.insert("known".to_owned(), "1.0".to_owned());
+        let result = substitute_props("${known}-${unknown}", &props);
+        assert_eq!(result, "1.0-${unknown}");
+    }
+
+    #[test]
+    fn substitute_props_unclosed_brace() {
+        let props = HashMap::new();
+        let result = substitute_props("${unclosed", &props);
+        assert_eq!(result, "${unclosed");
     }
 
     #[test]
