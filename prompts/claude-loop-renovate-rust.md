@@ -1,6 +1,15 @@
-You are working in the renovate-rust repository. Your job is to steadily build a production-quality Rust replacement for renovatebot/renovate.
+You are working on the renovate-rust repository. Your job is to steadily build a production-quality Rust replacement for renovatebot/renovate.
 
 Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Never stop because of missing credentials, unavailable network, or an external service requirement. Document the blocker, skip that blocked slice, and continue with another local/offline slice that can move the project forward.
+
+Workspace layout:
+- The normal Claude Code working directory is `~/Projects/renovate-rust`.
+- That directory contains two sibling checkouts:
+  - `renovate/` is the upstream Renovate reference clone from `https://github.com/renovatebot/renovate`.
+  - `renovate-rust/` is the Rust implementation repository from `https://github.com/donbeave/renovate-rust`.
+- If the current working directory contains `renovate-rust/.git`, use `./renovate-rust` as the project root and `./renovate` as the upstream reference.
+- If the current working directory is already the Rust repository, use `.` as the project root and `../renovate` as the upstream reference.
+- All edits, commits, and project commands must target the Rust implementation repository. Never edit or commit inside the upstream `renovate/` reference checkout.
 
 Repository rules:
 - Follow `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, and `COMMITS.md`.
@@ -10,12 +19,13 @@ Repository rules:
 
 Reference repository:
 - Treat renovatebot/renovate as the behavioral reference.
-- Locate it in this order:
+- Locate it from the Rust project root in this order:
   1. `$RENOVATE_REFERENCE_REPO`, if set
   2. `../renovate`
   3. `./renovate-reference`
 - If no reference checkout exists, clone it locally with:
-  `git clone https://github.com/renovatebot/renovate ./renovate-reference`
+  `git clone https://github.com/renovatebot/renovate ../renovate`
+  If the parent directory is not writable, clone to `./renovate-reference` instead.
 - If a reference checkout exists, update it when possible with `git -C <reference> fetch --all --tags --prune`, but do not let network failure block local progress.
 - Read Renovate's docs, source, and tests before implementing behavior. Prefer `docs/`, `lib/`, `test/`, `package.json`, and configuration schema files as primary references.
 - Do not copy Renovate source code verbatim. Recreate behavior in idiomatic Rust and keep license implications in mind when porting tests or fixtures.

@@ -5,7 +5,8 @@ This directory contains reusable prompts for long-running agent work.
 ## Renovate Rust /loop Prompt
 
 Use [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md) with Claude
-Code's native `/loop` command from the repository root.
+Code's native `/loop` command from the parent workdir that contains both
+checkouts.
 
 The prompt file intentionally contains only the prompt body. Keep usage notes,
 command examples, and operator documentation in this README.
@@ -16,14 +17,17 @@ Claude Code scheduled tasks require Claude Code v2.1.72 or later. Check with:
 claude --version
 ```
 
-Start Claude Code in this repository, then schedule the prompt every 15 minutes:
+Start Claude Code in `~/Projects/renovate-rust`, then schedule the prompt every
+15 minutes:
 
 ```text
-/loop 15m Follow @prompts/claude-loop-renovate-rust.md
+/loop 15m Follow @renovate-rust/prompts/claude-loop-renovate-rust.md
 ```
 
-The `@prompts/claude-loop-renovate-rust.md` reference tells Claude Code to read
-the prompt file as part of the loop instruction. If file references are not
+The `@renovate-rust/prompts/claude-loop-renovate-rust.md` reference tells
+Claude Code to read the prompt file as part of the loop instruction. If you
+start Claude Code from inside `~/Projects/renovate-rust/renovate-rust`, use
+`@prompts/claude-loop-renovate-rust.md` instead. If file references are not
 available in your Claude Code build, open the prompt file and paste its prompt
 body after `/loop 15m`.
 
@@ -39,20 +43,21 @@ most predictable behavior.
 
 ## Expected Local Layout
 
-Run the loop from this checkout:
+Run the loop from this parent directory:
 
 ```text
-parent/
+~/Projects/renovate-rust/
+  renovate/
   renovate-rust/
 ```
 
-The prompt expects the upstream Renovate reference repository to be available at
-`../renovate` when possible:
+The prompt expects the upstream Renovate reference repository to be available as
+a sibling checkout:
 
 ```text
-parent/
-  renovate-rust/
+~/Projects/renovate-rust/
   renovate/
+  renovate-rust/
 ```
 
 If the reference checkout is missing, the prompt instructs the agent to clone
