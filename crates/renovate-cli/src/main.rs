@@ -36,6 +36,8 @@ use renovate_core::datasources::nuget as nuget_datasource;
 use renovate_core::datasources::packagist as packagist_datasource;
 use renovate_core::datasources::pub_dev as pub_datasource;
 use renovate_core::datasources::pypi as pypi_datasource;
+use renovate_core::datasources::rubygems as rubygems_datasource;
+use renovate_core::extractors::bundler as bundler_extractor;
 use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::composer as composer_extractor;
 use renovate_core::extractors::github_actions as github_actions_extractor;
@@ -1130,6 +1132,47 @@ async fn process_repo(
         }
     }
 
+    // ── Bundler (Gemfile) ─────────────────────────────────────────────────────
+    for gemfile_path in manager_files(&detected, "bundler") {
+        match client.get_raw_file(owner, repo, &gemfile_path).await {
+            Ok(Some(raw)) => {
+                let deps = bundler_extractor::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %gemfile_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted bundler gems"
+                );
+                let dep_inputs: Vec<rubygems_datasource::GemDepInput> = actionable
+                    .iter()
+                    .map(|d| rubygems_datasource::GemDepInput {
+                        name: d.name.clone(),
+                        current_value: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = rubygems_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    rubygems_datasource::RUBYGEMS_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                repo_report.files.push(output::FileReport {
+                    path: gemfile_path.clone(),
+                    manager: "bundler".into(),
+                    deps: build_dep_reports_bundler(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%gemfile_path, "Gemfile not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gemfile_path, %err, "failed to fetch Gemfile");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 
@@ -1547,6 +1590,48 @@ fn build_dep_reports_pip(
         let status = match update_map.get(&dep.name) {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_bundler(
+    all_deps: &[renovate_core::extractors::bundler::BundlerExtractedDep],
+    actionable: &[&renovate_core::extractors::bundler::BundlerExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::rubygems::GemUpdateSummary,
+            renovate_core::datasources::rubygems::RubyGemsError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_value.clone(),
                 latest: s.latest.clone().unwrap_or_default(),
             },
             Some(Ok(s)) => output::DepStatus::UpToDate {

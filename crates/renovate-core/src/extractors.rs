@@ -3,6 +3,7 @@
 //! Each sub-module parses a specific manifest format and returns a list of
 //! [`ExtractedDep`] records suitable for datasource version lookups.
 
+pub mod bundler;
 pub mod cargo;
 pub mod composer;
 pub mod docker_compose;

@@ -1138,24 +1138,51 @@ None. No network or credentials were required for this slice.
 
 (Results recorded in the slice's commit body.)
 
+## Slice 0037 - Bundler `Gemfile` extractor + RubyGems datasource
+
+### Renovate reference
+- `lib/modules/manager/bundler/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/bundler/index.ts` — `defaultConfig`, pattern `/(^|/)Gemfile$/`
+- `lib/modules/datasource/rubygems/index.ts` — `RubygemsDatasource`
+- API: `GET https://rubygems.org/api/v1/versions/{gemname}.json`
+
+### What landed
+- `crates/renovate-core/src/extractors/bundler.rs` — line-scanner Gemfile extractor:
+  - Handles `gem 'name'`, `gem 'name', '~> 7.0'`, and multi-constraint forms
+    (`gem 'pg', '>= 0.18', '< 2.0'` → `">= 0.18, < 2.0"`).
+  - Git source detection: `git:`, `github:`, `gitlab:` options → `GitSource`.
+  - Path source detection: `path:` option → `PathSource`.
+  - Block depth tracking for `group :development, :test do … end` blocks.
+  - Double and single quoted gem names handled without backreferences (RE2 limit).
+- `crates/renovate-core/src/datasources/rubygems.rs` — RubyGems REST client:
+  - `GET /api/v1/versions/{gem}.json` → array newest-first, filter `prerelease == false`.
+  - `lower_bound_version()` strips leading operators (`~>`, `>=`, etc.) to extract the
+    pinned lower bound for `update_available` comparison.
+  - Concurrent lookups via `JoinSet` + `Arc<Semaphore>`.
+- `crates/renovate-core/src/managers.rs` — added `bundler` with pattern `(^|/)Gemfile$`.
+- `crates/renovate-cli/src/main.rs` — wired bundler pipeline section +
+  `build_dep_reports_bundler` helper.
+
+### What was intentionally deferred
+- `Gemfile.lock` lockfile parsing and locked-version pinning.
+- Gemspec (`.gemspec`) files.
+- Custom Gemfile sources (non-rubygems.org registries).
+- `ruby` version directive as a `RubyVersionDatasource` lookup.
+- git-ref source branch/tag pinning.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 340 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
 
-1. **Renovate option surface (first cut)**: port the option definitions
+1. **Terraform/HCL extractor + Terraform registry datasource**: high Ruby-like
+   coverage boost, public REST API, widely used infra manager.
+2. **Maven versioning module**: implement the Maven qualifier ordering scheme
+   (alpha < beta < milestone < rc < release < sp) for accurate update decisions.
+3. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
-   and wire them into clap. Will likely need to be split across two
-   slices because the option list is large; start with the small set of
-   flags `migrateArgs` already produces (`--dry-run`, `--require-config`,
-   `--platform-automerge`, `--fork-processing`, `--recreate-when`,
-   `--trust-level`, `--host-rules`, `--registry-aliases`,
-   `--allowed-commands`, `--allow-command-templating`) so the migration
-   wiring becomes end-to-end testable.
-2. **Logger init + log levels**: wire `tracing-subscriber` with
-   `LOG_LEVEL` env support and Renovate's level names (`fatal`, `error`,
-   `warn`, `info`, `debug`, `trace`).
-3. **Config file discovery**: port the `config.js`/`.renovaterc(.json)`
-   discovery rules from `lib/workers/global/config/parse/file.ts`.
-4. **`coersions` parity**: port the type coercions from
-   `lib/workers/global/config/parse/coersions.ts` (string, integer,
-   boolean, list, object, json) - feeds option-surface work.
+   and wire them into clap.
+4. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
