@@ -131,6 +131,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)gradle/wrapper/gradle-wrapper\.properties$"],
     },
     ManagerDef {
+        name: "helm-values",
+        patterns: &[r"(^|/)values\.ya?ml$"],
+    },
+    ManagerDef {
         name: "helmfile",
         patterns: &[
             r"(^|/)helmfile\.ya?ml(?:\.gotmpl)?$",

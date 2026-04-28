@@ -1483,6 +1483,26 @@ async fn process_repo(
         }
     }
 
+    // ── Helm Values (values.yaml) ─────────────────────────────────────────────
+    for hv_path in manager_files(&detected, "helm-values") {
+        match client.get_raw_file(owner, repo, &hv_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::helm_values::extract(&raw.content);
+                tracing::debug!(repo = %repo_slug, file = %hv_path, total = deps.len(), "extracted helm values images");
+                repo_report.files.push(output::FileReport {
+                    path: hv_path.clone(),
+                    manager: "helm-values".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%hv_path, "values.yaml not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%hv_path, %err, "failed to fetch values.yaml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Helmfile (helmfile.yaml / helmfile.d/*.yaml) ──────────────────────────
     for hf_path in manager_files(&detected, "helmfile") {
         match client.get_raw_file(owner, repo, &hf_path).await {

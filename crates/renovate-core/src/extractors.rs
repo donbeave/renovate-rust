@@ -25,6 +25,7 @@ pub mod gomod;
 pub mod gradle;
 pub mod gradle_wrapper;
 pub mod helm;
+pub mod helm_values;
 pub mod helmfile;
 pub mod jenkins;
 pub mod kustomize;
