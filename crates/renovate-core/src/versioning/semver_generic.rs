@@ -63,6 +63,36 @@ pub fn semver_update_summary(current_value: &str, latest: Option<&str>) -> Semve
     }
 }
 
+// ── Update type classification ────────────────────────────────────────────────
+
+/// Semantic update type for a version bump.
+///
+/// Mirrors Renovate's `UpdateType` enum from `lib/config/types.ts`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UpdateType {
+    Major,
+    Minor,
+    Patch,
+}
+
+/// Classify a version bump as major, minor, or patch using semver comparison.
+///
+/// Returns `None` when either version string cannot be parsed as semver.
+/// Both strings are padded to three components and leading `v` is stripped.
+pub fn classify_semver_update(current: &str, latest: &str) -> Option<UpdateType> {
+    let current_v = parse_padded(lower_bound(current))?;
+    let latest_v = parse_padded(latest)?;
+    if latest_v.major > current_v.major {
+        Some(UpdateType::Major)
+    } else if latest_v.minor > current_v.minor {
+        Some(UpdateType::Minor)
+    } else if latest_v.patch > current_v.patch {
+        Some(UpdateType::Patch)
+    } else {
+        None
+    }
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /// Extract the lower-bound version string from a constraint.
@@ -205,5 +235,58 @@ mod tests {
         // Latest is older than lower bound (shouldn't happen but defensive)
         let s = semver_update_summary("~> 5.0", Some("4.9.9"));
         assert!(!s.update_available);
+    }
+
+    // ── classify_semver_update tests ─────────────────────────────────────────
+
+    #[test]
+    fn classify_major_bump() {
+        assert_eq!(
+            classify_semver_update("1.2.3", "2.0.0"),
+            Some(UpdateType::Major)
+        );
+    }
+
+    #[test]
+    fn classify_minor_bump() {
+        assert_eq!(
+            classify_semver_update("1.2.3", "1.3.0"),
+            Some(UpdateType::Minor)
+        );
+    }
+
+    #[test]
+    fn classify_patch_bump() {
+        assert_eq!(
+            classify_semver_update("1.2.3", "1.2.4"),
+            Some(UpdateType::Patch)
+        );
+    }
+
+    #[test]
+    fn classify_same_version_returns_none() {
+        assert_eq!(classify_semver_update("1.2.3", "1.2.3"), None);
+    }
+
+    #[test]
+    fn classify_strips_v_prefix() {
+        assert_eq!(
+            classify_semver_update("v1.2.3", "v2.0.0"),
+            Some(UpdateType::Major)
+        );
+    }
+
+    #[test]
+    fn classify_caret_range_to_major() {
+        assert_eq!(
+            classify_semver_update("^1.2", "2.0.0"),
+            Some(UpdateType::Major)
+        );
+    }
+
+    #[test]
+    fn classify_non_semver_returns_none() {
+        assert_eq!(classify_semver_update("latest", "2.0.0"), None);
+        assert_eq!(classify_semver_update("1.0.0", "next"), None);
     }
 }

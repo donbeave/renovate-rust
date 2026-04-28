@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0066  | 2026-04-28 | `UpdateType` classification + update type labels in CLI output | Complete | See below. |
 | 0065  | 2026-04-28 | `packageRules` parsing + `enabled: false` filtering | Complete | See below. |
 | 0064  | 2026-04-28 | GitHub Actions `runs-on` runner version extraction | Complete | See below. |
 | 0063  | 2026-04-28 | GitHub Actions container/services Docker image extraction | Complete | See below. |
@@ -2022,14 +2023,39 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 693 passed
 
+## Slice 0066 - `UpdateType` classification + update type labels in CLI output
+
+### Renovate reference
+- `lib/config/types.ts` — `UpdateType` enum (`major`, `minor`, `patch`, ...)
+
+### What landed
+- `crates/renovate-core/src/versioning/semver_generic.rs`:
+  - `UpdateType { Major, Minor, Patch }` — enum for bump classification.
+  - `classify_semver_update(current: &str, latest: &str) -> Option<UpdateType>` — compares
+    semver versions (with `lower_bound()` and `parse_padded()`) to determine bump magnitude.
+    Returns `None` for non-semver strings, same versions, or when parsing fails.
+  - 7 new unit tests covering major/minor/patch/same-version/v-prefix/range/non-semver cases.
+- `crates/renovate-cli/src/output.rs`:
+  - `format_dep()` now calls `classify_semver_update(current, latest)` for `UpdateAvailable` deps.
+  - Appends colored bump label: red `major`, yellow `minor`, green `patch`.
+  - No change to `DepStatus` struct — classification is computed at display time.
+
+### What was intentionally deferred
+- `matchUpdateTypes` in `packageRules` filtering (infrastructure is now in place).
+- Non-semver update type classification (Docker tags, runner versions, etc.).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 700 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
 
-1. **Renovate option surface (first cut)**: port the option definitions
+1. **`packageRules` matchUpdateTypes**: wire `classify_semver_update` into packageRules filtering.
+2. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
-2. **`packageRules` matchUpdateTypes**: filter major/minor/patch updates with rules.
 3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 4. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 5. **`tekton` extractor**: Tekton pipeline bundle references.

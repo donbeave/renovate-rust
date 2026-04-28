@@ -247,13 +247,48 @@ fn format_file_counts(updates: usize, skipped: usize, errors: usize, use_color: 
 fn format_dep(dep: &DepReport, use_color: bool) -> String {
     match &dep.status {
         DepStatus::UpdateAvailable { current, latest } => {
+            use renovate_core::versioning::semver_generic::{UpdateType, classify_semver_update};
+            let type_label = match classify_semver_update(current, latest) {
+                Some(UpdateType::Major) => {
+                    format!(
+                        "  {}",
+                        if use_color {
+                            "\x1b[31mmajor\x1b[0m"
+                        } else {
+                            "major"
+                        }
+                    )
+                }
+                Some(UpdateType::Minor) => {
+                    format!(
+                        "  {}",
+                        if use_color {
+                            "\x1b[33mminor\x1b[0m"
+                        } else {
+                            "minor"
+                        }
+                    )
+                }
+                Some(UpdateType::Patch) => {
+                    format!(
+                        "  {}",
+                        if use_color {
+                            "\x1b[32mpatch\x1b[0m"
+                        } else {
+                            "patch"
+                        }
+                    )
+                }
+                None => String::new(),
+            };
             format!(
-                "{} {}  {}  {} → {}",
+                "{} {}  {}  {} → {}{}",
                 yellow("↑", use_color),
                 bold(&dep.name, use_color),
                 dim(current, use_color),
                 dim("→", use_color),
                 green(latest, use_color),
+                type_label,
             )
         }
         DepStatus::UpToDate { latest } => {
