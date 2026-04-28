@@ -425,6 +425,60 @@ async fn process_repo(
         }
     }
 
+    // ── Dockerfile ────────────────────────────────────────────────────────────
+    for df_file_path in manager_files(&detected, "dockerfile") {
+        match client.get_raw_file(owner, repo, &df_file_path).await {
+            Ok(Some(raw)) => {
+                match renovate_core::extractors::dockerfile::extract(&raw.content) {
+                    Ok(deps) => {
+                        let actionable: Vec<_> =
+                            deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                        tracing::debug!(
+                            repo = %repo_slug, file = %df_file_path,
+                            total = deps.len(), actionable = actionable.len(),
+                            "extracted dockerfile images"
+                        );
+                        // No Docker registry datasource yet — report as
+                        // UpToDate with no latest info (datasource slice follows).
+                        let mut file_deps: Vec<output::DepReport> = Vec::new();
+                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                            file_deps.push(output::DepReport {
+                                name: dep.image.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
+                                        .to_lowercase(),
+                                },
+                            });
+                        }
+                        for dep in &actionable {
+                            let name = match &dep.tag {
+                                Some(t) => format!("{}:{t}", dep.image),
+                                None => dep.image.clone(),
+                            };
+                            file_deps.push(output::DepReport {
+                                name,
+                                status: output::DepStatus::UpToDate { latest: None },
+                            });
+                        }
+                        repo_report.files.push(output::FileReport {
+                            path: df_file_path.clone(),
+                            manager: "dockerfile".into(),
+                            deps: file_deps,
+                        });
+                    }
+                    Err(err) => {
+                        tracing::warn!(repo=%repo_slug, file=%df_file_path, %err, "failed to parse Dockerfile")
+                    }
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%df_file_path, "Dockerfile not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%df_file_path, %err, "failed to fetch Dockerfile");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 

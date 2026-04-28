@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0020  | 2026-04-28 | Manager regex caching + Dockerfile FROM extractor | Complete | See below. |
 | 0019  | 2026-04-28 | Parallel repository processing (JoinSet + Semaphore) | Complete | See below. |
 | 0018  | 2026-04-28 | pip_requirements extractor + PyPI datasource | Complete | See below. |
 | 0017  | 2026-04-28 | Human-readable update report output      | Complete | See below. |
@@ -40,6 +41,38 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0020 - Manager regex caching + Dockerfile FROM extractor
+
+### Renovate reference
+- `lib/modules/manager/dockerfile/extract.ts` — `extractPackageFile`
+- Pattern: `/(^|/)(Dockerfile|Containerfile)(\.[^/]*)?$/`
+
+### What landed
+- `crates/renovate-core/src/managers.rs` — replaced per-call regex
+  compilation with `LazyLock<Vec<(&str, Vec<Regex>)>>` (`COMPILED`);
+  patterns are now compiled exactly once at first use.  The `detect()` function
+  became simpler and faster.
+- `crates/renovate-core/src/extractors/dockerfile.rs` — Parses `FROM`
+  instructions with multi-line continuation (`\`), strips `--platform=`
+  flags, splits `AS alias`, tracks build stage names to detect
+  `BuildStageRef` skip reasons.  Also handles `scratch` and ARG variable
+  (`$VAR`) skip reasons.  Registry port in image name (`host:5000/image`)
+  is not confused with a tag colon.  16 unit tests.
+- `crates/renovate-cli/src/main.rs` — Dockerfile section wired into
+  `process_repo`; reports images without registry lookup (Docker Hub
+  datasource is a separate slice).
+
+### What was intentionally deferred
+- Docker Hub / GHCR registry datasource — planned for a follow-on slice.
+- ARG value substitution before image classification.
+- COPY `--from=stage` parsing.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (216 passed)
 
 ## Slice 0019 - Parallel repository processing
 

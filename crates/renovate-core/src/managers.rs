@@ -13,6 +13,8 @@
 //! This module stores the inner regex (without surrounding `/`) and compiles
 //! them with the `regex` crate, which is RE2-compatible.
 
+use std::sync::LazyLock;
+
 use regex::Regex;
 
 /// A detected package manager with the list of matching files.
@@ -31,6 +33,39 @@ struct ManagerDef {
     name: &'static str,
     patterns: &'static [&'static str],
 }
+
+/// Pre-compiled manager patterns.  Compiled once at first use via
+/// `LazyLock` — avoids re-compilation on every `detect()` call.
+static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {
+    MANAGER_DEFS
+        .iter()
+        .filter_map(|def| {
+            let compiled: Vec<Regex> = def
+                .patterns
+                .iter()
+                .filter_map(|pat| {
+                    Regex::new(pat)
+                        .map_err(|e| {
+                            // Programmer error: a pattern in the static table
+                            // is invalid.  Log and skip the manager.
+                            tracing::error!(
+                                manager = def.name,
+                                pattern = pat,
+                                %e,
+                                "invalid manager pattern (bug in pattern definition)"
+                            );
+                        })
+                        .ok()
+                })
+                .collect();
+            if compiled.len() == def.patterns.len() {
+                Some((def.name, compiled))
+            } else {
+                None
+            }
+        })
+        .collect()
+});
 
 /// The initial set of supported manager definitions, ported from upstream
 /// `managerFilePatterns` entries. Coverage grows with each parity slice.
@@ -78,46 +113,21 @@ const MANAGER_DEFS: &[ManagerDef] = &[
 
 /// Detect which package managers are present in the repository.
 ///
-/// Compiles all manager patterns once, then matches every file path against
-/// every pattern. Managers with at least one match are included in the result.
-///
-/// Pattern compilation errors (which indicate a bug in this file, not user
-/// input) are logged as errors and that manager is skipped.
+/// Uses pre-compiled regex patterns (compiled once via [`COMPILED`]).
+/// Managers with at least one matching file are included in the result.
 pub fn detect(files: &[String]) -> Vec<DetectedManager> {
     let mut results = Vec::new();
 
-    for def in MANAGER_DEFS {
-        // Compile each pattern; skip the manager if any pattern is invalid.
-        let compiled: Vec<Regex> = def
-            .patterns
-            .iter()
-            .filter_map(|pat| {
-                Regex::new(pat)
-                    .map_err(|e| {
-                        tracing::error!(
-                            manager = def.name,
-                            pattern = pat,
-                            %e,
-                            "invalid manager pattern (bug in pattern definition)"
-                        );
-                    })
-                    .ok()
-            })
-            .collect();
-
-        if compiled.len() != def.patterns.len() {
-            continue; // skip manager if any pattern failed
-        }
-
+    for (name, patterns) in COMPILED.iter() {
         let matched: Vec<String> = files
             .iter()
-            .filter(|f| compiled.iter().any(|re| re.is_match(f)))
+            .filter(|f| patterns.iter().any(|re| re.is_match(f)))
             .cloned()
             .collect();
 
         if !matched.is_empty() {
             results.push(DetectedManager {
-                name: def.name,
+                name,
                 matched_files: matched,
             });
         }
