@@ -234,24 +234,40 @@ async fn process_repo(
 
     tracing::info!(repo = %repo_slug, "processing repository");
 
-    match repo_config::discover(client, owner, repo, config).await {
-        Ok(repo_config::RepoConfigResult::Found { path, .. }) => {
+    // Parse the per-repo config and apply top-level gates.
+    let repo_cfg = match repo_config::discover(client, owner, repo, config).await {
+        Ok(repo_config::RepoConfigResult::Found { path, config: rc }) => {
             tracing::info!(repo = %repo_slug, config_path = %path, "found renovate config");
+            if !rc.enabled {
+                tracing::info!(repo = %repo_slug, "renovate disabled in repo config — skipping");
+                return (None, false);
+            }
+            if !rc.ignore_deps.is_empty() || !rc.ignore_paths.is_empty() {
+                tracing::debug!(
+                    repo = %repo_slug,
+                    ignore_deps = ?rc.ignore_deps,
+                    ignore_paths = ?rc.ignore_paths,
+                    "repo config filters active"
+                );
+            }
+            rc
         }
         Ok(repo_config::RepoConfigResult::NeedsOnboarding) => {
             tracing::info!(repo = %repo_slug, "needs onboarding — no config file found");
+            renovate_core::repo_config::RepoConfig::default()
         }
         Ok(repo_config::RepoConfigResult::NotFound) => {
             tracing::debug!(
                 repo = %repo_slug,
                 "no config file (require_config=optional, skipping)"
             );
+            renovate_core::repo_config::RepoConfig::default()
         }
         Err(err) => {
             tracing::error!(repo = %repo_slug, %err, "error processing repository");
             return (None, true);
         }
-    }
+    };
 
     let files = match client.get_file_list(owner, repo).await {
         Ok(f) => f,
@@ -261,7 +277,13 @@ async fn process_repo(
         }
     };
 
-    let detected = managers::detect(&files);
+    // Filter out paths the repo config asks to ignore before detection.
+    let filtered_files: Vec<String> = files
+        .into_iter()
+        .filter(|f| !repo_cfg.is_path_ignored(f))
+        .collect();
+
+    let detected = managers::detect(&filtered_files);
     if detected.is_empty() {
         tracing::info!(repo = %repo_slug, "no package managers detected");
     } else {
@@ -280,8 +302,12 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &cargo_file_path).await {
             Ok(Some(raw)) => match cargo_extractor::extract(&raw.content) {
                 Ok(deps) => {
-                    let actionable: Vec<_> =
-                        deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| {
+                            d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name)
+                        })
+                        .collect();
                     tracing::debug!(
                         repo = %repo_slug, file = %cargo_file_path,
                         total = deps.len(), actionable = actionable.len(),
@@ -331,8 +357,10 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &npm_file_path).await {
             Ok(Some(raw)) => match npm_extractor::extract(&raw.content) {
                 Ok(deps) => {
-                    let actionable: Vec<_> =
-                        deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .collect();
                     tracing::debug!(
                         repo = %repo_slug, file = %npm_file_path,
                         total = deps.len(), actionable = actionable.len(),
@@ -381,8 +409,10 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &pip_file_path).await {
             Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
                 Ok(deps) => {
-                    let actionable: Vec<_> =
-                        deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .collect();
                     tracing::debug!(
                         repo = %repo_slug, file = %pip_file_path,
                         total = deps.len(), actionable = actionable.len(),

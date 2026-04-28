@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0025  | 2026-04-28 | Per-repo renovate.json config parsing + application | Complete | See below. |
 | 0024  | 2026-04-28 | docker-compose image extractor (line-scan, no YAML dep) | Complete | See below. |
 | 0023  | 2026-04-28 | HTTP retry with exponential backoff + Retry-After | Complete | See below. |
 | 0022  | 2026-04-28 | GitLab platform client                           | Complete | See below. |
@@ -45,6 +46,45 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0025 - Per-repo renovate.json config parsing + application
+
+### Renovate reference
+- `lib/config/options/index.ts` — `enabled`, `ignoreDeps`, `ignorePaths`
+- `lib/config/app-strings.ts` — `configFileNames`
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `RepoConfig { enabled, ignore_deps, ignore_paths }` struct with manual
+    `Default` impl (`enabled = true` per Renovate defaults).
+  - `RepoConfig::parse(content)` — parses JSON/JSON5 via the `json5` crate;
+    falls back to `RepoConfig::default()` on parse failure.
+  - `is_dep_ignored(name)` — exact string match against `ignoreDeps`.
+  - `is_path_ignored(path)` — prefix match against `ignorePaths`.
+  - `RepoConfigResult::Found { config: RepoConfig, .. }` — content field
+    replaced with the parsed struct.
+  - 9 unit tests: defaults, `enabled: false`, ignoreDeps, ignorePaths,
+    JSON5 comments, malformed JSON fallback, exact dep match, path prefix
+    match.
+- `crates/renovate-cli/src/main.rs`:
+  - `repo_cfg` extracted from discovery result and applied:
+    - `!repo_cfg.enabled` → skip entire repo (early return)
+    - File list filtered through `repo_cfg.is_path_ignored` before manager
+      detection
+    - Cargo, npm, and pip dep actionable lists filtered through
+      `repo_cfg.is_dep_ignored`
+
+### What was intentionally deferred
+- `extends` preset resolution.
+- `packageRules` matching.
+- Glob/minimatch `ignorePaths` support (currently prefix-only).
+- Dockerfile/compose `ignoreDeps` (image names are different from dep names).
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (266 passed)
 
 ## Slice 0024 - docker-compose image extractor
 
