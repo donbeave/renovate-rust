@@ -21,6 +21,14 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0015  | 2026-04-28 | npm package.json extractor + ledger catchup | Complete | See below. |
+| 0014  | 2026-04-28 | Concurrent crates.io lookups (JoinSet + Semaphore) | Complete | commit d760d28 |
+| 0013  | 2026-04-28 | update_summary + shared HttpClient | Complete | commit c5722df |
+| 0012  | 2026-04-28 | crates.io sparse datasource + cargo semver versioning | Complete | commit db326e3 |
+| 0011  | 2026-04-28 | Cargo.toml dependency extractor | Complete | commit ceecc6e |
+| 0010  | 2026-04-28 | Package manager detection + GitHub file tree API | Complete | commit 6bc862a |
+| 0009  | 2026-04-28 | Repository config discovery via GitHub Contents API | Complete | commit b8651c0 |
+| 0008  | 2026-04-28 | AnyPlatformClient factory + startup token validation | Complete | commit d51301f |
 | 0007  | 2026-04-28 | tokio async runtime + HttpClient + GitHub platform stub | Complete | See below. |
 | 0006  | 2026-04-28 | Global config file loading (JSON/JSON5)       | Complete | See below. |
 | 0005  | 2026-04-28 | GlobalConfig struct + CLI→config builder      | Complete | See below. |

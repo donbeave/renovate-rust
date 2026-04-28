@@ -4,3 +4,4 @@
 //! [`ExtractedDep`] records suitable for datasource version lookups.
 
 pub mod cargo;
+pub mod npm;
