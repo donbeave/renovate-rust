@@ -2261,6 +2261,96 @@ async fn process_repo(
         }
     }
 
+    // ── CircleCI (.circleci/config.yml) ──────────────────────────────────────
+    for cci_path in manager_files(&detected, "circleci") {
+        match client.get_raw_file(owner, repo, &cci_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::circleci::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.dep.skip_reason.is_none())
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %cci_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted circleci images"
+                );
+                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
+                    .iter()
+                    .filter_map(|d| {
+                        let tag = d.dep.tag.as_deref()?;
+                        Some(docker_datasource::DockerDepInput {
+                            dep_name: format!("{}:{tag}", d.dep.image),
+                            image: d.dep.image.clone(),
+                            tag: tag.to_owned(),
+                        })
+                    })
+                    .collect();
+                let updates = docker_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    docker_datasource::DOCKER_HUB_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for d in deps.iter().filter(|d| d.dep.skip_reason.is_some()) {
+                    file_deps.push(output::DepReport {
+                        name: d.dep.image.clone(),
+                        status: output::DepStatus::Skipped {
+                            reason: format!("{:?}", d.dep.skip_reason.as_ref().unwrap())
+                                .to_lowercase(),
+                        },
+                    });
+                }
+                for d in &actionable {
+                    let dep_name = match &d.dep.tag {
+                        Some(t) => format!("{}:{t}", d.dep.image),
+                        None => d.dep.image.clone(),
+                    };
+                    let status = match update_map.get(&dep_name) {
+                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_tag.clone(),
+                            latest: s.latest.clone().unwrap_or_default(),
+                        },
+                        Some(Ok(s)) => output::DepStatus::UpToDate {
+                            latest: s.latest.clone(),
+                        },
+                        Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
+                            output::DepStatus::Skipped {
+                                reason: "non-docker-hub registry".into(),
+                            }
+                        }
+                        Some(Err(e)) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                        None => output::DepStatus::UpToDate { latest: None },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep_name,
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: cci_path.clone(),
+                    manager: "circleci".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%cci_path, "circleci config not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%cci_path, %err, "failed to fetch circleci config");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 

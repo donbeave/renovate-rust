@@ -6,6 +6,7 @@
 pub mod asdf;
 pub mod bundler;
 pub mod cargo;
+pub mod circleci;
 pub mod cocoapods;
 pub mod composer;
 pub mod docker_compose;

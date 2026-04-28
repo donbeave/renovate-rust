@@ -1767,6 +1767,28 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 553 passed
 
+## Slice 0056 - CircleCI `.circleci/config.yml` Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/circleci/extract.ts` — `extractPackageFile`
+- Pattern: `(^|/)\.circleci/.+\.ya?ml$`
+- Datasource: Docker Hub (reuses existing `datasources/docker_hub.rs`)
+
+### What landed
+- `crates/renovate-core/src/extractors/circleci.rs` — line scanner:
+  - Detects `docker:` key, then collects `- image: ref` list items.
+  - Reuses `classify_image_ref()` and `DockerfileExtractedDep` from Dockerfile extractor.
+  - Skips `$VAR` variable images; other skip reasons (scratch, arg variable) inherit
+    from the Dockerfile extractor's classify function.
+  - Deferred: `orbs:` section (requires CircleCI Orb API datasource), `machine:`
+    executor (CircleCI VM images, not Docker Hub).
+- Manager pattern `circleci` with `(^|/)\.circleci/.+\.ya?ml$`.
+- Pipeline mirrors the GitLab CI pipeline (Docker Hub lookups, same update reporting).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 558 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1777,4 +1799,5 @@ Pick whichever can be completed in one loop:
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`ansible-galaxy` extractor**: `requirements.yml` for Ansible collections.
-5. **`kustomize` extractor**: Kustomize YAML image tags + `kustomization.yaml`.
+5. **`buildkite` extractor**: Buildkite pipeline Docker images.
+6. **`tekton` extractor**: Tekton pipeline bundle references.
