@@ -1906,6 +1906,70 @@ async fn process_repo(
         }
     }
 
+    // ── Gleam (gleam.toml) ────────────────────────────────────────────────────
+    for gleam_path in manager_files(&detected, "gleam") {
+        match client.get_raw_file(owner, repo, &gleam_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::gleam::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %gleam_path,
+                    total = deps.len(), "extracted gleam deps"
+                );
+                let dep_inputs: Vec<renovate_core::datasources::hex::HexDepInput> = actionable
+                    .iter()
+                    .map(|d| renovate_core::datasources::hex::HexDepInput {
+                        name: d.name.clone(),
+                        current_value: d.version.clone(),
+                    })
+                    .collect();
+                let updates = renovate_core::datasources::hex::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    renovate_core::datasources::hex::HEX_API,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = match update_map.get(&dep.name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_value.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: gleam_path.clone(),
+                    manager: "gleam".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%gleam_path, "gleam.toml not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gleam_path, %err, "failed to fetch gleam.toml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Swift Package Manager (Package.swift) ─────────────────────────────────
     for spm_file_path in manager_files(&detected, "swift") {
         match client.get_raw_file(owner, repo, &spm_file_path).await {

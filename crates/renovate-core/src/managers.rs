@@ -286,6 +286,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)pyproject\.toml$"],
     },
     ManagerDef {
+        name: "gleam",
+        patterns: &[r"(^|/)gleam\.toml$"],
+    },
+    ManagerDef {
         name: "gomod",
         patterns: &[r"(^|/)go\.mod$"],
     },
