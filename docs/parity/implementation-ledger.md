@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0157  | 2026-04-28 | `pip-compile` pipeline for `.in` source files | Complete | See below. |
 | 0155  | 2026-04-28 | `cdnurl` + stub registrations for `git-submodules`/`hermit`/`pip-compile`/`custom` | Complete | See below. |
 | 0154  | 2026-04-28 | PEP 723 Python inline script metadata extractor | Complete | See below. |
 | 0153  | 2026-04-28 | OCB (OpenTelemetry Collector Builder) Go module extractor | Complete | See below. |
@@ -3102,6 +3103,23 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0157 - `pip-compile` pipeline for `.in` source files
+
+### Renovate reference
+- `lib/modules/manager/pip-compile/extract.ts`
+- Full upstream behavior: tracks `.in`→`requirements.txt` output relationships (deferred).
+- Datasource: PyPI
+
+### What landed
+- `main.rs`: `pip-compile` pipeline block reads `requirements*.in` files with `pip_extractor::extract`.
+  - Routes to PyPI datasource same as `pip_requirements` pipeline.
+  - Simplified vs upstream (no output-file linking, no lockfile maintenance).
+  - Full multi-file source/output graph deferred to a future slice.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1129 passed
 
 ## Slice 0155 - `cdnurl` pipeline + remaining manager stub registrations
 

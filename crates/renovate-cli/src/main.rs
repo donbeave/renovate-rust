@@ -715,6 +715,61 @@ async fn process_repo(
         }
     }
 
+    // ── pip-compile (requirements*.in source files) ───────────────────────────
+    // Simplified: reads .in source files with the pip requirements extractor.
+    // Upstream also tracks the relationship to generated requirements.txt output
+    // files (deferred), but this correctly detects outdated source constraints.
+    for pc_path in manager_files(&detected, "pip-compile") {
+        match client.get_raw_file(owner, repo, &pc_path).await {
+            Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %pc_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted pip-compile source deps"
+                    );
+                    let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                        .iter()
+                        .map(|d| pypi_datasource::PypiDepInput {
+                            dep_name: d.name.clone(),
+                            specifier: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = pypi_datasource::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        pypi_datasource::PYPI_API,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: pc_path.clone(),
+                        manager: "pip-compile".into(),
+                        deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%pc_path, %err, "failed to parse pip-compile source")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%pc_path, "pip-compile source file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%pc_path, %err, "failed to fetch pip-compile source");
+                had_error = true;
+            }
+        }
+    }
+
     // ── setup.py (pip_setup) ─────────────────────────────────────────────────
     for setup_py_path in manager_files(&detected, "pip_setup") {
         match client.get_raw_file(owner, repo, &setup_py_path).await {
