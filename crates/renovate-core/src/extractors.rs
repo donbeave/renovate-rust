@@ -13,6 +13,7 @@ pub mod batect_wrapper;
 pub mod bazel_module;
 pub mod bicep;
 pub mod bitbucket_pipelines;
+pub mod bitrise;
 pub mod buildkite;
 pub mod bundler;
 pub mod cabal;

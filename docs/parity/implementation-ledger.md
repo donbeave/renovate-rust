@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0138  | 2026-04-28 | Bitrise CI step extractor + Bitrise steplib datasource | Complete | See below. |
 | 0137  | 2026-04-28 | Homebrew formula extractor (GitHub Archive/Release + NPM routing) | Complete | See below. |
 | 0136  | 2026-04-28 | Azure Bicep `.bicep` extractor + bicep-types-az datasource | Complete | See below. |
 | 0135  | 2026-04-28 | Perl `cpanfile` extractor + MetaCPAN datasource | Complete | See below. |
@@ -3084,6 +3085,37 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0138 - Bitrise CI step extractor + Bitrise steplib datasource
+
+### Renovate reference
+- `lib/modules/manager/bitrise/extract.ts` + `utils.ts`
+- `lib/modules/datasource/bitrise/index.ts`
+- Pattern: `(^|/)bitrise\.ya?ml$`
+- Datasources: `bitrise` (steplib index), `git-tags` (git:: steps)
+
+### What landed
+- `crates/renovate-core/src/extractors/bitrise.rs` (new):
+  - Regex-based line scanner; no serde_yaml dependency.
+  - `DEFAULT_REGISTRY_RE` extracts `default_step_lib_source`.
+  - `STEPS_KEY_RE` / `LIST_ITEM_RE` detect `steps:` blocks and list items.
+  - `extract_yaml_key()` handles `:://` and `::` in step ref strings.
+  - Routes `git::url@v` → `BitriseSource::Git`, `path::` → `BitriseSource::Local`,
+    `url::step@v` → `BitriseSource::Steplib { registry_url: Some(...) }`,
+    `step@v` → `BitriseSource::Steplib { registry_url: None }`.
+  - 8 unit tests covering all ref forms and edge cases.
+- `crates/renovate-core/src/datasources/bitrise.rs` (new):
+  - `fetch_latest(http, step_name, current_value, registry_url)`.
+  - Fetches `GET /repos/{owner}/{repo}/releases/tags/index` from GitHub API.
+  - Parses `index.json` asset (`{ Name, Versions, Channels }`).
+  - Process-level `Mutex<Option<...>>` cache for the default steplib URL.
+- Registered in `datasources.rs`, `extractors.rs`, `managers.rs`.
+- `crates/renovate-cli/src/main.rs`: pipeline routes `git::` steps to
+  `github_tags_datasource`, steplib steps to `bitrise_datasource`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 985 passed
 
 ## Slice 0137 - Homebrew formula extractor (GitHub Archive/Release + NPM routing)
 

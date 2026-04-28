@@ -476,6 +476,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "homebrew",
         patterns: &[r"(^|/)Formula/[^/]+\.rb$"],
     },
+    ManagerDef {
+        name: "bitrise",
+        patterns: &[r"(^|/)bitrise\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

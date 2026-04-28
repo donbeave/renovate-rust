@@ -26,6 +26,7 @@ use std::sync::Arc;
 use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
+use renovate_core::datasources::bitrise as bitrise_datasource;
 use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::datasources::docker_hub as docker_datasource;
 use renovate_core::datasources::github_releases as github_releases_datasource;
@@ -5842,6 +5843,121 @@ async fn process_repo(
             }
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%lein_path, %err, "failed to fetch project.clj");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── Bitrise CI (bitrise.yml / bitrise.yaml) ────────────────────────────────
+    for br_path in manager_files(&detected, "bitrise") {
+        match client.get_raw_file(owner, repo, &br_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::bitrise::{BitriseSkipReason, BitriseSource};
+                let deps = renovate_core::extractors::bitrise::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %br_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted bitrise steps"
+                );
+                let mut dep_reports: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: match reason {
+                                    BitriseSkipReason::UnspecifiedVersion => {
+                                        "unspecified-version".to_owned()
+                                    }
+                                },
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let current = dep.current_value.as_deref().unwrap_or("");
+                    let status = match &dep.source {
+                        BitriseSource::Git { repo_url } => {
+                            match github_tags_datasource::fetch_latest_tag(
+                                repo_url,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            {
+                                Ok(Some(tag)) => {
+                                    let stripped = tag.trim_start_matches('v');
+                                    let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                        current,
+                                        Some(stripped),
+                                    );
+                                    if s.update_available {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: current.to_owned(),
+                                            latest: stripped.to_owned(),
+                                        }
+                                    } else {
+                                        output::DepStatus::UpToDate {
+                                            latest: Some(stripped.to_owned()),
+                                        }
+                                    }
+                                }
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                        BitriseSource::Steplib { registry_url } => {
+                            let registry = registry_url
+                                .as_deref()
+                                .unwrap_or(bitrise_datasource::DEFAULT_STEPLIB_URL);
+                            match bitrise_datasource::fetch_latest(
+                                http,
+                                &dep.dep_name,
+                                current,
+                                registry,
+                            )
+                            .await
+                            {
+                                Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                                    current: current.to_owned(),
+                                    latest: s.latest.unwrap_or_default(),
+                                },
+                                Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                        BitriseSource::Local => output::DepStatus::Skipped {
+                            reason: "local-dependency".to_owned(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: br_path.clone(),
+                        manager: "bitrise".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%br_path, "bitrise.yml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%br_path, %err, "failed to fetch bitrise.yml");
                 had_error = true;
             }
         }
