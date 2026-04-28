@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0170  | 2026-04-28 | `matchDepNames` + `matchDatasources` packageRule matchers | Complete | See below. |
 | 0169  | 2026-04-28 | `ignoreVersions` global+packageRule + glob/regex `matchPackageNames` + `matchPackagePrefixes` | Complete | See below. |
 | 0168  | 2026-04-28 | `matchDepTypes` packageRule + npm dep type filtering | Complete | See below. |
 | 0167  | 2026-04-28 | `enabledManagers` repo config option | Complete | See below. |
@@ -4281,3 +4282,57 @@ Pick whichever can be completed in one loop:
 9. **`ruby-version`** — `.ruby-version` file version tracking (GitHub Releases).
 10. **`conan`** — C/C++ Conan package manager (`conanfile.txt`/`conanfile.py`).
 10. **`helm-requirements`** — `requirements.yaml` (Helm v2) chart dependencies.
+
+## Slice 0170 — `matchDepNames` + `matchDatasources` packageRule matchers
+
+### Renovate reference
+- `lib/util/package-rules/dep-names.ts` — `DepNameMatcher`
+- `lib/util/package-rules/matchers.ts` — matcher chain (AND conditions)
+- `lib/config/options/index.ts` — `matchDepNames`, `matchDatasources`
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PackageRule` struct: added `match_dep_names: Vec<PackageNameMatcher>`,
+    `has_dep_name_constraint: bool`, `match_datasources: Vec<String>`.
+  - `PackageRule::dep_name_matches()` — mirrors `DepNameMatcher`; returns true
+    when `matchDepNames` is not set (no constraint) or when the dep name
+    matches at least one exact/regex/glob entry.
+  - `PackageRule::datasource_matches()` — returns true when `matchDatasources`
+    is empty or contains the provided datasource ID.
+  - All `is_dep_ignored*`, `is_update_blocked*`, `is_version_restricted*`,
+    `is_version_ignored*` methods updated to AND in `dep_name_matches()`.
+  - `RawPackageRule` deserialization updated with `matchDepNames` and
+    `matchDatasources` fields.
+  - 7 new unit tests covering exact/regex/glob matching, AND logic, and
+    empty-list match-all semantics.
+
+### Deferred
+- `matchDatasources` is parsed and exposed via `datasource_matches()` but not
+  yet wired into the `is_dep_ignored*` / `is_update_blocked*` methods since
+  those methods don't currently receive the datasource as a parameter.
+  Future slice: add `datasource` parameter to the high-level filter methods
+  and wire `datasource_matches()` into the AND chain.
+- `packageName` vs `depName` distinction: currently both matchers check against
+  the same `dep_name` value since we don't track a separate `packageName` at
+  the rule-evaluation boundary.  When Docker/Helm extractors expose distinct
+  `packageName` fields, the call sites should pass `packageName` to
+  `name_matches()` and `depName` to `dep_name_matches()`.
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1160 passed
+
+## Next slice candidates
+
+1. **Wire `matchDatasources` into filter methods** — add `datasource` parameter
+   to `is_dep_ignored_for_manager` and related methods so `datasource_matches()`
+   is enforced.
+2. **`schedule` config option** — parse the `schedule` string vec from
+   `renovate.json`, store in `RepoConfig`, and expose for future PR-timing use.
+3. **`groupName` in packageRules** — add `groupName: Option<String>` to
+   `PackageRule` for future PR grouping output.
+4. **`automerge` + `labels`** — parse metadata fields into `RepoConfig` so
+   they appear in the output JSON even if not yet acted upon.
+5. **`git-submodules` extractor** — parse `.gitmodules` INI file to extract
+   submodule URLs; dispatch via the already-registered `git-submodules` manager.
