@@ -124,32 +124,15 @@ async fn fetch_update_summary(
     api_base: &str,
 ) -> Result<HexUpdateSummary, HexError> {
     let latest = fetch_latest(&dep.name, http, api_base).await?;
-    // Strip leading operators from the constraint to get the lower bound.
-    let lower = lower_bound(&dep.current_value);
-    let update_available = latest
-        .as_deref()
-        .is_some_and(|l| !lower.is_empty() && l != lower);
+    let s = crate::versioning::semver_generic::semver_update_summary(
+        &dep.current_value,
+        latest.as_deref(),
+    );
     Ok(HexUpdateSummary {
-        current_value: dep.current_value.clone(),
-        latest,
-        update_available,
+        current_value: s.current_value,
+        latest: s.latest,
+        update_available: s.update_available,
     })
-}
-
-/// Extract the lower-bound version from a Mix/Hex constraint.
-///
-/// Examples:
-/// - `"~> 1.7.0"` → `"1.7.0"`
-/// - `">= 0.0.0"` → `"0.0.0"`
-/// - `"1.2.3"` → `"1.2.3"`
-fn lower_bound(constraint: &str) -> &str {
-    constraint
-        .trim()
-        .trim_start_matches(['~', '>', '<', '=', '!', ' '])
-        .split(',')
-        .next()
-        .unwrap_or("")
-        .trim()
 }
 
 #[cfg(test)]
@@ -196,22 +179,6 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(result, None);
-    }
-
-    #[test]
-    fn lower_bound_pessimistic() {
-        assert_eq!(lower_bound("~> 1.7.0"), "1.7.0");
-        assert_eq!(lower_bound("~> 1.7"), "1.7");
-    }
-
-    #[test]
-    fn lower_bound_gte() {
-        assert_eq!(lower_bound(">= 0.0.0"), "0.0.0");
-    }
-
-    #[test]
-    fn lower_bound_exact() {
-        assert_eq!(lower_bound("1.2.3"), "1.2.3");
     }
 
     #[tokio::test]

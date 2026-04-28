@@ -132,35 +132,15 @@ async fn fetch_update_summary(
     api_base: &str,
 ) -> Result<GemUpdateSummary, RubyGemsError> {
     let latest = fetch_latest(&dep.name, http, api_base).await?;
-
-    // Determine if an update is available.  Current_value may be a pinned
-    // version ("1.2.3") or a range ("~> 1.0", ">= 1.0, < 2.0").  Strip the
-    // leading operator to extract the pinned lower bound for comparison, then
-    // compare the numeric lower bound against latest.
-    let update_available = latest.as_deref().is_some_and(|latest_ver| {
-        let lower = lower_bound_version(&dep.current_value);
-        !lower.is_empty() && latest_ver != lower
-    });
-
+    let s = crate::versioning::semver_generic::semver_update_summary(
+        &dep.current_value,
+        latest.as_deref(),
+    );
     Ok(GemUpdateSummary {
-        current_value: dep.current_value.clone(),
-        latest,
-        update_available,
+        current_value: s.current_value,
+        latest: s.latest,
+        update_available: s.update_available,
     })
-}
-
-/// Extract the lower-bound version string from a Ruby version constraint.
-///
-/// Examples:
-/// - `"~> 7.0.4"` → `"7.0.4"`
-/// - `">= 0.18"` → `"0.18"`
-/// - `"1.2.3"` → `"1.2.3"`
-/// - `""` → `""` (unconstrained — any version is acceptable)
-fn lower_bound_version(constraint: &str) -> &str {
-    let stripped = constraint
-        .trim()
-        .trim_start_matches(['~', '>', '<', '=', '!', ' ']);
-    stripped.split(',').next().unwrap_or("").trim()
 }
 
 #[cfg(test)]
@@ -229,32 +209,6 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(result, None);
-    }
-
-    #[test]
-    fn lower_bound_pessimistic() {
-        assert_eq!(lower_bound_version("~> 7.0.4"), "7.0.4");
-        assert_eq!(lower_bound_version("~> 1.0"), "1.0");
-    }
-
-    #[test]
-    fn lower_bound_gte() {
-        assert_eq!(lower_bound_version(">= 0.18"), "0.18");
-    }
-
-    #[test]
-    fn lower_bound_exact() {
-        assert_eq!(lower_bound_version("1.2.3"), "1.2.3");
-    }
-
-    #[test]
-    fn lower_bound_multi_constraint() {
-        assert_eq!(lower_bound_version(">= 0.18, < 2.0"), "0.18");
-    }
-
-    #[test]
-    fn lower_bound_empty() {
-        assert_eq!(lower_bound_version(""), "");
     }
 
     #[tokio::test]

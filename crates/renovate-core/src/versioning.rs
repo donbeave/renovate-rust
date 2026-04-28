@@ -8,3 +8,4 @@ pub mod hashicorp;
 pub mod maven;
 pub mod npm;
 pub mod pep440;
+pub mod semver_generic;

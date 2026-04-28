@@ -140,26 +140,15 @@ async fn fetch_update_summary(
     api_base: &str,
 ) -> Result<PodUpdateSummary, CocoapodsError> {
     let latest = fetch_latest(&dep.name, http, api_base).await?;
-    // Strip constraint operators to get the lower bound.
-    let lower = lower_bound(&dep.current_value);
-    let update_available = latest
-        .as_deref()
-        .is_some_and(|l| !lower.is_empty() && l != lower);
+    let s = crate::versioning::semver_generic::semver_update_summary(
+        &dep.current_value,
+        latest.as_deref(),
+    );
     Ok(PodUpdateSummary {
-        current_value: dep.current_value.clone(),
-        latest,
-        update_available,
+        current_value: s.current_value,
+        latest: s.latest,
+        update_available: s.update_available,
     })
-}
-
-fn lower_bound(constraint: &str) -> &str {
-    constraint
-        .trim()
-        .trim_start_matches(['~', '>', '<', '=', '!', ' '])
-        .split(',')
-        .next()
-        .unwrap_or("")
-        .trim()
 }
 
 #[cfg(test)]
@@ -242,12 +231,5 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(result, None);
-    }
-
-    #[test]
-    fn lower_bound_pessimistic() {
-        assert_eq!(lower_bound("~> 5.6"), "5.6");
-        assert_eq!(lower_bound(">= 1.0.0"), "1.0.0");
-        assert_eq!(lower_bound("5.6.4"), "5.6.4");
     }
 }

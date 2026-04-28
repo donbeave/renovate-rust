@@ -1484,6 +1484,37 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 460 passed
 
+## Slice 0047 - Generic semver versioning module
+
+### Renovate reference
+- `lib/modules/versioning/semver/index.ts` — `SemVer`
+- Applies to: pub.dev, Packagist/Composer, RubyGems, Hex.pm, CocoaPods
+
+### What landed
+- `crates/renovate-core/src/versioning/semver_generic.rs` — shared semver helper:
+  - `semver_update_summary(current_value, latest)`: strips operators, pads to 3 semver
+    components, uses `semver::Version` comparison to avoid false-positive updates.
+  - `lower_bound()`: strips `^`, `~>`, `>=`, `>`, `<=`, `<`, `=`, `!` from constraints.
+  - `parse_padded()`: pads `"6.4"` → `"6.4.0"` before `semver::Version::parse`.
+  - Fix: `lower_bound("^6.4") = "6.4"`, `latest = "6.4.0"` — string compare was a
+    false positive; semver compare correctly reports "no update needed".
+- Registered in `versioning.rs` as `pub mod semver_generic`.
+- Wired into 5 datasources replacing ad-hoc `lower_bound` + string-compare:
+  - `datasources/pub_dev.rs`
+  - `datasources/packagist.rs`
+  - `datasources/rubygems.rs` (removed `lower_bound_version` helper)
+  - `datasources/hex.rs` (removed `lower_bound` helper)
+  - `datasources/cocoapods.rs` (removed `lower_bound` helper)
+
+### What was intentionally deferred
+- NuGet: uses pinned versions (no constraint ranges) — string equality suffices.
+- Full semver range semantics (`^1.2.3` allows `1.x.x` but not `2.x.x`) — Renovate
+  tracks this separately; for update-check purposes lower-bound comparison is correct.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 469 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1492,6 +1523,6 @@ Pick whichever can be completed in one loop:
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 2. **`gemspec` extractor**: extend bundler manager to parse `.gemspec` files.
-3. **`semver` versioning module**: improve update decisions for pub.dev, NuGet,
-   and composer using proper semver range matching (uses existing `semver` crate).
-4. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
+3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
+4. **NuGet versioning**: NuGet uses SemVer2 with 4-part version numbers — add a
+   nuget versioning module for accurate `1.2.3.4` comparisons.

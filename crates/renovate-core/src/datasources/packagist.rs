@@ -139,13 +139,14 @@ async fn fetch_update_summary(
     api_base: &str,
 ) -> Result<PackagistUpdateSummary, PackagistError> {
     let latest = fetch_latest(&dep.package_name, http, api_base).await?;
-    let update_available = latest
-        .as_deref()
-        .is_some_and(|l| l != dep.current_value && !dep.current_value.is_empty());
+    let s = crate::versioning::semver_generic::semver_update_summary(
+        &dep.current_value,
+        latest.as_deref(),
+    );
     Ok(PackagistUpdateSummary {
-        current_value: dep.current_value.clone(),
-        latest,
-        update_available,
+        current_value: s.current_value,
+        latest: s.latest,
+        update_available: s.update_available,
     })
 }
 
