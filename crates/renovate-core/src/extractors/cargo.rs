@@ -88,15 +88,22 @@ struct RawManifest {
     dev_dependencies: Option<BTreeMap<String, RawDep>>,
     #[serde(rename = "build-dependencies")]
     build_dependencies: Option<BTreeMap<String, RawDep>>,
+    workspace: Option<RawWorkspace>,
     // target.*.dependencies are complex; deferred to a later slice.
+}
+
+/// Workspace-level definitions (from workspace root `Cargo.toml`).
+#[derive(Debug, Deserialize)]
+struct RawWorkspace {
+    dependencies: Option<BTreeMap<String, RawDep>>,
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /// Parse a `Cargo.toml` manifest string and extract all dependencies.
 ///
-/// Returns a flat list — regular, dev, and build deps combined with their
-/// respective `DepType`. The list is in deterministic order (BTreeMap
+/// Returns a flat list — regular, dev, build, and workspace deps combined with
+/// their respective `DepType`. The list is in deterministic order (BTreeMap
 /// iteration is sorted by key).
 ///
 /// Git, path, workspace-inherited, and spec-less dependencies are included
@@ -115,6 +122,13 @@ pub fn extract(content: &str) -> Result<Vec<ExtractedDep>, CargoExtractError> {
             for (name, raw) in deps {
                 out.push(convert_dep(name, raw, dep_type));
             }
+        }
+    }
+
+    // Workspace root dependencies (`[workspace.dependencies]`).
+    if let Some(deps) = manifest.workspace.and_then(|ws| ws.dependencies) {
+        for (name, raw) in deps {
+            out.push(convert_dep(name, raw, DepType::Regular));
         }
     }
 
@@ -287,5 +301,44 @@ criterion = "0.5"
         let deps = extract(toml).unwrap();
         assert_eq!(deps.len(), 4);
         assert_eq!(deps.iter().filter(|d| d.skip_reason.is_none()).count(), 3); // serde, tokio, criterion
+    }
+
+    #[test]
+    fn workspace_dependencies_extracted() {
+        let toml = r#"
+[workspace]
+members = ["crates/*"]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = "1.35"
+anyhow = { version = "1.0", path = "../anyhow" }
+"#;
+        let deps = extract(toml).unwrap();
+        // serde (table with version) + tokio (simple) + anyhow (path, skipped)
+        assert_eq!(deps.len(), 3);
+        let serde = deps.iter().find(|d| d.dep_name == "serde").unwrap();
+        assert_eq!(serde.current_value, "1.0");
+        assert!(serde.skip_reason.is_none());
+
+        let tokio = deps.iter().find(|d| d.dep_name == "tokio").unwrap();
+        assert_eq!(tokio.current_value, "1.35");
+
+        let anyhow = deps.iter().find(|d| d.dep_name == "anyhow").unwrap();
+        assert_eq!(anyhow.skip_reason, Some(SkipReason::PathDependency));
+    }
+
+    #[test]
+    fn workspace_and_member_deps_both_extracted() {
+        let toml = r#"
+[workspace.dependencies]
+serde = "1.0"
+
+[dependencies]
+tokio = "1.35"
+"#;
+        let deps = extract(toml).unwrap();
+        assert!(deps.iter().any(|d| d.dep_name == "serde"));
+        assert!(deps.iter().any(|d| d.dep_name == "tokio"));
     }
 }

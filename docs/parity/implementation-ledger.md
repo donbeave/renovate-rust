@@ -1812,6 +1812,29 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 563 passed
 
+## Slice 0058 - Cargo `[workspace.dependencies]` support
+
+### Renovate reference
+- Cargo workspace root `Cargo.toml` with `[workspace.dependencies]` section
+- Same `crates_io` datasource as regular `Cargo.toml` deps
+
+### What landed
+- Extended `extractors/cargo.rs`:
+  - Added `RawWorkspace { dependencies: Option<BTreeMap<String, RawDep>> }` struct.
+  - Added `workspace: Option<RawWorkspace>` field to `RawManifest`.
+  - `extract()` now also processes `workspace.dependencies` entries with `DepType::Regular`.
+  - Uses `manifest.workspace.and_then(|ws| ws.dependencies)` (Clippy let-chain form).
+  - 2 new tests: `workspace_dependencies_extracted` and `workspace_and_member_deps_both_extracted`.
+
+### What this fixes
+- Workspace root `Cargo.toml` files that define shared deps in `[workspace.dependencies]`
+  were previously returning 0 deps — the member crates correctly skipped inherited deps
+  (`WorkspaceInherited`), but the canonical versions in the workspace root were never extracted.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 565 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
