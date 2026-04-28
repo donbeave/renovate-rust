@@ -2696,9 +2696,9 @@ fn apply_update_blocking_to_report(
                     };
                     continue;
                 }
-                // Check matchUpdateTypes + enabled:false blocking.
+                // Check matchUpdateTypes + matchCurrentVersion + enabled:false blocking.
                 if let Some(update_type) = classify_semver_update(current, latest)
-                    && repo_cfg.is_update_blocked(&dep.name, update_type, &manager)
+                    && repo_cfg.is_update_blocked(&dep.name, current, update_type, &manager)
                 {
                     dep.status = output::DepStatus::Skipped {
                         reason: format!(

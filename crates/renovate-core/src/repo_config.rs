@@ -61,6 +61,10 @@ pub struct PackageRule {
     /// When set, updates to versions outside this range are blocked.
     /// Regex patterns (`/pattern/`) are not yet supported.
     pub allowed_versions: Option<String>,
+    /// Semver range that the current installed version must satisfy for this
+    /// rule to apply.  E.g. `"< 2.0"` means "only apply this rule if we're
+    /// currently below 2.0".  Regex patterns not yet supported.
+    pub match_current_version: Option<String>,
     /// If `Some(false)`, matching packages are disabled (skipped).
     pub enabled: Option<bool>,
     /// `true` when the raw config specified at least one name or pattern
@@ -97,6 +101,32 @@ impl PackageRule {
     /// An empty `matchUpdateTypes` list matches all update types.
     pub fn update_type_matches(&self, update_type: UpdateType) -> bool {
         self.match_update_types.is_empty() || self.match_update_types.contains(&update_type)
+    }
+
+    /// Return `true` when `current_value` satisfies this rule's
+    /// `matchCurrentVersion` constraint.
+    ///
+    /// If `matchCurrentVersion` is unset, the rule matches any current version.
+    /// The lower bound of `current_value` (stripped of operators) is parsed as
+    /// semver and checked against the constraint range.
+    /// Regex patterns (`/pattern/`) are silently ignored (treated as matching).
+    pub fn current_version_matches(&self, current_value: &str) -> bool {
+        use crate::versioning::semver_generic::{lower_bound, parse_padded};
+        let Some(ref mcv) = self.match_current_version else {
+            return true; // no constraint → matches all
+        };
+        // Regex patterns not yet supported — treat as matching.
+        if mcv.starts_with('/') {
+            return true;
+        }
+        let lb = lower_bound(current_value);
+        let Some(current_sv) = parse_padded(lb) else {
+            return true; // can't parse → don't restrict
+        };
+        match semver::VersionReq::parse(mcv) {
+            Ok(req) => req.matches(&current_sv),
+            Err(_) => true, // unparseable → don't restrict
+        }
     }
 }
 
@@ -190,6 +220,8 @@ impl RepoConfig {
             match_update_types: Vec<String>,
             #[serde(rename = "allowedVersions")]
             allowed_versions: Option<String>,
+            #[serde(rename = "matchCurrentVersion")]
+            match_current_version: Option<String>,
             enabled: Option<bool>,
         }
 
@@ -254,6 +286,7 @@ impl RepoConfig {
                     match_managers: r.match_managers,
                     match_update_types,
                     allowed_versions: r.allowed_versions,
+                    match_current_version: r.match_current_version,
                     enabled: r.enabled,
                     has_name_constraint,
                 }
@@ -295,16 +328,25 @@ impl RepoConfig {
         })
     }
 
-    /// Return `true` when a specific update (name + update type + manager)
-    /// is blocked by a `packageRules` entry with `enabled: false` and
-    /// `matchUpdateTypes` that includes `update_type`.
+    /// Return `true` when a specific update (name + current + update type + manager)
+    /// is blocked by a `packageRules` entry with `enabled: false`.
+    ///
+    /// Checks `matchPackageNames`, `matchPackagePatterns`, `matchManagers`,
+    /// `matchUpdateTypes`, and `matchCurrentVersion`.
     ///
     /// Used in the dep report building phase after fetching update summaries.
-    pub fn is_update_blocked(&self, name: &str, update_type: UpdateType, manager: &str) -> bool {
+    pub fn is_update_blocked(
+        &self,
+        name: &str,
+        current_value: &str,
+        update_type: UpdateType,
+        manager: &str,
+    ) -> bool {
         self.package_rules.iter().any(|rule| {
             rule.name_matches(name)
                 && rule.manager_matches(manager)
                 && rule.update_type_matches(update_type)
+                && rule.current_version_matches(current_value)
                 && rule.enabled == Some(false)
         })
     }
@@ -743,9 +785,9 @@ mod tests {
                 }]
             }"#,
         );
-        assert!(c.is_update_blocked("serde", UpdateType::Major, "cargo"));
-        assert!(!c.is_update_blocked("serde", UpdateType::Minor, "cargo"));
-        assert!(!c.is_update_blocked("serde", UpdateType::Patch, "cargo"));
+        assert!(c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
+        assert!(!c.is_update_blocked("serde", "1.0.0", UpdateType::Minor, "cargo"));
+        assert!(!c.is_update_blocked("serde", "1.0.0", UpdateType::Patch, "cargo"));
     }
 
     #[test]
@@ -759,9 +801,9 @@ mod tests {
                 }]
             }"#,
         );
-        assert!(c.is_update_blocked("serde", UpdateType::Major, "cargo"));
+        assert!(c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
         // Different package — not blocked
-        assert!(!c.is_update_blocked("tokio", UpdateType::Major, "cargo"));
+        assert!(!c.is_update_blocked("tokio", "1.0.0", UpdateType::Major, "cargo"));
     }
 
     #[test]
@@ -774,9 +816,9 @@ mod tests {
                 }]
             }"#,
         );
-        assert!(c.is_update_blocked("anything", UpdateType::Major, "cargo"));
-        assert!(c.is_update_blocked("anything", UpdateType::Minor, "cargo"));
-        assert!(!c.is_update_blocked("anything", UpdateType::Patch, "cargo"));
+        assert!(c.is_update_blocked("anything", "1.0.0", UpdateType::Major, "cargo"));
+        assert!(c.is_update_blocked("anything", "1.0.0", UpdateType::Minor, "cargo"));
+        assert!(!c.is_update_blocked("anything", "1.0.0", UpdateType::Patch, "cargo"));
     }
 
     #[test]
@@ -791,7 +833,7 @@ mod tests {
         );
         // "pin" and "digest" are not yet supported types — rule has no update type constraint
         // so it matches all update types
-        assert!(c.is_update_blocked("serde", UpdateType::Major, "cargo"));
+        assert!(c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
     }
 
     // ── allowedVersions tests ─────────────────────────────────────────────────
@@ -837,5 +879,50 @@ mod tests {
         );
         assert!(c.is_version_restricted("serde", "npm", "2.0.0"));
         assert!(!c.is_version_restricted("serde", "cargo", "2.0.0"));
+    }
+
+    // ── matchCurrentVersion tests ─────────────────────────────────────────────
+
+    #[test]
+    fn match_current_version_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "< 2.0", "enabled": false}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].match_current_version.as_deref(),
+            Some("< 2.0")
+        );
+    }
+
+    #[test]
+    fn match_current_version_blocks_when_below_range() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "< 2.0", "enabled": false}]}"#,
+        );
+        // Current 1.5 satisfies < 2.0 → rule applies
+        assert!(c.is_update_blocked("anything", "1.5.0", UpdateType::Major, "cargo"));
+        // Current 2.1 does NOT satisfy < 2.0 → rule does not apply
+        assert!(!c.is_update_blocked("anything", "2.1.0", UpdateType::Major, "cargo"));
+    }
+
+    #[test]
+    fn match_current_version_with_caret_range_current() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": ">= 1.0", "enabled": false}]}"#,
+        );
+        // current "^1.2.3" has lower bound 1.2.3 which satisfies >= 1.0 → rule applies
+        assert!(c.is_update_blocked("pkg", "^1.2.3", UpdateType::Major, "cargo"));
+        // current "^0.9.0" lower bound 0.9.0 does NOT satisfy >= 1.0 → rule doesn't apply
+        assert!(!c.is_update_blocked("pkg", "^0.9.0", UpdateType::Major, "cargo"));
+    }
+
+    #[test]
+    fn match_current_version_absent_matches_all() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchUpdateTypes": ["major"], "enabled": false}]}"#,
+        );
+        // No matchCurrentVersion → applies regardless of current version
+        assert!(c.is_update_blocked("pkg", "0.1.0", UpdateType::Major, "npm"));
+        assert!(c.is_update_blocked("pkg", "99.0.0", UpdateType::Major, "npm"));
     }
 }

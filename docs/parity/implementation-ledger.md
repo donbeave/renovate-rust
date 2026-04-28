@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0071  | 2026-04-28 | `packageRules` matchCurrentVersion filtering | Complete | See below. |
 | 0070  | 2026-04-28 | JSON output mode (`--output-format=json`) | Complete | See below. |
 | 0069  | 2026-04-28 | `packageRules` allowedVersions semver range filtering | Complete | See below. |
 | 0068  | 2026-04-28 | Wire matchUpdateTypes blocking into all manager dep report pipelines | Complete | See below. |
@@ -2168,6 +2169,32 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 710 passed
 
+## Slice 0071 - `packageRules` matchCurrentVersion filtering
+
+### Renovate reference
+- `lib/config/options/index.ts` — `matchCurrentVersion` option
+- "A version range to match the current dep version against."
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PackageRule.match_current_version: Option<String>` — raw range string.
+  - `PackageRule::current_version_matches(current_value) -> bool`:
+    - Strips leading operators from `current_value` (via `lower_bound()`), pads to 3 components.
+    - Parses `matchCurrentVersion` as `semver::VersionReq` and checks if current satisfies it.
+    - Passes through (returns `true`) for regex patterns, unset constraints, unparseable values.
+  - `is_update_blocked()` signature extended with `current_value: &str` parameter.
+    Now checks all four conditions: name, manager, update type, current version.
+  - Updated all test call sites with the new `current_value` argument.
+  - 4 new unit tests: blocks below range, passes current with caret constraint,
+    absent matchCurrentVersion matches all, current above range not blocked.
+
+### What was intentionally deferred
+- Regex `matchCurrentVersion` patterns (`/^1\./`) — silently treated as matching.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 714 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2179,4 +2206,4 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **GitLab CI `include:` project components**: component dependency version tracking.
-6. **`matchCurrentVersion` in packageRules**: match packages at a specific version range.
+6. **`autoMerge: true` in packageRules**: flag updates eligible for auto-merge in report output.
