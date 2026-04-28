@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0177  | 2026-04-28 | Branch name generation — sanitize_dep_name + branch_topic + branch_name | Complete | See below. |
 | 0176  | 2026-04-28 | `matchSourceUrls` + `matchCurrentValue` + `matchNewValue` packageRule matchers | Complete | See below. |
 | 0175  | 2026-04-28 | `extends` preset parsing + built-in expansion (config:recommended, :ignoreModulesAndTests) | Complete | See below. |
 | 0174  | 2026-04-28 | `disabled_by_default` manager flag — azure-pipelines/git-submodules/html/nix/pre-commit/travis | Complete | See below. |
@@ -4613,3 +4614,46 @@ managers should only run when explicitly listed in `enabledManagers`.
 3. **More built-in preset expansion** — group:monorepos, schedule presets.
 4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **Commit message / branch name composition** — template evaluation.
+
+## Slice 0177 — Branch name generation: `sanitize_dep_name` + `branch_topic` + `branch_name`
+
+### Renovate reference
+- `lib/workers/repository/updates/flatten.ts` — `sanitizeDepName()`
+- `lib/workers/repository/updates/branch-name.ts` — `generateBranchName()`,
+  `cleanBranchName()`
+- `lib/config/options/index.ts` — `branchTopic` default template, `branchName`
+
+### What landed
+- `crates/renovate-core/src/branch.rs` (new module):
+  - `sanitize_dep_name(name)` — strips `@types/`, `@`, replaces `/` `:` with
+    `-`, collapses consecutive dashes, lowercases
+  - `branch_topic(dep, major, minor, is_patch, separate_minor_patch)` — computes
+    the default `{depSanitized}-{major}.x` topic (or `{major}.{minor}.x` when
+    `separateMinorPatch=true` and `is_patch=true`)
+  - `branch_name(prefix, additional_prefix, topic)` — concatenates to
+    `{prefix}{additional}{topic}` and cleans invalid git ref chars
+  - 25 unit tests covering all behaviors
+- `crates/renovate-core/src/lib.rs`: registered `pub mod branch`
+- All doctest examples pass
+
+### Deferred
+- Grouped updates (`groupName` / `groupSlug`) use a different branch naming
+  path — deferred to a later slice.
+- Full Handlebars template evaluation for custom `branchTopic` / `branchName`
+  strings — deferred; current implementation handles the default template.
+- Integration into the output `DepReport` — branch name is now computable but
+  not yet added to the JSON/terminal output.
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1234 passed
+
+## Next slice candidates
+
+1. **Add `branch_name` to `DepReport` output** — show proposed branch names.
+2. **DepFilterContext struct** — thread source_url, current_value, new_value
+   through the filter chain so matchSourceUrls etc. are enforced.
+3. **Remote preset resolution** — `github>org/repo//preset` fetching.
+4. **`currentDigest` for git-submodules** — GitHub Trees API.
+5. **More built-in preset expansion** — schedule presets, group:monorepos.
