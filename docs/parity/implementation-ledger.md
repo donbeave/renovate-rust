@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0023  | 2026-04-28 | HTTP retry with exponential backoff + Retry-After | Complete | See below. |
 | 0022  | 2026-04-28 | GitLab platform client                           | Complete | See below. |
 | 0021  | 2026-04-28 | Docker Hub datasource + Dockerfile pipeline complete | Complete | See below. |
 | 0020  | 2026-04-28 | Manager regex caching + Dockerfile FROM extractor | Complete | See below. |
@@ -43,6 +44,40 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0023 - HTTP retry with exponential backoff + Retry-After
+
+### Renovate reference
+- `lib/util/http/retry-after.ts` — `wrapWithRetry`, `getRetryAfter`
+- Max retries: 2 (Renovate) / 3 (our implementation, slightly more generous)
+
+### What landed
+- `crates/renovate-core/src/http.rs`:
+  - `get_retrying(&self, url)` — retry loop: retries on 429/503/504, up to
+    `MAX_RETRIES = 3` times. Respects `Retry-After` header (numeric seconds
+    form); falls back to exponential backoff `BASE_DELAY_MS × 2^attempt`
+    (capped at 30s). Hard cap of 60s on `Retry-After` delays. Returns final
+    response regardless of status — callers check it.
+  - `#[cfg(test)]` `BASE_DELAY_MS = 10` so retry tests run fast.
+  - `get_json` updated to use `get_retrying` internally.
+  - `is_retryable`, `retry_delay`, `parse_retry_after` helpers.
+  - 7 new wiremock-based tests: 429→200 retry, stop after max retries, no
+    retry on 404, 503→200 via `get_json`, `Retry-After` header parsing.
+- Updated all non-test HTTP call sites to `get_retrying`:
+  - `datasources/crates_io.rs`, `npm.rs`, `pypi.rs`, `docker_hub.rs`
+  - `platform/gitlab.rs` (all 3 `send()` calls replaced)
+  - `platform/github.rs` benefits via the `get_json` path already updated.
+
+### Deferred
+- HTTP-date form of `Retry-After` header (uncommon in practice).
+- Per-host rate-limit tracking (Renovate's throttle rules).
+- Jitter on exponential backoff.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (248 passed)
 
 ## Slice 0022 - GitLab platform client
 

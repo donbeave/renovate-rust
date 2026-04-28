@@ -85,13 +85,11 @@ struct GitlabTreeEntry {
 impl PlatformClient for GitlabClient {
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let url = format!("{}/user", self.api_base);
-        // GitLab returns 401 with a JSON error body for invalid tokens.
         let resp = self
             .http
-            .get(&url)
-            .send()
+            .get_retrying(&url)
             .await
-            .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+            .map_err(PlatformError::Http)?;
 
         match resp.status() {
             s if s.is_success() => {}
@@ -125,10 +123,9 @@ impl PlatformClient for GitlabClient {
 
         let resp = self
             .http
-            .get(&url)
-            .send()
+            .get_retrying(&url)
             .await
-            .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+            .map_err(PlatformError::Http)?;
 
         match resp.status() {
             s if s.is_success() => {}
@@ -176,10 +173,9 @@ impl PlatformClient for GitlabClient {
 
             let resp = self
                 .http
-                .get(&url)
-                .send()
+                .get_retrying(&url)
                 .await
-                .map_err(|e| PlatformError::Http(HttpError::Request(e)))?;
+                .map_err(PlatformError::Http)?;
 
             match resp.status() {
                 s if s.is_success() => {}

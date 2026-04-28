@@ -151,11 +151,7 @@ pub async fn fetch_tags(
         let Some(page_url) = url.take() else {
             break;
         };
-        let resp = http
-            .get(&page_url)
-            .send()
-            .await
-            .map_err(HttpError::Request)?;
+        let resp = http.get_retrying(&page_url).await?;
         if !resp.status().is_success() {
             return Err(DockerHubError::Http(HttpError::Status {
                 status: resp.status(),

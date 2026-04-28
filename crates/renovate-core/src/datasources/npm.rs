@@ -98,7 +98,7 @@ pub async fn fetch_versions(
     let encoded = encode_package_name(package_name);
     let url = format!("{}/{}", registry.trim_end_matches('/'), encoded);
 
-    let resp = http.get(&url).send().await.map_err(HttpError::Request)?;
+    let resp = http.get_retrying(&url).await?;
     if !resp.status().is_success() {
         return Err(NpmError::Http(HttpError::Status {
             status: resp.status(),

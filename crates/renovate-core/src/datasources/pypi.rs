@@ -96,7 +96,7 @@ pub async fn fetch_versions(
     let normalized = normalize_name(package_name);
     let url = format!("{}/{}/json", api_base.trim_end_matches('/'), normalized);
 
-    let resp = http.get(&url).send().await.map_err(HttpError::Request)?;
+    let resp = http.get_retrying(&url).await?;
     if !resp.status().is_success() {
         return Err(PypiError::Http(HttpError::Status {
             status: resp.status(),

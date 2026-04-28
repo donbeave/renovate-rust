@@ -90,7 +90,7 @@ pub async fn fetch_versions(
     let path = index_path(crate_name);
     let url = format!("{}/{}", index_base.trim_end_matches('/'), path);
 
-    let resp = http.get(&url).send().await.map_err(HttpError::Request)?;
+    let resp = http.get_retrying(&url).await?;
 
     if !resp.status().is_success() {
         return Err(CratesIoError::Http(HttpError::Status {
