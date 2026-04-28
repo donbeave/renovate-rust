@@ -7316,6 +7316,86 @@ async fn process_repo(
         }
     }
 
+    // ── PEP 723 inline script metadata ────────────────────────────────────────
+    for pep723_path in manager_files(&detected, "pep723") {
+        match client.get_raw_file(owner, repo, &pep723_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::pep723::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %pep723_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted pep723 inline script deps"
+                );
+                let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                    .iter()
+                    .map(|d| pypi_datasource::PypiDepInput {
+                        dep_name: d.name.clone(),
+                        specifier: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = pypi_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    pypi_datasource::PYPI_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let dep_reports: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|d| {
+                        if let Some(ref reason) = d.skip_reason {
+                            return output::DepReport {
+                                name: d.name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: format!("{reason:?}").to_lowercase(),
+                                },
+                            };
+                        }
+                        let status = match update_map.get(&d.name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_specifier.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: d.name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: pep723_path.clone(),
+                    manager: "pep723".into(),
+                    deps: dep_reports,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%pep723_path, "Python script not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%pep723_path, %err, "failed to fetch Python script");
+                had_error = true;
+            }
+        }
+    }
+
     // ── helm-requirements (Helm v2 requirements.yaml) ─────────────────────────
     // Already handled by the helmv3 pipeline; register the manager name alias
     // so detection works, but skip files already captured by helmv3.

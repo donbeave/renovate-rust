@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0154  | 2026-04-28 | PEP 723 Python inline script metadata extractor | Complete | See below. |
 | 0153  | 2026-04-28 | OCB (OpenTelemetry Collector Builder) Go module extractor | Complete | See below. |
 | 0152  | 2026-04-28 | Sveltos `ClusterProfile`/`Profile` Helm chart extractor | Complete | See below. |
 | 0151  | 2026-04-28 | Renovate config presets extractor + `helm-requirements` alias | Complete | See below. |
@@ -3100,6 +3101,27 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0154 - PEP 723 Python inline script metadata extractor
+
+### Renovate reference
+- `lib/modules/manager/pep723/extract.ts`, `utils.ts`, `schema.ts`
+- Default patterns: `[]` (user-configured). We add `scripts/*.py`, `*.script.py` conventions.
+- Datasource: PyPI
+
+### What landed
+- `crates/renovate-core/src/extractors/pep723.rs` (new):
+  - Regex `# /// script\n(...)# ///` extracts the metadata block.
+  - Strips `# ` prefix per line to reconstruct TOML, then parses with `toml::from_str`.
+  - Note: must use `toml::from_str::<Value>()` (serde path), NOT `s.parse::<Value>()` (which only parses TOML value literals, not documents).
+  - PEP 508 parser extracts name + version specifier; name normalized per PEP 503.
+  - 6 unit tests: versioned deps, unpinned, direct ref, name normalization, pinned, no block.
+- Registered in `extractors.rs`, `managers.rs`.
+- `crates/renovate-cli/src/main.rs`: pipeline uses `pypi_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1049 passed
 
 ## Slice 0153 - OCB (OpenTelemetry Collector Builder) Go module extractor
 

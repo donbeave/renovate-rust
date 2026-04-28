@@ -581,6 +581,12 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "ocb",
         patterns: &[r"(^|/)otelcol-builder\.ya?ml$", r"(^|/)ocb\.ya?ml$"],
     },
+    ManagerDef {
+        // PEP 723 inline script metadata — upstream has empty managerFilePatterns;
+        // we register a common `.py` convention so detection works out of the box.
+        name: "pep723",
+        patterns: &[r"(^|/)scripts?/[^/]+\.py$", r"(^|/)[^/]+\.script\.py$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
