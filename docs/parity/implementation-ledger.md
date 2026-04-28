@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0176  | 2026-04-28 | `matchSourceUrls` + `matchCurrentValue` + `matchNewValue` packageRule matchers | Complete | See below. |
 | 0175  | 2026-04-28 | `extends` preset parsing + built-in expansion (config:recommended, :ignoreModulesAndTests) | Complete | See below. |
 | 0174  | 2026-04-28 | `disabled_by_default` manager flag — azure-pipelines/git-submodules/html/nix/pre-commit/travis | Complete | See below. |
 | 0173  | 2026-04-28 | `git-submodules` `.gitmodules` extractor + dispatch | Complete | See below. |
@@ -4565,4 +4566,50 @@ managers should only run when explicitly listed in `enabledManagers`.
 2. **More built-in preset expansion** — group:monorepos, schedule presets.
 3. **`currentDigest` for git-submodules** — GitHub Trees API.
 4. **Wire `matchDatasources` into filter methods**.
+5. **Commit message / branch name composition** — template evaluation.
+
+## Slice 0176 — `matchSourceUrls` + `matchCurrentValue` + `matchNewValue` packageRule matchers
+
+### Renovate reference
+- `lib/util/package-rules/sourceurls.ts` — `SourceUrlsMatcher`
+- `lib/util/package-rules/current-value.ts` — `CurrentValueMatcher`
+- `lib/util/package-rules/new-value.ts` — `NewValueMatcher`
+- `lib/config/options/index.ts` — option definitions
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PackageRule` struct: added `match_source_urls: Vec<PackageNameMatcher>`,
+    `has_source_url_constraint: bool`, `match_current_value: Option<PackageNameMatcher>`,
+    `match_new_value: Option<PackageNameMatcher>`
+  - `PackageRule::source_url_matches(source_url)` — same exact/regex/glob logic
+    as `dep_name_matches`; matches against the dep's source URL
+  - `PackageRule::current_value_matches(current_value)` — single-pattern match
+    against the raw version string in the manifest
+  - `PackageRule::new_value_matches(new_value)` — single-pattern match against
+    the proposed new version string
+  - `RawPackageRule` deserialization extended
+  - `PackageRule` construction updated
+  - 9 new unit tests (3 scenarios × 3 matchers)
+
+### Deferred
+- `matchSourceUrls` is not yet wired into `is_dep_ignored*` / `is_update_blocked*`
+  methods — those don't currently receive `sourceUrl` as a parameter.
+- `matchCurrentValue` and `matchNewValue` are not yet called at the update-
+  proposal level since we don't thread `currentValue`/`newValue` through the
+  high-level filter functions.
+- Future slice: add `DepFilterContext { source_url, current_value, new_value }`
+  and wire all three into the filter chain.
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1217 passed
+
+## Next slice candidates
+
+1. **`DepFilterContext` struct** — bundle `source_url`, `current_value`, `new_value`
+   into a context struct so all matchers can be wired into filter methods.
+2. **Remote preset resolution** — `github>org/repo//preset` fetching.
+3. **More built-in preset expansion** — group:monorepos, schedule presets.
+4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **Commit message / branch name composition** — template evaluation.

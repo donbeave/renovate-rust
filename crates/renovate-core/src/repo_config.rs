@@ -92,6 +92,26 @@ pub struct PackageRule {
     /// Version strings/ranges/regex patterns to ignore for packages matched
     /// by this rule.  Mirrors `ignoreVersions` in Renovate packageRules.
     pub ignore_versions: Vec<String>,
+    /// Source URL matchers from `matchSourceUrls`.
+    /// Targets the `sourceUrl` field of a dependency (e.g., the GitHub repo URL).
+    /// Supports the same exact/regex/glob syntax as `matchPackageNames`.
+    /// When non-empty, a dep's `sourceUrl` must match at least one entry.
+    ///
+    /// Renovate reference: `lib/util/package-rules/sourceurls.ts`
+    pub match_source_urls: Vec<PackageNameMatcher>,
+    /// `true` when the raw config specified at least one `matchSourceUrls` entry.
+    pub has_source_url_constraint: bool,
+    /// Single regex/glob pattern to match against the raw `currentValue` string
+    /// in the manifest (e.g., `"^1.0"`, `"~2.3.4"`, `"/^[~^]/"` for range
+    /// specifiers).  When `None`, all current values are accepted.
+    ///
+    /// Renovate reference: `lib/util/package-rules/current-value.ts`
+    pub match_current_value: Option<PackageNameMatcher>,
+    /// Single regex/glob pattern to match against the proposed new version
+    /// string for a dependency.  When `None`, all proposed versions are accepted.
+    ///
+    /// Renovate reference: `lib/util/package-rules/new-value.ts`
+    pub match_new_value: Option<PackageNameMatcher>,
     /// `true` when the raw config specified at least one `matchPackageNames` /
     /// `matchPackagePatterns` / `matchPackagePrefixes` entry.  Prevents
     /// a fully-invalid pattern list from silently matching all deps.
@@ -184,6 +204,46 @@ impl PackageRule {
     /// An empty `matchDatasources` list matches all datasources.
     pub fn datasource_matches(&self, datasource: &str) -> bool {
         self.match_datasources.is_empty() || self.match_datasources.iter().any(|d| d == datasource)
+    }
+
+    /// Return `true` when this rule's `matchSourceUrls` condition matches `source_url`.
+    ///
+    /// If `matchSourceUrls` is not set, returns `true` (matches all).
+    pub fn source_url_matches(&self, source_url: &str) -> bool {
+        if !self.has_source_url_constraint {
+            return true;
+        }
+        self.match_source_urls.iter().any(|m| match m {
+            PackageNameMatcher::Exact(s) => s == source_url,
+            PackageNameMatcher::Regex(re) => re.is_match(source_url),
+            PackageNameMatcher::Glob(gm) => gm.is_match(source_url),
+        })
+    }
+
+    /// Return `true` when this rule's `matchCurrentValue` pattern matches `current_value`.
+    ///
+    /// `current_value` is the raw version string from the manifest (e.g. `"^1.0.0"`).
+    /// When `matchCurrentValue` is not set, returns `true` (matches all).
+    pub fn current_value_matches(&self, current_value: &str) -> bool {
+        match &self.match_current_value {
+            None => true,
+            Some(PackageNameMatcher::Exact(s)) => s == current_value,
+            Some(PackageNameMatcher::Regex(re)) => re.is_match(current_value),
+            Some(PackageNameMatcher::Glob(gm)) => gm.is_match(current_value),
+        }
+    }
+
+    /// Return `true` when this rule's `matchNewValue` pattern matches `new_value`.
+    ///
+    /// `new_value` is the proposed new version string (e.g. `"2.0.0"`).
+    /// When `matchNewValue` is not set, returns `true` (matches all).
+    pub fn new_value_matches(&self, new_value: &str) -> bool {
+        match &self.match_new_value {
+            None => true,
+            Some(PackageNameMatcher::Exact(s)) => s == new_value,
+            Some(PackageNameMatcher::Regex(re)) => re.is_match(new_value),
+            Some(PackageNameMatcher::Glob(gm)) => gm.is_match(new_value),
+        }
     }
 
     /// Return `true` if `proposed_version` matches any entry in this rule's
@@ -581,6 +641,8 @@ impl RepoConfig {
             match_dep_names: Vec<String>,
             #[serde(rename = "matchDatasources", default)]
             match_datasources: Vec<String>,
+            #[serde(rename = "matchSourceUrls", default)]
+            match_source_urls: Vec<String>,
             #[serde(rename = "matchManagers", default)]
             match_managers: Vec<String>,
             #[serde(rename = "matchUpdateTypes", default)]
@@ -589,6 +651,10 @@ impl RepoConfig {
             allowed_versions: Option<String>,
             #[serde(rename = "matchCurrentVersion")]
             match_current_version: Option<String>,
+            #[serde(rename = "matchCurrentValue")]
+            match_current_value: Option<String>,
+            #[serde(rename = "matchNewValue")]
+            match_new_value: Option<String>,
             #[serde(rename = "matchFileNames", default)]
             match_file_names: Vec<String>,
             #[serde(rename = "matchDepTypes", default)]
@@ -674,89 +740,101 @@ impl RepoConfig {
             }
         };
 
-        let package_rules =
-            raw.package_rules
-                .into_iter()
-                .map(|r| {
-                    let has_name_constraint = !r.match_package_names.is_empty()
-                        || !r.match_package_patterns.is_empty()
-                        || !r.match_package_prefixes.is_empty();
+        let package_rules = raw
+            .package_rules
+            .into_iter()
+            .map(|r| {
+                let has_name_constraint = !r.match_package_names.is_empty()
+                    || !r.match_package_patterns.is_empty()
+                    || !r.match_package_prefixes.is_empty();
 
-                    // Compile each `matchPackageNames` entry as Exact / Regex / Glob.
-                    let mut match_package_names: Vec<PackageNameMatcher> = r
-                        .match_package_names
-                        .iter()
-                        .map(|s| compile_name_matcher(s))
-                        .collect();
-                    // Convert deprecated `matchPackagePrefixes` → glob `prefix**`.
-                    for prefix in &r.match_package_prefixes {
-                        let pattern = format!("{prefix}**");
-                        match globset::Glob::new(&pattern) {
-                            Ok(g) => match_package_names
-                                .push(PackageNameMatcher::Glob(g.compile_matcher())),
-                            Err(e) => tracing::warn!(
-                                prefix,
-                                %e,
-                                "invalid matchPackagePrefixes glob"
-                            ),
+                // Compile each `matchPackageNames` entry as Exact / Regex / Glob.
+                let mut match_package_names: Vec<PackageNameMatcher> = r
+                    .match_package_names
+                    .iter()
+                    .map(|s| compile_name_matcher(s))
+                    .collect();
+                // Convert deprecated `matchPackagePrefixes` → glob `prefix**`.
+                for prefix in &r.match_package_prefixes {
+                    let pattern = format!("{prefix}**");
+                    match globset::Glob::new(&pattern) {
+                        Ok(g) => {
+                            match_package_names.push(PackageNameMatcher::Glob(g.compile_matcher()))
                         }
+                        Err(e) => tracing::warn!(
+                            prefix,
+                            %e,
+                            "invalid matchPackagePrefixes glob"
+                        ),
                     }
+                }
 
-                    let match_package_patterns = r
-                        .match_package_patterns
-                        .iter()
-                        .filter_map(|pat| {
-                            Regex::new(pat)
-                                .map_err(|e| {
-                                    tracing::warn!(
-                                        pattern = pat,
-                                        %e,
-                                        "invalid packageRules matchPackagePatterns regex"
-                                    );
-                                })
-                                .ok()
-                        })
-                        .collect();
-                    let match_update_types = r
-                        .match_update_types
-                        .iter()
-                        .filter_map(|s| match s.as_str() {
-                            "major" => Some(UpdateType::Major),
-                            "minor" => Some(UpdateType::Minor),
-                            "patch" => Some(UpdateType::Patch),
-                            _ => None,
-                        })
-                        .collect();
+                let match_package_patterns = r
+                    .match_package_patterns
+                    .iter()
+                    .filter_map(|pat| {
+                        Regex::new(pat)
+                            .map_err(|e| {
+                                tracing::warn!(
+                                    pattern = pat,
+                                    %e,
+                                    "invalid packageRules matchPackagePatterns regex"
+                                );
+                            })
+                            .ok()
+                    })
+                    .collect();
+                let match_update_types = r
+                    .match_update_types
+                    .iter()
+                    .filter_map(|s| match s.as_str() {
+                        "major" => Some(UpdateType::Major),
+                        "minor" => Some(UpdateType::Minor),
+                        "patch" => Some(UpdateType::Patch),
+                        _ => None,
+                    })
+                    .collect();
 
-                    let has_dep_name_constraint = !r.match_dep_names.is_empty();
-                    let match_dep_names: Vec<PackageNameMatcher> = r
-                        .match_dep_names
-                        .iter()
-                        .map(|s| compile_name_matcher(s))
-                        .collect();
+                let has_dep_name_constraint = !r.match_dep_names.is_empty();
+                let match_dep_names: Vec<PackageNameMatcher> = r
+                    .match_dep_names
+                    .iter()
+                    .map(|s| compile_name_matcher(s))
+                    .collect();
 
-                    PackageRule {
-                        match_package_names,
-                        match_package_patterns,
-                        match_dep_names,
-                        has_dep_name_constraint,
-                        match_datasources: r.match_datasources,
-                        match_managers: r.match_managers,
-                        match_update_types,
-                        allowed_versions: r.allowed_versions,
-                        match_current_version: r.match_current_version,
-                        match_file_names: r.match_file_names,
-                        match_dep_types: r.match_dep_types,
-                        ignore_versions: r.ignore_versions,
-                        enabled: r.enabled,
-                        has_name_constraint,
-                        group_name: r.group_name,
-                        automerge: r.automerge,
-                        schedule: r.schedule,
-                        labels: r.labels,
-                    }
-                })
-                .collect();
+                let has_source_url_constraint = !r.match_source_urls.is_empty();
+                let match_source_urls: Vec<PackageNameMatcher> = r
+                    .match_source_urls
+                    .iter()
+                    .map(|s| compile_name_matcher(s))
+                    .collect();
+
+                PackageRule {
+                    match_package_names,
+                    match_package_patterns,
+                    match_dep_names,
+                    has_dep_name_constraint,
+                    match_source_urls,
+                    has_source_url_constraint,
+                    match_current_value: r.match_current_value.map(|s| compile_name_matcher(&s)),
+                    match_new_value: r.match_new_value.map(|s| compile_name_matcher(&s)),
+                    match_datasources: r.match_datasources,
+                    match_managers: r.match_managers,
+                    match_update_types,
+                    allowed_versions: r.allowed_versions,
+                    match_current_version: r.match_current_version,
+                    match_file_names: r.match_file_names,
+                    match_dep_types: r.match_dep_types,
+                    ignore_versions: r.ignore_versions,
+                    enabled: r.enabled,
+                    has_name_constraint,
+                    group_name: r.group_name,
+                    automerge: r.automerge,
+                    schedule: r.schedule,
+                    labels: r.labels,
+                }
+            })
+            .collect();
 
         Self {
             enabled: raw.enabled,
@@ -2265,5 +2343,97 @@ mod tests {
             "expected deduplication, got: {:?}",
             c.ignore_paths
         );
+    }
+}
+
+// Tests appended inline for slice 0176 — matchSourceUrls, matchCurrentValue, matchNewValue
+#[cfg(test)]
+mod source_url_tests {
+    use super::*;
+
+    #[test]
+    fn match_source_urls_exact_disables_dep() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/lodash/lodash"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.source_url_matches("https://github.com/lodash/lodash"));
+        assert!(!rule.source_url_matches("https://github.com/other/repo"));
+    }
+
+    #[test]
+    fn match_source_urls_glob() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/org/**"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.source_url_matches("https://github.com/org/repo1"));
+        assert!(rule.source_url_matches("https://github.com/org/repo2"));
+        assert!(!rule.source_url_matches("https://github.com/other/repo"));
+    }
+
+    #[test]
+    fn match_source_urls_regex() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchSourceUrls": ["/^https://github.com/org/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.source_url_matches("https://github.com/org/myrepo"));
+        assert!(!rule.source_url_matches("https://gitlab.com/org/myrepo"));
+    }
+
+    #[test]
+    fn match_source_urls_empty_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.source_url_matches("https://github.com/anything"));
+        assert!(rule.source_url_matches("https://example.com/pkg"));
+    }
+
+    #[test]
+    fn match_current_value_regex() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentValue": "/^[~^]/", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.current_value_matches("^1.0.0"));
+        assert!(rule.current_value_matches("~2.3.4"));
+        assert!(!rule.current_value_matches("1.0.0"));
+    }
+
+    #[test]
+    fn match_current_value_exact() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentValue": "1.0.0", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.current_value_matches("1.0.0"));
+        assert!(!rule.current_value_matches("2.0.0"));
+    }
+
+    #[test]
+    fn match_current_value_none_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.current_value_matches("^1.0.0"));
+        assert!(rule.current_value_matches("anything"));
+    }
+
+    #[test]
+    fn match_new_value_glob() {
+        let c =
+            RepoConfig::parse(r#"{"packageRules": [{"matchNewValue": "1.*", "enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.new_value_matches("1.0.0"));
+        assert!(rule.new_value_matches("1.99.0"));
+        assert!(!rule.new_value_matches("2.0.0"));
+    }
+
+    #[test]
+    fn match_new_value_none_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.new_value_matches("1.0.0"));
+        assert!(rule.new_value_matches("99.0.0"));
     }
 }
