@@ -85,6 +85,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Gemfile$"],
     },
     ManagerDef {
+        name: "gradle",
+        patterns: &[
+            r"\.gradle(\.kts)?$",
+            r"(^|/)gradle\.properties$",
+            r"\.versions\.toml$",
+        ],
+    },
+    ManagerDef {
         name: "helmv3",
         patterns: &[r"(^|/)Chart\.ya?ml$", r"(^|/)requirements\.ya?ml$"],
     },

@@ -10,6 +10,7 @@ pub mod docker_compose;
 pub mod dockerfile;
 pub mod github_actions;
 pub mod gomod;
+pub mod gradle;
 pub mod helm;
 pub mod maven;
 pub mod npm;

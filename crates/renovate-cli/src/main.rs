@@ -44,6 +44,7 @@ use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::composer as composer_extractor;
 use renovate_core::extractors::github_actions as github_actions_extractor;
 use renovate_core::extractors::gomod as gomod_extractor;
+use renovate_core::extractors::gradle as gradle_extractor;
 use renovate_core::extractors::helm as helm_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
@@ -1266,6 +1267,55 @@ async fn process_repo(
         }
     }
 
+    // ── Gradle (.gradle / .gradle.kts / .versions.toml) ──────────────────────
+    for gradle_file_path in manager_files(&detected, "gradle") {
+        match client.get_raw_file(owner, repo, &gradle_file_path).await {
+            Ok(Some(raw)) => {
+                // Route to the appropriate parser based on file extension.
+                let deps: Vec<renovate_core::extractors::gradle::GradleExtractedDep> =
+                    if gradle_file_path.ends_with(".toml") {
+                        gradle_extractor::extract_version_catalog(&raw.content)
+                    } else {
+                        gradle_extractor::extract_build_file(&raw.content)
+                    };
+
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %gradle_file_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted gradle deps"
+                );
+
+                // Reuse the Maven datasource — Gradle deps are Maven artifacts.
+                let dep_inputs: Vec<maven_datasource::MavenDepInput> = actionable
+                    .iter()
+                    .map(|d| maven_datasource::MavenDepInput {
+                        dep_name: d.dep_name.clone(),
+                        current_version: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates =
+                    maven_datasource::fetch_updates_concurrent(http, &dep_inputs, 10).await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: gradle_file_path.clone(),
+                    manager: "gradle".into(),
+                    deps: build_dep_reports_gradle(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%gradle_file_path, "Gradle file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gradle_file_path, %err, "failed to fetch Gradle file");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 
@@ -1821,6 +1871,48 @@ fn build_dep_reports_helm(
         };
         reports.push(output::DepReport {
             name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_gradle(
+    all_deps: &[renovate_core::extractors::gradle::GradleExtractedDep],
+    actionable: &[&renovate_core::extractors::gradle::GradleExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::maven::MavenUpdateSummary,
+            renovate_core::datasources::maven::MavenError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.dep_name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.dep_name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_version.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.dep_name.clone(),
             status,
         });
     }

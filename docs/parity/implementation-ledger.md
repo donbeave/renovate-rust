@@ -1253,10 +1253,48 @@ Pick whichever can be completed in one loop:
 
 Pick whichever can be completed in one loop:
 
+## Slice 0040 - Gradle `.gradle`/`.gradle.kts` extractor + TOML version catalog
+
+### Renovate reference
+- `lib/modules/manager/gradle/index.ts` — `defaultConfig`, file patterns
+- `lib/modules/manager/gradle/utils.ts`  — `parseDependencyString`
+- `lib/modules/manager/gradle/extract/catalog.ts` — TOML catalog parsing
+- Datasource: `MavenDatasource` (Maven Central, already implemented)
+
+### What landed
+- `crates/renovate-core/src/extractors/gradle.rs` — dual-format Gradle extractor:
+  - `extract_build_file()`: regex scanner for Groovy/Kotlin DSL string-notation deps.
+    Matches 20+ configuration keywords (implementation, api, classpath, kapt, ksp, …).
+    Deduplicates by `group:artifact` (same dep under different configs → one entry).
+    Skip reasons: `VariableReference` (`$var`), `DynamicVersion` (`1.+`, SNAPSHOT).
+  - `extract_version_catalog()`: TOML parser for `libs.versions.toml` / `.versions.toml`.
+    Supports inline string form (`guava = "group:artifact:version"`) and table form
+    with inline or `version.ref` lookups into `[versions]`.
+  - Both functions produce `GradleExtractedDep` with Maven coordinate `dep_name`.
+- Manager pattern `gradle` with `.gradle`, `.gradle.kts`, `.versions.toml` patterns.
+- Pipeline routes TOML files to `extract_version_catalog`, others to `extract_build_file`.
+- Reuses `datasources::maven` for Maven Central version lookups — no new datasource.
+
+### What was intentionally deferred
+- Map notation: `implementation group: 'com.example', name: 'mylib', version: '1.0'`.
+- `gradle.properties` version variable resolution.
+- Multi-project builds and cross-file variable sharing.
+- Gradle plugin declarations (`plugins { id("...") version "..." }`).
+- `gradle-consistent-versions` plugin support.
+- `gradle/libs.versions.toml` `[bundles]` and `[plugins]` sections.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 388 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
 1. **Maven versioning module**: implement the Maven qualifier ordering scheme
    (alpha < beta < milestone < rc < release < sp) for accurate update decisions.
 2. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 3. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
-4. **Gradle `build.gradle` extractor**: parse Gradle build files for dependency declarations.
+4. **Mix `mix.exs` extractor + Hex.pm datasource**: add Elixir package manager support.
