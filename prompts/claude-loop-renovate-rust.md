@@ -205,6 +205,22 @@ Output and UX requirements:
 - Keep machine-readable modes stable and easy to parse.
 - Prefer concise summaries with expandable verbose/debug detail.
 
+Refactoring philosophy:
+- Large-scale refactoring is always acceptable and expected. Never take the easiest
+  path out of fear of fundamental change. The goal is a better technical solution,
+  not the smallest possible diff.
+- Refactor internal implementation freely at any time: module structure, data types,
+  pipeline architecture, abstraction layers, naming, error handling, async design,
+  or anything internal that improves correctness, clarity, or performance.
+- Preserve external compatibility: CLI commands, flags, environment variables,
+  config file format and semantics, exit codes, and machine-readable output must
+  remain consistent with the original Renovate CLI where it makes sense. The
+  external interface is the contract; internal design is fully under our control.
+- Fix bad design decisions completely rather than working around them with hacks or
+  compatibility shims. If a prior choice turns out to be wrong, change it.
+- When a refactor touches many files, commit it as a single atomic change with a
+  clear description of the motivation.
+
 Autonomy rules:
 - Do not ask the user which crate, architecture, or behavior to implement next.
 - Do not wait for permission to add files, refactor local Rust code, or create tests.
