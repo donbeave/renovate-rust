@@ -21,6 +21,9 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0195  | 2026-04-28 | Parity tracking: create `renovate-source-map.md` + update loop prompt with maintenance rules | Complete | See below. |
+| 0194  | 2026-04-28 | `matchCurrentAge` packageRule matcher + `satisfies_date_range()` + per-version timestamps (npm/pypi) | Complete | See below. |
+| 0193  | 2026-04-28 | `--platform=local` fix: scan CWD, skip token requirement, `LocalClient` reads via `git ls-files` | Complete | See below. |
 | 0192  | 2026-04-28 | `groupName`-based output grouping: UpdateAvailable deps grouped under header lines | Complete | See below. |
 | 0191  | 2026-04-28 | PyPI release timestamp support + parse_age_duration tests + is_within_release_age tests | Complete | See below. |
 | 0190  | 2026-04-28 | `minimumReleaseAge` + npm release timestamp + `is_within_release_age()` + `parse_age_duration()` | Complete | See below. |
@@ -4835,10 +4838,87 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `cargo clippy --workspace --all-features -D warnings` ✓
 - `cargo nextest run --workspace --all-features`: 1249 passed
 
+## Slice 0193 - `--platform=local` fix: scan CWD, skip token requirement, LocalClient
+
+### Renovate reference
+- `lib/modules/platform/local/index.ts` — local platform reads from filesystem
+
+### What landed
+- `crates/renovate-core/src/platform/local.rs` (new):
+  - `LocalClient { base_dir }` struct
+  - `get_file_list()` — runs `git ls-files --cached --others --exclude-standard`;
+    falls back to recursive `walk_dir()` skipping `.git`, `target`, `node_modules`
+  - `get_raw_file()` — reads from `base_dir/path` via `std::fs::read_to_string`
+  - `get_current_user()` — returns `CurrentUser { login: "local" }`
+- `crates/renovate-core/src/platform.rs`:
+  - Added `Local(LocalClient)` variant to `AnyPlatformClient`
+  - Added `AnyPlatformClient::local(base_dir)` constructor
+  - Dispatch methods include Local arm
+- `crates/renovate-cli/src/main.rs`:
+  - When `platform == Local && repositories.is_empty()` → inject `"local/{dirname}"`
+  - When `platform == Local` → skip token requirement; create `AnyPlatformClient::local(&cwd)`
+  - Display slug uses CWD basename for readable output
+
+### Verification
+- `renovate --platform=local --dry-run=full` correctly scans CWD and shows deps
+
+---
+
+## Slice 0194 - `matchCurrentAge` packageRule matcher
+
+### Renovate reference
+- `lib/util/package-rules/current-age.ts` — `CurrentAgeMatcher`
+- `lib/util/pretty-time.ts` — `satisfiesDateRange`
+
+### What landed
+- `crates/renovate-core/src/schedule.rs`:
+  - `satisfies_date_range(timestamp, range)` — evaluates `"> 3 days"`,
+    `"< 1 month"`, `">= 2 weeks"` etc. against an ISO 8601 timestamp
+  - 9 tests for the function (operators, edge cases, naive timestamps)
+- `crates/renovate-core/src/repo_config.rs`:
+  - `match_current_age: Option<String>` field on `PackageRule`
+  - `current_version_timestamp: Option<&'a str>` field on `DepContext`
+  - `PackageRule::current_age_matches(timestamp)` method
+  - Wired into `matches_context()` AND-chain
+  - JSON parsing: `matchCurrentAge` deserialized from config
+  - 6 tests: parse, no-constraint match-all, with/without timestamp, DepContext integration
+- `crates/renovate-core/src/datasources/npm.rs`:
+  - `version_timestamps: HashMap<String, String>` added to `NpmVersionsEntry`
+  - Populated from packument `time` field (filtering meta-keys)
+- `crates/renovate-core/src/datasources/pypi.rs`:
+  - `version_timestamps: HashMap<String, String>` added to `PypiVersionsEntry`
+  - Collected per-version from `releases[v][].upload_time` during fetch
+- `crates/renovate-cli/src/output.rs`:
+  - `current_version_timestamp: Option<String>` added to `DepReport` (not serialized)
+- Wired `dep.current_version_timestamp.as_deref()` into `DepContext` in
+  `apply_update_blocking_to_report`
+
+### Deferred
+- Populating `current_version_timestamp` in each dep report from the cached
+  timestamps (requires resolving the current version string from specifier first)
+
+---
+
+## Slice 0195 - Parity tracking: source map + prompt rules
+
+### What landed
+- `docs/parity/renovate-source-map.md` (new): maps 60+ TypeScript source files
+  to their Rust counterparts with `full/partial/stub/not-started/out-of-scope`
+  status; covers CLI, platform, datasources, extractors, versioning, utilities
+- `docs/parity/renovate-test-map.md`: added 15 new rows for `matchCurrentAge`
+  tests (current-age.ts, pretty-time.ts) and LocalClient integration test
+- `prompts/claude-loop-renovate-rust.md`: added explicit rules for maintaining
+  all four parity tracking files in every loop iteration; added rule that prompt
+  changes must be committed separately
+
+---
+
 ## Next slice candidates
 
-1. **Wire `matchDatasources` into filter methods** — DepContext struct.
-2. **Remote preset resolution** — `github>org/repo//preset` fetching.
-3. **`matchCategories` packageRule matcher** — match by language category.
-4. **`matchBaseBranches` packageRule matcher** — match against base branches.
-5. **Group:monorepos preset expansion** — add packageRules for known monorepos.
+1. **Populate `current_version_timestamp` from npm/pypi cache** — resolve specifier
+   to current version string and look up in `version_timestamps`.
+2. **`matchHost` packageRule matcher** — filter deps by registry host.
+3. **crates.io release timestamp** — hit `crates.io/api/v1/crates/{name}/versions`
+   to get `created_at` per version for minimumReleaseAge support.
+4. **Remote preset resolution** — `github>org/repo//preset` fetching.
+5. **Docker versioning scheme** — proper Docker tag version comparison.
