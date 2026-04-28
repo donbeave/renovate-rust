@@ -3485,6 +3485,72 @@ async fn process_repo(
         }
     }
 
+    // ── SBT (build.sbt / project/*.scala / project/build.properties) ────────
+    for sbt_path in manager_files(&detected, "sbt") {
+        match client.get_raw_file(owner, repo, &sbt_path).await {
+            Ok(Some(raw)) => {
+                let deps = if sbt_path.ends_with("build.properties") {
+                    renovate_core::extractors::sbt::extract_build_properties(&raw.content)
+                        .map(|d| vec![d])
+                        .unwrap_or_default()
+                } else {
+                    renovate_core::extractors::sbt::extract(&raw.content)
+                };
+                tracing::debug!(
+                    repo = %repo_slug, file = %sbt_path,
+                    total = deps.len(), "extracted sbt deps"
+                );
+                let dep_inputs: Vec<maven_datasource::MavenDepInput> = deps
+                    .iter()
+                    .map(|d| maven_datasource::MavenDepInput {
+                        dep_name: d.dep_name(),
+                        current_version: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates =
+                    maven_datasource::fetch_updates_concurrent(http, &dep_inputs, 10).await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let dn = dep.dep_name();
+                        let status = match update_map.get(&dn) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport { name: dn, status }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: sbt_path.clone(),
+                    manager: "sbt".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%sbt_path, "sbt file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%sbt_path, %err, "failed to fetch sbt file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Ansible task files (tasks/*.yml) ─────────────────────────────────────
     for ansible_path in manager_files(&detected, "ansible") {
         match client.get_raw_file(owner, repo, &ansible_path).await {

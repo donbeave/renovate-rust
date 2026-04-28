@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0104  | 2026-04-28 | SBT `build.sbt` / `project/build.properties` extractor | Complete | See below. |
 | 0103  | 2026-04-28 | Ansible tasks Docker image extractor | Complete | See below. |
 | 0102  | 2026-04-28 | Leiningen `project.clj` extractor (Clojars + Maven Central) | Complete | See below. |
 | 0101  | 2026-04-28 | Jenkins plugins datasource (Update Center JSON) | Complete | See below. |
@@ -2689,6 +2690,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 872 passed
 
+## Slice 0104 - SBT `build.sbt` / `project/build.properties` extractor
+
+### Renovate reference
+- `lib/modules/manager/sbt/extract.ts`
+- Patterns: `/\.sbt$/`, `/project/[^/]*\.scala$/`, `/project/build\.properties$/`
+- Datasource: Maven Central
+
+### What landed
+- `crates/renovate-core/src/extractors/sbt.rs` (new):
+  - `SbtDepStyle { Java, Scala }` — `%` vs `%%` operator distinction.
+  - `SbtDepType { Library, Plugin, SbtVersion }` — dep classification.
+  - `SbtDep { group_id, artifact_id, current_value, style, dep_type }` with `dep_name()` helper.
+  - `extract(content)` — scans `.sbt`/`.scala` files line by line; strips `//` comments; detects
+    `addSbtPlugin` lines; uses regex `"group" %%? "artifact" % "version"` to extract deps.
+  - `extract_build_properties(content)` — extracts `sbt.version=x.y.z` from `build.properties`.
+  - 7 unit tests.
+- `crates/renovate-core/src/managers.rs`: `sbt` manager with `.sbt`, `project/*.scala`,
+  and `project/build.properties` patterns.
+- `crates/renovate-cli/src/main.rs`: SBT pipeline using Maven Central lookups.
+
+### What was intentionally deferred
+- `scalaVersion` variable substitution (e.g. `scalaVersion := "2.13.12"` affecting `%%` deps).
+- Sbt Plugin Registry (`https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases`).
+- Multi-project builds with sub-project references.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 879 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2703,5 +2733,5 @@ Pick whichever can be completed in one loop:
 6. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 7. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 8. **`nix` Flakes** — `flake.nix` version and input extraction.
-9. **`sbt` (Scala Build Tool)** — `build.sbt` dependency extraction (Maven coordinates).
+9. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
 11. **Travis CI** `.travis.yml` Node.js version extraction.

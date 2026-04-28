@@ -218,6 +218,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Cargo\.toml$"],
     },
     ManagerDef {
+        name: "sbt",
+        patterns: &[
+            r"\.sbt$",
+            r"(^|/)project/[^/]*\.scala$",
+            r"(^|/)project/build\.properties$",
+        ],
+    },
+    ManagerDef {
         name: "leiningen",
         patterns: &[r"(^|/)project\.clj$"],
     },
