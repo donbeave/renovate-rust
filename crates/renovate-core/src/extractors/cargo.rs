@@ -1,0 +1,291 @@
+//! Cargo.toml dependency extractor.
+//!
+//! Parses a `Cargo.toml` manifest and returns the set of crate dependencies
+//! with their version constraints, ready for datasource lookups.
+//!
+//! Renovate reference:
+//! - `lib/modules/manager/cargo/extract.ts` — extraction logic
+//! - `lib/modules/manager/cargo/schema.ts` — `CargoDep` / `CargoManifest` Zod schemas
+
+use std::collections::BTreeMap;
+
+use serde::Deserialize;
+use thiserror::Error;
+
+/// Why a dependency is being skipped (no version lookup needed).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SkipReason {
+    /// Dependency is a local path (`path = "../../foo"`).
+    PathDependency,
+    /// Dependency is sourced from git rather than a registry.
+    GitSource,
+    /// Dependency is inherited from `[workspace.dependencies]`.
+    WorkspaceInherited,
+    /// Dependency entry has no `version` and is not path/git/workspace.
+    InvalidSpec,
+}
+
+/// Dependency type — which section of Cargo.toml it came from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DepType {
+    Regular,
+    Dev,
+    Build,
+}
+
+/// A single extracted dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ExtractedDep {
+    /// The key name in `[dependencies]` (e.g. `"tokio"`).
+    pub dep_name: String,
+    /// The actual crate name — usually matches `dep_name` but overridable
+    /// via the `package` field (e.g. `openssl = { package = "openssl-sys", ... }`).
+    pub package_name: String,
+    /// The version constraint string (e.g. `"1"`, `"^1.0"`, `">=1.0,<2"`).
+    /// Empty string for skipped deps.
+    pub current_value: String,
+    /// Section the dep came from.
+    pub dep_type: DepType,
+    /// Set when the dep does not need a version lookup.
+    pub skip_reason: Option<SkipReason>,
+}
+
+/// Errors from parsing a `Cargo.toml`.
+#[derive(Debug, Error)]
+pub enum CargoExtractError {
+    #[error("TOML parse error: {0}")]
+    TomlParse(#[from] toml::de::Error),
+}
+
+// ── Internal deserialization types ───────────────────────────────────────────
+
+/// A dependency value: either a bare version string or a table.
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum RawDep {
+    /// `tokio = "1.52"`
+    Simple(String),
+    /// `tokio = { version = "1.52", features = ["full"] }`
+    Table(RawDepTable),
+}
+
+#[derive(Debug, Deserialize)]
+struct RawDepTable {
+    version: Option<String>,
+    path: Option<String>,
+    git: Option<String>,
+    #[serde(rename = "package")]
+    pkg: Option<String>,
+    workspace: Option<bool>,
+    // registry and other fields exist but are not needed for basic extraction
+}
+
+/// Minimal `Cargo.toml` representation — only the fields we need.
+#[derive(Debug, Deserialize)]
+struct RawManifest {
+    dependencies: Option<BTreeMap<String, RawDep>>,
+    #[serde(rename = "dev-dependencies")]
+    dev_dependencies: Option<BTreeMap<String, RawDep>>,
+    #[serde(rename = "build-dependencies")]
+    build_dependencies: Option<BTreeMap<String, RawDep>>,
+    // target.*.dependencies are complex; deferred to a later slice.
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
+/// Parse a `Cargo.toml` manifest string and extract all dependencies.
+///
+/// Returns a flat list — regular, dev, and build deps combined with their
+/// respective `DepType`. The list is in deterministic order (BTreeMap
+/// iteration is sorted by key).
+///
+/// Git, path, workspace-inherited, and spec-less dependencies are included
+/// with a `skip_reason` so callers can report them without attempting a
+/// version lookup.
+pub fn extract(content: &str) -> Result<Vec<ExtractedDep>, CargoExtractError> {
+    let manifest: RawManifest = toml::from_str(content)?;
+    let mut out = Vec::new();
+
+    for (section, dep_type) in [
+        (manifest.dependencies, DepType::Regular),
+        (manifest.dev_dependencies, DepType::Dev),
+        (manifest.build_dependencies, DepType::Build),
+    ] {
+        if let Some(deps) = section {
+            for (name, raw) in deps {
+                out.push(convert_dep(name, raw, dep_type));
+            }
+        }
+    }
+
+    Ok(out)
+}
+
+fn convert_dep(name: String, raw: RawDep, dep_type: DepType) -> ExtractedDep {
+    match raw {
+        RawDep::Simple(version) => ExtractedDep {
+            package_name: name.clone(),
+            dep_name: name,
+            current_value: version,
+            dep_type,
+            skip_reason: None,
+        },
+        RawDep::Table(t) => {
+            let package_name = t.pkg.unwrap_or_else(|| name.clone());
+            let skip_reason = if t.path.is_some() {
+                Some(SkipReason::PathDependency)
+            } else if t.workspace == Some(true) {
+                Some(SkipReason::WorkspaceInherited)
+            } else if t.git.is_some() {
+                Some(SkipReason::GitSource)
+            } else if t.version.is_none() {
+                Some(SkipReason::InvalidSpec)
+            } else {
+                None
+            };
+            ExtractedDep {
+                dep_name: name,
+                package_name,
+                current_value: t.version.unwrap_or_default(),
+                dep_type,
+                skip_reason,
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extracts_simple_string_deps() {
+        let toml = r#"
+[dependencies]
+serde = "1.0"
+tokio = "1.52"
+"#;
+        let deps = extract(toml).unwrap();
+        let serde = deps.iter().find(|d| d.dep_name == "serde").unwrap();
+        assert_eq!(serde.current_value, "1.0");
+        assert_eq!(serde.dep_type, DepType::Regular);
+        assert!(serde.skip_reason.is_none());
+    }
+
+    #[test]
+    fn extracts_table_deps_with_version() {
+        let toml = r#"
+[dependencies]
+tokio = { version = "1.52", features = ["full"] }
+"#;
+        let deps = extract(toml).unwrap();
+        let tokio = deps.iter().find(|d| d.dep_name == "tokio").unwrap();
+        assert_eq!(tokio.current_value, "1.52");
+        assert!(tokio.skip_reason.is_none());
+    }
+
+    #[test]
+    fn package_field_overrides_name() {
+        let toml = r#"
+[dependencies]
+openssl = { package = "openssl-sys", version = "0.9" }
+"#;
+        let deps = extract(toml).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "openssl").unwrap();
+        assert_eq!(dep.package_name, "openssl-sys");
+        assert_eq!(dep.dep_name, "openssl");
+        assert_eq!(dep.current_value, "0.9");
+    }
+
+    #[test]
+    fn path_dep_is_skipped() {
+        let toml = r#"
+[dependencies]
+my-lib = { path = "../my-lib" }
+"#;
+        let deps = extract(toml).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "my-lib").unwrap();
+        assert_eq!(dep.skip_reason, Some(SkipReason::PathDependency));
+    }
+
+    #[test]
+    fn workspace_dep_is_skipped() {
+        let toml = r#"
+[dependencies]
+serde = { workspace = true }
+"#;
+        let deps = extract(toml).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "serde").unwrap();
+        assert_eq!(dep.skip_reason, Some(SkipReason::WorkspaceInherited));
+    }
+
+    #[test]
+    fn git_dep_is_skipped() {
+        let toml = r#"
+[dependencies]
+foo = { git = "https://github.com/owner/foo", tag = "v1.0" }
+"#;
+        let deps = extract(toml).unwrap();
+        let dep = deps.iter().find(|d| d.dep_name == "foo").unwrap();
+        assert_eq!(dep.skip_reason, Some(SkipReason::GitSource));
+    }
+
+    #[test]
+    fn dev_and_build_deps_have_correct_type() {
+        let toml = r#"
+[dev-dependencies]
+criterion = "0.5"
+
+[build-dependencies]
+cc = "1.0"
+"#;
+        let deps = extract(toml).unwrap();
+        let crit = deps.iter().find(|d| d.dep_name == "criterion").unwrap();
+        let cc = deps.iter().find(|d| d.dep_name == "cc").unwrap();
+        assert_eq!(crit.dep_type, DepType::Dev);
+        assert_eq!(cc.dep_type, DepType::Build);
+    }
+
+    #[test]
+    fn empty_manifest_returns_empty_list() {
+        let toml = r#"
+[package]
+name = "my-crate"
+version = "0.1.0"
+"#;
+        let deps = extract(toml).unwrap();
+        assert!(deps.is_empty());
+    }
+
+    #[test]
+    fn version_constraint_forms_are_preserved() {
+        let toml = r#"
+[dependencies]
+a = "^1.0"
+b = ">=1.0,<2"
+c = "~1.2.3"
+d = "*"
+"#;
+        let deps = extract(toml).unwrap();
+        let a = deps.iter().find(|d| d.dep_name == "a").unwrap();
+        let b = deps.iter().find(|d| d.dep_name == "b").unwrap();
+        assert_eq!(a.current_value, "^1.0");
+        assert_eq!(b.current_value, ">=1.0,<2");
+    }
+
+    #[test]
+    fn mixed_manifest_extracts_all_sections() {
+        let toml = r#"
+[dependencies]
+serde = "1"
+tokio = { version = "1.52", features = ["full"] }
+my-lib = { path = "../my-lib" }
+
+[dev-dependencies]
+criterion = "0.5"
+"#;
+        let deps = extract(toml).unwrap();
+        assert_eq!(deps.len(), 4);
+        assert_eq!(deps.iter().filter(|d| d.skip_reason.is_none()).count(), 3); // serde, tokio, criterion
+    }
+}
