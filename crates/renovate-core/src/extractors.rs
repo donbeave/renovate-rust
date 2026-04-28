@@ -33,6 +33,7 @@ pub mod jenkins;
 pub mod kustomize;
 pub mod maven;
 pub mod maven_wrapper;
+pub mod mint;
 pub mod mise;
 pub mod mix;
 pub mod npm;

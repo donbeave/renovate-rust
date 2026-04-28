@@ -2099,6 +2099,71 @@ async fn process_repo(
         }
     }
 
+    // ── Mint (Mintfile) ───────────────────────────────────────────────────────
+    for mint_path in manager_files(&detected, "mint") {
+        match client.get_raw_file(owner, repo, &mint_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::mint::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %mint_path,
+                    total = deps.len(), "extracted mint deps"
+                );
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = deps
+                    .iter()
+                    .map(|d| github_tags_datasource::GithubActionsDepInput {
+                        dep_name: d.repo.clone(),
+                        current_value: d.version.clone(),
+                    })
+                    .collect();
+                let updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &gh_inputs,
+                    gh_api_base,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = match update_map.get(&dep.repo) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.version.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.repo.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: mint_path.clone(),
+                    manager: "mint".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%mint_path, "Mintfile not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%mint_path, %err, "failed to fetch Mintfile");
+                had_error = true;
+            }
+        }
+    }
+
     // ── CocoaPods (Podfile) ───────────────────────────────────────────────────
     for podfile_path in manager_files(&detected, "cocoapods") {
         match client.get_raw_file(owner, repo, &podfile_path).await {
