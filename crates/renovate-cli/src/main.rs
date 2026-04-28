@@ -61,6 +61,7 @@ use renovate_core::extractors::setup_cfg as setup_cfg_extractor;
 use renovate_core::extractors::terraform as terraform_extractor;
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
+use renovate_core::config::Platform;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
 use tokio::sync::Semaphore;
@@ -136,7 +137,15 @@ async fn main() -> ExitCode {
         "config resolved"
     );
 
-    // 5. Exit early when there is nothing to do.
+    // 5. For local platform, inject a synthetic repository slug when none is
+    //    supplied so that the current working directory is scanned — mirroring
+    //    how the original Renovate handles `--platform=local`.
+    let mut config = config;
+    if config.platform == Platform::Local && config.repositories.is_empty() {
+        tracing::info!(dir = %cwd.display(), "local platform: scanning current directory");
+        config.repositories = vec!["local/.".to_owned()];
+    }
+
     if config.repositories.is_empty() {
         tracing::info!("no repositories configured — nothing to do");
         return ExitCode::SUCCESS;
@@ -144,7 +153,11 @@ async fn main() -> ExitCode {
 
     // 6. Platform initialization: create client and validate credentials.
     //    Mirrors Renovate's globalInitialize → initPlatform.
-    let maybe_client: Option<AnyPlatformClient> = if config.token.is_none() {
+    //    For local platform no token is needed — the client reads from disk.
+    let maybe_client: Option<AnyPlatformClient> = if config.platform == Platform::Local {
+        tracing::info!("local platform — skipping token validation");
+        Some(AnyPlatformClient::local(&cwd))
+    } else if config.token.is_none() {
         tracing::warn!(
             platform = %config.platform,
             "no token configured — platform operations will fail"

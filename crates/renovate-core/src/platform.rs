@@ -12,6 +12,7 @@
 
 pub mod github;
 pub mod gitlab;
+pub mod local;
 
 use thiserror::Error;
 
@@ -19,6 +20,7 @@ use crate::config::{GlobalConfig, Platform};
 use crate::http::HttpError;
 use github::GithubClient;
 use gitlab::GitlabClient;
+use local::LocalClient;
 
 /// Errors from platform operations.
 #[derive(Debug, Error)]
@@ -90,15 +92,21 @@ pub trait PlatformClient: Send + Sync {
 
 /// Enum dispatch wrapper covering all supported platform clients.
 ///
-/// Constructed via [`AnyPlatformClient::create`] from a [`GlobalConfig`].
+/// Constructed via [`AnyPlatformClient::create`] from a [`GlobalConfig`] for
+/// remote platforms, or via [`AnyPlatformClient::local`] for `--platform=local`.
 #[derive(Debug, Clone)]
 pub enum AnyPlatformClient {
     Github(GithubClient),
     Gitlab(GitlabClient),
+    /// Local filesystem — no token required, reads from disk.
+    Local(LocalClient),
 }
 
 impl AnyPlatformClient {
     /// Build the right platform client from a resolved [`GlobalConfig`].
+    ///
+    /// Returns [`PlatformError::NotSupported`] for platforms that are not yet
+    /// implemented.  Use [`AnyPlatformClient::local`] for `Platform::Local`.
     pub fn create(config: &GlobalConfig) -> Result<Self, PlatformError> {
         let token = config.token.as_deref().unwrap_or_default();
         match config.platform {
@@ -122,11 +130,17 @@ impl AnyPlatformClient {
         }
     }
 
+    /// Create a local filesystem client rooted at `base_dir`.
+    pub fn local(base_dir: impl Into<std::path::PathBuf>) -> Self {
+        Self::Local(LocalClient::new(base_dir))
+    }
+
     /// Verify authentication and return the currently-authenticated user.
     pub async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         match self {
             Self::Github(c) => c.get_current_user().await,
             Self::Gitlab(c) => c.get_current_user().await,
+            Self::Local(c) => c.get_current_user().await,
         }
     }
 
@@ -140,6 +154,7 @@ impl AnyPlatformClient {
         match self {
             Self::Github(c) => c.get_raw_file(owner, repo, path).await,
             Self::Gitlab(c) => c.get_raw_file(owner, repo, path).await,
+            Self::Local(c) => c.get_raw_file(owner, repo, path).await,
         }
     }
 
@@ -152,6 +167,7 @@ impl AnyPlatformClient {
         match self {
             Self::Github(c) => c.get_file_list(owner, repo).await,
             Self::Gitlab(c) => c.get_file_list(owner, repo).await,
+            Self::Local(c) => c.get_file_list(owner, repo).await,
         }
     }
 }
