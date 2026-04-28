@@ -193,6 +193,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.circleci/.+\.ya?ml$"],
     },
     ManagerDef {
+        name: "buildkite",
+        patterns: &[r"buildkite\.ya?ml", r"(^|/)\.buildkite/.+\.ya?ml$"],
+    },
+    ManagerDef {
         name: "pep621",
         patterns: &[r"(^|/)pyproject\.toml$"],
     },

@@ -4,6 +4,7 @@
 //! [`ExtractedDep`] records suitable for datasource version lookups.
 
 pub mod asdf;
+pub mod buildkite;
 pub mod bundler;
 pub mod cargo;
 pub mod circleci;

@@ -1789,6 +1789,29 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 558 passed
 
+## Slice 0057 - Buildkite pipeline plugin extractor
+
+### Renovate reference
+- `lib/modules/manager/buildkite/extract.ts`
+- Patterns: `buildkite\.ya?ml`, `(^|/)\.buildkite/.+\.ya?ml$`
+- Datasource: GitHub Tags (reuses existing `datasources/github_tags.rs`)
+
+### What landed
+- `crates/renovate-core/src/extractors/buildkite.rs` — line scanner:
+  - Regex: `^\s*(?:-\s+(?:\?\s+)?)?['"]?(?P<dep>[^#\s'"]+)#(?P<ver>[^:'"]+)['"]?`
+  - Handles 3 plugin forms:
+    - 1-part shorthand (`docker-compose#v5.1.0`) → `buildkite-plugins/docker-compose-buildkite-plugin`
+    - 2-part shorthand (`buildkite/matrix-joiner#v1.0.0`) → `buildkite/matrix-joiner-buildkite-plugin`
+    - Full GitHub URL (`https://github.com/org/plugin.git#v2.3.0`) → `org/plugin`
+  - Non-semver versions (like branch names) get `InvalidVersion` skip reason.
+  - Bitbucket registry URLs deferred (no BitbucketTagsDatasource yet).
+- Manager patterns `buildkite` with two file patterns.
+- Pipeline uses `github_tags::fetch_updates_concurrent` via `gh_http`/`gh_api_base`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 563 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1799,5 +1822,5 @@ Pick whichever can be completed in one loop:
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`ansible-galaxy` extractor**: `requirements.yml` for Ansible collections.
-5. **`buildkite` extractor**: Buildkite pipeline Docker images.
-6. **`tekton` extractor**: Tekton pipeline bundle references.
+5. **`tekton` extractor**: Tekton pipeline bundle references.
+6. **`vendir` extractor**: Carvel vendir dependencies.

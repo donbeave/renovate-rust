@@ -2351,6 +2351,115 @@ async fn process_repo(
         }
     }
 
+    // ── Buildkite pipeline YAML ───────────────────────────────────────────────
+    for bk_path in manager_files(&detected, "buildkite") {
+        match client.get_raw_file(owner, repo, &bk_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::buildkite::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %bk_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted buildkite plugins"
+                );
+
+                // Group by unique GitHub repo for batched lookups.
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
+                    .iter()
+                    .filter_map(|d| {
+                        if let Some(
+                            renovate_core::extractors::buildkite::BuildkiteDatasource::GithubTags {
+                                repo: gr,
+                            },
+                        ) = &d.datasource
+                        {
+                            Some(github_tags_datasource::GithubActionsDepInput {
+                                dep_name: gr.clone(),
+                                current_value: d.current_value.clone(),
+                            })
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+
+                let gh_updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &gh_inputs,
+                    gh_api_base,
+                    8,
+                )
+                .await;
+
+                let update_map: HashMap<String, (bool, Option<String>, Option<String>)> = {
+                    let mut m = HashMap::new();
+                    for r in gh_updates {
+                        match r.summary {
+                            Ok(s) => {
+                                m.insert(r.dep_name, (s.update_available, s.latest, None));
+                            }
+                            Err(e) => {
+                                m.insert(r.dep_name, (false, None, Some(e.to_string())));
+                            }
+                        }
+                    }
+                    m
+                };
+
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = if let Some(reason) = &dep.skip_reason {
+                        output::DepStatus::Skipped {
+                            reason: format!("{reason:?}").to_lowercase(),
+                        }
+                    } else if !repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        let gh_repo = dep.datasource.as_ref().map(
+                            |renovate_core::extractors::buildkite::BuildkiteDatasource::GithubTags { repo: gr }| {
+                                gr.as_str()
+                            },
+                        );
+                        match gh_repo.and_then(|r| update_map.get(r)) {
+                            Some((true, Some(latest), _)) => output::DepStatus::UpdateAvailable {
+                                current: dep.current_value.clone(),
+                                latest: latest.clone(),
+                            },
+                            Some((false, latest, None)) => output::DepStatus::UpToDate {
+                                latest: latest.clone(),
+                            },
+                            Some((_, _, Some(err_msg))) => output::DepStatus::LookupError {
+                                message: err_msg.clone(),
+                            },
+                            _ => output::DepStatus::UpToDate { latest: None },
+                        }
+                    } else {
+                        output::DepStatus::Skipped {
+                            reason: "ignored".to_owned(),
+                        }
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: bk_path.clone(),
+                    manager: "buildkite".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%bk_path, "buildkite pipeline not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bk_path, %err, "failed to fetch buildkite pipeline");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 
