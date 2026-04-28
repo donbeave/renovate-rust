@@ -144,7 +144,10 @@ fn require_config_bare_is_accepted_via_migrate() {
 
 #[test]
 fn require_config_optional_is_accepted_directly() {
-    renovate().arg("--require-config=optional").assert().success();
+    renovate()
+        .arg("--require-config=optional")
+        .assert()
+        .success();
 }
 
 #[test]
@@ -201,7 +204,10 @@ fn token_flag_is_accepted() {
 
 #[test]
 fn env_renovate_token_sets_token() {
-    renovate().env("RENOVATE_TOKEN", "secret").assert().success();
+    renovate()
+        .env("RENOVATE_TOKEN", "secret")
+        .assert()
+        .success();
 }
 
 #[test]

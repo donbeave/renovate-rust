@@ -21,10 +21,49 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0005  | 2026-04-28 | GlobalConfig struct + CLI→config builder      | Complete | See below. |
 | 0004  | 2026-04-28 | Option surface first-cut + env vars           | Complete | See below. |
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0005 - GlobalConfig struct + CLI→config builder
+
+### Renovate reference
+- `lib/config/options/index.ts` — option defaults and allowed values.
+- `lib/workers/global/config/parse/cli.ts` `getConfig` — dryRun "true"→"full",
+  requireConfig "true"→"required"/"false"→"optional" coercions with warn.
+- `lib/constants/platforms.ts` — `PLATFORM_HOST_TYPES`.
+
+### What landed
+- `crates/renovate-core/src/config.rs` — `GlobalConfig` struct with typed
+  fields and a `Default` impl matching Renovate's option defaults.
+- `crates/renovate-core/src/config/platform.rs` — `Platform` canonical enum
+  with `Display` impl (kebab-case strings matching upstream).
+- `crates/renovate-core/src/config/run.rs` — `DryRun`, `RequireConfig`,
+  `ForkProcessing`, `RecreateWhen` canonical enums with `Display`.
+- `crates/renovate-cli/src/config_builder.rs` — `build(&Cli) -> GlobalConfig`:
+  maps CLI types to core types, emits `tracing::warn` for legacy boolean
+  variants (`DryRunArg::LegacyTrue` → `Full`, etc.) matching Renovate's
+  deprecation warnings.
+- Wired in `main.rs`: after arg parsing, `config_builder::build(&cli)` runs
+  and emits a debug log with the resolved platform/dry_run.
+- 10 unit tests in `config_builder.rs` covering all coercion paths and defaults.
+- 63 total tests, all passing.
+
+### Architecture note
+`renovate-core` owns the **canonical** types (no legacy variants); the CLI
+crate owns the CLI-facing types with legacy variants; `config_builder` bridges
+the two. This avoids dragging clap types into the core library.
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (63 passed)
 
 ## Slice 0004 - Option surface first-cut + env vars
 

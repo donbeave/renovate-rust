@@ -13,6 +13,7 @@
 )]
 
 mod cli;
+mod config_builder;
 mod logging;
 mod migrate;
 
@@ -49,6 +50,14 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    // Later slices replace this stub with the global worker entry point.
+    // Build the canonical config from CLI args. Later slices merge this with
+    // file and env configs before dispatching to the worker pipeline.
+    let config = config_builder::build(&cli);
+    tracing::debug!(
+        platform = %config.platform,
+        dry_run = config.dry_run.as_ref().map(|d| d.to_string()),
+        "config resolved"
+    );
+
     ExitCode::SUCCESS
 }
