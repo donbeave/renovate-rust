@@ -18,8 +18,10 @@ mod logging;
 mod migrate;
 mod output;
 
+use std::collections::HashMap;
 use std::path::Path;
 use std::process::ExitCode;
+use std::sync::Arc;
 
 use clap::Parser as _;
 use cli::Cli;
@@ -30,9 +32,19 @@ use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::extractors::pip as pip_extractor;
+use renovate_core::http::HttpClient;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
+use tokio::sync::Semaphore;
+use tokio::task::JoinSet;
+
+/// Maximum number of repositories processed concurrently.
+///
+/// Mirrors Renovate's `queue.concurrency` default. Each repo job
+/// itself fans out concurrent datasource requests, so this is a
+/// second level of bounded parallelism.
+const REPO_CONCURRENCY: usize = 4;
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -150,372 +162,49 @@ async fn main() -> ExitCode {
         }
     };
 
-    // 7. Process each repository.
+    // 7. Process repositories in parallel (bounded by REPO_CONCURRENCY).
     let Some(client) = maybe_client else {
         tracing::warn!("no platform client available; skipping repository processing");
         return ExitCode::SUCCESS;
     };
 
-    // Shared HTTP client for all datasource calls — one connection pool for
-    // the entire run rather than one per dependency.
-    let http = renovate_core::http::HttpClient::new().expect("failed to create HTTP client");
+    // One shared HTTP connection pool for all concurrent repo + datasource
+    // requests throughout the entire run.
+    let http = HttpClient::new().expect("failed to create HTTP client");
+    let use_color = output::should_use_color();
+
+    let sem = Arc::new(Semaphore::new(REPO_CONCURRENCY));
+    let mut set: JoinSet<(String, Option<output::RepoReport>, bool)> = JoinSet::new();
+
+    for repo_slug in &config.repositories {
+        let client = client.clone();
+        let http = http.clone();
+        let repo_slug = repo_slug.clone();
+        let config = config.clone();
+        let sem = Arc::clone(&sem);
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let (report, had_error) = process_repo(&client, &http, &repo_slug, &config).await;
+            (repo_slug, report, had_error)
+        });
+    }
 
     let mut had_error = false;
-    for repo_slug in &config.repositories {
-        let Some((owner, repo)) = repo_slug.split_once('/') else {
-            tracing::warn!(repo = %repo_slug, "skipping malformed repository slug (expected owner/repo)");
-            continue;
-        };
-
-        tracing::info!(repo = %repo_slug, "processing repository");
-
-        match repo_config::discover(&client, owner, repo, &config).await {
-            Ok(repo_config::RepoConfigResult::Found { path, .. }) => {
-                tracing::info!(repo = %repo_slug, config_path = %path, "found renovate config");
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((_slug, Some(report), repo_had_error)) => {
+                output::print_report(&report, use_color);
+                had_error |= repo_had_error;
             }
-            Ok(repo_config::RepoConfigResult::NeedsOnboarding) => {
-                tracing::info!(repo = %repo_slug, "needs onboarding — no config file found");
+            Ok((_slug, None, repo_had_error)) => {
+                had_error |= repo_had_error;
             }
-            Ok(repo_config::RepoConfigResult::NotFound) => {
-                tracing::debug!(
-                    repo = %repo_slug,
-                    "no config file (require_config=optional, skipping)"
-                );
-            }
-            Err(err) => {
-                tracing::error!(repo = %repo_slug, %err, "error processing repository");
+            Err(join_err) => {
+                tracing::error!(%join_err, "repository task panicked");
                 had_error = true;
-                continue;
             }
         }
-
-        // Detect which package managers are present.
-        let files = match client.get_file_list(owner, repo).await {
-            Ok(f) => f,
-            Err(err) => {
-                tracing::error!(repo = %repo_slug, %err, "failed to get file list");
-                had_error = true;
-                continue;
-            }
-        };
-
-        let detected = managers::detect(&files);
-        if detected.is_empty() {
-            tracing::info!(repo = %repo_slug, "no package managers detected");
-        } else {
-            let names: Vec<&str> = detected.iter().map(|m| m.name).collect();
-            tracing::info!(repo = %repo_slug, managers = ?names, "detected package managers");
-        }
-
-        // Collect per-file update results for the human-readable report.
-        let mut repo_report = output::RepoReport {
-            repo_slug: repo_slug.clone(),
-            files: Vec::new(),
-        };
-
-        // ── Cargo ────────────────────────────────────────────────────────────
-        let cargo_files: Vec<_> = detected
-            .iter()
-            .find(|m| m.name == "cargo")
-            .map(|m| m.matched_files.as_slice())
-            .unwrap_or_default()
-            .iter()
-            .collect();
-
-        for cargo_file_path in cargo_files {
-            match client.get_raw_file(owner, repo, cargo_file_path).await {
-                Ok(Some(raw)) => match cargo_extractor::extract(&raw.content) {
-                    Ok(deps) => {
-                        let actionable: Vec<_> =
-                            deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                        tracing::debug!(
-                            repo = %repo_slug,
-                            file = %cargo_file_path,
-                            total = deps.len(),
-                            actionable = actionable.len(),
-                            "extracted cargo dependencies"
-                        );
-
-                        let dep_inputs: Vec<DepInput> = actionable
-                            .iter()
-                            .map(|d| DepInput {
-                                dep_name: d.dep_name.clone(),
-                                package_name: d.package_name.clone(),
-                                constraint: d.current_value.clone(),
-                            })
-                            .collect();
-
-                        let updates = crates_io::fetch_updates_concurrent(
-                            &http,
-                            &dep_inputs,
-                            crates_io::CRATES_IO_SPARSE_INDEX,
-                            10,
-                        )
-                        .await;
-
-                        // Build a lookup map for update results.
-                        let update_map: std::collections::HashMap<_, _> = updates
-                            .into_iter()
-                            .map(|r| (r.dep_name, r.summary))
-                            .collect();
-
-                        let mut file_deps: Vec<output::DepReport> = Vec::new();
-
-                        // Skipped deps first (no registry lookup needed).
-                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
-                            file_deps.push(output::DepReport {
-                                name: dep.dep_name.clone(),
-                                status: output::DepStatus::Skipped {
-                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
-                                        .to_lowercase(),
-                                },
-                            });
-                        }
-
-                        // Actionable deps — looked up in registry.
-                        for dep in &actionable {
-                            let status = match update_map.get(&dep.dep_name) {
-                                Some(Ok(summary)) if summary.update_available => {
-                                    output::DepStatus::UpdateAvailable {
-                                        current: summary.current_constraint.clone(),
-                                        latest: summary
-                                            .latest_compatible
-                                            .clone()
-                                            .unwrap_or_default(),
-                                    }
-                                }
-                                Some(Ok(summary)) => output::DepStatus::UpToDate {
-                                    latest: summary.latest_compatible.clone(),
-                                },
-                                Some(Err(err)) => output::DepStatus::LookupError {
-                                    message: err.to_string(),
-                                },
-                                None => output::DepStatus::UpToDate { latest: None },
-                            };
-                            file_deps.push(output::DepReport {
-                                name: dep.dep_name.clone(),
-                                status,
-                            });
-                        }
-
-                        repo_report.files.push(output::FileReport {
-                            path: cargo_file_path.clone(),
-                            manager: "cargo".into(),
-                            deps: file_deps,
-                        });
-                    }
-                    Err(err) => {
-                        tracing::warn!(repo = %repo_slug, file = %cargo_file_path, %err, "failed to parse Cargo.toml");
-                    }
-                },
-                Ok(None) => {
-                    tracing::warn!(repo = %repo_slug, file = %cargo_file_path, "Cargo.toml not found");
-                }
-                Err(err) => {
-                    tracing::error!(repo = %repo_slug, file = %cargo_file_path, %err, "failed to fetch Cargo.toml");
-                    had_error = true;
-                }
-            }
-        }
-
-        // ── npm ──────────────────────────────────────────────────────────────
-        let npm_files: Vec<_> = detected
-            .iter()
-            .find(|m| m.name == "npm")
-            .map(|m| m.matched_files.as_slice())
-            .unwrap_or_default()
-            .iter()
-            .collect();
-
-        for npm_file_path in npm_files {
-            match client.get_raw_file(owner, repo, npm_file_path).await {
-                Ok(Some(raw)) => match npm_extractor::extract(&raw.content) {
-                    Ok(deps) => {
-                        let actionable: Vec<_> =
-                            deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                        tracing::debug!(
-                            repo = %repo_slug,
-                            file = %npm_file_path,
-                            total = deps.len(),
-                            actionable = actionable.len(),
-                            "extracted npm dependencies"
-                        );
-
-                        let dep_inputs: Vec<npm_datasource::NpmDepInput> = actionable
-                            .iter()
-                            .map(|d| npm_datasource::NpmDepInput {
-                                dep_name: d.name.clone(),
-                                constraint: d.current_value.clone(),
-                            })
-                            .collect();
-
-                        let updates = npm_datasource::fetch_updates_concurrent(
-                            &http,
-                            &dep_inputs,
-                            npm_datasource::NPM_REGISTRY,
-                            10,
-                        )
-                        .await;
-
-                        let update_map: std::collections::HashMap<_, _> = updates
-                            .into_iter()
-                            .map(|r| (r.dep_name, r.summary))
-                            .collect();
-
-                        let mut file_deps: Vec<output::DepReport> = Vec::new();
-
-                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
-                            file_deps.push(output::DepReport {
-                                name: dep.name.clone(),
-                                status: output::DepStatus::Skipped {
-                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
-                                        .to_lowercase(),
-                                },
-                            });
-                        }
-
-                        for dep in &actionable {
-                            let status = match update_map.get(&dep.name) {
-                                Some(Ok(summary)) if summary.update_available => {
-                                    output::DepStatus::UpdateAvailable {
-                                        current: summary.current_constraint.clone(),
-                                        latest: summary.latest.clone().unwrap_or_default(),
-                                    }
-                                }
-                                Some(Ok(summary)) => output::DepStatus::UpToDate {
-                                    latest: summary.latest.clone(),
-                                },
-                                Some(Err(err)) => output::DepStatus::LookupError {
-                                    message: err.to_string(),
-                                },
-                                None => output::DepStatus::UpToDate { latest: None },
-                            };
-                            file_deps.push(output::DepReport {
-                                name: dep.name.clone(),
-                                status,
-                            });
-                        }
-
-                        repo_report.files.push(output::FileReport {
-                            path: npm_file_path.clone(),
-                            manager: "npm".into(),
-                            deps: file_deps,
-                        });
-                    }
-                    Err(err) => {
-                        tracing::warn!(repo = %repo_slug, file = %npm_file_path, %err, "failed to parse package.json");
-                    }
-                },
-                Ok(None) => {
-                    tracing::warn!(repo = %repo_slug, file = %npm_file_path, "package.json not found");
-                }
-                Err(err) => {
-                    tracing::error!(repo = %repo_slug, file = %npm_file_path, %err, "failed to fetch package.json");
-                    had_error = true;
-                }
-            }
-        }
-
-        // ── pip_requirements ─────────────────────────────────────────────────
-        let pip_files: Vec<_> = detected
-            .iter()
-            .find(|m| m.name == "pip_requirements")
-            .map(|m| m.matched_files.as_slice())
-            .unwrap_or_default()
-            .iter()
-            .collect();
-
-        for pip_file_path in pip_files {
-            match client.get_raw_file(owner, repo, pip_file_path).await {
-                Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
-                    Ok(deps) => {
-                        let actionable: Vec<_> =
-                            deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                        tracing::debug!(
-                            repo = %repo_slug,
-                            file = %pip_file_path,
-                            total = deps.len(),
-                            actionable = actionable.len(),
-                            "extracted pip dependencies"
-                        );
-
-                        let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
-                            .iter()
-                            .map(|d| pypi_datasource::PypiDepInput {
-                                dep_name: d.name.clone(),
-                                specifier: d.current_value.clone(),
-                            })
-                            .collect();
-
-                        let updates = pypi_datasource::fetch_updates_concurrent(
-                            &http,
-                            &dep_inputs,
-                            pypi_datasource::PYPI_API,
-                            10,
-                        )
-                        .await;
-
-                        let update_map: std::collections::HashMap<_, _> = updates
-                            .into_iter()
-                            .map(|r| (r.dep_name, r.summary))
-                            .collect();
-
-                        let mut file_deps: Vec<output::DepReport> = Vec::new();
-
-                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
-                            file_deps.push(output::DepReport {
-                                name: dep.name.clone(),
-                                status: output::DepStatus::Skipped {
-                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
-                                        .to_lowercase(),
-                                },
-                            });
-                        }
-
-                        for dep in &actionable {
-                            let status = match update_map.get(&dep.name) {
-                                Some(Ok(summary)) if summary.update_available => {
-                                    output::DepStatus::UpdateAvailable {
-                                        current: summary.current_specifier.clone(),
-                                        latest: summary.latest.clone().unwrap_or_default(),
-                                    }
-                                }
-                                Some(Ok(summary)) => output::DepStatus::UpToDate {
-                                    latest: summary.latest.clone(),
-                                },
-                                Some(Err(err)) => output::DepStatus::LookupError {
-                                    message: err.to_string(),
-                                },
-                                None => output::DepStatus::UpToDate { latest: None },
-                            };
-                            file_deps.push(output::DepReport {
-                                name: dep.name.clone(),
-                                status,
-                            });
-                        }
-
-                        repo_report.files.push(output::FileReport {
-                            path: pip_file_path.clone(),
-                            manager: "pip_requirements".into(),
-                            deps: file_deps,
-                        });
-                    }
-                    Err(err) => {
-                        tracing::warn!(repo = %repo_slug, file = %pip_file_path, %err, "failed to parse requirements.txt");
-                    }
-                },
-                Ok(None) => {
-                    tracing::warn!(repo = %repo_slug, file = %pip_file_path, "requirements.txt not found");
-                }
-                Err(err) => {
-                    tracing::error!(repo = %repo_slug, file = %pip_file_path, %err, "failed to fetch requirements.txt");
-                    had_error = true;
-                }
-            }
-        }
-
-        // Print the human-readable summary for this repository.
-        output::print_report(&repo_report, output::should_use_color());
     }
 
     if had_error {
@@ -523,4 +212,356 @@ async fn main() -> ExitCode {
     } else {
         ExitCode::SUCCESS
     }
+}
+
+/// Process a single repository and return its update report.
+///
+/// Returns `(Option<RepoReport>, had_error)`:
+/// - `None` for the report means the repo was skipped (malformed slug, fatal
+///   platform error) and no output should be shown.
+/// - `had_error = true` signals the overall process should exit non-zero.
+async fn process_repo(
+    client: &AnyPlatformClient,
+    http: &HttpClient,
+    repo_slug: &str,
+    config: &GlobalConfig,
+) -> (Option<output::RepoReport>, bool) {
+    let Some((owner, repo)) = repo_slug.split_once('/') else {
+        tracing::warn!(repo = %repo_slug, "skipping malformed repository slug (expected owner/repo)");
+        return (None, false);
+    };
+
+    tracing::info!(repo = %repo_slug, "processing repository");
+
+    match repo_config::discover(client, owner, repo, config).await {
+        Ok(repo_config::RepoConfigResult::Found { path, .. }) => {
+            tracing::info!(repo = %repo_slug, config_path = %path, "found renovate config");
+        }
+        Ok(repo_config::RepoConfigResult::NeedsOnboarding) => {
+            tracing::info!(repo = %repo_slug, "needs onboarding — no config file found");
+        }
+        Ok(repo_config::RepoConfigResult::NotFound) => {
+            tracing::debug!(
+                repo = %repo_slug,
+                "no config file (require_config=optional, skipping)"
+            );
+        }
+        Err(err) => {
+            tracing::error!(repo = %repo_slug, %err, "error processing repository");
+            return (None, true);
+        }
+    }
+
+    let files = match client.get_file_list(owner, repo).await {
+        Ok(f) => f,
+        Err(err) => {
+            tracing::error!(repo = %repo_slug, %err, "failed to get file list");
+            return (None, true);
+        }
+    };
+
+    let detected = managers::detect(&files);
+    if detected.is_empty() {
+        tracing::info!(repo = %repo_slug, "no package managers detected");
+    } else {
+        let names: Vec<&str> = detected.iter().map(|m| m.name).collect();
+        tracing::info!(repo = %repo_slug, managers = ?names, "detected package managers");
+    }
+
+    let mut repo_report = output::RepoReport {
+        repo_slug: repo_slug.to_owned(),
+        files: Vec::new(),
+    };
+    let mut had_error = false;
+
+    // ── Cargo ─────────────────────────────────────────────────────────────────
+    for cargo_file_path in manager_files(&detected, "cargo") {
+        match client.get_raw_file(owner, repo, &cargo_file_path).await {
+            Ok(Some(raw)) => match cargo_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> =
+                        deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %cargo_file_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted cargo dependencies"
+                    );
+                    let dep_inputs: Vec<DepInput> = actionable
+                        .iter()
+                        .map(|d| DepInput {
+                            dep_name: d.dep_name.clone(),
+                            package_name: d.package_name.clone(),
+                            constraint: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = crates_io::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        crates_io::CRATES_IO_SPARSE_INDEX,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: cargo_file_path.clone(),
+                        manager: "cargo".into(),
+                        deps: build_dep_reports_cargo(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%cargo_file_path, %err, "failed to parse Cargo.toml")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%cargo_file_path, "Cargo.toml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%cargo_file_path, %err, "failed to fetch Cargo.toml");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── npm ───────────────────────────────────────────────────────────────────
+    for npm_file_path in manager_files(&detected, "npm") {
+        match client.get_raw_file(owner, repo, &npm_file_path).await {
+            Ok(Some(raw)) => match npm_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> =
+                        deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %npm_file_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted npm dependencies"
+                    );
+                    let dep_inputs: Vec<npm_datasource::NpmDepInput> = actionable
+                        .iter()
+                        .map(|d| npm_datasource::NpmDepInput {
+                            dep_name: d.name.clone(),
+                            constraint: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = npm_datasource::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        npm_datasource::NPM_REGISTRY,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: npm_file_path.clone(),
+                        manager: "npm".into(),
+                        deps: build_dep_reports_npm(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%npm_file_path, %err, "failed to parse package.json")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%npm_file_path, "package.json not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%npm_file_path, %err, "failed to fetch package.json");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── pip_requirements ──────────────────────────────────────────────────────
+    for pip_file_path in manager_files(&detected, "pip_requirements") {
+        match client.get_raw_file(owner, repo, &pip_file_path).await {
+            Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> =
+                        deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %pip_file_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted pip dependencies"
+                    );
+                    let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                        .iter()
+                        .map(|d| pypi_datasource::PypiDepInput {
+                            dep_name: d.name.clone(),
+                            specifier: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = pypi_datasource::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        pypi_datasource::PYPI_API,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: pip_file_path.clone(),
+                        manager: "pip_requirements".into(),
+                        deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%pip_file_path, %err, "failed to parse requirements.txt")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%pip_file_path, "requirements.txt not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%pip_file_path, %err, "failed to fetch requirements.txt");
+                had_error = true;
+            }
+        }
+    }
+
+    (Some(repo_report), had_error)
+}
+
+// ── Report-building helpers ───────────────────────────────────────────────────
+
+/// Return the matched files for a given manager name (empty slice if not
+/// detected).
+fn manager_files(detected: &[renovate_core::managers::DetectedManager], name: &str) -> Vec<String> {
+    detected
+        .iter()
+        .find(|m| m.name == name)
+        .map(|m| m.matched_files.clone())
+        .unwrap_or_default()
+}
+
+fn build_dep_reports_cargo(
+    all_deps: &[renovate_core::extractors::cargo::ExtractedDep],
+    actionable: &[&renovate_core::extractors::cargo::ExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::versioning::cargo::UpdateSummary,
+            renovate_core::datasources::crates_io::CratesIoError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.dep_name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.dep_name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_constraint.clone(),
+                latest: s.latest_compatible.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest_compatible.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.dep_name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_npm(
+    all_deps: &[renovate_core::extractors::npm::NpmExtractedDep],
+    actionable: &[&renovate_core::extractors::npm::NpmExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::versioning::npm::NpmUpdateSummary,
+            renovate_core::datasources::npm::NpmError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_constraint.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_pip(
+    all_deps: &[renovate_core::extractors::pip::PipExtractedDep],
+    actionable: &[&renovate_core::extractors::pip::PipExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::versioning::pep440::Pep440UpdateSummary,
+            renovate_core::datasources::pypi::PypiError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_specifier.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
 }

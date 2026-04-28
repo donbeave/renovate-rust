@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0019  | 2026-04-28 | Parallel repository processing (JoinSet + Semaphore) | Complete | See below. |
 | 0018  | 2026-04-28 | pip_requirements extractor + PyPI datasource | Complete | See below. |
 | 0017  | 2026-04-28 | Human-readable update report output      | Complete | See below. |
 | 0016  | 2026-04-28 | npm registry datasource + npm versioning | Complete | See below. |
@@ -39,6 +40,35 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0019 - Parallel repository processing
+
+### What landed
+- `crates/renovate-cli/src/main.rs` refactored:
+  - Extracted `process_repo(client, http, repo_slug, config)` async function
+    returning `(Option<RepoReport>, had_error)`.  The `None` case means the
+    repo was skipped without producing a report.
+  - Added `REPO_CONCURRENCY = 4` constant and a `JoinSet<(slug, report, bool)>`
+    bounded by `Arc<Semaphore>`, mirroring Renovate's worker queue model.
+  - Reports are printed serially in the join loop (completion order) to avoid
+    interleaved stdout from concurrent tasks.
+  - Added three `build_dep_reports_{cargo,npm,pip}` helper functions to remove
+    the duplicated skip-reason + update-map rendering logic.
+  - `manager_files(detected, name)` helper DRYs the matched-files lookup.
+  - Both `AnyPlatformClient` and `GlobalConfig` already derived `Clone` —
+    no changes needed there; `HttpClient` (reqwest::Client Arc) also clones
+    cheaply so each task gets its own handles into the shared connection pool.
+
+### Deferred
+- Configurable concurrency via CLI flag (`--queue-concurrency`).
+- Per-repo error isolation (a panicking task currently only logs, not
+  hard-exits).
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (200 passed)
 
 ## Slice 0018 - pip_requirements extractor + PyPI datasource
 
