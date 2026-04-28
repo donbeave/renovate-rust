@@ -21,11 +21,63 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0006  | 2026-04-28 | Global config file loading (JSON/JSON5)       | Complete | See below. |
 | 0005  | 2026-04-28 | GlobalConfig struct + CLI→config builder      | Complete | See below. |
 | 0004  | 2026-04-28 | Option surface first-cut + env vars           | Complete | See below. |
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0006 - Global config file loading
+
+### Renovate reference
+- `lib/workers/global/config/parse/file.ts` — `getConfig(env)`:
+  `RENOVATE_CONFIG_FILE ?? 'config.js'`, format detection, parse errors
+  → fatal+exit 1.
+- `lib/workers/global/config/parse/util.ts` — `getParsedContent(file)`:
+  per-extension routing (`.renovaterc` → JSON, `.json5` → JSON5, `.js` →
+  ESM/CJS import).
+
+### What landed
+- `serde`, `serde_json`, `json5`, `tempfile` added to workspace deps.
+- `#[derive(serde::Deserialize)]` + `#[serde(rename_all = "camelCase", default)]`
+  on `GlobalConfig` and all enum types so JSON config files deserialize
+  directly into canonical types.
+- `crates/renovate-core/src/config/file.rs` with:
+  - `ConfigFileError` (thiserror) — path-not-found, unsupported-format,
+    IO, parse.
+  - `resolve_config_path(env, cwd)` — returns the path to load (or `None`
+    if no env var set); errors when an explicit path doesn't exist.
+  - `load(path)` — routes `.json` / `.renovaterc` to `serde_json`, `.json5`
+    to the `json5` crate; rejects `.js`/`.cjs`/`.mjs` with a clear error.
+  - `merge_over_base(base, file_config)` — field-by-field merge; Option
+    fields use `or` semantics; non-Option fields from file always win
+    (CLI override happens after).
+- `config_builder::build(cli, base)` refactored to take a `base`
+  `GlobalConfig` so CLI args are applied as the final layer.
+- `main.rs` wires the full pipeline: `defaults → file (RENOVATE_CONFIG_FILE)
+  → CLI` with structured logging at each step.
+- 11 unit tests in `file.rs` (resolve, load JSON, load JSON5, load .js
+  rejection, parse error, merge semantics). 74 total tests, all passing.
+- Compatibility decision CD-0003 documented (no JS support, no config.js
+  default, YAML deferred).
+
+### What was intentionally deferred
+- YAML (`.yaml`, `.yml`) support — deferred pending a stable maintained
+  `serde_yaml` successor.
+- `.renovaterc` (no extension) file auto-discovery without
+  `RENOVATE_CONFIG_FILE` set — deferred to a future slice.
+- `processEnv` key export from config file.
+- `migrateAndValidateConfig` porting (config migration + validation).
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (74 passed)
 
 ## Slice 0005 - GlobalConfig struct + CLI→config builder
 

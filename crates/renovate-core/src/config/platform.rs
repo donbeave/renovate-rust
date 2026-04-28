@@ -3,7 +3,8 @@
 //! Source: `PLATFORM_HOST_TYPES` in `lib/constants/platforms.ts`.
 
 /// Identifies the type of source-code platform hosting the target repositories.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Platform {
     Azure,
     Bitbucket,

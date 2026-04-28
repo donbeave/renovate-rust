@@ -10,6 +10,8 @@
 mod platform;
 mod run;
 
+pub mod file;
+
 pub use platform::Platform;
 pub use run::{DryRun, ForkProcessing, RecreateWhen, RequireConfig};
 
@@ -18,7 +20,11 @@ pub use run::{DryRun, ForkProcessing, RecreateWhen, RequireConfig};
 /// Fields correspond to Renovate's `globalOnly` options. All have the same
 /// defaults as the upstream option definitions. Fields are `Option<T>` when
 /// the option has no inherent default and the absence of a value is meaningful.
-#[derive(Debug, Clone, PartialEq, Eq)]
+///
+/// The `serde::Deserialize` impl handles loading from JSON/JSON5 config files.
+/// All field names use camelCase in JSON (matching Renovate's option names).
+#[derive(Debug, Clone, PartialEq, Eq, serde::Deserialize)]
+#[serde(rename_all = "camelCase", default)]
 pub struct GlobalConfig {
     // ── Platform / auth ──────────────────────────────────────────────────────
     /// Platform type. Default: `Platform::Github`.

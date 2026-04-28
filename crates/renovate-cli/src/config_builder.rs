@@ -16,12 +16,16 @@ use crate::cli::{
     RecreateWhen as CliRecreateWhen, RequireConfigArg,
 };
 
-/// Build a [`GlobalConfig`] from parsed CLI arguments.
+/// Apply CLI arguments on top of a `base` [`GlobalConfig`].
+///
+/// Only fields that were explicitly supplied on the command line (i.e. `Some`
+/// in the `Cli` struct) override the base. This allows the caller to merge
+/// `defaults → file config → CLI config` by calling this function last.
 ///
 /// Applies Renovate-compatible coercions and emits `tracing::warn` for
 /// deprecated value forms (e.g. `--dry-run=true` → `full`).
-pub(crate) fn build(cli: &Cli) -> GlobalConfig {
-    let mut config = GlobalConfig::default();
+pub(crate) fn build(cli: &Cli, base: GlobalConfig) -> GlobalConfig {
+    let mut config = base;
 
     if let Some(p) = cli.platform {
         config.platform = map_platform(p);
@@ -33,8 +37,16 @@ pub(crate) fn build(cli: &Cli) -> GlobalConfig {
         config.endpoint = Some(e.clone());
     }
 
-    config.dry_run = map_dry_run(cli.dry_run);
-    config.require_config = map_require_config(cli.require_config);
+    if let Some(dry) = map_dry_run(cli.dry_run) {
+        config.dry_run = Some(dry);
+    } else if cli.dry_run.is_some() {
+        // --dry-run=false / --dry-run=null explicitly disables dry-run.
+        config.dry_run = None;
+    }
+
+    if let Some(rc) = map_require_config_explicit(cli.require_config) {
+        config.require_config = rc;
+    }
 
     if let Some(fp) = cli.fork_processing {
         config.fork_processing = map_fork_processing(fp);
@@ -87,19 +99,19 @@ fn map_dry_run(arg: Option<DryRunArg>) -> Option<DryRun> {
     }
 }
 
-fn map_require_config(arg: Option<RequireConfigArg>) -> RequireConfig {
-    match arg {
-        None => RequireConfig::Required,
-        Some(RequireConfigArg::Required) => RequireConfig::Required,
-        Some(RequireConfigArg::Optional) => RequireConfig::Optional,
-        Some(RequireConfigArg::Ignored) => RequireConfig::Ignored,
-        Some(RequireConfigArg::LegacyTrue) => {
+/// Returns `Some(value)` only when the arg was explicitly provided.
+fn map_require_config_explicit(arg: Option<RequireConfigArg>) -> Option<RequireConfig> {
+    match arg? {
+        RequireConfigArg::Required => Some(RequireConfig::Required),
+        RequireConfigArg::Optional => Some(RequireConfig::Optional),
+        RequireConfigArg::Ignored => Some(RequireConfig::Ignored),
+        RequireConfigArg::LegacyTrue => {
             tracing::warn!("cli config requireConfig property has been changed to required");
-            RequireConfig::Required
+            Some(RequireConfig::Required)
         }
-        Some(RequireConfigArg::LegacyFalse) => {
+        RequireConfigArg::LegacyFalse => {
             tracing::warn!("cli config requireConfig property has been changed to optional");
-            RequireConfig::Optional
+            Some(RequireConfig::Optional)
         }
     }
 }
@@ -151,7 +163,7 @@ mod tests {
     #[test]
     fn default_cli_produces_default_config() {
         let cli = cli_with(|_| {});
-        let config = build(&cli);
+        let config = build(&cli, GlobalConfig::default());
         assert_eq!(config, GlobalConfig::default());
     }
 
@@ -159,57 +171,78 @@ mod tests {
     fn platform_github_is_mapped() {
         use crate::cli::Platform as CliPlatform;
         let cli = cli_with(|c| c.platform = Some(CliPlatform::Github));
-        assert_eq!(build(&cli).platform, Platform::Github);
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).platform,
+            Platform::Github
+        );
     }
 
     #[test]
     fn platform_gitlab_is_mapped() {
         use crate::cli::Platform as CliPlatform;
         let cli = cli_with(|c| c.platform = Some(CliPlatform::Gitlab));
-        assert_eq!(build(&cli).platform, Platform::Gitlab);
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).platform,
+            Platform::Gitlab
+        );
     }
 
     #[test]
     fn token_is_set() {
         let cli = cli_with(|c| c.token = Some("mytoken".to_owned()));
-        assert_eq!(build(&cli).token.as_deref(), Some("mytoken"));
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).token.as_deref(),
+            Some("mytoken")
+        );
     }
 
     #[test]
     fn dry_run_full_is_mapped() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::Full));
-        assert_eq!(build(&cli).dry_run, Some(DryRun::Full));
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).dry_run,
+            Some(DryRun::Full)
+        );
     }
 
     #[test]
     fn dry_run_legacy_true_maps_to_full() {
         // --dry-run (bare) → --dry-run=true via migrateArgs → Full.
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyTrue));
-        assert_eq!(build(&cli).dry_run, Some(DryRun::Full));
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).dry_run,
+            Some(DryRun::Full)
+        );
     }
 
     #[test]
     fn dry_run_legacy_false_disables_dry_run() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyFalse));
-        assert_eq!(build(&cli).dry_run, None);
+        assert_eq!(build(&cli, GlobalConfig::default()).dry_run, None);
     }
 
     #[test]
     fn require_config_legacy_true_maps_to_required() {
         let cli = cli_with(|c| c.require_config = Some(RequireConfigArg::LegacyTrue));
-        assert_eq!(build(&cli).require_config, RequireConfig::Required);
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).require_config,
+            RequireConfig::Required
+        );
     }
 
     #[test]
     fn require_config_legacy_false_maps_to_optional() {
         let cli = cli_with(|c| c.require_config = Some(RequireConfigArg::LegacyFalse));
-        assert_eq!(build(&cli).require_config, RequireConfig::Optional);
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).require_config,
+            RequireConfig::Optional
+        );
     }
 
     #[test]
     fn allowed_commands_comma_split() {
         let cli = cli_with(|c| c.allowed_commands = Some("foo,bar, baz".to_owned()));
-        let config = build(&cli);
+        let config = build(&cli, GlobalConfig::default());
         assert_eq!(
             config.allowed_commands,
             vec!["foo".to_owned(), "bar".to_owned(), "baz".to_owned()],

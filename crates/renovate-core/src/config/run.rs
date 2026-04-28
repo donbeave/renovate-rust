@@ -4,7 +4,8 @@
 /// changes to the platform.
 ///
 /// Source: `dryRun` option in `lib/config/options/index.ts`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum DryRun {
     /// Perform dependency extraction only; no version lookups.
     Extract,
@@ -28,7 +29,8 @@ impl std::fmt::Display for DryRun {
 /// Controls how Renovate responds to missing repository config files.
 ///
 /// Source: `requireConfig` option in `lib/config/options/index.ts`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum RequireConfig {
     /// Onboard repositories that lack a config file; skip those that do.
     Required,
@@ -41,7 +43,8 @@ pub enum RequireConfig {
 /// Whether to process forked repositories.
 ///
 /// Source: `forkProcessing` option.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum ForkProcessing {
     /// Skip forks in autodiscover mode; process if explicitly listed.
     Auto,
@@ -54,7 +57,8 @@ pub enum ForkProcessing {
 /// When to recreate closed PRs.
 ///
 /// Source: `recreateWhen` option.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum RecreateWhen {
     /// Only recreate if the PR was closed without merging (Renovate default).
     Auto,

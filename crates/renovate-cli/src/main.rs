@@ -17,10 +17,12 @@ mod config_builder;
 mod logging;
 mod migrate;
 
+use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Parser as _;
 use cli::Cli;
+use renovate_core::config::{GlobalConfig, file as config_file};
 
 fn main() -> ExitCode {
     // 1. Initialize logging before anything that might emit log records.
@@ -50,9 +52,39 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    // Build the canonical config from CLI args. Later slices merge this with
-    // file and env configs before dispatching to the worker pipeline.
-    let config = config_builder::build(&cli);
+    // 4. Global config pipeline: defaults → file → CLI
+    //    Mirrors Renovate's parseConfigs order in
+    //    lib/workers/global/config/parse/index.ts.
+    let cwd = std::env::current_dir().unwrap_or_else(|_| Path::new(".").to_path_buf());
+    let config_file_env = std::env::var("RENOVATE_CONFIG_FILE").ok();
+
+    let base = match config_file::resolve_config_path(config_file_env.as_deref(), &cwd) {
+        Ok(Some(path)) => {
+            tracing::debug!(path = %path.display(), "loading global config file");
+            match config_file::load(&path) {
+                Ok(file_cfg) => {
+                    tracing::debug!("global config file loaded");
+                    config_file::merge_over_base(GlobalConfig::default(), file_cfg)
+                }
+                Err(err) => {
+                    tracing::error!(%err, "failed to parse config file");
+                    eprintln!("renovate: error parsing config file: {err}");
+                    return ExitCode::from(1);
+                }
+            }
+        }
+        Ok(None) => {
+            tracing::debug!("no global config file found, using defaults");
+            GlobalConfig::default()
+        }
+        Err(err) => {
+            tracing::error!(%err);
+            eprintln!("renovate: {err}");
+            return ExitCode::from(1);
+        }
+    };
+
+    let config = config_builder::build(&cli, base);
     tracing::debug!(
         platform = %config.platform,
         dry_run = config.dry_run.as_ref().map(|d| d.to_string()),

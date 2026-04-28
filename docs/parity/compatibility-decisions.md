@@ -31,6 +31,27 @@ Format per entry:
   - Renovate: `lib/workers/global/config/parse/cli.ts` (`.version(pkg.version, '-v, --version')`).
   - Rust: `crates/renovate-cli/src/main.rs`, `crates/renovate-cli/tests/cli.rs`.
 
+## CD-0003 - Global config file: no JS support; no `config.js` default
+
+- **Date**: 2026-04-28
+- **Renovate behavior**: Default global config file is `config.js` (a Node.js
+  module). Supports `.js`, `.cjs`, `.mjs`, `.json`, `.json5`, `.yaml`, `.yml`.
+- **Rust behavior**: JS execution is out of scope. When `RENOVATE_CONFIG_FILE`
+  is not set, no config file is auto-searched (unlike Renovate's `config.js`
+  default). When it IS set, `.js`/`.cjs`/`.mjs` are rejected with a clear
+  error. JSON and JSON5 are supported; YAML is deferred pending a stable
+  maintained `serde_yaml` successor.
+- **Reason**: JS execution would require bundling a full JS runtime or
+  shelling out to Node, which is contrary to the project's performance and
+  self-contained binary goals.
+- **Compatibility**: hard divergence for JS config files (unsupported with
+  clear error); opt-in divergence for the default path (no auto-search).
+  Users migrating from Renovate should rename `config.js` to `config.json`
+  or `renovate.json`.
+- **References**:
+  - Renovate: `lib/workers/global/config/parse/file.ts`.
+  - Rust: `crates/renovate-core/src/config/file.rs`.
+
 ## CD-0002 - Unknown flags exit with status 2
 
 - **Date**: 2026-04-28
