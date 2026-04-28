@@ -166,6 +166,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Mintfile$"],
     },
     ManagerDef {
+        name: "nix",
+        patterns: &[r"(^|/)flake\.nix$"],
+    },
+    ManagerDef {
         name: "mise",
         patterns: &[
             r"(^|/)\.?mise(\..*)?\.toml$",

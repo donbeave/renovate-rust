@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0106  | 2026-04-28 | Nix flakes `flake.lock` input extractor | Complete | See below. |
 | 0105  | 2026-04-28 | FluxCD `gotk-components.yaml` system manifest extractor | Complete | See below. |
 | 0104  | 2026-04-28 | SBT `build.sbt` / `project/build.properties` extractor | Complete | See below. |
 | 0103  | 2026-04-28 | Ansible tasks Docker image extractor | Complete | See below. |
@@ -2747,6 +2748,37 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 884 passed
 
+## Slice 0106 - Nix flakes `flake.lock` input extractor
+
+### Renovate reference
+- `lib/modules/manager/nix/extract.ts`
+- `lib/modules/manager/nix/schema.ts`
+- Pattern: `/(^|/)flake\.nix$/`
+- Datasource: GitRefsDatasource (GitHub Tags for github-type inputs)
+
+### What landed
+- `crates/renovate-core/src/extractors/nix.rs` (new):
+  - `FlakeInputType` enum (github, gitlab, git, tarball, sourcehut, indirect, path, etc.).
+  - `FlakeLocked`, `FlakeOriginal`, `FlakeNode`, `FlakeLock` deserialization structs.
+  - `NixSkipReason` enum (Indirect, LocalPath, NoRev, Transitive, UnsupportedType).
+  - `NixFlakeDep { input_name, locked_rev, current_ref, package_name, input_type, skip_reason }`.
+  - `extract(flake_lock_content)` — parses `flake.lock` JSON (version 7), collects only
+    root-referenced inputs, skips indirect/path/transitive, builds package URLs.
+  - `build_package_name()` — constructs `https://github.com/owner/repo` etc. per type.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `nix` manager with pattern `(^|/)flake\.nix$`.
+- `crates/renovate-cli/src/main.rs`: Nix pipeline — when `flake.nix` is detected, reads
+  sibling `flake.lock`; GitHub-type inputs use GitHub Tags datasource; others are skipped.
+
+### What was intentionally deferred
+- GitLab, git, tarball, sourcehut types (need git-refs-style datasource).
+- Nixpkgs channel versioning (nixpkgsVersioning).
+- `flake.nix` content update (updating `rev:` inline) — requires file mutation.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 889 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2759,7 +2791,7 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 6. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
-7. **`nix` Flakes** — `flake.lock` JSON input tracking via GitHub Tags.
-8. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
-9. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
-11. **Travis CI** `.travis.yml` Node.js version extraction.
+7. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+8. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
+9. **`pixi`** — Pixi `pixi.toml` conda package extraction.
+10. **`ruby-version`** — `.ruby-version` file version tracking (GitHub Releases).

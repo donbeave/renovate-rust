@@ -40,6 +40,7 @@ pub mod maven_wrapper;
 pub mod mint;
 pub mod mise;
 pub mod mix;
+pub mod nix;
 pub mod npm;
 pub mod nuget;
 pub mod pep621;
