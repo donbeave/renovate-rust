@@ -7,6 +7,9 @@ This directory contains reusable prompts for long-running agent work.
 Use [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md) with Claude
 Code's native `/loop` command from the repository root.
 
+The prompt file intentionally contains only the prompt body. Keep usage notes,
+command examples, and operator documentation in this README.
+
 Claude Code scheduled tasks require Claude Code v2.1.72 or later. Check with:
 
 ```sh

@@ -1,14 +1,3 @@
-# Claude Code /loop Prompt: Renovate in Rust
-
-Use this prompt with Claude Code's native `/loop` from the root of this repository. Run it on a 15 minute interval until the Rust implementation is a practical drop-in replacement for `renovatebot/renovate`.
-
-Usage instructions live in [prompts/README.md](README.md). The intended command is:
-
-```text
-/loop 15m Follow @prompts/claude-loop-renovate-rust.md
-```
-
-```text
 You are working in the renovate-rust repository. Your job is to steadily build a production-quality Rust replacement for renovatebot/renovate.
 
 Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Only stop when blocked by missing credentials, unavailable network, or an external service requirement that cannot be avoided.
@@ -40,6 +29,7 @@ Primary outcome:
 Rust project standards:
 - Use stable Rust and current mainstream crates.
 - Use `clap` derive APIs for the CLI, including subcommands, help, version output, shell completions when useful, env-backed options where appropriate, and Renovate-compatible aliases.
+- Use https://github.com/tailrocks/rust-best-practices as a secondary Rust engineering reference. If `../rust-best-practices/skills/rust-best-practices/SKILL.md` is available locally, read it before Rust architecture, API, lint, or review work. If it is not available, use the inline rules below and do not let the missing reference block progress.
 - Set up formatting, linting, and test infrastructure at the beginning of the project, before feature work grows:
   - `rustfmt` policy, committed through `rustfmt.toml` when project defaults are not enough
   - strict Clippy policy, committed through crate lints and/or `clippy.toml` when useful
@@ -64,6 +54,25 @@ Rust project standards:
   - small modules with clear ownership
   - deterministic tests
   - no hidden network access in unit tests
+
+Rust best-practice rules:
+- Inspect `Cargo.toml`, workspace layout, crate boundaries, feature flags, lint config, tests, docs, and dependency policy before changing Rust code.
+- Prefer borrowed inputs when ownership is not required: `&str`, `&[T]`, `&Path`, and `Option<&T>` over owned or nested-reference forms. Take ownership only when storing, moving, sending, or intentionally avoiding a caller-side clone.
+- Treat `.clone()` as a design decision. Do not clone merely to satisfy the borrow checker; make ownership boundaries explicit.
+- Avoid unnecessary intermediate `Vec` and `String` allocations when iterators, slices, borrowed views, or lazy fallback closures are clear enough.
+- Prefer readable control flow over clever iterator chains when errors, branching, ownership, or side effects become hidden.
+- Return `Result<T, E>` for expected failure. Use `Option<T>` only when absence needs no diagnostic detail.
+- Prefer typed errors in library/core crates. Use `anyhow`-style errors at binary, CLI, integration-test, or prototype boundaries. Add context at IO, parsing, network, task, and user-facing boundaries.
+- Reserve `panic!`, `unwrap`, and `expect` for tests, examples, unreachable invariants, or programmer errors with precise context.
+- Encode invariants in types with newtypes, enums, builders, validated wrappers, and type-state where that reduces ambiguity. Avoid ambiguous `bool`, primitive, or loosely-typed `String` parameters at important boundaries.
+- Keep public fields private unless representation is deliberately part of the contract. Avoid public dependency exposure, re-exports, blanket generics, and serialization derives unless they are intentional compatibility commitments.
+- Add dependencies conservatively; account for compile time, maintenance, supply-chain risk, and public API cost.
+- Tests should describe behavior at stable boundaries. Cover success and failure paths with minimal deterministic fixtures. Use snapshots for CLI output, generated data, serialized forms, and rendered summaries when whole-output review is clearer.
+- Public examples should work as doctests where practical and should use `?` rather than `unwrap` unless demonstrating panic behavior.
+- Comments should explain invariants, compatibility, platform behavior, safety, performance tradeoffs, or external constraints; do not restate obvious code.
+- Fix Clippy warnings before suppressing them. If suppression is justified, prefer `#[expect(clippy::lint_name, reason = "...")]` or the local equivalent so stale suppressions are caught later.
+- Do not enable broad Clippy `restriction`, `pedantic`, or `nursery` groups wholesale. Select strict lints intentionally.
+- Do not claim performance wins without measurement unless the change removes an obvious allocation, clone, or blocking operation from ordinary execution.
 
 Quality gates:
 - Before committing code changes, run the strongest applicable local checks that fit the iteration:
@@ -140,10 +149,10 @@ Commit rules:
 - Commit at the end of each successful loop when there are meaningful changes and checks pass.
 - Stage only files changed for this loop.
 - Use concise commit messages such as:
-  - `Add Rust workspace scaffolding`
-  - `Port Renovate config discovery tests`
-  - `Implement clap CLI compatibility flags`
-  - `Add parity ledger for Renovate tests`
+  - `build: add Rust workspace scaffolding`
+  - `test(config): port Renovate config discovery cases`
+  - `feat(cli): implement compatible CLI flags`
+  - `docs(parity): add Renovate test ledger`
 - Include test/check results in the commit body when useful.
 
 Start now:
@@ -151,4 +160,3 @@ Start now:
 2. Inspect this repository and its docs.
 3. Pick the next best parity slice.
 4. Implement it, test it, document it, and commit it.
-```
