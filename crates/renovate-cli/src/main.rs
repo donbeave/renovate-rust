@@ -1836,6 +1836,70 @@ async fn process_repo(
         }
     }
 
+    // ── Scalafmt (.scalafmt.conf) ─────────────────────────────────────────────
+    for sfmt_path in manager_files(&detected, "scalafmt") {
+        match client.get_raw_file(owner, repo, &sfmt_path).await {
+            Ok(Some(raw)) => {
+                if let Some(dep) = renovate_core::extractors::scalafmt::extract(&raw.content) {
+                    tracing::debug!(
+                        repo = %repo_slug, file = %sfmt_path,
+                        version = %dep.version, "extracted scalafmt version"
+                    );
+                    let input = github_tags_datasource::GithubActionsDepInput {
+                        dep_name: renovate_core::extractors::scalafmt::SCALAFMT_REPO.to_owned(),
+                        current_value: dep.version.clone(),
+                    };
+                    let updates = github_tags_datasource::fetch_updates_concurrent(
+                        &gh_http,
+                        &[input],
+                        gh_api_base,
+                        4,
+                    )
+                    .await;
+                    let status = match updates.into_iter().next().map(|r| r.summary) {
+                        Some(Ok(s)) if s.update_available => {
+                            let latest = s
+                                .latest
+                                .as_deref()
+                                .map(|l| l.strip_prefix('v').unwrap_or(l).to_owned())
+                                .unwrap_or_default();
+                            output::DepStatus::UpdateAvailable {
+                                current: dep.version.clone(),
+                                latest,
+                            }
+                        }
+                        Some(Ok(s)) => {
+                            let latest = s
+                                .latest
+                                .as_deref()
+                                .map(|l| l.strip_prefix('v').unwrap_or(l).to_owned());
+                            output::DepStatus::UpToDate { latest }
+                        }
+                        Some(Err(e)) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                        None => output::DepStatus::UpToDate { latest: None },
+                    };
+                    repo_report.files.push(output::FileReport {
+                        path: sfmt_path.clone(),
+                        manager: "scalafmt".into(),
+                        deps: vec![output::DepReport {
+                            name: "scalafmt".into(),
+                            status,
+                        }],
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%sfmt_path, ".scalafmt.conf not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%sfmt_path, %err, "failed to fetch .scalafmt.conf");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Mix (mix.exs) ─────────────────────────────────────────────────────────
     for mix_file_path in manager_files(&detected, "mix") {
         match client.get_raw_file(owner, repo, &mix_file_path).await {

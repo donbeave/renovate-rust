@@ -45,6 +45,7 @@ pub mod poetry;
 pub mod pre_commit;
 pub mod pubspec;
 pub mod quadlet;
+pub mod scalafmt;
 pub mod setup_cfg;
 pub mod spm;
 pub mod terraform;
