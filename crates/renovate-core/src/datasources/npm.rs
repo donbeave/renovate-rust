@@ -41,6 +41,8 @@ pub enum NpmError {
     Http(#[from] HttpError),
     #[error("failed to parse npm registry response: {0}")]
     Parse(String),
+    #[error("package '{0}' not found in versions cache")]
+    NotFound(String),
 }
 
 /// Per-version metadata from the registry (only fields we inspect).
@@ -187,6 +189,62 @@ pub async fn fetch_updates_concurrent(
         }
     }
     results
+}
+
+/// Cached versions entry: (sorted versions oldest-first, latest dist-tag).
+pub type NpmVersionsEntry = (Vec<String>, Option<String>);
+
+/// Fetch versions for a batch of unique package names concurrently.
+///
+/// Returns a `HashMap` from package name to `(versions, latest_tag)`.
+/// Packages that fail to fetch are omitted from the result.
+/// Use this for cross-file deduplication when the same package may appear
+/// in multiple manifests.
+pub async fn fetch_versions_batch(
+    http: &HttpClient,
+    package_names: &[String],
+    registry: &str,
+    concurrency: usize,
+) -> HashMap<String, NpmVersionsEntry> {
+    if package_names.is_empty() {
+        return HashMap::new();
+    }
+
+    let sem = Arc::new(Semaphore::new(concurrency));
+    let mut set: JoinSet<(String, Option<NpmVersionsEntry>)> = JoinSet::new();
+
+    for name in package_names {
+        let http = http.clone();
+        let sem = Arc::clone(&sem);
+        let name = name.clone();
+        let registry = registry.to_owned();
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let result = fetch_versions(&http, &name, &registry).await;
+            (name, result.ok())
+        });
+    }
+
+    let mut cache = HashMap::with_capacity(package_names.len());
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((name, Some(entry))) => {
+                cache.insert(name, entry);
+            }
+            Ok((name, None)) => {
+                tracing::debug!(package = %name, "npm versions fetch failed (package skipped)")
+            }
+            Err(join_err) => tracing::error!(%join_err, "npm versions fetch task panicked"),
+        }
+    }
+    cache
+}
+
+/// Compute an `NpmUpdateSummary` from a pre-fetched versions cache entry.
+pub fn summary_from_cache(constraint: &str, entry: &NpmVersionsEntry) -> NpmUpdateSummary {
+    let (versions, latest_tag) = entry;
+    npm_update_summary(constraint, versions, latest_tag.as_deref())
 }
 
 #[cfg(test)]

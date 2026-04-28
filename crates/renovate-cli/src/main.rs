@@ -553,54 +553,83 @@ async fn process_repo(
     }
 
     // ── npm ───────────────────────────────────────────────────────────────────
-    for npm_file_path in manager_files(&detected, "npm") {
-        match client.get_raw_file(owner, repo, &npm_file_path).await {
-            Ok(Some(raw)) => match npm_extractor::extract(&raw.content) {
-                Ok(deps) => {
-                    let actionable: Vec<_> = deps
-                        .iter()
-                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
-                        .collect();
-                    tracing::debug!(
-                        repo = %repo_slug, file = %npm_file_path,
-                        total = deps.len(), actionable = actionable.len(),
-                        "extracted npm dependencies"
-                    );
-                    let dep_inputs: Vec<npm_datasource::NpmDepInput> = actionable
-                        .iter()
-                        .map(|d| npm_datasource::NpmDepInput {
-                            dep_name: d.name.clone(),
-                            constraint: d.current_value.clone(),
-                        })
-                        .collect();
-                    let updates = npm_datasource::fetch_updates_concurrent(
-                        http,
-                        &dep_inputs,
-                        npm_datasource::NPM_REGISTRY,
-                        10,
-                    )
-                    .await;
-                    let update_map: HashMap<_, _> = updates
-                        .into_iter()
-                        .map(|r| (r.dep_name, r.summary))
-                        .collect();
-                    repo_report.files.push(output::FileReport {
-                        path: npm_file_path.clone(),
-                        manager: "npm".into(),
-                        deps: build_dep_reports_npm(&deps, &actionable, &update_map),
-                    });
+    // Two-pass: collect unique packages across all package.json files, fetch
+    // versions once per unique name, then build per-file reports.  This avoids
+    // redundant registry calls in monorepos where packages appear in multiple
+    // workspaces.
+    {
+        let npm_files = manager_files(&detected, "npm");
+        // Pass 1: fetch files and extract deps.
+        let mut npm_file_deps: Vec<(String, Vec<renovate_core::extractors::npm::NpmExtractedDep>)> =
+            Vec::new();
+        for npm_file_path in &npm_files {
+            match client.get_raw_file(owner, repo, npm_file_path).await {
+                Ok(Some(raw)) => match npm_extractor::extract(&raw.content) {
+                    Ok(deps) => npm_file_deps.push((npm_file_path.clone(), deps)),
+                    Err(err) => {
+                        tracing::warn!(repo=%repo_slug, file=%npm_file_path, %err,
+                            "failed to parse package.json")
+                    }
+                },
+                Ok(None) => {
+                    tracing::warn!(repo=%repo_slug, file=%npm_file_path, "package.json not found")
                 }
                 Err(err) => {
-                    tracing::warn!(repo=%repo_slug, file=%npm_file_path, %err, "failed to parse package.json")
+                    tracing::error!(repo=%repo_slug, file=%npm_file_path, %err,
+                        "failed to fetch package.json");
+                    had_error = true;
                 }
-            },
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%npm_file_path, "package.json not found")
             }
-            Err(err) => {
-                tracing::error!(repo=%repo_slug, file=%npm_file_path, %err, "failed to fetch package.json");
-                had_error = true;
-            }
+        }
+        // Collect unique actionable package names.
+        let unique_names: Vec<String> = {
+            let mut seen = std::collections::HashSet::new();
+            npm_file_deps
+                .iter()
+                .flat_map(|(_, deps)| deps.iter())
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .filter(|d| seen.insert(d.name.clone()))
+                .map(|d| d.name.clone())
+                .collect()
+        };
+        tracing::debug!(
+            repo = %repo_slug,
+            files = npm_file_deps.len(),
+            unique_packages = unique_names.len(),
+            "fetching npm versions (deduplicated)"
+        );
+        // Pass 2: fetch versions for all unique packages at once.
+        let versions_cache = npm_datasource::fetch_versions_batch(
+            http,
+            &unique_names,
+            npm_datasource::NPM_REGISTRY,
+            10,
+        )
+        .await;
+        // Pass 3: build per-file reports.
+        for (npm_file_path, deps) in npm_file_deps {
+            let actionable: Vec<_> = deps
+                .iter()
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .collect();
+            let update_map: HashMap<
+                _,
+                Result<renovate_core::versioning::npm::NpmUpdateSummary, _>,
+            > = actionable
+                .iter()
+                .map(|d| {
+                    let summary = versions_cache
+                        .get(&d.name)
+                        .map(|entry| npm_datasource::summary_from_cache(&d.current_value, entry))
+                        .ok_or(npm_datasource::NpmError::NotFound(d.name.clone()));
+                    (d.name.clone(), summary)
+                })
+                .collect();
+            repo_report.files.push(output::FileReport {
+                path: npm_file_path.clone(),
+                manager: "npm".into(),
+                deps: build_dep_reports_npm(&deps, &actionable, &update_map),
+            });
         }
     }
 

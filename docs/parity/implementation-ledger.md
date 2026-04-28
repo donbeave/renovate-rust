@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0161  | 2026-04-28 | npm cross-file dedup + `fetch_versions_batch` API | Complete | See below. |
 | 0160  | 2026-04-28 | JSR datasource + endoflife-date datasource | Complete | See below. |
 | 0159  | 2026-04-28 | Conda datasource (Anaconda API) + pixi conda dep activation | Complete | See below. |
 | 0158  | 2026-04-28 | Hermit package manager extractor + datasource (file-list based) | Complete | See below. |
@@ -3106,6 +3107,35 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0161 - npm cross-file request deduplication
+
+### Motivation
+In monorepos with multiple `package.json` files, the previous pipeline made
+one npm registry call per package per file. If `lodash` appears in 10 workspaces,
+that was 10 identical requests to registry.npmjs.org. This slice eliminates
+that redundancy.
+
+### What landed
+- `crates/renovate-core/src/datasources/npm.rs`:
+  - `fetch_versions_batch(names, registry, concurrency)` — fetches versions
+    for a set of unique package names; returns `HashMap<name, (versions, latest_tag)>`.
+  - `summary_from_cache(constraint, entry)` — computes `NpmUpdateSummary`
+    from a pre-fetched entry without a network call.
+  - Added `NpmError::NotFound` variant for cache-miss reporting.
+- `main.rs` npm pipeline refactored to three passes:
+  1. Fetch all `package.json` files and extract deps.
+  2. Collect unique package names, call `fetch_versions_batch` once.
+  3. Build per-file reports using `summary_from_cache` from the shared cache.
+- `NpmVersionsEntry` type alias exported for external use.
+
+### Impact
+- Reduces npm registry calls from O(files × packages) to O(unique packages).
+- Most beneficial in monorepos; single-file repos see no change in behavior.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1140 passed
 
 ## Slice 0160 - JSR datasource + endoflife-date datasource
 
