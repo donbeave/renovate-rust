@@ -58,6 +58,7 @@ pub mod mix;
 pub mod nix;
 pub mod npm;
 pub mod nuget;
+pub mod osgi;
 pub mod pep621;
 pub mod pip;
 pub mod pipfile;

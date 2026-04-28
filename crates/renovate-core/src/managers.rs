@@ -274,6 +274,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"\.(cs|fs|vb)proj$", r"\.(props|targets)$"],
     },
     ManagerDef {
+        name: "osgi",
+        patterns: &[r"(^|/)src/main/features/.+\.json$"],
+    },
+    ManagerDef {
         name: "cargo",
         patterns: &[r"(^|/)Cargo\.toml$"],
     },

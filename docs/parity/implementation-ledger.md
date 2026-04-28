@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0129  | 2026-04-28 | OSGi feature model Maven bundle extractor (JSON5, GAV parsing) | Complete | See below. |
 | 0128  | 2026-04-28 | XcodeGen `project.yml` Swift Package extractor (GitHub Tags) | Complete | See below. |
 | 0127  | 2026-04-28 | Typst `.typ` package extractor + Typst registry datasource | Complete | See below. |
 | 0126  | 2026-04-28 | TFLint plugin `.tflint.hcl` extractor (GitHub Releases) | Complete | See below. |
@@ -3075,6 +3076,31 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0129 - OSGi feature model Maven bundle extractor
+
+### Renovate reference
+- `lib/modules/manager/osgi/extract.ts`
+- Pattern: `/(^|/)src/main/features/.+\.json$/`
+- Datasource: Maven
+
+### What landed
+- `crates/renovate-core/src/extractors/osgi.rs` (new):
+  - Parses OSGi Compendium R8 feature model JSON files (via `json5` crate — supports JS comments).
+  - Validates `feature-resource-version` must be major version 1.
+  - Extracts bundle IDs from `bundles` array (string or `{id: ...}` object).
+  - Also checks `execution-environment:JSON|false`.framework.
+  - Scans extra sections for arrays with GAV-like entries.
+  - Normalizes `/`-separated to `:`-separated GAVs.
+  - Skip reasons: `ContainsVariable`, `InvalidValue`.
+  - 7 unit tests including JSON5 comment support.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod osgi`.
+- `crates/renovate-core/src/managers.rs`: added `osgi` with `src/main/features/.+\.json$`.
+- `crates/renovate-cli/src/main.rs`: pipeline using `maven_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 925 passed
 
 ## Slice 0128 - XcodeGen `project.yml` Swift Package extractor
 
