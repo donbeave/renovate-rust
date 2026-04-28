@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0184  | 2026-04-28 | Pass manager context to all 72 `is_dep_ignored` call sites in main.rs | Complete | See below. |
 | 0183  | 2026-04-28 | `DepContext` unified matcher + `matches_context()` on PackageRule | Complete | See below. |
 | 0182  | 2026-04-28 | `matchRegistryUrls` + `matchRepositories` packageRule matchers | Complete | See below. |
 | 0181  | 2026-04-28 | `matchCategories` + `matchBaseBranches` packageRule matchers | Complete | See below. |
@@ -4662,6 +4663,15 @@ managers should only run when explicitly listed in `enabledManagers`.
 3. **Remote preset resolution** — `github>org/repo//preset` fetching.
 4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **More built-in preset expansion** — schedule presets, group:monorepos.
+
+## Slice 0184 — Pass manager context to all dep-ignore call sites in main.rs
+
+### What was implemented
+- Upgraded all 72 `repo_cfg.is_dep_ignored(&d.name)` call sites in `main.rs` to `is_dep_ignored_for_manager(&d.name, "<manager>")` using an automated Python script
+- Each of the 80+ manager sections now passes the correct manager string when filtering deps, so `matchManagers` and `matchCategories` packageRule matchers fire correctly in production
+- Managers covered: cargo, pub, nuget, composer, bun, pip-compile, pip_setup, setup-cfg, homeassistant-manifest, html, cdnurl, typst, cpanfile, pipenv, pep621, poetry, gomod, ant, maven, kotlin-script, osgi, github-actions, gemspec, terragrunt, tflint-plugin, fleet, pre-commit, ansible-galaxy, asdf, bazel-module, bicep, buildkite, nix, meteor, cake, conan, haskell-cabal, jsonnet-bundler, vendir, xcodegen, puppet, deps-edn, leiningen, bitrise, pixi, kubernetes, bazel, tekton, argocd, homebrew, helmsman, buildpacks, glasskube, renovate-config-presets, pep723, hermit
+
+---
 
 ## Slice 0183 — `DepContext` unified matcher + `PackageRule::matches_context()`
 

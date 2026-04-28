@@ -396,7 +396,10 @@ async fn process_repo(
             cargo_file_deps
                 .iter()
                 .flat_map(|(_, deps)| deps.iter())
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "cargo")
+                })
                 .filter(|d| seen.insert(d.package_name.clone()))
                 .map(|d| d.package_name.clone())
                 .collect()
@@ -417,7 +420,10 @@ async fn process_repo(
         for (cargo_file_path, deps) in cargo_file_deps {
             let actionable: Vec<_> = deps
                 .iter()
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "cargo")
+                })
                 .collect();
             let update_map: HashMap<_, Result<renovate_core::versioning::cargo::UpdateSummary, _>> =
                 actionable
@@ -447,7 +453,10 @@ async fn process_repo(
                 let deps = pubspec_extractor::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pub")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %pub_file_path,
@@ -516,7 +525,10 @@ async fn process_repo(
             nuget_file_deps
                 .iter()
                 .flat_map(|(_, deps)| deps.iter())
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.package_id))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.package_id, "nuget")
+                })
                 .filter(|d| seen.insert(d.package_id.clone()))
                 .map(|d| d.package_id.clone())
                 .collect()
@@ -537,7 +549,10 @@ async fn process_repo(
         for (nuget_file_path, deps) in nuget_file_deps {
             let actionable: Vec<_> = deps
                 .iter()
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.package_id))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.package_id, "nuget")
+                })
                 .collect();
             let update_map: HashMap<_, Result<nuget_datasource::NuGetUpdateSummary, _>> =
                 actionable
@@ -565,7 +580,10 @@ async fn process_repo(
                 Ok(deps) => {
                     let actionable: Vec<_> = deps
                         .iter()
-                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .filter(|d| {
+                            d.skip_reason.is_none()
+                                && !repo_cfg.is_dep_ignored_for_manager(&d.name, "composer")
+                        })
                         .collect();
                     tracing::debug!(
                         repo = %repo_slug, file = %composer_file_path,
@@ -720,7 +738,10 @@ async fn process_repo(
                 Ok(deps) => {
                     let actionable: Vec<_> = deps
                         .iter()
-                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .filter(|d| {
+                            d.skip_reason.is_none()
+                                && !repo_cfg.is_dep_ignored_for_manager(&d.name, "bun")
+                        })
                         .collect();
                     tracing::debug!(
                         repo = %repo_slug, file = %bun_lockfile_path,
@@ -806,7 +827,10 @@ async fn process_repo(
             pip_file_deps
                 .iter()
                 .flat_map(|(_, _, deps)| deps.iter())
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pip-compile")
+                })
                 .filter(|d| seen.insert(d.name.clone()))
                 .map(|d| d.name.clone())
                 .collect()
@@ -827,7 +851,10 @@ async fn process_repo(
         for (manager_name, file_path, deps) in pip_file_deps {
             let actionable: Vec<_> = deps
                 .iter()
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pip-compile")
+                })
                 .collect();
             let update_map: HashMap<
                 _,
@@ -860,7 +887,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::pip_setup::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pip_setup")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %setup_py_path,
@@ -906,7 +936,10 @@ async fn process_repo(
                 let deps = setup_cfg_extractor::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "setup-cfg")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %setup_cfg_path,
@@ -954,7 +987,11 @@ async fn process_repo(
                 let deps = homeassistant_extractor::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg
+                                .is_dep_ignored_for_manager(&d.name, "homeassistant-manifest")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %ha_path,
@@ -1007,7 +1044,7 @@ async fn process_repo(
                 );
                 let mut dep_reports = Vec::new();
                 for dep in &deps {
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "html") {
                         continue;
                     }
                     let library = &dep.dep_name;
@@ -1065,7 +1102,7 @@ async fn process_repo(
                 );
                 let mut dep_reports = Vec::new();
                 for dep in &deps {
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "cdnurl") {
                         continue;
                     }
                     let status = match renovate_core::datasources::cdnjs::fetch_latest(
@@ -1130,7 +1167,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.package_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.package_name, "typst") {
                         continue;
                     }
                     let status = match renovate_core::datasources::typst::fetch_latest(
@@ -1193,7 +1230,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "cpanfile") {
                         continue;
                     }
                     let status = match renovate_core::datasources::cpan::fetch_latest(
@@ -1241,7 +1278,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::pipfile::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pipenv")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %pipfile_path,
@@ -1289,7 +1329,10 @@ async fn process_repo(
                 Ok(deps) => {
                     let actionable: Vec<_> = deps
                         .iter()
-                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .filter(|d| {
+                            d.skip_reason.is_none()
+                                && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pep621")
+                        })
                         .collect();
                     tracing::debug!(
                         repo = %repo_slug, file = %pep621_file_path,
@@ -1377,7 +1420,10 @@ async fn process_repo(
                 Ok(deps) => {
                     let actionable: Vec<_> = deps
                         .iter()
-                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .filter(|d| {
+                            d.skip_reason.is_none()
+                                && !repo_cfg.is_dep_ignored_for_manager(&d.name, "poetry")
+                        })
                         .collect();
                     tracing::debug!(
                         repo = %repo_slug, file = %poetry_file_path,
@@ -1455,7 +1501,7 @@ async fn process_repo(
                 .flat_map(|(_, deps)| deps.iter())
                 .filter(|d| {
                     d.skip_reason.is_none()
-                        && !repo_cfg.is_dep_ignored(&d.module_path)
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.module_path, "gomod")
                         && !d.current_value.is_empty()
                 })
                 .filter(|d| seen.insert(d.module_path.clone()))
@@ -1480,7 +1526,7 @@ async fn process_repo(
                 .iter()
                 .filter(|d| {
                     d.skip_reason.is_none()
-                        && !repo_cfg.is_dep_ignored(&d.module_path)
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.module_path, "gomod")
                         && !d.current_value.is_empty()
                 })
                 .collect();
@@ -1510,7 +1556,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::ant::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "ant")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %ant_path,
@@ -1613,7 +1662,7 @@ async fn process_repo(
                 .flat_map(|(_, deps)| deps.iter())
                 .filter(|d| {
                     d.skip_reason.is_none()
-                        && !repo_cfg.is_dep_ignored(&d.dep_name)
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "maven")
                         && !d.current_value.is_empty()
                 })
                 .filter(|d| seen.insert(d.dep_name.clone()))
@@ -1632,7 +1681,7 @@ async fn process_repo(
                 .iter()
                 .filter(|d| {
                     d.skip_reason.is_none()
-                        && !repo_cfg.is_dep_ignored(&d.dep_name)
+                        && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "maven")
                         && !d.current_value.is_empty()
                 })
                 .collect();
@@ -1662,7 +1711,7 @@ async fn process_repo(
                 let deps = renovate_core::extractors::kotlin_script::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "kotlin-script"))
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %kts_path,
@@ -1730,7 +1779,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::osgi::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "osgi")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %osgi_path,
@@ -1819,7 +1871,7 @@ async fn process_repo(
                     .filter(|d| {
                         d.skip_reason.is_none()
                             && !d.current_value.is_empty()
-                            && !repo_cfg.is_dep_ignored(&d.action)
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.action, "github-actions")
                     })
                     .collect();
                 tracing::debug!(
@@ -2137,7 +2189,7 @@ async fn process_repo(
                     .filter(|d| {
                         d.skip_reason.is_none()
                             && !d.current_value.is_empty()
-                            && !repo_cfg.is_dep_ignored(&d.name)
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "gemspec")
                     })
                     .collect();
                 tracing::debug!(
@@ -2171,7 +2223,7 @@ async fn process_repo(
                         output::DepStatus::Skipped {
                             reason: "no-version".to_owned(),
                         }
-                    } else if repo_cfg.is_dep_ignored(&dep.name) {
+                    } else if repo_cfg.is_dep_ignored_for_manager(&dep.name, "gemspec") {
                         output::DepStatus::Skipped {
                             reason: "ignored".to_owned(),
                         }
@@ -2285,7 +2337,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "terragrunt") {
                         continue;
                     }
 
@@ -2400,7 +2452,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "tflint-plugin") {
                         continue;
                     }
                     let status = match github_releases_datasource::fetch_latest_release(
@@ -2576,7 +2628,7 @@ async fn process_repo(
                     .iter()
                     .filter(|d| {
                         d.skip_reason.is_none()
-                            && !repo_cfg.is_dep_ignored(&d.chart)
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.chart, "fleet")
                             && !d.current_value.is_empty()
                     })
                     .collect();
@@ -3475,7 +3527,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::pre_commit::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "pre-commit")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %pc_path,
@@ -3606,7 +3661,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::ansible_galaxy::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "ansible-galaxy")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %ag_path,
@@ -3654,7 +3712,7 @@ async fn process_repo(
                         output::DepStatus::Skipped {
                             reason: format!("{reason:?}").to_lowercase(),
                         }
-                    } else if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    } else if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "ansible-galaxy") {
                         output::DepStatus::Skipped {
                             reason: "ignored".to_owned(),
                         }
@@ -3705,7 +3763,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::asdf::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.tool_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.tool_name, "asdf")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %asdf_path,
@@ -3815,7 +3876,7 @@ async fn process_repo(
                         output::DepStatus::Skipped {
                             reason: format!("{reason:?}").to_lowercase(),
                         }
-                    } else if !repo_cfg.is_dep_ignored(&dep.tool_name) {
+                    } else if !repo_cfg.is_dep_ignored_for_manager(&dep.tool_name, "asdf") {
                         let lookup_key = match &dep.datasource {
                             Some(AsdfDatasource::GithubTags { repo, tag_strip })
                             | Some(AsdfDatasource::GithubReleases { repo, tag_strip }) => {
@@ -4002,7 +4063,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.name, "bazel-module") {
                         continue;
                     }
                     let status = match renovate_core::datasources::bazel::fetch_latest(
@@ -4055,7 +4116,7 @@ async fn process_repo(
                 );
                 let mut dep_reports = Vec::new();
                 for dep in &deps {
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "bicep") {
                         continue;
                     }
                     let status = match renovate_core::datasources::azure_bicep::fetch_latest(
@@ -4449,7 +4510,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::buildkite::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "buildkite")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %bk_path,
@@ -4506,7 +4570,7 @@ async fn process_repo(
                         output::DepStatus::Skipped {
                             reason: format!("{reason:?}").to_lowercase(),
                         }
-                    } else if !repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    } else if !repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "buildkite") {
                         let gh_repo = dep.datasource.as_ref().map(
                             |renovate_core::extractors::buildkite::BuildkiteDatasource::GithubTags { repo: gr }| {
                                 gr.as_str()
@@ -4970,7 +5034,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::nix::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.input_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.input_name, "nix")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %flake_path,
@@ -5158,7 +5225,7 @@ async fn process_repo(
                 let deps = renovate_core::extractors::meteor::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| !repo_cfg.is_dep_ignored_for_manager(&d.name, "meteor"))
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %meteor_path,
@@ -5232,7 +5299,8 @@ async fn process_repo(
                 let actionable: Vec<_> = deps
                     .iter()
                     .filter(|d| {
-                        !d.current_value.is_empty() && !repo_cfg.is_dep_ignored(&d.package_name)
+                        !d.current_value.is_empty()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.package_name, "cake")
                     })
                     .collect();
                 tracing::debug!(
@@ -5314,7 +5382,10 @@ async fn process_repo(
                 };
                 let actionable_count = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "conan")
+                    })
                     .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %conan_path,
@@ -5333,7 +5404,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.name, "conan") {
                         continue;
                     }
                     let status = match renovate_core::datasources::conan::fetch_latest(
@@ -5384,7 +5455,9 @@ async fn process_repo(
                 let deps = renovate_core::extractors::cabal::extract(&raw.content);
                 let actionable_count = deps
                     .iter()
-                    .filter(|d| !repo_cfg.is_dep_ignored(&d.package_name))
+                    .filter(|d| {
+                        !repo_cfg.is_dep_ignored_for_manager(&d.package_name, "haskell-cabal")
+                    })
                     .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %cabal_path,
@@ -5393,7 +5466,7 @@ async fn process_repo(
                 );
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in &deps {
-                    if repo_cfg.is_dep_ignored(&dep.package_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.package_name, "haskell-cabal") {
                         continue;
                     }
                     let status = match renovate_core::datasources::hackage::fetch_latest(
@@ -5504,7 +5577,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::jsonnet_bundler::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| !d.github_repo.is_empty() && !repo_cfg.is_dep_ignored(&d.remote))
+                    .filter(|d| {
+                        !d.github_repo.is_empty()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.remote, "jsonnet-bundler")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %jb_path,
@@ -5593,7 +5669,7 @@ async fn process_repo(
                 let deps = renovate_core::extractors::vendir::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| !repo_cfg.is_dep_ignored(&d.chart_name))
+                    .filter(|d| !repo_cfg.is_dep_ignored_for_manager(&d.chart_name, "vendir"))
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %vendir_path,
@@ -5810,7 +5886,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.name, "xcodegen") {
                         continue;
                     }
                     let gh_repo = match &dep.source {
@@ -5960,7 +6036,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.name, "puppet") {
                         continue;
                     }
 
@@ -6138,7 +6214,7 @@ async fn process_repo(
                 );
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in &deps {
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "deps-edn") {
                         continue;
                     }
                     let latest = renovate_core::datasources::maven::fetch_latest_from_registry(
@@ -6198,7 +6274,7 @@ async fn process_repo(
                 let deps = renovate_core::extractors::leiningen::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "leiningen"))
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %lein_path,
@@ -6303,7 +6379,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::bitrise::extract(&raw.content);
                 let actionable_count = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "bitrise")
+                    })
                     .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %br_path,
@@ -6326,7 +6405,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "bitrise") {
                         continue;
                     }
                     let current = dep.current_value.as_deref().unwrap_or("");
@@ -6424,7 +6503,7 @@ async fn process_repo(
                     .filter(|d| {
                         d.source == PixiSource::Pypi
                             && d.skip_reason.is_none()
-                            && !repo_cfg.is_dep_ignored(&d.dep_name)
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "pixi")
                     })
                     .collect();
                 let conda_actionable: Vec<_> = deps
@@ -6432,7 +6511,7 @@ async fn process_repo(
                     .filter(|d| {
                         d.source == PixiSource::Conda
                             && d.skip_reason.is_none()
-                            && !repo_cfg.is_dep_ignored(&d.dep_name)
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "pixi")
                     })
                     .collect();
                 tracing::debug!(
@@ -6561,7 +6640,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::kubernetes::extract(&raw.content);
                 let actionable: Vec<&KubernetesDep> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.image_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.image_name, "kubernetes")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %k8s_path,
@@ -6656,7 +6738,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::bazel::extract(&raw.content);
                 let actionable_count = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "bazel")
+                    })
                     .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %bazel_path,
@@ -6678,7 +6763,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "bazel") {
                         continue;
                     }
                     let status = match &dep.source {
@@ -6776,7 +6861,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::tekton::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.image_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.image_name, "tekton")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %tekton_path,
@@ -6890,7 +6978,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "argocd") {
                         continue;
                     }
                     let status = match &dep.source {
@@ -6981,7 +7069,7 @@ async fn process_repo(
                 let Some(dep) = homebrew_extractor::extract(&raw.content) else {
                     continue;
                 };
-                if repo_cfg.is_dep_ignored(&dep.formula_name) {
+                if repo_cfg.is_dep_ignored_for_manager(&dep.formula_name, "homebrew") {
                     continue;
                 }
                 let status = if let Some(reason) = &dep.skip_reason {
@@ -7099,7 +7187,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::helmsman::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.dep_name, "helmsman")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %hsm_path,
@@ -7272,7 +7363,7 @@ async fn process_repo(
                     if dep.source != BuildpacksSource::Registry {
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "buildpacks") {
                         continue;
                     }
                     let status =
@@ -7433,7 +7524,7 @@ async fn process_repo(
                 let deps = renovate_core::extractors::glasskube::extract(&raw.content);
                 let actionable_count = deps
                     .iter()
-                    .filter(|d| !repo_cfg.is_dep_ignored(&d.package_name))
+                    .filter(|d| !repo_cfg.is_dep_ignored_for_manager(&d.package_name, "glasskube"))
                     .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %gk_path,
@@ -7442,7 +7533,7 @@ async fn process_repo(
                 );
                 let mut dep_reports: Vec<output::DepReport> = Vec::new();
                 for dep in &deps {
-                    if repo_cfg.is_dep_ignored(&dep.package_name) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.package_name, "glasskube") {
                         continue;
                     }
                     let status = match renovate_core::datasources::glasskube_packages::fetch_latest(
@@ -7496,7 +7587,11 @@ async fn process_repo(
                     renovate_core::extractors::renovate_config_presets::extract(&raw.content);
                 let actionable_count = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.repo))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg
+                                .is_dep_ignored_for_manager(&d.repo, "renovate-config-presets")
+                    })
                     .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %rc_path,
@@ -7522,7 +7617,7 @@ async fn process_repo(
                         });
                         continue;
                     }
-                    if repo_cfg.is_dep_ignored(&dep.repo) {
+                    if repo_cfg.is_dep_ignored_for_manager(&dep.repo, "renovate-config-presets") {
                         continue;
                     }
                     let status = match &dep.source {
@@ -7767,7 +7862,10 @@ async fn process_repo(
                 let deps = renovate_core::extractors::pep723::extract(&raw.content);
                 let actionable: Vec<_> = deps
                     .iter()
-                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pep723")
+                    })
                     .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %pep723_path,
@@ -7865,7 +7963,7 @@ async fn process_repo(
                 });
                 continue;
             }
-            if repo_cfg.is_dep_ignored(&dep.name) {
+            if repo_cfg.is_dep_ignored_for_manager(&dep.name, "hermit") {
                 continue;
             }
             let status = match renovate_core::datasources::hermit::fetch_latest(
