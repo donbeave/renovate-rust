@@ -1264,6 +1264,7 @@ dependencies = [
  "json5",
  "regex",
  "reqwest",
+ "semver",
  "serde",
  "serde_json",
  "tempfile",

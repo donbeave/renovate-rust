@@ -23,10 +23,12 @@ use std::process::ExitCode;
 use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
+use renovate_core::datasources::crates_io;
 use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
+use renovate_core::versioning::cargo as cargo_versioning;
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -221,13 +223,43 @@ async fn main() -> ExitCode {
                             skipped,
                             "extracted cargo dependencies"
                         );
+
+                        // Look up available versions for each actionable dep.
+                        let http = renovate_core::http::HttpClient::new().expect("HTTP client");
                         for dep in &actionable {
-                            tracing::debug!(
-                                repo = %repo_slug,
-                                dep = %dep.dep_name,
-                                version = %dep.current_value,
-                                "cargo dep"
-                            );
+                            match crates_io::fetch_versions(
+                                &http,
+                                &dep.package_name,
+                                crates_io::CRATES_IO_SPARSE_INDEX,
+                            )
+                            .await
+                            {
+                                Ok(records) => {
+                                    let non_yanked: Vec<String> = records
+                                        .iter()
+                                        .filter(|r| !r.yanked)
+                                        .map(|r| r.vers.clone())
+                                        .collect();
+                                    let latest = cargo_versioning::resolve_latest(
+                                        &dep.current_value,
+                                        &non_yanked,
+                                    );
+                                    tracing::info!(
+                                        repo = %repo_slug,
+                                        dep = %dep.dep_name,
+                                        constraint = %dep.current_value,
+                                        latest_compatible = ?latest,
+                                        "crate version info"
+                                    );
+                                }
+                                Err(err) => {
+                                    tracing::warn!(
+                                        dep = %dep.dep_name,
+                                        %err,
+                                        "failed to fetch crate versions"
+                                    );
+                                }
+                            }
                         }
                     }
                     Err(err) => {
