@@ -161,6 +161,30 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.tool-versions$"],
     },
     ManagerDef {
+        name: "terraform-version",
+        patterns: &[r"(^|/)\.terraform-version$"],
+    },
+    ManagerDef {
+        name: "terragrunt-version",
+        patterns: &[r"(^|/)\.terragrunt-version$"],
+    },
+    ManagerDef {
+        name: "go-version",
+        patterns: &[r"(^|/)\.go-version$"],
+    },
+    ManagerDef {
+        name: "python-version",
+        patterns: &[r"(^|/)\.python-version$"],
+    },
+    ManagerDef {
+        name: "node-version",
+        patterns: &[r"(^|/)\.node-version$"],
+    },
+    ManagerDef {
+        name: "nvmrc",
+        patterns: &[r"(^|/)\.nvmrc$"],
+    },
+    ManagerDef {
         name: "pep621",
         patterns: &[r"(^|/)pyproject\.toml$"],
     },

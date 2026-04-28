@@ -1707,6 +1707,37 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 532 passed
 
+## Slice 0054 - Version-file managers (.terraform-version, .go-version, etc.)
+
+### Renovate reference
+- `lib/modules/manager/terraform-version/` — `.terraform-version`
+- `lib/modules/manager/terragrunt-version/` — `.terragrunt-version`
+- Pattern per file: `(^|/)\.terraform-version$`, etc.
+- Datasources: GitHub Releases (terraform, terragrunt, nodejs) + GitHub Tags (golang, python)
+
+### What landed
+- `crates/renovate-core/src/extractors/version_file.rs` — single-version-file extractor:
+  - `VERSION_FILE_DEFS` static table: manager name → (tool, `AsdfDatasource`)
+  - `extract(content, manager_name)` returns one `VersionFileDep`: reads the first
+    non-empty, non-comment line; strips leading `v`; skips NVM aliases (`lts/*`,
+    `latest`, `stable`, `node`).
+  - Reuses `AsdfDatasource` enum (GithubTags/GithubReleases) from `extractors/asdf.rs`.
+  - 6 file types: `.terraform-version`, `.terragrunt-version`, `.go-version`,
+    `.python-version`, `.node-version`, `.nvmrc`.
+- 6 manager patterns added to `managers.rs`.
+- Single pipeline loop in `main.rs` iterates all 6 manager names, fetches the
+  version file, calls `version_file::extract()`, routes to github_tags or
+  github_releases, strips tag prefix, compares with `semver_generic`.
+
+### What was intentionally deferred
+- `.ruby-version` — requires a specialized Ruby version datasource (ruby-lang.org).
+- `.bun-version` — routes to npm datasource (need npm version lookup for bun).
+- NVM partial-version aliases (e.g. `20` meaning latest 20.x).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 547 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1715,6 +1746,6 @@ Pick whichever can be completed in one loop:
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
-3. **`pip-compile` / `requirements.in` extractor**: constrained pip requirements.
-4. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps.
-5. **`conda` environment extractor**: parse `environment.yml` for conda/pip packages.
+3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
+4. **`ansible-galaxy` extractor**: `requirements.yml` for Ansible collections.
+5. **`kustomize` extractor**: Kustomize YAML image tags + `kustomization.yaml`.

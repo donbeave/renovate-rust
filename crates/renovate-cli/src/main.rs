@@ -2072,6 +2072,105 @@ async fn process_repo(
         }
     }
 
+    // ── Version files (.terraform-version, .go-version, etc.) ─────────────────
+    for manager_name in [
+        "terraform-version",
+        "terragrunt-version",
+        "go-version",
+        "python-version",
+        "node-version",
+        "nvmrc",
+    ] {
+        for vf_path in manager_files(&detected, manager_name) {
+            match client.get_raw_file(owner, repo, &vf_path).await {
+                Ok(Some(raw)) => {
+                    let Some(dep) = renovate_core::extractors::version_file::extract(
+                        &raw.content,
+                        manager_name,
+                    ) else {
+                        continue;
+                    };
+                    tracing::debug!(
+                        repo = %repo_slug, file = %vf_path, tool = dep.tool,
+                        version = %dep.current_value, "extracted version file dep"
+                    );
+
+                    use renovate_core::extractors::asdf::AsdfDatasource;
+                    let lookup_key = match &dep.datasource {
+                        AsdfDatasource::GithubTags { repo, tag_strip } => {
+                            format!("{}|{}", repo, tag_strip)
+                        }
+                        AsdfDatasource::GithubReleases { repo, tag_strip } => {
+                            format!("{}|{}", repo, tag_strip)
+                        }
+                    };
+                    let (repo_name, tag_strip) =
+                        lookup_key.split_once('|').unwrap_or((&lookup_key, ""));
+
+                    let tag_result = match &dep.datasource {
+                        AsdfDatasource::GithubTags { .. } => {
+                            renovate_core::datasources::github_tags::fetch_latest_tag(
+                                repo_name,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            .map_err(|e| e.to_string())
+                        }
+                        AsdfDatasource::GithubReleases { .. } => {
+                            github_releases_datasource::fetch_latest_release(
+                                repo_name,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            .map_err(|e| e.to_string())
+                        }
+                    };
+
+                    let status = match tag_result {
+                        Ok(Some(tag)) => {
+                            let latest_ver = tag.trim_start_matches(tag_strip).to_owned();
+                            let s =
+                                renovate_core::versioning::semver_generic::semver_update_summary(
+                                    &dep.current_value,
+                                    Some(latest_ver.as_str()),
+                                );
+                            if s.update_available {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest: latest_ver,
+                                }
+                            } else {
+                                output::DepStatus::UpToDate {
+                                    latest: Some(latest_ver),
+                                }
+                            }
+                        }
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(msg) => output::DepStatus::LookupError { message: msg },
+                    };
+
+                    repo_report.files.push(output::FileReport {
+                        path: vf_path.clone(),
+                        manager: manager_name.to_owned(),
+                        deps: vec![output::DepReport {
+                            name: dep.tool.to_owned(),
+                            status,
+                        }],
+                    });
+                }
+                Ok(None) => {
+                    tracing::warn!(repo=%repo_slug, file=%vf_path, "version file not found")
+                }
+                Err(err) => {
+                    tracing::error!(repo=%repo_slug, file=%vf_path, %err, "failed to fetch version file");
+                    had_error = true;
+                }
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 
