@@ -21,6 +21,7 @@ pub mod npm;
 pub mod nuget;
 pub mod pep621;
 pub mod pip;
+pub mod pipfile;
 pub mod poetry;
 pub mod pre_commit;
 pub mod pubspec;

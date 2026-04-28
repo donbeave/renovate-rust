@@ -149,6 +149,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)setup\.cfg$"],
     },
     ManagerDef {
+        name: "pipenv",
+        patterns: &[r"(^|/)Pipfile$"],
+    },
+    ManagerDef {
         name: "pre-commit",
         patterns: &[r"(^|/)\.pre-commit-config\.ya?ml$"],
     },

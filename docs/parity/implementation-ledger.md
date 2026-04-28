@@ -1678,6 +1678,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 521 passed
 
+## Slice 0053 - Pipenv `Pipfile` extractor
+
+### Renovate reference
+- `lib/modules/manager/pipenv/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/pipenv/index.ts` — pattern `/(^|/)Pipfile$/`
+- Datasource: PyPI (reuses existing `datasources/pypi.rs`)
+- Versioning: pep440 (reuses existing `versioning/pep440.rs`)
+
+### What landed
+- `crates/renovate-core/src/extractors/pipfile.rs` — TOML-based extractor:
+  - Uses `toml::from_str::<toml::Table>()` (toml v1.x API — `Value::from_str` only
+    parses a single TOML value, not a full document).
+  - Parses `[packages]` (runtime) and `[dev-packages]` (dev) sections.
+  - Handles two entry forms: string (`requests = ">=2.25"`) and table
+    (`django = {version = ">=4.0", extras = [...]}`).
+  - Skip reasons: `Wildcard` (`"*"` or `{version = "*"}`), `GitDependency` (`git`
+    key), `LocalDependency` (`path`/`file` key).
+  - Normalizes names (lowercase, `-` for `_`/`.`).
+- Manager pattern `pipenv` with `(^|/)Pipfile$`.
+- Pipeline wired in `main.rs` via PyPI datasource + `build_dep_reports_pipfile`.
+
+### What was intentionally deferred
+- `Pipfile.lock` lockfile parsing.
+- Private PyPI index sources from `[[source]]` sections.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 532 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1687,5 +1716,5 @@ Pick whichever can be completed in one loop:
    and wire them into clap.
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`pip-compile` / `requirements.in` extractor**: constrained pip requirements.
-4. **`pipenv` / `Pipfile` extractor**: Python dependency management with Pipfile.
-5. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps.
+4. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps.
+5. **`conda` environment extractor**: parse `environment.yml` for conda/pip packages.

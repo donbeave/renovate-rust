@@ -691,6 +691,54 @@ async fn process_repo(
         }
     }
 
+    // ── Pipfile (pipenv) ──────────────────────────────────────────────────────
+    for pipfile_path in manager_files(&detected, "pipenv") {
+        match client.get_raw_file(owner, repo, &pipfile_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::pipfile::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %pipfile_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted Pipfile dependencies"
+                );
+                let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                    .iter()
+                    .map(|d| pypi_datasource::PypiDepInput {
+                        dep_name: d.name.clone(),
+                        specifier: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = pypi_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    pypi_datasource::PYPI_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: pipfile_path.clone(),
+                    manager: "pipenv".into(),
+                    deps: build_dep_reports_pipfile(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%pipfile_path, "Pipfile not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%pipfile_path, %err, "failed to fetch Pipfile");
+                had_error = true;
+            }
+        }
+    }
+
     // ── pep621 (pyproject.toml) ───────────────────────────────────────────────
     for pep621_file_path in manager_files(&detected, "pep621") {
         match client.get_raw_file(owner, repo, &pep621_file_path).await {
@@ -2630,6 +2678,48 @@ fn build_dep_reports_gradle(
 fn build_dep_reports_setup_cfg(
     all_deps: &[renovate_core::extractors::setup_cfg::SetupCfgDep],
     actionable: &[&renovate_core::extractors::setup_cfg::SetupCfgDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::versioning::pep440::Pep440UpdateSummary,
+            renovate_core::datasources::pypi::PypiError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_specifier.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_pipfile(
+    all_deps: &[renovate_core::extractors::pipfile::PipfileDep],
+    actionable: &[&renovate_core::extractors::pipfile::PipfileDep],
     update_map: &HashMap<
         String,
         Result<
