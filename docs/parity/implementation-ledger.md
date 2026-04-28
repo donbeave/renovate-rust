@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0196  | 2026-04-28 | Fix: SemVer build metadata falsely triggered Cargo update detection | Complete | See below. |
 | 0195  | 2026-04-28 | Parity tracking: create `renovate-source-map.md` + update loop prompt with maintenance rules | Complete | See below. |
 | 0194  | 2026-04-28 | `matchCurrentAge` packageRule matcher + `satisfies_date_range()` + per-version timestamps (npm/pypi) | Complete | See below. |
 | 0193  | 2026-04-28 | `--platform=local` fix: scan CWD, skip token requirement, `LocalClient` reads via `git ls-files` | Complete | See below. |

@@ -194,6 +194,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 |--------------------|------|---------------|---------------|-----------|--------|
 | `lib/modules/versioning/semver/index.spec.ts` | — | `isValid` accepts semver and ranges | `crates/renovate-core/src/versioning/semver_generic.rs` | `parse_padded_*` | partial |
 | `lib/modules/versioning/semver/index.spec.ts` | — | Major/minor/patch classification | `crates/renovate-core/src/versioning/semver_generic.rs` | `classify_semver_update` tests | ported |
+| `lib/modules/versioning/cargo/index.spec.ts` | 101 | `getPinnedValue` returns `=1.2.3` | `crates/renovate-core/src/versioning/cargo.rs` | `update_summary_tests` | partial |
+| `lib/modules/versioning/cargo/index.spec.ts` | — | Build metadata does not create false update | `crates/renovate-core/src/versioning/cargo.rs` | `build_metadata_same_precedence_is_not_update` | ported |
+| `lib/modules/versioning/cargo/index.spec.ts` | — | Genuine newer version alongside build-metadata variant is update | `crates/renovate-core/src/versioning/cargo.rs` | `build_metadata_with_actual_newer_version_is_update` | ported |
 
 ---
 
