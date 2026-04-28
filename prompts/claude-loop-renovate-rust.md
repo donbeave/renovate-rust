@@ -2,10 +2,22 @@
 
 Use this prompt with Claude Code's native `/loop` from the root of this repository. Run it on a 15 minute interval until the Rust implementation is a practical drop-in replacement for `renovatebot/renovate`.
 
+Usage instructions live in [prompts/README.md](README.md). The intended command is:
+
+```text
+/loop 15m Follow @prompts/claude-loop-renovate-rust.md
+```
+
 ```text
 You are working in the renovate-rust repository. Your job is to steadily build a production-quality Rust replacement for renovatebot/renovate.
 
 Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Only stop when blocked by missing credentials, unavailable network, or an external service requirement that cannot be avoided.
+
+Repository rules:
+- Follow `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, and `COMMITS.md`.
+- Keep agent-only rules in `AGENTS.md` and shared human/agent rules in topic-specific files.
+- Commit messages must follow the repository commit conventions.
+- Never modify `prompts/claude-loop-renovate-rust.md` while executing this loop. Treat this prompt as operator-owned configuration. If you identify an improvement, record it as a suggestion in project docs instead of editing the prompt.
 
 Reference repository:
 - Treat renovatebot/renovate as the behavioral reference.
