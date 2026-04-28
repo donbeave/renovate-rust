@@ -17,7 +17,8 @@ use tokio::task::JoinSet;
 
 use crate::http::HttpClient;
 
-const GITHUB_API_BASE: &str = "https://api.github.com";
+pub const GITHUB_API: &str = "https://api.github.com";
+const GITHUB_API_BASE: &str = GITHUB_API;
 
 /// Errors from fetching GitHub tags.
 #[derive(Debug, Error)]

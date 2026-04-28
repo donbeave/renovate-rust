@@ -89,6 +89,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)mix\.exs$"],
     },
     ManagerDef {
+        name: "swift",
+        patterns: &[r"(^|/)Package\.swift$"],
+    },
+    ManagerDef {
         name: "gradle",
         patterns: &[
             r"\.gradle(\.kts)?$",

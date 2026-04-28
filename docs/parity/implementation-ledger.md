@@ -1392,9 +1392,42 @@ Pick whichever can be completed in one loop:
 
 Pick whichever can be completed in one loop:
 
+## Slice 0044 - Swift Package Manager `Package.swift` extractor
+
+### Renovate reference
+- `lib/modules/manager/swift/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/swift/index.ts`   — pattern `/(^|/)Package\\.swift/`
+- Datasource: `GithubTagsDatasource` (already implemented, reused)
+
+### What landed
+- `crates/renovate-core/src/extractors/spm.rs` — `Package.swift` extractor:
+  - Regex matches `.package(url:, from:)`, `.package(url:, exact:)`,
+    `.upToNextMajor(from:)`, `.upToNextMinor(from:)`, and range forms.
+  - `parse_git_url()` extracts `owner/repo` from GitHub/GitLab URLs.
+  - Skip reasons: `LocalPath` (`path:` form), `NonGitHost` (Bitbucket, SSH, etc.).
+  - GitLab packages recognized but not currently looked up (no gitlab_tags datasource yet).
+- `crates/renovate-core/src/datasources/github_tags.rs` — exported `GITHUB_API` constant.
+- `crates/renovate-core/src/managers.rs` — added `swift` with pattern `(^|/)Package\.swift$`.
+- Swift pipeline in `main.rs` reuses `github_tags_datasource::fetch_updates_concurrent`.
+
+### What was intentionally deferred
+- GitLab package version lookup (no `gitlab_tags` datasource yet).
+- `Package.resolved` lockfile parsing.
+- SSH git URL parsing.
+- `.package(url:, branch:)` and `.package(url:, revision:)` forms.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 441 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
 1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
-2. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
-3. **Swift Package Manager** (`Package.swift` extractor + GitHub releases datasource).
-4. **CocoaPods** (`Podfile` extractor + CocoaPods trunk datasource).
+2. **`gemspec` extractor**: extend bundler manager to parse `.gemspec` files.
+3. **CocoaPods** (`Podfile` extractor + CocoaPods trunk datasource).
+4. **GitLab tags datasource**: add `gitlab_tags` datasource so SPM GitLab packages
+   and GitHub Actions on GitLab get version lookups.
