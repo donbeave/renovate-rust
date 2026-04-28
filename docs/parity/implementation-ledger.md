@@ -1738,6 +1738,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 547 passed
 
+## Slice 0055 - GitLab CI `.gitlab-ci.yml` Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/gitlabci/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/gitlabci/index.ts` — pattern `/\.gitlab-ci\.ya?ml$/`
+- Datasource: Docker Hub (reuses existing `datasources/docker_hub.rs`)
+
+### What landed
+- `crates/renovate-core/src/extractors/gitlabci.rs` — YAML line scanner:
+  - Three image forms: inline (`image: node:18`), block (`image:\n  name: ref`),
+    services list (`services:\n  - postgres:15`).
+  - Reuses `classify_image_ref()` from `extractors/dockerfile.rs` for Docker
+    image parsing (handles registry prefixes, `scratch`, variable references, etc.).
+  - Key bug fixed during dev: `image:\s+(\S+.*)` requires a space after colon
+    so `image:` alone (block form) is detected by a separate `IMAGE_KEY_ONLY` regex.
+  - Skips `$VAR`-form variable images.
+- Manager pattern `gitlabci` with `(^|/)\.gitlab-ci\.ya?ml$`.
+- Pipeline mirrors the Dockerfile pipeline: Docker Hub dep inputs, `update_map`,
+  non-Docker-Hub registries get `Skipped { reason: "non-docker-hub registry" }`.
+
+### What was intentionally deferred
+- GitLab CI components (`include: component`).
+- `extends:` inheritance (job templates sharing an image).
+- GitLab-hosted container registry images (non-Docker-Hub).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 553 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:

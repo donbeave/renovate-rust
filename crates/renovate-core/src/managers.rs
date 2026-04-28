@@ -185,6 +185,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.nvmrc$"],
     },
     ManagerDef {
+        name: "gitlabci",
+        patterns: &[r"(^|/)\.gitlab-ci\.ya?ml$"],
+    },
+    ManagerDef {
         name: "pep621",
         patterns: &[r"(^|/)pyproject\.toml$"],
     },

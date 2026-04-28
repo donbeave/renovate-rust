@@ -12,6 +12,7 @@ pub mod docker_compose;
 pub mod dockerfile;
 pub mod gemspec;
 pub mod github_actions;
+pub mod gitlabci;
 pub mod gomod;
 pub mod gradle;
 pub mod helm;
