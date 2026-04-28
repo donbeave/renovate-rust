@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0114  | 2026-04-28 | Copier `.copier-answers.yml` template extractor | Complete | See below. |
 | 0113  | 2026-04-28 | Batect `batect.yml` Docker image extractor | Complete | See below. |
 | 0112  | 2026-04-28 | Meteor `package.js` `Npm.depends()` extractor (npm datasource) | Complete | See below. |
 | 0111  | 2026-04-28 | Cake `.cake` build script extractor (NuGet datasource) | Complete | See below. |
@@ -2949,6 +2950,26 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 919 passed
 
+## Slice 0114 - Copier `.copier-answers.yml` template extractor
+
+### Renovate reference
+- `lib/modules/manager/copier/extract.ts`
+- Pattern: `/(^|/)\.copier-answers(\..+)?\.ya?ml/`
+- Datasource: git-tags (GitHub Tags for GitHub URLs)
+
+### What landed
+- `crates/renovate-core/src/extractors/copier.rs` (new):
+  - `CopierDep { src_path, github_repo, current_value }` struct.
+  - `extract(content)` — scans for `_src_path:` and `_commit:` YAML keys;
+    strips `git+` prefix; extracts `owner/repo` from GitHub URLs.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `copier` manager with `.copier-answers*.yml` pattern.
+- `crates/renovate-cli/src/main.rs`: Copier pipeline — GitHub repos use GitHub Tags; others → Skipped.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 924 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2961,6 +2982,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`vendir`** — Vendir `vendir.yml` Helm chart + Docker image sync tracking.
+8. **`osgi`** — OSGi `bnd.bnd` / `*.bndrun` Maven artifact extraction.
+9. **`pip-compile`** — `requirements.in` tracking upstream constraint files.
 7. **`vendir`** — Vendir `vendir.yml` sync bundle version tracking.
 8. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.
 9. **`cross`** — Rust Cross `Cross.toml` Docker image extraction.
