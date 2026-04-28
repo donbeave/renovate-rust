@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0072  | 2026-04-28 | `packageRules` matchFileNames glob filtering | Complete | See below. |
 | 0071  | 2026-04-28 | `packageRules` matchCurrentVersion filtering | Complete | See below. |
 | 0070  | 2026-04-28 | JSON output mode (`--output-format=json`) | Complete | See below. |
 | 0069  | 2026-04-28 | `packageRules` allowedVersions semver range filtering | Complete | See below. |
@@ -2195,6 +2196,26 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 714 passed
 
+## Slice 0072 - `packageRules` matchFileNames glob filtering
+
+### Renovate reference
+- `lib/config/options/index.ts` — `matchFileNames` option
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PackageRule.match_file_names: Vec<String>` — raw file name patterns.
+  - `PackageRule::file_name_matches(path) -> bool` — delegates to `PathMatcher::new(&self.match_file_names).is_ignored(path)`. Reuses the existing glob/prefix matching infrastructure from `ignorePaths`.
+  - `RepoConfig::is_update_blocked_for_file(name, current, type, manager, file_path)` — extends `is_update_blocked` with file-path-aware matching.
+  - `RepoConfig::is_version_restricted_for_file(...)` — extends `is_version_restricted` with file-path-aware matching.
+  - `is_update_blocked()` and `is_version_restricted()` now delegate to the `_for_file` variants with an empty path (matches all files).
+  - 4 new unit tests.
+- `crates/renovate-cli/src/main.rs`:
+  - `apply_update_blocking_to_report()` now uses the `_for_file` variants, passing `file.path` to respect `matchFileNames` constraints.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 718 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2206,4 +2227,4 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **GitLab CI `include:` project components**: component dependency version tracking.
-6. **`autoMerge: true` in packageRules**: flag updates eligible for auto-merge in report output.
+6. **`autoMerge` and `depTypes` in packageRules**: more rule condition fields.

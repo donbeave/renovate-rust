@@ -2683,22 +2683,30 @@ fn apply_update_blocking_to_report(
     use renovate_core::versioning::semver_generic::classify_semver_update;
     for file in &mut report.files {
         let manager = file.manager.clone();
+        let file_path = file.path.clone();
         for dep in &mut file.deps {
             if let output::DepStatus::UpdateAvailable {
                 ref current,
                 ref latest,
             } = dep.status
             {
-                // Check allowedVersions restriction first.
-                if repo_cfg.is_version_restricted(&dep.name, &manager, latest) {
+                // Check allowedVersions restriction (file-path-aware).
+                if repo_cfg.is_version_restricted_for_file(&dep.name, &manager, latest, &file_path)
+                {
                     dep.status = output::DepStatus::Skipped {
                         reason: "blocked by packageRules (allowedVersions)".into(),
                     };
                     continue;
                 }
-                // Check matchUpdateTypes + matchCurrentVersion + enabled:false blocking.
+                // Check matchUpdateTypes + matchCurrentVersion + matchFileNames + enabled:false.
                 if let Some(update_type) = classify_semver_update(current, latest)
-                    && repo_cfg.is_update_blocked(&dep.name, current, update_type, &manager)
+                    && repo_cfg.is_update_blocked_for_file(
+                        &dep.name,
+                        current,
+                        update_type,
+                        &manager,
+                        &file_path,
+                    )
                 {
                     dep.status = output::DepStatus::Skipped {
                         reason: format!(

@@ -65,6 +65,9 @@ pub struct PackageRule {
     /// rule to apply.  E.g. `"< 2.0"` means "only apply this rule if we're
     /// currently below 2.0".  Regex patterns not yet supported.
     pub match_current_version: Option<String>,
+    /// File name patterns (glob or exact) that the manifest file path must
+    /// match for this rule to apply.  Empty = all files.
+    pub match_file_names: Vec<String>,
     /// If `Some(false)`, matching packages are disabled (skipped).
     pub enabled: Option<bool>,
     /// `true` when the raw config specified at least one name or pattern
@@ -101,6 +104,18 @@ impl PackageRule {
     /// An empty `matchUpdateTypes` list matches all update types.
     pub fn update_type_matches(&self, update_type: UpdateType) -> bool {
         self.match_update_types.is_empty() || self.match_update_types.contains(&update_type)
+    }
+
+    /// Return `true` when `path` matches this rule's `matchFileNames` patterns.
+    ///
+    /// An empty `matchFileNames` list matches all files.
+    /// Glob strings (`*`, `?`, `[`) are compiled as globset patterns;
+    /// plain strings are treated as prefix matches.
+    pub fn file_name_matches(&self, path: &str) -> bool {
+        if self.match_file_names.is_empty() {
+            return true;
+        }
+        PathMatcher::new(&self.match_file_names).is_ignored(path)
     }
 
     /// Return `true` when `current_value` satisfies this rule's
@@ -222,6 +237,8 @@ impl RepoConfig {
             allowed_versions: Option<String>,
             #[serde(rename = "matchCurrentVersion")]
             match_current_version: Option<String>,
+            #[serde(rename = "matchFileNames", default)]
+            match_file_names: Vec<String>,
             enabled: Option<bool>,
         }
 
@@ -287,6 +304,7 @@ impl RepoConfig {
                     match_update_types,
                     allowed_versions: r.allowed_versions,
                     match_current_version: r.match_current_version,
+                    match_file_names: r.match_file_names,
                     enabled: r.enabled,
                     has_name_constraint,
                 }
@@ -342,11 +360,24 @@ impl RepoConfig {
         update_type: UpdateType,
         manager: &str,
     ) -> bool {
+        self.is_update_blocked_for_file(name, current_value, update_type, manager, "")
+    }
+
+    /// Like [`is_update_blocked`] but also checks `matchFileNames`.
+    pub fn is_update_blocked_for_file(
+        &self,
+        name: &str,
+        current_value: &str,
+        update_type: UpdateType,
+        manager: &str,
+        file_path: &str,
+    ) -> bool {
         self.package_rules.iter().any(|rule| {
             rule.name_matches(name)
                 && rule.manager_matches(manager)
                 && rule.update_type_matches(update_type)
                 && rule.current_version_matches(current_value)
+                && rule.file_name_matches(file_path)
                 && rule.enabled == Some(false)
         })
     }
@@ -358,12 +389,26 @@ impl RepoConfig {
     /// silently ignored).  If no rule has `allowedVersions`, this returns
     /// `false` (no restriction).
     pub fn is_version_restricted(&self, name: &str, manager: &str, proposed_version: &str) -> bool {
+        self.is_version_restricted_for_file(name, manager, proposed_version, "")
+    }
+
+    /// Like [`is_version_restricted`] but also checks `matchFileNames`.
+    pub fn is_version_restricted_for_file(
+        &self,
+        name: &str,
+        manager: &str,
+        proposed_version: &str,
+        file_path: &str,
+    ) -> bool {
         use crate::versioning::semver_generic::parse_padded;
         let Some(proposed_sv) = parse_padded(proposed_version) else {
             return false; // can't parse → don't restrict
         };
         self.package_rules.iter().any(|rule| {
-            if !rule.name_matches(name) || !rule.manager_matches(manager) {
+            if !rule.name_matches(name)
+                || !rule.manager_matches(manager)
+                || !rule.file_name_matches(file_path)
+            {
                 return false;
             }
             let Some(ref av) = rule.allowed_versions else {
@@ -924,5 +969,78 @@ mod tests {
         // No matchCurrentVersion → applies regardless of current version
         assert!(c.is_update_blocked("pkg", "0.1.0", UpdateType::Major, "npm"));
         assert!(c.is_update_blocked("pkg", "99.0.0", UpdateType::Major, "npm"));
+    }
+
+    // ── matchFileNames tests ──────────────────────────────────────────────────
+
+    #[test]
+    fn match_file_names_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchFileNames": ["**/test/**"], "enabled": false}]}"#,
+        );
+        assert_eq!(c.package_rules[0].match_file_names, vec!["**/test/**"]);
+    }
+
+    #[test]
+    fn match_file_names_blocks_matching_path() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchFileNames": ["**/test/**"], "enabled": false}]}"#,
+        );
+        assert!(c.is_update_blocked_for_file(
+            "serde",
+            "1.0.0",
+            UpdateType::Major,
+            "cargo",
+            "packages/test/Cargo.toml"
+        ));
+        assert!(!c.is_update_blocked_for_file(
+            "serde",
+            "1.0.0",
+            UpdateType::Major,
+            "cargo",
+            "packages/main/Cargo.toml"
+        ));
+    }
+
+    #[test]
+    fn match_file_names_exact_match() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchFileNames": ["package.json"], "enabled": false}]}"#,
+        );
+        assert!(c.is_update_blocked_for_file(
+            "lodash",
+            "1.0.0",
+            UpdateType::Patch,
+            "npm",
+            "package.json"
+        ));
+        assert!(!c.is_update_blocked_for_file(
+            "lodash",
+            "1.0.0",
+            UpdateType::Patch,
+            "npm",
+            "packages/frontend/package.json"
+        ));
+    }
+
+    #[test]
+    fn match_file_names_absent_matches_all_files() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["serde"], "enabled": false}]}"#,
+        );
+        assert!(c.is_update_blocked_for_file(
+            "serde",
+            "1.0.0",
+            UpdateType::Major,
+            "cargo",
+            "any/path/Cargo.toml"
+        ));
+        assert!(c.is_update_blocked_for_file(
+            "serde",
+            "1.0.0",
+            UpdateType::Major,
+            "cargo",
+            "other/Cargo.toml"
+        ));
     }
 }
