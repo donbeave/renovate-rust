@@ -3754,6 +3754,84 @@ async fn process_repo(
         }
     }
 
+    // ── Cake build scripts (.cake) ────────────────────────────────────────────
+    for cake_path in manager_files(&detected, "cake") {
+        match client.get_raw_file(owner, repo, &cake_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::cake::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| {
+                        !d.current_value.is_empty() && !repo_cfg.is_dep_ignored(&d.package_name)
+                    })
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %cake_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted cake deps"
+                );
+                let nuget_inputs: Vec<nuget_datasource::NuGetDepInput> = actionable
+                    .iter()
+                    .map(|d| nuget_datasource::NuGetDepInput {
+                        package_id: d.package_name.clone(),
+                        current_value: d.current_value.clone(),
+                    })
+                    .collect();
+                let nuget_updates = nuget_datasource::fetch_updates_concurrent(
+                    http,
+                    &nuget_inputs,
+                    nuget_datasource::NUGET_API,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<_, _> = nuget_updates
+                    .into_iter()
+                    .map(|r| (r.package_id, r.summary))
+                    .collect();
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = if dep.current_value.is_empty() {
+                            output::DepStatus::Skipped {
+                                reason: "no-version".into(),
+                            }
+                        } else {
+                            match update_map.get(&dep.package_name) {
+                                Some(Ok(s)) if s.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.current_value.clone(),
+                                        latest: s.latest.clone().unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(s)) => output::DepStatus::UpToDate {
+                                    latest: s.latest.clone(),
+                                },
+                                Some(Err(e)) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            }
+                        };
+                        output::DepReport {
+                            name: dep.package_name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: cake_path.clone(),
+                    manager: "cake".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%cake_path, "cake script not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%cake_path, %err, "failed to fetch cake script");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Conan (conanfile.txt / conanfile.py) ─────────────────────────────────
     for conan_path in manager_files(&detected, "conan") {
         match client.get_raw_file(owner, repo, &conan_path).await {

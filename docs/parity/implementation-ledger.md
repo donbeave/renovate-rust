@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0111  | 2026-04-28 | Cake `.cake` build script extractor (NuGet datasource) | Complete | See below. |
 | 0110  | 2026-04-28 | Conan `conanfile.txt`/`.py` extractor + Conan Center datasource | Complete | See below. |
 | 0109  | 2026-04-28 | `.ruby-version` version file (GitHub Tags, underscore tag normalization) | Complete | See below. |
 | 0108  | 2026-04-28 | Clojure `deps.edn` / `bb.edn` extractor | Complete | See below. |
@@ -2882,6 +2883,28 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 904 passed
 
+## Slice 0111 - Cake `.cake` build script extractor (NuGet datasource)
+
+### Renovate reference
+- `lib/modules/manager/cake/index.ts`
+- Pattern: `/\.cake$/`
+- Datasource: NuGet
+
+### What landed
+- `crates/renovate-core/src/extractors/cake.rs` (new):
+  - `CakeDep { package_name, current_value, registry_url }` struct.
+  - `find_comment_start()` — smart `//` comment detection that ignores `://` URL separators.
+  - `extract()` — handles `#addin`/`#tool`/`#module`/`#load`/`#l` directives with `nuget:` prefix;
+    skips `file://` local refs; strips `/* */` block comments; parses `package=` and `version=`.
+  - 7 unit tests.
+- `crates/renovate-core/src/managers.rs`: `cake` manager with `\.cake$` pattern.
+- `crates/renovate-cli/src/main.rs`: Cake pipeline using `nuget_datasource::fetch_updates_concurrent`;
+  deps without version → `Skipped("no-version")`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 911 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2894,6 +2917,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
+8. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.
+9. **`crow`** — C++ Crow framework `Makefile`/`CMakeLists.txt` dependency tracking.
 7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
 8. **`cake`** — C# Cake build scripts (`*.cake` / `*.csx`) dependency extraction.
 9. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.

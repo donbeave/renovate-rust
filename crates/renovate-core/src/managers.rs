@@ -222,6 +222,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Cargo\.toml$"],
     },
     ManagerDef {
+        name: "cake",
+        patterns: &[r"\.cake$"],
+    },
+    ManagerDef {
         name: "conan",
         patterns: &[r"(^|/)conanfile\.(txt|py)$"],
     },

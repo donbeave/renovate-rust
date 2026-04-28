@@ -10,6 +10,7 @@ pub mod azure_pipelines;
 pub mod bitbucket_pipelines;
 pub mod buildkite;
 pub mod bundler;
+pub mod cake;
 pub mod cargo;
 pub mod circleci;
 pub mod cloudbuild;
