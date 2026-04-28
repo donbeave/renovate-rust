@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0076  | 2026-04-28 | Gradle version catalog `[plugins]` section extraction | Complete | See below. |
 | 0075  | 2026-04-28 | Gradle `plugins {}` block extraction | Complete | See below. |
 | 0074  | 2026-04-28 | Extend asdf tool table (bun, deno, zig, elixir, scala) + bun-version file | Complete | See below. |
 | 0073  | 2026-04-28 | Add `stats` (update counts) to JSON output | Complete | See below. |

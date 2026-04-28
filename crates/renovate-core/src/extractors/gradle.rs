@@ -142,6 +142,15 @@ pub fn extract_version_catalog(content: &str) -> Vec<GradleExtractedDep> {
         }
     }
 
+    // Parse `[plugins]` section.
+    if let Some(plugins) = table.get("plugins").and_then(|v| v.as_table()) {
+        for (_, entry) in plugins {
+            if let Some(dep) = parse_catalog_plugin(entry, &versions) {
+                deps.push(dep);
+            }
+        }
+    }
+
     deps
 }
 
@@ -244,6 +253,58 @@ fn parse_catalog_library(
         }
         _ => None,
     }
+}
+
+/// Parse a single entry from the `[plugins]` section of a TOML catalog.
+///
+/// Supported forms:
+/// - String: `spring-boot = "org.springframework.boot:3.2.0"` (`id:version`)
+/// - Table inline: `spring-boot = { id = "org.springframework.boot", version = "3.2.0" }`
+/// - Table ref: `spring-boot = { id = "...", version.ref = "key" }`
+fn parse_catalog_plugin(
+    entry: &toml::Value,
+    versions: &HashMap<String, String>,
+) -> Option<GradleExtractedDep> {
+    let (plugin_id, version) = match entry {
+        toml::Value::String(s) => {
+            // String form: "plugin.id:version"
+            let parts: Vec<&str> = s.splitn(2, ':').collect();
+            if parts.len() != 2 {
+                return None;
+            }
+            (parts[0].trim().to_owned(), parts[1].trim().to_owned())
+        }
+        toml::Value::Table(t) => {
+            let id = t.get("id").and_then(|v| v.as_str())?.trim().to_owned();
+            let ver = if let Some(v) = t.get("version").and_then(|v| v.as_str()) {
+                v.to_owned()
+            } else if let Some(ref_key) = t
+                .get("version")
+                .and_then(|v| v.as_table())
+                .and_then(|vt| vt.get("ref"))
+                .and_then(|r| r.as_str())
+            {
+                versions.get(ref_key).cloned().unwrap_or_default()
+            } else {
+                return None;
+            };
+            (id, ver)
+        }
+        _ => return None,
+    };
+
+    if plugin_id.is_empty() || version.is_empty() {
+        return None;
+    }
+
+    let dep_name = format!("{plugin_id}:{plugin_id}.gradle.plugin");
+    let skip_reason = classify_version(&version);
+    Some(GradleExtractedDep {
+        dep_name,
+        current_value: version,
+        source: GradleDepSource::VersionCatalog,
+        skip_reason,
+    })
 }
 
 /// Determine whether a version string is dynamic or interpolated.
@@ -473,7 +534,7 @@ guava = { module = "com.google.guava:guava", version.ref = "guava" }
     }
 
     #[test]
-    fn catalog_ignores_plugins_section() {
+    fn catalog_plugins_section_table_version_ref() {
         let content = r#"
 [versions]
 kotlin = "1.9.0"
@@ -485,9 +546,51 @@ stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 "#;
         let deps = extract_version_catalog(content);
-        // Only the library, not the plugin
+        // Library AND plugin
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "org.jetbrains.kotlin:kotlin-stdlib")
+        );
+        let plugin = deps
+            .iter()
+            .find(|d| d.dep_name.contains("kotlin.jvm.gradle.plugin"))
+            .unwrap();
+        assert_eq!(plugin.current_value, "1.9.0");
+        assert_eq!(
+            plugin.dep_name,
+            "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin"
+        );
+    }
+
+    #[test]
+    fn catalog_plugins_section_string_form() {
+        let content = r#"
+[plugins]
+spring-boot = "org.springframework.boot:3.2.0"
+"#;
+        let deps = extract_version_catalog(content);
         assert_eq!(deps.len(), 1);
-        assert_eq!(deps[0].dep_name, "org.jetbrains.kotlin:kotlin-stdlib");
+        assert_eq!(
+            deps[0].dep_name,
+            "org.springframework.boot:org.springframework.boot.gradle.plugin"
+        );
+        assert_eq!(deps[0].current_value, "3.2.0");
+    }
+
+    #[test]
+    fn catalog_plugins_section_table_inline_version() {
+        let content = r#"
+[plugins]
+dependency-management = { id = "io.spring.dependency-management", version = "1.1.4" }
+"#;
+        let deps = extract_version_catalog(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].dep_name,
+            "io.spring.dependency-management:io.spring.dependency-management.gradle.plugin"
+        );
+        assert_eq!(deps[0].current_value, "1.1.4");
     }
 
     #[test]
