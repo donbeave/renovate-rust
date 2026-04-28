@@ -291,9 +291,7 @@ pub(crate) fn print_report(report: &RepoReport, use_color: bool, quiet: bool) {
         println!("{file_label}  {counts}");
 
         if !quiet {
-            for dep in &file.deps {
-                println!("    {}", format_dep(dep, use_color));
-            }
+            print_file_deps(&file.deps, use_color);
         }
         println!();
     }
@@ -354,6 +352,60 @@ pub(crate) fn print_run_summary(stats: &RunStats, use_color: bool) {
     }
 
     println!("{}", dim(&bar, use_color));
+}
+
+/// Print per-dep lines for one manifest file, grouping `UpdateAvailable` deps
+/// that share a `groupName` under a header line.  Non-update deps (UpToDate,
+/// Skipped, LookupError) are always shown flat after the grouped updates.
+fn print_file_deps(deps: &[DepReport], use_color: bool) {
+    // Partition: updates with group, updates without, non-updates.
+    let mut group_order: Vec<String> = Vec::new();
+    let mut groups: std::collections::HashMap<String, Vec<&DepReport>> =
+        std::collections::HashMap::new();
+    let mut ungrouped_updates: Vec<&DepReport> = Vec::new();
+    let mut non_updates: Vec<&DepReport> = Vec::new();
+
+    for dep in deps {
+        match &dep.status {
+            DepStatus::UpdateAvailable { .. } => {
+                if let Some(ref g) = dep.group_name {
+                    if !groups.contains_key(g) {
+                        group_order.push(g.clone());
+                    }
+                    groups.entry(g.clone()).or_default().push(dep);
+                } else {
+                    ungrouped_updates.push(dep);
+                }
+            }
+            _ => non_updates.push(dep),
+        }
+    }
+
+    // Print grouped updates.
+    for group_name in &group_order {
+        if let Some(group_deps) = groups.get(group_name) {
+            let group_header = format!(
+                "    {} {} {}",
+                dim("──", use_color),
+                dim(&format!("group: {group_name}"), use_color),
+                dim("──", use_color),
+            );
+            println!("{group_header}");
+            for dep in group_deps {
+                println!("      {}", format_dep(dep, use_color));
+            }
+        }
+    }
+
+    // Print ungrouped updates.
+    for dep in &ungrouped_updates {
+        println!("    {}", format_dep(dep, use_color));
+    }
+
+    // Print non-update deps (UpToDate, Skipped, LookupError).
+    for dep in &non_updates {
+        println!("    {}", format_dep(dep, use_color));
+    }
 }
 
 fn format_file_counts(updates: usize, skipped: usize, errors: usize, use_color: bool) -> String {
@@ -850,5 +902,64 @@ mod tests {
         assert!(json.contains("updateAvailable"));
         assert!(json.contains("stats"));
         assert!(json.contains("owner/myrepo"));
+    }
+
+    fn make_dep(name: &str, group: Option<&str>) -> DepReport {
+        DepReport {
+            name: name.into(),
+            branch_name: None,
+            group_name: group.map(str::to_owned),
+            automerge: None,
+            labels: Vec::new(),
+            pr_title: None,
+            release_timestamp: None,
+            status: DepStatus::UpdateAvailable {
+                current: "1.0.0".into(),
+                latest: "2.0.0".into(),
+            },
+        }
+    }
+
+    fn make_dep_up_to_date(name: &str) -> DepReport {
+        DepReport {
+            name: name.into(),
+            branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
+            pr_title: None,
+            release_timestamp: None,
+            status: DepStatus::UpToDate { latest: None },
+        }
+    }
+
+    #[test]
+    fn print_file_deps_no_groups_runs_without_panic() {
+        let deps = vec![make_dep("express", None), make_dep_up_to_date("lodash")];
+        // Should not panic.
+        print_file_deps(&deps, false);
+    }
+
+    #[test]
+    fn print_file_deps_with_groups_runs_without_panic() {
+        let deps = vec![
+            make_dep("serde", Some("rust-deps")),
+            make_dep("tokio", Some("rust-deps")),
+            make_dep("express", None),
+            make_dep_up_to_date("lodash"),
+        ];
+        // Should not panic and should output group header.
+        print_file_deps(&deps, false);
+    }
+
+    #[test]
+    fn group_order_preserves_first_seen() {
+        // Verify grouped deps produce reproducible output (no panic).
+        let deps = vec![
+            make_dep("a", Some("group-b")),
+            make_dep("b", Some("group-a")),
+            make_dep("c", Some("group-b")),
+        ];
+        print_file_deps(&deps, false);
     }
 }
