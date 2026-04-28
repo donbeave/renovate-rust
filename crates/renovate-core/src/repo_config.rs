@@ -25,8 +25,9 @@ use base64::Engine as _;
 /// Ordered list of candidate config file paths, matching Renovate's
 /// `configFileNames` constant in `lib/config/app-strings.ts`.
 ///
-/// The `package.json` entry is omitted for now — parsing a `renovate` key
-/// inside `package.json` is a separate slice.
+/// `package.json` is handled separately by [`discover`] — the file is very
+/// commonly present as an npm package manifest and must be checked for a
+/// `"renovate"` key before treating it as a config source.
 pub const CONFIG_FILE_CANDIDATES: &[&str] = &[
     "renovate.json",
     "renovate.json5",
@@ -717,6 +718,25 @@ impl RepoConfig {
         }
     }
 
+    /// Extract a Renovate config from a `package.json` file.
+    ///
+    /// Returns `Some(config)` when `package.json` contains a top-level
+    /// `"renovate"` key whose value is a JSON object.  Returns `None` when
+    /// the file is missing the key or cannot be parsed.
+    ///
+    /// Renovate reference: `lib/workers/repository/init/merge.ts` —
+    /// `detectConfigFile()` checks `pJson.renovate` before treating
+    /// `package.json` as a Renovate config source.
+    ///
+    /// Using `package.json` for Renovate config is deprecated upstream.
+    pub fn parse_from_package_json(content: &str) -> Option<Self> {
+        let pkg: serde_json::Value = serde_json::from_str(content).ok()?;
+        let renovate_val = pkg.get("renovate")?;
+        // Re-serialize the renovate sub-value and parse it as a RepoConfig.
+        let renovate_str = serde_json::to_string(renovate_val).ok()?;
+        Some(Self::parse(&renovate_str))
+    }
+
     /// Return `true` when `manager_name` is active under `enabledManagers`.
     ///
     /// When `enabledManagers` is empty, all managers are active.
@@ -950,8 +970,12 @@ pub enum RepoConfigResult {
 /// Try to find a Renovate config file in the repository.
 ///
 /// Tries each path in [`CONFIG_FILE_CANDIDATES`] in order and returns the
-/// first one found. Returns [`RepoConfigResult::NotFound`] or
-/// [`RepoConfigResult::NeedsOnboarding`] when none exist.
+/// first one found.  After exhausting the dedicated config paths, also checks
+/// `package.json` for a top-level `"renovate"` key (deprecated upstream but
+/// still supported for compatibility).
+///
+/// Returns [`RepoConfigResult::NotFound`] or [`RepoConfigResult::NeedsOnboarding`]
+/// when no config exists anywhere.
 pub async fn discover(
     client: &AnyPlatformClient,
     owner: &str,
@@ -964,6 +988,21 @@ pub async fn discover(
             let config = RepoConfig::parse(&file.content);
             return Ok(RepoConfigResult::Found {
                 path: file.path,
+                config,
+            });
+        }
+    }
+
+    // Fall back to package.json `"renovate"` key (deprecated; warn when used).
+    if let Some(file) = client.get_raw_file(owner, repo, "package.json").await? {
+        if let Some(config) = RepoConfig::parse_from_package_json(&file.content) {
+            tracing::warn!(
+                repo = %format!("{owner}/{repo}"),
+                "Using package.json for Renovate config is deprecated — \
+                 please migrate to a dedicated config file such as renovate.json"
+            );
+            return Ok(RepoConfigResult::Found {
+                path: "package.json".to_owned(),
                 config,
             });
         }
@@ -1017,17 +1056,27 @@ mod tests {
         );
     }
 
-    #[tokio::test]
-    async fn returns_needs_onboarding_when_no_config_and_required() {
-        let server = MockServer::start().await;
-        // All file requests return 404
+    /// Mount 404 mocks for all dedicated config candidates AND package.json.
+    async fn mock_all_configs_404(server: &MockServer) {
         for candidate in CONFIG_FILE_CANDIDATES {
             Mock::given(method("GET"))
                 .and(wm_path(format!("/repos/owner/repo/contents/{candidate}")))
                 .respond_with(ResponseTemplate::new(404))
-                .mount(&server)
+                .mount(server)
                 .await;
         }
+        // package.json fallback also returns 404.
+        Mock::given(method("GET"))
+            .and(wm_path("/repos/owner/repo/contents/package.json"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(server)
+            .await;
+    }
+
+    #[tokio::test]
+    async fn returns_needs_onboarding_when_no_config_and_required() {
+        let server = MockServer::start().await;
+        mock_all_configs_404(&server).await;
 
         let client = make_client(&server.uri());
         // require_config defaults to Required
@@ -1042,13 +1091,7 @@ mod tests {
     async fn returns_not_found_when_optional() {
         use crate::config::RequireConfig;
         let server = MockServer::start().await;
-        for candidate in CONFIG_FILE_CANDIDATES {
-            Mock::given(method("GET"))
-                .and(wm_path(format!("/repos/owner/repo/contents/{candidate}")))
-                .respond_with(ResponseTemplate::new(404))
-                .mount(&server)
-                .await;
-        }
+        mock_all_configs_404(&server).await;
 
         let client = make_client(&server.uri());
         let config = GlobalConfig {
@@ -1057,6 +1100,116 @@ mod tests {
         };
         let result = discover(&client, "owner", "repo", &config).await.unwrap();
         assert!(matches!(result, RepoConfigResult::NotFound));
+    }
+
+    #[tokio::test]
+    async fn discovers_renovate_key_in_package_json() {
+        let server = MockServer::start().await;
+        // All dedicated config files return 404.
+        for candidate in CONFIG_FILE_CANDIDATES {
+            Mock::given(method("GET"))
+                .and(wm_path(format!("/repos/owner/repo/contents/{candidate}")))
+                .respond_with(ResponseTemplate::new(404))
+                .mount(&server)
+                .await;
+        }
+        // package.json has a `renovate` key.
+        let pkg_json = serde_json::json!({
+            "name": "my-app",
+            "version": "1.0.0",
+            "renovate": {
+                "enabled": true,
+                "ignoreDeps": ["lodash"]
+            }
+        });
+        Mock::given(method("GET"))
+            .and(wm_path("/repos/owner/repo/contents/package.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": base64::engine::general_purpose::STANDARD
+                    .encode(pkg_json.to_string()),
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = discover(&client, "owner", "repo", &GlobalConfig::default())
+            .await
+            .unwrap();
+
+        let (path, config) = match result {
+            RepoConfigResult::Found { path, config } => (path, config),
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(path, "package.json");
+        assert!(config.enabled);
+        assert_eq!(config.ignore_deps, vec!["lodash"]);
+    }
+
+    #[tokio::test]
+    async fn package_json_without_renovate_key_triggers_onboarding() {
+        let server = MockServer::start().await;
+        for candidate in CONFIG_FILE_CANDIDATES {
+            Mock::given(method("GET"))
+                .and(wm_path(format!("/repos/owner/repo/contents/{candidate}")))
+                .respond_with(ResponseTemplate::new(404))
+                .mount(&server)
+                .await;
+        }
+        // package.json exists but has no `renovate` key.
+        let pkg_json = serde_json::json!({"name": "my-app", "version": "1.0.0"});
+        Mock::given(method("GET"))
+            .and(wm_path("/repos/owner/repo/contents/package.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": base64::engine::general_purpose::STANDARD
+                    .encode(pkg_json.to_string()),
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let result = discover(&client, "owner", "repo", &GlobalConfig::default())
+            .await
+            .unwrap();
+
+        assert!(matches!(result, RepoConfigResult::NeedsOnboarding));
+    }
+
+    // ── RepoConfig::parse_from_package_json ─────────────────────────────────
+
+    #[test]
+    fn parse_from_package_json_extracts_renovate_key() {
+        let pkg = r#"{"name":"app","version":"1.0.0","renovate":{"ignoreDeps":["lodash"]}}"#;
+        let c = RepoConfig::parse_from_package_json(pkg).expect("should find renovate key");
+        assert_eq!(c.ignore_deps, vec!["lodash"]);
+    }
+
+    #[test]
+    fn parse_from_package_json_returns_none_when_no_key() {
+        let pkg = r#"{"name":"app","version":"1.0.0","dependencies":{"react":"^18"}}"#;
+        assert!(RepoConfig::parse_from_package_json(pkg).is_none());
+    }
+
+    #[test]
+    fn parse_from_package_json_returns_none_for_invalid_json() {
+        assert!(RepoConfig::parse_from_package_json("not json").is_none());
+    }
+
+    #[test]
+    fn parse_from_package_json_full_config() {
+        let pkg = r#"{
+            "name": "my-app",
+            "renovate": {
+                "schedule": ["before 5am"],
+                "automerge": true,
+                "labels": ["deps"]
+            }
+        }"#;
+        let c = RepoConfig::parse_from_package_json(pkg).unwrap();
+        assert_eq!(c.schedule, vec!["before 5am"]);
+        assert!(c.automerge);
+        assert_eq!(c.labels, vec!["deps"]);
     }
 
     // ── RepoConfig::parse ────────────────────────────────────────────────────

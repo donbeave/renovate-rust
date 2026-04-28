@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0172  | 2026-04-28 | `package.json` `renovate` key config discovery | Complete | See below. |
 | 0170  | 2026-04-28 | `matchDepNames` + `matchDatasources` packageRule matchers | Complete | See below. |
 | 0169  | 2026-04-28 | `ignoreVersions` global+packageRule + glob/regex `matchPackageNames` + `matchPackagePrefixes` | Complete | See below. |
 | 0168  | 2026-04-28 | `matchDepTypes` packageRule + npm dep type filtering | Complete | See below. |
@@ -4386,3 +4387,46 @@ Pick whichever can be completed in one loop:
    `commitMessagePrefix`, `commitMessageAction`, `commitMessageSuffix`.
 5. **`prConcurrentLimit` / `prHourlyLimit` enforcement** — count open PRs
    and respect the limits when proposing updates.
+
+## Slice 0172 — `package.json` `renovate` key config discovery
+
+### Renovate reference
+- `lib/config/app-strings.ts` — `configFileNames` (includes `package.json`)
+- `lib/workers/repository/init/merge.ts` — `detectConfigFile()` checks
+  `pJson.renovate` before treating `package.json` as a Renovate config source
+- Upstream emits a deprecation warning when `package.json` is the config source
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `RepoConfig::parse_from_package_json(content)` — parses a `package.json`
+    string, extracts the `"renovate"` key, and delegates to `parse()`.
+    Returns `None` when no `renovate` key exists or JSON is invalid.
+  - `discover()` updated: after exhausting `CONFIG_FILE_CANDIDATES`, fetches
+    `package.json` and calls `parse_from_package_json`.  If a `renovate` key
+    is found, logs a deprecation warning and returns `RepoConfigResult::Found`.
+  - Updated `CONFIG_FILE_CANDIDATES` doc comment to note the special handling.
+  - Updated existing async tests (`returns_needs_onboarding_*`,
+    `returns_not_found_*`) to also mock `package.json` with 404.
+  - 4 new async integration tests and 4 unit tests (6 tests total for new code).
+
+### Notes
+- Using `package.json` for Renovate config is deprecated upstream.
+  The warning nudges users to migrate to a dedicated file.
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1184 passed
+
+## Next slice candidates
+
+1. **Wire `matchDatasources` into filter methods** — add `datasource` param to
+   `is_dep_ignored_for_manager` and related methods.
+2. **`extends` preset resolution** — fetch `config:recommended` and other
+   presets from GitHub and merge them into the local `RepoConfig`.
+3. **Commit message composition** — `branchName`, `commitMessage`,
+   `commitMessagePrefix`, `commitMessageAction`, `commitMessageSuffix`.
+4. **`prConcurrentLimit` / `prHourlyLimit` enforcement** — count open PRs and
+   respect the limits when proposing updates.
+5. **`git-submodules` extractor** — parse `.gitmodules` INI content to extract
+   submodule name/path/URL; dispatch via the already-registered manager.
