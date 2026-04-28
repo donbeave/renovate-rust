@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0026  | 2026-04-28 | pyproject.toml (PEP 621/735) extractor + pep621 manager | Complete | See below. |
 | 0025  | 2026-04-28 | Per-repo renovate.json config parsing + application | Complete | See below. |
 | 0024  | 2026-04-28 | docker-compose image extractor (line-scan, no YAML dep) | Complete | See below. |
 | 0023  | 2026-04-28 | HTTP retry with exponential backoff + Retry-After | Complete | See below. |
@@ -46,6 +47,38 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0026 - pyproject.toml (PEP 621/735) extractor + pep621 manager
+
+### Renovate reference
+- `lib/modules/manager/pep621/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/pep621/schema.ts` — `PyProject`
+- Pattern: `/(^|/)pyproject\\.toml$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/pep621.rs` — parses `pyproject.toml`
+  using the `toml` crate (already a dependency); extracts deps from:
+  `[project].dependencies` (Regular), `[project.optional-dependencies].*`
+  (Optional), `[dependency-groups].*` (Group, PEP 735). Handles PEP 508
+  strings: strips env markers (`;`), strips extras (`[...]`), normalizes
+  names per PEP 503. Classifies direct references (`@`) and group-include
+  tables as skip reasons. 12 unit tests including the PDM fixture.
+- `crates/renovate-core/src/managers.rs` — `pep621` manager added with
+  `(^|/)pyproject\.toml$` pattern.
+- `crates/renovate-core/src/extractors.rs` — `pub mod pep621` added.
+- `crates/renovate-cli/src/main.rs` — pep621 pipeline wired: extract deps
+  → filter by `repo_cfg.is_dep_ignored` → PyPI datasource → report.
+
+### What was intentionally deferred
+- `[tool.poetry.dependencies]` (Poetry) — separate manager.
+- `[tool.pdm.dev-dependencies]` (PDM tool section) — separate slice.
+- `build-system.requires` — build tool deps.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (276 passed)
 
 ## Slice 0025 - Per-repo renovate.json config parsing + application
 

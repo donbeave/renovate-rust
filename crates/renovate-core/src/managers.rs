@@ -74,6 +74,7 @@ static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {
 /// - cargo:          `/(^|/)Cargo\\.toml$/`
 /// - npm:            `/(^|/)package\\.json$/`, `/(^|/)pnpm-workspace\\.yaml$/`, `/(^|/)\\.yarnrc\\.yml$/`
 /// - pip_requirements: `/(^|/)[\\w-]*requirements([-._]\\w+)?\\.(txt|pip)$/`
+/// - pep621:         `/(^|/)pyproject\\.toml$/`
 /// - github-actions: `/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/`, `/(^|/)action\\.ya?ml$/`
 /// - dockerfile:     `/(^|/)(Dockerfile|Containerfile)(\\.[^/]*)?$/`
 /// - docker-compose: `/(^|/)(?:docker-)?compose\\.ya?ml$/`
@@ -93,6 +94,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
     ManagerDef {
         name: "pip_requirements",
         patterns: &[r"(^|/)[\w-]*requirements([-._]\w+)?\.(txt|pip)$"],
+    },
+    ManagerDef {
+        name: "pep621",
+        patterns: &[r"(^|/)pyproject\.toml$"],
     },
     ManagerDef {
         name: "github-actions",

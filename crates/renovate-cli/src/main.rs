@@ -456,6 +456,92 @@ async fn process_repo(
         }
     }
 
+    // ── pep621 (pyproject.toml) ───────────────────────────────────────────────
+    for pep621_file_path in manager_files(&detected, "pep621") {
+        match client.get_raw_file(owner, repo, &pep621_file_path).await {
+            Ok(Some(raw)) => match renovate_core::extractors::pep621::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %pep621_file_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted pyproject.toml dependencies"
+                    );
+                    let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                        .iter()
+                        .map(|d| pypi_datasource::PypiDepInput {
+                            dep_name: d.name.clone(),
+                            specifier: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = pypi_datasource::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        pypi_datasource::PYPI_API,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+
+                    let mut file_deps: Vec<output::DepReport> = Vec::new();
+                    for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                        file_deps.push(output::DepReport {
+                            name: dep.name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
+                                    .to_lowercase(),
+                            },
+                        });
+                    }
+                    for dep in &actionable {
+                        let status = match update_map.get(&dep.name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_specifier.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        file_deps.push(output::DepReport {
+                            name: dep.name.clone(),
+                            status,
+                        });
+                    }
+                    repo_report.files.push(output::FileReport {
+                        path: pep621_file_path.clone(),
+                        manager: "pep621".into(),
+                        deps: file_deps,
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%pep621_file_path, %err,
+                            "failed to parse pyproject.toml")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%pep621_file_path, "pyproject.toml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%pep621_file_path, %err,
+                    "failed to fetch pyproject.toml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Dockerfile ────────────────────────────────────────────────────────────
     for df_file_path in manager_files(&detected, "dockerfile") {
         match client.get_raw_file(owner, repo, &df_file_path).await {
