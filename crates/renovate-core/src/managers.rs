@@ -334,6 +334,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)[\w-]*requirements([-._]\w+)?\.(txt|pip)$"],
     },
     ManagerDef {
+        name: "pip_setup",
+        patterns: &[r"(^|/)setup\.py$"],
+    },
+    ManagerDef {
         name: "scalafmt",
         patterns: &[r"(^|/)\.scalafmt\.conf$"],
     },

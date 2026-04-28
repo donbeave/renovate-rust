@@ -62,6 +62,7 @@ pub mod nuget;
 pub mod osgi;
 pub mod pep621;
 pub mod pip;
+pub mod pip_setup;
 pub mod pipfile;
 pub mod poetry;
 pub mod pre_commit;

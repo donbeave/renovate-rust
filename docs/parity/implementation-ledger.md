@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0133  | 2026-04-28 | Python `setup.py` PyPI dependency extractor (balanced-bracket scanner) | Complete | See below. |
 | 0132  | 2026-04-28 | Apache Ant `build.xml` Maven dependency extractor (XML, coords + attributes) | Complete | See below. |
 | 0131  | 2026-04-28 | Terragrunt `terragrunt.hcl` extractor (GitHub Tags + Terraform Registry) | Complete | See below. |
 | 0130  | 2026-04-28 | Puppet `Puppetfile` extractor + Puppet Forge datasource | Complete | See below. |
@@ -3079,6 +3080,28 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0133 - Python `setup.py` PyPI dependency extractor
+
+### Renovate reference
+- `lib/modules/manager/pip_setup/extract.ts`
+- Pattern: `/(^|/)setup\.py$/`
+- Datasource: PyPI
+
+### What landed
+- `crates/renovate-core/src/extractors/pip_setup.rs` (new):
+  - `KEY_START_RE` regex finds `install_requires=[`, `tests_require=[`, `setup_requires=[`, `extras_require={` blocks.
+  - `extract_balanced()` walks bytes tracking quote state to find end of bracket block.
+  - `STRING_RE` collects all single/double-quoted string literals from the block.
+  - Delegates to `pip::extract` for PEP 508 parsing (reuses existing logic).
+  - 6 unit tests covering install_requires, tests_require, extras_require, empty lists.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod pip_setup`.
+- `crates/renovate-core/src/managers.rs`: added `pip_setup` with `(^|/)setup\.py$`.
+- `crates/renovate-cli/src/main.rs`: pipeline reuses `build_dep_reports_pip` and PyPI datasource.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 949 passed
 
 ## Slice 0132 - Apache Ant `build.xml` Maven dependency extractor
 

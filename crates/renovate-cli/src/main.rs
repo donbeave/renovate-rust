@@ -654,6 +654,52 @@ async fn process_repo(
         }
     }
 
+    // ── setup.py (pip_setup) ─────────────────────────────────────────────────
+    for setup_py_path in manager_files(&detected, "pip_setup") {
+        match client.get_raw_file(owner, repo, &setup_py_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::pip_setup::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %setup_py_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted setup.py dependencies"
+                );
+                let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                    .iter()
+                    .map(|d| pypi_datasource::PypiDepInput {
+                        dep_name: d.name.clone(),
+                        specifier: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = pypi_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    pypi_datasource::PYPI_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: setup_py_path.clone(),
+                    manager: "pip_setup".into(),
+                    deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%setup_py_path, "setup.py not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%setup_py_path, %err, "failed to fetch setup.py");
+                had_error = true;
+            }
+        }
+    }
+
     // ── setup.cfg ────────────────────────────────────────────────────────────
     for setup_cfg_path in manager_files(&detected, "setup-cfg") {
         match client.get_raw_file(owner, repo, &setup_cfg_path).await {
