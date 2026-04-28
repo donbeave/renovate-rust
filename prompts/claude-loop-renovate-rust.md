@@ -107,6 +107,9 @@ Rust best-practice rules:
   each implementation run, refactor code that has become messy, confusing,
   overly coupled, duplicated, or hard to extend, provided the refactor is scoped
   to the current slice and protected by tests or follow-up checks.
+- Follow DRY and Rust best practices. Remove accidental duplication when it
+  obscures behavior or makes future changes risky, but do not introduce broad
+  abstractions before repeated patterns are clear and stable.
 - Prefer designs that avoid avoidable overhead: stream large inputs where
   practical, avoid repeated filesystem scans, cache expensive derived data,
   batch independent work, use bounded parallelism for IO-heavy workflows, and
