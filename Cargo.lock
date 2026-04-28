@@ -1262,6 +1262,7 @@ version = "0.0.0"
 dependencies = [
  "base64",
  "json5",
+ "regex",
  "reqwest",
  "serde",
  "serde_json",

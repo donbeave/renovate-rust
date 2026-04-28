@@ -73,6 +73,17 @@ pub trait PlatformClient: Send + Sync {
         repo: &str,
         path: &str,
     ) -> impl std::future::Future<Output = Result<Option<RawFile>, PlatformError>> + Send;
+
+    /// List all file paths in the repository (recursive).
+    ///
+    /// Returns paths relative to the repo root (e.g. `"src/main.rs"`).
+    /// Large repositories may trigger a truncated response — implementations
+    /// should warn when this happens.
+    fn get_file_list(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> impl std::future::Future<Output = Result<Vec<String>, PlatformError>> + Send;
 }
 
 /// Enum dispatch wrapper covering all supported platform clients.
@@ -116,6 +127,17 @@ impl AnyPlatformClient {
     ) -> Result<Option<RawFile>, PlatformError> {
         match self {
             Self::Github(c) => c.get_raw_file(owner, repo, path).await,
+        }
+    }
+
+    /// List all file paths in the repository.
+    pub async fn get_file_list(
+        &self,
+        owner: &str,
+        repo: &str,
+    ) -> Result<Vec<String>, PlatformError> {
+        match self {
+            Self::Github(c) => c.get_file_list(owner, repo).await,
         }
     }
 }

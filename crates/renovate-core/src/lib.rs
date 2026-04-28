@@ -2,6 +2,7 @@
 
 pub mod config;
 pub mod http;
+pub mod managers;
 pub mod platform;
 pub mod repo_config;
 

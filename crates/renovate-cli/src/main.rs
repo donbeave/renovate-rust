@@ -23,6 +23,7 @@ use std::process::ExitCode;
 use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
+use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
 
@@ -172,6 +173,28 @@ async fn main() -> ExitCode {
             }
             Err(err) => {
                 tracing::error!(repo = %repo_slug, %err, "error processing repository");
+                had_error = true;
+                continue;
+            }
+        }
+
+        // Detect which package managers are present.
+        match client.get_file_list(owner, repo).await {
+            Ok(files) => {
+                let detected = managers::detect(&files);
+                if detected.is_empty() {
+                    tracing::info!(repo = %repo_slug, "no package managers detected");
+                } else {
+                    let names: Vec<&str> = detected.iter().map(|m| m.name).collect();
+                    tracing::info!(
+                        repo = %repo_slug,
+                        managers = ?names,
+                        "detected package managers"
+                    );
+                }
+            }
+            Err(err) => {
+                tracing::error!(repo = %repo_slug, %err, "failed to get file list");
                 had_error = true;
             }
         }

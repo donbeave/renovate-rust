@@ -54,6 +54,20 @@ struct GithubContent {
     encoding: Option<String>,
 }
 
+/// GitHub Git Trees API response.
+#[derive(Debug, Deserialize)]
+struct GithubTree {
+    tree: Vec<GithubTreeEntry>,
+    truncated: bool,
+}
+
+#[derive(Debug, Deserialize)]
+struct GithubTreeEntry {
+    path: Option<String>,
+    #[serde(rename = "type")]
+    entry_type: Option<String>,
+}
+
 impl PlatformClient for GithubClient {
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let url = format!("{}/user", self.api_base);
@@ -90,6 +104,32 @@ impl PlatformClient for GithubClient {
             }
             Err(e) => Err(PlatformError::Http(e)),
         }
+    }
+
+    async fn get_file_list(&self, owner: &str, repo: &str) -> Result<Vec<String>, PlatformError> {
+        // Use HEAD as the tree reference; GitHub resolves it to the default branch.
+        let url = format!(
+            "{}/repos/{}/{}/git/trees/HEAD?recursive=1",
+            self.api_base, owner, repo
+        );
+        let tree: GithubTree = self
+            .http
+            .get_json(&url)
+            .await
+            .map_err(PlatformError::Http)?;
+        if tree.truncated {
+            tracing::warn!(
+                repo = %format!("{owner}/{repo}"),
+                "file tree truncated — some managers may not be detected"
+            );
+        }
+        let files = tree
+            .tree
+            .into_iter()
+            .filter(|e| e.entry_type.as_deref() == Some("blob"))
+            .filter_map(|e| e.path)
+            .collect();
+        Ok(files)
     }
 }
 
