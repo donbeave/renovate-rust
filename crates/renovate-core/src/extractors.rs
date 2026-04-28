@@ -41,6 +41,7 @@ pub mod fleet;
 pub mod flux;
 pub mod fvm;
 pub mod gemspec;
+pub mod git_submodules;
 pub mod github_actions;
 pub mod gitlabci;
 pub mod gitlabci_include;

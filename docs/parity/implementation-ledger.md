@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0173  | 2026-04-28 | `git-submodules` `.gitmodules` extractor + dispatch | Complete | See below. |
 | 0172  | 2026-04-28 | `package.json` `renovate` key config discovery | Complete | See below. |
 | 0170  | 2026-04-28 | `matchDepNames` + `matchDatasources` packageRule matchers | Complete | See below. |
 | 0169  | 2026-04-28 | `ignoreVersions` global+packageRule + glob/regex `matchPackageNames` + `matchPackagePrefixes` | Complete | See below. |
@@ -4430,3 +4431,47 @@ Pick whichever can be completed in one loop:
    respect the limits when proposing updates.
 5. **`git-submodules` extractor** — parse `.gitmodules` INI content to extract
    submodule name/path/URL; dispatch via the already-registered manager.
+
+## Slice 0173 — `git-submodules` `.gitmodules` extractor + dispatch
+
+### Renovate reference
+- `lib/modules/manager/git-submodules/extract.ts` — INI parsing + URL normalization
+- `lib/modules/manager/git-submodules/index.ts` — defaultConfig: enabled=false,
+  datasource: git-refs, versioning: git
+- Renovate fixtures: `.gitmodules.{1-8}` in `__fixtures__/`
+
+### What landed
+- `crates/renovate-core/src/extractors/git_submodules.rs` (new):
+  - `GitSubmoduleDep { name, path, url, branch }` struct
+  - `extract(content)` — hand-written INI state machine parser
+  - `normalize_url()` — converts SSH `git@host:org/repo` → `https://host/org/repo`,
+    strips Azure DevOps user prefix, strips `.git` suffix from HTTPS URLs,
+    passes relative paths through unchanged
+  - `branch = .` normalized to `None` (Renovate: means "current branch")
+  - 11 unit tests covering all fixture scenarios
+- `crates/renovate-core/src/extractors.rs`: registered `pub mod git_submodules`
+- `crates/renovate-cli/src/main.rs`: dispatches `git-submodules` manager,
+  fetches `.gitmodules`, calls extractor, builds dep reports
+
+### Deferred
+- `currentDigest` (the submodule's current commit SHA) requires reading the
+  git tree via the platform API — deferred to a future slice.
+- `branch = .` ("current branch"): requires knowing the repo's default branch —
+  deferred.
+- Manager is disabled by default in Renovate; our `is_manager_enabled` check
+  doesn't yet honour per-manager default configs.  Future: add a
+  `disabled_by_default` field to `ManagerDef`.
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1195 passed
+
+## Next slice candidates
+
+1. **`currentDigest` for git-submodules** — use GitHub Trees API to get
+   submodule commit SHAs.
+2. **Wire `matchDatasources` into filter methods** — add `datasource` param.
+3. **`extends` preset resolution** — fetch `config:recommended` and merge.
+4. **Commit message composition** — `branchName`, `commitMessage` templates.
+5. **`prConcurrentLimit` / `prHourlyLimit` enforcement**.
