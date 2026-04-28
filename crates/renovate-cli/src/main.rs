@@ -16,6 +16,7 @@ mod cli;
 mod config_builder;
 mod logging;
 mod migrate;
+mod output;
 
 use std::path::Path;
 use std::process::ExitCode;
@@ -204,7 +205,13 @@ async fn main() -> ExitCode {
             tracing::info!(repo = %repo_slug, managers = ?names, "detected package managers");
         }
 
-        // Extract dependencies from Cargo.toml files.
+        // Collect per-file update results for the human-readable report.
+        let mut repo_report = output::RepoReport {
+            repo_slug: repo_slug.clone(),
+            files: Vec::new(),
+        };
+
+        // ── Cargo ────────────────────────────────────────────────────────────
         let cargo_files: Vec<_> = detected
             .iter()
             .find(|m| m.name == "cargo")
@@ -219,18 +226,14 @@ async fn main() -> ExitCode {
                     Ok(deps) => {
                         let actionable: Vec<_> =
                             deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                        let skipped = deps.len() - actionable.len();
-                        tracing::info!(
+                        tracing::debug!(
                             repo = %repo_slug,
                             file = %cargo_file_path,
                             total = deps.len(),
                             actionable = actionable.len(),
-                            skipped,
                             "extracted cargo dependencies"
                         );
 
-                        // Look up available versions concurrently (bounded by 10
-                        // simultaneous requests — matches Renovate's HTTP queue depth).
                         let dep_inputs: Vec<DepInput> = actionable
                             .iter()
                             .map(|d| DepInput {
@@ -248,31 +251,56 @@ async fn main() -> ExitCode {
                         )
                         .await;
 
-                        for result in &updates {
-                            match &result.summary {
-                                Ok(summary) => {
-                                    let status = if summary.update_available {
-                                        "update available"
-                                    } else {
-                                        "up to date"
-                                    };
-                                    tracing::info!(
-                                        repo = %repo_slug,
-                                        dep = %result.dep_name,
-                                        constraint = %summary.current_constraint,
-                                        latest = ?summary.latest_compatible,
-                                        status,
-                                    );
-                                }
-                                Err(err) => {
-                                    tracing::warn!(
-                                        dep = %result.dep_name,
-                                        %err,
-                                        "failed to fetch crate versions"
-                                    );
-                                }
-                            }
+                        // Build a lookup map for update results.
+                        let update_map: std::collections::HashMap<_, _> = updates
+                            .into_iter()
+                            .map(|r| (r.dep_name, r.summary))
+                            .collect();
+
+                        let mut file_deps: Vec<output::DepReport> = Vec::new();
+
+                        // Skipped deps first (no registry lookup needed).
+                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                            file_deps.push(output::DepReport {
+                                name: dep.dep_name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
+                                        .to_lowercase(),
+                                },
+                            });
                         }
+
+                        // Actionable deps — looked up in registry.
+                        for dep in &actionable {
+                            let status = match update_map.get(&dep.dep_name) {
+                                Some(Ok(summary)) if summary.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: summary.current_constraint.clone(),
+                                        latest: summary
+                                            .latest_compatible
+                                            .clone()
+                                            .unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(summary)) => output::DepStatus::UpToDate {
+                                    latest: summary.latest_compatible.clone(),
+                                },
+                                Some(Err(err)) => output::DepStatus::LookupError {
+                                    message: err.to_string(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            };
+                            file_deps.push(output::DepReport {
+                                name: dep.dep_name.clone(),
+                                status,
+                            });
+                        }
+
+                        repo_report.files.push(output::FileReport {
+                            path: cargo_file_path.clone(),
+                            manager: "cargo".into(),
+                            deps: file_deps,
+                        });
                     }
                     Err(err) => {
                         tracing::warn!(repo = %repo_slug, file = %cargo_file_path, %err, "failed to parse Cargo.toml");
@@ -288,7 +316,7 @@ async fn main() -> ExitCode {
             }
         }
 
-        // Extract dependencies from package.json files.
+        // ── npm ──────────────────────────────────────────────────────────────
         let npm_files: Vec<_> = detected
             .iter()
             .find(|m| m.name == "npm")
@@ -303,13 +331,11 @@ async fn main() -> ExitCode {
                     Ok(deps) => {
                         let actionable: Vec<_> =
                             deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-                        let skipped = deps.len() - actionable.len();
-                        tracing::info!(
+                        tracing::debug!(
                             repo = %repo_slug,
                             file = %npm_file_path,
                             total = deps.len(),
                             actionable = actionable.len(),
-                            skipped,
                             "extracted npm dependencies"
                         );
 
@@ -329,32 +355,50 @@ async fn main() -> ExitCode {
                         )
                         .await;
 
-                        for result in &updates {
-                            match &result.summary {
-                                Ok(summary) => {
-                                    let status = if summary.update_available {
-                                        "update available"
-                                    } else {
-                                        "up to date"
-                                    };
-                                    tracing::info!(
-                                        repo = %repo_slug,
-                                        dep = %result.dep_name,
-                                        constraint = %summary.current_constraint,
-                                        latest = ?summary.latest,
-                                        latest_compatible = ?summary.latest_compatible,
-                                        status,
-                                    );
-                                }
-                                Err(err) => {
-                                    tracing::warn!(
-                                        dep = %result.dep_name,
-                                        %err,
-                                        "failed to fetch npm package versions"
-                                    );
-                                }
-                            }
+                        let update_map: std::collections::HashMap<_, _> = updates
+                            .into_iter()
+                            .map(|r| (r.dep_name, r.summary))
+                            .collect();
+
+                        let mut file_deps: Vec<output::DepReport> = Vec::new();
+
+                        for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                            file_deps.push(output::DepReport {
+                                name: dep.name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
+                                        .to_lowercase(),
+                                },
+                            });
                         }
+
+                        for dep in &actionable {
+                            let status = match update_map.get(&dep.name) {
+                                Some(Ok(summary)) if summary.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: summary.current_constraint.clone(),
+                                        latest: summary.latest.clone().unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(summary)) => output::DepStatus::UpToDate {
+                                    latest: summary.latest.clone(),
+                                },
+                                Some(Err(err)) => output::DepStatus::LookupError {
+                                    message: err.to_string(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            };
+                            file_deps.push(output::DepReport {
+                                name: dep.name.clone(),
+                                status,
+                            });
+                        }
+
+                        repo_report.files.push(output::FileReport {
+                            path: npm_file_path.clone(),
+                            manager: "npm".into(),
+                            deps: file_deps,
+                        });
                     }
                     Err(err) => {
                         tracing::warn!(repo = %repo_slug, file = %npm_file_path, %err, "failed to parse package.json");
@@ -369,6 +413,9 @@ async fn main() -> ExitCode {
                 }
             }
         }
+
+        // Print the human-readable summary for this repository.
+        output::print_report(&repo_report, output::should_use_color());
     }
 
     if had_error {

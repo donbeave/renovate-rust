@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0017  | 2026-04-28 | Human-readable update report output      | Complete | See below. |
 | 0016  | 2026-04-28 | npm registry datasource + npm versioning | Complete | See below. |
 | 0015  | 2026-04-28 | npm package.json extractor + ledger catchup | Complete | See below. |
 | 0014  | 2026-04-28 | Concurrent crates.io lookups (JoinSet + Semaphore) | Complete | commit d760d28 |
@@ -37,6 +38,40 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0017 - Human-readable update report output
+
+### Renovate reference
+- Loop prompt: "Default interactive output should be colorful, intuitive, and
+  easy to understand at a glance: group by repository and dependency, use
+  semantic color consistently."
+- Renovate's own output is structured logging; the UX improvement here is a
+  Rust-native enhancement.
+
+### What landed
+- `crates/renovate-cli/src/output.rs` — `DepStatus`, `DepReport`, `FileReport`,
+  `RepoReport` data model; `print_report(report, use_color)` renderer;
+  `should_use_color()` (checks `NO_COLOR` env + stdout TTY). Color uses raw
+  ANSI escape codes — no new dependencies. Green = up-to-date/success,
+  yellow = update available, red = error, dim = skipped/metadata.
+  10 unit tests.
+- `crates/renovate-cli/src/main.rs` — per-dep `tracing::info!` calls replaced
+  with structured `RepoReport` collection; `print_report` called once per repo
+  at the end of the repo loop. Debug-level tracing kept for extraction counts.
+
+### What was intentionally deferred
+- `--quiet` flag suppression of the report (deferred to CLI flag slice).
+- Full `LOG_FORMAT=json` structured report output for CI integration.
+- Dep counts in the file header vs. full dep listing (currently always verbose).
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (168 passed)
 
 ## Slice 0016 - npm registry datasource + npm versioning
 
