@@ -149,6 +149,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.pre-commit-config\.ya?ml$"],
     },
     ManagerDef {
+        name: "asdf",
+        patterns: &[r"(^|/)\.tool-versions$"],
+    },
+    ManagerDef {
         name: "pep621",
         patterns: &[r"(^|/)pyproject\.toml$"],
     },

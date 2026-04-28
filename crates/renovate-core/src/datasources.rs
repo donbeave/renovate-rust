@@ -7,6 +7,7 @@
 pub mod cocoapods;
 pub mod crates_io;
 pub mod docker_hub;
+pub mod github_releases;
 pub mod github_tags;
 pub mod gitlab_tags;
 pub mod gomod;

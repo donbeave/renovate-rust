@@ -28,6 +28,7 @@ use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::datasources::docker_hub as docker_datasource;
+use renovate_core::datasources::github_releases as github_releases_datasource;
 use renovate_core::datasources::github_tags as github_tags_datasource;
 use renovate_core::datasources::gomod as gomod_datasource;
 use renovate_core::datasources::helm as helm_datasource;
@@ -1759,6 +1760,181 @@ async fn process_repo(
             }
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%pc_path, %err, "failed to fetch .pre-commit-config.yaml");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── asdf (.tool-versions) ─────────────────────────────────────────────────
+    for asdf_path in manager_files(&detected, "asdf") {
+        match client.get_raw_file(owner, repo, &asdf_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::asdf::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.tool_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %asdf_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted asdf tool versions"
+                );
+
+                // Partition by datasource type.
+                use renovate_core::extractors::asdf::AsdfDatasource;
+                let gh_tag_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
+                    .iter()
+                    .filter_map(|d| {
+                        if let Some(AsdfDatasource::GithubTags { repo, tag_strip }) = &d.datasource
+                        {
+                            Some(github_tags_datasource::GithubActionsDepInput {
+                                dep_name: format!("{}|{}", repo, tag_strip),
+                                current_value: d.current_value.clone(),
+                            })
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+
+                let gh_rel_inputs: Vec<github_releases_datasource::GithubReleasesDepInput> =
+                    actionable
+                        .iter()
+                        .filter_map(|d| {
+                            if let Some(AsdfDatasource::GithubReleases { repo, tag_strip }) =
+                                &d.datasource
+                            {
+                                // Prepend tag_strip to current_value so comparison works with v-prefixed tags.
+                                let cv = format!("{}{}", tag_strip, d.current_value);
+                                Some(github_releases_datasource::GithubReleasesDepInput {
+                                    dep_name: format!("{}|{}", repo, tag_strip),
+                                    current_value: cv,
+                                })
+                            } else {
+                                None
+                            }
+                        })
+                        .collect();
+
+                // Build lookup map: "repo|tag_strip" → (update_available, latest_tag, err_msg)
+                let mut lookup_map: HashMap<String, (bool, Option<String>, Option<String>)> =
+                    HashMap::new();
+
+                // GitHub Tags lookups.
+                {
+                    let unique_repos: std::collections::HashSet<&str> =
+                        gh_tag_inputs.iter().map(|i| i.dep_name.as_str()).collect();
+                    for key in unique_repos {
+                        let (repo_name, tag_strip) = key.split_once('|').unwrap_or((key, ""));
+                        match renovate_core::datasources::github_tags::fetch_latest_tag(
+                            repo_name,
+                            &gh_http,
+                            gh_api_base,
+                        )
+                        .await
+                        {
+                            Ok(Some(tag)) => {
+                                let version = tag.trim_start_matches(tag_strip).to_owned();
+                                lookup_map.insert(key.to_owned(), (false, Some(version), None));
+                            }
+                            Ok(None) => {
+                                lookup_map.insert(key.to_owned(), (false, None, None));
+                            }
+                            Err(e) => {
+                                lookup_map
+                                    .insert(key.to_owned(), (false, None, Some(e.to_string())));
+                            }
+                        }
+                    }
+                }
+
+                // GitHub Releases lookups.
+                {
+                    let unique_repos: std::collections::HashSet<&str> =
+                        gh_rel_inputs.iter().map(|i| i.dep_name.as_str()).collect();
+                    for key in unique_repos {
+                        let (repo_name, tag_strip) = key.split_once('|').unwrap_or((key, ""));
+                        match github_releases_datasource::fetch_latest_release(
+                            repo_name,
+                            &gh_http,
+                            gh_api_base,
+                        )
+                        .await
+                        {
+                            Ok(Some(tag)) => {
+                                let version = tag.trim_start_matches(tag_strip).to_owned();
+                                lookup_map.insert(key.to_owned(), (false, Some(version), None));
+                            }
+                            Ok(None) => {
+                                lookup_map.insert(key.to_owned(), (false, None, None));
+                            }
+                            Err(e) => {
+                                lookup_map
+                                    .insert(key.to_owned(), (false, None, Some(e.to_string())));
+                            }
+                        }
+                    }
+                }
+
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = if let Some(reason) = &dep.skip_reason {
+                        output::DepStatus::Skipped {
+                            reason: format!("{reason:?}").to_lowercase(),
+                        }
+                    } else if !repo_cfg.is_dep_ignored(&dep.tool_name) {
+                        let lookup_key = match &dep.datasource {
+                            Some(AsdfDatasource::GithubTags { repo, tag_strip })
+                            | Some(AsdfDatasource::GithubReleases { repo, tag_strip }) => {
+                                Some(format!("{}|{}", repo, tag_strip))
+                            }
+                            None => None,
+                        };
+                        match lookup_key.as_deref().and_then(|k| lookup_map.get(k)) {
+                            Some((_, Some(latest_ver), None)) => {
+                                let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                    &dep.current_value,
+                                    Some(latest_ver.as_str()),
+                                );
+                                if s.update_available {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.current_value.clone(),
+                                        latest: latest_ver.clone(),
+                                    }
+                                } else {
+                                    output::DepStatus::UpToDate {
+                                        latest: Some(latest_ver.clone()),
+                                    }
+                                }
+                            }
+                            Some((_, None, None)) => output::DepStatus::UpToDate { latest: None },
+                            Some((_, _, Some(err_msg))) => output::DepStatus::LookupError {
+                                message: err_msg.clone(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        }
+                    } else {
+                        output::DepStatus::Skipped {
+                            reason: "ignored".to_owned(),
+                        }
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.tool_name.clone(),
+                        status,
+                    });
+                }
+
+                repo_report.files.push(output::FileReport {
+                    path: asdf_path.clone(),
+                    manager: "asdf".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%asdf_path, ".tool-versions not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%asdf_path, %err, "failed to fetch .tool-versions");
                 had_error = true;
             }
         }

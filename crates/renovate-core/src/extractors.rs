@@ -3,6 +3,7 @@
 //! Each sub-module parses a specific manifest format and returns a list of
 //! [`ExtractedDep`] records suitable for datasource version lookups.
 
+pub mod asdf;
 pub mod bundler;
 pub mod cargo;
 pub mod cocoapods;

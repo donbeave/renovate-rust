@@ -1609,6 +1609,46 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 503 passed
 
+## Slice 0051 - GitHub Releases datasource + asdf `.tool-versions` extractor
+
+### Renovate reference
+- `lib/modules/datasource/github-releases/index.ts` — `GithubReleasesDatasource`
+- `lib/modules/manager/asdf/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/asdf/upgradeable-tooling.ts` — tool-to-datasource map
+- API: `GET https://api.github.com/repos/{owner}/{repo}/releases?per_page=100`
+- Pattern: `(^|/)\.tool-versions$`
+
+### What landed
+- `crates/renovate-core/src/datasources/github_releases.rs` — GitHub Releases client:
+  - Filters `prerelease: true` and `draft: true` releases.
+  - Releases are newest-first; returns first stable `tag_name`.
+  - Uses `semver_generic::semver_update_summary` for version comparison (handles
+    `v` prefix stripping).
+- `crates/renovate-core/src/extractors/asdf.rs` — `.tool-versions` line scanner:
+  - Regex `^([\w_-]+)\s+(\S+)` parses `tool version` pairs; strips inline comments.
+  - Static `TOOL_TABLE` maps 20 common tools to (GitHub repo, `tag_strip`):
+    - **GithubTags**: awscli, erlang, flux2, golang, kubectl, perl, php, python, rust
+    - **GithubReleases**: argocd, consul, helm, k9s, kind, minikube, packer, terraform,
+      terragrunt, vault, waypoint
+  - Unknown tools emit `skip_reason: UnsupportedTool`.
+- Manager pattern `asdf` with `(^|/)\.tool-versions$`.
+- Pipeline in `main.rs`:
+  - Partitions actionable deps by datasource type.
+  - Unique-repo dedup: each `repo|tag_strip` key is looked up once, not once per dep.
+  - `tag_strip` prefix stripped from tag before semver comparison with stored version.
+  - Uses existing `gh_http` (authenticated) and `gh_api_base` from GitHub Actions setup.
+
+### What was intentionally deferred
+- nodejs (NodeVersionDatasource), ruby (RubyVersionDatasource), java
+  (JavaVersionDatasource) — require specialized version datasources.
+- Tools using non-standard version formats that require additional conversion
+  (e.g. erlang `OTP-26.0` tag → asdf stores `26.0` — currently handled by tag_strip).
+- `.tool-versions` files with multiple versions per line (only first captured).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 513 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1618,6 +1658,5 @@ Pick whichever can be completed in one loop:
    and wire them into clap.
 2. **`gemspec` extractor**: extend bundler manager to parse `.gemspec` files.
 3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
-4. **`asdf` / `.tool-versions` extractor**: version manager for polyglot repos (common tools
-   map to GitHub Tags datasource).
-5. **`pip-compile` / `requirements.in` extractor**: constrained pip requirements.
+4. **`pip-compile` / `requirements.in` extractor**: constrained pip requirements.
+5. **`conda` environment extractor**: parse `environment.yml` for conda packages.
