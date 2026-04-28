@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0139  | 2026-04-28 | Pixi `pixi.toml` extractor (PyPI deps actionable, Conda skipped) | Complete | See below. |
 | 0138  | 2026-04-28 | Bitrise CI step extractor + Bitrise steplib datasource | Complete | See below. |
 | 0137  | 2026-04-28 | Homebrew formula extractor (GitHub Archive/Release + NPM routing) | Complete | See below. |
 | 0136  | 2026-04-28 | Azure Bicep `.bicep` extractor + bicep-types-az datasource | Complete | See below. |
@@ -3085,6 +3086,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0139 - Pixi `pixi.toml` extractor (PyPI deps actionable, Conda skipped)
+
+### Renovate reference
+- `lib/modules/manager/pixi/extract.ts` + `schema.ts`
+- Pattern: `(^|/)pixi\.toml$`
+- Datasources: `pypi` (actionable), `conda` (skipped — not yet implemented)
+
+### What landed
+- `crates/renovate-core/src/extractors/pixi.rs` (new):
+  - `extract(content)`: parses `[pypi-dependencies]` (PyPI, actionable),
+    `[dependencies]` (Conda, skipped with `CondaNotSupported`),
+    and `[feature.*.{pypi-dependencies,dependencies}]` sections.
+  - `extract_from_pyproject(content)`: same for `[tool.pixi]` in `pyproject.toml`.
+  - Supports both string specs (`">=1.0"`) and table specs (`{ version = ">=1.0" }`).
+  - 6 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with `(^|/)pixi\.toml$`.
+- `crates/renovate-cli/src/main.rs`: pipeline uses `pypi_datasource::fetch_updates_concurrent`
+  for PyPI deps; Conda deps emitted as `Skipped { reason: "conda-not-supported" }`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 991 passed
 
 ## Slice 0138 - Bitrise CI step extractor + Bitrise steplib datasource
 

@@ -480,6 +480,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "bitrise",
         patterns: &[r"(^|/)bitrise\.ya?ml$"],
     },
+    ManagerDef {
+        name: "pixi",
+        patterns: &[r"(^|/)pixi\.toml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

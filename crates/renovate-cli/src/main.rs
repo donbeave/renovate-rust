@@ -5963,6 +5963,111 @@ async fn process_repo(
         }
     }
 
+    // ── Pixi (pixi.toml) ──────────────────────────────────────────────────────
+    for pixi_path in manager_files(&detected, "pixi") {
+        match client.get_raw_file(owner, repo, &pixi_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::pixi::{PixiSkipReason, PixiSource};
+                let deps = renovate_core::extractors::pixi::extract(&raw.content);
+                let pypi_actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| {
+                        d.source == PixiSource::Pypi
+                            && d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored(&d.dep_name)
+                    })
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %pixi_path,
+                    total = deps.len(), actionable = pypi_actionable.len(),
+                    "extracted pixi deps"
+                );
+                let pypi_inputs: Vec<pypi_datasource::PypiDepInput> = pypi_actionable
+                    .iter()
+                    .map(|d| pypi_datasource::PypiDepInput {
+                        dep_name: d.dep_name.clone(),
+                        specifier: d.current_value.clone(),
+                    })
+                    .collect();
+                let pypi_updates = pypi_datasource::fetch_updates_concurrent(
+                    http,
+                    &pypi_inputs,
+                    pypi_datasource::PYPI_API,
+                    10,
+                )
+                .await;
+                let update_map: std::collections::HashMap<_, _> = pypi_updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let dep_reports: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        if let Some(reason) = &dep.skip_reason {
+                            return output::DepReport {
+                                name: dep.dep_name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: match reason {
+                                        PixiSkipReason::CondaNotSupported => {
+                                            "conda-not-supported".to_owned()
+                                        }
+                                        PixiSkipReason::InvalidVersion => {
+                                            "invalid-version".to_owned()
+                                        }
+                                        PixiSkipReason::UnspecifiedVersion => {
+                                            "unspecified-version".to_owned()
+                                        }
+                                    },
+                                },
+                            };
+                        }
+                        if dep.source == PixiSource::Conda {
+                            return output::DepReport {
+                                name: dep.dep_name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: "conda-not-supported".to_owned(),
+                                },
+                            };
+                        }
+                        let status = match update_map.get(&dep.dep_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_specifier.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: pixi_path.clone(),
+                        manager: "pixi".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%pixi_path, "pixi.toml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%pixi_path, %err, "failed to fetch pixi.toml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Homebrew formula (Formula/*.rb) ────────────────────────────────────────
     for hb_path in manager_files(&detected, "homebrew") {
         match client.get_raw_file(owner, repo, &hb_path).await {

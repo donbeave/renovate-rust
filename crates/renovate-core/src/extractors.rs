@@ -69,6 +69,7 @@ pub mod pep621;
 pub mod pip;
 pub mod pip_setup;
 pub mod pipfile;
+pub mod pixi;
 pub mod poetry;
 pub mod pre_commit;
 pub mod pubspec;
