@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0073  | 2026-04-28 | Add `stats` (update counts) to JSON output | Complete | See below. |
 | 0072  | 2026-04-28 | `packageRules` matchFileNames glob filtering | Complete | See below. |
 | 0071  | 2026-04-28 | `packageRules` matchCurrentVersion filtering | Complete | See below. |
 | 0070  | 2026-04-28 | JSON output mode (`--output-format=json`) | Complete | See below. |
@@ -2215,6 +2216,33 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 718 passed
+
+## Slice 0073 - Add stats (update counts) to JSON output
+
+### What landed
+- `crates/renovate-cli/src/output.rs`:
+  - `DepStats { total, updateAvailable, upToDate, skipped, errors }` — serializable struct.
+  - `DepStats::from_deps(deps) -> DepStats` — computes counts from a dep slice.
+  - `JsonFileReport<'a>` and `JsonRepoReport<'a>` — wrapper structs used only for JSON serialization that include `stats` fields computed from the deps.
+  - `print_json_reports()` now emits the wrapper structs with computed per-file and per-repo stats.
+  - 2 new unit tests.
+
+### JSON output example
+```json
+[{
+  "repoSlug": "owner/repo",
+  "stats": {"total": 42, "updateAvailable": 5, "upToDate": 30, "skipped": 6, "errors": 1},
+  "files": [{
+    "path": "package.json", "manager": "npm",
+    "stats": {"total": 10, "updateAvailable": 2, "upToDate": 8, "skipped": 0, "errors": 0},
+    "deps": [...]
+  }]
+}]
+```
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 720 passed
 
 ## Next slice candidates
 

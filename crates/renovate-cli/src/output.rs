@@ -60,9 +60,92 @@ pub(crate) struct RepoReport {
     pub files: Vec<FileReport>,
 }
 
-/// Print a JSON array of repository reports to stdout.
+/// Per-file or per-repo dependency count breakdown included in JSON output.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub(crate) struct DepStats {
+    pub total: usize,
+    #[serde(rename = "updateAvailable")]
+    pub update_available: usize,
+    #[serde(rename = "upToDate")]
+    pub up_to_date: usize,
+    pub skipped: usize,
+    pub errors: usize,
+}
+
+impl DepStats {
+    pub(crate) fn from_deps(deps: &[DepReport]) -> Self {
+        let mut update_available = 0usize;
+        let mut up_to_date = 0usize;
+        let mut skipped = 0usize;
+        let mut errors = 0usize;
+        for dep in deps {
+            match &dep.status {
+                DepStatus::UpdateAvailable { .. } => update_available += 1,
+                DepStatus::UpToDate { .. } => up_to_date += 1,
+                DepStatus::Skipped { .. } => skipped += 1,
+                DepStatus::LookupError { .. } => errors += 1,
+            }
+        }
+        DepStats {
+            total: deps.len(),
+            update_available,
+            up_to_date,
+            skipped,
+            errors,
+        }
+    }
+}
+
+/// A `FileReport` annotated with computed stats for JSON output.
+#[derive(Debug, Clone, Serialize)]
+struct JsonFileReport<'a> {
+    path: &'a str,
+    manager: &'a str,
+    stats: DepStats,
+    deps: &'a [DepReport],
+}
+
+/// A `RepoReport` annotated with computed stats for JSON output.
+#[derive(Debug, Clone, Serialize)]
+struct JsonRepoReport<'a> {
+    #[serde(rename = "repoSlug")]
+    repo_slug: &'a str,
+    stats: DepStats,
+    files: Vec<JsonFileReport<'a>>,
+}
+
+/// Print a JSON array of repository reports to stdout (with computed stats).
 pub(crate) fn print_json_reports(reports: &[RepoReport]) {
-    match serde_json::to_string_pretty(reports) {
+    let json_reports: Vec<JsonRepoReport<'_>> = reports
+        .iter()
+        .map(|r| {
+            let files: Vec<JsonFileReport<'_>> = r
+                .files
+                .iter()
+                .map(|f| JsonFileReport {
+                    path: &f.path,
+                    manager: &f.manager,
+                    stats: DepStats::from_deps(&f.deps),
+                    deps: &f.deps,
+                })
+                .collect();
+            let repo_stats = files.iter().fold(DepStats::default(), |mut acc, f| {
+                acc.total += f.stats.total;
+                acc.update_available += f.stats.update_available;
+                acc.up_to_date += f.stats.up_to_date;
+                acc.skipped += f.stats.skipped;
+                acc.errors += f.stats.errors;
+                acc
+            });
+            JsonRepoReport {
+                repo_slug: &r.repo_slug,
+                stats: repo_stats,
+                files,
+            }
+        })
+        .collect();
+
+    match serde_json::to_string_pretty(&json_reports) {
         Ok(json) => println!("{json}"),
         Err(e) => eprintln!("{{\"error\": \"failed to serialize report: {e}\"}}"),
     }
@@ -571,5 +654,83 @@ mod tests {
     fn no_ansi_codes_when_color_disabled() {
         assert_eq!(bold("hello", false), "hello");
         assert_eq!(green("ok", false), "ok");
+    }
+
+    // ── JSON output tests ─────────────────────────────────────────────────────
+
+    #[test]
+    fn dep_stats_counts_correctly() {
+        let deps = vec![
+            DepReport {
+                name: "a".into(),
+                status: DepStatus::UpdateAvailable {
+                    current: "1.0.0".into(),
+                    latest: "2.0.0".into(),
+                },
+            },
+            DepReport {
+                name: "b".into(),
+                status: DepStatus::UpToDate { latest: None },
+            },
+            DepReport {
+                name: "c".into(),
+                status: DepStatus::Skipped {
+                    reason: "local".into(),
+                },
+            },
+            DepReport {
+                name: "d".into(),
+                status: DepStatus::LookupError {
+                    message: "404".into(),
+                },
+            },
+        ];
+        let s = DepStats::from_deps(&deps);
+        assert_eq!(s.total, 4);
+        assert_eq!(s.update_available, 1);
+        assert_eq!(s.up_to_date, 1);
+        assert_eq!(s.skipped, 1);
+        assert_eq!(s.errors, 1);
+    }
+
+    #[test]
+    fn print_json_reports_produces_valid_json() {
+        let report = make_report();
+        // Just ensure it doesn't panic and produces non-empty output.
+        // Capture via a channel is complex; test the underlying serialization.
+        let json_reports: Vec<JsonRepoReport<'_>> = std::slice::from_ref(&report)
+            .iter()
+            .map(|r| {
+                let files: Vec<JsonFileReport<'_>> = r
+                    .files
+                    .iter()
+                    .map(|f| JsonFileReport {
+                        path: &f.path,
+                        manager: &f.manager,
+                        stats: DepStats::from_deps(&f.deps),
+                        deps: &f.deps,
+                    })
+                    .collect();
+                let repo_stats = files.iter().fold(DepStats::default(), |mut acc, f| {
+                    acc.total += f.stats.total;
+                    acc.update_available += f.stats.update_available;
+                    acc.up_to_date += f.stats.up_to_date;
+                    acc.skipped += f.stats.skipped;
+                    acc.errors += f.stats.errors;
+                    acc
+                });
+                JsonRepoReport {
+                    repo_slug: &r.repo_slug,
+                    stats: repo_stats,
+                    files,
+                }
+            })
+            .collect();
+
+        let json = serde_json::to_string_pretty(&json_reports).unwrap();
+        assert!(json.contains("repoSlug"));
+        assert!(json.contains("updateAvailable"));
+        assert!(json.contains("stats"));
+        assert!(json.contains("owner/myrepo"));
     }
 }
