@@ -8534,11 +8534,21 @@ fn apply_update_blocking_to_report(
                     latest,
                     is_major,
                     repo_cfg.semantic_commits.as_deref(),
+                    Some(repo_cfg.commit_message_action.as_str()).filter(|s| *s != "Update"),
+                    repo_cfg.commit_message_prefix.as_deref(),
                 ));
                 // Collect positive packageRule effects (groupName, automerge, labels).
-                let ctx = renovate_core::repo_config::DepContext::for_dep(&dep.name)
-                    .with_manager(&manager)
-                    .with_file_path(&file_path);
+                // Include version context so matchCurrentVersion/matchUpdateTypes
+                // rules can gate effect application correctly.
+                let ctx = renovate_core::repo_config::DepContext {
+                    dep_name: &dep.name,
+                    manager: Some(manager.as_str()),
+                    file_path: Some(file_path.as_str()),
+                    current_value: Some(current.as_str()),
+                    new_value: Some(latest.as_str()),
+                    update_type: classify_semver_update(current, latest),
+                    ..Default::default()
+                };
                 let effects = repo_cfg.collect_rule_effects(&ctx);
                 dep.group_name = effects.group_name;
                 dep.automerge = effects.automerge;

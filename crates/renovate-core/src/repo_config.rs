@@ -763,6 +763,27 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `extends`.
     pub extends: Vec<String>,
+
+    // ── Commit message customization ─────────────────────────────────────────
+    /// Action verb in PR titles and commit messages.  Default `"Update"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageAction`.
+    pub commit_message_action: String,
+
+    /// Custom prefix to prepend to commit messages and PR titles.
+    /// Overrides the semantic-commit prefix (`"chore(deps):"`) when set.
+    /// Example: `"fix(deps):"`, `"build(deps):"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessagePrefix`.
+    pub commit_message_prefix: Option<String>,
+
+    // ── Range / version strategy ──────────────────────────────────────────────
+    /// Range update strategy. Controls how existing version ranges are modified.
+    /// Accepted: `"auto"`, `"pin"`, `"bump"`, `"replace"`, `"widen"`,
+    /// `"update-lockfile"`, `"in-range-only"`.  Default: `"auto"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `rangeStrategy`.
+    pub range_strategy: String,
 }
 
 /// Compiled path-ignore matcher built from a `RepoConfig`.
@@ -1121,6 +1142,12 @@ impl RepoConfig {
             semantic_commits: Option<String>,
             #[serde(default)]
             extends: Vec<String>,
+            #[serde(rename = "commitMessageAction", default = "default_commit_action")]
+            commit_message_action: String,
+            #[serde(rename = "commitMessagePrefix")]
+            commit_message_prefix: Option<String>,
+            #[serde(rename = "rangeStrategy", default = "default_range_strategy")]
+            range_strategy: String,
         }
 
         fn default_true() -> bool {
@@ -1129,6 +1156,14 @@ impl RepoConfig {
 
         fn default_branch_prefix() -> String {
             "renovate/".to_owned()
+        }
+
+        fn default_commit_action() -> String {
+            "Update".to_owned()
+        }
+
+        fn default_range_strategy() -> String {
+            "auto".to_owned()
         }
 
         fn default_pr_hourly_limit() -> u32 {
@@ -1307,6 +1342,9 @@ impl RepoConfig {
                 preset_paths
             },
             extends: raw.extends,
+            commit_message_action: raw.commit_message_action,
+            commit_message_prefix: raw.commit_message_prefix,
+            range_strategy: raw.range_strategy,
         }
     }
 
@@ -1590,6 +1628,9 @@ impl Default for RepoConfig {
             separate_minor_patch: false,
             semantic_commits: None,
             extends: Vec::new(),
+            commit_message_action: "Update".to_owned(),
+            commit_message_prefix: None,
+            range_strategy: "auto".to_owned(),
         }
     }
 }

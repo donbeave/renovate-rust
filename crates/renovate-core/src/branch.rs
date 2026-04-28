@@ -117,43 +117,49 @@ pub fn branch_name(branch_prefix: &str, additional_prefix: &str, topic: &str) ->
     clean_branch_name(&raw)
 }
 
-/// Generate the default PR title / commit message for a dependency update.
+/// Generate the PR title / commit message for a dependency update.
 ///
 /// Mirrors Renovate's default `commitMessage` template:
 /// ```text
 /// {commitMessagePrefix} {commitMessageAction} {commitMessageTopic} {commitMessageExtra}
 /// ```
-/// which resolves to (e.g.):
-/// - `"Update dependency lodash to v4.17.21"` (plain)
-/// - `"chore(deps): Update dependency lodash to v4.17.21"` (semantic)
-/// - `"chore(deps)!: Update dependency lodash to v5"` (semantic + major)
 ///
 /// Parameters:
 /// - `dep_name` — display name of the dependency (as-is, not sanitized)
 /// - `new_version` — proposed new version string (e.g. `"4.17.21"`, `"v5"`)
 /// - `is_major` — `true` when this is a major-version bump (adds `!` in semantic mode)
 /// - `semantic_commits` — `"enabled"` adds `"chore(deps)"` prefix; other values skip it
+/// - `action` — action verb; `None` uses the default `"Update"`
+/// - `custom_prefix` — explicit prefix; when `Some`, overrides semantic prefix entirely
 ///
 /// Renovate reference:
 /// - `lib/config/options/index.ts` — `commitMessage`, `commitMessageAction`,
-///   `commitMessageTopic`, `commitMessageExtra`
+///   `commitMessageTopic`, `commitMessageExtra`, `commitMessagePrefix`
 /// - `lib/workers/repository/updates/commit.ts` — commit body generation
 pub fn pr_title(
     dep_name: &str,
     new_version: &str,
     is_major: bool,
     semantic_commits: Option<&str>,
+    action: Option<&str>,
+    custom_prefix: Option<&str>,
 ) -> String {
-    let action = "Update";
+    let action = action.unwrap_or("Update");
     let topic = format!("dependency {dep_name}");
     let extra = format!("to {new_version}");
+    let body = format!("{action} {topic} {extra}");
+
+    if let Some(prefix) = custom_prefix {
+        // Explicit prefix overrides semantic prefix entirely.
+        return format!("{prefix} {body}");
+    }
 
     match semantic_commits {
         Some("enabled") => {
             let breaking = if is_major { "!" } else { "" };
-            format!("chore(deps){breaking}: {action} {topic} {extra}")
+            format!("chore(deps){breaking}: {body}")
         }
-        _ => format!("{action} {topic} {extra}"),
+        _ => body,
     }
 }
 
@@ -314,7 +320,7 @@ mod tests {
     #[test]
     fn pr_title_plain_minor() {
         assert_eq!(
-            pr_title("express", "4.18.2", false, None),
+            pr_title("express", "4.18.2", false, None, None, None),
             "Update dependency express to 4.18.2"
         );
     }
@@ -322,7 +328,7 @@ mod tests {
     #[test]
     fn pr_title_plain_major() {
         assert_eq!(
-            pr_title("lodash", "5.0.0", true, None),
+            pr_title("lodash", "5.0.0", true, None, None, None),
             "Update dependency lodash to 5.0.0"
         );
     }
@@ -330,7 +336,7 @@ mod tests {
     #[test]
     fn pr_title_semantic_minor() {
         assert_eq!(
-            pr_title("express", "4.18.2", false, Some("enabled")),
+            pr_title("express", "4.18.2", false, Some("enabled"), None, None),
             "chore(deps): Update dependency express to 4.18.2"
         );
     }
@@ -338,7 +344,7 @@ mod tests {
     #[test]
     fn pr_title_semantic_major_breaking() {
         assert_eq!(
-            pr_title("lodash", "5.0.0", true, Some("enabled")),
+            pr_title("lodash", "5.0.0", true, Some("enabled"), None, None),
             "chore(deps)!: Update dependency lodash to 5.0.0"
         );
     }
@@ -347,7 +353,7 @@ mod tests {
     fn pr_title_semantic_disabled() {
         // "disabled" semantic_commits → no prefix
         assert_eq!(
-            pr_title("react", "18.0.0", true, Some("disabled")),
+            pr_title("react", "18.0.0", true, Some("disabled"), None, None),
             "Update dependency react to 18.0.0"
         );
     }
@@ -355,8 +361,55 @@ mod tests {
     #[test]
     fn pr_title_scoped_package() {
         assert_eq!(
-            pr_title("@angular/core", "17.1.0", false, Some("enabled")),
+            pr_title(
+                "@angular/core",
+                "17.1.0",
+                false,
+                Some("enabled"),
+                None,
+                None
+            ),
             "chore(deps): Update dependency @angular/core to 17.1.0"
+        );
+    }
+
+    #[test]
+    fn pr_title_custom_action() {
+        // commitMessageAction: "Bump" → custom action verb
+        assert_eq!(
+            pr_title("lodash", "4.17.21", false, None, Some("Bump"), None),
+            "Bump dependency lodash to 4.17.21"
+        );
+    }
+
+    #[test]
+    fn pr_title_custom_prefix_overrides_semantic() {
+        // commitMessagePrefix: "fix(deps):" overrides chore(deps) even with semantic enabled
+        assert_eq!(
+            pr_title(
+                "express",
+                "4.18.2",
+                false,
+                Some("enabled"),
+                None,
+                Some("fix(deps):")
+            ),
+            "fix(deps): Update dependency express to 4.18.2"
+        );
+    }
+
+    #[test]
+    fn pr_title_custom_prefix_and_action() {
+        assert_eq!(
+            pr_title(
+                "react",
+                "18.0.0",
+                true,
+                Some("enabled"),
+                Some("Pin"),
+                Some("build(deps):")
+            ),
+            "build(deps): Pin dependency react to 18.0.0"
         );
     }
 }
