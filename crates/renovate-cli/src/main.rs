@@ -36,7 +36,9 @@ use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::github_actions as github_actions_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
+use renovate_core::extractors::pep621 as pep621_extractor;
 use renovate_core::extractors::pip as pip_extractor;
+use renovate_core::extractors::poetry as poetry_extractor;
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
@@ -470,7 +472,7 @@ async fn process_repo(
     // ── pep621 (pyproject.toml) ───────────────────────────────────────────────
     for pep621_file_path in manager_files(&detected, "pep621") {
         match client.get_raw_file(owner, repo, &pep621_file_path).await {
-            Ok(Some(raw)) => match renovate_core::extractors::pep621::extract(&raw.content) {
+            Ok(Some(raw)) => match pep621_extractor::extract(&raw.content) {
                 Ok(deps) => {
                     let actionable: Vec<_> = deps
                         .iter()
@@ -548,6 +550,60 @@ async fn process_repo(
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%pep621_file_path, %err,
                     "failed to fetch pyproject.toml");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── Poetry (pyproject.toml) ───────────────────────────────────────────────
+    for poetry_file_path in manager_files(&detected, "poetry") {
+        match client.get_raw_file(owner, repo, &poetry_file_path).await {
+            Ok(Some(raw)) => match poetry_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %poetry_file_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted poetry dependencies"
+                    );
+                    let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                        .iter()
+                        .map(|d| pypi_datasource::PypiDepInput {
+                            dep_name: d.name.clone(),
+                            specifier: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = pypi_datasource::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        pypi_datasource::PYPI_API,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: poetry_file_path.clone(),
+                        manager: "poetry".into(),
+                        deps: build_dep_reports_poetry(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%poetry_file_path, %err,
+                        "failed to parse poetry pyproject.toml")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%poetry_file_path, "pyproject.toml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%poetry_file_path, %err,
+                    "failed to fetch poetry pyproject.toml");
                 had_error = true;
             }
         }
@@ -1036,6 +1092,48 @@ fn build_dep_reports_maven(
         };
         reports.push(output::DepReport {
             name: dep.dep_name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_poetry(
+    all_deps: &[renovate_core::extractors::poetry::PoetryExtractedDep],
+    actionable: &[&renovate_core::extractors::poetry::PoetryExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::versioning::pep440::Pep440UpdateSummary,
+            renovate_core::datasources::pypi::PypiError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_specifier.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
             status,
         });
     }

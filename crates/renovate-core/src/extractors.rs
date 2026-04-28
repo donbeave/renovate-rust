@@ -11,3 +11,4 @@ pub mod maven;
 pub mod npm;
 pub mod pep621;
 pub mod pip;
+pub mod poetry;

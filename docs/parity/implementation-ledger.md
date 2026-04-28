@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0032  | 2026-04-28 | Poetry `pyproject.toml` extractor + poetry manager | Complete | See below. |
 | 0031  | 2026-04-28 | GitHub Actions `uses:` extractor + GitHub tags datasource | Complete | See below. |
 | 0030  | 2026-04-28 | Maven POM property resolution (`<properties>`)  | Complete | See below. |
 | 0029  | 2026-04-28 | Glob-based `ignorePaths` matching (globset)     | Complete | See below. |
@@ -52,6 +53,48 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0032 - Poetry `pyproject.toml` extractor + poetry manager
+
+### Renovate reference
+- `lib/modules/manager/poetry/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/poetry/index.ts` — `managerFilePatterns`,
+  `supersedesManagers: ['pep621']`
+- Pattern: `/(^|/)pyproject\\.toml$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/poetry.rs` — Poetry pyproject.toml
+  extractor using the `toml` crate (already a dependency):
+  - Sections: `[tool.poetry.dependencies]` (Regular), `[tool.poetry.dev-dependencies]`
+    (Dev), `[tool.poetry.group.*.dependencies]` (Group).
+  - String form: `requests = "^2.28.0"` → version `^2.28.0`.
+  - Inline table form: `django = {version = "4.2.7", optional = true}`.
+  - Skip reasons: `PythonVersion` (python key), `GitSource` ({git = "…"}),
+    `LocalPath` ({path = "…"}), `UrlInstall` ({url = "…"}).
+  - Wildcard `"*"` → empty constraint (unconstrained dep).
+  - Names normalized per PEP 503.
+  - `nested_table` helper traverses arbitrary key chains in TOML.
+  - 11 unit tests including fixture from Renovate's test suite.
+- `crates/renovate-core/src/managers.rs` — `poetry` manager added with
+  pattern `(^|/)pyproject\.toml$` (same file as pep621, different sections).
+- `crates/renovate-core/src/extractors.rs` — `pub mod poetry` added.
+- `crates/renovate-cli/src/main.rs`:
+  - `poetry_extractor` import added; pep621 pipeline updated to use
+    `pep621_extractor` alias.
+  - Poetry pipeline wired: extract → filter actionable → PyPI datasource →
+    `build_dep_reports_poetry` helper → `FileReport`.
+
+### What was intentionally deferred
+- `[tool.poetry]` version key (`packageFileVersion`).
+- Poetry-specific version range semantics (`^`, `~` map to PEP 440 for now).
+- Platform-conditional array form (`[{version = "…", platform = "…"}, …]`).
+- `poetry.lock` lockfile parsing.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (340 passed)
 
 ## Slice 0031 - GitHub Actions `uses:` extractor + GitHub tags datasource
 

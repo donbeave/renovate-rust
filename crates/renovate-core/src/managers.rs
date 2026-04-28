@@ -101,6 +101,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)pyproject\.toml$"],
     },
     ManagerDef {
+        name: "poetry",
+        patterns: &[r"(^|/)pyproject\.toml$"],
+    },
+    ManagerDef {
         name: "maven",
         patterns: &[r"(^|/|\.)(pom\.xml)$", r"^((\.mvn|\.m2)/)?settings\.xml$"],
     },
