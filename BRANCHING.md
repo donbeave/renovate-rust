@@ -1,18 +1,17 @@
 # Branching
 
-This repository uses `main` as the primary branch. Keep `main` releasable and
-easy to review.
+This repository uses `main` as the normal working branch. Agents may commit
+straight to `main` for requested work and for autonomous loop iterations.
 
-All non-trivial features and bug fixes should be developed on a dedicated
-branch once a remote/PR workflow exists. Direct commits to `main` are acceptable
-only for local bootstrap work or when the operator explicitly asks for it.
+Feature branches and pull requests are optional in this project. Use them only
+when the operator explicitly asks for a branch or PR workflow.
 
-- Create branches from `main`: `git checkout -b feature/<short-description>`
-- Use prefixes that match the change type: `feature/`, `fix/`, `refactor/`,
-  `docs/`, `test/`, `build/`, or `chore/`
-- Keep branch names short, lowercase, and hyphen-separated
-- Merge back to `main` through a pull request after review when working with a
-  remote repository
-- Do not force-push shared branches without explicit operator approval
+- Keep `main` buildable, tested, and easy to review.
+- Make small, coherent commits directly on `main`.
+- Stage only files related to the current task.
+- If the operator asks for a branch, create it from `main` and keep its name
+  short, lowercase, and hyphen-separated.
+- Do not force-push remote history unless the operator explicitly asks for a
+  history rewrite or force push.
 - Do not commit credentials, local Renovate reference clones, caches, build
   artifacts, or registry data
