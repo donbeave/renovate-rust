@@ -3237,6 +3237,54 @@ async fn process_repo(
         }
     }
 
+    // ── Jenkins plugins (plugins.txt / plugins.yml) ───────────────────────────
+    for jenkins_path in manager_files(&detected, "jenkins") {
+        match client.get_raw_file(owner, repo, &jenkins_path).await {
+            Ok(Some(raw)) => {
+                let deps = if jenkins_path.ends_with(".txt") {
+                    renovate_core::extractors::jenkins::extract_txt(&raw.content)
+                } else {
+                    renovate_core::extractors::jenkins::extract_yml(&raw.content)
+                };
+                tracing::debug!(
+                    repo = %repo_slug, file = %jenkins_path,
+                    total = deps.len(),
+                    "extracted jenkins plugin deps"
+                );
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = if let Some(reason) = &dep.skip_reason {
+                            output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            }
+                        } else {
+                            output::DepStatus::Skipped {
+                                reason: "jenkins-plugins datasource pending".into(),
+                            }
+                        };
+                        output::DepReport {
+                            name: dep.artifact_id.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: jenkins_path.clone(),
+                    manager: "jenkins".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%jenkins_path, "jenkins plugins file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%jenkins_path, %err, "failed to fetch jenkins plugins file");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 

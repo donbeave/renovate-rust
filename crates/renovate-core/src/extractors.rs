@@ -24,6 +24,7 @@ pub mod gomod;
 pub mod gradle;
 pub mod helm;
 pub mod helmfile;
+pub mod jenkins;
 pub mod kustomize;
 pub mod maven;
 pub mod mix;

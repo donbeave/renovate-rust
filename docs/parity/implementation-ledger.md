@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0083  | 2026-04-28 | Jenkins `plugins.txt` / `plugins.yml` extractor | Complete | See below. |
 | 0082  | 2026-04-28 | Bitbucket Pipelines `*-pipelines.yml` Docker image extractor | Complete | See below. |
 | 0081  | 2026-04-28 | Drone CI `.drone.yml` Docker image extractor | Complete | See below. |
 | 0080  | 2026-04-28 | Helmfile `helmfile.yaml` extractor | Complete | See below. |
@@ -2405,6 +2406,34 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 769 passed
 
+## Slice 0083 - Jenkins `plugins.txt` / `plugins.yml` extractor
+
+### Renovate reference
+- `lib/modules/manager/jenkins/extract.ts`
+- Pattern: `/(^|/)plugins\.(txt|ya?ml)$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/jenkins.rs`:
+  - `JenkinsPluginDep { artifact_id, version, skip_reason }` struct.
+  - `JenkinsSkipReason { UnspecifiedVersion, UnsupportedVersion }` enum.
+  - `extract_txt(content)` — line scanner for `plugin-id:version` format;
+    strips `#`-prefixed comments; skips `latest`/`experimental` with `UnsupportedVersion`.
+  - `extract_yml(content)` — line scanner for YAML `plugins:` list with `artifactId:` + `version:`
+    (also handles `source.version:` nested form via `version:` key).
+  - 9 unit tests (5 txt, 4 yml).
+- `crates/renovate-core/src/managers.rs`: `jenkins` manager with pattern `(^|/)plugins\.(txt|ya?ml)$`.
+- `crates/renovate-core/src/extractors.rs`: `pub mod jenkins`.
+- `crates/renovate-cli/src/main.rs`: Jenkins pipeline — all deps emitted as skipped
+  (jenkins-plugins datasource pending), actionable deps also skipped with reason.
+
+### What was intentionally deferred
+- `jenkins-plugins` datasource (Jenkins Update Center JSON API).
+- `renovate.ignore: true` annotation in YAML format.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 778 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2418,4 +2447,4 @@ Pick whichever can be completed in one loop:
 5. **GitLab CI `include:` project components**: component dependency version tracking.
 6. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
-8. **Jenkins** pipeline Docker image extraction.
+8. **Jenkins plugins datasource** (Jenkins Update Center JSON).
