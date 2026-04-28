@@ -3075,11 +3075,57 @@ async fn process_repo(
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::circleci::extract(&raw.content);
                 let docker_deps: Vec<_> = deps.iter().map(|d| d.dep.clone()).collect();
-                tracing::debug!(repo = %repo_slug, file = %cci_path, total = deps.len(), "extracted circleci images");
+                let orb_deps = renovate_core::extractors::circleci::extract_orbs(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %cci_path,
+                    docker = docker_deps.len(), orbs = orb_deps.len(),
+                    "extracted circleci deps"
+                );
+                let mut all_deps = docker_hub_reports(http, &docker_deps).await;
+                if !orb_deps.is_empty() {
+                    let orb_inputs: Vec<renovate_core::datasources::orb::OrbDepInput> = orb_deps
+                        .iter()
+                        .map(|o| renovate_core::datasources::orb::OrbDepInput {
+                            package_name: o.package_name.clone(),
+                            current_value: o.version.clone(),
+                        })
+                        .collect();
+                    let orb_updates = renovate_core::datasources::orb::fetch_updates_concurrent(
+                        http,
+                        &orb_inputs,
+                        6,
+                    )
+                    .await;
+                    let orb_map: HashMap<_, _> = orb_updates
+                        .into_iter()
+                        .map(|r| (r.package_name, r.summary))
+                        .collect();
+                    for orb in &orb_deps {
+                        let status = match orb_map.get(&orb.package_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: orb.version.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        all_deps.push(output::DepReport {
+                            name: orb.package_name.clone(),
+                            status,
+                        });
+                    }
+                }
                 repo_report.files.push(output::FileReport {
                     path: cci_path.clone(),
                     manager: "circleci".into(),
-                    deps: docker_hub_reports(http, &docker_deps).await,
+                    deps: all_deps,
                 });
             }
             Ok(None) => {

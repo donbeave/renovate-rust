@@ -145,6 +145,35 @@ impl HttpClient {
         let body = resp.json::<T>().await?;
         Ok(body)
     }
+
+    /// Send a POST request with a JSON body and deserialize the JSON response.
+    pub async fn post_json<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+        body: &str,
+    ) -> Result<T, HttpError> {
+        let rb = self
+            .inner
+            .post(url)
+            .header("Content-Type", "application/json");
+        let rb = match &self.token {
+            Some(t) => rb.bearer_auth(t),
+            None => rb,
+        };
+        let resp = rb
+            .body(body.to_owned())
+            .send()
+            .await
+            .map_err(HttpError::Request)?;
+        if !resp.status().is_success() {
+            return Err(HttpError::Status {
+                status: resp.status(),
+                url: url.to_owned(),
+            });
+        }
+        let result = resp.json::<T>().await?;
+        Ok(result)
+    }
 }
 
 impl Default for HttpClient {

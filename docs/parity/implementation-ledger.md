@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0100  | 2026-04-28 | CircleCI orbs extractor + Orb GraphQL datasource | Complete | See below. |
 | 0099  | 2026-04-28 | GitLab CI `include:` project reference extractor | Complete | See below. |
 | 0098  | 2026-04-28 | Travis CI `.travis.yml` Node.js version extractor | Complete | See below. |
 | 0097  | 2026-04-28 | Bazelisk `.bazelversion` version file support | Complete | See below. |
@@ -2576,6 +2577,37 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 853 passed
 
+## Slice 0100 - CircleCI orbs extractor + Orb GraphQL datasource
+
+### Renovate reference
+- `lib/modules/manager/circleci/extract.ts` — `extractDefinition` (orb handling)
+- `lib/modules/datasource/orb/index.ts` — `OrbDatasource`
+- API: `POST https://circleci.com/graphql-unstable` (GraphQL)
+- Versioning: npm semver (same as orb versions are semver)
+
+### What landed
+- `crates/renovate-core/src/extractors/circleci.rs`:
+  - Added `CircleCiOrbDep { alias, package_name, version }` struct.
+  - Added `extract_orbs(content)` function — line-scanner for `orbs:` top-level block,
+    parses `alias: owner/name@version` entries; skips inline orb map values.
+  - 5 new unit tests: extract 2 orbs, skip missing `@`, block ends at next top-level key, empty, no orbs block.
+- `crates/renovate-core/src/datasources/orb.rs` (new):
+  - `OrbDepInput { package_name, current_value }`, `OrbUpdateSummary`, `OrbUpdateResult` structs.
+  - `fetch_latest(http, package_name, current_value)` — POSTs GraphQL query to
+    `https://circleci.com/graphql-unstable`, extracts `data.orb.versions[0].version`.
+  - `fetch_updates_concurrent(http, deps, concurrency)` — semaphore-bounded concurrent fetcher.
+- `crates/renovate-core/src/http.rs`: Added `post_json<T>(url, body)` method to `HttpClient`.
+- `crates/renovate-cli/src/main.rs`: Extended circleci pipeline — runs `extract_orbs` in parallel
+  with Docker image extraction; combines both into one `FileReport` per file.
+
+### What was intentionally deferred
+- Inline orbs (YAML map values with `commands:`, `jobs:` etc. — not a version reference).
+- `machine:` executor VM image versions (CircleCI-specific, not Docker Hub).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 858 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2590,6 +2622,5 @@ Pick whichever can be completed in one loop:
 6. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 7. **Jenkins plugins datasource** (Jenkins Update Center JSON).
 8. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
-9. **CircleCI orbs** — `orbs:` block version extraction and registry datasource.
-10. **Buildkite plugin** extractor — `plugins:` block with `owner/name#version` format.
+9. **Buildkite plugin** extractor — `plugins:` block with `owner/name#version` format.
 11. **Travis CI** `.travis.yml` Node.js version extraction.

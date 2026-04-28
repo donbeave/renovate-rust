@@ -19,6 +19,7 @@ pub mod hex;
 pub mod maven;
 pub mod npm;
 pub mod nuget;
+pub mod orb;
 pub mod packagist;
 pub mod pub_dev;
 pub mod pypi;
