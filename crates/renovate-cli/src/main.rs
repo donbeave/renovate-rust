@@ -2974,6 +2974,52 @@ async fn process_repo(
         }
     }
 
+    // ── Devbox (devbox.json) ──────────────────────────────────────────────────
+    for db_path in manager_files(&detected, "devbox") {
+        match client.get_raw_file(owner, repo, &db_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::devbox::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %db_path,
+                    total = deps.len(), "extracted devbox deps"
+                );
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = match renovate_core::datasources::devbox::fetch_latest(
+                        http,
+                        &dep.name,
+                        &dep.version,
+                    )
+                    .await
+                    {
+                        Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_version,
+                            latest: s.latest.unwrap_or_default(),
+                        },
+                        Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: db_path.clone(),
+                    manager: "devbox".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%db_path, "devbox.json not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%db_path, %err, "failed to fetch devbox.json");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Dev Container (devcontainer.json) ────────────────────────────────────
     for dc_path in manager_files(&detected, "devcontainer") {
         match client.get_raw_file(owner, repo, &dc_path).await {

@@ -6,6 +6,7 @@
 
 pub mod cocoapods;
 pub mod crates_io;
+pub mod devbox;
 pub mod docker_hub;
 pub mod github_releases;
 pub mod github_runners;

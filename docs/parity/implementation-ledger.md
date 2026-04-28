@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0093  | 2026-04-28 | Devbox `devbox.json` extractor + `search.devbox.sh` datasource | Complete | See below. |
 | 0092  | 2026-04-28 | Helm `values.yaml` Docker image extractor | Complete | See below. |
 | 0091  | 2026-04-28 | mise-en-place `mise.toml` tool version extractor | Complete | See below. |
 | 0090  | 2026-04-28 | Quadlet `.container`/`.image`/`.volume` Docker image extractor | Complete | See below. |

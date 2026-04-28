@@ -14,6 +14,7 @@ pub mod circleci;
 pub mod cloudbuild;
 pub mod cocoapods;
 pub mod composer;
+pub mod devbox;
 pub mod devcontainer;
 pub mod docker_compose;
 pub mod dockerfile;
