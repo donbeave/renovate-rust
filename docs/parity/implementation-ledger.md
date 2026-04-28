@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0107  | 2026-04-28 | Azure Pipelines Tasks datasource (GitHub mirror JSON) | Complete | See below. |
 | 0106  | 2026-04-28 | Nix flakes `flake.lock` input extractor | Complete | See below. |
 | 0105  | 2026-04-28 | FluxCD `gotk-components.yaml` system manifest extractor | Complete | See below. |
 | 0104  | 2026-04-28 | SBT `build.sbt` / `project/build.properties` extractor | Complete | See below. |
@@ -2779,6 +2780,28 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 889 passed
 
+## Slice 0107 - Azure Pipelines Tasks datasource (GitHub mirror JSON)
+
+### Renovate reference
+- `lib/modules/datasource/azure-pipelines-tasks/index.ts`
+- JSON mirrors: `https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main/*.json`
+- Format: `Record<string, string[]>` — task name (lowercase) → list of versions
+
+### What landed
+- `crates/renovate-core/src/datasources/azure_pipelines_tasks.rs` (new):
+  - `AzureTaskUpdateSummary { current_value, latest, update_available }` struct.
+  - `fetch_latest(http, task_name, current_value)` — fetches built-in tasks JSON, falls
+    back to marketplace tasks JSON; uses `OnceLock` for process-wide caching.
+  - Case-insensitive task name lookup (normalized to lowercase).
+  - `cmp_version()` — numeric component-wise comparison for version selection.
+  - 1 unit test for version comparison.
+- `crates/renovate-cli/src/main.rs`: Replaced "azure-pipelines-tasks datasource pending"
+  stub with real `fetch_latest` calls; `NotFound` → `Skipped` status.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 890 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2789,9 +2812,9 @@ Pick whichever can be completed in one loop:
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
-5. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
-6. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
-7. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
-8. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
-9. **`pixi`** — Pixi `pixi.toml` conda package extraction.
-10. **`ruby-version`** — `.ruby-version` file version tracking (GitHub Releases).
+5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
+6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
+8. **`pixi`** — Pixi `pixi.toml` conda package extraction.
+9. **`ruby-version`** — `.ruby-version` file version tracking (GitHub Releases).
+10. **`helm-requirements`** — `requirements.yaml` (Helm v2) chart dependencies.
