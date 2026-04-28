@@ -121,13 +121,12 @@ async fn fetch_update_summary(
     http: &HttpClient,
 ) -> Result<MavenUpdateSummary, MavenError> {
     let latest = fetch_latest(&dep.dep_name, http).await?;
-    let update_available = latest
-        .as_deref()
-        .is_some_and(|l| l != dep.current_version && !dep.current_version.is_empty());
+    let summary =
+        crate::versioning::maven::maven_update_summary(&dep.current_version, latest.as_deref());
     Ok(MavenUpdateSummary {
-        current_version: dep.current_version.clone(),
-        latest,
-        update_available,
+        current_version: summary.current_version,
+        latest: summary.latest,
+        update_available: summary.update_available,
     })
 }
 

@@ -1291,10 +1291,45 @@ Pick whichever can be completed in one loop:
 
 Pick whichever can be completed in one loop:
 
-1. **Maven versioning module**: implement the Maven qualifier ordering scheme
-   (alpha < beta < milestone < rc < release < sp) for accurate update decisions.
-2. **Renovate option surface (first cut)**: port the option definitions
+## Slice 0041 - Maven versioning module + Maven datasource integration
+
+### Renovate reference
+- `lib/modules/versioning/maven/compare.ts` — tokenizer and qualifier ordering
+- `lib/modules/versioning/maven/index.ts`   — `compare`, `isStable`
+
+### What landed
+- `crates/renovate-core/src/versioning/maven.rs` — full Maven version comparison:
+  - `tokenize(v)`: splits on `.`, `-`, and digit↔letter transitions; strips leading `v`.
+  - `is_null(token)`: number 0, and qualifiers `""`, `final`, `ga`, `release`, `latest`, `sr`.
+  - `qualifier_order()`: alpha(1) < beta(2) < milestone(3) < rc/cr/preview(4) < snapshot(5)
+    < release/ga/final/""(6) < sp(7). Unknown qualifiers compare lexicographically between
+    snapshot and sp.
+  - `compare(l, r) -> Ordering`: token-by-token comparison with null-fill.
+  - `is_stable(v) -> bool`: true when no pre-release qualifier present.
+  - `maven_update_summary(current, latest)`: produces `MavenUpdateSummary` using proper
+    Maven ordering — SNAPSHOT and pre-releases won't falsely trigger updates.
+- `crates/renovate-core/src/datasources/maven.rs` — wired to `maven_update_summary`.
+  Previously used naive string comparison; now correctly handles pre-release ordering.
+
+### Key correctness improvements
+- `5.0.0-RC1` vs `5.0.0`: RC < release, so `5.0.0` is an update (was already correct
+  by string diff, now correct by semantics).
+- `5.3.28-SNAPSHOT` vs `5.3.28`: SNAPSHOT < release — `5.3.28-SNAPSHOT` being the
+  "latest" from the registry would NOT trigger a false update to itself.
+- `1.0.RELEASE` == `1.0` == `1.0.GA`: release-equivalent tokens treated as equal.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 399 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
+1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
-3. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
-4. **Mix `mix.exs` extractor + Hex.pm datasource**: add Elixir package manager support.
+2. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
+3. **Mix `mix.exs` extractor + Hex.pm datasource**: add Elixir package manager support.
+4. **`hashicorp` versioning module**: implement HashiCorp's constraint syntax (`~>`, `>=`)
+   for Terraform provider version decisions.
