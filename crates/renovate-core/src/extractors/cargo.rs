@@ -89,7 +89,18 @@ struct RawManifest {
     #[serde(rename = "build-dependencies")]
     build_dependencies: Option<BTreeMap<String, RawDep>>,
     workspace: Option<RawWorkspace>,
-    // target.*.dependencies are complex; deferred to a later slice.
+    /// Platform-conditional dependencies: `[target.'cfg(...)'.dependencies]`
+    target: Option<BTreeMap<String, RawTargetDeps>>,
+}
+
+/// Platform-conditional dependency block: `[target.'cfg(...)'.dependencies]`.
+#[derive(Debug, Deserialize)]
+struct RawTargetDeps {
+    dependencies: Option<BTreeMap<String, RawDep>>,
+    #[serde(rename = "dev-dependencies")]
+    dev_dependencies: Option<BTreeMap<String, RawDep>>,
+    #[serde(rename = "build-dependencies")]
+    build_dependencies: Option<BTreeMap<String, RawDep>>,
 }
 
 /// Workspace-level definitions (from workspace root `Cargo.toml`).
@@ -129,6 +140,21 @@ pub fn extract(content: &str) -> Result<Vec<ExtractedDep>, CargoExtractError> {
     if let Some(deps) = manifest.workspace.and_then(|ws| ws.dependencies) {
         for (name, raw) in deps {
             out.push(convert_dep(name, raw, DepType::Regular));
+        }
+    }
+
+    // Platform-conditional deps (`[target.'cfg(...)'.dependencies]`).
+    for (_cfg, target) in manifest.target.into_iter().flatten() {
+        for (section, dep_type) in [
+            (target.dependencies, DepType::Regular),
+            (target.dev_dependencies, DepType::Dev),
+            (target.build_dependencies, DepType::Build),
+        ] {
+            if let Some(deps) = section {
+                for (name, raw) in deps {
+                    out.push(convert_dep(name, raw, dep_type));
+                }
+            }
         }
     }
 
@@ -340,5 +366,27 @@ tokio = "1.35"
         let deps = extract(toml).unwrap();
         assert!(deps.iter().any(|d| d.dep_name == "serde"));
         assert!(deps.iter().any(|d| d.dep_name == "tokio"));
+    }
+
+    #[test]
+    fn target_cfg_dependencies_extracted() {
+        let toml = r#"
+[dependencies]
+serde = "1.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winsock2"] }
+
+[target.'cfg(unix)'.dev-dependencies]
+libc = "0.2"
+"#;
+        let deps = extract(toml).unwrap();
+        assert!(deps.iter().any(|d| d.dep_name == "serde"));
+        let winapi = deps.iter().find(|d| d.dep_name == "winapi").unwrap();
+        assert_eq!(winapi.current_value, "0.3");
+        assert_eq!(winapi.dep_type, DepType::Regular);
+        let libc = deps.iter().find(|d| d.dep_name == "libc").unwrap();
+        assert_eq!(libc.current_value, "0.2");
+        assert_eq!(libc.dep_type, DepType::Dev);
     }
 }

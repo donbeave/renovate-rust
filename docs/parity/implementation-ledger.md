@@ -1835,6 +1835,22 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 565 passed
 
+## Slice 0059 - Cargo `[target.'cfg(...)'.dependencies]` support
+
+### What landed
+- Extended `extractors/cargo.rs`:
+  - Added `RawTargetDeps { dependencies, dev_dependencies, build_dependencies }` struct.
+  - Added `target: Option<BTreeMap<String, RawTargetDeps>>` field to `RawManifest`.
+  - `extract()` now iterates all target platform blocks and collects their deps
+    using the same `convert_dep()` path as regular deps.
+  - 1 new test: `target_cfg_dependencies_extracted`.
+- Closes gap: `[target.'cfg(windows)'.dependencies]`, `[target.'cfg(unix)'.dev-dependencies]`,
+  etc. were previously silently ignored.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 566 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1844,6 +1860,6 @@ Pick whichever can be completed in one loop:
    and wire them into clap.
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
-4. **`ansible-galaxy` extractor**: `requirements.yml` for Ansible collections.
+4. **`ansible-galaxy` GitHub-URL roles extractor**: `requirements.yml` with GitHub-sourced roles.
 5. **`tekton` extractor**: Tekton pipeline bundle references.
-6. **`vendir` extractor**: Carvel vendir dependencies.
+6. **npm `resolutions`/`overrides` field**: yarn/npm overrides in package.json.
