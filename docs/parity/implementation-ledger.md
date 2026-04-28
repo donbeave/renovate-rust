@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0064  | 2026-04-28 | GitHub Actions `runs-on` runner version extraction | Complete | See below. |
 | 0063  | 2026-04-28 | GitHub Actions container/services Docker image extraction | Complete | See below. |
 | 0035  | 2026-04-28 | NuGet `.csproj`/`.props` extractor + NuGet API datasource | Complete | See below. |
 | 0034  | 2026-04-28 | Composer `composer.json` extractor + Packagist datasource | Complete | See below. |
@@ -1952,6 +1953,46 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 661 passed
 
+## Slice 0064 - GitHub Actions `runs-on` runner version extraction
+
+### Renovate reference
+- `lib/modules/datasource/github-runners/index.ts` — static `releases` table
+- `lib/modules/manager/github-actions/extract.ts` — `extractRunner()`, `runnerVersionRegex`
+- `GithubRunnersDatasource.isValidRunner(name, version)`
+
+### What landed
+- `crates/renovate-core/src/datasources/github_runners.rs` — fully offline, static datasource:
+  - `RunnerVersion { version, stable, deprecated }` — per-version record.
+  - `RUNNERS: &[(&str, &[RunnerVersion])]` — table for `ubuntu`, `macos`, `windows`
+    (ported from Renovate's `GithubRunnersDatasource.releases`).
+  - `is_valid_runner(name, version) -> bool` — checks if a runner+version exists.
+  - `variant_suffix(version) -> &str` — strips leading `X.Y` numeric prefix to get `-arm`, `-xlarge`, etc.
+  - `latest_stable(name, current_version) -> Option<&str>` — finds newest stable, non-deprecated
+    version with the same variant suffix.
+  - `update_summary(name, version) -> RunnerUpdateSummary` — combines update + deprecated flags.
+  - 12 unit tests.
+- `crates/renovate-core/src/extractors/github_actions.rs`:
+  - `GhRunnerDep { runner_name, current_value }` — extracted runner dep.
+  - `extract_runner_labels(content) -> Vec<GhRunnerDep>` — line-scanner for `runs-on:`.
+    - Handles inline single value (`runs-on: ubuntu-22.04`) and inline array form
+      (`runs-on: [ubuntu-22.04, self-hosted]`).
+    - Skips `latest`, `${{...}}` variables, self-hosted, unknown runners.
+  - `parse_runner_label(s) -> Option<(&str, &str)>` — splits `ubuntu-22.04` into name + version.
+  - 8 unit tests.
+- `crates/renovate-cli/src/main.rs` — GitHub Actions pipeline extended:
+  - Calls `extract_runner_labels()` for each workflow file.
+  - Computes update summary via `update_summary()` (no network needed).
+  - Reports `UpdateAvailable`, `UpToDate`, or `Skipped { "deprecated runner" }`.
+
+### What was intentionally deferred
+- Block-form `runs-on:` arrays (multi-line list items after `runs-on:`).
+- Matrix expression expansion (`${{ matrix.os }}`).
+- `self-hosted` runner labels with custom labels.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 685 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1962,5 +2003,5 @@ Pick whichever can be completed in one loop:
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
-5. **Maven `<parent>` POM dependency**: parent POM version tracking.
-6. **GitHub Actions `runs-on` runner labels**: runner version tracking via GitHub Releases datasource.
+5. **Maven `<parent>` POM dependency**: parent POM version tracking (already extracted, verify pipeline).
+6. **Gradle `build.gradle` DSL extraction** (beyond version catalog): detect `implementation` and `api` calls.

@@ -1094,6 +1094,32 @@ async fn process_repo(
                         });
                     }
                 }
+
+                // Extract and report `runs-on:` runner label versions.
+                let runner_deps = github_actions_extractor::extract_runner_labels(&raw.content);
+                for rdep in &runner_deps {
+                    let s = renovate_core::datasources::github_runners::update_summary(
+                        &rdep.runner_name,
+                        &rdep.current_value,
+                    );
+                    let dep_name = format!("{}-{}", rdep.runner_name, rdep.current_value);
+                    let status = if s.update_available {
+                        output::DepStatus::UpdateAvailable {
+                            current: s.current.clone(),
+                            latest: s.latest.unwrap_or_default(),
+                        }
+                    } else if s.deprecated {
+                        output::DepStatus::Skipped {
+                            reason: "deprecated runner".into(),
+                        }
+                    } else {
+                        output::DepStatus::UpToDate { latest: s.latest }
+                    };
+                    all_deps.push(output::DepReport {
+                        name: dep_name,
+                        status,
+                    });
+                }
                 repo_report.files.push(output::FileReport {
                     path: gha_file_path.clone(),
                     manager: "github-actions".into(),

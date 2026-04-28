@@ -288,6 +288,91 @@ fn transition_default(
     }
 }
 
+// ── Runner label extraction ───────────────────────────────────────────────────
+
+/// A `runs-on:` runner label extracted from a GitHub Actions workflow.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GhRunnerDep {
+    /// Runner family name (e.g., `"ubuntu"`, `"macos"`, `"windows"`).
+    pub runner_name: String,
+    /// Version string (e.g., `"22.04"`, `"14-xlarge"`, `"2022"`).
+    pub current_value: String,
+}
+
+/// Extract `runs-on:` runner labels from a GitHub Actions workflow YAML.
+///
+/// Handles:
+/// - Inline single value: `runs-on: ubuntu-22.04`
+/// - Inline array: `runs-on: [ubuntu-22.04, self-hosted]`
+///
+/// Skips `ubuntu-latest`, matrix expressions (`${{...}}`), and any runner
+/// names not in the known static runner table.
+pub fn extract_runner_labels(content: &str) -> Vec<GhRunnerDep> {
+    use crate::datasources::github_runners;
+
+    let mut out = Vec::new();
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        let trimmed = line.trim_start();
+
+        let Some(rest) = strip_key(trimmed, "runs-on") else {
+            continue;
+        };
+        let rest = rest.trim();
+
+        // Collect one or more runner strings from this line.
+        let runners: Vec<&str> = if rest.starts_with('[') {
+            // Inline array: `[ubuntu-22.04, self-hosted]`
+            let inner = rest.trim_start_matches('[').trim_end_matches(']');
+            inner.split(',').map(|s| s.trim()).collect()
+        } else {
+            vec![rest]
+        };
+
+        for runner_str in runners {
+            let runner_str = runner_str.trim_matches('"').trim_matches('\'');
+            // Skip variable references and empty values.
+            if runner_str.is_empty() || runner_str.starts_with('$') {
+                continue;
+            }
+            // Parse `{name}-{version}` — name is alpha-only, version is the rest.
+            if let Some((name, version)) = parse_runner_label(runner_str) {
+                // Skip `ubuntu-latest`, `macos-latest`, etc.
+                if version == "latest" {
+                    continue;
+                }
+                // Only emit if this is a known runner+version combination.
+                if github_runners::is_valid_runner(name, version) {
+                    out.push(GhRunnerDep {
+                        runner_name: name.to_owned(),
+                        current_value: version.to_owned(),
+                    });
+                }
+            }
+        }
+    }
+
+    out
+}
+
+/// Split `ubuntu-22.04` → `("ubuntu", "22.04")`, `macos-14-xlarge` → `("macos", "14-xlarge")`.
+///
+/// The runner name is the leading all-alpha prefix; the version is everything
+/// after the first `-` that follows that prefix.
+fn parse_runner_label(s: &str) -> Option<(&str, &str)> {
+    let dash = s.find(|c: char| !c.is_ascii_alphabetic())?;
+    if s.as_bytes().get(dash) != Some(&b'-') {
+        return None;
+    }
+    let name = &s[..dash];
+    let version = &s[dash + 1..];
+    if name.is_empty() || version.is_empty() {
+        return None;
+    }
+    Some((name, version))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -595,5 +680,84 @@ jobs:
         let deps = extract_docker_images(content);
         // container inline, redis (block), postgres (inline), container block
         assert_eq!(deps.len(), 4);
+    }
+
+    // ── extract_runner_labels tests ───────────────────────────────────────────
+
+    #[test]
+    fn runner_simple_ubuntu() {
+        let content = "    runs-on: ubuntu-22.04\n";
+        let runners = extract_runner_labels(content);
+        assert_eq!(runners.len(), 1);
+        assert_eq!(runners[0].runner_name, "ubuntu");
+        assert_eq!(runners[0].current_value, "22.04");
+    }
+
+    #[test]
+    fn runner_macos_xlarge() {
+        let content = "    runs-on: macos-14-xlarge\n";
+        let runners = extract_runner_labels(content);
+        assert_eq!(runners.len(), 1);
+        assert_eq!(runners[0].runner_name, "macos");
+        assert_eq!(runners[0].current_value, "14-xlarge");
+    }
+
+    #[test]
+    fn runner_windows() {
+        let content = "    runs-on: windows-2022\n";
+        let runners = extract_runner_labels(content);
+        assert_eq!(runners.len(), 1);
+        assert_eq!(runners[0].runner_name, "windows");
+        assert_eq!(runners[0].current_value, "2022");
+    }
+
+    #[test]
+    fn runner_latest_skipped() {
+        let content = "    runs-on: ubuntu-latest\n";
+        assert!(extract_runner_labels(content).is_empty());
+    }
+
+    #[test]
+    fn runner_self_hosted_skipped() {
+        let content = "    runs-on: self-hosted\n";
+        assert!(extract_runner_labels(content).is_empty());
+    }
+
+    #[test]
+    fn runner_matrix_variable_skipped() {
+        let content = "    runs-on: ${{ matrix.os }}\n";
+        assert!(extract_runner_labels(content).is_empty());
+    }
+
+    #[test]
+    fn runner_inline_array() {
+        let content = "    runs-on: [ubuntu-22.04, self-hosted]\n";
+        let runners = extract_runner_labels(content);
+        assert_eq!(runners.len(), 1);
+        assert_eq!(runners[0].current_value, "22.04");
+    }
+
+    #[test]
+    fn runner_unknown_version_skipped() {
+        let content = "    runs-on: ubuntu-99.99\n";
+        assert!(extract_runner_labels(content).is_empty());
+    }
+
+    #[test]
+    fn parse_runner_label_splits_correctly() {
+        assert_eq!(
+            parse_runner_label("ubuntu-22.04"),
+            Some(("ubuntu", "22.04"))
+        );
+        assert_eq!(
+            parse_runner_label("macos-14-xlarge"),
+            Some(("macos", "14-xlarge"))
+        );
+        assert_eq!(
+            parse_runner_label("windows-2022"),
+            Some(("windows", "2022"))
+        );
+        assert_eq!(parse_runner_label("self-hosted"), Some(("self", "hosted")));
+        assert_eq!(parse_runner_label("nodash"), None);
     }
 }
