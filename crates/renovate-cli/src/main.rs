@@ -2817,6 +2817,95 @@ async fn process_repo(
         }
     }
 
+    // ── Cloud Build (cloudbuild.yaml) ─────────────────────────────────────────
+    for cb_path in manager_files(&detected, "cloudbuild") {
+        match client.get_raw_file(owner, repo, &cb_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::cloudbuild::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %cb_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted cloudbuild images"
+                );
+                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
+                    .iter()
+                    .filter_map(|d| {
+                        let tag = d.tag.as_deref()?;
+                        Some(docker_datasource::DockerDepInput {
+                            dep_name: format!("{}:{tag}", d.image),
+                            image: d.image.clone(),
+                            tag: tag.to_owned(),
+                        })
+                    })
+                    .collect();
+                let updates = docker_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    docker_datasource::DOCKER_HUB_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        file_deps.push(output::DepReport {
+                            name: dep.image.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                    } else {
+                        let dep_name = match &dep.tag {
+                            Some(t) => format!("{}:{t}", dep.image),
+                            None => dep.image.clone(),
+                        };
+                        let status = match update_map.get(&dep_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_tag.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
+                                output::DepStatus::Skipped {
+                                    reason: "non-docker-hub registry".into(),
+                                }
+                            }
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        file_deps.push(output::DepReport {
+                            name: dep_name,
+                            status,
+                        });
+                    }
+                }
+                repo_report.files.push(output::FileReport {
+                    path: cb_path.clone(),
+                    manager: "cloudbuild".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%cb_path, "cloudbuild.yaml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%cb_path, %err, "failed to fetch cloudbuild.yaml");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 

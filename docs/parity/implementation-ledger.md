@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0078  | 2026-04-28 | Google Cloud Build `cloudbuild.yaml` extractor | Complete | See below. |
 | 0077  | 2026-04-28 | Kustomize `images:` and `helmCharts:` extractor | Complete | See below. |
 | 0076  | 2026-04-28 | Gradle version catalog `[plugins]` section extraction | Complete | See below. |
 | 0075  | 2026-04-28 | Gradle `plugins {}` block extraction | Complete | See below. |

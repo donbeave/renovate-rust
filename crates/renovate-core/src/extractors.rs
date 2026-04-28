@@ -9,6 +9,7 @@ pub mod buildkite;
 pub mod bundler;
 pub mod cargo;
 pub mod circleci;
+pub mod cloudbuild;
 pub mod cocoapods;
 pub mod composer;
 pub mod docker_compose;

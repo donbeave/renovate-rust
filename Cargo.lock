@@ -1273,6 +1273,8 @@ dependencies = [
  "clap",
  "predicates",
  "renovate-core",
+ "serde",
+ "serde_json",
  "tokio",
  "tracing",
  "tracing-subscriber",
