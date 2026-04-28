@@ -14,6 +14,8 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use regex::Regex;
 use serde::Deserialize;
 
+use crate::versioning::semver_generic::UpdateType;
+
 use crate::config::GlobalConfig;
 use crate::platform::{AnyPlatformClient, PlatformError};
 
@@ -52,6 +54,9 @@ pub struct PackageRule {
     pub match_package_patterns: Vec<Regex>,
     /// Limit this rule to specific managers (empty = all managers).
     pub match_managers: Vec<String>,
+    /// Update types this rule applies to (`major`, `minor`, `patch`).
+    /// Empty = all update types.
+    pub match_update_types: Vec<UpdateType>,
     /// If `Some(false)`, matching packages are disabled (skipped).
     pub enabled: Option<bool>,
     /// `true` when the raw config specified at least one name or pattern
@@ -81,6 +86,13 @@ impl PackageRule {
     /// An empty `matchManagers` list matches all managers.
     pub fn manager_matches(&self, manager: &str) -> bool {
         self.match_managers.is_empty() || self.match_managers.iter().any(|m| m == manager)
+    }
+
+    /// Return `true` when this rule's update type condition matches `update_type`.
+    ///
+    /// An empty `matchUpdateTypes` list matches all update types.
+    pub fn update_type_matches(&self, update_type: UpdateType) -> bool {
+        self.match_update_types.is_empty() || self.match_update_types.contains(&update_type)
     }
 }
 
@@ -170,6 +182,8 @@ impl RepoConfig {
             match_package_patterns: Vec<String>,
             #[serde(rename = "matchManagers", default)]
             match_managers: Vec<String>,
+            #[serde(rename = "matchUpdateTypes", default)]
+            match_update_types: Vec<String>,
             enabled: Option<bool>,
         }
 
@@ -218,10 +232,21 @@ impl RepoConfig {
                             .ok()
                     })
                     .collect();
+                let match_update_types = r
+                    .match_update_types
+                    .iter()
+                    .filter_map(|s| match s.as_str() {
+                        "major" => Some(UpdateType::Major),
+                        "minor" => Some(UpdateType::Minor),
+                        "patch" => Some(UpdateType::Patch),
+                        _ => None,
+                    })
+                    .collect();
                 PackageRule {
                     match_package_names: r.match_package_names,
                     match_package_patterns,
                     match_managers: r.match_managers,
+                    match_update_types,
                     enabled: r.enabled,
                     has_name_constraint,
                 }
@@ -260,6 +285,20 @@ impl RepoConfig {
         }
         self.package_rules.iter().any(|rule| {
             rule.name_matches(name) && rule.manager_matches(manager) && rule.enabled == Some(false)
+        })
+    }
+
+    /// Return `true` when a specific update (name + update type + manager)
+    /// is blocked by a `packageRules` entry with `enabled: false` and
+    /// `matchUpdateTypes` that includes `update_type`.
+    ///
+    /// Used in the dep report building phase after fetching update summaries.
+    pub fn is_update_blocked(&self, name: &str, update_type: UpdateType, manager: &str) -> bool {
+        self.package_rules.iter().any(|rule| {
+            rule.name_matches(name)
+                && rule.manager_matches(manager)
+                && rule.update_type_matches(update_type)
+                && rule.enabled == Some(false)
         })
     }
 }
@@ -636,5 +675,85 @@ mod tests {
         assert!(c.is_dep_ignored_for_manager("tokio", "cargo"));
         // Different manager — not matched
         assert!(!c.is_dep_ignored_for_manager("serde", "npm"));
+    }
+
+    // ── matchUpdateTypes tests ────────────────────────────────────────────────
+
+    #[test]
+    fn match_update_types_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchUpdateTypes": ["major"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        assert_eq!(c.package_rules.len(), 1);
+        assert_eq!(
+            c.package_rules[0].match_update_types,
+            vec![UpdateType::Major]
+        );
+    }
+
+    #[test]
+    fn is_update_blocked_major_only() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchUpdateTypes": ["major"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        assert!(c.is_update_blocked("serde", UpdateType::Major, "cargo"));
+        assert!(!c.is_update_blocked("serde", UpdateType::Minor, "cargo"));
+        assert!(!c.is_update_blocked("serde", UpdateType::Patch, "cargo"));
+    }
+
+    #[test]
+    fn is_update_blocked_with_package_name_filter() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchPackageNames": ["serde"],
+                    "matchUpdateTypes": ["major"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        assert!(c.is_update_blocked("serde", UpdateType::Major, "cargo"));
+        // Different package — not blocked
+        assert!(!c.is_update_blocked("tokio", UpdateType::Major, "cargo"));
+    }
+
+    #[test]
+    fn is_update_blocked_multiple_types() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchUpdateTypes": ["major", "minor"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        assert!(c.is_update_blocked("anything", UpdateType::Major, "cargo"));
+        assert!(c.is_update_blocked("anything", UpdateType::Minor, "cargo"));
+        assert!(!c.is_update_blocked("anything", UpdateType::Patch, "cargo"));
+    }
+
+    #[test]
+    fn is_update_blocked_unknown_type_strings_skipped() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchUpdateTypes": ["pin", "digest"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        // "pin" and "digest" are not yet supported types — rule has no update type constraint
+        // so it matches all update types
+        assert!(c.is_update_blocked("serde", UpdateType::Major, "cargo"));
     }
 }

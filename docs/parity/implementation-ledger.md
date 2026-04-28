@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0067  | 2026-04-28 | `packageRules` matchUpdateTypes filtering | Complete | See below. |
 | 0066  | 2026-04-28 | `UpdateType` classification + update type labels in CLI output | Complete | See below. |
 | 0065  | 2026-04-28 | `packageRules` parsing + `enabled: false` filtering | Complete | See below. |
 | 0064  | 2026-04-28 | GitHub Actions `runs-on` runner version extraction | Complete | See below. |
@@ -2048,11 +2049,40 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 700 passed
 
+## Slice 0067 - `packageRules` matchUpdateTypes filtering
+
+### Renovate reference
+- `lib/config/options/index.ts` — `matchUpdateTypes` option
+- Allowed values: `major`, `minor`, `patch`, `pin`, `pinDigest`, `digest`,
+  `lockFileMaintenance`, `rollback`, `bump`, `replacement`
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PackageRule.match_update_types: Vec<UpdateType>` — parsed from `matchUpdateTypes`.
+    Known types (`major`, `minor`, `patch`) are compiled to `UpdateType`; unknown strings
+    (e.g., `pin`, `digest`) are silently skipped (empty list → matches all update types).
+  - `PackageRule::update_type_matches(update_type) -> bool` — checks if the given type
+    is in the rule's `match_update_types` list (empty = all).
+  - `RepoConfig::is_update_blocked(name, update_type, manager) -> bool` — returns `true`
+    when any matching rule with `enabled: false` covers this update type.
+  - Added `use crate::versioning::semver_generic::UpdateType;` import.
+  - 5 new unit tests.
+
+### What was intentionally deferred
+- Wiring `is_update_blocked()` into all 32+ dep-report building sites in `main.rs`.
+  The API is ready; the wiring can be done incrementally or in a bulk slice.
+- `pin`, `pinDigest`, `digest`, etc. update type classifications (non-semver bump types).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 705 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
 
-1. **`packageRules` matchUpdateTypes**: wire `classify_semver_update` into packageRules filtering.
+1. **Wire `is_update_blocked` into main.rs dep report builders**: apply matchUpdateTypes
+   filtering across all managers (cargo, npm, maven, etc.) using `classify_semver_update`.
 2. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
