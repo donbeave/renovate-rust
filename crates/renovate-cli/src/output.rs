@@ -59,6 +59,10 @@ pub(crate) struct DepReport {
     /// Labels to add to the PR from matching packageRules.
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub labels: Vec<String>,
+    /// Generated PR title following Renovate's default commitMessage template.
+    /// Set only for `UpdateAvailable` deps.
+    #[serde(rename = "prTitle", skip_serializing_if = "Option::is_none")]
+    pub pr_title: Option<String>,
     #[serde(flatten)]
     pub status: DepStatus,
 }
@@ -508,6 +512,7 @@ mod tests {
                             group_name: None,
                             automerge: None,
                             labels: Vec::new(),
+                            pr_title: None,
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -519,6 +524,7 @@ mod tests {
                             group_name: None,
                             automerge: None,
                             labels: Vec::new(),
+                            pr_title: None,
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
@@ -529,6 +535,7 @@ mod tests {
                             group_name: None,
                             automerge: None,
                             labels: Vec::new(),
+                            pr_title: None,
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -544,6 +551,7 @@ mod tests {
                         group_name: None,
                         automerge: None,
                         labels: Vec::new(),
+                        pr_title: None,
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -607,6 +615,7 @@ mod tests {
                     group_name: None,
                     automerge: None,
                     labels: Vec::new(),
+                    pr_title: None,
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -633,6 +642,7 @@ mod tests {
             group_name: None,
             automerge: None,
             labels: Vec::new(),
+            pr_title: None,
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -653,6 +663,7 @@ mod tests {
             group_name: None,
             automerge: None,
             labels: Vec::new(),
+            pr_title: None,
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -671,6 +682,7 @@ mod tests {
             group_name: None,
             automerge: None,
             labels: Vec::new(),
+            pr_title: None,
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -688,6 +700,7 @@ mod tests {
             group_name: None,
             automerge: None,
             labels: Vec::new(),
+            pr_title: None,
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -734,6 +747,7 @@ mod tests {
                 group_name: None,
                 automerge: None,
                 labels: Vec::new(),
+                pr_title: None,
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -745,6 +759,7 @@ mod tests {
                 group_name: None,
                 automerge: None,
                 labels: Vec::new(),
+                pr_title: None,
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
@@ -753,6 +768,7 @@ mod tests {
                 group_name: None,
                 automerge: None,
                 labels: Vec::new(),
+                pr_title: None,
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
@@ -763,6 +779,7 @@ mod tests {
                 group_name: None,
                 automerge: None,
                 labels: Vec::new(),
+                pr_title: None,
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),
