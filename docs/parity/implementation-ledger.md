@@ -1546,6 +1546,40 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 478 passed
 
+## Slice 0049 - pre-commit `.pre-commit-config.yaml` extractor
+
+### Renovate reference
+- `lib/modules/manager/pre-commit/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/pre-commit/index.ts` — pattern `/(^|/)\\.pre-commit-config\\.ya?ml$/`
+- Datasources: GitHub Tags, GitLab Tags (reuses existing datasources)
+
+### What landed
+- `crates/renovate-core/src/extractors/pre_commit.rs` — YAML line scanner:
+  - Tracks `repos:` list with proper indent-level detection to distinguish
+    entry-level `- repo:` items from nested `- id:` hook items.
+  - `local` and `meta` repos emitted without a rev (so they appear as skipped).
+  - Skip reasons: `LocalHook` (`local`), `MetaHook` (`meta`),
+    `InvalidUrl`, `UnknownRegistry`.
+  - Git host detection: `github.com` → `GitHost::GitHub`,
+    `*.gitlab.*` → `GitHost::GitLab`.
+  - Strips `.git` suffix from dep names; strips surrounding quotes from rev values.
+- Manager pattern `pre-commit` with `(^|/)\.pre-commit-config\.ya?ml$`.
+- Pipeline wired in `main.rs`:
+  - GitHub hooks → `github_tags` datasource (reuses `gh_http` + `gh_api_base`).
+  - GitLab hooks → `gitlab_tags` datasource.
+  - Both paths use `HashMap<String, (update_available, latest, error_msg)>` pattern
+    (same as SPM mixed-host pipeline).
+
+### What was intentionally deferred
+- `additional_dependencies` for `language: node`, `language: python`,
+  `language: golang` hooks — requires npm/PyPI/Go module datasource wiring per-hook.
+- `rev` frozen-comment parsing (`# frozen: v1.2.3` alongside a digest `rev:`).
+- Custom/self-hosted Git registries with host-rule lookup.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 487 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1557,5 +1591,4 @@ Pick whichever can be completed in one loop:
 3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 4. **NuGet versioning**: NuGet uses SemVer2 with 4-part version numbers — add a
    nuget versioning module for accurate `1.2.3.4` comparisons.
-5. **`pre-commit` hooks**: parse `.pre-commit-config.yaml` and look up hook
-   revisions via GitHub/GitLab tags datasource.
+5. **`asdf` / `.tool-versions` extractor**: version manager for polyglot repos.

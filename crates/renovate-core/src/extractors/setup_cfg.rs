@@ -42,8 +42,7 @@ pub struct SetupCfgDep {
     pub skip_reason: Option<SetupCfgSkipReason>,
 }
 
-static SECTION: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\[([^\]]+)\]").unwrap());
+static SECTION: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\[([^\]]+)\]").unwrap());
 
 static RECORD_KEY: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^([\w.-]+)\s*=\s*(.*)").unwrap());
@@ -173,8 +172,7 @@ fn parse_dep(raw: &str, dep_type: &str) -> Option<SetupCfgDep> {
 
 /// Normalize PyPI name: lowercase, replace `-`/`_`/`.` with `-`.
 fn normalize_name(name: &str) -> String {
-    name.to_ascii_lowercase()
-        .replace(['.', '_'], "-")
+    name.to_ascii_lowercase().replace(['.', '_'], "-")
 }
 
 #[cfg(test)]
@@ -257,7 +255,8 @@ docs =
 
     #[test]
     fn skips_git_source() {
-        let content = "[options]\ninstall_requires =\n    git+https://github.com/org/repo.git@v1.0\n";
+        let content =
+            "[options]\ninstall_requires =\n    git+https://github.com/org/repo.git@v1.0\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].skip_reason, Some(SetupCfgSkipReason::GitSource));

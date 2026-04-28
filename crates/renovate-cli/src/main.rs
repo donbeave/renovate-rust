@@ -52,8 +52,8 @@ use renovate_core::extractors::nuget as nuget_extractor;
 use renovate_core::extractors::pep621 as pep621_extractor;
 use renovate_core::extractors::pip as pip_extractor;
 use renovate_core::extractors::poetry as poetry_extractor;
-use renovate_core::extractors::setup_cfg as setup_cfg_extractor;
 use renovate_core::extractors::pubspec as pubspec_extractor;
+use renovate_core::extractors::setup_cfg as setup_cfg_extractor;
 use renovate_core::extractors::terraform as terraform_extractor;
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
@@ -1630,6 +1630,135 @@ async fn process_repo(
             Ok(None) => tracing::warn!(repo=%repo_slug, file=%podfile_path, "Podfile not found"),
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%podfile_path, %err, "failed to fetch Podfile");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── pre-commit (.pre-commit-config.yaml) ──────────────────────────────────
+    for pc_path in manager_files(&detected, "pre-commit") {
+        match client.get_raw_file(owner, repo, &pc_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::pre_commit::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %pc_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted pre-commit hook deps"
+                );
+
+                // Partition actionable by host.
+                let gh_actionable: Vec<_> = actionable
+                    .iter()
+                    .filter(|d| {
+                        d.git_host == Some(renovate_core::extractors::pre_commit::GitHost::GitHub)
+                    })
+                    .collect();
+                let gl_actionable: Vec<_> = actionable
+                    .iter()
+                    .filter(|d| {
+                        d.git_host == Some(renovate_core::extractors::pre_commit::GitHost::GitLab)
+                    })
+                    .collect();
+
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = gh_actionable
+                    .iter()
+                    .map(|d| github_tags_datasource::GithubActionsDepInput {
+                        dep_name: d.dep_name.clone(),
+                        current_value: d.current_value.trim_matches('\'').to_owned(),
+                    })
+                    .collect();
+                let gh_updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &gh_inputs,
+                    gh_api_base,
+                    8,
+                )
+                .await;
+                let mut update_map: HashMap<String, (bool, Option<String>, Option<String>)> =
+                    HashMap::new();
+                for r in gh_updates {
+                    match r.summary {
+                        Ok(s) => {
+                            update_map.insert(r.dep_name, (s.update_available, s.latest, None));
+                        }
+                        Err(e) => {
+                            update_map.insert(r.dep_name, (false, None, Some(e.to_string())));
+                        }
+                    }
+                }
+
+                let gl_inputs: Vec<renovate_core::datasources::gitlab_tags::GitlabTagsDepInput> =
+                    gl_actionable
+                        .iter()
+                        .map(
+                            |d| renovate_core::datasources::gitlab_tags::GitlabTagsDepInput {
+                                dep_name: d.dep_name.clone(),
+                                current_value: d.current_value.trim_matches('\'').to_owned(),
+                            },
+                        )
+                        .collect();
+                let gl_updates = renovate_core::datasources::gitlab_tags::fetch_updates_concurrent(
+                    http,
+                    &gl_inputs,
+                    renovate_core::datasources::gitlab_tags::GITLAB_API,
+                    8,
+                )
+                .await;
+                for r in gl_updates {
+                    match r.summary {
+                        Ok(s) => {
+                            update_map.insert(r.dep_name, (s.update_available, s.latest, None));
+                        }
+                        Err(e) => {
+                            update_map.insert(r.dep_name, (false, None, Some(e.to_string())));
+                        }
+                    }
+                }
+
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                    file_deps.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status: output::DepStatus::Skipped {
+                            reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
+                                .to_lowercase(),
+                        },
+                    });
+                }
+                for dep in &actionable {
+                    let status = match update_map.get(&dep.dep_name) {
+                        Some((true, Some(latest), _)) => output::DepStatus::UpdateAvailable {
+                            current: dep.current_value.trim_matches('\'').to_owned(),
+                            latest: latest.clone(),
+                        },
+                        Some((false, latest, None)) => output::DepStatus::UpToDate {
+                            latest: latest.clone(),
+                        },
+                        Some((_, _, Some(err_msg))) => output::DepStatus::LookupError {
+                            message: err_msg.clone(),
+                        },
+                        _ => output::DepStatus::UpToDate { latest: None },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: pc_path.clone(),
+                    manager: "pre-commit".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%pc_path, ".pre-commit-config.yaml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%pc_path, %err, "failed to fetch .pre-commit-config.yaml");
                 had_error = true;
             }
         }
