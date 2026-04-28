@@ -194,6 +194,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"\.tf$", r"\.tofu$"],
     },
     ManagerDef {
+        name: "travis",
+        patterns: &[r"^\.travis\.ya?ml$"],
+    },
+    ManagerDef {
         name: "composer",
         patterns: &[r"(^|/)([\w-]*)composer\.json$"],
     },

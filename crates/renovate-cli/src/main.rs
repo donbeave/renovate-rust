@@ -2907,6 +2907,73 @@ async fn process_repo(
         }
     }
 
+    // ── Travis CI (.travis.yml) ───────────────────────────────────────────────
+    for travis_path in manager_files(&detected, "travis") {
+        match client.get_raw_file(owner, repo, &travis_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::travis::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %travis_path,
+                    total = deps.len(), "extracted travis node_js versions"
+                );
+                // Reuse the Node.js GitHub Releases lookup (same as nvmrc/node-version).
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = deps
+                    .iter()
+                    .map(|d| github_tags_datasource::GithubActionsDepInput {
+                        dep_name: "nodejs/node".to_owned(),
+                        current_value: d.version.clone(),
+                    })
+                    .collect();
+                let updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &gh_inputs,
+                    gh_api_base,
+                    4,
+                )
+                .await;
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .zip(updates.iter())
+                    .map(|(dep, result)| {
+                        let status = match &result.summary {
+                            Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                                current: dep.version.clone(),
+                                latest: s
+                                    .latest
+                                    .as_deref()
+                                    .map(|l| l.strip_prefix('v').unwrap_or(l).to_owned())
+                                    .unwrap_or_default(),
+                            },
+                            Ok(s) => output::DepStatus::UpToDate {
+                                latest: s
+                                    .latest
+                                    .as_deref()
+                                    .map(|l| l.strip_prefix('v').unwrap_or(l).to_owned()),
+                            },
+                            Err(e) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                        };
+                        output::DepReport {
+                            name: format!("node@{}", dep.version),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: travis_path.clone(),
+                    manager: "travis".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%travis_path, ".travis.yml not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%travis_path, %err, "failed to fetch .travis.yml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── GitLab CI (.gitlab-ci.yml) ────────────────────────────────────────────
     for glci_path in manager_files(&detected, "gitlabci") {
         match client.get_raw_file(owner, repo, &glci_path).await {
