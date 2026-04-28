@@ -21,6 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0198  | 2026-04-28 | PyPI `current_version_timestamp` for `matchCurrentAge` + AGPL-3.0 LICENSE + README goals section | Complete | See below. |
+| 0197  | 2026-04-28 | npm `current_version_timestamp` population for `matchCurrentAge` exact pins | Complete | See below. |
 | 0196  | 2026-04-28 | Fix: SemVer build metadata falsely triggered Cargo update detection | Complete | See below. |
 | 0195  | 2026-04-28 | Parity tracking: create `renovate-source-map.md` + update loop prompt with maintenance rules | Complete | See below. |
 | 0194  | 2026-04-28 | `matchCurrentAge` packageRule matcher + `satisfies_date_range()` + per-version timestamps (npm/pypi) | Complete | See below. |

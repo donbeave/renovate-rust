@@ -213,11 +213,11 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 ## Pending / not yet ported
 
 The following Renovate test areas have no current Rust coverage and are planned
-for future slices:
+for future slices.  **Do not list ported items here** — move them to the
+relevant section above.
 
 | Renovate spec file | Topic | Priority |
 |--------------------|-------|----------|
-| `lib/util/package-rules/repositories.ts` | `matchRepositories` matcher | ported |
 | `lib/config/presets/index.spec.ts` | Remote preset resolution (`github>`) | high |
 | `lib/modules/manager/npm/extract.spec.ts` | npm dep extraction edge cases | high |
 | `lib/modules/manager/cargo/extract.spec.ts` | Cargo workspace dep extraction | high |
@@ -225,4 +225,5 @@ for future slices:
 | `lib/modules/datasource/npm/index.spec.ts` | npm registry lookup | high |
 | `lib/modules/datasource/docker/index.spec.ts` | Docker Hub lookup | medium |
 | `lib/modules/datasource/github-releases/index.spec.ts` | GitHub Releases lookup | medium |
-| `lib/modules/versioning/*/index.spec.ts` | Full versioning suites | medium |
+| `lib/modules/versioning/pep440/index.spec.ts` | Full PEP 440 versioning suite | medium |
+| `lib/modules/versioning/docker/index.spec.ts` | Docker versioning (shorter-is-bigger) | medium |
