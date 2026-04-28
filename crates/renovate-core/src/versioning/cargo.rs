@@ -139,7 +139,15 @@ pub fn update_summary(constraint: &str, available_versions: &[String]) -> Update
         && !constraint.contains(',')
         && !constraint.contains('*');
 
-    let update_available = is_pinned && latest.as_deref().map(|l| l != stripped).unwrap_or(false);
+    // Use precedence comparison (ignoring build metadata) per SemVer spec.
+    // String comparison would incorrectly flag "1.1.2" vs "1.1.2+meta" as an update.
+    let update_available = is_pinned
+        && latest.as_deref().map(|l| {
+            match (Version::parse(l), Version::parse(stripped)) {
+                (Ok(lv), Ok(sv)) => lv.cmp_precedence(&sv).is_gt(),
+                _ => l != stripped,
+            }
+        }).unwrap_or(false);
 
     UpdateSummary {
         current_constraint: constraint.to_owned(),
@@ -189,6 +197,25 @@ mod update_summary_tests {
         let s = update_summary("2.0.0", &avail);
         assert!(s.latest_compatible.is_none());
         assert!(!s.update_available);
+    }
+
+    #[test]
+    fn build_metadata_same_precedence_is_not_update() {
+        // "1.1.2" and "1.1.2+spec-1.1.0" have equal SemVer precedence.
+        // The crates.io sparse index may list both; this must NOT show as update.
+        let avail = v(&["1.1.2", "1.1.2+spec-1.1.0"]);
+        let s = update_summary("1.1.2", &avail);
+        assert!(!s.update_available, "build-metadata variant should not trigger update");
+    }
+
+    #[test]
+    fn build_metadata_with_actual_newer_version_is_update() {
+        // If a genuinely newer version exists alongside a build-metadata variant,
+        // the update should still fire.
+        let avail = v(&["1.1.2", "1.1.2+spec-1.1.0", "1.1.3"]);
+        let s = update_summary("1.1.2", &avail);
+        assert!(s.update_available);
+        assert_eq!(s.latest_compatible.as_deref(), Some("1.1.3"));
     }
 }
 
