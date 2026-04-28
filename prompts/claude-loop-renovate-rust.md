@@ -29,7 +29,6 @@ Primary outcome:
 Rust project standards:
 - Use stable Rust and current mainstream crates.
 - Use `clap` derive APIs for the CLI, including subcommands, help, version output, shell completions when useful, env-backed options where appropriate, and Renovate-compatible aliases.
-- Use https://github.com/tailrocks/rust-best-practices as a secondary Rust engineering reference. If `../rust-best-practices/skills/rust-best-practices/SKILL.md` is available locally, read it before Rust architecture, API, lint, or review work. If it is not available, use the inline rules below and do not let the missing reference block progress.
 - Set up formatting, linting, and test infrastructure at the beginning of the project, before feature work grows:
   - `rustfmt` policy, committed through `rustfmt.toml` when project defaults are not enough
   - strict Clippy policy, committed through crate lints and/or `clippy.toml` when useful
