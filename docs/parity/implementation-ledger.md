@@ -21,8 +21,53 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0003 - Logger init
+
+### Renovate reference
+- `lib/logger/index.ts` — `init()`, `logLevel()`, `LOG_LEVEL` env, default `"info"`.
+- `lib/logger/bunyan.ts` — `validateLogLevel`, `createLogger`,
+  `LOG_FORMAT=json` vs pretty-stdout, `LOG_FILE`/`LOG_FILE_LEVEL`/`LOG_FILE_FORMAT`.
+- `lib/logger/types.ts` — `BunyanLogLevel` alias for Bunyan's
+  `LogLevelString`: `"trace" | "debug" | "info" | "warn" | "error" | "fatal"`.
+
+### What landed
+- `crates/renovate-cli/src/logging.rs` with:
+  - `parse_log_level(&str) -> ParseLevelResult` — maps Renovate's 6 level
+    names to `tracing::Level`; `fatal` → `Level::ERROR` (Bunyan-specific,
+    no tracing equivalent above `error`); unknown → `Invalid`.
+  - `should_use_ansi()` — detects TTY on stderr and respects `NO_COLOR`.
+  - `init() -> InitResult` — reads `LOG_LEVEL` (default `info`) and
+    `LOG_FORMAT` (default pretty). Sets up `tracing-subscriber` `fmt`
+    subscriber writing to stderr; uses `.json()` when `LOG_FORMAT=json`.
+- Invalid `LOG_LEVEL` exits 1 with a JSON-formatted fatal message
+  matching Renovate's `validateLogLevel` behavior.
+- `tracing-subscriber` `json` feature enabled in workspace `Cargo.toml`.
+- `main.rs` — logging initialized first, before argv migration and arg
+  parsing, matching Renovate's startup order.
+- 7 unit tests (level parsing for all 6 valid names + invalid cases).
+- 5 integration tests (invalid level → exit 1; debug/fatal/JSON/NO_COLOR
+  → exit 0).
+
+### What was intentionally deferred
+- `LOG_FILE` / `LOG_FILE_LEVEL` / `LOG_FILE_FORMAT` support — the file
+  logging path is orthogonal to stdout and can land as its own slice.
+- `LOG_FORMAT=pretty` explicit format variant and colored human output
+  improvements — the fmt subscriber's default is already human-readable;
+  formatting polish comes later.
+- `LOG_CONTEXT` env var for structured request IDs.
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (38 passed)
 
 ## Slice 0002 - `migrateArgs` parity
 

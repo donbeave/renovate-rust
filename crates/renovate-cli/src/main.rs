@@ -1,18 +1,18 @@
 //! Entry point for the `renovate` binary.
 //!
-//! This is the Rust reimplementation of `renovatebot/renovate`'s CLI. The
-//! initial slice exposes only the early flags (`-v`/`--version` and `--help`)
-//! and accepts repositories as positional arguments. Flag parsing and
-//! behavior will grow slice-by-slice toward Renovate parity; see
+//! This is the Rust reimplementation of `renovatebot/renovate`'s CLI. Flag
+//! parsing and behavior grow slice-by-slice toward Renovate parity; see
 //! `docs/parity/implementation-ledger.md` for the running plan.
 
 // Allow user-facing CLI output. The workspace lints forbid this elsewhere so
 // that print! calls cannot leak into library code.
 #![allow(
     clippy::print_stdout,
-    reason = "CLI surface — user-facing output belongs in this crate"
+    clippy::print_stderr,
+    reason = "CLI surface — user-facing output and error messages belong in this crate"
 )]
 
+mod logging;
 mod migrate;
 
 use std::process::ExitCode;
@@ -31,26 +31,38 @@ use clap::{ArgAction, Parser};
     // `-v`/`--version` and print the bare version string for compatibility
     // with `renovatebot/renovate`'s commander-based CLI.
     disable_version_flag = true,
-    // Surface unknown flags as errors during early parsing once the full
-    // option set is wired up. Kept default for now.
 )]
 struct Cli {
     /// Print the version and exit.
     #[arg(short = 'v', long = "version", action = ArgAction::SetTrue, global = true)]
     version: bool,
 
-    /// Repositories to process (positional). Slice 1 only records them; later
-    /// slices will dispatch into the worker pipeline.
+    /// Repositories to process (positional). Later slices dispatch these
+    /// into the worker pipeline.
     #[arg(value_name = "repositories")]
     repositories: Vec<String>,
 }
 
 fn main() -> ExitCode {
-    // Mirror Renovate's pipeline: legacy-flag migration happens before the
-    // option parser sees argv. See `migrate` module docs for semantics.
+    // 1. Initialize logging before anything that might emit log records.
+    //    Reads LOG_LEVEL (default "info") and LOG_FORMAT (default pretty).
+    //    Mirrors Renovate's logger init in lib/logger/index.ts.
+    match logging::init() {
+        logging::InitResult::Ok => {}
+        logging::InitResult::InvalidLevel(lvl) => {
+            // Mirror Renovate's validateLogLevel: print a fatal-level message
+            // and exit 1.
+            eprintln!(r#"{{"level":"fatal","msg":"Invalid log level","logLevel":{lvl:?}}}"#);
+            return ExitCode::from(1);
+        }
+    }
+
+    // 2. Legacy-flag migration before the option parser sees argv.
+    //    See migrate module docs for semantics.
     let raw: Vec<String> = std::env::args().collect();
     let migrated = migrate::migrate_args(&raw);
 
+    // 3. Parse flags.
     let cli = match Cli::try_parse_from(&migrated) {
         Ok(cli) => cli,
         Err(err) => {
@@ -65,7 +77,6 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    // Slice 1 stops here. Later slices replace this with the global worker
-    // entry point.
+    // Later slices replace this stub with the global worker entry point.
     ExitCode::SUCCESS
 }

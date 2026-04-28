@@ -63,6 +63,60 @@ fn no_args_succeeds() {
         .stderr(predicate::str::is_empty());
 }
 
+// ── Logging ────────────────────────────────────────────────────────────────
+
+#[test]
+fn invalid_log_level_exits_1_with_fatal_message() {
+    // Mirrors Renovate's validateLogLevel: exits 1 and writes a fatal-level
+    // message when LOG_LEVEL is unrecognized.
+    renovate()
+        .env("LOG_LEVEL", "not_a_level")
+        .assert()
+        .failure()
+        .code(1)
+        .stderr(predicate::str::contains("Invalid log level"))
+        .stderr(predicate::str::contains("not_a_level"));
+}
+
+#[test]
+fn log_level_debug_does_not_crash() {
+    renovate()
+        .env("LOG_LEVEL", "debug")
+        .arg("--version")
+        .assert()
+        .success();
+}
+
+#[test]
+fn log_level_fatal_does_not_crash() {
+    // `fatal` is a valid Renovate level name; maps to error in tracing.
+    renovate()
+        .env("LOG_LEVEL", "fatal")
+        .arg("--version")
+        .assert()
+        .success();
+}
+
+#[test]
+fn log_format_json_does_not_crash() {
+    renovate()
+        .env("LOG_FORMAT", "json")
+        .arg("--version")
+        .assert()
+        .success();
+}
+
+#[test]
+fn no_color_env_does_not_crash() {
+    renovate()
+        .env("NO_COLOR", "1")
+        .arg("--version")
+        .assert()
+        .success();
+}
+
+// ── Legacy-flag migration ───────────────────────────────────────────────────
+
 #[test]
 fn git_fs_legacy_flags_are_silently_dropped() {
     // Renovate's `migrateArgs` filters every `--git-fs*` token before the
