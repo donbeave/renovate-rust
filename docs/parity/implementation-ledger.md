@@ -21,9 +21,60 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0004  | 2026-04-28 | Option surface first-cut + env vars           | Complete | See below. |
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0004 - Option surface first-cut + env vars
+
+### Renovate reference
+- `lib/config/options/index.ts` — option definitions for `platform`,
+  `token`, `endpoint`, `dryRun`, `requireConfig`, `forkProcessing`,
+  `platformAutomerge`, `recreateWhen`, `allowedCommands`,
+  `allowCommandTemplating`, `hostRules`, `registryAliases`.
+- `lib/config/options/env.ts` — `getEnvName` maps camelCase names to
+  `RENOVATE_UPPER_SNAKE_CASE` env vars.
+- `lib/constants/platforms.ts` — `PLATFORM_HOST_TYPES` constant.
+- `lib/workers/global/config/parse/cli.ts` — `getConfig` coercions for
+  `dryRun` ("true"→"full", "false"/"null"→null) and `requireConfig`
+  ("true"→"required", "false"→"optional").
+
+### What landed
+- `crates/renovate-cli/src/cli.rs` — new module holding the `Cli` struct
+  and associated `ValueEnum` types. `main.rs` is now thin (logging,
+  migration, parse, dispatch).
+- Registered flags: `--platform` (`Platform` enum with all 11 values),
+  `--token`, `--endpoint`, `--dry-run` (`DryRunArg` enum with
+  extract/lookup/full plus legacy true/false/null variants), `--require-config`
+  (`RequireConfigArg` with required/optional/ignored + legacy true/false),
+  `--fork-processing`, `--platform-automerge`, `--recreate-when`,
+  `--allowed-commands`, `--allow-command-templating`, `--host-rules`,
+  `--registry-aliases`.
+- Every flag backed by its `RENOVATE_*` env var via clap's `env` feature.
+- Legacy "true"/"false" variants in `DryRunArg` and `RequireConfigArg`
+  so `--dry-run=true` (produced by `migrateArgs`) and `--require-config=true`
+  are accepted without error. Conversion to canonical values is deferred to
+  the config layer (next slice).
+- 15 new integration tests completing the migrateArgs end-to-end chain
+  plus env var coverage. 53 tests total, all passing.
+
+### What was intentionally deferred
+- `DryRunArg::canonical()` / `RequireConfigArg::canonical()` conversion
+  methods and their callers — the config layer isn't yet wired.
+- JSON5 parsing for `--allowed-commands` and `--host-rules` / `--registry-aliases`
+  (accepted as raw strings; a `coercions` parity slice will parse them).
+- Remaining option surface (hundreds of per-repo options); the next
+  option-surface slice will add the most commonly used ones.
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (53 passed)
 
 ## Slice 0003 - Logger init
 
