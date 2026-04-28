@@ -539,6 +539,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "tekton",
         patterns: &[r"(^|/)tekton/.+\.ya?ml$"],
     },
+    ManagerDef {
+        name: "bazel",
+        patterns: &[
+            r"(^|/)WORKSPACE(\.bazel|\.bzlmod)?$",
+            r"(^|/)\.WORKSPACE\.bazel$",
+            r"\.bzl$",
+        ],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

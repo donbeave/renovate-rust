@@ -11,6 +11,7 @@ pub mod asdf;
 pub mod azure_pipelines;
 pub mod batect;
 pub mod batect_wrapper;
+pub mod bazel;
 pub mod bazel_module;
 pub mod bicep;
 pub mod bitbucket_pipelines;

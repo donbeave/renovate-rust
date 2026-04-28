@@ -6223,6 +6223,124 @@ async fn process_repo(
         }
     }
 
+    // ── Bazel WORKSPACE / .bzl http_archive() ────────────────────────────────
+    for bazel_path in manager_files(&detected, "bazel") {
+        match client.get_raw_file(owner, repo, &bazel_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::bazel::{BazelSkipReason, BazelSource};
+                let deps = renovate_core::extractors::bazel::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %bazel_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted bazel http_archive deps"
+                );
+                let mut dep_reports: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: match reason {
+                                    BazelSkipReason::NoGithubUrl => "no-github-url".to_owned(),
+                                    BazelSkipReason::MissingSha256 => "missing-sha256".to_owned(),
+                                },
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let status = match &dep.source {
+                        BazelSource::GithubTags { repo: gh_repo } => {
+                            match renovate_core::datasources::github_tags::fetch_latest_tag(
+                                gh_repo,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            {
+                                Ok(Some(tag)) => {
+                                    let stripped = tag.trim_start_matches('v');
+                                    let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                        &dep.current_value, Some(stripped),
+                                    );
+                                    if s.update_available {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: dep.current_value.clone(),
+                                            latest: stripped.to_owned(),
+                                        }
+                                    } else {
+                                        output::DepStatus::UpToDate {
+                                            latest: Some(stripped.to_owned()),
+                                        }
+                                    }
+                                }
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                        BazelSource::GithubReleases { repo: gh_repo } => {
+                            match github_releases_datasource::fetch_latest_release(
+                                gh_repo,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            {
+                                Ok(Some(tag)) => {
+                                    let stripped = tag.trim_start_matches('v');
+                                    let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                        &dep.current_value, Some(stripped),
+                                    );
+                                    if s.update_available {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: dep.current_value.clone(),
+                                            latest: stripped.to_owned(),
+                                        }
+                                    } else {
+                                        output::DepStatus::UpToDate {
+                                            latest: Some(stripped.to_owned()),
+                                        }
+                                    }
+                                }
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                        BazelSource::Unsupported => output::DepStatus::Skipped {
+                            reason: "no-github-url".to_owned(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: bazel_path.clone(),
+                        manager: "bazel".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%bazel_path, "bazel file not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bazel_path, %err, "failed to fetch bazel file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Tekton resources (tekton/) ────────────────────────────────────────────
     for tekton_path in manager_files(&detected, "tekton") {
         match client.get_raw_file(owner, repo, &tekton_path).await {

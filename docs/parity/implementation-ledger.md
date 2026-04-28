@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0148  | 2026-04-28 | Bazel WORKSPACE `http_archive()` extractor (GitHub Tags + Releases) | Complete | See below. |
 | 0147  | 2026-04-28 | Tekton CI/CD resource extractor (step image deps) | Complete | See below. |
 | 0146  | 2026-04-28 | Kubernetes manifest Docker image extractor | Complete | See below. |
 | 0145  | 2026-04-28 | ArgoCD Application manifest extractor (Helm + Git sources) | Complete | See below. |
@@ -3094,6 +3095,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0148 - Bazel WORKSPACE `http_archive()` extractor (GitHub Tags + Releases)
+
+### Renovate reference
+- `lib/modules/manager/bazel/extract.ts`
+- `lib/modules/manager/bazel/rules/git.ts`
+- Patterns: `WORKSPACE(\.bazel|\.bzlmod)?`, `\.WORKSPACE\.bazel`, `\.bzl`
+- Datasources: GitHub Tags (archive URLs), GitHub Releases (release download URLs)
+
+### What landed
+- `crates/renovate-core/src/extractors/bazel.rs` (new):
+  - Brace-counting `extract_block()` finds `http_archive(...)` call boundaries.
+  - `name = "..."` extraction with fallback inline pattern.
+  - `urls = [...]` scanning with `GH_ARCHIVE_RE` / `GH_RELEASE_RE` matching
+    (same patterns as Homebrew extractor — both handle GitHub tarball/zip URLs).
+  - 5 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with WORKSPACE and `.bzl` patterns.
+- `crates/renovate-cli/src/main.rs`: pipeline dispatches GitHub Archive → `github_tags`,
+  GitHub Release → `github_releases_datasource`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1024 passed
 
 ## Slice 0147 - Tekton CI/CD resource extractor (step image deps)
 
