@@ -48,6 +48,7 @@ pub mod gradle_wrapper;
 pub mod helm;
 pub mod helm_values;
 pub mod helmfile;
+pub mod helmsman;
 pub mod homeassistant;
 pub mod homebrew;
 pub mod html;

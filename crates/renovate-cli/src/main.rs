@@ -6186,6 +6186,93 @@ async fn process_repo(
         }
     }
 
+    // ── Helmsman DSF (helmsman.yml / helmsman.d/*.yml) ────────────────────────
+    for hsm_path in manager_files(&detected, "helmsman") {
+        match client.get_raw_file(owner, repo, &hsm_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::helmsman::HelmsmanSkipReason;
+                let deps = renovate_core::extractors::helmsman::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %hsm_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted helmsman deps"
+                );
+                let helm_inputs: Vec<helm_datasource::HelmDepInput> = actionable
+                    .iter()
+                    .map(|d| helm_datasource::HelmDepInput {
+                        name: d.chart_name.clone(),
+                        current_value: d.current_value.clone(),
+                        repository_url: d.registry_url.clone(),
+                    })
+                    .collect();
+                let updates =
+                    helm_datasource::fetch_updates_concurrent(http, &helm_inputs, 8).await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                let dep_reports: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        if let Some(reason) = &dep.skip_reason {
+                            return output::DepReport {
+                                name: dep.dep_name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: match reason {
+                                        HelmsmanSkipReason::UnspecifiedVersion => {
+                                            "unspecified-version".to_owned()
+                                        }
+                                        HelmsmanSkipReason::InvalidChart => {
+                                            "invalid-name".to_owned()
+                                        }
+                                        HelmsmanSkipReason::NoRepository => {
+                                            "no-repository".to_owned()
+                                        }
+                                    },
+                                },
+                            };
+                        }
+                        let status = match update_map.get(&dep.chart_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_value.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: hsm_path.clone(),
+                        manager: "helmsman".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%hsm_path, "helmsman file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%hsm_path, %err, "failed to fetch helmsman file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Unity3D ProjectVersion.txt ─────────────────────────────────────────────
     for unity_path in manager_files(&detected, "unity3d") {
         match client.get_raw_file(owner, repo, &unity_path).await {

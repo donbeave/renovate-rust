@@ -492,6 +492,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "buildpacks",
         patterns: &[r"(^|/)project\.toml$"],
     },
+    ManagerDef {
+        name: "helmsman",
+        patterns: &[r"(^|/)helmsman\.ya?ml$", r"(^|/)helmsman\.d/.+\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

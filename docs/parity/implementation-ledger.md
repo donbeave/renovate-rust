@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0142  | 2026-04-28 | Helmsman DSF extractor (Helm chart version tracking) | Complete | See below. |
 | 0141  | 2026-04-28 | Cloud Native Buildpacks `project.toml` extractor + BuildpacksRegistry datasource | Complete | See below. |
 | 0140  | 2026-04-28 | Unity3D `ProjectVersion.txt` extractor + Unity releases datasource | Complete | See below. |
 | 0139  | 2026-04-28 | Pixi `pixi.toml` extractor (PyPI deps actionable, Conda skipped) | Complete | See below. |
@@ -3088,6 +3089,28 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0142 - Helmsman DSF extractor (Helm chart version tracking)
+
+### Renovate reference
+- `lib/modules/manager/helmsman/extract.ts`
+- Default patterns: `[]`; we add `(^|/)helmsman\.ya?ml$` and `(^|/)helmsman\.d/.+\.ya?ml$`
+- Datasource: `helm`
+
+### What landed
+- `crates/renovate-core/src/extractors/helmsman.rs` (new):
+  - Line-based scanner with 2-section state machine (`helmRepos`, `apps`).
+  - Parses `helmRepos:` alias→URL map.
+  - For each `apps:` entry extracts `chart` and `version`.
+  - Resolves `stable/redis` → `(alias="stable", chart_name="redis")` → registry URL.
+  - `HelmsmanSkipReason::UnspecifiedVersion`, `InvalidChart`, `NoRepository`.
+  - 4 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with two common Helmsman patterns.
+- `crates/renovate-cli/src/main.rs`: pipeline uses `helm_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1003 passed (crossed 1000 tests)
 
 ## Slice 0141 - Cloud Native Buildpacks `project.toml` extractor + BuildpacksRegistry datasource
 
