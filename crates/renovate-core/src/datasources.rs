@@ -16,6 +16,7 @@ pub mod github_tags;
 pub mod gitlab_tags;
 pub mod gomod;
 pub mod gradle_version;
+pub mod hackage;
 pub mod helm;
 pub mod hex;
 pub mod jenkins_plugins;

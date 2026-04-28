@@ -11,6 +11,7 @@ pub mod batect;
 pub mod bitbucket_pipelines;
 pub mod buildkite;
 pub mod bundler;
+pub mod cabal;
 pub mod cake;
 pub mod cargo;
 pub mod circleci;

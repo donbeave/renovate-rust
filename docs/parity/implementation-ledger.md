@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0118  | 2026-04-28 | Haskell Cabal `*.cabal` extractor + Hackage datasource | Complete | See below. |
 | 0117  | 2026-04-28 | FVM `.fvmrc`/`.fvm/fvm_config.json` Flutter version extractor | Complete | See below. |
 | 0116  | 2026-04-28 | Jsonnet Bundler `jsonnetfile.json` extractor (GitHub Tags) | Complete | See below. |
 | 0115  | 2026-04-28 | Vendir `vendir.yml` Helm chart extractor | Complete | See below. |
@@ -3036,6 +3037,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 938 passed
 
+## Slice 0118 - Haskell Cabal `*.cabal` extractor + Hackage datasource
+
+### Renovate reference
+- `lib/modules/manager/haskell-cabal/extract.ts`
+- `lib/modules/datasource/hackage/index.ts`
+- Pattern: `/\.cabal$/`
+- Datasource: Hackage (`https://hackage.haskell.org/package/{name}.json`)
+
+### What landed
+- `crates/renovate-core/src/extractors/cabal.rs` (new):
+  - `CabalDep { package_name, current_value }` struct.
+  - `extract(content)` — finds `build-depends:` fields (case-insensitive), collects
+    continuation lines, strips `--` comments, splits on commas, extracts package names.
+  - 5 unit tests.
+- `crates/renovate-core/src/datasources/hackage.rs` (new):
+  - `fetch_latest(http, package_name)` — GETs `{name}.json`, filters deprecated versions,
+    sorts by PVP version components, returns latest.
+  - `cmp_pvp()` — PVP-aware numeric component comparison.
+  - 1 unit test.
+- `crates/renovate-core/src/managers.rs`: `haskell-cabal` with `\.cabal$` pattern.
+- `crates/renovate-cli/src/main.rs`: Cabal pipeline with exact-version update detection.
+
+### What was intentionally deferred
+- Complex version constraint ranges for update comparison (e.g. `>= 4.7 && < 5`).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 944 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -3048,6 +3078,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`homebrew`** — Homebrew formula GitHub version tracking.
+8. **`batect-wrapper`** — Batect wrapper script version tracking (GitHub Releases).
+9. **`pixi`** — Pixi `pixi.toml` package extraction (PyPI + Conda).
 7. **`haskell-cabal`** — Cabal `*.cabal` Hackage package version tracking.
 8. **`homebrew`** — Homebrew formula version tracking.
 9. **`glasskube`** — Glasskube package manifest version tracking.

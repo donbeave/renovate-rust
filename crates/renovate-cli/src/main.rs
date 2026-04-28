@@ -3976,6 +3976,77 @@ async fn process_repo(
         }
     }
 
+    // ── Haskell Cabal (*.cabal) ───────────────────────────────────────────────
+    for cabal_path in manager_files(&detected, "haskell-cabal") {
+        match client.get_raw_file(owner, repo, &cabal_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::cabal::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| !repo_cfg.is_dep_ignored(&d.package_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %cabal_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted cabal deps"
+                );
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if repo_cfg.is_dep_ignored(&dep.package_name) {
+                        continue;
+                    }
+                    let status = match renovate_core::datasources::hackage::fetch_latest(
+                        http,
+                        &dep.package_name,
+                    )
+                    .await
+                    {
+                        Ok(s) => {
+                            if let Some(ref l) = s.latest {
+                                // Compare latest against the constraint if it's a plain version.
+                                let current_ver =
+                                    dep.current_value.trim_start_matches("==").trim().to_owned();
+                                if !current_ver.is_empty()
+                                    && !current_ver
+                                        .contains(|c: char| c == '<' || c == '>' || c == '&')
+                                    && l != &current_ver
+                                {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: current_ver,
+                                        latest: l.clone(),
+                                    }
+                                } else {
+                                    output::DepStatus::UpToDate {
+                                        latest: s.latest.clone(),
+                                    }
+                                }
+                            } else {
+                                output::DepStatus::UpToDate { latest: None }
+                            }
+                        }
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.package_name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: cabal_path.clone(),
+                    manager: "haskell-cabal".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%cabal_path, "cabal file not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%cabal_path, %err, "failed to fetch cabal file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── FVM Flutter Version Manager (.fvmrc / .fvm/fvm_config.json) ────────
     for fvm_path in manager_files(&detected, "fvm") {
         match client.get_raw_file(owner, repo, &fvm_path).await {
