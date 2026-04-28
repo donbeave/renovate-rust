@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0070  | 2026-04-28 | JSON output mode (`--output-format=json`) | Complete | See below. |
 | 0069  | 2026-04-28 | `packageRules` allowedVersions semver range filtering | Complete | See below. |
 | 0068  | 2026-04-28 | Wire matchUpdateTypes blocking into all manager dep report pipelines | Complete | See below. |
 | 0067  | 2026-04-28 | `packageRules` matchUpdateTypes filtering | Complete | See below. |
@@ -2128,6 +2129,45 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 710 passed
 
+## Slice 0070 - JSON output mode (`--output-format=json`)
+
+### What landed
+- `crates/renovate-cli/src/cli.rs`:
+  - `OutputFormat { Human, Json }` — `ValueEnum` for `--output-format`.
+  - `--output-format` flag with `RENOVATE_OUTPUT_FORMAT` env var support.
+- `crates/renovate-cli/src/output.rs`:
+  - `serde::{Serialize, Deserialize}` derived on `DepStatus`, `DepReport`, `FileReport`, `RepoReport`.
+  - `DepStatus` uses `#[serde(tag = "status", rename_all = "camelCase")]` for JSON tag discriminant.
+  - `DepReport` uses `#[serde(flatten)]` so status fields appear inline.
+  - `print_json_reports(reports: &[RepoReport])` — serializes to pretty JSON.
+- `crates/renovate-cli/src/main.rs`:
+  - When `--output-format=json`, collects all `RepoReport`s into `all_reports` and emits
+    them as a JSON array at the end; suppresses the human summary.
+  - `serde` and `serde_json` added to the CLI crate's `Cargo.toml`.
+
+### JSON format
+```json
+[
+  {
+    "repoSlug": "owner/repo",
+    "files": [
+      {
+        "path": "package.json",
+        "manager": "npm",
+        "deps": [
+          {"name": "lodash", "status": "updateAvailable", "current": "4.17.20", "latest": "4.17.21"},
+          {"name": "react", "status": "upToDate", "latest": "18.3.1"}
+        ]
+      }
+    ]
+  }
+]
+```
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 710 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2139,4 +2179,4 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **GitLab CI `include:` project components**: component dependency version tracking.
-6. **JSON output mode**: machine-readable `--output=json` flag for CI integration.
+6. **`matchCurrentVersion` in packageRules**: match packages at a specific version range.

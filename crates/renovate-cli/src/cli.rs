@@ -17,6 +17,16 @@
 
 use clap::{ArgAction, Parser, ValueEnum};
 
+/// Report output format.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+#[clap(rename_all = "kebab-case")]
+pub(crate) enum OutputFormat {
+    /// Colored, human-readable text (default).
+    Human,
+    /// Machine-readable JSON array of repository update reports.
+    Json,
+}
+
 /// Platform type — the `--platform` flag.
 ///
 /// Source: `PLATFORM_HOST_TYPES` in `lib/constants/platforms.ts`.
@@ -187,6 +197,13 @@ pub(crate) struct Cli {
     /// Env: RENOVATE_QUIET.
     #[arg(long, short = 'q', env = "RENOVATE_QUIET", default_value_t = false)]
     pub(crate) quiet: bool,
+
+    /// Output format for the update report.
+    /// `human` (default) prints colored human-readable output.
+    /// `json` emits machine-readable JSON to stdout.
+    /// Env: RENOVATE_OUTPUT_FORMAT.
+    #[arg(long, env = "RENOVATE_OUTPUT_FORMAT", default_value = "human")]
+    pub(crate) output_format: OutputFormat,
 
     // ── Repositories ─────────────────────────────────────────────────────────
     /// Repositories to process (positional). Later slices dispatch these

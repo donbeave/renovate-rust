@@ -197,6 +197,7 @@ async fn main() -> ExitCode {
     let http = HttpClient::new().expect("failed to create HTTP client");
     let use_color = output::should_use_color();
     let quiet = cli.quiet;
+    let output_format = cli.output_format;
 
     let sem = Arc::new(Semaphore::new(REPO_CONCURRENCY));
     let mut set: JoinSet<(String, Option<output::RepoReport>, bool)> = JoinSet::new();
@@ -217,11 +218,16 @@ async fn main() -> ExitCode {
     }
 
     let mut had_error = false;
+    let mut all_reports: Vec<output::RepoReport> = Vec::new();
     while let Some(outcome) = set.join_next().await {
         match outcome {
             Ok((_slug, Some(report), repo_had_error)) => {
                 run_stats.add_report(&report);
-                output::print_report(&report, use_color, quiet);
+                if output_format == cli::OutputFormat::Human {
+                    output::print_report(&report, use_color, quiet);
+                } else {
+                    all_reports.push(report);
+                }
                 had_error |= repo_had_error;
             }
             Ok((_slug, None, repo_had_error)) => {
@@ -234,7 +240,11 @@ async fn main() -> ExitCode {
         }
     }
 
-    output::print_run_summary(&run_stats, use_color);
+    if output_format == cli::OutputFormat::Json {
+        output::print_json_reports(&all_reports);
+    } else {
+        output::print_run_summary(&run_stats, use_color);
+    }
 
     if had_error {
         ExitCode::from(1)

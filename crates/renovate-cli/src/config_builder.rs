@@ -159,6 +159,7 @@ mod tests {
             host_rules: None,
             registry_aliases: None,
             quiet: false,
+            output_format: crate::cli::OutputFormat::Human,
             repositories: Vec::new(),
         };
         mutate(&mut cli);

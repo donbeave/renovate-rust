@@ -11,31 +11,39 @@
 
 use std::io::IsTerminal as _;
 
+use serde::{Deserialize, Serialize};
+
 // ── Data model ────────────────────────────────────────────────────────────────
 
 /// Status of a single dependency after a registry lookup.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "status", rename_all = "camelCase")]
 pub(crate) enum DepStatus {
     /// A newer version is available and the constraint should be bumped.
+    #[serde(rename = "updateAvailable")]
     UpdateAvailable { current: String, latest: String },
     /// The installed constraint already resolves to the latest available version.
+    #[serde(rename = "upToDate")]
     UpToDate { latest: Option<String> },
     /// The dep was skipped before a registry lookup (workspace protocol, local
     /// path, git URL, etc.).
+    #[serde(rename = "skipped")]
     Skipped { reason: String },
     /// The registry lookup failed.
+    #[serde(rename = "lookupError")]
     LookupError { message: String },
 }
 
 /// A single dependency entry in a report.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct DepReport {
     pub name: String,
+    #[serde(flatten)]
     pub status: DepStatus,
 }
 
 /// All deps extracted from one manifest file.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct FileReport {
     /// Relative path within the repository (e.g. `"package.json"`).
     pub path: String,
@@ -45,10 +53,19 @@ pub(crate) struct FileReport {
 }
 
 /// Full per-repository update report.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct RepoReport {
+    #[serde(rename = "repoSlug")]
     pub repo_slug: String,
     pub files: Vec<FileReport>,
+}
+
+/// Print a JSON array of repository reports to stdout.
+pub(crate) fn print_json_reports(reports: &[RepoReport]) {
+    match serde_json::to_string_pretty(reports) {
+        Ok(json) => println!("{json}"),
+        Err(e) => eprintln!("{{\"error\": \"failed to serialize report: {e}\"}}"),
+    }
 }
 
 /// Aggregate statistics for a complete run across all repositories.
