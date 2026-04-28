@@ -372,6 +372,15 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `semanticCommits`.
     pub semantic_commits: Option<String>,
+
+    // ── Preset inheritance ────────────────────────────────────────────────────
+    /// Preset references to extend (e.g. `["config:recommended"]`).
+    /// Built-in presets are resolved and their config effects merged at parse
+    /// time.  Unknown or remote presets are stored for inspection but not
+    /// acted upon.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `extends`.
+    pub extends: Vec<String>,
 }
 
 /// Compiled path-ignore matcher built from a `RepoConfig`.
@@ -428,6 +437,61 @@ impl PathMatcher {
 }
 
 // ── Free helpers ─────────────────────────────────────────────────────────────
+
+/// Collect `ignorePaths` contributed by built-in presets in `extends`.
+///
+/// Renovate's built-in presets can set `ignorePaths`.  The most impactful one
+/// is `:ignoreModulesAndTests` (included transitively by `config:recommended`),
+/// which ignores `node_modules`, `vendor`, `test/**`, etc.
+///
+/// This function resolves the well-known presets that set `ignorePaths` and
+/// returns the union of their paths.  Unknown or remote presets are silently
+/// skipped (they would require network access).
+///
+/// Renovate reference:
+/// - `lib/config/presets/internal/default.preset.ts` — `:ignoreModulesAndTests`
+/// - `lib/config/presets/internal/config.preset.ts` — `config:recommended`
+///   transitively includes `:ignoreModulesAndTests`
+fn resolve_extends_ignore_paths(extends: &[String]) -> Vec<String> {
+    /// `ignorePaths` added by `:ignoreModulesAndTests`.
+    const IGNORE_MODULES_AND_TESTS_PATHS: &[&str] = &[
+        "**/node_modules/**",
+        "**/bower_components/**",
+        "**/vendor/**",
+        "**/examples/**",
+        "**/__tests__/**",
+        "**/test/**",
+        "**/tests/**",
+        "**/__fixtures__/**",
+    ];
+
+    let mut seen_ignore_modules = false;
+    let mut result: Vec<String> = Vec::new();
+
+    for preset in extends {
+        match preset.as_str() {
+            ":ignoreModulesAndTests" | "default:ignoreModulesAndTests" => {
+                if !seen_ignore_modules {
+                    seen_ignore_modules = true;
+                    result.extend(IGNORE_MODULES_AND_TESTS_PATHS.iter().map(|s| s.to_string()));
+                }
+            }
+            // config:recommended → includes :ignoreModulesAndTests (among others).
+            "config:recommended" | "config:base" | "config:best-practices" => {
+                if !seen_ignore_modules {
+                    seen_ignore_modules = true;
+                    result.extend(IGNORE_MODULES_AND_TESTS_PATHS.iter().map(|s| s.to_string()));
+                }
+            }
+            _ => {
+                // Unknown or remote preset — skip silently.
+                tracing::debug!(preset, "unresolved extends preset (no built-in expansion)");
+            }
+        }
+    }
+
+    result
+}
 
 /// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
 ///
@@ -586,6 +650,8 @@ impl RepoConfig {
             separate_minor_patch: bool,
             #[serde(rename = "semanticCommits")]
             semantic_commits: Option<String>,
+            #[serde(default)]
+            extends: Vec<String>,
         }
 
         fn default_true() -> bool {
@@ -695,7 +761,6 @@ impl RepoConfig {
         Self {
             enabled: raw.enabled,
             ignore_deps: raw.ignore_deps,
-            ignore_paths: raw.ignore_paths,
             package_rules,
             enabled_managers: raw.enabled_managers,
             ignore_versions: raw.ignore_versions,
@@ -714,7 +779,24 @@ impl RepoConfig {
             group_name: raw.group_name,
             separate_major_minor: raw.separate_major_minor,
             separate_minor_patch: raw.separate_minor_patch,
-            semantic_commits: raw.semantic_commits,
+            semantic_commits: raw.semantic_commits.or_else(|| {
+                // `:semanticCommits` preset implies semanticCommits = "enabled"
+                if raw.extends.iter().any(|e| e == ":semanticCommits") {
+                    Some("enabled".to_owned())
+                } else if raw.extends.iter().any(|e| e == ":semanticCommitsDisabled") {
+                    Some("disabled".to_owned())
+                } else {
+                    None
+                }
+            }),
+            ignore_paths: {
+                // Prepend ignore paths from resolved built-in presets.
+                // User-configured paths override/extend preset paths.
+                let mut preset_paths = resolve_extends_ignore_paths(&raw.extends);
+                preset_paths.extend(raw.ignore_paths);
+                preset_paths
+            },
+            extends: raw.extends,
         }
     }
 
@@ -944,6 +1026,7 @@ impl Default for RepoConfig {
             separate_major_minor: true,
             separate_minor_patch: false,
             semantic_commits: None,
+            extends: Vec::new(),
         }
     }
 }
@@ -2092,5 +2175,95 @@ mod tests {
         let c = RepoConfig::parse(r#"{"reviewers": ["user1", "user2"], "assignees": ["user3"]}"#);
         assert_eq!(c.reviewers, vec!["user1", "user2"]);
         assert_eq!(c.assignees, vec!["user3"]);
+    }
+
+    // ── extends preset resolution ────────────────────────────────────────────
+
+    #[test]
+    fn extends_field_stored() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
+        assert_eq!(c.extends, vec!["config:recommended"]);
+    }
+
+    #[test]
+    fn config_recommended_adds_ignore_modules_and_tests_paths() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
+        assert!(
+            c.ignore_paths.contains(&"**/node_modules/**".to_owned()),
+            "expected node_modules in ignorePaths, got: {:?}",
+            c.ignore_paths
+        );
+        assert!(c.ignore_paths.contains(&"**/vendor/**".to_owned()));
+        assert!(c.ignore_paths.contains(&"**/test/**".to_owned()));
+        assert!(c.ignore_paths.contains(&"**/__tests__/**".to_owned()));
+    }
+
+    #[test]
+    fn ignore_modules_and_tests_preset_direct() {
+        let c = RepoConfig::parse(r#"{"extends": [":ignoreModulesAndTests"]}"#);
+        assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
+        assert!(c.ignore_paths.contains(&"**/__fixtures__/**".to_owned()));
+    }
+
+    #[test]
+    fn user_ignore_paths_appended_after_preset_paths() {
+        let c = RepoConfig::parse(
+            r#"{"extends": [":ignoreModulesAndTests"], "ignorePaths": ["custom/dir"]}"#,
+        );
+        // Preset paths come first, then user paths.
+        let last = c.ignore_paths.last().unwrap();
+        assert_eq!(last, "custom/dir");
+        assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
+    }
+
+    #[test]
+    fn unknown_preset_ignored() {
+        let c = RepoConfig::parse(r#"{"extends": ["github>org/repo"]}"#);
+        // Unknown preset doesn't break parsing.
+        assert_eq!(c.extends, vec!["github>org/repo"]);
+        assert!(c.ignore_paths.is_empty()); // no paths added
+    }
+
+    #[test]
+    fn semantic_commits_preset_sets_field() {
+        let c = RepoConfig::parse(r#"{"extends": [":semanticCommits"]}"#);
+        assert_eq!(c.semantic_commits.as_deref(), Some("enabled"));
+    }
+
+    #[test]
+    fn semantic_commits_disabled_preset() {
+        let c = RepoConfig::parse(r#"{"extends": [":semanticCommitsDisabled"]}"#);
+        assert_eq!(c.semantic_commits.as_deref(), Some("disabled"));
+    }
+
+    #[test]
+    fn explicit_semantic_commits_overrides_preset() {
+        // Explicit field wins over :semanticCommits preset.
+        let c =
+            RepoConfig::parse(r#"{"semanticCommits": "auto", "extends": [":semanticCommits"]}"#);
+        assert_eq!(c.semantic_commits.as_deref(), Some("auto"));
+    }
+
+    #[test]
+    fn config_base_adds_ignore_paths() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:base"]}"#);
+        assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
+    }
+
+    #[test]
+    fn duplicate_preset_deduplicated() {
+        let c =
+            RepoConfig::parse(r#"{"extends": [":ignoreModulesAndTests", "config:recommended"]}"#);
+        // node_modules should appear only once.
+        let count = c
+            .ignore_paths
+            .iter()
+            .filter(|p| p.as_str() == "**/node_modules/**")
+            .count();
+        assert_eq!(
+            count, 1,
+            "expected deduplication, got: {:?}",
+            c.ignore_paths
+        );
     }
 }

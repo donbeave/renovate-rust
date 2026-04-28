@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0175  | 2026-04-28 | `extends` preset parsing + built-in expansion (config:recommended, :ignoreModulesAndTests) | Complete | See below. |
 | 0174  | 2026-04-28 | `disabled_by_default` manager flag — azure-pipelines/git-submodules/html/nix/pre-commit/travis | Complete | See below. |
 | 0173  | 2026-04-28 | `git-submodules` `.gitmodules` extractor + dispatch | Complete | See below. |
 | 0172  | 2026-04-28 | `package.json` `renovate` key config discovery | Complete | See below. |
@@ -4516,3 +4517,52 @@ managers should only run when explicitly listed in `enabledManagers`.
 3. **`extends` preset resolution** — `config:recommended` and built-in presets.
 4. **Commit message / branch name composition** — template evaluation.
 5. **`separateMajorMinor` split behavior** — report major vs minor/patch separately.
+
+## Slice 0175 — `extends` preset parsing + built-in expansion
+
+### Renovate reference
+- `lib/config/presets/internal/config.preset.ts` — `config:recommended`,
+  `config:base`, `config:best-practices`
+- `lib/config/presets/internal/default.preset.ts` — `:ignoreModulesAndTests`,
+  `:semanticCommits`, `:semanticCommitsDisabled`
+- `lib/config/options/index.ts` — `extends`
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `RepoConfig.extends: Vec<String>` — stores the raw extends array
+  - `Raw.extends: Vec<String>` — deserialized from renovate.json
+  - `resolve_extends_ignore_paths(extends)` — expands known presets to
+    `ignorePaths`: handles `:ignoreModulesAndTests`, `config:recommended`,
+    `config:base`, `config:best-practices`; deduplicates; unknown presets logged
+  - `parse()` updated: preset paths prepended to user-configured `ignorePaths`;
+    `:semanticCommits` / `:semanticCommitsDisabled` sets `semanticCommits`
+    when not explicitly overridden
+  - `Default::default()`: extends = vec![]
+  - 10 new unit tests
+
+### Preset effects implemented
+- `config:recommended`, `config:base`, `config:best-practices`,
+  `:ignoreModulesAndTests` → adds 8 ignore paths: `**/node_modules/**`,
+  `**/bower_components/**`, `**/vendor/**`, `**/examples/**`,
+  `**/__tests__/**`, `**/test/**`, `**/tests/**`, `**/__fixtures__/**`
+- `:semanticCommits` → `semanticCommits = "enabled"`
+- `:semanticCommitsDisabled` → `semanticCommits = "disabled"`
+
+### Deferred
+- Remote presets (`github>org/repo`, `local>path`, `npm>package`) require
+  network fetching — future slice.
+- Most built-in presets beyond ignore paths / semantic commits are not yet
+  expanded (group:monorepos, workarounds:all, etc.) — future slices.
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1208 passed
+
+## Next slice candidates
+
+1. **Remote preset resolution** — `github>org/repo//preset` fetching.
+2. **More built-in preset expansion** — group:monorepos, schedule presets.
+3. **`currentDigest` for git-submodules** — GitHub Trees API.
+4. **Wire `matchDatasources` into filter methods**.
+5. **Commit message / branch name composition** — template evaluation.
