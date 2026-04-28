@@ -44,6 +44,7 @@ pub mod gemspec;
 pub mod github_actions;
 pub mod gitlabci;
 pub mod gitlabci_include;
+pub mod glasskube;
 pub mod gleam;
 pub mod gomod;
 pub mod gradle;

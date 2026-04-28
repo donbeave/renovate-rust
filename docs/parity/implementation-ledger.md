@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0150  | 2026-04-28 | Glasskube package manifest extractor + packages datasource | Complete | See below. |
 | 0149  | 2026-04-28 | Crossplane package manifest extractor | Complete | See below. |
 | 0148  | 2026-04-28 | Bazel WORKSPACE `http_archive()` extractor (GitHub Tags + Releases) | Complete | See below. |
 | 0147  | 2026-04-28 | Tekton CI/CD resource extractor (step image deps) | Complete | See below. |
@@ -3096,6 +3097,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0150 - Glasskube package manifest extractor + packages datasource
+
+### Renovate reference
+- `lib/modules/manager/glasskube/extract.ts`
+- `lib/modules/datasource/glasskube-packages/index.ts`
+- Default patterns: `[]`; we add `(^|/)glasskube/.+\.ya?ml$`
+- Datasource: Glasskube packages registry (`packages.dl.glasskube.dev`)
+
+### What landed
+- `crates/renovate-core/src/extractors/glasskube.rs` (new):
+  - `GLASSKUBE_RE` — content detection for `apiVersion: glasskube.dev/`.
+  - Multi-doc YAML split on `\n---`, extracts `packageInfo.name` + `version`.
+  - 3 unit tests.
+- `crates/renovate-core/src/datasources/glasskube_packages.rs` (new):
+  - `fetch_latest(http, package_name, current_value)`.
+  - `GET https://packages.dl.glasskube.dev/packages/{name}/versions.yaml`.
+  - Regex-based YAML parser for `latestVersion` and `versions[].version`.
+- Registered in all 4 files. Manager count: 111.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1031 passed
 
 ## Slice 0149 - Crossplane package manifest extractor
 

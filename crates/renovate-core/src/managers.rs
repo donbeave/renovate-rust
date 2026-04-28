@@ -552,6 +552,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "crossplane",
         patterns: &[r"(^|/)crossplane/.+\.ya?ml$"],
     },
+    ManagerDef {
+        name: "glasskube",
+        patterns: &[r"(^|/)glasskube/.+\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

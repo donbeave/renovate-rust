@@ -6988,6 +6988,64 @@ async fn process_repo(
         }
     }
 
+    // ── Glasskube packages (glasskube/) ───────────────────────────────────────
+    for gk_path in manager_files(&detected, "glasskube") {
+        match client.get_raw_file(owner, repo, &gk_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::glasskube::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| !repo_cfg.is_dep_ignored(&d.package_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %gk_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted glasskube package deps"
+                );
+                let mut dep_reports: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if repo_cfg.is_dep_ignored(&dep.package_name) {
+                        continue;
+                    }
+                    let status = match renovate_core::datasources::glasskube_packages::fetch_latest(
+                        http,
+                        &dep.package_name,
+                        &dep.current_value,
+                    )
+                    .await
+                    {
+                        Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: dep.current_value.clone(),
+                            latest: s.latest.unwrap_or_default(),
+                        },
+                        Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.package_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: gk_path.clone(),
+                        manager: "glasskube".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%gk_path, "glasskube manifest not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gk_path, %err, "failed to fetch glasskube manifest");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 
