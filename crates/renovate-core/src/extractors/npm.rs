@@ -57,6 +57,20 @@ pub enum NpmDepType {
     Overrides,
 }
 
+impl NpmDepType {
+    /// Return the Renovate-compatible dep type string used in `matchDepTypes`.
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            NpmDepType::Regular => "dependencies",
+            NpmDepType::Dev => "devDependencies",
+            NpmDepType::Peer => "peerDependencies",
+            NpmDepType::Optional => "optionalDependencies",
+            NpmDepType::Resolutions => "resolutions",
+            NpmDepType::Overrides => "overrides",
+        }
+    }
+}
+
 /// A single extracted npm dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NpmExtractedDep {

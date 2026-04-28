@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0168  | 2026-04-28 | `matchDepTypes` packageRule + npm dep type filtering | Complete | See below. |
 | 0167  | 2026-04-28 | `enabledManagers` repo config option | Complete | See below. |
 | 0166  | 2026-04-28 | NuGet cross-file dedup for .NET solutions | Complete | See below. |
 | 0165  | 2026-04-28 | Go module cross-file dedup for Go workspaces | Complete | See below. |

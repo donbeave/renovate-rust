@@ -68,6 +68,9 @@ pub struct PackageRule {
     /// File name patterns (glob or exact) that the manifest file path must
     /// match for this rule to apply.  Empty = all files.
     pub match_file_names: Vec<String>,
+    /// Dep types to match (e.g. `["dependencies"]`, `["devDependencies"]`).
+    /// Empty = all dep types.
+    pub match_dep_types: Vec<String>,
     /// If `Some(false)`, matching packages are disabled (skipped).
     pub enabled: Option<bool>,
     /// `true` when the raw config specified at least one name or pattern
@@ -104,6 +107,13 @@ impl PackageRule {
     /// An empty `matchUpdateTypes` list matches all update types.
     pub fn update_type_matches(&self, update_type: UpdateType) -> bool {
         self.match_update_types.is_empty() || self.match_update_types.contains(&update_type)
+    }
+
+    /// Return `true` when this rule's dep type condition matches `dep_type`.
+    ///
+    /// An empty `matchDepTypes` list matches all dep types.
+    pub fn dep_type_matches(&self, dep_type: &str) -> bool {
+        self.match_dep_types.is_empty() || self.match_dep_types.iter().any(|t| t == dep_type)
     }
 
     /// Return `true` when `path` matches this rule's `matchFileNames` patterns.
@@ -242,6 +252,8 @@ impl RepoConfig {
             match_current_version: Option<String>,
             #[serde(rename = "matchFileNames", default)]
             match_file_names: Vec<String>,
+            #[serde(rename = "matchDepTypes", default)]
+            match_dep_types: Vec<String>,
             enabled: Option<bool>,
         }
 
@@ -310,6 +322,7 @@ impl RepoConfig {
                     allowed_versions: r.allowed_versions,
                     match_current_version: r.match_current_version,
                     match_file_names: r.match_file_names,
+                    match_dep_types: r.match_dep_types,
                     enabled: r.enabled,
                     has_name_constraint,
                 }
@@ -356,6 +369,23 @@ impl RepoConfig {
         }
         self.package_rules.iter().any(|rule| {
             rule.name_matches(name) && rule.manager_matches(manager) && rule.enabled == Some(false)
+        })
+    }
+
+    /// Like [`is_dep_ignored_for_manager`] but also checks `matchDepTypes`.
+    ///
+    /// `dep_type` is the type string from the manifest (e.g. `"devDependencies"`,
+    /// `"dependencies"`, `"peerDependencies"`).  An empty `dep_type` matches
+    /// any rule regardless of its `matchDepTypes` setting.
+    pub fn is_dep_ignored_with_dep_type(&self, name: &str, manager: &str, dep_type: &str) -> bool {
+        if self.ignore_deps.iter().any(|p| p == name) {
+            return true;
+        }
+        self.package_rules.iter().any(|rule| {
+            rule.name_matches(name)
+                && rule.manager_matches(manager)
+                && rule.dep_type_matches(dep_type)
+                && rule.enabled == Some(false)
         })
     }
 
@@ -800,6 +830,34 @@ mod tests {
         assert!(!c.is_dep_ignored_for_manager("lodash", "cargo"));
         // Generic check ignores manager constraint (all managers)
         assert!(c.is_dep_ignored("lodash"));
+    }
+
+    #[test]
+    fn match_dep_types_filters_by_dep_type() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchDepTypes": ["devDependencies"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        // devDeps should be ignored
+        assert!(c.is_dep_ignored_with_dep_type("lodash", "npm", "devDependencies"));
+        // regular deps should NOT be ignored by this rule
+        assert!(!c.is_dep_ignored_with_dep_type("lodash", "npm", "dependencies"));
+        // empty dep_type matches any rule (backward-compat)
+        assert!(!c.is_dep_ignored_with_dep_type("lodash", "npm", ""));
+    }
+
+    #[test]
+    fn match_dep_types_empty_matches_all() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "enabled": false}]}"#,
+        );
+        // No matchDepTypes → matches all dep types
+        assert!(c.is_dep_ignored_with_dep_type("lodash", "npm", "dependencies"));
+        assert!(c.is_dep_ignored_with_dep_type("lodash", "npm", "devDependencies"));
     }
 
     #[test]

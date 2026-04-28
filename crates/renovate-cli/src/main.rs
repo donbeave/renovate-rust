@@ -641,7 +641,14 @@ async fn process_repo(
             npm_file_deps
                 .iter()
                 .flat_map(|(_, deps)| deps.iter())
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_with_dep_type(
+                            &d.name,
+                            "npm",
+                            d.dep_type.as_renovate_str(),
+                        )
+                })
                 .filter(|d| seen.insert(d.name.clone()))
                 .map(|d| d.name.clone())
                 .collect()
@@ -664,7 +671,14 @@ async fn process_repo(
         for (npm_file_path, deps) in npm_file_deps {
             let actionable: Vec<_> = deps
                 .iter()
-                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored_with_dep_type(
+                            &d.name,
+                            "npm",
+                            d.dep_type.as_renovate_str(),
+                        )
+                })
                 .collect();
             let update_map: HashMap<
                 _,
