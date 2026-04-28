@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0082  | 2026-04-28 | Bitbucket Pipelines `*-pipelines.yml` Docker image extractor | Complete | See below. |
 | 0081  | 2026-04-28 | Drone CI `.drone.yml` Docker image extractor | Complete | See below. |
 | 0080  | 2026-04-28 | Helmfile `helmfile.yaml` extractor | Complete | See below. |
 | 0079  | 2026-04-28 | Azure Pipelines extractor (Docker containers + tasks) | Complete | See below. |
@@ -2376,6 +2377,34 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 761 passed
 
+## Slice 0082 - Bitbucket Pipelines `*-pipelines.yml` Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/bitbucket-pipelines/extract.ts`
+- `lib/modules/manager/bitbucket-pipelines/util.ts`
+- Pattern: `**/*-pipelines.yml`
+
+### What landed
+- `crates/renovate-core/src/extractors/bitbucket_pipelines.rs`:
+  - `extract()` — index-based line scanner (needed for look-ahead on image objects).
+  - **Simple `image:` line**: scans `image: ref` and `- image: ref` forms.
+  - **Image object**: when `image:` has no inline value, looks ahead for `name:` key
+    in the next non-empty line.
+  - **Docker pipe**: `- pipe: docker://image:tag` → extracts Docker image.
+  - Non-docker pipes (`atlassian/pipe-name:version`) → skipped (BitbucketTags datasource pending).
+  - 8 unit tests.
+- `crates/renovate-core/src/managers.rs`: `bitbucket-pipelines` manager with pattern.
+- `crates/renovate-core/src/extractors.rs`: `pub mod bitbucket_pipelines`.
+- `crates/renovate-cli/src/main.rs`: Bitbucket Pipelines pipeline using Docker Hub datasource.
+
+### What was intentionally deferred
+- `pipe:` non-docker references (BitbucketTags datasource).
+- `image.username`/`image.password` authentication fields.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 769 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2389,4 +2418,4 @@ Pick whichever can be completed in one loop:
 5. **GitLab CI `include:` project components**: component dependency version tracking.
 6. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
-8. **Bitbucket Pipelines** (`bitbucket-pipelines.yml`) Docker image extractor.
+8. **Jenkins** pipeline Docker image extraction.

@@ -88,6 +88,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         ],
     },
     ManagerDef {
+        name: "bitbucket-pipelines",
+        patterns: &[r".*-pipelines\.yml$"],
+    },
+    ManagerDef {
         name: "bundler",
         patterns: &[r"(^|/)Gemfile$"],
     },
