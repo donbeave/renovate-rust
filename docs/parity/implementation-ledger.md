@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0063  | 2026-04-28 | GitHub Actions container/services Docker image extraction | Complete | See below. |
 | 0035  | 2026-04-28 | NuGet `.csproj`/`.props` extractor + NuGet API datasource | Complete | See below. |
 | 0034  | 2026-04-28 | Composer `composer.json` extractor + Packagist datasource | Complete | See below. |
 | 0033  | 2026-04-28 | Go modules `go.mod` extractor + Go proxy datasource | Complete | See below. |
@@ -1917,6 +1918,40 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 575 passed
 
+## Slice 0063 - GitHub Actions container/services Docker image extraction
+
+### Renovate reference
+- `lib/modules/manager/github-actions/schema.ts` — `WorkFlowJobs.container` (string | `{ image }`)
+  and `WorkFlowJobs.services` (mapping of string | `{ image }`)
+- `lib/modules/manager/github-actions/extract.ts` — `extractWithYAMLParser`
+
+### What landed
+- `crates/renovate-core/src/extractors/github_actions.rs`:
+  - Added `extract_docker_images(content) -> Vec<DockerfileExtractedDep>` — line-scan state machine.
+  - `GaDockerState` enum: `Default | InContainerBlock { indent } | InServices { svc_indent, service_level }`.
+  - Handles four forms:
+    1. Inline container: `container: node:18`
+    2. Block container: `container:\n  image: node:18`
+    3. Block service: `services:\n  redis:\n    image: redis:5`
+    4. Inline service string: `services:\n  postgres: postgres:10`
+  - `$VAR` references skipped automatically.
+  - Reuses `classify_image_ref()` from the dockerfile extractor.
+  - `transition_default()` helper avoids duplication on block-exit reprocessing.
+  - 8 new unit tests (includes upstream `workflow_1.yml` fixture scenario).
+- `crates/renovate-cli/src/main.rs` — GitHub Actions pipeline extended:
+  - Calls `extract_docker_images` alongside `extract` for each workflow file.
+  - Routes container/services images through the Docker Hub datasource pipeline.
+  - Combines action dep reports and Docker dep reports into a single `FileReport`.
+
+### What was intentionally deferred
+- Non-Docker-Hub private registry images (already handled by the existing
+  `NonDockerHub` skip reason in the Docker Hub datasource).
+- `runs-on` labels (GitHub-hosted runner versions — different datasource).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 661 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1927,5 +1962,5 @@ Pick whichever can be completed in one loop:
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
-5. **GitHub Actions container/services images**: `container:` and `services:` Docker images.
-6. **Maven `<parent>` POM dependency**: parent POM version tracking.
+5. **Maven `<parent>` POM dependency**: parent POM version tracking.
+6. **GitHub Actions `runs-on` runner labels**: runner version tracking via GitHub Releases datasource.

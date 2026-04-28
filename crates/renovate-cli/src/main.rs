@@ -1023,10 +1023,81 @@ async fn process_repo(
                     .into_iter()
                     .map(|r| (r.dep_name, r.summary))
                     .collect();
+
+                // Also extract container/services Docker images from this workflow file.
+                let docker_deps = github_actions_extractor::extract_docker_images(&raw.content);
+                let docker_actionable: Vec<_> = docker_deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none())
+                    .collect();
+                let docker_inputs: Vec<docker_datasource::DockerDepInput> = docker_actionable
+                    .iter()
+                    .filter_map(|d| {
+                        let tag = d.tag.as_deref()?;
+                        Some(docker_datasource::DockerDepInput {
+                            dep_name: format!("{}:{tag}", d.image),
+                            image: d.image.clone(),
+                            tag: tag.to_owned(),
+                        })
+                    })
+                    .collect();
+                let docker_updates = docker_datasource::fetch_updates_concurrent(
+                    http,
+                    &docker_inputs,
+                    docker_datasource::DOCKER_HUB_API,
+                    10,
+                )
+                .await;
+                let docker_update_map: HashMap<_, _> = docker_updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+
+                let mut all_deps =
+                    build_dep_reports_github_actions(&deps, &actionable, &update_map);
+                for dep in &docker_deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        all_deps.push(output::DepReport {
+                            name: dep.image.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                    } else {
+                        let dep_name = match &dep.tag {
+                            Some(t) => format!("{}:{t}", dep.image),
+                            None => dep.image.clone(),
+                        };
+                        let status = match docker_update_map.get(&dep_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_tag.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
+                                output::DepStatus::Skipped {
+                                    reason: "non-docker-hub registry".into(),
+                                }
+                            }
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        all_deps.push(output::DepReport {
+                            name: dep_name,
+                            status,
+                        });
+                    }
+                }
                 repo_report.files.push(output::FileReport {
                     path: gha_file_path.clone(),
                     manager: "github-actions".into(),
-                    deps: build_dep_reports_github_actions(&deps, &actionable, &update_map),
+                    deps: all_deps,
                 });
             }
             Ok(None) => {

@@ -1,13 +1,14 @@
-//! GitHub Actions `uses:` dependency extractor.
+//! GitHub Actions `uses:` dependency extractor and container/services image extractor.
 //!
-//! Scans workflow YAML files line-by-line for `uses:` entries and classifies
-//! each reference as a versioned action, a local action, a Docker image, or a
-//! SHA-pinned action.
+//! Scans workflow YAML files line-by-line for `uses:` entries (actions) and
+//! `container:`/`services:` entries (Docker images).
 //!
 //! Renovate reference:
 //! - `lib/modules/manager/github-actions/extract.ts` — `extractPackageFile`
 //! - `lib/modules/manager/github-actions/parse.ts`   — `parseUsesLine`,
 //!   `isSha`, `isShortSha`, `versionLikeRe`
+//! - `lib/modules/manager/github-actions/schema.ts`  — `WorkFlowJobs.container`,
+//!   `WorkFlowJobs.services`
 //!
 //! ## Supported `uses:` forms
 //!
@@ -19,10 +20,26 @@
 //! | `docker://image:tag` | Skipped — `DockerRef` (separate datasource) |
 //! | `owner/repo@<40-hex>` | Skipped — `ShaPin` |
 //! | `owner/repo@<6-7-hex>` | Skipped — `ShortShaPin` |
+//!
+//! ## Supported container/services forms
+//!
+//! ```yaml
+//! jobs:
+//!   build:
+//!     container: node:18              # inline
+//!     container:                      # block form
+//!       image: node:18
+//!     services:
+//!       redis:                        # service block
+//!         image: redis:5
+//!       postgres: postgres:10        # inline service string
+//! ```
 
 use std::sync::LazyLock;
 
 use regex::Regex;
+
+use crate::extractors::dockerfile::{DockerfileExtractedDep, classify_image_ref};
 
 /// Why a GitHub Actions dep is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -142,6 +159,132 @@ fn strip_comment(s: &str) -> &str {
         s[..idx].trim()
     } else {
         s
+    }
+}
+
+fn leading_spaces(s: &str) -> usize {
+    s.len() - s.trim_start_matches([' ', '\t']).len()
+}
+
+fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
+    let prefix = format!("{key}:");
+    line.strip_prefix(prefix.as_str())
+}
+
+// ── Container / Services image extraction ────────────────────────────────────
+
+#[derive(Clone, Copy)]
+enum GaDockerState {
+    Default,
+    /// Inside `container:` block form — looking for `image:`.
+    InContainerBlock {
+        indent: usize,
+    },
+    /// Inside `services:` block.
+    InServices {
+        svc_indent: usize,
+        /// Indent level of the first service-name entry (set on first deep line).
+        service_level: Option<usize>,
+    },
+}
+
+/// Extract Docker image deps from the `container:` and `services:` fields of
+/// a GitHub Actions workflow YAML.
+///
+/// Supports the two container forms (inline string and `image:` block) and
+/// services that are either inline strings or objects with an `image:` key.
+pub fn extract_docker_images(content: &str) -> Vec<DockerfileExtractedDep> {
+    let mut out: Vec<DockerfileExtractedDep> = Vec::new();
+    let mut st = GaDockerState::Default;
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        if line.trim().is_empty() {
+            continue;
+        }
+        let trimmed = line.trim_start();
+        let indent = leading_spaces(line);
+
+        match st {
+            GaDockerState::Default => {
+                st = transition_default(trimmed, indent, &mut out);
+            }
+            GaDockerState::InContainerBlock {
+                indent: block_indent,
+            } => {
+                if indent <= block_indent {
+                    // Exited the container block — reprocess line as Default.
+                    st = transition_default(trimmed, indent, &mut out);
+                } else if let Some(rest) = strip_key(trimmed, "image") {
+                    let val = rest.trim().trim_matches('"').trim_matches('\'');
+                    if !val.is_empty() && !val.starts_with('$') {
+                        out.push(classify_image_ref(val));
+                    }
+                    st = GaDockerState::Default;
+                }
+            }
+            GaDockerState::InServices {
+                svc_indent,
+                service_level,
+            } => {
+                if indent <= svc_indent {
+                    // Exited the services section — reprocess line as Default.
+                    st = transition_default(trimmed, indent, &mut out);
+                    continue;
+                }
+                let sni = service_level.unwrap_or(indent);
+                if indent == sni {
+                    // Service-name entry: `redis:` (block) or `postgres: image-ref` (inline).
+                    if let Some(colon_pos) = trimmed.find(':') {
+                        let value = trimmed[colon_pos + 1..].trim();
+                        if !value.is_empty() && !value.starts_with('#') && !value.starts_with('$') {
+                            let val = value.trim_matches('"').trim_matches('\'');
+                            if !val.is_empty() {
+                                out.push(classify_image_ref(val));
+                            }
+                        }
+                    }
+                } else if let Some(rest) = strip_key(trimmed, "image") {
+                    // Inside a service block: `image: redis:5`.
+                    let val = rest.trim().trim_matches('"').trim_matches('\'');
+                    if !val.is_empty() && !val.starts_with('$') {
+                        out.push(classify_image_ref(val));
+                    }
+                }
+                st = GaDockerState::InServices {
+                    svc_indent,
+                    service_level: Some(sni),
+                };
+            }
+        }
+    }
+
+    out
+}
+
+/// Process one line in the Default context and return the next state.
+fn transition_default(
+    trimmed: &str,
+    indent: usize,
+    out: &mut Vec<DockerfileExtractedDep>,
+) -> GaDockerState {
+    if let Some(rest) = strip_key(trimmed, "container") {
+        let val = rest.trim().trim_matches('"').trim_matches('\'');
+        if val.is_empty() || val.starts_with('#') {
+            GaDockerState::InContainerBlock { indent }
+        } else if !val.starts_with('$') {
+            out.push(classify_image_ref(val));
+            GaDockerState::Default
+        } else {
+            GaDockerState::Default
+        }
+    } else if trimmed == "services:" {
+        GaDockerState::InServices {
+            svc_indent: indent,
+            service_level: None,
+        }
+    } else {
+        GaDockerState::Default
     }
 }
 
@@ -294,5 +437,163 @@ jobs:
         );
         assert_eq!(owner_repo("org/repo/sub/path"), Some("org/repo".to_owned()));
         assert_eq!(owner_repo("nodot"), None);
+    }
+
+    // ── extract_docker_images tests ───────────────────────────────────────────
+
+    #[test]
+    fn docker_container_inline() {
+        let content = r#"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye
+    steps:
+      - uses: actions/checkout@v4
+"#;
+        let deps = extract_docker_images(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
+        assert_eq!(deps[0].tag.as_deref(), Some("16-bullseye"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    #[test]
+    fn docker_container_block_form() {
+        let content = r#"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: node:16-bullseye
+      options: --cpus 1
+"#;
+        let deps = extract_docker_images(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
+        assert_eq!(deps[0].tag.as_deref(), Some("16-bullseye"));
+    }
+
+    #[test]
+    fn docker_services_block_image() {
+        let content = r#"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:5
+      postgres:
+        image: postgres:14
+"#;
+        let deps = extract_docker_images(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "redis" && d.tag.as_deref() == Some("5"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "postgres" && d.tag.as_deref() == Some("14"))
+        );
+    }
+
+    #[test]
+    fn docker_services_inline_string() {
+        let content = r#"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres: postgres:10
+"#;
+        let deps = extract_docker_images(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "postgres");
+        assert_eq!(deps[0].tag.as_deref(), Some("10"));
+    }
+
+    #[test]
+    fn docker_mixed_container_and_services() {
+        let content = r#"
+jobs:
+  container-job:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye
+    services:
+      redis:
+        image: redis:5
+      postgres: postgres:10
+  container-job-with-image-keyword:
+    runs-on: ubuntu-latest
+    container:
+      image: node:18-alpine
+"#;
+        let deps = extract_docker_images(content);
+        assert_eq!(deps.len(), 4);
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "node" && d.tag.as_deref() == Some("16-bullseye"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "redis" && d.tag.as_deref() == Some("5"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "postgres" && d.tag.as_deref() == Some("10"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "node" && d.tag.as_deref() == Some("18-alpine"))
+        );
+    }
+
+    #[test]
+    fn docker_var_refs_skipped() {
+        let content = r#"
+jobs:
+  build:
+    container: ${{ env.MY_IMAGE }}
+    services:
+      db:
+        image: $MY_DB_IMAGE
+"#;
+        let deps = extract_docker_images(content);
+        assert!(deps.is_empty(), "variable references should be skipped");
+    }
+
+    #[test]
+    fn docker_no_container_no_services_returns_empty() {
+        let content = r#"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+"#;
+        assert!(extract_docker_images(content).is_empty());
+    }
+
+    #[test]
+    fn docker_workflow_fixture() {
+        // Reflects upstream workflow_1.yml fixture from renovatebot/renovate.
+        let content = r#"
+jobs:
+  container-job:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye
+    services:
+      redis:
+        image: redis:5
+      postgres: postgres:10
+  container-job-with-image-keyword:
+    runs-on: ubuntu-latest
+    container:
+      image: node:16-bullseye
+"#;
+        let deps = extract_docker_images(content);
+        // container inline, redis (block), postgres (inline), container block
+        assert_eq!(deps.len(), 4);
     }
 }
