@@ -23,6 +23,7 @@ use std::process::ExitCode;
 use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
+use renovate_core::platform::{AnyPlatformClient, PlatformError};
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -53,9 +54,8 @@ async fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    // 4. Global config pipeline: defaults → file → CLI
-    //    Mirrors Renovate's parseConfigs order in
-    //    lib/workers/global/config/parse/index.ts.
+    // 4. Global config pipeline: defaults → file → CLI.
+    //    Mirrors Renovate's parseConfigs in lib/workers/global/config/parse/index.ts.
     let cwd = std::env::current_dir().unwrap_or_else(|_| Path::new(".").to_path_buf());
     let config_file_env = std::env::var("RENOVATE_CONFIG_FILE").ok();
 
@@ -86,11 +86,64 @@ async fn main() -> ExitCode {
     };
 
     let config = config_builder::build(&cli, base);
-    tracing::debug!(
+    tracing::info!(
         platform = %config.platform,
-        dry_run = config.dry_run.as_ref().map(|d| d.to_string()),
+        dry_run = ?config.dry_run,
         "config resolved"
     );
 
+    // 5. If there are repositories to process, validate platform credentials.
+    //    Skipped when no repos are configured — matches Renovate's behavior of
+    //    only initializing the platform when there is actual work to do.
+    //    Later slices will add autodiscover here.
+    if config.repositories.is_empty() {
+        tracing::info!("no repositories configured — nothing to do");
+        return ExitCode::SUCCESS;
+    }
+
+    if config.token.is_none() {
+        tracing::warn!(
+            platform = %config.platform,
+            "no token configured — platform operations will fail"
+        );
+    } else {
+        match AnyPlatformClient::create(&config) {
+            Err(PlatformError::NotSupported(name)) => {
+                tracing::warn!(
+                    platform = %name,
+                    "platform not yet implemented; skipping token validation"
+                );
+            }
+            Err(err) => {
+                tracing::error!(%err, "failed to create platform client");
+                eprintln!("renovate: platform initialization failed: {err}");
+                return ExitCode::from(1);
+            }
+            Ok(client) => match client.get_current_user().await {
+                Ok(user) => {
+                    tracing::info!(
+                        login = %user.login,
+                        platform = %config.platform,
+                        "authenticated"
+                    );
+                }
+                Err(PlatformError::Unauthorized) => {
+                    tracing::error!(
+                        platform = %config.platform,
+                        "token authentication failed"
+                    );
+                    eprintln!("renovate: authentication failed — check your token");
+                    return ExitCode::from(1);
+                }
+                Err(err) => {
+                    tracing::error!(%err, "platform authentication error");
+                    eprintln!("renovate: platform error: {err}");
+                    return ExitCode::from(1);
+                }
+            },
+        }
+    }
+
+    // Later slices: dispatch repository workers.
     ExitCode::SUCCESS
 }

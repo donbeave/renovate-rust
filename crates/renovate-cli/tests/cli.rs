@@ -54,9 +54,10 @@ fn unknown_flag_exits_with_usage_error() {
 
 #[test]
 fn no_args_succeeds() {
-    // Slice 1 has no work to dispatch yet; an arg-less invocation must not
-    // crash and must not produce stray output.
+    // No repos means "nothing to do" — must exit 0 with no user-facing stdout.
+    // LOG_LEVEL=off silences tracing so stderr is clean for assertion purposes.
     renovate()
+        .env("LOG_LEVEL", "fatal")
         .assert()
         .success()
         .stdout(predicate::str::is_empty())
@@ -225,8 +226,9 @@ fn git_fs_legacy_flags_are_silently_dropped() {
     // Renovate's `migrateArgs` filters every `--git-fs*` token before the
     // option parser runs. Without that filter, clap would reject the flag
     // as unknown and exit 2. With it wired up, the flag disappears and the
-    // CLI succeeds.
+    // CLI succeeds. LOG_LEVEL=fatal silences tracing for clean stderr assertion.
     renovate()
+        .env("LOG_LEVEL", "fatal")
         .arg("--git-fs-something")
         .assert()
         .success()

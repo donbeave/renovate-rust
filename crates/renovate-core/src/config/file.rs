@@ -149,6 +149,8 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             file_config.allowed_commands
         },
         allow_command_templating: file_config.allow_command_templating,
+        // repositories are CLI-only; the file config never sets them.
+        repositories: base.repositories,
     }
 }
 

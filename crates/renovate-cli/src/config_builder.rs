@@ -67,6 +67,10 @@ pub(crate) fn build(cli: &Cli, base: GlobalConfig) -> GlobalConfig {
         config.allow_command_templating = act;
     }
 
+    if !cli.repositories.is_empty() {
+        config.repositories = cli.repositories.clone();
+    }
+
     config
 }
 

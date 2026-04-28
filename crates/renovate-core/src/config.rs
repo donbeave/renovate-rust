@@ -61,6 +61,10 @@ pub struct GlobalConfig {
 
     /// Whether command templating is allowed in post-upgrade tasks.
     pub allow_command_templating: bool,
+
+    /// Repositories to process. Empty means "nothing to do" unless autodiscover
+    /// is enabled (future slice).
+    pub repositories: Vec<String>,
 }
 
 impl Default for GlobalConfig {
@@ -76,6 +80,7 @@ impl Default for GlobalConfig {
             recreate_when: RecreateWhen::Auto,
             allowed_commands: Vec::new(),
             allow_command_templating: false,
+            repositories: Vec::new(),
         }
     }
 }
