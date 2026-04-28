@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0031  | 2026-04-28 | GitHub Actions `uses:` extractor + GitHub tags datasource | Complete | See below. |
 | 0030  | 2026-04-28 | Maven POM property resolution (`<properties>`)  | Complete | See below. |
 | 0029  | 2026-04-28 | Glob-based `ignorePaths` matching (globset)     | Complete | See below. |
 | 0028  | 2026-04-28 | Run summary totals + `--quiet` mode            | Complete | See below. |
@@ -51,6 +52,52 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0031 - GitHub Actions `uses:` extractor + GitHub tags datasource
+
+### Renovate reference
+- `lib/modules/manager/github-actions/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/github-actions/parse.ts` — `parseUsesLine`, `isSha`,
+  `isShortSha`, `versionLikeRe`
+- `lib/modules/datasource/github-tags/index.ts`
+
+### What landed
+- `crates/renovate-core/src/extractors/github_actions.rs` — line-scanner (no
+  YAML parser needed) extracting `uses:` entries from workflow files.
+  - `USES_LINE` regex matches `uses:` lines with optional list prefix.
+  - `parse_uses`: classifies as local (`./`), Docker (`docker://`), full SHA
+    (40/64 hex), short SHA (6–7 hex), or actionable (version tag).
+  - `owner_repo`: strips sub-path to get canonical `owner/repo` lookup key.
+  - `strip_comment`: removes trailing `# comment` from YAML values.
+  - Quoted actions (`"actions/checkout@v4"`) handled via `trim_matches`.
+  - 10 unit tests including fixture with mixed dep types.
+- `crates/renovate-core/src/datasources/github_tags.rs` — GitHub tags API.
+  - `GET /repos/{owner/repo}/tags?per_page=100` → JSON array of tag names.
+  - Returns first version-like tag (`v…` or digit-prefixed) — GitHub returns
+    tags in reverse creation order so index 0 is most recent.
+  - `api_base_from_endpoint(endpoint)` maps platform endpoint → GitHub API URL
+    (GHE support: pass custom endpoint, falls back to `api.github.com`).
+  - `fetch_updates_concurrent`: bounded JoinSet, same pattern as other DS.
+  - 3 wiremock tests + 3 unit tests for `api_base_from_endpoint`.
+- `crates/renovate-core/src/extractors.rs` — `pub mod github_actions` added.
+- `crates/renovate-core/src/datasources.rs` — `pub mod github_tags` added.
+- `crates/renovate-cli/src/main.rs` — GitHub Actions pipeline wired:
+  - Derives `gh_api_base` from `config.endpoint`.
+  - Builds an authenticated `HttpClient::with_token` for GitHub API calls.
+  - Extracts `uses:`, filters actionable, fetches tags, emits `FileReport`.
+  - `build_dep_reports_github_actions` helper follows existing pattern.
+
+### What was intentionally deferred
+- `action.yml` / composite action extraction.
+- Gitea/Forgejo/GitHub Enterprise action lookup variants.
+- SHA-pinned deps with renovate-pin comments (ratchet support).
+- Docker `uses:` entries (separate Docker Hub datasource needed).
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (329 passed)
 
 ## Slice 0030 - Maven POM property resolution (`<properties>`)
 

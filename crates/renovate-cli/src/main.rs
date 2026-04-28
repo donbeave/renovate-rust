@@ -28,10 +28,12 @@ use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::datasources::docker_hub as docker_datasource;
+use renovate_core::datasources::github_tags as github_tags_datasource;
 use renovate_core::datasources::maven as maven_datasource;
 use renovate_core::datasources::npm as npm_datasource;
 use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
+use renovate_core::extractors::github_actions as github_actions_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::extractors::pip as pip_extractor;
@@ -602,6 +604,65 @@ async fn process_repo(
         }
     }
 
+    // ── GitHub Actions ────────────────────────────────────────────────────────
+    let gh_api_base = github_tags_datasource::api_base_from_endpoint(config.endpoint.as_deref());
+    // Build an authenticated HTTP client for GitHub API calls (tag lookups).
+    let gh_http = if let Some(ref token) = config.token {
+        renovate_core::http::HttpClient::with_token(token).unwrap_or_else(|_| http.clone())
+    } else {
+        http.clone()
+    };
+    for gha_file_path in manager_files(&detected, "github-actions") {
+        match client.get_raw_file(owner, repo, &gha_file_path).await {
+            Ok(Some(raw)) => {
+                let deps = github_actions_extractor::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !d.current_value.is_empty()
+                            && !repo_cfg.is_dep_ignored(&d.action)
+                    })
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %gha_file_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted github-actions dependencies"
+                );
+                let dep_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
+                    .iter()
+                    .map(|d| github_tags_datasource::GithubActionsDepInput {
+                        dep_name: d.action.clone(),
+                        current_value: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &dep_inputs,
+                    gh_api_base,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: gha_file_path.clone(),
+                    manager: "github-actions".into(),
+                    deps: build_dep_reports_github_actions(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%gha_file_path, "workflow file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gha_file_path, %err, "failed to fetch workflow file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Dockerfile ────────────────────────────────────────────────────────────
     for df_file_path in manager_files(&detected, "dockerfile") {
         match client.get_raw_file(owner, repo, &df_file_path).await {
@@ -891,6 +952,48 @@ fn build_dep_reports_npm(
         };
         reports.push(output::DepReport {
             name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_github_actions(
+    all_deps: &[renovate_core::extractors::github_actions::GithubActionsExtractedDep],
+    actionable: &[&renovate_core::extractors::github_actions::GithubActionsExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::github_tags::GithubActionsUpdateSummary,
+            renovate_core::datasources::github_tags::GithubTagsError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.action.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.action) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_value.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.action.clone(),
             status,
         });
     }
