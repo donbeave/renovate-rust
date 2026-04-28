@@ -326,7 +326,27 @@ async fn process_repo(
         .filter(|f| !path_matcher.is_ignored(f))
         .collect();
 
-    let detected = managers::detect(&filtered_files);
+    let detected = {
+        let all = managers::detect(&filtered_files);
+        // Apply `enabledManagers` filter: when non-empty, only the listed
+        // managers are active.  Empty list means all managers are active.
+        if repo_cfg.enabled_managers.is_empty() {
+            all
+        } else {
+            let filtered: Vec<_> = all
+                .into_iter()
+                .filter(|m| repo_cfg.is_manager_enabled(m.name))
+                .collect();
+            if !filtered.is_empty() {
+                tracing::debug!(
+                    repo = %repo_slug,
+                    enabled = ?repo_cfg.enabled_managers,
+                    "enabledManagers filter applied"
+                );
+            }
+            filtered
+        }
+    };
     if detected.is_empty() {
         tracing::info!(repo = %repo_slug, "no package managers detected");
     } else {

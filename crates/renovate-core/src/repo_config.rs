@@ -161,6 +161,9 @@ pub struct RepoConfig {
     pub ignore_paths: Vec<String>,
     /// Compiled package rules (from `packageRules` in `renovate.json`).
     pub package_rules: Vec<PackageRule>,
+    /// When non-empty, only these manager names are active.
+    /// Empty means all managers are active.
+    pub enabled_managers: Vec<String>,
 }
 
 /// Compiled path-ignore matcher built from a `RepoConfig`.
@@ -252,6 +255,8 @@ impl RepoConfig {
             ignore_paths: Vec<String>,
             #[serde(rename = "packageRules", default)]
             package_rules: Vec<RawPackageRule>,
+            #[serde(rename = "enabledManagers", default)]
+            enabled_managers: Vec<String>,
         }
 
         fn default_true() -> bool {
@@ -316,7 +321,15 @@ impl RepoConfig {
             ignore_deps: raw.ignore_deps,
             ignore_paths: raw.ignore_paths,
             package_rules,
+            enabled_managers: raw.enabled_managers,
         }
+    }
+
+    /// Return `true` when `manager_name` is active under `enabledManagers`.
+    ///
+    /// When `enabledManagers` is empty, all managers are active.
+    pub fn is_manager_enabled(&self, manager_name: &str) -> bool {
+        self.enabled_managers.is_empty() || self.enabled_managers.iter().any(|m| m == manager_name)
     }
 
     /// Return `true` when a dependency name should be ignored.
@@ -434,6 +447,7 @@ impl Default for RepoConfig {
             ignore_deps: Vec::new(),
             ignore_paths: Vec::new(),
             package_rules: Vec::new(),
+            enabled_managers: Vec::new(),
         }
     }
 }
@@ -601,6 +615,24 @@ mod tests {
     fn ignore_deps_parsed() {
         let c = RepoConfig::parse(r#"{"ignoreDeps": ["lodash", "react"]}"#);
         assert_eq!(c.ignore_deps, vec!["lodash", "react"]);
+    }
+
+    #[test]
+    fn enabled_managers_parsed() {
+        let c = RepoConfig::parse(r#"{"enabledManagers": ["cargo", "npm"]}"#);
+        assert_eq!(c.enabled_managers, vec!["cargo", "npm"]);
+        assert!(c.is_manager_enabled("cargo"));
+        assert!(c.is_manager_enabled("npm"));
+        assert!(!c.is_manager_enabled("maven"));
+    }
+
+    #[test]
+    fn enabled_managers_empty_means_all_active() {
+        let c = RepoConfig::parse("{}");
+        assert!(c.enabled_managers.is_empty());
+        assert!(c.is_manager_enabled("cargo"));
+        assert!(c.is_manager_enabled("maven"));
+        assert!(c.is_manager_enabled("anything"));
     }
 
     #[test]

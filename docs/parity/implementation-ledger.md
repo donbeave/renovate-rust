@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0167  | 2026-04-28 | `enabledManagers` repo config option | Complete | See below. |
 | 0166  | 2026-04-28 | NuGet cross-file dedup for .NET solutions | Complete | See below. |
 | 0165  | 2026-04-28 | Go module cross-file dedup for Go workspaces | Complete | See below. |
 | 0164  | 2026-04-28 | Maven cross-file dedup for multi-module projects | Complete | See below. |
@@ -3112,6 +3113,26 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0167 - `enabledManagers` repo config option
+
+### Renovate reference
+- `lib/config/options/index.ts` — `enabledManagers` option
+- When set, only the listed manager names are active; all others are skipped.
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `enabled_managers: Vec<String>` field added to `RepoConfig`.
+  - Parsed from `"enabledManagers"` key in `renovate.json` / `.renovaterc`.
+  - `is_manager_enabled(name)` helper method.
+  - 2 unit tests.
+- `main.rs`: after `managers::detect()`, filters the detected list using
+  `repo_cfg.is_manager_enabled()` when `enabled_managers` is non-empty.
+  - Single filter point; all 100+ `manager_files()` calls inherit the restriction.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1142 passed
 
 ## Slice 0166 - NuGet cross-file deduplication for .NET solutions
 
