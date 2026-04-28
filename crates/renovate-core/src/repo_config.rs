@@ -57,6 +57,10 @@ pub struct PackageRule {
     /// Update types this rule applies to (`major`, `minor`, `patch`).
     /// Empty = all update types.
     pub match_update_types: Vec<UpdateType>,
+    /// Semver range that the proposed new version must satisfy.
+    /// When set, updates to versions outside this range are blocked.
+    /// Regex patterns (`/pattern/`) are not yet supported.
+    pub allowed_versions: Option<String>,
     /// If `Some(false)`, matching packages are disabled (skipped).
     pub enabled: Option<bool>,
     /// `true` when the raw config specified at least one name or pattern
@@ -184,6 +188,8 @@ impl RepoConfig {
             match_managers: Vec<String>,
             #[serde(rename = "matchUpdateTypes", default)]
             match_update_types: Vec<String>,
+            #[serde(rename = "allowedVersions")]
+            allowed_versions: Option<String>,
             enabled: Option<bool>,
         }
 
@@ -247,6 +253,7 @@ impl RepoConfig {
                     match_package_patterns,
                     match_managers: r.match_managers,
                     match_update_types,
+                    allowed_versions: r.allowed_versions,
                     enabled: r.enabled,
                     has_name_constraint,
                 }
@@ -299,6 +306,36 @@ impl RepoConfig {
                 && rule.manager_matches(manager)
                 && rule.update_type_matches(update_type)
                 && rule.enabled == Some(false)
+        })
+    }
+
+    /// Return `true` when `proposed_version` does NOT satisfy the
+    /// `allowedVersions` constraint of any matching rule.
+    ///
+    /// Only semver range strings are supported (regex `/pattern/` values are
+    /// silently ignored).  If no rule has `allowedVersions`, this returns
+    /// `false` (no restriction).
+    pub fn is_version_restricted(&self, name: &str, manager: &str, proposed_version: &str) -> bool {
+        use crate::versioning::semver_generic::parse_padded;
+        let Some(proposed_sv) = parse_padded(proposed_version) else {
+            return false; // can't parse → don't restrict
+        };
+        self.package_rules.iter().any(|rule| {
+            if !rule.name_matches(name) || !rule.manager_matches(manager) {
+                return false;
+            }
+            let Some(ref av) = rule.allowed_versions else {
+                return false;
+            };
+            // Skip regex-style patterns (start with `/`).
+            if av.starts_with('/') {
+                return false;
+            }
+            // Parse the semver VersionReq and check the proposed version.
+            match semver::VersionReq::parse(av) {
+                Ok(req) => !req.matches(&proposed_sv),
+                Err(_) => false, // unparseable constraint → don't restrict
+            }
         })
     }
 }
@@ -755,5 +792,50 @@ mod tests {
         // "pin" and "digest" are not yet supported types — rule has no update type constraint
         // so it matches all update types
         assert!(c.is_update_blocked("serde", UpdateType::Major, "cargo"));
+    }
+
+    // ── allowedVersions tests ─────────────────────────────────────────────────
+
+    #[test]
+    fn allowed_versions_restricts_outside_range() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["serde"], "allowedVersions": "< 2.0"}]}"#,
+        );
+        // 1.9.0 is < 2.0 → allowed
+        assert!(!c.is_version_restricted("serde", "cargo", "1.9.0"));
+        // 2.0.0 is NOT < 2.0 → restricted
+        assert!(c.is_version_restricted("serde", "cargo", "2.0.0"));
+    }
+
+    #[test]
+    fn allowed_versions_no_rule_means_no_restriction() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(!c.is_version_restricted("serde", "cargo", "99.0.0"));
+    }
+
+    #[test]
+    fn allowed_versions_gte_constraint() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"allowedVersions": ">= 1.0.0"}]}"#);
+        assert!(!c.is_version_restricted("anything", "cargo", "1.0.0"));
+        assert!(!c.is_version_restricted("anything", "cargo", "2.0.0"));
+        assert!(c.is_version_restricted("anything", "cargo", "0.9.0"));
+    }
+
+    #[test]
+    fn allowed_versions_regex_pattern_skipped() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["foo"], "allowedVersions": "/^1\\./"}]}"#,
+        );
+        // Regex patterns are not yet supported — no restriction applies
+        assert!(!c.is_version_restricted("foo", "cargo", "2.0.0"));
+    }
+
+    #[test]
+    fn allowed_versions_respects_manager_filter() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["npm"], "allowedVersions": "< 2.0"}]}"#,
+        );
+        assert!(c.is_version_restricted("serde", "npm", "2.0.0"));
+        assert!(!c.is_version_restricted("serde", "cargo", "2.0.0"));
     }
 }

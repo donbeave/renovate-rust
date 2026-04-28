@@ -2678,18 +2678,26 @@ fn apply_update_blocking_to_report(
                 ref current,
                 ref latest,
             } = dep.status
-                && let Some(update_type) = classify_semver_update(current, latest)
             {
-                if !repo_cfg.is_update_blocked(&dep.name, update_type, &manager) {
+                // Check allowedVersions restriction first.
+                if repo_cfg.is_version_restricted(&dep.name, &manager, latest) {
+                    dep.status = output::DepStatus::Skipped {
+                        reason: "blocked by packageRules (allowedVersions)".into(),
+                    };
                     continue;
                 }
-                dep.status = output::DepStatus::Skipped {
-                    reason: format!(
-                        "blocked by packageRules (matchUpdateTypes: {:?})",
-                        update_type
-                    )
-                    .to_lowercase(),
-                };
+                // Check matchUpdateTypes + enabled:false blocking.
+                if let Some(update_type) = classify_semver_update(current, latest)
+                    && repo_cfg.is_update_blocked(&dep.name, update_type, &manager)
+                {
+                    dep.status = output::DepStatus::Skipped {
+                        reason: format!(
+                            "blocked by packageRules (matchUpdateTypes: {:?})",
+                            update_type
+                        )
+                        .to_lowercase(),
+                    };
+                }
             }
         }
     }

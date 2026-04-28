@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0069  | 2026-04-28 | `packageRules` allowedVersions semver range filtering | Complete | See below. |
 | 0068  | 2026-04-28 | Wire matchUpdateTypes blocking into all manager dep report pipelines | Complete | See below. |
 | 0067  | 2026-04-28 | `packageRules` matchUpdateTypes filtering | Complete | See below. |
 | 0066  | 2026-04-28 | `UpdateType` classification + update type labels in CLI output | Complete | See below. |
@@ -2099,6 +2100,34 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 705 passed
 
+## Slice 0069 - `packageRules` allowedVersions semver range filtering
+
+### Renovate reference
+- `lib/config/options/index.ts` — `allowedVersions` option
+- "A version range or regex pattern capturing allowed versions for dependencies."
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PackageRule.allowed_versions: Option<String>` — raw range string from config.
+  - `RepoConfig::is_version_restricted(name, manager, proposed_version) -> bool`:
+    - Parses `proposed_version` via `parse_padded()`.
+    - For each matching rule with `allowedVersions` set, parses the range as a
+      `semver::VersionReq` and checks if the proposed version satisfies it.
+    - Returns `true` (restricted) when the proposed version is outside the allowed range.
+    - Skips: regex patterns (leading `/`), unparseable constraints, non-semver versions.
+  - 5 new unit tests.
+- `crates/renovate-cli/src/main.rs`:
+  - `apply_update_blocking_to_report()` now also checks `is_version_restricted()` before
+    `is_update_blocked()`. Restricted deps are marked `Skipped { reason: "blocked by packageRules (allowedVersions)" }`.
+
+### What was intentionally deferred
+- Regex `allowedVersions` patterns (`/^1\./`) — would require regex matching against
+  version strings, different from semver range matching.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 710 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2109,5 +2138,5 @@ Pick whichever can be completed in one loop:
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
-5. **`allowedVersions` in packageRules**: restrict updates to a semver range.
-6. **GitLab CI `include:` project components**: component dependency version tracking.
+5. **GitLab CI `include:` project components**: component dependency version tracking.
+6. **JSON output mode**: machine-readable `--output=json` flag for CI integration.
