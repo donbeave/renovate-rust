@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0085  | 2026-04-28 | Gradle Wrapper extractor + Gradle Version datasource | Complete | See below. |
 | 0084  | 2026-04-28 | Refactor: extract `docker_hub_reports` helper to eliminate Docker pipeline duplication | Complete | See below. |
 | 0083  | 2026-04-28 | Jenkins `plugins.txt` / `plugins.yml` extractor | Complete | See below. |
 | 0082  | 2026-04-28 | Bitbucket Pipelines `*-pipelines.yml` Docker image extractor | Complete | See below. |
@@ -2454,6 +2455,37 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 778 passed
 
+## Slice 0085 - Gradle Wrapper extractor + Gradle Version datasource
+
+### Renovate reference
+- `lib/modules/manager/gradle-wrapper/extract.ts`
+- `lib/modules/manager/gradle-wrapper/utils.ts` — `extractGradleVersion`
+- `lib/modules/datasource/gradle-version/index.ts`
+- Pattern: `/(^|/)gradle/wrapper/gradle-wrapper\.properties$/`
+- API: `https://services.gradle.org/versions/all`
+
+### What landed
+- `crates/renovate-core/src/extractors/gradle_wrapper.rs`:
+  - `GradleWrapperDep { version }` struct.
+  - `extract(content)` — scans for `distributionUrl=` key, calls `parse_distribution_url()`.
+  - `parse_distribution_url()` — unescapes `\:` → `:`, extracts filename from URL path,
+    strips `gradle-` prefix and `-bin`/`-all` suffix via `rfind('-')`.
+  - 5 unit tests.
+- `crates/renovate-core/src/datasources/gradle_version.rs`:
+  - `GradleVersionSummary { update_available, current_version, latest }` struct.
+  - `fetch_latest(http, current_version)` — GETs `services.gradle.org/versions/all` JSON,
+    filters stable releases (no snapshot/nightly/broken), sorts by numeric version descending,
+    compares with current.
+  - `cmp_gradle_version()` — splits on `.`, parses segments as `u32`, lexicographic compare;
+    handles `8.10 > 8.4` correctly (vs. string comparison).
+  - 1 unit test for sorting.
+- `crates/renovate-core/src/managers.rs`: `gradle-wrapper` manager pattern.
+- `crates/renovate-cli/src/main.rs`: Gradle Wrapper pipeline (single dep `"gradle"`, version lookup).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 784 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2468,3 +2500,4 @@ Pick whichever can be completed in one loop:
 6. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 8. **Jenkins plugins datasource** (Jenkins Update Center JSON).
+9. **Maven Wrapper** (`mvnw`/`maven-wrapper.properties`) extractor.

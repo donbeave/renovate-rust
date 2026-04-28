@@ -22,6 +22,7 @@ pub mod github_actions;
 pub mod gitlabci;
 pub mod gomod;
 pub mod gradle;
+pub mod gradle_wrapper;
 pub mod helm;
 pub mod helmfile;
 pub mod jenkins;

@@ -120,6 +120,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         ],
     },
     ManagerDef {
+        name: "gradle-wrapper",
+        patterns: &[r"(^|/)gradle/wrapper/gradle-wrapper\.properties$"],
+    },
+    ManagerDef {
         name: "helmfile",
         patterns: &[
             r"(^|/)helmfile\.ya?ml(?:\.gotmpl)?$",

@@ -1721,6 +1721,51 @@ async fn process_repo(
         }
     }
 
+    // ── Gradle Wrapper (gradle/wrapper/gradle-wrapper.properties) ────────────
+    for gw_path in manager_files(&detected, "gradle-wrapper") {
+        match client.get_raw_file(owner, repo, &gw_path).await {
+            Ok(Some(raw)) => {
+                if let Some(dep) = renovate_core::extractors::gradle_wrapper::extract(&raw.content)
+                {
+                    tracing::debug!(
+                        repo = %repo_slug, file = %gw_path,
+                        version = %dep.version, "extracted gradle-wrapper version"
+                    );
+                    let status = match renovate_core::datasources::gradle_version::fetch_latest(
+                        http,
+                        &dep.version,
+                    )
+                    .await
+                    {
+                        Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_version,
+                            latest: s.latest.unwrap_or_default(),
+                        },
+                        Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    repo_report.files.push(output::FileReport {
+                        path: gw_path.clone(),
+                        manager: "gradle-wrapper".into(),
+                        deps: vec![output::DepReport {
+                            name: "gradle".into(),
+                            status,
+                        }],
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%gw_path, "gradle-wrapper.properties not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gw_path, %err, "failed to fetch gradle-wrapper.properties");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Mix (mix.exs) ─────────────────────────────────────────────────────────
     for mix_file_path in manager_files(&detected, "mix") {
         match client.get_raw_file(owner, repo, &mix_file_path).await {
