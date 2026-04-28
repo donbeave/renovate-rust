@@ -3976,6 +3976,94 @@ async fn process_repo(
         }
     }
 
+    // ── Jsonnet Bundler (jsonnetfile.json) ───────────────────────────────────
+    for jb_path in manager_files(&detected, "jsonnet-bundler") {
+        match client.get_raw_file(owner, repo, &jb_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::jsonnet_bundler::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| !d.github_repo.is_empty() && !repo_cfg.is_dep_ignored(&d.remote))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %jb_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted jsonnet-bundler deps"
+                );
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
+                    .iter()
+                    .map(|d| github_tags_datasource::GithubActionsDepInput {
+                        dep_name: d.github_repo.clone(),
+                        current_value: d.version.clone(),
+                    })
+                    .collect();
+                let gh_updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &gh_inputs,
+                    gh_api_base,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<String, (bool, Option<String>, Option<String>)> = {
+                    let mut m = HashMap::new();
+                    for r in gh_updates {
+                        match r.summary {
+                            Ok(s) => {
+                                m.insert(r.dep_name, (s.update_available, s.latest, None));
+                            }
+                            Err(e) => {
+                                m.insert(r.dep_name, (false, None, Some(e.to_string())));
+                            }
+                        }
+                    }
+                    m
+                };
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = if dep.github_repo.is_empty() {
+                            output::DepStatus::Skipped {
+                                reason: "non-github remote".into(),
+                            }
+                        } else {
+                            match update_map.get(&dep.github_repo) {
+                                Some((true, Some(latest), _)) => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.version.clone(),
+                                        latest: latest.clone(),
+                                    }
+                                }
+                                Some((_, latest, None)) => output::DepStatus::UpToDate {
+                                    latest: latest.clone(),
+                                },
+                                Some((_, _, Some(err))) => output::DepStatus::LookupError {
+                                    message: err.clone(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            }
+                        };
+                        output::DepReport {
+                            name: dep.remote.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: jb_path.clone(),
+                    manager: "jsonnet-bundler".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%jb_path, "jsonnetfile.json not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%jb_path, %err, "failed to fetch jsonnetfile.json");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Vendir (vendir.yml) ───────────────────────────────────────────────────
     for vendir_path in manager_files(&detected, "vendir") {
         match client.get_raw_file(owner, repo, &vendir_path).await {

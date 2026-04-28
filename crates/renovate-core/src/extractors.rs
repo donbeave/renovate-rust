@@ -38,6 +38,7 @@ pub mod helm;
 pub mod helm_values;
 pub mod helmfile;
 pub mod jenkins;
+pub mod jsonnet_bundler;
 pub mod kustomize;
 pub mod leiningen;
 pub mod maven;

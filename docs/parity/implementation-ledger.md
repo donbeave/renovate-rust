@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0116  | 2026-04-28 | Jsonnet Bundler `jsonnetfile.json` extractor (GitHub Tags) | Complete | See below. |
 | 0115  | 2026-04-28 | Vendir `vendir.yml` Helm chart extractor | Complete | See below. |
 | 0114  | 2026-04-28 | Copier `.copier-answers.yml` template extractor | Complete | See below. |
 | 0113  | 2026-04-28 | Batect `batect.yml` Docker image extractor | Complete | See below. |
@@ -2995,6 +2996,26 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 928 passed
 
+## Slice 0116 - Jsonnet Bundler `jsonnetfile.json` extractor
+
+### Renovate reference
+- `lib/modules/manager/jsonnet-bundler/extract.ts`
+- Pattern: `/(^|/)jsonnetfile\.json$/`
+- Datasource: git-tags (GitHub Tags for GitHub remotes)
+
+### What landed
+- `crates/renovate-core/src/extractors/jsonnet_bundler.rs` (new):
+  - `JsonnetDep { remote, github_repo, version }` struct.
+  - `extract(content)` — parses JSON, iterates `dependencies[]`, extracts `source.git.remote` + `version`.
+  - `github_repo()` — converts GitHub HTTPS/SSH URLs to `owner/repo` form.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `jsonnet-bundler` with `jsonnetfile.json` pattern.
+- `crates/renovate-cli/src/main.rs`: Jsonnet Bundler pipeline using GitHub Tags; non-GitHub → Skipped.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 933 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -3007,6 +3028,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`fvm`** — Flutter Version Manager `.fvmrc` / `fvm_config.json` version tracking.
+8. **`helm-requirements`** — Helm v2 `requirements.yaml` chart tracking.
+9. **`haskell-cabal`** — Cabal `*.cabal` package version tracking (Hackage datasource).
 7. **`pixi`** — Pixi `pixi.toml` package extraction (PyPI + Conda).
 8. **`renovate-config-presets`** — `renovate.json` extends preset version tracking.
 9. **`nodenv`** — `.node-version` tracking (already covered by node-version manager).
