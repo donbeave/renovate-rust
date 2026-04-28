@@ -151,15 +151,63 @@ Quality gates:
 - If the project does not yet have the required Rust scaffolding, create it first, including `Cargo.toml`, a latest-stable Rust toolchain policy, rustfmt/clippy/nextest configuration where useful, and CI-ready commands.
 - Never commit failing formatting, Clippy, build, or tests unless the repo was already failing before your changes and the failure is documented in the commit message and progress notes.
 
+Parity tracking files:
+
+The following Markdown files track port coverage and must be kept current.
+They are the primary tool for understanding what is done and what remains.
+
+- `docs/parity/implementation-ledger.md` — one row per completed slice, newest
+  first.  Record what was implemented, what was deferred, and any blockers.
+
+- `docs/parity/renovate-test-map.md` — maps Renovate TypeScript test cases
+  (file + line + test name) to their Rust counterparts (file + line + test
+  name).  Update this file whenever you:
+  - Write a new Rust test that corresponds to a Renovate test case.
+  - Port a behavior that Renovate tests but whose test you skipped.
+  - Change an existing test's name or location.
+  Rules:
+  - List every test you write under the correct section.
+  - One Renovate `it()` may map to multiple Rust tests; list each Rust test
+    on its own row.
+  - Include the line number in the Renovate file when you read it; use `—`
+    if you did not look up the exact line.
+  - Use status values: `ported` · `partial` · `pending` · `not-applicable`.
+
+- `docs/parity/renovate-source-map.md` — maps Renovate TypeScript **source**
+  files (not test files) to their Rust counterparts.  Update this file
+  whenever you:
+  - Implement code from a TypeScript file you have read.
+  - Change the status of a partially-ported file to `full`.
+  - Add a new file to the mapping because you referenced it for the first time.
+  Rules:
+  - Use status: `full` · `partial` · `stub` · `not-started` · `out-of-scope`.
+  - Status reflects observable behavior coverage, not line count.
+  - One TypeScript file may map to many Rust files; one Rust file may cover
+    many TypeScript files.  List all relationships, one row per TypeScript file.
+  - Keep the "Out of scope" section up to date for hosted/infra-only features.
+
+- `docs/parity/compatibility-decisions.md` — documents explicit decisions where
+  the Rust implementation intentionally diverges from Renovate and why.
+
+Updating prompt file:
+
+When you update `prompts/claude-loop-renovate-rust.md`, always commit it as a
+**separate standalone commit** with no other file changes, so the change is
+easy to review and revert independently.  Use a commit message like:
+  `docs(prompt): add parity tracking file maintenance rules`
+
 Parity workflow:
 1. Inspect the current repo state and the latest commits.
 2. Inspect Renovate reference docs/tests/source for one missing behavior slice.
 3. Choose the highest-value slice that can be completed in this loop without breaking existing work.
-4. Add or update a parity note before or during implementation. Maintain docs such as:
-   - `docs/parity/implementation-ledger.md`
-   - `docs/parity/renovate-test-map.md`
-   - `docs/parity/compatibility-decisions.md`
-   Create them if they do not exist.
+4. Add or update parity tracking docs before or during implementation:
+   - `docs/parity/implementation-ledger.md` — add a row for the new slice.
+   - `docs/parity/renovate-source-map.md` — update status for any TypeScript
+     source files you read or implement from.
+   - `docs/parity/renovate-test-map.md` — add rows for every new Rust test
+     that corresponds to a Renovate test case.
+   - `docs/parity/compatibility-decisions.md` — record any intentional divergence.
+   Create any file that does not yet exist.
 5. Write Rust tests that encode Renovate-compatible behavior. When practical, translate Renovate test cases into Rust tests using original Rust test code and local fixtures.
 6. Implement the behavior in idiomatic Rust.
 7. Run checks, fix failures, and tighten the implementation.
