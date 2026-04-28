@@ -59,7 +59,27 @@ cargo run -p renovate-cli -- --version
 cargo run -p renovate-cli -- --help
 ```
 
+## Goals
+
+- Faster execution (Rust) — startup, repo scanning, datasource lookups, bounded concurrency
+- Smaller binary footprint — single statically-linked binary, no Node.js runtime required
+- Better isolation for agent-based workflows — deterministic runs, no side effects by default
+- Improved architecture for parallelism — async-first design with bounded concurrency throughout
+
 ## Contributing
 
 See `AGENTS.md`, `BRANCHING.md`, and `COMMITS.md`. Agent-only rules live
 in `AGENTS.md`; everything else applies equally to humans and agents.
+
+## License
+
+This project is licensed under the **GNU Affero General Public License v3.0**
+(AGPL-3.0-only). See [LICENSE](LICENSE) for the full text.
+
+## Acknowledgment
+
+This project is inspired by [Renovate](https://github.com/renovatebot/renovate)
+and was developed by analyzing its behavior and architecture. It is a
+Rust-native reimplementation — no Renovate source code was copied. AGPL-3.0
+was chosen to respect the original project's licensing model and to protect
+against cloud-service parasitism of infrastructure tooling.
