@@ -462,58 +462,73 @@ async fn process_repo(
     }
 
     // ── NuGet (.csproj / .props / .targets) ──────────────────────────────────
-    for nuget_file_path in manager_files(&detected, "nuget") {
-        match client.get_raw_file(owner, repo, &nuget_file_path).await {
-            Ok(Some(raw)) => match nuget_extractor::extract(&raw.content) {
-                Ok(deps) => {
-                    let actionable: Vec<_> = deps
-                        .iter()
-                        .filter(|d| {
-                            d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.package_id)
-                        })
-                        .collect();
-                    tracing::debug!(
-                        repo = %repo_slug, file = %nuget_file_path,
-                        total = deps.len(), actionable = actionable.len(),
-                        "extracted nuget dependencies"
-                    );
-                    let dep_inputs: Vec<nuget_datasource::NuGetDepInput> = actionable
-                        .iter()
-                        .map(|d| nuget_datasource::NuGetDepInput {
-                            package_id: d.package_id.clone(),
-                            current_value: d.current_value.clone(),
-                        })
-                        .collect();
-                    let updates = nuget_datasource::fetch_updates_concurrent(
-                        http,
-                        &dep_inputs,
-                        nuget_datasource::NUGET_API,
-                        10,
-                    )
-                    .await;
-                    let update_map: HashMap<_, _> = updates
-                        .into_iter()
-                        .map(|r| (r.package_id, r.summary))
-                        .collect();
-                    repo_report.files.push(output::FileReport {
-                        path: nuget_file_path.clone(),
-                        manager: "nuget".into(),
-                        deps: build_dep_reports_nuget(&deps, &actionable, &update_map),
-                    });
-                }
+    // Two-pass NuGet dedup: .NET solutions share many NuGet packages across projects.
+    {
+        let nuget_files = manager_files(&detected, "nuget");
+        let mut nuget_file_deps: Vec<(
+            String,
+            Vec<renovate_core::extractors::nuget::NuGetExtractedDep>,
+        )> = Vec::new();
+        for nuget_file_path in &nuget_files {
+            match client.get_raw_file(owner, repo, nuget_file_path).await {
+                Ok(Some(raw)) => match nuget_extractor::extract(&raw.content) {
+                    Ok(deps) => nuget_file_deps.push((nuget_file_path.clone(), deps)),
+                    Err(err) => tracing::warn!(repo=%repo_slug, file=%nuget_file_path, %err,
+                        "failed to parse nuget project file"),
+                },
+                Ok(None) => tracing::warn!(repo=%repo_slug, file=%nuget_file_path,
+                    "nuget file not found"),
                 Err(err) => {
-                    tracing::warn!(repo=%repo_slug, file=%nuget_file_path, %err,
-                        "failed to parse nuget project file")
+                    tracing::error!(repo=%repo_slug, file=%nuget_file_path, %err,
+                        "failed to fetch nuget file");
+                    had_error = true;
                 }
-            },
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%nuget_file_path, "nuget file not found")
             }
-            Err(err) => {
-                tracing::error!(repo=%repo_slug, file=%nuget_file_path, %err,
-                    "failed to fetch nuget file");
-                had_error = true;
-            }
+        }
+        let unique_ids: Vec<String> = {
+            let mut seen = std::collections::HashSet::new();
+            nuget_file_deps
+                .iter()
+                .flat_map(|(_, deps)| deps.iter())
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.package_id))
+                .filter(|d| seen.insert(d.package_id.clone()))
+                .map(|d| d.package_id.clone())
+                .collect()
+        };
+        tracing::debug!(
+            repo = %repo_slug,
+            files = nuget_file_deps.len(),
+            unique_packages = unique_ids.len(),
+            "fetching nuget versions (deduplicated)"
+        );
+        let latest_cache = nuget_datasource::fetch_latest_batch(
+            http,
+            &unique_ids,
+            nuget_datasource::NUGET_API,
+            10,
+        )
+        .await;
+        for (nuget_file_path, deps) in nuget_file_deps {
+            let actionable: Vec<_> = deps
+                .iter()
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.package_id))
+                .collect();
+            let update_map: HashMap<_, Result<nuget_datasource::NuGetUpdateSummary, _>> =
+                actionable
+                    .iter()
+                    .map(|d| {
+                        let latest = latest_cache.get(&d.package_id).cloned().unwrap_or(None);
+                        let summary = Ok::<_, nuget_datasource::NuGetError>(
+                            nuget_datasource::summary_from_cache(&d.current_value, latest),
+                        );
+                        (d.package_id.clone(), summary)
+                    })
+                    .collect();
+            repo_report.files.push(output::FileReport {
+                path: nuget_file_path.clone(),
+                manager: "nuget".into(),
+                deps: build_dep_reports_nuget(&deps, &actionable, &update_map),
+            });
         }
     }
 

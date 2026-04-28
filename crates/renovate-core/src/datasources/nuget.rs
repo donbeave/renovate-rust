@@ -6,6 +6,7 @@
 //! - `lib/modules/datasource/nuget/index.ts`
 //! - API: `https://api.nuget.org/v3-flatcontainer/{id}/index.json`
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use serde::Deserialize;
@@ -137,6 +138,58 @@ async fn fetch_update_summary(
         latest: s.latest,
         update_available: s.update_available,
     })
+}
+
+/// Cached NuGet latest version entry.
+pub type NuGetLatestEntry = Option<String>;
+
+/// Fetch the latest stable version for a batch of unique NuGet package IDs.
+pub async fn fetch_latest_batch(
+    http: &HttpClient,
+    package_ids: &[String],
+    api_base: &str,
+    concurrency: usize,
+) -> HashMap<String, NuGetLatestEntry> {
+    if package_ids.is_empty() {
+        return HashMap::new();
+    }
+
+    let sem = Arc::new(Semaphore::new(concurrency));
+    let mut set: JoinSet<(String, NuGetLatestEntry)> = JoinSet::new();
+
+    for id in package_ids {
+        let http = http.clone();
+        let id = id.clone();
+        let api_base = api_base.to_owned();
+        let sem = Arc::clone(&sem);
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let latest = fetch_latest(&id, &http, &api_base).await.ok().flatten();
+            (id, latest)
+        });
+    }
+
+    let mut cache = HashMap::with_capacity(package_ids.len());
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((id, latest)) => {
+                cache.insert(id, latest);
+            }
+            Err(join_err) => tracing::error!(%join_err, "nuget batch fetch task panicked"),
+        }
+    }
+    cache
+}
+
+/// Compute a `NuGetUpdateSummary` from a pre-fetched latest version entry.
+pub fn summary_from_cache(current_value: &str, latest: NuGetLatestEntry) -> NuGetUpdateSummary {
+    let s = crate::versioning::nuget::nuget_update_summary(current_value, latest.as_deref());
+    NuGetUpdateSummary {
+        current_value: s.current_value,
+        latest: s.latest,
+        update_available: s.update_available,
+    }
 }
 
 /// Returns `true` when the version string looks like a stable NuGet release.
