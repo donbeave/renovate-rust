@@ -6140,6 +6140,7 @@ async fn process_repo(
     for pixi_path in manager_files(&detected, "pixi") {
         match client.get_raw_file(owner, repo, &pixi_path).await {
             Ok(Some(raw)) => {
+                use renovate_core::datasources::conda as conda_datasource;
                 use renovate_core::extractors::pixi::{PixiSkipReason, PixiSource};
                 let deps = renovate_core::extractors::pixi::extract(&raw.content);
                 let pypi_actionable: Vec<_> = deps
@@ -6150,9 +6151,19 @@ async fn process_repo(
                             && !repo_cfg.is_dep_ignored(&d.dep_name)
                     })
                     .collect();
+                let conda_actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| {
+                        d.source == PixiSource::Conda
+                            && d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored(&d.dep_name)
+                    })
+                    .collect();
                 tracing::debug!(
                     repo = %repo_slug, file = %pixi_path,
-                    total = deps.len(), actionable = pypi_actionable.len(),
+                    total = deps.len(),
+                    pypi = pypi_actionable.len(),
+                    conda = conda_actionable.len(),
                     "extracted pixi deps"
                 );
                 let pypi_inputs: Vec<pypi_datasource::PypiDepInput> = pypi_actionable
@@ -6169,10 +6180,22 @@ async fn process_repo(
                     10,
                 )
                 .await;
-                let update_map: std::collections::HashMap<_, _> = pypi_updates
+                let pypi_map: HashMap<_, _> = pypi_updates
                     .into_iter()
                     .map(|r| (r.dep_name, r.summary))
                     .collect();
+                // Conda lookups (sequential to keep API load manageable).
+                let mut conda_map: HashMap<
+                    String,
+                    Result<conda_datasource::CondaUpdateSummary, String>,
+                > = HashMap::new();
+                for d in &conda_actionable {
+                    let result =
+                        conda_datasource::fetch_latest(&d.dep_name, &d.current_value, http)
+                            .await
+                            .map_err(|e| e.to_string());
+                    conda_map.insert(d.dep_name.clone(), result);
+                }
                 let dep_reports: Vec<output::DepReport> = deps
                     .iter()
                     .map(|dep| {
@@ -6181,9 +6204,6 @@ async fn process_repo(
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
-                                        PixiSkipReason::CondaNotSupported => {
-                                            "conda-not-supported".to_owned()
-                                        }
                                         PixiSkipReason::InvalidVersion => {
                                             "invalid-version".to_owned()
                                         }
@@ -6195,14 +6215,27 @@ async fn process_repo(
                             };
                         }
                         if dep.source == PixiSource::Conda {
+                            let status = match conda_map.get(&dep.dep_name) {
+                                Some(Ok(s)) if s.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.current_value.clone(),
+                                        latest: s.latest.clone().unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(s)) => output::DepStatus::UpToDate {
+                                    latest: s.latest.clone(),
+                                },
+                                Some(Err(e)) => {
+                                    output::DepStatus::LookupError { message: e.clone() }
+                                }
+                                None => output::DepStatus::UpToDate { latest: None },
+                            };
                             return output::DepReport {
                                 name: dep.dep_name.clone(),
-                                status: output::DepStatus::Skipped {
-                                    reason: "conda-not-supported".to_owned(),
-                                },
+                                status,
                             };
                         }
-                        let status = match update_map.get(&dep.dep_name) {
+                        let status = match pypi_map.get(&dep.dep_name) {
                             Some(Ok(s)) if s.update_available => {
                                 output::DepStatus::UpdateAvailable {
                                     current: s.current_specifier.clone(),

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0159  | 2026-04-28 | Conda datasource (Anaconda API) + pixi conda dep activation | Complete | See below. |
 | 0158  | 2026-04-28 | Hermit package manager extractor + datasource (file-list based) | Complete | See below. |
 | 0157  | 2026-04-28 | `pip-compile` pipeline for `.in` source files | Complete | See below. |
 | 0155  | 2026-04-28 | `cdnurl` + stub registrations for `git-submodules`/`hermit`/`pip-compile`/`custom` | Complete | See below. |
@@ -3104,6 +3105,31 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0159 - Conda datasource (Anaconda API) + pixi conda dep activation
+
+### Renovate reference
+- `lib/modules/datasource/conda/index.ts`
+- Default registry: `https://api.anaconda.org/package/`
+- Default channel: `conda-forge`
+
+### What landed
+- `crates/renovate-core/src/datasources/conda.rs` (new):
+  - `fetch_latest(package_name, current_value, http)` queries Anaconda API.
+  - Supports `channel::package` syntax (e.g. `bioconda::bwa`).
+  - Returns `CondaUpdateSummary { versions, latest, update_available }`.
+  - 2 unit tests for channel parsing.
+- `crates/renovate-core/src/extractors/pixi.rs` (updated):
+  - Removed `PixiSkipReason::CondaNotSupported` — conda deps are now actionable.
+  - `parse_conda_dep` only skips when version is missing/empty.
+  - Updated test: `extracts_conda_deps_as_actionable`.
+- `main.rs` pixi pipeline:
+  - Conda actionable deps now route to `conda_datasource::fetch_latest`.
+  - Conda and PyPI dep reports built and combined in a single `FileReport`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1137 passed
 
 ## Slice 0158 - Hermit package manager extractor + datasource
 

@@ -1,14 +1,13 @@
 //! Pixi `pixi.toml` dependency extractor.
 //!
 //! Extracts PyPI and Conda dependencies from Pixi project files.
-//! Conda deps are extracted but skipped (CondaDatasource not implemented);
-//! PyPI deps are fully actionable via the existing PyPI datasource.
+//! PyPI deps use the PyPI datasource; Conda deps use the Anaconda datasource.
 //!
 //! Renovate reference:
 //! - `lib/modules/manager/pixi/extract.ts`
 //! - `lib/modules/manager/pixi/schema.ts`
 //! - Patterns: `(^|/)pixi\.toml$`, `(^|/)pyproject\.toml$` (`[tool.pixi]`)
-//! - Datasources: `pypi`, `conda` (conda not yet implemented here)
+//! - Datasources: `pypi`, `conda`
 //!
 //! ## File formats
 //!
@@ -40,8 +39,6 @@ pub enum PixiSource {
 /// Skip reason for a Pixi dep that cannot be looked up.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PixiSkipReason {
-    /// Conda packages are not yet supported (CondaDatasource not implemented).
-    CondaNotSupported,
     /// Version string could not be parsed.
     InvalidVersion,
     /// No version specified (e.g. path or git dependency).
@@ -175,9 +172,13 @@ fn parse_conda_dep(name: &str, spec: &Value) -> PixiDep {
     let version = extract_version(spec);
     PixiDep {
         dep_name: name.to_owned(),
-        current_value: version.unwrap_or_default(),
+        current_value: version.clone().unwrap_or_default(),
         source: PixiSource::Conda,
-        skip_reason: Some(PixiSkipReason::CondaNotSupported),
+        skip_reason: if version.is_none() || version.as_deref() == Some("") {
+            Some(PixiSkipReason::UnspecifiedVersion)
+        } else {
+            None
+        },
     }
 }
 
@@ -228,7 +229,7 @@ requests = { version = ">=2.31" }
     }
 
     #[test]
-    fn skips_conda_deps() {
+    fn extracts_conda_deps_as_actionable() {
         let content = r#"
 [dependencies]
 numpy = ">=1.26"
@@ -238,7 +239,10 @@ python = ">=3.9"
         assert_eq!(deps.len(), 2);
         for d in &deps {
             assert_eq!(d.source, PixiSource::Conda);
-            assert_eq!(d.skip_reason, Some(PixiSkipReason::CondaNotSupported));
+            assert!(
+                d.skip_reason.is_none(),
+                "conda deps should now be actionable"
+            );
         }
     }
 

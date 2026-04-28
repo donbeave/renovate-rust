@@ -12,6 +12,7 @@ pub mod buildpacks_registry;
 pub mod cdnjs;
 pub mod cocoapods;
 pub mod conan;
+pub mod conda;
 pub mod cpan;
 pub mod crates_io;
 pub mod devbox;
