@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0183  | 2026-04-28 | `DepContext` unified matcher + `matches_context()` on PackageRule | Complete | See below. |
 | 0182  | 2026-04-28 | `matchRegistryUrls` + `matchRepositories` packageRule matchers | Complete | See below. |
 | 0181  | 2026-04-28 | `matchCategories` + `matchBaseBranches` packageRule matchers | Complete | See below. |
 | 0180  | 2026-04-28 | `manager_categories()` lookup table (27 ecosystems) | Complete | See below. |
@@ -4661,6 +4662,34 @@ managers should only run when explicitly listed in `enabledManagers`.
 3. **Remote preset resolution** — `github>org/repo//preset` fetching.
 4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **More built-in preset expansion** — schedule presets, group:monorepos.
+
+## Slice 0183 — `DepContext` unified matcher + `PackageRule::matches_context()`
+
+### Renovate reference
+- `lib/util/package-rules/index.ts` — `matchesRule(inputConfig, packageRule)` iterating all matchers
+- `lib/config/types.ts` — `PackageRuleInputConfig`
+
+### What was implemented
+- `DepContext<'a>` struct in `repo_config.rs` — carries all matching context (dep_name, package_name, manager, datasource, dep_type, file_path, source_url, registry_urls, repository, base_branch, current_value, new_value, update_type)
+- `DepContext::for_dep()` convenience constructor + builder methods (`with_manager`, `with_datasource`, `with_dep_type`, `with_file_path`)
+- `PackageRule::matches_context(ctx: &DepContext)` — unified entry point calling ALL matchers in correct AND-chain, following upstream semantics (missing context field + rule constraint = no match)
+- `RepoConfig::is_dep_ignored_ctx(ctx: &DepContext)` — full-context ignore check
+- Rewrote `is_dep_ignored`, `is_dep_ignored_for_manager`, `is_dep_ignored_with_dep_type` as wrappers delegating to `is_dep_ignored_ctx`
+- Rewrote `is_update_blocked_for_file` and `is_version_restricted_for_file` to use `matches_context`
+- **Behavior fix**: a rule with `matchManagers: ["npm"]` no longer fires when called via `is_dep_ignored(name)` without manager context (upstream-correct; old tests updated)
+- Added `manager_categories` import to `repo_config.rs` so category derivation happens inside `matches_context`
+
+### Tests added (5 new)
+- `dep_context_tests::dep_context_with_manager_fires_correct_rule`
+- `dep_context_tests::dep_context_datasource_gates_rule`
+- `dep_context_tests::dep_context_categories_from_manager`
+- `dep_context_tests::dep_context_repository_gates_rule`
+- `dep_context_tests::dep_context_builder_methods`
+
+### Deferred
+- Update `main.rs` call sites to pass richer `DepContext` (datasource, registry URLs, repository, base branch) for more accurate filtering
+
+---
 
 ## Slice 0182 — `matchRegistryUrls` + `matchRepositories` packageRule matchers
 

@@ -14,6 +14,7 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use regex::Regex;
 use serde::Deserialize;
 
+use crate::managers::manager_categories;
 use crate::versioning::semver_generic::UpdateType;
 
 use crate::config::GlobalConfig;
@@ -388,6 +389,144 @@ impl PackageRule {
         })
     }
 
+    /// Return `true` when ALL matchers in this rule fire for `ctx`.
+    ///
+    /// This is the unified entry point that mirrors Renovate's `matchesRule()`
+    /// from `lib/util/package-rules/index.ts`.  Each matcher AND-s with the
+    /// others; missing context fields (e.g. `ctx.datasource.is_none()`) are
+    /// treated as "unknown → the rule's constraint cannot be satisfied → false"
+    /// when the rule specifies that constraint, matching upstream semantics.
+    ///
+    /// Prefer calling this over calling individual `*_matches` methods, so that
+    /// all matchers are always evaluated.
+    pub fn matches_context(&self, ctx: &DepContext<'_>) -> bool {
+        // Package name / dep name matchers
+        let name = ctx.package_name.unwrap_or(ctx.dep_name);
+        if !self.name_matches(name) {
+            return false;
+        }
+        if !self.dep_name_matches(ctx.dep_name) {
+            return false;
+        }
+
+        // Manager / categories
+        match ctx.manager {
+            Some(mgr) => {
+                if !self.manager_matches(mgr) {
+                    return false;
+                }
+                let cats = manager_categories(mgr);
+                if !self.categories_match(cats) {
+                    return false;
+                }
+            }
+            None => {
+                // Rule has matchManagers or matchCategories but we don't know the
+                // manager → no match.
+                if !self.match_managers.is_empty() || !self.match_categories.is_empty() {
+                    return false;
+                }
+            }
+        }
+
+        // Datasource
+        match ctx.datasource {
+            Some(ds) => {
+                if !self.datasource_matches(ds) {
+                    return false;
+                }
+            }
+            None => {
+                if !self.match_datasources.is_empty() {
+                    return false;
+                }
+            }
+        }
+
+        // Dep type
+        let dep_type = ctx.dep_type.unwrap_or("");
+        if !self.dep_type_matches(dep_type) {
+            return false;
+        }
+
+        // File name
+        let file = ctx.file_path.unwrap_or("");
+        if !self.file_name_matches(file) {
+            return false;
+        }
+
+        // Source URL
+        match ctx.source_url {
+            Some(url) => {
+                if !self.source_url_matches(url) {
+                    return false;
+                }
+            }
+            None => {
+                if self.has_source_url_constraint {
+                    return false;
+                }
+            }
+        }
+
+        // Registry URLs
+        match ctx.registry_urls {
+            Some(urls) => {
+                if !self.registry_url_matches(urls) {
+                    return false;
+                }
+            }
+            None => {
+                if self.has_registry_url_constraint {
+                    return false;
+                }
+            }
+        }
+
+        // Repository
+        match ctx.repository {
+            Some(repo) => {
+                if !self.repository_matches(repo) {
+                    return false;
+                }
+            }
+            None => {
+                if self.has_repository_constraint {
+                    return false;
+                }
+            }
+        }
+
+        // Base branch
+        let base = ctx.base_branch.unwrap_or("");
+        if !self.base_branch_matches(base) {
+            return false;
+        }
+
+        // Version / value matchers
+        let current_val = ctx.current_value.unwrap_or("");
+        if !self.current_value_matches(current_val) {
+            return false;
+        }
+        if !self.current_version_matches(current_val) {
+            return false;
+        }
+
+        let new_val = ctx.new_value.unwrap_or("");
+        if !self.new_value_matches(new_val) {
+            return false;
+        }
+
+        // Update type: unknown → allow match (no constraint to check)
+        if let Some(ut) = ctx.update_type
+            && !self.update_type_matches(ut)
+        {
+            return false;
+        }
+
+        true
+    }
+
     /// Return `true` when this rule's `matchCategories` condition matches `categories`.
     ///
     /// `categories` is the slice of category strings for the dep's manager
@@ -420,6 +559,83 @@ impl PackageRule {
                 pattern == branch
             }
         })
+    }
+}
+
+/// Matching context for evaluating a dependency against `packageRules`.
+///
+/// All fields are `Option` so partial contexts (e.g., before update lookups)
+/// are safe to use.  Missing fields follow upstream semantics:
+/// - If the **rule** constraint is unset → matcher returns true (match-all).
+/// - If the **rule** constraint IS set but the **context** field is `None` →
+///   matcher returns false (the constraint cannot be satisfied).
+///
+/// Renovate reference: `PackageRuleInputConfig` in
+/// `lib/config/types.ts`.
+#[derive(Debug, Default)]
+pub struct DepContext<'a> {
+    /// The `depName` field (logical dep name, used by `matchDepNames`).
+    pub dep_name: &'a str,
+    /// The `packageName` field.  When `None`, `dep_name` is used for
+    /// `matchPackageNames` too.
+    pub package_name: Option<&'a str>,
+    /// Manager that detected this dep (e.g. `"npm"`, `"cargo"`).
+    /// Used by `matchManagers` and derived for `matchCategories`.
+    pub manager: Option<&'a str>,
+    /// Datasource identifier (e.g. `"npm"`, `"pypi"`, `"docker"`).
+    pub datasource: Option<&'a str>,
+    /// Dep classification within the manifest (e.g. `"dependencies"`,
+    /// `"devDependencies"`).
+    pub dep_type: Option<&'a str>,
+    /// Relative manifest file path.
+    pub file_path: Option<&'a str>,
+    /// Source repository URL reported by the datasource.
+    pub source_url: Option<&'a str>,
+    /// Registry URLs used by the dep (from manifest or datasource).
+    pub registry_urls: Option<&'a [&'a str]>,
+    /// Current repository name (`"owner/repo"`).
+    pub repository: Option<&'a str>,
+    /// Current base branch (e.g. `"main"`, `"develop"`).
+    pub base_branch: Option<&'a str>,
+    /// Raw current version string from the manifest.
+    pub current_value: Option<&'a str>,
+    /// Proposed new version string (after datasource lookup).
+    pub new_value: Option<&'a str>,
+    /// Classified update type (available after version lookup).
+    pub update_type: Option<UpdateType>,
+}
+
+impl<'a> DepContext<'a> {
+    /// Convenience constructor for the most common case: just a dep name.
+    pub fn for_dep(dep_name: &'a str) -> Self {
+        Self {
+            dep_name,
+            ..Default::default()
+        }
+    }
+
+    /// Set the manager and return `self` for builder-style chaining.
+    pub fn with_manager(mut self, manager: &'a str) -> Self {
+        self.manager = Some(manager);
+        self
+    }
+
+    /// Set the datasource and return `self`.
+    pub fn with_datasource(mut self, datasource: &'a str) -> Self {
+        self.datasource = Some(datasource);
+        self
+    }
+
+    /// Set the dep type and return `self`.
+    pub fn with_dep_type(mut self, dep_type: &'a str) -> Self {
+        self.dep_type = Some(dep_type);
+        self
+    }
+
+    /// Set the file path and return `self`.
+    pub fn with_file_path(mut self, file_path: &'a str) -> Self {
+        self.file_path = Some(file_path);
+        self
     }
 }
 
@@ -1137,54 +1353,43 @@ impl RepoConfig {
     /// Checks both the `ignoreDeps` list (exact match) and any `packageRules`
     /// that set `enabled: false`.  Manager-agnostic: rules with `matchManagers`
     /// are treated as matching all managers.
+    ///
+    /// For richer filtering (datasource, categories, dep type, file path, etc.)
+    /// use [`is_dep_ignored_ctx`] with a full [`DepContext`].
     pub fn is_dep_ignored(&self, name: &str) -> bool {
-        if self.ignore_deps.iter().any(|p| p == name) {
-            return true;
-        }
-        self.package_rules.iter().any(|rule| {
-            rule.name_matches(name) && rule.dep_name_matches(name) && rule.enabled == Some(false)
-        })
+        self.is_dep_ignored_ctx(&DepContext::for_dep(name))
     }
 
     /// Like [`is_dep_ignored`] but also filters by manager name.
-    ///
-    /// Rules whose `matchManagers` list is non-empty are only applied when
-    /// `manager` appears in that list.
     pub fn is_dep_ignored_for_manager(&self, name: &str, manager: &str) -> bool {
-        if self.ignore_deps.iter().any(|p| p == name) {
-            return true;
-        }
-        self.package_rules.iter().any(|rule| {
-            rule.name_matches(name)
-                && rule.dep_name_matches(name)
-                && rule.manager_matches(manager)
-                && rule.enabled == Some(false)
-        })
+        self.is_dep_ignored_ctx(&DepContext::for_dep(name).with_manager(manager))
     }
 
     /// Like [`is_dep_ignored_for_manager`] but also checks `matchDepTypes`.
-    ///
-    /// `dep_type` is the type string from the manifest (e.g. `"devDependencies"`,
-    /// `"dependencies"`, `"peerDependencies"`).  An empty `dep_type` matches
-    /// any rule regardless of its `matchDepTypes` setting.
     pub fn is_dep_ignored_with_dep_type(&self, name: &str, manager: &str, dep_type: &str) -> bool {
-        if self.ignore_deps.iter().any(|p| p == name) {
+        self.is_dep_ignored_ctx(
+            &DepContext::for_dep(name)
+                .with_manager(manager)
+                .with_dep_type(dep_type),
+        )
+    }
+
+    /// Full-context dep-ignore check.  Evaluates all packageRule matchers.
+    ///
+    /// The dep is ignored when:
+    /// - `ignoreDeps` contains the dep name, OR
+    /// - A `packageRules` entry with `enabled: false` matches `ctx` via all matchers.
+    pub fn is_dep_ignored_ctx(&self, ctx: &DepContext<'_>) -> bool {
+        if self.ignore_deps.iter().any(|p| p == ctx.dep_name) {
             return true;
         }
-        self.package_rules.iter().any(|rule| {
-            rule.name_matches(name)
-                && rule.dep_name_matches(name)
-                && rule.manager_matches(manager)
-                && rule.dep_type_matches(dep_type)
-                && rule.enabled == Some(false)
-        })
+        self.package_rules
+            .iter()
+            .any(|rule| rule.matches_context(ctx) && rule.enabled == Some(false))
     }
 
     /// Return `true` when a specific update (name + current + update type + manager)
     /// is blocked by a `packageRules` entry with `enabled: false`.
-    ///
-    /// Checks `matchPackageNames`, `matchPackagePatterns`, `matchManagers`,
-    /// `matchUpdateTypes`, and `matchCurrentVersion`.
     ///
     /// Used in the dep report building phase after fetching update summaries.
     pub fn is_update_blocked(
@@ -1206,15 +1411,17 @@ impl RepoConfig {
         manager: &str,
         file_path: &str,
     ) -> bool {
-        self.package_rules.iter().any(|rule| {
-            rule.name_matches(name)
-                && rule.dep_name_matches(name)
-                && rule.manager_matches(manager)
-                && rule.update_type_matches(update_type)
-                && rule.current_version_matches(current_value)
-                && rule.file_name_matches(file_path)
-                && rule.enabled == Some(false)
-        })
+        let ctx = DepContext {
+            dep_name: name,
+            manager: Some(manager),
+            current_value: Some(current_value),
+            update_type: Some(update_type),
+            file_path: Some(file_path),
+            ..Default::default()
+        };
+        self.package_rules
+            .iter()
+            .any(|rule| rule.matches_context(&ctx) && rule.enabled == Some(false))
     }
 
     /// Return `true` when `proposed_version` does NOT satisfy the
@@ -1239,25 +1446,25 @@ impl RepoConfig {
         let Some(proposed_sv) = parse_padded(proposed_version) else {
             return false; // can't parse → don't restrict
         };
+        let ctx = DepContext {
+            dep_name: name,
+            manager: Some(manager),
+            file_path: Some(file_path),
+            ..Default::default()
+        };
         self.package_rules.iter().any(|rule| {
-            if !rule.name_matches(name)
-                || !rule.dep_name_matches(name)
-                || !rule.manager_matches(manager)
-                || !rule.file_name_matches(file_path)
-            {
+            if !rule.matches_context(&ctx) {
                 return false;
             }
             let Some(ref av) = rule.allowed_versions else {
                 return false;
             };
-            // Skip regex-style patterns (start with `/`).
             if av.starts_with('/') {
                 return false;
             }
-            // Parse the semver VersionReq and check the proposed version.
             match semver::VersionReq::parse(av) {
                 Ok(req) => !req.matches(&proposed_sv),
-                Err(_) => false, // unparseable constraint → don't restrict
+                Err(_) => false,
             }
         })
     }
@@ -1280,18 +1487,18 @@ impl RepoConfig {
         proposed_version: &str,
         file_path: &str,
     ) -> bool {
-        // Global ignore list applies to all packages.
         if version_matches_ignore_list(proposed_version, &self.ignore_versions) {
             return true;
         }
-        // Per-rule ignore list: only applies when the rule matches this dep.
-        self.package_rules.iter().any(|rule| {
-            rule.name_matches(name)
-                && rule.dep_name_matches(name)
-                && rule.manager_matches(manager)
-                && rule.file_name_matches(file_path)
-                && rule.version_is_ignored(proposed_version)
-        })
+        let ctx = DepContext {
+            dep_name: name,
+            manager: Some(manager),
+            file_path: Some(file_path),
+            ..Default::default()
+        };
+        self.package_rules
+            .iter()
+            .any(|rule| rule.matches_context(&ctx) && rule.version_is_ignored(proposed_version))
     }
 }
 
@@ -1841,8 +2048,9 @@ mod tests {
         // With manager-aware check, only npm matches
         assert!(c.is_dep_ignored_for_manager("lodash", "npm"));
         assert!(!c.is_dep_ignored_for_manager("lodash", "cargo"));
-        // Generic check ignores manager constraint (all managers)
-        assert!(c.is_dep_ignored("lodash"));
+        // Without manager context, a rule with matchManagers set does NOT fire.
+        // (matches_context requires manager to be known before matchManagers fires)
+        assert!(!c.is_dep_ignored("lodash"));
     }
 
     #[test]
@@ -2941,5 +3149,97 @@ mod registry_url_repository_tests {
         let rule = &c.package_rules[0];
         assert!(rule.repository_matches("owner/repo"));
         assert!(rule.repository_matches("anyone/anything"));
+    }
+}
+
+#[cfg(test)]
+mod dep_context_tests {
+    use super::*;
+
+    /// `matchManagers: ["npm"]` rule with `DepContext` that knows the manager.
+    #[test]
+    fn dep_context_with_manager_fires_correct_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "matchManagers": ["npm"], "enabled": false}]}"#,
+        );
+        let npm_ctx = DepContext::for_dep("lodash").with_manager("npm");
+        assert!(c.is_dep_ignored_ctx(&npm_ctx));
+
+        let cargo_ctx = DepContext::for_dep("lodash").with_manager("cargo");
+        assert!(!c.is_dep_ignored_ctx(&cargo_ctx));
+
+        // No manager context → matchManagers constraint cannot be satisfied → no fire.
+        assert!(!c.is_dep_ignored("lodash"));
+    }
+
+    /// `matchDatasources` fires correctly via DepContext.
+    #[test]
+    fn dep_context_datasource_gates_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["npm"], "matchPackageNames": ["react"], "enabled": false}]}"#,
+        );
+        let npm_ctx = DepContext {
+            dep_name: "react",
+            datasource: Some("npm"),
+            ..Default::default()
+        };
+        assert!(c.is_dep_ignored_ctx(&npm_ctx));
+
+        let pypi_ctx = DepContext {
+            dep_name: "react",
+            datasource: Some("pypi"),
+            ..Default::default()
+        };
+        assert!(!c.is_dep_ignored_ctx(&pypi_ctx));
+    }
+
+    /// `matchCategories: ["rust"]` fires when manager is cargo.
+    #[test]
+    fn dep_context_categories_from_manager() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCategories": ["rust"], "enabled": false}]}"#,
+        );
+        let cargo_ctx = DepContext::for_dep("serde").with_manager("cargo");
+        assert!(c.is_dep_ignored_ctx(&cargo_ctx));
+
+        let npm_ctx = DepContext::for_dep("express").with_manager("npm");
+        assert!(!c.is_dep_ignored_ctx(&npm_ctx));
+    }
+
+    /// `matchRepositories` gates correctly via DepContext.
+    #[test]
+    fn dep_context_repository_gates_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["owner/repo"], "enabled": false}]}"#,
+        );
+        let in_repo = DepContext {
+            dep_name: "any-dep",
+            repository: Some("owner/repo"),
+            ..Default::default()
+        };
+        assert!(c.is_dep_ignored_ctx(&in_repo));
+
+        let other_repo = DepContext {
+            dep_name: "any-dep",
+            repository: Some("other/repo"),
+            ..Default::default()
+        };
+        assert!(!c.is_dep_ignored_ctx(&other_repo));
+    }
+
+    /// Builder methods produce correct context.
+    #[test]
+    fn dep_context_builder_methods() {
+        let ctx = DepContext::for_dep("react")
+            .with_manager("npm")
+            .with_datasource("npm")
+            .with_dep_type("devDependencies")
+            .with_file_path("package.json");
+
+        assert_eq!(ctx.dep_name, "react");
+        assert_eq!(ctx.manager, Some("npm"));
+        assert_eq!(ctx.datasource, Some("npm"));
+        assert_eq!(ctx.dep_type, Some("devDependencies"));
+        assert_eq!(ctx.file_path, Some("package.json"));
     }
 }
