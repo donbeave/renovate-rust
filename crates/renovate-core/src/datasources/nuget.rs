@@ -131,13 +131,11 @@ async fn fetch_update_summary(
     api_base: &str,
 ) -> Result<NuGetUpdateSummary, NuGetError> {
     let latest = fetch_latest(&dep.package_id, http, api_base).await?;
-    let update_available = latest
-        .as_deref()
-        .is_some_and(|l| l != dep.current_value && !dep.current_value.is_empty());
+    let s = crate::versioning::nuget::nuget_update_summary(&dep.current_value, latest.as_deref());
     Ok(NuGetUpdateSummary {
-        current_value: dep.current_value.clone(),
-        latest,
-        update_available,
+        current_value: s.current_value,
+        latest: s.latest,
+        update_available: s.update_available,
     })
 }
 

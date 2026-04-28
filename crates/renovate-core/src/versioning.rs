@@ -7,5 +7,6 @@ pub mod cargo;
 pub mod hashicorp;
 pub mod maven;
 pub mod npm;
+pub mod nuget;
 pub mod pep440;
 pub mod semver_generic;

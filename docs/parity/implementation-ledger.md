@@ -1580,6 +1580,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 487 passed
 
+## Slice 0050 - NuGet versioning module
+
+### Renovate reference
+- `lib/modules/versioning/nuget/version.ts` — `compare`, `parseVersion`
+- `lib/modules/versioning/nuget/index.ts` — `isStable`
+- NuGet versioning spec: `Major.Minor.Patch[.Revision][-PreRelease]`
+
+### What landed
+- `crates/renovate-core/src/versioning/nuget.rs` — 4-part version comparison:
+  - `parse()`: splits on `-` for pre-release, splits numeric part on `.`, pads to
+    4 components (Revision defaults to 0).
+  - `compare(a, b) -> Ordering`: numeric component comparison, then stable > pre-release.
+  - `is_stable(v) -> bool`: true when no pre-release label.
+  - `nuget_update_summary(current, latest)`: returns update summary using proper
+    4-part comparison; fixes false-positive where `"13.0.3"` != `"13.0.3.0"`.
+- Registered in `versioning.rs` as `pub mod nuget`.
+- Wired into `datasources/nuget.rs` replacing the old `l != dep.current_value`
+  string compare in `fetch_update_summary`.
+
+### What was intentionally deferred
+- NuGet range constraints (`[1.0,)`, `[1.0,2.0)`, `(,2.0)`). The extractor
+  currently passes pinned versions only; range constraint parsing would require
+  a NuGet range parser to extract the lower bound.
+- Floating/wildcard versions (`1.*`, `1.2.*`).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 503 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1589,6 +1618,6 @@ Pick whichever can be completed in one loop:
    and wire them into clap.
 2. **`gemspec` extractor**: extend bundler manager to parse `.gemspec` files.
 3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
-4. **NuGet versioning**: NuGet uses SemVer2 with 4-part version numbers — add a
-   nuget versioning module for accurate `1.2.3.4` comparisons.
-5. **`asdf` / `.tool-versions` extractor**: version manager for polyglot repos.
+4. **`asdf` / `.tool-versions` extractor**: version manager for polyglot repos (common tools
+   map to GitHub Tags datasource).
+5. **`pip-compile` / `requirements.in` extractor**: constrained pip requirements.
