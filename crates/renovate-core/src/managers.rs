@@ -402,6 +402,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.mvn/wrapper/maven-wrapper\.properties$"],
     },
     ManagerDef {
+        name: "fleet",
+        patterns: &[r"(^|/)fleet\.ya?ml"],
+    },
+    ManagerDef {
         name: "flux",
         patterns: &[r"(^|/)gotk-components\.ya?ml$"],
     },

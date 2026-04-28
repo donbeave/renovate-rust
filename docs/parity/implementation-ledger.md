@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0124  | 2026-04-28 | Rancher Fleet extractor (Helm + GitRepo CRD dual-mode) | Complete | See below. |
 | 0123  | 2026-04-28 | HTML cdnjs extractor + CDNJS datasource | Complete | See below. |
 | 0122  | 2026-04-28 | Kotlin Script `*.main.kts` Maven dependency extractor | Complete | See below. |
 | 0121  | 2026-04-28 | Dev Container features extractor upgrade (node/go/python/ruby version deps) | Complete | See below. |
@@ -3070,6 +3071,38 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0124 - Rancher Fleet extractor (Helm + GitRepo CRD dual-mode)
+
+### Renovate reference
+- `lib/modules/manager/fleet/extract.ts`
+- Pattern: `/(^|/)fleet\.ya?ml/`
+- Datasources: Helm, GitTagsDatasource
+
+### What landed
+- `crates/renovate-core/src/extractors/fleet.rs` (new):
+  - `FleetDeps { helm_deps, git_deps }` return type.
+  - `is_fleet_yaml_path(path)` detects `fleet.yaml`/`fleet.yml` by filename.
+  - `extract_fleet_yaml(content)` — indentation-level scanner:
+    - Parses top-level `helm:` block (chart, repo, version).
+    - Parses `targetCustomizations:` list; each item merges with the base helm block.
+    - Skip reasons: `MissingChart`, `NoRepository`, `OciRegistry`, `LocalOrAlias`, `UnspecifiedVersion`.
+  - `extract_gitrepo(content)` — multi-document YAML scanner:
+    - Processes `---` separated docs.
+    - Only processes docs with `kind: GitRepo`.
+    - Extracts `spec.repo` and `spec.revision`.
+    - Skip reasons: `MissingRepo`, `UnspecifiedVersion`.
+  - 8 unit tests.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod fleet`.
+- `crates/renovate-core/src/managers.rs`: added `fleet` with `(^|/)fleet\.ya?ml` pattern.
+- `crates/renovate-cli/src/main.rs`:
+  - Pipeline block: uses `is_fleet_yaml_path()` to dispatch parsing mode.
+  - Helm deps → `helm_datasource::fetch_updates_concurrent`.
+  - Git deps → `github_tags::fetch_latest_tag` (GitHub repo URL parsed from spec.repo).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 892 passed
 
 ## Slice 0123 - HTML cdnjs extractor + CDNJS datasource
 

@@ -1712,6 +1712,145 @@ async fn process_repo(
         }
     }
 
+    // ── Fleet (fleet.yaml / GitRepo CRDs) ────────────────────────────────────
+    for fleet_path in manager_files(&detected, "fleet") {
+        match client.get_raw_file(owner, repo, &fleet_path).await {
+            Ok(Some(raw)) => {
+                let is_fleet_yaml =
+                    renovate_core::extractors::fleet::is_fleet_yaml_path(&fleet_path);
+                let extracted =
+                    renovate_core::extractors::fleet::extract(&raw.content, is_fleet_yaml);
+                tracing::debug!(
+                    repo = %repo_slug, file = %fleet_path,
+                    helm = extracted.helm_deps.len(),
+                    git = extracted.git_deps.len(),
+                    "extracted fleet deps"
+                );
+
+                let mut dep_reports: Vec<output::DepReport> = Vec::new();
+
+                // Helm deps
+                let helm_actionable: Vec<_> = extracted
+                    .helm_deps
+                    .iter()
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored(&d.chart)
+                            && !d.current_value.is_empty()
+                    })
+                    .collect();
+                if !helm_actionable.is_empty() {
+                    let dep_inputs: Vec<helm_datasource::HelmDepInput> = helm_actionable
+                        .iter()
+                        .map(|d| helm_datasource::HelmDepInput {
+                            name: d.chart.clone(),
+                            current_value: d.current_value.clone(),
+                            repository_url: d.registry_url.clone(),
+                        })
+                        .collect();
+                    let updates =
+                        helm_datasource::fetch_updates_concurrent(http, &dep_inputs, 8).await;
+                    let update_map: HashMap<_, _> =
+                        updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                    for dep in &extracted.helm_deps {
+                        if let Some(reason) = &dep.skip_reason {
+                            dep_reports.push(output::DepReport {
+                                name: dep.chart.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: format!("{reason:?}").to_lowercase(),
+                                },
+                            });
+                            continue;
+                        }
+                        let status = match update_map.get(&dep.chart) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_value.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        dep_reports.push(output::DepReport {
+                            name: dep.chart.clone(),
+                            status,
+                        });
+                    }
+                }
+
+                // Git repo deps
+                for git_dep in &extracted.git_deps {
+                    if let Some(ref reason) = git_dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: git_dep.repo_url.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                        continue;
+                    }
+                    let repo_name = git_dep
+                        .repo_url
+                        .trim_end_matches('/')
+                        .trim_end_matches(".git")
+                        .trim_start_matches("https://github.com/")
+                        .trim_start_matches("http://github.com/");
+                    let tag_result = renovate_core::datasources::github_tags::fetch_latest_tag(
+                        repo_name,
+                        &gh_http,
+                        gh_api_base,
+                    )
+                    .await
+                    .map_err(|e| e.to_string());
+                    let status = match tag_result {
+                        Ok(Some(tag)) => {
+                            let s =
+                                renovate_core::versioning::semver_generic::semver_update_summary(
+                                    &git_dep.current_value,
+                                    Some(&tag),
+                                );
+                            if s.update_available {
+                                output::DepStatus::UpdateAvailable {
+                                    current: git_dep.current_value.clone(),
+                                    latest: tag,
+                                }
+                            } else {
+                                output::DepStatus::UpToDate { latest: Some(tag) }
+                            }
+                        }
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError { message: e },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: git_dep.repo_url.clone(),
+                        status,
+                    });
+                }
+
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: fleet_path.clone(),
+                        manager: "fleet".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%fleet_path, "fleet file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%fleet_path, %err, "failed to fetch fleet file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Kustomize (kustomization.yaml) ───────────────────────────────────────
     for kustomize_path in manager_files(&detected, "kustomize") {
         match client.get_raw_file(owner, repo, &kustomize_path).await {

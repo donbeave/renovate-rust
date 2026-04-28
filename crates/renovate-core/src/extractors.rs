@@ -27,6 +27,7 @@ pub mod devcontainer;
 pub mod docker_compose;
 pub mod dockerfile;
 pub mod droneci;
+pub mod fleet;
 pub mod flux;
 pub mod fvm;
 pub mod gemspec;
