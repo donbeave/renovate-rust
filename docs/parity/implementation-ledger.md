@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0122  | 2026-04-28 | Kotlin Script `*.main.kts` Maven dependency extractor | Complete | See below. |
 | 0121  | 2026-04-28 | Dev Container features extractor upgrade (node/go/python/ruby version deps) | Complete | See below. |
 | 0120  | 2026-04-28 | Home Assistant `manifest.json` PyPI extractor | Complete | See below. |
 | 0119  | 2026-04-28 | Batect wrapper script version extractor (GitHub Releases) | Complete | See below. |
@@ -3068,6 +3069,28 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0122 - Kotlin Script `*.main.kts` Maven dependency extractor
+
+### Renovate reference
+- `lib/modules/manager/kotlin-script/extract.ts`
+- Pattern: `/^.+\.main\.kts$/`
+- Datasource: Maven
+
+### What landed
+- `crates/renovate-core/src/extractors/kotlin_script.rs` (new):
+  - `KotlinScriptDep { dep_name, current_value, registry_urls }`.
+  - `DEPENDS_ON_RE` regex extracts `@file:DependsOn("group:artifact:version")`.
+  - `REPOSITORY_RE` regex extracts `@file:Repository("url")` declarations.
+  - `registry_urls` attached to each dep (not yet used for lookup — Maven Central default).
+  - 5 unit tests.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod kotlin_script`.
+- `crates/renovate-core/src/managers.rs`: added `kotlin-script` with `^.+\.main\.kts$` pattern.
+- `crates/renovate-cli/src/main.rs`: pipeline block fetches `*.main.kts`, extracts deps, looks up Maven Central updates.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 877 passed
 
 ## Slice 0121 - Dev Container features extractor upgrade
 

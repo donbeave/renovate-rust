@@ -190,6 +190,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)plugins\.(txt|ya?ml)$"],
     },
     ManagerDef {
+        name: "kotlin-script",
+        patterns: &[r"^.+\.main\.kts$"],
+    },
+    ManagerDef {
         name: "kustomize",
         patterns: &[r"(^|/)kustomization\.ya?ml$"],
     },

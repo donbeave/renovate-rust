@@ -1039,6 +1039,73 @@ async fn process_repo(
         }
     }
 
+    // ── Kotlin Script (*.main.kts) ────────────────────────────────────────────
+    for kts_path in manager_files(&detected, "kotlin-script") {
+        match client.get_raw_file(owner, repo, &kts_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::kotlin_script::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %kts_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted kotlin script dependencies"
+                );
+                let dep_inputs: Vec<maven_datasource::MavenDepInput> = actionable
+                    .iter()
+                    .map(|d| maven_datasource::MavenDepInput {
+                        dep_name: d.dep_name.clone(),
+                        current_version: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates =
+                    maven_datasource::fetch_updates_concurrent(http, &dep_inputs, 10).await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let dep_reports: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = match update_map.get(&dep.dep_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_version.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: kts_path.clone(),
+                    manager: "kotlin-script".into(),
+                    deps: dep_reports,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%kts_path, "kotlin script not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%kts_path, %err, "failed to fetch kotlin script");
+                had_error = true;
+            }
+        }
+    }
+
     // ── GitHub Actions ────────────────────────────────────────────────────────
     let gh_api_base = github_tags_datasource::api_base_from_endpoint(config.endpoint.as_deref());
     // Build an authenticated HTTP client for GitHub API calls (tag lookups).
