@@ -42,3 +42,4 @@ pub mod setup_cfg;
 pub mod spm;
 pub mod terraform;
 pub mod version_file;
+pub mod woodpecker;

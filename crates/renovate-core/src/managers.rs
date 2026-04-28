@@ -151,6 +151,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.drone\.yml$"],
     },
     ManagerDef {
+        name: "woodpecker",
+        patterns: &[r"^\.woodpecker(?:/[^/]+)?\.ya?ml$"],
+    },
+    ManagerDef {
         name: "terraform",
         patterns: &[r"\.tf$", r"\.tofu$"],
     },

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0087  | 2026-04-28 | Woodpecker CI `.woodpecker.yml` Docker image extractor | Complete | See below. |
 | 0086  | 2026-04-28 | Maven Wrapper `.mvn/wrapper/maven-wrapper.properties` extractor | Complete | See below. |
 | 0085  | 2026-04-28 | Gradle Wrapper extractor + Gradle Version datasource | Complete | See below. |
 | 0084  | 2026-04-28 | Refactor: extract `docker_hub_reports` helper to eliminate Docker pipeline duplication | Complete | See below. |
@@ -2516,6 +2517,26 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 789 passed
 
+## Slice 0087 - Woodpecker CI `.woodpecker.yml` Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/woodpecker/extract.ts`
+- Pattern: `/^\.woodpecker(?:/[^/]+)?\.ya?ml$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/woodpecker.rs`:
+  - Universal `image:` key scanner (same approach as Drone CI).
+  - Works at any nesting depth — covers steps, services, pipeline, clone blocks.
+  - Handles `- image:` list-item inline and `image:` key forms.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `woodpecker` manager pattern.
+- `crates/renovate-core/src/extractors.rs`: `pub mod woodpecker`.
+- `crates/renovate-cli/src/main.rs`: Woodpecker pipeline using `docker_hub_reports` helper.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 794 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2531,3 +2552,4 @@ Pick whichever can be completed in one loop:
 7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 8. **Jenkins plugins datasource** (Jenkins Update Center JSON).
 9. **Travis CI** `.travis.yml` Node.js version extraction.
+10. **`devcontainer`** (`.devcontainer.json`) Docker image extraction.

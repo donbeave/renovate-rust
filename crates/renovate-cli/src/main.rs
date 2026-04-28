@@ -2849,6 +2849,28 @@ async fn process_repo(
         }
     }
 
+    // ── Woodpecker CI (.woodpecker.yml / .woodpecker/*.yml) ──────────────────
+    for wp_path in manager_files(&detected, "woodpecker") {
+        match client.get_raw_file(owner, repo, &wp_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::woodpecker::extract(&raw.content);
+                tracing::debug!(repo = %repo_slug, file = %wp_path, total = deps.len(), "extracted woodpecker images");
+                repo_report.files.push(output::FileReport {
+                    path: wp_path.clone(),
+                    manager: "woodpecker".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%wp_path, "woodpecker config not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%wp_path, %err, "failed to fetch woodpecker config");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Jenkins plugins (plugins.txt / plugins.yml) ───────────────────────────
     for jenkins_path in manager_files(&detected, "jenkins") {
         match client.get_raw_file(owner, repo, &jenkins_path).await {
