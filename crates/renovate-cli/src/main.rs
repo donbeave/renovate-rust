@@ -711,110 +711,90 @@ async fn process_repo(
         }
     }
 
-    // ── pip_requirements ──────────────────────────────────────────────────────
-    for pip_file_path in manager_files(&detected, "pip_requirements") {
-        match client.get_raw_file(owner, repo, &pip_file_path).await {
-            Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
-                Ok(deps) => {
-                    let actionable: Vec<_> = deps
-                        .iter()
-                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
-                        .collect();
-                    tracing::debug!(
-                        repo = %repo_slug, file = %pip_file_path,
-                        total = deps.len(), actionable = actionable.len(),
-                        "extracted pip dependencies"
-                    );
-                    let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
-                        .iter()
-                        .map(|d| pypi_datasource::PypiDepInput {
-                            dep_name: d.name.clone(),
-                            specifier: d.current_value.clone(),
-                        })
-                        .collect();
-                    let updates = pypi_datasource::fetch_updates_concurrent(
-                        http,
-                        &dep_inputs,
-                        pypi_datasource::PYPI_API,
-                        10,
-                    )
-                    .await;
-                    let update_map: HashMap<_, _> = updates
-                        .into_iter()
-                        .map(|r| (r.dep_name, r.summary))
-                        .collect();
-                    repo_report.files.push(output::FileReport {
-                        path: pip_file_path.clone(),
-                        manager: "pip_requirements".into(),
-                        deps: build_dep_reports_pip(&deps, &actionable, &update_map),
-                    });
+    // ── pip_requirements + pip-compile: shared PyPI dedup ─────────────────────
+    // Both managers use the same extractor and PyPI datasource. Deduplicate
+    // package lookups across all their files in one batch.
+    {
+        // Collect (manager_name, file_path, file_content) for both managers.
+        let pip_managers = [
+            (
+                "pip_requirements",
+                manager_files(&detected, "pip_requirements"),
+            ),
+            ("pip-compile", manager_files(&detected, "pip-compile")),
+        ];
+        let mut pip_file_deps: Vec<(
+            &'static str,
+            String,
+            Vec<renovate_core::extractors::pip::PipExtractedDep>,
+        )> = Vec::new();
+        for (manager_name, files) in &pip_managers {
+            for file_path in files {
+                match client.get_raw_file(owner, repo, file_path).await {
+                    Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
+                        Ok(deps) => pip_file_deps.push((manager_name, file_path.clone(), deps)),
+                        Err(err) => tracing::warn!(repo=%repo_slug, file=%file_path, %err,
+                            "failed to parse pip requirements"),
+                    },
+                    Ok(None) => tracing::warn!(repo=%repo_slug, file=%file_path,
+                        "pip requirements file not found"),
+                    Err(err) => {
+                        tracing::error!(repo=%repo_slug, file=%file_path, %err,
+                            "failed to fetch pip requirements file");
+                        had_error = true;
+                    }
                 }
-                Err(err) => {
-                    tracing::warn!(repo=%repo_slug, file=%pip_file_path, %err, "failed to parse requirements.txt")
-                }
-            },
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%pip_file_path, "requirements.txt not found")
-            }
-            Err(err) => {
-                tracing::error!(repo=%repo_slug, file=%pip_file_path, %err, "failed to fetch requirements.txt");
-                had_error = true;
             }
         }
-    }
-
-    // ── pip-compile (requirements*.in source files) ───────────────────────────
-    // Simplified: reads .in source files with the pip requirements extractor.
-    // Upstream also tracks the relationship to generated requirements.txt output
-    // files (deferred), but this correctly detects outdated source constraints.
-    for pc_path in manager_files(&detected, "pip-compile") {
-        match client.get_raw_file(owner, repo, &pc_path).await {
-            Ok(Some(raw)) => match pip_extractor::extract(&raw.content) {
-                Ok(deps) => {
-                    let actionable: Vec<_> = deps
-                        .iter()
-                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
-                        .collect();
-                    tracing::debug!(
-                        repo = %repo_slug, file = %pc_path,
-                        total = deps.len(), actionable = actionable.len(),
-                        "extracted pip-compile source deps"
-                    );
-                    let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
-                        .iter()
-                        .map(|d| pypi_datasource::PypiDepInput {
-                            dep_name: d.name.clone(),
-                            specifier: d.current_value.clone(),
-                        })
-                        .collect();
-                    let updates = pypi_datasource::fetch_updates_concurrent(
-                        http,
-                        &dep_inputs,
-                        pypi_datasource::PYPI_API,
-                        10,
-                    )
-                    .await;
-                    let update_map: HashMap<_, _> = updates
-                        .into_iter()
-                        .map(|r| (r.dep_name, r.summary))
-                        .collect();
-                    repo_report.files.push(output::FileReport {
-                        path: pc_path.clone(),
-                        manager: "pip-compile".into(),
-                        deps: build_dep_reports_pip(&deps, &actionable, &update_map),
-                    });
-                }
-                Err(err) => {
-                    tracing::warn!(repo=%repo_slug, file=%pc_path, %err, "failed to parse pip-compile source")
-                }
-            },
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%pc_path, "pip-compile source file not found")
-            }
-            Err(err) => {
-                tracing::error!(repo=%repo_slug, file=%pc_path, %err, "failed to fetch pip-compile source");
-                had_error = true;
-            }
+        let unique_pkg_names: Vec<String> = {
+            let mut seen = std::collections::HashSet::new();
+            pip_file_deps
+                .iter()
+                .flat_map(|(_, _, deps)| deps.iter())
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .filter(|d| seen.insert(d.name.clone()))
+                .map(|d| d.name.clone())
+                .collect()
+        };
+        tracing::debug!(
+            repo = %repo_slug,
+            files = pip_file_deps.len(),
+            unique_packages = unique_pkg_names.len(),
+            "fetching pip package versions (deduplicated)"
+        );
+        let versions_cache = pypi_datasource::fetch_versions_batch(
+            http,
+            &unique_pkg_names,
+            pypi_datasource::PYPI_API,
+            10,
+        )
+        .await;
+        for (manager_name, file_path, deps) in pip_file_deps {
+            let actionable: Vec<_> = deps
+                .iter()
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                .collect();
+            let update_map: HashMap<
+                _,
+                Result<
+                    renovate_core::versioning::pep440::Pep440UpdateSummary,
+                    pypi_datasource::PypiError,
+                >,
+            > = actionable
+                .iter()
+                .map(|d| {
+                    let summary = versions_cache
+                        .get(&d.name)
+                        .map(|entry| pypi_datasource::summary_from_cache(&d.current_value, entry))
+                        .ok_or(pypi_datasource::PypiError::NotFound(d.name.clone()));
+                    (d.name.clone(), summary)
+                })
+                .collect();
+            repo_report.files.push(output::FileReport {
+                path: file_path.clone(),
+                manager: manager_name.to_owned(),
+                deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+            });
         }
     }
 

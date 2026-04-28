@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0163  | 2026-04-28 | PyPI cross-file dedup for pip_requirements + pip-compile | Complete | See below. |
 | 0162  | 2026-04-28 | Cargo cross-file dedup + `crates_io::fetch_versions_batch` | Complete | See below. |
 | 0161  | 2026-04-28 | npm cross-file dedup + `fetch_versions_batch` API | Complete | See below. |
 | 0160  | 2026-04-28 | JSR datasource + endoflife-date datasource | Complete | See below. |
@@ -3108,6 +3109,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0163 - PyPI cross-file deduplication for pip_requirements + pip-compile
+
+### What landed
+- `crates/renovate-core/src/datasources/pypi.rs`:
+  - `fetch_versions_batch(names, api_base, concurrency)` — batch PyPI fetch.
+  - `summary_from_cache(specifier, entry)` — PEP 440 summary from cached versions.
+  - `PypiVersionsEntry` type alias.
+  - `PypiError::NotFound` variant.
+- `main.rs`: pip_requirements and pip-compile pipelines merged into a single
+  two-pass block:
+  1. Fetch all requirement files from both managers.
+  2. Collect unique package names, call `fetch_versions_batch` once.
+  3. Build per-file reports using `summary_from_cache`.
+
+### Impact
+- Repos with both `requirements.txt` and `requirements-dev.txt` sharing packages
+  (e.g. `django`) make one PyPI API call instead of two.
+- pip-compile `.in` files are processed in the same dedup batch.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1140 passed
 
 ## Slice 0162 - Cargo cross-file request deduplication
 

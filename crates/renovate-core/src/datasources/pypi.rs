@@ -42,6 +42,8 @@ pub enum PypiError {
     Http(#[from] HttpError),
     #[error("failed to parse PyPI response: {0}")]
     Parse(String),
+    #[error("package '{0}' not found in versions cache")]
+    NotFound(String),
 }
 
 /// Minimal PyPI JSON API response structure.
@@ -189,6 +191,61 @@ pub async fn fetch_updates_concurrent(
         }
     }
     results
+}
+
+/// Cached versions entry: `(sorted versions oldest-first, latest_stable)`.
+pub type PypiVersionsEntry = (Vec<String>, String);
+
+/// Fetch versions for a batch of unique package names concurrently.
+///
+/// Returns a `HashMap` from normalised package name to `(versions, latest)`.
+/// Packages that fail to fetch are omitted.  Use for cross-file deduplication
+/// when the same package may appear in multiple requirements files.
+pub async fn fetch_versions_batch(
+    http: &HttpClient,
+    package_names: &[String],
+    api_base: &str,
+    concurrency: usize,
+) -> HashMap<String, PypiVersionsEntry> {
+    if package_names.is_empty() {
+        return HashMap::new();
+    }
+
+    let sem = Arc::new(Semaphore::new(concurrency));
+    let mut set: JoinSet<(String, Option<PypiVersionsEntry>)> = JoinSet::new();
+
+    for name in package_names {
+        let http = http.clone();
+        let sem = Arc::clone(&sem);
+        let name = name.clone();
+        let api_base = api_base.to_owned();
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let result = fetch_versions(&http, &name, &api_base).await;
+            (name, result.ok())
+        });
+    }
+
+    let mut cache = HashMap::with_capacity(package_names.len());
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((name, Some(entry))) => {
+                cache.insert(name, entry);
+            }
+            Ok((name, None)) => {
+                tracing::debug!(package = %name, "pypi fetch failed (package skipped)")
+            }
+            Err(join_err) => tracing::error!(%join_err, "pypi batch fetch task panicked"),
+        }
+    }
+    cache
+}
+
+/// Compute a `Pep440UpdateSummary` from a pre-fetched versions cache entry.
+pub fn summary_from_cache(specifier: &str, entry: &PypiVersionsEntry) -> Pep440UpdateSummary {
+    let (_versions, latest) = entry;
+    pep440_update_summary(specifier, Some(latest.as_str()))
 }
 
 #[cfg(test)]
