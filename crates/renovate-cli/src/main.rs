@@ -3754,6 +3754,78 @@ async fn process_repo(
         }
     }
 
+    // ── Meteor (package.js Npm.depends) ──────────────────────────────────────
+    for meteor_path in manager_files(&detected, "meteor") {
+        match client.get_raw_file(owner, repo, &meteor_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::meteor::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| !repo_cfg.is_dep_ignored(&d.name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %meteor_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted meteor npm deps"
+                );
+                let npm_inputs: Vec<npm_datasource::NpmDepInput> = actionable
+                    .iter()
+                    .map(|d| npm_datasource::NpmDepInput {
+                        dep_name: d.name.clone(),
+                        constraint: d.current_value.clone(),
+                    })
+                    .collect();
+                let npm_updates = npm_datasource::fetch_updates_concurrent(
+                    http,
+                    &npm_inputs,
+                    npm_datasource::NPM_REGISTRY,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<_, _> = npm_updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = match update_map.get(&dep.name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: meteor_path.clone(),
+                    manager: "meteor".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%meteor_path, "meteor package.js not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%meteor_path, %err, "failed to fetch meteor package.js");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Cake build scripts (.cake) ────────────────────────────────────────────
     for cake_path in manager_files(&detected, "cake") {
         match client.get_raw_file(owner, repo, &cake_path).await {

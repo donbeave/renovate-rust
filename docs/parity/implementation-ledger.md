@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0112  | 2026-04-28 | Meteor `package.js` `Npm.depends()` extractor (npm datasource) | Complete | See below. |
 | 0111  | 2026-04-28 | Cake `.cake` build script extractor (NuGet datasource) | Complete | See below. |
 | 0110  | 2026-04-28 | Conan `conanfile.txt`/`.py` extractor + Conan Center datasource | Complete | See below. |
 | 0109  | 2026-04-28 | `.ruby-version` version file (GitHub Tags, underscore tag normalization) | Complete | See below. |
@@ -2905,6 +2906,26 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 911 passed
 
+## Slice 0112 - Meteor `package.js` `Npm.depends()` extractor
+
+### Renovate reference
+- `lib/modules/manager/meteor/extract.ts`
+- Pattern: `/(^|/)package\.js$/`
+- Datasource: npm
+
+### What landed
+- `crates/renovate-core/src/extractors/meteor.rs` (new):
+  - `MeteorDep { name, current_value }` struct.
+  - `extract(content)` — DOTALL regex captures `Npm.depends({...})` block, then
+    extracts `name: "version"` pairs with `PAIR_RE`.
+  - 3 unit tests.
+- `crates/renovate-core/src/managers.rs`: `meteor` manager with `(^|/)package\.js$` pattern.
+- `crates/renovate-cli/src/main.rs`: Meteor pipeline using npm datasource.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 914 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2917,6 +2938,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
+8. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.
+9. **`batect`** — Batect `batect.yml` Docker image extraction.
 7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
 8. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.
 9. **`crow`** — C++ Crow framework `Makefile`/`CMakeLists.txt` dependency tracking.

@@ -222,6 +222,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Cargo\.toml$"],
     },
     ManagerDef {
+        name: "meteor",
+        patterns: &[r"(^|/)package\.js$"],
+    },
+    ManagerDef {
         name: "cake",
         patterns: &[r"\.cake$"],
     },
