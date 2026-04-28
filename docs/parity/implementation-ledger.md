@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0119  | 2026-04-28 | Batect wrapper script version extractor (GitHub Releases) | Complete | See below. |
 | 0118  | 2026-04-28 | Haskell Cabal `*.cabal` extractor + Hackage datasource | Complete | See below. |
 | 0117  | 2026-04-28 | FVM `.fvmrc`/`.fvm/fvm_config.json` Flutter version extractor | Complete | See below. |
 | 0116  | 2026-04-28 | Jsonnet Bundler `jsonnetfile.json` extractor (GitHub Tags) | Complete | See below. |
@@ -3066,6 +3067,24 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
 
+## Slice 0119 - Batect wrapper script version extractor
+
+### Renovate reference
+- `lib/modules/manager/batect-wrapper/extract.ts`
+- Pattern: `/(^|/)batect$/`
+- Datasource: GitHub Releases (`batect/batect`)
+
+### What landed
+- `crates/renovate-core/src/extractors/batect_wrapper.rs` (new):
+  - `BatectWrapperDep { version }` struct.
+  - `extract(content)` — finds `VERSION="x.y.z"` via regex; 3 unit tests.
+- `crates/renovate-core/src/managers.rs`: `batect-wrapper` with `(^|/)batect$` pattern.
+- `crates/renovate-cli/src/main.rs`: Uses `github_releases_datasource::fetch_latest_release("batect/batect")`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 947 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -3078,6 +3097,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`homebrew`** — Homebrew formula GitHub version tracking.
+8. **`pixi`** — Pixi `pixi.toml` package extraction (PyPI + Conda).
+9. **`cdnurl`** — CDN URL version extraction (semver in URL paths).
 7. **`homebrew`** — Homebrew formula GitHub version tracking.
 8. **`batect-wrapper`** — Batect wrapper script version tracking (GitHub Releases).
 9. **`pixi`** — Pixi `pixi.toml` package extraction (PyPI + Conda).

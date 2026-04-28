@@ -4331,6 +4331,57 @@ async fn process_repo(
         }
     }
 
+    // ── Batect wrapper script (`batect`) ─────────────────────────────────────
+    for bw_path in manager_files(&detected, "batect-wrapper") {
+        match client.get_raw_file(owner, repo, &bw_path).await {
+            Ok(Some(raw)) => {
+                if let Some(dep) = renovate_core::extractors::batect_wrapper::extract(&raw.content)
+                {
+                    tracing::debug!(
+                        repo = %repo_slug, file = %bw_path,
+                        version = %dep.version, "extracted batect wrapper version"
+                    );
+                    let status = match github_releases_datasource::fetch_latest_release(
+                        renovate_core::extractors::batect_wrapper::BATECT_REPO,
+                        &gh_http,
+                        gh_api_base,
+                    )
+                    .await
+                    {
+                        Ok(Some(latest)) if latest != dep.version => {
+                            output::DepStatus::UpdateAvailable {
+                                current: dep.version.clone(),
+                                latest,
+                            }
+                        }
+                        Ok(Some(latest)) => output::DepStatus::UpToDate {
+                            latest: Some(latest),
+                        },
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    repo_report.files.push(output::FileReport {
+                        path: bw_path.clone(),
+                        manager: "batect-wrapper".into(),
+                        deps: vec![output::DepReport {
+                            name: renovate_core::extractors::batect_wrapper::BATECT_REPO.to_owned(),
+                            status,
+                        }],
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%bw_path, "batect wrapper script not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bw_path, %err, "failed to fetch batect wrapper");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Ansible task files (tasks/*.yml) ─────────────────────────────────────
     for ansible_path in manager_files(&detected, "ansible") {
         match client.get_raw_file(owner, repo, &ansible_path).await {
