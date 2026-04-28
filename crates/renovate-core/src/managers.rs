@@ -34,6 +34,35 @@ struct ManagerDef {
     patterns: &'static [&'static str],
 }
 
+/// Managers that are **disabled by default** in Renovate.
+///
+/// These managers have `defaultConfig.enabled: false` in their upstream
+/// `lib/modules/manager/*/index.ts`.  They only run when the user explicitly
+/// lists them in `enabledManagers` in `renovate.json`.
+///
+/// Reference files:
+/// - `lib/modules/manager/azure-pipelines/index.ts`
+/// - `lib/modules/manager/git-submodules/index.ts`
+/// - `lib/modules/manager/html/index.ts`
+/// - `lib/modules/manager/nix/index.ts`
+/// - `lib/modules/manager/pre-commit/index.ts`
+/// - `lib/modules/manager/travis/index.ts`
+pub const DISABLED_BY_DEFAULT: &[&str] = &[
+    "azure-pipelines",
+    "git-submodules",
+    "html",
+    "nix",
+    "pre-commit",
+    "travis",
+];
+
+/// Return `true` when `manager_name` is disabled by default in Renovate.
+///
+/// Disabled-by-default managers require explicit opt-in via `enabledManagers`.
+pub fn is_disabled_by_default(manager_name: &str) -> bool {
+    DISABLED_BY_DEFAULT.contains(&manager_name)
+}
+
 /// Pre-compiled manager patterns.  Compiled once at first use via
 /// `LazyLock` — avoids re-compilation on every `detect()` call.
 static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {

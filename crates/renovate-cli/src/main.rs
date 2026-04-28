@@ -335,7 +335,12 @@ async fn process_repo(
         } else {
             let filtered: Vec<_> = all
                 .into_iter()
-                .filter(|m| repo_cfg.is_manager_enabled(m.name))
+                .filter(|m| {
+                    repo_cfg.is_manager_enabled(
+                        m.name,
+                        renovate_core::managers::is_disabled_by_default(m.name),
+                    )
+                })
                 .collect();
             if !filtered.is_empty() {
                 tracing::debug!(

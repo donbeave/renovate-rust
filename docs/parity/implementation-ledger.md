@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0174  | 2026-04-28 | `disabled_by_default` manager flag — azure-pipelines/git-submodules/html/nix/pre-commit/travis | Complete | See below. |
 | 0173  | 2026-04-28 | `git-submodules` `.gitmodules` extractor + dispatch | Complete | See below. |
 | 0172  | 2026-04-28 | `package.json` `renovate` key config discovery | Complete | See below. |
 | 0170  | 2026-04-28 | `matchDepNames` + `matchDatasources` packageRule matchers | Complete | See below. |
@@ -4475,3 +4476,43 @@ Pick whichever can be completed in one loop:
 3. **`extends` preset resolution** — fetch `config:recommended` and merge.
 4. **Commit message composition** — `branchName`, `commitMessage` templates.
 5. **`prConcurrentLimit` / `prHourlyLimit` enforcement**.
+
+## Slice 0174 — `disabled_by_default` manager flag + `is_manager_enabled` fix
+
+### Renovate reference
+- `lib/modules/manager/azure-pipelines/index.ts` — `defaultConfig.enabled: false`
+- `lib/modules/manager/git-submodules/index.ts` — `defaultConfig.enabled: false`
+- `lib/modules/manager/html/index.ts` — `defaultConfig.enabled: false`
+- `lib/modules/manager/nix/index.ts` — `defaultConfig.enabled: false`
+- `lib/modules/manager/pre-commit/index.ts` — `defaultConfig.enabled: false`
+- `lib/modules/manager/travis/index.ts` — `defaultConfig.enabled: false`
+
+### Bug fixed
+Previously `is_manager_enabled` returned `true` when `enabledManagers` was
+empty, causing disabled-by-default managers (git-submodules, html, nix,
+pre-commit, travis, azure-pipelines) to run for every repository.  These
+managers should only run when explicitly listed in `enabledManagers`.
+
+### What landed
+- `crates/renovate-core/src/managers.rs`:
+  - `DISABLED_BY_DEFAULT: &[&str]` — static list of opt-in-only manager names
+  - `is_disabled_by_default(name) -> bool` — public lookup function
+- `crates/renovate-core/src/repo_config.rs`:
+  - `is_manager_enabled(name, disabled_by_default) -> bool` — updated signature;
+    when `enabledManagers` is empty, disabled-by-default managers return false
+- `crates/renovate-cli/src/main.rs`: updated the single filter call site to
+  pass `is_disabled_by_default(m.name)` as the second argument
+- 5 new tests covering disabled-by-default semantics (3 scenario tests)
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1198 passed
+
+## Next slice candidates
+
+1. **`currentDigest` for git-submodules** — GitHub Trees API to get SHA.
+2. **Wire `matchDatasources` into filter methods**.
+3. **`extends` preset resolution** — `config:recommended` and built-in presets.
+4. **Commit message / branch name composition** — template evaluation.
+5. **`separateMajorMinor` split behavior** — report major vs minor/patch separately.

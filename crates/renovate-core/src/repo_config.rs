@@ -737,11 +737,23 @@ impl RepoConfig {
         Some(Self::parse(&renovate_str))
     }
 
-    /// Return `true` when `manager_name` is active under `enabledManagers`.
+    /// Return `true` when `manager_name` should run for this repository.
     ///
-    /// When `enabledManagers` is empty, all managers are active.
-    pub fn is_manager_enabled(&self, manager_name: &str) -> bool {
-        self.enabled_managers.is_empty() || self.enabled_managers.iter().any(|m| m == manager_name)
+    /// Rules (mirroring Renovate's behavior):
+    /// 1. If `enabledManagers` is non-empty, the manager must be listed there.
+    /// 2. Otherwise, the manager runs unless it is disabled by default
+    ///    (`defaultConfig.enabled: false` in the upstream manager definition).
+    ///
+    /// `disabled_by_default` should come from
+    /// [`renovate_core::managers::is_disabled_by_default`].
+    pub fn is_manager_enabled(&self, manager_name: &str, disabled_by_default: bool) -> bool {
+        if !self.enabled_managers.is_empty() {
+            // Explicit whitelist: manager must be listed.
+            self.enabled_managers.iter().any(|m| m == manager_name)
+        } else {
+            // No whitelist: opt-out managers are skipped unless explicitly enabled.
+            !disabled_by_default
+        }
     }
 
     /// Return `true` when a dependency name should be ignored.
@@ -1238,18 +1250,50 @@ mod tests {
     fn enabled_managers_parsed() {
         let c = RepoConfig::parse(r#"{"enabledManagers": ["cargo", "npm"]}"#);
         assert_eq!(c.enabled_managers, vec!["cargo", "npm"]);
-        assert!(c.is_manager_enabled("cargo"));
-        assert!(c.is_manager_enabled("npm"));
-        assert!(!c.is_manager_enabled("maven"));
+        assert!(c.is_manager_enabled("cargo", false));
+        assert!(c.is_manager_enabled("npm", false));
+        assert!(!c.is_manager_enabled("maven", false));
     }
 
     #[test]
     fn enabled_managers_empty_means_all_active() {
         let c = RepoConfig::parse("{}");
         assert!(c.enabled_managers.is_empty());
-        assert!(c.is_manager_enabled("cargo"));
-        assert!(c.is_manager_enabled("maven"));
-        assert!(c.is_manager_enabled("anything"));
+        assert!(c.is_manager_enabled("cargo", false));
+        assert!(c.is_manager_enabled("maven", false));
+        assert!(c.is_manager_enabled("anything", false));
+    }
+
+    #[test]
+    fn disabled_by_default_manager_skipped_without_explicit_list() {
+        let c = RepoConfig::parse("{}");
+        // No enabledManagers → disabled-by-default managers do NOT run.
+        assert!(!c.is_manager_enabled("git-submodules", true));
+        assert!(!c.is_manager_enabled("html", true));
+        assert!(!c.is_manager_enabled("nix", true));
+        assert!(!c.is_manager_enabled("pre-commit", true));
+        // Non-disabled managers still run.
+        assert!(c.is_manager_enabled("cargo", false));
+    }
+
+    #[test]
+    fn disabled_by_default_manager_enabled_when_explicitly_listed() {
+        let c = RepoConfig::parse(r#"{"enabledManagers": ["git-submodules", "cargo"]}"#);
+        // Explicitly listed → enabled regardless of disabled_by_default flag.
+        assert!(c.is_manager_enabled("git-submodules", true));
+        assert!(c.is_manager_enabled("cargo", false));
+        // Not listed → disabled.
+        assert!(!c.is_manager_enabled("npm", false));
+    }
+
+    #[test]
+    fn disabled_by_default_enabled_overrides_default_flag() {
+        // When enabledManagers has entries, disabled_by_default is irrelevant.
+        let c = RepoConfig::parse(r#"{"enabledManagers": ["pre-commit"]}"#);
+        assert!(c.is_manager_enabled("pre-commit", true));
+        // Other managers not listed are off regardless of their default.
+        assert!(!c.is_manager_enabled("cargo", false));
+        assert!(!c.is_manager_enabled("nix", true));
     }
 
     #[test]
