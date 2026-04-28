@@ -11,12 +11,14 @@
 //! allocation overhead.
 
 pub mod github;
+pub mod gitlab;
 
 use thiserror::Error;
 
 use crate::config::{GlobalConfig, Platform};
 use crate::http::HttpError;
 use github::GithubClient;
+use gitlab::GitlabClient;
 
 /// Errors from platform operations.
 #[derive(Debug, Error)]
@@ -92,20 +94,29 @@ pub trait PlatformClient: Send + Sync {
 #[derive(Debug, Clone)]
 pub enum AnyPlatformClient {
     Github(GithubClient),
+    Gitlab(GitlabClient),
 }
 
 impl AnyPlatformClient {
     /// Build the right platform client from a resolved [`GlobalConfig`].
     pub fn create(config: &GlobalConfig) -> Result<Self, PlatformError> {
+        let token = config.token.as_deref().unwrap_or_default();
         match config.platform {
             Platform::Github => {
-                let token = config.token.as_deref().unwrap_or_default();
                 let client = match config.endpoint.as_deref() {
                     Some(ep) => GithubClient::with_endpoint(token, ep),
                     None => GithubClient::new(token),
                 }
                 .map_err(PlatformError::Http)?;
                 Ok(Self::Github(client))
+            }
+            Platform::Gitlab => {
+                let client = match config.endpoint.as_deref() {
+                    Some(ep) => GitlabClient::with_endpoint(token, ep),
+                    None => GitlabClient::new(token),
+                }
+                .map_err(PlatformError::Http)?;
+                Ok(Self::Gitlab(client))
             }
             other => Err(PlatformError::NotSupported(other.to_string())),
         }
@@ -115,6 +126,7 @@ impl AnyPlatformClient {
     pub async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         match self {
             Self::Github(c) => c.get_current_user().await,
+            Self::Gitlab(c) => c.get_current_user().await,
         }
     }
 
@@ -127,6 +139,7 @@ impl AnyPlatformClient {
     ) -> Result<Option<RawFile>, PlatformError> {
         match self {
             Self::Github(c) => c.get_raw_file(owner, repo, path).await,
+            Self::Gitlab(c) => c.get_raw_file(owner, repo, path).await,
         }
     }
 
@@ -138,6 +151,7 @@ impl AnyPlatformClient {
     ) -> Result<Vec<String>, PlatformError> {
         match self {
             Self::Github(c) => c.get_file_list(owner, repo).await,
+            Self::Gitlab(c) => c.get_file_list(owner, repo).await,
         }
     }
 }

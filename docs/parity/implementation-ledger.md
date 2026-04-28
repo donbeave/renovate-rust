@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0022  | 2026-04-28 | GitLab platform client                           | Complete | See below. |
 | 0021  | 2026-04-28 | Docker Hub datasource + Dockerfile pipeline complete | Complete | See below. |
 | 0020  | 2026-04-28 | Manager regex caching + Dockerfile FROM extractor | Complete | See below. |
 | 0019  | 2026-04-28 | Parallel repository processing (JoinSet + Semaphore) | Complete | See below. |
@@ -42,6 +43,45 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0022 - GitLab platform client
+
+### Renovate reference
+- `lib/modules/platform/gitlab/index.ts` — `initPlatform`, `getRawFile`,
+  `getRepoInfo`
+- Default endpoint: `https://gitlab.com/api/v4`
+
+### What landed
+- `crates/renovate-core/src/platform/gitlab.rs` — `GitlabClient` implementing
+  `PlatformClient`:
+  - `get_current_user` → `GET /user` (returns `username` field).
+  - `get_raw_file` → `GET /projects/{ns%2Frepo}/repository/files/{encoded_path}?ref=HEAD`;
+    decodes base64 content (GitLab may include newlines in the base64 payload
+    — these are stripped before decoding).
+  - `get_file_list` → paginates `GET /projects/{id}/repository/tree?recursive=true&per_page=100&page={n}`,
+    filters to `type == "blob"` entries, stops on last page or 50-page cap.
+  - 9 wiremock-based tests: auth success/401, file fetch, 404, path-slash
+    encoding, blob-only filtering, pagination.
+- `crates/renovate-core/src/platform.rs`:
+  - `pub mod gitlab` added.
+  - `AnyPlatformClient::Gitlab(GitlabClient)` variant added.
+  - `AnyPlatformClient::create` handles `Platform::Gitlab` (with optional
+    custom endpoint for self-hosted GitLab).
+  - All three dispatch methods (`get_current_user`, `get_raw_file`,
+    `get_file_list`) have the `Gitlab` arm added.
+
+### What was intentionally deferred
+- `PRIVATE-TOKEN` vs `Authorization: Bearer` header selection — currently
+  the Bearer form is used for both PATs and OAuth tokens (GitLab accepts
+  both; a later slice can detect which to use from the token format).
+- GitLab merge request creation / update (PR pipeline).
+- Group-level namespaces with subgroups.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (241 passed)
 
 ## Slice 0021 - Docker Hub datasource + Dockerfile pipeline complete
 
