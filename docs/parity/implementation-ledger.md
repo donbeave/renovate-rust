@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0134  | 2026-04-28 | Bazel `MODULE.bazel` extractor + Bazel Central Registry datasource | Complete | See below. |
 | 0133  | 2026-04-28 | Python `setup.py` PyPI dependency extractor (balanced-bracket scanner) | Complete | See below. |
 | 0132  | 2026-04-28 | Apache Ant `build.xml` Maven dependency extractor (XML, coords + attributes) | Complete | See below. |
 | 0131  | 2026-04-28 | Terragrunt `terragrunt.hcl` extractor (GitHub Tags + Terraform Registry) | Complete | See below. |
@@ -3080,6 +3081,33 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0134 - Bazel `MODULE.bazel` extractor + Bazel Central Registry datasource
+
+### Renovate reference
+- `lib/modules/manager/bazel-module/extract.ts`
+- `lib/modules/datasource/bazel/index.ts`
+- Pattern: `/(^|/|\.)MODULE\.bazel$/`
+- Datasource: `https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main`
+
+### What landed
+- `crates/renovate-core/src/datasources/bazel.rs` (new):
+  - `fetch_latest(http, module_name, current_value)` — fetches `metadata.json` from GitHub raw.
+  - Filters out yanked versions before finding the latest by semver comparison.
+- `crates/renovate-core/src/extractors/bazel_module.rs` (new):
+  - `BAZEL_DEP_BLOCK_RE` matches `bazel_dep(...)` calls (including multiline via `(?s)`).
+  - `ATTR_RE` extracts `name=` and `version=` from call arguments.
+  - `DEV_DEP_RE` detects `dev_dependency = True`.
+  - Comment stripping before regex matching.
+  - 7 unit tests.
+- `crates/renovate-core/src/datasources.rs`: added `pub mod bazel`.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod bazel_module`.
+- `crates/renovate-core/src/managers.rs`: added `bazel-module` with `(^|/|\.)MODULE\.bazel$`.
+- `crates/renovate-cli/src/main.rs`: pipeline using `bazel::fetch_latest`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 956 passed
 
 ## Slice 0133 - Python `setup.py` PyPI dependency extractor
 

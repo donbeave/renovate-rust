@@ -3565,6 +3565,67 @@ async fn process_repo(
         }
     }
 
+    // ── Bazel Module (MODULE.bazel) ───────────────────────────────────────────
+    for bm_path in manager_files(&detected, "bazel-module") {
+        match client.get_raw_file(owner, repo, &bm_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::bazel_module::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %bm_path,
+                    total = deps.len(),
+                    "extracted bazel module deps"
+                );
+                let mut dep_reports = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.name) {
+                        continue;
+                    }
+                    let status = match renovate_core::datasources::bazel::fetch_latest(
+                        http,
+                        &dep.name,
+                        &dep.current_value,
+                    )
+                    .await
+                    {
+                        Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_value,
+                            latest: s.latest.unwrap_or_default(),
+                        },
+                        Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: bm_path.clone(),
+                        manager: "bazel-module".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%bm_path, "MODULE.bazel not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bm_path, %err, "failed to fetch MODULE.bazel");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Version files (.terraform-version, .go-version, .bun-version, etc.) ──
     for manager_name in [
         "terraform-version",

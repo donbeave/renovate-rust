@@ -394,6 +394,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.bun-version$"],
     },
     ManagerDef {
+        name: "bazel-module",
+        patterns: &[r"(^|/|\.)MODULE\.bazel$"],
+    },
+    ManagerDef {
         name: "bazelisk",
         patterns: &[r"(^|/)\.bazelversion$"],
     },
