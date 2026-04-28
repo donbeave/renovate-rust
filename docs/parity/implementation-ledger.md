@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0143  | 2026-04-28 | Heroku/Render `runtime.txt` Python version extractor | Complete | See below. |
 | 0142  | 2026-04-28 | Helmsman DSF extractor (Helm chart version tracking) | Complete | See below. |
 | 0141  | 2026-04-28 | Cloud Native Buildpacks `project.toml` extractor + BuildpacksRegistry datasource | Complete | See below. |
 | 0140  | 2026-04-28 | Unity3D `ProjectVersion.txt` extractor + Unity releases datasource | Complete | See below. |
@@ -3089,6 +3090,26 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0143 - Heroku/Render `runtime.txt` Python version extractor
+
+### Renovate reference
+- `lib/modules/manager/runtime-version/extract.ts`
+- Pattern: `(^|/)runtime\.txt$`
+- Datasource: GitHub Releases on `python/cpython` (upstream uses DockerDatasource)
+
+### What landed
+- `crates/renovate-core/src/extractors/runtime_version.rs` (new):
+  - `PYTHON_RE` matches `python-X.Y.Z` (exact 3-part semver).
+  - Returns `RuntimeVersionDep { dep_name: "python", current_value: "X.Y.Z" }`.
+  - 4 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with `(^|/)runtime\.txt$`.
+- `crates/renovate-cli/src/main.rs`: pipeline uses GitHub Releases on `python/cpython`
+  (strips `v` prefix for comparison).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1007 passed
 
 ## Slice 0142 - Helmsman DSF extractor (Helm chart version tracking)
 

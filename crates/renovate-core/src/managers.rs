@@ -496,6 +496,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "helmsman",
         patterns: &[r"(^|/)helmsman\.ya?ml$", r"(^|/)helmsman\.d/.+\.ya?ml$"],
     },
+    ManagerDef {
+        name: "runtime-version",
+        patterns: &[r"(^|/)runtime\.txt$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
