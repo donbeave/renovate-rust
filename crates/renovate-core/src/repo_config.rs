@@ -97,6 +97,30 @@ pub struct PackageRule {
     pub has_name_constraint: bool,
     /// `true` when the raw config specified at least one `matchDepNames` entry.
     pub has_dep_name_constraint: bool,
+
+    // ── Per-rule metadata (applied when this rule matches) ───────────────────
+    /// Group name for this rule's matching dependencies.  When set, all
+    /// matched deps are bundled into a single PR with this title.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `groupName`.
+    pub group_name: Option<String>,
+
+    /// Per-rule auto-merge override.  Overrides the repo-level `automerge`
+    /// setting for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `automerge`.
+    pub automerge: Option<bool>,
+
+    /// Per-rule schedule override.  When non-empty, replaces the repo-level
+    /// `schedule` for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `schedule`.
+    pub schedule: Vec<String>,
+
+    /// Per-rule labels to add to PRs for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `labels`.
+    pub labels: Vec<String>,
 }
 
 /// A compiled entry from `matchPackageNames`.
@@ -255,6 +279,98 @@ pub struct RepoConfig {
     /// entry, the update is suppressed for all packages.
     /// Entries may be semver ranges (`"< 2.0"`) or `/regex/` patterns.
     pub ignore_versions: Vec<String>,
+
+    // ── Scheduling ────��──────────────────────────��──────────────────────────
+    /// Schedule windows for creating PRs.  Entries are Renovate schedule
+    /// strings (e.g. `"before 5am"`, `"every weekend"`) or POSIX cron
+    /// expressions.  Empty = no schedule restriction (always active).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `schedule`.
+    pub schedule: Vec<String>,
+
+    /// IANA timezone name used when evaluating `schedule` entries.
+    /// E.g. `"America/New_York"`.  `None` means use UTC / system timezone.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `timezone`.
+    pub timezone: Option<String>,
+
+    // ── PR behavior ───────────��──────────────────────────────────────────────
+    /// Enable automatic merging of Renovate PRs that pass all checks.
+    /// Defaults to `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `automerge`.
+    pub automerge: bool,
+
+    /// Strategy for auto-merge: `"merge-commit"`, `"squash"`, or `"rebase"`.
+    /// `None` means use platform default.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `automergeType`.
+    pub automerge_type: Option<String>,
+
+    /// Labels to add to Renovate PRs (must exist in the repository).
+    /// Renovate reference: `lib/config/options/index.ts` — `labels`.
+    pub labels: Vec<String>,
+
+    /// Additional labels appended to `labels` (for preset layering).
+    /// Renovate reference: `lib/config/options/index.ts` — `addLabels`.
+    pub add_labels: Vec<String>,
+
+    /// GitHub usernames/team slugs to assign as PR assignees.
+    /// Renovate reference: `lib/config/options/index.ts` — `assignees`.
+    pub assignees: Vec<String>,
+
+    /// GitHub usernames/team slugs to add as PR reviewers.
+    /// Renovate reference: `lib/config/options/index.ts` — `reviewers`.
+    pub reviewers: Vec<String>,
+
+    // ── Branch behavior ──────────────���───────────────────────────────────────
+    /// Branch name prefix for update branches.  Default: `"renovate/"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `branchPrefix`.
+    pub branch_prefix: String,
+
+    /// Branches to process (alternative base branches).  Empty = default
+    /// branch only.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `baseBranches`.
+    pub base_branches: Vec<String>,
+
+    // ── Update grouping / limits ─────────────────────────────────────────────
+    /// Maximum number of open Renovate PRs at any one time.  `0` = unlimited.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prConcurrentLimit`.
+    pub pr_concurrent_limit: u32,
+
+    /// Maximum number of Renovate PRs to create per hour.  `0` = unlimited.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prHourlyLimit`.
+    pub pr_hourly_limit: u32,
+
+    /// Group name for global dep grouping.  When non-empty, all updates are
+    /// bundled into a single PR with this name.  Per-rule `groupName` in
+    /// `packageRules` takes precedence.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `groupName`.
+    pub group_name: Option<String>,
+
+    /// When `true`, major and minor/patch updates are split into separate PRs.
+    /// Default: `true`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `separateMajorMinor`.
+    pub separate_major_minor: bool,
+
+    /// When `true`, minor and patch updates are split into separate PRs.
+    /// Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `separateMinorPatch`.
+    pub separate_minor_patch: bool,
+
+    // ── Semantic commits ──────────────────────��─────────────────────��────────
+    /// Enable semantic commits (`"enabled"` / `"disabled"` / `"auto"`).
+    /// `None` → auto (detect from repository history).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `semanticCommits`.
+    pub semantic_commits: Option<String>,
 }
 
 /// Compiled path-ignore matcher built from a `RepoConfig`.
@@ -415,6 +531,13 @@ impl RepoConfig {
             #[serde(rename = "ignoreVersions", default)]
             ignore_versions: Vec<String>,
             enabled: Option<bool>,
+            #[serde(rename = "groupName")]
+            group_name: Option<String>,
+            automerge: Option<bool>,
+            #[serde(default)]
+            schedule: Vec<String>,
+            #[serde(default)]
+            labels: Vec<String>,
         }
 
         #[derive(Deserialize)]
@@ -431,10 +554,49 @@ impl RepoConfig {
             enabled_managers: Vec<String>,
             #[serde(rename = "ignoreVersions", default)]
             ignore_versions: Vec<String>,
+            #[serde(default)]
+            schedule: Vec<String>,
+            timezone: Option<String>,
+            #[serde(default)]
+            automerge: bool,
+            #[serde(rename = "automergeType")]
+            automerge_type: Option<String>,
+            #[serde(default)]
+            labels: Vec<String>,
+            #[serde(rename = "addLabels", default)]
+            add_labels: Vec<String>,
+            #[serde(default)]
+            assignees: Vec<String>,
+            #[serde(default)]
+            reviewers: Vec<String>,
+            #[serde(rename = "branchPrefix", default = "default_branch_prefix")]
+            branch_prefix: String,
+            #[serde(rename = "baseBranches", default)]
+            base_branches: Vec<String>,
+            #[serde(rename = "prConcurrentLimit", default)]
+            pr_concurrent_limit: u32,
+            #[serde(rename = "prHourlyLimit", default = "default_pr_hourly_limit")]
+            pr_hourly_limit: u32,
+            #[serde(rename = "groupName")]
+            group_name: Option<String>,
+            #[serde(rename = "separateMajorMinor", default = "default_true")]
+            separate_major_minor: bool,
+            #[serde(rename = "separateMinorPatch", default)]
+            separate_minor_patch: bool,
+            #[serde(rename = "semanticCommits")]
+            semantic_commits: Option<String>,
         }
 
         fn default_true() -> bool {
             true
+        }
+
+        fn default_branch_prefix() -> String {
+            "renovate/".to_owned()
+        }
+
+        fn default_pr_hourly_limit() -> u32 {
+            2
         }
 
         let raw: Raw = match json5::from_str(content) {
@@ -521,6 +683,10 @@ impl RepoConfig {
                         ignore_versions: r.ignore_versions,
                         enabled: r.enabled,
                         has_name_constraint,
+                        group_name: r.group_name,
+                        automerge: r.automerge,
+                        schedule: r.schedule,
+                        labels: r.labels,
                     }
                 })
                 .collect();
@@ -532,6 +698,22 @@ impl RepoConfig {
             package_rules,
             enabled_managers: raw.enabled_managers,
             ignore_versions: raw.ignore_versions,
+            schedule: raw.schedule,
+            timezone: raw.timezone,
+            automerge: raw.automerge,
+            automerge_type: raw.automerge_type,
+            labels: raw.labels,
+            add_labels: raw.add_labels,
+            assignees: raw.assignees,
+            reviewers: raw.reviewers,
+            branch_prefix: raw.branch_prefix,
+            base_branches: raw.base_branches,
+            pr_concurrent_limit: raw.pr_concurrent_limit,
+            pr_hourly_limit: raw.pr_hourly_limit,
+            group_name: raw.group_name,
+            separate_major_minor: raw.separate_major_minor,
+            separate_minor_patch: raw.separate_minor_patch,
+            semantic_commits: raw.semantic_commits,
         }
     }
 
@@ -708,12 +890,28 @@ impl RepoConfig {
 impl Default for RepoConfig {
     fn default() -> Self {
         Self {
-            enabled: true, // Renovate default is enabled
+            enabled: true,
             ignore_deps: Vec::new(),
             ignore_paths: Vec::new(),
             package_rules: Vec::new(),
             enabled_managers: Vec::new(),
             ignore_versions: Vec::new(),
+            schedule: Vec::new(),
+            timezone: None,
+            automerge: false,
+            automerge_type: None,
+            labels: Vec::new(),
+            add_labels: Vec::new(),
+            assignees: Vec::new(),
+            reviewers: Vec::new(),
+            branch_prefix: "renovate/".to_owned(),
+            base_branches: Vec::new(),
+            pr_concurrent_limit: 0,
+            pr_hourly_limit: 2,
+            group_name: None,
+            separate_major_minor: true,
+            separate_minor_patch: false,
+            semantic_commits: None,
         }
     }
 }
@@ -1577,5 +1775,125 @@ mod tests {
         // No matchDatasources set → matches any datasource.
         assert!(rule.datasource_matches("docker"));
         assert!(rule.datasource_matches("npm"));
+    }
+
+    // ── Metadata config fields ───────────────────────────────────────────────
+
+    #[test]
+    fn schedule_parsed_into_repo_config() {
+        let c = RepoConfig::parse(r#"{"schedule": ["before 5am", "every weekend"]}"#);
+        assert_eq!(c.schedule, vec!["before 5am", "every weekend"]);
+    }
+
+    #[test]
+    fn schedule_default_is_empty() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(c.schedule.is_empty());
+    }
+
+    #[test]
+    fn timezone_parsed() {
+        let c = RepoConfig::parse(r#"{"timezone": "America/New_York"}"#);
+        assert_eq!(c.timezone.as_deref(), Some("America/New_York"));
+    }
+
+    #[test]
+    fn automerge_defaults_false() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(!c.automerge);
+    }
+
+    #[test]
+    fn automerge_parsed_true() {
+        let c = RepoConfig::parse(r#"{"automerge": true}"#);
+        assert!(c.automerge);
+    }
+
+    #[test]
+    fn labels_parsed() {
+        let c = RepoConfig::parse(r#"{"labels": ["dependencies", "renovate"]}"#);
+        assert_eq!(c.labels, vec!["dependencies", "renovate"]);
+    }
+
+    #[test]
+    fn branch_prefix_default() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert_eq!(c.branch_prefix, "renovate/");
+    }
+
+    #[test]
+    fn branch_prefix_custom() {
+        let c = RepoConfig::parse(r#"{"branchPrefix": "deps/"}"#);
+        assert_eq!(c.branch_prefix, "deps/");
+    }
+
+    #[test]
+    fn base_branches_parsed() {
+        let c = RepoConfig::parse(r#"{"baseBranches": ["main", "develop"]}"#);
+        assert_eq!(c.base_branches, vec!["main", "develop"]);
+    }
+
+    #[test]
+    fn separate_major_minor_default_true() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(c.separate_major_minor);
+    }
+
+    #[test]
+    fn separate_minor_patch_default_false() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(!c.separate_minor_patch);
+    }
+
+    #[test]
+    fn pr_hourly_limit_default() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert_eq!(c.pr_hourly_limit, 2);
+    }
+
+    #[test]
+    fn pr_hourly_limit_custom() {
+        let c = RepoConfig::parse(r#"{"prHourlyLimit": 5}"#);
+        assert_eq!(c.pr_hourly_limit, 5);
+    }
+
+    #[test]
+    fn group_name_parsed_at_repo_level() {
+        let c = RepoConfig::parse(r#"{"groupName": "all-deps"}"#);
+        assert_eq!(c.group_name.as_deref(), Some("all-deps"));
+    }
+
+    #[test]
+    fn package_rule_group_name_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["react"], "groupName": "react-packages"}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].group_name.as_deref(),
+            Some("react-packages")
+        );
+    }
+
+    #[test]
+    fn package_rule_automerge_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["prettier"], "automerge": true}]}"#,
+        );
+        assert_eq!(c.package_rules[0].automerge, Some(true));
+    }
+
+    #[test]
+    fn package_rule_schedule_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchUpdateTypes": ["patch"], "schedule": ["every weekend"]}]}"#,
+        );
+        assert_eq!(c.package_rules[0].schedule, vec!["every weekend"]);
+    }
+
+    #[test]
+    fn reviewers_and_assignees_parsed() {
+        let c = RepoConfig::parse(r#"{"reviewers": ["user1", "user2"], "assignees": ["user3"]}"#);
+        assert_eq!(c.reviewers, vec!["user1", "user2"]);
+        assert_eq!(c.assignees, vec!["user3"]);
     }
 }

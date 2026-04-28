@@ -4336,3 +4336,53 @@ Pick whichever can be completed in one loop:
    they appear in the output JSON even if not yet acted upon.
 5. **`git-submodules` extractor** — parse `.gitmodules` INI file to extract
    submodule URLs; dispatch via the already-registered `git-submodules` manager.
+
+## Slice 0171 — `RepoConfig` metadata fields: schedule, automerge, labels, groupName, baseBranches, and more
+
+### Renovate reference
+- `lib/config/options/index.ts` — `schedule`, `timezone`, `automerge`,
+  `automergeType`, `labels`, `addLabels`, `assignees`, `reviewers`,
+  `branchPrefix`, `baseBranches`, `prConcurrentLimit`, `prHourlyLimit`,
+  `groupName`, `separateMajorMinor`, `separateMinorPatch`, `semanticCommits`
+- `lib/config/defaults.ts` — default values for each option
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `RepoConfig` struct: added 16 new fields — `schedule`, `timezone`,
+    `automerge`, `automerge_type`, `labels`, `add_labels`, `assignees`,
+    `reviewers`, `branch_prefix` (default `"renovate/"`), `base_branches`,
+    `pr_concurrent_limit` (default 0), `pr_hourly_limit` (default 2),
+    `group_name`, `separate_major_minor` (default true),
+    `separate_minor_patch` (default false), `semantic_commits`.
+  - `PackageRule` struct: added 4 per-rule metadata fields — `group_name`,
+    `automerge`, `schedule`, `labels`.
+  - `RawPackageRule` deserialization updated with all new fields.
+  - `Raw` deserialization updated with all new repo-level fields.
+  - `Default for RepoConfig` updated to match Renovate defaults.
+  - 18 new unit tests covering parsing and defaults of all new fields.
+
+### Deferred
+- None of the new metadata fields are yet used to drive PR creation or
+  filtering.  They are parsed, stored, and exposed, ready for use in the
+  PR-creation / output-formatting slice.
+- `branchName` / `branchNameStrict` / commit message composition options
+  will be a separate slice.
+- `extends` preset resolution is a separate slice (requires fetching
+  preset configs from GitHub).
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1178 passed
+
+## Next slice candidates
+
+1. **Wire `matchDatasources` into filter methods** — add `datasource` param.
+2. **`extends` preset resolution** — fetch and merge `config:recommended`
+   and other presets from GitHub into the local `RepoConfig`.
+3. **`package.json` `renovate` key** — parse `renovate.json`-equivalent
+   config from `package.json` (currently skipped).
+4. **Commit message composition** — `branchName`, `commitMessage`,
+   `commitMessagePrefix`, `commitMessageAction`, `commitMessageSuffix`.
+5. **`prConcurrentLimit` / `prHourlyLimit` enforcement** — count open PRs
+   and respect the limits when proposing updates.
