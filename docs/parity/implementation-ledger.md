@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0187  | 2026-04-28 | `schedule` module: POSIX cron evaluation + schedule-gate in CLI pipeline | Complete | See below. |
 | 0186  | 2026-04-28 | `branch::pr_title()` + `prTitle` field in DepReport output (semantic commit support) | Complete | See below. |
 | 0185  | 2026-04-28 | `RuleEffects` + `collect_rule_effects()` + `groupName`/`automerge`/`labels` in DepReport | Complete | See below. |
 | 0184  | 2026-04-28 | Pass manager context to all 72 `is_dep_ignored` call sites in main.rs | Complete | See below. |

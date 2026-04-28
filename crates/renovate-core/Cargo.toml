@@ -26,6 +26,7 @@ json5.workspace = true
 thiserror.workspace = true
 reqwest.workspace = true
 tokio.workspace = true
+chrono = "0.4.44"
 
 [dev-dependencies]
 tempfile.workspace = true

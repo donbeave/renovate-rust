@@ -8,6 +8,7 @@ pub mod http;
 pub mod managers;
 pub mod platform;
 pub mod repo_config;
+pub mod schedule;
 pub mod versioning;
 
 /// Library version string, sourced from the workspace package version.

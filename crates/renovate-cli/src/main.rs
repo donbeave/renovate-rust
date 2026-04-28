@@ -284,6 +284,16 @@ async fn process_repo(
                 tracing::info!(repo = %repo_slug, "renovate disabled in repo config — skipping");
                 return (None, false);
             }
+            // Check schedule: if configured, only process during the scheduled window.
+            if !rc.schedule.is_empty() && !renovate_core::schedule::is_within_schedule(&rc.schedule)
+            {
+                tracing::info!(
+                    repo = %repo_slug,
+                    schedule = ?rc.schedule,
+                    "outside schedule window — skipping"
+                );
+                return (None, false);
+            }
             if !rc.ignore_deps.is_empty() || !rc.ignore_paths.is_empty() {
                 tracing::debug!(
                     repo = %repo_slug,
