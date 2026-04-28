@@ -115,28 +115,33 @@ pub async fn fetch_versions(
 
     let latest = data.info.version.clone();
 
-    // Collect non-yanked versions and extract the latest timestamp.
+    // Collect non-yanked versions, per-version timestamps, and the latest timestamp.
     let mut latest_timestamp: Option<String> = None;
+    let mut version_timestamps: HashMap<String, String> = HashMap::new();
     let mut versions: Vec<String> = data
         .releases
         .iter()
         .filter(|(_, files)| files.is_empty() || files.iter().any(|f| !f.yanked))
         .map(|(v, files)| {
+            // Pick the earliest non-yanked file's upload_time for this version.
+            let ts = files
+                .iter()
+                .filter(|f| !f.yanked)
+                .filter_map(|f| f.upload_time.as_deref())
+                .min()
+                .map(|t| {
+                    // PyPI uses naive ISO datetime; append Z to make it UTC-parseable.
+                    if t.ends_with('Z') || t.contains('+') {
+                        t.to_owned()
+                    } else {
+                        format!("{t}Z")
+                    }
+                });
+            if let Some(ts) = &ts {
+                version_timestamps.insert(v.clone(), ts.clone());
+            }
             if v == &latest {
-                // Pick the earliest (by upload_time) non-yanked file's timestamp.
-                latest_timestamp = files
-                    .iter()
-                    .filter(|f| !f.yanked)
-                    .filter_map(|f| f.upload_time.as_deref())
-                    .min()
-                    .map(|t| {
-                        // PyPI uses naive ISO datetime; append Z to make it UTC-parseable.
-                        if t.ends_with('Z') || t.contains('+') {
-                            t.to_owned()
-                        } else {
-                            format!("{t}Z")
-                        }
-                    });
+                latest_timestamp = ts;
             }
             v.clone()
         })
@@ -157,6 +162,7 @@ pub async fn fetch_versions(
         versions,
         latest,
         latest_timestamp,
+        version_timestamps,
     })
 }
 
@@ -225,6 +231,9 @@ pub struct PypiVersionsEntry {
     pub latest: String,
     /// ISO 8601 publish timestamp for the latest version, if available.
     pub latest_timestamp: Option<String>,
+    /// Release timestamps keyed by version string (UTC ISO 8601 with Z suffix).
+    /// Used for `matchCurrentAge` evaluation.
+    pub version_timestamps: HashMap<String, String>,
 }
 
 /// Fetch versions for a batch of unique package names concurrently.

@@ -67,6 +67,10 @@ pub(crate) struct DepReport {
     /// from the datasource.  Used for `minimumReleaseAge` reporting.
     #[serde(rename = "releaseTimestamp", skip_serializing_if = "Option::is_none")]
     pub release_timestamp: Option<String>,
+    /// ISO 8601 publish timestamp of the **currently installed** version.
+    /// Used for `matchCurrentAge` rule evaluation; not included in serialized output.
+    #[serde(skip)]
+    pub(crate) current_version_timestamp: Option<String>,
     #[serde(flatten)]
     pub status: DepStatus,
 }
@@ -570,6 +574,7 @@ mod tests {
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -583,6 +588,7 @@ mod tests {
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
@@ -595,6 +601,7 @@ mod tests {
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -612,6 +619,7 @@ mod tests {
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -677,6 +685,7 @@ mod tests {
                     labels: Vec::new(),
                     pr_title: None,
                     release_timestamp: None,
+                    current_version_timestamp: None,
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -705,6 +714,7 @@ mod tests {
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -727,6 +737,7 @@ mod tests {
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -747,6 +758,7 @@ mod tests {
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -766,6 +778,7 @@ mod tests {
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -814,6 +827,7 @@ mod tests {
                 labels: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
+                current_version_timestamp: None,
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -827,6 +841,7 @@ mod tests {
                 labels: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
+                current_version_timestamp: None,
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
@@ -837,6 +852,7 @@ mod tests {
                 labels: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
+                current_version_timestamp: None,
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
@@ -849,6 +865,7 @@ mod tests {
                 labels: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
+                current_version_timestamp: None,
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),
@@ -913,6 +930,7 @@ mod tests {
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             status: DepStatus::UpdateAvailable {
                 current: "1.0.0".into(),
                 latest: "2.0.0".into(),
@@ -929,6 +947,7 @@ mod tests {
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             status: DepStatus::UpToDate { latest: None },
         }
     }

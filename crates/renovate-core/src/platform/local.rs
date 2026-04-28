@@ -87,7 +87,14 @@ fn git_ls_files(dir: &Path) -> Option<Vec<String>> {
     )
 }
 
-const SKIP_DIRS: &[&str] = &[".git", "target", "node_modules", ".tox", "__pycache__", "vendor"];
+const SKIP_DIRS: &[&str] = &[
+    ".git",
+    "target",
+    "node_modules",
+    ".tox",
+    "__pycache__",
+    "vendor",
+];
 
 /// Walk `dir` recursively, returning paths relative to `dir`.
 /// Skips directories in [`SKIP_DIRS`] and hidden directories (`.`-prefixed).
@@ -115,10 +122,10 @@ fn walk_dir_inner(base: &Path, current: &Path, files: &mut Vec<String>) {
 
         if path.is_dir() {
             walk_dir_inner(base, &path, files);
-        } else if let Ok(rel) = path.strip_prefix(base) {
-            if let Some(s) = rel.to_str() {
-                files.push(s.to_owned());
-            }
+        } else if let Ok(rel) = path.strip_prefix(base)
+            && let Some(s) = rel.to_str()
+        {
+            files.push(s.to_owned());
         }
     }
 }

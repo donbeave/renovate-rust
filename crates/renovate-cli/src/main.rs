@@ -25,6 +25,7 @@ use std::sync::Arc;
 
 use clap::Parser as _;
 use cli::Cli;
+use renovate_core::config::Platform;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::bitrise as bitrise_datasource;
 use renovate_core::datasources::crates_io;
@@ -61,7 +62,6 @@ use renovate_core::extractors::setup_cfg as setup_cfg_extractor;
 use renovate_core::extractors::terraform as terraform_extractor;
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
-use renovate_core::config::Platform;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
 use tokio::sync::Semaphore;
@@ -140,10 +140,18 @@ async fn main() -> ExitCode {
     // 5. For local platform, inject a synthetic repository slug when none is
     //    supplied so that the current working directory is scanned — mirroring
     //    how the original Renovate handles `--platform=local`.
+    //
+    //    The slug format "local/{dirname}" keeps owner/repo splitting intact
+    //    while making log output and report headers show the directory name.
     let mut config = config;
     if config.platform == Platform::Local && config.repositories.is_empty() {
+        let dir_name = cwd
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or(".")
+            .to_owned();
         tracing::info!(dir = %cwd.display(), "local platform: scanning current directory");
-        config.repositories = vec!["local/.".to_owned()];
+        config.repositories = vec![format!("local/{dir_name}")];
     }
 
     if config.repositories.is_empty() {
@@ -1094,6 +1102,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1156,6 +1165,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1198,6 +1208,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.package_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1231,6 +1242,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -1271,6 +1283,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1304,6 +1317,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1420,6 +1434,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -1450,6 +1465,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status,
                         });
@@ -1653,6 +1669,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -1681,6 +1698,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1829,6 +1847,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1891,6 +1910,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -1919,6 +1939,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -2026,6 +2047,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.image.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2063,6 +2085,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep_name,
                             status,
                         });
@@ -2096,6 +2119,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep_name,
                         status,
                     });
@@ -2187,6 +2211,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.image.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -2226,6 +2251,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep_name,
                                 status,
                             });
@@ -2364,6 +2390,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -2453,6 +2480,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2536,6 +2564,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -2578,6 +2607,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2625,6 +2655,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -2792,6 +2823,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.chart.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -2821,6 +2853,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.chart.clone(),
                             status,
                         });
@@ -2837,6 +2870,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: git_dep.repo_url.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2883,6 +2917,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: git_dep.repo_url.clone(),
                         status,
                     });
@@ -2992,6 +3027,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.image.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -3029,6 +3065,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep_name,
                             status,
                         });
@@ -3055,6 +3092,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: helm.chart_name.clone(),
                         status,
                     });
@@ -3159,6 +3197,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: "gradle".into(),
                             status,
                         }],
@@ -3209,6 +3248,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3285,6 +3325,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: "scalafmt".into(),
                             status,
                         }],
@@ -3337,6 +3378,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3365,6 +3407,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -3434,6 +3477,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status,
                         }
@@ -3544,6 +3588,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.owner_repo.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3574,6 +3619,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.owner_repo.clone(),
                         status,
                     });
@@ -3646,6 +3692,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.repo.clone(),
                             status,
                         }
@@ -3702,6 +3749,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3730,6 +3778,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -3844,6 +3893,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3872,6 +3922,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3979,6 +4030,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -4162,6 +4214,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -4276,6 +4329,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -4314,6 +4368,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -4347,6 +4402,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -4405,6 +4461,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -4526,6 +4583,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.tool.to_owned(),
                             status,
                         }],
@@ -4596,6 +4654,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: format!("node@{}", dep.version),
                             status,
                         }
@@ -4696,6 +4755,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.project.clone(),
                                 status,
                             }
@@ -4770,6 +4830,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: orb.package_name.clone(),
                             status,
                         });
@@ -4889,6 +4950,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -4977,6 +5039,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: format!("{}@{}", t.name, t.version),
                             status,
                         });
@@ -5074,6 +5137,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -5171,6 +5235,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: vdep.tool.to_owned(),
                         status,
                     });
@@ -5314,6 +5379,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: renovate_core::extractors::flux::FLUX2_REPO.to_owned(),
                             status,
                         }],
@@ -5445,6 +5511,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.input_name.clone(),
                             status,
                         }
@@ -5520,6 +5587,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dn,
                             status,
                         }
@@ -5598,6 +5666,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status,
                         }
@@ -5685,6 +5754,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.package_name.clone(),
                             status,
                         }
@@ -5735,6 +5805,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -5773,6 +5844,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -5851,6 +5923,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -5909,6 +5982,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: "flutter".to_owned(),
                             status,
                         }],
@@ -5999,6 +6073,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.remote.clone(),
                             status,
                         }
@@ -6071,6 +6146,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.chart_name.clone(),
                             status,
                         }
@@ -6139,6 +6215,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.src_path.clone(),
                             status,
                         }],
@@ -6221,6 +6298,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: renovate_core::extractors::batect_wrapper::BATECT_REPO.to_owned(),
                             status,
                         }],
@@ -6257,6 +6335,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -6279,6 +6358,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: "non-github-source".into(),
@@ -6324,6 +6404,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -6367,6 +6448,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: "ignored".into(),
@@ -6390,6 +6472,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.path.clone(),
                         status,
                     });
@@ -6432,6 +6515,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -6505,6 +6589,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -6596,6 +6681,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.artifact_id.clone(),
                         status,
                     });
@@ -6667,6 +6753,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6773,6 +6860,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -6822,6 +6910,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -6902,6 +6991,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6995,6 +7085,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -7031,6 +7122,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.dep_name.clone(),
                                 status,
                             };
@@ -7057,6 +7149,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -7128,6 +7221,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.image_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -7165,6 +7259,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.image_name.clone(),
                             status,
                         }
@@ -7216,6 +7311,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7301,6 +7397,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -7369,6 +7466,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.image_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -7406,6 +7504,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.image_name.clone(),
                             status,
                         }
@@ -7449,6 +7548,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7527,6 +7627,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -7657,6 +7758,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.formula_name.clone(),
                         status,
                     }],
@@ -7713,6 +7815,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -7751,6 +7854,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -7822,6 +7926,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: "Unity Editor".to_owned(),
                         status,
                     }],
@@ -7860,6 +7965,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7903,6 +8009,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -7973,6 +8080,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.dep_name.clone(),
                         status,
                     }],
@@ -8022,6 +8130,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: format!("{}: {}", dep.kind, dep.package),
                             status,
                         }
@@ -8087,6 +8196,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -8141,6 +8251,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: dep.repo.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -8225,6 +8336,7 @@ async fn process_repo(
                         labels: Vec::new(),
                         pr_title: None,
                         release_timestamp: None,
+                        current_version_timestamp: None,
                         name: dep.repo.clone(),
                         status,
                     });
@@ -8293,6 +8405,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: d.chart_name.clone(),
                             status,
                         }
@@ -8364,6 +8477,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: d.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -8392,6 +8506,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: d.dep_name.clone(),
                             status,
                         }
@@ -8459,6 +8574,7 @@ async fn process_repo(
                                 labels: Vec::new(),
                                 pr_title: None,
                                 release_timestamp: None,
+                                current_version_timestamp: None,
                                 name: d.name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -8487,6 +8603,7 @@ async fn process_repo(
                             labels: Vec::new(),
                             pr_title: None,
                             release_timestamp: None,
+                            current_version_timestamp: None,
                             name: d.name.clone(),
                             status,
                         }
@@ -8529,6 +8646,7 @@ async fn process_repo(
                     labels: Vec::new(),
                     pr_title: None,
                     release_timestamp: None,
+                    current_version_timestamp: None,
                     name: dep.name.clone(),
                     status: output::DepStatus::Skipped {
                         reason: format!("{reason:?}").to_lowercase(),
@@ -8563,6 +8681,7 @@ async fn process_repo(
                 labels: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
+                current_version_timestamp: None,
                 name: dep.name.clone(),
                 status,
             });
@@ -8683,6 +8802,7 @@ fn apply_update_blocking_to_report(
                     current_value: Some(current.as_str()),
                     new_value: Some(latest.as_str()),
                     update_type: classify_semver_update(current, latest),
+                    current_version_timestamp: dep.current_version_timestamp.as_deref(),
                     ..Default::default()
                 };
                 let effects = repo_cfg.collect_rule_effects(&ctx);
@@ -8769,6 +8889,7 @@ async fn docker_hub_reports(
                 labels: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
+                current_version_timestamp: None,
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -8804,6 +8925,7 @@ async fn docker_hub_reports(
                 labels: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
+                current_version_timestamp: None,
                 name: dep_name,
                 status,
             });
@@ -8832,6 +8954,7 @@ fn build_dep_reports_cargo(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8859,6 +8982,7 @@ fn build_dep_reports_cargo(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -8886,6 +9010,7 @@ fn build_dep_reports_npm(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8917,6 +9042,7 @@ fn build_dep_reports_npm(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -8944,6 +9070,7 @@ fn build_dep_reports_github_actions(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.action.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8971,6 +9098,7 @@ fn build_dep_reports_github_actions(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.action.clone(),
             status,
         });
@@ -8998,6 +9126,7 @@ fn build_dep_reports_maven(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9025,6 +9154,7 @@ fn build_dep_reports_maven(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -9052,6 +9182,7 @@ fn build_dep_reports_pub(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9079,6 +9210,7 @@ fn build_dep_reports_pub(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9106,6 +9238,7 @@ fn build_dep_reports_nuget(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.package_id.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9133,6 +9266,7 @@ fn build_dep_reports_nuget(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.package_id.clone(),
             status,
         });
@@ -9160,6 +9294,7 @@ fn build_dep_reports_composer(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9187,6 +9322,7 @@ fn build_dep_reports_composer(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9214,6 +9350,7 @@ fn build_dep_reports_gomod(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.module_path.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9241,6 +9378,7 @@ fn build_dep_reports_gomod(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.module_path.clone(),
             status,
         });
@@ -9268,6 +9406,7 @@ fn build_dep_reports_poetry(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9299,6 +9438,7 @@ fn build_dep_reports_poetry(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9326,6 +9466,7 @@ fn build_dep_reports_pip(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9357,6 +9498,7 @@ fn build_dep_reports_pip(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9384,6 +9526,7 @@ fn build_dep_reports_bundler(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9411,6 +9554,7 @@ fn build_dep_reports_bundler(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9438,6 +9582,7 @@ fn build_dep_reports_terraform(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9465,6 +9610,7 @@ fn build_dep_reports_terraform(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9492,6 +9638,7 @@ fn build_dep_reports_helm(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9519,6 +9666,7 @@ fn build_dep_reports_helm(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9546,6 +9694,7 @@ fn build_dep_reports_gradle(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9573,6 +9722,7 @@ fn build_dep_reports_gradle(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -9600,6 +9750,7 @@ fn build_dep_reports_setup_cfg(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9631,6 +9782,7 @@ fn build_dep_reports_setup_cfg(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });
@@ -9658,6 +9810,7 @@ fn build_dep_reports_pipfile(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp: None,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -9689,6 +9842,7 @@ fn build_dep_reports_pipfile(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
+            current_version_timestamp: None,
             name: dep.name.clone(),
             status,
         });

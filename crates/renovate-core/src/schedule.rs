@@ -80,6 +80,61 @@ pub fn is_within_release_age(
     Utc::now() - ts >= min_dur
 }
 
+/// Evaluate a `matchCurrentAge` range expression against a version release timestamp.
+///
+/// `range` has the form `"<operator> <age>"` where operator is one of
+/// `>`, `>=`, `<`, `<=` and `age` is a human duration like `"3 days"`,
+/// `"1 month"`, `"2 weeks"`.
+///
+/// Semantics (mirrors Renovate's `satisfiesDateRange`):
+/// - `> age` — version was released **more than** `age` ago
+/// - `>= age` — version was released `age` or more ago
+/// - `< age` — version was released **less than** `age` ago
+/// - `<= age` — version was released `age` or less ago
+///
+/// Returns `false` when either the range or timestamp is unparseable.
+pub fn satisfies_date_range(timestamp: &str, range: &str) -> bool {
+    let range = range.trim();
+    // Parse "<operator> <age>" — operator is >=, <=, >, or <.
+    let (operator, age_str) = if let Some(rest) = range.strip_prefix(">=") {
+        (">=", rest.trim())
+    } else if let Some(rest) = range.strip_prefix("<=") {
+        ("<=", rest.trim())
+    } else if let Some(rest) = range.strip_prefix('>') {
+        (">", rest.trim())
+    } else if let Some(rest) = range.strip_prefix('<') {
+        ("<", rest.trim())
+    } else {
+        return false;
+    };
+
+    let Some(age_dur) = parse_age_duration(age_str) else {
+        return false;
+    };
+
+    // Parse the timestamp — append Z if needed so chrono recognises it as UTC.
+    let ts_str = if timestamp.ends_with('Z') || timestamp.contains('+') {
+        timestamp.to_owned()
+    } else {
+        format!("{timestamp}Z")
+    };
+    let Ok(ts) = ts_str.parse::<DateTime<Utc>>() else {
+        return false;
+    };
+
+    let date_ms = ts.timestamp_millis();
+    let age_ms = age_dur.num_milliseconds();
+    let threshold_ms = Utc::now().timestamp_millis() - age_ms;
+
+    match operator {
+        ">" => date_ms < threshold_ms,
+        ">=" => date_ms <= threshold_ms,
+        "<" => date_ms > threshold_ms,
+        "<=" => date_ms >= threshold_ms,
+        _ => false,
+    }
+}
+
 /// Return `true` when any entry in `schedule` matches the current UTC time.
 ///
 /// An empty schedule (or `["at any time"]`) always returns `true`.
@@ -696,5 +751,65 @@ mod tests {
             Some("2099-12-31T23:59:59Z"),
             Some("3 days")
         ));
+    }
+
+    // ── satisfies_date_range ──────────────────────────────────────────────────
+
+    #[test]
+    fn date_range_gt_old_timestamp_is_true() {
+        // A timestamp from 2020 is clearly "> 3 days" old
+        assert!(satisfies_date_range("2020-01-01T00:00:00Z", "> 3 days"));
+    }
+
+    #[test]
+    fn date_range_gt_future_timestamp_is_false() {
+        // A timestamp from the far future is NOT "> 3 days" old
+        assert!(!satisfies_date_range("2099-01-01T00:00:00Z", "> 3 days"));
+    }
+
+    #[test]
+    fn date_range_lt_recent_timestamp_is_true() {
+        // Far-future timestamp is "newer than 5 years" → "< 5 years" is true
+        // (only for very old threshold; let's use a near-future timestamp)
+        // A timestamp 1 second in the future — not yet "3 days" old
+        let just_now = (Utc::now() + chrono::Duration::seconds(5))
+            .format("%Y-%m-%dT%H:%M:%SZ")
+            .to_string();
+        assert!(satisfies_date_range(&just_now, "< 3 days"));
+    }
+
+    #[test]
+    fn date_range_lt_old_timestamp_is_false() {
+        // A 2020 timestamp is NOT "< 3 days" old
+        assert!(!satisfies_date_range("2020-01-01T00:00:00Z", "< 3 days"));
+    }
+
+    #[test]
+    fn date_range_gte_old_is_true() {
+        assert!(satisfies_date_range("2020-01-01T00:00:00Z", ">= 1 week"));
+    }
+
+    #[test]
+    fn date_range_lte_future_is_true() {
+        let just_now = (Utc::now() + chrono::Duration::seconds(5))
+            .format("%Y-%m-%dT%H:%M:%SZ")
+            .to_string();
+        assert!(satisfies_date_range(&just_now, "<= 1 week"));
+    }
+
+    #[test]
+    fn date_range_invalid_operator_returns_false() {
+        assert!(!satisfies_date_range("2020-01-01T00:00:00Z", "== 3 days"));
+    }
+
+    #[test]
+    fn date_range_invalid_timestamp_returns_false() {
+        assert!(!satisfies_date_range("not-a-date", "> 3 days"));
+    }
+
+    #[test]
+    fn date_range_naive_timestamp_accepted_with_z_suffix() {
+        // PyPI-style naive timestamp gets Z appended internally
+        assert!(satisfies_date_range("2020-01-01T00:00:00", "> 3 days"));
     }
 }

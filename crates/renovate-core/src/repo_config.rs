@@ -180,6 +180,20 @@ pub struct PackageRule {
     pub match_repositories: Vec<PackageNameMatcher>,
     /// `true` when the raw config specified at least one `matchRepositories` entry.
     pub has_repository_constraint: bool,
+
+    // ── Age-based constraint ──────────────────────────────────────────────────
+    /// Age range expression for the **currently installed** version.
+    /// Format: `"<op> <duration>"` where op is `>`, `>=`, `<`, `<=` and
+    /// duration is a human string like `"3 days"`, `"1 month"`.
+    ///
+    /// Examples:
+    /// - `"> 6 months"` — dep's current release is older than 6 months
+    /// - `"< 2 weeks"` — dep's current release is newer than 2 weeks
+    ///
+    /// When `None`, all current-version ages are accepted.
+    ///
+    /// Renovate reference: `lib/util/package-rules/current-age.ts`
+    pub match_current_age: Option<String>,
 }
 
 /// A compiled entry from `matchPackageNames`.
@@ -524,6 +538,11 @@ impl PackageRule {
             return false;
         }
 
+        // Current version age
+        if !self.current_age_matches(ctx.current_version_timestamp) {
+            return false;
+        }
+
         true
     }
 
@@ -559,6 +578,21 @@ impl PackageRule {
                 pattern == branch
             }
         })
+    }
+
+    /// Return `true` when this rule's `matchCurrentAge` condition is satisfied.
+    ///
+    /// `timestamp` is the ISO 8601 release date of the currently-installed version.
+    /// When `matchCurrentAge` is `None` returns `true` (match-all).
+    /// When `timestamp` is `None` but a constraint is set, returns `false`.
+    pub fn current_age_matches(&self, timestamp: Option<&str>) -> bool {
+        let Some(ref range) = self.match_current_age else {
+            return true; // no constraint → match all
+        };
+        let Some(ts) = timestamp else {
+            return false; // constraint set but no timestamp available → no match
+        };
+        crate::schedule::satisfies_date_range(ts, range)
     }
 }
 
@@ -603,6 +637,9 @@ pub struct DepContext<'a> {
     pub new_value: Option<&'a str>,
     /// Classified update type (available after version lookup).
     pub update_type: Option<UpdateType>,
+    /// ISO 8601 release timestamp for the **currently installed** version.
+    /// Used by `matchCurrentAge`.  `None` when the datasource did not provide it.
+    pub current_version_timestamp: Option<&'a str>,
 }
 
 impl<'a> DepContext<'a> {
@@ -1101,6 +1138,8 @@ impl RepoConfig {
             match_registry_urls: Vec<String>,
             #[serde(rename = "matchRepositories", default)]
             match_repositories: Vec<String>,
+            #[serde(rename = "matchCurrentAge")]
+            match_current_age: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -1300,6 +1339,7 @@ impl RepoConfig {
                     has_registry_url_constraint,
                     match_repositories,
                     has_repository_constraint,
+                    match_current_age: r.match_current_age,
                 }
             })
             .collect();
@@ -3438,5 +3478,75 @@ mod rule_effects_tests {
         let ctx = DepContext::for_dep("serde").with_manager("cargo");
         let effects = c.collect_rule_effects(&ctx);
         assert!(effects.group_name.is_none());
+    }
+
+    // ── matchCurrentAge ───────────────────────────────────────────────────────
+
+    #[test]
+    fn match_current_age_parsed_from_config() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "> 6 months", "enabled": false}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].match_current_age.as_deref(),
+            Some("> 6 months")
+        );
+    }
+
+    #[test]
+    fn match_current_age_none_unset_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        // No matchCurrentAge → matches any timestamp (or none)
+        assert!(c.package_rules[0].current_age_matches(None));
+        assert!(c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
+    }
+
+    #[test]
+    fn match_current_age_set_without_timestamp_returns_false() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "> 3 days", "enabled": false}]}"#,
+        );
+        // No timestamp → constraint cannot be evaluated → conservative false
+        assert!(!c.package_rules[0].current_age_matches(None));
+    }
+
+    #[test]
+    fn match_current_age_old_dep_matches_gt_constraint() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "> 3 days", "enabled": false}]}"#,
+        );
+        // A 2020 timestamp is definitely older than 3 days
+        assert!(c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
+    }
+
+    #[test]
+    fn match_current_age_new_dep_does_not_match_gt_constraint() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "> 3 days", "enabled": false}]}"#,
+        );
+        // A far-future timestamp is not older than 3 days
+        assert!(!c.package_rules[0].current_age_matches(Some("2099-01-01T00:00:00Z")));
+    }
+
+    #[test]
+    fn match_current_age_via_dep_context_disables_dep() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "> 3 days", "enabled": false}]}"#,
+        );
+        // With an old timestamp the rule fires → dep is ignored
+        let ctx = DepContext {
+            dep_name: "lodash",
+            current_version_timestamp: Some("2020-01-01T00:00:00Z"),
+            ..Default::default()
+        };
+        assert!(c.is_dep_ignored_ctx(&ctx));
+
+        // With no timestamp the rule doesn't fire → dep is not ignored
+        let ctx_no_ts = DepContext {
+            dep_name: "lodash",
+            current_version_timestamp: None,
+            ..Default::default()
+        };
+        assert!(!c.is_dep_ignored_ctx(&ctx_no_ts));
     }
 }

@@ -122,6 +122,13 @@ pub async fn fetch_versions(
         .and_then(|tag| packument.time.get(tag))
         .cloned();
 
+    // Retain all per-version timestamps (skip meta-keys "created"/"modified").
+    let version_timestamps: HashMap<String, String> = packument
+        .time
+        .into_iter()
+        .filter(|(k, _)| k != "created" && k != "modified")
+        .collect();
+
     let mut versions: Vec<String> = packument
         .versions
         .into_iter()
@@ -145,6 +152,7 @@ pub async fn fetch_versions(
         versions,
         latest_tag,
         latest_timestamp,
+        version_timestamps,
     })
 }
 
@@ -216,6 +224,9 @@ pub struct NpmVersionsEntry {
     /// ISO 8601 publish timestamp for the `latest` dist-tag version, if known.
     /// Used for `minimumReleaseAge` checking.
     pub latest_timestamp: Option<String>,
+    /// Release timestamps for all known versions (from packument `time` field).
+    /// Used for `matchCurrentAge` evaluation.
+    pub version_timestamps: HashMap<String, String>,
 }
 
 /// Fetch versions for a batch of unique package names concurrently.
