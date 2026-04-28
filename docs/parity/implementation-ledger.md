@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0080  | 2026-04-28 | Helmfile `helmfile.yaml` extractor | Complete | See below. |
 | 0079  | 2026-04-28 | Azure Pipelines extractor (Docker containers + tasks) | Complete | See below. |
 | 0078  | 2026-04-28 | Google Cloud Build `cloudbuild.yaml` extractor | Complete | See below. |
 | 0077  | 2026-04-28 | Kustomize `images:` and `helmCharts:` extractor | Complete | See below. |
@@ -2323,6 +2324,36 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 745 passed
 
+## Slice 0080 - Helmfile `helmfile.yaml` extractor
+
+### Renovate reference
+- `lib/modules/manager/helmfile/extract.ts`
+- `lib/modules/manager/helmfile/schema.ts`
+- Patterns: `/(^|/)helmfile\.ya?ml(?:\.gotmpl)?$/`, `/(^|/)helmfile\.d/.+\.ya?ml(?:\.gotmpl)?$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/helmfile.rs`:
+  - Two-pass line scanner: Pass 1 collects `repositories:` name→URL map; Pass 2 collects `releases:`.
+  - Handles both 0-indent and 2-indent YAML list item styles.
+  - `resolve_release()` handles: local path (excluded), Go templates (skip UnresolvableAlias),
+    OCI direct (`oci://`), OCI-backed repo alias, `alias/chart-name` form, plain name lookup.
+  - Reuses `HelmExtractedDep` + `HelmSkipReason` from `extractors/helm.rs`.
+  - `stable` alias built-in (resolves to `STABLE_REPO` without repo entry).
+  - 10 unit tests.
+- `crates/renovate-core/src/managers.rs`: `helmfile` manager with 2 patterns.
+- `crates/renovate-core/src/extractors.rs`: `pub mod helmfile`.
+- `crates/renovate-cli/src/main.rs`: Helmfile pipeline reuses `helm_datasource::fetch_updates_concurrent`
+  and `build_dep_reports_helm` helper — no duplication.
+
+### What was intentionally deferred
+- Multi-document YAML (multiple `---` separated documents in one helmfile).
+- `helmfile.lock` lockfile parsing.
+- `values:` inline values injection.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 755 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2334,5 +2365,5 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **GitLab CI `include:` project components**: component dependency version tracking.
-6. **Helmfile** (`helmfile.yaml`) extractor for Helm chart repos.
-7. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
+6. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
+7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.

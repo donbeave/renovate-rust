@@ -1556,6 +1556,44 @@ async fn process_repo(
         }
     }
 
+    // ── Helmfile (helmfile.yaml / helmfile.d/*.yaml) ──────────────────────────
+    for hf_path in manager_files(&detected, "helmfile") {
+        match client.get_raw_file(owner, repo, &hf_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::helmfile::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %hf_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted helmfile chart deps"
+                );
+                let dep_inputs: Vec<helm_datasource::HelmDepInput> = actionable
+                    .iter()
+                    .map(|d| helm_datasource::HelmDepInput {
+                        name: d.name.clone(),
+                        current_value: d.current_value.clone(),
+                        repository_url: d.repository.clone(),
+                    })
+                    .collect();
+                let updates = helm_datasource::fetch_updates_concurrent(http, &dep_inputs, 8).await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                repo_report.files.push(output::FileReport {
+                    path: hf_path.clone(),
+                    manager: "helmfile".into(),
+                    deps: build_dep_reports_helm(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%hf_path, "helmfile not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%hf_path, %err, "failed to fetch helmfile");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Kustomize (kustomization.yaml) ───────────────────────────────────────
     for kustomize_path in manager_files(&detected, "kustomize") {
         match client.get_raw_file(owner, repo, &kustomize_path).await {

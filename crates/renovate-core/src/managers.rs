@@ -116,6 +116,13 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         ],
     },
     ManagerDef {
+        name: "helmfile",
+        patterns: &[
+            r"(^|/)helmfile\.ya?ml(?:\.gotmpl)?$",
+            r"(^|/)helmfile\.d/.+\.ya?ml(?:\.gotmpl)?$",
+        ],
+    },
+    ManagerDef {
         name: "helmv3",
         patterns: &[r"(^|/)Chart\.ya?ml$", r"(^|/)requirements\.ya?ml$"],
     },
