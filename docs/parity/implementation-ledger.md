@@ -1889,6 +1889,34 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 569 passed
 
+## Slice 0062 - Ansible Galaxy `requirements.yml` GitHub-URL roles extractor
+
+### Renovate reference
+- `lib/modules/manager/ansible-galaxy/roles.ts` — `extractRoles`
+- `lib/modules/manager/ansible-galaxy/extract.ts`
+- Pattern: `(^|/)(galaxy|requirements)(\.ansible)?\.ya?ml$`
+- Datasource: GitHub Tags for GitHub-URL roles (Galaxy API deferred)
+
+### What landed
+- `crates/renovate-core/src/extractors/ansible_galaxy.rs` — YAML line scanner:
+  - Scans `roles:` and `collections:` sections.
+  - Extracts `name:`, `src:`, `version:` fields from each list item.
+  - `classify_source()`: GitHub URL (`https://github.com/` or `git@github.com:`)
+    → `AnsibleGalaxySource::GitHub { owner_repo }`, else `Galaxy`.
+  - Skip reasons: `NoVersion` (no `version:` field), `GalaxyHosted`
+    (requires GalaxyDatasource not yet implemented).
+  - `.git` suffix stripped from repo URLs.
+- Manager pattern `ansible-galaxy`.
+- Pipeline routes GitHub-sourced roles to `github_tags` datasource.
+
+### What was intentionally deferred
+- Galaxy-hosted roles (`geerlingguy.apache`) → requires `GalaxyDatasource`.
+- Galaxy collections (`community.general`) → same.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 575 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1898,6 +1926,6 @@ Pick whichever can be completed in one loop:
    and wire them into clap.
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
-4. **`ansible-galaxy` GitHub-URL roles extractor**: `requirements.yml` with GitHub-sourced roles.
-5. **`tekton` extractor**: Tekton pipeline bundle references.
-6. **Poetry `[tool.poetry.group.*.dependencies]`**: poetry dependency groups (PEP 735-like).
+4. **`tekton` extractor**: Tekton pipeline bundle references.
+5. **GitHub Actions container/services images**: `container:` and `services:` Docker images.
+6. **Maven `<parent>` POM dependency**: parent POM version tracking.

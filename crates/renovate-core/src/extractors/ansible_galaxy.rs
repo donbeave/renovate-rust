@@ -1,0 +1,302 @@
+//! Ansible Galaxy `requirements.yml` dependency extractor.
+//!
+//! Parses Ansible Galaxy requirements files and extracts role/collection
+//! dependencies. GitHub-URL-sourced roles are routed to the GitHub Tags
+//! datasource. Galaxy-hosted collections and roles are noted but deferred
+//! (require a specialized Galaxy API datasource).
+//!
+//! Renovate reference:
+//! - `lib/modules/manager/ansible-galaxy/extract.ts`
+//! - `lib/modules/manager/ansible-galaxy/roles.ts`
+//! - Pattern: `/(^|/)(galaxy|requirements)(\\.ansible)?\\.ya?ml$/`
+//!
+//! ## Supported forms
+//!
+//! ```yaml
+//! roles:
+//!   - name: my_role
+//!     src: https://github.com/owner/ansible-role-something
+//!     version: v2.1.0
+//!
+//!   - name: galaxy_role         # Galaxy-hosted → skipped (GalaxyDatasource)
+//!     src: namespace.role_name
+//!
+//! collections:
+//!   - name: community.general   # Galaxy-hosted → skipped (GalaxyDatasource)
+//!     version: ">=7.0.0"
+//! ```
+
+/// Where this dep comes from.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AnsibleGalaxySource {
+    /// GitHub repo URL — routes to GitHub Tags datasource.
+    GitHub { owner_repo: String },
+    /// Ansible Galaxy ID (`namespace.name`) — deferred (GalaxyDatasource).
+    Galaxy,
+}
+
+/// Why a dep is being skipped (in the context of this extractor).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AnsibleGalaxySkipReason {
+    /// No version was specified.
+    NoVersion,
+    /// Hosted on Ansible Galaxy (requires `GalaxyDatasource`, not yet implemented).
+    GalaxyHosted,
+}
+
+/// A single extracted Ansible Galaxy dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AnsibleGalaxyDep {
+    /// Role/collection name or display name.
+    pub dep_name: String,
+    /// Version string (git tag or semver range).
+    pub current_value: String,
+    pub source: AnsibleGalaxySource,
+    pub skip_reason: Option<AnsibleGalaxySkipReason>,
+}
+
+/// Extract dependencies from an Ansible Galaxy `requirements.yml`.
+pub fn extract(content: &str) -> Vec<AnsibleGalaxyDep> {
+    let mut out = Vec::new();
+
+    // Simple state machine: scan blocks starting with `- name:` or `- src:`.
+    // Each block has `name:`, `src:`, and optionally `version:`.
+    let mut in_list = false; // inside roles: or collections: list
+    let mut current_name: Option<String> = None;
+    let mut current_src: Option<String> = None;
+    let mut current_ver: Option<String> = None;
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        if line.trim().is_empty() {
+            continue;
+        }
+
+        let trimmed = line.trim_start();
+        let indent = leading_spaces(line);
+
+        // Detect top-level section keys (`roles:`, `collections:`).
+        if indent == 0 {
+            if trimmed.starts_with("roles:") || trimmed.starts_with("collections:") {
+                flush(
+                    &mut current_name,
+                    &mut current_src,
+                    &mut current_ver,
+                    &mut out,
+                );
+                in_list = true;
+                continue;
+            }
+            // Any other top-level key ends the current section.
+            if !trimmed.starts_with('-') {
+                flush(
+                    &mut current_name,
+                    &mut current_src,
+                    &mut current_ver,
+                    &mut out,
+                );
+                in_list = false;
+                continue;
+            }
+        }
+
+        if !in_list {
+            continue;
+        }
+
+        // New list item.
+        if let Some(rest) = trimmed.strip_prefix("- ") {
+            flush(
+                &mut current_name,
+                &mut current_src,
+                &mut current_ver,
+                &mut out,
+            );
+            // Inline `- name: val` or `- src: val`.
+            if let Some(val) = strip_key(rest, "name") {
+                current_name = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+            } else if let Some(val) = strip_key(rest, "src") {
+                current_src = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+            } else if let Some(val) = strip_key(rest, "version") {
+                current_ver = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+            }
+            continue;
+        }
+
+        // Continuation key inside current list item.
+        if let Some(val) = strip_key(trimmed, "name") {
+            current_name = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+        } else if let Some(val) = strip_key(trimmed, "src") {
+            current_src = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+        } else if let Some(val) = strip_key(trimmed, "version") {
+            current_ver = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+        }
+    }
+
+    flush(
+        &mut current_name,
+        &mut current_src,
+        &mut current_ver,
+        &mut out,
+    );
+    out
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+fn flush(
+    name: &mut Option<String>,
+    src: &mut Option<String>,
+    ver: &mut Option<String>,
+    out: &mut Vec<AnsibleGalaxyDep>,
+) {
+    let dep_name = name.take().or_else(|| src.clone()).unwrap_or_default();
+    let raw_src = src.take().unwrap_or_default();
+    let version = ver.take().unwrap_or_default();
+
+    if dep_name.is_empty() && raw_src.is_empty() {
+        return;
+    }
+
+    let display_name = if dep_name.is_empty() {
+        raw_src.clone()
+    } else {
+        dep_name
+    };
+
+    let (source, skip_reason) = classify_source(&raw_src, &version);
+
+    out.push(AnsibleGalaxyDep {
+        dep_name: display_name,
+        current_value: version,
+        source,
+        skip_reason,
+    });
+}
+
+fn classify_source(
+    src: &str,
+    version: &str,
+) -> (AnsibleGalaxySource, Option<AnsibleGalaxySkipReason>) {
+    // GitHub URL: https://github.com/owner/repo or https://github.com/owner/repo.git
+    if src.starts_with("https://github.com/") || src.starts_with("git@github.com:") {
+        let path = src
+            .trim_start_matches("https://github.com/")
+            .trim_start_matches("git@github.com:")
+            .trim_end_matches(".git");
+        let owner_repo = path.to_owned();
+        if version.is_empty() {
+            return (
+                AnsibleGalaxySource::GitHub { owner_repo },
+                Some(AnsibleGalaxySkipReason::NoVersion),
+            );
+        }
+        return (AnsibleGalaxySource::GitHub { owner_repo }, None);
+    }
+
+    // Galaxy-hosted (namespace.name format or empty src with just a name).
+    (
+        AnsibleGalaxySource::Galaxy,
+        Some(AnsibleGalaxySkipReason::GalaxyHosted),
+    )
+}
+
+fn leading_spaces(s: &str) -> usize {
+    s.len() - s.trim_start_matches([' ', '\t']).len()
+}
+
+fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
+    let prefix = format!("{key}:");
+    line.strip_prefix(prefix.as_str())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SAMPLE: &str = r"
+roles:
+  - name: webserver
+    src: https://github.com/geerlingguy/ansible-role-apache
+    version: 3.2.0
+
+  - name: database
+    src: https://github.com/geerlingguy/ansible-role-mysql.git
+    version: v4.0.0
+
+  - name: galaxy_role
+    src: geerlingguy.java
+
+  - src: https://github.com/owner/role-without-version
+
+collections:
+  - name: community.general
+    version: '>=7.0.0'
+  - name: ansible.posix
+    version: '1.5.4'
+";
+
+    #[test]
+    fn extracts_github_roles() {
+        let deps = extract(SAMPLE);
+        let apache = deps.iter().find(|d| d.dep_name == "webserver").unwrap();
+        assert_eq!(apache.current_value, "3.2.0");
+        assert_eq!(
+            apache.source,
+            AnsibleGalaxySource::GitHub {
+                owner_repo: "geerlingguy/ansible-role-apache".to_owned()
+            }
+        );
+        assert!(apache.skip_reason.is_none());
+    }
+
+    #[test]
+    fn strips_git_suffix() {
+        let deps = extract(SAMPLE);
+        let mysql = deps.iter().find(|d| d.dep_name == "database").unwrap();
+        assert_eq!(
+            mysql.source,
+            AnsibleGalaxySource::GitHub {
+                owner_repo: "geerlingguy/ansible-role-mysql".to_owned()
+            }
+        );
+        assert_eq!(mysql.current_value, "v4.0.0");
+    }
+
+    #[test]
+    fn galaxy_roles_skipped() {
+        let deps = extract(SAMPLE);
+        let galaxy = deps.iter().find(|d| d.dep_name == "galaxy_role").unwrap();
+        assert_eq!(
+            galaxy.skip_reason,
+            Some(AnsibleGalaxySkipReason::GalaxyHosted)
+        );
+    }
+
+    #[test]
+    fn no_version_skipped() {
+        let deps = extract(SAMPLE);
+        let no_ver = deps
+            .iter()
+            .find(|d| d.dep_name.contains("role-without-version"))
+            .unwrap();
+        assert_eq!(no_ver.skip_reason, Some(AnsibleGalaxySkipReason::NoVersion));
+    }
+
+    #[test]
+    fn collections_skipped_as_galaxy() {
+        let deps = extract(SAMPLE);
+        let cg = deps.iter().find(|d| d.dep_name == "community.general");
+        // Collections without GitHub src are GalaxyHosted
+        assert!(cg.is_some());
+        assert_eq!(
+            cg.unwrap().skip_reason,
+            Some(AnsibleGalaxySkipReason::GalaxyHosted)
+        );
+    }
+
+    #[test]
+    fn empty_content_returns_no_deps() {
+        assert!(extract("").is_empty());
+    }
+}

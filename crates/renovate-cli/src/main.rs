@@ -1897,6 +1897,104 @@ async fn process_repo(
         }
     }
 
+    // ── Ansible Galaxy (requirements.yml) ────────────────────────────────────
+    for ag_path in manager_files(&detected, "ansible-galaxy") {
+        match client.get_raw_file(owner, repo, &ag_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::ansible_galaxy::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %ag_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted ansible-galaxy role deps"
+                );
+                // Only GitHub-URL-sourced roles are actionable right now.
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
+                    .iter()
+                    .filter_map(|d| {
+                        if let renovate_core::extractors::ansible_galaxy::AnsibleGalaxySource::GitHub { owner_repo } = &d.source {
+                            Some(github_tags_datasource::GithubActionsDepInput {
+                                dep_name: owner_repo.clone(),
+                                current_value: d.current_value.clone(),
+                            })
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                let gh_updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &gh_inputs,
+                    gh_api_base,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<String, (bool, Option<String>, Option<String>)> = {
+                    let mut m = HashMap::new();
+                    for r in gh_updates {
+                        match r.summary {
+                            Ok(s) => {
+                                m.insert(r.dep_name, (s.update_available, s.latest, None));
+                            }
+                            Err(e) => {
+                                m.insert(r.dep_name, (false, None, Some(e.to_string())));
+                            }
+                        }
+                    }
+                    m
+                };
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = if let Some(reason) = &dep.skip_reason {
+                        output::DepStatus::Skipped {
+                            reason: format!("{reason:?}").to_lowercase(),
+                        }
+                    } else if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        output::DepStatus::Skipped {
+                            reason: "ignored".to_owned(),
+                        }
+                    } else {
+                        let gh_key = if let renovate_core::extractors::ansible_galaxy::AnsibleGalaxySource::GitHub { owner_repo } = &dep.source {
+                            Some(owner_repo.as_str())
+                        } else { None };
+                        match gh_key.and_then(|k| update_map.get(k)) {
+                            Some((true, Some(latest), _)) => output::DepStatus::UpdateAvailable {
+                                current: dep.current_value.clone(),
+                                latest: latest.clone(),
+                            },
+                            Some((false, latest, None)) => output::DepStatus::UpToDate {
+                                latest: latest.clone(),
+                            },
+                            Some((_, _, Some(e))) => {
+                                output::DepStatus::LookupError { message: e.clone() }
+                            }
+                            _ => output::DepStatus::UpToDate { latest: None },
+                        }
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: ag_path.clone(),
+                    manager: "ansible-galaxy".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%ag_path, "requirements.yml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%ag_path, %err, "failed to fetch requirements.yml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── asdf (.tool-versions) ─────────────────────────────────────────────────
     for asdf_path in manager_files(&detected, "asdf") {
         match client.get_raw_file(owner, repo, &asdf_path).await {

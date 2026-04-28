@@ -157,6 +157,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.pre-commit-config\.ya?ml$"],
     },
     ManagerDef {
+        name: "ansible-galaxy",
+        patterns: &[r"(^|/)(galaxy|requirements)(\.ansible)?\.ya?ml$"],
+    },
+    ManagerDef {
         name: "asdf",
         patterns: &[r"(^|/)\.tool-versions$"],
     },
