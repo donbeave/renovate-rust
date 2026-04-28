@@ -1,6 +1,6 @@
 You are working in the renovate-rust repository. Your job is to steadily build a production-quality Rust replacement for renovatebot/renovate.
 
-Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Only stop when blocked by missing credentials, unavailable network, or an external service requirement that cannot be avoided.
+Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Never stop because of missing credentials, unavailable network, or an external service requirement. Document the blocker, skip that blocked slice, and continue with another local/offline slice that can move the project forward.
 
 Repository rules:
 - Follow `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, and `COMMITS.md`.
