@@ -27,7 +27,7 @@ use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::bitrise as bitrise_datasource;
-use renovate_core::datasources::crates_io::{self, DepInput};
+use renovate_core::datasources::crates_io;
 use renovate_core::datasources::docker_hub as docker_datasource;
 use renovate_core::datasources::github_releases as github_releases_datasource;
 use renovate_core::datasources::github_tags as github_tags_datasource;
@@ -341,57 +341,76 @@ async fn process_repo(
     let mut had_error = false;
 
     // ── Cargo ─────────────────────────────────────────────────────────────────
-    for cargo_file_path in manager_files(&detected, "cargo") {
-        match client.get_raw_file(owner, repo, &cargo_file_path).await {
-            Ok(Some(raw)) => match cargo_extractor::extract(&raw.content) {
-                Ok(deps) => {
-                    let actionable: Vec<_> = deps
-                        .iter()
-                        .filter(|d| {
-                            d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name)
-                        })
-                        .collect();
-                    tracing::debug!(
-                        repo = %repo_slug, file = %cargo_file_path,
-                        total = deps.len(), actionable = actionable.len(),
-                        "extracted cargo dependencies"
-                    );
-                    let dep_inputs: Vec<DepInput> = actionable
-                        .iter()
-                        .map(|d| DepInput {
-                            dep_name: d.dep_name.clone(),
-                            package_name: d.package_name.clone(),
-                            constraint: d.current_value.clone(),
-                        })
-                        .collect();
-                    let updates = crates_io::fetch_updates_concurrent(
-                        http,
-                        &dep_inputs,
-                        crates_io::CRATES_IO_SPARSE_INDEX,
-                        10,
-                    )
-                    .await;
-                    let update_map: HashMap<_, _> = updates
-                        .into_iter()
-                        .map(|r| (r.dep_name, r.summary))
-                        .collect();
-                    repo_report.files.push(output::FileReport {
-                        path: cargo_file_path.clone(),
-                        manager: "cargo".into(),
-                        deps: build_dep_reports_cargo(&deps, &actionable, &update_map),
-                    });
+    // Two-pass: deduplicate crate lookups across Cargo workspace members.
+    {
+        let cargo_files = manager_files(&detected, "cargo");
+        let mut cargo_file_deps: Vec<(
+            String,
+            Vec<renovate_core::extractors::cargo::ExtractedDep>,
+        )> = Vec::new();
+        for cargo_file_path in &cargo_files {
+            match client.get_raw_file(owner, repo, cargo_file_path).await {
+                Ok(Some(raw)) => match cargo_extractor::extract(&raw.content) {
+                    Ok(deps) => cargo_file_deps.push((cargo_file_path.clone(), deps)),
+                    Err(err) => tracing::warn!(repo=%repo_slug, file=%cargo_file_path, %err,
+                        "failed to parse Cargo.toml"),
+                },
+                Ok(None) => {
+                    tracing::warn!(repo=%repo_slug, file=%cargo_file_path, "Cargo.toml not found")
                 }
                 Err(err) => {
-                    tracing::warn!(repo=%repo_slug, file=%cargo_file_path, %err, "failed to parse Cargo.toml")
+                    tracing::error!(repo=%repo_slug, file=%cargo_file_path, %err,
+                        "failed to fetch Cargo.toml");
+                    had_error = true;
                 }
-            },
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%cargo_file_path, "Cargo.toml not found")
             }
-            Err(err) => {
-                tracing::error!(repo=%repo_slug, file=%cargo_file_path, %err, "failed to fetch Cargo.toml");
-                had_error = true;
-            }
+        }
+        let unique_crate_names: Vec<String> = {
+            let mut seen = std::collections::HashSet::new();
+            cargo_file_deps
+                .iter()
+                .flat_map(|(_, deps)| deps.iter())
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                .filter(|d| seen.insert(d.package_name.clone()))
+                .map(|d| d.package_name.clone())
+                .collect()
+        };
+        tracing::debug!(
+            repo = %repo_slug,
+            files = cargo_file_deps.len(),
+            unique_crates = unique_crate_names.len(),
+            "fetching crate versions (deduplicated)"
+        );
+        let versions_cache = crates_io::fetch_versions_batch(
+            http,
+            &unique_crate_names,
+            crates_io::CRATES_IO_SPARSE_INDEX,
+            10,
+        )
+        .await;
+        for (cargo_file_path, deps) in cargo_file_deps {
+            let actionable: Vec<_> = deps
+                .iter()
+                .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
+                .collect();
+            let update_map: HashMap<_, Result<renovate_core::versioning::cargo::UpdateSummary, _>> =
+                actionable
+                    .iter()
+                    .map(|d| {
+                        let summary = versions_cache
+                            .get(&d.package_name)
+                            .map(|entry| crates_io::summary_from_cache(&d.current_value, entry))
+                            .ok_or_else(|| {
+                                crates_io::CratesIoError::NotFound(d.package_name.clone())
+                            });
+                        (d.dep_name.clone(), summary)
+                    })
+                    .collect();
+            repo_report.files.push(output::FileReport {
+                path: cargo_file_path.clone(),
+                manager: "cargo".into(),
+                deps: build_dep_reports_cargo(&deps, &actionable, &update_map),
+            });
         }
     }
 

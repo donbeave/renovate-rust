@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0162  | 2026-04-28 | Cargo cross-file dedup + `crates_io::fetch_versions_batch` | Complete | See below. |
 | 0161  | 2026-04-28 | npm cross-file dedup + `fetch_versions_batch` API | Complete | See below. |
 | 0160  | 2026-04-28 | JSR datasource + endoflife-date datasource | Complete | See below. |
 | 0159  | 2026-04-28 | Conda datasource (Anaconda API) + pixi conda dep activation | Complete | See below. |
@@ -3107,6 +3108,27 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0162 - Cargo cross-file request deduplication
+
+### What landed
+- `crates/renovate-core/src/datasources/crates_io.rs`:
+  - `fetch_versions_batch(names, index_base, concurrency)` — batch version fetch.
+  - `summary_from_cache(constraint, versions)` — summary from cached versions.
+  - `CrateVersionsEntry` type alias.
+  - `CratesIoError::NotFound` variant.
+- `main.rs` cargo pipeline refactored to three passes (same pattern as npm):
+  1. Fetch all `Cargo.toml` files and extract deps.
+  2. Collect unique crate names, call `fetch_versions_batch` once.
+  3. Build per-file reports using `summary_from_cache`.
+
+### Impact
+- Reduces crates.io index requests from O(files × crates) to O(unique crates).
+- Significant for Rust workspaces with multiple crates sharing dependencies.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1140 passed
 
 ## Slice 0161 - npm cross-file request deduplication
 

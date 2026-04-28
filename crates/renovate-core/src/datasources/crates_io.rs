@@ -20,6 +20,7 @@
 //!
 //! The response body is newline-delimited JSON: one `CrateRecord` per line.
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use serde::Deserialize;
@@ -41,6 +42,9 @@ pub enum CratesIoError {
 
     #[error("Failed to parse crate index record: {0}")]
     Parse(String),
+
+    #[error("crate '{0}' not found in versions cache")]
+    NotFound(String),
 }
 
 /// A single version record from the sparse index.
@@ -172,6 +176,67 @@ pub async fn fetch_updates_concurrent(
         }
     }
     results
+}
+
+/// Cached versions entry: a list of non-yanked version strings.
+pub type CrateVersionsEntry = Vec<String>;
+
+/// Fetch versions for a batch of unique crate names concurrently.
+///
+/// Returns a `HashMap` from crate name to non-yanked version strings.
+/// Crates that fail to fetch are omitted from the result.
+/// Use for cross-file deduplication in Cargo workspaces.
+pub async fn fetch_versions_batch(
+    http: &HttpClient,
+    crate_names: &[String],
+    index_base: &str,
+    concurrency: usize,
+) -> HashMap<String, CrateVersionsEntry> {
+    if crate_names.is_empty() {
+        return HashMap::new();
+    }
+
+    let sem = Arc::new(Semaphore::new(concurrency));
+    let mut set: JoinSet<(String, Option<CrateVersionsEntry>)> = JoinSet::new();
+
+    for name in crate_names {
+        let http = http.clone();
+        let sem = Arc::clone(&sem);
+        let name = name.clone();
+        let index_base = index_base.to_owned();
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let result = fetch_versions(&http, &name, &index_base).await;
+            let entry = result.ok().map(|records| {
+                records
+                    .into_iter()
+                    .filter(|r| !r.yanked)
+                    .map(|r| r.vers)
+                    .collect()
+            });
+            (name, entry)
+        });
+    }
+
+    let mut cache = HashMap::with_capacity(crate_names.len());
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((name, Some(entry))) => {
+                cache.insert(name, entry);
+            }
+            Ok((name, None)) => {
+                tracing::debug!(crate_name = %name, "crates.io fetch failed (crate skipped)")
+            }
+            Err(join_err) => tracing::error!(%join_err, "crates.io batch fetch task panicked"),
+        }
+    }
+    cache
+}
+
+/// Compute an `UpdateSummary` from a pre-fetched versions cache entry.
+pub fn summary_from_cache(constraint: &str, versions: &CrateVersionsEntry) -> UpdateSummary {
+    update_summary(constraint, versions)
 }
 
 fn parse_index_body(body: &str) -> Result<Vec<CrateRecord>, CratesIoError> {
