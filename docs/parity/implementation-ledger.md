@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0029  | 2026-04-28 | Glob-based `ignorePaths` matching (globset)     | Complete | See below. |
 | 0028  | 2026-04-28 | Run summary totals + `--quiet` mode            | Complete | See below. |
 | 0027  | 2026-04-28 | Maven pom.xml extractor + Maven Central datasource | Complete | See below. |
 | 0026  | 2026-04-28 | pyproject.toml (PEP 621/735) extractor + pep621 manager | Complete | See below. |
@@ -49,6 +50,40 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0029 - Glob-based `ignorePaths` matching (globset)
+
+### Renovate reference
+- `lib/config/options/index.ts` — `ignorePaths` default:
+  `['**/node_modules/**', '**/__tests__/**']`; patterns use minimatch.
+
+### What landed
+- Added `globset = "0.4.18"` workspace dependency.
+- `crates/renovate-core/src/repo_config.rs`:
+  - `PathMatcher` struct — pre-compiles `ignorePaths` patterns at construction
+    time, separating glob patterns (contain `*`, `?`, or `[`) from plain-prefix
+    patterns (trailing `/` stripped). Glob patterns compiled into a `GlobSet`
+    via `globset::GlobSetBuilder`; prefix patterns checked with `starts_with`.
+  - `RepoConfig::build_path_matcher() -> PathMatcher` — public method for
+    efficient batch checking (build once, check many).
+  - `RepoConfig::is_path_ignored` updated to call `build_path_matcher()`.
+  - `RepoConfig::ignore_paths` doc comment updated to describe glob support.
+  - 9 new tests: `**/node_modules/**`, `**/*.spec.ts`, `**/test/**`,
+    rooted `test/**`, trailing-slash stripping, mixed glob+prefix, empty,
+    integration with `RepoConfig::parse`.
+- `crates/renovate-cli/src/main.rs` — file-list filter uses
+  `repo_cfg.build_path_matcher()` once before the `filter()` iterator rather
+  than calling `is_path_ignored` (which rebuilt the matcher) per file.
+
+### What was intentionally deferred
+- Brace expansion `{a,b}` (globset supports it via `GlobOptions`; not needed yet).
+- Case-insensitive matching on Windows.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (307 passed)
 
 ## Slice 0028 - Run summary totals + `--quiet` mode
 

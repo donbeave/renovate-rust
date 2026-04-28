@@ -285,9 +285,11 @@ async fn process_repo(
     };
 
     // Filter out paths the repo config asks to ignore before detection.
+    // Build the path matcher once so glob compilation is amortized.
+    let path_matcher = repo_cfg.build_path_matcher();
     let filtered_files: Vec<String> = files
         .into_iter()
-        .filter(|f| !repo_cfg.is_path_ignored(f))
+        .filter(|f| !path_matcher.is_ignored(f))
         .collect();
 
     let detected = managers::detect(&filtered_files);

@@ -9,6 +9,7 @@
 //! platform client's file-reading capability, and parses the config content
 //! into a typed `RepoConfig` struct.
 
+use globset::{Glob, GlobSet, GlobSetBuilder};
 use serde::Deserialize;
 
 use crate::config::GlobalConfig;
@@ -48,9 +49,63 @@ pub struct RepoConfig {
     pub enabled: bool,
     /// Dependency names to skip during update lookups.  Exact string match.
     pub ignore_deps: Vec<String>,
-    /// File path patterns to exclude from scanning.  Stored as-is for now;
-    /// the caller may use them for glob/regex matching.
+    /// File path patterns to exclude from scanning.  Patterns follow
+    /// minimatch/globset syntax (`**/test/**`, `**/*.spec.ts`, etc.).  Plain
+    /// paths (no glob characters) are treated as prefix matches.
     pub ignore_paths: Vec<String>,
+}
+
+/// Compiled path-ignore matcher built from a `RepoConfig`.
+///
+/// Separates plain-prefix patterns from glob patterns at construction time so
+/// matching a single path is O(patterns) rather than building a GlobSet per
+/// call.
+///
+/// Renovate reference: `lib/config/options/index.ts` — `ignorePaths`.
+#[derive(Debug)]
+pub struct PathMatcher {
+    prefixes: Vec<String>,
+    globs: GlobSet,
+}
+
+impl PathMatcher {
+    /// Compile `patterns` into a `PathMatcher`.
+    ///
+    /// Patterns containing `*`, `?`, or `[` are compiled as globset globs;
+    /// all others are treated as path prefixes (trailing `/` is stripped).
+    pub fn new(patterns: &[String]) -> Self {
+        let mut prefixes = Vec::new();
+        let mut glob_builder = GlobSetBuilder::new();
+
+        for raw in patterns {
+            let pattern = raw.trim_end_matches('/');
+            if pattern.contains('*') || pattern.contains('?') || pattern.contains('[') {
+                if let Ok(g) = Glob::new(pattern) {
+                    glob_builder.add(g);
+                }
+            } else {
+                prefixes.push(pattern.to_owned());
+            }
+        }
+
+        let globs = glob_builder.build().unwrap_or_else(|_| {
+            GlobSetBuilder::new()
+                .build()
+                .expect("empty globset always builds")
+        });
+
+        PathMatcher { prefixes, globs }
+    }
+
+    /// Returns `true` when `path` matches any ignore pattern.
+    pub fn is_ignored(&self, path: &str) -> bool {
+        if self.globs.is_match(path) {
+            return true;
+        }
+        self.prefixes
+            .iter()
+            .any(|p| path == p || path.starts_with(&format!("{p}/")))
+    }
 }
 
 impl RepoConfig {
@@ -106,14 +161,21 @@ impl Default for RepoConfig {
 }
 
 impl RepoConfig {
+    /// Build a compiled `PathMatcher` from this config's `ignore_paths`.
+    ///
+    /// Call this once and reuse the result when checking many paths (e.g. the
+    /// repo file list), rather than calling `is_path_ignored` in a loop.
+    pub fn build_path_matcher(&self) -> PathMatcher {
+        PathMatcher::new(&self.ignore_paths)
+    }
+
     /// Return `true` when a file path should be excluded from scanning.
     ///
-    /// Currently uses exact string prefix matching; a later slice will add
-    /// proper glob/minimatch support.
+    /// Supports globset patterns (`**/test/**`, `**/*.spec.ts`) and plain
+    /// path prefixes (`vendor`, `packages/legacy`).  For large file lists,
+    /// prefer [`build_path_matcher`] to amortize glob compilation.
     pub fn is_path_ignored(&self, path: &str) -> bool {
-        self.ignore_paths
-            .iter()
-            .any(|p| path == p || path.starts_with(p.trim_end_matches('/')))
+        self.build_path_matcher().is_ignored(path)
     }
 }
 
@@ -300,5 +362,69 @@ mod tests {
         let c = RepoConfig::parse(r#"{"ignorePaths": ["vendor"]}"#);
         assert!(c.is_path_ignored("vendor/react/index.js"));
         assert!(!c.is_path_ignored("src/vendor.ts"));
+    }
+
+    // ── PathMatcher glob tests ────────────────────────────────────────────────
+
+    #[test]
+    fn glob_double_star_node_modules() {
+        let m = PathMatcher::new(&["**/node_modules/**".to_owned()]);
+        assert!(m.is_ignored("node_modules/lodash/index.js"));
+        assert!(m.is_ignored("packages/foo/node_modules/bar/index.js"));
+        assert!(!m.is_ignored("src/foo.ts"));
+    }
+
+    #[test]
+    fn glob_spec_files() {
+        let m = PathMatcher::new(&["**/*.spec.ts".to_owned()]);
+        assert!(m.is_ignored("src/foo.spec.ts"));
+        assert!(m.is_ignored("tests/bar.spec.ts"));
+        assert!(!m.is_ignored("src/foo.ts"));
+        assert!(!m.is_ignored("src/foo.spec.js"));
+    }
+
+    #[test]
+    fn glob_tests_directory() {
+        let m = PathMatcher::new(&["**/test/**".to_owned()]);
+        assert!(m.is_ignored("src/test/helpers.ts"));
+        assert!(m.is_ignored("test/unit/foo.ts"));
+        assert!(!m.is_ignored("src/testing.ts"));
+    }
+
+    #[test]
+    fn glob_rooted_path_under_dir() {
+        let m = PathMatcher::new(&["test/**".to_owned()]);
+        assert!(m.is_ignored("test/foo.ts"));
+        assert!(!m.is_ignored("src/test/foo.ts")); // rooted glob, not deep
+    }
+
+    #[test]
+    fn prefix_with_trailing_slash_stripped() {
+        let m = PathMatcher::new(&["vendor/".to_owned()]);
+        assert!(m.is_ignored("vendor/react/index.js"));
+        assert!(!m.is_ignored("src/vendor.ts"));
+    }
+
+    #[test]
+    fn mixed_glob_and_prefix_patterns() {
+        let m = PathMatcher::new(&["**/node_modules/**".to_owned(), "vendor".to_owned()]);
+        assert!(m.is_ignored("node_modules/foo/bar.js"));
+        assert!(m.is_ignored("vendor/react.js"));
+        assert!(!m.is_ignored("src/foo.ts"));
+    }
+
+    #[test]
+    fn empty_patterns_ignore_nothing() {
+        let m = PathMatcher::new(&[]);
+        assert!(!m.is_ignored("anything/at/all.ts"));
+    }
+
+    #[test]
+    fn repo_config_build_path_matcher_uses_globs() {
+        let c = RepoConfig::parse(r#"{"ignorePaths": ["**/test/**", "vendor"]}"#);
+        let m = c.build_path_matcher();
+        assert!(m.is_ignored("src/test/unit.ts"));
+        assert!(m.is_ignored("vendor/lib.js"));
+        assert!(!m.is_ignored("src/main.ts"));
     }
 }
