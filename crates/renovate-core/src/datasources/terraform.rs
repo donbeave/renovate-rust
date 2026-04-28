@@ -233,16 +233,14 @@ async fn fetch_update_summary(
         TerraformLookupKind::Module => fetch_module_latest(&dep.name, http, registry_base).await?,
     };
 
-    // Strip constraint operators to get the lower bound for comparison.
-    let lower = lower_bound_version(&dep.current_value);
-    let update_available = latest
-        .as_deref()
-        .is_some_and(|l| !lower.is_empty() && l != lower);
-
+    let summary = crate::versioning::hashicorp::hashicorp_update_summary(
+        &dep.current_value,
+        latest.as_deref(),
+    );
     Ok(TerraformUpdateSummary {
-        current_value: dep.current_value.clone(),
-        latest,
-        update_available,
+        current_value: summary.current_value,
+        latest: summary.latest,
+        update_available: summary.update_available,
     })
 }
 
@@ -258,13 +256,6 @@ fn split_provider_name(name: &str) -> Result<(&str, &str), TerraformError> {
 }
 
 /// Extract the lower-bound version string from a HashiCorp constraint.
-fn lower_bound_version(constraint: &str) -> &str {
-    let stripped = constraint
-        .trim()
-        .trim_start_matches(['~', '>', '<', '=', '!', ' ']);
-    stripped.split(',').next().unwrap_or("").trim()
-}
-
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{method, path, query_param};
@@ -374,9 +365,10 @@ mod tests {
 
     #[test]
     fn lower_bound_tilde_gt() {
-        assert_eq!(lower_bound_version("~> 5.0"), "5.0");
-        assert_eq!(lower_bound_version(">= 2.0.0"), "2.0.0");
-        assert_eq!(lower_bound_version("= 3.1.4"), "3.1.4");
+        use crate::versioning::hashicorp::lower_bound;
+        assert_eq!(lower_bound("~> 5.0").as_deref(), Some("5.0"));
+        assert_eq!(lower_bound(">= 2.0.0").as_deref(), Some("2.0.0"));
+        assert_eq!(lower_bound("= 3.1.4").as_deref(), Some("3.1.4"));
     }
 
     #[test]

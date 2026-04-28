@@ -1361,10 +1361,40 @@ Pick whichever can be completed in one loop:
 
 Pick whichever can be completed in one loop:
 
+## Slice 0043 - HashiCorp versioning module + Terraform datasource integration
+
+### Renovate reference
+- `lib/modules/versioning/hashicorp/convertor.ts` — `hashicorp2npm` conversion rules
+- `lib/modules/versioning/hashicorp/index.ts`    — `isValid`, `matches`, `getSatisfyingVersion`
+
+### What landed
+- `crates/renovate-core/src/versioning/hashicorp.rs` — HashiCorp constraint parser:
+  - Parses comma-separated constraints: `~> 5.0`, `>= 2.0.0`, `= 3.1.4`, `!= ...`, etc.
+  - `lower_bound(constraint)` → `Option<String>`: extracts the pinned lower bound.
+  - `parse_version(v)` pads 1- or 2-component versions to 3 components for semver compare.
+  - `hashicorp_update_summary(current, latest)`: semver-orders `latest > lower_bound`.
+  - Handles `~> 5` (major-only: lower bound `5.0.0`), `~> 5.0` (`5.0.0`), `~> 5.0.1` (`5.0.1`).
+- `crates/renovate-core/src/datasources/terraform.rs` — wired to `hashicorp_update_summary`.
+  Removed the old `lower_bound_version` string-comparison helper; tests updated.
+
+### Key correctness improvements
+- `~> 5.0` with latest `5.7.3`: semver comparison `5.7.3 > 5.0.0` → update_available.
+- `~> 5.7.3` with latest `5.7.3`: same lower bound → no update.
+- `>= 4.0.0, < 5.0.0` with latest `4.5.0`: lower bound `4.0.0`, `4.5.0 > 4.0.0` → update.
+- Old string comparison `l != lower` was correct most of the time but semantically wrong for
+  multi-component constraints where the lower bound string didn't match the latest string.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 429 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
 1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 2. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
-3. **`hashicorp` versioning module**: implement HashiCorp's constraint syntax (`~>`, `>=`)
-   for Terraform provider version decisions.
-4. **Swift Package Manager** (`Package.swift` extractor + GitHub releases datasource).
+3. **Swift Package Manager** (`Package.swift` extractor + GitHub releases datasource).
+4. **CocoaPods** (`Podfile` extractor + CocoaPods trunk datasource).
