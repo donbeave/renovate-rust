@@ -1260,6 +1260,7 @@ dependencies = [
 name = "renovate-core"
 version = "0.0.0"
 dependencies = [
+ "base64",
  "json5",
  "reqwest",
  "serde",
@@ -1267,6 +1268,7 @@ dependencies = [
  "tempfile",
  "thiserror",
  "tokio",
+ "tracing",
  "wiremock",
 ]
 

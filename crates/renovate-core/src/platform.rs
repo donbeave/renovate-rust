@@ -1,15 +1,14 @@
 //! Platform client trait and implementations.
 //!
 //! Each supported platform (GitHub, GitLab, Bitbucket, …) implements
-//! [`PlatformClient`]. The trait is intentionally minimal; methods are added
-//! as parity slices land.
+//! [`PlatformClient`]. The trait grows as parity slices land.
 //!
 //! ## Object safety and dispatch
 //!
 //! `PlatformClient` uses `-> impl Future` RPIT which is not object-safe, so
 //! `Box<dyn PlatformClient>` does not compile. Use [`AnyPlatformClient`] for
-//! runtime dispatch — it is an enum that delegates to each concrete client
-//! with no heap allocation and full static dispatch inside each arm.
+//! runtime dispatch — it delegates to each concrete client with zero
+//! allocation overhead.
 
 pub mod github;
 
@@ -43,25 +42,42 @@ pub struct CurrentUser {
     pub login: String,
 }
 
+/// A raw (text) file fetched from the platform.
+#[derive(Debug, Clone)]
+pub struct RawFile {
+    /// Path within the repository.
+    pub path: String,
+    /// Decoded UTF-8 content.
+    pub content: String,
+}
+
 /// Common interface for all platform integrations.
 ///
 /// All methods are async. Use [`AnyPlatformClient`] when you need runtime
 /// dispatch across platforms.
 pub trait PlatformClient: Send + Sync {
     /// Verify authentication and return the currently-authenticated user.
-    ///
-    /// Used at startup to confirm the token is valid before any repository
-    /// work. Maps to Renovate's `initPlatform()` token check.
     fn get_current_user(
         &self,
     ) -> impl std::future::Future<Output = Result<CurrentUser, PlatformError>> + Send;
+
+    /// Fetch a single file from the repository at the default branch.
+    ///
+    /// Returns `Ok(None)` when the file does not exist (404), and `Err` for
+    /// other failures. This is a simplified implementation that uses the
+    /// platform's REST API; a later slice will replace it with git-based
+    /// reading after a repo clone.
+    fn get_raw_file(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+    ) -> impl std::future::Future<Output = Result<Option<RawFile>, PlatformError>> + Send;
 }
 
 /// Enum dispatch wrapper covering all supported platform clients.
 ///
 /// Constructed via [`AnyPlatformClient::create`] from a [`GlobalConfig`].
-/// Prefer this over `Box<dyn PlatformClient>` — it avoids heap allocation
-/// and keeps full monomorphization inside each match arm.
 #[derive(Debug, Clone)]
 pub enum AnyPlatformClient {
     Github(GithubClient),
@@ -69,9 +85,6 @@ pub enum AnyPlatformClient {
 
 impl AnyPlatformClient {
     /// Build the right platform client from a resolved [`GlobalConfig`].
-    ///
-    /// Returns `Err(PlatformError::NotSupported)` for platforms that do not
-    /// have a Rust implementation yet.
     pub fn create(config: &GlobalConfig) -> Result<Self, PlatformError> {
         match config.platform {
             Platform::Github => {
@@ -91,6 +104,18 @@ impl AnyPlatformClient {
     pub async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         match self {
             Self::Github(c) => c.get_current_user().await,
+        }
+    }
+
+    /// Fetch a single file from the repository.
+    pub async fn get_raw_file(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+    ) -> Result<Option<RawFile>, PlatformError> {
+        match self {
+            Self::Github(c) => c.get_raw_file(owner, repo, path).await,
         }
     }
 }

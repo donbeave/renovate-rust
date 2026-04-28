@@ -4,10 +4,11 @@
 //!
 //! Renovate reference: `lib/modules/platform/github/index.ts`.
 
+use base64::Engine as _;
 use serde::Deserialize;
 
 use crate::http::{HttpClient, HttpError};
-use crate::platform::{CurrentUser, PlatformClient, PlatformError};
+use crate::platform::{CurrentUser, PlatformClient, PlatformError, RawFile};
 
 /// Default GitHub API base URL.
 pub const GITHUB_API_BASE: &str = "https://api.github.com";
@@ -46,6 +47,13 @@ struct GithubUser {
     login: String,
 }
 
+/// GitHub Contents API response for a file.
+#[derive(Debug, Deserialize)]
+struct GithubContent {
+    content: Option<String>,
+    encoding: Option<String>,
+}
+
 impl PlatformClient for GithubClient {
     async fn get_current_user(&self) -> Result<CurrentUser, PlatformError> {
         let url = format!("{}/user", self.api_base);
@@ -56,6 +64,53 @@ impl PlatformClient for GithubClient {
             other => PlatformError::Http(other),
         })?;
         Ok(CurrentUser { login: user.login })
+    }
+
+    async fn get_raw_file(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+    ) -> Result<Option<RawFile>, PlatformError> {
+        let url = format!(
+            "{}/repos/{}/{}/contents/{}",
+            self.api_base, owner, repo, path
+        );
+        let result: Result<GithubContent, _> = self.http.get_json(&url).await;
+        match result {
+            Ok(content) => {
+                let raw = decode_github_content(content)?;
+                Ok(Some(RawFile {
+                    path: path.to_owned(),
+                    content: raw,
+                }))
+            }
+            Err(HttpError::Status { status, .. }) if status == reqwest::StatusCode::NOT_FOUND => {
+                Ok(None)
+            }
+            Err(e) => Err(PlatformError::Http(e)),
+        }
+    }
+}
+
+fn decode_github_content(c: GithubContent) -> Result<String, PlatformError> {
+    let raw_content = c.content.unwrap_or_default();
+    match c.encoding.as_deref() {
+        Some("base64") | None => {
+            // GitHub wraps lines at 60 chars; strip whitespace before decoding.
+            let stripped: String = raw_content
+                .chars()
+                .filter(|ch| !ch.is_whitespace())
+                .collect();
+            let bytes = base64::engine::general_purpose::STANDARD
+                .decode(stripped)
+                .map_err(|e| PlatformError::Unexpected(format!("base64 decode: {e}")))?;
+            String::from_utf8(bytes)
+                .map_err(|e| PlatformError::Unexpected(format!("utf8 decode: {e}")))
+        }
+        Some(enc) => Err(PlatformError::Unexpected(format!(
+            "unsupported encoding: {enc}"
+        ))),
     }
 }
 
@@ -113,7 +168,6 @@ mod tests {
 
         let client = GithubClient::with_endpoint("my-secret-token", server.uri()).unwrap();
         client.get_current_user().await.unwrap();
-        // wiremock asserts the expected call count on Drop
     }
 
     #[tokio::test]
@@ -130,5 +184,47 @@ mod tests {
         let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
         let user = client.get_current_user().await.unwrap();
         assert_eq!(user.login, "ghe-user");
+    }
+
+    #[tokio::test]
+    async fn get_raw_file_returns_decoded_content() {
+        let server = MockServer::start().await;
+        // Base64 of '{"extends":["config:recommended"]}'
+        let b64 = base64::engine::general_purpose::STANDARD
+            .encode(r#"{"extends":["config:recommended"]}"#);
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/renovate.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "content": b64,
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let file = client
+            .get_raw_file("owner", "repo", "renovate.json")
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(file.path, "renovate.json");
+        assert!(file.content.contains("config:recommended"));
+    }
+
+    #[tokio::test]
+    async fn get_raw_file_returns_none_on_404() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/owner/repo/contents/renovate.json"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let client = GithubClient::with_endpoint("token", server.uri()).unwrap();
+        let result = client
+            .get_raw_file("owner", "repo", "renovate.json")
+            .await
+            .unwrap();
+        assert!(result.is_none());
     }
 }

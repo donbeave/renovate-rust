@@ -24,11 +24,11 @@ use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
+use renovate_core::repo_config;
 
 #[tokio::main]
 async fn main() -> ExitCode {
-    // 1. Initialize logging before anything that might emit log records.
-    //    Reads LOG_LEVEL (default "info") and LOG_FORMAT (default pretty).
+    // 1. Initialize logging.
     match logging::init() {
         logging::InitResult::Ok => {}
         logging::InitResult::InvalidLevel(lvl) => {
@@ -37,16 +37,14 @@ async fn main() -> ExitCode {
         }
     }
 
-    // 2. Legacy-flag migration before the option parser sees argv.
+    // 2. Legacy-flag migration.
     let raw: Vec<String> = std::env::args().collect();
     let migrated = migrate::migrate_args(&raw);
 
     // 3. Parse flags.
     let cli = match Cli::try_parse_from(&migrated) {
         Ok(cli) => cli,
-        Err(err) => {
-            err.exit();
-        }
+        Err(err) => err.exit(),
     };
 
     if cli.version {
@@ -55,7 +53,6 @@ async fn main() -> ExitCode {
     }
 
     // 4. Global config pipeline: defaults → file → CLI.
-    //    Mirrors Renovate's parseConfigs in lib/workers/global/config/parse/index.ts.
     let cwd = std::env::current_dir().unwrap_or_else(|_| Path::new(".").to_path_buf());
     let config_file_env = std::env::var("RENOVATE_CONFIG_FILE").ok();
 
@@ -92,20 +89,20 @@ async fn main() -> ExitCode {
         "config resolved"
     );
 
-    // 5. If there are repositories to process, validate platform credentials.
-    //    Skipped when no repos are configured — matches Renovate's behavior of
-    //    only initializing the platform when there is actual work to do.
-    //    Later slices will add autodiscover here.
+    // 5. Exit early when there is nothing to do.
     if config.repositories.is_empty() {
         tracing::info!("no repositories configured — nothing to do");
         return ExitCode::SUCCESS;
     }
 
-    if config.token.is_none() {
+    // 6. Platform initialization: create client and validate credentials.
+    //    Mirrors Renovate's globalInitialize → initPlatform.
+    let maybe_client: Option<AnyPlatformClient> = if config.token.is_none() {
         tracing::warn!(
             platform = %config.platform,
             "no token configured — platform operations will fail"
         );
+        None
     } else {
         match AnyPlatformClient::create(&config) {
             Err(PlatformError::NotSupported(name)) => {
@@ -113,37 +110,76 @@ async fn main() -> ExitCode {
                     platform = %name,
                     "platform not yet implemented; skipping token validation"
                 );
+                None
             }
             Err(err) => {
                 tracing::error!(%err, "failed to create platform client");
                 eprintln!("renovate: platform initialization failed: {err}");
                 return ExitCode::from(1);
             }
-            Ok(client) => match client.get_current_user().await {
-                Ok(user) => {
-                    tracing::info!(
-                        login = %user.login,
-                        platform = %config.platform,
-                        "authenticated"
-                    );
+            Ok(client) => {
+                match client.get_current_user().await {
+                    Ok(user) => {
+                        tracing::info!(
+                            login = %user.login,
+                            platform = %config.platform,
+                            "authenticated"
+                        );
+                    }
+                    Err(PlatformError::Unauthorized) => {
+                        tracing::error!(platform = %config.platform, "token authentication failed");
+                        eprintln!("renovate: authentication failed — check your token");
+                        return ExitCode::from(1);
+                    }
+                    Err(err) => {
+                        tracing::error!(%err, "platform authentication error");
+                        eprintln!("renovate: platform error: {err}");
+                        return ExitCode::from(1);
+                    }
                 }
-                Err(PlatformError::Unauthorized) => {
-                    tracing::error!(
-                        platform = %config.platform,
-                        "token authentication failed"
-                    );
-                    eprintln!("renovate: authentication failed — check your token");
-                    return ExitCode::from(1);
-                }
-                Err(err) => {
-                    tracing::error!(%err, "platform authentication error");
-                    eprintln!("renovate: platform error: {err}");
-                    return ExitCode::from(1);
-                }
-            },
+                Some(client)
+            }
+        }
+    };
+
+    // 7. Process each repository.
+    let Some(client) = maybe_client else {
+        tracing::warn!("no platform client available; skipping repository processing");
+        return ExitCode::SUCCESS;
+    };
+
+    let mut had_error = false;
+    for repo_slug in &config.repositories {
+        let Some((owner, repo)) = repo_slug.split_once('/') else {
+            tracing::warn!(repo = %repo_slug, "skipping malformed repository slug (expected owner/repo)");
+            continue;
+        };
+
+        tracing::info!(repo = %repo_slug, "processing repository");
+
+        match repo_config::discover(&client, owner, repo, &config).await {
+            Ok(repo_config::RepoConfigResult::Found { path, .. }) => {
+                tracing::info!(repo = %repo_slug, config_path = %path, "found renovate config");
+            }
+            Ok(repo_config::RepoConfigResult::NeedsOnboarding) => {
+                tracing::info!(repo = %repo_slug, "needs onboarding — no config file found");
+            }
+            Ok(repo_config::RepoConfigResult::NotFound) => {
+                tracing::debug!(
+                    repo = %repo_slug,
+                    "no config file (require_config=optional, skipping)"
+                );
+            }
+            Err(err) => {
+                tracing::error!(repo = %repo_slug, %err, "error processing repository");
+                had_error = true;
+            }
         }
     }
 
-    // Later slices: dispatch repository workers.
-    ExitCode::SUCCESS
+    if had_error {
+        ExitCode::from(1)
+    } else {
+        ExitCode::SUCCESS
+    }
 }
