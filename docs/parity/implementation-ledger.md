@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0128  | 2026-04-28 | XcodeGen `project.yml` Swift Package extractor (GitHub Tags) | Complete | See below. |
 | 0127  | 2026-04-28 | Typst `.typ` package extractor + Typst registry datasource | Complete | See below. |
 | 0126  | 2026-04-28 | TFLint plugin `.tflint.hcl` extractor (GitHub Releases) | Complete | See below. |
 | 0125  | 2026-04-28 | Crow CI `.crow/*.yml` Docker image extractor | Complete | See below. |
@@ -3074,6 +3075,28 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0128 - XcodeGen `project.yml` Swift Package extractor
+
+### Renovate reference
+- `lib/modules/manager/xcodegen/extract.ts`
+- Pattern: `**/project.yml`
+- Datasources: GitHub Tags, GitLab Tags, Git Tags
+
+### What landed
+- `crates/renovate-core/src/extractors/xcodegen.rs` (new):
+  - 3-state scanner: `Scanning` → `InPackages` → `InPackageEntry`.
+  - Extracts `url:` / `github:` source and version fields (`from`, `exactVersion`, `version`, etc.).
+  - `build_source()` detects GitHub/GitLab from URL prefix.
+  - Skip reasons: `LocalPath`, `NoSemverVersion`, `MissingSource`.
+  - 7 unit tests.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod xcodegen`.
+- `crates/renovate-core/src/managers.rs`: added `xcodegen` with `(^|/)project\.yml$`.
+- `crates/renovate-cli/src/main.rs`: pipeline routes GitHub sources to `github_tags::fetch_latest_tag`; non-GitHub sources skipped for now.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 918 passed
 
 ## Slice 0127 - Typst `.typ` package extractor + Typst registry datasource
 

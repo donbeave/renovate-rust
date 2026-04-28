@@ -77,3 +77,4 @@ pub mod velaci;
 pub mod vendir;
 pub mod version_file;
 pub mod woodpecker;
+pub mod xcodegen;

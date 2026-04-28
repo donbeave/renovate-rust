@@ -238,6 +238,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"^\.woodpecker(?:/[^/]+)?\.ya?ml$"],
     },
     ManagerDef {
+        name: "xcodegen",
+        patterns: &[r"(^|/)project\.yml$"],
+    },
+    ManagerDef {
         name: "quadlet",
         patterns: &[r".+\.(container|image|volume)$"],
     },

@@ -4920,6 +4920,95 @@ async fn process_repo(
         }
     }
 
+    // ── XcodeGen (project.yml) ────────────────────────────────────────────────
+    for xg_path in manager_files(&detected, "xcodegen") {
+        match client.get_raw_file(owner, repo, &xg_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::xcodegen::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %xg_path,
+                    total = deps.len(),
+                    "extracted xcodegen swift package deps"
+                );
+                let mut dep_reports = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.name) {
+                        continue;
+                    }
+                    let gh_repo = match &dep.source {
+                        Some(renovate_core::extractors::xcodegen::XcodeGenSource::GitHub(r)) => {
+                            r.as_str()
+                        }
+                        _ => {
+                            dep_reports.push(output::DepReport {
+                                name: dep.name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: "non-github-source".into(),
+                                },
+                            });
+                            continue;
+                        }
+                    };
+                    let tag_result = renovate_core::datasources::github_tags::fetch_latest_tag(
+                        gh_repo,
+                        &gh_http,
+                        gh_api_base,
+                    )
+                    .await
+                    .map_err(|e| e.to_string());
+                    let status = match tag_result {
+                        Ok(Some(tag)) => {
+                            let stripped = tag.trim_start_matches('v');
+                            let clean_current = dep.current_value.trim_start_matches('v');
+                            let s =
+                                renovate_core::versioning::semver_generic::semver_update_summary(
+                                    clean_current,
+                                    Some(stripped),
+                                );
+                            if s.update_available {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest: stripped.to_owned(),
+                                }
+                            } else {
+                                output::DepStatus::UpToDate {
+                                    latest: Some(stripped.to_owned()),
+                                }
+                            }
+                        }
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError { message: e },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: xg_path.clone(),
+                        manager: "xcodegen".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%xg_path, "project.yml not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%xg_path, %err, "failed to fetch project.yml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Ansible task files (tasks/*.yml) ─────────────────────────────────────
     for ansible_path in manager_files(&detected, "ansible") {
         match client.get_raw_file(owner, repo, &ansible_path).await {
