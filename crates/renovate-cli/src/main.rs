@@ -2655,10 +2655,45 @@ async fn process_repo(
         }
     }
 
+    // Apply matchUpdateTypes packageRules blocking across all collected file reports.
+    apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
+
     (Some(repo_report), had_error)
 }
 
 // ── Report-building helpers ───────────────────────────────────────────────────
+
+/// Apply `packageRules` `matchUpdateTypes`+`enabled:false` blocking across all
+/// file reports.  For each `UpdateAvailable` dep, classifies the semver bump
+/// type and converts to `Skipped` when a matching rule blocks it.
+fn apply_update_blocking_to_report(
+    report: &mut output::RepoReport,
+    repo_cfg: &renovate_core::repo_config::RepoConfig,
+) {
+    use renovate_core::versioning::semver_generic::classify_semver_update;
+    for file in &mut report.files {
+        let manager = file.manager.clone();
+        for dep in &mut file.deps {
+            if let output::DepStatus::UpdateAvailable {
+                ref current,
+                ref latest,
+            } = dep.status
+                && let Some(update_type) = classify_semver_update(current, latest)
+            {
+                if !repo_cfg.is_update_blocked(&dep.name, update_type, &manager) {
+                    continue;
+                }
+                dep.status = output::DepStatus::Skipped {
+                    reason: format!(
+                        "blocked by packageRules (matchUpdateTypes: {:?})",
+                        update_type
+                    )
+                    .to_lowercase(),
+                };
+            }
+        }
+    }
+}
 
 /// Return the matched files for a given manager name (empty slice if not
 /// detected).

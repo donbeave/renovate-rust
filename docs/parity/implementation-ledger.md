@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0068  | 2026-04-28 | Wire matchUpdateTypes blocking into all manager dep report pipelines | Complete | See below. |
 | 0067  | 2026-04-28 | `packageRules` matchUpdateTypes filtering | Complete | See below. |
 | 0066  | 2026-04-28 | `UpdateType` classification + update type labels in CLI output | Complete | See below. |
 | 0065  | 2026-04-28 | `packageRules` parsing + `enabled: false` filtering | Complete | See below. |
@@ -2077,16 +2078,36 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 705 passed
 
+## Slice 0068 - Wire matchUpdateTypes blocking into all manager dep report pipelines
+
+### What landed
+- `crates/renovate-cli/src/main.rs`:
+  - `apply_update_blocking_to_report(report, repo_cfg)` — post-processes all `FileReport`s
+    after every manager's scan is complete. For each `UpdateAvailable` dep, classifies
+    the semver bump type (via `classify_semver_update`) and converts to `Skipped` if any
+    `packageRules` entry with `enabled: false` and `matchUpdateTypes` blocks it.
+  - Called once before the `(Some(repo_report), had_error)` return, covering all ~30
+    manager pipelines in a single pass.
+  - Skip reason includes the blocked update type for debuggability:
+    `"blocked by packageRules (matchUpdateTypes: major)"`.
+
+### What was intentionally deferred
+- Non-semver version strings (Docker tags, runner labels) — `classify_semver_update`
+  returns `None` and the dep is unaffected.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 705 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
 
-1. **Wire `is_update_blocked` into main.rs dep report builders**: apply matchUpdateTypes
-   filtering across all managers (cargo, npm, maven, etc.) using `classify_semver_update`.
-2. **Renovate option surface (first cut)**: port the option definitions
+1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
-3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
-4. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
-5. **`tekton` extractor**: Tekton pipeline bundle references.
-6. **Gradle `build.gradle` DSL extraction** (beyond version catalog): detect `implementation` and `api` calls.
+2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
+3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
+4. **`tekton` extractor**: Tekton pipeline bundle references.
+5. **`allowedVersions` in packageRules**: restrict updates to a semver range.
+6. **GitLab CI `include:` project components**: component dependency version tracking.
