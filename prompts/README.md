@@ -17,7 +17,7 @@ Claude Code scheduled tasks require Claude Code v2.1.72 or later. Check with:
 claude --version
 ```
 
-Start Claude Code in `~/Projects/renovate-rust`, then schedule the prompt every
+Start Claude Code in `~/Projects/renovate-rust-experiement`, then schedule the prompt every
 15 minutes:
 
 ```text
@@ -26,7 +26,7 @@ Start Claude Code in `~/Projects/renovate-rust`, then schedule the prompt every
 
 The `@renovate-rust/prompts/claude-loop-renovate-rust.md` reference tells
 Claude Code to read the prompt file as part of the loop instruction. If you
-start Claude Code from inside `~/Projects/renovate-rust/renovate-rust`, use
+start Claude Code from inside `~/Projects/renovate-rust-experiement/renovate-rust`, use
 `@prompts/claude-loop-renovate-rust.md` instead. If file references are not
 available in your Claude Code build, open the prompt file and paste its prompt
 body after `/loop 15m`.
@@ -46,7 +46,7 @@ most predictable behavior.
 Run the loop from this parent directory:
 
 ```text
-~/Projects/renovate-rust/
+~/Projects/renovate-rust-experiement/
   renovate/
   renovate-rust/
 ```
@@ -56,7 +56,7 @@ a sibling checkout. This checkout is required, should already exist, and must be
 treated as read-only by agents:
 
 ```text
-~/Projects/renovate-rust/
+~/Projects/renovate-rust-experiement/
   renovate/
   renovate-rust/
 ```

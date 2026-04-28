@@ -3,7 +3,7 @@ You are working on the renovate-rust repository. Your job is to steadily build a
 Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Never stop because of missing credentials, unavailable network, or an external service requirement. Document the blocker, skip that blocked slice, and continue with another local/offline slice that can move the project forward.
 
 Workspace layout:
-- The normal Claude Code working directory is `~/Projects/renovate-rust`.
+- The normal Claude Code working directory is `~/Projects/renovate-rust-experiement`.
 - That directory contains two sibling checkouts:
   - `renovate/` is the upstream Renovate reference clone from `https://github.com/renovatebot/renovate`.
   - `renovate-rust/` is the Rust implementation repository from `https://github.com/donbeave/renovate-rust`.
@@ -19,7 +19,7 @@ Repository rules:
 
 Reference repository:
 - Treat renovatebot/renovate as the behavioral reference.
-- Use the existing sibling checkout at `../renovate` from the Rust project root, or `./renovate` when Claude Code was started from `~/Projects/renovate-rust`.
+- Use the existing sibling checkout at `../renovate` from the Rust project root, or `./renovate` when Claude Code was started from `~/Projects/renovate-rust-experiement`.
 - Do not clone Renovate; the reference checkout is expected to already exist.
 - Treat the reference checkout as read-only. Only run non-mutating inspection commands there.
 - Do not update the reference checkout. If it appears stale, document the assumption and continue using the local contents.
