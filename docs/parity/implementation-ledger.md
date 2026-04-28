@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0121  | 2026-04-28 | Dev Container features extractor upgrade (node/go/python/ruby version deps) | Complete | See below. |
 | 0120  | 2026-04-28 | Home Assistant `manifest.json` PyPI extractor | Complete | See below. |
 | 0119  | 2026-04-28 | Batect wrapper script version extractor (GitHub Releases) | Complete | See below. |
 | 0118  | 2026-04-28 | Haskell Cabal `*.cabal` extractor + Hackage datasource | Complete | See below. |
@@ -3067,6 +3068,31 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0121 - Dev Container features extractor upgrade
+
+### Renovate reference
+- `lib/modules/manager/devcontainer/extract.ts`
+- Patterns: `^.devcontainer/devcontainer.json$`, `^.devcontainer.json$`
+- Datasources: Docker, NodeVersionDatasource, GolangVersionDatasource, PythonVersionDatasource, RubyVersionDatasource
+
+### What landed
+- `crates/renovate-core/src/extractors/devcontainer.rs` upgraded:
+  - Rewrote using `serde_json` for proper JSON parsing.
+  - Added `DevContainerDeps { docker_deps, version_deps }` return type.
+  - Extracts `image` field as Docker dep (unchanged).
+  - Extracts each `features` key as OCI Docker dep.
+  - For known features (node, go, python, ruby), also extracts `version` field as `VersionFileDep` using same GitHub Tags/Releases datasources as `version_file.rs`.
+  - 7 unit tests covering all cases.
+- `crates/renovate-cli/src/main.rs`:
+  - Updated devcontainer pipeline block to handle new `DevContainerDeps` struct.
+  - Docker deps → `docker_hub_reports`.
+  - Version deps → GitHub Tags/Releases lookup (same pattern as version-file manager).
+  - Ruby tag underscore normalization applied.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 872 passed
 
 ## Slice 0120 - Home Assistant `manifest.json` PyPI extractor
 

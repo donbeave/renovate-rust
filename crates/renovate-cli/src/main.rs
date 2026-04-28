@@ -3478,14 +3478,84 @@ async fn process_repo(
     for dc_path in manager_files(&detected, "devcontainer") {
         match client.get_raw_file(owner, repo, &dc_path).await {
             Ok(Some(raw)) => {
-                let deps: Vec<_> = renovate_core::extractors::devcontainer::extract(&raw.content)
-                    .into_iter()
-                    .collect();
-                tracing::debug!(repo = %repo_slug, file = %dc_path, total = deps.len(), "extracted devcontainer image");
+                let extracted = renovate_core::extractors::devcontainer::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %dc_path,
+                    docker = extracted.docker_deps.len(),
+                    version = extracted.version_deps.len(),
+                    "extracted devcontainer deps"
+                );
+                let mut dep_reports = docker_hub_reports(http, &extracted.docker_deps).await;
+
+                for vdep in &extracted.version_deps {
+                    use renovate_core::extractors::asdf::AsdfDatasource;
+                    let lookup_key = match &vdep.datasource {
+                        AsdfDatasource::GithubTags { repo, tag_strip } => {
+                            format!("{}|{}", repo, tag_strip)
+                        }
+                        AsdfDatasource::GithubReleases { repo, tag_strip } => {
+                            format!("{}|{}", repo, tag_strip)
+                        }
+                    };
+                    let (ds_repo, tag_strip) =
+                        lookup_key.split_once('|').unwrap_or((&lookup_key, ""));
+                    let tag_result = match &vdep.datasource {
+                        AsdfDatasource::GithubTags { .. } => {
+                            renovate_core::datasources::github_tags::fetch_latest_tag(
+                                ds_repo,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            .map_err(|e| e.to_string())
+                        }
+                        AsdfDatasource::GithubReleases { .. } => {
+                            github_releases_datasource::fetch_latest_release(
+                                ds_repo,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            .map_err(|e| e.to_string())
+                        }
+                    };
+                    let status = match tag_result {
+                        Ok(Some(tag)) => {
+                            let stripped = tag.trim_start_matches(tag_strip);
+                            let latest_ver = if vdep.tool == "ruby" {
+                                stripped.replace('_', ".")
+                            } else {
+                                stripped.to_owned()
+                            };
+                            let s =
+                                renovate_core::versioning::semver_generic::semver_update_summary(
+                                    &vdep.current_value,
+                                    Some(latest_ver.as_str()),
+                                );
+                            if s.update_available {
+                                output::DepStatus::UpdateAvailable {
+                                    current: vdep.current_value.clone(),
+                                    latest: latest_ver,
+                                }
+                            } else {
+                                output::DepStatus::UpToDate {
+                                    latest: Some(latest_ver),
+                                }
+                            }
+                        }
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError { message: e },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: vdep.tool.to_owned(),
+                        status,
+                    });
+                }
+
                 repo_report.files.push(output::FileReport {
                     path: dc_path.clone(),
                     manager: "devcontainer".into(),
-                    deps: docker_hub_reports(http, &deps).await,
+                    deps: dep_reports,
                 });
             }
             Ok(None) => {

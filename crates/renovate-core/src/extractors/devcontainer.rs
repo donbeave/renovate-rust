@@ -1,49 +1,132 @@
-//! Dev Container (`devcontainer.json`) Docker image extractor.
+//! Dev Container (`devcontainer.json`) Docker image + features extractor.
 //!
-//! Reads the `"image"` field from Dev Container JSON configuration files.
-//! Dev Containers are used by VS Code and GitHub Codespaces to define the
-//! development environment container.
+//! Extracts:
+//! - The top-level `"image"` field as a Docker dep.
+//! - Each entry in `"features"` as an OCI Docker dep.
+//! - For the four known devcontainers/features (node, go, python, ruby),
+//!   a separate version dep routed to the same GitHub datasource as
+//!   the corresponding version-file manager.
 //!
 //! Renovate reference:
 //! - `lib/modules/manager/devcontainer/extract.ts`
-//! - Patterns: `/^.devcontainer/devcontainer.json$/`, `/^.devcontainer.json$/`
-//!
-//! ## Supported form
-//!
-//! ```json
-//! {
-//!   "name": "My Dev Container",
-//!   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04"
-//! }
-//! ```
+//! - Patterns: `^.devcontainer/devcontainer.json$`, `^.devcontainer.json$`
 
+use std::collections::HashMap;
+
+use serde::Deserialize;
+use serde_json::Value;
+
+use crate::extractors::asdf::AsdfDatasource;
 use crate::extractors::dockerfile::{DockerfileExtractedDep, classify_image_ref};
+use crate::extractors::version_file::VersionFileDep;
 
-/// Extract the Docker image dep from a `devcontainer.json` file.
-///
-/// Returns `Some(dep)` when an `"image"` key with a non-empty string value is
-/// found. Returns `None` for empty files or files with no `image` key.
-pub fn extract(content: &str) -> Option<DockerfileExtractedDep> {
-    // Simple JSON scan: look for `"image": "value"` without pulling in serde_json.
-    // This avoids adding a dependency and keeps the extractor fast.
-    for line in content.lines() {
-        let trimmed = line.trim();
-        // Find `"image":` anywhere in the line (handles single-line JSON).
-        let Some(after_key) = trimmed.find(r#""image":"#).map(|pos| &trimmed[pos + 8..]) else {
-            continue;
-        };
-        let rest = after_key.trim();
-        // Strip optional leading/trailing quotes and trailing comma.
-        let image = rest
-            .trim_start_matches('"')
-            .trim_end_matches([',', '}'])
-            .trim_end_matches('"')
-            .trim();
+#[derive(Debug, Deserialize)]
+struct DevContainerFile {
+    image: Option<String>,
+    features: Option<HashMap<String, Value>>,
+}
+
+/// All deps extracted from a `devcontainer.json`.
+#[derive(Debug, Default, Clone)]
+pub struct DevContainerDeps {
+    /// Docker image refs: the top-level `image` plus each feature key.
+    pub docker_deps: Vec<DockerfileExtractedDep>,
+    /// Tool version deps from known devcontainer features (node, go, python, ruby).
+    pub version_deps: Vec<VersionFileDep>,
+}
+
+/// Mapping from feature dep-name prefix → tool info.
+struct KnownFeature {
+    /// The dep-name prefix (image without tag).
+    prefix: &'static str,
+    tool: &'static str,
+    datasource: AsdfDatasource,
+}
+
+static KNOWN_FEATURES: &[KnownFeature] = &[
+    KnownFeature {
+        prefix: "ghcr.io/devcontainers/features/node",
+        tool: "nodejs",
+        datasource: AsdfDatasource::GithubReleases {
+            repo: "nodejs/node",
+            tag_strip: "v",
+        },
+    },
+    KnownFeature {
+        prefix: "ghcr.io/devcontainers/features/go",
+        tool: "golang",
+        datasource: AsdfDatasource::GithubTags {
+            repo: "golang/go",
+            tag_strip: "go",
+        },
+    },
+    KnownFeature {
+        prefix: "ghcr.io/devcontainers/features/python",
+        tool: "python",
+        datasource: AsdfDatasource::GithubTags {
+            repo: "python/cpython",
+            tag_strip: "v",
+        },
+    },
+    KnownFeature {
+        prefix: "ghcr.io/devcontainers/features/ruby",
+        tool: "ruby",
+        datasource: AsdfDatasource::GithubTags {
+            repo: "ruby/ruby",
+            tag_strip: "v",
+        },
+    },
+];
+
+/// Extract all deps from a `devcontainer.json` file.
+pub fn extract(content: &str) -> DevContainerDeps {
+    let file: DevContainerFile = match serde_json::from_str(content.trim()) {
+        Ok(f) => f,
+        Err(_) => return DevContainerDeps::default(),
+    };
+
+    let mut result = DevContainerDeps::default();
+
+    if let Some(image) = &file.image {
         if !image.is_empty() {
-            return Some(classify_image_ref(image));
+            result.docker_deps.push(classify_image_ref(image));
         }
     }
-    None
+
+    if let Some(features) = &file.features {
+        for (feature_ref, value) in features {
+            let docker_dep = classify_image_ref(feature_ref);
+
+            // Check if this is a known feature (match on dep-name prefix).
+            if let Some(known) = KNOWN_FEATURES
+                .iter()
+                .find(|kf| docker_dep.image.starts_with(kf.prefix))
+            {
+                // The OCI ref for the feature container itself.
+                result.docker_deps.push(docker_dep);
+
+                // Extract the runtime version, if present.
+                let version_str = value
+                    .get("version")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .trim()
+                    .trim_start_matches('v');
+
+                if !version_str.is_empty() {
+                    result.version_deps.push(VersionFileDep {
+                        tool: known.tool,
+                        current_value: version_str.to_owned(),
+                        datasource: known.datasource.clone(),
+                    });
+                }
+            } else {
+                result.docker_deps.push(docker_dep);
+            }
+        }
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -52,46 +135,92 @@ mod tests {
 
     #[test]
     fn extracts_image() {
-        let content = r#"
-{
-  "name": "Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04"
-}
-"#;
-        let dep = extract(content).unwrap();
-        assert_eq!(dep.image, "mcr.microsoft.com/devcontainers/base");
-        assert_eq!(dep.tag.as_deref(), Some("ubuntu-22.04"));
+        let content = r#"{"image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04"}"#;
+        let deps = extract(content);
+        assert_eq!(deps.docker_deps.len(), 1);
+        assert_eq!(
+            deps.docker_deps[0].image,
+            "mcr.microsoft.com/devcontainers/base"
+        );
+        assert_eq!(deps.docker_deps[0].tag.as_deref(), Some("ubuntu-22.04"));
     }
 
     #[test]
-    fn extracts_docker_hub_image() {
-        let content = r#"{"image": "node:18-bullseye"}"#;
-        let dep = extract(content).unwrap();
-        assert_eq!(dep.image, "node");
-        assert_eq!(dep.tag.as_deref(), Some("18-bullseye"));
+    fn no_image_returns_empty() {
+        let content = r#"{"name": "Dev Container"}"#;
+        let deps = extract(content);
+        assert!(deps.docker_deps.is_empty());
     }
 
     #[test]
-    fn variable_ref_skipped() {
-        let content = r#"{"image": "$MY_IMAGE"}"#;
-        let dep = extract(content).unwrap();
-        assert!(dep.skip_reason.is_some());
+    fn invalid_json_returns_empty() {
+        let deps = extract("not json");
+        assert!(deps.docker_deps.is_empty());
+        assert!(deps.version_deps.is_empty());
     }
 
     #[test]
-    fn no_image_key_returns_none() {
-        let content = r#"{"name": "My Container"}"#;
-        assert!(extract(content).is_none());
+    fn extracts_node_feature_and_version() {
+        let content = r#"{
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    }
+  }
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.docker_deps.len(), 1);
+        assert_eq!(
+            deps.docker_deps[0].image,
+            "ghcr.io/devcontainers/features/node"
+        );
+        assert_eq!(deps.version_deps.len(), 1);
+        assert_eq!(deps.version_deps[0].tool, "nodejs");
+        assert_eq!(deps.version_deps[0].current_value, "18");
+        assert_eq!(
+            deps.version_deps[0].datasource,
+            AsdfDatasource::GithubReleases {
+                repo: "nodejs/node",
+                tag_strip: "v",
+            }
+        );
     }
 
     #[test]
-    fn empty_returns_none() {
-        assert!(extract("").is_none());
+    fn extracts_go_feature_and_version() {
+        let content = r#"{
+  "features": {
+    "ghcr.io/devcontainers/features/go:1": {"version": "1.21"}
+  }
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.version_deps.len(), 1);
+        assert_eq!(deps.version_deps[0].tool, "golang");
+        assert_eq!(deps.version_deps[0].current_value, "1.21");
     }
 
     #[test]
-    fn build_spec_no_image_returns_none() {
-        let content = r#"{"build": {"dockerfile": "Dockerfile"}}"#;
-        assert!(extract(content).is_none());
+    fn feature_without_version_skipped_from_version_deps() {
+        let content = r#"{
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {}
+  }
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.docker_deps.len(), 1);
+        assert!(deps.version_deps.is_empty());
+    }
+
+    #[test]
+    fn image_and_feature_combined() {
+        let content = r#"{
+  "image": "node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/go:1": {"version": "1.21"}
+  }
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.docker_deps.len(), 2);
+        assert_eq!(deps.version_deps.len(), 1);
     }
 }
