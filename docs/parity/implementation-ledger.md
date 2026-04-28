@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0151  | 2026-04-28 | Renovate config presets extractor + `helm-requirements` alias | Complete | See below. |
 | 0150  | 2026-04-28 | Glasskube package manifest extractor + packages datasource | Complete | See below. |
 | 0149  | 2026-04-28 | Crossplane package manifest extractor | Complete | See below. |
 | 0148  | 2026-04-28 | Bazel WORKSPACE `http_archive()` extractor (GitHub Tags + Releases) | Complete | See below. |
@@ -3097,6 +3098,28 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0151 - Renovate config presets extractor + `helm-requirements` alias
+
+### Renovate reference
+- `lib/modules/manager/renovate-config-presets/extract.ts`
+- Patterns: `renovate.json(5)`, `.renovaterc`, `.github/renovate.json(5)`, `.gitlab/renovate.json(5)`
+- Datasources: GitHub Tags, GitLab Tags
+
+### What landed
+- `crates/renovate-core/src/extractors/renovate_config_presets.rs` (new):
+  - `PRESET_STR_RE` (r##"..."##) — matches `"github>owner/repo#tag"` patterns.
+  - Extracts `github>` presets → GitHub Tags, `gitlab>` presets → GitLab Tags.
+  - Skips presets without `#tag` (UnspecifiedVersion) and internal presets.
+  - 5 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with all standard Renovate config filenames.
+- `helm-requirements` registered as manager name alias for `requirements.ya?ml`
+  (no new pipeline — helmv3 already processes these files).
+- `crates/renovate-cli/src/main.rs`: pipeline uses `github_tags`/`gitlab_tags` datasources.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1036 passed
 
 ## Slice 0150 - Glasskube package manifest extractor + packages datasource
 

@@ -556,6 +556,21 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "glasskube",
         patterns: &[r"(^|/)glasskube/.+\.ya?ml$"],
     },
+    ManagerDef {
+        name: "renovate-config-presets",
+        patterns: &[
+            r"(^|/)renovate\.json5?$",
+            r"(^|/)\.renovaterc(\.json5?)?$",
+            r"(^|/)\.github/renovate\.json5?$",
+            r"(^|/)\.gitlab/renovate\.json5?$",
+        ],
+    },
+    ManagerDef {
+        // helm-requirements handles Helm v2 requirements.yaml; already covered by
+        // helmv3 extractor, but registered here so users can reference this name.
+        name: "helm-requirements",
+        patterns: &[r"(^|/)requirements\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

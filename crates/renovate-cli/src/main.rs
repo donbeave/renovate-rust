@@ -7046,6 +7046,133 @@ async fn process_repo(
         }
     }
 
+    // ── Renovate config extends presets ───────────────────────────────────────
+    for rc_path in manager_files(&detected, "renovate-config-presets") {
+        match client.get_raw_file(owner, repo, &rc_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::renovate_config_presets::{
+                    PresetSkipReason, PresetSource,
+                };
+                let deps =
+                    renovate_core::extractors::renovate_config_presets::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.repo))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %rc_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted renovate config preset deps"
+                );
+                let mut dep_reports: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.repo.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: match reason {
+                                    PresetSkipReason::UnspecifiedVersion => {
+                                        "unspecified-version".to_owned()
+                                    }
+                                    PresetSkipReason::UnsupportedDatasource => {
+                                        "unsupported-datasource".to_owned()
+                                    }
+                                },
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.repo) {
+                        continue;
+                    }
+                    let status = match &dep.source {
+                        PresetSource::GitHub => {
+                            match github_tags_datasource::fetch_latest_tag(
+                                &dep.repo,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            {
+                                Ok(Some(tag)) => {
+                                    let stripped = tag.trim_start_matches('v');
+                                    let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                        dep.current_value.trim_start_matches('v'),
+                                        Some(stripped),
+                                    );
+                                    if s.update_available {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: dep.current_value.clone(),
+                                            latest: tag,
+                                        }
+                                    } else {
+                                        output::DepStatus::UpToDate { latest: Some(tag) }
+                                    }
+                                }
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                        PresetSource::GitLab => {
+                            match renovate_core::datasources::gitlab_tags::fetch_latest_tag(
+                                &dep.repo,
+                                http,
+                                renovate_core::datasources::gitlab_tags::GITLAB_API,
+                            )
+                            .await
+                            {
+                                Ok(Some(tag)) => {
+                                    let stripped = tag.trim_start_matches('v');
+                                    let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                        dep.current_value.trim_start_matches('v'),
+                                        Some(stripped),
+                                    );
+                                    if s.update_available {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: dep.current_value.clone(),
+                                            latest: tag,
+                                        }
+                                    } else {
+                                        output::DepStatus::UpToDate { latest: Some(tag) }
+                                    }
+                                }
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.repo.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: rc_path.clone(),
+                        manager: "renovate-config-presets".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::debug!(repo=%repo_slug, file=%rc_path, "renovate config not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%rc_path, %err, "failed to fetch renovate config");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── helm-requirements (Helm v2 requirements.yaml) ─────────────────────────
+    // Already handled by the helmv3 pipeline; register the manager name alias
+    // so detection works, but skip files already captured by helmv3.
+    // (No separate processing needed — helmv3 covers the same pattern.)
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 
