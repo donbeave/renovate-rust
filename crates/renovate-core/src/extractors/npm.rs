@@ -51,6 +51,10 @@ pub enum NpmDepType {
     Dev,
     Peer,
     Optional,
+    /// yarn `resolutions` override.
+    Resolutions,
+    /// npm 8+ `overrides` override.
+    Overrides,
 }
 
 /// A single extracted npm dependency.
@@ -85,6 +89,12 @@ struct PackageJson {
     peer_dependencies: BTreeMap<String, String>,
     #[serde(rename = "optionalDependencies", default)]
     optional_dependencies: BTreeMap<String, String>,
+    /// yarn `resolutions` block — flat `{ "pkg": "version" }`.
+    #[serde(default)]
+    resolutions: BTreeMap<String, String>,
+    /// npm 8+ `overrides` block — flat `{ "pkg": "version" }`.
+    #[serde(default)]
+    overrides: BTreeMap<String, String>,
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -102,6 +112,8 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
         (&pkg.dev_dependencies, NpmDepType::Dev),
         (&pkg.peer_dependencies, NpmDepType::Peer),
         (&pkg.optional_dependencies, NpmDepType::Optional),
+        (&pkg.resolutions, NpmDepType::Resolutions),
+        (&pkg.overrides, NpmDepType::Overrides),
     ] {
         for (name, value) in section {
             out.push(classify(name.clone(), value, dep_type));
@@ -283,5 +295,37 @@ mod tests {
         let json = r#"{ "dependencies": { "lodash": "^4" } }"#;
         let deps = extract_ok(json);
         assert_eq!(deps.len(), 1);
+    }
+
+    #[test]
+    fn extracts_yarn_resolutions() {
+        let json = r#"{
+          "dependencies": { "lodash": "^4.17.0" },
+          "resolutions": { "minimist": "^1.2.6", "lodash": ">=4.17.21" }
+        }"#;
+        let deps = extract_ok(json);
+        let resolutions: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_type == NpmDepType::Resolutions)
+            .collect();
+        assert_eq!(resolutions.len(), 2);
+        assert!(resolutions.iter().any(|d| d.name == "minimist"));
+        assert!(resolutions.iter().any(|d| d.name == "lodash"));
+    }
+
+    #[test]
+    fn extracts_npm_overrides() {
+        let json = r#"{
+          "overrides": { "semver": "^7.5.2", "tough-cookie": ">=4.1.3" }
+        }"#;
+        let deps = extract_ok(json);
+        let overrides: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_type == NpmDepType::Overrides)
+            .collect();
+        assert_eq!(overrides.len(), 2);
+        let semver = overrides.iter().find(|d| d.name == "semver").unwrap();
+        assert_eq!(semver.current_value, "^7.5.2");
+        assert!(semver.skip_reason.is_none());
     }
 }

@@ -1851,6 +1851,20 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 566 passed
 
+## Slice 0060 - npm `resolutions` (yarn) and `overrides` (npm 8+) support
+
+### What landed
+- Extended `extractors/npm.rs`:
+  - Added `Resolutions` and `Overrides` variants to `NpmDepType`.
+  - Added `resolutions` and `overrides` fields to `PackageJson` struct.
+  - Both sections are flat `{ "pkg": "version" }` maps, same format as `dependencies`.
+  - Included in the same dep-classification loop — no special handling needed.
+  - 2 new tests: `extracts_yarn_resolutions`, `extracts_npm_overrides`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 568 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1862,4 +1876,4 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`ansible-galaxy` GitHub-URL roles extractor**: `requirements.yml` with GitHub-sourced roles.
 5. **`tekton` extractor**: Tekton pipeline bundle references.
-6. **npm `resolutions`/`overrides` field**: yarn/npm overrides in package.json.
+6. **pep621 extras dependencies**: `[project.optional-dependencies]` in pyproject.toml.
