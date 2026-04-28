@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0164  | 2026-04-28 | Maven cross-file dedup for multi-module projects | Complete | See below. |
 | 0163  | 2026-04-28 | PyPI cross-file dedup for pip_requirements + pip-compile | Complete | See below. |
 | 0162  | 2026-04-28 | Cargo cross-file dedup + `crates_io::fetch_versions_batch` | Complete | See below. |
 | 0161  | 2026-04-28 | npm cross-file dedup + `fetch_versions_batch` API | Complete | See below. |
@@ -3109,6 +3110,27 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0164 - Maven cross-file deduplication for multi-module projects
+
+### What landed
+- `crates/renovate-core/src/datasources/maven.rs`:
+  - `fetch_latest_batch(dep_names, concurrency)` — fetches latest version for
+    a batch of unique `groupId:artifactId` coordinates concurrently.
+  - `summary_from_cache(current_version, latest)` — update summary from cache.
+  - `MavenLatestEntry` type alias.
+- `main.rs` maven pipeline refactored to three passes:
+  1. Fetch all pom.xml files and extract deps.
+  2. Collect unique coordinates, call `fetch_latest_batch` once.
+  3. Build per-file reports from cached latest versions.
+
+### Impact
+- Reduces Maven Central requests from O(files × coords) to O(unique coords).
+- Significant for Java multi-module projects with dozens of POMs.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1140 passed
 
 ## Slice 0163 - PyPI cross-file deduplication for pip_requirements + pip-compile
 

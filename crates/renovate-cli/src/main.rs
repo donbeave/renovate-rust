@@ -1487,53 +1487,77 @@ async fn process_repo(
     }
 
     // ── Maven (pom.xml) ───────────────────────────────────────────────────────
-    for maven_file_path in manager_files(&detected, "maven") {
-        match client.get_raw_file(owner, repo, &maven_file_path).await {
-            Ok(Some(raw)) => match maven_extractor::extract(&raw.content) {
-                Ok(deps) => {
-                    let actionable: Vec<_> = deps
-                        .iter()
-                        .filter(|d| {
-                            d.skip_reason.is_none()
-                                && !repo_cfg.is_dep_ignored(&d.dep_name)
-                                && !d.current_value.is_empty()
-                        })
-                        .collect();
-                    tracing::debug!(
-                        repo = %repo_slug, file = %maven_file_path,
-                        total = deps.len(), actionable = actionable.len(),
-                        "extracted maven dependencies"
-                    );
-                    let dep_inputs: Vec<maven_datasource::MavenDepInput> = actionable
-                        .iter()
-                        .map(|d| maven_datasource::MavenDepInput {
-                            dep_name: d.dep_name.clone(),
-                            current_version: d.current_value.clone(),
-                        })
-                        .collect();
-                    let updates =
-                        maven_datasource::fetch_updates_concurrent(http, &dep_inputs, 10).await;
-                    let update_map: HashMap<_, _> = updates
-                        .into_iter()
-                        .map(|r| (r.dep_name, r.summary))
-                        .collect();
-                    repo_report.files.push(output::FileReport {
-                        path: maven_file_path.clone(),
-                        manager: "maven".into(),
-                        deps: build_dep_reports_maven(&deps, &actionable, &update_map),
-                    });
+    // Two-pass Maven dedup: Maven multi-module projects share many dependencies
+    // across parent + child POMs. Batch-fetch per unique groupId:artifactId.
+    {
+        let maven_files = manager_files(&detected, "maven");
+        let mut maven_file_deps: Vec<(
+            String,
+            Vec<renovate_core::extractors::maven::MavenExtractedDep>,
+        )> = Vec::new();
+        for maven_file_path in &maven_files {
+            match client.get_raw_file(owner, repo, maven_file_path).await {
+                Ok(Some(raw)) => match maven_extractor::extract(&raw.content) {
+                    Ok(deps) => maven_file_deps.push((maven_file_path.clone(), deps)),
+                    Err(err) => tracing::warn!(repo=%repo_slug, file=%maven_file_path, %err,
+                        "failed to parse pom.xml"),
+                },
+                Ok(None) => {
+                    tracing::warn!(repo=%repo_slug, file=%maven_file_path, "pom.xml not found")
                 }
                 Err(err) => {
-                    tracing::warn!(repo=%repo_slug, file=%maven_file_path, %err, "failed to parse pom.xml")
+                    tracing::error!(repo=%repo_slug, file=%maven_file_path, %err,
+                        "failed to fetch pom.xml");
+                    had_error = true;
                 }
-            },
-            Ok(None) => {
-                tracing::warn!(repo=%repo_slug, file=%maven_file_path, "pom.xml not found")
             }
-            Err(err) => {
-                tracing::error!(repo=%repo_slug, file=%maven_file_path, %err, "failed to fetch pom.xml");
-                had_error = true;
-            }
+        }
+        let unique_coords: Vec<String> = {
+            let mut seen = std::collections::HashSet::new();
+            maven_file_deps
+                .iter()
+                .flat_map(|(_, deps)| deps.iter())
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored(&d.dep_name)
+                        && !d.current_value.is_empty()
+                })
+                .filter(|d| seen.insert(d.dep_name.clone()))
+                .map(|d| d.dep_name.clone())
+                .collect()
+        };
+        tracing::debug!(
+            repo = %repo_slug,
+            files = maven_file_deps.len(),
+            unique_artifacts = unique_coords.len(),
+            "fetching maven versions (deduplicated)"
+        );
+        let latest_cache = maven_datasource::fetch_latest_batch(http, &unique_coords, 10).await;
+        for (maven_file_path, deps) in maven_file_deps {
+            let actionable: Vec<_> = deps
+                .iter()
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored(&d.dep_name)
+                        && !d.current_value.is_empty()
+                })
+                .collect();
+            let update_map: HashMap<_, Result<maven_datasource::MavenUpdateSummary, _>> =
+                actionable
+                    .iter()
+                    .map(|d| {
+                        let latest = latest_cache.get(&d.dep_name).cloned().unwrap_or(None);
+                        let summary = Ok::<_, maven_datasource::MavenError>(
+                            maven_datasource::summary_from_cache(&d.current_value, latest),
+                        );
+                        (d.dep_name.clone(), summary)
+                    })
+                    .collect();
+            repo_report.files.push(output::FileReport {
+                path: maven_file_path.clone(),
+                manager: "maven".into(),
+                deps: build_dep_reports_maven(&deps, &actionable, &update_map),
+            });
         }
     }
 

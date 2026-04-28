@@ -8,6 +8,7 @@
 //! - `lib/modules/datasource/maven/index.ts`
 //! - `lib/modules/datasource/maven/common.ts` — `MAVEN_REPO`
 
+use std::collections::HashMap;
 use std::io::BufReader;
 use std::sync::Arc;
 
@@ -138,6 +139,60 @@ async fn fetch_update_summary(
         latest: summary.latest,
         update_available: summary.update_available,
     })
+}
+
+/// Cached latest-version entry: `Option<String>` (None if not found).
+pub type MavenLatestEntry = Option<String>;
+
+/// Fetch the latest version for a batch of unique Maven coordinates concurrently.
+///
+/// Returns a `HashMap` from `groupId:artifactId` to the latest version string.
+/// Coordinates that fail to resolve are stored as `None`.
+pub async fn fetch_latest_batch(
+    http: &HttpClient,
+    dep_names: &[String],
+    concurrency: usize,
+) -> HashMap<String, MavenLatestEntry> {
+    if dep_names.is_empty() {
+        return HashMap::new();
+    }
+
+    let sem = Arc::new(Semaphore::new(concurrency));
+    let mut set: JoinSet<(String, MavenLatestEntry)> = JoinSet::new();
+
+    for dep_name in dep_names {
+        let http = http.clone();
+        let dep_name = dep_name.clone();
+        let sem = Arc::clone(&sem);
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let result = fetch_latest(&dep_name, &http).await.ok().flatten();
+            (dep_name, result)
+        });
+    }
+
+    let mut cache = HashMap::with_capacity(dep_names.len());
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((name, latest)) => {
+                cache.insert(name, latest);
+            }
+            Err(join_err) => tracing::error!(%join_err, "maven batch fetch task panicked"),
+        }
+    }
+    cache
+}
+
+/// Compute a `MavenUpdateSummary` from a pre-fetched latest version entry.
+pub fn summary_from_cache(current_version: &str, latest: MavenLatestEntry) -> MavenUpdateSummary {
+    let summary =
+        crate::versioning::maven::maven_update_summary(current_version, latest.as_deref());
+    MavenUpdateSummary {
+        current_version: summary.current_version,
+        latest: summary.latest,
+        update_available: summary.update_available,
+    }
 }
 
 /// Parse a Maven `maven-metadata.xml` and return the best "latest stable"
