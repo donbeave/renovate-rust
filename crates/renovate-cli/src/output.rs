@@ -38,8 +38,26 @@ pub(crate) enum DepStatus {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct DepReport {
     pub name: String,
+    /// Proposed Renovate branch name for this update, when applicable.
+    ///
+    /// Set only when `status` is `UpdateAvailable`.  Follows Renovate's default
+    /// `branchName` template: `{branchPrefix}{depNameSanitized}-{newMajor}.x`
+    /// (or `{major}.{minor}.x` when `separateMinorPatch = true`).
+    #[serde(rename = "branchName", skip_serializing_if = "Option::is_none")]
+    pub branch_name: Option<String>,
     #[serde(flatten)]
     pub status: DepStatus,
+}
+
+impl DepReport {
+    /// Convenience constructor: creates a `DepReport` with no branch name set.
+    pub(crate) fn new(name: String, status: DepStatus) -> Self {
+        Self {
+            name,
+            branch_name: None,
+            status,
+        }
+    }
 }
 
 /// All deps extracted from one manifest file.
@@ -472,6 +490,7 @@ mod tests {
                     manager: "npm".into(),
                     deps: vec![
                         DepReport {
+                            branch_name: None,
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -479,12 +498,14 @@ mod tests {
                             },
                         },
                         DepReport {
+                            branch_name: None,
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
                             },
                         },
                         DepReport {
+                            branch_name: None,
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -496,6 +517,7 @@ mod tests {
                     path: "Cargo.toml".into(),
                     manager: "cargo".into(),
                     deps: vec![DepReport {
+                        branch_name: None,
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -555,6 +577,7 @@ mod tests {
                 path: "Cargo.toml".into(),
                 manager: "cargo".into(),
                 deps: vec![DepReport {
+                    branch_name: None,
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -577,6 +600,7 @@ mod tests {
     #[test]
     fn format_dep_update_available_plain() {
         let dep = DepReport {
+            branch_name: None,
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -593,6 +617,7 @@ mod tests {
     #[test]
     fn format_dep_up_to_date_with_latest() {
         let dep = DepReport {
+            branch_name: None,
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -607,6 +632,7 @@ mod tests {
     #[test]
     fn format_dep_skipped() {
         let dep = DepReport {
+            branch_name: None,
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -620,6 +646,7 @@ mod tests {
     #[test]
     fn format_dep_error() {
         let dep = DepReport {
+            branch_name: None,
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -662,6 +689,7 @@ mod tests {
     fn dep_stats_counts_correctly() {
         let deps = vec![
             DepReport {
+                branch_name: None,
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -669,16 +697,19 @@ mod tests {
                 },
             },
             DepReport {
+                branch_name: None,
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
             DepReport {
+                branch_name: None,
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
                 },
             },
             DepReport {
+                branch_name: None,
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),

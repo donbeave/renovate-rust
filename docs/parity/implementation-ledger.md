@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0178  | 2026-04-28 | Add branchName to DepReport output | Complete | See below. |
 | 0177  | 2026-04-28 | Branch name generation — sanitize_dep_name + branch_topic + branch_name | Complete | See below. |
 | 0176  | 2026-04-28 | `matchSourceUrls` + `matchCurrentValue` + `matchNewValue` packageRule matchers | Complete | See below. |
 | 0175  | 2026-04-28 | `extends` preset parsing + built-in expansion (config:recommended, :ignoreModulesAndTests) | Complete | See below. |
@@ -4654,6 +4655,37 @@ managers should only run when explicitly listed in `enabledManagers`.
 1. **Add `branch_name` to `DepReport` output** — show proposed branch names.
 2. **DepFilterContext struct** — thread source_url, current_value, new_value
    through the filter chain so matchSourceUrls etc. are enforced.
+3. **Remote preset resolution** — `github>org/repo//preset` fetching.
+4. **`currentDigest` for git-submodules** — GitHub Trees API.
+5. **More built-in preset expansion** — schedule presets, group:monorepos.
+
+## Slice 0178 — Add `branchName` field to `DepReport` output
+
+### Renovate reference
+- `lib/workers/repository/updates/branch-name.ts` — `generateBranchName()`
+- `lib/config/options/index.ts` — `branchName`, `branchTopic` defaults
+
+### What landed
+- `crates/renovate-cli/src/output.rs`:
+  - `DepReport` struct: added `branch_name: Option<String>` with serde rename
+    `"branchName"`, skipped when `None`
+  - `DepReport::new(name, status)` convenience constructor (branch_name=None)
+- `crates/renovate-cli/src/main.rs`:
+  - 145 `output::DepReport { ... }` literals updated with `branch_name: None,`
+  - Post-processing loop (`apply_package_rules_to_report`): computes branch name
+    for all remaining `UpdateAvailable` deps using `branch::branch_topic()` and
+    `branch::branch_name()` with `parse_padded(latest)` for version decomposition
+    and `repo_cfg.separate_minor_patch` / `repo_cfg.branch_prefix`
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo nextest run --workspace --all-features`: 1234 passed
+
+## Next slice candidates
+
+1. **`renovate-test-map.md`** — build and maintain the Renovate↔Rust test map.
+2. **DepFilterContext** — thread source_url, current_value, new_value.
 3. **Remote preset resolution** — `github>org/repo//preset` fetching.
 4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **More built-in preset expansion** — schedule presets, group:monorepos.

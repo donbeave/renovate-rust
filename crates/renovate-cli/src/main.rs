@@ -1027,6 +1027,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1083,6 +1084,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1119,6 +1121,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.package_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1146,6 +1149,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -1180,6 +1184,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1207,6 +1212,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1311,6 +1317,7 @@ async fn process_repo(
                     let mut file_deps: Vec<output::DepReport> = Vec::new();
                     for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                         file_deps.push(output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -1335,6 +1342,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         file_deps.push(output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status,
                         });
@@ -1526,6 +1534,7 @@ async fn process_repo(
                     .map(|dep| {
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -1548,6 +1557,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1690,6 +1700,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1743,6 +1754,7 @@ async fn process_repo(
                     .map(|dep| {
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -1765,6 +1777,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1866,6 +1879,7 @@ async fn process_repo(
                 for dep in &docker_deps {
                     if let Some(reason) = &dep.skip_reason {
                         all_deps.push(output::DepReport {
+                            branch_name: None,
                             name: dep.image.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1897,6 +1911,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         all_deps.push(output::DepReport {
+                            branch_name: None,
                             name: dep_name,
                             status,
                         });
@@ -1924,6 +1939,7 @@ async fn process_repo(
                         output::DepStatus::UpToDate { latest: s.latest }
                     };
                     all_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep_name,
                         status,
                     });
@@ -2009,6 +2025,7 @@ async fn process_repo(
                         let mut file_deps: Vec<output::DepReport> = Vec::new();
                         for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                             file_deps.push(output::DepReport {
+                                branch_name: None,
                                 name: dep.image.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -2042,6 +2059,7 @@ async fn process_repo(
                                 None => output::DepStatus::UpToDate { latest: None },
                             };
                             file_deps.push(output::DepReport {
+                                branch_name: None,
                                 name: dep_name,
                                 status,
                             });
@@ -2174,6 +2192,7 @@ async fn process_repo(
                         }
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -2257,6 +2276,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2334,6 +2354,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -2370,6 +2391,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2411,6 +2433,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -2572,6 +2595,7 @@ async fn process_repo(
                     for dep in &extracted.helm_deps {
                         if let Some(reason) = &dep.skip_reason {
                             dep_reports.push(output::DepReport {
+                                branch_name: None,
                                 name: dep.chart.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -2595,6 +2619,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.chart.clone(),
                             status,
                         });
@@ -2605,6 +2630,7 @@ async fn process_repo(
                 for git_dep in &extracted.git_deps {
                     if let Some(ref reason) = git_dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: git_dep.repo_url.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2645,6 +2671,7 @@ async fn process_repo(
                         Err(e) => output::DepStatus::LookupError { message: e },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: git_dep.repo_url.clone(),
                         status,
                     });
@@ -2748,6 +2775,7 @@ async fn process_repo(
                 for dep in &image_deps {
                     if let Some(reason) = &dep.skip_reason {
                         file_deps.push(output::DepReport {
+                            branch_name: None,
                             name: dep.image.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2779,6 +2807,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         file_deps.push(output::DepReport {
+                            branch_name: None,
                             name: dep_name,
                             status,
                         });
@@ -2799,6 +2828,7 @@ async fn process_repo(
                         None => output::DepStatus::UpToDate { latest: None },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: helm.chart_name.clone(),
                         status,
                     });
@@ -2897,6 +2927,7 @@ async fn process_repo(
                         path: gw_path.clone(),
                         manager: "gradle-wrapper".into(),
                         deps: vec![output::DepReport {
+                            branch_name: None,
                             name: "gradle".into(),
                             status,
                         }],
@@ -2941,6 +2972,7 @@ async fn process_repo(
                         },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3011,6 +3043,7 @@ async fn process_repo(
                         path: sfmt_path.clone(),
                         manager: "scalafmt".into(),
                         deps: vec![output::DepReport {
+                            branch_name: None,
                             name: "scalafmt".into(),
                             status,
                         }],
@@ -3057,6 +3090,7 @@ async fn process_repo(
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3079,6 +3113,7 @@ async fn process_repo(
                         None => output::DepStatus::UpToDate { latest: None },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -3142,6 +3177,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status,
                         }
@@ -3246,6 +3282,7 @@ async fn process_repo(
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.owner_repo.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3270,6 +3307,7 @@ async fn process_repo(
                         },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.owner_repo.clone(),
                         status,
                     });
@@ -3336,6 +3374,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.repo.clone(),
                             status,
                         }
@@ -3386,6 +3425,7 @@ async fn process_repo(
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3408,6 +3448,7 @@ async fn process_repo(
                         None => output::DepStatus::UpToDate { latest: None },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -3513,6 +3554,7 @@ async fn process_repo(
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3535,6 +3577,7 @@ async fn process_repo(
                         _ => output::DepStatus::UpToDate { latest: None },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3633,6 +3676,7 @@ async fn process_repo(
                         }
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3807,6 +3851,7 @@ async fn process_repo(
                         }
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -3915,6 +3960,7 @@ async fn process_repo(
                         output::DepStatus::UpToDate { latest: None }
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -3947,6 +3993,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -3974,6 +4021,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -4026,6 +4074,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -4141,6 +4190,7 @@ async fn process_repo(
                         path: vf_path.clone(),
                         manager: manager_name.to_owned(),
                         deps: vec![output::DepReport {
+                            branch_name: None,
                             name: dep.tool.to_owned(),
                             status,
                         }],
@@ -4205,6 +4255,7 @@ async fn process_repo(
                             },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: format!("node@{}", dep.version),
                             status,
                         }
@@ -4299,6 +4350,7 @@ async fn process_repo(
                                 None => output::DepStatus::UpToDate { latest: None },
                             };
                             output::DepReport {
+                                branch_name: None,
                                 name: dep.project.clone(),
                                 status,
                             }
@@ -4367,6 +4419,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         all_deps.push(output::DepReport {
+                            branch_name: None,
                             name: orb.package_name.clone(),
                             status,
                         });
@@ -4477,6 +4530,7 @@ async fn process_repo(
                         }
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -4559,6 +4613,7 @@ async fn process_repo(
                             },
                         };
                         file_deps.push(output::DepReport {
+                            branch_name: None,
                             name: format!("{}@{}", t.name, t.version),
                             status,
                         });
@@ -4650,6 +4705,7 @@ async fn process_repo(
                         },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -4741,6 +4797,7 @@ async fn process_repo(
                         Err(e) => output::DepStatus::LookupError { message: e },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: vdep.tool.to_owned(),
                         status,
                     });
@@ -4878,6 +4935,7 @@ async fn process_repo(
                         path: flux_path.clone(),
                         manager: "flux".into(),
                         deps: vec![output::DepReport {
+                            branch_name: None,
                             name: renovate_core::extractors::flux::FLUX2_REPO.to_owned(),
                             status,
                         }],
@@ -5000,6 +5058,7 @@ async fn process_repo(
                             }
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.input_name.clone(),
                             status,
                         }
@@ -5068,7 +5127,11 @@ async fn process_repo(
                             },
                             None => output::DepStatus::UpToDate { latest: None },
                         };
-                        output::DepReport { name: dn, status }
+                        output::DepReport {
+                            branch_name: None,
+                            name: dn,
+                            status,
+                        }
                     })
                     .collect();
                 repo_report.files.push(output::FileReport {
@@ -5138,6 +5201,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status,
                         }
@@ -5218,6 +5282,7 @@ async fn process_repo(
                             }
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.package_name.clone(),
                             status,
                         }
@@ -5259,6 +5324,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         file_deps.push(output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -5291,6 +5357,7 @@ async fn process_repo(
                         },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -5362,6 +5429,7 @@ async fn process_repo(
                         },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -5414,6 +5482,7 @@ async fn process_repo(
                         path: fvm_path.clone(),
                         manager: "fvm".into(),
                         deps: vec![output::DepReport {
+                            branch_name: None,
                             name: "flutter".to_owned(),
                             status,
                         }],
@@ -5495,6 +5564,7 @@ async fn process_repo(
                             }
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.remote.clone(),
                             status,
                         }
@@ -5561,6 +5631,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.chart_name.clone(),
                             status,
                         }
@@ -5623,6 +5694,7 @@ async fn process_repo(
                         path: copier_path.clone(),
                         manager: "copier".into(),
                         deps: vec![output::DepReport {
+                            branch_name: None,
                             name: dep.src_path.clone(),
                             status,
                         }],
@@ -5699,6 +5771,7 @@ async fn process_repo(
                         path: bw_path.clone(),
                         manager: "batect-wrapper".into(),
                         deps: vec![output::DepReport {
+                            branch_name: None,
                             name: renovate_core::extractors::batect_wrapper::BATECT_REPO.to_owned(),
                             status,
                         }],
@@ -5729,6 +5802,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -5745,6 +5819,7 @@ async fn process_repo(
                         }
                         _ => {
                             dep_reports.push(output::DepReport {
+                                branch_name: None,
                                 name: dep.name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: "non-github-source".into(),
@@ -5784,6 +5859,7 @@ async fn process_repo(
                         Err(e) => output::DepStatus::LookupError { message: e },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -5821,6 +5897,7 @@ async fn process_repo(
                 for dep in &deps {
                     if repo_cfg.is_dep_ignored_for_manager(&dep.name, "git-submodules") {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: "ignored".into(),
@@ -5838,6 +5915,7 @@ async fn process_repo(
                         output::DepStatus::UpToDate { latest: None }
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.path.clone(),
                         status,
                     });
@@ -5874,6 +5952,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -5941,6 +6020,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -6026,6 +6106,7 @@ async fn process_repo(
                         }
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.artifact_id.clone(),
                         status,
                     });
@@ -6091,6 +6172,7 @@ async fn process_repo(
                         Err(e) => output::DepStatus::LookupError { message: e },
                     };
                     file_deps.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6191,6 +6273,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -6231,6 +6314,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -6305,6 +6389,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6392,6 +6477,7 @@ async fn process_repo(
                     .map(|dep| {
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -6422,6 +6508,7 @@ async fn process_repo(
                                 None => output::DepStatus::UpToDate { latest: None },
                             };
                             return output::DepReport {
+                                branch_name: None,
                                 name: dep.dep_name.clone(),
                                 status,
                             };
@@ -6442,6 +6529,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -6504,6 +6592,7 @@ async fn process_repo(
                     .map(|dep| {
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: dep.image_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -6535,6 +6624,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.image_name.clone(),
                             status,
                         }
@@ -6577,6 +6667,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -6656,6 +6747,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6715,6 +6807,7 @@ async fn process_repo(
                     .map(|dep| {
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: dep.image_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -6746,6 +6839,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.image_name.clone(),
                             status,
                         }
@@ -6783,6 +6877,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -6855,6 +6950,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6980,6 +7076,7 @@ async fn process_repo(
                     path: hb_path.clone(),
                     manager: "homebrew".into(),
                     deps: vec![output::DepReport {
+                        branch_name: None,
                         name: dep.formula_name.clone(),
                         status,
                     }],
@@ -7027,6 +7124,7 @@ async fn process_repo(
                     .map(|dep| {
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -7059,6 +7157,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -7124,6 +7223,7 @@ async fn process_repo(
                     path: unity_path.clone(),
                     manager: "unity3d".into(),
                     deps: vec![output::DepReport {
+                        branch_name: None,
                         name: "Unity Editor".to_owned(),
                         status,
                     }],
@@ -7156,6 +7256,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7193,6 +7294,7 @@ async fn process_repo(
                             },
                         };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -7257,6 +7359,7 @@ async fn process_repo(
                     path: rt_path.clone(),
                     manager: "runtime-version".into(),
                     deps: vec![output::DepReport {
+                        branch_name: None,
                         name: dep.dep_name.clone(),
                         status,
                     }],
@@ -7300,6 +7403,7 @@ async fn process_repo(
                             output::DepStatus::UpToDate { latest: None }
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: format!("{}: {}", dep.kind, dep.package),
                             status,
                         }
@@ -7359,6 +7463,7 @@ async fn process_repo(
                         },
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -7403,6 +7508,7 @@ async fn process_repo(
                 for dep in &deps {
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
+                            branch_name: None,
                             name: dep.repo.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7481,6 +7587,7 @@ async fn process_repo(
                         }
                     };
                     dep_reports.push(output::DepReport {
+                        branch_name: None,
                         name: dep.repo.clone(),
                         status,
                     });
@@ -7543,6 +7650,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: d.chart_name.clone(),
                             status,
                         }
@@ -7608,6 +7716,7 @@ async fn process_repo(
                     .map(|d| {
                         if let Some(ref reason) = d.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: d.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -7630,6 +7739,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: d.dep_name.clone(),
                             status,
                         }
@@ -7688,6 +7798,7 @@ async fn process_repo(
                     .map(|d| {
                         if let Some(ref reason) = d.skip_reason {
                             return output::DepReport {
+                                branch_name: None,
                                 name: d.name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -7710,6 +7821,7 @@ async fn process_repo(
                             None => output::DepStatus::UpToDate { latest: None },
                         };
                         output::DepReport {
+                            branch_name: None,
                             name: d.name.clone(),
                             status,
                         }
@@ -7746,6 +7858,7 @@ async fn process_repo(
         for dep in &deps {
             if let Some(ref reason) = dep.skip_reason {
                 dep_reports.push(output::DepReport {
+                    branch_name: None,
                     name: dep.name.clone(),
                     status: output::DepStatus::Skipped {
                         reason: format!("{reason:?}").to_lowercase(),
@@ -7774,6 +7887,7 @@ async fn process_repo(
                 },
             };
             dep_reports.push(output::DepReport {
+                branch_name: None,
                 name: dep.name.clone(),
                 status,
             });
@@ -7809,7 +7923,8 @@ fn apply_update_blocking_to_report(
     report: &mut output::RepoReport,
     repo_cfg: &renovate_core::repo_config::RepoConfig,
 ) {
-    use renovate_core::versioning::semver_generic::classify_semver_update;
+    use renovate_core::branch;
+    use renovate_core::versioning::semver_generic::{classify_semver_update, parse_padded};
     for file in &mut report.files {
         let manager = file.manager.clone();
         let file_path = file.path.clone();
@@ -7844,6 +7959,21 @@ fn apply_update_blocking_to_report(
                         )
                         .to_lowercase(),
                     };
+                    continue;
+                }
+                // Compute the proposed branch name for this update.
+                if let Some(new_ver) = parse_padded(latest) {
+                    let is_patch = classify_semver_update(current, latest)
+                        == Some(renovate_core::versioning::semver_generic::UpdateType::Patch);
+                    let topic = branch::branch_topic(
+                        &dep.name,
+                        new_ver.major,
+                        new_ver.minor,
+                        is_patch,
+                        repo_cfg.separate_minor_patch,
+                    );
+                    dep.branch_name =
+                        Some(branch::branch_name(&repo_cfg.branch_prefix, "", &topic));
                 }
             }
         }
@@ -7919,6 +8049,7 @@ async fn docker_hub_reports(
     for dep in deps {
         if let Some(reason) = &dep.skip_reason {
             reports.push(output::DepReport {
+                branch_name: None,
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -7948,6 +8079,7 @@ async fn docker_hub_reports(
                 None => output::DepStatus::UpToDate { latest: None },
             };
             reports.push(output::DepReport {
+                branch_name: None,
                 name: dep_name,
                 status,
             });
@@ -7970,6 +8102,7 @@ fn build_dep_reports_cargo(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -7991,6 +8124,7 @@ fn build_dep_reports_cargo(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -8012,6 +8146,7 @@ fn build_dep_reports_npm(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8033,6 +8168,7 @@ fn build_dep_reports_npm(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8054,6 +8190,7 @@ fn build_dep_reports_github_actions(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.action.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8075,6 +8212,7 @@ fn build_dep_reports_github_actions(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.action.clone(),
             status,
         });
@@ -8096,6 +8234,7 @@ fn build_dep_reports_maven(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8117,6 +8256,7 @@ fn build_dep_reports_maven(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -8138,6 +8278,7 @@ fn build_dep_reports_pub(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8159,6 +8300,7 @@ fn build_dep_reports_pub(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8180,6 +8322,7 @@ fn build_dep_reports_nuget(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.package_id.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8201,6 +8344,7 @@ fn build_dep_reports_nuget(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.package_id.clone(),
             status,
         });
@@ -8222,6 +8366,7 @@ fn build_dep_reports_composer(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8243,6 +8388,7 @@ fn build_dep_reports_composer(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8264,6 +8410,7 @@ fn build_dep_reports_gomod(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.module_path.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8285,6 +8432,7 @@ fn build_dep_reports_gomod(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.module_path.clone(),
             status,
         });
@@ -8306,6 +8454,7 @@ fn build_dep_reports_poetry(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8327,6 +8476,7 @@ fn build_dep_reports_poetry(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8348,6 +8498,7 @@ fn build_dep_reports_pip(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8369,6 +8520,7 @@ fn build_dep_reports_pip(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8390,6 +8542,7 @@ fn build_dep_reports_bundler(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8411,6 +8564,7 @@ fn build_dep_reports_bundler(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8432,6 +8586,7 @@ fn build_dep_reports_terraform(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8453,6 +8608,7 @@ fn build_dep_reports_terraform(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8474,6 +8630,7 @@ fn build_dep_reports_helm(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8495,6 +8652,7 @@ fn build_dep_reports_helm(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8516,6 +8674,7 @@ fn build_dep_reports_gradle(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8537,6 +8696,7 @@ fn build_dep_reports_gradle(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -8558,6 +8718,7 @@ fn build_dep_reports_setup_cfg(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8579,6 +8740,7 @@ fn build_dep_reports_setup_cfg(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -8600,6 +8762,7 @@ fn build_dep_reports_pipfile(
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8621,6 +8784,7 @@ fn build_dep_reports_pipfile(
             None => output::DepStatus::UpToDate { latest: None },
         };
         reports.push(output::DepReport {
+            branch_name: None,
             name: dep.name.clone(),
             status,
         });
