@@ -85,6 +85,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Gemfile$"],
     },
     ManagerDef {
+        name: "terraform",
+        patterns: &[r"\.tf$", r"\.tofu$"],
+    },
+    ManagerDef {
         name: "composer",
         patterns: &[r"(^|/)([\w-]*)composer\.json$"],
     },

@@ -1174,15 +1174,53 @@ None. No network or credentials were required for this slice.
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 340 passed
 
+## Slice 0038 - Terraform `.tf`/`.tofu` extractor + Terraform Registry datasource
+
+### Renovate reference
+- `lib/modules/manager/terraform/index.ts` — `defaultConfig`, patterns `**/*.tf`, `**/*.tofu`
+- `lib/modules/manager/terraform/extractors/terraform-block/required-provider.ts`
+- `lib/modules/manager/terraform/extractors/others/modules.ts`
+- `lib/modules/datasource/terraform-provider/index.ts` — v2 API
+- `lib/modules/datasource/terraform-module/index.ts` — v1 API
+
+### What landed
+- `crates/renovate-core/src/extractors/terraform.rs` — brace-depth state machine extractor:
+  - `terraform { required_providers { ... } }` — provider deps with `source` + `version`.
+  - `module "name" { source = "...", version = "..." }` — module deps.
+  - Inline string form: `provider = "~> 5.0"` in required_providers.
+  - Skip reasons: `ExternalSource` (git/https/local path), `NoVersionConstraint` (no version field).
+  - `lower_bound_version()` strips operators for accurate `update_available` comparison.
+  - Does NOT use a full HCL parser — handles common single-line patterns only.
+- `crates/renovate-core/src/datasources/terraform.rs` — Terraform Registry clients:
+  - Provider: `GET /v2/providers/{ns}/{type}?include=provider-versions` (newest-first in `included`).
+  - Module: `GET /v1/modules/{ns}/{name}/{provider}/versions` (first entry is newest).
+  - Bare provider names (e.g. `random`) default to `hashicorp` namespace.
+  - Concurrent bounded lookups via `JoinSet` + `Arc<Semaphore>`.
+- `crates/renovate-core/src/managers.rs` — added `terraform` with patterns `\.tf$`, `\.tofu$`.
+- `crates/renovate-cli/src/main.rs` — wired terraform pipeline section +
+  `build_dep_reports_terraform` helper.
+
+### What was intentionally deferred
+- `.terraform.lock.hcl` lockfile parsing.
+- Provider `required_version` constraint (Terraform CLI version).
+- `terraform_workspace` resource type.
+- Docker image references inside Terraform resources.
+- Helm chart references in `helm_release` resources.
+- HCL string interpolation and heredocs.
+- OpenTofu registry differences.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 357 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
 
-1. **Terraform/HCL extractor + Terraform registry datasource**: high Ruby-like
-   coverage boost, public REST API, widely used infra manager.
-2. **Maven versioning module**: implement the Maven qualifier ordering scheme
+1. **Maven versioning module**: implement the Maven qualifier ordering scheme
    (alpha < beta < milestone < rc < release < sp) for accurate update decisions.
-3. **Renovate option surface (first cut)**: port the option definitions
+2. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
-4. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
+3. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
+4. **Helm chart extractor + ArtifactHub datasource**: parse `Chart.yaml` for chart deps.

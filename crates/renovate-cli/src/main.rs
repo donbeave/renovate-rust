@@ -37,6 +37,7 @@ use renovate_core::datasources::packagist as packagist_datasource;
 use renovate_core::datasources::pub_dev as pub_datasource;
 use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::datasources::rubygems as rubygems_datasource;
+use renovate_core::datasources::terraform as terraform_datasource;
 use renovate_core::extractors::bundler as bundler_extractor;
 use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::composer as composer_extractor;
@@ -49,6 +50,7 @@ use renovate_core::extractors::pep621 as pep621_extractor;
 use renovate_core::extractors::pip as pip_extractor;
 use renovate_core::extractors::poetry as poetry_extractor;
 use renovate_core::extractors::pubspec as pubspec_extractor;
+use renovate_core::extractors::terraform as terraform_extractor;
 use renovate_core::http::HttpClient;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
@@ -1173,6 +1175,57 @@ async fn process_repo(
         }
     }
 
+    // ── Terraform (.tf / .tofu) ───────────────────────────────────────────────
+    for tf_file_path in manager_files(&detected, "terraform") {
+        match client.get_raw_file(owner, repo, &tf_file_path).await {
+            Ok(Some(raw)) => {
+                let deps = terraform_extractor::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %tf_file_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted terraform deps"
+                );
+                let dep_inputs: Vec<terraform_datasource::TerraformDepInput> = actionable
+                    .iter()
+                    .map(|d| terraform_datasource::TerraformDepInput {
+                        name: d.name.clone(),
+                        current_value: d.current_value.clone(),
+                        kind: match d.dep_type {
+                            terraform_extractor::TerraformDepType::Provider => {
+                                terraform_datasource::TerraformLookupKind::Provider
+                            }
+                            terraform_extractor::TerraformDepType::Module => {
+                                terraform_datasource::TerraformLookupKind::Module
+                            }
+                        },
+                    })
+                    .collect();
+                let updates = terraform_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    terraform_datasource::TERRAFORM_REGISTRY,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                repo_report.files.push(output::FileReport {
+                    path: tf_file_path.clone(),
+                    manager: "terraform".into(),
+                    deps: build_dep_reports_terraform(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%tf_file_path, "Terraform file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%tf_file_path, %err, "failed to fetch Terraform file");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 
@@ -1616,6 +1669,48 @@ fn build_dep_reports_bundler(
         Result<
             renovate_core::datasources::rubygems::GemUpdateSummary,
             renovate_core::datasources::rubygems::RubyGemsError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_value.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_terraform(
+    all_deps: &[renovate_core::extractors::terraform::TerraformExtractedDep],
+    actionable: &[&renovate_core::extractors::terraform::TerraformExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::terraform::TerraformUpdateSummary,
+            renovate_core::datasources::terraform::TerraformError,
         >,
     >,
 ) -> Vec<output::DepReport> {
