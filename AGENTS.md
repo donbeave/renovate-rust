@@ -93,6 +93,6 @@ agent:
   branch expectations.
 - [COMMITS.md](COMMITS.md) - Conventional Commits, verification commands, and
   commit trailers.
-- [CLAUDE.md](CLAUDE.md) - Claude Code entry-point instructions.
+- [CLAUDE.md](CLAUDE.md) - Claude Code linker to this agent guide.
 - [prompts/README.md](prompts/README.md) - how to run the native Claude Code
   `/loop` prompt for the Renovate rewrite.
