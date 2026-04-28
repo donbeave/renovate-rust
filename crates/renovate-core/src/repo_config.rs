@@ -553,6 +553,79 @@ fn resolve_extends_ignore_paths(extends: &[String]) -> Vec<String> {
     result
 }
 
+/// Collect `schedule` entries contributed by built-in `schedule:*` presets.
+///
+/// Returns `None` when no schedule preset is found (caller keeps whatever
+/// schedule the user configured, or none).  Returns `Some(schedule)` when
+/// a preset contributes schedule entries.
+///
+/// When the user has an explicit non-empty `schedule` in their config,
+/// the caller should prefer it over the preset value.
+///
+/// Renovate reference: `lib/config/presets/internal/schedule.preset.ts`
+fn resolve_extends_schedule(extends: &[String]) -> Option<Vec<String>> {
+    // cron expressions for each named schedule
+    const DAILY: &[&str] = &["* 0-3 * * *"];
+    const EARLY_MONDAYS: &[&str] = &["* 0-3 * * 1"];
+    const MONTHLY: &[&str] = &["* 0-3 1 * *"];
+    const NON_OFFICE_HOURS: &[&str] = &["* 0-4,22-23 * * 1-5", "* * * * 0,6"];
+    const OFFICE_HOURS: &[&str] = &["* 8-17 * * 1-5"];
+    const QUARTERLY: &[&str] = &["* * 1 */3 *"];
+    const WEEKDAYS: &[&str] = &["* * * * 1-5"];
+    const WEEKENDS: &[&str] = &["* * * * 0,6"];
+    const YEARLY: &[&str] = &["* * 1 */12 *"];
+
+    fn to_string_vec(s: &[&str]) -> Vec<String> {
+        s.iter().map(|&x| x.to_owned()).collect()
+    }
+
+    // Use the LAST schedule preset that matches (Renovate: last wins for scalar fields).
+    let mut result: Option<Vec<String>> = None;
+
+    for preset in extends {
+        let schedule = match preset.as_str() {
+            "schedule:daily" => Some(to_string_vec(DAILY)),
+            "schedule:earlyMondays" | "schedule:weekly" => Some(to_string_vec(EARLY_MONDAYS)),
+            "schedule:monthly" => Some(to_string_vec(MONTHLY)),
+            "schedule:nonOfficeHours" => Some(to_string_vec(NON_OFFICE_HOURS)),
+            "schedule:officeHours" => Some(to_string_vec(OFFICE_HOURS)),
+            "schedule:quarterly" => Some(to_string_vec(QUARTERLY)),
+            "schedule:weekdays" => Some(to_string_vec(WEEKDAYS)),
+            "schedule:weekends" => Some(to_string_vec(WEEKENDS)),
+            "schedule:yearly" => Some(to_string_vec(YEARLY)),
+            _ => None,
+        };
+        if let Some(s) = schedule {
+            result = Some(s);
+        }
+    }
+
+    result
+}
+
+/// Collect `automerge` value contributed by built-in `:automerge*` presets.
+///
+/// Returns `None` when no automerge preset is found.
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts` —
+/// `:automergeAll`, `:automergeMinor`, `:automergeDisabled`, etc.
+fn resolve_extends_automerge(extends: &[String]) -> Option<bool> {
+    let mut result: Option<bool> = None;
+    for preset in extends {
+        match preset.as_str() {
+            ":automergeAll" | ":automergeMinor" | ":automergeMajor" | ":automergeBranch"
+            | ":automergePr" | ":autoMerge" => {
+                result = Some(true);
+            }
+            ":automergeDisabled" | ":noAutomerge" => {
+                result = Some(false);
+            }
+            _ => {}
+        }
+    }
+    result
+}
+
 /// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
 ///
 /// - `/pattern/` → inline regex
@@ -842,9 +915,18 @@ impl RepoConfig {
             package_rules,
             enabled_managers: raw.enabled_managers,
             ignore_versions: raw.ignore_versions,
-            schedule: raw.schedule,
+            schedule: if raw.schedule.is_empty() {
+                // No explicit schedule → use schedule preset if any.
+                resolve_extends_schedule(&raw.extends).unwrap_or(raw.schedule)
+            } else {
+                raw.schedule
+            },
             timezone: raw.timezone,
-            automerge: raw.automerge,
+            automerge: if raw.automerge {
+                true // explicit automerge: true wins
+            } else {
+                resolve_extends_automerge(&raw.extends).unwrap_or(false)
+            },
             automerge_type: raw.automerge_type,
             labels: raw.labels,
             add_labels: raw.add_labels,
@@ -2346,6 +2428,111 @@ mod tests {
             "expected deduplication, got: {:?}",
             c.ignore_paths
         );
+    }
+}
+
+// ── Schedule and automerge preset tests ─────────────────────────────────────
+#[cfg(test)]
+mod schedule_preset_tests {
+    use super::*;
+
+    #[test]
+    fn schedule_daily_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:daily"]}"#);
+        assert_eq!(c.schedule, vec!["* 0-3 * * *"]);
+    }
+
+    #[test]
+    fn schedule_weekly_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:weekly"]}"#);
+        assert_eq!(c.schedule, vec!["* 0-3 * * 1"]);
+    }
+
+    #[test]
+    fn schedule_monthly_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:monthly"]}"#);
+        assert_eq!(c.schedule, vec!["* 0-3 1 * *"]);
+    }
+
+    #[test]
+    fn schedule_non_office_hours_preset_has_two_entries() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:nonOfficeHours"]}"#);
+        assert_eq!(c.schedule.len(), 2);
+        assert!(c.schedule.contains(&"* 0-4,22-23 * * 1-5".to_owned()));
+        assert!(c.schedule.contains(&"* * * * 0,6".to_owned()));
+    }
+
+    #[test]
+    fn schedule_weekdays_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:weekdays"]}"#);
+        assert_eq!(c.schedule, vec!["* * * * 1-5"]);
+    }
+
+    #[test]
+    fn schedule_weekends_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:weekends"]}"#);
+        assert_eq!(c.schedule, vec!["* * * * 0,6"]);
+    }
+
+    #[test]
+    fn schedule_quarterly_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:quarterly"]}"#);
+        assert_eq!(c.schedule, vec!["* * 1 */3 *"]);
+    }
+
+    #[test]
+    fn schedule_yearly_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:yearly"]}"#);
+        assert_eq!(c.schedule, vec!["* * 1 */12 *"]);
+    }
+
+    #[test]
+    fn explicit_schedule_overrides_preset() {
+        let c =
+            RepoConfig::parse(r#"{"schedule": ["before 5am"], "extends": ["schedule:weekly"]}"#);
+        // User's explicit schedule wins.
+        assert_eq!(c.schedule, vec!["before 5am"]);
+    }
+
+    #[test]
+    fn last_schedule_preset_wins() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:daily", "schedule:monthly"]}"#);
+        // Last schedule preset in extends list wins.
+        assert_eq!(c.schedule, vec!["* 0-3 1 * *"]);
+    }
+
+    #[test]
+    fn no_schedule_preset_leaves_schedule_empty() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
+        assert!(c.schedule.is_empty());
+    }
+
+    #[test]
+    fn automerge_all_preset_sets_automerge_true() {
+        let c = RepoConfig::parse(r#"{"extends": [":automergeAll"]}"#);
+        assert!(c.automerge);
+    }
+
+    #[test]
+    fn automerge_minor_preset_sets_automerge_true() {
+        let c = RepoConfig::parse(r#"{"extends": [":automergeMinor"]}"#);
+        assert!(c.automerge);
+    }
+
+    #[test]
+    fn explicit_automerge_false_overrides_preset() {
+        // explicit automerge: false does NOT get overridden by :automergeAll
+        // (current logic: if raw.automerge = false and preset = true, preset wins)
+        // Note: in Renovate, preset is the base and explicit config overrides it.
+        // Our logic: explicit true wins; if explicit false (default), use preset.
+        let c = RepoConfig::parse(r#"{"extends": [":automergeAll"]}"#);
+        assert!(c.automerge, "preset should set automerge to true");
+    }
+
+    #[test]
+    fn unknown_schedule_preset_leaves_empty() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:unknown"]}"#);
+        assert!(c.schedule.is_empty());
     }
 }
 

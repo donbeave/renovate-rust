@@ -4689,3 +4689,37 @@ managers should only run when explicitly listed in `enabledManagers`.
 3. **Remote preset resolution** — `github>org/repo//preset` fetching.
 4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **More built-in preset expansion** — schedule presets, group:monorepos.
+
+## Slice 0180 — `schedule:*` and `:automerge*` preset expansion
+
+### Renovate reference
+- `lib/config/presets/internal/schedule.preset.ts` — all `schedule:*` presets
+- `lib/config/presets/internal/default.preset.ts` — `:automergeAll`, `:automergeMinor`, etc.
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - `resolve_extends_schedule(extends)` — maps `schedule:daily`, `schedule:weekly`,
+    `schedule:monthly`, `schedule:earlyMondays`, `schedule:nonOfficeHours`,
+    `schedule:officeHours`, `schedule:quarterly`, `schedule:weekdays`,
+    `schedule:weekends`, `schedule:yearly` to cron string arrays; last matching
+    preset wins; user-configured `schedule` takes precedence
+  - `resolve_extends_automerge(extends)` — maps `:automergeAll`, `:automergeMinor`,
+    `:automergeMajor`, `:automergeBranch`, `:automergePr`, `:autoMerge` to
+    `automerge: true`; `:automergeDisabled` to `false`
+  - Both functions wired into `parse()` alongside existing `semantic_commits` and
+    `ignore_paths` preset resolution
+  - 15 new unit tests
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo fmt --all --check` ✓
+- `cargo clippy --workspace --all-features -D warnings` ✓
+- `cargo nextest run --workspace --all-features`: 1249 passed
+
+## Next slice candidates
+
+1. **Wire `matchDatasources` into filter methods** — DepContext struct.
+2. **Remote preset resolution** — `github>org/repo//preset` fetching.
+3. **`matchCategories` packageRule matcher** — match by language category.
+4. **`matchBaseBranches` packageRule matcher** — match against base branches.
+5. **Group:monorepos preset expansion** — add packageRules for known monorepos.
