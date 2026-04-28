@@ -6130,6 +6130,114 @@ async fn process_repo(
         }
     }
 
+    // ── ArgoCD Application manifests ─────────────────────────────────────────
+    for argo_path in manager_files(&detected, "argocd") {
+        match client.get_raw_file(owner, repo, &argo_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::argocd::{ArgocdSkipReason, ArgocdSource};
+                let deps = renovate_core::extractors::argocd::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %argo_path,
+                    total = deps.len(), "extracted argocd deps"
+                );
+                let mut dep_reports: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: match reason {
+                                    ArgocdSkipReason::UnspecifiedVersion => {
+                                        "unspecified-version".to_owned()
+                                    }
+                                    ArgocdSkipReason::InvalidConfig => "invalid-config".to_owned(),
+                                },
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let status = match &dep.source {
+                        ArgocdSource::Helm {
+                            registry_url,
+                            chart_name,
+                        } => {
+                            match helm_datasource::fetch_latest(chart_name, registry_url, http)
+                                .await
+                            {
+                                Ok(Some(latest)) if latest != dep.current_value => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.current_value.clone(),
+                                        latest,
+                                    }
+                                }
+                                Ok(Some(latest)) => output::DepStatus::UpToDate {
+                                    latest: Some(latest),
+                                },
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                        ArgocdSource::Git { repo_url } => {
+                            match github_tags_datasource::fetch_latest_tag(
+                                repo_url,
+                                &gh_http,
+                                gh_api_base,
+                            )
+                            .await
+                            {
+                                Ok(Some(tag)) => {
+                                    let stripped = tag.trim_start_matches('v');
+                                    let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                        dep.current_value.trim_start_matches('v'),
+                                        Some(stripped),
+                                    );
+                                    if s.update_available {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: dep.current_value.clone(),
+                                            latest: tag,
+                                        }
+                                    } else {
+                                        output::DepStatus::UpToDate { latest: Some(tag) }
+                                    }
+                                }
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                            }
+                        }
+                        ArgocdSource::Unsupported => output::DepStatus::Skipped {
+                            reason: "unsupported-datasource".to_owned(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: argo_path.clone(),
+                        manager: "argocd".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%argo_path, "argocd manifest not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%argo_path, %err, "failed to fetch argocd manifest");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Homebrew formula (Formula/*.rb) ────────────────────────────────────────
     for hb_path in manager_files(&detected, "homebrew") {
         match client.get_raw_file(owner, repo, &hb_path).await {

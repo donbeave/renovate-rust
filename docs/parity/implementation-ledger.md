@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0145  | 2026-04-28 | ArgoCD Application manifest extractor (Helm + Git sources) | Complete | See below. |
 | 0144  | 2026-04-28 | Bun lockfile manager + nodenv/nvm/pyenv manager aliases | Complete | See below. |
 | 0143  | 2026-04-28 | Heroku/Render `runtime.txt` Python version extractor | Complete | See below. |
 | 0142  | 2026-04-28 | Helmsman DSF extractor (Helm chart version tracking) | Complete | See below. |
@@ -3091,6 +3092,31 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0145 - ArgoCD Application manifest extractor (Helm + Git sources)
+
+### Renovate reference
+- `lib/modules/manager/argocd/extract.ts`
+- `lib/modules/manager/argocd/util.ts`
+- Default patterns: `[]`; we add `(^|/)argocd/.+\.ya?ml$` and `(^|/)argo-cd/.+\.ya?ml$`
+- Datasources: `helm` (chart sources), `git-tags` (GitHub Git sources)
+
+### What landed
+- `crates/renovate-core/src/extractors/argocd.rs` (new):
+  - `ARGOCD_RE` — detects `apiVersion: argoproj.io/` (skips non-ArgoCD files).
+  - `SOURCE_RE` — detects `source:` / `sources:` blocks.
+  - `KV_RE` — extracts `repoURL`, `chart`, `targetRevision` fields.
+  - Line-based scanner with flush-on-block-end pattern.
+  - Helm sources → `ArgocdSource::Helm { registry_url, chart_name }`.
+  - GitHub/Git sources → `ArgocdSource::Git { repo_url }`.
+  - 4 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with two ArgoCD directory patterns.
+- `crates/renovate-cli/src/main.rs`: pipeline dispatches Helm to `helm_datasource`,
+  Git to `github_tags_datasource`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1011 passed
 
 ## Slice 0144 - Bun lockfile manager + nodenv/nvm/pyenv manager aliases
 

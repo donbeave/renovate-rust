@@ -518,6 +518,12 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "pyenv",
         patterns: &[r"(^|/)\.python-version$"],
     },
+    ManagerDef {
+        // Common convention: ArgoCD Applications stored in argocd/ directory.
+        // Upstream default is [] (user-configured); we add a practical common pattern.
+        name: "argocd",
+        patterns: &[r"(^|/)argocd/.+\.ya?ml$", r"(^|/)argo-cd/.+\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
