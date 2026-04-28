@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0103  | 2026-04-28 | Ansible tasks Docker image extractor | Complete | See below. |
 | 0102  | 2026-04-28 | Leiningen `project.clj` extractor (Clojars + Maven Central) | Complete | See below. |
 | 0101  | 2026-04-28 | Jenkins plugins datasource (Update Center JSON) | Complete | See below. |
 | 0100  | 2026-04-28 | CircleCI orbs extractor + Orb GraphQL datasource | Complete | See below. |
@@ -2667,6 +2668,27 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 867 passed
 
+## Slice 0103 - Ansible tasks Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/ansible/extract.ts`
+- Pattern: `/(^|/)tasks/[^/]+\\.ya?ml$/`
+- Datasource: Docker Hub (same as Dockerfile)
+
+### What landed
+- `crates/renovate-core/src/extractors/ansible.rs` (new):
+  - `extract(content)` — scans for `image:` key lines (with optional quotes), strips
+    inline comments, skips variable refs (`${...}` and `$`-prefixed values).
+  - Delegates to `classify_image_ref` for Docker image parsing (same as Dockerfile extractor).
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `ansible` manager with pattern `(^|/)tasks/[^/]+\.ya?ml$`.
+- `crates/renovate-core/src/extractors.rs`: `pub mod ansible`.
+- `crates/renovate-cli/src/main.rs`: Ansible pipeline using `docker_hub_reports` helper.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 872 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2680,5 +2702,6 @@ Pick whichever can be completed in one loop:
 5. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 6. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 7. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
-8. **`ansible` playbooks** — Docker image and role version extraction.
+8. **`nix` Flakes** — `flake.nix` version and input extraction.
+9. **`sbt` (Scala Build Tool)** — `build.sbt` dependency extraction (Maven coordinates).
 11. **Travis CI** `.travis.yml` Node.js version extraction.

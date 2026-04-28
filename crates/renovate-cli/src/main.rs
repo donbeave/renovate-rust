@@ -3485,6 +3485,28 @@ async fn process_repo(
         }
     }
 
+    // ── Ansible task files (tasks/*.yml) ─────────────────────────────────────
+    for ansible_path in manager_files(&detected, "ansible") {
+        match client.get_raw_file(owner, repo, &ansible_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::ansible::extract(&raw.content);
+                tracing::debug!(repo = %repo_slug, file = %ansible_path, total = deps.len(), "extracted ansible images");
+                repo_report.files.push(output::FileReport {
+                    path: ansible_path.clone(),
+                    manager: "ansible".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%ansible_path, "ansible task file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%ansible_path, %err, "failed to fetch ansible task file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Jenkins plugins (plugins.txt / plugins.yml) ───────────────────────────
     for jenkins_path in manager_files(&detected, "jenkins") {
         match client.get_raw_file(owner, repo, &jenkins_path).await {
