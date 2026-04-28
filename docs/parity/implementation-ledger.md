@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0146  | 2026-04-28 | Kubernetes manifest Docker image extractor | Complete | See below. |
 | 0145  | 2026-04-28 | ArgoCD Application manifest extractor (Helm + Git sources) | Complete | See below. |
 | 0144  | 2026-04-28 | Bun lockfile manager + nodenv/nvm/pyenv manager aliases | Complete | See below. |
 | 0143  | 2026-04-28 | Heroku/Render `runtime.txt` Python version extractor | Complete | See below. |
@@ -3092,6 +3093,28 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0146 - Kubernetes manifest Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/kubernetes/extract.ts`
+- Default patterns: `[]`; we add `k8s/`, `kubernetes/`, `manifests/` directory conventions
+- Datasource: `docker` (Docker Hub)
+
+### What landed
+- `crates/renovate-core/src/extractors/kubernetes.rs` (new):
+  - `API_RE` + `KIND_RE` — content-based K8s detection (`apiVersion:` + `kind:`).
+  - `IMAGE_RE` — extracts `image:` values with optional quotes and list prefix.
+  - `split_image_tag()` — correctly splits `image:tag` (handles ports in registry URLs).
+  - `is_non_docker_hub()` — detects private/GCR/ECR registries (skipped with `non-docker-hub`).
+  - Skips `@sha256:` digest-pinned images and `:latest` tags.
+  - 5 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with three common K8s directory patterns.
+- `crates/renovate-cli/src/main.rs`: pipeline uses `docker_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1016 passed
 
 ## Slice 0145 - ArgoCD Application manifest extractor (Helm + Git sources)
 

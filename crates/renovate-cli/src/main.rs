@@ -6130,6 +6130,99 @@ async fn process_repo(
         }
     }
 
+    // ── Kubernetes manifests (k8s/, kubernetes/, manifests/) ─────────────────
+    for k8s_path in manager_files(&detected, "kubernetes") {
+        match client.get_raw_file(owner, repo, &k8s_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::kubernetes::{KubernetesDep, KubernetesSkipReason};
+                let deps = renovate_core::extractors::kubernetes::extract(&raw.content);
+                let actionable: Vec<&KubernetesDep> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.image_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %k8s_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted kubernetes image deps"
+                );
+                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
+                    .iter()
+                    .map(|d| docker_datasource::DockerDepInput {
+                        dep_name: format!("{}:{}", d.image_name, d.current_value),
+                        image: d.image_name.clone(),
+                        tag: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = docker_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    docker_datasource::DOCKER_HUB_API,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<String, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let dep_reports: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        if let Some(reason) = &dep.skip_reason {
+                            return output::DepReport {
+                                name: dep.image_name.clone(),
+                                status: output::DepStatus::Skipped {
+                                    reason: match reason {
+                                        KubernetesSkipReason::DigestPinned => {
+                                            "digest-pinned".to_owned()
+                                        }
+                                        KubernetesSkipReason::NonDockerHub => {
+                                            "non-docker-hub".to_owned()
+                                        }
+                                        KubernetesSkipReason::NoVersion => "no-version".to_owned(),
+                                    },
+                                },
+                            };
+                        }
+                        let key = format!("{}:{}", dep.image_name, dep.current_value);
+                        let status = match update_map.get(&key) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_tag.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.image_name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: k8s_path.clone(),
+                        manager: "kubernetes".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%k8s_path, "kubernetes manifest not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%k8s_path, %err, "failed to fetch kubernetes manifest");
+                had_error = true;
+            }
+        }
+    }
+
     // ── ArgoCD Application manifests ─────────────────────────────────────────
     for argo_path in manager_files(&detected, "argocd") {
         match client.get_raw_file(owner, repo, &argo_path).await {

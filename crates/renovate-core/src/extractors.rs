@@ -56,6 +56,7 @@ pub mod html;
 pub mod jenkins;
 pub mod jsonnet_bundler;
 pub mod kotlin_script;
+pub mod kubernetes;
 pub mod kustomize;
 pub mod leiningen;
 pub mod maven;

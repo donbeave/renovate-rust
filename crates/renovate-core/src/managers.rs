@@ -524,6 +524,16 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "argocd",
         patterns: &[r"(^|/)argocd/.+\.ya?ml$", r"(^|/)argo-cd/.+\.ya?ml$"],
     },
+    ManagerDef {
+        // Upstream default is [] — user must configure patterns.
+        // Common conventions for K8s manifests.
+        name: "kubernetes",
+        patterns: &[
+            r"(^|/)k8s/.+\.ya?ml$",
+            r"(^|/)kubernetes/.+\.ya?ml$",
+            r"(^|/)manifests/.+\.ya?ml$",
+        ],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
