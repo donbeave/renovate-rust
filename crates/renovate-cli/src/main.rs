@@ -9262,7 +9262,11 @@ fn build_dep_reports_poetry(
         });
     }
     for dep in actionable {
-        let status = match update_map.get(&dep.name) {
+        let summary = update_map.get(&dep.name);
+        let release_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.latest_timestamp.clone());
+        let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
                 latest: s.latest.clone().unwrap_or_default(),
@@ -9281,7 +9285,7 @@ fn build_dep_reports_poetry(
             automerge: None,
             labels: Vec::new(),
             pr_title: None,
-            release_timestamp: None,
+            release_timestamp,
             name: dep.name.clone(),
             status,
         });
@@ -9316,7 +9320,11 @@ fn build_dep_reports_pip(
         });
     }
     for dep in actionable {
-        let status = match update_map.get(&dep.name) {
+        let summary = update_map.get(&dep.name);
+        let release_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.latest_timestamp.clone());
+        let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
                 latest: s.latest.clone().unwrap_or_default(),
@@ -9335,7 +9343,7 @@ fn build_dep_reports_pip(
             automerge: None,
             labels: Vec::new(),
             pr_title: None,
-            release_timestamp: None,
+            release_timestamp,
             name: dep.name.clone(),
             status,
         });
@@ -9586,7 +9594,11 @@ fn build_dep_reports_setup_cfg(
         });
     }
     for dep in actionable {
-        let status = match update_map.get(&dep.name) {
+        let summary = update_map.get(&dep.name);
+        let release_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.latest_timestamp.clone());
+        let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
                 latest: s.latest.clone().unwrap_or_default(),
@@ -9605,7 +9617,7 @@ fn build_dep_reports_setup_cfg(
             automerge: None,
             labels: Vec::new(),
             pr_title: None,
-            release_timestamp: None,
+            release_timestamp,
             name: dep.name.clone(),
             status,
         });
@@ -9640,7 +9652,11 @@ fn build_dep_reports_pipfile(
         });
     }
     for dep in actionable {
-        let status = match update_map.get(&dep.name) {
+        let summary = update_map.get(&dep.name);
+        let release_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.latest_timestamp.clone());
+        let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
                 latest: s.latest.clone().unwrap_or_default(),
@@ -9659,7 +9675,7 @@ fn build_dep_reports_pipfile(
             automerge: None,
             labels: Vec::new(),
             pr_title: None,
-            release_timestamp: None,
+            release_timestamp,
             name: dep.name.clone(),
             status,
         });

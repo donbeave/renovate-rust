@@ -628,4 +628,73 @@ mod tests {
         // 10am → out of window
         assert!(!is_within_schedule_at(&sched, fri_10am()));
     }
+
+    // ── parse_age_duration ────────────────────────────────────────────────────
+
+    #[test]
+    fn parse_age_3_days() {
+        let d = parse_age_duration("3 days").unwrap();
+        assert_eq!(d.num_days(), 3);
+    }
+
+    #[test]
+    fn parse_age_1_week() {
+        let d = parse_age_duration("1 week").unwrap();
+        assert_eq!(d.num_days(), 7);
+    }
+
+    #[test]
+    fn parse_age_2_hours() {
+        let d = parse_age_duration("2 hours").unwrap();
+        assert_eq!(d.num_hours(), 2);
+    }
+
+    #[test]
+    fn parse_age_30_minutes() {
+        let d = parse_age_duration("30 minutes").unwrap();
+        assert_eq!(d.num_minutes(), 30);
+    }
+
+    #[test]
+    fn parse_age_1_month_approximated_as_30_days() {
+        let d = parse_age_duration("1 month").unwrap();
+        assert_eq!(d.num_days(), 30);
+    }
+
+    #[test]
+    fn parse_age_unknown_returns_none() {
+        assert!(parse_age_duration("bogus").is_none());
+        assert!(parse_age_duration("3 fortnights").is_none());
+    }
+
+    // ── is_within_release_age ────────────────────────────────────────────────
+
+    #[test]
+    fn release_age_no_constraint_passes() {
+        assert!(is_within_release_age(Some("2020-01-01T00:00:00Z"), None));
+    }
+
+    #[test]
+    fn release_age_old_release_passes() {
+        // Old release (2020) clearly satisfies "3 days" minimum
+        assert!(is_within_release_age(
+            Some("2020-01-01T00:00:00Z"),
+            Some("3 days")
+        ));
+    }
+
+    #[test]
+    fn release_age_missing_timestamp_fails_open() {
+        // No timestamp → can't check → fail-open (true)
+        assert!(is_within_release_age(None, Some("3 days")));
+    }
+
+    #[test]
+    fn release_age_future_release_fails() {
+        // Far-future release timestamp doesn't satisfy minimum age
+        assert!(!is_within_release_age(
+            Some("2099-12-31T23:59:59Z"),
+            Some("3 days")
+        ));
+    }
 }

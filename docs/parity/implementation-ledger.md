@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0191  | 2026-04-28 | PyPI release timestamp support + parse_age_duration tests + is_within_release_age tests | Complete | See below. |
 | 0190  | 2026-04-28 | `minimumReleaseAge` + npm release timestamp + `is_within_release_age()` + `parse_age_duration()` | Complete | See below. |
 | 0189  | 2026-04-28 | `commitMessageAction` + `commitMessagePrefix` + `rangeStrategy` in RepoConfig; pr_title() now configurable | Complete | See below. |
 | 0188  | 2026-04-28 | Schedule text DSL parser: before/after/between/every weekday/on Monday/first day of month | Complete | See below. |

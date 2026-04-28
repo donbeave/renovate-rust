@@ -23,6 +23,8 @@ pub struct Pep440UpdateSummary {
     /// `true` when the specifier is an exact pin (`==X.Y.Z`) and a newer
     /// version is available.
     pub update_available: bool,
+    /// ISO 8601 publish timestamp for the latest version, if available.
+    pub latest_timestamp: Option<String>,
 }
 
 /// Produce a PEP 440 update summary.
@@ -45,6 +47,7 @@ pub fn pep440_update_summary(specifier: &str, latest_stable: Option<&str>) -> Pe
         current_specifier: specifier.to_owned(),
         latest,
         update_available,
+        latest_timestamp: None, // populated by datasource layer
     }
 }
 

@@ -63,6 +63,9 @@ struct PypiInfo {
 struct PypiRelease {
     #[serde(default)]
     yanked: bool,
+    /// ISO 8601 publish timestamp (without timezone suffix), e.g. `"2023-01-15T10:30:00"`.
+    #[serde(default)]
+    upload_time: Option<String>,
 }
 
 /// Normalize a Python package name for use in the PyPI URL.
@@ -94,7 +97,7 @@ pub async fn fetch_versions(
     http: &HttpClient,
     package_name: &str,
     api_base: &str,
-) -> Result<(Vec<String>, String), PypiError> {
+) -> Result<PypiVersionsEntry, PypiError> {
     let normalized = normalize_name(package_name);
     let url = format!("{}/{}/json", api_base.trim_end_matches('/'), normalized);
 
@@ -110,23 +113,35 @@ pub async fn fetch_versions(
     let data: PypiResponse =
         serde_json::from_str(&body).map_err(|e| PypiError::Parse(e.to_string()))?;
 
-    let latest = data.info.version;
+    let latest = data.info.version.clone();
 
-    // Collect non-yanked versions (a version is active if at least one of its
-    // files is not yanked, or if the files list is empty/no yanked field).
+    // Collect non-yanked versions and extract the latest timestamp.
+    let mut latest_timestamp: Option<String> = None;
     let mut versions: Vec<String> = data
         .releases
-        .into_iter()
-        .filter(|(_, files)| {
-            // Keep the version if it has no files (pre-release/metadata-only)
-            // or if at least one file is not yanked.
-            files.is_empty() || files.iter().any(|f| !f.yanked)
+        .iter()
+        .filter(|(_, files)| files.is_empty() || files.iter().any(|f| !f.yanked))
+        .map(|(v, files)| {
+            if v == &latest {
+                // Pick the earliest (by upload_time) non-yanked file's timestamp.
+                latest_timestamp = files
+                    .iter()
+                    .filter(|f| !f.yanked)
+                    .filter_map(|f| f.upload_time.as_deref())
+                    .min()
+                    .map(|t| {
+                        // PyPI uses naive ISO datetime; append Z to make it UTC-parseable.
+                        if t.ends_with('Z') || t.contains('+') {
+                            t.to_owned()
+                        } else {
+                            format!("{t}Z")
+                        }
+                    });
+            }
+            v.clone()
         })
-        .map(|(v, _)| v)
         .collect();
 
-    // Sort by version string (best-effort semver; PEP 440 ordering is a later
-    // slice — for most packages semver ordering is correct).
     versions.sort_by(|a, b| {
         let av = semver::Version::parse(a);
         let bv = semver::Version::parse(b);
@@ -138,7 +153,11 @@ pub async fn fetch_versions(
         }
     });
 
-    Ok((versions, latest))
+    Ok(PypiVersionsEntry {
+        versions,
+        latest,
+        latest_timestamp,
+    })
 }
 
 /// Input descriptor for a single pip dependency in a batch fetch.
@@ -177,8 +196,11 @@ pub async fn fetch_updates_concurrent(
         set.spawn(async move {
             let _permit = sem.acquire_owned().await.expect("semaphore closed");
             let result = fetch_versions(&http, &dep_name, &api_base).await;
-            let summary =
-                result.map(|(_versions, latest)| pep440_update_summary(&specifier, Some(&latest)));
+            let summary = result.map(|entry| {
+                let mut s = pep440_update_summary(&specifier, Some(entry.latest.as_str()));
+                s.latest_timestamp = entry.latest_timestamp;
+                s
+            });
             PypiDepUpdate { dep_name, summary }
         });
     }
@@ -194,7 +216,16 @@ pub async fn fetch_updates_concurrent(
 }
 
 /// Cached versions entry: `(sorted versions oldest-first, latest_stable)`.
-pub type PypiVersionsEntry = (Vec<String>, String);
+/// Cached PyPI versions entry for a single package.
+#[derive(Debug, Clone)]
+pub struct PypiVersionsEntry {
+    /// Versions sorted oldest-first by PEP 440 semantics.
+    pub versions: Vec<String>,
+    /// Latest stable version reported by `info.version`.
+    pub latest: String,
+    /// ISO 8601 publish timestamp for the latest version, if available.
+    pub latest_timestamp: Option<String>,
+}
 
 /// Fetch versions for a batch of unique package names concurrently.
 ///
@@ -244,8 +275,9 @@ pub async fn fetch_versions_batch(
 
 /// Compute a `Pep440UpdateSummary` from a pre-fetched versions cache entry.
 pub fn summary_from_cache(specifier: &str, entry: &PypiVersionsEntry) -> Pep440UpdateSummary {
-    let (_versions, latest) = entry;
-    pep440_update_summary(specifier, Some(latest.as_str()))
+    let mut s = pep440_update_summary(specifier, Some(entry.latest.as_str()));
+    s.latest_timestamp = entry.latest_timestamp.clone();
+    s
 }
 
 #[cfg(test)]
@@ -294,11 +326,11 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let (versions, latest) = fetch_versions(&http, "django", &server.uri())
+        let entry = fetch_versions(&http, "django", &server.uri())
             .await
             .unwrap();
-        assert_eq!(latest, "4.2.7");
-        assert_eq!(versions, vec!["4.0.0", "4.2.5", "4.2.7"]);
+        assert_eq!(entry.latest, "4.2.7");
+        assert_eq!(entry.versions, vec!["4.0.0", "4.2.5", "4.2.7"]);
     }
 
     #[tokio::test]
@@ -312,10 +344,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let (_, latest) = fetch_versions(&http, "my_package", &server.uri())
+        let entry = fetch_versions(&http, "my_package", &server.uri())
             .await
             .unwrap();
-        assert_eq!(latest, "1.0.0");
+        assert_eq!(entry.latest, "1.0.0");
     }
 
     #[tokio::test]
