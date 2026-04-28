@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0155  | 2026-04-28 | `cdnurl` + stub registrations for `git-submodules`/`hermit`/`pip-compile`/`custom` | Complete | See below. |
 | 0154  | 2026-04-28 | PEP 723 Python inline script metadata extractor | Complete | See below. |
 | 0153  | 2026-04-28 | OCB (OpenTelemetry Collector Builder) Go module extractor | Complete | See below. |
 | 0152  | 2026-04-28 | Sveltos `ClusterProfile`/`Profile` Helm chart extractor | Complete | See below. |
@@ -3101,6 +3102,32 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0155 - `cdnurl` pipeline + remaining manager stub registrations
+
+### Renovate reference
+- `lib/modules/manager/cdnurl/extract.ts` — same cloudflare URL regex as html, no SRI
+- `lib/modules/manager/git-submodules/` — requires local git ops (deferred)
+- `lib/modules/manager/hermit/` — requires directory listing (deferred)
+- `lib/modules/manager/pip-compile/` — multi-file delegation (deferred)
+- `lib/modules/manager/custom/` — runtime user-defined patterns (deferred)
+
+### What landed
+- `managers.rs`: registered `cdnurl`, `git-submodules`, `hermit`, `pip-compile`, `custom`.
+  - `cdnurl`: empty default patterns (user-configured), pipeline reuses html extractor.
+  - Others: stub entries with practical file patterns so names are valid in config.
+- `main.rs`: `cdnurl` pipeline block reuses `renovate_core::extractors::html::extract` + cdnjs datasource (same as `html`, but manager field = `"cdnurl"`).
+- All upstream manager names are now registered — manager name coverage = 100%.
+
+### Deferred
+- `git-submodules`: needs local git operations to resolve submodule commit hashes.
+- `hermit`: needs directory listing for `.*.pkg` files.
+- `pip-compile`: needs multi-file extraction delegating to pip_requirements/pep621/pip_setup.
+- `custom`: needs runtime regex/jsonpath pattern support.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1049 passed
 
 ## Slice 0154 - PEP 723 Python inline script metadata extractor
 

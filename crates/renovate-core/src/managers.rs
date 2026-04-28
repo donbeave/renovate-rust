@@ -587,6 +587,36 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "pep723",
         patterns: &[r"(^|/)scripts?/[^/]+\.py$", r"(^|/)[^/]+\.script\.py$"],
     },
+    ManagerDef {
+        // cdnurl — Cloudflare CDN URL extractor; upstream has empty patterns (user-configured).
+        // Uses the same cloudflare URL regex as the html manager but without SRI hash updates.
+        name: "cdnurl",
+        patterns: &[],
+    },
+    ManagerDef {
+        // git-submodules — upstream patterns: `/(^|/)\.gitmodules$/`.
+        // Stub registration; full Git-ref lookup requires local git operations (deferred).
+        name: "git-submodules",
+        patterns: &[r"(^|/)\.gitmodules$"],
+    },
+    ManagerDef {
+        // hermit — reads `.*.pkg` files in the bin/ directory.
+        // Stub registration; full extraction requires directory listing (deferred).
+        name: "hermit",
+        patterns: &[r"(^|/)bin/\.?hermit\.hcl$"],
+    },
+    ManagerDef {
+        // pip-compile — delegates to pip_requirements/pep621/pip_setup managers.
+        // Stub registration; full multi-file extraction deferred.
+        name: "pip-compile",
+        patterns: &[r"(^|/)requirements\.in$", r"(^|/)requirements-.*\.in$"],
+    },
+    ManagerDef {
+        // custom — user-defined regex/jsonpath patterns; runtime-configured only.
+        // Stub registration so the manager name is valid in config references.
+        name: "custom",
+        patterns: &[],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
