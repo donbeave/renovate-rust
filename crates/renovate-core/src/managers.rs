@@ -576,6 +576,11 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "sveltos",
         patterns: &[r"(^|/)sveltos/.+\.ya?ml$"],
     },
+    ManagerDef {
+        // OpenTelemetry Collector Builder config files.
+        name: "ocb",
+        patterns: &[r"(^|/)otelcol-builder\.ya?ml$", r"(^|/)ocb\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

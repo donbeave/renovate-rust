@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0153  | 2026-04-28 | OCB (OpenTelemetry Collector Builder) Go module extractor | Complete | See below. |
 | 0152  | 2026-04-28 | Sveltos `ClusterProfile`/`Profile` Helm chart extractor | Complete | See below. |
 | 0151  | 2026-04-28 | Renovate config presets extractor + `helm-requirements` alias | Complete | See below. |
 | 0150  | 2026-04-28 | Glasskube package manifest extractor + packages datasource | Complete | See below. |
@@ -3099,6 +3100,28 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0153 - OCB (OpenTelemetry Collector Builder) Go module extractor
+
+### Renovate reference
+- `lib/modules/manager/ocb/extract.ts`, `schema.ts`
+- Default patterns: `[]` (user-configured). We add `otelcol-builder.ya?ml`, `ocb.ya?ml`.
+- Datasource: `go` (Go module proxy)
+
+### What landed
+- `crates/renovate-core/src/extractors/ocb.rs` (new):
+  - Line-based YAML scanner detects `dist:` / module-section structure.
+  - `dist.otelcol_version` → collector dep (bare version; pipeline prepends `v` for proxy lookup).
+  - `exporters[]`, `extensions[]`, `receivers[]`, `processors[]`, `providers[]`, `connectors[]` → `gomod: path version` entries.
+  - `OcbDep { dep_name, current_value, dep_type, skip_reason }`.
+  - 4 unit tests covering full example, section types, missing version, unknown content.
+- Registered in `extractors.rs`, `managers.rs`.
+- `crates/renovate-cli/src/main.rs`: pipeline uses `gomod_datasource::fetch_updates_concurrent`.
+  - Collector dep: `v`-prefix normalized before proxy lookup.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1043 passed
 
 ## Slice 0152 - Sveltos `ClusterProfile`/`Profile` Helm chart extractor
 
