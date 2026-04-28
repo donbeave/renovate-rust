@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0185  | 2026-04-28 | `RuleEffects` + `collect_rule_effects()` + `groupName`/`automerge`/`labels` in DepReport | Complete | See below. |
 | 0184  | 2026-04-28 | Pass manager context to all 72 `is_dep_ignored` call sites in main.rs | Complete | See below. |
 | 0183  | 2026-04-28 | `DepContext` unified matcher + `matches_context()` on PackageRule | Complete | See below. |
 | 0182  | 2026-04-28 | `matchRegistryUrls` + `matchRepositories` packageRule matchers | Complete | See below. |

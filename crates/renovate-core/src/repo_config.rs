@@ -1500,6 +1500,68 @@ impl RepoConfig {
             .iter()
             .any(|rule| rule.matches_context(&ctx) && rule.version_is_ignored(proposed_version))
     }
+
+    /// Collect merged packageRule effects for a dep.
+    ///
+    /// Evaluates all rules in order and merges their positive effects:
+    /// - `group_name`: first matching rule that sets it wins.
+    /// - `automerge`: last matching rule that sets it wins (overrides repo default).
+    /// - `schedule`: last matching rule that sets it wins.
+    /// - `labels`: union of all matching rules.
+    ///
+    /// Repository-level defaults (`automerge`, `group_name`) are applied after
+    /// the rules, so rule-level values take precedence.
+    ///
+    /// Renovate reference: `lib/util/package-rules/index.ts` —
+    /// `applyPackageRules()` merging logic.
+    pub fn collect_rule_effects(&self, ctx: &DepContext<'_>) -> RuleEffects {
+        let mut effects = RuleEffects::default();
+        for rule in &self.package_rules {
+            if !rule.matches_context(ctx) {
+                continue;
+            }
+            if effects.group_name.is_none() {
+                effects.group_name = rule.group_name.clone();
+            }
+            if let Some(am) = rule.automerge {
+                effects.automerge = Some(am);
+            }
+            if !rule.schedule.is_empty() {
+                effects.schedule.clone_from(&rule.schedule);
+            }
+            for label in &rule.labels {
+                if !effects.labels.contains(label) {
+                    effects.labels.push(label.clone());
+                }
+            }
+        }
+        // Apply repo-level defaults if no rule overrode them.
+        if effects.group_name.is_none() && self.group_name.is_some() {
+            effects.group_name.clone_from(&self.group_name);
+        }
+        if effects.automerge.is_none() && self.automerge {
+            effects.automerge = Some(true);
+        }
+        effects
+    }
+}
+
+/// Merged effects from all matching packageRules for a specific dep.
+///
+/// Fields follow upstream merge semantics: first-wins for `group_name`,
+/// last-wins for `automerge`/`schedule`, union for `labels`.
+///
+/// Renovate reference: `lib/util/package-rules/index.ts` — `applyPackageRules()`.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct RuleEffects {
+    /// `groupName` from the first matching rule that sets it (or repo default).
+    pub group_name: Option<String>,
+    /// `automerge` from the last matching rule that sets it (or repo default if `true`).
+    pub automerge: Option<bool>,
+    /// `schedule` from the last matching rule that sets it.  Empty = use repo default.
+    pub schedule: Vec<String>,
+    /// Labels accumulated (union) from all matching rules.
+    pub labels: Vec<String>,
 }
 
 impl Default for RepoConfig {
@@ -3241,5 +3303,87 @@ mod dep_context_tests {
         assert_eq!(ctx.datasource, Some("npm"));
         assert_eq!(ctx.dep_type, Some("devDependencies"));
         assert_eq!(ctx.file_path, Some("package.json"));
+    }
+}
+
+#[cfg(test)]
+mod rule_effects_tests {
+    use super::*;
+
+    #[test]
+    fn group_name_from_matching_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["express"], "groupName": "web-framework"}]}"#,
+        );
+        let ctx = DepContext::for_dep("express");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.group_name.as_deref(), Some("web-framework"));
+    }
+
+    #[test]
+    fn group_name_first_matching_rule_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["express"], "groupName": "first"},
+                {"matchPackageNames": ["express"], "groupName": "second"}
+            ]}"#,
+        );
+        let ctx = DepContext::for_dep("express");
+        let effects = c.collect_rule_effects(&ctx);
+        // First matching rule wins for groupName.
+        assert_eq!(effects.group_name.as_deref(), Some("first"));
+    }
+
+    #[test]
+    fn automerge_last_rule_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["express"], "automerge": true},
+                {"matchPackageNames": ["express"], "automerge": false}
+            ]}"#,
+        );
+        let ctx = DepContext::for_dep("express");
+        let effects = c.collect_rule_effects(&ctx);
+        // Last matching rule wins for automerge.
+        assert_eq!(effects.automerge, Some(false));
+    }
+
+    #[test]
+    fn labels_accumulated_from_all_matching_rules() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["express"], "labels": ["backend"]},
+                {"matchPackageNames": ["express"], "labels": ["web", "backend"]}
+            ]}"#,
+        );
+        let ctx = DepContext::for_dep("express");
+        let effects = c.collect_rule_effects(&ctx);
+        // Union — "backend" deduped, "web" added.
+        assert!(effects.labels.contains(&"backend".to_owned()));
+        assert!(effects.labels.contains(&"web".to_owned()));
+        assert_eq!(effects.labels.len(), 2);
+    }
+
+    #[test]
+    fn no_matching_rule_returns_defaults() {
+        let c = RepoConfig::parse(
+            r#"{"automerge": true, "groupName": "all-deps",
+               "packageRules": [{"matchPackageNames": ["other-pkg"], "automerge": false}]}"#,
+        );
+        let ctx = DepContext::for_dep("express");
+        let effects = c.collect_rule_effects(&ctx);
+        // No rule matches express → repo-level defaults applied.
+        assert_eq!(effects.group_name.as_deref(), Some("all-deps"));
+        assert_eq!(effects.automerge, Some(true));
+    }
+
+    #[test]
+    fn rule_with_non_matching_manager_doesnt_apply() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["npm"], "matchPackageNames": ["serde"], "groupName": "npm-only"}]}"#,
+        );
+        let ctx = DepContext::for_dep("serde").with_manager("cargo");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.group_name.is_none());
     }
 }

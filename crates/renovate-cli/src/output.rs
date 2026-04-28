@@ -45,6 +45,20 @@ pub(crate) struct DepReport {
     /// (or `{major}.{minor}.x` when `separateMinorPatch = true`).
     #[serde(rename = "branchName", skip_serializing_if = "Option::is_none")]
     pub branch_name: Option<String>,
+    /// Group name from the first matching packageRule that sets `groupName`, or
+    /// from the repo-level `groupName` config.  When set, all deps with the same
+    /// group name are bundled into a single PR.
+    #[serde(rename = "groupName", skip_serializing_if = "Option::is_none")]
+    pub group_name: Option<String>,
+    /// Auto-merge setting from the effective packageRule or repo config.
+    /// `true` = merge automatically when all checks pass;
+    /// `false` = requires manual merge;
+    /// `None` = not configured.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub automerge: Option<bool>,
+    /// Labels to add to the PR from matching packageRules.
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub labels: Vec<String>,
     #[serde(flatten)]
     pub status: DepStatus,
 }
@@ -388,6 +402,17 @@ fn format_dep(dep: &DepReport, use_color: bool) -> String {
                 }
                 None => String::new(),
             };
+            let mut annotations = type_label;
+            if dep.automerge == Some(true) {
+                annotations.push_str(&format!("  {}", dim("automerge", use_color)));
+            }
+            if let Some(ref g) = dep.group_name {
+                annotations.push_str(&format!("  {}", dim(&format!("group:{g}"), use_color)));
+            }
+            if !dep.labels.is_empty() {
+                let label_str = dep.labels.join(",");
+                annotations.push_str(&format!("  {}", dim(&format!("[{label_str}]"), use_color)));
+            }
             format!(
                 "{} {}  {}  {} → {}{}",
                 yellow("↑", use_color),
@@ -395,7 +420,7 @@ fn format_dep(dep: &DepReport, use_color: bool) -> String {
                 dim(current, use_color),
                 dim("→", use_color),
                 green(latest, use_color),
-                type_label,
+                annotations,
             )
         }
         DepStatus::UpToDate { latest } => {
@@ -480,6 +505,9 @@ mod tests {
                     deps: vec![
                         DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -488,6 +516,9 @@ mod tests {
                         },
                         DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
@@ -495,6 +526,9 @@ mod tests {
                         },
                         DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -507,6 +541,9 @@ mod tests {
                     manager: "cargo".into(),
                     deps: vec![DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -567,6 +604,9 @@ mod tests {
                 manager: "cargo".into(),
                 deps: vec![DepReport {
                     branch_name: None,
+                    group_name: None,
+                    automerge: None,
+                    labels: Vec::new(),
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -590,6 +630,9 @@ mod tests {
     fn format_dep_update_available_plain() {
         let dep = DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -607,6 +650,9 @@ mod tests {
     fn format_dep_up_to_date_with_latest() {
         let dep = DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -622,6 +668,9 @@ mod tests {
     fn format_dep_skipped() {
         let dep = DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -636,6 +685,9 @@ mod tests {
     fn format_dep_error() {
         let dep = DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -679,6 +731,9 @@ mod tests {
         let deps = vec![
             DepReport {
                 branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -687,11 +742,17 @@ mod tests {
             },
             DepReport {
                 branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
             DepReport {
                 branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
@@ -699,6 +760,9 @@ mod tests {
             },
             DepReport {
                 branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),

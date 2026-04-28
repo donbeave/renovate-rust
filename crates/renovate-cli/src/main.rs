@@ -1066,6 +1066,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1123,6 +1126,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1160,6 +1166,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.package_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1188,6 +1197,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -1223,6 +1235,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1251,6 +1266,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -1362,6 +1380,9 @@ async fn process_repo(
                     for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                         file_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -1387,6 +1408,9 @@ async fn process_repo(
                         };
                         file_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status,
                         });
@@ -1585,6 +1609,9 @@ async fn process_repo(
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -1608,6 +1635,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1751,6 +1781,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1808,6 +1841,9 @@ async fn process_repo(
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -1831,6 +1867,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -1933,6 +1972,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         all_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.image.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1965,6 +2007,9 @@ async fn process_repo(
                         };
                         all_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep_name,
                             status,
                         });
@@ -1993,6 +2038,9 @@ async fn process_repo(
                     };
                     all_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep_name,
                         status,
                     });
@@ -2079,6 +2127,9 @@ async fn process_repo(
                         for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                             file_deps.push(output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.image.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -2113,6 +2164,9 @@ async fn process_repo(
                             };
                             file_deps.push(output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep_name,
                                 status,
                             });
@@ -2246,6 +2300,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -2330,6 +2387,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2408,6 +2468,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -2445,6 +2508,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2487,6 +2553,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -2649,6 +2718,9 @@ async fn process_repo(
                         if let Some(reason) = &dep.skip_reason {
                             dep_reports.push(output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.chart.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -2673,6 +2745,9 @@ async fn process_repo(
                         };
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.chart.clone(),
                             status,
                         });
@@ -2684,6 +2759,9 @@ async fn process_repo(
                     if let Some(ref reason) = git_dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: git_dep.repo_url.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2725,6 +2803,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: git_dep.repo_url.clone(),
                         status,
                     });
@@ -2829,6 +2910,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         file_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.image.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -2861,6 +2945,9 @@ async fn process_repo(
                         };
                         file_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep_name,
                             status,
                         });
@@ -2882,6 +2969,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: helm.chart_name.clone(),
                         status,
                     });
@@ -2981,6 +3071,9 @@ async fn process_repo(
                         manager: "gradle-wrapper".into(),
                         deps: vec![output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: "gradle".into(),
                             status,
                         }],
@@ -3026,6 +3119,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3097,6 +3193,9 @@ async fn process_repo(
                         manager: "scalafmt".into(),
                         deps: vec![output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: "scalafmt".into(),
                             status,
                         }],
@@ -3144,6 +3243,9 @@ async fn process_repo(
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3167,6 +3269,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -3231,6 +3336,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status,
                         }
@@ -3336,6 +3444,9 @@ async fn process_repo(
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.owner_repo.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3361,6 +3472,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.owner_repo.clone(),
                         status,
                     });
@@ -3428,6 +3542,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.repo.clone(),
                             status,
                         }
@@ -3479,6 +3596,9 @@ async fn process_repo(
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3502,6 +3622,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -3611,6 +3734,9 @@ async fn process_repo(
                 for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -3634,6 +3760,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3736,6 +3865,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -3914,6 +4046,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -4023,6 +4158,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -4056,6 +4194,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -4084,6 +4225,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -4137,6 +4281,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -4253,6 +4400,9 @@ async fn process_repo(
                         manager: manager_name.to_owned(),
                         deps: vec![output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.tool.to_owned(),
                             status,
                         }],
@@ -4318,6 +4468,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: format!("node@{}", dep.version),
                             status,
                         }
@@ -4413,6 +4566,9 @@ async fn process_repo(
                             };
                             output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.project.clone(),
                                 status,
                             }
@@ -4482,6 +4638,9 @@ async fn process_repo(
                         };
                         all_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: orb.package_name.clone(),
                             status,
                         });
@@ -4596,6 +4755,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -4679,6 +4841,9 @@ async fn process_repo(
                         };
                         file_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: format!("{}@{}", t.name, t.version),
                             status,
                         });
@@ -4771,6 +4936,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -4863,6 +5031,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: vdep.tool.to_owned(),
                         status,
                     });
@@ -5001,6 +5172,9 @@ async fn process_repo(
                         manager: "flux".into(),
                         deps: vec![output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: renovate_core::extractors::flux::FLUX2_REPO.to_owned(),
                             status,
                         }],
@@ -5127,6 +5301,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.input_name.clone(),
                             status,
                         }
@@ -5197,6 +5374,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dn,
                             status,
                         }
@@ -5270,6 +5450,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status,
                         }
@@ -5352,6 +5535,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.package_name.clone(),
                             status,
                         }
@@ -5397,6 +5583,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         file_deps.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -5430,6 +5619,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -5503,6 +5695,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -5556,6 +5751,9 @@ async fn process_repo(
                         manager: "fvm".into(),
                         deps: vec![output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: "flutter".to_owned(),
                             status,
                         }],
@@ -5641,6 +5839,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.remote.clone(),
                             status,
                         }
@@ -5708,6 +5909,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.chart_name.clone(),
                             status,
                         }
@@ -5771,6 +5975,9 @@ async fn process_repo(
                         manager: "copier".into(),
                         deps: vec![output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.src_path.clone(),
                             status,
                         }],
@@ -5848,6 +6055,9 @@ async fn process_repo(
                         manager: "batect-wrapper".into(),
                         deps: vec![output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: renovate_core::extractors::batect_wrapper::BATECT_REPO.to_owned(),
                             status,
                         }],
@@ -5879,6 +6089,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -5896,6 +6109,9 @@ async fn process_repo(
                         _ => {
                             dep_reports.push(output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: "non-github-source".into(),
@@ -5936,6 +6152,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -5974,6 +6193,9 @@ async fn process_repo(
                     if repo_cfg.is_dep_ignored_for_manager(&dep.name, "git-submodules") {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: "ignored".into(),
@@ -5992,6 +6214,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.path.clone(),
                         status,
                     });
@@ -6029,6 +6254,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -6097,6 +6325,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.name.clone(),
                         status,
                     });
@@ -6183,6 +6414,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.artifact_id.clone(),
                         status,
                     });
@@ -6249,6 +6483,9 @@ async fn process_repo(
                     };
                     file_deps.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6350,6 +6587,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -6394,6 +6634,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -6469,6 +6712,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6557,6 +6803,9 @@ async fn process_repo(
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -6588,6 +6837,9 @@ async fn process_repo(
                             };
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.dep_name.clone(),
                                 status,
                             };
@@ -6609,6 +6861,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -6675,6 +6930,9 @@ async fn process_repo(
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.image_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -6707,6 +6965,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.image_name.clone(),
                             status,
                         }
@@ -6753,6 +7014,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -6833,6 +7097,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -6896,6 +7163,9 @@ async fn process_repo(
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.image_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -6928,6 +7198,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.image_name.clone(),
                             status,
                         }
@@ -6966,6 +7239,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7039,6 +7315,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -7164,6 +7443,9 @@ async fn process_repo(
                     manager: "homebrew".into(),
                     deps: vec![output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.formula_name.clone(),
                         status,
                     }],
@@ -7215,6 +7497,9 @@ async fn process_repo(
                         if let Some(reason) = &dep.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -7248,6 +7533,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -7314,6 +7602,9 @@ async fn process_repo(
                     manager: "unity3d".into(),
                     deps: vec![output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: "Unity Editor".to_owned(),
                         status,
                     }],
@@ -7347,6 +7638,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7385,6 +7679,9 @@ async fn process_repo(
                         };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -7450,6 +7747,9 @@ async fn process_repo(
                     manager: "runtime-version".into(),
                     deps: vec![output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.dep_name.clone(),
                         status,
                     }],
@@ -7494,6 +7794,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: format!("{}: {}", dep.kind, dep.package),
                             status,
                         }
@@ -7554,6 +7857,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -7603,6 +7909,9 @@ async fn process_repo(
                     if let Some(reason) = &dep.skip_reason {
                         dep_reports.push(output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: dep.repo.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -7682,6 +7991,9 @@ async fn process_repo(
                     };
                     dep_reports.push(output::DepReport {
                         branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
                         name: dep.repo.clone(),
                         status,
                     });
@@ -7745,6 +8057,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: d.chart_name.clone(),
                             status,
                         }
@@ -7811,6 +8126,9 @@ async fn process_repo(
                         if let Some(ref reason) = d.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: d.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -7834,6 +8152,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: d.dep_name.clone(),
                             status,
                         }
@@ -7896,6 +8217,9 @@ async fn process_repo(
                         if let Some(ref reason) = d.skip_reason {
                             return output::DepReport {
                                 branch_name: None,
+                                group_name: None,
+                                automerge: None,
+                                labels: Vec::new(),
                                 name: d.name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -7919,6 +8243,9 @@ async fn process_repo(
                         };
                         output::DepReport {
                             branch_name: None,
+                            group_name: None,
+                            automerge: None,
+                            labels: Vec::new(),
                             name: d.name.clone(),
                             status,
                         }
@@ -7956,6 +8283,9 @@ async fn process_repo(
             if let Some(ref reason) = dep.skip_reason {
                 dep_reports.push(output::DepReport {
                     branch_name: None,
+                    group_name: None,
+                    automerge: None,
+                    labels: Vec::new(),
                     name: dep.name.clone(),
                     status: output::DepStatus::Skipped {
                         reason: format!("{reason:?}").to_lowercase(),
@@ -7985,6 +8315,9 @@ async fn process_repo(
             };
             dep_reports.push(output::DepReport {
                 branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
                 name: dep.name.clone(),
                 status,
             });
@@ -8072,6 +8405,14 @@ fn apply_update_blocking_to_report(
                     dep.branch_name =
                         Some(branch::branch_name(&repo_cfg.branch_prefix, "", &topic));
                 }
+                // Collect positive packageRule effects (groupName, automerge, labels).
+                let ctx = renovate_core::repo_config::DepContext::for_dep(&dep.name)
+                    .with_manager(&manager)
+                    .with_file_path(&file_path);
+                let effects = repo_cfg.collect_rule_effects(&ctx);
+                dep.group_name = effects.group_name;
+                dep.automerge = effects.automerge;
+                dep.labels = effects.labels;
             }
         }
     }
@@ -8147,6 +8488,9 @@ async fn docker_hub_reports(
         if let Some(reason) = &dep.skip_reason {
             reports.push(output::DepReport {
                 branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -8177,6 +8521,9 @@ async fn docker_hub_reports(
             };
             reports.push(output::DepReport {
                 branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
                 name: dep_name,
                 status,
             });
@@ -8200,6 +8547,9 @@ fn build_dep_reports_cargo(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8222,6 +8572,9 @@ fn build_dep_reports_cargo(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.dep_name.clone(),
             status,
         });
@@ -8244,6 +8597,9 @@ fn build_dep_reports_npm(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8266,6 +8622,9 @@ fn build_dep_reports_npm(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8288,6 +8647,9 @@ fn build_dep_reports_github_actions(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.action.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8310,6 +8672,9 @@ fn build_dep_reports_github_actions(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.action.clone(),
             status,
         });
@@ -8332,6 +8697,9 @@ fn build_dep_reports_maven(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8354,6 +8722,9 @@ fn build_dep_reports_maven(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.dep_name.clone(),
             status,
         });
@@ -8376,6 +8747,9 @@ fn build_dep_reports_pub(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8398,6 +8772,9 @@ fn build_dep_reports_pub(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8420,6 +8797,9 @@ fn build_dep_reports_nuget(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.package_id.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8442,6 +8822,9 @@ fn build_dep_reports_nuget(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.package_id.clone(),
             status,
         });
@@ -8464,6 +8847,9 @@ fn build_dep_reports_composer(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8486,6 +8872,9 @@ fn build_dep_reports_composer(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8508,6 +8897,9 @@ fn build_dep_reports_gomod(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.module_path.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8530,6 +8922,9 @@ fn build_dep_reports_gomod(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.module_path.clone(),
             status,
         });
@@ -8552,6 +8947,9 @@ fn build_dep_reports_poetry(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8574,6 +8972,9 @@ fn build_dep_reports_poetry(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8596,6 +8997,9 @@ fn build_dep_reports_pip(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8618,6 +9022,9 @@ fn build_dep_reports_pip(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8640,6 +9047,9 @@ fn build_dep_reports_bundler(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8662,6 +9072,9 @@ fn build_dep_reports_bundler(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8684,6 +9097,9 @@ fn build_dep_reports_terraform(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8706,6 +9122,9 @@ fn build_dep_reports_terraform(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8728,6 +9147,9 @@ fn build_dep_reports_helm(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8750,6 +9172,9 @@ fn build_dep_reports_helm(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8772,6 +9197,9 @@ fn build_dep_reports_gradle(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8794,6 +9222,9 @@ fn build_dep_reports_gradle(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.dep_name.clone(),
             status,
         });
@@ -8816,6 +9247,9 @@ fn build_dep_reports_setup_cfg(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8838,6 +9272,9 @@ fn build_dep_reports_setup_cfg(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
@@ -8860,6 +9297,9 @@ fn build_dep_reports_pipfile(
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -8882,6 +9322,9 @@ fn build_dep_reports_pipfile(
         };
         reports.push(output::DepReport {
             branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
             name: dep.name.clone(),
             status,
         });
