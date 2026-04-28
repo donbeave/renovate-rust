@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0088  | 2026-04-28 | Dev Container `devcontainer.json` Docker image extractor | Complete | See below. |
 | 0087  | 2026-04-28 | Woodpecker CI `.woodpecker.yml` Docker image extractor | Complete | See below. |
 | 0086  | 2026-04-28 | Maven Wrapper `.mvn/wrapper/maven-wrapper.properties` extractor | Complete | See below. |
 | 0085  | 2026-04-28 | Gradle Wrapper extractor + Gradle Version datasource | Complete | See below. |
@@ -2552,4 +2553,4 @@ Pick whichever can be completed in one loop:
 7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 8. **Jenkins plugins datasource** (Jenkins Update Center JSON).
 9. **Travis CI** `.travis.yml` Node.js version extraction.
-10. **`devcontainer`** (`.devcontainer.json`) Docker image extraction.
+10. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.

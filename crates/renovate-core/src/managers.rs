@@ -81,6 +81,13 @@ static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {
 /// - docker-compose: `/(^|/)(?:docker-)?compose\\.ya?ml$/`
 const MANAGER_DEFS: &[ManagerDef] = &[
     ManagerDef {
+        name: "devcontainer",
+        patterns: &[
+            r"^\.devcontainer/devcontainer\.json$",
+            r"^\.devcontainer\.json$",
+        ],
+    },
+    ManagerDef {
         name: "azure-pipelines",
         patterns: &[
             r"(^|/)\.azuredevops/.+\.ya?ml$",

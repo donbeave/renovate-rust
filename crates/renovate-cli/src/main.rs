@@ -2849,6 +2849,30 @@ async fn process_repo(
         }
     }
 
+    // ── Dev Container (devcontainer.json) ────────────────────────────────────
+    for dc_path in manager_files(&detected, "devcontainer") {
+        match client.get_raw_file(owner, repo, &dc_path).await {
+            Ok(Some(raw)) => {
+                let deps: Vec<_> = renovate_core::extractors::devcontainer::extract(&raw.content)
+                    .into_iter()
+                    .collect();
+                tracing::debug!(repo = %repo_slug, file = %dc_path, total = deps.len(), "extracted devcontainer image");
+                repo_report.files.push(output::FileReport {
+                    path: dc_path.clone(),
+                    manager: "devcontainer".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%dc_path, "devcontainer.json not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%dc_path, %err, "failed to fetch devcontainer.json");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Woodpecker CI (.woodpecker.yml / .woodpecker/*.yml) ──────────────────
     for wp_path in manager_files(&detected, "woodpecker") {
         match client.get_raw_file(owner, repo, &wp_path).await {
