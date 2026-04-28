@@ -2906,6 +2906,121 @@ async fn process_repo(
         }
     }
 
+    // ── Azure Pipelines ───────────────────────────────────────────────────────
+    for az_path in manager_files(&detected, "azure-pipelines") {
+        match client.get_raw_file(owner, repo, &az_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::azure_pipelines::extract(&raw.content);
+                let images: Vec<_> = deps
+                    .iter()
+                    .filter_map(|d| match d {
+                        renovate_core::extractors::azure_pipelines::AzPipelinesDep::Container(
+                            c,
+                        ) => Some(c),
+                        renovate_core::extractors::azure_pipelines::AzPipelinesDep::Task(_) => None,
+                    })
+                    .collect();
+                let actionable: Vec<_> =
+                    images.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %az_path,
+                    total_images = images.len(), actionable = actionable.len(),
+                    "extracted azure-pipelines images"
+                );
+                let dep_inputs: Vec<docker_datasource::DockerDepInput> = actionable
+                    .iter()
+                    .filter_map(|d| {
+                        let tag = d.tag.as_deref()?;
+                        Some(docker_datasource::DockerDepInput {
+                            dep_name: format!("{}:{tag}", d.image),
+                            image: d.image.clone(),
+                            tag: tag.to_owned(),
+                        })
+                    })
+                    .collect();
+                let updates = docker_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    docker_datasource::DOCKER_HUB_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    match dep {
+                        renovate_core::extractors::azure_pipelines::AzPipelinesDep::Container(
+                            img,
+                        ) => {
+                            if let Some(reason) = &img.skip_reason {
+                                file_deps.push(output::DepReport {
+                                    name: img.image.clone(),
+                                    status: output::DepStatus::Skipped {
+                                        reason: format!("{reason:?}").to_lowercase(),
+                                    },
+                                });
+                            } else {
+                                let dep_name = match &img.tag {
+                                    Some(t) => format!("{}:{t}", img.image),
+                                    None => img.image.clone(),
+                                };
+                                let status = match update_map.get(&dep_name) {
+                                    Some(Ok(s)) if s.update_available => {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: s.current_tag.clone(),
+                                            latest: s.latest.clone().unwrap_or_default(),
+                                        }
+                                    }
+                                    Some(Ok(s)) => output::DepStatus::UpToDate {
+                                        latest: s.latest.clone(),
+                                    },
+                                    Some(Err(docker_datasource::DockerHubError::NonDockerHub(
+                                        _,
+                                    ))) => output::DepStatus::Skipped {
+                                        reason: "non-docker-hub registry".into(),
+                                    },
+                                    Some(Err(e)) => output::DepStatus::LookupError {
+                                        message: e.to_string(),
+                                    },
+                                    None => output::DepStatus::UpToDate { latest: None },
+                                };
+                                file_deps.push(output::DepReport {
+                                    name: dep_name,
+                                    status,
+                                });
+                            }
+                        }
+                        renovate_core::extractors::azure_pipelines::AzPipelinesDep::Task(t) => {
+                            // azure-pipelines-tasks datasource not yet implemented;
+                            // emit as skipped so the dep is visible in output.
+                            file_deps.push(output::DepReport {
+                                name: format!("{}@{}", t.name, t.version),
+                                status: output::DepStatus::Skipped {
+                                    reason: "azure-pipelines-tasks datasource pending".into(),
+                                },
+                            });
+                        }
+                    }
+                }
+                repo_report.files.push(output::FileReport {
+                    path: az_path.clone(),
+                    manager: "azure-pipelines".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%az_path, "azure-pipelines file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%az_path, %err, "failed to fetch azure-pipelines file");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 

@@ -5,6 +5,7 @@
 
 pub mod ansible_galaxy;
 pub mod asdf;
+pub mod azure_pipelines;
 pub mod buildkite;
 pub mod bundler;
 pub mod cargo;

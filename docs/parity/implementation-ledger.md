@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0079  | 2026-04-28 | Azure Pipelines extractor (Docker containers + tasks) | Complete | See below. |
 | 0078  | 2026-04-28 | Google Cloud Build `cloudbuild.yaml` extractor | Complete | See below. |
 | 0077  | 2026-04-28 | Kustomize `images:` and `helmCharts:` extractor | Complete | See below. |
 | 0076  | 2026-04-28 | Gradle version catalog `[plugins]` section extraction | Complete | See below. |
@@ -2290,6 +2291,38 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 724 passed
 
+## Slice 0079 - Azure Pipelines extractor (Docker containers + tasks)
+
+### Renovate reference
+- `lib/modules/manager/azure-pipelines/extract.ts`
+- `lib/modules/manager/azure-pipelines/schema.ts`
+- Patterns: `/(^|/).azuredevops/.+\.ya?ml$/`, `/azure.*pipelines?.*\.ya?ml$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/azure_pipelines.rs`:
+  - `AzPipelineTaskDep { name, version }` — pipeline task dep from `task: Name@Version`.
+  - `AzPipelinesDep { Container(DockerfileExtractedDep), Task(AzPipelineTaskDep) }` enum.
+  - `extract(content)` — line-scanner with state tracking for `resources.containers` block.
+  - Container images: state machine tracks `in_resources → in_containers → in_container_item`,
+    extracts `image:` values and runs through `classify_image_ref()`.
+  - Pipeline tasks: universal scan of all lines for `[- ]task: Name@Version` (inline and key forms);
+    tasks appear inside `steps:` at any nesting level (top-level, jobs, stages, deployments).
+  - 8 unit tests: single container, multiple containers, tasks, nested stage/job tasks,
+    variable ref skip, task without `@` ignored, empty file, non-container resources.
+- `crates/renovate-core/src/managers.rs`: `azure-pipelines` manager with 2 patterns.
+- `crates/renovate-core/src/extractors.rs`: `pub mod azure_pipelines`.
+- `crates/renovate-cli/src/main.rs`: Azure Pipelines pipeline loop — Docker images go through
+  Docker Hub datasource; tasks emitted as skipped with `"azure-pipelines-tasks datasource pending"`.
+
+### What was intentionally deferred
+- `azure-pipelines-tasks` datasource (requires Azure DevOps API or GitHub data mirror).
+- `resources.repositories` extraction (git tags datasource).
+- Template file references.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 745 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2301,5 +2334,5 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **GitLab CI `include:` project components**: component dependency version tracking.
-6. **kustomize `images:` and `helmCharts:` extractor**: Kustomize manifest image and Helm chart deps.
-7. **Gradle version catalog `[plugins]` section**: extract plugin versions from TOML catalogs.
+6. **Helmfile** (`helmfile.yaml`) extractor for Helm chart repos.
+7. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
