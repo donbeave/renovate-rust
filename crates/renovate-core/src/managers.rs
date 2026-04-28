@@ -472,6 +472,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "docker-compose",
         patterns: &[r"(^|/)(?:docker-)?compose\.ya?ml$"],
     },
+    ManagerDef {
+        name: "homebrew",
+        patterns: &[r"(^|/)Formula/[^/]+\.rb$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

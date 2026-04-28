@@ -48,6 +48,7 @@ use renovate_core::extractors::gomod as gomod_extractor;
 use renovate_core::extractors::gradle as gradle_extractor;
 use renovate_core::extractors::helm as helm_extractor;
 use renovate_core::extractors::homeassistant as homeassistant_extractor;
+use renovate_core::extractors::homebrew as homebrew_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::extractors::nuget as nuget_extractor;
@@ -5841,6 +5842,124 @@ async fn process_repo(
             }
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%lein_path, %err, "failed to fetch project.clj");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── Homebrew formula (Formula/*.rb) ────────────────────────────────────────
+    for hb_path in manager_files(&detected, "homebrew") {
+        match client.get_raw_file(owner, repo, &hb_path).await {
+            Ok(Some(raw)) => {
+                use homebrew_extractor::{GitHubUrlType, HomebrewSkipReason, HomebrewSource};
+                let dep = match homebrew_extractor::extract(&raw.content) {
+                    Some(d) => d,
+                    None => continue,
+                };
+                if repo_cfg.is_dep_ignored(&dep.formula_name) {
+                    continue;
+                }
+                let status = if let Some(reason) = &dep.skip_reason {
+                    output::DepStatus::Skipped {
+                        reason: match reason {
+                            HomebrewSkipReason::InvalidSha256 => "invalid-sha256".to_owned(),
+                            HomebrewSkipReason::UnsupportedUrl => "unsupported-url".to_owned(),
+                            HomebrewSkipReason::MissingUrl => "missing-url".to_owned(),
+                        },
+                    }
+                } else {
+                    match &dep.source {
+                        HomebrewSource::GitHub {
+                            repo: gh_repo,
+                            url_type,
+                        } => {
+                            let result = match url_type {
+                                GitHubUrlType::Archive => {
+                                    renovate_core::datasources::github_tags::fetch_latest_tag(
+                                        gh_repo,
+                                        &gh_http,
+                                        gh_api_base,
+                                    )
+                                    .await
+                                    .map_err(|e| e.to_string())
+                                }
+                                GitHubUrlType::Release => {
+                                    github_releases_datasource::fetch_latest_release(
+                                        gh_repo,
+                                        &gh_http,
+                                        gh_api_base,
+                                    )
+                                    .await
+                                    .map_err(|e| e.to_string())
+                                }
+                            };
+                            match result {
+                                Ok(Some(tag)) => {
+                                    let stripped = tag.trim_start_matches('v');
+                                    let s = renovate_core::versioning::semver_generic::semver_update_summary(
+                                        &dep.current_value,
+                                        Some(stripped),
+                                    );
+                                    if s.update_available {
+                                        output::DepStatus::UpdateAvailable {
+                                            current: dep.current_value.clone(),
+                                            latest: stripped.to_owned(),
+                                        }
+                                    } else {
+                                        output::DepStatus::UpToDate {
+                                            latest: Some(stripped.to_owned()),
+                                        }
+                                    }
+                                }
+                                Ok(None) => output::DepStatus::UpToDate { latest: None },
+                                Err(e) => output::DepStatus::LookupError { message: e },
+                            }
+                        }
+                        HomebrewSource::Npm { package } => {
+                            let npm_input = vec![npm_datasource::NpmDepInput {
+                                dep_name: package.clone(),
+                                constraint: dep.current_value.clone(),
+                            }];
+                            let mut updates = npm_datasource::fetch_updates_concurrent(
+                                http,
+                                &npm_input,
+                                npm_datasource::NPM_REGISTRY,
+                                1,
+                            )
+                            .await;
+                            match updates.pop().map(|r| r.summary) {
+                                Some(Ok(s)) if s.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.current_value.clone(),
+                                        latest: s.latest.unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(s)) => output::DepStatus::UpToDate { latest: s.latest },
+                                Some(Err(e)) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            }
+                        }
+                        HomebrewSource::Unsupported(_) => output::DepStatus::Skipped {
+                            reason: "unsupported-url".to_owned(),
+                        },
+                    }
+                };
+                repo_report.files.push(output::FileReport {
+                    path: hb_path.clone(),
+                    manager: "homebrew".into(),
+                    deps: vec![output::DepReport {
+                        name: dep.formula_name.clone(),
+                        status,
+                    }],
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%hb_path, "homebrew formula not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%hb_path, %err, "failed to fetch homebrew formula");
                 had_error = true;
             }
         }

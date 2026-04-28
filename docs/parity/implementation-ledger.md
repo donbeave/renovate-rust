@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0137  | 2026-04-28 | Homebrew formula extractor (GitHub Archive/Release + NPM routing) | Complete | See below. |
 | 0136  | 2026-04-28 | Azure Bicep `.bicep` extractor + bicep-types-az datasource | Complete | See below. |
 | 0135  | 2026-04-28 | Perl `cpanfile` extractor + MetaCPAN datasource | Complete | See below. |
 | 0134  | 2026-04-28 | Bazel `MODULE.bazel` extractor + Bazel Central Registry datasource | Complete | See below. |
@@ -3083,6 +3084,30 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0137 - Homebrew formula extractor (GitHub Archive/Release + NPM routing)
+
+### Renovate reference
+- `lib/modules/manager/homebrew/extract.ts`
+- Pattern: `(^|/)Formula/[^/]+\.rb$`
+- Datasources: GitHub Tags (archive), GitHub Releases (release download), NPM
+
+### What landed
+- `crates/renovate-core/src/extractors/homebrew.rs` (new):
+  - Parses `class Name < Formula`, `url "..."`, `sha256 "..."` via `LazyLock<Regex>`.
+  - Skips with `InvalidSha256` when sha256 is not exactly 64 hex chars.
+  - Routes GitHub archive URLs (`/archive/refs/tags/` or `/archive/`) to `GitHubUrlType::Archive`.
+  - Routes GitHub release URLs (`/releases/download/`) to `GitHubUrlType::Release`.
+  - Routes `registry.npmjs.org` URLs to `HomebrewSource::Npm`.
+  - Otherwise emits `HomebrewSkipReason::UnsupportedUrl`.
+  - 5 unit tests covering all URL forms and skip cases.
+- Registered in `extractors.rs` and `managers.rs` with `(^|/)Formula/[^/]+\.rb$`.
+- `crates/renovate-cli/src/main.rs`: pipeline dispatches GitHub Archive to `github_tags::fetch_latest_tag`,
+  GitHub Release to `github_releases::fetch_latest_release`, NPM to `npm_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 975 passed
 
 ## Slice 0136 - Azure Bicep `.bicep` extractor + bicep-types-az datasource
 
