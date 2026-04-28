@@ -274,6 +274,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.bun-version$"],
     },
     ManagerDef {
+        name: "bazelisk",
+        patterns: &[r"(^|/)\.bazelversion$"],
+    },
+    ManagerDef {
         name: "gitlabci",
         patterns: &[r"(^|/)\.gitlab-ci\.ya?ml$"],
     },

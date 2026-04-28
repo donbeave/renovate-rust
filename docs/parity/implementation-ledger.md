@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0097  | 2026-04-28 | Bazelisk `.bazelversion` version file support | Complete | See below. |
 | 0096  | 2026-04-28 | Scalafmt `.scalafmt.conf` version extractor | Complete | See below. |
 | 0095  | 2026-04-28 | Mint `Mintfile` extractor (GitHub Tags datasource) | Complete | See below. |
 | 0094  | 2026-04-28 | Gleam `gleam.toml` extractor (Hex.pm datasource) | Complete | See below. |

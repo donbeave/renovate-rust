@@ -93,6 +93,22 @@ static VERSION_FILE_DEFS: &[(&str, &str, AsdfDatasource)] = &[
             tag_strip: "bun-v",
         },
     ),
+    (
+        "bazelisk",
+        "bazel",
+        AsdfDatasource::GithubReleases {
+            repo: "bazelbuild/bazel",
+            tag_strip: "",
+        },
+    ),
+    (
+        "bazel-version",
+        "bazel",
+        AsdfDatasource::GithubReleases {
+            repo: "bazelbuild/bazel",
+            tag_strip: "",
+        },
+    ),
 ];
 
 /// Extract a single version dep from a version file.
@@ -142,6 +158,7 @@ pub fn manager_for_file(filename: &str) -> Option<&'static str> {
         ".python-version" => Some("python-version"),
         ".node-version" => Some("node-version"),
         ".nvmrc" => Some("nvmrc"),
+        ".bazelversion" => Some("bazelisk"),
         _ => None,
     }
 }

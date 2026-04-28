@@ -2815,6 +2815,7 @@ async fn process_repo(
         "node-version",
         "nvmrc",
         "bun-version",
+        "bazelisk",
     ] {
         for vf_path in manager_files(&detected, manager_name) {
             match client.get_raw_file(owner, repo, &vf_path).await {
