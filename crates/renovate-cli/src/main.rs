@@ -604,6 +604,65 @@ async fn process_repo(
         }
     }
 
+    // ── Bun (bun.lockb / bun.lock) → package.json ────────────────────────────
+    for bun_lockfile_path in manager_files(&detected, "bun") {
+        // Derive sibling package.json path from the lockfile path.
+        let package_json_path = if let Some(dir) = bun_lockfile_path.rfind('/') {
+            format!("{}/package.json", &bun_lockfile_path[..dir])
+        } else {
+            "package.json".to_owned()
+        };
+        match client.get_raw_file(owner, repo, &package_json_path).await {
+            Ok(Some(raw)) => match npm_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                        .collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %bun_lockfile_path,
+                        package_json = %package_json_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted bun dependencies from package.json"
+                    );
+                    let dep_inputs: Vec<npm_datasource::NpmDepInput> = actionable
+                        .iter()
+                        .map(|d| npm_datasource::NpmDepInput {
+                            dep_name: d.name.clone(),
+                            constraint: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = npm_datasource::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        npm_datasource::NPM_REGISTRY,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: package_json_path.clone(),
+                        manager: "bun".into(),
+                        deps: build_dep_reports_npm(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%package_json_path, %err, "failed to parse package.json for bun")
+                }
+            },
+            Ok(None) => {
+                tracing::debug!(repo=%repo_slug, file=%package_json_path, "no package.json sibling for bun lockfile")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bun_lockfile_path, %err, "failed to fetch bun package.json");
+                had_error = true;
+            }
+        }
+    }
+
     // ── pip_requirements ──────────────────────────────────────────────────────
     for pip_file_path in manager_files(&detected, "pip_requirements") {
         match client.get_raw_file(owner, repo, &pip_file_path).await {
@@ -3747,8 +3806,11 @@ async fn process_repo(
         "terragrunt-version",
         "go-version",
         "python-version",
+        "pyenv", // .python-version (Renovate alias)
         "node-version",
+        "nodenv", // .node-version (Renovate alias)
         "nvmrc",
+        "nvm", // .nvmrc (Renovate alias)
         "bun-version",
         "bazelisk",
         "ruby-version",

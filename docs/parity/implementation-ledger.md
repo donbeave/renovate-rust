@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0144  | 2026-04-28 | Bun lockfile manager + nodenv/nvm/pyenv manager aliases | Complete | See below. |
 | 0143  | 2026-04-28 | Heroku/Render `runtime.txt` Python version extractor | Complete | See below. |
 | 0142  | 2026-04-28 | Helmsman DSF extractor (Helm chart version tracking) | Complete | See below. |
 | 0141  | 2026-04-28 | Cloud Native Buildpacks `project.toml` extractor + BuildpacksRegistry datasource | Complete | See below. |
@@ -3090,6 +3091,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0144 - Bun lockfile manager + nodenv/nvm/pyenv manager aliases
+
+### Renovate reference
+- `lib/modules/manager/bun/index.ts` — bun lockfile detection
+- `lib/modules/manager/nodenv/index.ts`, `nvm/index.ts`, `pyenv/index.ts`
+- Patterns: `bun.lockb?`, `.node-version`, `.nvmrc`, `.python-version`
+
+### What landed
+- Registered 4 new managers in `managers.rs`:
+  - `bun`: detects `bun.lockb?` files; pipeline reads sibling `package.json`.
+  - `nodenv`: `.node-version` alias for existing `node-version` pipeline.
+  - `nvm`: `.nvmrc` alias for existing `nvmrc` pipeline.
+  - `pyenv`: `.python-version` alias for existing `python-version` pipeline.
+- `crates/renovate-cli/src/main.rs`:
+  - `bun` pipeline: finds sibling `package.json` from lockfile path, extracts with
+    `npm_extractor`, routes to npm datasource — no lockfile parsing needed.
+  - Added `nodenv`, `nvm`, `pyenv` to the version-file manager loop (same routing
+    as their counterparts via `AsdfDatasource`).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1007 passed
 
 ## Slice 0143 - Heroku/Render `runtime.txt` Python version extractor
 

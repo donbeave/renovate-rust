@@ -500,6 +500,24 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "runtime-version",
         patterns: &[r"(^|/)runtime\.txt$"],
     },
+    ManagerDef {
+        // Bun lockfile presence signals that bun manages this project's packages.
+        // Dep extraction happens from the sibling package.json (see pipeline).
+        name: "bun",
+        patterns: &[r"(^|/)bun\.lockb?$"],
+    },
+    ManagerDef {
+        name: "nodenv",
+        patterns: &[r"(^|/)\.node-version$"],
+    },
+    ManagerDef {
+        name: "nvm",
+        patterns: &[r"(^|/)\.nvmrc$"],
+    },
+    ManagerDef {
+        name: "pyenv",
+        patterns: &[r"(^|/)\.python-version$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
