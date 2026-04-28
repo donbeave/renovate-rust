@@ -12,6 +12,7 @@
 //! `!` + lowercase (e.g. `github.com/Azure/sdk` → `github.com/!azure/sdk`).
 //! This encoding is applied before making requests.
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use serde::Deserialize;
@@ -121,6 +122,62 @@ pub async fn fetch_updates_concurrent(
         }
     }
     results
+}
+
+/// Cached Go module latest version entry.
+pub type GoModLatestEntry = Option<String>;
+
+/// Fetch the latest version for a batch of unique Go module paths concurrently.
+///
+/// Returns a `HashMap` from module path to latest version string (None if not found).
+pub async fn fetch_latest_batch(
+    http: &HttpClient,
+    module_paths: &[String],
+    proxy_base: &str,
+    concurrency: usize,
+) -> HashMap<String, GoModLatestEntry> {
+    if module_paths.is_empty() {
+        return HashMap::new();
+    }
+
+    let sem = Arc::new(Semaphore::new(concurrency));
+    let mut set: JoinSet<(String, GoModLatestEntry)> = JoinSet::new();
+
+    for path in module_paths {
+        let http = http.clone();
+        let path = path.clone();
+        let proxy_base = proxy_base.to_owned();
+        let sem = Arc::clone(&sem);
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let latest = fetch_latest(&path, &http, &proxy_base).await.ok().flatten();
+            (path, latest)
+        });
+    }
+
+    let mut cache = HashMap::with_capacity(module_paths.len());
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((path, latest)) => {
+                cache.insert(path, latest);
+            }
+            Err(join_err) => tracing::error!(%join_err, "go proxy batch fetch task panicked"),
+        }
+    }
+    cache
+}
+
+/// Compute a `GoModUpdateSummary` from a pre-fetched latest version entry.
+pub fn summary_from_cache(current_value: &str, latest: GoModLatestEntry) -> GoModUpdateSummary {
+    let update_available = latest
+        .as_deref()
+        .is_some_and(|l| l != current_value && !current_value.is_empty());
+    GoModUpdateSummary {
+        current_value: current_value.to_owned(),
+        latest,
+        update_available,
+    }
 }
 
 async fn fetch_update_summary(

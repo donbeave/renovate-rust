@@ -1362,52 +1362,81 @@ async fn process_repo(
     }
 
     // ── Go modules (go.mod) ──────────────────────────────────────────────────
-    for gomod_file_path in manager_files(&detected, "gomod") {
-        match client.get_raw_file(owner, repo, &gomod_file_path).await {
-            Ok(Some(raw)) => {
-                let deps = gomod_extractor::extract(&raw.content);
-                let actionable: Vec<_> = deps
+    // Two-pass Go module dedup: Go workspaces may have multiple go.mod files.
+    {
+        let gomod_files = manager_files(&detected, "gomod");
+        let mut gomod_file_deps: Vec<(
+            String,
+            Vec<renovate_core::extractors::gomod::GoModExtractedDep>,
+        )> = Vec::new();
+        for gomod_file_path in &gomod_files {
+            match client.get_raw_file(owner, repo, gomod_file_path).await {
+                Ok(Some(raw)) => {
+                    let deps = gomod_extractor::extract(&raw.content);
+                    gomod_file_deps.push((gomod_file_path.clone(), deps));
+                }
+                Ok(None) => {
+                    tracing::warn!(repo=%repo_slug, file=%gomod_file_path, "go.mod not found")
+                }
+                Err(err) => {
+                    tracing::error!(repo=%repo_slug, file=%gomod_file_path, %err,
+                        "failed to fetch go.mod");
+                    had_error = true;
+                }
+            }
+        }
+        let unique_modules: Vec<String> = {
+            let mut seen = std::collections::HashSet::new();
+            gomod_file_deps
+                .iter()
+                .flat_map(|(_, deps)| deps.iter())
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored(&d.module_path)
+                        && !d.current_value.is_empty()
+                })
+                .filter(|d| seen.insert(d.module_path.clone()))
+                .map(|d| d.module_path.clone())
+                .collect()
+        };
+        tracing::debug!(
+            repo = %repo_slug,
+            files = gomod_file_deps.len(),
+            unique_modules = unique_modules.len(),
+            "fetching go module versions (deduplicated)"
+        );
+        let latest_cache = gomod_datasource::fetch_latest_batch(
+            http,
+            &unique_modules,
+            gomod_datasource::GO_PROXY_BASE,
+            10,
+        )
+        .await;
+        for (gomod_file_path, deps) in gomod_file_deps {
+            let actionable: Vec<_> = deps
+                .iter()
+                .filter(|d| {
+                    d.skip_reason.is_none()
+                        && !repo_cfg.is_dep_ignored(&d.module_path)
+                        && !d.current_value.is_empty()
+                })
+                .collect();
+            let update_map: HashMap<_, Result<gomod_datasource::GoModUpdateSummary, _>> =
+                actionable
                     .iter()
-                    .filter(|d| {
-                        d.skip_reason.is_none()
-                            && !repo_cfg.is_dep_ignored(&d.module_path)
-                            && !d.current_value.is_empty()
+                    .map(|d| {
+                        let latest = latest_cache.get(&d.module_path).cloned().unwrap_or(None);
+                        let summary = Ok::<_, gomod_datasource::GoModError>(
+                            gomod_datasource::summary_from_cache(&d.current_value, latest),
+                        );
+                        (d.module_path.clone(), summary)
                     })
                     .collect();
-                tracing::debug!(
-                    repo = %repo_slug, file = %gomod_file_path,
-                    total = deps.len(), actionable = actionable.len(),
-                    "extracted go module dependencies"
-                );
-                let dep_inputs: Vec<gomod_datasource::GoModDepInput> = actionable
-                    .iter()
-                    .map(|d| gomod_datasource::GoModDepInput {
-                        module_path: d.module_path.clone(),
-                        current_value: d.current_value.clone(),
-                    })
-                    .collect();
-                let updates = gomod_datasource::fetch_updates_concurrent(
-                    http,
-                    &dep_inputs,
-                    gomod_datasource::GO_PROXY_BASE,
-                    10,
-                )
-                .await;
-                let update_map: HashMap<_, _> = updates
-                    .into_iter()
-                    .map(|r| (r.module_path, r.summary))
-                    .collect();
-                repo_report.files.push(output::FileReport {
-                    path: gomod_file_path.clone(),
-                    manager: "gomod".into(),
-                    deps: build_dep_reports_gomod(&deps, &actionable, &update_map),
-                });
-            }
-            Ok(None) => tracing::warn!(repo=%repo_slug, file=%gomod_file_path, "go.mod not found"),
-            Err(err) => {
-                tracing::error!(repo=%repo_slug, file=%gomod_file_path, %err, "failed to fetch go.mod");
-                had_error = true;
-            }
+            repo_report.files.push(output::FileReport {
+                path: gomod_file_path.clone(),
+                manager: "gomod".into(),
+                deps: build_dep_reports_gomod(&deps, &actionable, &update_map),
+            });
         }
     }
 

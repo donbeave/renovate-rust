@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0165  | 2026-04-28 | Go module cross-file dedup for Go workspaces | Complete | See below. |
 | 0164  | 2026-04-28 | Maven cross-file dedup for multi-module projects | Complete | See below. |
 | 0163  | 2026-04-28 | PyPI cross-file dedup for pip_requirements + pip-compile | Complete | See below. |
 | 0162  | 2026-04-28 | Cargo cross-file dedup + `crates_io::fetch_versions_batch` | Complete | See below. |
@@ -3110,6 +3111,20 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0165 - Go module cross-file deduplication for Go workspaces
+
+### What landed
+- `crates/renovate-core/src/datasources/gomod.rs`:
+  - `fetch_latest_batch(module_paths, proxy_base, concurrency)` — concurrent batch.
+  - `summary_from_cache(current_value, latest)` — update summary from cache.
+  - `GoModLatestEntry` type alias.
+- `main.rs` gomod pipeline refactored to three passes.
+  - Significant for Go workspaces with multiple `go.mod` files.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1140 passed
 
 ## Slice 0164 - Maven cross-file deduplication for multi-module projects
 
