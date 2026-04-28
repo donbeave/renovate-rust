@@ -23,6 +23,7 @@ pub mod cocoapods;
 pub mod composer;
 pub mod conan;
 pub mod copier;
+pub mod cpanfile;
 pub mod crow;
 pub mod deps_edn;
 pub mod devbox;

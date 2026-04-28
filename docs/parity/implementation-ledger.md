@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0135  | 2026-04-28 | Perl `cpanfile` extractor + MetaCPAN datasource | Complete | See below. |
 | 0134  | 2026-04-28 | Bazel `MODULE.bazel` extractor + Bazel Central Registry datasource | Complete | See below. |
 | 0133  | 2026-04-28 | Python `setup.py` PyPI dependency extractor (balanced-bracket scanner) | Complete | See below. |
 | 0132  | 2026-04-28 | Apache Ant `build.xml` Maven dependency extractor (XML, coords + attributes) | Complete | See below. |
@@ -3081,6 +3082,32 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0135 - Perl `cpanfile` extractor + MetaCPAN datasource
+
+### Renovate reference
+- `lib/modules/manager/cpanfile/extract.ts` + `parser.ts`
+- `lib/modules/datasource/cpan/index.ts`
+- Pattern: `/(^|/)cpanfile$/`
+- Datasource: MetaCPAN (`fastapi.metacpan.org`)
+
+### What landed
+- `crates/renovate-core/src/datasources/cpan.rs` (new):
+  - `fetch_latest(http, module_name, current_value)` — `GET /v1/module/{name}`.
+  - Simpler single-endpoint approach vs Renovate's Elasticsearch POST.
+- `crates/renovate-core/src/extractors/cpanfile.rs` (new):
+  - Phase-tracking line scanner: `PHASE_BLOCK_RE` detects `on 'phase' => sub {`.
+  - Brace-depth counter exits phase blocks on `}`.
+  - `REQUIRES_RE` extracts module names + versions from `requires`/`recommends`/etc.
+  - Handles comma and fat-arrow (`=>`) separators; bare numeric versions.
+  - Skip reasons: `UnspecifiedVersion`, `PerlCore` (skips `perl` itself).
+  - 8 unit tests.
+- Registered in `datasources.rs`, `extractors.rs`, `managers.rs`.
+- `crates/renovate-cli/src/main.rs`: pipeline using `cpan::fetch_latest`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 964 passed
 
 ## Slice 0134 - Bazel `MODULE.bazel` extractor + Bazel Central Registry datasource
 

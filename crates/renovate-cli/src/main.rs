@@ -912,6 +912,67 @@ async fn process_repo(
         }
     }
 
+    // ── cpanfile (Perl) ──────────────────────────────────────────────────────
+    for cpan_path in manager_files(&detected, "cpanfile") {
+        match client.get_raw_file(owner, repo, &cpan_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::cpanfile::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %cpan_path,
+                    total = deps.len(),
+                    "extracted cpanfile perl deps"
+                );
+                let mut dep_reports = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let status = match renovate_core::datasources::cpan::fetch_latest(
+                        http,
+                        &dep.dep_name,
+                        &dep.current_value,
+                    )
+                    .await
+                    {
+                        Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_value,
+                            latest: s.latest.unwrap_or_default(),
+                        },
+                        Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: cpan_path.clone(),
+                        manager: "cpanfile".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%cpan_path, "cpanfile not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%cpan_path, %err, "failed to fetch cpanfile");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Pipfile (pipenv) ──────────────────────────────────────────────────────
     for pipfile_path in manager_files(&detected, "pipenv") {
         match client.get_raw_file(owner, repo, &pipfile_path).await {

@@ -9,6 +9,7 @@ pub mod bazel;
 pub mod cdnjs;
 pub mod cocoapods;
 pub mod conan;
+pub mod cpan;
 pub mod crates_io;
 pub mod devbox;
 pub mod docker_hub;

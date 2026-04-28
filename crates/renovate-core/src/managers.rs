@@ -274,6 +274,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)([\w-]*)composer\.json$"],
     },
     ManagerDef {
+        name: "cpanfile",
+        patterns: &[r"(^|/)cpanfile$"],
+    },
+    ManagerDef {
         name: "pub",
         patterns: &[r"(^|/)pubspec\.ya?ml$"],
     },
