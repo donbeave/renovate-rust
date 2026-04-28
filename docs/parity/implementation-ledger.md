@@ -21,12 +21,51 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0007  | 2026-04-28 | tokio async runtime + HttpClient + GitHub platform stub | Complete | See below. |
 | 0006  | 2026-04-28 | Global config file loading (JSON/JSON5)       | Complete | See below. |
 | 0005  | 2026-04-28 | GlobalConfig struct + CLI→config builder      | Complete | See below. |
 | 0004  | 2026-04-28 | Option surface first-cut + env vars           | Complete | See below. |
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0007 - tokio async runtime + HttpClient + GitHub platform stub
+
+### Renovate reference
+- `lib/modules/platform/github/index.ts` — `initPlatform(config)` which
+  calls `GET /user` to verify the token.
+- `lib/util/http/index.ts` — Renovate's internal HTTP client with user-agent
+  and retry logic.
+
+### What landed
+- `tokio` and `reqwest` added to workspace deps; `wiremock` added as dev dep.
+- `main()` converted to `#[tokio::main] async fn main()`.
+- `crates/renovate-core/src/http.rs` — `HttpClient` wrapping `reqwest::Client`
+  with `renovate-rust/<version>` User-Agent and optional bearer-token auth.
+  `get_json<T>()` sends GET, maps non-2xx to `HttpError::Status`.
+- `crates/renovate-core/src/platform.rs` — `PlatformClient` trait with
+  `get_current_user() -> Result<CurrentUser, PlatformError>`; `PlatformError`
+  with `Http`, `Unauthorized`, `Unexpected` variants.
+- `crates/renovate-core/src/platform/github.rs` — `GithubClient` implementing
+  `PlatformClient`; supports custom endpoint for GHE.
+- 4 wiremock-based tests (success, 401→Unauthorized, bearer header verified,
+  GHE custom endpoint). Tests spin up a real TCP mock server — no live network.
+- 78 total tests, all passing.
+
+### What was intentionally deferred
+- Token validation in the main pipeline (the builder doesn't call
+  `get_current_user()` yet — that comes when the worker pipeline lands).
+- Retry/rate-limit logic in `HttpClient`.
+- GitLab, Bitbucket, etc. platform clients.
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (78 passed)
 
 ## Slice 0006 - Global config file loading
 

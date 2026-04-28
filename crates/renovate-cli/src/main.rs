@@ -24,7 +24,8 @@ use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 
-fn main() -> ExitCode {
+#[tokio::main]
+async fn main() -> ExitCode {
     // 1. Initialize logging before anything that might emit log records.
     //    Reads LOG_LEVEL (default "info") and LOG_FORMAT (default pretty).
     match logging::init() {

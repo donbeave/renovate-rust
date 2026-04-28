@@ -17,6 +17,9 @@ serde.workspace = true
 serde_json.workspace = true
 json5.workspace = true
 thiserror.workspace = true
+reqwest.workspace = true
+tokio.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
+wiremock.workspace = true
