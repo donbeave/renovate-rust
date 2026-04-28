@@ -23,12 +23,11 @@ use std::process::ExitCode;
 use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
-use renovate_core::datasources::crates_io;
+use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
-use renovate_core::versioning::cargo as cargo_versioning;
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -228,25 +227,28 @@ async fn main() -> ExitCode {
                             "extracted cargo dependencies"
                         );
 
-                        // Look up available versions and determine update status.
-                        for dep in &actionable {
-                            match crates_io::fetch_versions(
-                                &http,
-                                &dep.package_name,
-                                crates_io::CRATES_IO_SPARSE_INDEX,
-                            )
-                            .await
-                            {
-                                Ok(records) => {
-                                    let non_yanked: Vec<String> = records
-                                        .iter()
-                                        .filter(|r| !r.yanked)
-                                        .map(|r| r.vers.clone())
-                                        .collect();
-                                    let summary = cargo_versioning::update_summary(
-                                        &dep.current_value,
-                                        &non_yanked,
-                                    );
+                        // Look up available versions concurrently (bounded by 10
+                        // simultaneous requests — matches Renovate's HTTP queue depth).
+                        let dep_inputs: Vec<DepInput> = actionable
+                            .iter()
+                            .map(|d| DepInput {
+                                dep_name: d.dep_name.clone(),
+                                package_name: d.package_name.clone(),
+                                constraint: d.current_value.clone(),
+                            })
+                            .collect();
+
+                        let updates = crates_io::fetch_updates_concurrent(
+                            &http,
+                            &dep_inputs,
+                            crates_io::CRATES_IO_SPARSE_INDEX,
+                            10,
+                        )
+                        .await;
+
+                        for result in &updates {
+                            match &result.summary {
+                                Ok(summary) => {
                                     let status = if summary.update_available {
                                         "update available"
                                     } else {
@@ -254,15 +256,15 @@ async fn main() -> ExitCode {
                                     };
                                     tracing::info!(
                                         repo = %repo_slug,
-                                        dep = %dep.dep_name,
-                                        constraint = %dep.current_value,
+                                        dep = %result.dep_name,
+                                        constraint = %summary.current_constraint,
                                         latest = ?summary.latest_compatible,
                                         status,
                                     );
                                 }
                                 Err(err) => {
                                     tracing::warn!(
-                                        dep = %dep.dep_name,
+                                        dep = %result.dep_name,
                                         %err,
                                         "failed to fetch crate versions"
                                     );
