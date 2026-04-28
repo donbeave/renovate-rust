@@ -217,6 +217,14 @@ fn find_as_keyword(upper: &str) -> Option<usize> {
     None
 }
 
+/// Parse `image[:tag][@digest]` with no stage-name context.
+///
+/// Convenience wrapper used by the docker-compose extractor, which does not
+/// have multi-stage build context.
+pub fn classify_image_ref(image_ref: &str) -> DockerfileExtractedDep {
+    classify_from(image_ref, &[])
+}
+
 /// Parse `image[:tag][@digest]` and classify the resulting dep.
 fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtractedDep {
     // ARG variable references.

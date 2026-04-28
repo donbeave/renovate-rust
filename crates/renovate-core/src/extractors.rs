@@ -4,6 +4,7 @@
 //! [`ExtractedDep`] records suitable for datasource version lookups.
 
 pub mod cargo;
+pub mod docker_compose;
 pub mod dockerfile;
 pub mod npm;
 pub mod pip;

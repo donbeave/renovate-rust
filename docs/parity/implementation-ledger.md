@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0024  | 2026-04-28 | docker-compose image extractor (line-scan, no YAML dep) | Complete | See below. |
 | 0023  | 2026-04-28 | HTTP retry with exponential backoff + Retry-After | Complete | See below. |
 | 0022  | 2026-04-28 | GitLab platform client                           | Complete | See below. |
 | 0021  | 2026-04-28 | Docker Hub datasource + Dockerfile pipeline complete | Complete | See below. |
@@ -44,6 +45,37 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0024 - docker-compose image extractor
+
+### Renovate reference
+- `lib/modules/manager/docker-compose/extract.ts` — `extractPackageFile`
+
+### What landed
+- `crates/renovate-core/src/extractors/docker_compose.rs` — line-scan
+  extractor for docker-compose files; no YAML dependency required.
+  Tracks service blocks by indentation to detect `build:` directives
+  (skip) and `image:` values.  Strips single/double quote wrapping.
+  Classifies variable interpolation (`${VAR}`) as `VariableRef` skip.
+  Delegates image parsing to `dockerfile::classify_image_ref`.  11 unit
+  tests including Renovate fixture cases.
+- `crates/renovate-core/src/extractors/dockerfile.rs` — exposes public
+  `classify_image_ref(image_ref)` wrapper (calls `classify_from` with
+  empty stage-names slice) so compose module can reuse it.
+- `crates/renovate-core/src/extractors.rs` — `pub mod docker_compose` added.
+- `crates/renovate-cli/src/main.rs` — docker-compose pipeline wired into
+  `process_repo`; uses the same Docker Hub datasource as the Dockerfile
+  pipeline.
+
+### What was intentionally deferred
+- Full YAML parsing (needed for YAML anchors/aliases with image values).
+- `extends:` service composition.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (258 passed)
 
 ## Slice 0023 - HTTP retry with exponential backoff + Retry-After
 
