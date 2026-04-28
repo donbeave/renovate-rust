@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0199  | 2026-04-28 | `matchManagers` glob/regex/negation + custom manager prefix + `string_match` utility module | Complete | See below. |
 | 0198  | 2026-04-28 | PyPI `current_version_timestamp` for `matchCurrentAge` + AGPL-3.0 LICENSE + README goals section | Complete | See below. |
 | 0197  | 2026-04-28 | npm `current_version_timestamp` population for `matchCurrentAge` exact pins | Complete | See below. |
 | 0196  | 2026-04-28 | Fix: SemVer build metadata falsely triggered Cargo update detection | Complete | See below. |
@@ -4916,11 +4917,37 @@ managers should only run when explicitly listed in `enabledManagers`.
 
 ---
 
+---
+
+## Slice 0199 - `matchManagers` glob/regex/negation + custom manager prefix
+
+### What landed
+- `crates/renovate-core/src/string_match.rs` (new): `match_regex_or_glob` and
+  `match_regex_or_glob_list` utilities mirroring Renovate's `lib/util/string-match.ts`.
+  Supports `/regex/flags` literals (with `(?i)` embedding), glob patterns
+  (`*`, `?`, `**`, `{a,b}`), and negation patterns (`!pattern`).
+  13 unit tests.
+- `crates/renovate-core/src/repo_config.rs`: `PackageRule::manager_matches`
+  rewritten to use `match_regex_or_glob_list`.  Custom managers (`"regex"`,
+  `"jsonata"`) are matched as `"custom.<id>"` per Renovate convention.
+  4 new integration tests: glob, `/regex/`, negation, custom prefix.
+- `crates/renovate-core/src/lib.rs`: `pub mod string_match` registered.
+
+### Deferred
+- Applying `match_regex_or_glob_list` to `matchDepTypes` and `matchDatasources`
+  (currently exact-only; glob/negation on those is rare in practice).
+
+### Renovate reference
+- `lib/util/package-rules/managers.ts`
+- `lib/util/string-match.ts`
+
+---
+
 ## Next slice candidates
 
 1. **Populate `current_version_timestamp` from npm/pypi cache** — resolve specifier
    to current version string and look up in `version_timestamps`.
-2. **`matchHost` packageRule matcher** — filter deps by registry host.
+2. **`matchDepTypes` glob/regex** — apply `match_regex_or_glob_list` to dep type matching.
 3. **crates.io release timestamp** — hit `crates.io/api/v1/crates/{name}/versions`
    to get `created_at` per version for minimumReleaseAge support.
 4. **Remote preset resolution** — `github>org/repo//preset` fetching.

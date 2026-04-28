@@ -311,9 +311,27 @@ impl PackageRule {
 
     /// Return `true` when this rule's manager condition matches `manager`.
     ///
-    /// An empty `matchManagers` list matches all managers.
+    /// An empty `matchManagers` list matches all managers.  When the list is
+    /// non-empty, each entry may be an exact string, a `/regex/` pattern, or a
+    /// glob pattern.  Entries starting with `!` are negative exclusions.
+    ///
+    /// Custom managers (currently `"regex"` and `"jsonata"`) are also matched
+    /// against the `"custom.<manager>"` form that Renovate uses in config.
+    ///
+    /// Renovate reference: `lib/util/package-rules/managers.ts`
     pub fn manager_matches(&self, manager: &str) -> bool {
-        self.match_managers.is_empty() || self.match_managers.iter().any(|m| m == manager)
+        use crate::string_match::match_regex_or_glob_list;
+        if self.match_managers.is_empty() {
+            return true;
+        }
+        // Custom managers are matched as "custom.<id>" in Renovate config.
+        const CUSTOM_MANAGERS: &[&str] = &["regex", "jsonata"];
+        let effective = if CUSTOM_MANAGERS.contains(&manager) {
+            std::borrow::Cow::Owned(format!("custom.{manager}"))
+        } else {
+            std::borrow::Cow::Borrowed(manager)
+        };
+        match_regex_or_glob_list(&effective, &self.match_managers)
     }
 
     /// Return `true` when this rule's update type condition matches `update_type`.
@@ -2206,6 +2224,56 @@ mod tests {
         // Without manager context, a rule with matchManagers set does NOT fire.
         // (matches_context requires manager to be known before matchManagers fires)
         assert!(!c.is_dep_ignored("lodash"));
+    }
+
+    // ── matchManagers glob/regex/negation (Renovate-compat) ──────────────────
+
+    #[test]
+    fn match_managers_glob_pattern() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["npm*"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.manager_matches("npm"));
+        assert!(rule.manager_matches("npm-check"));
+        assert!(!rule.manager_matches("cargo"));
+    }
+
+    #[test]
+    fn match_managers_regex_pattern() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["/^(npm|pip)/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.manager_matches("npm"));
+        assert!(rule.manager_matches("pip"));
+        assert!(!rule.manager_matches("cargo"));
+    }
+
+    #[test]
+    fn match_managers_negation() {
+        // ["npm", "!cargo"] means: match npm but exclude cargo
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["npm", "!cargo"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.manager_matches("npm"));
+        assert!(!rule.manager_matches("cargo"));
+    }
+
+    #[test]
+    fn match_managers_custom_prefix() {
+        // Renovate uses "custom.regex" to target the regex custom manager.
+        // The actual manager name in our system is "regex".
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["custom.regex"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(
+            rule.manager_matches("regex"),
+            "regex is a custom manager → custom.regex"
+        );
+        assert!(!rule.manager_matches("npm"));
     }
 
     #[test]

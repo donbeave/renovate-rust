@@ -79,8 +79,7 @@ find where a given TypeScript module is implemented in Rust.
 | `lib/util/package-rules/dep-types.ts` | `crates/renovate-core/src/repo_config.rs` | full | `matchDepTypes` |
 | `lib/util/package-rules/confidence.ts` | — | not-started | `matchConfidence` (MergeConfidence, hosted only) |
 | `lib/util/package-rules/jsonata.ts` | — | not-started | `matchJsonata` (complex expression engine) |
-| `lib/util/package-rules/host.ts` | — | not-started | `matchHost` |
-| `lib/util/package-rules/message.ts` | — | not-started | `matchMessage` |
+| `lib/util/string-match.ts` | `crates/renovate-core/src/string_match.rs` | full | `match_regex_or_glob`, `match_regex_or_glob_list` with negation |
 
 ---
 
@@ -143,8 +142,9 @@ find where a given TypeScript module is implemented in Rust.
 | `lib/modules/versioning/pep440/index.ts` | `crates/renovate-core/src/versioning/pep440.rs` | partial | PEP 440 comparison, `==` specifier resolution |
 | `lib/modules/versioning/cargo/index.ts` | `crates/renovate-core/src/versioning/cargo.rs` | partial | Cargo semver ranges |
 | `lib/modules/versioning/ruby/index.ts` | `crates/renovate-core/src/versioning/ruby.rs` | partial | Gem version ranges |
-| `lib/modules/versioning/docker/index.ts` | — | not-started | Docker tag versioning |
-| `lib/modules/versioning/hashicorp/index.ts` | — | not-started | HCL version constraints |
+| `lib/modules/versioning/docker/index.ts` | `crates/renovate-core/src/datasources/docker_hub.rs` | partial | Tag comparison + suffix filter inline in datasource; no separate module |
+| `lib/modules/versioning/hashicorp/index.ts` | `crates/renovate-core/src/versioning/hashicorp.rs` | partial | `lower_bound`, `hashicorp_update_summary`; `getNewValue` (range update) not yet ported |
+| `lib/modules/versioning/hashicorp/convertor.ts` | `crates/renovate-core/src/versioning/hashicorp.rs` | partial | Constraint parsing; `hashicorp2npm`/`npm2hashicorp` conversion not ported |
 | `lib/modules/versioning/composer/index.ts` | — | not-started | Composer semver |
 
 ---

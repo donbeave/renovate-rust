@@ -77,6 +77,19 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | — | `matchDatasources` list | `crates/renovate-core/src/repo_config.rs` | `match_datasources_method_matches_listed_datasource`, `match_datasources_empty_matches_all` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchUpdateTypes` major/minor/patch | `crates/renovate-core/src/repo_config.rs` | `is_update_blocked_for_major_but_not_minor` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchFileNames` glob | `crates/renovate-core/src/repo_config.rs` | `is_update_blocked_for_file_with_filename_rule` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` exact match | `crates/renovate-core/src/repo_config.rs` | `package_rules_match_managers_respected` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` null for undefined matchManagers | `crates/renovate-core/src/repo_config.rs` | `package_rules_match_managers_respected` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` custom manager `custom.regex` | `crates/renovate-core/src/repo_config.rs` | `match_managers_custom_prefix` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` glob pattern | `crates/renovate-core/src/repo_config.rs` | `match_managers_glob_pattern` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` regex pattern | `crates/renovate-core/src/repo_config.rs` | `match_managers_regex_pattern` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` negation `!pattern` | `crates/renovate-core/src/repo_config.rs` | `match_managers_negation` | ported |
+| `lib/util/string-match.ts` | — | `matchRegexOrGlob` exact | `crates/renovate-core/src/string_match.rs` | `exact_match` | ported |
+| `lib/util/string-match.ts` | — | `matchRegexOrGlob` regex `/pattern/` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_match` | ported |
+| `lib/util/string-match.ts` | — | `matchRegexOrGlob` regex `/pattern/flags` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_with_flags_match` | ported |
+| `lib/util/string-match.ts` | — | `matchRegexOrGlob` glob `npm*` | `crates/renovate-core/src/string_match.rs` | `glob_star_prefix` | ported |
+| `lib/util/string-match.ts` | — | `matchRegexOrGlobList` empty → false | `crates/renovate-core/src/string_match.rs` | `empty_list_returns_false` | ported |
+| `lib/util/string-match.ts` | — | `matchRegexOrGlobList` positive list | `crates/renovate-core/src/string_match.rs` | `positive_list_matches` | ported |
+| `lib/util/string-match.ts` | — | `matchRegexOrGlobList` negation `!pattern` | `crates/renovate-core/src/string_match.rs` | `negation_excludes_input`, `all_negative_patterns_allow_non_matching` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDepTypes` | `crates/renovate-core/src/repo_config.rs` | `dep_type_rule_blocks_dependencies`, `dep_type_rule_does_not_block_dev_dep` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `allowedVersions` semver range | `crates/renovate-core/src/repo_config.rs` | `allowed_versions_blocks_out_of_range_update` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `ignoreVersions` in packageRules | `crates/renovate-core/src/repo_config.rs` | `package_rule_ignore_versions_scoped_to_matched_package` | ported |
