@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0160  | 2026-04-28 | JSR datasource + endoflife-date datasource | Complete | See below. |
 | 0159  | 2026-04-28 | Conda datasource (Anaconda API) + pixi conda dep activation | Complete | See below. |
 | 0158  | 2026-04-28 | Hermit package manager extractor + datasource (file-list based) | Complete | See below. |
 | 0157  | 2026-04-28 | `pip-compile` pipeline for `.in` source files | Complete | See below. |
@@ -3105,6 +3106,33 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0160 - JSR datasource + endoflife-date datasource
+
+### Renovate reference
+- `lib/modules/datasource/jsr/index.ts` — JSR.io package registry
+- `lib/modules/datasource/endoflife-date/index.ts` — endoflife.date API
+
+### What landed
+- `crates/renovate-core/src/datasources/jsr.rs` (new):
+  - Fetches `https://jsr.io/@scope/name/meta.json` for JSR package versions.
+  - Validates `@scope/name` format before making requests.
+  - Filters yanked versions; returns `latest` field from meta.
+  - 2 unit tests.
+- `crates/renovate-core/src/datasources/endoflife.rs` (new):
+  - Fetches `https://endoflife.date/api/{product}.json` for lifecycle info.
+  - Custom `eol` field deserializer handles both `bool` and date-string values.
+  - Returns EOL status + latest non-EOL cycle version.
+  - 1 integration-style test with wiremock.
+
+### Notes
+- Both datasources are available for user-configured `custom` manager rules.
+- Neither is wired to a specific manager pipeline yet (no upstream manager
+  directly uses them by default). Can be used via custom regex manager.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1140 passed
 
 ## Slice 0159 - Conda datasource (Anaconda API) + pixi conda dep activation
 
