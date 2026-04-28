@@ -52,13 +52,11 @@ Run the loop from this parent directory:
 ```
 
 The prompt expects the upstream Renovate reference repository to be available as
-a sibling checkout:
+a sibling checkout. This checkout is required, should already exist, and must be
+treated as read-only by agents:
 
 ```text
 ~/Projects/renovate-rust/
   renovate/
   renovate-rust/
 ```
-
-If the reference checkout is missing, the prompt instructs the agent to clone
-`https://github.com/renovatebot/renovate` into a local reference directory.

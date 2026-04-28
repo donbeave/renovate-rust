@@ -9,7 +9,7 @@ Workspace layout:
   - `renovate-rust/` is the Rust implementation repository from `https://github.com/donbeave/renovate-rust`.
 - If the current working directory contains `renovate-rust/.git`, use `./renovate-rust` as the project root and `./renovate` as the upstream reference.
 - If the current working directory is already the Rust repository, use `.` as the project root and `../renovate` as the upstream reference.
-- All edits, commits, and project commands must target the Rust implementation repository. Never edit or commit inside the upstream `renovate/` reference checkout.
+- All edits, commits, and project commands must target the Rust implementation repository. Treat the upstream `renovate/` reference checkout as read-only: inspect it, but never edit, format, generate files, install dependencies, run mutating commands, or commit inside it.
 
 Repository rules:
 - Follow `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, and `COMMITS.md`.
@@ -19,14 +19,10 @@ Repository rules:
 
 Reference repository:
 - Treat renovatebot/renovate as the behavioral reference.
-- Locate it from the Rust project root in this order:
-  1. `$RENOVATE_REFERENCE_REPO`, if set
-  2. `../renovate`
-  3. `./renovate-reference`
-- If no reference checkout exists, clone it locally with:
-  `git clone https://github.com/renovatebot/renovate ../renovate`
-  If the parent directory is not writable, clone to `./renovate-reference` instead.
-- If a reference checkout exists, update it when possible with `git -C <reference> fetch --all --tags --prune`, but do not let network failure block local progress.
+- Use the existing sibling checkout at `../renovate` from the Rust project root, or `./renovate` when Claude Code was started from `~/Projects/renovate-rust`.
+- Do not clone Renovate; the reference checkout is expected to already exist.
+- Treat the reference checkout as read-only. Only run non-mutating inspection commands there.
+- Do not update the reference checkout. If it appears stale, document the assumption and continue using the local contents.
 - Read Renovate's docs, source, and tests before implementing behavior. Prefer `docs/`, `lib/`, `test/`, `package.json`, and configuration schema files as primary references.
 - Do not copy Renovate source code verbatim. Recreate behavior in idiomatic Rust and keep license implications in mind when porting tests or fixtures.
 
@@ -165,7 +161,7 @@ Commit rules:
 - Include test/check results in the commit body when useful.
 
 Start now:
-1. Confirm the reference Renovate checkout exists or clone it.
+1. Confirm the existing reference Renovate checkout is available.
 2. Inspect this repository and its docs.
 3. Pick the next best parity slice.
 4. Implement it, test it, document it, and commit it.

@@ -67,10 +67,12 @@ Treat the upstream Renovate repository as the behavioral reference for this
 project.
 
 - Prefer the local checkout at `../renovate`.
-- If it is missing, clone `https://github.com/renovatebot/renovate` into a local
-  reference directory such as `./renovate-reference`.
-- Do not commit the reference checkout, downloaded registries, credentials,
-  tokens, or generated cache directories.
+- Do not clone Renovate; the sibling reference checkout is expected to already
+  exist.
+- Treat the reference checkout as read-only. Do not edit files, install
+  dependencies, generate artifacts, run mutating commands, or commit there.
+- Do not commit downloaded registries, credentials, tokens, or generated cache
+  directories.
 - Use Renovate docs, source, and tests to drive Rust parity work.
 
 ## Autonomous Implementation (agent-only)
