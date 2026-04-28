@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0149  | 2026-04-28 | Crossplane package manifest extractor | Complete | See below. |
 | 0148  | 2026-04-28 | Bazel WORKSPACE `http_archive()` extractor (GitHub Tags + Releases) | Complete | See below. |
 | 0147  | 2026-04-28 | Tekton CI/CD resource extractor (step image deps) | Complete | See below. |
 | 0146  | 2026-04-28 | Kubernetes manifest Docker image extractor | Complete | See below. |
@@ -3095,6 +3096,27 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0149 - Crossplane package manifest extractor
+
+### Renovate reference
+- `lib/modules/manager/crossplane/extract.ts`
+- Default patterns: `[]`; we add `(^|/)crossplane/.+\.ya?ml$`
+- Datasource: `docker` (OCI packages — currently skipped for `xpkg.upbound.io`)
+
+### What landed
+- `crates/renovate-core/src/extractors/crossplane.rs` (new):
+  - `CROSSPLANE_RE` — content detection for `apiVersion: pkg.crossplane.io/v*`.
+  - Multi-document YAML split on `\n---` boundary.
+  - `KIND_RE` + `PACKAGE_RE` — extracts kind and `spec.package` OCI image.
+  - `xpkg.upbound.io` packages → `UnsupportedRegistry` skip (OCI registry pending).
+  - 4 unit tests.
+- Registered in `extractors.rs`, `managers.rs` with `crossplane/` directory pattern.
+- `crates/renovate-cli/src/main.rs`: pipeline reports all deps with skip reasons.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 1028 passed
 
 ## Slice 0148 - Bazel WORKSPACE `http_archive()` extractor (GitHub Tags + Releases)
 

@@ -6937,6 +6937,57 @@ async fn process_repo(
         }
     }
 
+    // ── Crossplane packages (crossplane/) ─────────────────────────────────────
+    for xp_path in manager_files(&detected, "crossplane") {
+        match client.get_raw_file(owner, repo, &xp_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::crossplane::CrossplaneSkipReason;
+                let deps = renovate_core::extractors::crossplane::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %xp_path,
+                    total = deps.len(), "extracted crossplane package deps"
+                );
+                let dep_reports: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = if let Some(reason) = &dep.skip_reason {
+                            output::DepStatus::Skipped {
+                                reason: match reason {
+                                    CrossplaneSkipReason::UnsupportedRegistry => {
+                                        "unsupported-registry".to_owned()
+                                    }
+                                    CrossplaneSkipReason::MissingPackage => {
+                                        "missing-package".to_owned()
+                                    }
+                                },
+                            }
+                        } else {
+                            output::DepStatus::UpToDate { latest: None }
+                        };
+                        output::DepReport {
+                            name: format!("{}: {}", dep.kind, dep.package),
+                            status,
+                        }
+                    })
+                    .collect();
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: xp_path.clone(),
+                        manager: "crossplane".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%xp_path, "crossplane manifest not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%xp_path, %err, "failed to fetch crossplane manifest");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 

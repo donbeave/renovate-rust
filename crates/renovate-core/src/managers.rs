@@ -547,6 +547,11 @@ const MANAGER_DEFS: &[ManagerDef] = &[
             r"\.bzl$",
         ],
     },
+    ManagerDef {
+        // Crossplane packages stored in crossplane/ directory convention.
+        name: "crossplane",
+        patterns: &[r"(^|/)crossplane/.+\.ya?ml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.
