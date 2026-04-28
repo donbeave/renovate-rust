@@ -279,6 +279,7 @@ async fn process_repo(
     let repo_cfg = match repo_config::discover(client, owner, repo, config).await {
         Ok(repo_config::RepoConfigResult::Found { path, config: rc }) => {
             tracing::info!(repo = %repo_slug, config_path = %path, "found renovate config");
+            let rc = *rc;
             if !rc.enabled {
                 tracing::info!(repo = %repo_slug, "renovate disabled in repo config — skipping");
                 return (None, false);
@@ -544,7 +545,7 @@ async fn process_repo(
                     .map(|d| {
                         let latest = latest_cache.get(&d.package_id).cloned().unwrap_or(None);
                         let summary = Ok::<_, nuget_datasource::NuGetError>(
-                            nuget_datasource::summary_from_cache(&d.current_value, latest),
+                            nuget_datasource::summary_from_cache(&d.current_value, &latest),
                         );
                         (d.package_id.clone(), summary)
                     })
@@ -1641,7 +1642,7 @@ async fn process_repo(
                     .map(|d| {
                         let latest = latest_cache.get(&d.dep_name).cloned().unwrap_or(None);
                         let summary = Ok::<_, maven_datasource::MavenError>(
-                            maven_datasource::summary_from_cache(&d.current_value, latest),
+                            maven_datasource::summary_from_cache(&d.current_value, &latest),
                         );
                         (d.dep_name.clone(), summary)
                     })
@@ -5311,13 +5312,13 @@ async fn process_repo(
                 } else {
                     renovate_core::extractors::conan::extract_txt(&raw.content)
                 };
-                let actionable: Vec<_> = deps
+                let actionable_count = deps
                     .iter()
                     .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
-                    .collect();
+                    .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %conan_path,
-                    total = deps.len(), actionable = actionable.len(),
+                    total = deps.len(), actionable = actionable_count,
                     "extracted conan deps"
                 );
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
@@ -5381,13 +5382,13 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &cabal_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::cabal::extract(&raw.content);
-                let actionable: Vec<_> = deps
+                let actionable_count = deps
                     .iter()
                     .filter(|d| !repo_cfg.is_dep_ignored(&d.package_name))
-                    .collect();
+                    .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %cabal_path,
-                    total = deps.len(), actionable = actionable.len(),
+                    total = deps.len(), actionable = actionable_count,
                     "extracted cabal deps"
                 );
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
@@ -5407,8 +5408,7 @@ async fn process_repo(
                                 let current_ver =
                                     dep.current_value.trim_start_matches("==").trim().to_owned();
                                 if !current_ver.is_empty()
-                                    && !current_ver
-                                        .contains(|c: char| c == '<' || c == '>' || c == '&')
+                                    && !current_ver.contains(['<', '>', '&'])
                                     && l != &current_ver
                                 {
                                     output::DepStatus::UpdateAvailable {
@@ -6301,13 +6301,13 @@ async fn process_repo(
             Ok(Some(raw)) => {
                 use renovate_core::extractors::bitrise::{BitriseSkipReason, BitriseSource};
                 let deps = renovate_core::extractors::bitrise::extract(&raw.content);
-                let actionable: Vec<_> = deps
+                let actionable_count = deps
                     .iter()
                     .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
-                    .collect();
+                    .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %br_path,
-                    total = deps.len(), actionable = actionable.len(),
+                    total = deps.len(), actionable = actionable_count,
                     "extracted bitrise steps"
                 );
                 let mut dep_reports: Vec<output::DepReport> = Vec::new();
@@ -6654,13 +6654,13 @@ async fn process_repo(
             Ok(Some(raw)) => {
                 use renovate_core::extractors::bazel::{BazelSkipReason, BazelSource};
                 let deps = renovate_core::extractors::bazel::extract(&raw.content);
-                let actionable: Vec<_> = deps
+                let actionable_count = deps
                     .iter()
                     .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.dep_name))
-                    .collect();
+                    .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %bazel_path,
-                    total = deps.len(), actionable = actionable.len(),
+                    total = deps.len(), actionable = actionable_count,
                     "extracted bazel http_archive deps"
                 );
                 let mut dep_reports: Vec<output::DepReport> = Vec::new();
@@ -6978,9 +6978,8 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &hb_path).await {
             Ok(Some(raw)) => {
                 use homebrew_extractor::{GitHubUrlType, HomebrewSkipReason, HomebrewSource};
-                let dep = match homebrew_extractor::extract(&raw.content) {
-                    Some(d) => d,
-                    None => continue,
+                let Some(dep) = homebrew_extractor::extract(&raw.content) else {
+                    continue;
                 };
                 if repo_cfg.is_dep_ignored(&dep.formula_name) {
                     continue;
@@ -7432,13 +7431,13 @@ async fn process_repo(
         match client.get_raw_file(owner, repo, &gk_path).await {
             Ok(Some(raw)) => {
                 let deps = renovate_core::extractors::glasskube::extract(&raw.content);
-                let actionable: Vec<_> = deps
+                let actionable_count = deps
                     .iter()
                     .filter(|d| !repo_cfg.is_dep_ignored(&d.package_name))
-                    .collect();
+                    .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %gk_path,
-                    total = deps.len(), actionable = actionable.len(),
+                    total = deps.len(), actionable = actionable_count,
                     "extracted glasskube package deps"
                 );
                 let mut dep_reports: Vec<output::DepReport> = Vec::new();
@@ -7495,13 +7494,13 @@ async fn process_repo(
                 };
                 let deps =
                     renovate_core::extractors::renovate_config_presets::extract(&raw.content);
-                let actionable: Vec<_> = deps
+                let actionable_count = deps
                     .iter()
                     .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.repo))
-                    .collect();
+                    .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %rc_path,
-                    total = deps.len(), actionable = actionable.len(),
+                    total = deps.len(), actionable = actionable_count,
                     "extracted renovate config preset deps"
                 );
                 let mut dep_reports: Vec<output::DepReport> = Vec::new();
@@ -7848,10 +7847,10 @@ async fn process_repo(
     // `bin/`.  We skip fetching file content and parse the path list directly.
     if !manager_files(&detected, "hermit").is_empty() {
         let deps = renovate_core::extractors::hermit::extract_from_file_list(&filtered_files);
-        let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+        let actionable_count = deps.iter().filter(|d| d.skip_reason.is_none()).count();
         tracing::debug!(
             repo = %repo_slug,
-            total = deps.len(), actionable = actionable.len(),
+            total = deps.len(), actionable = actionable_count,
             "extracted hermit package deps"
         );
         let mut dep_reports: Vec<output::DepReport> = Vec::new();
@@ -7991,13 +7990,13 @@ fn apply_version_ignore_to_report(
     for file in &mut report.files {
         let manager = file.manager.clone();
         for dep in &mut file.deps {
-            if let output::DepStatus::UpdateAvailable { ref latest, .. } = dep.status {
-                if repo_cfg.is_version_ignored(&dep.name, &manager, latest) {
-                    let latest_str = latest.clone();
-                    dep.status = output::DepStatus::UpToDate {
-                        latest: Some(latest_str),
-                    };
-                }
+            if let output::DepStatus::UpdateAvailable { ref latest, .. } = dep.status
+                && repo_cfg.is_version_ignored(&dep.name, &manager, latest)
+            {
+                let latest_str = latest.clone();
+                dep.status = output::DepStatus::UpToDate {
+                    latest: Some(latest_str),
+                };
             }
         }
     }

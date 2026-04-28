@@ -1132,7 +1132,10 @@ impl RepoConfig {
 #[derive(Debug, Clone)]
 pub enum RepoConfigResult {
     /// A config file was found; parsed config is ready to use.
-    Found { path: String, config: RepoConfig },
+    Found {
+        path: String,
+        config: Box<RepoConfig>,
+    },
     /// No config file exists in the repository.
     NotFound,
     /// The repository has not been onboarded (no config) and
@@ -1161,24 +1164,24 @@ pub async fn discover(
             let config = RepoConfig::parse(&file.content);
             return Ok(RepoConfigResult::Found {
                 path: file.path,
-                config,
+                config: Box::new(config),
             });
         }
     }
 
     // Fall back to package.json `"renovate"` key (deprecated; warn when used).
-    if let Some(file) = client.get_raw_file(owner, repo, "package.json").await? {
-        if let Some(config) = RepoConfig::parse_from_package_json(&file.content) {
-            tracing::warn!(
-                repo = %format!("{owner}/{repo}"),
-                "Using package.json for Renovate config is deprecated — \
-                 please migrate to a dedicated config file such as renovate.json"
-            );
-            return Ok(RepoConfigResult::Found {
-                path: "package.json".to_owned(),
-                config,
-            });
-        }
+    if let Some(file) = client.get_raw_file(owner, repo, "package.json").await?
+        && let Some(config) = RepoConfig::parse_from_package_json(&file.content)
+    {
+        tracing::warn!(
+            repo = %format!("{owner}/{repo}"),
+            "Using package.json for Renovate config is deprecated — \
+             please migrate to a dedicated config file such as renovate.json"
+        );
+        return Ok(RepoConfigResult::Found {
+            path: "package.json".to_owned(),
+            config: Box::new(config),
+        });
     }
 
     tracing::debug!(repo = %format!("{owner}/{repo}"), "no renovate config found");

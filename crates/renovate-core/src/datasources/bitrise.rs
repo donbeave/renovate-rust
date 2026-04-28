@@ -98,12 +98,11 @@ async fn get_or_fetch_index(
     registry_url: &str,
 ) -> Result<HashMap<String, Vec<String>>, BitriseError> {
     // Check cache (only caches the default registry to keep it simple).
-    if registry_url == DEFAULT_STEPLIB_URL {
-        if let Ok(guard) = INDEX_CACHE.lock() {
-            if let Some(ref cached) = *guard {
-                return Ok(cached.clone());
-            }
-        }
+    if registry_url == DEFAULT_STEPLIB_URL
+        && let Ok(guard) = INDEX_CACHE.lock()
+        && let Some(ref cached) = *guard
+    {
+        return Ok(cached.clone());
     }
 
     let (owner, repo) = parse_github_url(registry_url)?;
@@ -158,10 +157,10 @@ async fn get_or_fetch_index(
         index.insert(entry.name, versions);
     }
 
-    if registry_url == DEFAULT_STEPLIB_URL {
-        if let Ok(mut guard) = INDEX_CACHE.lock() {
-            *guard = Some(index.clone());
-        }
+    if registry_url == DEFAULT_STEPLIB_URL
+        && let Ok(mut guard) = INDEX_CACHE.lock()
+    {
+        *guard = Some(index.clone());
     }
 
     Ok(index)

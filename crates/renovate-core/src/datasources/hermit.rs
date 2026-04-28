@@ -132,9 +132,8 @@ pub async fn fetch_latest(
 /// Parse `owner` and `repo` from a `https://github.com/{owner}/{repo}` URL.
 fn parse_github_repo(url: &str) -> Option<(&str, &str)> {
     let path = url.strip_prefix("https://github.com/")?;
-    let mut parts = path.trim_end_matches('/').splitn(2, '/');
-    let owner = parts.next()?;
-    let repo = parts.next()?;
+    let (owner, repo) = path.trim_end_matches('/').split_once('/')?;
+
     Some((owner, repo))
 }
 

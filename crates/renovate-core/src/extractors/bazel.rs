@@ -90,9 +90,8 @@ pub fn extract(content: &str) -> Vec<BazelDep> {
     while let Some(start) = content[search_pos..].find("http_archive(") {
         let abs_start = search_pos + start;
         // Find the matching closing `)` — simple brace counting.
-        let block = match extract_block(&content[abs_start..]) {
-            Some(b) => b,
-            None => break,
+        let Some(block) = extract_block(&content[abs_start..]) else {
+            break;
         };
         if let Some(dep) = parse_http_archive(block) {
             deps.push(dep);

@@ -87,12 +87,11 @@ pub fn extract(content: &str) -> Vec<OsgiDep> {
     }
 
     // `execution-environment:JSON|false` framework bundle
-    if let Some(exec_env) = model.extra.get("execution-environment:JSON|false") {
-        if let Some(framework) = exec_env.get("framework") {
-            if let Some(id) = bundle_id(framework) {
-                all_bundles.push(id);
-            }
-        }
+    if let Some(exec_env) = model.extra.get("execution-environment:JSON|false")
+        && let Some(framework) = exec_env.get("framework")
+        && let Some(id) = bundle_id(framework)
+    {
+        all_bundles.push(id);
     }
 
     // Custom artifact list sections (keys ending with `:JSON|false` or containing

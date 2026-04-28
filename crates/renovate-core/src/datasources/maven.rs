@@ -185,7 +185,7 @@ pub async fn fetch_latest_batch(
 }
 
 /// Compute a `MavenUpdateSummary` from a pre-fetched latest version entry.
-pub fn summary_from_cache(current_version: &str, latest: MavenLatestEntry) -> MavenUpdateSummary {
+pub fn summary_from_cache(current_version: &str, latest: &MavenLatestEntry) -> MavenUpdateSummary {
     let summary =
         crate::versioning::maven::maven_update_summary(current_version, latest.as_deref());
     MavenUpdateSummary {

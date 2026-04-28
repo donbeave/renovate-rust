@@ -148,7 +148,7 @@ pub fn extract(content: &str) -> Vec<CpanDep> {
 
             // Strip leading `== `, `>= ` etc. and leading `v`.
             let version = raw_version
-                .trim_start_matches(|c: char| c == '=' || c == '>' || c == '<' || c == ' ')
+                .trim_start_matches(['=', '>', '<', ' '])
                 .trim_start_matches('v')
                 .to_owned();
 

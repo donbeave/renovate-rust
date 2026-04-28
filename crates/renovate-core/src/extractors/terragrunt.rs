@@ -105,12 +105,11 @@ pub fn extract(content: &str) -> Vec<TerragruntDep> {
                 let closes = line.chars().filter(|&c| c == '}').count() as i32;
                 brace_count += opens - closes;
 
-                if brace_count > 0 {
-                    if let Some(cap) = KV_RE.captures(line) {
-                        if &cap[1] == "source" {
-                            source_val = Some(cap[2].to_owned());
-                        }
-                    }
+                if brace_count > 0
+                    && let Some(cap) = KV_RE.captures(line)
+                    && &cap[1] == "source"
+                {
+                    source_val = Some(cap[2].to_owned());
                 }
                 i += 1;
             }

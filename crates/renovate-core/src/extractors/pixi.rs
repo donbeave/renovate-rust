@@ -59,9 +59,8 @@ pub fn extract(content: &str) -> Vec<PixiDep> {
     let Ok(root) = toml::from_str::<Value>(content) else {
         return Vec::new();
     };
-    let table = match root.as_table() {
-        Some(t) => t,
-        None => return Vec::new(),
+    let Some(table) = root.as_table() else {
+        return Vec::new();
     };
 
     let mut deps = Vec::new();

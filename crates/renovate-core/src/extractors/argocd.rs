@@ -147,14 +147,12 @@ pub fn extract(content: &str) -> Vec<ArgocdDep> {
             continue;
         }
 
-        if in_source {
-            if let Some(cap) = KV_RE.captures(line) {
-                match &cap[1] {
-                    "repoURL" => repo_url = Some(kv_val(&cap).to_owned()),
-                    "chart" => chart = Some(kv_val(&cap).to_owned()),
-                    "targetRevision" => target_revision = Some(kv_val(&cap).to_owned()),
-                    _ => {}
-                }
+        if in_source && let Some(cap) = KV_RE.captures(line) {
+            match &cap[1] {
+                "repoURL" => repo_url = Some(kv_val(&cap).to_owned()),
+                "chart" => chart = Some(kv_val(&cap).to_owned()),
+                "targetRevision" => target_revision = Some(kv_val(&cap).to_owned()),
+                _ => {}
             }
         }
     }

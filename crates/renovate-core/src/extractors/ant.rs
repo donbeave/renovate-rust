@@ -77,10 +77,10 @@ pub fn extract(content: &str) -> Vec<AntDep> {
                     }
                     "remoteRepository" => {
                         for attr in e.attributes().flatten() {
-                            if attr.key.as_ref() == b"url" {
-                                if let Ok(url) = std::str::from_utf8(attr.value.as_ref()) {
-                                    registry_urls.push(url.to_owned());
-                                }
+                            if attr.key.as_ref() == b"url"
+                                && let Ok(url) = std::str::from_utf8(attr.value.as_ref())
+                            {
+                                registry_urls.push(url.to_owned());
                             }
                         }
                     }

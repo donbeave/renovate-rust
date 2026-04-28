@@ -65,10 +65,10 @@ pub fn extract(content: &str) -> Vec<Pep723Dep> {
     let toml_text: String = block
         .lines()
         .map(|line| {
-            if line.starts_with("# ") {
-                &line[2..]
-            } else if line.starts_with('#') {
-                &line[1..]
+            if let Some(rest) = line.strip_prefix("# ") {
+                rest
+            } else if let Some(rest) = line.strip_prefix('#') {
+                rest
             } else {
                 line
             }
@@ -81,9 +81,8 @@ pub fn extract(content: &str) -> Vec<Pep723Dep> {
         Err(_) => return Vec::new(),
     };
 
-    let deps_array = match parsed.get("dependencies").and_then(|v| v.as_array()) {
-        Some(arr) => arr,
-        None => return Vec::new(),
+    let Some(deps_array) = parsed.get("dependencies").and_then(|v| v.as_array()) else {
+        return Vec::new();
     };
 
     deps_array

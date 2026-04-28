@@ -107,21 +107,21 @@ pub fn extract(content: &str) -> Vec<OcbDep> {
         }
 
         // Inside a module section look for `- gomod: module version`.
-        if let Some(section) = current_section {
-            if let Some(cap) = GOMOD_RE.captures(line) {
-                let module_path = cap[1].to_owned();
-                let version = cap.get(2).map(|m| m.as_str().to_owned());
-                deps.push(OcbDep {
-                    dep_name: module_path,
-                    current_value: version.clone().unwrap_or_default(),
-                    dep_type: section.to_owned(),
-                    skip_reason: if version.is_none() {
-                        Some(OcbSkipReason::MissingVersion)
-                    } else {
-                        None
-                    },
-                });
-            }
+        if let Some(section) = current_section
+            && let Some(cap) = GOMOD_RE.captures(line)
+        {
+            let module_path = cap[1].to_owned();
+            let version = cap.get(2).map(|m| m.as_str().to_owned());
+            deps.push(OcbDep {
+                dep_name: module_path,
+                current_value: version.clone().unwrap_or_default(),
+                dep_type: section.to_owned(),
+                skip_reason: if version.is_none() {
+                    Some(OcbSkipReason::MissingVersion)
+                } else {
+                    None
+                },
+            });
         }
     }
 

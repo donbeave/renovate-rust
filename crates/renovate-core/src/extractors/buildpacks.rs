@@ -83,23 +83,22 @@ pub fn extract(content: &str) -> Vec<BuildpacksDep> {
         return Vec::new();
     };
 
-    let io = match root.get("io").and_then(|v| v.get("buildpacks")) {
-        Some(v) => v,
-        None => return Vec::new(),
+    let Some(io) = root.get("io").and_then(|v| v.get("buildpacks")) else {
+        return Vec::new();
     };
 
     let mut deps = Vec::new();
 
     // `builder = "image:tag"` — Docker image, skipped
-    if let Some(Value::String(builder)) = io.get("builder") {
-        if !builder.is_empty() {
-            deps.push(BuildpacksDep {
-                dep_name: strip_docker_prefix(builder),
-                current_value: String::new(),
-                source: BuildpacksSource::Docker,
-                skip_reason: Some(BuildpacksSkipReason::DockerImage),
-            });
-        }
+    if let Some(Value::String(builder)) = io.get("builder")
+        && !builder.is_empty()
+    {
+        deps.push(BuildpacksDep {
+            dep_name: strip_docker_prefix(builder),
+            current_value: String::new(),
+            source: BuildpacksSource::Docker,
+            skip_reason: Some(BuildpacksSkipReason::DockerImage),
+        });
     }
 
     // `[[io.buildpacks.group]]` entries

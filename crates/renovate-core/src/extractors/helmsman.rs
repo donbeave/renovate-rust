@@ -139,13 +139,13 @@ pub fn extract(content: &str) -> Vec<HelmsmanDep> {
         match section {
             Section::HelmRepos => {
                 // `  alias: "url"` at indent 2
-                if indent == 2 {
-                    if let Some(cap) = KV_RE.captures(line) {
-                        let alias = cap[1].to_owned();
-                        let url = kv_value(&cap).to_owned();
-                        if !url.is_empty() {
-                            helm_repos.insert(alias, url);
-                        }
+                if indent == 2
+                    && let Some(cap) = KV_RE.captures(line)
+                {
+                    let alias = cap[1].to_owned();
+                    let url = kv_value(&cap).to_owned();
+                    if !url.is_empty() {
+                        helm_repos.insert(alias, url);
                     }
                 }
             }
@@ -219,32 +219,26 @@ pub fn extract(content: &str) -> Vec<HelmsmanDep> {
         };
 
         // chart format: "alias/chart-name"
-        let (alias, chart_name) = match chart.split_once('/') {
-            Some((a, c)) => (a, c),
-            None => {
-                deps.push(HelmsmanDep {
-                    dep_name: app_name.clone(),
-                    chart_name: chart.clone(),
-                    registry_url: String::new(),
-                    current_value: version.clone(),
-                    skip_reason: Some(HelmsmanSkipReason::InvalidChart),
-                });
-                continue;
-            }
+        let Some((alias, chart_name)) = chart.split_once('/') else {
+            deps.push(HelmsmanDep {
+                dep_name: app_name.clone(),
+                chart_name: chart.clone(),
+                registry_url: String::new(),
+                current_value: version.clone(),
+                skip_reason: Some(HelmsmanSkipReason::InvalidChart),
+            });
+            continue;
         };
 
-        let registry_url = match helm_repos.get(alias) {
-            Some(url) => url.clone(),
-            None => {
-                deps.push(HelmsmanDep {
-                    dep_name: app_name.clone(),
-                    chart_name: chart_name.to_owned(),
-                    registry_url: String::new(),
-                    current_value: version.clone(),
-                    skip_reason: Some(HelmsmanSkipReason::NoRepository),
-                });
-                continue;
-            }
+        let Some(registry_url) = helm_repos.get(alias).cloned() else {
+            deps.push(HelmsmanDep {
+                dep_name: app_name.clone(),
+                chart_name: chart_name.to_owned(),
+                registry_url: String::new(),
+                current_value: version.clone(),
+                skip_reason: Some(HelmsmanSkipReason::NoRepository),
+            });
+            continue;
         };
 
         deps.push(HelmsmanDep {
@@ -300,11 +294,10 @@ apps:
     #[test]
     fn skips_missing_version() {
         let deps = extract(SAMPLE);
-        let no_ver: Vec<_> = deps
-            .iter()
-            .filter(|d| d.skip_reason == Some(HelmsmanSkipReason::UnspecifiedVersion))
-            .collect();
-        assert!(!no_ver.is_empty());
+        assert!(
+            deps.iter()
+                .any(|d| d.skip_reason == Some(HelmsmanSkipReason::UnspecifiedVersion))
+        );
     }
 
     #[test]

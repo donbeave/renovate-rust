@@ -89,13 +89,14 @@ fn flush(
     project: &mut Option<String>,
     ref_val: &mut Option<String>,
 ) {
-    if let (Some(p), Some(r)) = (project.take(), ref_val.take()) {
-        if !p.is_empty() && !r.is_empty() {
-            out.push(GitlabIncludeDep {
-                project: p,
-                ref_value: r,
-            });
-        }
+    if let (Some(p), Some(r)) = (project.take(), ref_val.take())
+        && !p.is_empty()
+        && !r.is_empty()
+    {
+        out.push(GitlabIncludeDep {
+            project: p,
+            ref_value: r,
+        });
     }
     project.take();
     ref_val.take();

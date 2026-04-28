@@ -272,27 +272,23 @@ pub fn extract(content: &str) -> Vec<XcodeGenDep> {
                         "github" => github = Some(val),
                         "path" => is_path = true,
                         "branch" | "revision" => has_branch_or_revision = true,
-                        "from" => {
-                            if current_value.is_empty() {
-                                current_value = val;
-                                dep_type = "from";
-                            }
+                        "from" if current_value.is_empty() => {
+                            current_value = val;
+                            dep_type = "from";
                         }
                         "exactVersion" => {
                             current_value = val;
                             dep_type = "exactVersion";
                         }
-                        "version" => {
-                            if current_value.is_empty() || dep_type == "from" {
-                                current_value = val;
-                                dep_type = "version";
-                            }
+                        "version" if (current_value.is_empty() || dep_type == "from") => {
+                            current_value = val;
+                            dep_type = "version";
                         }
-                        "majorVersion" | "minorVersion" | "minVersion" | "maxVersion" => {
-                            if current_value.is_empty() {
-                                current_value = val;
-                                dep_type = "from";
-                            }
+                        "majorVersion" | "minorVersion" | "minVersion" | "maxVersion"
+                            if current_value.is_empty() =>
+                        {
+                            current_value = val;
+                            dep_type = "from";
                         }
                         _ => {}
                     }

@@ -127,9 +127,8 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
         return Vec::new();
     }
 
-    let root = match lock.nodes.get("root") {
-        Some(r) => r,
-        None => return Vec::new(),
+    let Some(root) = lock.nodes.get("root") else {
+        return Vec::new();
     };
 
     let root_inputs: std::collections::HashSet<String> = root
@@ -150,34 +149,28 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
             continue;
         }
 
-        let locked = match &node.locked {
-            Some(l) => l,
-            None => {
-                deps.push(NixFlakeDep {
-                    input_name: name.clone(),
-                    locked_rev: String::new(),
-                    current_ref: None,
-                    package_name: None,
-                    input_type: FlakeInputType::Unknown,
-                    skip_reason: Some(NixSkipReason::NoRev),
-                });
-                continue;
-            }
+        let Some(locked) = &node.locked else {
+            deps.push(NixFlakeDep {
+                input_name: name.clone(),
+                locked_rev: String::new(),
+                current_ref: None,
+                package_name: None,
+                input_type: FlakeInputType::Unknown,
+                skip_reason: Some(NixSkipReason::NoRev),
+            });
+            continue;
         };
 
-        let original = match &node.original {
-            Some(o) => o,
-            None => {
-                deps.push(NixFlakeDep {
-                    input_name: name.clone(),
-                    locked_rev: String::new(),
-                    current_ref: None,
-                    package_name: None,
-                    input_type: locked.input_type.clone(),
-                    skip_reason: Some(NixSkipReason::NoRev),
-                });
-                continue;
-            }
+        let Some(original) = &node.original else {
+            deps.push(NixFlakeDep {
+                input_name: name.clone(),
+                locked_rev: String::new(),
+                current_ref: None,
+                package_name: None,
+                input_type: locked.input_type.clone(),
+                skip_reason: Some(NixSkipReason::NoRev),
+            });
+            continue;
         };
 
         // Skip indirect and local-path inputs.

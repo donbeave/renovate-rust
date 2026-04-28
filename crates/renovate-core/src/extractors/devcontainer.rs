@@ -87,10 +87,10 @@ pub fn extract(content: &str) -> DevContainerDeps {
 
     let mut result = DevContainerDeps::default();
 
-    if let Some(image) = &file.image {
-        if !image.is_empty() {
-            result.docker_deps.push(classify_image_ref(image));
-        }
+    if let Some(image) = &file.image
+        && !image.is_empty()
+    {
+        result.docker_deps.push(classify_image_ref(image));
     }
 
     if let Some(features) = &file.features {

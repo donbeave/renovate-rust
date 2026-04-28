@@ -47,15 +47,15 @@ pub fn extract(content: &str) -> Option<CopierDep> {
 
     for line in content.lines() {
         let trimmed = line.trim();
-        if src_path.is_none() {
-            if let Some(cap) = SRC_PATH_RE.captures(trimmed) {
-                src_path = Some(cap[1].trim().to_owned());
-            }
+        if src_path.is_none()
+            && let Some(cap) = SRC_PATH_RE.captures(trimmed)
+        {
+            src_path = Some(cap[1].trim().to_owned());
         }
-        if commit.is_none() {
-            if let Some(cap) = COMMIT_RE.captures(trimmed) {
-                commit = Some(cap[1].trim().to_owned());
-            }
+        if commit.is_none()
+            && let Some(cap) = COMMIT_RE.captures(trimmed)
+        {
+            commit = Some(cap[1].trim().to_owned());
         }
         if src_path.is_some() && commit.is_some() {
             break;

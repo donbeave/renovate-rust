@@ -201,21 +201,19 @@ spec:
     #[test]
     fn skips_digest_pinned() {
         let deps = extract(DEPLOYMENT);
-        let pinned: Vec<_> = deps
+        let has_pinned = deps
             .iter()
-            .filter(|d| d.skip_reason == Some(KubernetesSkipReason::DigestPinned))
-            .collect();
-        assert!(!pinned.is_empty());
+            .any(|d| d.skip_reason == Some(KubernetesSkipReason::DigestPinned));
+        assert!(has_pinned);
     }
 
     #[test]
     fn skips_latest_tag() {
         let deps = extract(DEPLOYMENT);
-        let no_ver: Vec<_> = deps
+        let has_no_ver = deps
             .iter()
-            .filter(|d| d.skip_reason == Some(KubernetesSkipReason::NoVersion))
-            .collect();
-        assert!(!no_ver.is_empty());
+            .any(|d| d.skip_reason == Some(KubernetesSkipReason::NoVersion));
+        assert!(has_no_ver);
     }
 
     #[test]

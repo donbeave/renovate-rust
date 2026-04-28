@@ -75,13 +75,14 @@ pub fn extract(content: &str) -> Vec<TflintPluginDep> {
                 let close = line.chars().filter(|&c| c == '}').count() as i32;
                 brace_count += open - close;
 
-                if i > start && brace_count == 1 {
-                    if let Some(kv) = KV.captures(line) {
-                        match &kv[1] {
-                            "version" => version = Some(kv[2].to_owned()),
-                            "source" => source = Some(kv[2].to_owned()),
-                            _ => {}
-                        }
+                if i > start
+                    && brace_count == 1
+                    && let Some(kv) = KV.captures(line)
+                {
+                    match &kv[1] {
+                        "version" => version = Some(kv[2].to_owned()),
+                        "source" => source = Some(kv[2].to_owned()),
+                        _ => {}
                     }
                 }
 
@@ -120,16 +121,13 @@ fn build_dep(name: String, source: Option<String>, version: Option<String>) -> T
     }
 
     let dep_name = parts[1..].join("/");
-    let current_value = match version {
-        Some(v) => v,
-        None => {
-            return TflintPluginDep {
-                name,
-                dep_name,
-                current_value: String::new(),
-                skip_reason: Some(TflintSkipReason::UnspecifiedVersion),
-            };
-        }
+    let Some(current_value) = version else {
+        return TflintPluginDep {
+            name,
+            dep_name,
+            current_value: String::new(),
+            skip_reason: Some(TflintSkipReason::UnspecifiedVersion),
+        };
     };
 
     TflintPluginDep {

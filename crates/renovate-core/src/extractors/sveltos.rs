@@ -120,7 +120,7 @@ fn extract_from_doc(doc: &str) -> Vec<SveltosDep> {
             let trimmed = stripped.trim_start();
 
             // New list item — flush previous chart.
-            if trimmed.starts_with("- ") {
+            if let Some(rest) = trimmed.strip_prefix("- ") {
                 flush_chart(
                     &mut repo_url,
                     &mut chart_name,
@@ -128,7 +128,6 @@ fn extract_from_doc(doc: &str) -> Vec<SveltosDep> {
                     &mut deps,
                 );
                 // Parse inline KV if present.
-                let rest = &trimmed[2..];
                 if let Some(cap) = KV_RE.captures(&format!("    {rest}")) {
                     set_field(
                         &cap[1],

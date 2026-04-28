@@ -117,17 +117,14 @@ pub fn extract(content: &str) -> Option<HomebrewDep> {
         .and_then(|cap| cap.get(1).or_else(|| cap.get(2)))
         .map(|m| m.as_str().to_owned());
 
-    let url = match url {
-        Some(u) => u,
-        None => {
-            return Some(HomebrewDep {
-                formula_name,
-                current_value: String::new(),
-                source: HomebrewSource::Unsupported(String::new()),
-                sha256: None,
-                skip_reason: Some(HomebrewSkipReason::MissingUrl),
-            });
-        }
+    let Some(url) = url else {
+        return Some(HomebrewDep {
+            formula_name,
+            current_value: String::new(),
+            source: HomebrewSource::Unsupported(String::new()),
+            sha256: None,
+            skip_reason: Some(HomebrewSkipReason::MissingUrl),
+        });
     };
 
     // Get sha256

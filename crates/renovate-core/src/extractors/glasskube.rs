@@ -75,9 +75,8 @@ pub fn extract(content: &str) -> Vec<GlasskubeDep> {
         };
 
         // Find `packageInfo:` section boundary, then extract name/version.
-        let pkg_info_start = match doc.find("packageInfo:") {
-            Some(pos) => pos,
-            None => continue,
+        let Some(pkg_info_start) = doc.find("packageInfo:") else {
+            continue;
         };
         let pkg_section = &doc[pkg_info_start..];
 

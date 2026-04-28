@@ -136,16 +136,16 @@ fn parse_dep_line(line: &str, dep_type: ConanDepType, out: &mut Vec<ConanDep>) {
         }
 
         // Skip custom user/channel (anything that isn't `@_/_` or absent).
-        if let Some(ch) = channel {
-            if ch != "_/_" {
-                out.push(ConanDep {
-                    name,
-                    current_value: version,
-                    dep_type,
-                    skip_reason: Some(ConanSkipReason::CustomChannel),
-                });
-                continue;
-            }
+        if let Some(ch) = channel
+            && ch != "_/_"
+        {
+            out.push(ConanDep {
+                name,
+                current_value: version,
+                dep_type,
+                skip_reason: Some(ConanSkipReason::CustomChannel),
+            });
+            continue;
         }
 
         out.push(ConanDep {

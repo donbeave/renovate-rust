@@ -49,17 +49,6 @@ pub(crate) struct DepReport {
     pub status: DepStatus,
 }
 
-impl DepReport {
-    /// Convenience constructor: creates a `DepReport` with no branch name set.
-    pub(crate) fn new(name: String, status: DepStatus) -> Self {
-        Self {
-            name,
-            branch_name: None,
-            status,
-        }
-    }
-}
-
 /// All deps extracted from one manifest file.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct FileReport {

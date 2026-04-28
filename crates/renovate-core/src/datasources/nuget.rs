@@ -183,7 +183,7 @@ pub async fn fetch_latest_batch(
 }
 
 /// Compute a `NuGetUpdateSummary` from a pre-fetched latest version entry.
-pub fn summary_from_cache(current_value: &str, latest: NuGetLatestEntry) -> NuGetUpdateSummary {
+pub fn summary_from_cache(current_value: &str, latest: &NuGetLatestEntry) -> NuGetUpdateSummary {
     let s = crate::versioning::nuget::nuget_update_summary(current_value, latest.as_deref());
     NuGetUpdateSummary {
         current_value: s.current_value,
