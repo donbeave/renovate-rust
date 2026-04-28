@@ -1865,6 +1865,30 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 568 passed
 
+## Slice 0061 - pep621 `[build-system].requires` support
+
+### Renovate reference
+- `lib/modules/manager/pep621/extract.ts` — line 76: `const buildSystemRequires = def['build-system']?.requires`
+- Dep type: `build-system.requires`
+
+### What landed
+- Extended `extractors/pep621.rs`:
+  - Added `BuildSystem` variant to `Pep621DepType`.
+  - Added `[build-system].requires` extraction after existing sections.
+  - `parse_pep508_entry` reused — same PEP 508 format as regular deps.
+  - 2 new tests: `no_project_section_returns_build_system_only`,
+    `build_system_requires_with_project_deps`.
+- Updated module doc table to include the new section.
+
+### What this fixes
+- Build tool dependencies like `setuptools>=61.0`, `poetry-core>=1.0.0`,
+  `hatchling`, `wheel` were silently ignored even though they're pinned and
+  can fall behind.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 569 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1876,4 +1900,4 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`ansible-galaxy` GitHub-URL roles extractor**: `requirements.yml` with GitHub-sourced roles.
 5. **`tekton` extractor**: Tekton pipeline bundle references.
-6. **pep621 extras dependencies**: `[project.optional-dependencies]` in pyproject.toml.
+6. **Poetry `[tool.poetry.group.*.dependencies]`**: poetry dependency groups (PEP 735-like).

@@ -15,6 +15,7 @@
 //! | `[project].dependencies` | `Regular` |
 //! | `[project.optional-dependencies].*` | `Optional` |
 //! | `[dependency-groups].*` (PEP 735) | `Group` |
+//! | `[build-system].requires` | `BuildSystem` |
 //!
 //! ## PEP 508 string format
 //!
@@ -37,6 +38,8 @@ pub enum Pep621DepType {
     Optional,
     /// `[dependency-groups].*` (PEP 735)
     Group,
+    /// `[build-system].requires`
+    BuildSystem,
 }
 
 /// Why a pyproject.toml dependency is being skipped.
@@ -123,6 +126,19 @@ pub fn extract(content: &str) -> Result<Vec<Pep621ExtractedDep>, Pep621ExtractEr
                         deps.push(dep);
                     }
                 }
+            }
+        }
+    }
+
+    // [build-system].requires
+    if let Some(build_reqs) = doc
+        .get("build-system")
+        .and_then(|b| b.get("requires"))
+        .and_then(|r| r.as_array())
+    {
+        for entry in build_reqs {
+            if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::BuildSystem) {
+                deps.push(dep);
             }
         }
     }
@@ -348,10 +364,35 @@ dependencies = ["mypkg @ https://example.com/mypkg.tar.gz"]
     // ── empty / no deps ───────────────────────────────────────────────────────
 
     #[test]
-    fn no_project_section_returns_empty() {
-        let content = "[build-system]\nrequires = [\"setuptools\"]\n";
+    fn no_project_section_returns_build_system_only() {
+        let content = "[build-system]\nrequires = [\"setuptools>=61.0\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n";
         let deps = extract_ok(content);
-        assert!(deps.is_empty());
+        assert_eq!(deps.len(), 2);
+        let st = deps.iter().find(|d| d.name == "setuptools").unwrap();
+        assert_eq!(st.current_value, ">=61.0");
+        assert_eq!(st.dep_type, Pep621DepType::BuildSystem);
+        // unconstrained dep — emitted with empty specifier, no skip reason
+        let wheel = deps.iter().find(|d| d.name == "wheel").unwrap();
+        assert!(wheel.current_value.is_empty());
+        assert!(wheel.skip_reason.is_none());
+    }
+
+    #[test]
+    fn build_system_requires_with_project_deps() {
+        let content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "myapp"
+dependencies = ["requests>=2.28"]
+"#;
+        let deps = extract_ok(content);
+        let poetry = deps.iter().find(|d| d.name == "poetry-core").unwrap();
+        assert_eq!(poetry.dep_type, Pep621DepType::BuildSystem);
+        assert_eq!(poetry.current_value, ">=1.0.0");
+        assert!(deps.iter().any(|d| d.name == "requests"));
     }
 
     #[test]
