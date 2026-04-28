@@ -2277,7 +2277,7 @@ async fn process_repo(
         }
     }
 
-    // ── Version files (.terraform-version, .go-version, etc.) ─────────────────
+    // ── Version files (.terraform-version, .go-version, .bun-version, etc.) ──
     for manager_name in [
         "terraform-version",
         "terragrunt-version",
@@ -2285,6 +2285,7 @@ async fn process_repo(
         "python-version",
         "node-version",
         "nvmrc",
+        "bun-version",
     ] {
         for vf_path in manager_files(&detected, manager_name) {
             match client.get_raw_file(owner, repo, &vf_path).await {

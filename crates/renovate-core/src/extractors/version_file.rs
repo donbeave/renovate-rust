@@ -14,6 +14,7 @@
 //! | `.python-version` | python | GitHub Tags | `v{version}` |
 //! | `.node-version` | nodejs | GitHub Releases | `v{version}` |
 //! | `.nvmrc` | nodejs | GitHub Releases | `v{version}` |
+//! | `.bun-version` | bun | GitHub Releases | `bun-v{version}` |
 //!
 //! Renovate references:
 //! - `lib/modules/manager/terraform-version/`
@@ -82,6 +83,14 @@ static VERSION_FILE_DEFS: &[(&str, &str, AsdfDatasource)] = &[
         AsdfDatasource::GithubReleases {
             repo: "nodejs/node",
             tag_strip: "v",
+        },
+    ),
+    (
+        "bun-version",
+        "bun",
+        AsdfDatasource::GithubReleases {
+            repo: "oven-sh/bun",
+            tag_strip: "bun-v",
         },
     ),
 ];

@@ -249,6 +249,49 @@ static TOOL_TABLE: &[(&str, AsdfDatasource)] = &[
             tag_strip: "v",
         },
     ),
+    // ── Additional popular tools ──────────────────────────────────────────────
+    (
+        "bun",
+        AsdfDatasource::GithubReleases {
+            repo: "oven-sh/bun",
+            tag_strip: "bun-v",
+        },
+    ),
+    (
+        "deno",
+        AsdfDatasource::GithubReleases {
+            repo: "denoland/deno",
+            tag_strip: "v",
+        },
+    ),
+    (
+        "zig",
+        AsdfDatasource::GithubTags {
+            repo: "ziglang/zig",
+            tag_strip: "",
+        },
+    ),
+    (
+        "elixir",
+        AsdfDatasource::GithubTags {
+            repo: "elixir-lang/elixir",
+            tag_strip: "v",
+        },
+    ),
+    (
+        "java",
+        AsdfDatasource::GithubReleases {
+            repo: "adoptium/temurin17-binaries",
+            tag_strip: "jdk-",
+        },
+    ),
+    (
+        "scala",
+        AsdfDatasource::GithubTags {
+            repo: "scala/scala",
+            tag_strip: "v",
+        },
+    ),
 ];
 
 #[cfg(test)]

@@ -189,6 +189,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.nvmrc$"],
     },
     ManagerDef {
+        name: "bun-version",
+        patterns: &[r"(^|/)\.bun-version$"],
+    },
+    ManagerDef {
         name: "gitlabci",
         patterns: &[r"(^|/)\.gitlab-ci\.ya?ml$"],
     },

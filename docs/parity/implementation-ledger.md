@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0074  | 2026-04-28 | Extend asdf tool table (bun, deno, zig, elixir, scala) + bun-version file | Complete | See below. |
 | 0073  | 2026-04-28 | Add `stats` (update counts) to JSON output | Complete | See below. |
 | 0072  | 2026-04-28 | `packageRules` matchFileNames glob filtering | Complete | See below. |
 | 0071  | 2026-04-28 | `packageRules` matchCurrentVersion filtering | Complete | See below. |
@@ -2244,6 +2245,28 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 720 passed
 
+## Slice 0074 - Extend asdf tool table (bun, deno, zig, elixir, scala) + bun-version file
+
+### What landed
+- `crates/renovate-core/src/extractors/asdf.rs`:
+  - Added 6 new tools to `TOOL_TABLE`:
+    - `bun` → GitHub Releases `oven-sh/bun`, tag_strip `bun-v`
+    - `deno` → GitHub Releases `denoland/deno`, tag_strip `v`
+    - `zig` → GitHub Tags `ziglang/zig`, tag_strip `` (bare tags)
+    - `elixir` → GitHub Tags `elixir-lang/elixir`, tag_strip `v`
+    - `java` → GitHub Releases `adoptium/temurin17-binaries`, tag_strip `jdk-`
+    - `scala` → GitHub Tags `scala/scala`, tag_strip `v`
+- `crates/renovate-core/src/managers.rs`:
+  - Added `bun-version` manager with pattern `(^|/)\.bun-version$`.
+- `crates/renovate-core/src/extractors/version_file.rs`:
+  - Added `bun-version` entry to `VERSION_FILE_DEFS` using GitHub Releases `oven-sh/bun` with `bun-v` tag strip.
+- `crates/renovate-cli/src/main.rs`:
+  - Added `bun-version` to the version file processing manager loop.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 720 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2256,3 +2279,4 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **GitLab CI `include:` project components**: component dependency version tracking.
 6. **`autoMerge` and `depTypes` in packageRules**: more rule condition fields.
+7. **kustomize extractor**: Kustomize `kustomization.yaml` resource URLs and image references.
