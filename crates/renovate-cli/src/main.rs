@@ -1515,6 +1515,77 @@ async fn process_repo(
         }
     }
 
+    // ── CocoaPods (Podfile) ───────────────────────────────────────────────────
+    for podfile_path in manager_files(&detected, "cocoapods") {
+        match client.get_raw_file(owner, repo, &podfile_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::cocoapods::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %podfile_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted cocoapods deps"
+                );
+                let dep_inputs: Vec<renovate_core::datasources::cocoapods::PodDepInput> =
+                    actionable
+                        .iter()
+                        .map(|d| renovate_core::datasources::cocoapods::PodDepInput {
+                            name: d.name.clone(),
+                            current_value: d.current_value.clone(),
+                        })
+                        .collect();
+                let updates = renovate_core::datasources::cocoapods::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    renovate_core::datasources::cocoapods::TRUNK_API,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                    file_deps.push(output::DepReport {
+                        name: dep.name.clone(),
+                        status: output::DepStatus::Skipped {
+                            reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
+                                .to_lowercase(),
+                        },
+                    });
+                }
+                for dep in &actionable {
+                    let status = match update_map.get(&dep.name) {
+                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_value.clone(),
+                            latest: s.latest.clone().unwrap_or_default(),
+                        },
+                        Some(Ok(s)) => output::DepStatus::UpToDate {
+                            latest: s.latest.clone(),
+                        },
+                        Some(Err(e)) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                        None => output::DepStatus::UpToDate { latest: None },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: podfile_path.clone(),
+                    manager: "cocoapods".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%podfile_path, "Podfile not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%podfile_path, %err, "failed to fetch Podfile");
+                had_error = true;
+            }
+        }
+    }
+
     (Some(repo_report), had_error)
 }
 

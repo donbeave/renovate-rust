@@ -1454,10 +1454,44 @@ Pick whichever can be completed in one loop:
 
 Pick whichever can be completed in one loop:
 
+## Slice 0046 - CocoaPods `Podfile` extractor + CocoaPods trunk datasource
+
+### Renovate reference
+- `lib/modules/manager/cocoapods/extract.ts` — `parseLine`, `extractPackageFile`
+- `lib/modules/manager/cocoapods/index.ts`   — pattern `/(^|/)Podfile$/`
+- `lib/modules/datasource/pod/index.ts`      — `PodDatasource`
+- API: `GET https://trunk.cocoapods.org/api/v1/pods/{name}`
+
+### What landed
+- `crates/renovate-core/src/extractors/cocoapods.rs` — Podfile line-scanner:
+  - Matches `pod 'Name'` and `pod 'Name', 'version'` in both quote styles.
+  - Inline comment stripping (`# comment`).
+  - Skip reasons: `LocalPath` (`:path =>`), `GitSource` (`:git =>`), `PodspecSource`.
+  - Subspec support: `Firebase/Analytics` name preserved in dep.
+- `crates/renovate-core/src/datasources/cocoapods.rs` — CocoaPods trunk REST client:
+  - `GET /api/v1/pods/{name}` → `{"versions":[{"name":"5.6.4",...}]}`
+  - Filters pre-releases (versions containing `-`).
+  - Subspec names use base pod name: `Firebase/Analytics` → lookup `Firebase`.
+  - `lower_bound()` strips `~>`, `>=`, etc. for update comparison.
+- Manager pattern `cocoapods` with `(^|/)Podfile$`.
+
+### What was intentionally deferred
+- `:git => 'url', :tag => 'X'` deps via GitHub/GitLab tags datasource.
+- Custom CDN sources (non-trunk registries).
+- `Podfile.lock` lockfile parsing.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 460 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
 1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 2. **`gemspec` extractor**: extend bundler manager to parse `.gemspec` files.
-3. **CocoaPods** (`Podfile` extractor + CocoaPods trunk datasource).
-4. **`semver` versioning module**: improve update decisions for pub.dev, NuGet,
+3. **`semver` versioning module**: improve update decisions for pub.dev, NuGet,
    and composer using proper semver range matching (uses existing `semver` crate).
+4. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.

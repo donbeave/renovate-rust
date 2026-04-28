@@ -4,6 +4,7 @@
 //! output is a list of available version strings that the update-planner then
 //! compares against the current constraint.
 
+pub mod cocoapods;
 pub mod crates_io;
 pub mod docker_hub;
 pub mod github_tags;

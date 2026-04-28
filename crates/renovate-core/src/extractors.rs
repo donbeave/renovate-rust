@@ -5,6 +5,7 @@
 
 pub mod bundler;
 pub mod cargo;
+pub mod cocoapods;
 pub mod composer;
 pub mod docker_compose;
 pub mod dockerfile;
