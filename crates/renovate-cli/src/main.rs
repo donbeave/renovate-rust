@@ -722,6 +722,11 @@ async fn process_repo(
             10,
         )
         .await;
+        // Build a per-package version-timestamp map from the cache for matchCurrentAge.
+        let npm_version_ts: HashMap<String, HashMap<String, String>> = versions_cache
+            .iter()
+            .map(|(name, entry)| (name.clone(), entry.version_timestamps.clone()))
+            .collect();
         // Pass 3: build per-file reports.
         for (npm_file_path, deps) in npm_file_deps {
             let actionable: Vec<_> = deps
@@ -751,7 +756,7 @@ async fn process_repo(
             repo_report.files.push(output::FileReport {
                 path: npm_file_path.clone(),
                 manager: "npm".into(),
-                deps: build_dep_reports_npm(&deps, &actionable, &update_map),
+                deps: build_dep_reports_npm(&deps, &actionable, &update_map, &npm_version_ts),
             });
         }
     }
@@ -801,7 +806,14 @@ async fn process_repo(
                     repo_report.files.push(output::FileReport {
                         path: package_json_path.clone(),
                         manager: "bun".into(),
-                        deps: build_dep_reports_npm(&deps, &actionable, &update_map),
+                        // Bun uses concurrent fetch (no versions_cache here) so
+                        // current_version_timestamp is not available in this path.
+                        deps: build_dep_reports_npm(
+                            &deps,
+                            &actionable,
+                            &update_map,
+                            &HashMap::new(),
+                        ),
                     });
                 }
                 Err(err) => {
@@ -9000,6 +9012,9 @@ fn build_dep_reports_npm(
             renovate_core::datasources::npm::NpmError,
         >,
     >,
+    // Per-package release timestamps keyed by exact version string.
+    // Used to populate `current_version_timestamp` for `matchCurrentAge` rules.
+    version_timestamps: &HashMap<String, HashMap<String, String>>,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -9022,6 +9037,22 @@ fn build_dep_reports_npm(
         let release_timestamp = summary
             .and_then(|r| r.as_ref().ok())
             .and_then(|s| s.latest_timestamp.clone());
+        // Resolve current_version_timestamp for exact pins (e.g. "4.17.21").
+        // For ranges we don't know the installed version, so leave as None.
+        let current_version_timestamp = {
+            let stripped = dep.current_value.trim().trim_start_matches('=').trim();
+            // Heuristic: no range operators + starts with digit → exact pin.
+            let is_exact = stripped.starts_with(|c: char| c.is_ascii_digit())
+                && !stripped.contains(['^', '~', '>', '<', '*', ' ', ',']);
+            if is_exact {
+                version_timestamps
+                    .get(&dep.name)
+                    .and_then(|ts| ts.get(stripped))
+                    .cloned()
+            } else {
+                None
+            }
+        };
         let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_constraint.clone(),
@@ -9042,7 +9073,7 @@ fn build_dep_reports_npm(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
-            current_version_timestamp: None,
+            current_version_timestamp,
             name: dep.name.clone(),
             status,
         });
