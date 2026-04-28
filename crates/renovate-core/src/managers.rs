@@ -250,6 +250,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"\.tf$", r"\.tofu$"],
     },
     ManagerDef {
+        name: "terragrunt",
+        patterns: &[r"(^|/)terragrunt\.hcl$"],
+    },
+    ManagerDef {
         name: "tflint-plugin",
         patterns: &[r"\.tflint\.hcl$"],
     },

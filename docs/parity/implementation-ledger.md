@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0131  | 2026-04-28 | Terragrunt `terragrunt.hcl` extractor (GitHub Tags + Terraform Registry) | Complete | See below. |
 | 0130  | 2026-04-28 | Puppet `Puppetfile` extractor + Puppet Forge datasource | Complete | See below. |
 | 0129  | 2026-04-28 | OSGi feature model Maven bundle extractor (JSON5, GAV parsing) | Complete | See below. |
 | 0128  | 2026-04-28 | XcodeGen `project.yml` Swift Package extractor (GitHub Tags) | Complete | See below. |
@@ -3077,6 +3078,32 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0131 - Terragrunt `terragrunt.hcl` extractor
+
+### Renovate reference
+- `lib/modules/manager/terragrunt/extract.ts` + `modules.ts`
+- Pattern: `/(^|/)terragrunt\.hcl$/`
+- Datasources: GitHub Tags, Terraform Module Registry
+
+### What landed
+- `crates/renovate-core/src/extractors/terragrunt.rs` (new):
+  - Brace-counting scanner finds `terraform { source = "..." }` blocks.
+  - `analyse_source()` dispatches on source string:
+    - `github.com/owner/repo?ref=tag` → `TerragruntSource::GitHub`.
+    - `git::https://github.com/...?ref=tag` → `TerragruntSource::GitHub`.
+    - `git::https://other?ref=tag` → `TerragruntSource::Git`.
+    - `tfr://registry/org/name/cloud?version=x` → `TerragruntSource::TerraformRegistry`.
+    - 3-part registry paths → Terraform Registry (no version).
+    - Local (`../`, `./`) → skipped.
+  - 5 unit tests.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod terragrunt`.
+- `crates/renovate-core/src/managers.rs`: added `terragrunt` with `(^|/)terragrunt\.hcl$`.
+- `crates/renovate-cli/src/main.rs`: GitHub → `github_tags::fetch_latest_tag`; Terraform Registry → `terraform_datasource::fetch_updates_concurrent`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 937 passed
 
 ## Slice 0130 - Puppet `Puppetfile` extractor + Puppet Forge datasource
 
