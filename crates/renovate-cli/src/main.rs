@@ -9509,6 +9509,9 @@ fn build_dep_reports_pip(
         let release_timestamp = summary
             .and_then(|r| r.as_ref().ok())
             .and_then(|s| s.latest_timestamp.clone());
+        let current_version_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.current_version_timestamp.clone());
         let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
@@ -9529,7 +9532,7 @@ fn build_dep_reports_pip(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
-            current_version_timestamp: None,
+            current_version_timestamp,
             name: dep.name.clone(),
             status,
         });

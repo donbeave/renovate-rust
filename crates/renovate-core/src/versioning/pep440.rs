@@ -25,6 +25,9 @@ pub struct Pep440UpdateSummary {
     pub update_available: bool,
     /// ISO 8601 publish timestamp for the latest version, if available.
     pub latest_timestamp: Option<String>,
+    /// ISO 8601 publish timestamp for the **currently pinned** version.
+    /// Used for `matchCurrentAge` rule evaluation.
+    pub current_version_timestamp: Option<String>,
 }
 
 /// Produce a PEP 440 update summary.
@@ -47,7 +50,8 @@ pub fn pep440_update_summary(specifier: &str, latest_stable: Option<&str>) -> Pe
         current_specifier: specifier.to_owned(),
         latest,
         update_available,
-        latest_timestamp: None, // populated by datasource layer
+        latest_timestamp: None,          // populated by datasource layer
+        current_version_timestamp: None, // populated by datasource layer
     }
 }
 

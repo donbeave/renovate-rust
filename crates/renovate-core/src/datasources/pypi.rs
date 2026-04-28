@@ -205,6 +205,9 @@ pub async fn fetch_updates_concurrent(
             let summary = result.map(|entry| {
                 let mut s = pep440_update_summary(&specifier, Some(entry.latest.as_str()));
                 s.latest_timestamp = entry.latest_timestamp;
+                if let Some(pinned) = crate::versioning::pep440::exact_pin_version(&specifier) {
+                    s.current_version_timestamp = entry.version_timestamps.get(&pinned).cloned();
+                }
                 s
             });
             PypiDepUpdate { dep_name, summary }
@@ -286,6 +289,10 @@ pub async fn fetch_versions_batch(
 pub fn summary_from_cache(specifier: &str, entry: &PypiVersionsEntry) -> Pep440UpdateSummary {
     let mut s = pep440_update_summary(specifier, Some(entry.latest.as_str()));
     s.latest_timestamp = entry.latest_timestamp.clone();
+    // Populate current_version_timestamp for exact pins (e.g. "==1.2.3").
+    if let Some(pinned) = crate::versioning::pep440::exact_pin_version(specifier) {
+        s.current_version_timestamp = entry.version_timestamps.get(&pinned).cloned();
+    }
     s
 }
 
