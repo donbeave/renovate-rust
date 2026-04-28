@@ -3829,6 +3829,26 @@ async fn process_repo(
         }
     }
 
+    // ── Crow CI (.crow/*.yml) ─────────────────────────────────────────────────
+    for crow_path in manager_files(&detected, "crow") {
+        match client.get_raw_file(owner, repo, &crow_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::crow::extract(&raw.content);
+                tracing::debug!(repo = %repo_slug, file = %crow_path, total = deps.len(), "extracted crow-ci images");
+                repo_report.files.push(output::FileReport {
+                    path: crow_path.clone(),
+                    manager: "crow".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%crow_path, "crow CI file not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%crow_path, %err, "failed to fetch crow CI file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Vela CI (.vela.yml) ───────────────────────────────────────────────────
     for vela_path in manager_files(&detected, "velaci") {
         match client.get_raw_file(owner, repo, &vela_path).await {

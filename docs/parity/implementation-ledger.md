@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0125  | 2026-04-28 | Crow CI `.crow/*.yml` Docker image extractor | Complete | See below. |
 | 0124  | 2026-04-28 | Rancher Fleet extractor (Helm + GitRepo CRD dual-mode) | Complete | See below. |
 | 0123  | 2026-04-28 | HTML cdnjs extractor + CDNJS datasource | Complete | See below. |
 | 0122  | 2026-04-28 | Kotlin Script `*.main.kts` Maven dependency extractor | Complete | See below. |
@@ -3071,6 +3072,26 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0125 - Crow CI `.crow/*.yml` Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/crow/extract.ts`
+- Pattern: `/^\.crow(?:/[^/]+)?\.ya?ml$/`
+- Datasource: Docker
+
+### What landed
+- `crates/renovate-core/src/extractors/crow.rs` (new):
+  - Scans `pipeline:`, `steps:`, `clone:`, `services:` sections for `image:` values.
+  - Array items at indent=0 correctly remain in the current section.
+  - 7 unit tests covering pipeline, services, array-style steps, clone, variable refs.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod crow`.
+- `crates/renovate-core/src/managers.rs`: added `crow` with `^\.crow(?:/[^/]+)?\.ya?ml$`.
+- `crates/renovate-cli/src/main.rs`: pipeline block using `docker_hub_reports`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 899 passed
 
 ## Slice 0124 - Rancher Fleet extractor (Helm + GitRepo CRD dual-mode)
 
