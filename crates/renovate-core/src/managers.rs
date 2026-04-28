@@ -93,6 +93,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)batect(-bundle)?\.ya?ml$"],
     },
     ManagerDef {
+        name: "bicep",
+        patterns: &[r"\.bicep$"],
+    },
+    ManagerDef {
         name: "batect-wrapper",
         patterns: &[r"(^|/)batect$"],
     },

@@ -3687,6 +3687,58 @@ async fn process_repo(
         }
     }
 
+    // ── Azure Bicep (*.bicep) ─────────────────────────────────────────────────
+    for bicep_path in manager_files(&detected, "bicep") {
+        match client.get_raw_file(owner, repo, &bicep_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::bicep::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %bicep_path,
+                    total = deps.len(),
+                    "extracted bicep resource type deps"
+                );
+                let mut dep_reports = Vec::new();
+                for dep in &deps {
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let status = match renovate_core::datasources::azure_bicep::fetch_latest(
+                        http,
+                        &dep.dep_name,
+                        &dep.current_value,
+                    )
+                    .await
+                    {
+                        Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_value,
+                            latest: s.latest.unwrap_or_default(),
+                        },
+                        Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: bicep_path.clone(),
+                        manager: "bicep".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%bicep_path, "bicep file not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bicep_path, %err, "failed to fetch bicep file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Version files (.terraform-version, .go-version, .bun-version, etc.) ──
     for manager_name in [
         "terraform-version",

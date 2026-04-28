@@ -4,6 +4,7 @@
 //! output is a list of available version strings that the update-planner then
 //! compares against the current constraint.
 
+pub mod azure_bicep;
 pub mod azure_pipelines_tasks;
 pub mod bazel;
 pub mod cdnjs;

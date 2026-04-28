@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0136  | 2026-04-28 | Azure Bicep `.bicep` extractor + bicep-types-az datasource | Complete | See below. |
 | 0135  | 2026-04-28 | Perl `cpanfile` extractor + MetaCPAN datasource | Complete | See below. |
 | 0134  | 2026-04-28 | Bazel `MODULE.bazel` extractor + Bazel Central Registry datasource | Complete | See below. |
 | 0133  | 2026-04-28 | Python `setup.py` PyPI dependency extractor (balanced-bracket scanner) | Complete | See below. |
@@ -3082,6 +3083,30 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0136 - Azure Bicep `.bicep` extractor + bicep-types-az datasource
+
+### Renovate reference
+- `lib/modules/manager/bicep/extract.ts`
+- `lib/modules/datasource/azure-bicep-resource/index.ts`
+- Pattern: `/\.bicep$/`
+- Datasource: `raw.githubusercontent.com/Azure/bicep-types-az/main/generated/index.json`
+
+### What landed
+- `crates/renovate-core/src/datasources/azure_bicep.rs` (new):
+  - `fetch_latest(http, resource_type, current_value)`.
+  - `get_or_fetch_index()` — process-level `OnceLock` cache of the full index (avoids re-fetching per dep).
+  - Parses `resources` map (keys `type@version`) into `HashMap<type, Vec<version>>`.
+  - Latest = lexicographic max (ISO 8601 dates sort correctly).
+- `crates/renovate-core/src/extractors/bicep.rs` (new):
+  - `RESOURCE_RE` matches `resource Name 'Namespace.Provider/Type@version'` on non-comment lines.
+  - 5 unit tests.
+- Registered in `datasources.rs`, `extractors.rs`, `managers.rs` with `\.bicep$`.
+- `crates/renovate-cli/src/main.rs`: pipeline using `azure_bicep::fetch_latest`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 969 passed
 
 ## Slice 0135 - Perl `cpanfile` extractor + MetaCPAN datasource
 
