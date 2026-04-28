@@ -24,6 +24,9 @@ pub struct NpmUpdateSummary {
     /// `true` when the constraint is an exact pin and a newer compatible
     /// version exists in the registry.
     pub update_available: bool,
+    /// ISO 8601 publish timestamp for the `latest` version, if available.
+    /// Used to enforce `minimumReleaseAge` constraints.
+    pub latest_timestamp: Option<String>,
 }
 
 /// Parse an npm constraint string into a `VersionReq`.
@@ -97,6 +100,7 @@ pub fn npm_update_summary(
         latest,
         latest_compatible,
         update_available,
+        latest_timestamp: None, // populated by datasource layer from packument `time` field
     }
 }
 

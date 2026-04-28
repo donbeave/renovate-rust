@@ -764,6 +764,14 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `extends`.
     pub extends: Vec<String>,
 
+    // ── Release age / safety ─────────────────────────────────────────────────
+    /// Minimum time a release must have been published before it is eligible
+    /// for updates.  Format: `"3 days"`, `"1 week"`, `"2 months"`, etc.
+    /// `None` (default) means no age restriction.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `minimumReleaseAge`.
+    pub minimum_release_age: Option<String>,
+
     // ── Commit message customization ─────────────────────────────────────────
     /// Action verb in PR titles and commit messages.  Default `"Update"`.
     ///
@@ -1142,6 +1150,8 @@ impl RepoConfig {
             semantic_commits: Option<String>,
             #[serde(default)]
             extends: Vec<String>,
+            #[serde(rename = "minimumReleaseAge")]
+            minimum_release_age: Option<String>,
             #[serde(rename = "commitMessageAction", default = "default_commit_action")]
             commit_message_action: String,
             #[serde(rename = "commitMessagePrefix")]
@@ -1342,6 +1352,7 @@ impl RepoConfig {
                 preset_paths
             },
             extends: raw.extends,
+            minimum_release_age: raw.minimum_release_age,
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
             range_strategy: raw.range_strategy,
@@ -1628,6 +1639,7 @@ impl Default for RepoConfig {
             separate_minor_patch: false,
             semantic_commits: None,
             extends: Vec::new(),
+            minimum_release_age: None,
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
             range_strategy: "auto".to_owned(),

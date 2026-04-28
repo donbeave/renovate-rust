@@ -60,6 +60,10 @@ struct NpmPackument {
     versions: HashMap<String, NpmVersionEntry>,
     #[serde(rename = "dist-tags", default)]
     dist_tags: HashMap<String, String>,
+    /// Publish timestamps keyed by version string (ISO 8601).
+    /// Also contains `"created"` and `"modified"` meta-keys (ignored).
+    #[serde(default)]
+    time: HashMap<String, String>,
 }
 
 /// Encode a package name for use in the registry URL path.
@@ -96,7 +100,7 @@ pub async fn fetch_versions(
     http: &HttpClient,
     package_name: &str,
     registry: &str,
-) -> Result<(Vec<String>, Option<String>), NpmError> {
+) -> Result<NpmVersionsEntry, NpmError> {
     let encoded = encode_package_name(package_name);
     let url = format!("{}/{}", registry.trim_end_matches('/'), encoded);
 
@@ -113,6 +117,10 @@ pub async fn fetch_versions(
         serde_json::from_str(&body).map_err(|e| NpmError::Parse(e.to_string()))?;
 
     let latest_tag = packument.dist_tags.get("latest").cloned();
+    let latest_timestamp = latest_tag
+        .as_deref()
+        .and_then(|tag| packument.time.get(tag))
+        .cloned();
 
     let mut versions: Vec<String> = packument
         .versions
@@ -133,7 +141,11 @@ pub async fn fetch_versions(
         }
     });
 
-    Ok((versions, latest_tag))
+    Ok(NpmVersionsEntry {
+        versions,
+        latest_tag,
+        latest_timestamp,
+    })
 }
 
 /// Input descriptor for a single npm dependency in a batch fetch.
@@ -174,8 +186,11 @@ pub async fn fetch_updates_concurrent(
         set.spawn(async move {
             let _permit = sem.acquire_owned().await.expect("semaphore closed");
             let result = fetch_versions(&http, &dep_name, &registry).await;
-            let summary = result.map(|(versions, latest_tag)| {
-                npm_update_summary(&constraint, &versions, latest_tag.as_deref())
+            let summary = result.map(|entry| {
+                let mut s =
+                    npm_update_summary(&constraint, &entry.versions, entry.latest_tag.as_deref());
+                s.latest_timestamp = entry.latest_timestamp;
+                s
             });
             NpmDepUpdate { dep_name, summary }
         });
@@ -191,8 +206,17 @@ pub async fn fetch_updates_concurrent(
     results
 }
 
-/// Cached versions entry: (sorted versions oldest-first, latest dist-tag).
-pub type NpmVersionsEntry = (Vec<String>, Option<String>);
+/// Cached versions entry for a single npm package.
+#[derive(Debug, Clone)]
+pub struct NpmVersionsEntry {
+    /// Versions sorted oldest-first by semver.
+    pub versions: Vec<String>,
+    /// The `latest` dist-tag value, if present.
+    pub latest_tag: Option<String>,
+    /// ISO 8601 publish timestamp for the `latest` dist-tag version, if known.
+    /// Used for `minimumReleaseAge` checking.
+    pub latest_timestamp: Option<String>,
+}
 
 /// Fetch versions for a batch of unique package names concurrently.
 ///
@@ -243,8 +267,9 @@ pub async fn fetch_versions_batch(
 
 /// Compute an `NpmUpdateSummary` from a pre-fetched versions cache entry.
 pub fn summary_from_cache(constraint: &str, entry: &NpmVersionsEntry) -> NpmUpdateSummary {
-    let (versions, latest_tag) = entry;
-    npm_update_summary(constraint, versions, latest_tag.as_deref())
+    let mut s = npm_update_summary(constraint, &entry.versions, entry.latest_tag.as_deref());
+    s.latest_timestamp = entry.latest_timestamp.clone();
+    s
 }
 
 #[cfg(test)]
@@ -330,13 +355,13 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let (versions, latest) = fetch_versions(&http, "express", &server.uri())
+        let entry = fetch_versions(&http, "express", &server.uri())
             .await
             .unwrap();
 
         // 1.1.0 is deprecated — should be excluded
-        assert_eq!(versions, vec!["1.0.0", "1.2.0"]);
-        assert_eq!(latest.as_deref(), Some("1.2.0"));
+        assert_eq!(entry.versions, vec!["1.0.0", "1.2.0"]);
+        assert_eq!(entry.latest_tag.as_deref(), Some("1.2.0"));
     }
 
     #[tokio::test]
@@ -350,10 +375,10 @@ mod tests {
             .await;
 
         let http = HttpClient::new().unwrap();
-        let (versions, _) = fetch_versions(&http, "@types/node", &server.uri())
+        let entry = fetch_versions(&http, "@types/node", &server.uri())
             .await
             .unwrap();
-        assert_eq!(versions, vec!["20.0.0"]);
+        assert_eq!(entry.versions, vec!["20.0.0"]);
     }
 
     #[tokio::test]

@@ -23,7 +23,62 @@
 //! Both `0` and `7` map to Sunday (ISO week: Monday = 1, Sunday = 7) is
 //! normalised to 0.
 
-use chrono::{DateTime, Datelike, Timelike, Utc, Weekday};
+use chrono::{DateTime, Datelike, Duration, Timelike, Utc, Weekday};
+
+/// Parse a Renovate `minimumReleaseAge` string into a [`Duration`].
+///
+/// Supported units: `second`/`seconds`/`sec`/`secs`, `minute`/`minutes`/`min`/`mins`,
+/// `hour`/`hours`/`hr`/`hrs`, `day`/`days`, `week`/`weeks`, `month`/`months`.
+///
+/// A "month" is approximated as 30 days.  Returns `None` for unrecognised strings.
+///
+/// # Examples
+/// ```
+/// # use renovate_core::schedule::parse_age_duration;
+/// assert!(parse_age_duration("3 days").is_some());
+/// assert!(parse_age_duration("1 week").is_some());
+/// assert!(parse_age_duration("bogus").is_none());
+/// ```
+pub fn parse_age_duration(age: &str) -> Option<Duration> {
+    let age = age.trim().to_lowercase();
+    let mut parts = age.splitn(2, ' ');
+    let n: i64 = parts.next()?.parse().ok()?;
+    let unit = parts.next()?.trim();
+
+    match unit {
+        "second" | "seconds" | "sec" | "secs" => Duration::try_seconds(n),
+        "minute" | "minutes" | "min" | "mins" => Duration::try_minutes(n),
+        "hour" | "hours" | "hr" | "hrs" => Duration::try_hours(n),
+        "day" | "days" => Duration::try_days(n),
+        "week" | "weeks" => Duration::try_weeks(n),
+        "month" | "months" => Duration::try_days(n * 30),
+        _ => None,
+    }
+}
+
+/// Return `true` when `release_timestamp` satisfies the `minimum_release_age` constraint.
+///
+/// - If `minimum_release_age` is `None` → always `true` (no restriction).
+/// - If the timestamp is unparseable → `true` (fail-open).
+/// - Otherwise checks `Utc::now() - timestamp >= minimum_release_age`.
+pub fn is_within_release_age(
+    release_timestamp: Option<&str>,
+    minimum_release_age: Option<&str>,
+) -> bool {
+    let Some(min_age) = minimum_release_age else {
+        return true; // no age restriction
+    };
+    let Some(min_dur) = parse_age_duration(min_age) else {
+        return true; // unparseable constraint → fail-open
+    };
+    let Some(ts_str) = release_timestamp else {
+        return true; // no timestamp available → fail-open
+    };
+    let Ok(ts) = ts_str.parse::<DateTime<Utc>>() else {
+        return true; // unparseable timestamp → fail-open
+    };
+    Utc::now() - ts >= min_dur
+}
 
 /// Return `true` when any entry in `schedule` matches the current UTC time.
 ///
