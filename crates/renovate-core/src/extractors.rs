@@ -32,6 +32,7 @@ pub mod helm_values;
 pub mod helmfile;
 pub mod jenkins;
 pub mod kustomize;
+pub mod leiningen;
 pub mod maven;
 pub mod maven_wrapper;
 pub mod mint;

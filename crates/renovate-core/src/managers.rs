@@ -214,6 +214,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Cargo\.toml$"],
     },
     ManagerDef {
+        name: "leiningen",
+        patterns: &[r"(^|/)project\.clj$"],
+    },
+    ManagerDef {
         name: "npm",
         patterns: &[
             r"(^|/)package\.json$",

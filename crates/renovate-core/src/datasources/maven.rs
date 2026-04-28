@@ -20,6 +20,7 @@ use tokio::task::JoinSet;
 use crate::http::HttpClient;
 
 pub const MAVEN_CENTRAL_BASE: &str = "https://repo.maven.apache.org/maven2";
+pub const CLOJARS_BASE: &str = "https://clojars.org/repo";
 
 const MAVEN_CENTRAL: &str = MAVEN_CENTRAL_BASE;
 
@@ -54,17 +55,26 @@ pub enum MavenError {
     Xml(#[from] quick_xml::Error),
 }
 
-/// Fetch the latest stable version of a Maven artifact.
+/// Fetch the latest stable version of a Maven artifact from Maven Central.
 ///
 /// `dep_name` must be `groupId:artifactId` (e.g. `org.springframework:spring-core`).
 /// Returns `None` if no metadata can be found or no versions are listed.
 pub async fn fetch_latest(dep_name: &str, http: &HttpClient) -> Result<Option<String>, MavenError> {
+    fetch_latest_from_registry(dep_name, http, MAVEN_CENTRAL).await
+}
+
+/// Fetch the latest stable version from an arbitrary Maven-compatible registry.
+pub async fn fetch_latest_from_registry(
+    dep_name: &str,
+    http: &HttpClient,
+    registry: &str,
+) -> Result<Option<String>, MavenError> {
     let Some((group_id, artifact_id)) = dep_name.split_once(':') else {
         return Ok(None);
     };
 
     let group_path = group_id.replace('.', "/");
-    let url = format!("{MAVEN_CENTRAL}/{group_path}/{artifact_id}/maven-metadata.xml");
+    let url = format!("{registry}/{group_path}/{artifact_id}/maven-metadata.xml");
 
     let resp = http.get_retrying(&url).await?;
     if resp.status().as_u16() == 404 {

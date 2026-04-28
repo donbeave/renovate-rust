@@ -3548,6 +3548,109 @@ async fn process_repo(
         }
     }
 
+    // ── Leiningen (project.clj) ───────────────────────────────────────────────
+    for lein_path in manager_files(&detected, "leiningen") {
+        match client.get_raw_file(owner, repo, &lein_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::leiningen::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| !repo_cfg.is_dep_ignored(&d.dep_name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %lein_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted leiningen deps"
+                );
+                let dep_inputs: Vec<maven_datasource::MavenDepInput> = actionable
+                    .iter()
+                    .map(|d| maven_datasource::MavenDepInput {
+                        dep_name: d.dep_name.clone(),
+                        current_version: d.current_value.clone(),
+                    })
+                    .collect();
+                // Try Clojars first, then fall back to Maven Central for each dep.
+                let clojars_updates = {
+                    let mut results = Vec::new();
+                    for input in &dep_inputs {
+                        let latest = renovate_core::datasources::maven::fetch_latest_from_registry(
+                            &input.dep_name,
+                            http,
+                            renovate_core::datasources::maven::CLOJARS_BASE,
+                        )
+                        .await;
+                        results.push((
+                            input.dep_name.clone(),
+                            input.current_version.clone(),
+                            latest,
+                        ));
+                    }
+                    results
+                };
+                // Build update map: prefer Clojars result if found, else Maven Central.
+                let mut update_map: HashMap<String, Result<Option<String>, String>> =
+                    HashMap::new();
+                for (dep_name, current, clojars_result) in clojars_updates {
+                    match clojars_result {
+                        Ok(Some(v)) => {
+                            update_map.insert(dep_name, Ok(Some(v)));
+                        }
+                        Ok(None) => {
+                            // Not on Clojars, try Maven Central.
+                            let central =
+                                renovate_core::datasources::maven::fetch_latest_from_registry(
+                                    &dep_name,
+                                    http,
+                                    renovate_core::datasources::maven::MAVEN_CENTRAL_BASE,
+                                )
+                                .await;
+                            update_map.insert(dep_name, central.map_err(|e| e.to_string()));
+                        }
+                        Err(e) => {
+                            update_map.insert(dep_name, Err(e.to_string()));
+                        }
+                    }
+                    let _ = current;
+                }
+                let file_deps: Vec<output::DepReport> = deps
+                    .iter()
+                    .map(|dep| {
+                        let status = match update_map.get(&dep.dep_name) {
+                            Some(Ok(Some(latest))) if latest != &dep.current_value => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest: latest.clone(),
+                                }
+                            }
+                            Some(Ok(Some(latest))) => output::DepStatus::UpToDate {
+                                latest: Some(latest.clone()),
+                            },
+                            Some(Ok(None)) => output::DepStatus::UpToDate { latest: None },
+                            Some(Err(e)) => output::DepStatus::LookupError { message: e.clone() },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status,
+                        }
+                    })
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: lein_path.clone(),
+                    manager: "leiningen".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%lein_path, "project.clj not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%lein_path, %err, "failed to fetch project.clj");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 

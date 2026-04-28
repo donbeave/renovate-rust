@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0102  | 2026-04-28 | Leiningen `project.clj` extractor (Clojars + Maven Central) | Complete | See below. |
 | 0101  | 2026-04-28 | Jenkins plugins datasource (Update Center JSON) | Complete | See below. |
 | 0100  | 2026-04-28 | CircleCI orbs extractor + Orb GraphQL datasource | Complete | See below. |
 | 0099  | 2026-04-28 | GitLab CI `include:` project reference extractor | Complete | See below. |
@@ -2633,6 +2634,39 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 859 passed
 
+## Slice 0102 - Leiningen `project.clj` extractor (Clojars + Maven Central)
+
+### Renovate reference
+- `lib/modules/manager/leiningen/extract.ts` — `extractPackageFile`, `expandDepName`
+- `lib/modules/datasource/clojure/index.ts` — `ClojureDatasource` (Maven + Clojars)
+- Pattern: `/(^|/)project\\.clj$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/leiningen.rs` (new):
+  - `LeinDepType { Dependencies, ManagedDependencies, Plugins, PomPlugins, Coords }` enum.
+  - `LeinDep { dep_name, current_value, dep_type }` struct.
+  - `strip_comments(content)` — strips `;` Clojure line comments without touching string literals.
+  - `balanced_brackets(s)` — returns slice from `[` to matching `]`, respecting string contents.
+  - `expand_dep_name(symbol)` — `org.clojure/clojure` → `org.clojure:clojure`; `ring` → `ring:ring`.
+  - `extract(content)` — scans for `:dependencies`, `:managed-dependencies`, `:plugins`,
+    `:pom-plugins`, `:coords` keywords; extracts `[symbol "version"]` pairs from their vectors.
+  - 8 unit tests covering all dep types, bare names, comment stripping, empty file.
+- `crates/renovate-core/src/datasources/maven.rs`:
+  - Added `CLOJARS_BASE` constant.
+  - Added `fetch_latest_from_registry(dep_name, http, registry)` — same as `fetch_latest` but
+    accepts a registry base URL.
+- `crates/renovate-core/src/managers.rs`: `leiningen` manager with pattern `(^|/)project\.clj$`.
+- `crates/renovate-cli/src/main.rs`: Leiningen pipeline — tries Clojars first per dep, falls
+  back to Maven Central if not found on Clojars.
+
+### What was intentionally deferred
+- `~varName` version interpolation (runtime variable substitution).
+- Custom `:repositories` entries.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 867 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2646,6 +2680,5 @@ Pick whichever can be completed in one loop:
 5. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 6. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
 7. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
-8. **`mix` (Elixir) hex.pm datasource** — `mix.exs` version lookup.
-9. **`pub` (Flutter/Dart) pubspec.yaml** — already extracted, needs live datasource.
+8. **`ansible` playbooks** — Docker image and role version extraction.
 11. **Travis CI** `.travis.yml` Node.js version extraction.
