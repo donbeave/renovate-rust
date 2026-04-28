@@ -7507,6 +7507,62 @@ async fn process_repo(
         }
     }
 
+    // ── Hermit (bin/.*.pkg filenames) ────────────────────────────────────────
+    // Hermit encodes package name+version in hidden `.*.pkg` filenames inside
+    // `bin/`.  We skip fetching file content and parse the path list directly.
+    if !manager_files(&detected, "hermit").is_empty() {
+        let deps = renovate_core::extractors::hermit::extract_from_file_list(&filtered_files);
+        let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+        tracing::debug!(
+            repo = %repo_slug,
+            total = deps.len(), actionable = actionable.len(),
+            "extracted hermit package deps"
+        );
+        let mut dep_reports: Vec<output::DepReport> = Vec::new();
+        for dep in &deps {
+            if let Some(ref reason) = dep.skip_reason {
+                dep_reports.push(output::DepReport {
+                    name: dep.name.clone(),
+                    status: output::DepStatus::Skipped {
+                        reason: format!("{reason:?}").to_lowercase(),
+                    },
+                });
+                continue;
+            }
+            if repo_cfg.is_dep_ignored(&dep.name) {
+                continue;
+            }
+            let status = match renovate_core::datasources::hermit::fetch_latest(
+                &dep.name,
+                &dep.current_value,
+                renovate_core::datasources::hermit::DEFAULT_REGISTRY,
+                http,
+            )
+            .await
+            {
+                Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                    current: dep.current_value.clone(),
+                    latest: s.latest.unwrap_or_default(),
+                },
+                Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                Err(e) => output::DepStatus::LookupError {
+                    message: e.to_string(),
+                },
+            };
+            dep_reports.push(output::DepReport {
+                name: dep.name.clone(),
+                status,
+            });
+        }
+        if !dep_reports.is_empty() {
+            repo_report.files.push(output::FileReport {
+                path: "bin/".to_owned(),
+                manager: "hermit".into(),
+                deps: dep_reports,
+            });
+        }
+    }
+
     // ── helm-requirements (Helm v2 requirements.yaml) ─────────────────────────
     // Already handled by the helmv3 pipeline; register the manager name alias
     // so detection works, but skip files already captured by helmv3.

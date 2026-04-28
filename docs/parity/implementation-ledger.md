@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0158  | 2026-04-28 | Hermit package manager extractor + datasource (file-list based) | Complete | See below. |
 | 0157  | 2026-04-28 | `pip-compile` pipeline for `.in` source files | Complete | See below. |
 | 0155  | 2026-04-28 | `cdnurl` + stub registrations for `git-submodules`/`hermit`/`pip-compile`/`custom` | Complete | See below. |
 | 0154  | 2026-04-28 | PEP 723 Python inline script metadata extractor | Complete | See below. |
@@ -3103,6 +3104,30 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0158 - Hermit package manager extractor + datasource
+
+### Renovate reference
+- `lib/modules/manager/hermit/extract.ts`
+- `lib/modules/datasource/hermit/index.ts`
+- Registry: `https://github.com/cashapp/hermit-packages` (default)
+
+### What landed
+- `crates/renovate-core/src/extractors/hermit.rs` (new):
+  - `extract_from_file_list(files: &[String])` — scans file list for `bin/.*.pkg` files.
+  - Versioned: `bin/.git-2.47.0.pkg` → name=`git`, version=`2.47.0`
+  - Channel: `bin/.kubectl@stable.pkg` → name=`kubectl`, channel=`@stable`, ChannelPin skip.
+  - 5 unit tests.
+- `crates/renovate-core/src/datasources/hermit.rs` (new):
+  - Fetches `https://api.github.com/repos/{owner}/{repo}/releases/tags/index`
+  - Downloads `index.json` asset, finds package by name, returns versions + channels.
+  - `parse_github_repo()` helper extracts owner/repo from GitHub URL.
+- `main.rs`: Hermit pipeline uses `filtered_files` (already fetched) directly.
+  - No extra HTTP call for file content — filenames encode all needed info.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run --workspace --all-features`: 1135 passed
 
 ## Slice 0157 - `pip-compile` pipeline for `.in` source files
 

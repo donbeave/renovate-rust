@@ -25,6 +25,7 @@ pub mod gomod;
 pub mod gradle_version;
 pub mod hackage;
 pub mod helm;
+pub mod hermit;
 pub mod hex;
 pub mod jenkins_plugins;
 pub mod maven;
