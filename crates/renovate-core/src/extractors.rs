@@ -70,6 +70,7 @@ pub mod scalafmt;
 pub mod setup_cfg;
 pub mod spm;
 pub mod terraform;
+pub mod tflint_plugin;
 pub mod travis;
 pub mod velaci;
 pub mod vendir;

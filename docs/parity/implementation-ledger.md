@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0126  | 2026-04-28 | TFLint plugin `.tflint.hcl` extractor (GitHub Releases) | Complete | See below. |
 | 0125  | 2026-04-28 | Crow CI `.crow/*.yml` Docker image extractor | Complete | See below. |
 | 0124  | 2026-04-28 | Rancher Fleet extractor (Helm + GitRepo CRD dual-mode) | Complete | See below. |
 | 0123  | 2026-04-28 | HTML cdnjs extractor + CDNJS datasource | Complete | See below. |
@@ -3072,6 +3073,29 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0126 - TFLint plugin `.tflint.hcl` extractor
+
+### Renovate reference
+- `lib/modules/manager/tflint-plugin/extract.ts`
+- Pattern: `/\.tflint\.hcl$/`
+- Datasource: GitHub Releases
+
+### What landed
+- `crates/renovate-core/src/extractors/tflint_plugin.rs` (new):
+  - `TflintPluginDep { name, dep_name, current_value, skip_reason }`.
+  - `PLUGIN_BLOCK` regex matches `plugin "name" {` block starts.
+  - Brace-counting state machine extracts `source` and `version` from each block.
+  - `build_dep` parses `github.com/owner/repo` source URL → `dep_name`.
+  - Skip reasons: `MissingSource`, `UnsupportedDatasource`, `UnspecifiedVersion`.
+  - 5 unit tests.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod tflint_plugin`.
+- `crates/renovate-core/src/managers.rs`: added `tflint-plugin` with `\.tflint\.hcl$`.
+- `crates/renovate-cli/src/main.rs`: pipeline block using `github_releases_datasource`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 904 passed
 
 ## Slice 0125 - Crow CI `.crow/*.yml` Docker image extractor
 

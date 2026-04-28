@@ -1616,6 +1616,83 @@ async fn process_repo(
         }
     }
 
+    // ── TFLint plugin (.tflint.hcl) ──────────────────────────────────────────
+    for tflint_path in manager_files(&detected, "tflint-plugin") {
+        match client.get_raw_file(owner, repo, &tflint_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::tflint_plugin::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %tflint_path,
+                    total = deps.len(),
+                    "extracted tflint plugin deps"
+                );
+                let mut dep_reports = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let status = match github_releases_datasource::fetch_latest_release(
+                        &dep.dep_name,
+                        &gh_http,
+                        gh_api_base,
+                    )
+                    .await
+                    {
+                        Ok(Some(tag)) => {
+                            let stripped = tag.trim_start_matches('v');
+                            let s =
+                                renovate_core::versioning::semver_generic::semver_update_summary(
+                                    &dep.current_value,
+                                    Some(stripped),
+                                );
+                            if s.update_available {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest: stripped.to_owned(),
+                                }
+                            } else {
+                                output::DepStatus::UpToDate {
+                                    latest: Some(stripped.to_owned()),
+                                }
+                            }
+                        }
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: tflint_path.clone(),
+                        manager: "tflint-plugin".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%tflint_path, ".tflint.hcl not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%tflint_path, %err, "failed to fetch .tflint.hcl");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Helm (Chart.yaml / requirements.yaml) ────────────────────────────────
     for helm_file_path in manager_files(&detected, "helmv3") {
         match client.get_raw_file(owner, repo, &helm_file_path).await {
