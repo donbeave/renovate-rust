@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0182  | 2026-04-28 | `matchRegistryUrls` + `matchRepositories` packageRule matchers | Complete | See below. |
 | 0181  | 2026-04-28 | `matchCategories` + `matchBaseBranches` packageRule matchers | Complete | See below. |
 | 0180  | 2026-04-28 | `manager_categories()` lookup table (27 ecosystems) | Complete | See below. |
 | 0178  | 2026-04-28 | Add branchName to DepReport output | Complete | See below. |
@@ -4660,6 +4661,35 @@ managers should only run when explicitly listed in `enabledManagers`.
 3. **Remote preset resolution** — `github>org/repo//preset` fetching.
 4. **`currentDigest` for git-submodules** — GitHub Trees API.
 5. **More built-in preset expansion** — schedule presets, group:monorepos.
+
+## Slice 0182 — `matchRegistryUrls` + `matchRepositories` packageRule matchers
+
+### Renovate reference
+- `lib/util/package-rules/registryurls.ts` — `matchRegistryUrls`
+- `lib/util/package-rules/repositories.ts` — `matchRepositories`
+
+### What was implemented
+- `PackageRule::match_registry_urls: Vec<PackageNameMatcher>` + `has_registry_url_constraint` flag
+- `PackageRule::registry_url_matches(urls: &[&str]) -> bool` — any dep URL matches any pattern (ANY-of-any semantics), empty = matches all, no URLs with constraint = false
+- `PackageRule::match_repositories: Vec<PackageNameMatcher>` + `has_repository_constraint` flag
+- `PackageRule::repository_matches(repo: &str) -> bool` — single repo name matched against exact/regex/glob, empty = matches all
+- `RawPackageRule` serde fields for `matchRegistryUrls` and `matchRepositories`
+
+### Tests added (9 new)
+- `registry_url_repository_tests::match_registry_urls_exact_hit`
+- `registry_url_repository_tests::match_registry_urls_any_of_dep_urls`
+- `registry_url_repository_tests::match_registry_urls_glob`
+- `registry_url_repository_tests::match_registry_urls_empty_matches_all`
+- `registry_url_repository_tests::match_registry_urls_no_dep_urls_fails_when_constraint_set`
+- `registry_url_repository_tests::match_repositories_exact_hit`
+- `registry_url_repository_tests::match_repositories_glob`
+- `registry_url_repository_tests::match_repositories_regex`
+- `registry_url_repository_tests::match_repositories_empty_matches_all`
+
+### Deferred
+- Wiring `registry_url_matches` and `repository_matches` into the CLI dep-report filtering (requires registry URL and repository context through the pipeline)
+
+---
 
 ## Slice 0181 — `matchCategories` + `matchBaseBranches` packageRule matchers
 

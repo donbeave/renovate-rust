@@ -157,6 +157,28 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/util/package-rules/base-branch.ts`
     pub match_base_branches: Vec<String>,
+
+    // ── Registry URL constraint ───────────────────────────────────────────────
+    /// Registry URL matchers from `matchRegistryUrls`.
+    /// The dep must have at least one registry URL that matches any entry in this
+    /// list (OR across dep's registry URLs, AND with other matchers).
+    /// Supports the same exact/regex/glob syntax as `matchPackageNames`.
+    /// Empty = all registry URLs.
+    ///
+    /// Renovate reference: `lib/util/package-rules/registryurls.ts`
+    pub match_registry_urls: Vec<PackageNameMatcher>,
+    /// `true` when the raw config specified at least one `matchRegistryUrls` entry.
+    pub has_registry_url_constraint: bool,
+
+    // ── Repository constraint ─────────────────────────────────────────────────
+    /// Repository name matchers from `matchRepositories`.
+    /// The current repository name (e.g. `"owner/repo"`) must match at least one
+    /// entry.  Supports exact/regex/glob.  Empty = all repositories.
+    ///
+    /// Renovate reference: `lib/util/package-rules/repositories.ts`
+    pub match_repositories: Vec<PackageNameMatcher>,
+    /// `true` when the raw config specified at least one `matchRepositories` entry.
+    pub has_repository_constraint: bool,
 }
 
 /// A compiled entry from `matchPackageNames`.
@@ -329,6 +351,41 @@ impl PackageRule {
             Ok(req) => req.matches(&current_sv),
             Err(_) => true, // unparseable → don't restrict
         }
+    }
+
+    /// Return `true` when this rule's `matchRegistryUrls` condition matches `registry_urls`.
+    ///
+    /// `registry_urls` is the list of registry URLs configured for the dep.
+    /// The rule fires when ANY URL in `registry_urls` matches ANY pattern in
+    /// `match_registry_urls` (ANY-of-any semantics, mirroring Renovate).
+    /// If `matchRegistryUrls` is not set, returns `true` (matches all).
+    pub fn registry_url_matches(&self, registry_urls: &[&str]) -> bool {
+        if !self.has_registry_url_constraint {
+            return true;
+        }
+        // ANY dep registry URL matching ANY rule pattern → match.
+        registry_urls.iter().any(|url| {
+            self.match_registry_urls.iter().any(|m| match m {
+                PackageNameMatcher::Exact(s) => s == url,
+                PackageNameMatcher::Regex(re) => re.is_match(url),
+                PackageNameMatcher::Glob(gm) => gm.is_match(url),
+            })
+        })
+    }
+
+    /// Return `true` when this rule's `matchRepositories` condition matches `repository`.
+    ///
+    /// `repository` is the current repository name (e.g. `"owner/repo"`).
+    /// If `matchRepositories` is not set, returns `true` (matches all).
+    pub fn repository_matches(&self, repository: &str) -> bool {
+        if !self.has_repository_constraint {
+            return true;
+        }
+        self.match_repositories.iter().any(|m| match m {
+            PackageNameMatcher::Exact(s) => s == repository,
+            PackageNameMatcher::Regex(re) => re.is_match(repository),
+            PackageNameMatcher::Glob(gm) => gm.is_match(repository),
+        })
     }
 
     /// Return `true` when this rule's `matchCategories` condition matches `categories`.
@@ -795,6 +852,10 @@ impl RepoConfig {
             match_categories: Vec<String>,
             #[serde(rename = "matchBaseBranches", default)]
             match_base_branches: Vec<String>,
+            #[serde(rename = "matchRegistryUrls", default)]
+            match_registry_urls: Vec<String>,
+            #[serde(rename = "matchRepositories", default)]
+            match_repositories: Vec<String>,
         }
 
         #[derive(Deserialize)]
@@ -935,6 +996,20 @@ impl RepoConfig {
                     .map(|s| compile_name_matcher(s))
                     .collect();
 
+                let has_registry_url_constraint = !r.match_registry_urls.is_empty();
+                let match_registry_urls: Vec<PackageNameMatcher> = r
+                    .match_registry_urls
+                    .iter()
+                    .map(|s| compile_name_matcher(s))
+                    .collect();
+
+                let has_repository_constraint = !r.match_repositories.is_empty();
+                let match_repositories: Vec<PackageNameMatcher> = r
+                    .match_repositories
+                    .iter()
+                    .map(|s| compile_name_matcher(s))
+                    .collect();
+
                 PackageRule {
                     match_package_names,
                     match_package_patterns,
@@ -960,6 +1035,10 @@ impl RepoConfig {
                     labels: r.labels,
                     match_categories: r.match_categories,
                     match_base_branches: r.match_base_branches,
+                    match_registry_urls,
+                    has_registry_url_constraint,
+                    match_repositories,
+                    has_repository_constraint,
                 }
             })
             .collect();
@@ -2763,5 +2842,104 @@ mod categories_base_branch_tests {
         assert!(rule.base_branch_matches("main"));
         assert!(rule.base_branch_matches("develop"));
         assert!(!rule.base_branch_matches("feature/foo"));
+    }
+}
+
+#[cfg(test)]
+mod registry_url_repository_tests {
+    use super::*;
+
+    // ── matchRegistryUrls ────────────────────────────────────────────────────
+
+    #[test]
+    fn match_registry_urls_exact_hit() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRegistryUrls": ["https://registry.npmjs.org"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.registry_url_matches(&["https://registry.npmjs.org"]));
+        assert!(!rule.registry_url_matches(&["https://registry.corp.example"]));
+    }
+
+    #[test]
+    fn match_registry_urls_any_of_dep_urls() {
+        // Rule has one pattern; dep has two registry URLs — match if ANY URL matches.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRegistryUrls": ["https://registry.npmjs.org"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.registry_url_matches(&[
+            "https://registry.corp.example",
+            "https://registry.npmjs.org"
+        ]));
+    }
+
+    #[test]
+    fn match_registry_urls_glob() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRegistryUrls": ["https://registry.corp.**"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.registry_url_matches(&["https://registry.corp.example"]));
+        assert!(!rule.registry_url_matches(&["https://registry.npmjs.org"]));
+    }
+
+    #[test]
+    fn match_registry_urls_empty_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.registry_url_matches(&["https://registry.npmjs.org"]));
+        assert!(rule.registry_url_matches(&[]));
+    }
+
+    #[test]
+    fn match_registry_urls_no_dep_urls_fails_when_constraint_set() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRegistryUrls": ["https://registry.npmjs.org"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        // No registry URLs on the dep → no match.
+        assert!(!rule.registry_url_matches(&[]));
+    }
+
+    // ── matchRepositories ────────────────────────────────────────────────────
+
+    #[test]
+    fn match_repositories_exact_hit() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["owner/repo"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.repository_matches("owner/repo"));
+        assert!(!rule.repository_matches("owner/other"));
+    }
+
+    #[test]
+    fn match_repositories_glob() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["owner/**"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.repository_matches("owner/repo1"));
+        assert!(rule.repository_matches("owner/repo2"));
+        assert!(!rule.repository_matches("other/repo"));
+    }
+
+    #[test]
+    fn match_repositories_regex() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["/^owner/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.repository_matches("owner/repo1"));
+        assert!(!rule.repository_matches("other/repo"));
+    }
+
+    #[test]
+    fn match_repositories_empty_matches_all() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.repository_matches("owner/repo"));
+        assert!(rule.repository_matches("anyone/anything"));
     }
 }

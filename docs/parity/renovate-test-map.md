@@ -81,6 +81,14 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | — | `allowedVersions` semver range | `crates/renovate-core/src/repo_config.rs` | `allowed_versions_blocks_out_of_range_update` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `ignoreVersions` in packageRules | `crates/renovate-core/src/repo_config.rs` | `package_rule_ignore_versions_scoped_to_matched_package` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchPackagePrefixes` (deprecated) | `crates/renovate-core/src/repo_config.rs` | `match_package_prefixes_converted_to_glob` | ported |
+| `lib/util/package-rules/registryurls.ts` | — | `matchRegistryUrls` exact | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_registry_urls_exact_hit` | ported |
+| `lib/util/package-rules/registryurls.ts` | — | `matchRegistryUrls` any-of-dep-urls | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_registry_urls_any_of_dep_urls` | ported |
+| `lib/util/package-rules/registryurls.ts` | — | `matchRegistryUrls` glob | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_registry_urls_glob` | ported |
+| `lib/util/package-rules/registryurls.ts` | — | empty `matchRegistryUrls` matches all | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_registry_urls_empty_matches_all` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` exact | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_exact_hit` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` glob | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_glob` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` regex | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_regex` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | empty `matchRepositories` matches all | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_empty_matches_all` | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` exact hit | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_exact_hit` | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` any-of-many | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_any_of_many` | ported |
 | `lib/util/package-rules/categories.ts` | — | empty `matchCategories` matches all | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all` | ported |
