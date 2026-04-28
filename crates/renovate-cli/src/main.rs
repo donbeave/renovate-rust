@@ -7733,6 +7733,8 @@ async fn process_repo(
 
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
+    // Apply ignoreVersions (global + per-rule) across all collected file reports.
+    apply_version_ignore_to_report(&mut repo_report, &repo_cfg);
 
     (Some(repo_report), had_error)
 }
@@ -7780,6 +7782,29 @@ fn apply_update_blocking_to_report(
                             update_type
                         )
                         .to_lowercase(),
+                    };
+                }
+            }
+        }
+    }
+}
+
+/// Apply global `ignoreVersions` and per-rule `ignoreVersions` across all
+/// file reports.  For each `UpdateAvailable` dep whose proposed latest version
+/// is in the ignore list, the status is downgraded to `UpToDate` so the update
+/// is silently suppressed (consistent with Renovate's behaviour).
+fn apply_version_ignore_to_report(
+    report: &mut output::RepoReport,
+    repo_cfg: &renovate_core::repo_config::RepoConfig,
+) {
+    for file in &mut report.files {
+        let manager = file.manager.clone();
+        for dep in &mut file.deps {
+            if let output::DepStatus::UpdateAvailable { ref latest, .. } = dep.status {
+                if repo_cfg.is_version_ignored(&dep.name, &manager, latest) {
+                    let latest_str = latest.clone();
+                    dep.status = output::DepStatus::UpToDate {
+                        latest: Some(latest_str),
                     };
                 }
             }

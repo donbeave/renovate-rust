@@ -48,9 +48,11 @@ pub const CONFIG_FILE_CANDIDATES: &[&str] = &[
 /// is only checked when non-empty.
 #[derive(Debug, Clone)]
 pub struct PackageRule {
-    /// Exact package names that this rule applies to.
-    pub match_package_names: Vec<String>,
-    /// Compiled regex patterns for package names.
+    /// Package name matchers: exact strings, `/regex/` inline patterns, and
+    /// glob patterns (`@angular/**`).  Populated from `matchPackageNames` and
+    /// the deprecated `matchPackagePrefixes` (converted to `prefix**` globs).
+    pub match_package_names: Vec<PackageNameMatcher>,
+    /// Compiled regex patterns from the deprecated `matchPackagePatterns` field.
     pub match_package_patterns: Vec<Regex>,
     /// Limit this rule to specific managers (empty = all managers).
     pub match_managers: Vec<String>,
@@ -73,10 +75,30 @@ pub struct PackageRule {
     pub match_dep_types: Vec<String>,
     /// If `Some(false)`, matching packages are disabled (skipped).
     pub enabled: Option<bool>,
+    /// Version strings/ranges/regex patterns to ignore for packages matched
+    /// by this rule.  Mirrors `ignoreVersions` in Renovate packageRules.
+    pub ignore_versions: Vec<String>,
     /// `true` when the raw config specified at least one name or pattern
     /// constraint (even if all patterns failed to compile).  Prevents
     /// a fully-invalid `matchPackagePatterns` from silently matching all deps.
     pub has_name_constraint: bool,
+}
+
+/// A compiled entry from `matchPackageNames`.
+///
+/// Modern Renovate treats `matchPackageNames` as a mixed list that can contain:
+/// - Exact strings (`"express"`)
+/// - Inline `/regex/` patterns (`"/^@angular/"`)
+/// - Glob patterns (`"@aws-sdk/**"`)
+///
+/// The deprecated `matchPackagePrefixes` is converted to glob entries at parse
+/// time (`"prefix"` → `"prefix**"`).
+#[derive(Debug, Clone)]
+pub enum PackageNameMatcher {
+    Exact(String),
+    Regex(Regex),
+    /// Pre-compiled single-pattern glob matcher.
+    Glob(globset::GlobMatcher),
 }
 
 impl PackageRule {
@@ -88,11 +110,27 @@ impl PackageRule {
         if !self.has_name_constraint {
             return true;
         }
-        self.match_package_names.iter().any(|n| n == dep_name)
+        let name_match = self.match_package_names.iter().any(|m| match m {
+            PackageNameMatcher::Exact(s) => s == dep_name,
+            PackageNameMatcher::Regex(re) => re.is_match(dep_name),
+            PackageNameMatcher::Glob(gm) => gm.is_match(dep_name),
+        });
+        name_match
             || self
                 .match_package_patterns
                 .iter()
                 .any(|re| re.is_match(dep_name))
+    }
+
+    /// Return `true` if `proposed_version` matches any entry in this rule's
+    /// `ignoreVersions` list.
+    ///
+    /// Entries can be:
+    /// - `/regex/` — a regex pattern applied to the version string
+    /// - A semver range string — the proposed version must satisfy it to be ignored
+    /// - An exact version string — tested as both string equality and semver match
+    pub fn version_is_ignored(&self, proposed_version: &str) -> bool {
+        version_matches_ignore_list(proposed_version, &self.ignore_versions)
     }
 
     /// Return `true` when this rule's manager condition matches `manager`.
@@ -174,6 +212,10 @@ pub struct RepoConfig {
     /// When non-empty, only these manager names are active.
     /// Empty means all managers are active.
     pub enabled_managers: Vec<String>,
+    /// Global version ignore list.  If the proposed latest version matches any
+    /// entry, the update is suppressed for all packages.
+    /// Entries may be semver ranges (`"< 2.0"`) or `/regex/` patterns.
+    pub ignore_versions: Vec<String>,
 }
 
 /// Compiled path-ignore matcher built from a `RepoConfig`.
@@ -229,6 +271,74 @@ impl PathMatcher {
     }
 }
 
+// ── Free helpers ─────────────────────────────────────────────────────────────
+
+/// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
+///
+/// - `/pattern/` → inline regex
+/// - Contains `*`, `?`, or `[` → glob
+/// - Otherwise → exact string
+fn compile_name_matcher(s: &str) -> PackageNameMatcher {
+    // Inline regex: `/pattern/` or `/pattern/flags`
+    if s.starts_with('/') {
+        let inner = s.trim_start_matches('/');
+        let pat = inner
+            .trim_end_matches(|c: char| c.is_alphabetic())
+            .trim_end_matches('/');
+        if let Ok(re) = Regex::new(pat) {
+            return PackageNameMatcher::Regex(re);
+        }
+    }
+    // Glob: any glob metacharacter
+    if (s.contains('*') || s.contains('?') || s.contains('['))
+        && let Ok(g) = globset::Glob::new(s)
+    {
+        return PackageNameMatcher::Glob(g.compile_matcher());
+    }
+    PackageNameMatcher::Exact(s.to_owned())
+}
+
+/// Return `true` if `proposed_version` is matched by any entry in `ignore_list`.
+///
+/// Entries may be:
+/// - `/regex/` — version string is matched against the regex
+/// - A semver range (starts with `<`, `>`, `~`, `^`, `=`, `*`) — the version
+///   must satisfy the range to be ignored
+/// - An exact version string — checked via string equality only
+fn version_matches_ignore_list(proposed_version: &str, ignore_list: &[String]) -> bool {
+    use crate::versioning::semver_generic::parse_padded;
+    for entry in ignore_list {
+        let e = entry.trim();
+        // Regex pattern: `/pattern/`
+        if e.starts_with('/') {
+            let inner = e.trim_start_matches('/');
+            let pat = inner
+                .trim_end_matches(|c: char| c.is_alphabetic())
+                .trim_end_matches('/');
+            if let Ok(re) = Regex::new(pat) && re.is_match(proposed_version) {
+                return true;
+            }
+            continue;
+        }
+        // Exact string match (always checked first to avoid false positives from
+        // semver range parsing — "1.0.0-beta" as a VersionReq matches "1.0.0" stable).
+        if e == proposed_version {
+            return true;
+        }
+        // Semver range match: only try when the entry begins with a range operator.
+        // This avoids treating exact version strings like "1.0.0-beta" as ranges.
+        let first = e.chars().next().unwrap_or(' ');
+        if matches!(first, '<' | '>' | '~' | '^' | '=' | '*')
+            && let Ok(req) = semver::VersionReq::parse(e)
+            && let Some(sv) = parse_padded(proposed_version)
+            && req.matches(&sv)
+        {
+            return true;
+        }
+    }
+    false
+}
+
 impl RepoConfig {
     /// Parse the raw content of a `renovate.json` / `.renovaterc` file.
     ///
@@ -242,6 +352,9 @@ impl RepoConfig {
             match_package_names: Vec<String>,
             #[serde(rename = "matchPackagePatterns", default)]
             match_package_patterns: Vec<String>,
+            /// Deprecated; converted to glob patterns in `matchPackageNames`.
+            #[serde(rename = "matchPackagePrefixes", default)]
+            match_package_prefixes: Vec<String>,
             #[serde(rename = "matchManagers", default)]
             match_managers: Vec<String>,
             #[serde(rename = "matchUpdateTypes", default)]
@@ -254,6 +367,8 @@ impl RepoConfig {
             match_file_names: Vec<String>,
             #[serde(rename = "matchDepTypes", default)]
             match_dep_types: Vec<String>,
+            #[serde(rename = "ignoreVersions", default)]
+            ignore_versions: Vec<String>,
             enabled: Option<bool>,
         }
 
@@ -269,6 +384,8 @@ impl RepoConfig {
             package_rules: Vec<RawPackageRule>,
             #[serde(rename = "enabledManagers", default)]
             enabled_managers: Vec<String>,
+            #[serde(rename = "ignoreVersions", default)]
+            ignore_versions: Vec<String>,
         }
 
         fn default_true() -> bool {
@@ -283,51 +400,74 @@ impl RepoConfig {
             }
         };
 
-        let package_rules = raw
-            .package_rules
-            .into_iter()
-            .map(|r| {
-                let has_name_constraint =
-                    !r.match_package_names.is_empty() || !r.match_package_patterns.is_empty();
-                let match_package_patterns = r
-                    .match_package_patterns
-                    .iter()
-                    .filter_map(|pat| {
-                        Regex::new(pat)
-                            .map_err(|e| {
-                                tracing::warn!(
-                                    pattern = pat,
-                                    %e,
-                                    "invalid packageRules matchPackagePatterns regex"
-                                );
-                            })
-                            .ok()
-                    })
-                    .collect();
-                let match_update_types = r
-                    .match_update_types
-                    .iter()
-                    .filter_map(|s| match s.as_str() {
-                        "major" => Some(UpdateType::Major),
-                        "minor" => Some(UpdateType::Minor),
-                        "patch" => Some(UpdateType::Patch),
-                        _ => None,
-                    })
-                    .collect();
-                PackageRule {
-                    match_package_names: r.match_package_names,
-                    match_package_patterns,
-                    match_managers: r.match_managers,
-                    match_update_types,
-                    allowed_versions: r.allowed_versions,
-                    match_current_version: r.match_current_version,
-                    match_file_names: r.match_file_names,
-                    match_dep_types: r.match_dep_types,
-                    enabled: r.enabled,
-                    has_name_constraint,
-                }
-            })
-            .collect();
+        let package_rules =
+            raw.package_rules
+                .into_iter()
+                .map(|r| {
+                    let has_name_constraint = !r.match_package_names.is_empty()
+                        || !r.match_package_patterns.is_empty()
+                        || !r.match_package_prefixes.is_empty();
+
+                    // Compile each `matchPackageNames` entry as Exact / Regex / Glob.
+                    let mut match_package_names: Vec<PackageNameMatcher> = r
+                        .match_package_names
+                        .iter()
+                        .map(|s| compile_name_matcher(s))
+                        .collect();
+                    // Convert deprecated `matchPackagePrefixes` → glob `prefix**`.
+                    for prefix in &r.match_package_prefixes {
+                        let pattern = format!("{prefix}**");
+                        match globset::Glob::new(&pattern) {
+                            Ok(g) => match_package_names
+                                .push(PackageNameMatcher::Glob(g.compile_matcher())),
+                            Err(e) => tracing::warn!(
+                                prefix,
+                                %e,
+                                "invalid matchPackagePrefixes glob"
+                            ),
+                        }
+                    }
+
+                    let match_package_patterns = r
+                        .match_package_patterns
+                        .iter()
+                        .filter_map(|pat| {
+                            Regex::new(pat)
+                                .map_err(|e| {
+                                    tracing::warn!(
+                                        pattern = pat,
+                                        %e,
+                                        "invalid packageRules matchPackagePatterns regex"
+                                    );
+                                })
+                                .ok()
+                        })
+                        .collect();
+                    let match_update_types = r
+                        .match_update_types
+                        .iter()
+                        .filter_map(|s| match s.as_str() {
+                            "major" => Some(UpdateType::Major),
+                            "minor" => Some(UpdateType::Minor),
+                            "patch" => Some(UpdateType::Patch),
+                            _ => None,
+                        })
+                        .collect();
+                    PackageRule {
+                        match_package_names,
+                        match_package_patterns,
+                        match_managers: r.match_managers,
+                        match_update_types,
+                        allowed_versions: r.allowed_versions,
+                        match_current_version: r.match_current_version,
+                        match_file_names: r.match_file_names,
+                        match_dep_types: r.match_dep_types,
+                        ignore_versions: r.ignore_versions,
+                        enabled: r.enabled,
+                        has_name_constraint,
+                    }
+                })
+                .collect();
 
         Self {
             enabled: raw.enabled,
@@ -335,6 +475,7 @@ impl RepoConfig {
             ignore_paths: raw.ignore_paths,
             package_rules,
             enabled_managers: raw.enabled_managers,
+            ignore_versions: raw.ignore_versions,
         }
     }
 
@@ -468,6 +609,37 @@ impl RepoConfig {
             }
         })
     }
+
+    /// Return `true` when `proposed_version` should be ignored according to the
+    /// global `ignoreVersions` list or any matching packageRule's `ignoreVersions`.
+    ///
+    /// The global list is checked first; if it fires, per-rule checks are skipped.
+    /// For per-rule checks, the rule must match `name` and `manager` (and optionally
+    /// file path) before its `ignoreVersions` list is consulted.
+    pub fn is_version_ignored(&self, name: &str, manager: &str, proposed_version: &str) -> bool {
+        self.is_version_ignored_for_file(name, manager, proposed_version, "")
+    }
+
+    /// Like [`is_version_ignored`] but also checks `matchFileNames`.
+    pub fn is_version_ignored_for_file(
+        &self,
+        name: &str,
+        manager: &str,
+        proposed_version: &str,
+        file_path: &str,
+    ) -> bool {
+        // Global ignore list applies to all packages.
+        if version_matches_ignore_list(proposed_version, &self.ignore_versions) {
+            return true;
+        }
+        // Per-rule ignore list: only applies when the rule matches this dep.
+        self.package_rules.iter().any(|rule| {
+            rule.name_matches(name)
+                && rule.manager_matches(manager)
+                && rule.file_name_matches(file_path)
+                && rule.version_is_ignored(proposed_version)
+        })
+    }
 }
 
 impl Default for RepoConfig {
@@ -478,6 +650,7 @@ impl Default for RepoConfig {
             ignore_paths: Vec::new(),
             package_rules: Vec::new(),
             enabled_managers: Vec::new(),
+            ignore_versions: Vec::new(),
         }
     }
 }
@@ -783,7 +956,9 @@ mod tests {
             }"#,
         );
         assert_eq!(c.package_rules.len(), 1);
-        assert_eq!(c.package_rules[0].match_package_names, vec!["lodash"]);
+        assert_eq!(c.package_rules[0].match_package_names.len(), 1);
+        assert!(c.package_rules[0].name_matches("lodash"));
+        assert!(!c.package_rules[0].name_matches("react"));
         assert_eq!(c.package_rules[0].enabled, Some(false));
     }
 
@@ -1132,5 +1307,98 @@ mod tests {
             "cargo",
             "other/Cargo.toml"
         ));
+    }
+
+    // ── matchPackageNames glob / regex / prefix tests ─────────────────────────
+
+    #[test]
+    fn match_package_names_glob_pattern() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["@angular/**"], "enabled": false}]}"#,
+        );
+        assert!(c.is_dep_ignored("@angular/core"));
+        assert!(c.is_dep_ignored("@angular/router"));
+        assert!(!c.is_dep_ignored("@react/core"));
+        assert!(!c.is_dep_ignored("express"));
+    }
+
+    #[test]
+    fn match_package_names_inline_regex() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["/^@aws-sdk/"], "enabled": false}]}"#,
+        );
+        assert!(c.is_dep_ignored("@aws-sdk/client-s3"));
+        assert!(c.is_dep_ignored("@aws-sdk/credential-providers"));
+        assert!(!c.is_dep_ignored("@gcp/storage"));
+    }
+
+    #[test]
+    fn match_package_prefixes_converted_to_glob() {
+        // `matchPackagePrefixes` is a deprecated field — converted to `prefix**` globs.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackagePrefixes": ["@angular/"], "enabled": false}]}"#,
+        );
+        assert!(c.is_dep_ignored("@angular/core"));
+        assert!(c.is_dep_ignored("@angular/router"));
+        assert!(!c.is_dep_ignored("@react/core"));
+    }
+
+    #[test]
+    fn match_package_prefixes_multiple_prefixes() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackagePrefixes": ["@angular/", "@ngrx/"], "enabled": false}]}"#,
+        );
+        assert!(c.is_dep_ignored("@angular/core"));
+        assert!(c.is_dep_ignored("@ngrx/store"));
+        assert!(!c.is_dep_ignored("@react/core"));
+    }
+
+    // ── ignoreVersions tests ──────────────────────────────────────────────────
+
+    #[test]
+    fn global_ignore_versions_exact_match() {
+        let c = RepoConfig::parse(r#"{"ignoreVersions": ["1.0.0-beta"]}"#);
+        assert!(c.is_version_ignored("lodash", "npm", "1.0.0-beta"));
+        assert!(!c.is_version_ignored("lodash", "npm", "1.0.0"));
+    }
+
+    #[test]
+    fn global_ignore_versions_semver_range() {
+        let c = RepoConfig::parse(r#"{"ignoreVersions": ["< 2.0"]}"#);
+        assert!(c.is_version_ignored("any", "npm", "1.9.9"));
+        assert!(!c.is_version_ignored("any", "npm", "2.0.0"));
+        assert!(!c.is_version_ignored("any", "npm", "3.0.0"));
+    }
+
+    #[test]
+    fn global_ignore_versions_regex() {
+        let c = RepoConfig::parse(r#"{"ignoreVersions": ["/beta/", "/rc/"]}"#);
+        assert!(c.is_version_ignored("pkg", "npm", "2.0.0-beta.1"));
+        assert!(c.is_version_ignored("pkg", "npm", "2.0.0-rc.1"));
+        assert!(!c.is_version_ignored("pkg", "npm", "2.0.0"));
+    }
+
+    #[test]
+    fn package_rule_ignore_versions_scoped_to_matched_package() {
+        let c = RepoConfig::parse(
+            r#"{
+            "packageRules": [{
+                "matchPackageNames": ["lodash"],
+                "ignoreVersions": ["< 4.0"]
+            }]
+        }"#,
+        );
+        // lodash below 4.0 should be ignored
+        assert!(c.is_version_ignored("lodash", "npm", "3.9.0"));
+        // lodash at 4.0 is fine
+        assert!(!c.is_version_ignored("lodash", "npm", "4.0.0"));
+        // moment is unaffected by this rule
+        assert!(!c.is_version_ignored("moment", "npm", "2.0.0"));
+    }
+
+    #[test]
+    fn empty_ignore_versions_ignores_nothing() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(!c.is_version_ignored("any", "npm", "99.0.0-rc.1"));
     }
 }
