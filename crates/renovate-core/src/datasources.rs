@@ -27,6 +27,7 @@ pub mod nuget;
 pub mod orb;
 pub mod packagist;
 pub mod pub_dev;
+pub mod puppet_forge;
 pub mod pypi;
 pub mod rubygems;
 pub mod terraform;

@@ -342,6 +342,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.pre-commit-config\.ya?ml$"],
     },
     ManagerDef {
+        name: "puppet",
+        patterns: &[r"(^|/)Puppetfile$"],
+    },
+    ManagerDef {
         name: "ansible-galaxy",
         patterns: &[r"(^|/)(galaxy|requirements)(\.ansible)?\.ya?ml$"],
     },

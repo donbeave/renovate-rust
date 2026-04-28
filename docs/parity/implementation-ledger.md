@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0130  | 2026-04-28 | Puppet `Puppetfile` extractor + Puppet Forge datasource | Complete | See below. |
 | 0129  | 2026-04-28 | OSGi feature model Maven bundle extractor (JSON5, GAV parsing) | Complete | See below. |
 | 0128  | 2026-04-28 | XcodeGen `project.yml` Swift Package extractor (GitHub Tags) | Complete | See below. |
 | 0127  | 2026-04-28 | Typst `.typ` package extractor + Typst registry datasource | Complete | See below. |
@@ -3076,6 +3077,36 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0130 - Puppet `Puppetfile` extractor + Puppet Forge datasource
+
+### Renovate reference
+- `lib/modules/manager/puppet/extract.ts` + `puppetfile-parser.ts`
+- `lib/modules/datasource/puppet-forge/index.ts`
+- Pattern: `/(^|/)Puppetfile$/`
+- Datasources: PuppetForgeDatasource, GithubTagsDatasource
+
+### What landed
+- `crates/renovate-core/src/datasources/puppet_forge.rs` (new):
+  - `fetch_latest(http, module_name, current_value, registry_url)`.
+  - `GET {forge}/v3/modules/{author}-{name}?exclude_fields=current_release`.
+  - Normalizes `author/name` → `author-name` for API slug.
+  - Finds latest by semver comparison over `releases[]`.
+- `crates/renovate-core/src/extractors/puppet.rs` (new):
+  - Line-by-line parser: `FORGE_RE` for forge URL changes, `MOD_START_RE` for mod declarations, `SYMBOL_KV_RE` for `:key => 'value'` Ruby symbol hashes.
+  - Handles multi-line `mod` declarations ending with `,`.
+  - Forge modules → `PuppetSource::PuppetForge { forge_url }`.
+  - Git modules with GitHub URL → `PuppetSource::GitHub(repo)`.
+  - Git modules without tag → skipped.
+  - 7 unit tests.
+- `crates/renovate-core/src/datasources.rs`: added `pub mod puppet_forge`.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod puppet`.
+- `crates/renovate-core/src/managers.rs`: added `puppet` with `(^|/)Puppetfile$`.
+- `crates/renovate-cli/src/main.rs`: routes Forge → `puppet_forge::fetch_latest`; GitHub → `github_tags::fetch_latest_tag`; generic git → skipped.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 932 passed
 
 ## Slice 0129 - OSGi feature model Maven bundle extractor
 

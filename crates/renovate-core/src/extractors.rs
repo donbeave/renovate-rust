@@ -65,6 +65,7 @@ pub mod pipfile;
 pub mod poetry;
 pub mod pre_commit;
 pub mod pubspec;
+pub mod puppet;
 pub mod quadlet;
 pub mod sbt;
 pub mod scalafmt;
