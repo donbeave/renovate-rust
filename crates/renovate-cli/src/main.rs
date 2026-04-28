@@ -175,9 +175,11 @@ async fn main() -> ExitCode {
     // requests throughout the entire run.
     let http = HttpClient::new().expect("failed to create HTTP client");
     let use_color = output::should_use_color();
+    let quiet = cli.quiet;
 
     let sem = Arc::new(Semaphore::new(REPO_CONCURRENCY));
     let mut set: JoinSet<(String, Option<output::RepoReport>, bool)> = JoinSet::new();
+    let mut run_stats = output::RunStats::default();
 
     for repo_slug in &config.repositories {
         let client = client.clone();
@@ -197,7 +199,8 @@ async fn main() -> ExitCode {
     while let Some(outcome) = set.join_next().await {
         match outcome {
             Ok((_slug, Some(report), repo_had_error)) => {
-                output::print_report(&report, use_color);
+                run_stats.add_report(&report);
+                output::print_report(&report, use_color, quiet);
                 had_error |= repo_had_error;
             }
             Ok((_slug, None, repo_had_error)) => {
@@ -209,6 +212,8 @@ async fn main() -> ExitCode {
             }
         }
     }
+
+    output::print_run_summary(&run_stats, use_color);
 
     if had_error {
         ExitCode::from(1)

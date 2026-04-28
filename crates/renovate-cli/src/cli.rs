@@ -182,6 +182,12 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_REGISTRY_ALIASES")]
     pub(crate) registry_aliases: Option<String>,
 
+    // ── Output control ───────────────────────────────────────────────────────
+    /// Suppress per-dependency listing; show only per-file and run summaries.
+    /// Env: RENOVATE_QUIET.
+    #[arg(long, short = 'q', env = "RENOVATE_QUIET", default_value_t = false)]
+    pub(crate) quiet: bool,
+
     // ── Repositories ─────────────────────────────────────────────────────────
     /// Repositories to process (positional). Later slices dispatch these
     /// into the worker pipeline.

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0028  | 2026-04-28 | Run summary totals + `--quiet` mode            | Complete | See below. |
 | 0027  | 2026-04-28 | Maven pom.xml extractor + Maven Central datasource | Complete | See below. |
 | 0026  | 2026-04-28 | pyproject.toml (PEP 621/735) extractor + pep621 manager | Complete | See below. |
 | 0025  | 2026-04-28 | Per-repo renovate.json config parsing + application | Complete | See below. |
@@ -48,6 +49,46 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0028 - Run summary totals + `--quiet` mode
+
+### Renovate reference
+- Output UX improvement (no direct Renovate equivalent — Renovate logs via
+  structured JSON, this adds an interactive summary footer).
+- `--quiet` / `RENOVATE_QUIET` env var.
+
+### What landed
+- `crates/renovate-cli/src/cli.rs` — `--quiet` / `-q` / `RENOVATE_QUIET` flag
+  (default `false`). Suppresses per-dependency listing; shows file-level
+  summary lines only.
+- `crates/renovate-cli/src/output.rs`:
+  - `RunStats` struct with `repos_processed`, `repos_with_updates`,
+    `repos_up_to_date`, `repos_with_errors`, `total_deps`, `total_updates`,
+    `total_skipped`, `total_errors`.
+  - `RunStats::add_report(&mut self, report: &RepoReport)` — accumulates counts
+    from one repo's report.
+  - `print_run_summary(stats: &RunStats, use_color: bool)` — prints a double-rule
+    footer with repository and dep aggregate counts after the run.
+  - `print_report` gains a `quiet: bool` parameter; when set, the per-dep
+    `format_dep` lines are skipped while file-level counts remain.
+  - 6 new tests: quiet smoke, stats accumulation over 1 and 2 repos, empty run
+    summary, summary-with-updates smoke.
+- `crates/renovate-cli/src/main.rs` — `quiet = cli.quiet` wired; `RunStats`
+  accumulated across all repo outcomes; `print_run_summary` called after the
+  join loop.
+- `crates/renovate-cli/src/config_builder.rs` — `quiet: false` added to `Cli`
+  constructor in tests.
+
+### What was intentionally deferred
+- `--quiet` propagation into `GlobalConfig` (not needed until quiet affects
+  non-output behavior).
+- JSON/machine-readable output mode (`--output-format=json`).
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (299 passed)
 
 ## Slice 0027 - Maven pom.xml extractor + Maven Central datasource
 

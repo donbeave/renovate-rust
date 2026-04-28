@@ -158,6 +158,7 @@ mod tests {
             allow_command_templating: None,
             host_rules: None,
             registry_aliases: None,
+            quiet: false,
             repositories: Vec::new(),
         };
         mutate(&mut cli);

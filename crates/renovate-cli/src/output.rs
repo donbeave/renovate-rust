@@ -51,6 +51,60 @@ pub(crate) struct RepoReport {
     pub files: Vec<FileReport>,
 }
 
+/// Aggregate statistics for a complete run across all repositories.
+#[derive(Debug, Clone, Default)]
+pub(crate) struct RunStats {
+    /// Total repositories processed.
+    pub repos_processed: usize,
+    /// Repos with at least one update available.
+    pub repos_with_updates: usize,
+    /// Repos where everything is up to date.
+    pub repos_up_to_date: usize,
+    /// Repos where a platform or extraction error occurred.
+    pub repos_with_errors: usize,
+    /// Total dep records found across all files.
+    pub total_deps: usize,
+    /// Dep records with an update available.
+    pub total_updates: usize,
+    /// Dep records skipped (workspace, local path, git URL, etc.).
+    pub total_skipped: usize,
+    /// Dep records where the registry lookup failed.
+    pub total_errors: usize,
+}
+
+impl RunStats {
+    /// Merge statistics from one repository's report into the running totals.
+    pub(crate) fn add_report(&mut self, report: &RepoReport) {
+        self.repos_processed += 1;
+        let mut repo_updates = 0usize;
+        let mut repo_errors = 0usize;
+        for file in &report.files {
+            self.total_deps += file.deps.len();
+            for dep in &file.deps {
+                match &dep.status {
+                    DepStatus::UpdateAvailable { .. } => {
+                        self.total_updates += 1;
+                        repo_updates += 1;
+                    }
+                    DepStatus::Skipped { .. } => self.total_skipped += 1,
+                    DepStatus::LookupError { .. } => {
+                        self.total_errors += 1;
+                        repo_errors += 1;
+                    }
+                    DepStatus::UpToDate { .. } => {}
+                }
+            }
+        }
+        if repo_errors > 0 {
+            self.repos_with_errors += 1;
+        } else if repo_updates > 0 {
+            self.repos_with_updates += 1;
+        } else {
+            self.repos_up_to_date += 1;
+        }
+    }
+}
+
 // ── Rendering ─────────────────────────────────────────────────────────────────
 
 /// Return `true` when colored output should be used.
@@ -67,9 +121,9 @@ pub(crate) fn should_use_color() -> bool {
 
 /// Print a repository update report to stdout.
 ///
-/// Pass `use_color = should_use_color()` for the default terminal behavior,
-/// or `false` to force plain text (e.g. in tests or when piped).
-pub(crate) fn print_report(report: &RepoReport, use_color: bool) {
+/// - `use_color`: pass `should_use_color()` for TTY-aware coloring.
+/// - `quiet`: suppress per-dependency listing; show file-level summaries only.
+pub(crate) fn print_report(report: &RepoReport, use_color: bool, quiet: bool) {
     let bar = "─".repeat(60);
     println!("{}", dim(&bar, use_color));
     println!(" Repository: {}", bold(&report.repo_slug, use_color));
@@ -107,11 +161,70 @@ pub(crate) fn print_report(report: &RepoReport, use_color: bool) {
         let counts = format_file_counts(updates, skipped, errors, use_color);
         println!("{file_label}  {counts}");
 
-        for dep in &file.deps {
-            println!("    {}", format_dep(dep, use_color));
+        if !quiet {
+            for dep in &file.deps {
+                println!("    {}", format_dep(dep, use_color));
+            }
         }
         println!();
     }
+}
+
+/// Print the aggregate run summary after all repositories have been processed.
+pub(crate) fn print_run_summary(stats: &RunStats, use_color: bool) {
+    let bar = "═".repeat(60);
+    println!("{}", dim(&bar, use_color));
+
+    let repos_line = format!(
+        "  {} repositories processed",
+        bold(&stats.repos_processed.to_string(), use_color)
+    );
+    println!("{repos_line}");
+
+    if stats.repos_processed > 0 {
+        if stats.repos_with_updates > 0 {
+            println!(
+                "    {} {} with updates available",
+                yellow("↑", use_color),
+                stats.repos_with_updates,
+            );
+        }
+        if stats.repos_up_to_date > 0 {
+            println!(
+                "    {} {} up to date",
+                green("✓", use_color),
+                stats.repos_up_to_date,
+            );
+        }
+        if stats.repos_with_errors > 0 {
+            println!(
+                "    {} {} with errors",
+                red("✗", use_color),
+                stats.repos_with_errors,
+            );
+        }
+    }
+
+    if stats.total_deps > 0 {
+        let dep_summary = format!(
+            "  {} dependencies  ·  {} updates  ·  {} skipped  ·  {} errors",
+            bold(&stats.total_deps.to_string(), use_color),
+            if stats.total_updates > 0 {
+                yellow(&stats.total_updates.to_string(), use_color)
+            } else {
+                stats.total_updates.to_string()
+            },
+            dim(&stats.total_skipped.to_string(), use_color),
+            if stats.total_errors > 0 {
+                red(&stats.total_errors.to_string(), use_color)
+            } else {
+                stats.total_errors.to_string()
+            },
+        );
+        println!("{dep_summary}");
+    }
+
+    println!("{}", dim(&bar, use_color));
 }
 
 fn format_file_counts(updates: usize, skipped: usize, errors: usize, use_color: bool) -> String {
@@ -260,10 +373,14 @@ mod tests {
 
     #[test]
     fn print_report_plain_text_runs_without_panic() {
-        // Basic smoke test: report renders without panicking in no-color mode.
         let report = make_report();
-        // Capture via redirect isn't trivial; just verify no panic.
-        print_report(&report, false);
+        print_report(&report, false, false);
+    }
+
+    #[test]
+    fn print_report_quiet_runs_without_panic() {
+        let report = make_report();
+        print_report(&report, false, true);
     }
 
     #[test]
@@ -272,7 +389,54 @@ mod tests {
             repo_slug: "owner/empty".into(),
             files: vec![],
         };
-        print_report(&report, false);
+        print_report(&report, false, false);
+    }
+
+    #[test]
+    fn print_run_summary_empty_run() {
+        let stats = RunStats::default();
+        print_run_summary(&stats, false);
+    }
+
+    #[test]
+    fn run_stats_add_report_accumulates() {
+        let mut stats = RunStats::default();
+        let report = make_report();
+        stats.add_report(&report);
+        assert_eq!(stats.repos_processed, 1);
+        assert_eq!(stats.total_deps, 4); // lodash + express + local-lib + serde
+        assert_eq!(stats.total_updates, 1); // lodash
+        assert_eq!(stats.total_skipped, 1); // local-lib
+        assert_eq!(stats.repos_with_updates, 1);
+    }
+
+    #[test]
+    fn run_stats_two_repos() {
+        let mut stats = RunStats::default();
+        stats.add_report(&make_report());
+        stats.add_report(&RepoReport {
+            repo_slug: "owner/clean".into(),
+            files: vec![FileReport {
+                path: "Cargo.toml".into(),
+                manager: "cargo".into(),
+                deps: vec![DepReport {
+                    name: "tokio".into(),
+                    status: DepStatus::UpToDate {
+                        latest: Some("1.0.0".into()),
+                    },
+                }],
+            }],
+        });
+        assert_eq!(stats.repos_processed, 2);
+        assert_eq!(stats.repos_with_updates, 1);
+        assert_eq!(stats.repos_up_to_date, 1);
+    }
+
+    #[test]
+    fn print_run_summary_with_updates() {
+        let mut stats = RunStats::default();
+        stats.add_report(&make_report());
+        print_run_summary(&stats, false);
     }
 
     #[test]
