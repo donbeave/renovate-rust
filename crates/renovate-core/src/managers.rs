@@ -85,6 +85,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)tasks/[^/]+\.ya?ml$"],
     },
     ManagerDef {
+        name: "batect",
+        patterns: &[r"(^|/)batect(-bundle)?\.ya?ml$"],
+    },
+    ManagerDef {
         name: "devbox",
         patterns: &[r"(^|/)devbox\.json$"],
     },

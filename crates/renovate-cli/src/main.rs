@@ -3976,6 +3976,31 @@ async fn process_repo(
         }
     }
 
+    // ── Batect (batect.yml / batect-bundle.yml) ───────────────────────────────
+    for batect_path in manager_files(&detected, "batect") {
+        match client.get_raw_file(owner, repo, &batect_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::batect::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %batect_path,
+                    total = deps.len(), "extracted batect images"
+                );
+                repo_report.files.push(output::FileReport {
+                    path: batect_path.clone(),
+                    manager: "batect".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%batect_path, "batect config not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%batect_path, %err, "failed to fetch batect config");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Ansible task files (tasks/*.yml) ─────────────────────────────────────
     for ansible_path in manager_files(&detected, "ansible") {
         match client.get_raw_file(owner, repo, &ansible_path).await {

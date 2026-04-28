@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0113  | 2026-04-28 | Batect `batect.yml` Docker image extractor | Complete | See below. |
 | 0112  | 2026-04-28 | Meteor `package.js` `Npm.depends()` extractor (npm datasource) | Complete | See below. |
 | 0111  | 2026-04-28 | Cake `.cake` build script extractor (NuGet datasource) | Complete | See below. |
 | 0110  | 2026-04-28 | Conan `conanfile.txt`/`.py` extractor + Conan Center datasource | Complete | See below. |
@@ -2926,6 +2927,28 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 914 passed
 
+## Slice 0113 - Batect `batect.yml` Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/batect/extract.ts`
+- Patterns: `/(^|/)batect(-bundle)?\.ya?ml$/`
+- Datasource: Docker Hub
+
+### What landed
+- `crates/renovate-core/src/extractors/batect.rs` (new):
+  - `extract(content)` — scans `containers:` block for `image:` keys; stops at next top-level key.
+  - Delegates to `classify_image_ref` for Docker image parsing.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `batect` manager with batect.yml pattern.
+- `crates/renovate-cli/src/main.rs`: Batect pipeline using `docker_hub_reports` helper.
+
+### What was intentionally deferred
+- `include[*]` with `type: git` (git bundle includes, requires git-tags datasource with custom URLs).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 919 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2938,6 +2961,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`vendir`** — Vendir `vendir.yml` sync bundle version tracking.
+8. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.
+9. **`cross`** — Rust Cross `Cross.toml` Docker image extraction.
 7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
 8. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.
 9. **`batect`** — Batect `batect.yml` Docker image extraction.
