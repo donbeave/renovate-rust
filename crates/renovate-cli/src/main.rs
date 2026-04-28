@@ -2997,6 +2997,78 @@ async fn process_repo(
         }
     }
 
+    // ── GitLab CI includes (.gitlab-ci.yml include: project refs) ────────────
+    for glci_inc_path in manager_files(&detected, "gitlabci-include") {
+        match client.get_raw_file(owner, repo, &glci_inc_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::gitlabci_include::extract(&raw.content);
+                if !deps.is_empty() {
+                    tracing::debug!(
+                        repo = %repo_slug, file = %glci_inc_path,
+                        total = deps.len(), "extracted gitlab-ci include refs"
+                    );
+                    let gl_inputs: Vec<
+                        renovate_core::datasources::gitlab_tags::GitlabTagsDepInput,
+                    > = deps
+                        .iter()
+                        .map(
+                            |d| renovate_core::datasources::gitlab_tags::GitlabTagsDepInput {
+                                dep_name: d.project.clone(),
+                                current_value: d.ref_value.clone(),
+                            },
+                        )
+                        .collect();
+                    let gl_updates =
+                        renovate_core::datasources::gitlab_tags::fetch_updates_concurrent(
+                            http,
+                            &gl_inputs,
+                            renovate_core::datasources::gitlab_tags::GITLAB_API,
+                            8,
+                        )
+                        .await;
+                    let update_map: HashMap<_, _> = gl_updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    let file_deps: Vec<output::DepReport> = deps
+                        .iter()
+                        .map(|dep| {
+                            let status = match update_map.get(&dep.project) {
+                                Some(Ok(s)) if s.update_available => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.ref_value.clone(),
+                                        latest: s.latest.clone().unwrap_or_default(),
+                                    }
+                                }
+                                Some(Ok(s)) => output::DepStatus::UpToDate {
+                                    latest: s.latest.clone(),
+                                },
+                                Some(Err(e)) => output::DepStatus::LookupError {
+                                    message: e.to_string(),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
+                            };
+                            output::DepReport {
+                                name: dep.project.clone(),
+                                status,
+                            }
+                        })
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: glci_inc_path.clone(),
+                        manager: "gitlabci-include".into(),
+                        deps: file_deps,
+                    });
+                }
+            }
+            Ok(None) => {}
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%glci_inc_path, %err, "failed to fetch .gitlab-ci.yml (includes)");
+                had_error = true;
+            }
+        }
+    }
+
     // ── CircleCI (.circleci/config.yml) ──────────────────────────────────────
     for cci_path in manager_files(&detected, "circleci") {
         match client.get_raw_file(owner, repo, &cci_path).await {

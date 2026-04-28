@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0099  | 2026-04-28 | GitLab CI `include:` project reference extractor | Complete | See below. |
 | 0098  | 2026-04-28 | Travis CI `.travis.yml` Node.js version extractor | Complete | See below. |
 | 0097  | 2026-04-28 | Bazelisk `.bazelversion` version file support | Complete | See below. |
 | 0096  | 2026-04-28 | Scalafmt `.scalafmt.conf` version extractor | Complete | See below. |
@@ -2548,6 +2549,33 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 794 passed
 
+## Slice 0099 - GitLab CI `include:` project reference extractor
+
+### Renovate reference
+- `lib/modules/manager/gitlabci-include/extract.ts`
+- Pattern: `/(^|/)\.gitlab-ci\.ya?ml$/` (shared with `gitlabci`)
+- Datasource: GitLab Tags (`datasources::gitlab_tags`)
+
+### What landed
+- `crates/renovate-core/src/extractors/gitlabci_include.rs`:
+  - `GitlabIncludeDep { project, ref_value }` struct.
+  - `extract(content)` — line-scanner that detects the `include:` block, iterates list items,
+    collects `project:` + `ref:` pairs; flushes each item when a new `- ` list bullet is seen.
+  - Inline comment stripping (`# ...`), `include:` block exit on next top-level key.
+  - 5 unit tests: single ref, multiple refs, ref missing → skip, non-include blocks ignored, empty.
+- `crates/renovate-core/src/managers.rs`: `gitlabci-include` manager entry (same pattern as `gitlabci`).
+- `crates/renovate-core/src/extractors.rs`: `pub mod gitlabci_include`.
+- `crates/renovate-cli/src/main.rs`: `gitlabci-include` pipeline — builds `GitlabTagsDepInput`
+  (with `dep_name` = project path), calls `fetch_updates_concurrent`, emits `DepReport` per dep.
+
+### What was intentionally deferred
+- `include: component:` style references (GitLab CI components, different datasource).
+- `include: remote:` and `include: template:` forms.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 853 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2558,10 +2586,10 @@ Pick whichever can be completed in one loop:
 2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
-5. **GitLab CI `include:` project components**: component dependency version tracking.
-6. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
-7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
-8. **Jenkins plugins datasource** (Jenkins Update Center JSON).
-9. **Travis CI** `.travis.yml` Node.js version extraction.
-10. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
+5. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
+6. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
+7. **Jenkins plugins datasource** (Jenkins Update Center JSON).
+8. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
+9. **CircleCI orbs** — `orbs:` block version extraction and registry datasource.
+10. **Buildkite plugin** extractor — `plugins:` block with `owner/name#version` format.
 11. **Travis CI** `.travis.yml` Node.js version extraction.

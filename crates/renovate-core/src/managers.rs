@@ -286,6 +286,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.gitlab-ci\.ya?ml$"],
     },
     ManagerDef {
+        name: "gitlabci-include",
+        patterns: &[r"(^|/)\.gitlab-ci\.ya?ml$"],
+    },
+    ManagerDef {
         name: "circleci",
         patterns: &[r"(^|/)\.circleci/.+\.ya?ml$"],
     },
