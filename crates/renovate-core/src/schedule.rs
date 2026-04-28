@@ -54,9 +54,15 @@ pub fn is_within_schedule_at(schedule: &[String], now: DateTime<Utc>) -> bool {
         Weekday::Sun => 0,
     };
 
-    schedule
-        .iter()
-        .any(|entry| cron_matches(entry, hour, dom, month, weekday))
+    schedule.iter().any(|entry| {
+        // Try cron first (5 space-separated fields starting with a digit or `*`).
+        // Fall back to later.js text format.
+        if looks_like_cron(entry) {
+            cron_matches(entry, hour, dom, month, weekday)
+        } else {
+            text_schedule_matches(entry, hour, dom, weekday)
+        }
+    })
 }
 
 /// Return `true` if `cron_expr` matches the given time components.
@@ -128,9 +134,217 @@ fn cron_part_matches(part: &str, value: u8, min: u8, max: u8) -> bool {
 
 /// Weekday field matching with Sunday=0 AND Sunday=7 aliasing.
 fn cron_field_matches_weekday(field: &str, weekday: u8) -> bool {
-    // Normalise: if any part says "7" treat it as "0" (Sunday).
     let normalised = field.replace('7', "0");
     cron_field_matches(&normalised, weekday, 0, 6)
+}
+
+/// Heuristic: does `entry` look like a 5-field cron expression?
+/// Cron entries start with `*` or a digit and contain at least 4 spaces.
+fn looks_like_cron(entry: &str) -> bool {
+    let first = entry.chars().next().unwrap_or(' ');
+    (first == '*' || first.is_ascii_digit()) && entry.split_whitespace().count() == 5
+}
+
+/// Parse an AM/PM time token like `"5am"`, `"4pm"`, `"4:00am"`, `"11:00pm"`.
+/// Returns the 24-hour value, or `None` if unparseable.
+fn parse_ampm_hour(tok: &str) -> Option<u8> {
+    let tok = tok.trim().to_lowercase();
+    let (digits, is_pm) = if let Some(s) = tok.strip_suffix("pm") {
+        (s, true)
+    } else if let Some(s) = tok.strip_suffix("am") {
+        (s, false)
+    } else {
+        return None;
+    };
+    // Strip optional ":00" or ":30" minute part.
+    let hour_part = digits.split(':').next().unwrap_or(digits);
+    let h: u8 = hour_part.parse().ok()?;
+    if is_pm {
+        // 12pm = noon = 12; 1pm = 13; ...
+        Some(if h == 12 { 12 } else { h + 12 })
+    } else {
+        // 12am = midnight = 0; 1am = 1; ...
+        Some(if h == 12 { 0 } else { h })
+    }
+}
+
+/// Return the bitmask of weekday values (0=Sun .. 6=Sat) described by `name`.
+/// Handles individual day names and "weekday"/"weekend" keywords.
+fn parse_day_names(text: &str) -> Option<Vec<u8>> {
+    let t = text.trim().to_lowercase();
+    match t.as_str() {
+        "sunday" | "sun" => Some(vec![0]),
+        "monday" | "mon" => Some(vec![1]),
+        "tuesday" | "tue" => Some(vec![2]),
+        "wednesday" | "wed" => Some(vec![3]),
+        "thursday" | "thu" => Some(vec![4]),
+        "friday" | "fri" => Some(vec![5]),
+        "saturday" | "sat" => Some(vec![6]),
+        "weekday" | "weekdays" => Some(vec![1, 2, 3, 4, 5]),
+        "weekend" | "weekends" => Some(vec![0, 6]),
+        _ => None,
+    }
+}
+
+/// Evaluate a later.js text schedule entry against the given time components.
+///
+/// Supports the most common Renovate patterns:
+/// - `"before Xam"` / `"before X:00am"` — current hour < X
+/// - `"after Xpm"` — current hour >= X
+/// - `"between Xam and Ypm"` — X <= hour < Y
+/// - `"every weekday"` / `"every weekend"` — day of week
+/// - `"on Monday"`, `"on friday and saturday"` — specific days
+/// - `"before X on weekdays"`, `"after X every weekday"` — combined
+/// - `"on the first day of the month"` — dom == 1
+///
+/// Unrecognised entries return `true` (fail-open: don't block on unknown schedules).
+///
+/// Renovate reference: `lib/workers/repository/update/branch/schedule.ts` —
+/// `later.parse.text()` driven schedule evaluation.
+pub fn text_schedule_matches(entry: &str, hour: u8, dom: u8, weekday: u8) -> bool {
+    let s = entry.trim().to_lowercase();
+
+    // "at any time" / "" — always match
+    if s.is_empty() || s == "at any time" {
+        return true;
+    }
+
+    // "on the first day of the month"
+    if s.contains("first day of the month") {
+        let time_ok = if let Some(before_part) = extract_before_time(&s) {
+            hour < before_part
+        } else {
+            true
+        };
+        return dom == 1 && time_ok;
+    }
+
+    // Parse time constraints and day constraints separately.
+    let (time_ok, has_time) = evaluate_time_constraint(&s, hour);
+    let (day_ok, has_day) = evaluate_day_constraint(&s, weekday);
+
+    if !has_time && !has_day {
+        // Unrecognised format → fail-open (treat as always matching)
+        return true;
+    }
+
+    // Both must pass if both are present; otherwise only the present one matters.
+    match (has_time, has_day) {
+        (true, true) => time_ok && day_ok,
+        (true, false) => time_ok,
+        (false, true) => day_ok,
+        (false, false) => true,
+    }
+}
+
+/// Extract the hour limit from a `"before Xam"` clause in `s`, if present.
+fn extract_before_time(s: &str) -> Option<u8> {
+    let idx = s.find("before ")?;
+    let rest = &s[idx + "before ".len()..];
+    let tok: &str = rest.split_whitespace().next()?;
+    parse_ampm_hour(tok)
+}
+
+/// Extract the hour limit from an `"after Xpm"` clause.
+fn extract_after_time(s: &str) -> Option<u8> {
+    let idx = s.find("after ")?;
+    let rest = &s[idx + "after ".len()..];
+    let tok: &str = rest.split_whitespace().next()?;
+    parse_ampm_hour(tok)
+}
+
+/// Evaluate the time part of a text schedule.
+/// Returns `(passes, has_time_constraint)`.
+fn evaluate_time_constraint(s: &str, hour: u8) -> (bool, bool) {
+    let has_before = s.contains("before ");
+    let has_after = s.contains("after ");
+    let has_between = s.contains("between ");
+
+    if has_between {
+        // "between Xam and Ypm"
+        if let Some(idx) = s.find("between ") {
+            let rest = &s[idx + "between ".len()..];
+            let parts: Vec<&str> = rest.split(" and ").collect();
+            if parts.len() >= 2 {
+                let lo = parts[0].split_whitespace().next().and_then(parse_ampm_hour);
+                let hi = parts[1].split_whitespace().next().and_then(parse_ampm_hour);
+                if let (Some(lo), Some(hi)) = (lo, hi) {
+                    return (hour >= lo && hour < hi, true);
+                }
+            }
+        }
+    }
+
+    if has_before && has_after {
+        // "after Xpm and before Yam" or vice versa — overnight window
+        let before_h = extract_before_time(s);
+        let after_h = extract_after_time(s);
+        if let (Some(bh), Some(ah)) = (before_h, after_h) {
+            // If after > before: e.g. after 22 and before 6 → hour >= 22 OR hour < 6
+            if ah > bh {
+                return (hour >= ah || hour < bh, true);
+            }
+            return (hour < bh && hour >= ah, true);
+        }
+    }
+
+    if let (true, Some(h)) = (has_before, extract_before_time(s)) {
+        return (hour < h, true);
+    }
+    if let (true, Some(h)) = (has_after, extract_after_time(s)) {
+        return (hour >= h, true);
+    }
+
+    (true, false)
+}
+
+/// Evaluate the day-of-week part of a text schedule.
+/// Returns `(passes, has_day_constraint)`.
+fn evaluate_day_constraint(s: &str, weekday: u8) -> (bool, bool) {
+    // "every weekday" / "every weekend"
+    if s.contains("every weekday") || s.contains("on every weekday") {
+        return ((1..=5).contains(&weekday), true);
+    }
+    if s.contains("every weekend") {
+        return (weekday == 0 || weekday == 6, true);
+    }
+
+    // "on Monday", "on friday and saturday", "on monday and tuesday"
+    let on_pos = s
+        .find(" on ")
+        .map(|i| i + 4)
+        .or_else(|| if s.starts_with("on ") { Some(3) } else { None });
+
+    if let Some(start) = on_pos {
+        let day_part = &s[start..];
+        // Strip any trailing time-related words.
+        let day_part = day_part
+            .split(" before ")
+            .next()
+            .unwrap_or(day_part)
+            .split(" after ")
+            .next()
+            .unwrap_or(day_part);
+
+        // Check special keyword "the first day of the month" — handled elsewhere.
+        if day_part.starts_with("the first day") {
+            return (true, false); // Handled by DOM check above.
+        }
+
+        // Collect allowed weekdays from "day1 and day2" list.
+        let mut allowed: Vec<u8> = Vec::new();
+        for token in day_part.split(" and ") {
+            let token = token.trim();
+            if let Some(days) = parse_day_names(token) {
+                allowed.extend(days);
+            }
+        }
+        if !allowed.is_empty() {
+            return (allowed.contains(&weekday), true);
+        }
+    }
+
+    (true, false)
 }
 
 #[cfg(test)]
@@ -261,13 +475,102 @@ mod tests {
 
     #[test]
     fn multiple_entries_any_match_wins() {
-        // First entry: hours 0-3; second entry: Saturdays.
         let sched = vec!["* 0-3 * * *".to_owned(), "* * * * 6".to_owned()];
-        // 2024-04-15 10am Monday — neither matches
         assert!(!is_within_schedule_at(&sched, utc(2024, 4, 15, 10)));
-        // 2024-04-15 2am Monday — first matches
         assert!(is_within_schedule_at(&sched, utc(2024, 4, 15, 2)));
-        // 2024-04-20 Saturday 10am — second matches
         assert!(is_within_schedule_at(&sched, utc(2024, 4, 20, 10)));
+    }
+
+    // ── text_schedule_matches ─────────────────────────────────────────────────
+    // Reference mock time: 2017-06-30 10:50am UTC (Friday, weekday 5)
+
+    fn fri_10am() -> DateTime<Utc> {
+        utc(2017, 6, 30, 10)
+    }
+
+    #[test]
+    fn text_before_4pm_true() {
+        // "before 4:00pm" at 10am → true
+        let sched = vec!["before 4:00pm".to_owned()];
+        assert!(is_within_schedule_at(&sched, fri_10am()));
+    }
+
+    #[test]
+    fn text_before_4am_false() {
+        // "before 4:00am" at 10am → false
+        let sched = vec!["before 4:00am".to_owned()];
+        assert!(!is_within_schedule_at(&sched, fri_10am()));
+    }
+
+    #[test]
+    fn text_after_4pm_false() {
+        // "after 4:00pm" at 10am → false
+        let sched = vec!["after 4:00pm".to_owned()];
+        assert!(!is_within_schedule_at(&sched, fri_10am()));
+    }
+
+    #[test]
+    fn text_every_weekday_true() {
+        // "every weekday" on Friday → true
+        let sched = vec!["every weekday".to_owned()];
+        assert!(is_within_schedule_at(&sched, fri_10am()));
+    }
+
+    #[test]
+    fn text_every_weekend_false() {
+        // "every weekend" on Friday → false
+        let sched = vec!["every weekend".to_owned()];
+        assert!(!is_within_schedule_at(&sched, fri_10am()));
+        // Saturday → true
+        assert!(is_within_schedule_at(&sched, utc(2024, 4, 20, 10)));
+    }
+
+    #[test]
+    fn text_on_friday_and_saturday_true() {
+        let sched = vec!["on friday and saturday".to_owned()];
+        assert!(is_within_schedule_at(&sched, fri_10am())); // Friday
+        assert!(!is_within_schedule_at(&sched, utc(2024, 4, 15, 10))); // Monday
+    }
+
+    #[test]
+    fn text_on_monday_and_tuesday_false() {
+        let sched = vec!["on monday and tuesday".to_owned()];
+        assert!(!is_within_schedule_at(&sched, fri_10am())); // Friday
+    }
+
+    #[test]
+    fn text_before_11am_every_weekday_true() {
+        // "before 11:00am every weekday" at 10am Friday → true
+        let sched = vec!["before 11:00am every weekday".to_owned()];
+        assert!(is_within_schedule_at(&sched, fri_10am()));
+        // At noon same day → false (time fails)
+        assert!(!is_within_schedule_at(&sched, utc(2017, 6, 30, 12)));
+        // Before 11am on Saturday → false (day fails)
+        assert!(!is_within_schedule_at(&sched, utc(2024, 4, 20, 9)));
+    }
+
+    #[test]
+    fn text_first_day_of_month_true() {
+        let sched = vec!["before 11am on the first day of the month".to_owned()];
+        // First of a month at 9am
+        assert!(is_within_schedule_at(&sched, utc(2017, 10, 1, 9)));
+        // First of a month but after 11am
+        assert!(!is_within_schedule_at(&sched, utc(2017, 10, 1, 12)));
+        // Not the first day
+        assert!(!is_within_schedule_at(&sched, fri_10am()));
+    }
+
+    #[test]
+    fn text_after_11pm_and_before_6am_overnight() {
+        // "after 11pm and before 6am" — overnight window
+        let sched = vec!["after 11pm and before 6am".to_owned()];
+        // Midnight → in window
+        assert!(is_within_schedule_at(&sched, utc(2024, 4, 15, 0)));
+        // 5am → in window
+        assert!(is_within_schedule_at(&sched, utc(2024, 4, 15, 5)));
+        // 11pm → in window
+        assert!(is_within_schedule_at(&sched, utc(2024, 4, 15, 23)));
+        // 10am → out of window
+        assert!(!is_within_schedule_at(&sched, fri_10am()));
     }
 }
