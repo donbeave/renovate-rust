@@ -1515,6 +1515,37 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 469 passed
 
+## Slice 0048 - `setup.cfg` extractor (Setuptools declarative config)
+
+### Renovate reference
+- `lib/modules/manager/setup-cfg/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/setup-cfg/index.ts` — pattern `/(^|/)setup\\.cfg$/`
+- Datasource: PyPI (reuses existing `datasources/pypi.rs`)
+- Versioning: pep440 (reuses existing `versioning/pep440.rs`)
+
+### What landed
+- `crates/renovate-core/src/extractors/setup_cfg.rs` — INI-format scanner:
+  - Tracks current `[section]` and `record =` key to classify dep type:
+    - `[options]` + `install_requires` → `install`
+    - `[options]` + `setup_requires` → `setup`
+    - `[options]` + `tests_require` → `test`
+    - `[options.extras_require]` + any key → `extra`
+  - Handles multi-line continuation (indented lines after `key =`).
+  - Strips inline comments (`# …`) and environment markers (`; python_version …`).
+  - Skip reasons: `NoVersion` (unconstrained dep), `GitSource` (`git+…`).
+  - Normalizes package names to lowercase with `-` (PEP 503).
+- Manager pattern `setup-cfg` with `(^|/)setup\\.cfg$` added to `managers.rs`.
+- Pipeline wired in `main.rs`: extracts deps → PyPI lookups → `setup-cfg` FileReport.
+
+### What was intentionally deferred
+- `setup.py` parsing (imperative Python — no reliable static parser).
+- `install_requires` declared as a list in `setup.py` calls.
+- `-r file.txt` sub-requirement references within setup.cfg.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 478 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1526,3 +1557,5 @@ Pick whichever can be completed in one loop:
 3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
 4. **NuGet versioning**: NuGet uses SemVer2 with 4-part version numbers — add a
    nuget versioning module for accurate `1.2.3.4` comparisons.
+5. **`pre-commit` hooks**: parse `.pre-commit-config.yaml` and look up hook
+   revisions via GitHub/GitLab tags datasource.

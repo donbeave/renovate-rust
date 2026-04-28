@@ -52,6 +52,7 @@ use renovate_core::extractors::nuget as nuget_extractor;
 use renovate_core::extractors::pep621 as pep621_extractor;
 use renovate_core::extractors::pip as pip_extractor;
 use renovate_core::extractors::poetry as poetry_extractor;
+use renovate_core::extractors::setup_cfg as setup_cfg_extractor;
 use renovate_core::extractors::pubspec as pubspec_extractor;
 use renovate_core::extractors::terraform as terraform_extractor;
 use renovate_core::http::HttpClient;
@@ -636,6 +637,54 @@ async fn process_repo(
             }
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%pip_file_path, %err, "failed to fetch requirements.txt");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── setup.cfg ────────────────────────────────────────────────────────────
+    for setup_cfg_path in manager_files(&detected, "setup-cfg") {
+        match client.get_raw_file(owner, repo, &setup_cfg_path).await {
+            Ok(Some(raw)) => {
+                let deps = setup_cfg_extractor::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.name))
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %setup_cfg_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted setup.cfg dependencies"
+                );
+                let dep_inputs: Vec<pypi_datasource::PypiDepInput> = actionable
+                    .iter()
+                    .map(|d| pypi_datasource::PypiDepInput {
+                        dep_name: d.name.clone(),
+                        specifier: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = pypi_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    pypi_datasource::PYPI_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: setup_cfg_path.clone(),
+                    manager: "setup-cfg".into(),
+                    deps: build_dep_reports_setup_cfg(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%setup_cfg_path, "setup.cfg not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%setup_cfg_path, %err, "failed to fetch setup.cfg");
                 had_error = true;
             }
         }
@@ -2183,6 +2232,48 @@ fn build_dep_reports_gradle(
         };
         reports.push(output::DepReport {
             name: dep.dep_name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_setup_cfg(
+    all_deps: &[renovate_core::extractors::setup_cfg::SetupCfgDep],
+    actionable: &[&renovate_core::extractors::setup_cfg::SetupCfgDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::versioning::pep440::Pep440UpdateSummary,
+            renovate_core::datasources::pypi::PypiError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_specifier.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.name.clone(),
             status,
         });
     }

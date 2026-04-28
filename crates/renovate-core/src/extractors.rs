@@ -21,5 +21,6 @@ pub mod pep621;
 pub mod pip;
 pub mod poetry;
 pub mod pubspec;
+pub mod setup_cfg;
 pub mod spm;
 pub mod terraform;

@@ -141,6 +141,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)[\w-]*requirements([-._]\w+)?\.(txt|pip)$"],
     },
     ManagerDef {
+        name: "setup-cfg",
+        patterns: &[r"(^|/)setup\.cfg$"],
+    },
+    ManagerDef {
         name: "pep621",
         patterns: &[r"(^|/)pyproject\.toml$"],
     },
