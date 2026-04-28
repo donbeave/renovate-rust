@@ -750,6 +750,61 @@ async fn process_repo(
         }
     }
 
+    // ── HTML (cdnjs) ─────────────────────────────────────────────────────────
+    for html_path in manager_files(&detected, "html") {
+        match client.get_raw_file(owner, repo, &html_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::html::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %html_path,
+                    total = deps.len(),
+                    "extracted HTML cdnjs dependencies"
+                );
+                let mut dep_reports = Vec::new();
+                for dep in &deps {
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let library = &dep.dep_name;
+                    let status = match renovate_core::datasources::cdnjs::fetch_latest(
+                        http,
+                        library,
+                        &dep.current_value,
+                    )
+                    .await
+                    {
+                        Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_value.clone(),
+                            latest: s.latest.unwrap_or_default(),
+                        },
+                        Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: html_path.clone(),
+                        manager: "html".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%html_path, "HTML file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%html_path, %err, "failed to fetch HTML file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Pipfile (pipenv) ──────────────────────────────────────────────────────
     for pipfile_path in manager_files(&detected, "pipenv") {
         match client.get_raw_file(owner, repo, &pipfile_path).await {

@@ -5,6 +5,7 @@
 //! compares against the current constraint.
 
 pub mod azure_pipelines_tasks;
+pub mod cdnjs;
 pub mod cocoapods;
 pub mod conan;
 pub mod crates_io;

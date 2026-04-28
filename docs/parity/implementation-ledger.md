@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0123  | 2026-04-28 | HTML cdnjs extractor + CDNJS datasource | Complete | See below. |
 | 0122  | 2026-04-28 | Kotlin Script `*.main.kts` Maven dependency extractor | Complete | See below. |
 | 0121  | 2026-04-28 | Dev Container features extractor upgrade (node/go/python/ruby version deps) | Complete | See below. |
 | 0120  | 2026-04-28 | Home Assistant `manifest.json` PyPI extractor | Complete | See below. |
@@ -3069,6 +3070,32 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0123 - HTML cdnjs extractor + CDNJS datasource
+
+### Renovate reference
+- `lib/modules/manager/html/extract.ts`
+- Pattern: `/\.html?$/`
+- Datasource: CDNJS (`api.cdnjs.com`)
+
+### What landed
+- `crates/renovate-core/src/datasources/cdnjs.rs` (new):
+  - `fetch_latest(http, library, current_value)` → `GET https://api.cdnjs.com/libraries/{library}?fields=versions`.
+  - Finds highest version using semver comparison.
+  - Error variants: `Http`, `NotFound`, `Parse`.
+- `crates/renovate-core/src/extractors/html.rs` (new):
+  - `HtmlCdnjsDep { dep_name, current_value, asset }`.
+  - `TAG_RE` matches `<script>` and `<link>` tags.
+  - `CDNJS_URL_RE` extracts `depName/version/asset` from cdnjs.cloudflare.com URLs.
+  - 6 unit tests.
+- `crates/renovate-core/src/datasources.rs`: added `pub mod cdnjs`.
+- `crates/renovate-core/src/extractors.rs`: added `pub mod html`.
+- `crates/renovate-core/src/managers.rs`: added `html` with `\.html?$` pattern.
+- `crates/renovate-cli/src/main.rs`: pipeline block fetches HTML, extracts cdnjs deps, fetches latest versions.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run -p renovate-core`: 883 passed
 
 ## Slice 0122 - Kotlin Script `*.main.kts` Maven dependency extractor
 
