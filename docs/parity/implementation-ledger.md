@@ -21,6 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0090  | 2026-04-28 | Quadlet `.container`/`.image`/`.volume` Docker image extractor | Complete | See below. |
+| 0089  | 2026-04-28 | Vela CI `.vela.yml` Docker image extractor | Complete | See below. |
 | 0088  | 2026-04-28 | Dev Container `devcontainer.json` Docker image extractor | Complete | See below. |
 | 0087  | 2026-04-28 | Woodpecker CI `.woodpecker.yml` Docker image extractor | Complete | See below. |
 | 0086  | 2026-04-28 | Maven Wrapper `.mvn/wrapper/maven-wrapper.properties` extractor | Complete | See below. |
@@ -2554,3 +2556,4 @@ Pick whichever can be completed in one loop:
 8. **Jenkins plugins datasource** (Jenkins Update Center JSON).
 9. **Travis CI** `.travis.yml` Node.js version extraction.
 10. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
+11. **Travis CI** `.travis.yml` Node.js version extraction.

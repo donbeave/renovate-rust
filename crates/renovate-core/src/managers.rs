@@ -158,8 +158,16 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.drone\.yml$"],
     },
     ManagerDef {
+        name: "velaci",
+        patterns: &[r"(^|/)\.vela\.ya?ml$"],
+    },
+    ManagerDef {
         name: "woodpecker",
         patterns: &[r"^\.woodpecker(?:/[^/]+)?\.ya?ml$"],
+    },
+    ManagerDef {
+        name: "quadlet",
+        patterns: &[r".+\.(container|image|volume)$"],
     },
     ManagerDef {
         name: "terraform",

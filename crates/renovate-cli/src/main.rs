@@ -2873,6 +2873,46 @@ async fn process_repo(
         }
     }
 
+    // ── Vela CI (.vela.yml) ───────────────────────────────────────────────────
+    for vela_path in manager_files(&detected, "velaci") {
+        match client.get_raw_file(owner, repo, &vela_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::velaci::extract(&raw.content);
+                tracing::debug!(repo = %repo_slug, file = %vela_path, total = deps.len(), "extracted vela-ci images");
+                repo_report.files.push(output::FileReport {
+                    path: vela_path.clone(),
+                    manager: "velaci".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%vela_path, ".vela.yml not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%vela_path, %err, "failed to fetch .vela.yml");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── Quadlet (.container / .image / .volume) ───────────────────────────────
+    for qlet_path in manager_files(&detected, "quadlet") {
+        match client.get_raw_file(owner, repo, &qlet_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::quadlet::extract(&raw.content);
+                tracing::debug!(repo = %repo_slug, file = %qlet_path, total = deps.len(), "extracted quadlet images");
+                repo_report.files.push(output::FileReport {
+                    path: qlet_path.clone(),
+                    manager: "quadlet".into(),
+                    deps: docker_hub_reports(http, &deps).await,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%qlet_path, "quadlet file not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%qlet_path, %err, "failed to fetch quadlet file");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Woodpecker CI (.woodpecker.yml / .woodpecker/*.yml) ──────────────────
     for wp_path in manager_files(&detected, "woodpecker") {
         match client.get_raw_file(owner, repo, &wp_path).await {
