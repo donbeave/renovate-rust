@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0101  | 2026-04-28 | Jenkins plugins datasource (Update Center JSON) | Complete | See below. |
 | 0100  | 2026-04-28 | CircleCI orbs extractor + Orb GraphQL datasource | Complete | See below. |
 | 0099  | 2026-04-28 | GitLab CI `include:` project reference extractor | Complete | See below. |
 | 0098  | 2026-04-28 | Travis CI `.travis.yml` Node.js version extractor | Complete | See below. |
@@ -2608,6 +2609,30 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 858 passed
 
+## Slice 0101 - Jenkins plugins datasource (Update Center JSON)
+
+### Renovate reference
+- `lib/modules/datasource/jenkins-plugins/index.ts` — `JenkinsPluginsDatasource`
+- API: `GET https://updates.jenkins.io/current/update-center.actual.json`
+
+### What landed
+- `crates/renovate-core/src/datasources/jenkins_plugins.rs` (new):
+  - `JenkinsPluginUpdateSummary { current_value, latest, update_available }` struct.
+  - `fetch_latest(http, plugin_name, current_value)` — fetches and parses the Update Center
+    JSON; uses `OnceLock` to cache the full response for the process lifetime (~1.5 MB).
+  - Parses `{"plugins": {"name": {"version": "x.y.z"}}}` shape.
+  - 1 unit test for JSON deserialization.
+- `crates/renovate-cli/src/main.rs`: Replaced the Jenkins pipeline "datasource pending" stub
+  with real `fetch_latest` calls; skips deps with `skip_reason` or no version.
+
+### What was intentionally deferred
+- `plugin-versions.json` (all historical versions) — not needed for "is update available?"
+- Custom Update Center URLs (non-`updates.jenkins.io` registries).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 859 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2620,7 +2645,7 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 6. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
-7. **Jenkins plugins datasource** (Jenkins Update Center JSON).
-8. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
-9. **Buildkite plugin** extractor — `plugins:` block with `owner/name#version` format.
+7. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
+8. **`mix` (Elixir) hex.pm datasource** — `mix.exs` version lookup.
+9. **`pub` (Flutter/Dart) pubspec.yaml** — already extracted, needs live datasource.
 11. **Travis CI** `.travis.yml` Node.js version extraction.

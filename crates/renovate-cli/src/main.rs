@@ -3499,24 +3499,39 @@ async fn process_repo(
                     total = deps.len(),
                     "extracted jenkins plugin deps"
                 );
-                let file_deps: Vec<output::DepReport> = deps
-                    .iter()
-                    .map(|dep| {
-                        let status = if let Some(reason) = &dep.skip_reason {
-                            output::DepStatus::Skipped {
-                                reason: format!("{reason:?}").to_lowercase(),
-                            }
-                        } else {
-                            output::DepStatus::Skipped {
-                                reason: "jenkins-plugins datasource pending".into(),
-                            }
-                        };
-                        output::DepReport {
-                            name: dep.artifact_id.clone(),
-                            status,
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = if let Some(reason) = &dep.skip_reason {
+                        output::DepStatus::Skipped {
+                            reason: format!("{reason:?}").to_lowercase(),
                         }
-                    })
-                    .collect();
+                    } else if let Some(ver) = &dep.version {
+                        match renovate_core::datasources::jenkins_plugins::fetch_latest(
+                            http,
+                            &dep.artifact_id,
+                            ver,
+                        )
+                        .await
+                        {
+                            Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                                current: ver.clone(),
+                                latest: s.latest.unwrap_or_default(),
+                            },
+                            Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                            Err(e) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                        }
+                    } else {
+                        output::DepStatus::Skipped {
+                            reason: "unspecified-version".into(),
+                        }
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.artifact_id.clone(),
+                        status,
+                    });
+                }
                 repo_report.files.push(output::FileReport {
                     path: jenkins_path.clone(),
                     manager: "jenkins".into(),

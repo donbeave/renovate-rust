@@ -16,6 +16,7 @@ pub mod gomod;
 pub mod gradle_version;
 pub mod helm;
 pub mod hex;
+pub mod jenkins_plugins;
 pub mod maven;
 pub mod npm;
 pub mod nuget;
