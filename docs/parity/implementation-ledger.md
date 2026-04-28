@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0117  | 2026-04-28 | FVM `.fvmrc`/`.fvm/fvm_config.json` Flutter version extractor | Complete | See below. |
 | 0116  | 2026-04-28 | Jsonnet Bundler `jsonnetfile.json` extractor (GitHub Tags) | Complete | See below. |
 | 0115  | 2026-04-28 | Vendir `vendir.yml` Helm chart extractor | Complete | See below. |
 | 0114  | 2026-04-28 | Copier `.copier-answers.yml` template extractor | Complete | See below. |
@@ -3016,6 +3017,25 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 933 passed
 
+## Slice 0117 - FVM `.fvmrc`/`.fvm/fvm_config.json` Flutter version extractor
+
+### Renovate reference
+- `lib/modules/manager/fvm/extract.ts`
+- Patterns: `/(^|/)\.fvm/fvm_config\.json$/`, `/(^|/)\.fvmrc$/`
+- Datasource: flutter-version (we use GitHub Tags `flutter/flutter`)
+
+### What landed
+- `crates/renovate-core/src/extractors/fvm.rs` (new):
+  - `FvmDep { version }` struct.
+  - `extract(content)` — deserializes JSON; reads `flutter` or `flutterSdkVersion` key.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `fvm` manager with `.fvmrc` and `.fvm/fvm_config.json` patterns.
+- `crates/renovate-cli/src/main.rs`: FVM pipeline using GitHub Tags `flutter/flutter`.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 938 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -3028,6 +3048,9 @@ Pick whichever can be completed in one loop:
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+7. **`haskell-cabal`** — Cabal `*.cabal` Hackage package version tracking.
+8. **`homebrew`** — Homebrew formula version tracking.
+9. **`glasskube`** — Glasskube package manifest version tracking.
 7. **`fvm`** — Flutter Version Manager `.fvmrc` / `fvm_config.json` version tracking.
 8. **`helm-requirements`** — Helm v2 `requirements.yaml` chart tracking.
 9. **`haskell-cabal`** — Cabal `*.cabal` package version tracking (Hackage datasource).

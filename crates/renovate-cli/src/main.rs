@@ -3976,6 +3976,54 @@ async fn process_repo(
         }
     }
 
+    // ── FVM Flutter Version Manager (.fvmrc / .fvm/fvm_config.json) ────────
+    for fvm_path in manager_files(&detected, "fvm") {
+        match client.get_raw_file(owner, repo, &fvm_path).await {
+            Ok(Some(raw)) => {
+                if let Some(dep) = renovate_core::extractors::fvm::extract(&raw.content) {
+                    tracing::debug!(
+                        repo = %repo_slug, file = %fvm_path,
+                        version = %dep.version, "extracted fvm flutter version"
+                    );
+                    let status = match github_tags_datasource::fetch_latest_tag(
+                        "flutter/flutter",
+                        &gh_http,
+                        gh_api_base,
+                    )
+                    .await
+                    {
+                        Ok(Some(latest)) if latest != dep.version => {
+                            output::DepStatus::UpdateAvailable {
+                                current: dep.version.clone(),
+                                latest,
+                            }
+                        }
+                        Ok(Some(latest)) => output::DepStatus::UpToDate {
+                            latest: Some(latest),
+                        },
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    repo_report.files.push(output::FileReport {
+                        path: fvm_path.clone(),
+                        manager: "fvm".into(),
+                        deps: vec![output::DepReport {
+                            name: "flutter".to_owned(),
+                            status,
+                        }],
+                    });
+                }
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%fvm_path, "fvm config not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%fvm_path, %err, "failed to fetch fvm config");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Jsonnet Bundler (jsonnetfile.json) ───────────────────────────────────
     for jb_path in manager_files(&detected, "jsonnet-bundler") {
         match client.get_raw_file(owner, repo, &jb_path).await {

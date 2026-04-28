@@ -93,6 +93,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.copier-answers(\..+)?\.ya?ml$"],
     },
     ManagerDef {
+        name: "fvm",
+        patterns: &[r"(^|/)\.fvm/fvm_config\.json$", r"(^|/)\.fvmrc$"],
+    },
+    ManagerDef {
         name: "jsonnet-bundler",
         patterns: &[r"(^|/)jsonnetfile\.json$"],
     },
