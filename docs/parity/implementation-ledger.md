@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0156  | 2026-04-28 | GitHub Actions CI workflow (fmt + clippy + nextest) | Complete | See below. |
 | 0155  | 2026-04-28 | `cdnurl` + stub registrations for `git-submodules`/`hermit`/`pip-compile`/`custom` | Complete | See below. |
 | 0154  | 2026-04-28 | PEP 723 Python inline script metadata extractor | Complete | See below. |
 | 0153  | 2026-04-28 | OCB (OpenTelemetry Collector Builder) Go module extractor | Complete | See below. |
@@ -3102,6 +3103,19 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0156 - GitHub Actions CI workflow
+
+### What landed
+- `.github/workflows/ci.yml` (new):
+  - `check` job: `cargo fmt --all --check` + `cargo clippy --workspace --all-targets --all-features` + `cargo build`
+  - `test` job: `cargo nextest run --workspace --all-features` + `cargo test --doc`
+  - Caches `~/.cargo/registry`, `~/.cargo/git`, and `target/` on `Cargo.lock` hash.
+  - Triggered on `push` to `main` and `pull_request` to `main`.
+  - Uses `RUSTFLAGS="-D warnings"` to promote warnings to errors in CI.
+
+### Verification
+- File created; CI will run on next push.
 
 ## Slice 0155 - `cdnurl` pipeline + remaining manager stub registrations
 
