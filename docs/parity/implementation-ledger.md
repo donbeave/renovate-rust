@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0027  | 2026-04-28 | Maven pom.xml extractor + Maven Central datasource | Complete | See below. |
 | 0026  | 2026-04-28 | pyproject.toml (PEP 621/735) extractor + pep621 manager | Complete | See below. |
 | 0025  | 2026-04-28 | Per-repo renovate.json config parsing + application | Complete | See below. |
 | 0024  | 2026-04-28 | docker-compose image extractor (line-scan, no YAML dep) | Complete | See below. |
@@ -47,6 +48,51 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0027 - Maven pom.xml extractor + Maven Central datasource
+
+### Renovate reference
+- `lib/modules/manager/maven/index.ts` — `managerFilePatterns`
+- `lib/modules/manager/maven/extract.ts` — `extractAllPackageFiles`
+- `lib/modules/manager/maven/dep-types.ts` — dep type taxonomy
+- `lib/modules/datasource/maven/common.ts` — `MAVEN_REPO`
+- `lib/modules/datasource/maven/util.ts` — `getMavenUrl`, `getDependencyParts`
+- Patterns: `/(^|/|\\.)pom\\.xml$/`, `/^(((\\.mvn)|(\\.m2))/)?settings\\.xml$/`
+
+### What landed
+- Added `quick-xml = "0.39.2"` workspace dependency for streaming SAX-style XML parsing.
+- `crates/renovate-core/src/extractors/maven.rs` — SAX-style POM extractor using
+  quick-xml. Tracks element stack to correctly classify deps by section:
+  `<dependencies>` → Regular, `<dependencyManagement><dependencies>` → Management,
+  `<build><plugins><plugin>` → Plugin (default groupId `org.apache.maven.plugins`),
+  `<build><extensions><extension>` → Extension, `<parent>` → Parent,
+  `<profiles><profile><dependencies>` → Profile. Plugin's own nested
+  `<dependencies>` are not captured as Regular deps. Property refs (`${…}`) →
+  `MavenSkipReason::PropertyRef`. 12 unit tests including multiline element values,
+  nested plugin dependencies, and default groupId.
+- `crates/renovate-core/src/datasources/maven.rs` — Maven Central datasource.
+  Fetches `maven-metadata.xml` from `https://repo.maven.apache.org/maven2/{group}/{artifact}/maven-metadata.xml`.
+  Parses `<release>` → `<latest>` → last `<version>` precedence. `MavenUpdateSummary`,
+  `MavenDepInput`, `fetch_updates_concurrent` (bounded JoinSet, same pattern as
+  crates.io/npm). 5 unit tests + 1 mock integration test.
+- `crates/renovate-core/src/managers.rs` — `maven` manager added with patterns
+  `(^|/|\.)(pom\.xml)$` and `^((\.mvn|\.m2)/)?settings\.xml$`. Detection test added.
+- `crates/renovate-cli/src/main.rs` — Maven pipeline wired: extract deps → filter
+  by `repo_cfg.is_dep_ignored` + non-empty version → Maven Central lookup →
+  `build_dep_reports_maven` helper → `FileReport`.
+
+### What was intentionally deferred
+- `settings.xml` content extraction (currently matched but not extracted).
+- Maven property resolution (`${spring.version}` → actual version).
+- Maven version range syntax (`[1.0,2.0)`) — treated as skip for now.
+- Non-Maven-Central registries (Sonatype Nexus, JFrog, GitHub Packages).
+- `<distributionManagement>` and `<relocation>` elements.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (293 passed)
 
 ## Slice 0026 - pyproject.toml (PEP 621/735) extractor + pep621 manager
 

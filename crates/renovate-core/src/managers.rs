@@ -75,6 +75,7 @@ static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {
 /// - npm:            `/(^|/)package\\.json$/`, `/(^|/)pnpm-workspace\\.yaml$/`, `/(^|/)\\.yarnrc\\.yml$/`
 /// - pip_requirements: `/(^|/)[\\w-]*requirements([-._]\\w+)?\\.(txt|pip)$/`
 /// - pep621:         `/(^|/)pyproject\\.toml$/`
+/// - maven:          `/(^|/|\\.)pom\\.xml$/`, `/^(((\\.mvn)|(\\.m2))/)?settings\\.xml$/`
 /// - github-actions: `/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/`, `/(^|/)action\\.ya?ml$/`
 /// - dockerfile:     `/(^|/)(Dockerfile|Containerfile)(\\.[^/]*)?$/`
 /// - docker-compose: `/(^|/)(?:docker-)?compose\\.ya?ml$/`
@@ -98,6 +99,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
     ManagerDef {
         name: "pep621",
         patterns: &[r"(^|/)pyproject\.toml$"],
+    },
+    ManagerDef {
+        name: "maven",
+        patterns: &[r"(^|/|\.)(pom\.xml)$", r"^((\.mvn|\.m2)/)?settings\.xml$"],
     },
     ManagerDef {
         name: "github-actions",
@@ -215,6 +220,16 @@ mod tests {
         let result = detect(&f);
         let dc = result.iter().find(|m| m.name == "docker-compose").unwrap();
         assert_eq!(dc.matched_files.len(), 2);
+    }
+
+    #[test]
+    fn detects_maven_pom() {
+        let f = files(&["pom.xml", "module/pom.xml", "parent.pom.xml"]);
+        let result = detect(&f);
+        let maven = result.iter().find(|m| m.name == "maven").unwrap();
+        assert!(maven.matched_files.contains(&"pom.xml".to_owned()));
+        assert!(maven.matched_files.contains(&"module/pom.xml".to_owned()));
+        assert!(maven.matched_files.contains(&"parent.pom.xml".to_owned()));
     }
 
     #[test]

@@ -28,9 +28,11 @@ use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::datasources::docker_hub as docker_datasource;
+use renovate_core::datasources::maven as maven_datasource;
 use renovate_core::datasources::npm as npm_datasource;
 use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
+use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::extractors::pip as pip_extractor;
 use renovate_core::http::HttpClient;
@@ -542,6 +544,57 @@ async fn process_repo(
         }
     }
 
+    // ── Maven (pom.xml) ───────────────────────────────────────────────────────
+    for maven_file_path in manager_files(&detected, "maven") {
+        match client.get_raw_file(owner, repo, &maven_file_path).await {
+            Ok(Some(raw)) => match maven_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| {
+                            d.skip_reason.is_none()
+                                && !repo_cfg.is_dep_ignored(&d.dep_name)
+                                && !d.current_value.is_empty()
+                        })
+                        .collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %maven_file_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted maven dependencies"
+                    );
+                    let dep_inputs: Vec<maven_datasource::MavenDepInput> = actionable
+                        .iter()
+                        .map(|d| maven_datasource::MavenDepInput {
+                            dep_name: d.dep_name.clone(),
+                            current_version: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates =
+                        maven_datasource::fetch_updates_concurrent(http, &dep_inputs, 10).await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.dep_name, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: maven_file_path.clone(),
+                        manager: "maven".into(),
+                        deps: build_dep_reports_maven(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%maven_file_path, %err, "failed to parse pom.xml")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%maven_file_path, "pom.xml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%maven_file_path, %err, "failed to fetch pom.xml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Dockerfile ────────────────────────────────────────────────────────────
     for df_file_path in manager_files(&detected, "dockerfile") {
         match client.get_raw_file(owner, repo, &df_file_path).await {
@@ -831,6 +884,48 @@ fn build_dep_reports_npm(
         };
         reports.push(output::DepReport {
             name: dep.name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_maven(
+    all_deps: &[renovate_core::extractors::maven::MavenExtractedDep],
+    actionable: &[&renovate_core::extractors::maven::MavenExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::maven::MavenUpdateSummary,
+            renovate_core::datasources::maven::MavenError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.dep_name.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.dep_name) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_version.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.dep_name.clone(),
             status,
         });
     }
