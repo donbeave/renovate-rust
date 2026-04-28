@@ -85,6 +85,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)([\w-]*)composer\.json$"],
     },
     ManagerDef {
+        name: "pub",
+        patterns: &[r"(^|/)pubspec\.ya?ml$"],
+    },
+    ManagerDef {
         name: "nuget",
         patterns: &[r"\.(cs|fs|vb)proj$", r"\.(props|targets)$"],
     },

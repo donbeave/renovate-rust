@@ -12,4 +12,5 @@ pub mod maven;
 pub mod npm;
 pub mod nuget;
 pub mod packagist;
+pub mod pub_dev;
 pub mod pypi;
