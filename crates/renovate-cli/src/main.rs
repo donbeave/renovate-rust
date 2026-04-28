@@ -24,7 +24,9 @@ use clap::Parser as _;
 use cli::Cli;
 use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::crates_io::{self, DepInput};
+use renovate_core::datasources::npm as npm_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
+use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::managers;
 use renovate_core::platform::{AnyPlatformClient, PlatformError};
 use renovate_core::repo_config;
@@ -281,6 +283,88 @@ async fn main() -> ExitCode {
                 }
                 Err(err) => {
                     tracing::error!(repo = %repo_slug, file = %cargo_file_path, %err, "failed to fetch Cargo.toml");
+                    had_error = true;
+                }
+            }
+        }
+
+        // Extract dependencies from package.json files.
+        let npm_files: Vec<_> = detected
+            .iter()
+            .find(|m| m.name == "npm")
+            .map(|m| m.matched_files.as_slice())
+            .unwrap_or_default()
+            .iter()
+            .collect();
+
+        for npm_file_path in npm_files {
+            match client.get_raw_file(owner, repo, npm_file_path).await {
+                Ok(Some(raw)) => match npm_extractor::extract(&raw.content) {
+                    Ok(deps) => {
+                        let actionable: Vec<_> =
+                            deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                        let skipped = deps.len() - actionable.len();
+                        tracing::info!(
+                            repo = %repo_slug,
+                            file = %npm_file_path,
+                            total = deps.len(),
+                            actionable = actionable.len(),
+                            skipped,
+                            "extracted npm dependencies"
+                        );
+
+                        let dep_inputs: Vec<npm_datasource::NpmDepInput> = actionable
+                            .iter()
+                            .map(|d| npm_datasource::NpmDepInput {
+                                dep_name: d.name.clone(),
+                                constraint: d.current_value.clone(),
+                            })
+                            .collect();
+
+                        let updates = npm_datasource::fetch_updates_concurrent(
+                            &http,
+                            &dep_inputs,
+                            npm_datasource::NPM_REGISTRY,
+                            10,
+                        )
+                        .await;
+
+                        for result in &updates {
+                            match &result.summary {
+                                Ok(summary) => {
+                                    let status = if summary.update_available {
+                                        "update available"
+                                    } else {
+                                        "up to date"
+                                    };
+                                    tracing::info!(
+                                        repo = %repo_slug,
+                                        dep = %result.dep_name,
+                                        constraint = %summary.current_constraint,
+                                        latest = ?summary.latest,
+                                        latest_compatible = ?summary.latest_compatible,
+                                        status,
+                                    );
+                                }
+                                Err(err) => {
+                                    tracing::warn!(
+                                        dep = %result.dep_name,
+                                        %err,
+                                        "failed to fetch npm package versions"
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        tracing::warn!(repo = %repo_slug, file = %npm_file_path, %err, "failed to parse package.json");
+                    }
+                },
+                Ok(None) => {
+                    tracing::warn!(repo = %repo_slug, file = %npm_file_path, "package.json not found");
+                }
+                Err(err) => {
+                    tracing::error!(repo = %repo_slug, file = %npm_file_path, %err, "failed to fetch package.json");
                     had_error = true;
                 }
             }

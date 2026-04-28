@@ -5,3 +5,4 @@
 //! compares against the current constraint.
 
 pub mod crates_io;
+pub mod npm;

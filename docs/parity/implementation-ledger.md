@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0016  | 2026-04-28 | npm registry datasource + npm versioning | Complete | See below. |
 | 0015  | 2026-04-28 | npm package.json extractor + ledger catchup | Complete | See below. |
 | 0014  | 2026-04-28 | Concurrent crates.io lookups (JoinSet + Semaphore) | Complete | commit d760d28 |
 | 0013  | 2026-04-28 | update_summary + shared HttpClient | Complete | commit c5722df |
@@ -36,6 +37,47 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0016 - npm registry datasource + npm versioning
+
+### Renovate reference
+- `lib/modules/datasource/npm/index.ts` — `NpmDatasource`
+- `lib/modules/datasource/npm/get.ts` — `getDependency`
+- `lib/modules/datasource/npm/types.ts` — `NpmResponse` / `NpmResponseVersion`
+- `lib/modules/versioning/npm/index.ts` — node-semver semantics
+
+### What landed
+- `crates/renovate-core/src/versioning/npm.rs` — `NpmUpdateSummary`,
+  `parse_constraint`, `resolve_latest_compatible`, `npm_update_summary`,
+  `is_exact_pin`. Key difference from Cargo versioning: npm bare `"1.2.3"`
+  is an exact pin (`=1.2.3`), not a compatible range. Detects updates by
+  comparing the current pin against the registry's `latest` dist-tag.
+  15 unit tests covering pin detection, range resolution, and update summary.
+- `crates/renovate-core/src/datasources/npm.rs` — `fetch_versions` (fetches
+  packument from `{registry}/{encoded_name}`, filters deprecated versions,
+  sorts oldest-first), `fetch_updates_concurrent` (bounded JoinSet + Semaphore,
+  same pattern as crates.io). Scoped package names encoded with `%2F`.
+  7 wiremock-based tests.
+- `crates/renovate-core/src/versioning.rs` and `datasources.rs` — `pub mod npm`
+  declarations added.
+- `crates/renovate-cli/src/main.rs` — npm processing wired into per-repo loop
+  alongside existing Cargo processing: detect npm manager → fetch each
+  `package.json` → extract deps → concurrent registry lookups → log results.
+
+### What was intentionally deferred
+- npmrc / scoped registry overrides — npm packages can use custom registries
+  per scope; deferred to a later slice.
+- `deprecated` flag surfaced in update log output — currently filtered silently.
+- Retry and rate-limit logic in `HttpClient`.
+
+### Blockers
+None.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (158 passed)
 
 ## Slice 0007 - tokio async runtime + HttpClient + GitHub platform stub
 

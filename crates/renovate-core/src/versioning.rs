@@ -4,3 +4,4 @@
 //! and update planning. The Cargo module is first; others will follow.
 
 pub mod cargo;
+pub mod npm;
