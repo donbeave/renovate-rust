@@ -19,6 +19,7 @@ pub mod gitlabci;
 pub mod gomod;
 pub mod gradle;
 pub mod helm;
+pub mod kustomize;
 pub mod maven;
 pub mod mix;
 pub mod npm;

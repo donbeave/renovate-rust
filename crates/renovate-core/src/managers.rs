@@ -113,6 +113,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Chart\.ya?ml$", r"(^|/)requirements\.ya?ml$"],
     },
     ManagerDef {
+        name: "kustomize",
+        patterns: &[r"(^|/)kustomization\.ya?ml$"],
+    },
+    ManagerDef {
         name: "terraform",
         patterns: &[r"\.tf$", r"\.tofu$"],
     },

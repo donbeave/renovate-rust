@@ -1556,6 +1556,157 @@ async fn process_repo(
         }
     }
 
+    // ── Kustomize (kustomization.yaml) ───────────────────────────────────────
+    for kustomize_path in manager_files(&detected, "kustomize") {
+        match client.get_raw_file(owner, repo, &kustomize_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::kustomize::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %kustomize_path,
+                    total = deps.len(),
+                    "extracted kustomize deps"
+                );
+
+                // Collect image and helm deps separately for datasource routing.
+                let image_deps: Vec<_> = deps
+                    .iter()
+                    .filter_map(|d| {
+                        if let renovate_core::extractors::kustomize::KustomizeDep::Image(i) = d {
+                            Some(i)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                let helm_deps: Vec<_> = deps
+                    .iter()
+                    .filter_map(|d| {
+                        if let renovate_core::extractors::kustomize::KustomizeDep::Helm(h) = d {
+                            Some(h)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+
+                // Look up Docker images.
+                let image_inputs: Vec<docker_datasource::DockerDepInput> = image_deps
+                    .iter()
+                    .filter(|i| i.skip_reason.is_none())
+                    .filter_map(|i| {
+                        let tag = i.tag.as_deref()?;
+                        Some(docker_datasource::DockerDepInput {
+                            dep_name: format!("{}:{tag}", i.image),
+                            image: i.image.clone(),
+                            tag: tag.to_owned(),
+                        })
+                    })
+                    .collect();
+                let image_updates = docker_datasource::fetch_updates_concurrent(
+                    http,
+                    &image_inputs,
+                    docker_datasource::DOCKER_HUB_API,
+                    10,
+                )
+                .await;
+                let image_update_map: HashMap<_, _> = image_updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+
+                // Look up Helm charts.
+                let helm_inputs: Vec<helm_datasource::HelmDepInput> = helm_deps
+                    .iter()
+                    .filter(|h| !h.current_value.is_empty())
+                    .map(|h| helm_datasource::HelmDepInput {
+                        name: h.chart_name.clone(),
+                        current_value: h.current_value.clone(),
+                        repository_url: h.repository_url.clone(),
+                    })
+                    .collect();
+                let helm_updates =
+                    helm_datasource::fetch_updates_concurrent(http, &helm_inputs, 8).await;
+                let helm_update_map: HashMap<_, _> = helm_updates
+                    .into_iter()
+                    .map(|r| (r.name, r.summary))
+                    .collect();
+
+                // Build dep reports.
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &image_deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        file_deps.push(output::DepReport {
+                            name: dep.image.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: format!("{reason:?}").to_lowercase(),
+                            },
+                        });
+                    } else {
+                        let dep_name = match &dep.tag {
+                            Some(t) => format!("{}:{t}", dep.image),
+                            None => dep.image.clone(),
+                        };
+                        let status = match image_update_map.get(&dep_name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_tag.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
+                                output::DepStatus::Skipped {
+                                    reason: "non-docker-hub registry".into(),
+                                }
+                            }
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        };
+                        file_deps.push(output::DepReport {
+                            name: dep_name,
+                            status,
+                        });
+                    }
+                }
+                for helm in &helm_deps {
+                    let status = match helm_update_map.get(&helm.chart_name) {
+                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: helm.current_value.clone(),
+                            latest: s.latest.clone().unwrap_or_default(),
+                        },
+                        Some(Ok(s)) => output::DepStatus::UpToDate {
+                            latest: s.latest.clone(),
+                        },
+                        Some(Err(e)) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                        None => output::DepStatus::UpToDate { latest: None },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: helm.chart_name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: kustomize_path.clone(),
+                    manager: "kustomize".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%kustomize_path, "kustomization.yaml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%kustomize_path, %err, "failed to fetch kustomization.yaml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Gradle (.gradle / .gradle.kts / .versions.toml) ──────────────────────
     for gradle_file_path in manager_files(&detected, "gradle") {
         match client.get_raw_file(owner, repo, &gradle_file_path).await {
