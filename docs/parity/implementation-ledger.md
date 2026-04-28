@@ -1326,10 +1326,45 @@ Pick whichever can be completed in one loop:
 
 Pick whichever can be completed in one loop:
 
+## Slice 0042 - Elixir Mix `mix.exs` extractor + Hex.pm datasource
+
+### Renovate reference
+- `lib/modules/manager/mix/extract.ts` — `extractPackageFile`, regex patterns
+- `lib/modules/manager/mix/index.ts`   — pattern `/(^|/)mix\\.exs$/`
+- `lib/modules/datasource/hex/index.ts` — `HexDatasource`
+- API: `GET https://hex.pm/api/packages/{name}` → `{"latest_stable_version": "x.y.z"}`
+
+### What landed
+- `crates/renovate-core/src/extractors/mix.rs` — `mix.exs` extractor:
+  - Locates the `deps do … end` block using a depth-aware character scanner.
+  - Matches `{:name, "constraint"}` tuples via regex; optional `only:`, `runtime:`, etc.
+  - Skip reasons: `GitSource` (`git:`, `github:`), `LocalPath` (`path:`), `NoVersion`.
+- `crates/renovate-core/src/datasources/hex.rs` — Hex.pm REST client:
+  - `GET /api/packages/{name}` → `latest_stable_version` (avoids pre-release).
+  - `lower_bound()` strips `~>`, `>=`, etc. for update comparison.
+  - Concurrent bounded lookups via `JoinSet` + `Arc<Semaphore>`.
+- `crates/renovate-core/src/managers.rs` — added `mix` with pattern `(^|/)mix\.exs$`.
+- Mix pipeline inlined in `main.rs` (no separate build-report helper needed for this
+  iteration).
+
+### What was intentionally deferred
+- `mix.lock` lockfile parsing.
+- GitHub/git source deps (would use `github_tags` datasource).
+- Hex organization packages (`:my_package` atom form in `:hex` option).
+- Umbrella project sub-app deps resolution.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 414 passed
+
+## Next slice candidates
+
+Pick whichever can be completed in one loop:
+
 1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
 2. **`gemspec` extractor**: extend bundler manager to also parse `.gemspec` files.
-3. **Mix `mix.exs` extractor + Hex.pm datasource**: add Elixir package manager support.
-4. **`hashicorp` versioning module**: implement HashiCorp's constraint syntax (`~>`, `>=`)
+3. **`hashicorp` versioning module**: implement HashiCorp's constraint syntax (`~>`, `>=`)
    for Terraform provider version decisions.
+4. **Swift Package Manager** (`Package.swift` extractor + GitHub releases datasource).

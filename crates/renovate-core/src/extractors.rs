@@ -13,6 +13,7 @@ pub mod gomod;
 pub mod gradle;
 pub mod helm;
 pub mod maven;
+pub mod mix;
 pub mod npm;
 pub mod nuget;
 pub mod pep621;

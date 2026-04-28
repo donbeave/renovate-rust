@@ -9,6 +9,7 @@ pub mod docker_hub;
 pub mod github_tags;
 pub mod gomod;
 pub mod helm;
+pub mod hex;
 pub mod maven;
 pub mod npm;
 pub mod nuget;
