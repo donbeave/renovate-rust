@@ -29,11 +29,13 @@ use renovate_core::config::{GlobalConfig, file as config_file};
 use renovate_core::datasources::crates_io::{self, DepInput};
 use renovate_core::datasources::docker_hub as docker_datasource;
 use renovate_core::datasources::github_tags as github_tags_datasource;
+use renovate_core::datasources::gomod as gomod_datasource;
 use renovate_core::datasources::maven as maven_datasource;
 use renovate_core::datasources::npm as npm_datasource;
 use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
 use renovate_core::extractors::github_actions as github_actions_extractor;
+use renovate_core::extractors::gomod as gomod_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
 use renovate_core::extractors::pep621 as pep621_extractor;
@@ -609,6 +611,56 @@ async fn process_repo(
         }
     }
 
+    // ── Go modules (go.mod) ──────────────────────────────────────────────────
+    for gomod_file_path in manager_files(&detected, "gomod") {
+        match client.get_raw_file(owner, repo, &gomod_file_path).await {
+            Ok(Some(raw)) => {
+                let deps = gomod_extractor::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !repo_cfg.is_dep_ignored(&d.module_path)
+                            && !d.current_value.is_empty()
+                    })
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %gomod_file_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted go module dependencies"
+                );
+                let dep_inputs: Vec<gomod_datasource::GoModDepInput> = actionable
+                    .iter()
+                    .map(|d| gomod_datasource::GoModDepInput {
+                        module_path: d.module_path.clone(),
+                        current_value: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = gomod_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    gomod_datasource::GO_PROXY_BASE,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.module_path, r.summary))
+                    .collect();
+                repo_report.files.push(output::FileReport {
+                    path: gomod_file_path.clone(),
+                    manager: "gomod".into(),
+                    deps: build_dep_reports_gomod(&deps, &actionable, &update_map),
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%gomod_file_path, "go.mod not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gomod_file_path, %err, "failed to fetch go.mod");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Maven (pom.xml) ───────────────────────────────────────────────────────
     for maven_file_path in manager_files(&detected, "maven") {
         match client.get_raw_file(owner, repo, &maven_file_path).await {
@@ -1092,6 +1144,48 @@ fn build_dep_reports_maven(
         };
         reports.push(output::DepReport {
             name: dep.dep_name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_gomod(
+    all_deps: &[renovate_core::extractors::gomod::GoModExtractedDep],
+    actionable: &[&renovate_core::extractors::gomod::GoModExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::gomod::GoModUpdateSummary,
+            renovate_core::datasources::gomod::GoModError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.module_path.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.module_path) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_value.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.module_path.clone(),
             status,
         });
     }

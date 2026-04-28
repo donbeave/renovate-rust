@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0033  | 2026-04-28 | Go modules `go.mod` extractor + Go proxy datasource | Complete | See below. |
 | 0032  | 2026-04-28 | Poetry `pyproject.toml` extractor + poetry manager | Complete | See below. |
 | 0031  | 2026-04-28 | GitHub Actions `uses:` extractor + GitHub tags datasource | Complete | See below. |
 | 0030  | 2026-04-28 | Maven POM property resolution (`<properties>`)  | Complete | See below. |
@@ -53,6 +54,45 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0033 - Go modules `go.mod` extractor + Go proxy datasource
+
+### Renovate reference
+- `lib/modules/manager/gomod/extract.ts` — `extractPackageFile`
+- `lib/modules/manager/gomod/line-parser.ts` — `parseLine`
+- `lib/modules/datasource/go/index.ts` — `GoDatasource`
+- Pattern: `/(^|/)go\\.mod$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/gomod.rs` — two-pass line scanner:
+  1. First pass collects `replace X => ../local` directives.
+  2. Second pass extracts `require` directives (single-line and block form).
+  - Skip reasons: `PseudoVersion` (timestamp-hash pseudo-versions matching
+    `^v\d+\.\d+\.\d+-\d{14}-[0-9a-f]+$`) and `LocalReplace` (module path in
+    local replace set).
+  - `// indirect` comments tracked; deps are included regardless.
+  - `exclude (…)` blocks are skipped entirely.
+  - 9 unit tests including the Renovate fixture.
+- `crates/renovate-core/src/datasources/gomod.rs` — Go module proxy datasource:
+  - `GET {proxy_base}/{module}/@latest` → `{"Version":"v1.8.1","Time":"…"}`.
+  - `encode_module_path`: capital letters → `!` + lowercase (Go proxy protocol).
+  - `fetch_updates_concurrent` with bounded JoinSet.
+  - `GO_PROXY_BASE = "https://proxy.golang.org"`.
+  - 4 tests: encoding, 2 wiremock HTTP tests.
+- `managers.rs` — `gomod` manager added: `(^|/)go\.mod$`.
+- `cli/main.rs` — gomod pipeline wired with `build_dep_reports_gomod` helper.
+
+### What was intentionally deferred
+- `go` version directive (`go 1.21`) — `GolangVersionDatasource`.
+- `toolchain` directive.
+- Non-local `replace` directives (module-to-module remapping).
+- `go.sum` checksum verification.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (353 passed)
 
 ## Slice 0032 - Poetry `pyproject.toml` extractor + poetry manager
 
