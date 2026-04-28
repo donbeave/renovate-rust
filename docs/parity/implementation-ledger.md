@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0034  | 2026-04-28 | Composer `composer.json` extractor + Packagist datasource | Complete | See below. |
 | 0033  | 2026-04-28 | Go modules `go.mod` extractor + Go proxy datasource | Complete | See below. |
 | 0032  | 2026-04-28 | Poetry `pyproject.toml` extractor + poetry manager | Complete | See below. |
 | 0031  | 2026-04-28 | GitHub Actions `uses:` extractor + GitHub tags datasource | Complete | See below. |
@@ -54,6 +55,44 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0034 - Composer `composer.json` extractor + Packagist datasource
+
+### Renovate reference
+- `lib/modules/manager/composer/extract.ts` — `extractPackageFile`
+- `lib/modules/datasource/packagist/index.ts`
+- Pattern: `/(^|/)([\w-]*)composer\.json$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/composer.rs` — JSON extractor using
+  `serde_json` (already a dependency):
+  - Sections: `require` (Regular), `require-dev` (Dev).
+  - Skip reasons: `PlatformPackage` (`php`, `ext-*`, `lib-*`, `composer-*`,
+    `hhvm`, any package name without `/`), `DevBranch` (version starts with
+    `dev-` or ends with `-dev`).
+  - Output sorted by name for deterministic ordering (HashMap is unordered).
+  - 9 unit tests including Renovate's composer1.json fixture.
+- `crates/renovate-core/src/datasources/packagist.rs` — Packagist metadata
+  API v2 datasource:
+  - `GET {api_base}/p2/{vendor}/{package}.json`.
+  - Versions are newest-first in p2; `is_stable()` filters pre-releases
+    (`-alpha`, `-beta`, `-RC`, `dev-*`, `*-dev`).
+  - `fetch_updates_concurrent` with bounded JoinSet.
+  - 5 tests: stability filtering, mock HTTP (returns first stable, 404, RC
+    skipped to find stable).
+- `managers.rs` — `composer` manager with pattern `(^|/)([\w-]*)composer\.json$`.
+- `cli/main.rs` — composer pipeline wired with `build_dep_reports_composer`.
+
+### What was intentionally deferred
+- VCS repository dependencies (git URL form).
+- Custom Satis/Packagist repositories.
+- `composer.lock` lockfile parsing.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (367 passed)
 
 ## Slice 0033 - Go modules `go.mod` extractor + Go proxy datasource
 
