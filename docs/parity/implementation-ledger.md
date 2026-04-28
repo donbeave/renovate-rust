@@ -21,7 +21,59 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0002 - `migrateArgs` parity
+
+### Renovate reference
+- `lib/workers/global/config/parse/cli.ts` - `migrateArgs` function
+  (substring rewrites + `--git-fs*` filter, applied before
+  `parseEarlyFlags` and `getConfig`).
+- `lib/workers/global/config/parse/cli.spec.ts` - the table-driven test at
+  lines 125-143 (`--azure-auto-complete`, `--git-lab-automerge`,
+  `--recreate-closed*`, `--endpoints=`) plus the `--dry-run` /
+  `--require-config` regex cases at lines 175-208.
+
+### What landed
+- `crates/renovate-cli/src/migrate.rs` with `migrate_args(&[String]) -> Vec<String>`.
+- Faithful port of upstream's 19 substring rewrites + 2 anchored regexes +
+  `--git-fs*` filter, applied in upstream's exact order. JavaScript
+  `String.prototype.replace(string, string)` first-occurrence semantics
+  preserved via Rust `str::replacen(_, _, 1)`.
+- 22 unit tests covering every transformation, ordering edge cases (chained
+  `--renovate-fork` → `--include-forks` → `--fork-processing=enabled`),
+  the first-occurrence-only behavior for JSON-key rewrites inside
+  `--host-rules` values, and the no-op pass-through path.
+- Wired into `crates/renovate-cli/src/main.rs`: `std::env::args()` is
+  passed through `migrate_args` before clap parses, mirroring Renovate's
+  `parseEarlyFlags` / `getConfig` pipeline order.
+- 1 integration test (`git_fs_legacy_flags_are_silently_dropped`) proves
+  the wiring is live: a `--git-fs-something` arg that would otherwise be
+  rejected by clap as unknown (exit 2) now disappears and the CLI exits 0.
+
+### What was intentionally deferred
+- End-to-end integration tests for the rewritten flags (`--dry-run`,
+  `--include-forks=true`, etc.). They cannot be exercised at the CLI
+  boundary until the option surface lands - clap would still reject the
+  rewritten forms as unknown. Unit tests cover the transformation
+  correctness; the integration tests will follow when `--dry-run` &c. are
+  recognized by the parser.
+
+### Blockers
+None for the implementation. Push to `origin/main` is blocked in the
+current execution environment because no SSH key, `gh auth`, or git
+credential helper is configured. Slice was committed locally; user can
+push manually or the next loop iteration will retry once credentials are
+available.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`
+
+(Results recorded in the slice's commit body.)
 
 ## Slice 0001 - Workspace + early CLI flags
 
@@ -83,14 +135,20 @@ None. No network or credentials were required for this slice.
 
 Pick whichever can be completed in one loop:
 
-1. **Renovate option surface**: port the option definitions from
-   `lib/config/options/index.ts` into a strongly-typed Rust schema, then
-   wire them into clap. Likely needs to be split across two slices because
-   the option list is large.
-2. **`migrateArgs` parity**: implement the deprecated-flag rewriter and
-   port Renovate's CLI tests for it.
-3. **Logger init + log levels**: wire `tracing-subscriber` with
+1. **Renovate option surface (first cut)**: port the option definitions
+   from `lib/config/options/index.ts` into a strongly-typed Rust schema
+   and wire them into clap. Will likely need to be split across two
+   slices because the option list is large; start with the small set of
+   flags `migrateArgs` already produces (`--dry-run`, `--require-config`,
+   `--platform-automerge`, `--fork-processing`, `--recreate-when`,
+   `--trust-level`, `--host-rules`, `--registry-aliases`,
+   `--allowed-commands`, `--allow-command-templating`) so the migration
+   wiring becomes end-to-end testable.
+2. **Logger init + log levels**: wire `tracing-subscriber` with
    `LOG_LEVEL` env support and Renovate's level names (`fatal`, `error`,
    `warn`, `info`, `debug`, `trace`).
-4. **Config file discovery**: port the `config.js`/`.renovaterc(.json)`
-   discovery rules from `lib/workers/global/config/parse/`.
+3. **Config file discovery**: port the `config.js`/`.renovaterc(.json)`
+   discovery rules from `lib/workers/global/config/parse/file.ts`.
+4. **`coersions` parity**: port the type coercions from
+   `lib/workers/global/config/parse/coersions.ts` (string, integer,
+   boolean, list, object, json) - feeds option-surface work.

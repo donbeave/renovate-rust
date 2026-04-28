@@ -62,3 +62,17 @@ fn no_args_succeeds() {
         .stdout(predicate::str::is_empty())
         .stderr(predicate::str::is_empty());
 }
+
+#[test]
+fn git_fs_legacy_flags_are_silently_dropped() {
+    // Renovate's `migrateArgs` filters every `--git-fs*` token before the
+    // option parser runs. Without that filter, clap would reject the flag
+    // as unknown and exit 2. With it wired up, the flag disappears and the
+    // CLI succeeds.
+    renovate()
+        .arg("--git-fs-something")
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::is_empty());
+}

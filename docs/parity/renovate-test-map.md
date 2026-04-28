@@ -16,7 +16,7 @@ Format per row:
 |--------------------|----------------------------|--------------------|--------|
 | `lib/workers/global/config/parse/cli.spec.ts` | `'--version'` shows the version | `crates/renovate-cli/tests/cli.rs::version_long_flag_prints_bare_version`, `version_short_flag_matches_long_flag` | ported |
 | `lib/workers/global/config/parse/cli.spec.ts` | `'--help'` shows help text | `crates/renovate-cli/tests/cli.rs::help_flag_succeeds_and_mentions_repositories` | partial (just exit/keyword smoke) |
-| `lib/workers/global/config/parse/cli.spec.ts` | `migrateArgs` rewrites for legacy flags | _not yet ported_ | pending |
+| `lib/workers/global/config/parse/cli.spec.ts` | `migrateArgs` rewrites for legacy flags (table at lines 125-143; `--dry-run` / `--require-config` cases at lines 175-208) | `crates/renovate-cli/src/migrate.rs::tests` (22 cases) + `crates/renovate-cli/tests/cli.rs::git_fs_legacy_flags_are_silently_dropped` | ported |
 | `lib/workers/global/config/parse/cli.spec.ts` | `parseEarlyFlags` ignores unknown flags | _not yet ported_ | pending (see CD-0002) |
 
 ## Config

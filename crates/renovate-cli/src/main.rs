@@ -13,6 +13,8 @@
     reason = "CLI surface — user-facing output belongs in this crate"
 )]
 
+mod migrate;
+
 use std::process::ExitCode;
 
 use clap::{ArgAction, Parser};
@@ -44,7 +46,12 @@ struct Cli {
 }
 
 fn main() -> ExitCode {
-    let cli = match Cli::try_parse() {
+    // Mirror Renovate's pipeline: legacy-flag migration happens before the
+    // option parser sees argv. See `migrate` module docs for semantics.
+    let raw: Vec<String> = std::env::args().collect();
+    let migrated = migrate::migrate_args(&raw);
+
+    let cli = match Cli::try_parse_from(&migrated) {
         Ok(cli) => cli,
         Err(err) => {
             // clap renders help/usage/errors itself, including the right
