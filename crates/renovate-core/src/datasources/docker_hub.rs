@@ -195,11 +195,14 @@ pub fn split_version_tag(tag: &str) -> Option<(&str, &str)> {
     Some((numeric, &tag[end..]))
 }
 
-/// Compare two version strings using component-wise numeric ordering.
+/// Compare two Docker version strings using component-wise numeric ordering.
 ///
-/// Each version is split on `.` and components are compared as `u64`.
-/// A shorter version wins ties by treating missing components as `0`:
-/// `"18"` == `"18.0"`.
+/// Mirrors Renovate's `DockerVersioningApi._compare`:
+/// - numeric components are compared left-to-right
+/// - **shorter wins on ties**: `"2.1"` > `"2.1.1"` (shorter tag = more general
+///   floating pointer = considered "newer")
+///
+/// Only same-length versions are compared in practice (see [`docker_update_summary`]).
 fn cmp_version(a: &str, b: &str) -> std::cmp::Ordering {
     let parse_parts =
         |s: &str| -> Vec<u64> { s.split('.').filter_map(|p| p.parse().ok()).collect() };
@@ -207,11 +210,15 @@ fn cmp_version(a: &str, b: &str) -> std::cmp::Ordering {
     let bp = parse_parts(b);
     let len = ap.len().max(bp.len());
     for i in 0..len {
-        let av = ap.get(i).copied().unwrap_or(0);
-        let bv = bp.get(i).copied().unwrap_or(0);
-        match av.cmp(&bv) {
-            std::cmp::Ordering::Equal => continue,
-            other => return other,
+        match (ap.get(i), bp.get(i)) {
+            // One version exhausted before the other — shorter wins (is "newer").
+            (None, Some(_)) => return std::cmp::Ordering::Greater,
+            (Some(_), None) => return std::cmp::Ordering::Less,
+            (Some(av), Some(bv)) => match av.cmp(bv) {
+                std::cmp::Ordering::Equal => continue,
+                other => return other,
+            },
+            (None, None) => unreachable!(),
         }
     }
     std::cmp::Ordering::Equal
@@ -231,12 +238,21 @@ pub fn docker_update_summary(current_tag: &str, tags: &[String]) -> DockerUpdate
         };
     };
 
-    // Find all tags with the same variant suffix.
+    // Count components in the current version for isCompatible check.
+    // Renovate's Docker versioning only compares tags with the same suffix AND
+    // the same component count: "22.04" is not compatible with "22" or "22.04.1".
+    let current_components = current_ver.split('.').count();
+
+    // Find all tags with the same variant suffix AND same component count.
     let compatible: Vec<&str> = tags
         .iter()
         .filter_map(|t| {
             let (ver, sfx) = split_version_tag(t)?;
-            if sfx == suffix { Some(ver) } else { None }
+            if sfx == suffix && ver.split('.').count() == current_components {
+                Some(ver)
+            } else {
+                None
+            }
         })
         .collect();
 
@@ -385,11 +401,46 @@ mod tests {
 
     #[test]
     fn version_ordering() {
-        assert!(cmp_version("22.04", "22.04.1").is_lt());
+        // Same-length comparisons (the common case after isCompatible filtering).
         assert!(cmp_version("22.04.2", "22.04.1").is_gt());
         assert!(cmp_version("18", "20").is_lt());
         assert!(cmp_version("1.25.3", "1.26.0").is_lt());
-        assert_eq!(cmp_version("18", "18.0"), std::cmp::Ordering::Equal);
+        // "shorter is bigger" — Renovate Docker versioning semantics.
+        assert!(
+            cmp_version("22.04", "22.04.1").is_gt(),
+            "shorter tag is greater"
+        );
+        assert!(
+            cmp_version("2.1", "2.1.1").is_gt(),
+            "shorter wins at tie-break"
+        );
+        // Strictly different-length same-prefix: shorter wins.
+        assert!(
+            cmp_version("22", "22.04").is_gt(),
+            "major-only tag is newer"
+        );
+    }
+
+    #[test]
+    fn component_count_filter_prevents_cross_length_updates() {
+        // "22.04" (2-component) should NOT suggest updating to "22" (1-component)
+        // or "22.04.1" (3-component); only other 2-component versions are compatible.
+        let tags: Vec<String> = ["22", "22.04", "22.04.1", "23.10", "24"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        let s = docker_update_summary("22.04", &tags);
+        assert_eq!(s.latest.as_deref(), Some("23.10"));
+        assert!(s.update_available);
+    }
+
+    #[test]
+    fn single_component_update_stays_single_component() {
+        // "18" (1-component) should update to "20" (1-component), not "20.1" (2-component).
+        let tags: Vec<String> = ["18", "20", "20.1"].iter().map(|s| s.to_string()).collect();
+        let s = docker_update_summary("18", &tags);
+        assert_eq!(s.latest.as_deref(), Some("20"));
+        assert!(s.update_available);
     }
 
     // ── docker_update_summary ─────────────────────────────────────────────────
@@ -407,6 +458,8 @@ mod tests {
 
     #[test]
     fn detects_update_for_variant_tag() {
+        // "18-alpine" is 1-component; "18.1-alpine" and "20.1-alpine" are 2-component
+        // and should be filtered out by the isCompatible check.
         let tags: Vec<String> = [
             "18-alpine",
             "18.1-alpine",
@@ -418,6 +471,7 @@ mod tests {
         .map(|s| s.to_string())
         .collect();
         let s = docker_update_summary("18-alpine", &tags);
+        // Only 1-component -alpine tags are compatible: 18, 20, 21 → latest is 21.
         assert_eq!(s.latest.as_deref(), Some("21-alpine"));
         assert!(s.update_available);
     }
