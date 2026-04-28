@@ -84,6 +84,7 @@ pub mod terragrunt;
 pub mod tflint_plugin;
 pub mod travis;
 pub mod typst;
+pub mod unity3d;
 pub mod velaci;
 pub mod vendir;
 pub mod version_file;

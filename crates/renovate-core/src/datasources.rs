@@ -36,3 +36,4 @@ pub mod pypi;
 pub mod rubygems;
 pub mod terraform;
 pub mod typst;
+pub mod unity3d;

@@ -6186,6 +6186,63 @@ async fn process_repo(
         }
     }
 
+    // ── Unity3D ProjectVersion.txt ─────────────────────────────────────────────
+    for unity_path in manager_files(&detected, "unity3d") {
+        match client.get_raw_file(owner, repo, &unity_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::unity3d::Unity3dVersionKind;
+                let Some(dep) = renovate_core::extractors::unity3d::extract(&raw.content) else {
+                    continue;
+                };
+                let with_revision = dep.kind == Unity3dVersionKind::WithRevision;
+                let status = match renovate_core::datasources::unity3d::fetch_latest_lts(
+                    http,
+                    with_revision,
+                )
+                .await
+                {
+                    Ok(s) => {
+                        let latest_str = if with_revision {
+                            s.latest_with_revision.clone()
+                        } else {
+                            s.latest.clone()
+                        };
+                        match latest_str {
+                            Some(latest) if latest != dep.current_value => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest,
+                                }
+                            }
+                            Some(latest) => output::DepStatus::UpToDate {
+                                latest: Some(latest),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        }
+                    }
+                    Err(e) => output::DepStatus::LookupError {
+                        message: e.to_string(),
+                    },
+                };
+                repo_report.files.push(output::FileReport {
+                    path: unity_path.clone(),
+                    manager: "unity3d".into(),
+                    deps: vec![output::DepReport {
+                        name: "Unity Editor".to_owned(),
+                        status,
+                    }],
+                });
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%unity_path, "ProjectVersion.txt not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%unity_path, %err, "failed to fetch ProjectVersion.txt");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0140  | 2026-04-28 | Unity3D `ProjectVersion.txt` extractor + Unity releases datasource | Complete | See below. |
 | 0139  | 2026-04-28 | Pixi `pixi.toml` extractor (PyPI deps actionable, Conda skipped) | Complete | See below. |
 | 0138  | 2026-04-28 | Bitrise CI step extractor + Bitrise steplib datasource | Complete | See below. |
 | 0137  | 2026-04-28 | Homebrew formula extractor (GitHub Archive/Release + NPM routing) | Complete | See below. |
@@ -3086,6 +3087,30 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0140 - Unity3D `ProjectVersion.txt` extractor + Unity releases datasource
+
+### Renovate reference
+- `lib/modules/manager/unity3d/extract.ts`
+- `lib/modules/datasource/unity3d/index.ts`
+- Pattern: `(^|/)ProjectSettings/ProjectVersion\.txt$`
+- Datasource: Unity Releases API (`services.api.unity.com`)
+
+### What landed
+- `crates/renovate-core/src/extractors/unity3d.rs` (new):
+  - `WITH_REV_RE` matches `m_EditorVersionWithRevision: 2022.3.10f1 (ff3792e53c62)`.
+  - `VERSION_RE` fallback for plain `m_EditorVersion: 2022.3.10f1`.
+  - `Unity3dVersionKind::WithRevision` / `Plain` controls datasource lookup mode.
+  - 3 unit tests.
+- `crates/renovate-core/src/datasources/unity3d.rs` (new):
+  - `fetch_latest_lts(http, with_revision)` — fetches first page of LTS stream.
+  - Returns `Unity3dUpdateSummary` with `latest` and `latest_with_revision` fields.
+- Registered in `datasources.rs`, `extractors.rs`, `managers.rs`.
+- `crates/renovate-cli/src/main.rs`: pipeline dispatches based on `kind` field.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 994 passed
 
 ## Slice 0139 - Pixi `pixi.toml` extractor (PyPI deps actionable, Conda skipped)
 
