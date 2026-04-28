@@ -230,6 +230,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         ],
     },
     ManagerDef {
+        name: "deps-edn",
+        patterns: &[r"(^|/)(?:deps|bb)\.edn$"],
+    },
+    ManagerDef {
         name: "leiningen",
         patterns: &[r"(^|/)project\.clj$"],
     },

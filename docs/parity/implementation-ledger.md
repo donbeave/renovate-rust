@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0108  | 2026-04-28 | Clojure `deps.edn` / `bb.edn` extractor | Complete | See below. |
 | 0107  | 2026-04-28 | Azure Pipelines Tasks datasource (GitHub mirror JSON) | Complete | See below. |
 | 0106  | 2026-04-28 | Nix flakes `flake.lock` input extractor | Complete | See below. |
 | 0105  | 2026-04-28 | FluxCD `gotk-components.yaml` system manifest extractor | Complete | See below. |
@@ -2802,6 +2803,33 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 890 passed
 
+## Slice 0108 - Clojure `deps.edn` / `bb.edn` extractor
+
+### Renovate reference
+- `lib/modules/manager/deps-edn/extract.ts`
+- Pattern: `/(^|/)(?:deps|bb)\.edn$/`
+- Datasource: Clojure (Maven Central + Clojars)
+
+### What landed
+- `crates/renovate-core/src/extractors/deps_edn.rs` (new):
+  - `DepsEdnDep { dep_name, current_value }` struct.
+  - `expand_name()` — `org.clojure/clojure` → `org.clojure:clojure`; bare `ring` → `ring:ring`.
+  - `extract(content)` — line-scanner that strips `;` comments, tracks `dep-name {` on each line,
+    matches `:mvn/version "version"` and pairs with last-seen dep symbol; skips `:git/`/`:local/` deps.
+  - `find_last_dep_sym()` — char-by-char scan finding rightmost `symbol {` on a line.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `deps-edn` manager with `(^|/)(?:deps|bb)\.edn$` pattern.
+- `crates/renovate-cli/src/main.rs`: deps-edn pipeline using Clojars-then-Maven-Central fallback.
+
+### What was intentionally deferred
+- `:git/url` + `:git/sha` deps (GitRefsDatasource).
+- `com.github.owner/repo` → GitHub Tags mapping.
+- Variable substitution (`${version}`).
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 895 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2817,4 +2845,5 @@ Pick whichever can be completed in one loop:
 7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
 8. **`pixi`** — Pixi `pixi.toml` conda package extraction.
 9. **`ruby-version`** — `.ruby-version` file version tracking (GitHub Releases).
+10. **`conan`** — C/C++ Conan package manager (`conanfile.txt`/`conanfile.py`).
 10. **`helm-requirements`** — `requirements.yaml` (Helm v2) chart dependencies.

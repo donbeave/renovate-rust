@@ -3832,6 +3832,69 @@ async fn process_repo(
         }
     }
 
+    // ── Clojure deps.edn / bb.edn ────────────────────────────────────────────
+    for edn_path in manager_files(&detected, "deps-edn") {
+        match client.get_raw_file(owner, repo, &edn_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::deps_edn::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %edn_path,
+                    total = deps.len(), "extracted deps-edn deps"
+                );
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let latest = renovate_core::datasources::maven::fetch_latest_from_registry(
+                        &dep.dep_name,
+                        http,
+                        renovate_core::datasources::maven::CLOJARS_BASE,
+                    )
+                    .await;
+                    let latest = match latest {
+                        Ok(Some(v)) => Ok(Some(v)),
+                        Ok(None) => renovate_core::datasources::maven::fetch_latest_from_registry(
+                            &dep.dep_name,
+                            http,
+                            renovate_core::datasources::maven::MAVEN_CENTRAL_BASE,
+                        )
+                        .await
+                        .map_err(|e| e.to_string()),
+                        Err(e) => Err(e.to_string()),
+                    };
+                    let status = match latest {
+                        Ok(Some(ref l)) if l != &dep.current_value => {
+                            output::DepStatus::UpdateAvailable {
+                                current: dep.current_value.clone(),
+                                latest: l.clone(),
+                            }
+                        }
+                        Ok(Some(ref l)) => output::DepStatus::UpToDate {
+                            latest: Some(l.clone()),
+                        },
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError { message: e },
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: edn_path.clone(),
+                    manager: "deps-edn".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%edn_path, "deps.edn not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%edn_path, %err, "failed to fetch deps.edn");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Leiningen (project.clj) ───────────────────────────────────────────────
     for lein_path in manager_files(&detected, "leiningen") {
         match client.get_raw_file(owner, repo, &lein_path).await {
