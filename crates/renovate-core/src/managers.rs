@@ -135,6 +135,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)cloudbuild\.ya?ml$"],
     },
     ManagerDef {
+        name: "droneci",
+        patterns: &[r"(^|/)\.drone\.yml$"],
+    },
+    ManagerDef {
         name: "terraform",
         patterns: &[r"\.tf$", r"\.tofu$"],
     },

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0081  | 2026-04-28 | Drone CI `.drone.yml` Docker image extractor | Complete | See below. |
 | 0080  | 2026-04-28 | Helmfile `helmfile.yaml` extractor | Complete | See below. |
 | 0079  | 2026-04-28 | Azure Pipelines extractor (Docker containers + tasks) | Complete | See below. |
 | 0078  | 2026-04-28 | Google Cloud Build `cloudbuild.yaml` extractor | Complete | See below. |
@@ -2354,6 +2355,27 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
 - `cargo nextest run --workspace`: 755 passed
 
+## Slice 0081 - Drone CI `.drone.yml` Docker image extractor
+
+### Renovate reference
+- `lib/modules/manager/droneci/extract.ts`
+- Pattern: `/(^|/)\.drone\.yml$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/droneci.rs`:
+  - Simplest CI extractor: scans every `image:` key in the file at any nesting depth.
+  - Strips `- ` list-item prefix before matching (handles both `- image:` and `image:` forms).
+  - Passes each value through `classify_image_ref()` — `$VAR` refs become `ArgVariable` skip.
+  - 6 unit tests: single step image, service image, multiple images, variable ref skip,
+    private registry, empty file.
+- `crates/renovate-core/src/managers.rs`: `droneci` manager with pattern `(^|/)\.drone\.yml$`.
+- `crates/renovate-core/src/extractors.rs`: `pub mod droneci`.
+- `crates/renovate-cli/src/main.rs`: Drone CI pipeline using Docker Hub datasource.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets -- -D warnings`
+- `cargo nextest run --workspace`: 761 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2367,3 +2389,4 @@ Pick whichever can be completed in one loop:
 5. **GitLab CI `include:` project components**: component dependency version tracking.
 6. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
 7. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
+8. **Bitbucket Pipelines** (`bitbucket-pipelines.yml`) Docker image extractor.

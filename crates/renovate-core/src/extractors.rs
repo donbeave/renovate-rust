@@ -15,6 +15,7 @@ pub mod cocoapods;
 pub mod composer;
 pub mod docker_compose;
 pub mod dockerfile;
+pub mod droneci;
 pub mod gemspec;
 pub mod github_actions;
 pub mod gitlabci;
