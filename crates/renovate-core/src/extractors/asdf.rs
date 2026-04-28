@@ -106,7 +106,7 @@ fn parse_line(line: &str) -> Option<AsdfDep> {
 
 // ── Tool table ────────────────────────────────────────────────────────────────
 
-static TOOL_TABLE: &[(&str, AsdfDatasource)] = &[
+pub(crate) static TOOL_TABLE: &[(&str, AsdfDatasource)] = &[
     // ── GitHub Tags ─────────────────────────────────────────────────────────
     (
         "awscli",

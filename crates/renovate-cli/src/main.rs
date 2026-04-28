@@ -2488,6 +2488,111 @@ async fn process_repo(
         }
     }
 
+    // ── mise (mise.toml / .mise.toml) ────────────────────────────────────────
+    for mise_path in manager_files(&detected, "mise") {
+        match client.get_raw_file(owner, repo, &mise_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::mise::extract(&raw.content);
+                let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %mise_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted mise tool versions"
+                );
+                let gh_inputs: Vec<github_tags_datasource::GithubActionsDepInput> = actionable
+                    .iter()
+                    .filter_map(|d| {
+                        let ds = d.datasource.as_ref()?;
+                        let (repo_str, _) = match ds {
+                            renovate_core::extractors::asdf::AsdfDatasource::GithubTags {
+                                repo,
+                                ..
+                            } => (repo, false),
+                            renovate_core::extractors::asdf::AsdfDatasource::GithubReleases {
+                                repo,
+                                ..
+                            } => (repo, true),
+                        };
+                        Some(github_tags_datasource::GithubActionsDepInput {
+                            dep_name: (*repo_str).to_owned(),
+                            current_value: d.current_value.clone(),
+                        })
+                    })
+                    .collect();
+                let updates = github_tags_datasource::fetch_updates_concurrent(
+                    &gh_http,
+                    &gh_inputs,
+                    gh_api_base,
+                    8,
+                )
+                .await;
+                let update_map: HashMap<_, _> = updates
+                    .into_iter()
+                    .map(|r| (r.dep_name, r.summary))
+                    .collect();
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = if let Some(reason) = &dep.skip_reason {
+                        output::DepStatus::Skipped {
+                            reason: format!("{reason:?}").to_lowercase(),
+                        }
+                    } else if let Some(ds) = &dep.datasource {
+                        let (repo_str, tag_strip) = match ds {
+                            renovate_core::extractors::asdf::AsdfDatasource::GithubTags {
+                                repo,
+                                tag_strip,
+                            } => (*repo, *tag_strip),
+                            renovate_core::extractors::asdf::AsdfDatasource::GithubReleases {
+                                repo,
+                                tag_strip,
+                            } => (*repo, *tag_strip),
+                        };
+                        match update_map.get(repo_str) {
+                            Some(Ok(s)) if s.update_available => {
+                                let latest = s
+                                    .latest
+                                    .as_deref()
+                                    .map(|l| l.strip_prefix(tag_strip).unwrap_or(l).to_owned())
+                                    .unwrap_or_default();
+                                output::DepStatus::UpdateAvailable {
+                                    current: dep.current_value.clone(),
+                                    latest,
+                                }
+                            }
+                            Some(Ok(s)) => {
+                                let latest = s
+                                    .latest
+                                    .as_deref()
+                                    .map(|l| l.strip_prefix(tag_strip).unwrap_or(l).to_owned());
+                                output::DepStatus::UpToDate { latest }
+                            }
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        }
+                    } else {
+                        output::DepStatus::UpToDate { latest: None }
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.tool_name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: mise_path.clone(),
+                    manager: "mise".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%mise_path, "mise.toml not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%mise_path, %err, "failed to fetch mise.toml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Version files (.terraform-version, .go-version, .bun-version, etc.) ──
     for manager_name in [
         "terraform-version",

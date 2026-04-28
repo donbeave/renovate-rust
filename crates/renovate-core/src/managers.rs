@@ -150,6 +150,14 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)kustomization\.ya?ml$"],
     },
     ManagerDef {
+        name: "mise",
+        patterns: &[
+            r"(^|/)\.?mise(\..*)?\.toml$",
+            r"(^|/)\.config/mise(\..*)?\.toml$",
+            r"(^|/)\.rtx(\..*)?\.toml$",
+        ],
+    },
+    ManagerDef {
         name: "cloudbuild",
         patterns: &[r"(^|/)cloudbuild\.ya?ml$"],
     },

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0091  | 2026-04-28 | mise-en-place `mise.toml` tool version extractor | Complete | See below. |
 | 0090  | 2026-04-28 | Quadlet `.container`/`.image`/`.volume` Docker image extractor | Complete | See below. |
 | 0089  | 2026-04-28 | Vela CI `.vela.yml` Docker image extractor | Complete | See below. |
 | 0088  | 2026-04-28 | Dev Container `devcontainer.json` Docker image extractor | Complete | See below. |
