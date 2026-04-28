@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0141  | 2026-04-28 | Cloud Native Buildpacks `project.toml` extractor + BuildpacksRegistry datasource | Complete | See below. |
 | 0140  | 2026-04-28 | Unity3D `ProjectVersion.txt` extractor + Unity releases datasource | Complete | See below. |
 | 0139  | 2026-04-28 | Pixi `pixi.toml` extractor (PyPI deps actionable, Conda skipped) | Complete | See below. |
 | 0138  | 2026-04-28 | Bitrise CI step extractor + Bitrise steplib datasource | Complete | See below. |
@@ -3087,6 +3088,34 @@ Pick whichever can be completed in one loop:
 ### Verification
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 944 passed
+
+## Slice 0141 - Cloud Native Buildpacks `project.toml` extractor + BuildpacksRegistry datasource
+
+### Renovate reference
+- `lib/modules/manager/buildpacks/extract.ts` + `schema.ts`
+- `lib/modules/datasource/buildpacks-registry/index.ts`
+- Pattern: `(^|/)project\.toml$`
+- Datasources: `buildpacks-registry` (actionable), `docker` (skipped)
+
+### What landed
+- `crates/renovate-core/src/extractors/buildpacks.rs` (new):
+  - TOML parsing of `[io.buildpacks]` section.
+  - `builder = "image:tag"` → `BuildpacksSource::Docker` (skipped, `docker-image`).
+  - `[[io.buildpacks.group]]` with `id`+`version` → `BuildpacksSource::Registry` (actionable).
+  - `uri = "urn:cnb:registry:ns/name@v"` → `BuildpacksSource::Registry` (actionable).
+  - `uri = "docker://..."` or `uri = "image:tag"` → `BuildpacksSource::Docker` (skipped).
+  - Unsupported schemes → `BuildpacksSkipReason::UnsupportedUri`.
+  - 5 unit tests.
+- `crates/renovate-core/src/datasources/buildpacks_registry.rs` (new):
+  - `fetch_latest(http, package_name, current_value)`.
+  - `GET https://registry.buildpacks.io/api/v1/buildpacks/{ns}/{name}`.
+  - Versions returned newest-first; picks `results[0]`.
+- Registered in `datasources.rs`, `extractors.rs`, `managers.rs`.
+- `crates/renovate-cli/src/main.rs`: pipeline dispatches registry deps to datasource.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`: clean
+- `cargo nextest run -p renovate-core`: 999 passed
 
 ## Slice 0140 - Unity3D `ProjectVersion.txt` extractor + Unity releases datasource
 

@@ -15,6 +15,7 @@ pub mod bicep;
 pub mod bitbucket_pipelines;
 pub mod bitrise;
 pub mod buildkite;
+pub mod buildpacks;
 pub mod bundler;
 pub mod cabal;
 pub mod cake;

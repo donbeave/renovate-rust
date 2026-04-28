@@ -488,6 +488,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         name: "unity3d",
         patterns: &[r"(^|/)ProjectSettings/ProjectVersion\.txt$"],
     },
+    ManagerDef {
+        name: "buildpacks",
+        patterns: &[r"(^|/)project\.toml$"],
+    },
 ];
 
 /// Detect which package managers are present in the repository.

@@ -6243,6 +6243,82 @@ async fn process_repo(
         }
     }
 
+    // ── Cloud Native Buildpacks (project.toml) ────────────────────────────────
+    for bp_path in manager_files(&detected, "buildpacks") {
+        match client.get_raw_file(owner, repo, &bp_path).await {
+            Ok(Some(raw)) => {
+                use renovate_core::extractors::buildpacks::{
+                    BuildpacksSkipReason, BuildpacksSource,
+                };
+                let deps = renovate_core::extractors::buildpacks::extract(&raw.content);
+                tracing::debug!(
+                    repo = %repo_slug, file = %bp_path,
+                    total = deps.len(),
+                    "extracted buildpacks deps"
+                );
+                let mut dep_reports: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    if let Some(reason) = &dep.skip_reason {
+                        dep_reports.push(output::DepReport {
+                            name: dep.dep_name.clone(),
+                            status: output::DepStatus::Skipped {
+                                reason: match reason {
+                                    BuildpacksSkipReason::DockerImage => "docker-image".to_owned(),
+                                    BuildpacksSkipReason::NoVersion => "no-version".to_owned(),
+                                    BuildpacksSkipReason::UnsupportedUri => {
+                                        "unsupported-url".to_owned()
+                                    }
+                                },
+                            },
+                        });
+                        continue;
+                    }
+                    if dep.source != BuildpacksSource::Registry {
+                        continue;
+                    }
+                    if repo_cfg.is_dep_ignored(&dep.dep_name) {
+                        continue;
+                    }
+                    let status =
+                        match renovate_core::datasources::buildpacks_registry::fetch_latest(
+                            http,
+                            &dep.dep_name,
+                            &dep.current_value,
+                        )
+                        .await
+                        {
+                            Ok(s) if s.update_available => output::DepStatus::UpdateAvailable {
+                                current: dep.current_value.clone(),
+                                latest: s.latest.unwrap_or_default(),
+                            },
+                            Ok(s) => output::DepStatus::UpToDate { latest: s.latest },
+                            Err(e) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                        };
+                    dep_reports.push(output::DepReport {
+                        name: dep.dep_name.clone(),
+                        status,
+                    });
+                }
+                if !dep_reports.is_empty() {
+                    repo_report.files.push(output::FileReport {
+                        path: bp_path.clone(),
+                        manager: "buildpacks".into(),
+                        deps: dep_reports,
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%bp_path, "project.toml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%bp_path, %err, "failed to fetch project.toml");
+                had_error = true;
+            }
+        }
+    }
+
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
 
