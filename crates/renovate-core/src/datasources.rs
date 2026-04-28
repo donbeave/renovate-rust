@@ -10,5 +10,6 @@ pub mod github_tags;
 pub mod gomod;
 pub mod maven;
 pub mod npm;
+pub mod nuget;
 pub mod packagist;
 pub mod pypi;

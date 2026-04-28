@@ -32,6 +32,7 @@ use renovate_core::datasources::github_tags as github_tags_datasource;
 use renovate_core::datasources::gomod as gomod_datasource;
 use renovate_core::datasources::maven as maven_datasource;
 use renovate_core::datasources::npm as npm_datasource;
+use renovate_core::datasources::nuget as nuget_datasource;
 use renovate_core::datasources::packagist as packagist_datasource;
 use renovate_core::datasources::pypi as pypi_datasource;
 use renovate_core::extractors::cargo as cargo_extractor;
@@ -40,6 +41,7 @@ use renovate_core::extractors::github_actions as github_actions_extractor;
 use renovate_core::extractors::gomod as gomod_extractor;
 use renovate_core::extractors::maven as maven_extractor;
 use renovate_core::extractors::npm as npm_extractor;
+use renovate_core::extractors::nuget as nuget_extractor;
 use renovate_core::extractors::pep621 as pep621_extractor;
 use renovate_core::extractors::pip as pip_extractor;
 use renovate_core::extractors::poetry as poetry_extractor;
@@ -364,6 +366,62 @@ async fn process_repo(
             }
             Err(err) => {
                 tracing::error!(repo=%repo_slug, file=%cargo_file_path, %err, "failed to fetch Cargo.toml");
+                had_error = true;
+            }
+        }
+    }
+
+    // ── NuGet (.csproj / .props / .targets) ──────────────────────────────────
+    for nuget_file_path in manager_files(&detected, "nuget") {
+        match client.get_raw_file(owner, repo, &nuget_file_path).await {
+            Ok(Some(raw)) => match nuget_extractor::extract(&raw.content) {
+                Ok(deps) => {
+                    let actionable: Vec<_> = deps
+                        .iter()
+                        .filter(|d| {
+                            d.skip_reason.is_none() && !repo_cfg.is_dep_ignored(&d.package_id)
+                        })
+                        .collect();
+                    tracing::debug!(
+                        repo = %repo_slug, file = %nuget_file_path,
+                        total = deps.len(), actionable = actionable.len(),
+                        "extracted nuget dependencies"
+                    );
+                    let dep_inputs: Vec<nuget_datasource::NuGetDepInput> = actionable
+                        .iter()
+                        .map(|d| nuget_datasource::NuGetDepInput {
+                            package_id: d.package_id.clone(),
+                            current_value: d.current_value.clone(),
+                        })
+                        .collect();
+                    let updates = nuget_datasource::fetch_updates_concurrent(
+                        http,
+                        &dep_inputs,
+                        nuget_datasource::NUGET_API,
+                        10,
+                    )
+                    .await;
+                    let update_map: HashMap<_, _> = updates
+                        .into_iter()
+                        .map(|r| (r.package_id, r.summary))
+                        .collect();
+                    repo_report.files.push(output::FileReport {
+                        path: nuget_file_path.clone(),
+                        manager: "nuget".into(),
+                        deps: build_dep_reports_nuget(&deps, &actionable, &update_map),
+                    });
+                }
+                Err(err) => {
+                    tracing::warn!(repo=%repo_slug, file=%nuget_file_path, %err,
+                        "failed to parse nuget project file")
+                }
+            },
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%nuget_file_path, "nuget file not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%nuget_file_path, %err,
+                    "failed to fetch nuget file");
                 had_error = true;
             }
         }
@@ -1200,6 +1258,48 @@ fn build_dep_reports_maven(
         };
         reports.push(output::DepReport {
             name: dep.dep_name.clone(),
+            status,
+        });
+    }
+    reports
+}
+
+fn build_dep_reports_nuget(
+    all_deps: &[renovate_core::extractors::nuget::NuGetExtractedDep],
+    actionable: &[&renovate_core::extractors::nuget::NuGetExtractedDep],
+    update_map: &HashMap<
+        String,
+        Result<
+            renovate_core::datasources::nuget::NuGetUpdateSummary,
+            renovate_core::datasources::nuget::NuGetError,
+        >,
+    >,
+) -> Vec<output::DepReport> {
+    let mut reports = Vec::new();
+    for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
+        reports.push(output::DepReport {
+            name: dep.package_id.clone(),
+            status: output::DepStatus::Skipped {
+                reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
+            },
+        });
+    }
+    for dep in actionable {
+        let status = match update_map.get(&dep.package_id) {
+            Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                current: s.current_value.clone(),
+                latest: s.latest.clone().unwrap_or_default(),
+            },
+            Some(Ok(s)) => output::DepStatus::UpToDate {
+                latest: s.latest.clone(),
+            },
+            Some(Err(e)) => output::DepStatus::LookupError {
+                message: e.to_string(),
+            },
+            None => output::DepStatus::UpToDate { latest: None },
+        };
+        reports.push(output::DepReport {
+            name: dep.package_id.clone(),
             status,
         });
     }

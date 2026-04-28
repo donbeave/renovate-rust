@@ -11,6 +11,7 @@ pub mod github_actions;
 pub mod gomod;
 pub mod maven;
 pub mod npm;
+pub mod nuget;
 pub mod pep621;
 pub mod pip;
 pub mod poetry;

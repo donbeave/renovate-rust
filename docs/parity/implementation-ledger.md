@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0035  | 2026-04-28 | NuGet `.csproj`/`.props` extractor + NuGet API datasource | Complete | See below. |
 | 0034  | 2026-04-28 | Composer `composer.json` extractor + Packagist datasource | Complete | See below. |
 | 0033  | 2026-04-28 | Go modules `go.mod` extractor + Go proxy datasource | Complete | See below. |
 | 0032  | 2026-04-28 | Poetry `pyproject.toml` extractor + poetry manager | Complete | See below. |
@@ -55,6 +56,50 @@ should be able to plan the next slice from this file alone.
 | 0003  | 2026-04-28 | Logger init (LOG_LEVEL, LOG_FORMAT, NO_COLOR) | Complete | See below. |
 | 0002  | 2026-04-28 | `migrateArgs` parity           | Complete | See below. |
 | 0001  | 2026-04-28 | Workspace + early CLI flags    | Complete | See below. |
+
+## Slice 0035 - NuGet `.csproj`/`.props` extractor + NuGet API datasource
+
+### Renovate reference
+- `lib/modules/manager/nuget/extract.ts` — `extractPackageFile`
+- `lib/modules/datasource/nuget/index.ts`
+- Patterns: `/\\.(?:cs|fs|vb)proj$/`, `/\\.(?:props|targets)$/`
+
+### What landed
+- `crates/renovate-core/src/extractors/nuget.rs` — SAX-style MSBuild XML
+  extractor using `quick-xml` (already a dependency). Handles both
+  `Event::Empty` (self-closing `<PackageReference ... />`) and `Event::Start`
+  + child elements (`<Version>...</Version>`, `<VersionOverride>...</VersionOverride>`).
+  - Supported elements: `PackageReference` (Include/Update), `PackageVersion`,
+    `DotNetCliToolReference`, `GlobalPackageReference`.
+  - `VersionOverride` wins over `Version` attribute when both present.
+  - Skip reasons: `PropertyRef` (`$(Variable)`), `VersionRange` (complex range
+    with upper bound or exclusive lower), `NoVersion` (no version specified).
+  - NuGet version range normalization: `[1.2.3]` → `1.2.3`, `[1.2.3,]`/`[1.2.3,)` →
+    `1.2.3` (updateable min-only ranges), `(1.2.3,)` and ranges with upper bound → skip.
+  - 13 unit tests.
+- `crates/renovate-core/src/datasources/nuget.rs` — NuGet flat-container API:
+  - `GET {api_base}/{lowercase_id}/index.json` → `{"versions": [...]}`.
+  - Package ID lowercased in URL (NuGet API requirement).
+  - Versions in ascending order; search in reverse for latest stable.
+  - `is_stable`: version must not contain `-` (pre-release hyphen separator).
+  - `fetch_updates_concurrent` with bounded JoinSet.
+  - 5 tests (2 unit, 3 wiremock).
+- `managers.rs` — `nuget` manager with patterns for `.csproj`, `.fsproj`,
+  `.vbproj`, `.props`, `.targets`.
+- `cli/main.rs` — NuGet pipeline with `build_dep_reports_nuget` helper.
+
+### What was intentionally deferred
+- `packages.config` XML format (legacy NuGet).
+- `dotnet-tools.json` tool manifest.
+- `global.json` SDK version.
+- Custom NuGet feeds (via `nuget.config`).
+- Directory.Packages.props multi-project detection.
+
+### Verification
+- `cargo build --workspace --all-features`
+- `cargo fmt --all --check`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features` (386 passed)
 
 ## Slice 0034 - Composer `composer.json` extractor + Packagist datasource
 
