@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0110  | 2026-04-28 | Conan `conanfile.txt`/`.py` extractor + Conan Center datasource | Complete | See below. |
 | 0109  | 2026-04-28 | `.ruby-version` version file (GitHub Tags, underscore tag normalization) | Complete | See below. |
 | 0108  | 2026-04-28 | Clojure `deps.edn` / `bb.edn` extractor | Complete | See below. |
 | 0107  | 2026-04-28 | Azure Pipelines Tasks datasource (GitHub mirror JSON) | Complete | See below. |
@@ -2852,6 +2853,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 897 passed
 
+## Slice 0110 - Conan `conanfile.txt`/`.py` extractor + Conan Center datasource
+
+### Renovate reference
+- `lib/modules/manager/conan/extract.ts`
+- `lib/modules/datasource/conan/index.ts` — `getConanCenterReleases`
+- Patterns: `/(^|/)conanfile\.(txt|py)$/`
+- API: GitHub API `conan-io/conan-center-index/contents/recipes/{name}/config.yml`
+
+### What landed
+- `crates/renovate-core/src/extractors/conan.rs` (new):
+  - `ConanDepType { Requires, BuildRequires, PythonRequires }` enum.
+  - `ConanSkipReason { CustomChannel, RangeVersion }` enum.
+  - `ConanDep { name, current_value, dep_type, skip_reason }` struct.
+  - `extract_txt()` — section-aware `[requires]`/`[build_requires]` scanner.
+  - `extract_py()` — line scanner for `requires`/`build_requires` assignments.
+  - `parse_dep_line()` — shared `name/version[@channel]` regex parser.
+  - 5 unit tests.
+- `crates/renovate-core/src/datasources/conan.rs` (new):
+  - `fetch_latest(http, package_name, current_value)` — fetches `config.yml` from
+    `conan-io/conan-center-index` on GitHub via raw Accept header; parses version keys.
+  - `get_raw_with_accept()` added to `HttpClient`.
+  - 2 unit tests.
+- `crates/renovate-core/src/managers.rs`: `conan` with `(^|/)conanfile\.(txt|py)$` pattern.
+- `crates/renovate-cli/src/main.rs`: Conan pipeline with `ConanError::NotFound` → Skipped.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 904 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2865,7 +2895,8 @@ Pick whichever can be completed in one loop:
 5. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
 6. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
 7. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
-8. **`conan`** — C/C++ Conan package manager (`conanfile.txt`/`conanfile.py`) extraction.
+8. **`cake`** — C# Cake build scripts (`*.cake` / `*.csx`) dependency extraction.
+9. **`pixi`** — Pixi `pixi.toml` conda/PyPI package extraction.
 9. **`pixi`** — Pixi `pixi.toml` conda package extraction.
 9. **`ruby-version`** — `.ruby-version` file version tracking (GitHub Releases).
 10. **`conan`** — C/C++ Conan package manager (`conanfile.txt`/`conanfile.py`).

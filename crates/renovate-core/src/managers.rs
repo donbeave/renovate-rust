@@ -222,6 +222,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Cargo\.toml$"],
     },
     ManagerDef {
+        name: "conan",
+        patterns: &[r"(^|/)conanfile\.(txt|py)$"],
+    },
+    ManagerDef {
         name: "ruby-version",
         patterns: &[r"(^|/)\.ruby-version$"],
     },

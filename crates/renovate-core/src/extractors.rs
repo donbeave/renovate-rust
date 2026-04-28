@@ -15,6 +15,7 @@ pub mod circleci;
 pub mod cloudbuild;
 pub mod cocoapods;
 pub mod composer;
+pub mod conan;
 pub mod deps_edn;
 pub mod devbox;
 pub mod devcontainer;

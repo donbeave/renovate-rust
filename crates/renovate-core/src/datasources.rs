@@ -6,6 +6,7 @@
 
 pub mod azure_pipelines_tasks;
 pub mod cocoapods;
+pub mod conan;
 pub mod crates_io;
 pub mod devbox;
 pub mod docker_hub;

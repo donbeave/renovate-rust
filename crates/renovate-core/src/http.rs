@@ -146,6 +146,24 @@ impl HttpClient {
         Ok(body)
     }
 
+    /// Send a GET request with a custom `Accept` header and return the body as text.
+    pub async fn get_raw_with_accept(&self, url: &str, accept: &str) -> Result<String, HttpError> {
+        let rb = self.inner.get(url).header("Accept", accept);
+        let rb = match &self.token {
+            Some(t) => rb.bearer_auth(t),
+            None => rb,
+        };
+        let resp = rb.send().await.map_err(HttpError::Request)?;
+        if !resp.status().is_success() {
+            return Err(HttpError::Status {
+                status: resp.status(),
+                url: url.to_owned(),
+            });
+        }
+        let text = resp.text().await.map_err(HttpError::Request)?;
+        Ok(text)
+    }
+
     /// Send a POST request with a JSON body and deserialize the JSON response.
     pub async fn post_json<T: serde::de::DeserializeOwned>(
         &self,
