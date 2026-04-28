@@ -1228,6 +1228,90 @@ async fn process_repo(
         }
     }
 
+    // ── gemspec (.gemspec) ────────────────────────────────────────────────────
+    for gemspec_path in manager_files(&detected, "gemspec") {
+        match client.get_raw_file(owner, repo, &gemspec_path).await {
+            Ok(Some(raw)) => {
+                let deps = renovate_core::extractors::gemspec::extract(&raw.content);
+                let actionable: Vec<_> = deps
+                    .iter()
+                    .filter(|d| {
+                        d.skip_reason.is_none()
+                            && !d.current_value.is_empty()
+                            && !repo_cfg.is_dep_ignored(&d.name)
+                    })
+                    .collect();
+                tracing::debug!(
+                    repo = %repo_slug, file = %gemspec_path,
+                    total = deps.len(), actionable = actionable.len(),
+                    "extracted gemspec deps"
+                );
+                let dep_inputs: Vec<rubygems_datasource::GemDepInput> = actionable
+                    .iter()
+                    .map(|d| rubygems_datasource::GemDepInput {
+                        name: d.name.clone(),
+                        current_value: d.current_value.clone(),
+                    })
+                    .collect();
+                let updates = rubygems_datasource::fetch_updates_concurrent(
+                    http,
+                    &dep_inputs,
+                    rubygems_datasource::RUBYGEMS_API,
+                    10,
+                )
+                .await;
+                let update_map: HashMap<_, _> =
+                    updates.into_iter().map(|r| (r.name, r.summary)).collect();
+                let mut file_deps: Vec<output::DepReport> = Vec::new();
+                for dep in &deps {
+                    let status = if let Some(reason) = &dep.skip_reason {
+                        output::DepStatus::Skipped {
+                            reason: format!("{reason:?}").to_lowercase(),
+                        }
+                    } else if dep.current_value.is_empty() {
+                        output::DepStatus::Skipped {
+                            reason: "no-version".to_owned(),
+                        }
+                    } else if repo_cfg.is_dep_ignored(&dep.name) {
+                        output::DepStatus::Skipped {
+                            reason: "ignored".to_owned(),
+                        }
+                    } else {
+                        match update_map.get(&dep.name) {
+                            Some(Ok(s)) if s.update_available => {
+                                output::DepStatus::UpdateAvailable {
+                                    current: s.current_value.clone(),
+                                    latest: s.latest.clone().unwrap_or_default(),
+                                }
+                            }
+                            Some(Ok(s)) => output::DepStatus::UpToDate {
+                                latest: s.latest.clone(),
+                            },
+                            Some(Err(e)) => output::DepStatus::LookupError {
+                                message: e.to_string(),
+                            },
+                            None => output::DepStatus::UpToDate { latest: None },
+                        }
+                    };
+                    file_deps.push(output::DepReport {
+                        name: dep.name.clone(),
+                        status,
+                    });
+                }
+                repo_report.files.push(output::FileReport {
+                    path: gemspec_path.clone(),
+                    manager: "gemspec".into(),
+                    deps: file_deps,
+                });
+            }
+            Ok(None) => tracing::warn!(repo=%repo_slug, file=%gemspec_path, ".gemspec not found"),
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%gemspec_path, %err, "failed to fetch .gemspec");
+                had_error = true;
+            }
+        }
+    }
+
     // ── Terraform (.tf / .tofu) ───────────────────────────────────────────────
     for tf_file_path in manager_files(&detected, "terraform") {
         match client.get_raw_file(owner, repo, &tf_file_path).await {

@@ -1649,6 +1649,35 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo test --workspace`: 513 passed
 
+## Slice 0052 - Ruby `.gemspec` extractor
+
+### Renovate reference
+- `lib/modules/manager/bundler/extract.ts` — handles gemspec deps inline
+- Datasource: RubyGems (reuses existing `datasources/rubygems.rs`)
+- Versioning: semver_generic (reuses existing `versioning/semver_generic.rs`)
+- Pattern: `(^|/)[^/]*\.gemspec$`
+
+### What landed
+- `crates/renovate-core/src/extractors/gemspec.rs` — line scanner:
+  - Regex: `(?i)^\s*(?:\w+\.)?add(?:_(runtime|development))?_dependency\s+['"]name['"](rest)`
+  - Captures all three method forms: `add_dependency`, `add_runtime_dependency`,
+    `add_development_dependency` with any receiver prefix (`spec.`, `s.`, `gem.`).
+  - Multi-constraint versions joined: `">= 6.0", "< 8.0"` → `">= 6.0, < 8.0"`.
+  - Skip reasons: `NoVersion` (unconstrained), `GitSource` (`git:`/`github:` option),
+    `PathSource` (`path:` option).
+  - `is_dev: bool` field set for development dependencies.
+- Manager pattern `gemspec` with `(^|/)[^/]*\.gemspec$`.
+- Pipeline wired in `main.rs` routing to RubyGems datasource + semver_generic.
+
+### What was intentionally deferred
+- `gemspec` directive in `Gemfile` (Bundler reads the .gemspec file and includes
+  its deps — would require cross-file resolution).
+- Ruby version requirements (`spec.required_ruby_version`).
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo test --workspace`: 521 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -1656,7 +1685,7 @@ Pick whichever can be completed in one loop:
 1. **Renovate option surface (first cut)**: port the option definitions
    from `lib/config/options/index.ts` into a strongly-typed Rust schema
    and wire them into clap.
-2. **`gemspec` extractor**: extend bundler manager to parse `.gemspec` files.
-3. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
-4. **`pip-compile` / `requirements.in` extractor**: constrained pip requirements.
-5. **`conda` environment extractor**: parse `environment.yml` for conda packages.
+2. **Cargo lock parsing**: parse `Cargo.lock` for pinned transitive dependency versions.
+3. **`pip-compile` / `requirements.in` extractor**: constrained pip requirements.
+4. **`pipenv` / `Pipfile` extractor**: Python dependency management with Pipfile.
+5. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps.

@@ -85,6 +85,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)Gemfile$"],
     },
     ManagerDef {
+        name: "gemspec",
+        patterns: &[r"(^|/)[^/]*\.gemspec$"],
+    },
+    ManagerDef {
         name: "cocoapods",
         patterns: &[r"(^|/)Podfile$"],
     },
