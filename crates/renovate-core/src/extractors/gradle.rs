@@ -42,6 +42,9 @@ pub enum GradleSkipReason {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GradleExtractedDep {
     /// Maven coordinate `group:artifact` (e.g. `com.google.guava:guava`).
+    ///
+    /// For `plugins {}` entries, this is `{id}:{id}.gradle.plugin` — the
+    /// conventional Maven marker artifact for Gradle plugins.
     pub dep_name: String,
     /// Version string (e.g. `31.0-jre`).
     pub current_value: String,
@@ -49,6 +52,15 @@ pub struct GradleExtractedDep {
     pub source: GradleDepSource,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<GradleSkipReason>,
+}
+
+/// Whether this dep came from the `plugins {}` block.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GradleDepKind {
+    /// Normal dependency declaration (`implementation`, `api`, `classpath`, etc.).
+    Dependency,
+    /// Plugin declared in the `plugins {}` block (`id "..." version "..."`).
+    Plugin,
 }
 
 // ── Compiled regexes ──────────────────────────────────────────────────────────
@@ -62,15 +74,35 @@ static STRING_DEP: LazyLock<Regex> = LazyLock::new(|| {
     ).unwrap()
 });
 
+/// Matches a Gradle `plugins {}` block entry:
+/// `id "plugin.id" version "X.Y.Z"` or `id("plugin.id") version "X.Y.Z"`.
+///
+/// Group 1: plugin ID string.
+/// Group 2: version string.
+static PLUGIN_DEP: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"\bid\s*[\(]?\s*['"]([^'"]+)['"]\s*[\)]?\s+version\s+['"]([^'"]+)['"]"#).unwrap()
+});
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /// Parse a `.gradle` or `.gradle.kts` file and extract all dep declarations.
+///
+/// Handles both regular dependency declarations (`implementation`, `api`, etc.)
+/// and `plugins {}` block entries (`id "..." version "..."`).
 pub fn extract_build_file(content: &str) -> Vec<GradleExtractedDep> {
     let mut deps = Vec::new();
 
     for cap in STRING_DEP.captures_iter(content) {
         let raw = cap[1].trim();
         if let Some(dep) = parse_dep_string(raw, GradleDepSource::BuildScript) {
+            deps.push(dep);
+        }
+    }
+
+    for cap in PLUGIN_DEP.captures_iter(content) {
+        let plugin_id = cap[1].trim();
+        let version = cap[2].trim();
+        if let Some(dep) = parse_plugin_dep(plugin_id, version) {
             deps.push(dep);
         }
     }
@@ -114,6 +146,25 @@ pub fn extract_version_catalog(content: &str) -> Vec<GradleExtractedDep> {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/// Parse a Gradle `plugins {}` block entry into a `GradleExtractedDep`.
+///
+/// Converts the plugin ID `org.springframework.boot` to the Maven marker
+/// artifact coordinate `org.springframework.boot:org.springframework.boot.gradle.plugin`.
+fn parse_plugin_dep(plugin_id: &str, version: &str) -> Option<GradleExtractedDep> {
+    if plugin_id.is_empty() || version.is_empty() {
+        return None;
+    }
+    // Plugin marker artifact: `{id}:{id}.gradle.plugin`
+    let dep_name = format!("{plugin_id}:{plugin_id}.gradle.plugin");
+    let skip_reason = classify_version(version);
+    Some(GradleExtractedDep {
+        dep_name,
+        current_value: version.to_owned(),
+        source: GradleDepSource::BuildScript,
+        skip_reason,
+    })
+}
 
 /// Parse a Maven `group:artifact:version` dependency string.
 ///
@@ -310,6 +361,70 @@ testImplementation 'junit:junit:4.13.2'
         let deps = extract_build_file(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "com.android.tools.build:gradle");
+    }
+
+    // ── plugins {} block tests ────────────────────────────────────────────────
+
+    #[test]
+    fn plugins_block_single_quote() {
+        let content = r#"
+plugins {
+    id 'org.springframework.boot' version '3.2.0'
+}
+"#;
+        let deps = extract_build_file(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].dep_name,
+            "org.springframework.boot:org.springframework.boot.gradle.plugin"
+        );
+        assert_eq!(deps[0].current_value, "3.2.0");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    #[test]
+    fn plugins_block_double_quote_parens() {
+        let content = r#"
+plugins {
+    id("io.spring.dependency-management") version "1.1.4"
+    id("org.jetbrains.kotlin.jvm") version "1.9.20"
+}
+"#;
+        let deps = extract_build_file(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(|d| d.dep_name
+            == "io.spring.dependency-management:io.spring.dependency-management.gradle.plugin"));
+        assert!(deps.iter().any(|d| d.dep_name
+            == "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin"
+            && d.current_value == "1.9.20"));
+    }
+
+    #[test]
+    fn plugins_and_deps_in_same_file() {
+        let content = r#"
+plugins {
+    id 'org.springframework.boot' version '3.2.0'
+}
+
+dependencies {
+    implementation 'com.google.guava:guava:31.0-jre'
+}
+"#;
+        let deps = extract_build_file(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(|d| d.dep_name.contains("springframework")));
+        assert!(deps.iter().any(|d| d.dep_name == "com.google.guava:guava"));
+    }
+
+    #[test]
+    fn plugins_block_variable_version_skipped() {
+        let content = r#"plugins { id 'org.example.plugin' version "$pluginVersion" }"#;
+        let deps = extract_build_file(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(GradleSkipReason::VariableReference)
+        );
     }
 
     // ── version catalog tests ─────────────────────────────────────────────────

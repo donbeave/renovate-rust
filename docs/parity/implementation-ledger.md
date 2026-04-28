@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0075  | 2026-04-28 | Gradle `plugins {}` block extraction | Complete | See below. |
 | 0074  | 2026-04-28 | Extend asdf tool table (bun, deno, zig, elixir, scala) + bun-version file | Complete | See below. |
 | 0073  | 2026-04-28 | Add `stats` (update counts) to JSON output | Complete | See below. |
 | 0072  | 2026-04-28 | `packageRules` matchFileNames glob filtering | Complete | See below. |
@@ -2267,6 +2268,25 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `cargo nextest run --workspace --all-features`: 720 passed
 
+## Slice 0075 - Gradle `plugins {}` block extraction
+
+### Renovate reference
+- `lib/modules/manager/gradle/parser/plugins.ts` — plugin block parser
+
+### What landed
+- `crates/renovate-core/src/extractors/gradle.rs`:
+  - `PLUGIN_DEP` regex: `\bid\s*[\(]?\s*['"]([^'"]+)['"]\s*[\)]?\s+version\s+['"]([^'"]+)['"]`
+    matches both `id 'plugin.id' version 'X.Y'` and `id("plugin.id") version "X.Y"` forms.
+  - `parse_plugin_dep(plugin_id, version) -> Option<GradleExtractedDep>` — converts plugin ID to
+    Maven marker coordinate `{id}:{id}.gradle.plugin` (the standard artifact name for Gradle plugins).
+  - `extract_build_file()` now calls both `STRING_DEP` and `PLUGIN_DEP` scanners.
+  - `GradleDepKind` enum added (Dependency / Plugin) for future dep-type filtering.
+  - 4 new tests: single-quote, double-quote-parens, mixed plugins + deps, variable version skip.
+
+### Verification
+- `cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo nextest run --workspace --all-features`: 724 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2278,5 +2298,5 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **GitLab CI `include:` project components**: component dependency version tracking.
-6. **`autoMerge` and `depTypes` in packageRules**: more rule condition fields.
-7. **kustomize extractor**: Kustomize `kustomization.yaml` resource URLs and image references.
+6. **kustomize `images:` and `helmCharts:` extractor**: Kustomize manifest image and Helm chart deps.
+7. **Gradle version catalog `[plugins]` section**: extract plugin versions from TOML catalogs.
