@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0105  | 2026-04-28 | FluxCD `gotk-components.yaml` system manifest extractor | Complete | See below. |
 | 0104  | 2026-04-28 | SBT `build.sbt` / `project/build.properties` extractor | Complete | See below. |
 | 0103  | 2026-04-28 | Ansible tasks Docker image extractor | Complete | See below. |
 | 0102  | 2026-04-28 | Leiningen `project.clj` extractor (Clojars + Maven Central) | Complete | See below. |
@@ -2719,6 +2720,33 @@ Pick whichever can be completed in one loop:
 - `cargo fmt --all && cargo clippy --all-targets --all-features`
 - `cargo nextest run --workspace`: 879 passed
 
+## Slice 0105 - FluxCD `gotk-components.yaml` system manifest extractor
+
+### Renovate reference
+- `lib/modules/manager/flux/extract.ts` — `extractSystemManifest`
+- `lib/modules/manager/flux/common.ts` — `systemManifestHeaderRegex`
+- Pattern: `/(^|/)gotk-components\.ya?ml$/`
+- Datasource: GitHub Releases (`fluxcd/flux2`)
+
+### What landed
+- `crates/renovate-core/src/extractors/flux.rs` (new):
+  - `FluxSystemDep { version, components }` struct.
+  - `FLUX2_REPO = "fluxcd/flux2"` constant.
+  - `extract(content)` — applies `# Flux Version: <ver>` regex to whole file content
+    (not line-by-line) so the optional `# Components:` on the next line is captured.
+  - 5 unit tests.
+- `crates/renovate-core/src/managers.rs`: `flux` manager with pattern `(^|/)gotk-components\.ya?ml$`.
+- `crates/renovate-cli/src/main.rs`: Flux pipeline — calls `fetch_latest_release("fluxcd/flux2")`
+  and emits one `DepReport`.
+
+### What was intentionally deferred
+- `HelmRelease`, `GitRepository`, `OCIRepository` CRD resources (require YAML schema parsing).
+- Kustomize image refs inside Flux resource manifests.
+
+### Verification
+- `cargo fmt --all && cargo clippy --all-targets --all-features`
+- `cargo nextest run --workspace`: 884 passed
+
 ## Next slice candidates
 
 Pick whichever can be completed in one loop:
@@ -2730,8 +2758,8 @@ Pick whichever can be completed in one loop:
 3. **`bazel` / `MODULE.bazel` extractor**: Bazel module deps (requires Bazel Central Registry datasource).
 4. **`tekton` extractor**: Tekton pipeline bundle references.
 5. **`azure-pipelines-tasks` datasource**: fetch task versions from GitHub mirror JSON.
-6. **Flux** (`gotk-components.yaml`, `HelmRelease` CRDs) extractor.
-7. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
-8. **`nix` Flakes** — `flake.nix` version and input extraction.
-9. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+6. **`devcontainer` features** — version extraction for Node, Go, Python, Ruby features.
+7. **`nix` Flakes** — `flake.lock` JSON input tracking via GitHub Tags.
+8. **`argocd`** — ArgoCD Application YAML Helm chart version extraction.
+9. **`cpanfile`** — Perl `cpanfile` dependency extraction (MetaCPAN API).
 11. **Travis CI** `.travis.yml` Node.js version extraction.

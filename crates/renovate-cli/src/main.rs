@@ -3485,6 +3485,56 @@ async fn process_repo(
         }
     }
 
+    // ── FluxCD system manifest (gotk-components.yaml) ────────────────────────
+    for flux_path in manager_files(&detected, "flux") {
+        match client.get_raw_file(owner, repo, &flux_path).await {
+            Ok(Some(raw)) => {
+                if let Some(dep) = renovate_core::extractors::flux::extract(&raw.content) {
+                    tracing::debug!(
+                        repo = %repo_slug, file = %flux_path,
+                        version = %dep.version, "extracted flux version"
+                    );
+                    let status = match github_releases_datasource::fetch_latest_release(
+                        renovate_core::extractors::flux::FLUX2_REPO,
+                        &gh_http,
+                        gh_api_base,
+                    )
+                    .await
+                    {
+                        Ok(Some(latest)) if latest != dep.version => {
+                            output::DepStatus::UpdateAvailable {
+                                current: dep.version.clone(),
+                                latest,
+                            }
+                        }
+                        Ok(Some(latest)) => output::DepStatus::UpToDate {
+                            latest: Some(latest),
+                        },
+                        Ok(None) => output::DepStatus::UpToDate { latest: None },
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    repo_report.files.push(output::FileReport {
+                        path: flux_path.clone(),
+                        manager: "flux".into(),
+                        deps: vec![output::DepReport {
+                            name: renovate_core::extractors::flux::FLUX2_REPO.to_owned(),
+                            status,
+                        }],
+                    });
+                }
+            }
+            Ok(None) => {
+                tracing::warn!(repo=%repo_slug, file=%flux_path, "gotk-components.yaml not found")
+            }
+            Err(err) => {
+                tracing::error!(repo=%repo_slug, file=%flux_path, %err, "failed to fetch gotk-components.yaml");
+                had_error = true;
+            }
+        }
+    }
+
     // ── SBT (build.sbt / project/*.scala / project/build.properties) ────────
     for sbt_path in manager_files(&detected, "sbt") {
         match client.get_raw_file(owner, repo, &sbt_path).await {

@@ -338,6 +338,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)\.mvn/wrapper/maven-wrapper\.properties$"],
     },
     ManagerDef {
+        name: "flux",
+        patterns: &[r"(^|/)gotk-components\.ya?ml$"],
+    },
+    ManagerDef {
         name: "github-actions",
         patterns: &[
             r"(^|/)(workflow-templates|\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\.ya?ml$",

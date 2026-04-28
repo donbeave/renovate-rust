@@ -20,6 +20,7 @@ pub mod devcontainer;
 pub mod docker_compose;
 pub mod dockerfile;
 pub mod droneci;
+pub mod flux;
 pub mod gemspec;
 pub mod github_actions;
 pub mod gitlabci;
