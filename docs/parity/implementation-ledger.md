@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0301  | 2026-04-29 | `group:react`, `group:puppeteer`, `group:remark`, `group:socketio`, `group:micrometer`, `group:resilience4j`, `group:hibernateValidator`, `group:hibernateOgm`, `group:springBoot` (2 rules), `group:springCore/Cloud/Data/Security`; 4 tests | Complete | See below. |
 | 0300  | 2026-04-29 | `group:jsTestNonMajor`, `group:jsUnitTest`, `group:jsUnitTestNonMajor`, `group:gradle`, `group:hibernateCore`, `group:hibernateCommons`, `group:definitelyTyped`; refactor to shared `JS_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |
 | 0299  | 2026-04-29 | `group:allDigest`, `group:nodeJs`, `group:jsTest` presets; `group:nodeJs` uses regex+negation match_package_names with docker+node-version datasources; `group:jsTest` inlines jsUnitTest package list; 3 tests | Complete | See below. |
 | 0298  | 2026-04-29 | `automergeSchedule` config field + `schedule:automerge*` preset expansion (9 presets); parallel to `schedule` but gates automerge not branch creation; default `"at any time"`; 7 tests | Complete | See below. |
@@ -5636,6 +5637,31 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
   - `group:hibernateCommons`: `matchPackageNames: ["org.hibernate.common:**"]`
   - `group:definitelyTyped`: `matchPackageNames: ["@types/**"]`
 - 3 tests: jsTestNonMajor has update type constraint; gradle matches gradle; definitelyTyped matches @types/*
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0301 - More group presets from group:recommended
+
+### Renovate reference
+- `lib/config/presets/internal/group.preset.ts`: react, puppeteer, remark, socketio, micrometer, resilience4j, hibernateValidator, hibernateOgm, springBoot, springCore, springCloud, springData, springSecurity
+
+### Implementation
+- Added 14 preset cases to `resolve_extends_group_presets()`:
+  - `group:react`: `matchPackageNames: ["@types/react", "@types/react-dom", "@types/react-is"]`
+  - `group:puppeteer`: npm datasource, puppeteer + puppeteer-core
+  - `group:remark`: npm datasource, `matchSourceUrls: ["https://github.com/remarkjs/**"]`
+  - `group:socketio`: `matchPackageNames: ["socket.io**"]`
+  - `group:micrometer`: `matchPackageNames: ["io.micrometer:micrometer-**"]`
+  - `group:resilience4j`: `matchPackageNames: ["io.github.resilience4j:**"]`
+  - `group:hibernateValidator`: `matchPackageNames: ["org.hibernate.validator:**"]`
+  - `group:hibernateOgm`: `matchPackageNames: ["org.hibernate.ogm:**"]`
+  - `group:springBoot`: **two rules** — one with `matchDepNames` (BOM parent artifact), one with `matchPackageNames: ["org.springframework.boot:**"]`
+  - `group:springCore/Cloud/Data/Security`: each with their `org.springframework.*` maven coordinate glob
+- 4 tests: react types (not react itself), springBoot injects 2 rules, springCore matches spring-core coords, definitelyTyped check
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

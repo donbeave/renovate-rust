@@ -1191,6 +1191,148 @@ fn resolve_extends_group_presets(
                     ..Default::default()
                 });
             }
+            // group:react — group React @types packages together.
+            "group:react" => {
+                rules.push(PackageRule {
+                    group_name: Some("react monorepo".to_owned()),
+                    group_slug: Some("react".to_owned()),
+                    match_package_names: vec![
+                        "@types/react".to_owned(),
+                        "@types/react-dom".to_owned(),
+                        "@types/react-is".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:puppeteer — group Puppeteer packages.
+            "group:puppeteer" => {
+                rules.push(PackageRule {
+                    group_name: Some("Puppeteer".to_owned()),
+                    group_slug: Some("puppeteer".to_owned()),
+                    match_datasources: vec!["npm".to_owned()],
+                    match_package_names: vec!["puppeteer".to_owned(), "puppeteer-core".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:remark — group remark packages from remarkjs org.
+            "group:remark" => {
+                rules.push(PackageRule {
+                    group_name: Some("remark".to_owned()),
+                    group_slug: Some("remark".to_owned()),
+                    match_datasources: vec!["npm".to_owned()],
+                    match_source_urls: vec!["https://github.com/remarkjs/**".to_owned()],
+                    ..Default::default()
+                });
+            }
+            // group:socketio — group socket.io packages.
+            "group:socketio" => {
+                rules.push(PackageRule {
+                    group_name: Some("socket.io packages".to_owned()),
+                    group_slug: Some("socketio".to_owned()),
+                    match_package_names: vec!["socket.io**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:micrometer — group Micrometer monitoring packages.
+            "group:micrometer" => {
+                rules.push(PackageRule {
+                    group_name: Some("micrometer".to_owned()),
+                    group_slug: Some("micrometer".to_owned()),
+                    match_package_names: vec!["io.micrometer:micrometer-**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:resilience4j — group Resilience4j packages.
+            "group:resilience4j" => {
+                rules.push(PackageRule {
+                    group_name: Some("resilience4j".to_owned()),
+                    group_slug: Some("resilience4j".to_owned()),
+                    match_package_names: vec!["io.github.resilience4j:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:hibernateValidator — group Hibernate Validator packages.
+            "group:hibernateValidator" => {
+                rules.push(PackageRule {
+                    group_name: Some("hibernate validator".to_owned()),
+                    group_slug: Some("hibernate-validator".to_owned()),
+                    match_package_names: vec!["org.hibernate.validator:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:hibernateOgm — group Hibernate OGM packages.
+            "group:hibernateOgm" => {
+                rules.push(PackageRule {
+                    group_name: Some("hibernate ogm".to_owned()),
+                    group_slug: Some("hibernate-ogm".to_owned()),
+                    match_package_names: vec!["org.hibernate.ogm:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:springBoot — group Spring Boot packages.
+            // Two rules: one for matchDepNames (BOM parent), one for matchPackageNames.
+            "group:springBoot" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring boot".to_owned()),
+                    group_slug: Some("spring-boot".to_owned()),
+                    match_dep_names: vec!["org.springframework.boot".to_owned()],
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    group_name: Some("spring boot".to_owned()),
+                    group_slug: Some("spring-boot".to_owned()),
+                    match_package_names: vec!["org.springframework.boot:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:springCore — group Spring Core packages.
+            "group:springCore" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring core".to_owned()),
+                    group_slug: Some("spring-core".to_owned()),
+                    match_package_names: vec!["org.springframework:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:springCloud — group Spring Cloud packages.
+            "group:springCloud" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring cloud".to_owned()),
+                    group_slug: Some("spring-cloud".to_owned()),
+                    match_package_names: vec!["org.springframework.cloud:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:springData — group Spring Data packages.
+            "group:springData" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring data".to_owned()),
+                    group_slug: Some("spring-data".to_owned()),
+                    match_package_names: vec!["org.springframework.data:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:springSecurity — group Spring Security packages.
+            "group:springSecurity" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring security".to_owned()),
+                    group_slug: Some("spring-security".to_owned()),
+                    match_package_names: vec!["org.springframework.security:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -5955,6 +6097,38 @@ mod rule_effects_tests {
         assert!(rule.name_matches("@types/node"));
         assert!(rule.name_matches("@types/jest"));
         assert!(!rule.name_matches("lodash"));
+    }
+
+    #[test]
+    fn group_react_preset_matches_react_types() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:react"]}"#);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("react monorepo"));
+        assert!(rule.name_matches("@types/react"));
+        assert!(rule.name_matches("@types/react-dom"));
+        assert!(!rule.name_matches("react"));
+        assert!(!rule.name_matches("lodash"));
+    }
+
+    #[test]
+    fn group_spring_boot_injects_two_rules() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:springBoot"]}"#);
+        // springBoot uses both matchDepNames and matchPackageNames → two rules
+        assert_eq!(c.package_rules.len(), 2);
+        assert!(
+            c.package_rules
+                .iter()
+                .all(|r| r.group_name.as_deref() == Some("spring boot"))
+        );
+    }
+
+    #[test]
+    fn group_spring_core_matches_spring_packages() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:springCore"]}"#);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("spring core"));
+        assert!(rule.name_matches("org.springframework:spring-core"));
+        assert!(!rule.name_matches("org.springframework.boot:spring-boot"));
     }
 
     #[test]
