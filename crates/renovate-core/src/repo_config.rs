@@ -1006,6 +1006,12 @@ impl RepoConfig {
             match_package_prefixes: Vec<String>,
             #[serde(rename = "matchDepNames", default)]
             match_dep_names: Vec<String>,
+            /// Deprecated; converted to `/pattern/` strings in `matchDepNames`.
+            #[serde(rename = "matchDepPatterns", default)]
+            match_dep_patterns: Vec<String>,
+            /// Deprecated; converted to `prefix**` globs in `matchDepNames`.
+            #[serde(rename = "matchDepPrefixes", default)]
+            match_dep_prefixes: Vec<String>,
             #[serde(rename = "matchDatasources", default)]
             match_datasources: Vec<String>,
             #[serde(rename = "matchSourceUrls", default)]
@@ -1311,11 +1317,21 @@ impl RepoConfig {
                     })
                     .collect();
 
+                // Merge deprecated matchDepPrefixes and matchDepPatterns into matchDepNames,
+                // mirroring Renovate's package-rules migration for dep name conditions.
+                let mut match_dep_names = r.match_dep_names;
+                for prefix in r.match_dep_prefixes {
+                    match_dep_names.push(format!("{prefix}**"));
+                }
+                for pat in r.match_dep_patterns {
+                    match_dep_names.push(format!("/{pat}/"));
+                }
+
                 // matchDepNames, matchSourceUrls, matchRegistryUrls, matchRepositories
                 // store raw strings so match_regex_or_glob_list can apply negation.
                 PackageRule {
                     match_package_names,
-                    match_dep_names: r.match_dep_names,
+                    match_dep_names,
                     match_source_urls: r.match_source_urls,
                     match_current_value: r.match_current_value,
                     match_new_value: r.match_new_value,
@@ -3240,6 +3256,30 @@ mod tests {
         );
         assert!(c.is_dep_ignored("lodash"));
         assert!(!c.is_dep_ignored("express"));
+    }
+
+    #[test]
+    fn match_dep_prefixes_converted_to_glob() {
+        // Deprecated matchDepPrefixes → "prefix**" globs in matchDepNames.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepPrefixes": ["@angular/"], "enabled": false}]}"#,
+        );
+        let ctx = DepContext::for_dep("@angular/core");
+        assert!(c.is_update_blocked_ctx(&ctx));
+        let ctx2 = DepContext::for_dep("react");
+        assert!(!c.is_update_blocked_ctx(&ctx2));
+    }
+
+    #[test]
+    fn match_dep_patterns_converted_to_regex() {
+        // Deprecated matchDepPatterns → "/pattern/" strings in matchDepNames.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepPatterns": ["^@angular"], "enabled": false}]}"#,
+        );
+        let ctx = DepContext::for_dep("@angular/core");
+        assert!(c.is_update_blocked_ctx(&ctx));
+        let ctx2 = DepContext::for_dep("react");
+        assert!(!c.is_update_blocked_ctx(&ctx2));
     }
 
     #[test]

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0285  | 2026-04-29 | Deprecated `matchDepPatterns`/`matchDepPrefixes` in packageRules: converted to `/pattern/` and `prefix**` glob strings in `matchDepNames` at parse time, matching Renovate's migration behavior; 2 tests | Complete | See below. |
 | 0284  | 2026-04-29 | Bug fix: `matchUpdateTypes: ["pin","digest"]` (unrecognized types) now correctly does NOT match major/minor/patch updates; `has_update_type_constraint` guard field added to `PackageRule`; 2 tests (1 corrected) | Complete | See below. |
 | 0283  | 2026-04-29 | `draftPR` + `assignAutomerge` config fields; `draftPR`/`assignAutomerge` exposed in `RepoReport` JSON output (top-level, `skip_serializing_if = "false"`); 4 tests | Complete | See below. |
 | 0282  | 2026-04-29 | `maxMajorIncrement` config field (default: 500); pipeline enforcement skips major updates that exceed the configured jump limit; 2 pipeline tests | Complete | See below. |
