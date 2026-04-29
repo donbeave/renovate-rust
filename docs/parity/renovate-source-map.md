@@ -51,9 +51,21 @@ find where a given TypeScript module is implemented in Rust.
 | `lib/config/parse.ts` | `crates/renovate-core/src/repo_config.rs` | partial | JSON/JSON5 parsing; JSON5 via `json5` crate |
 | `lib/config/validation.ts` | — | not-started | Schema validation pending |
 | `lib/config/inherit.ts` | — | not-started | Organizational config inheritance pending |
-| `lib/config/presets/index.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Built-in presets only (`config:recommended`, `:ignoreModulesAndTests`, `:semanticCommits`) |
-| `lib/config/presets/internal/config.preset.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `config:recommended`, `config:base` inline expansion |
-| `lib/config/presets/internal/default.preset.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `:ignoreModulesAndTests`, `:semanticCommits`, `:semanticCommitsDisabled` |
+| `lib/config/presets/index.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Built-in presets only; remote/npm preset fetching not implemented |
+| `lib/config/presets/internal/config.preset.ts` | `crates/renovate-core/src/repo_config.rs` | full | `config:recommended`, `config:base`, `config:best-practices`, `config:js-app/lib`, `config:semverAll*` |
+| `lib/config/presets/internal/default.preset.ts` | `crates/renovate-core/src/repo_config.rs` | full | All documented presets implemented (scalar overrides, schedule, automerge, semantic, parameterized) |
+| `lib/config/presets/internal/group.preset.ts` | `crates/renovate-core/src/repo_config.rs` | full | `group:all`, `group:monorepos` (452 groups), `group:recommended` (52 sub-presets), all named group presets |
+| `lib/config/presets/internal/schedule.preset.ts` | `crates/renovate-core/src/repo_config.rs` | full | All 15 schedule presets (daily, weekly, monthly, weekend, nonOfficeHours, etc.) |
+| `lib/config/presets/internal/workarounds.preset.ts` | `crates/renovate-core/src/repo_config.rs` | full | All 19 workarounds sub-presets + `workarounds:all` compound |
+| `lib/config/presets/internal/helpers.preset.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `helpers:pinGitHubActionDigests`, `helpers:disableTypesNodeMajor`, `helpers:followTypescriptNext/Rc`, `helpers:*DigestChangelogs`; missing `helpers:goXPackages*` (prBodyDefinitions) |
+| `lib/config/presets/internal/docker.preset.ts` | `crates/renovate-core/src/repo_config.rs` | full | `docker:pinDigests`, `docker:disableMajor`, `docker:enableMajor`, `docker:disable` |
+| `lib/config/presets/internal/security.preset.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `security:minimumReleaseAge*` presets; `security:only-security-updates` deferred |
+| `lib/config/presets/internal/packages.preset.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Package lists inlined in group presets; individual `packages:*` selectors not exposed |
+| `lib/config/presets/internal/replacements.preset.ts` | `crates/renovate-core/src/replacements.rs` | full | All 60 replacement presets via embedded `lib/data/replacements.json`; `replacements:all` compound |
+| `lib/config/presets/internal/monorepos.preset.ts` | `crates/renovate-core/src/monorepos.rs` | full | All 452 monorepo groups (422 repo + 9 org + 21 pattern) via embedded `lib/data/monorepo.json` |
+| `lib/config/presets/internal/merge-confidence.preset.ts` | — | not-started | `prBodyColumns` (PR body formatting, not scanning) |
+| `lib/data/replacements.json` | `crates/renovate-core/data/replacements.json` | full | Embedded at compile time |
+| `lib/data/monorepo.json` | `crates/renovate-core/data/monorepo.json` | full | Embedded at compile time |
 
 ---
 
