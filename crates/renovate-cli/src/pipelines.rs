@@ -35,16 +35,22 @@
 //! - [`cpanfile`]      — cpanfile (Perl)
 //! - [`vendir`]        — Vendir
 //! - [`cnb`]           — Cloud Native Buildpacks
-//! - [`misc`]          — Copier, Batect, Heroku/Render, Renovate config presets, Hermit
+//! - [`copier`]        — Copier template manager
+//! - [`batect`]        — Batect build tool
+//! - [`heroku`]        — Heroku/Render runtime.txt
+//! - [`misc`]          — Renovate config extends presets, Hermit
 
 mod ansible;
 mod bazel;
+mod batect;
 mod ci;
 mod cnb;
 mod conan;
+mod copier;
 mod cpanfile;
 mod git;
 mod haskell;
+mod heroku;
 mod homebrew;
 mod jenkins;
 mod dart;
@@ -144,5 +150,8 @@ pub(crate) async fn process_all_managers(ctx: &mut RepoPipelineCtx<'_>) {
     cpanfile::process(ctx).await;
     vendir::process(ctx).await;
     cnb::process(ctx).await;
+    copier::process(ctx).await;
+    batect::process(ctx).await;
+    heroku::process(ctx).await;
     misc::process(ctx).await;
 }

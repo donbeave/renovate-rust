@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0232  | 2026-04-29 | Refactor: split `misc.rs` → `copier.rs` + `batect.rs` + `heroku.rs` (259 lines, was 557) — pipeline split complete | Complete | See below. |
 | 0231  | 2026-04-29 | pep621 inline pipeline dep_type fix; propagate `Pep621DepType::as_renovate_str()` in python.rs | Complete | See below. |
 | 0230  | 2026-04-29 | `as_renovate_str()` + `depType` propagation for Composer, Poetry, Bundler, pep621, NuGet, Terraform | Complete | See below. |
 | 0229  | 2026-04-29 | `depType` for Maven (`MavenDepType::as_renovate_str()`) and Pub/Dart (`PubspecDepType`) propagated to `DepReport` | Complete | See below. |
