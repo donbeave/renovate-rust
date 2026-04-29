@@ -165,6 +165,12 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `separateMultipleMajor`.
     pub separate_multiple_major: bool,
 
+    /// Maximum allowed increment in major version number.  `0` disables major
+    /// updates entirely.  Default: `500` (effectively unlimited).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `maxMajorIncrement`.
+    pub max_major_increment: u32,
+
     /// When `true`, minor and patch updates are split into separate PRs.
     /// Default: `false`.
     ///
@@ -1110,6 +1116,8 @@ impl RepoConfig {
             separate_minor_patch: bool,
             #[serde(rename = "separateMultipleMinor", default)]
             separate_multiple_minor: bool,
+            #[serde(rename = "maxMajorIncrement", default = "default_max_major_increment")]
+            max_major_increment: u32,
             #[serde(rename = "semanticCommits")]
             semantic_commits: Option<String>,
             #[serde(
@@ -1163,6 +1171,10 @@ impl RepoConfig {
 
         fn default_range_strategy() -> String {
             "auto".to_owned()
+        }
+
+        fn default_max_major_increment() -> u32 {
+            500
         }
 
         fn default_semantic_commit_type() -> String {
@@ -1425,6 +1437,7 @@ impl RepoConfig {
                 .or(group_separate_major_minor)
                 .unwrap_or(raw.separate_major_minor),
             separate_multiple_major: scalar_sep_multi_major.unwrap_or(raw.separate_multiple_major),
+            max_major_increment: raw.max_major_increment,
             separate_minor_patch: scalar_sep_minor_patch
                 .unwrap_or(raw.separate_minor_patch || preset_separate_minor_patch),
             separate_multiple_minor: scalar_sep_multi_minor
@@ -1849,6 +1862,7 @@ impl Default for RepoConfig {
             group_name: None,
             separate_major_minor: true,
             separate_multiple_major: false,
+            max_major_increment: 500,
             separate_minor_patch: false,
             separate_multiple_minor: false,
             semantic_commit_type: "chore".to_owned(),

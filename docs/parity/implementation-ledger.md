@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0282  | 2026-04-29 | `maxMajorIncrement` config field (default: 500); pipeline enforcement skips major updates that exceed the configured jump limit; 2 pipeline tests | Complete | See below. |
 | 0281  | 2026-04-29 | `ignoreUnstable` pipeline enforcement: when config is `true` and current version is stable semver, skip proposals where latest is a semver pre-release; 3 pipeline tests | Complete | See below. |
 | 0280  | 2026-04-29 | `:timezone(zone)` parameterized preset → sets `timezone` field; `:disableRenovate` / `:enableRenovate` presets → override `enabled` field; 4 tests | Complete | See below. |
 | 0279  | 2026-04-29 | `:widenPeerDependencies` preset (widen rangeStrategy for peerDependencies); `ignoreUnstable` field + `:ignoreUnstable` preset; `updateNotScheduled` field (default: true) + `:noUnscheduledUpdates` preset; 6 tests | Complete | See below. |

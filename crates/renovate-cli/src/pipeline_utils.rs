@@ -48,6 +48,24 @@ pub(crate) fn apply_update_blocking_to_report(
                     ..Default::default()
                 };
 
+                // maxMajorIncrement: skip updates that jump more major versions than allowed.
+                if repo_cfg.max_major_increment < 500 || repo_cfg.max_major_increment == 0 {
+                    use renovate_core::versioning::semver_generic::parse_padded;
+                    if let (Some(cur_v), Some(lat_v)) = (parse_padded(current), parse_padded(latest)) {
+                        if lat_v.major > cur_v.major {
+                            let jump = lat_v.major - cur_v.major;
+                            if jump > u64::from(repo_cfg.max_major_increment) {
+                                dep.status = output::DepStatus::Skipped {
+                                    reason: format!(
+                                        "maxMajorIncrement: version jump of {} majors exceeds limit of {}",
+                                        jump, repo_cfg.max_major_increment
+                                    ),
+                                };
+                                continue;
+                            }
+                        }
+                    }
+                }
                 // ignoreUnstable: if current is stable and proposed latest is a
                 // pre-release semver, skip the update.
                 if repo_cfg.ignore_unstable {
@@ -567,6 +585,54 @@ mod tests {
         assert!(
             matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
             "pre-release→pre-release update should not be blocked when current is already unstable"
+        );
+    }
+
+    #[test]
+    fn max_major_increment_skips_oversized_jump() {
+        let cfg = RepoConfig::parse(r#"{"maxMajorIncrement": 1}"#);
+        let mut report = make_report(vec![
+            (
+                "pkg",
+                DepStatus::UpdateAvailable {
+                    current: "1.0.0".into(),
+                    latest: "3.0.0".into(), // 2 major versions ahead > limit 1
+                },
+            ),
+            (
+                "pkg2",
+                DepStatus::UpdateAvailable {
+                    current: "1.0.0".into(),
+                    latest: "2.0.0".into(), // exactly 1 major → allowed
+                },
+            ),
+        ]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        let deps = &report.files[0].deps;
+        assert!(
+            matches!(&deps[0].status, DepStatus::Skipped { reason } if reason.contains("maxMajorIncrement")),
+            "should skip 1→3 jump when maxMajorIncrement=1"
+        );
+        assert!(
+            matches!(&deps[1].status, DepStatus::UpdateAvailable { .. }),
+            "1→2 jump should be allowed when maxMajorIncrement=1"
+        );
+    }
+
+    #[test]
+    fn max_major_increment_default_allows_all() {
+        let cfg = RepoConfig::parse(r#"{}"#);
+        let mut report = make_report(vec![(
+            "pkg",
+            DepStatus::UpdateAvailable {
+                current: "1.0.0".into(),
+                latest: "100.0.0".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert!(
+            matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
+            "default maxMajorIncrement (500) should not block any realistic jump"
         );
     }
 
