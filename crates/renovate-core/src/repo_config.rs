@@ -1016,7 +1016,9 @@ fn resolve_extends_scalar_overrides(extends: &[String]) -> ScalarOverrides {
     let mut pr_hourly: Option<u32> = None;
 
     for preset in extends {
-        match preset.as_str() {
+        // Strip leading `:` for built-in preset namespace — `:foo` == `foo`.
+        let p = preset.trim_start_matches(':');
+        match p {
             // separateMinorPatch
             "combinePatchMinorReleases" => sep_minor_patch = Some(false),
             "separatePatchReleases" => sep_minor_patch = Some(true),
@@ -5796,6 +5798,20 @@ mod schedule_preset_tests {
     fn combine_patch_minor_releases_clears_separate_minor_patch() {
         let c = RepoConfig::parse(r#"{"extends": ["combinePatchMinorReleases"]}"#);
         assert!(!c.separate_minor_patch);
+    }
+
+    #[test]
+    fn combine_patch_minor_releases_with_colon_prefix() {
+        // `:combinePatchMinorReleases` is the canonical form users write in extends arrays.
+        let c = RepoConfig::parse(r#"{"extends": [":combinePatchMinorReleases"]}"#);
+        assert!(!c.separate_minor_patch);
+    }
+
+    #[test]
+    fn disable_rate_limiting_with_colon_prefix() {
+        let c = RepoConfig::parse(r#"{"extends": [":disableRateLimiting"]}"#);
+        assert_eq!(c.pr_concurrent_limit, 0);
+        assert_eq!(c.pr_hourly_limit, 0);
     }
 
     #[test]
