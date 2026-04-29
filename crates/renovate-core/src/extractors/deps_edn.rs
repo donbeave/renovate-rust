@@ -213,4 +213,10 @@ mod tests {
     fn empty_returns_empty() {
         assert!(extract("{}").is_empty());
     }
+
+    // Ported: "returns null for invalid file" — deps-edn/extract.spec.ts line 6
+    #[test]
+    fn invalid_edn_returns_empty() {
+        assert!(extract("123").is_empty());
+    }
 }

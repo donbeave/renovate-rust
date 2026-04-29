@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 23 / 46 actionable tests ported (50%) — updated 2026-04-29
+**Overall progress:** 24 / 46 actionable tests ported (52%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -156,13 +156,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/deps-edn/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deps-edn/extract.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
 
 ### `extractPackageFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for invalid file | 6 | pending | — | — | — |
+| returns null for invalid file | 6 | ported | `deps_edn.rs` | `invalid_edn_returns_empty` | — |
 | extractPackageFile | 10 | pending | — | — | — |
 
 ---
