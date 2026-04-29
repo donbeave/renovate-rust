@@ -39,6 +39,8 @@ pub struct PackagistUpdateSummary {
     pub current_value: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 release timestamp from the Packagist `time` field of the latest stable version.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result from `fetch_updates_concurrent`.
@@ -57,6 +59,8 @@ struct P2Response {
 #[derive(Debug, Deserialize)]
 struct P2Version {
     version: String,
+    /// ISO 8601 release timestamp for this version.
+    time: Option<String>,
 }
 
 /// Fetch the latest stable version of a Packagist package.
@@ -66,7 +70,7 @@ pub async fn fetch_latest(
     package_name: &str,
     http: &HttpClient,
     api_base: &str,
-) -> Result<Option<String>, PackagistError> {
+) -> Result<Option<(String, Option<String>)>, PackagistError> {
     let url = format!("{api_base}/p2/{package_name}.json");
 
     let resp = http.get_retrying(&url).await?;
@@ -83,12 +87,11 @@ pub async fn fetch_latest(
         return Ok(None);
     };
 
-    // Versions are newest-first; return the first stable release.
+    // Versions are newest-first; return the first stable release with its timestamp.
     let latest = versions
         .iter()
-        .map(|v| v.version.as_str())
-        .find(|v| is_stable(v))
-        .map(str::to_owned);
+        .find(|v| is_stable(&v.version))
+        .map(|v| (v.version.clone(), v.time.clone()));
 
     Ok(latest)
 }
@@ -138,15 +141,19 @@ async fn fetch_update_summary(
     http: &HttpClient,
     api_base: &str,
 ) -> Result<PackagistUpdateSummary, PackagistError> {
-    let latest = fetch_latest(&dep.package_name, http, api_base).await?;
+    let result = fetch_latest(&dep.package_name, http, api_base).await?;
+    let (latest_version, release_timestamp) = result
+        .map(|(v, ts)| (Some(v), ts))
+        .unwrap_or((None, None));
     let s = crate::versioning::semver_generic::semver_update_summary(
         &dep.current_value,
-        latest.as_deref(),
+        latest_version.as_deref(),
     );
     Ok(PackagistUpdateSummary {
         current_value: s.current_value,
         latest: s.latest,
         update_available: s.update_available,
+        release_timestamp,
     })
 }
 
@@ -216,7 +223,7 @@ mod tests {
         let result = fetch_latest("symfony/framework-bundle", &http, &server.uri())
             .await
             .unwrap();
-        assert_eq!(result, Some("v7.1.0".to_owned()));
+        assert_eq!(result.map(|(v, _)| v), Some("v7.1.0".to_owned()));
     }
 
     #[tokio::test]
@@ -258,6 +265,6 @@ mod tests {
         let result = fetch_latest("vendor/pkg", &http, &server.uri())
             .await
             .unwrap();
-        assert_eq!(result, Some("v7.1.0".to_owned()));
+        assert_eq!(result.map(|(v, _)| v), Some("v7.1.0".to_owned()));
     }
 }

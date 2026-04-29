@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0247  | 2026-04-29 | Packagist `release_timestamp`: `time` field from p2 API version objects propagated through `fetch_latest` → `PackagistUpdateSummary` → `build_dep_reports_composer` | Complete | See below. |
 | 0246  | 2026-04-29 | Pub.dev `release_timestamp`: `published` field from `latest` object propagated through `fetch_latest` → `PubUpdateSummary` → `build_dep_reports_pub` | Complete | See below. |
 | 0245  | 2026-04-29 | Go module proxy `release_timestamp`: `Time` field from `@latest` endpoint propagated through `fetch_latest` → `GoModUpdateSummary` → `build_dep_reports_gomod` | Complete | See below. |
 | 0244  | 2026-04-29 | GitHub Releases `release_timestamp`: `published_at` field propagated through `fetch_latest_release` return type → `GithubReleasesUpdateSummary` → batect/kubernetes/report builders; all 9 callers updated | Complete | See below. |

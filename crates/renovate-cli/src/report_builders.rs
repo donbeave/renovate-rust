@@ -508,7 +508,11 @@ pub(crate) fn build_dep_reports_composer(
         });
     }
     for dep in actionable {
-        let status = match update_map.get(&dep.name) {
+        let summary = update_map.get(&dep.name);
+        let release_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.release_timestamp.clone());
+        let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_value.clone(),
                 latest: s.latest.clone().unwrap_or_default(),
@@ -531,7 +535,7 @@ pub(crate) fn build_dep_reports_composer(
             update_type: None,
             pr_priority: None,
             pr_title: None,
-            release_timestamp: None,
+            release_timestamp,
             current_version_timestamp: None,
 
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
