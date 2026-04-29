@@ -396,8 +396,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
-
-                            dep_type: None,
+                            dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
                             name: dep.name.clone(),
                             status,
                         });
