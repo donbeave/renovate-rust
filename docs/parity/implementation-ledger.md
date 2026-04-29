@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0293  | 2026-04-29 | `resolve_extends_parameterized_rules()`: `:doNotPinPackage(name)`, `:semanticCommitTypeAll(type)`, `:pathSemanticCommitType(path, type)` inject packageRules from preset arguments; 2 tests | Complete | See below. |
 | 0292  | 2026-04-29 | Extended compound preset expansion: `:semanticPrefixChore`, `:semanticPrefixFix`, `:assignAndReview(user)` (parameterized) all expand into constituent presets; 3 tests | Complete | See below. |
 | 0291  | 2026-04-29 | Compound preset expansion: `expand_compound_presets()` resolves `config:js-app`, `config:js-lib`, `config:semverAllMonthly`, `config:semverAllWeekly` into their constituent presets before resolution; 4 tests | Complete | See below. |
 | 0290  | 2026-04-29 | Bug fix: `is_version_restricted_ctx` now uses last-matching-rule-wins for `allowedVersions` — later rules override earlier ones, matching Renovate's `mergeChildConfig` semantics; 1 test | Complete | See below. |

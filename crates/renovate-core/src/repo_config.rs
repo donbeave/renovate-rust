@@ -736,6 +736,55 @@ fn resolve_extends_range_strategy_rules(extends: &[String]) -> Vec<PackageRule> 
     rules
 }
 
+/// Resolve packageRules injected by parameterized built-in presets.
+///
+/// Handles presets that expand into packageRules using their arguments:
+/// - `:doNotPinPackage(name)` — set rangeStrategy: replace for the named package
+/// - `:semanticCommitTypeAll(type)` — set semanticCommitType for all packages
+/// - `:pathSemanticCommitType(path, type)` — set semanticCommitType for path-matched packages
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts`
+fn resolve_extends_parameterized_rules(extends: &[String]) -> Vec<PackageRule> {
+    let mut rules: Vec<PackageRule> = Vec::new();
+
+    for preset in extends {
+        let (name, args) = parse_preset_args(preset.as_str());
+        match name {
+            ":doNotPinPackage" | "doNotPinPackage" => {
+                if let Some(pkg) = args.first().filter(|s| !s.is_empty()) {
+                    rules.push(PackageRule {
+                        match_package_names: vec![pkg.to_string()],
+                        has_name_constraint: true,
+                        range_strategy: Some("replace".to_owned()),
+                        ..Default::default()
+                    });
+                }
+            }
+            ":semanticCommitTypeAll" | "semanticCommitTypeAll" => {
+                if let Some(commit_type) = args.first().filter(|s| !s.is_empty()) {
+                    rules.push(PackageRule {
+                        match_file_names: vec!["**/*".to_owned()],
+                        semantic_commit_type: Some(commit_type.to_string()),
+                        ..Default::default()
+                    });
+                }
+            }
+            ":pathSemanticCommitType" | "pathSemanticCommitType" => {
+                if args.len() >= 2 && !args[0].is_empty() && !args[1].is_empty() {
+                    rules.push(PackageRule {
+                        match_file_names: vec![args[0].to_string()],
+                        semantic_commit_type: Some(args[1].to_string()),
+                        ..Default::default()
+                    });
+                }
+            }
+            _ => {}
+        }
+    }
+
+    rules
+}
+
 /// Return type for `resolve_extends_scalar_overrides`:
 /// `(sep_minor_patch, sep_major_minor, sep_multi_major, sep_multi_minor, pr_concurrent, pr_hourly)`.
 type ScalarOverrides = (
@@ -1319,6 +1368,9 @@ impl RepoConfig {
         // Inject range-strategy rules from pin/preserve presets.
         let range_rules = resolve_extends_range_strategy_rules(&effective_extends);
         preset_rules.extend(range_rules);
+        // Inject packageRules from parameterized presets like :doNotPinPackage(name).
+        let param_rules = resolve_extends_parameterized_rules(&effective_extends);
+        preset_rules.extend(param_rules);
         // :automergePatch sets separateMinorPatch: true.
         let preset_separate_minor_patch = effective_extends.iter().any(|p| p == ":automergePatch");
         let (
@@ -4343,6 +4395,35 @@ mod schedule_preset_tests {
         // :semanticPrefixFix → :semanticCommitType(fix)
         let c = RepoConfig::parse(r#"{"extends": [":semanticPrefixFix"]}"#);
         assert_eq!(c.semantic_commit_type, "fix");
+    }
+
+    #[test]
+    fn do_not_pin_package_preset_injects_rule() {
+        // :doNotPinPackage(react) → packageRule with matchPackageNames:["react"] rangeStrategy:replace
+        let c = RepoConfig::parse(r#"{"extends": [":doNotPinPackage(react)"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.range_strategy.as_deref() == Some("replace"));
+        assert!(rule.is_some(), "expected a replace rangeStrategy rule for react");
+        let rule = rule.unwrap();
+        assert!(rule.match_package_names.contains(&"react".to_owned()));
+    }
+
+    #[test]
+    fn path_semantic_commit_type_preset_injects_rule() {
+        // :pathSemanticCommitType(src/**,feat) → packageRule with matchFileNames:["src/**"] semanticCommitType:"feat"
+        let c = RepoConfig::parse(r#"{"extends": [":pathSemanticCommitType(src/**, feat)"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.semantic_commit_type.as_deref() == Some("feat"));
+        assert!(rule.is_some(), "expected a feat semanticCommitType rule");
+        let rule = rule.unwrap();
+        assert!(
+            rule.match_file_names.iter().any(|f| f.contains("src")),
+            "rule should match src/**"
+        );
     }
 
     #[test]
