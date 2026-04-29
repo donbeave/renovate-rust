@@ -31,17 +31,25 @@
 //! - [`haskell`]       — Haskell Cabal
 //! - [`jenkins`]       — Jenkins plugins + OCB (OpenTelemetry Collector Builder)
 //! - [`homebrew`]      — Homebrew formula
-//! - [`misc`]          — Typst, cpanfile, Jsonnet, Vendir, Copier, Batect, Unity3D, CNB, Heroku, …
+//! - [`typst`]         — Typst
+//! - [`cpanfile`]      — cpanfile (Perl)
+//! - [`vendir`]        — Vendir
+//! - [`cnb`]           — Cloud Native Buildpacks
+//! - [`misc`]          — Copier, Batect, Heroku/Render, Renovate config presets, Hermit
 
 mod ansible;
 mod bazel;
 mod ci;
+mod cnb;
 mod conan;
+mod cpanfile;
 mod git;
 mod haskell;
 mod homebrew;
 mod jenkins;
 mod dart;
+mod typst;
+mod vendir;
 mod docker;
 mod dotnet;
 mod go;
@@ -132,5 +140,9 @@ pub(crate) async fn process_all_managers(ctx: &mut RepoPipelineCtx<'_>) {
     haskell::process(ctx).await;
     jenkins::process(ctx).await;
     homebrew::process(ctx).await;
+    typst::process(ctx).await;
+    cpanfile::process(ctx).await;
+    vendir::process(ctx).await;
+    cnb::process(ctx).await;
     misc::process(ctx).await;
 }
