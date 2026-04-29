@@ -81,13 +81,15 @@ pub struct PackageRule {
     /// Renovate reference: `lib/util/package-rules/sourceurls.ts`
     pub match_source_urls: Vec<String>,
     /// Single regex/glob pattern to match against the raw `currentValue` string.
+    /// Supports `/regex/flags`, glob, or exact strings.
     ///
     /// Renovate reference: `lib/util/package-rules/current-value.ts`
-    pub match_current_value: Option<PackageNameMatcher>,
+    pub match_current_value: Option<String>,
     /// Single regex/glob pattern to match against the proposed new version string.
+    /// Supports `/regex/flags`, glob, or exact strings.
     ///
     /// Renovate reference: `lib/util/package-rules/new-value.ts`
-    pub match_new_value: Option<PackageNameMatcher>,
+    pub match_new_value: Option<String>,
     /// `true` when any `matchPackageNames` / `matchPackagePatterns` /
     /// `matchPackagePrefixes` entry was set (non-empty `match_package_names`).
     pub has_name_constraint: bool,
@@ -145,25 +147,6 @@ pub struct PackageRule {
     pub match_current_age: Option<String>,
 }
 
-// ── PackageNameMatcher ────────────────────────────────────────────────────────
-
-/// A compiled entry from `matchPackageNames`.
-///
-/// Modern Renovate treats `matchPackageNames` as a mixed list that can contain:
-/// - Exact strings (`"express"`)
-/// - Inline `/regex/` patterns (`"/^@angular/"`)
-/// - Glob patterns (`"@aws-sdk/**"`)
-///
-/// The deprecated `matchPackagePrefixes` is converted to glob entries at parse
-/// time (`"prefix"` → `"prefix**"`).
-#[derive(Debug, Clone)]
-pub enum PackageNameMatcher {
-    Exact(String),
-    Regex(Regex),
-    /// Pre-compiled single-pattern glob matcher.
-    Glob(globset::GlobMatcher),
-}
-
 // ── impl PackageRule ──────────────────────────────────────────────────────────
 
 impl PackageRule {
@@ -210,22 +193,24 @@ impl PackageRule {
     }
 
     /// Return `true` when this rule's `matchCurrentValue` pattern matches `current_value`.
+    ///
+    /// Supports `/regex/flags`, glob, and exact strings.  When `None`, matches all.
     pub fn current_value_matches(&self, current_value: &str) -> bool {
+        use crate::string_match::match_regex_or_glob;
         match &self.match_current_value {
             None => true,
-            Some(PackageNameMatcher::Exact(s)) => s == current_value,
-            Some(PackageNameMatcher::Regex(re)) => re.is_match(current_value),
-            Some(PackageNameMatcher::Glob(gm)) => gm.is_match(current_value),
+            Some(pattern) => match_regex_or_glob(current_value, pattern),
         }
     }
 
     /// Return `true` when this rule's `matchNewValue` pattern matches `new_value`.
+    ///
+    /// Supports `/regex/flags`, glob, and exact strings.  When `None`, matches all.
     pub fn new_value_matches(&self, new_value: &str) -> bool {
+        use crate::string_match::match_regex_or_glob;
         match &self.match_new_value {
             None => true,
-            Some(PackageNameMatcher::Exact(s)) => s == new_value,
-            Some(PackageNameMatcher::Regex(re)) => re.is_match(new_value),
-            Some(PackageNameMatcher::Glob(gm)) => gm.is_match(new_value),
+            Some(pattern) => match_regex_or_glob(new_value, pattern),
         }
     }
 
@@ -630,29 +615,6 @@ pub struct RuleEffects {
 }
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────
-
-/// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
-///
-/// - `/pattern/` or `/pattern/flags` → inline regex (flags ignored in compile)
-/// - Contains `*`, `?`, or `[` → glob
-/// - Otherwise → exact string
-pub(crate) fn compile_name_matcher(s: &str) -> PackageNameMatcher {
-    if s.starts_with('/') {
-        let inner = s.trim_start_matches('/');
-        let pat = inner
-            .trim_end_matches(|c: char| c.is_alphabetic())
-            .trim_end_matches('/');
-        if let Ok(re) = Regex::new(pat) {
-            return PackageNameMatcher::Regex(re);
-        }
-    }
-    if (s.contains('*') || s.contains('?') || s.contains('['))
-        && let Ok(g) = globset::Glob::new(s)
-    {
-        return PackageNameMatcher::Glob(g.compile_matcher());
-    }
-    PackageNameMatcher::Exact(s.to_owned())
-}
 
 /// Return `true` if `proposed_version` is matched by any entry in `ignore_list`.
 ///

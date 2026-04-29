@@ -16,10 +16,8 @@
 use serde::Deserialize;
 
 // Re-export rule/context types so callers can keep using `repo_config::*`.
-pub use crate::package_rule::{
-    DepContext, PackageNameMatcher, PackageRule, PathMatcher, RuleEffects,
-};
-use crate::package_rule::{compile_name_matcher, version_matches_ignore_list};
+use crate::package_rule::version_matches_ignore_list;
+pub use crate::package_rule::{DepContext, PackageRule, PathMatcher, RuleEffects};
 use crate::versioning::semver_generic::UpdateType;
 
 use crate::config::GlobalConfig;
@@ -517,8 +515,8 @@ impl RepoConfig {
                     match_package_names,
                     match_dep_names: r.match_dep_names,
                     match_source_urls: r.match_source_urls,
-                    match_current_value: r.match_current_value.map(|s| compile_name_matcher(&s)),
-                    match_new_value: r.match_new_value.map(|s| compile_name_matcher(&s)),
+                    match_current_value: r.match_current_value,
+                    match_new_value: r.match_new_value,
                     match_datasources: r.match_datasources,
                     match_managers: r.match_managers,
                     match_update_types,
@@ -2450,6 +2448,20 @@ mod source_url_tests {
         let rule = &c.package_rules[0];
         assert!(rule.new_value_matches("1.0.0"));
         assert!(rule.new_value_matches("99.0.0"));
+    }
+
+    #[test]
+    fn match_current_value_regex_with_flags() {
+        // Ported from lib/util/package-rules/current-value.spec.ts
+        // "case insensitive match" test
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentValue": "/^\"v/i", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        // '"V1.1.0"' should match /^"v/i (case-insensitive)
+        assert!(rule.current_value_matches("\"V1.1.0\""));
+        // '"v1.1.0"' should also match
+        assert!(rule.current_value_matches("\"v1.1.0\""));
     }
 }
 
