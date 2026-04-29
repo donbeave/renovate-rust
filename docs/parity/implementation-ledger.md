@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0306  | 2026-04-29 | Fix `config:recommended` to inject `group:recommended` rules; `resolve_extends_group_presets` now expands `config:recommended/base/best-practices` to their group rules; 1 test | Complete | See below. |
 | 0305  | 2026-04-29 | 13 more group presets: `codemirror`, `flyway`, `fortawesome`, `fusionjs`, `githubArtifactActions`, `glimmer`, `goOpenapi`, `polymer`, `allApollographql`, `apiPlatform`, `phpstan`, `symfony` (with exclusions), `rubyOnRails`; update `group:recommended` to include all; 3 tests | Complete | See below. |
 | 0304  | 2026-04-29 | `group:linters` preset: inlines expanded `packages:linters` (emberTemplateLint + eslint + phpLinters + stylelint + tslint + prettier/oxlint) via `LINTER_PACKAGES` const; 1 test | Complete | See below. |
 | 0303  | 2026-04-29 | `helpers:disableTypesNodeMajor` preset: disables `@types/node` major updates via packageRule; 2 tests (major blocked, other packages unaffected) | Complete | See below. |
@@ -5747,6 +5748,27 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
 - Added `group:rubyOnRails`: rubygems + 13 Rails gem names
 - Updated `group:recommended` to include all 52 sub-presets
 - 3 tests: group:recommended ≥40 rules with symfony/rubyOnRails; symfony exclusion matching; Rails gem matching
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0306 - Fix `config:recommended` to inject `group:recommended` rules
+
+### Renovate reference
+- `lib/config/presets/internal/config.preset.ts` — `recommended` extends `group:monorepos` and `group:recommended` among others
+- When users put `config:recommended` in their `extends`, they expect all `group:recommended` packageRules to be active
+
+### What was wrong
+`config:recommended` was only handled in `resolve_extends_ignore_paths()` (to expand `:ignoreModulesAndTests`). The `resolve_extends_group_presets()` function did not handle it, so no group rules were injected for `config:recommended` users.
+
+### Implementation
+- Added `"config:recommended" | "config:base" | "config:best-practices"` case to `resolve_extends_group_presets()`:
+  - Recursively calls `resolve_extends_group_presets(["group:recommended"])` and merges the results
+- This means configs with `extends: ["config:recommended"]` now correctly get all group:recommended rules (Node.js, Gradle, Spring, React, etc.)
+- 1 test: `config:recommended` injects ≥40 package rules including "Node.js" group
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

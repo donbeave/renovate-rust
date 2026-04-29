@@ -1069,6 +1069,14 @@ fn resolve_extends_group_presets(
                     "group:monorepos preset — partial support (grouped dep names not expanded)"
                 );
             }
+            // config:recommended transitively includes group:monorepos and group:recommended.
+            // Expand group:recommended here so that `extends: ["config:recommended"]` users
+            // get the full group preset treatment.
+            "config:recommended" | "config:base" | "config:best-practices" => {
+                let sub_extends = vec!["group:recommended".to_string()];
+                let (sub_rules, _) = resolve_extends_group_presets(&sub_extends);
+                rules.extend(sub_rules);
+            }
             // group:allDigest — group all digest-pinned updates into one branch.
             // Digest updates are not yet implemented in the pipeline, so this rule
             // has no match_update_types constraint (digest is not an UpdateType variant).
@@ -5008,6 +5016,27 @@ mod schedule_preset_tests {
     fn no_schedule_preset_leaves_schedule_empty() {
         let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
         assert!(c.schedule.is_empty());
+    }
+
+    #[test]
+    fn config_recommended_injects_group_recommended_rules() {
+        // config:recommended transitively includes group:recommended.
+        // Ensure that packageRules from group:recommended are injected.
+        let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
+        assert!(
+            c.package_rules.len() >= 40,
+            "config:recommended must inject group:recommended rules, got {}",
+            c.package_rules.len()
+        );
+        let group_names: Vec<&str> = c
+            .package_rules
+            .iter()
+            .filter_map(|r| r.group_name.as_deref())
+            .collect();
+        assert!(
+            group_names.contains(&"Node.js"),
+            "group:recommended nodeJs rule missing from config:recommended"
+        );
     }
 
     // ── automergeSchedule ────────────────────────────────────────────────────
