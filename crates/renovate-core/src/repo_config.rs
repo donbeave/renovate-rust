@@ -2423,6 +2423,51 @@ mod tests {
         assert!(!rule.current_version_matches("1.0.0"));
     }
 
+    #[test]
+    fn match_current_version_negated_regex() {
+        // !/^0/ means: current version does NOT match /^0/
+        // Used by :automergeStableNonMajor to match only stable (non-0.x) packages.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "!/^0/", "automerge": true}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        // "0.1.0" matches /^0/ → !/^0/ is FALSE for this version
+        assert!(!rule.current_version_matches("0.1.0"));
+        // "1.0.0" does NOT match /^0/ → !/^0/ is TRUE
+        assert!(rule.current_version_matches("1.0.0"));
+        // "2.5.3" does NOT match /^0/ → !/^0/ is TRUE
+        assert!(rule.current_version_matches("2.5.3"));
+    }
+
+    #[test]
+    fn automerge_stable_non_major_preset_blocks_zero_deps() {
+        // :automergeStableNonMajor uses matchCurrentVersion: "!/^0/"
+        // It should NOT automerge 0.x packages.
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": [":automergeStableNonMajor"]}"#);
+        // A 0.x dep with a minor update should NOT get automerge.
+        let ctx = DepContext {
+            dep_name: "unstable-pkg",
+            update_type: Some(UpdateType::Minor),
+            current_value: Some("0.5.0"),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.automerge.is_none() || effects.automerge == Some(false),
+            "0.x package should not automerge via :automergeStableNonMajor"
+        );
+        // A stable (1.x) dep with a minor update SHOULD get automerge.
+        let ctx2 = DepContext {
+            dep_name: "stable-pkg",
+            update_type: Some(UpdateType::Minor),
+            current_value: Some("1.2.3"),
+            ..Default::default()
+        };
+        let effects2 = c.collect_rule_effects(&ctx2);
+        assert_eq!(effects2.automerge, Some(true));
+    }
+
     // ── matchFileNames tests ──────────────────────────────────────────────────
 
     #[test]

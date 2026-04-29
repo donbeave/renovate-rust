@@ -351,6 +351,12 @@ impl PackageRule {
         let Some(ref mcv) = self.match_current_version else {
             return true;
         };
+        // Negated regex: !/pattern/ — invert the regex match.
+        if let Some(inner) = mcv.strip_prefix('!')
+            && inner.starts_with('/')
+        {
+            return !match_regex_or_glob(current_value, inner);
+        }
         // Regex patterns are matched directly against currentValue string.
         if mcv.starts_with('/') {
             return match_regex_or_glob(current_value, mcv);
