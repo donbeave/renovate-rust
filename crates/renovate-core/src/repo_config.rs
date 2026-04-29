@@ -1636,9 +1636,21 @@ impl RepoConfig {
     /// (with `dep_type`, `repository`, `datasource`, etc.) to avoid re-constructing
     /// it and to ensure all matchers (`matchDepTypes`, `matchRepositories`, …) fire.
     pub fn is_update_blocked_ctx(&self, ctx: &DepContext<'_>) -> bool {
-        self.package_rules
-            .iter()
-            .any(|rule| rule.matches_context(ctx) && rule.enabled == Some(false))
+        // Renovate uses "last matching rule wins" semantics for `enabled`.
+        // A later `enabled: true` rule overrides an earlier `enabled: false` rule
+        // (mirrors applyPackageRules in lib/util/package-rules/index.ts).
+        let mut blocked = false;
+        for rule in &self.package_rules {
+            if !rule.matches_context(ctx) {
+                continue;
+            }
+            match rule.enabled {
+                Some(false) => blocked = true,
+                Some(true) => blocked = false, // explicitly re-enabled
+                None => {}                     // no change
+            }
+        }
+        blocked
     }
 
     /// Return `true` when `proposed_version` does NOT satisfy the
@@ -2823,6 +2835,32 @@ mod tests {
         assert!(
             c.is_update_blocked_ctx(&ctx),
             "enabled:false should fire even when update_type is None"
+        );
+    }
+
+    #[test]
+    fn enabled_true_later_rule_overrides_earlier_enabled_false() {
+        // Renovate: last matching rule wins for enabled field.
+        // A later `enabled: true` should re-enable a dep blocked by an earlier `enabled: false`.
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [
+                    {"matchPackageNames": ["*"], "enabled": false},
+                    {"matchPackageNames": ["lodash"], "enabled": true}
+                ]
+            }"#,
+        );
+        let ctx = DepContext::for_dep("lodash");
+        // lodash matches both rules; later enabled:true should win.
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "later enabled:true should override earlier enabled:false"
+        );
+        let ctx2 = DepContext::for_dep("react");
+        // react only matches the first rule (enabled:false).
+        assert!(
+            c.is_update_blocked_ctx(&ctx2),
+            "react should still be blocked"
         );
     }
 

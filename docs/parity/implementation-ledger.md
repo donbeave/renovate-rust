@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0287  | 2026-04-29 | Bug fix: `is_update_blocked_ctx` now implements "last matching rule wins" for `enabled` field — a later `enabled: true` overrides an earlier `enabled: false`, mirroring Renovate's `applyPackageRules` behavior; 1 test | Complete | See below. |
 | 0286  | 2026-04-29 | Verify + test brace expansion in `matchPackageNames`/`matchDepNames` glob patterns (e.g. `@opentelemetry{/,}**`); globset handles this natively; 1 test added to `string_match.rs` | Complete | See below. |
 | 0285  | 2026-04-29 | Deprecated `matchDepPatterns`/`matchDepPrefixes` in packageRules: converted to `/pattern/` and `prefix**` glob strings in `matchDepNames` at parse time, matching Renovate's migration behavior; 2 tests | Complete | See below. |
 | 0284  | 2026-04-29 | Bug fix: `matchUpdateTypes: ["pin","digest"]` (unrecognized types) now correctly does NOT match major/minor/patch updates; `has_update_type_constraint` guard field added to `PackageRule`; 2 tests (1 corrected) | Complete | See below. |
