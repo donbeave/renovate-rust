@@ -269,6 +269,27 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 ---
 
+## Custom managers (`customManagers` + `custom-managers:*` preset)
+
+| Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
+|--------------------|------|---------------|---------------|-----------|--------|
+| `lib/modules/manager/custom/regex/index.spec.ts` | 23 | extracts multiple dependencies | `crates/renovate-core/src/repo_config.rs` | `custom_manager_extracts_deps_from_content` | ported |
+| `lib/modules/manager/custom/regex/index.spec.ts` | 50 | returns null if no dependencies found | `crates/renovate-core/src/repo_config.rs` | `custom_manager_combination_incomplete_match_returns_empty` | ported |
+| `lib/modules/manager/custom/regex/index.spec.ts` | 81 | extracts `extractVersion` from capture | `crates/renovate-core/src/repo_config.rs` | `custom_manager_extracts_deps_from_content` | partial |
+| `lib/modules/manager/custom/regex/index.spec.ts` | 299 | combination strategy merges captures | `crates/renovate-core/src/repo_config.rs` | `custom_manager_combination_strategy_merges_captures` | ported |
+| `lib/modules/manager/custom/regex/index.spec.ts` | — | `customType: "regex"` is default | `crates/renovate-core/src/repo_config.rs` | (handled in migration at parse time) | ported |
+| `lib/modules/manager/custom/regex/index.spec.ts` | — | `fileMatch`/`managerFilePatterns` gating | `crates/renovate-core/src/repo_config.rs` | `custom_manager_matches_file_by_pattern`, `custom_manager_file_match_legacy_field_parsed` | ported |
+| `lib/modules/manager/custom/regex/index.spec.ts` | — | `datasourceTemplate` used when group missing | `crates/renovate-core/src/repo_config.rs` | `custom_manager_uses_datasource_template_when_group_missing` | ported |
+| `lib/config/presets/internal/custom-managers.ts` | — | `dockerfileVersions` preset regression | `crates/renovate-core/src/repo_config.rs` | `dockerfile_versions_extracts_env_with_double_quotes`, `…_single_quotes`, `…_without_quotes`, `…_arg_directive`, `…_versioning_and_extract_version`, `…_file_pattern_matches` | ported |
+| `lib/config/presets/internal/custom-managers.ts` | — | `makefileVersions` preset: `=`, ` = `, `:=`, `?=` | `crates/renovate-core/src/repo_config.rs` | `makefile_versions_extracts_simple_assignment`, `…_space_assignment`, `…_colon_equal`, `…_question_equal`, `…_file_pattern_matches` | ported |
+| `lib/config/presets/internal/custom-managers.ts` | — | `helmChartYamlAppVersions` preset extracts appVersion | `crates/renovate-core/src/repo_config.rs` | `helm_chart_yaml_extracts_app_version`, `…_file_pattern_matches` | ported |
+| `lib/config/presets/internal/custom-managers.ts` | — | `azurePipelinesVersions` file pattern | `crates/renovate-core/src/repo_config.rs` | `azure_pipelines_file_pattern_matches` | ported |
+| `lib/config/presets/internal/custom-managers.ts` | — | `mavenPropertyVersions` preset extracts pom.xml | `crates/renovate-core/src/repo_config.rs` | `maven_property_versions_extracts_from_pom_xml`, `…_file_pattern_matches` | ported |
+| `lib/config/presets/internal/custom-managers.ts` | — | `recursive` strategy | — | (not implemented — recursive extraction strategy not supported) | pending |
+| `lib/modules/manager/custom/regex/index.spec.ts` | 221 | `autoReplaceStringTemplate` extraction | — | (not implemented) | pending |
+
+---
+
 ## Versioning
 
 | Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
