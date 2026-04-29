@@ -254,6 +254,15 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `followTag`.
     pub follow_tag: Option<String>,
+    /// Replacement package name when the dep is being migrated to a different package.
+    /// E.g. `"replacementName": "@babel/eslint-parser"` to replace `"babel-eslint"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `replacementName`.
+    pub replacement_name: Option<String>,
+    /// Replacement version constraint when migrating to a different package.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `replacementVersion`.
+    pub replacement_version: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -773,6 +782,10 @@ pub struct RuleEffects {
     /// Per-rule dist-tag to follow (e.g. `"next"`, `"beta"`).
     /// `None` = use the package's default release channel.
     pub follow_tag: Option<String>,
+    /// Replacement package name for migration suggestions.
+    pub replacement_name: Option<String>,
+    /// Replacement version constraint for migration suggestions.
+    pub replacement_version: Option<String>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────

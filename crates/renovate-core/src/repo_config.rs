@@ -2430,6 +2430,10 @@ impl RepoConfig {
             pin_digests: Option<bool>,
             #[serde(rename = "followTag")]
             follow_tag: Option<String>,
+            #[serde(rename = "replacementName")]
+            replacement_name: Option<String>,
+            #[serde(rename = "replacementVersion")]
+            replacement_version: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -2737,6 +2741,8 @@ impl RepoConfig {
                     versioning: r.versioning,
                     pin_digests: r.pin_digests,
                     follow_tag: r.follow_tag,
+                    replacement_name: r.replacement_name,
+                    replacement_version: r.replacement_version,
                 }
             })
             .collect();
@@ -3294,6 +3300,14 @@ impl RepoConfig {
             }
             if rule.follow_tag.is_some() {
                 effects.follow_tag.clone_from(&rule.follow_tag);
+            }
+            if rule.replacement_name.is_some() {
+                effects.replacement_name.clone_from(&rule.replacement_name);
+            }
+            if rule.replacement_version.is_some() {
+                effects
+                    .replacement_version
+                    .clone_from(&rule.replacement_version);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
