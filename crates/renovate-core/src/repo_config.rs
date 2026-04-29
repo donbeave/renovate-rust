@@ -4074,12 +4074,8 @@ impl RepoConfig {
                     match_file_names: {
                         let mut f = r.match_file_names;
                         f.extend(r.paths);
-                        // matchPaths takes precedence when both present; prefer matchFiles second
-                        if !r.match_paths.is_empty() {
-                            f.extend(r.match_paths);
-                        } else {
-                            f.extend(r.match_files);
-                        }
+                        f.extend(r.match_paths);
+                        f.extend(r.match_files);
                         f
                     },
                     // Deprecated: depTypeList → matchDepTypes (plain alias)
