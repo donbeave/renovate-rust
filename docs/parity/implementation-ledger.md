@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0342  | 2026-04-29 | More deprecated field migrations: `ignoreNodeModules: true` → adds `"node_modules/"` to `ignorePaths`; `enabledManagers: ["yarn"]` → `"npm"`, `"regex"` → `"custom.regex"` (matching Renovate's enabledManagers migration); 2 tests | Complete | See below. |
 | 0341  | 2026-04-29 | More deprecated field migrations: `semanticCommits: bool` → `"enabled"/"disabled"` via custom deserializer; `baseBranch: string` → prepended to `baseBranches` array; `separateMajorReleases: bool` → alias for `separateMajorMinor`; 4 tests | Complete | See below. |
 | 0340  | 2026-04-29 | `automerge` string value migration: deprecated `automerge: "none"/"any"/"patch"/"minor"` string enum deserialized via custom `deserialize_automerge_bool` function that accepts both bool and string (maps `"none"` → false, `"any"/"patch"/"minor"` → true); 2 tests | Complete | See below. |
 | 0339  | 2026-04-29 | Deprecated field migrations: `upgradeInRange: true` → `rangeStrategy: "bump"`, `versionStrategy: "widen"` → `rangeStrategy: "widen"`, `unpublishSafe: true` → injects `security:minimumReleaseAgeNpm` into extends; all 3 matched from Renovate's migration files; 4 tests | Complete | See below. |

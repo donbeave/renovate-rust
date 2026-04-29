@@ -3550,6 +3550,9 @@ impl RepoConfig {
             ignore_deps: Vec<String>,
             #[serde(rename = "ignorePaths", default)]
             ignore_paths: Vec<String>,
+            /// Deprecated: ignoreNodeModules: true → adds "node_modules/" to ignorePaths.
+            #[serde(rename = "ignoreNodeModules")]
+            ignore_node_modules: Option<bool>,
             #[serde(rename = "includePaths", default)]
             include_paths: Vec<String>,
             #[serde(rename = "packageRules", default)]
@@ -4040,7 +4043,17 @@ impl RepoConfig {
         });
 
         // Resolve managers enabled/disabled via presets.
-        let mut enabled_managers = raw.enabled_managers;
+        // Migrate deprecated enabledManagers values: "yarn" → "npm", "regex" → "custom.regex".
+        // Renovate reference: lib/config/migrations/custom/enabled-managers-migration.ts
+        let mut enabled_managers: Vec<String> = raw
+            .enabled_managers
+            .into_iter()
+            .map(|m| match m.as_str() {
+                "yarn" => "npm".to_owned(),
+                "regex" => "custom.regex".to_owned(),
+                _ => m,
+            })
+            .collect();
         // Start with any managers explicitly disabled in the JSON config.
         let mut disabled_managers: Vec<String> = raw.disabled_managers;
         for preset in &effective_extends {
@@ -4200,6 +4213,13 @@ impl RepoConfig {
                 // Prepend ignore paths from resolved built-in presets.
                 // User-configured paths override/extend preset paths.
                 let mut preset_paths = resolve_extends_ignore_paths(&effective_extends);
+                // Deprecated ignoreNodeModules: true → add "node_modules/" to ignorePaths.
+                // Renovate reference: lib/config/migrations/custom/ignore-node-modules-migration.ts
+                if raw.ignore_node_modules == Some(true)
+                    && !raw.ignore_paths.contains(&"node_modules/".to_owned())
+                {
+                    raw.ignore_paths.push("node_modules/".to_owned());
+                }
                 preset_paths.extend(raw.ignore_paths);
                 preset_paths
             },
@@ -6323,6 +6343,29 @@ mod tests {
             !c.separate_major_minor,
             "separateMajorReleases: false must set separateMajorMinor to false"
         );
+    }
+
+    #[test]
+    fn ignore_node_modules_true_adds_to_ignore_paths() {
+        let c = RepoConfig::parse(r#"{"ignoreNodeModules": true}"#);
+        assert!(
+            c.ignore_paths.contains(&"node_modules/".to_owned()),
+            "ignoreNodeModules: true must add node_modules/ to ignorePaths"
+        );
+    }
+
+    #[test]
+    fn enabled_managers_yarn_migrated_to_npm() {
+        let c = RepoConfig::parse(r#"{"enabledManagers": ["yarn", "cargo"]}"#);
+        assert!(
+            c.enabled_managers.contains(&"npm".to_owned()),
+            "enabledManagers: ['yarn'] must migrate to 'npm'"
+        );
+        assert!(
+            !c.enabled_managers.contains(&"yarn".to_owned()),
+            "'yarn' must be replaced, not kept"
+        );
+        assert!(c.enabled_managers.contains(&"cargo".to_owned()));
     }
 
     #[test]
