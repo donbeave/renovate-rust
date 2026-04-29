@@ -3565,7 +3565,7 @@ impl RepoConfig {
             #[serde(rename = "automergeSchedule", default)]
             automerge_schedule: Vec<String>,
             timezone: Option<String>,
-            #[serde(default)]
+            #[serde(default, deserialize_with = "deserialize_automerge_bool")]
             automerge: bool,
             #[serde(rename = "automergeType")]
             automerge_type: Option<String>,
@@ -3721,6 +3721,32 @@ impl RepoConfig {
 
         fn default_range_strategy() -> String {
             "auto".to_owned()
+        }
+
+        /// Deserialize automerge from bool or legacy string enum.
+        /// Renovate reference: lib/config/migrations/custom/automerge-migration.ts
+        fn deserialize_automerge_bool<'de, D>(d: D) -> Result<bool, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            use serde::de::Error;
+            use serde_json::Value;
+            let val = Value::deserialize(d)?;
+            match &val {
+                Value::Bool(b) => Ok(*b),
+                Value::String(s) => match s.as_str() {
+                    "none" => Ok(false),
+                    "any" => Ok(true),
+                    // "patch"/"minor" also migrate but need patch/minor config blocks
+                    // which we can't set here; treat as true (automerge partial types).
+                    "patch" | "minor" => Ok(true),
+                    _ => Ok(false),
+                },
+                Value::Null => Ok(false),
+                _ => Err(D::Error::custom(format!(
+                    "expected bool or string for automerge, got {val}"
+                ))),
+            }
         }
 
         fn default_max_major_increment() -> u32 {
@@ -6210,6 +6236,18 @@ mod tests {
     fn automerge_parsed_true() {
         let c = RepoConfig::parse(r#"{"automerge": true}"#);
         assert!(c.automerge);
+    }
+
+    #[test]
+    fn automerge_legacy_none_string_migrated_to_false() {
+        let c = RepoConfig::parse(r#"{"automerge": "none"}"#);
+        assert!(!c.automerge, "automerge: 'none' must migrate to false");
+    }
+
+    #[test]
+    fn automerge_legacy_any_string_migrated_to_true() {
+        let c = RepoConfig::parse(r#"{"automerge": "any"}"#);
+        assert!(c.automerge, "automerge: 'any' must migrate to true");
     }
 
     #[test]
