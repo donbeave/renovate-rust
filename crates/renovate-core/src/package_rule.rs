@@ -93,6 +93,10 @@ pub struct PackageRule {
     /// `true` when any `matchPackageNames` / `matchPackagePatterns` /
     /// `matchPackagePrefixes` entry was set (non-empty `match_package_names`).
     pub has_name_constraint: bool,
+    /// `true` when `matchUpdateTypes` was set in the raw config, even if all
+    /// specified types are unrecognized (e.g. `"pin"`, `"digest"`).
+    /// When `true` and `match_update_types` is empty, the rule can never match.
+    pub has_update_type_constraint: bool,
 
     // ── Per-rule metadata (applied when this rule matches) ───────────────────
     /// Group name for this rule's matching dependencies.
@@ -330,6 +334,11 @@ impl PackageRule {
 
     /// Return `true` when this rule's update type condition matches `update_type`.
     pub fn update_type_matches(&self, update_type: UpdateType) -> bool {
+        if self.has_update_type_constraint && self.match_update_types.is_empty() {
+            // All specified update types were unrecognized (e.g. ["pin", "digest"]).
+            // An unrecognized-only constraint never matches our known update types.
+            return false;
+        }
         self.match_update_types.is_empty() || self.match_update_types.contains(&update_type)
     }
 

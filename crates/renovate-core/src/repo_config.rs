@@ -1299,6 +1299,7 @@ impl RepoConfig {
                 for pat in r.match_package_patterns {
                     match_package_names.push(format!("/{pat}/"));
                 }
+                let has_update_type_constraint = !r.match_update_types.is_empty();
                 let match_update_types = r
                     .match_update_types
                     .iter()
@@ -1328,6 +1329,7 @@ impl RepoConfig {
                     ignore_versions: r.ignore_versions,
                     enabled: r.enabled,
                     has_name_constraint,
+                    has_update_type_constraint,
                     group_name: r.group_name,
                     group_slug: r.group_slug,
                     automerge: r.automerge,
@@ -2769,9 +2771,25 @@ mod tests {
                 }]
             }"#,
         );
-        // "pin" and "digest" are not yet supported types — rule has no update type constraint
-        // so it matches all update types
+        // "pin" and "digest" are unrecognized update types — rule has has_update_type_constraint
+        // but empty match_update_types, so it cannot match any major/minor/patch update.
+        assert!(!c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
+    }
+
+    #[test]
+    fn mixed_known_unknown_update_types_still_match_known() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "matchUpdateTypes": ["major", "pin"],
+                    "enabled": false
+                }]
+            }"#,
+        );
+        // "major" is recognized, "pin" is not — rule should still block major updates.
         assert!(c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
+        // Minor should not be blocked (only major and pin are in the list).
+        assert!(!c.is_update_blocked("serde", "1.0.0", UpdateType::Minor, "cargo"));
     }
 
     #[test]
