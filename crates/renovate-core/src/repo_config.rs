@@ -3587,6 +3587,9 @@ impl RepoConfig {
             additional_branch_prefix: String,
             #[serde(rename = "baseBranches", default)]
             base_branches: Vec<String>,
+            /// Deprecated: singular baseBranch → baseBranches[0].
+            #[serde(rename = "baseBranch")]
+            base_branch: Option<String>,
             #[serde(rename = "rebaseWhen")]
             rebase_when: Option<String>,
             #[serde(rename = "prCreation")]
@@ -3599,6 +3602,9 @@ impl RepoConfig {
             group_name: Option<String>,
             #[serde(rename = "separateMajorMinor", default = "default_true")]
             separate_major_minor: bool,
+            /// Deprecated: separateMajorReleases is an alias for separateMajorMinor.
+            #[serde(rename = "separateMajorReleases")]
+            separate_major_releases: Option<bool>,
             #[serde(rename = "separateMultipleMajor", default)]
             separate_multiple_major: bool,
             #[serde(rename = "separateMinorPatch", default)]
@@ -3607,7 +3613,7 @@ impl RepoConfig {
             separate_multiple_minor: bool,
             #[serde(rename = "maxMajorIncrement", default = "default_max_major_increment")]
             max_major_increment: u32,
-            #[serde(rename = "semanticCommits")]
+            #[serde(rename = "semanticCommits", deserialize_with = "deserialize_semantic_commits_opt", default)]
             semantic_commits: Option<String>,
             #[serde(
                 rename = "semanticCommitType",
@@ -3721,6 +3727,26 @@ impl RepoConfig {
 
         fn default_range_strategy() -> String {
             "auto".to_owned()
+        }
+
+        /// Deserialize semanticCommits from bool or string.
+        /// Renovate reference: lib/config/migrations/custom/semantic-commits-migration.ts
+        fn deserialize_semantic_commits_opt<'de, D>(d: D) -> Result<Option<String>, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            use serde_json::Value;
+            let val = Value::deserialize(d)?;
+            Ok(match &val {
+                Value::Bool(true) => Some("enabled".to_owned()),
+                Value::Bool(false) => Some("disabled".to_owned()),
+                Value::String(s) if s == "enabled" || s == "disabled" || s == "auto" => {
+                    Some(s.clone())
+                }
+                Value::String(_) => Some("auto".to_owned()),
+                Value::Null => None,
+                _ => None,
+            })
         }
 
         /// Deserialize automerge from bool or legacy string enum.
@@ -4101,7 +4127,16 @@ impl RepoConfig {
             assign_automerge: raw.assign_automerge,
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
-            base_branches: raw.base_branches,
+            base_branches: {
+                // Deprecated singular baseBranch → prepend to baseBranches array.
+                let mut branches = raw.base_branches;
+                if let Some(b) = raw.base_branch {
+                    if !branches.contains(&b) {
+                        branches.insert(0, b);
+                    }
+                }
+                branches
+            },
             rebase_when: raw.rebase_when.or_else(|| {
                 // :rebaseStalePrs preset sets rebaseWhen: "behind-base-branch".
                 if effective_extends
@@ -4133,11 +4168,13 @@ impl RepoConfig {
             }),
             group_name: raw.group_name,
             // group:all preset implies separateMajorMinor: false.
+            // Deprecated separateMajorReleases is an alias for separateMajorMinor.
             // Explicit user config overrides the preset (but default true from serde means
             // we can't distinguish user-set vs default; group preset wins only when
             // the user hasn't explicitly set it to true in the raw JSON).
             separate_major_minor: scalar_sep_major_minor
                 .or(group_separate_major_minor)
+                .or(raw.separate_major_releases)
                 .unwrap_or(raw.separate_major_minor),
             separate_multiple_major: scalar_sep_multi_major.unwrap_or(raw.separate_multiple_major),
             max_major_increment: raw.max_major_increment,
@@ -6248,6 +6285,44 @@ mod tests {
     fn automerge_legacy_any_string_migrated_to_true() {
         let c = RepoConfig::parse(r#"{"automerge": "any"}"#);
         assert!(c.automerge, "automerge: 'any' must migrate to true");
+    }
+
+    #[test]
+    fn semantic_commits_bool_true_migrated_to_enabled() {
+        let c = RepoConfig::parse(r#"{"semanticCommits": true}"#);
+        assert_eq!(
+            c.semantic_commits.as_deref(),
+            Some("enabled"),
+            "semanticCommits: true must migrate to 'enabled'"
+        );
+    }
+
+    #[test]
+    fn semantic_commits_bool_false_migrated_to_disabled() {
+        let c = RepoConfig::parse(r#"{"semanticCommits": false}"#);
+        assert_eq!(
+            c.semantic_commits.as_deref(),
+            Some("disabled"),
+            "semanticCommits: false must migrate to 'disabled'"
+        );
+    }
+
+    #[test]
+    fn base_branch_singular_prepended_to_base_branches() {
+        let c = RepoConfig::parse(r#"{"baseBranch": "develop"}"#);
+        assert!(
+            c.base_branches.contains(&"develop".to_owned()),
+            "deprecated baseBranch must be added to baseBranches"
+        );
+    }
+
+    #[test]
+    fn separate_major_releases_alias_for_separate_major_minor() {
+        let c = RepoConfig::parse(r#"{"separateMajorReleases": false}"#);
+        assert!(
+            !c.separate_major_minor,
+            "separateMajorReleases: false must set separateMajorMinor to false"
+        );
     }
 
     #[test]
