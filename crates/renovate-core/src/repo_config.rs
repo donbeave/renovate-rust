@@ -377,6 +377,30 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
             ":semanticPrefixFix" | "semanticPrefixFix" => {
                 result.push(":semanticCommitType(fix)".to_owned());
             }
+            // config:recommended expands to its constituent supported presets.
+            // The real preset also extends mergeConfidence, replacements, workarounds, and
+            // helpers — those are either unsupported or deferred.
+            "config:recommended" | "config:base" => {
+                if seen.insert("config:recommended") {
+                    // Key behavioral presets from config:recommended that we support:
+                    result.push(":semanticPrefixFixDepsChoreOthers".to_owned());
+                    result.push(":ignoreModulesAndTests".to_owned());
+                    result.push("group:monorepos".to_owned());
+                    result.push("group:recommended".to_owned());
+                    // Keep the preset itself so downstream handlers (ignorePaths,
+                    // group expansion) that match on "config:recommended" still fire.
+                    result.push("config:recommended".to_owned());
+                }
+            }
+            // config:best-practices extends config:recommended plus additional presets.
+            "config:best-practices" => {
+                if seen.insert("config:best-practices") {
+                    result.push("config:recommended".to_owned());
+                    result.push(":pinDevDependencies".to_owned());
+                    // Keep for downstream handlers.
+                    result.push("config:best-practices".to_owned());
+                }
+            }
             other => {
                 // Handle parameterized compound presets like :assignAndReview(user).
                 let (name, args) = parse_preset_args(other);
@@ -5218,6 +5242,25 @@ mod schedule_preset_tests {
         assert!(
             group_names.contains(&"Node.js"),
             "group:recommended nodeJs rule missing from config:recommended"
+        );
+    }
+
+    #[test]
+    fn config_recommended_includes_semantic_prefix_rules() {
+        // config:recommended transitively extends :semanticPrefixFixDepsChoreOthers.
+        // Verify that the semantic commit packageRules are injected.
+        let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
+        let ctx_dep = DepContext {
+            dep_name: "lodash",
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx_dep);
+        // Production deps should get "fix" semantic type from :semanticPrefixFixDepsChoreOthers
+        assert_eq!(
+            effects.semantic_commit_type.as_deref(),
+            Some("fix"),
+            "config:recommended should apply semanticCommitType=fix for production deps"
         );
     }
 

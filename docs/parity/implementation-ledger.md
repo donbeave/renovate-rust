@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0308  | 2026-04-29 | Fix `config:recommended` to expand `:semanticPrefixFixDepsChoreOthers`, `:ignoreModulesAndTests`, `group:monorepos`, `group:recommended` in `expand_compound_presets`; `config:best-practices` also expanded; 2 tests | Complete | See below. |
 | 0307  | 2026-04-29 | 12 more group presets: `jwtFramework`, `atlaskit`, `dotNetCore`, `googleapis`, `jekyllEcosystem`, `postcss`, `vite`, `pulumi` (5 rules), `test`, `testNonMajor`, `unitTest`, `unitTestNonMajor`; `PHP_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |
 | 0306  | 2026-04-29 | Fix `config:recommended` to inject `group:recommended` rules; `resolve_extends_group_presets` now expands `config:recommended/base/best-practices` to their group rules; 1 test | Complete | See below. |
 | 0305  | 2026-04-29 | 13 more group presets: `codemirror`, `flyway`, `fortawesome`, `fusionjs`, `githubArtifactActions`, `glimmer`, `goOpenapi`, `polymer`, `allApollographql`, `apiPlatform`, `phpstan`, `symfony` (with exclusions), `rubyOnRails`; update `group:recommended` to include all; 3 tests | Complete | See below. |
@@ -5795,6 +5796,33 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
 - Added `group:pulumi`: **5 rules** — npm @pulumi/**, pypi pulumi-**, go github.com/pulumi/**, maven com.pulumi**, nuget Pulumi**
 - Added `group:test`, `group:testNonMajor`, `group:unitTest`, `group:unitTestNonMajor`: combine JS_UNIT_TEST_PACKAGES + PHP_UNIT_TEST_PACKAGES; Non-major variants add minor/patch update type constraint
 - 3 tests: vite matches vite/vite-plugin/@vitejs; pulumi has 5 rules; jwtFramework is packagist-only
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0308 - Fix `config:recommended` compound expansion
+
+### Renovate reference
+- `lib/config/presets/internal/config.preset.ts` — `recommended` extends many presets including `:semanticPrefixFixDepsChoreOthers`, `:ignoreModulesAndTests`, `group:monorepos`, `group:recommended`
+- `best-practices` extends `config:recommended` plus additional presets
+
+### What was wrong
+`config:recommended` was passed through `expand_compound_presets()` without expansion, meaning users with `extends: ["config:recommended"]` did NOT get:
+- Semantic commit type rules (`:semanticPrefixFixDepsChoreOthers`)
+- ignorePaths expansion (`:ignoreModulesAndTests`) — this was working separately
+- Group rules (group:monorepos, group:recommended) — this was working separately
+
+The `resolve_extends_semantic_prefix_rules` and `resolve_extends_ignore_paths` checked for `:semanticPrefixFixDepsChoreOthers` and `config:recommended` separately, but the compound expansion path was broken.
+
+### Implementation
+- Added `"config:recommended" | "config:base"` case to `expand_compound_presets()`:
+  - Expands to: `:semanticPrefixFixDepsChoreOthers`, `:ignoreModulesAndTests`, `group:monorepos`, `group:recommended`, `config:recommended` (kept for downstream handlers)
+  - Uses `seen` HashSet to prevent duplicate expansion
+- Added `"config:best-practices"` case: expands to `config:recommended` + `:pinDevDependencies` + keeps itself
+- 2 tests: config:recommended production deps get semanticCommitType "fix"; group rules still present
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`
