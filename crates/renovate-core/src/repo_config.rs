@@ -622,6 +622,55 @@ fn resolve_extends_automerge_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
+            // :automergeMajor — automerge all updates including major.
+            ":automergeMajor" | "automergeMajor" => {
+                rules.push(PackageRule {
+                    match_update_types: vec![
+                        UpdateType::Major,
+                        UpdateType::Minor,
+                        UpdateType::Patch,
+                    ],
+                    automerge: Some(true),
+                    ..Default::default()
+                });
+            }
+            // :automergeAll — automerge all (including major); global flag handled in parse().
+            // packageRule version for completeness.
+            ":automergeAll" | "automergeAll" | ":autoMerge" | "autoMerge" => {
+                // Global automerge: true is set in parse(); no per-rule needed.
+            }
+            // :automergeLinters — automerge linter packages.
+            ":automergeLinters" | "automergeLinters" => {
+                rules.push(PackageRule {
+                    has_name_constraint: true,
+                    match_package_names: LINTER_PACKAGES.iter().map(|&s| s.to_owned()).collect(),
+                    automerge: Some(true),
+                    ..Default::default()
+                });
+            }
+            // :automergeTesters — automerge test packages (js + php unit tests).
+            ":automergeTesters" | "automergeTesters" => {
+                let mut pkgs: Vec<String> = JS_UNIT_TEST_PACKAGES
+                    .iter()
+                    .map(|&s| s.to_owned())
+                    .collect();
+                pkgs.extend(PHP_UNIT_TEST_PACKAGES.iter().map(|&s| s.to_owned()));
+                rules.push(PackageRule {
+                    has_name_constraint: true,
+                    match_package_names: pkgs,
+                    automerge: Some(true),
+                    ..Default::default()
+                });
+            }
+            // :automergeTypes — automerge @types/* packages.
+            ":automergeTypes" | "automergeTypes" => {
+                rules.push(PackageRule {
+                    has_name_constraint: true,
+                    match_package_names: vec!["@types/**".to_owned()],
+                    automerge: Some(true),
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -5485,6 +5534,27 @@ mod schedule_preset_tests {
         // Our logic: explicit true wins; if explicit false (default), use preset.
         let c = RepoConfig::parse(r#"{"extends": [":automergeAll"]}"#);
         assert!(c.automerge, "preset should set automerge to true");
+    }
+
+    #[test]
+    fn automerge_linters_preset_injects_automerge_rule() {
+        let c = RepoConfig::parse(r#"{"extends": [":automergeLinters"]}"#);
+        // Rule injected for linter packages
+        assert!(!c.package_rules.is_empty());
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.automerge, Some(true));
+        assert!(rule.name_matches("eslint"));
+        assert!(!rule.name_matches("lodash"));
+    }
+
+    #[test]
+    fn automerge_types_preset_injects_types_rule() {
+        let c = RepoConfig::parse(r#"{"extends": [":automergeTypes"]}"#);
+        assert!(!c.package_rules.is_empty());
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.automerge, Some(true));
+        assert!(rule.name_matches("@types/node"));
+        assert!(!rule.name_matches("lodash"));
     }
 
     #[test]

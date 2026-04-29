@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0313  | 2026-04-29 | `:automergeLinters`, `:automergeTesters`, `:automergeTypes`, `:automergeMajor` presets: inject packageRules with `automerge: true` for their respective package lists; 2 tests | Complete | See below. |
 | 0312  | 2026-04-29 | `helpers:pinGitHubActionDigests` preset: injects `{matchDepTypes: ["action"], pinDigests: true}` rule; 1 test | Complete | See below. |
 | 0311  | 2026-04-29 | `pinDigests` field in `packageRules` + `docker:pinDigests` preset (2 rules: docker datasource + undo for argocd/devcontainer/helmv3/pyenv); 2 tests | Complete | See below. |
 | 0310  | 2026-04-29 | Bug fix: remove duplicate group:recommended expansion in `resolve_extends_group_presets` — the handler for `config:recommended` was running in both `expand_compound_presets` AND `resolve_extends_group_presets`, injecting rules twice | Complete | See below. |
