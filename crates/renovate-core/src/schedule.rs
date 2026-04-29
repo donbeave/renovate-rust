@@ -914,4 +914,110 @@ mod tests {
             "Berlin 10:00 (UTC+2 CET) is after 9am"
         );
     }
+
+    // ── Ported from schedule.spec.ts (isScheduledNow at 2017-06-30 10:50am, a Friday) ──
+
+    #[test]
+    fn spec_supports_before_hours_true() {
+        // "returns true if before hours" — at 10am, "before 4:00pm" is true
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["before 4:00pm".to_owned()];
+        assert!(
+            is_within_schedule_at(&sched, friday_10am),
+            "10am is before 4:00pm"
+        );
+    }
+
+    #[test]
+    fn spec_supports_before_hours_false() {
+        // "returns false if before hours" — at 10am, "before 4:00am" is false
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["before 4:00am".to_owned()];
+        assert!(
+            !is_within_schedule_at(&sched, friday_10am),
+            "10am is NOT before 4:00am"
+        );
+    }
+
+    #[test]
+    fn spec_supports_outside_hours() {
+        // "returns false for outside hours" — at 10am, "after 4:00pm" is false
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["after 4:00pm".to_owned()];
+        assert!(
+            !is_within_schedule_at(&sched, friday_10am),
+            "10am is NOT after 4:00pm"
+        );
+    }
+
+    #[test]
+    fn spec_cron_with_hours_match() {
+        // "supports cron syntax with hours" — * 10 * * * at hour=10 matches
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched_match = vec!["* 10 * * *".to_owned()];
+        let sched_no_match = vec!["* 11 * * *".to_owned()];
+        assert!(is_within_schedule_at(&sched_match, friday_10am));
+        assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
+    }
+
+    #[test]
+    fn spec_cron_with_days_match() {
+        // "supports cron syntax with days" — * * 30 * * on day=30 matches
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched_match = vec!["* * 30 * *".to_owned()];
+        let sched_no_match = vec!["* * 1 * *".to_owned()];
+        assert!(is_within_schedule_at(&sched_match, friday_10am));
+        assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
+    }
+
+    #[test]
+    fn spec_cron_with_months_match() {
+        // "supports cron syntax with months" — * * * 6 * on month=6 (June) matches
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched_match = vec!["* * * 6 *".to_owned()];
+        let sched_no_match = vec!["* * * 7 *".to_owned()];
+        assert!(is_within_schedule_at(&sched_match, friday_10am));
+        assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
+    }
+
+    #[test]
+    fn spec_cron_with_weekdays_match() {
+        // "supports cron syntax with weekdays" — * * * * 5 on weekday=5 (Friday) matches
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched_match = vec!["* * * * 5".to_owned()];
+        let sched_no_match = vec!["* * * * 6".to_owned()];
+        assert!(is_within_schedule_at(&sched_match, friday_10am));
+        assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
+    }
+
+    #[test]
+    fn spec_returns_true_if_no_schedule() {
+        // "returns true if no schedule" — empty schedule means always scheduled
+        let friday_10am = utc(2017, 6, 30, 10);
+        assert!(is_within_schedule_at(&[], friday_10am));
+    }
+
+    #[test]
+    fn spec_returns_true_for_at_any_time() {
+        // "returns true if at any time"
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["at any time".to_owned()];
+        assert!(is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_cron_on_sunday_weekday_0() {
+        // "approves if the weekday is 0" — Sunday matches weekday 0
+        let sunday_10am = utc(2023, 1, 8, 10);
+        let sched = vec!["* * * * 0".to_owned()];
+        assert!(is_within_schedule_at(&sched, sunday_10am));
+    }
+
+    #[test]
+    fn spec_cron_on_sunday_rejects_weekday_1() {
+        // "rejects if the weekday is 1" — Sunday does NOT match Monday
+        let sunday_10am = utc(2023, 1, 8, 10);
+        let sched = vec!["* * * * 1".to_owned()];
+        assert!(!is_within_schedule_at(&sched, sunday_10am));
+    }
 }
