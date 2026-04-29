@@ -62,7 +62,14 @@ find where a given TypeScript module is implemented in Rust.
 | TypeScript file | Rust file(s) | Status | Notes |
 |-----------------|-------------|--------|-------|
 | `lib/util/package-rules/index.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `matches_context()` + `collect_rule_effects()` |
-| `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/repo_config.rs` | full | `matchDepNames` |
+| `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/package_rule.rs` | partial | `matchDepNames` exact/regex/glob; negation pending |
+| `lib/util/package-rules/package-names.ts` | `crates/renovate-core/src/package_rule.rs` | partial | `matchPackageNames` exact/regex/glob; negation pending |
+| `lib/util/package-rules/files.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchFileNames` |
+| `lib/util/package-rules/base-branches.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchBaseBranches` |
+| `lib/util/package-rules/base.ts` | — | out-of-scope | Abstract base class — internal TypeScript abstraction |
+| `lib/util/package-rules/matchers.ts` | — | out-of-scope | Matcher registry — internal TypeScript abstraction |
+| `lib/util/package-rules/types.ts` | — | out-of-scope | Type definitions only |
+| `lib/util/package-rules/merge-confidence.ts` | — | not-started | `matchConfidence` (MergeConfidence, hosted only) |
 | `lib/util/package-rules/datasources.ts` | `crates/renovate-core/src/repo_config.rs` | full | `matchDatasources` |
 | `lib/util/package-rules/managers.ts` | `crates/renovate-core/src/repo_config.rs` | full | `matchManagers` |
 | `lib/util/package-rules/update-types.ts` | `crates/renovate-core/src/repo_config.rs` | full | `matchUpdateTypes` |

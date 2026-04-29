@@ -39,10 +39,12 @@ pub struct PackageRule {
     pub match_package_names: Vec<PackageNameMatcher>,
     /// Compiled regex patterns from the deprecated `matchPackagePatterns` field.
     pub match_package_patterns: Vec<Regex>,
-    /// Dep name matchers from `matchDepNames`.
+    /// Dep name patterns from `matchDepNames`.
     /// Targets the `depName` field (may differ from `packageName`).
-    /// When non-empty, the dep name must match at least one entry.
-    pub match_dep_names: Vec<PackageNameMatcher>,
+    /// Supports exact, `/regex/`, glob, and `!negation` patterns.
+    ///
+    /// Renovate reference: `lib/util/package-rules/dep-names.ts`
+    pub match_dep_names: Vec<String>,
     /// Datasource IDs to match (e.g. `"npm"`, `"pypi"`, `"docker"`).
     /// Empty = all datasources.
     pub match_datasources: Vec<String>,
@@ -86,8 +88,6 @@ pub struct PackageRule {
     /// `true` when any `matchPackageNames` / `matchPackagePatterns` /
     /// `matchPackagePrefixes` entry was set.
     pub has_name_constraint: bool,
-    /// `true` when any `matchDepNames` entry was set.
-    pub has_dep_name_constraint: bool,
 
     // ── Per-rule metadata (applied when this rule matches) ───────────────────
     /// Group name for this rule's matching dependencies.
@@ -182,15 +182,11 @@ impl PackageRule {
     }
 
     /// Return `true` when this rule's `matchDepNames` condition matches `dep_name`.
+    ///
+    /// Supports exact, `/regex/`, glob, and `!negation` patterns.
     pub fn dep_name_matches(&self, dep_name: &str) -> bool {
-        if !self.has_dep_name_constraint {
-            return true;
-        }
-        self.match_dep_names.iter().any(|m| match m {
-            PackageNameMatcher::Exact(s) => s == dep_name,
-            PackageNameMatcher::Regex(re) => re.is_match(dep_name),
-            PackageNameMatcher::Glob(gm) => gm.is_match(dep_name),
-        })
+        use crate::string_match::match_regex_or_glob_list;
+        self.match_dep_names.is_empty() || match_regex_or_glob_list(dep_name, &self.match_dep_names)
     }
 
     /// Return `true` when this rule's `matchDatasources` condition matches `datasource`.

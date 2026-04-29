@@ -536,20 +536,12 @@ impl RepoConfig {
                     })
                     .collect();
 
-                let has_dep_name_constraint = !r.match_dep_names.is_empty();
-                let match_dep_names: Vec<PackageNameMatcher> = r
-                    .match_dep_names
-                    .iter()
-                    .map(|s| compile_name_matcher(s))
-                    .collect();
-
-                // matchSourceUrls, matchRegistryUrls, matchRepositories store
-                // raw strings so match_regex_or_glob_list can apply negation.
+                // matchDepNames, matchSourceUrls, matchRegistryUrls, matchRepositories
+                // store raw strings so match_regex_or_glob_list can apply negation.
                 PackageRule {
                     match_package_names,
                     match_package_patterns,
-                    match_dep_names,
-                    has_dep_name_constraint,
+                    match_dep_names: r.match_dep_names,
                     match_source_urls: r.match_source_urls,
                     match_current_value: r.match_current_value.map(|s| compile_name_matcher(&s)),
                     match_new_value: r.match_new_value.map(|s| compile_name_matcher(&s)),
@@ -1988,6 +1980,40 @@ mod tests {
         );
         assert!(c.is_dep_ignored("lodash"));
         assert!(!c.is_dep_ignored("express"));
+    }
+
+    #[test]
+    fn match_dep_names_negation_regex() {
+        // "!/^@opentelemetry/" excludes the whole @opentelemetry scope.
+        // Ported from lib/util/package-rules/dep-names.spec.ts
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepNames": ["!/^@opentelemetry/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.dep_name_matches("@opentelemetry/http"));
+        assert!(rule.dep_name_matches("lodash"));
+    }
+
+    #[test]
+    fn match_dep_names_negation_glob() {
+        // "!@opentelemetry/**" excludes the whole @opentelemetry scope via glob.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepNames": ["!@opentelemetry/**"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.dep_name_matches("@opentelemetry/http"));
+        assert!(rule.dep_name_matches("express"));
+    }
+
+    #[test]
+    fn match_dep_names_regex_includes() {
+        // "/^@opentelemetry/" positive match
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepNames": ["/^@opentelemetry/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.dep_name_matches("@opentelemetry/http"));
+        assert!(!rule.dep_name_matches("express"));
     }
 
     // ── matchDatasources ─────────────────────────────────────────────────────

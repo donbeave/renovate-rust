@@ -67,6 +67,10 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | — | `matchPackageNames` regex `/pattern/` | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_regex_disables_dep` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchPackageNames` glob `@aws-sdk/**` | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_glob_disables_dep` | ported |
 | `lib/util/package-rules/dep-names.ts` | — | `matchDepNames` matches `depName` | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_exact_disables_dep`, `match_dep_names_regex_disables_dep`, `match_dep_names_glob_disables_dep` | ported |
+| `lib/util/package-rules/dep-names.spec.ts` | — | `matchDepNames` negation regex `!/^@opentelemetry/` | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_negation_regex` | ported |
+| `lib/util/package-rules/dep-names.spec.ts` | — | `matchDepNames` negation glob `!@opentelemetry/**` | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_negation_glob` | ported |
+| `lib/util/package-rules/dep-names.spec.ts` | — | `matchDepNames` positive regex include | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_regex_includes` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` negation glob | `crates/renovate-core/src/repo_config.rs` | `match_repositories_negation` | ported |
 | `lib/util/package-rules/sourceurls.ts` | — | `matchSourceUrls` exact | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_exact_disables_dep` | ported |
 | `lib/util/package-rules/sourceurls.ts` | — | `matchSourceUrls` glob | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_glob` | ported |
 | `lib/util/package-rules/sourceurls.ts` | — | `matchSourceUrls` regex | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_regex` | ported |
