@@ -359,8 +359,26 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                 result.push("group:all".to_owned());
                 result.push("schedule:weekly".to_owned());
             }
+            // :semanticPrefixChore → :semanticCommitType(chore)
+            ":semanticPrefixChore" | "semanticPrefixChore" => {
+                result.push(":semanticCommitType(chore)".to_owned());
+            }
+            // :semanticPrefixFix → :semanticCommitType(fix)
+            ":semanticPrefixFix" | "semanticPrefixFix" => {
+                result.push(":semanticCommitType(fix)".to_owned());
+            }
             other => {
-                result.push(other.to_owned());
+                // Handle parameterized compound presets like :assignAndReview(user).
+                let (name, args) = parse_preset_args(other);
+                if (name == ":assignAndReview" || name == "assignAndReview")
+                    && !args.is_empty()
+                    && !args[0].is_empty()
+                {
+                    result.push(format!(":assignee({})", args[0]));
+                    result.push(format!(":reviewer({})", args[0]));
+                } else {
+                    result.push(other.to_owned());
+                }
             }
         }
     }
@@ -4297,6 +4315,34 @@ mod schedule_preset_tests {
     fn reviewer_preset_adds_reviewer() {
         let c = RepoConfig::parse(r#"{"extends": [":reviewer(myteam)"]}"#);
         assert!(c.reviewers.contains(&"myteam".to_owned()));
+    }
+
+    #[test]
+    fn assign_and_review_compound_preset_expands() {
+        // :assignAndReview(user) → :assignee(user) + :reviewer(user)
+        let c = RepoConfig::parse(r#"{"extends": [":assignAndReview(alice)"]}"#);
+        assert!(
+            c.assignees.contains(&"alice".to_owned()),
+            "should set alice as assignee"
+        );
+        assert!(
+            c.reviewers.contains(&"alice".to_owned()),
+            "should set alice as reviewer"
+        );
+    }
+
+    #[test]
+    fn semantic_prefix_chore_expands() {
+        // :semanticPrefixChore → :semanticCommitType(chore)
+        let c = RepoConfig::parse(r#"{"extends": [":semanticPrefixChore"]}"#);
+        assert_eq!(c.semantic_commit_type, "chore");
+    }
+
+    #[test]
+    fn semantic_prefix_fix_expands() {
+        // :semanticPrefixFix → :semanticCommitType(fix)
+        let c = RepoConfig::parse(r#"{"extends": [":semanticPrefixFix"]}"#);
+        assert_eq!(c.semantic_commit_type, "fix");
     }
 
     #[test]
