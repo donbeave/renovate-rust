@@ -266,6 +266,37 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `ignoreUnstable`.
     pub ignore_unstable: bool,
 
+    /// When `true`, Renovate will only update npm packages up to the "latest"
+    /// dist-tag (respects the `latest` tag even if newer versions are published).
+    /// Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `respectLatest`.
+    pub respect_latest: bool,
+
+    /// When `true`, Renovate pins Docker image digests on update.
+    /// Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `pinDigests`.
+    pub pin_digests: bool,
+
+    /// When `true`, Renovate creates a Dependency Dashboard issue in the repo.
+    /// Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `dependencyDashboard`.
+    pub dependency_dashboard: bool,
+
+    /// When `true`, all updates require approval via the Dependency Dashboard
+    /// before Renovate creates the PR.  Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `dependencyDashboardApproval`.
+    pub dependency_dashboard_approval: bool,
+
+    /// When `true`, Renovate creates a PR to migrate stale config options to
+    /// their modern equivalents.  Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `configMigration`.
+    pub config_migration: bool,
+
     // ── Scheduling behavior ───────────────────────────────────────────────────
     /// When `false`, Renovate will not update branches that are outside the
     /// configured schedule window.  Default: `true` (updates happen even when
@@ -1828,6 +1859,15 @@ fn resolve_extends_parameterized_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
+            // :approveMajorUpdates — require Dependency Dashboard approval for major updates.
+            ":approveMajorUpdates" | "approveMajorUpdates" => {
+                rules.push(PackageRule {
+                    match_update_types: vec![UpdateType::Major],
+                    has_update_type_constraint: true,
+                    dependency_dashboard_approval: Some(true),
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -3294,6 +3334,8 @@ impl RepoConfig {
             version_compatibility: Option<String>,
             #[serde(rename = "changelogUrl")]
             changelog_url: Option<String>,
+            #[serde(rename = "dependencyDashboardApproval")]
+            dependency_dashboard_approval: Option<bool>,
         }
 
         #[derive(Deserialize)]
@@ -3381,6 +3423,16 @@ impl RepoConfig {
             minimum_release_age: Option<String>,
             #[serde(rename = "ignoreUnstable", default)]
             ignore_unstable: bool,
+            #[serde(rename = "respectLatest", default)]
+            respect_latest: bool,
+            #[serde(rename = "pinDigests", default)]
+            pin_digests: bool,
+            #[serde(rename = "dependencyDashboard", default)]
+            dependency_dashboard: bool,
+            #[serde(rename = "dependencyDashboardApproval", default)]
+            dependency_dashboard_approval: bool,
+            #[serde(rename = "configMigration", default)]
+            config_migration: bool,
             #[serde(rename = "updateNotScheduled", default = "default_true")]
             update_not_scheduled: bool,
             #[serde(rename = "commitMessageAction", default = "default_commit_action")]
@@ -3654,6 +3706,7 @@ impl RepoConfig {
                     replacement_version: r.replacement_version,
                     version_compatibility: r.version_compatibility,
                     changelog_url: r.changelog_url,
+                    dependency_dashboard_approval: r.dependency_dashboard_approval,
                 }
             })
             .collect();
@@ -3854,6 +3907,32 @@ impl RepoConfig {
             ignore_presets: raw.ignore_presets,
             minimum_release_age: raw.minimum_release_age,
             ignore_unstable: raw.ignore_unstable || preset_ignore_unstable,
+            respect_latest: raw.respect_latest
+                || effective_extends
+                    .iter()
+                    .any(|p| p == ":respectLatest" || p == "respectLatest"),
+            pin_digests: effective_extends
+                .iter()
+                .any(|p| p == ":pinDigests" || p == "pinDigests")
+                || (raw.pin_digests
+                    && !effective_extends
+                        .iter()
+                        .any(|p| p == ":pinDigestsDisabled" || p == "pinDigestsDisabled")),
+            dependency_dashboard: raw.dependency_dashboard
+                || effective_extends
+                    .iter()
+                    .any(|p| p == ":dependencyDashboard" || p == "dependencyDashboard")
+                    && !effective_extends.iter().any(|p| {
+                        p == ":disableDependencyDashboard" || p == "disableDependencyDashboard"
+                    }),
+            dependency_dashboard_approval: raw.dependency_dashboard_approval
+                || effective_extends.iter().any(|p| {
+                    p == ":dependencyDashboardApproval" || p == "dependencyDashboardApproval"
+                }),
+            config_migration: raw.config_migration
+                || effective_extends
+                    .iter()
+                    .any(|p| p == ":configMigration" || p == "configMigration"),
             update_not_scheduled: preset_update_not_scheduled.unwrap_or(raw.update_not_scheduled),
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
@@ -4267,6 +4346,9 @@ impl RepoConfig {
             if rule.changelog_url.is_some() {
                 effects.changelog_url.clone_from(&rule.changelog_url);
             }
+            if rule.dependency_dashboard_approval.is_some() {
+                effects.dependency_dashboard_approval = rule.dependency_dashboard_approval;
+            }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
                 effects.assignees.clone_from(&rule.assignees);
@@ -4346,6 +4428,11 @@ impl Default for RepoConfig {
             ignore_presets: Vec::new(),
             minimum_release_age: None,
             ignore_unstable: false,
+            respect_latest: false,
+            pin_digests: false,
+            dependency_dashboard: false,
+            dependency_dashboard_approval: false,
+            config_migration: false,
             update_not_scheduled: true,
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
@@ -9203,6 +9290,87 @@ mod rule_effects_tests {
             user_cm.dep_name_template.as_deref(),
             Some("my-tool"),
             "last manager must be the user-defined one"
+        );
+    }
+
+    // ── Missing default preset tests ─────────────────────────────────────────
+
+    #[test]
+    fn preset_respect_latest_sets_flag() {
+        let c = RepoConfig::parse(r#"{"extends": [":respectLatest"]}"#);
+        assert!(c.respect_latest, ":respectLatest must set respect_latest = true");
+    }
+
+    #[test]
+    fn preset_respect_latest_off_by_default() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(!c.respect_latest, "respectLatest must default to false");
+    }
+
+    #[test]
+    fn preset_dependency_dashboard_sets_flag() {
+        let c = RepoConfig::parse(r#"{"extends": [":dependencyDashboard"]}"#);
+        assert!(c.dependency_dashboard, ":dependencyDashboard must enable dependency dashboard");
+    }
+
+    #[test]
+    fn preset_disable_dependency_dashboard_overrides() {
+        // disableDependencyDashboard should win over dependencyDashboard
+        let c = RepoConfig::parse(
+            r#"{"extends": [":dependencyDashboard", ":disableDependencyDashboard"]}"#,
+        );
+        assert!(
+            !c.dependency_dashboard,
+            ":disableDependencyDashboard must suppress the dashboard"
+        );
+    }
+
+    #[test]
+    fn raw_dependency_dashboard_parsed() {
+        let c = RepoConfig::parse(r#"{"dependencyDashboard": true}"#);
+        assert!(c.dependency_dashboard, "raw dependencyDashboard: true must be parsed");
+    }
+
+    #[test]
+    fn preset_config_migration_sets_flag() {
+        let c = RepoConfig::parse(r#"{"extends": [":configMigration"]}"#);
+        assert!(c.config_migration, ":configMigration must set config_migration = true");
+    }
+
+    #[test]
+    fn preset_dependency_dashboard_approval_sets_flag() {
+        let c = RepoConfig::parse(r#"{"extends": [":dependencyDashboardApproval"]}"#);
+        assert!(
+            c.dependency_dashboard_approval,
+            ":dependencyDashboardApproval must set the flag"
+        );
+    }
+
+    #[test]
+    fn preset_approve_major_updates_injects_rule() {
+        let c = RepoConfig::parse(r#"{"extends": [":approveMajorUpdates"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.dependency_dashboard_approval == Some(true))
+            .expect(":approveMajorUpdates must inject a rule with dependencyDashboardApproval");
+        use crate::versioning::semver_generic::UpdateType;
+        assert!(
+            rule.match_update_types.contains(&UpdateType::Major),
+            ":approveMajorUpdates rule must match major updates"
+        );
+    }
+
+    #[test]
+    fn raw_dependency_dashboard_approval_parsed_in_package_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "dependencyDashboardApproval": true}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert_eq!(
+            rule.dependency_dashboard_approval,
+            Some(true),
+            "dependencyDashboardApproval in packageRules must be parsed"
         );
     }
 }

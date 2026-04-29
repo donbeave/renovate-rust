@@ -276,6 +276,11 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `changelogUrl`.
     pub changelog_url: Option<String>,
+    /// When `Some(true)`, requires Dependency Dashboard approval before Renovate
+    /// creates a PR for matching deps.  Forwarded to PR generator.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `dependencyDashboardApproval`.
+    pub dependency_dashboard_approval: Option<bool>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -803,6 +808,8 @@ pub struct RuleEffects {
     pub version_compatibility: Option<String>,
     /// Custom changelog URL template (forwarded to PR generator; not evaluated here).
     pub changelog_url: Option<String>,
+    /// Whether Dependency Dashboard approval is required before creating a PR.
+    pub dependency_dashboard_approval: Option<bool>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────
