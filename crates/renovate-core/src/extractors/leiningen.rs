@@ -35,6 +35,19 @@ pub enum LeinDepType {
     Coords,
 }
 
+impl LeinDepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            LeinDepType::Dependencies => "dependencies",
+            LeinDepType::ManagedDependencies => "managed-dependencies",
+            LeinDepType::Plugins => "plugins",
+            LeinDepType::PomPlugins => "pom-plugins",
+            LeinDepType::Coords => "coords",
+        }
+    }
+}
+
+
 /// A single extracted Leiningen dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LeinDep {

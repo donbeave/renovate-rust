@@ -41,6 +41,17 @@ pub enum SbtDepType {
     SbtVersion,
 }
 
+impl SbtDepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            SbtDepType::Library => "library",
+            SbtDepType::Plugin => "plugin",
+            SbtDepType::SbtVersion => "sbt",
+        }
+    }
+}
+
+
 /// A single extracted SBT dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SbtDep {
