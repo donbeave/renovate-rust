@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0352  | 2026-04-29 | Port `managers.spec.ts` tests: undefined manager + rule set → doesn't fire; absent matchManagers → fires for any manager; legacy `manager:'regex'` matches `matchManagers:['custom.regex']`; 3 new tests; 1723 tests total | Complete | See below. |
 | 0351  | 2026-04-29 | Port `package-names.spec.ts` tests: `matchPackageNames` uses `packageName` field (not `depName`) when set; rule does not fire when neither name matches; 2 new tests; 1720 tests total | Complete | See below. |
 | 0350  | 2026-04-29 | Port Renovate package-rules spec tests: 10 new tests from `repositories.spec.ts`, `current-value.spec.ts`, `new-value.spec.ts`, `files.spec.ts` — invalid regex → false, negated invalid regex → true, any-of-patterns, undefined inputs, glob matching; 1718 tests total | Complete | See below. |
 | 0349  | 2026-04-29 | `isBump` support: `UpdateType::Bump` variant added; `"bump"` now parsed in `matchUpdateTypes`; `DepContext.is_bump: bool` field added; `update_type_matches(ut, is_bump)` checks `Bump` variant when `is_bump` is true (mirrors Renovate's `UpdateTypesMatcher` pushing `'bump'` to checked set); 2 new tests ported from `index.spec.ts` | Complete | See below. |

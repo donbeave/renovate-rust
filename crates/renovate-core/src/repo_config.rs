@@ -5508,6 +5508,60 @@ mod tests {
         assert!(!rule.manager_matches("npm"));
     }
 
+    // ── Ported from Renovate managers.spec.ts ────────────────────────────────
+
+    #[test]
+    fn match_managers_no_manager_no_rule_fire() {
+        // "should return false if no manager": undefined manager + matchManagers set → rule doesn't fire.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["npm"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            manager: None,
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when manager is None"
+        );
+    }
+
+    #[test]
+    fn match_managers_undefined_rule_fires_for_any_manager() {
+        // "should return null if matchManagers is undefined": no matchManagers → matches any manager.
+        let c = RepoConfig::parse(r#"{"packageRules": [{"automerge": true}]}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            manager: Some("npm"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "rule must fire when matchManagers is absent"
+        );
+    }
+
+    #[test]
+    fn match_managers_legacy_regex_matches_custom_regex_rule() {
+        // "should match custom managers": manager:'regex' (legacy) matches matchManagers:['custom.regex']
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["custom.regex"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "my-dep",
+            manager: Some("regex"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "legacy 'regex' manager should match 'custom.regex' rule"
+        );
+    }
+
     #[test]
     fn match_dep_types_filters_by_dep_type() {
         let c = RepoConfig::parse(

@@ -98,6 +98,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` glob pattern | `crates/renovate-core/src/repo_config.rs` | `match_managers_glob_pattern` | ported |
 | `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` regex pattern | `crates/renovate-core/src/repo_config.rs` | `match_managers_regex_pattern` | ported |
 | `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` negation `!pattern` | `crates/renovate-core/src/repo_config.rs` | `match_managers_negation` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | undefined manager + `matchManagers` set → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `match_managers_no_manager_no_rule_fire` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` absent → fires for any manager | `crates/renovate-core/src/repo_config.rs` | `match_managers_undefined_rule_fires_for_any_manager` | ported |
+| `lib/util/package-rules/managers.spec.ts` | — | legacy `manager:'regex'` matches `matchManagers:['custom.regex']` | `crates/renovate-core/src/repo_config.rs` | `match_managers_legacy_regex_matches_custom_regex_rule` | ported |
 | `lib/util/string-match.ts` | — | `matchRegexOrGlob` exact | `crates/renovate-core/src/string_match.rs` | `exact_match` | ported |
 | `lib/util/string-match.ts` | — | `matchRegexOrGlob` regex `/pattern/` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_match` | ported |
 | `lib/util/string-match.ts` | — | `matchRegexOrGlob` regex `/pattern/flags` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_with_flags_match` | ported |
