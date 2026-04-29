@@ -291,6 +291,11 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `commitMessageSuffix`.
     pub commit_message_suffix: Option<String>,
+    /// Body text appended to commit messages (after a blank line).  Supports
+    /// `{{{gitAuthor}}}` substitution.  Example: `"Signed-off-by: Bot <bot@example.com>"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitBody`.
+    pub commit_body: Option<String>,
 
     // ── Range / version strategy ──────────────────────────────────────────────
     /// Range update strategy. Controls how existing version ranges are modified.
@@ -2518,6 +2523,8 @@ impl RepoConfig {
             commit_message_extra: Option<String>,
             #[serde(rename = "commitMessageSuffix")]
             commit_message_suffix: Option<String>,
+            #[serde(rename = "commitBody")]
+            commit_body: Option<String>,
             #[serde(rename = "rangeStrategy", default = "default_range_strategy")]
             range_strategy: String,
             #[serde(rename = "hashedBranchLength")]
@@ -2916,6 +2923,17 @@ impl RepoConfig {
             commit_message_prefix: raw.commit_message_prefix,
             commit_message_extra: raw.commit_message_extra,
             commit_message_suffix: raw.commit_message_suffix,
+            commit_body: raw.commit_body.or_else(|| {
+                // :gitSignOff preset sets commitBody to Signed-off-by trailer.
+                if effective_extends
+                    .iter()
+                    .any(|p| p == ":gitSignOff" || p == "gitSignOff")
+                {
+                    Some("Signed-off-by: {{{gitAuthor}}}".to_owned())
+                } else {
+                    None
+                }
+            }),
             range_strategy: raw.range_strategy,
             hashed_branch_length: raw.hashed_branch_length,
             major_config: raw.major,
@@ -3354,6 +3372,7 @@ impl Default for RepoConfig {
             commit_message_prefix: None,
             commit_message_extra: None,
             commit_message_suffix: None,
+            commit_body: None,
             range_strategy: "auto".to_owned(),
             hashed_branch_length: None,
             major_config: None,
@@ -4919,6 +4938,24 @@ mod tests {
     fn rebase_when_default_none() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(c.rebase_when.is_none());
+    }
+
+    #[test]
+    fn commit_body_parsed_from_config() {
+        let c = RepoConfig::parse(r#"{"commitBody": "Signed-off-by: Bot <bot@example.com>"}"#);
+        assert_eq!(
+            c.commit_body.as_deref(),
+            Some("Signed-off-by: Bot <bot@example.com>")
+        );
+    }
+
+    #[test]
+    fn git_sign_off_preset_sets_commit_body() {
+        let c = RepoConfig::parse(r#"{"extends": [":gitSignOff"]}"#);
+        assert_eq!(
+            c.commit_body.as_deref(),
+            Some("Signed-off-by: {{{gitAuthor}}}")
+        );
     }
 
     #[test]
