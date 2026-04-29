@@ -251,4 +251,23 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].current_value, "7.0.5");
     }
+
+    #[test]
+    fn null_string_returns_empty() {
+        // Ported: "returns null for a null string passed in" — osgi/extract.spec.ts line 163
+        assert!(extract("null").is_empty());
+    }
+
+    #[test]
+    fn empty_returns_empty() {
+        // Ported: "returns null for empty file" — osgi/extract.spec.ts line 143
+        assert!(extract("").is_empty());
+    }
+
+    #[test]
+    fn no_bundles_returns_empty() {
+        // Ported: "returns null for a valid file with no artifact definitions" — spec line 167
+        let content = r#"{"feature-resource-version": "1.0"}"#;
+        assert!(extract(content).is_empty());
+    }
 }

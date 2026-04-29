@@ -110,6 +110,21 @@ services:
 
     #[test]
     fn empty_returns_empty() {
+        // Ported: "returns null for empty" — woodpecker/extract.spec.ts line 8
         assert!(extract("").is_empty());
+    }
+
+    #[test]
+    fn non_object_yaml_returns_empty() {
+        // Ported: "returns null for non-object YAML" — woodpecker/extract.spec.ts line 12
+        assert!(extract("nothing here").is_empty());
+        assert!(extract("clone: null").is_empty());
+    }
+
+    #[test]
+    fn no_steps_or_services_returns_empty() {
+        // Ported: "return null when no dependencies are provided" — woodpecker/extract.spec.ts line 313
+        let content = "pipeline: {}\n";
+        assert!(extract(content).is_empty());
     }
 }
