@@ -399,6 +399,12 @@ impl RepoConfig {
             schedule: Vec<String>,
             #[serde(default)]
             labels: Vec<String>,
+            #[serde(rename = "addLabels", default)]
+            add_labels: Vec<String>,
+            #[serde(default)]
+            assignees: Vec<String>,
+            #[serde(default)]
+            reviewers: Vec<String>,
             #[serde(rename = "matchCategories", default)]
             match_categories: Vec<String>,
             #[serde(rename = "matchBaseBranches", default)]
@@ -555,6 +561,9 @@ impl RepoConfig {
                     automerge: r.automerge,
                     schedule: r.schedule,
                     labels: r.labels,
+                    add_labels: r.add_labels,
+                    assignees: r.assignees,
+                    reviewers: r.reviewers,
                     match_categories: r.match_categories,
                     match_base_branches: r.match_base_branches,
                     match_registry_urls: r.match_registry_urls,
@@ -858,8 +867,20 @@ impl RepoConfig {
                     effects.labels.push(label.clone());
                 }
             }
+            // addLabels is mergeable=true: accumulate from ALL matching rules.
+            for label in &rule.add_labels {
+                if !effects.labels.contains(label) {
+                    effects.labels.push(label.clone());
+                }
+            }
             if rule.minimum_release_age.is_some() {
                 effects.minimum_release_age.clone_from(&rule.minimum_release_age);
+            }
+            if !rule.assignees.is_empty() {
+                effects.assignees.clone_from(&rule.assignees);
+            }
+            if !rule.reviewers.is_empty() {
+                effects.reviewers.clone_from(&rule.reviewers);
             }
         }
         // Apply repo-level defaults if no rule overrode them.
@@ -868,6 +889,12 @@ impl RepoConfig {
         }
         if effects.automerge.is_none() && self.automerge {
             effects.automerge = Some(true);
+        }
+        if effects.assignees.is_empty() && !self.assignees.is_empty() {
+            effects.assignees.clone_from(&self.assignees);
+        }
+        if effects.reviewers.is_empty() && !self.reviewers.is_empty() {
+            effects.reviewers.clone_from(&self.reviewers);
         }
         effects
     }
@@ -3120,6 +3147,81 @@ mod rule_effects_tests {
             effects.minimum_release_age.as_deref(),
             Some("1 week"),
             "last matching rule should win"
+        );
+    }
+
+    // ── per-rule addLabels ────────────────────────────────────────────────────
+
+    #[test]
+    fn per_rule_add_labels_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "addLabels": ["dep-update", "js"]}]}"#,
+        );
+        assert_eq!(c.package_rules[0].add_labels, vec!["dep-update", "js"]);
+    }
+
+    #[test]
+    fn per_rule_add_labels_accumulated_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "addLabels": ["dep-update"]}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.labels.contains(&"dep-update".to_owned()));
+    }
+
+    #[test]
+    fn per_rule_add_labels_accumulate_from_multiple_rules() {
+        // Two matching rules each add a different label; both should appear.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["lodash"], "addLabels": ["dep-update"]},
+                {"matchPackageNames": ["lodash"], "addLabels": ["js"]}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.labels.contains(&"dep-update".to_owned()));
+        assert!(effects.labels.contains(&"js".to_owned()));
+    }
+
+    #[test]
+    fn per_rule_add_labels_does_not_duplicate() {
+        // Same label from addLabels and repo-level labels → only one copy.
+        let c = RepoConfig::parse(
+            r#"{"labels": ["dep-update"], "packageRules": [{"matchPackageNames": ["lodash"], "addLabels": ["dep-update"]}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.labels.iter().filter(|l| *l == "dep-update").count(),
+            1,
+            "label should not be duplicated"
+        );
+    }
+
+    #[test]
+    fn per_rule_add_labels_not_applied_to_non_matching_dep() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "addLabels": ["dep-update"]}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "react",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            !effects.labels.contains(&"dep-update".to_owned()),
+            "non-matching dep should not get addLabels"
         );
     }
 }

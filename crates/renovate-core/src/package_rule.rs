@@ -115,6 +115,24 @@ pub struct PackageRule {
     /// Renovate reference: `lib/config/options/index.ts` — `labels`.
     pub labels: Vec<String>,
 
+    /// Additional labels appended to (not replacing) the existing label set.
+    /// `mergeable: true` in Renovate — accumulates from all matching rules.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `addLabels`.
+    pub add_labels: Vec<String>,
+
+    /// Per-rule GitHub usernames/team slugs to assign as PR assignees.
+    /// Overrides the repo-level `assignees` for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `assignees`.
+    pub assignees: Vec<String>,
+
+    /// Per-rule GitHub usernames/team slugs to add as PR reviewers.
+    /// Overrides the repo-level `reviewers` for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `reviewers`.
+    pub reviewers: Vec<String>,
+
     // ── Category / base-branch constraints ───────────────────────────────────
     /// Ecosystem category strings to match (e.g. `["js"]`, `["python", "rust"]`).
     ///
@@ -620,11 +638,18 @@ pub struct RuleEffects {
     pub automerge: Option<bool>,
     /// `schedule` from the last matching rule that sets it.  Empty = repo default.
     pub schedule: Vec<String>,
-    /// Labels accumulated (union) from all matching rules.
+    /// Labels accumulated (union) from all matching rules (includes both `labels`
+    /// and `addLabels` from each matching rule).
     pub labels: Vec<String>,
     /// Per-rule `minimumReleaseAge` override.  `None` = use repo-level default.
     /// The last matching rule that sets this wins.
     pub minimum_release_age: Option<String>,
+    /// PR assignees from the last matching rule that sets them.
+    /// Empty = use repo-level assignees.
+    pub assignees: Vec<String>,
+    /// PR reviewers from the last matching rule that sets them.
+    /// Empty = use repo-level reviewers.
+    pub reviewers: Vec<String>,
 }
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────

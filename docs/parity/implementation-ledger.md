@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0214  | 2026-04-29 | `addLabels` + `assignees`/`reviewers` per-rule in `packageRules`; exposed in output | Complete | See below. |
 | 0213  | 2026-04-29 | Per-rule `schedule` + `minimumReleaseAge` in `packageRules` | Complete | See below. |
 | 0212  | 2026-04-29 | `hashedBranchLength` config option — SHA-512 branch name hashing | Complete | See below. |
 | 0211  | 2026-04-28 | Refactor: split `managers_impl` into 17 focused `pipelines/` sub-modules | Complete | See below. |
@@ -4956,6 +4957,34 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0214 - `addLabels` + `assignees`/`reviewers` per-rule; output fields
+
+### Renovate reference
+- `lib/config/options/index.ts` — `addLabels` (mergeable: true), `assignees`, `reviewers`
+
+### What landed
+- `PackageRule`: added `add_labels: Vec<String>` (serde: `addLabels`),
+  `assignees: Vec<String>`, `reviewers: Vec<String>`
+- `RuleEffects`: added `assignees: Vec<String>`, `reviewers: Vec<String>`
+- `collect_rule_effects`:
+  - `add_labels` from each matching rule is accumulated (union) into `effects.labels` —
+    implements Renovate's `mergeable: true` semantics (addLabels stacks across rules)
+  - `assignees`/`reviewers` from the last matching rule that sets them win (same
+    as schedule/minimumReleaseAge); fall back to repo-level values if no rule sets them
+- `pipeline_utils.rs`: sets `dep.assignees = effects.assignees` and
+  `dep.reviewers = effects.reviewers` after collect_rule_effects
+- `output.rs` `DepReport`: added `assignees: Vec<String>` and `reviewers: Vec<String>`
+  fields (serialized in JSON output, `skip_serializing_if = "Vec::is_empty"`)
+- All 100+ `DepReport` initializer sites updated to include both new fields
+- 5 new unit tests for addLabels (parsed, accumulated, multi-rule stacking,
+  no-duplicate, non-matching dep unaffected)
+
+### Verification
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` ✓
+- `cargo nextest run --workspace --all-features` → 1402 tests pass (5 new)
 
 ---
 

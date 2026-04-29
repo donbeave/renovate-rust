@@ -139,6 +139,8 @@ pub(crate) fn apply_update_blocking_to_report(
                 dep.group_name = effects.group_name;
                 dep.automerge = effects.automerge;
                 dep.labels = effects.labels;
+                dep.assignees = effects.assignees;
+                dep.reviewers = effects.reviewers;
             }
         }
     }
@@ -222,6 +224,8 @@ pub(crate) async fn docker_hub_reports(
                 group_name: None,
                 automerge: None,
                 labels: Vec::new(),
+                assignees: Vec::new(),
+                reviewers: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
@@ -258,6 +262,8 @@ pub(crate) async fn docker_hub_reports(
                 group_name: None,
                 automerge: None,
                 labels: Vec::new(),
+                assignees: Vec::new(),
+                reviewers: Vec::new(),
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
