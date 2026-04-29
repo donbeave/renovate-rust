@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0360  | 2026-04-29 | Port `migration.spec.ts` `unpublishSafe` tests: 3 new tests (appends preset to existing extends, false→no-inject, no-duplicate when `:unpublishSafe` already in extends); add migration.spec.ts section to test map with 15 entries; 1739 tests | Complete | See below. |
 | 0359  | 2026-04-29 | `lockFiles` in DepContext: `lock_files: &[&str]` added; `matchFileNames` now checks packageFile first, then falls back to `anyMatchRegexOrGlobList(lockFiles, patterns)` (matching Renovate's FileNamesMatcher); 2 new tests from `index.spec.ts`; 1736 tests | Complete | See below. |
 | 0358  | 2026-04-29 | `lockedVersion` in DepContext: `locked_version: Option<&str>` added to `DepContext`; `current_version_matches(current_value, locked_version)` now uses `lockedVersion ?? currentValue` for regex patterns (matching Renovate's `CurrentVersionMatcher`); 3 new tests from `current-version.spec.ts`; 1734 tests | Complete | See below. |
 | 0357  | 2026-04-29 | Port dep-names.spec.ts "undefined depName → false" test: explicit test that empty dep_name + matchDepNames set → rule doesn't fire; mark as ported in test map; 1731 tests | Complete | See below. |

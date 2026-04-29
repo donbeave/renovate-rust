@@ -209,6 +209,28 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 ---
 
+## Deprecated field migrations (`lib/config/migration.spec.ts`)
+
+| Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
+|--------------------|------|---------------|---------------|-----------|--------|
+| `lib/config/migration.spec.ts` | 441 | `unpublishSafe: true` → injects `security:minimumReleaseAgeNpm` | `crates/renovate-core/src/repo_config.rs` | `unpublish_safe_true_injects_minimum_release_age_preset` | ported |
+| `lib/config/migration.spec.ts` | 441 | `unpublishSafe: true` + existing extends → appends preset | `crates/renovate-core/src/repo_config.rs` | `unpublish_safe_true_with_existing_extends_appends_preset` | ported |
+| `lib/config/migration.spec.ts` | 441 | `unpublishSafe: false` → no injection | `crates/renovate-core/src/repo_config.rs` | `unpublish_safe_false_does_not_inject` | ported |
+| `lib/config/migration.spec.ts` | 441 | `unpublishSafe: true` + `:unpublishSafe` in extends → no duplication | `crates/renovate-core/src/repo_config.rs` | `unpublish_safe_with_unpublish_safe_preset_already_in_extends_does_not_duplicate` | ported |
+| `lib/config/migration.spec.ts` | 532 | `npm:unpublishSafe` in extends → `security:minimumReleaseAgeNpm` | `crates/renovate-core/src/repo_config.rs` | `npm_unPublish_safe_resolves_to_minimum_release_age` | ported |
+| `lib/config/migration.spec.ts` | 17 | `automerge: 'none'` → `automerge: false` | `crates/renovate-core/src/repo_config.rs` | `automerge_none_migrated_to_false` | ported |
+| `lib/config/migration.spec.ts` | 17 | `separateMajorReleases: true` → `separateMajorMinor: true` | `crates/renovate-core/src/repo_config.rs` | `separate_major_releases_migrated` | ported |
+| `lib/config/migration.spec.ts` | 17 | `upgradeInRange: true` → `rangeStrategy: 'bump'` | `crates/renovate-core/src/repo_config.rs` | `upgrade_in_range_true_sets_range_strategy_bump` | ported |
+| `lib/config/migration.spec.ts` | 17 | `baseBranch: 'next'` → `baseBranches: ['next']` | `crates/renovate-core/src/repo_config.rs` | `base_branch_singular_migrated_to_base_branches` | ported |
+| `lib/config/migration.spec.ts` | 17 | `rebaseStalePrs: true` → `rebaseWhen: 'behind-base-branch'` | `crates/renovate-core/src/repo_config.rs` | `rebase_stale_prs_true_sets_rebase_when` | ported |
+| `lib/config/migration.spec.ts` | 17 | `rebaseConflictedPrs: false` → `rebaseWhen: 'never'` | `crates/renovate-core/src/repo_config.rs` | `rebase_conflicted_prs_false_sets_rebase_when_never` | ported |
+| `lib/config/migration.spec.ts` | 17 | `ignoreNodeModules: true` → adds `node_modules/` to `ignorePaths` | `crates/renovate-core/src/repo_config.rs` | `ignore_node_modules_true_adds_to_ignore_paths` | ported |
+| `lib/config/migration.spec.ts` | 17 | `enabledManagers: ['yarn']` → `['npm']` | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_yarn_migrated_to_npm` | ported |
+| `lib/config/migration.spec.ts` | 17 | `semanticCommits: true` → `semanticCommits: 'enabled'` | `crates/renovate-core/src/repo_config.rs` | `semantic_commits_bool_true_migrated` | ported |
+| `lib/config/migration.spec.ts` | — | `stabilityDays: N` → `minimumReleaseAge: 'N days'` | `crates/renovate-core/src/repo_config.rs` | `stability_days_migrated_to_minimum_release_age` | ported |
+
+---
+
 ## Manager detection
 
 | Renovate test file | Line | Renovate test | Rust location | Rust test | Status |

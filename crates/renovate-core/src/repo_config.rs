@@ -8816,6 +8816,59 @@ mod rule_effects_tests {
         );
     }
 
+    // ── Ported from migration.spec.ts unpublishSafe tests ────────────────────
+
+    #[test]
+    fn unpublish_safe_true_with_existing_extends_appends_preset() {
+        // Ported: 'unpublishSafe: true, extends: "foo"' → extends: ['foo', 'security:minimumReleaseAgeNpm']
+        // Verify that our impl injects the preset and APPENDS to existing extends.
+        let c = RepoConfig::parse(r#"{"unpublishSafe": true, "extends": ["foo"]}"#);
+        let has_npm_age = c.package_rules.iter().any(|r| {
+            r.match_datasources.contains(&"npm".to_owned())
+                && r.minimum_release_age.as_deref() == Some("3 days")
+        });
+        assert!(
+            has_npm_age,
+            "minimumReleaseAge npm rule must be present when unpublishSafe: true with other extends"
+        );
+    }
+
+    #[test]
+    fn unpublish_safe_false_does_not_inject() {
+        // Ported: 'unpublishSafe: false' → extends unchanged, no minimumReleaseAge rule.
+        let c = RepoConfig::parse(r#"{"unpublishSafe": false, "extends": ["foo", "bar"]}"#);
+        let has_npm_age = c.package_rules.iter().any(|r| {
+            r.match_datasources.contains(&"npm".to_owned())
+                && r.minimum_release_age.as_deref() == Some("3 days")
+        });
+        assert!(
+            !has_npm_age,
+            "unpublishSafe: false must not inject minimumReleaseAge"
+        );
+    }
+
+    #[test]
+    fn unpublish_safe_with_unpublish_safe_preset_already_in_extends_does_not_duplicate() {
+        // Ported: when ':unpublishSafe' is already in extends, don't add security:minimumReleaseAgeNpm.
+        // The ':unpublishSafe' preset itself adds the 3-day rule, so there's no double injection.
+        let c = RepoConfig::parse(
+            r#"{"unpublishSafe": true, "extends": ["foo", ":unpublishSafe", "bar"]}"#,
+        );
+        let npm_age_rules_count = c
+            .package_rules
+            .iter()
+            .filter(|r| {
+                r.match_datasources.contains(&"npm".to_owned())
+                    && r.minimum_release_age.as_deref() == Some("3 days")
+            })
+            .count();
+        // Should have exactly one such rule (from :unpublishSafe), not duplicated.
+        assert_eq!(
+            npm_age_rules_count, 1,
+            ":unpublishSafe in extends + unpublishSafe:true must not duplicate the rule"
+        );
+    }
+
     // ── stabilityDays migration ───────────────────────────────────────────────
 
     #[test]
