@@ -123,6 +123,8 @@ original Renovate TypeScript repository**. Every `it()` test case in every
   internal behavior with no runtime equivalent (type guards, mock infrastructure,
   generic constraint tests, module resolution). Always record the reason in the
   test map's Reason column. When in doubt, port the test.
+- There is no `skipped` status. In-scope tests that are not yet ported stay
+  `pending` until ported or reclassified as `not-applicable`.
 - Additional Rust tests beyond the TypeScript baseline are welcome and
   encouraged, but they do not count toward closing parity gaps.
 - Track coverage in `docs/parity/renovate-test-map.md` using the per-test

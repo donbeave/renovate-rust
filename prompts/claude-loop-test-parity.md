@@ -3,18 +3,18 @@ You are working on the renovate-rust repository.
 ## Mission
 
 The Rust implementation must have **at minimum the same test coverage as the
-original Renovate TypeScript repository**. Every `it()` test case in every
-`.spec.ts` file in the Renovate reference is a requirement: it must either be
+original Renovate TypeScript repository**. Every `it()` and `it.each()` test
+case in every `.spec.ts` file is a porting requirement: it must either be
 ported to an equivalent Rust test or explicitly marked `not-applicable` with a
 documented reason.
 
-This is the minimum bar. The Rust test suite may and should go further —
+This is the minimum bar. The Rust test suite may and should go beyond it —
 additional edge cases, Rust-specific invariants, performance assertions — but
-those extras do not substitute for the TypeScript parity requirement.
+extras do not substitute for the TypeScript parity requirement.
 
-Your goal in this loop is to drive the Rust test suite toward that minimum
-bar by maintaining `docs/parity/renovate-test-map.md` as a precise, per-test
-audit trail, and by writing or annotating Rust tests to close the gaps.
+Your goal in this loop is to drive the Rust test suite toward that minimum bar
+by maintaining `docs/parity/renovate-test-map.md` as a precise, per-test audit
+trail, and by writing or annotating Rust tests to close the gaps.
 
 Run autonomously. Do not ask questions. Make the best engineering decision you
 can from local evidence. Never stop because of a missing credential or external
@@ -39,271 +39,249 @@ Never modify `prompts/claude-loop-test-parity.md` while executing this loop.
 
 `docs/parity/renovate-test-map.md`
 
-This file must be rebuilt to use the **per-test format** defined below.
-The previous file-level table format (one row per spec file with just counts)
-is being replaced entirely. Read the current file before you start each
-iteration so you know which entries already exist and what phase they are in.
+This file is being rebuilt from the old file-level table format into the
+per-test format defined below. Read it at the start of every iteration to know
+which entries already exist and what phase they are in.
+
+The file must begin with a summary block that is updated every commit:
+
+```markdown
+# Renovate Test Map
+
+**Overall progress:** 340 / 1,247 test cases ported (27%) — updated 2026-04-29
+
+Status key: `ported` · `pending` · `not-applicable`
+```
+
+Update the counts by running:
+```sh
+grep -c "| ported |" docs/parity/renovate-test-map.md
+grep -c "| pending \|" docs/parity/renovate-test-map.md
+grep -c "| not-applicable |" docs/parity/renovate-test-map.md
+```
 
 ---
 
-## New per-test format
+## Per-test format
 
-The file is structured as a set of Markdown sections, one per `.spec.ts` file.
-Each section follows this template exactly:
+The file body is a sequence of sections, one per `.spec.ts` file. Every section
+follows this template exactly. The table **always has six columns** — Reason is
+`—` for `ported` and `pending` rows.
 
 ```markdown
 ## `lib/modules/manager/ansible-galaxy/extract.spec.ts`
 
-**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible-galaxy/extract.spec.ts  
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible-galaxy/extract.spec.ts
 **Total tests:** 14 | **Ported:** 9 | **Status:** partial
 
 ### `extractPackageFile()`
 
-| Original test name | Line | Status | Rust file | Rust test name |
-|---|---|---|---|---|
-| returns null for empty | 15 | ported | `ansible_galaxy.rs` | `test_returns_null_for_empty` |
-| extracts multiple dependencies from requirements.yml | 23 | pending | — | — |
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 15 | ported | `ansible_galaxy.rs` | `test_returns_null_for_empty` | — |
+| extracts multiple dependencies from requirements.yml | 23 | pending | — | — | — |
+| validates TypeScript types | 67 | not-applicable | — | — | TypeScript type-system test; no runtime behavior |
 ```
 
-Rules:
-- Section heading (`##`) = spec file path as inline code, relative to Renovate repo root.
-- **Reference** link always points to the GitHub blob URL for that spec file.
-- **Total tests** = number of `it(` occurrences in the spec file (count with grep).
-- **Ported** = number of rows whose Status is `ported`.
-- **Status** summary: `ported` (all done) · `partial` (some done) · `pending` (none done) · `not-applicable` (out of scope or TypeScript-internal).
-- Subsection heading (`###`) = the full `describe()` path joined with ` › ` when nested.
-  Example: outer describe `extractPackageFile()` only → `### \`extractPackageFile()\``
-  Nested: outer `extractPackageFile()` + inner `git deps` → `### \`extractPackageFile() › git deps\``
-- Table columns: **Original test name** (exact string from `it(` call) · **Line** (1-based line number of the `it(` call) · **Status** · **Rust file** (filename only, no path) · **Rust test name** (the `#[test] fn` name).
-- Use `—` in Rust file and Rust test name when the test is not yet ported.
-- Status values per row: `ported` · `pending` · `not-applicable` · `skipped`.
-- For `not-applicable` and `skipped` rows, add a **Reason** column with a short explanation.
+### Format rules
 
-  Extended table format when skips exist:
-  ```
-  | Original test name | Line | Status | Rust file | Rust test name | Reason |
-  |---|---|---|---|---|---|
-  | validates TypeScript types | 42 | not-applicable | — | — | TypeScript type-system test; no runtime behavior |
-  ```
+- `##` heading = spec file path as inline code, relative to Renovate repo root.
+- **Reference** = GitHub blob URL for the spec file (no line anchor on the file
+  itself; line anchors appear in the `// Ported:` comment on the Rust side).
+- **Total tests** = count of `it(` and `it.each(` call sites in the spec file.
+- **Ported** = count of rows with Status `ported`.
+- **Status** summary (file level): `ported` · `partial` · `pending` · `not-applicable`.
+- `###` heading = full `describe()` path. Nested describes join with ` › `.
+  Example: top-level `extractPackageFile()` → `### \`extractPackageFile()\``
+  Nested: outer `extractPackageFile()` + inner `git deps` → `### \`extractPackageFile() › git deps\``
+- Table columns always present in this order:
+  1. **Original test name** — exact string from the `it(` call, or the
+     `it.each` description template (e.g. `returns $type for $input`).
+  2. **Line** — 1-based line of the `it(` or `it.each(` call.
+  3. **Status** — `ported` · `pending` · `not-applicable`.
+  4. **Rust file** — filename only, no path. `—` when not ported.
+  5. **Rust test name** — the `#[test] fn` name. `—` when not ported.
+  6. **Reason** — mandatory for `not-applicable`; `—` for everything else.
+
+### Handling `it.each`
+
+An `it.each([...])` call is one row in the table — do not expand individual
+cases into separate rows. Use the description template as the test name. In
+Rust, implement it as `#[rstest]` / `#[case]` or as a loop over a fixed
+input array. Mark the row `ported` once *all* cases from the original `it.each`
+are covered by the Rust equivalent.
 
 ---
 
-## Four-phase workflow
+## Phases
 
-Determine the current phase for each spec file by reading `renovate-test-map.md`:
+### Phase 0 — Backfill existing Rust tests
 
-- **Phase 0 — Backfill:** Many Rust tests were written before the provenance
-  comment convention existed. These must be audited and annotated.
+Many Rust tests were written before the `// Ported:` comment convention existed.
+Audit and annotate them each iteration as a background task, not a hard blocker.
 
-  For each Rust file in `crates/`, collect all `#[test]` functions that do NOT
-  already have a `// Ported:` comment immediately above them. For each such
-  test, inspect the test body and try to match it to an `it()` call in the
-  corresponding TypeScript spec file. If a match is found:
-  1. Add the `// Ported:` comment to the Rust test.
-  2. Update (or create) the corresponding row in `renovate-test-map.md` with
-     Status `ported` and the Rust file/test name.
+**Audit commands:**
 
-  If no TypeScript match can be found, the test is Rust-specific — leave it
-  uncommented and do not add it to the test map (it goes beyond the minimum bar,
-  which is fine).
+```sh
+# Total #[test] occurrences in the codebase
+grep -rn "#\[test\]" crates/ --include="*.rs" | wc -l
 
-  Run Phase 0 for a batch of Rust files each iteration. Prioritize files with
-  the most existing `#[test]` functions and no `// Ported:` comments yet.
+# Tests that already carry a // Ported: comment
+grep -rn "// Ported:" crates/ --include="*.rs" | wc -l
 
-  Quick audit commands:
-  ```sh
-  # All tests in the codebase
-  grep -rn "#\[test\]" crates/ --include="*.rs" | wc -l
+# Individual #[test] entries whose preceding line is NOT // Ported:
+grep -rn "#\[test\]" crates/ --include="*.rs" -B1 \
+  | grep -v "// Ported:" | grep -v "^--$" | grep "#\[test\]"
+```
 
-  # Tests already attributed
-  grep -rn "// Ported:" crates/ --include="*.rs" | wc -l
+For each unattributed test found:
+1. Read the test body.
+2. Identify the corresponding `it()` call in the TypeScript spec (look for
+   matching fixture data, assertion values, or function names).
+3. If a confident match is found: add the `// Ported:` comment to the Rust test
+   and update or create the corresponding row in `renovate-test-map.md`.
+4. **If no confident match is found after inspecting the most likely spec file,
+   classify the test as Rust-specific and move on.** Do not spend more than a
+   few minutes on any single unmatchable test. Leave it uncommented; it does not
+   belong in the test map.
 
-  # Find Rust files that still have un-attributed tests
-  grep -rln "#\[test\]" crates/ --include="*.rs" | while read f; do
-    if ! grep -q "// Ported:" "$f"; then echo "$f"; fi
-  done
-  ```
+Process a batch of Rust files per iteration, not all at once. Phase 0 runs
+alongside other phases — it does not block Phases 1–3.
 
-- **Phase 1 — Inventory:** The spec file has no section in the new format yet.
-  Parse the spec file, enumerate all `describe()` and `it()` calls (including
-  nested describes), write the section with every row set to `pending`.
-  Do not skip nested describes — they become separate `###` subsections.
+---
 
-- **Phase 2 — Mapping:** The section exists and at least one row is still
-  `pending`. Grep the Rust codebase (`crates/`) for test function names or
-  assertion strings that correspond to this original test. If a clear match
-  exists, fill in the Rust file and Rust test name and update Status to `ported`.
-  If no match is found, leave Status as `pending`.
+### Phase 1 — Inventory a spec file
 
-- **Phase 3 — Porting:** The section exists, rows remain `pending`, and you
-  have completed Phase 2 mapping for this file. Now write the missing Rust test.
-  Implement only what is needed to make the test pass — no broad refactors
-  unless the implementation is simply missing. After writing and verifying the
-  test, update the row to `ported` and fill in the Rust file and test name.
+When a `.spec.ts` file has no section in the new per-test format yet:
 
-Each loop iteration processes as many files as possible. Prefer to complete all
-three phases for a small group of related spec files rather than doing Phase 1
-across every file in one pass. This keeps the tracking file useful and accurate
-after every commit.
+1. Read the spec file from the Renovate reference checkout.
+2. Count `it(` and `it.each(` call sites with:
+   ```sh
+   grep -cE "^\s+it(\.|\.each)?\(" path/to/extract.spec.ts
+   ```
+3. Extract describe and it call names with line numbers:
+   ```sh
+   grep -nE "^\s+(describe|it|it\.each|it\.skip|xit)\(" path/to/extract.spec.ts
+   ```
+4. Build the section: create one row per `it` / `it.each` call, all with
+   Status `pending`. Track nesting depth manually using the describe block
+   structure. Note `it.skip` and `xit` rows as `not-applicable` with Reason
+   `intentionally skipped in source`.
+
+---
+
+### Phase 2 — Map existing Rust coverage
+
+When a section exists and rows are still `pending`:
+
+1. First, grep for tests that already carry a provenance comment:
+   ```sh
+   grep -rn "// Ported:" crates/ --include="*.rs"
+   ```
+   These are definitively ported — link them immediately.
+
+2. For remaining `pending` rows, search by function name keywords:
+   ```sh
+   grep -rn "fn test_" crates/ --include="*.rs" | grep -i "keyword"
+   ```
+
+3. Also search assertion values, fixture filenames, or error strings that the
+   original test uses:
+   ```sh
+   grep -rn "fixture_string_or_value" crates/ --include="*.rs"
+   ```
+
+4. Use judgment — a Rust test does not need the same name as the TypeScript
+   original. Check that the *behavior under test* is the same.
+
+5. When you confirm a match that lacks the `// Ported:` comment, add the
+   comment to the Rust test as part of this iteration.
+
+---
+
+### Phase 3 — Port missing tests
+
+When a section has `pending` rows and Phase 2 mapping is complete for that file:
+
+1. Read `prompts/claude-loop-renovate-rust.md` before writing any Rust code.
+   It is the canonical reference for Rust standards, crate conventions, scope
+   boundaries, and quality gates for this project.
+
+2. Read the original TypeScript test and its fixtures.
+
+3. Find fixtures in `../renovate/lib/modules/manager/<manager>/__fixtures__/`.
+   Copy needed fixtures into the corresponding Rust fixtures directory.
+
+4. **Implement the actual behavior being tested — not a stub that hardcodes
+   the expected return value.** The implementation must correctly handle the
+   inputs described by the test, not just satisfy the single assertion.
+
+5. Place the test in the existing Rust extractor file for the manager, or
+   create a new test module if none exists.
+
+6. Every ported test must carry a provenance comment on the line immediately
+   above `#[test]`:
+   ```rust
+   // Ported: "<original it() description>" — <manager>/<spec-file>.spec.ts line <N>
+   #[test]
+   fn test_returns_null_for_invalid_yaml() {
+   ```
+   - Quoted string = exact text from the `it(` call.
+   - Path = relative to `lib/modules/manager/`.
+   - Line = 1-based line of the `it(` call.
+   - No exceptions.
+
+7. After the test passes, update the row: Status → `ported`, fill in Rust file
+   and Rust test name.
+
+---
+
+## When to mark `not-applicable`
+
+Use `not-applicable` (never `pending`) for tests that should never be ported.
+Always fill in the Reason column. Examples:
+
+| Situation | Reason text |
+|---|---|
+| Verifies TypeScript type shapes, generics, or type guards | `TypeScript type-system test; no runtime behavior` |
+| Tests Jest/Vitest mock infrastructure or fixture loading helpers | `mocking framework internals` |
+| Tests TypeScript module import/export resolution | `TypeScript module system` |
+| Feature is out of scope for the Rust CLI | `out of scope: hosted only` / `out of scope: GitHub App` |
+| `it.skip` / `xit` in the original source | `intentionally skipped in source` |
+
+**When in doubt, port the test.** Rust can ignore the TypeScript mechanics and
+test the underlying runtime behavior directly.
+
+There is no `skipped` status. If a test is in scope but the implementation does
+not exist yet, it stays `pending` until it is ported or `not-applicable` is
+justified.
 
 ---
 
 ## Iteration order
 
-Each loop iteration should do one of the following, in priority order:
+Each iteration makes multiple commits. Spread work across phases rather than
+spending the whole budget on one phase:
 
-1. **Phase 0 — Backfill existing tests.** If any Rust files still contain
-   `#[test]` functions without a `// Ported:` comment, process a batch of them.
-   This must run until every ported test is attributed before spending time on
-   new Phase 1/2/3 work. Check progress with:
-   ```sh
-   grep -rln "#\[test\]" crates/ --include="*.rs" | while read f; do
-     if ! grep -q "// Ported:" "$f"; then echo "$f"; fi
-   done
-   ```
+1. **Phase 0 batch** — process a batch of unattributed Rust tests (aim for
+   one Rust file's worth). Update the test map for any matches found.
 
-2. **Phase 3 — Port missing tests.** Any spec file section that completed
-   Phase 2 mapping and still has `pending` rows needs new Rust tests written.
+2. **Phase 3 work** — pick one spec file section that has finished Phase 2 and
+   still has `pending` rows. Write the missing Rust tests, run quality gates,
+   commit.
 
-3. **Phase 2 — Map existing coverage.** Any spec file that has a Phase 1
-   section with `pending` rows — grep for Rust matches and fill in the table.
+3. **Phase 2 work** — pick one spec file section in Phase 1 format and run the
+   mapping pass. Update status of any matched rows, commit.
 
-4. **Phase 1 — Inventory new spec files.** Convert remaining spec files from
-   the old table format into the new per-test section format, or add sections
-   for spec files not yet mentioned at all.
+4. **Phase 1 work** — convert one spec file from the old table format (or add a
+   new section from scratch). Commit.
 
-Within each priority group, prefer spec files where the Rust extractor already
-exists (most likely to have matchable or porteable tests).
+Within each step, prefer spec files where the Rust extractor already exists —
+they are most likely to have matchable or portable tests.
 
----
-
-## When to skip a test
-
-Some TypeScript tests exist only to verify TypeScript-internal behavior that
-has no equivalent concept in Rust. These must be explicitly skipped rather than
-left as `pending` forever. Use Status `not-applicable` for tests that should
-never be ported, and `skipped` for tests that are deferred without a definitive
-decision.
-
-**Always mark `not-applicable` (never port):**
-- Tests that verify TypeScript type shapes (`typeof`, `as const`, type guards,
-  generic constraint behavior) — these test the compiler, not runtime logic.
-- Tests that verify mock infrastructure, Jest helper behavior, or test fixture
-  loading (e.g. `Fixtures.get` behavior itself).
-- Tests for TypeScript-specific module import/export resolution.
-- Tests for features that are out of scope for the Rust CLI — see the out-of-scope
-  list in `prompts/claude-loop-renovate-rust.md` (hosted bots, GitHub Apps,
-  webhook processors, etc.).
-
-**Mark `skipped` (defer, revisit later):**
-- Tests for features not yet implemented in Rust but that are in scope. These
-  will become `pending` once implementation starts.
-
-For every `not-applicable` or `skipped` row, the **Reason** column is
-mandatory. Short phrases are fine: `TypeScript type test`, `mocking framework`,
-`out of scope: hosted only`, `not yet implemented`.
-
-When in doubt, port the test. Rust can always ignore the TypeScript-specific
-mechanics and test the underlying behavior directly.
-
----
-
-## Porting approach reference
-
-Read `prompts/claude-loop-renovate-rust.md` before writing any Rust code in
-Phase 3. It is the canonical reference for:
-- How to read and use the Renovate upstream checkout as a behavioral reference.
-- Rust project standards and crate conventions to follow.
-- Which features are in scope and out of scope for the CLI.
-- Quality gates and commit conventions.
-
-Do not re-derive these decisions from scratch. Follow the patterns already
-established in the Rust codebase and documented in that prompt.
-
----
-
-## Discovering and parsing spec files
-
-To enumerate all spec files in the Renovate reference:
-
-```sh
-find ../renovate/lib -name '*.spec.ts' | sort
-```
-
-To count `it(` occurrences (total tests) in a spec file:
-
-```sh
-grep -c "^\s*it(" path/to/extract.spec.ts
-```
-
-To extract `describe` and `it` call names with line numbers:
-
-```sh
-grep -n "^\s*\(describe\|it\)(" path/to/extract.spec.ts
-```
-
-Use these to build each Phase 1 section. Parse the nesting depth manually by
-tracking open/close describe blocks if the file has nested describes.
-
----
-
-## Finding Rust matches (Phase 2)
-
-First, check for tests that already carry a provenance comment — these are
-definitively ported and can be linked immediately:
-
-```sh
-grep -rn "// Ported:" crates/ --include="*.rs"
-```
-
-The comment format is:
-```
-// Ported: "<original it() description>" — <manager>/<spec-file>.spec.ts line <N>
-```
-
-For tests without a provenance comment, search by name or assertion content:
-
-```sh
-grep -rn "fn test_" crates/ | grep -i "keyword"
-grep -rn "#\[test\]" crates/ -A 1 | grep -i "keyword"
-```
-
-Also search assertion strings — Rust tests often assert on the same fixture
-values or error messages as the TypeScript originals:
-
-```sh
-grep -rn "returns null\|empty" crates/ --include="*.rs"
-```
-
-Use judgment: a Rust test does not need the same name as the TypeScript
-original to be a port. Check that the behavior under test is the same.
-If you confirm a match that lacks the provenance comment, add the comment
-to that Rust test as part of this loop iteration.
-
----
-
-## Writing ported tests (Phase 3)
-
-- Read the original TypeScript test and any fixture files it uses.
-- Find the fixture files in `../renovate/lib/modules/manager/<manager>/__fixtures__/`.
-  Copy needed fixture files into the corresponding Rust test fixtures directory.
-- Write the Rust test in idiomatic Rust. Do not copy TypeScript verbatim.
-- Place the test in the existing Rust extractor file for that manager, or
-  create a new test module if none exists.
-- **Every ported test must carry a provenance comment on the line immediately
-  above `#[test]`:**
-  ```rust
-  // Ported: "<original it() description>" — <manager>/<spec-file>.spec.ts line <N>
-  #[test]
-  fn test_returns_null_for_invalid_yaml() {
-  ```
-  - Quoted string = exact text from the `it(` call in the TypeScript spec.
-  - Path = relative to `lib/modules/manager/` (e.g. `pre-commit/extract.spec.ts`).
-  - Line = 1-based line of the `it(` call.
-  - No exceptions. Every ported test needs this comment.
-- Run `cargo nextest run --workspace --all-features` to verify the test passes.
-- Run `cargo fmt --all` and `cargo clippy --workspace --all-targets --all-features -- -D warnings` before committing.
-- Do not commit failing tests.
+If a spec file has no corresponding Rust file yet, still create the Phase 1
+inventory section. Use `—` for Rust file and Rust test name at the file-level
+metadata. The section documents the gap explicitly.
 
 ---
 
@@ -316,8 +294,8 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo nextest run --workspace --all-features
 ```
 
-Fix all failures before committing. If a failure existed before your changes,
-document it in the commit message and skip only that test, not the gate.
+Fix all failures before committing. If a failure predates your changes, note it
+in the commit message and skip only that test, not the gate.
 
 ---
 
@@ -328,26 +306,28 @@ document it in the commit message and skip only that test, not the gate.
   ```
   Co-authored-by: Claude <noreply@anthropic.com>
   ```
-- Commit `renovate-test-map.md` updates together with any Rust test files added
-  in the same iteration. One commit per loop slice.
-- Use concise commit messages:
-  - `docs(parity): inventory ansible-galaxy extract spec tests`
-  - `test(ansible-galaxy): port extract tests from renovate spec`
+- Multiple commits per session are expected and correct — commit after each
+  coherent unit of work (one Phase 0 batch, one spec file mapped, one spec file
+  ported).
+- Always commit `renovate-test-map.md` together with any Rust files changed in
+  the same unit of work. Update the summary block counts on every commit.
+- Example commit messages:
+  - `docs(parity): inventory ansible-galaxy extract spec (14 tests)`
+  - `test(ansible-galaxy): port 5 extract tests from renovate spec`
   - `docs(parity): map existing Rust coverage for cargo extract spec`
+  - `test(parity): backfill Ported comments in pre-commit extractor`
 
 ---
 
 ## Start now
 
-1. Run the Phase 0 audit commands to count how many Rust tests still lack a
-   `// Ported:` comment. If the number is non-zero, start there.
-2. Read `docs/parity/renovate-test-map.md` to understand the current state.
-3. Identify the highest-priority work according to the Iteration order above.
-4. Execute that phase, update `renovate-test-map.md`, run quality gates, commit.
-5. Repeat until the loop budget is exhausted.
+1. Run the Phase 0 audit to get a baseline count of unattributed tests.
+2. Read `docs/parity/renovate-test-map.md` to understand current state.
+3. Update the summary block if the counts are stale.
+4. Work through phases in the Iteration order above until the loop budget runs out.
 
-At every commit, the repository must be in a state where:
-- All quality gates pass.
+At every commit:
+- Quality gates must pass.
 - Every Rust test you touched or wrote has a `// Ported:` comment if it maps
   to a TypeScript spec test.
-- `renovate-test-map.md` accurately reflects what you just did.
+- `renovate-test-map.md` summary block reflects accurate current counts.
