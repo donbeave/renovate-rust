@@ -251,6 +251,31 @@ pub(crate) fn apply_version_ignore_to_report(
     }
 }
 
+/// Skip deps whose name appears in `ignoreDeps`.
+///
+/// Applies to ALL dep statuses — if the dep name is listed in `ignore_deps`,
+/// the dep is marked as `Skipped { reason: "ignoreDeps" }` regardless of its
+/// current status.  Globs are not supported (Renovate uses exact string match).
+///
+/// Renovate reference: `lib/config/options/index.ts` — `ignoreDeps`.
+pub(crate) fn apply_ignore_deps_to_report(
+    report: &mut output::RepoReport,
+    repo_cfg: &renovate_core::repo_config::RepoConfig,
+) {
+    if repo_cfg.ignore_deps.is_empty() {
+        return;
+    }
+    for file in &mut report.files {
+        for dep in &mut file.deps {
+            if repo_cfg.ignore_deps.iter().any(|d| d == &dep.name) {
+                dep.status = output::DepStatus::Skipped {
+                    reason: "ignoreDeps".into(),
+                };
+            }
+        }
+    }
+}
+
 /// Return the matched files for a given manager name (empty slice if not
 /// detected).
 pub(crate) fn manager_files(
@@ -365,4 +390,74 @@ pub(crate) async fn docker_hub_reports(
         }
     }
     reports
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::output::{DepReport, DepStatus, FileReport, RepoReport};
+    use renovate_core::repo_config::RepoConfig;
+
+    fn make_report(deps: Vec<(&str, DepStatus)>) -> RepoReport {
+        let dep_reports = deps.into_iter().map(|(name, status)| DepReport {
+            name: name.to_owned(),
+            branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
+            assignees: Vec::new(),
+            reviewers: Vec::new(),
+            update_type: None,
+            pr_priority: None,
+            pr_title: None,
+            release_timestamp: None,
+            current_version_timestamp: None,
+            dep_type: None,
+            package_name: None,
+            status,
+        }).collect();
+        RepoReport {
+            repo_slug: "test/repo".to_owned(),
+            files: vec![FileReport {
+                path: "package.json".to_owned(),
+                manager: "npm".to_owned(),
+                deps: dep_reports,
+            }],
+        }
+    }
+
+    #[test]
+    fn ignore_deps_skips_matching_dep() {
+        let cfg = RepoConfig::parse(r#"{"ignoreDeps": ["lodash"]}"#);
+        let mut report = make_report(vec![
+            ("lodash", DepStatus::UpdateAvailable { current: "4.0.0".into(), latest: "4.17.21".into() }),
+            ("react", DepStatus::UpdateAvailable { current: "17.0.0".into(), latest: "18.0.0".into() }),
+        ]);
+        apply_ignore_deps_to_report(&mut report, &cfg);
+        let deps = &report.files[0].deps;
+        assert!(matches!(&deps[0].status, DepStatus::Skipped { reason } if reason == "ignoreDeps"));
+        assert!(matches!(&deps[1].status, DepStatus::UpdateAvailable { .. }));
+    }
+
+    #[test]
+    fn ignore_deps_skips_up_to_date_dep_too() {
+        let cfg = RepoConfig::parse(r#"{"ignoreDeps": ["express"]}"#);
+        let mut report = make_report(vec![
+            ("express", DepStatus::UpToDate { latest: Some("4.18.2".into()) }),
+        ]);
+        apply_ignore_deps_to_report(&mut report, &cfg);
+        let deps = &report.files[0].deps;
+        assert!(matches!(&deps[0].status, DepStatus::Skipped { reason } if reason == "ignoreDeps"));
+    }
+
+    #[test]
+    fn ignore_deps_empty_list_is_noop() {
+        let cfg = RepoConfig::parse(r#"{}"#);
+        let mut report = make_report(vec![
+            ("lodash", DepStatus::UpdateAvailable { current: "4.0.0".into(), latest: "4.17.21".into() }),
+        ]);
+        apply_ignore_deps_to_report(&mut report, &cfg);
+        assert!(matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }));
+    }
 }

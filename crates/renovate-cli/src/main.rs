@@ -385,6 +385,8 @@ async fn process_repo(
     pipelines::process_all_managers(&mut ctx).await;
     let (mut repo_report, had_error) = (ctx.report, ctx.had_error);
 
+    // Skip deps listed in ignoreDeps before any other filters.
+    pipeline_utils::apply_ignore_deps_to_report(&mut repo_report, &repo_cfg);
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
     pipeline_utils::apply_update_blocking_to_report(&mut repo_report, &repo_cfg, repo_slug);
     // Apply ignoreVersions (global + per-rule) across all collected file reports.
