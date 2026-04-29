@@ -377,6 +377,9 @@ fn resolve_extends_schedule(extends: &[String]) -> Option<Vec<String>> {
 /// Collect `automerge` value contributed by built-in `:automerge*` presets.
 ///
 /// Returns `None` when no automerge preset is found.
+/// Only `:automergeAll` / `:automergeMajor` / `:autoMerge` / `:automergeBranch`
+/// set global `automerge: true`.  `:automergeMinor` and `:automergePatch`
+/// inject per-update-type packageRules instead (see `resolve_extends_automerge_rules`).
 ///
 /// Renovate reference: `lib/config/presets/internal/default.preset.ts` —
 /// `:automergeAll`, `:automergeMinor`, `:automergeDisabled`, etc.
@@ -384,7 +387,7 @@ fn resolve_extends_automerge(extends: &[String]) -> Option<bool> {
     let mut result: Option<bool> = None;
     for preset in extends {
         match preset.as_str() {
-            ":automergeAll" | ":automergeMinor" | ":automergeMajor" | ":automergeBranch"
+            ":automergeAll" | ":automergeMajor" | ":automergeBranch"
             | ":automergePr" | ":autoMerge" => {
                 result = Some(true);
             }
@@ -395,6 +398,42 @@ fn resolve_extends_automerge(extends: &[String]) -> Option<bool> {
         }
     }
     result
+}
+
+/// Emit low-priority packageRules for selective automerge presets.
+///
+/// `:automergeMinor` → automerge minor + patch updates.
+/// `:automergePatch` → automerge patch updates only.
+///
+/// These rules are prepended before user packageRules so user rules can
+/// override them (last rule wins).
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts`
+fn resolve_extends_automerge_rules(extends: &[String]) -> Vec<PackageRule> {
+    use crate::versioning::semver_generic::UpdateType;
+    let mut rules = Vec::new();
+    for preset in extends {
+        match preset.as_str() {
+            ":automergeMinor" => {
+                // Automerge minor + patch.
+                rules.push(PackageRule {
+                    match_update_types: vec![UpdateType::Minor, UpdateType::Patch],
+                    automerge: Some(true),
+                    ..Default::default()
+                });
+            }
+            ":automergePatch" => {
+                // Automerge patch only.
+                rules.push(PackageRule {
+                    match_update_types: vec![UpdateType::Patch],
+                    automerge: Some(true),
+                    ..Default::default()
+                });
+            }
+            _ => {}
+        }
+    }
+    rules
 }
 
 /// Resolve semantic commit type/scope from built-in `semantic*` presets.
@@ -744,6 +783,11 @@ impl RepoConfig {
         let sem_prefix_rules = resolve_extends_semantic_prefix_rules(&raw.extends);
         preset_rules.extend(sem_prefix_rules);
         let _ = resolve_extends_semantic_type_scope(&raw.extends); // placeholder for future use
+        // Inject selective automerge rules from :automergeMinor / :automergePatch.
+        let automerge_rules = resolve_extends_automerge_rules(&raw.extends);
+        preset_rules.extend(automerge_rules);
+        // :automergePatch sets separateMinorPatch: true.
+        let preset_separate_minor_patch = raw.extends.iter().any(|p| p == ":automergePatch");
 
         // Convert `enabled: false` inside major/minor/patch blocks to synthetic
         // packageRules so the existing is_update_blocked_ctx path handles them.
@@ -880,7 +924,7 @@ impl RepoConfig {
             // the user hasn't explicitly set it to true in the raw JSON).
             separate_major_minor: group_separate_major_minor.unwrap_or(raw.separate_major_minor),
             separate_multiple_major: raw.separate_multiple_major,
-            separate_minor_patch: raw.separate_minor_patch,
+            separate_minor_patch: raw.separate_minor_patch || preset_separate_minor_patch,
             semantic_commit_type: raw.semantic_commit_type,
             semantic_commit_scope: raw.semantic_commit_scope,
             semantic_commits: raw.semantic_commits.or_else(|| {
@@ -2941,16 +2985,52 @@ mod schedule_preset_tests {
     }
 
     #[test]
-    fn automerge_minor_preset_sets_automerge_true() {
+    fn automerge_minor_preset_injects_packagerules_not_global() {
+        // :automergeMinor does NOT set global automerge; instead it injects
+        // packageRules that automerge minor+patch updates.
+        use crate::versioning::semver_generic::UpdateType;
         let c = RepoConfig::parse(r#"{"extends": [":automergeMinor"]}"#);
-        assert!(c.automerge);
+        assert!(!c.automerge, ":automergeMinor should not set global automerge");
+        // Minor update context should get automerge=true from injected rule.
+        let ctx = DepContext {
+            dep_name: "react",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.automerge, Some(true), "minor update should automerge");
+        // Major update should NOT get automerge.
+        let ctx_major = DepContext {
+            dep_name: "react",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        let effects_major = c.collect_rule_effects(&ctx_major);
+        assert!(
+            effects_major.automerge.is_none() || effects_major.automerge == Some(false),
+            "major update must not be automerged by :automergeMinor"
+        );
+    }
+
+    #[test]
+    fn automerge_patch_preset_injects_packagerules_for_patch_only() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": [":automergePatch"]}"#);
+        assert!(!c.automerge, ":automergePatch should not set global automerge");
+        assert!(c.separate_minor_patch, ":automergePatch should set separateMinorPatch");
+        // Patch update → automerge.
+        let ctx = DepContext { dep_name: "express", update_type: Some(UpdateType::Patch), ..Default::default() };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.automerge, Some(true));
+        // Minor update → no automerge.
+        let ctx_minor = DepContext { dep_name: "express", update_type: Some(UpdateType::Minor), ..Default::default() };
+        let effects_minor = c.collect_rule_effects(&ctx_minor);
+        assert!(effects_minor.automerge.is_none() || effects_minor.automerge == Some(false));
     }
 
     #[test]
     fn explicit_automerge_false_overrides_preset() {
         // explicit automerge: false does NOT get overridden by :automergeAll
-        // (current logic: if raw.automerge = false and preset = true, preset wins)
-        // Note: in Renovate, preset is the base and explicit config overrides it.
         // Our logic: explicit true wins; if explicit false (default), use preset.
         let c = RepoConfig::parse(r#"{"extends": [":automergeAll"]}"#);
         assert!(c.automerge, "preset should set automerge to true");
