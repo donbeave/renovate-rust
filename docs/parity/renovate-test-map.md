@@ -127,6 +127,8 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | — | `matchCategories` undefined categories → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all`, `needs_categories_to_match_rule_does_not_fire_without_it` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchBaseBranches` absent baseBranch → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `needs_base_branch_to_match_rule_does_not_fire_without_it` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchManagers` absent manager → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `needs_manager_to_match_rule_does_not_fire_without_it` | ported |
+| `lib/util/package-rules/index.spec.ts` | 370 | `matchDepTypes` multiple types in list | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_multiple_types_in_list` | ported |
+| `lib/util/package-rules/index.spec.ts` | 414 | no `depType` + `matchDepTypes` set → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_no_dep_type_rule_does_not_fire` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | rule with no matchers → fires for all deps | `crates/renovate-core/src/repo_config.rs` | `package_rules_enabled_true_does_not_ignore` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | only-negative matchPackageNames → others pass | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchCurrentVersion` regex `/^4/` match | `crates/renovate-core/src/repo_config.rs` | `match_current_version_regex_against_current_value` | ported |

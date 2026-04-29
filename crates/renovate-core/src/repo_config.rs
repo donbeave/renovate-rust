@@ -5870,6 +5870,45 @@ mod tests {
         assert!(!rule.dep_type_matches("devDependencies"));
     }
 
+    // ── Ported from Renovate index.spec.ts matchDepTypes ─────────────────────
+
+    #[test]
+    fn match_dep_types_multiple_types_in_list() {
+        // Ported: "filters requested depType" — matchDepTypes: ['dependencies', 'peerDependencies']
+        // matches dep with depType: 'dependencies'.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["dependencies", "peerDependencies"], "matchPackageNames": ["a"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "rule must fire when depType is in matchDepTypes list"
+        );
+    }
+
+    #[test]
+    fn match_dep_types_no_dep_type_rule_does_not_fire() {
+        // Ported: "returns false if no depTypes" — when dep_type is None and matchDepTypes set → false.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["test"], "matchPackageNames": ["a"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            dep_type: None,
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when dep_type is None and matchDepTypes is set"
+        );
+    }
+
     #[test]
     fn match_dep_types_enabled_false_via_ctx_blocks_dev_dep() {
         // Regression: is_update_blocked_ctx must include dep_type in context so

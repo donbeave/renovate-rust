@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0367  | 2026-04-29 | Port 2 matchDepTypes tests from index.spec.ts: multiple types in list, absent depType → rule doesn't fire; also fix missing #[test] for previously skipped test; 1758 tests | Complete | See below. |
 | 0366  | 2026-04-29 | Port 3 `matchSourceUrls` tests from index.spec.ts: double-star glob matching sub-repos, case-insensitive URL matching, absent sourceUrl → rule doesn't fire; 1756 tests | Complete | See below. |
 | 0365  | 2026-04-29 | Test map expansion: add cargo extractor section (12 entries from cargo/extract.spec.ts), fix future-planned table entries, update cargo/extract entry format | Complete | See test-map. |
 | 0364  | 2026-04-29 | Port `migration.spec.ts` packages + groupName migration: deprecated `packages` field merged into `packageRules`; `groupName: ["name"]` (array) deserialized as first element string; 2 new tests; 1753 tests | Complete | See below. |
