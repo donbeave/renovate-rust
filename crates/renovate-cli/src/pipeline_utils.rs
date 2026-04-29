@@ -59,7 +59,9 @@ pub(crate) fn apply_update_blocking_to_report(
                 // maxMajorIncrement: skip updates that jump more major versions than allowed.
                 if repo_cfg.max_major_increment < 500 || repo_cfg.max_major_increment == 0 {
                     use renovate_core::versioning::semver_generic::parse_padded;
-                    if let (Some(cur_v), Some(lat_v)) = (parse_padded(current), parse_padded(latest)) {
+                    if let (Some(cur_v), Some(lat_v)) =
+                        (parse_padded(current), parse_padded(latest))
+                    {
                         if lat_v.major > cur_v.major {
                             let jump = lat_v.major - cur_v.major;
                             if jump > u64::from(repo_cfg.max_major_increment) {
@@ -593,7 +595,10 @@ mod tests {
         )]);
         apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
         assert!(
-            matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
+            matches!(
+                &report.files[0].deps[0].status,
+                DepStatus::UpdateAvailable { .. }
+            ),
             "pre-release→pre-release update should not be blocked when current is already unstable"
         );
     }
@@ -662,7 +667,10 @@ mod tests {
         )]);
         apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
         assert!(
-            matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
+            matches!(
+                &report.files[0].deps[0].status,
+                DepStatus::UpdateAvailable { .. }
+            ),
             "default maxMajorIncrement (500) should not block any realistic jump"
         );
     }
@@ -679,7 +687,10 @@ mod tests {
         )]);
         apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
         assert!(
-            matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
+            matches!(
+                &report.files[0].deps[0].status,
+                DepStatus::UpdateAvailable { .. }
+            ),
             "with ignoreUnstable=false, pre-release proposals should not be blocked"
         );
     }

@@ -177,9 +177,7 @@ pub fn manager_default_datasource(manager_name: &str) -> Option<&'static str> {
 /// `lib/modules/datasource/*/index.ts`.
 pub fn manager_default_registry_urls(manager_name: &str) -> &'static [&'static str] {
     match manager_name {
-        "npm" | "bun" | "meteor" | "mint" => {
-            &["https://registry.npmjs.org"]
-        }
+        "npm" | "bun" | "meteor" | "mint" => &["https://registry.npmjs.org"],
         "pip_requirements" | "pip-compile" | "pip_setup" | "pipenv" | "poetry" | "pep621"
         | "pep723" | "setup-cfg" => &["https://pypi.org/simple/"],
         "cargo" => &["https://crates.io/"],

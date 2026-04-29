@@ -1378,8 +1378,7 @@ impl RepoConfig {
         let package_rules = preset_rules;
 
         // Resolve scalar presets that set ignoreUnstable / updateNotScheduled / enabled.
-        let preset_ignore_unstable =
-            effective_extends.iter().any(|p| p == ":ignoreUnstable");
+        let preset_ignore_unstable = effective_extends.iter().any(|p| p == ":ignoreUnstable");
         let preset_update_not_scheduled = effective_extends
             .iter()
             .any(|p| p == ":noUnscheduledUpdates")
@@ -1403,7 +1402,10 @@ impl RepoConfig {
         let preset_timezone: Option<String> = effective_extends.iter().find_map(|p| {
             let (name, args) = parse_preset_args(p.as_str());
             if name == ":timezone" || name == "timezone" {
-                args.into_iter().next().filter(|s| !s.is_empty()).map(String::from)
+                args.into_iter()
+                    .next()
+                    .filter(|s| !s.is_empty())
+                    .map(String::from)
             } else {
                 None
             }
@@ -1475,15 +1477,17 @@ impl RepoConfig {
             max_major_increment: raw.max_major_increment,
             separate_minor_patch: scalar_sep_minor_patch
                 .unwrap_or(raw.separate_minor_patch || preset_separate_minor_patch),
-            separate_multiple_minor: scalar_sep_multi_minor
-                .unwrap_or(raw.separate_multiple_minor),
+            separate_multiple_minor: scalar_sep_multi_minor.unwrap_or(raw.separate_multiple_minor),
             semantic_commit_type: param_sem_type.unwrap_or(raw.semantic_commit_type),
             semantic_commit_scope: param_sem_scope.unwrap_or(raw.semantic_commit_scope),
             semantic_commits: raw.semantic_commits.or_else(|| {
                 // `:semanticCommits` preset implies semanticCommits = "enabled"
                 if effective_extends.iter().any(|e| e == ":semanticCommits") {
                     Some("enabled".to_owned())
-                } else if effective_extends.iter().any(|e| e == ":semanticCommitsDisabled") {
+                } else if effective_extends
+                    .iter()
+                    .any(|e| e == ":semanticCommitsDisabled")
+                {
                     Some("disabled".to_owned())
                 } else {
                     None
@@ -1501,8 +1505,7 @@ impl RepoConfig {
             ignore_presets: raw.ignore_presets,
             minimum_release_age: raw.minimum_release_age,
             ignore_unstable: raw.ignore_unstable || preset_ignore_unstable,
-            update_not_scheduled: preset_update_not_scheduled
-                .unwrap_or(raw.update_not_scheduled),
+            update_not_scheduled: preset_update_not_scheduled.unwrap_or(raw.update_not_scheduled),
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
             commit_message_extra: raw.commit_message_extra,
@@ -3609,10 +3612,7 @@ mod tests {
         let c = RepoConfig::parse(
             r#"{"extends": ["config:recommended"], "ignorePresets": [":semanticPrefixFixDepsChoreOthers"]}"#,
         );
-        assert_eq!(
-            c.ignore_presets,
-            vec![":semanticPrefixFixDepsChoreOthers"]
-        );
+        assert_eq!(c.ignore_presets, vec![":semanticPrefixFixDepsChoreOthers"]);
     }
 
     #[test]
@@ -4057,7 +4057,8 @@ mod schedule_preset_tests {
         assert!(rule.is_some(), "expected a widen rangeStrategy rule");
         let rule = rule.unwrap();
         assert!(
-            rule.match_dep_types.contains(&"peerDependencies".to_owned()),
+            rule.match_dep_types
+                .contains(&"peerDependencies".to_owned()),
             "rule should match peerDependencies"
         );
     }

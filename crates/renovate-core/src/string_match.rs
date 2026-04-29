@@ -245,7 +245,13 @@ mod tests {
     #[test]
     fn brace_expansion_in_glob() {
         // globset supports brace expansion: {/,} matches '/' or ','
-        assert!(match_regex_or_glob("@opentelemetry/http", "@opentelemetry{/,}**"));
-        assert!(!match_regex_or_glob("@opentelemetry-http", "@opentelemetry{/,}**"));
+        assert!(match_regex_or_glob(
+            "@opentelemetry/http",
+            "@opentelemetry{/,}**"
+        ));
+        assert!(!match_regex_or_glob(
+            "@opentelemetry-http",
+            "@opentelemetry{/,}**"
+        ));
     }
 }
