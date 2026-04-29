@@ -21,8 +21,13 @@
 //! - [`php`]           — Composer
 //! - [`dart`]          — pub (Dart/Flutter), FVM
 //! - [`version_files`] — asdf, mise, tool-version files, Devbox
-//! - [`misc`]          — Bazel, Nix, pre-commit, Ansible, Puppet, Jenkins, Conan, …
+//! - [`bazel`]         — Bazel Module, Bazel WORKSPACE
+//! - [`ansible`]       — ansible-galaxy, ansible task files
+//! - [`nix`]           — Nix flakes
+//! - [`misc`]          — Typst, cpanfile, pre-commit, Conan, Haskell, Jsonnet, Puppet, Jenkins, …
 
+mod ansible;
+mod bazel;
 mod ci;
 mod dart;
 mod docker;
@@ -34,6 +39,7 @@ mod jvm;
 mod kubernetes;
 mod misc;
 mod mobile;
+mod nix;
 mod php;
 mod python;
 mod ruby;
@@ -102,5 +108,8 @@ pub(crate) async fn process_all_managers(ctx: &mut RepoPipelineCtx<'_>) {
     ruby::process(ctx).await;
     mobile::process(ctx).await;
     version_files::process(ctx).await;
+    bazel::process(ctx).await;
+    ansible::process(ctx).await;
+    nix::process(ctx).await;
     misc::process(ctx).await;
 }
