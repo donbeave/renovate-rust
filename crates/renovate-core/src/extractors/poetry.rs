@@ -40,6 +40,8 @@ pub enum PoetryDepType {
     Dev,
     /// `[tool.poetry.group.*.dependencies]`
     Group,
+    /// `[build-system].requires`
+    BuildSystem,
 }
 
 impl PoetryDepType {
@@ -48,6 +50,7 @@ impl PoetryDepType {
             PoetryDepType::Regular => "dependencies",
             PoetryDepType::Dev => "dev-dependencies",
             PoetryDepType::Group => "group",
+            PoetryDepType::BuildSystem => "build-system.requires",
         }
     }
 }
@@ -118,6 +121,17 @@ pub fn extract(content: &str) -> Result<Vec<PoetryExtractedDep>, PoetryExtractEr
                     if let Some(dep) = parse_dep(name, value, PoetryDepType::Group) {
                         deps.push(dep);
                     }
+                }
+            }
+        }
+    }
+
+    // [build-system].requires
+    if let Some(requires) = doc.get("build-system").and_then(|bs| bs.get("requires")).and_then(|r| r.as_array()) {
+        for req in requires {
+            if let Some(s) = req.as_str() {
+                if let Some(dep) = parse_build_system_req(s) {
+                    deps.push(dep);
                 }
             }
         }
@@ -205,6 +219,30 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
 }
 
 /// Normalize a Python package name per PEP 503.
+/// Parse a PEP 508 build-system requirement string like `"poetry-core>=1.0.0"`.
+fn parse_build_system_req(req: &str) -> Option<PoetryExtractedDep> {
+    // Find the first version operator char position.
+    let op_chars = ['>', '<', '=', '!', '~', '^'];
+    let sep = req.find(|c| op_chars.contains(&c)).unwrap_or(req.len());
+    let raw_name = req[..sep].trim();
+    let version = req[sep..].trim();
+
+    if raw_name.is_empty() {
+        return None;
+    }
+
+    // Strip any extras like `package[extra]`.
+    let name_clean = raw_name.split('[').next().unwrap_or(raw_name).trim();
+    let normalized = normalize_name(name_clean);
+
+    Some(PoetryExtractedDep {
+        name: normalized,
+        current_value: version.to_owned(),
+        dep_type: PoetryDepType::BuildSystem,
+        skip_reason: None,
+    })
+}
+
 fn normalize_name(name: &str) -> String {
     let lower = name.to_lowercase();
     let mut result = String::with_capacity(lower.len());
@@ -403,6 +441,44 @@ dev_dep2 = "Invalid version."
                 .count(),
             2
         );
+    }
+
+    // ── [build-system].requires ──────────────────────────────────────────────
+
+    #[test]
+    fn extracts_build_system_requires() {
+        // Ported: "extracts build-system.requires dependencies" — poetry/extract.spec.ts line 77
+        let content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0", "setuptools>=40.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "test"
+version = "1.0.0"
+
+[tool.poetry.dependencies]
+abc = "^5.5"
+"#;
+        let deps = extract_ok(content);
+        let bs: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_type == PoetryDepType::BuildSystem)
+            .collect();
+        assert_eq!(bs.len(), 2);
+        let core = bs.iter().find(|d| d.name == "poetry-core").unwrap();
+        assert_eq!(core.current_value, ">=1.0.0");
+        assert_eq!(core.dep_type, PoetryDepType::BuildSystem);
+        let setup = bs.iter().find(|d| d.name == "setuptools").unwrap();
+        assert_eq!(setup.current_value, ">=40.0");
+
+        // Regular dep is still extracted
+        let regular: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_type == PoetryDepType::Regular)
+            .collect();
+        assert_eq!(regular.len(), 1);
+        assert_eq!(regular[0].name, "abc");
     }
 
     // ── Empty / no poetry section ─────────────────────────────────────────────

@@ -35,7 +35,7 @@ pub struct SveltosDep {
 // ── Regexes ───────────────────────────────────────────────────────────────────
 
 static SVELTOS_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"apiVersion:\s*(config|lib)\.projectsveltos\.io/").unwrap());
+    LazyLock::new(|| Regex::new(r#"apiVersion:\s*["']?(config|lib)\.projectsveltos\.io/"#).unwrap());
 
 static HELM_CHARTS_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s+helmCharts:\s*$").unwrap());
@@ -244,6 +244,68 @@ spec:
 
     #[test]
     fn skips_non_sveltos_files() {
+        // Ported: "return null for Kubernetes manifest" — sveltos/extract.spec.ts line 264
         assert!(extract("apiVersion: v1\nkind: ConfigMap\n").is_empty());
+    }
+
+    #[test]
+    fn empty_content_returns_empty() {
+        // Ported: "returns null for empty" — sveltos/extract.spec.ts line 254
+        assert!(extract("").is_empty());
+        assert!(extract("nothing here").is_empty());
+    }
+
+    #[test]
+    fn malformed_no_charts_returns_empty() {
+        // Ported: "return null if deps array would be empty" — sveltos/extract.spec.ts line 269
+        let content = r#"apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: test
+spec:
+  clusterSelector:
+    matchLabels:
+      env: production
+"#;
+        assert!(extract(content).is_empty());
+    }
+
+    #[test]
+    fn double_quoted_api_version_extracted() {
+        // Ported: "return result for double quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 288
+        let content = r#"apiVersion: "config.projectsveltos.io/v1beta1"
+kind: ClusterProfile
+metadata:
+  name: prometheus
+spec:
+  helmCharts:
+  - repositoryURL: https://prometheus-community.github.io/helm-charts
+    repositoryName: prometheus-community
+    chartName: prometheus-community/prometheus
+    chartVersion: "23.4.0"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].chart_name, "prometheus-community/prometheus");
+        assert_eq!(deps[0].current_value, "23.4.0");
+    }
+
+    #[test]
+    fn single_quoted_api_version_extracted() {
+        // Ported: "return result for single quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 320
+        let content = r#"apiVersion: 'config.projectsveltos.io/v1beta1'
+kind: ClusterProfile
+metadata:
+  name: prometheus
+spec:
+  helmCharts:
+  - repositoryURL: https://prometheus-community.github.io/helm-charts
+    repositoryName: prometheus-community
+    chartName: prometheus-community/prometheus
+    chartVersion: "23.4.0"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].chart_name, "prometheus-community/prometheus");
     }
 }
