@@ -10026,4 +10026,224 @@ mod rule_effects_tests {
             "dependencyDashboardApproval in packageRules must be parsed"
         );
     }
+
+    // ── Ported from Renovate's custom-managers.spec.ts ───────────────────────
+    // Tests verify our regex extraction matches Renovate's extraction behavior.
+
+    fn get_preset_custom_manager(preset: &str) -> CustomManager {
+        let c = RepoConfig::parse(&format!(r#"{{"extends": ["{preset}"]}}"#));
+        c.custom_managers
+            .into_iter()
+            .next()
+            .unwrap_or_else(|| panic!("{preset} must register at least one custom manager"))
+    }
+
+    #[test]
+    fn dockerfile_versions_extracts_env_with_double_quotes() {
+        // Port of Renovate custom-managers.spec.ts: dockerfileVersions "find dependencies in file"
+        let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
+        let content = concat!(
+            "# renovate: datasource=npm depName=pnpm\n",
+            "ENV PNPM_VERSION=\"7.25.1\"\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract one dep from ENV with double quotes");
+        assert_eq!(deps[0].dep_name, "pnpm");
+        assert_eq!(deps[0].datasource, "npm");
+        assert_eq!(deps[0].current_value, "7.25.1");
+    }
+
+    #[test]
+    fn dockerfile_versions_extracts_env_with_single_quotes() {
+        let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
+        let content = concat!(
+            "# renovate: datasource=npm depName=yarn\n",
+            "ENV YARN_VERSION='3.3.1'\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract one dep from ENV with single quotes");
+        assert_eq!(deps[0].dep_name, "yarn");
+        assert_eq!(deps[0].current_value, "3.3.1");
+    }
+
+    #[test]
+    fn dockerfile_versions_extracts_env_without_quotes() {
+        let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
+        let content = concat!(
+            "# renovate: datasource=npm depName=yarn\n",
+            "ENV YARN_VERSION 3.3.1\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract one dep from ENV without quotes");
+        assert_eq!(deps[0].current_value, "3.3.1");
+    }
+
+    #[test]
+    fn dockerfile_versions_extracts_arg_directive() {
+        let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
+        let content = concat!(
+            "# renovate: datasource=docker depName=node versioning=docker\n",
+            "ARG NODE_VERSION=18\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract one dep from ARG directive");
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].datasource, "docker");
+        assert_eq!(deps[0].current_value, "18");
+        assert_eq!(deps[0].versioning.as_deref(), Some("docker"));
+    }
+
+    #[test]
+    fn dockerfile_versions_extracts_with_versioning_and_extract_version() {
+        let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
+        let content = concat!(
+            "# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize",
+            " versioning=regex:^(?P<compatibility>.+)/v(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)$",
+            " extractVersion=^kustomize/(?P<version>.+)$\n",
+            "ENV KUSTOMIZE_VERSION v5.2.1\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "kubernetes-sigs/kustomize");
+        assert_eq!(deps[0].current_value, "v5.2.1");
+        assert!(deps[0].versioning.is_some(), "versioning must be captured");
+        assert!(deps[0].extract_version.is_some(), "extractVersion must be captured");
+    }
+
+    #[test]
+    fn dockerfile_versions_file_pattern_matches() {
+        // Port of Renovate custom-managers.spec.ts: "matches regexes patterns"
+        let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
+        assert!(cm.matches_file("Dockerfile"), "Dockerfile must match");
+        assert!(cm.matches_file("foo/Dockerfile"), "foo/Dockerfile must match");
+        assert!(cm.matches_file("Dockerfile-foo"), "Dockerfile-foo must match");
+        assert!(cm.matches_file("something.dockerfile"), "lowercase .dockerfile must match");
+        assert!(cm.matches_file("something.containerfile"), ".containerfile must match");
+        assert!(!cm.matches_file("foo-Dockerfile"), "foo-Dockerfile must NOT match (prefix only)");
+    }
+
+    #[test]
+    fn makefile_versions_extracts_simple_assignment() {
+        // Port of Renovate custom-managers.spec.ts: makefileVersions "find dependencies in file"
+        let cm = get_preset_custom_manager("custom-managers:makefileVersions");
+        let content = concat!(
+            "# renovate: datasource=node depName=node versioning=node\n",
+            "NODE_VERSION=18.13.0\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].current_value, "18.13.0");
+    }
+
+    #[test]
+    fn makefile_versions_extracts_space_assignment() {
+        let cm = get_preset_custom_manager("custom-managers:makefileVersions");
+        let content = concat!(
+            "# renovate: datasource=npm depName=pnpm\n",
+            "PNPM_VERSION = \"7.25.1\"\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract from PNPM_VERSION = \"...\" (spaces around =)");
+        assert_eq!(deps[0].current_value, "7.25.1");
+    }
+
+    #[test]
+    fn makefile_versions_extracts_colon_equal() {
+        let cm = get_preset_custom_manager("custom-managers:makefileVersions");
+        let content = concat!(
+            "# renovate: datasource=npm depName=yarn\n",
+            "YARN_VERSION := '3.3.1'\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract from YARN_VERSION := '...' (:= assignment)");
+        assert_eq!(deps[0].current_value, "3.3.1");
+    }
+
+    #[test]
+    fn makefile_versions_extracts_question_equal() {
+        let cm = get_preset_custom_manager("custom-managers:makefileVersions");
+        let content = concat!(
+            "# renovate: datasource=custom.hashicorp depName=consul\n",
+            "CONSUL_VERSION ?= 1.3.1\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract from CONSUL_VERSION ?= value (?= assignment)");
+        assert_eq!(deps[0].current_value, "1.3.1");
+        assert_eq!(deps[0].datasource, "custom.hashicorp");
+    }
+
+    #[test]
+    fn makefile_versions_file_pattern_matches() {
+        let cm = get_preset_custom_manager("custom-managers:makefileVersions");
+        assert!(cm.matches_file("Makefile"));
+        assert!(cm.matches_file("makefile"));
+        assert!(cm.matches_file("GNUMakefile"));
+        assert!(cm.matches_file("sub/dir/Makefile"));
+        assert!(cm.matches_file("versions.mk"));
+        assert!(!cm.matches_file("Dockerfile"));
+        assert!(!cm.matches_file("MakefileGenerator.ts"));
+    }
+
+    #[test]
+    fn helm_chart_yaml_extracts_app_version() {
+        // Port of Renovate custom-managers.spec.ts: helmChartYamlAppVersions
+        let cm = get_preset_custom_manager("custom-managers:helmChartYamlAppVersions");
+        let content = concat!(
+            "apiVersion: v1\n",
+            "name: a-chart\n",
+            "version: \"1\"\n",
+            "# renovate: image=node\n",
+            "appVersion: 19.4.0\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert!(!deps.is_empty(), "must extract dep from Chart.yaml appVersion");
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].current_value, "19.4.0");
+        assert_eq!(deps[0].datasource, "docker");
+    }
+
+    #[test]
+    fn helm_chart_yaml_file_pattern_matches() {
+        let cm = get_preset_custom_manager("custom-managers:helmChartYamlAppVersions");
+        assert!(cm.matches_file("Chart.yaml"));
+        assert!(cm.matches_file("foo/Chart.yaml"));
+        assert!(!cm.matches_file("Chart.yml"));
+        assert!(!cm.matches_file("Chart.yamlo"));
+    }
+
+    #[test]
+    fn azure_pipelines_file_pattern_matches() {
+        // Port of Renovate custom-managers.spec.ts: azurePipelinesVersions "matches regexes patterns"
+        let cm = get_preset_custom_manager("custom-managers:azurePipelinesVersions");
+        assert!(cm.matches_file(".azuredevops/bar.yml"));
+        assert!(cm.matches_file(".azuredevops/bar.yaml"));
+        assert!(cm.matches_file("azure-pipelines.yml"));
+        assert!(cm.matches_file("azure-pipelines.yaml"));
+        assert!(cm.matches_file("azurepipelines.yml"));
+        assert!(!cm.matches_file("foo.yml"), "generic yml must NOT match");
+        assert!(!cm.matches_file("foo.yaml"), "generic yaml must NOT match");
+    }
+
+    #[test]
+    fn maven_property_versions_extracts_from_pom_xml() {
+        // Port of Renovate custom-managers.spec.ts: mavenPropertyVersions
+        let cm = get_preset_custom_manager("custom-managers:mavenPropertyVersions");
+        let content = concat!(
+            "<!-- renovate: depName=org.ow2.asm:asm -->\n",
+            "<asm.version>9.3</asm.version>\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert!(!deps.is_empty(), "must extract from pom.xml property with renovate comment");
+        assert_eq!(deps[0].dep_name, "org.ow2.asm:asm");
+        assert_eq!(deps[0].current_value, "9.3");
+    }
+
+    #[test]
+    fn maven_property_versions_file_pattern_matches() {
+        let cm = get_preset_custom_manager("custom-managers:mavenPropertyVersions");
+        assert!(cm.matches_file("pom.xml"));
+        assert!(cm.matches_file("foo/pom.xml"));
+        assert!(!cm.matches_file("build.gradle"));
+    }
 }

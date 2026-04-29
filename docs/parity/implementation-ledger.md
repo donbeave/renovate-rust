@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0347  | 2026-04-29 | Port Renovate custom-managers.spec.ts extraction tests: 16 new tests verifying preset regex extraction from real file content (dockerfile ENV/ARG with `=`/` `/quotes, Makefile `=`/`:=`/`?=`/` = `, Helm Chart.yaml `appVersion`, Maven pom.xml, file pattern matching); all pass confirming our regex matches Renovate behavior | Complete | See below. |
 | 0346  | 2026-04-29 | `rebaseStalePrs`/`rebaseConflictedPrs` migrations: `rebaseStalePrs: true` → `rebaseWhen: "behind-base-branch"`, `rebaseStalePrs: false` → `rebaseWhen: "conflicted"`, `rebaseConflictedPrs: false` → `rebaseWhen: "never"`; explicit `rebaseWhen` takes precedence | Complete | See below. |
 | 0345  | 2026-04-29 | Datasource name migration in `matchDatasources`: deprecated `"adoptium-java"` → `"java-version"`, `"dotnet"` → `"dotnet-version"`, `"node"` → `"node-version"` (matching Renovate's datasource-migration.ts) | Complete | See below. |
 | 0344  | 2026-04-29 | `customManagers` without `customType`: when `customType` field is absent, defaults to `"regex"` (matching Renovate's customManagers migration which adds `customType: "regex"` to legacy custom managers) | Complete | See below. |
