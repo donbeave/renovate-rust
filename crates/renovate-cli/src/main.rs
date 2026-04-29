@@ -335,29 +335,28 @@ async fn process_repo(
 
     let detected = {
         let all = managers::detect(&filtered_files);
-        // Apply `enabledManagers` filter: when non-empty, only the listed
-        // managers are active.  Empty list means all managers are active.
-        if repo_cfg.enabled_managers.is_empty() {
-            all
-        } else {
-            let filtered: Vec<_> = all
-                .into_iter()
-                .filter(|m| {
-                    repo_cfg.is_manager_enabled(
-                        m.name,
-                        renovate_core::managers::is_disabled_by_default(m.name),
-                    )
-                })
-                .collect();
-            if !filtered.is_empty() {
-                tracing::debug!(
-                    repo = %repo_slug,
-                    enabled = ?repo_cfg.enabled_managers,
-                    "enabledManagers filter applied"
-                );
-            }
-            filtered
+        // Always filter using is_manager_enabled, which:
+        // - When enabledManagers is empty: excludes disabled-by-default managers
+        // - When enabledManagers is set: only includes explicitly listed managers
+        // Mirrors Renovate's behavior: disabled-by-default managers (pre-commit, nix, etc.)
+        // only run when explicitly listed in enabledManagers.
+        let filtered: Vec<_> = all
+            .into_iter()
+            .filter(|m| {
+                repo_cfg.is_manager_enabled(
+                    m.name,
+                    renovate_core::managers::is_disabled_by_default(m.name),
+                )
+            })
+            .collect();
+        if !repo_cfg.enabled_managers.is_empty() && !filtered.is_empty() {
+            tracing::debug!(
+                repo = %repo_slug,
+                enabled = ?repo_cfg.enabled_managers,
+                "enabledManagers filter applied"
+            );
         }
+        filtered
     };
     if detected.is_empty() {
         tracing::info!(repo = %repo_slug, "no package managers detected");

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0294  | 2026-04-29 | Bug fix: disabled-by-default managers (pre-commit, nix, html, travis, etc.) now correctly excluded even when `enabledManagers` is empty; always apply `is_manager_enabled()` filter | Complete | See below. |
 | 0293  | 2026-04-29 | `resolve_extends_parameterized_rules()`: `:doNotPinPackage(name)`, `:semanticCommitTypeAll(type)`, `:pathSemanticCommitType(path, type)` inject packageRules from preset arguments; 2 tests | Complete | See below. |
 | 0292  | 2026-04-29 | Extended compound preset expansion: `:semanticPrefixChore`, `:semanticPrefixFix`, `:assignAndReview(user)` (parameterized) all expand into constituent presets; 3 tests | Complete | See below. |
 | 0291  | 2026-04-29 | Compound preset expansion: `expand_compound_presets()` resolves `config:js-app`, `config:js-lib`, `config:semverAllMonthly`, `config:semverAllWeekly` into their constituent presets before resolution; 4 tests | Complete | See below. |
