@@ -110,6 +110,28 @@ the smallest possible diff.
 - When a refactor touches many files, commit it as a single atomic change with
   a clear description of the motivation.
 
+## Ported Test Attribution (agent-only)
+
+Every Rust test that was ported from a Renovate TypeScript spec file **must**
+include the following comment on the line immediately above `#[test]`:
+
+```rust
+// Ported: "<original it() description>" — <manager>/<spec-file>.spec.ts line <N>
+#[test]
+fn test_returns_null_for_invalid_yaml() {
+```
+
+Rules:
+- The quoted string is the exact text passed to `it(` in the TypeScript spec.
+- The path is relative to `lib/modules/manager/` — e.g. `pre-commit/extract.spec.ts`.
+- The line number is the 1-based line of the `it(` call in the spec file.
+- This comment is required on every ported test, no exceptions.
+- When searching for existing ported tests during Phase 2 mapping, grep for
+  `// Ported:` to locate already-attributed tests quickly:
+  ```sh
+  grep -rn "// Ported:" crates/
+  ```
+
 ## Shared Conventions
 
 Rules in the files below apply to everyone working in the repo, human and

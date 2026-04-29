@@ -137,7 +137,19 @@ tracking open/close describe blocks if the file has nested describes.
 
 ## Finding Rust matches (Phase 2)
 
-To search for a test that might correspond to an original test name:
+First, check for tests that already carry a provenance comment — these are
+definitively ported and can be linked immediately:
+
+```sh
+grep -rn "// Ported:" crates/ --include="*.rs"
+```
+
+The comment format is:
+```
+// Ported: "<original it() description>" — <manager>/<spec-file>.spec.ts line <N>
+```
+
+For tests without a provenance comment, search by name or assertion content:
 
 ```sh
 grep -rn "fn test_" crates/ | grep -i "keyword"
@@ -153,6 +165,8 @@ grep -rn "returns null\|empty" crates/ --include="*.rs"
 
 Use judgment: a Rust test does not need the same name as the TypeScript
 original to be a port. Check that the behavior under test is the same.
+If you confirm a match that lacks the provenance comment, add the comment
+to that Rust test as part of this loop iteration.
 
 ---
 
@@ -164,6 +178,17 @@ original to be a port. Check that the behavior under test is the same.
 - Write the Rust test in idiomatic Rust. Do not copy TypeScript verbatim.
 - Place the test in the existing Rust extractor file for that manager, or
   create a new test module if none exists.
+- **Every ported test must carry a provenance comment on the line immediately
+  above `#[test]`:**
+  ```rust
+  // Ported: "<original it() description>" — <manager>/<spec-file>.spec.ts line <N>
+  #[test]
+  fn test_returns_null_for_invalid_yaml() {
+  ```
+  - Quoted string = exact text from the `it(` call in the TypeScript spec.
+  - Path = relative to `lib/modules/manager/` (e.g. `pre-commit/extract.spec.ts`).
+  - Line = 1-based line of the `it(` call.
+  - No exceptions. Every ported test needs this comment.
 - Run `cargo nextest run --workspace --all-features` to verify the test passes.
 - Run `cargo fmt --all` and `cargo clippy --workspace --all-targets --all-features -- -D warnings` before committing.
 - Do not commit failing tests.

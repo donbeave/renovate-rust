@@ -129,6 +129,15 @@ Rust best-practice rules:
   concrete blocker and choose the newest compatible release instead of silently
   pinning an older version.
 - Tests should describe behavior at stable boundaries. Cover success and failure paths with minimal deterministic fixtures. Use snapshots for CLI output, generated data, serialized forms, and rendered summaries when whole-output review is clearer.
+- Every Rust test ported from a Renovate TypeScript spec **must** include a
+  provenance comment on the line immediately above `#[test]`:
+  ```rust
+  // Ported: "<original it() description>" — <manager>/<spec-file>.spec.ts line <N>
+  #[test]
+  fn test_name() {
+  ```
+  Path is relative to `lib/modules/manager/`. Line is the 1-based line of the
+  `it(` call. This is required on every ported test without exception.
 - Add focused benchmarks or measurable before/after notes for performance-sensitive
   code paths when practical. Do not claim the Rust implementation is faster
   because it is Rust; make algorithmic, IO, concurrency, or allocation choices
