@@ -55,6 +55,8 @@ pub struct HelmUpdateSummary {
     pub current_value: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 timestamp from the `created` field of the chart entry in `index.yaml`.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result from `fetch_updates_concurrent`.
@@ -67,11 +69,14 @@ pub struct HelmUpdateResult {
 // ── Fetch functions ───────────────────────────────────────────────────────────
 
 /// Fetch the latest version of a Helm chart from a repository's `index.yaml`.
+///
+/// Returns `(version, created_at)` where `created_at` is the chart entry's
+/// `created` timestamp from `index.yaml`.
 pub async fn fetch_latest(
     chart_name: &str,
     repository_url: &str,
     http: &HttpClient,
-) -> Result<Option<String>, HelmError> {
+) -> Result<Option<(String, Option<String>)>, HelmError> {
     let base = repository_url.trim_end_matches('/');
     let url = format!("{base}/index.yaml");
 
@@ -130,7 +135,10 @@ async fn fetch_update_summary(
     dep: &HelmDepInput,
     http: &HttpClient,
 ) -> Result<HelmUpdateSummary, HelmError> {
-    let latest = fetch_latest(&dep.name, &dep.repository_url, http).await?;
+    let result = fetch_latest(&dep.name, &dep.repository_url, http).await?;
+    let (latest, release_timestamp) = result
+        .map(|(v, ts)| (Some(v), ts))
+        .unwrap_or((None, None));
     let current = strip_constraint_operators(&dep.current_value);
     let update_available = latest
         .as_deref()
@@ -139,6 +147,7 @@ async fn fetch_update_summary(
         current_value: dep.current_value.clone(),
         latest,
         update_available,
+        release_timestamp,
     })
 }
 
@@ -150,7 +159,14 @@ async fn fetch_update_summary(
 /// 1. Searching for `entries:` at indent 0.
 /// 2. Searching for `  {chart_name}:` at indent 2.
 /// 3. Searching for the first `    version:` value (entries are newest-first).
-pub fn parse_latest_version(index_yaml: &str, chart_name: &str) -> Option<String> {
+/// Parse the latest version (and optionally its `created` timestamp) from a
+/// Helm `index.yaml` for the given `chart_name`.
+///
+/// Returns `(version, created_at)`.
+pub fn parse_latest_version(
+    index_yaml: &str,
+    chart_name: &str,
+) -> Option<(String, Option<String>)> {
     #[derive(PartialEq)]
     enum State {
         Entries,
@@ -160,6 +176,8 @@ pub fn parse_latest_version(index_yaml: &str, chart_name: &str) -> Option<String
 
     let chart_key = format!("{chart_name}:");
     let mut state = State::Entries;
+    let mut found_version: Option<String> = None;
+    let mut found_created: Option<String> = None;
 
     for line in index_yaml.lines() {
         let trimmed = line.trim();
@@ -186,15 +204,29 @@ pub fn parse_latest_version(index_yaml: &str, chart_name: &str) -> Option<String
                 }
             }
             State::Version => {
-                // The chart key appeared; now find the first `version:` field.
-                // Version fields are indented at 4+ spaces.
-                if indent >= 4 && trimmed.starts_with("version:") {
-                    let val = trimmed["version:".len()..].trim().trim_matches('"');
-                    if !val.is_empty() {
-                        return Some(val.to_owned());
+                // Collect version and created fields from the first chart entry.
+                if indent >= 4 {
+                    if trimmed.starts_with("version:") {
+                        let val = trimmed["version:".len()..].trim().trim_matches('"');
+                        if !val.is_empty() && found_version.is_none() {
+                            found_version = Some(val.to_owned());
+                        }
+                    } else if trimmed.starts_with("created:") {
+                        let val = trimmed["created:".len()..].trim().trim_matches('"');
+                        if !val.is_empty() && found_created.is_none() {
+                            found_created = Some(val.to_owned());
+                        }
                     }
                 }
-                // If we hit another indent-2 key, we've left this chart's block.
+                // Return as soon as we have the version (created may come before or after).
+                // Stop collecting when we reach the second entry (indent 2, starts with `-`).
+                if indent == 2 && (trimmed == "-" || trimmed.starts_with('-')) {
+                    if found_version.is_some() {
+                        break; // first entry complete
+                    }
+                    // Still in first entry header, continue
+                }
+                // If we hit another indent-2 non-list key, we've left this chart's block.
                 if indent == 2 && trimmed != "-" && !trimmed.starts_with('-') {
                     break;
                 }
@@ -202,7 +234,7 @@ pub fn parse_latest_version(index_yaml: &str, chart_name: &str) -> Option<String
         }
     }
 
-    None
+    found_version.map(|v| (v, found_created))
 }
 
 fn leading_spaces(line: &str) -> usize {
@@ -241,7 +273,7 @@ mod tests {
     fn parse_finds_first_version() {
         let yaml = index_yaml(&[("redis", &["17.0.0", "16.0.0", "15.0.0"])]);
         assert_eq!(
-            parse_latest_version(&yaml, "redis"),
+            parse_latest_version(&yaml, "redis").map(|(v, _)| v),
             Some("17.0.0".to_owned())
         );
     }
@@ -259,9 +291,19 @@ mod tests {
             ("postgresql", &["12.0.0", "11.0.0"]),
         ]);
         assert_eq!(
-            parse_latest_version(&yaml, "postgresql"),
+            parse_latest_version(&yaml, "postgresql").map(|(v, _)| v),
             Some("12.0.0".to_owned())
         );
+    }
+
+    #[test]
+    fn parse_extracts_created_timestamp() {
+        let yaml = "apiVersion: v1\nentries:\n  redis:\n    - name: redis\n      version: 17.0.0\n      created: \"2024-01-15T10:30:00.000Z\"\n";
+        let result = parse_latest_version(yaml, "redis");
+        assert!(result.is_some());
+        let (version, created) = result.unwrap();
+        assert_eq!(version, "17.0.0");
+        assert_eq!(created.as_deref(), Some("2024-01-15T10:30:00.000Z"));
     }
 
     #[test]
@@ -284,7 +326,7 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_latest("redis", &server.uri(), &http).await.unwrap();
-        assert_eq!(result, Some("17.5.0".to_owned()));
+        assert_eq!(result.map(|(v, _)| v), Some("17.5.0".to_owned()));
     }
 
     #[tokio::test]

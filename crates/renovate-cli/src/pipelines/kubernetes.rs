@@ -579,13 +579,13 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             match helm_datasource::fetch_latest(chart_name, registry_url, http)
                                 .await
                             {
-                                Ok(Some(latest)) if latest != dep.current_value => {
+                                Ok(Some((latest, _))) if latest != dep.current_value => {
                                     output::DepStatus::UpdateAvailable {
                                         current: dep.current_value.clone(),
                                         latest,
                                     }
                                 }
-                                Ok(Some(latest)) => output::DepStatus::UpToDate {
+                                Ok(Some((latest, _))) => output::DepStatus::UpToDate {
                                     latest: Some(latest),
                                 },
                                 Ok(None) => output::DepStatus::UpToDate { latest: None },
