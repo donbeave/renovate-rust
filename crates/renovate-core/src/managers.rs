@@ -382,9 +382,19 @@ const MANAGER_DEFS: &[ManagerDef] = &[
     },
     ManagerDef {
         name: "mise",
+        // Mirrors Renovate's mise defaultConfig.managerFilePatterns:
+        // **/{,.}mise{,.*}.toml
+        // **/{,.}mise/config{,.*}.toml
+        // **/.config/mise{,.*}.toml
+        // **/.config/mise/{mise,config}{,.*}.toml
+        // **/.config/mise/conf.d/*.toml
+        // **/.rtx{,.*}.toml
         patterns: &[
             r"(^|/)\.?mise(\..*)?\.toml$",
+            r"(^|/)\.?mise/config(\..*)?\.toml$",
             r"(^|/)\.config/mise(\..*)?\.toml$",
+            r"(^|/)\.config/mise/(mise|config)(\..*)?\.toml$",
+            r"(^|/)\.config/mise/conf\.d/[^/]+\.toml$",
             r"(^|/)\.rtx(\..*)?\.toml$",
         ],
     },
@@ -895,6 +905,75 @@ mod tests {
             assert!(
                 !pip.matched_files.contains(&name.to_string()),
                 "{name} should NOT match pip_requirements"
+            );
+        }
+    }
+
+    #[test]
+    fn mise_file_patterns_match_spec() {
+        // Ported: "managerFilePatterns" from mise/index.spec.ts
+        let should_match = &[
+            "mise.toml",
+            ".mise.toml",
+            "mise.local.toml",
+            ".mise.local.toml",
+            "mise.production.toml",
+            ".mise.dev.toml",
+            "mise/config.toml",
+            ".mise/config.toml",
+            "mise/config.local.toml",
+            ".mise/config.production.toml",
+            ".config/mise.toml",
+            ".config/mise.local.toml",
+            ".config/mise.staging.toml",
+            ".config/mise/config.toml",
+            ".config/mise/config.local.toml",
+            ".config/mise/config.production.toml",
+            ".config/mise/mise.toml",
+            ".config/mise/mise.local.toml",
+            ".config/mise/mise.dev.toml",
+            ".rtx.toml",
+            ".rtx.local.toml",
+            ".rtx.production.toml",
+            "subdir/mise.toml",
+            "subdir/.mise.toml",
+            "subdir/.config/mise.toml",
+            "subdir/.config/mise/config.toml",
+            "deep/nested/path/mise.toml",
+            "deep/nested/.config/mise/mise.toml",
+        ];
+        let should_not_match = &[
+            "foo.toml",
+            "mise.json",
+            "mise.yaml",
+            "mise-config.toml",
+            "rtx.toml",
+            ".config/other.toml",
+            "mise.toml.backup",
+            ".mise.toml.bak",
+        ];
+        let all_files: Vec<String> = should_match
+            .iter()
+            .chain(should_not_match.iter())
+            .map(|s| s.to_string())
+            .collect();
+        let file_refs: Vec<&str> = all_files.iter().map(|s| s.as_str()).collect();
+        let f = files(&file_refs);
+        let result = detect(&f);
+        let mise = result
+            .iter()
+            .find(|m| m.name == "mise")
+            .expect("mise manager not detected");
+        for name in should_match {
+            assert!(
+                mise.matched_files.contains(&name.to_string()),
+                "{name} should match mise"
+            );
+        }
+        for name in should_not_match {
+            assert!(
+                !mise.matched_files.contains(&name.to_string()),
+                "{name} should NOT match mise"
             );
         }
     }
