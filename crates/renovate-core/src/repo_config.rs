@@ -315,6 +315,58 @@ pub struct RepoConfig {
 }
 // ── Free helpers ─────────────────────────────────────────────────────────────
 
+/// Expand compound presets (presets that themselves extend other presets)
+/// into their constituent presets.
+///
+/// This is a single-level expansion — we handle known compound presets by
+/// replacing them with the list of presets they extend.  Recursion happens
+/// implicitly because the expanded presets are themselves recognized by the
+/// downstream resolution functions.
+///
+/// Renovate reference: `lib/config/presets/internal/config.preset.ts`.
+fn expand_compound_presets(extends: &[String]) -> Vec<String> {
+    let mut result: Vec<String> = Vec::new();
+    let mut seen: std::collections::HashSet<&str> = std::collections::HashSet::new();
+
+    for preset in extends {
+        match preset.as_str() {
+            // config:js-app = config:recommended + :pinAllExceptPeerDependencies
+            "config:js-app" => {
+                if seen.insert("config:recommended") {
+                    result.push("config:recommended".to_owned());
+                }
+                result.push(":pinAllExceptPeerDependencies".to_owned());
+            }
+            // config:js-lib = config:recommended + :pinOnlyDevDependencies
+            "config:js-lib" => {
+                if seen.insert("config:recommended") {
+                    result.push("config:recommended".to_owned());
+                }
+                result.push(":pinOnlyDevDependencies".to_owned());
+            }
+            // config:semverAllMonthly = :preserveSemverRanges + group:all + schedule:monthly
+            // The preset also sets separateMajorMinor: false; we use "combineMajorMinorReleases"
+            // as a sentinel for that since group:all already implies separate_major_minor: false.
+            "config:semverAllMonthly" => {
+                result.push(":preserveSemverRanges".to_owned());
+                result.push("group:all".to_owned());
+                result.push("schedule:monthly".to_owned());
+                // group:all sets separate_major_minor = false implicitly
+            }
+            // config:semverAllWeekly = :preserveSemverRanges + group:all + schedule:weekly
+            "config:semverAllWeekly" => {
+                result.push(":preserveSemverRanges".to_owned());
+                result.push("group:all".to_owned());
+                result.push("schedule:weekly".to_owned());
+            }
+            other => {
+                result.push(other.to_owned());
+            }
+        }
+    }
+    result
+}
+
 /// Collect `ignorePaths` contributed by built-in presets in `extends`.
 ///
 /// Renovate's built-in presets can set `ignorePaths`.  The most impactful one
@@ -1218,14 +1270,18 @@ impl RepoConfig {
             }
         };
 
+        // Expand compound presets (presets that themselves extend other presets)
+        // before filtering. This handles presets like config:js-app, config:js-lib,
+        // config:semverAllMonthly, config:semverAllWeekly which are defined as
+        // `extends: [other presets...]` in Renovate's preset registry.
+        let expanded_extends = expand_compound_presets(&raw.extends);
+
         // Filter the extends list to remove any presets in `ignorePresets`.
         // This is evaluated before all preset resolution so ignored presets are
         // never expanded, matching Renovate's behaviour.
-        let effective_extends: Vec<String> = raw
-            .extends
-            .iter()
+        let effective_extends: Vec<String> = expanded_extends
+            .into_iter()
             .filter(|p| !raw.ignore_presets.contains(p))
-            .cloned()
             .collect();
 
         // Resolve group presets before building user-defined rules.
@@ -3751,6 +3807,55 @@ mod tests {
     fn config_base_adds_ignore_paths() {
         let c = RepoConfig::parse(r#"{"extends": ["config:base"]}"#);
         assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
+    }
+
+    #[test]
+    fn config_js_app_expands_to_recommended_plus_pin_all() {
+        // config:js-app = config:recommended + :pinAllExceptPeerDependencies
+        let c = RepoConfig::parse(r#"{"extends": ["config:js-app"]}"#);
+        // Should have the node_modules ignore path from config:recommended
+        assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
+        // Should have a rangeStrategy: pin rule from :pinAllExceptPeerDependencies
+        let has_pin_rule = c
+            .package_rules
+            .iter()
+            .any(|r| r.range_strategy.as_deref() == Some("pin"));
+        assert!(
+            has_pin_rule,
+            "config:js-app should inject a pin rangeStrategy rule"
+        );
+    }
+
+    #[test]
+    fn config_js_lib_expands_to_recommended_plus_pin_dev() {
+        // config:js-lib = config:recommended + :pinOnlyDevDependencies
+        let c = RepoConfig::parse(r#"{"extends": ["config:js-lib"]}"#);
+        assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
+        let has_pin_dev_rule = c.package_rules.iter().any(|r| {
+            r.range_strategy.as_deref() == Some("pin")
+                && r.match_dep_types.contains(&"devDependencies".to_owned())
+        });
+        assert!(
+            has_pin_dev_rule,
+            "config:js-lib should inject a pin rule for devDependencies"
+        );
+    }
+
+    #[test]
+    fn config_semver_all_monthly_expands_to_group_all_and_schedule() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:semverAllMonthly"]}"#);
+        // Should have monthly schedule from schedule:monthly
+        assert_eq!(c.schedule, vec!["* 0-3 1 * *"]);
+        // Should have group:all (separate_major_minor: false)
+        assert!(!c.separate_major_minor);
+    }
+
+    #[test]
+    fn config_semver_all_weekly_expands_to_group_all_and_schedule() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:semverAllWeekly"]}"#);
+        // Should have weekly schedule
+        assert_eq!(c.schedule, vec!["* 0-3 * * 1"]);
+        assert!(!c.separate_major_minor);
     }
 
     #[test]

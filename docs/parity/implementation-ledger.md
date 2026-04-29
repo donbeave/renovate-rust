@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0291  | 2026-04-29 | Compound preset expansion: `expand_compound_presets()` resolves `config:js-app`, `config:js-lib`, `config:semverAllMonthly`, `config:semverAllWeekly` into their constituent presets before resolution; 4 tests | Complete | See below. |
 | 0290  | 2026-04-29 | Bug fix: `is_version_restricted_ctx` now uses last-matching-rule-wins for `allowedVersions` — later rules override earlier ones, matching Renovate's `mergeChildConfig` semantics; 1 test | Complete | See below. |
 | 0289  | 2026-04-29 | `matchRegistryUrls` now fires in pipeline: `manager_default_registry_urls()` populates `DepContext.registry_urls` with the manager's default registry, enabling `matchRegistryUrls` rules to match correctly; 1 pipeline test | Complete | See below. |
 | 0288  | 2026-04-29 | Bug fix: `is_dep_ignored_ctx` delegates to `is_update_blocked_ctx` so last-rule-wins `enabled` semantics apply to pre-lookup skipping as well; unified `enabled` rule evaluation path | Complete | See below. |
