@@ -967,26 +967,28 @@ impl RepoConfig {
     /// Renovate reference: `lib/util/package-rules/index.ts` —
     /// `applyPackageRules()` merging logic.
     pub fn collect_rule_effects(&self, ctx: &DepContext<'_>) -> RuleEffects {
-        // Seed with repo-level labels (labels ∪ addLabels) as the base.
+        // Seed with repo-level config as the base.
+        // `labels` and `addLabels` start with the repo-level values.
         let mut effects = RuleEffects {
-            labels: {
-                let mut base = self.labels.clone();
-                for l in &self.add_labels {
-                    if !base.contains(l) {
-                        base.push(l.clone());
-                    }
-                }
-                base
-            },
+            labels: self.labels.clone(),
+            assignees: self.assignees.clone(),
+            reviewers: self.reviewers.clone(),
             ..RuleEffects::default()
         };
+        // Accumulate repo-level addLabels into the label set.
+        for l in &self.add_labels {
+            if !effects.labels.contains(l) {
+                effects.labels.push(l.clone());
+            }
+        }
+
         for rule in &self.package_rules {
             if !rule.matches_context(ctx) {
                 continue;
             }
-            // Renovate applies packageRules as "last rule wins" for scalar fields
-            // (mergeChildConfig in lib/util/package-rules/index.ts). Each matching
-            // rule fully overrides earlier matching rules for the same field.
+            // Renovate applies packageRules via mergeChildConfig (lib/util/package-rules/index.ts):
+            // - fields without `mergeable: true` REPLACE the current value (last rule wins)
+            // - fields with `mergeable: true` (addLabels) APPEND to the current value
             if rule.group_name.is_some() {
                 effects.group_name.clone_from(&rule.group_name);
             }
@@ -999,12 +1001,11 @@ impl RepoConfig {
             if !rule.schedule.is_empty() {
                 effects.schedule.clone_from(&rule.schedule);
             }
-            for label in &rule.labels {
-                if !effects.labels.contains(label) {
-                    effects.labels.push(label.clone());
-                }
+            // `labels` is NOT mergeable → replaces the current label set.
+            if !rule.labels.is_empty() {
+                effects.labels.clone_from(&rule.labels);
             }
-            // addLabels is mergeable=true: accumulate from ALL matching rules.
+            // `addLabels` IS mergeable → appends to the current label set.
             for label in &rule.add_labels {
                 if !effects.labels.contains(label) {
                     effects.labels.push(label.clone());
@@ -1025,6 +1026,7 @@ impl RepoConfig {
             if rule.commit_message_prefix.is_some() {
                 effects.commit_message_prefix.clone_from(&rule.commit_message_prefix);
             }
+            // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
                 effects.assignees.clone_from(&rule.assignees);
             }
@@ -1032,18 +1034,13 @@ impl RepoConfig {
                 effects.reviewers.clone_from(&rule.reviewers);
             }
         }
-        // Apply repo-level defaults if no rule overrode them.
+        // Apply repo-level group_name if no rule set one.
         if effects.group_name.is_none() && self.group_name.is_some() {
             effects.group_name.clone_from(&self.group_name);
         }
+        // Apply repo-level automerge if no rule overrode it.
         if effects.automerge.is_none() && self.automerge {
             effects.automerge = Some(true);
-        }
-        if effects.assignees.is_empty() && !self.assignees.is_empty() {
-            effects.assignees.clone_from(&self.assignees);
-        }
-        if effects.reviewers.is_empty() && !self.reviewers.is_empty() {
-            effects.reviewers.clone_from(&self.reviewers);
         }
         effects
     }
@@ -3263,13 +3260,28 @@ mod rule_effects_tests {
     }
 
     #[test]
-    fn rule_labels_append_to_repo_labels() {
-        // Per-rule labels union with repo-level labels.
+    fn rule_labels_replaces_repo_labels() {
+        // Per-rule `labels` is NOT mergeable — it replaces the repo-level labels.
+        // To append, use `addLabels` instead.
         let c = RepoConfig::parse(
             r#"{"labels": ["base"], "packageRules": [{"matchPackageNames": ["express"], "labels": ["frontend"]}]}"#,
         );
         let ctx = DepContext::for_dep("express");
         let effects = c.collect_rule_effects(&ctx);
+        // After the rule, labels = ["frontend"] (replaced "base").
+        assert!(!effects.labels.contains(&"base".to_owned()), "rule `labels` should replace repo labels");
+        assert!(effects.labels.contains(&"frontend".to_owned()));
+    }
+
+    #[test]
+    fn rule_add_labels_appends_to_repo_labels() {
+        // `addLabels` IS mergeable — it appends to the repo-level labels.
+        let c = RepoConfig::parse(
+            r#"{"labels": ["base"], "packageRules": [{"matchPackageNames": ["express"], "addLabels": ["frontend"]}]}"#,
+        );
+        let ctx = DepContext::for_dep("express");
+        let effects = c.collect_rule_effects(&ctx);
+        // addLabels appends: both "base" and "frontend" should be present.
         assert!(effects.labels.contains(&"base".to_owned()));
         assert!(effects.labels.contains(&"frontend".to_owned()));
     }

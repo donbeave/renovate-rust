@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0251  | 2026-04-29 | Fix: `labels` in packageRules now REPLACES global labels (non-mergeable); `addLabels` still APPENDs (mergeable=true); `assignees`/`reviewers` seeded at start from repo config | Complete | See below. |
 | 0250  | 2026-04-29 | Fix: `groupName`/`groupSlug` now use Renovate's "last rule wins" semantics — was "first rule wins" which broke subsequent packageRules that re-assign groupName | Complete | See below. |
 | 0249  | 2026-04-29 | `group:all` + `group:allNonMajor` built-in preset expansion: `#[derive(Default)]` on `PackageRule`, `resolve_extends_group_presets()` injects packageRules and sets `separateMajorMinor: false` for `group:all` | Complete | See below. |
 | 0248  | 2026-04-29 | Helm `release_timestamp`: `created` field from `index.yaml` chart entries propagated through `parse_latest_version` → `fetch_latest` → `HelmUpdateSummary` → `build_dep_reports_helm` | Complete | See below. |
