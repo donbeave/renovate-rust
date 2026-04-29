@@ -330,7 +330,7 @@ async fn process_repo(
     let path_matcher = repo_cfg.build_path_matcher();
     let filtered_files: Vec<String> = files
         .into_iter()
-        .filter(|f| !path_matcher.is_ignored(f))
+        .filter(|f| !path_matcher.is_ignored(f) && repo_cfg.is_path_included(f))
         .collect();
 
     let detected = {

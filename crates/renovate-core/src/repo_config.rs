@@ -58,6 +58,11 @@ pub struct RepoConfig {
     /// minimatch/globset syntax (`**/test/**`, `**/*.spec.ts`, etc.).  Plain
     /// paths (no glob characters) are treated as prefix matches.
     pub ignore_paths: Vec<String>,
+    /// If non-empty, only files matching at least one of these patterns will be
+    /// scanned.  Applied after `ignorePaths` exclusions.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `includePaths`.
+    pub include_paths: Vec<String>,
     /// Compiled package rules (from `packageRules` in `renovate.json`).
     pub package_rules: Vec<PackageRule>,
     /// When non-empty, only these manager names are active.
@@ -627,6 +632,8 @@ impl RepoConfig {
             ignore_deps: Vec<String>,
             #[serde(rename = "ignorePaths", default)]
             ignore_paths: Vec<String>,
+            #[serde(rename = "includePaths", default)]
+            include_paths: Vec<String>,
             #[serde(rename = "packageRules", default)]
             package_rules: Vec<RawPackageRule>,
             #[serde(rename = "enabledManagers", default)]
@@ -893,6 +900,7 @@ impl RepoConfig {
                 preset_paths.extend(raw.ignore_paths);
                 preset_paths
             },
+            include_paths: raw.include_paths,
             extends: raw.extends,
             minimum_release_age: raw.minimum_release_age,
             commit_message_action: raw.commit_message_action,
@@ -1244,6 +1252,7 @@ impl Default for RepoConfig {
             enabled: true,
             ignore_deps: Vec::new(),
             ignore_paths: Vec::new(),
+            include_paths: Vec::new(),
             package_rules: Vec::new(),
             enabled_managers: Vec::new(),
             ignore_versions: Vec::new(),
@@ -1298,6 +1307,19 @@ impl RepoConfig {
     /// prefer [`build_path_matcher`] to amortize glob compilation.
     pub fn is_path_ignored(&self, path: &str) -> bool {
         self.build_path_matcher().is_ignored(path)
+    }
+
+    /// Return `true` when `path` is allowed by the `includePaths` config.
+    ///
+    /// If `include_paths` is empty, all paths are allowed (returns `true`).
+    /// Otherwise the path must match at least one include pattern.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `includePaths`.
+    pub fn is_path_included(&self, path: &str) -> bool {
+        if self.include_paths.is_empty() {
+            return true;
+        }
+        PathMatcher::new(&self.include_paths).is_ignored(path)
     }
 }
 
@@ -1670,6 +1692,28 @@ mod tests {
         let c = RepoConfig::parse(r#"{"ignorePaths": ["vendor"]}"#);
         assert!(c.is_path_ignored("vendor/react/index.js"));
         assert!(!c.is_path_ignored("src/vendor.ts"));
+    }
+
+    #[test]
+    fn include_paths_empty_allows_all() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(c.is_path_included("package.json"));
+        assert!(c.is_path_included("apps/frontend/package.json"));
+    }
+
+    #[test]
+    fn include_paths_limits_to_matching_files() {
+        let c = RepoConfig::parse(r#"{"includePaths": ["apps/**"]}"#);
+        assert!(c.is_path_included("apps/backend/package.json"));
+        assert!(!c.is_path_included("package.json"));
+        assert!(!c.is_path_included("libs/utils/package.json"));
+    }
+
+    #[test]
+    fn include_paths_prefix_match() {
+        let c = RepoConfig::parse(r#"{"includePaths": ["apps"]}"#);
+        assert!(c.is_path_included("apps/frontend/package.json"));
+        assert!(!c.is_path_included("package.json"));
     }
 
     // ── PathMatcher glob tests ────────────────────────────────────────────────
