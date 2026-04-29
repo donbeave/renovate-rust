@@ -32,13 +32,16 @@ use crate::versioning::semver_generic::UpdateType;
 /// images they may differ.
 #[derive(Debug, Clone)]
 pub struct PackageRule {
-    /// Package name matchers: exact strings, `/regex/` inline patterns, and
-    /// glob patterns (`@angular/**`).  Populated from `matchPackageNames` and
-    /// the deprecated `matchPackagePrefixes` (converted to `prefix**` globs).
-    /// Targets the `packageName` field of a dependency.
-    pub match_package_names: Vec<PackageNameMatcher>,
-    /// Compiled regex patterns from the deprecated `matchPackagePatterns` field.
-    pub match_package_patterns: Vec<Regex>,
+    /// Package name patterns targeting the `packageName` / `depName` field.
+    ///
+    /// Populated from `matchPackageNames` (as-is), the deprecated
+    /// `matchPackagePrefixes` (converted to `prefix**` globs), and the
+    /// deprecated `matchPackagePatterns` (wrapped as `/regex/` strings).
+    /// Supports exact, `/regex/`, glob, and `!negation` patterns via
+    /// `match_regex_or_glob_list`.
+    ///
+    /// Renovate reference: `lib/util/package-rules/package-names.ts`
+    pub match_package_names: Vec<String>,
     /// Dep name patterns from `matchDepNames`.
     /// Targets the `depName` field (may differ from `packageName`).
     /// Supports exact, `/regex/`, glob, and `!negation` patterns.
@@ -86,7 +89,7 @@ pub struct PackageRule {
     /// Renovate reference: `lib/util/package-rules/new-value.ts`
     pub match_new_value: Option<PackageNameMatcher>,
     /// `true` when any `matchPackageNames` / `matchPackagePatterns` /
-    /// `matchPackagePrefixes` entry was set.
+    /// `matchPackagePrefixes` entry was set (non-empty `match_package_names`).
     pub has_name_constraint: bool,
 
     // ── Per-rule metadata (applied when this rule matches) ───────────────────
@@ -165,20 +168,17 @@ pub enum PackageNameMatcher {
 
 impl PackageRule {
     /// Return `true` when this rule's name conditions match `dep_name`.
+    ///
+    /// Checks `match_package_names` (which merges `matchPackageNames`,
+    /// deprecated `matchPackagePrefixes` as `prefix**` globs, and deprecated
+    /// `matchPackagePatterns` wrapped as `/regex/` strings) via
+    /// `match_regex_or_glob_list` — supporting exact, regex, glob, and negation.
     pub fn name_matches(&self, dep_name: &str) -> bool {
+        use crate::string_match::match_regex_or_glob_list;
         if !self.has_name_constraint {
             return true;
         }
-        let name_match = self.match_package_names.iter().any(|m| match m {
-            PackageNameMatcher::Exact(s) => s == dep_name,
-            PackageNameMatcher::Regex(re) => re.is_match(dep_name),
-            PackageNameMatcher::Glob(gm) => gm.is_match(dep_name),
-        });
-        name_match
-            || self
-                .match_package_patterns
-                .iter()
-                .any(|re| re.is_match(dep_name))
+        match_regex_or_glob_list(dep_name, &self.match_package_names)
     }
 
     /// Return `true` when this rule's `matchDepNames` condition matches `dep_name`.

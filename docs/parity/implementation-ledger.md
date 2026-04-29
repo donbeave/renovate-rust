@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0205  | 2026-04-28 | Fix negation in `matchPackageNames` — merge deprecated fields + migrate to raw strings | Complete | See below. |
 | 0204  | 2026-04-28 | Fix negation in `matchDepNames` — migrate to raw strings + `match_regex_or_glob_list` | Complete | See below. |
 | 0203  | 2026-04-28 | Fix negation in `matchSourceUrls`, `matchRegistryUrls`, `matchRepositories`; Cargo `current_version_timestamp` | Complete | See below. |
 | 0202  | 2026-04-28 | crates.io release timestamps via REST API — `minimumReleaseAge` for Cargo | Complete | See below. |

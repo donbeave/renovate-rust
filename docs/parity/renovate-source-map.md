@@ -62,8 +62,8 @@ find where a given TypeScript module is implemented in Rust.
 | TypeScript file | Rust file(s) | Status | Notes |
 |-----------------|-------------|--------|-------|
 | `lib/util/package-rules/index.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `matches_context()` + `collect_rule_effects()` |
-| `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/package_rule.rs` | partial | `matchDepNames` exact/regex/glob; negation pending |
-| `lib/util/package-rules/package-names.ts` | `crates/renovate-core/src/package_rule.rs` | partial | `matchPackageNames` exact/regex/glob; negation pending |
+| `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchDepNames` exact/regex/glob/negation |
+| `lib/util/package-rules/package-names.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchPackageNames` exact/regex/glob/negation; deprecated fields merged |
 | `lib/util/package-rules/files.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchFileNames` |
 | `lib/util/package-rules/base-branches.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchBaseBranches` |
 | `lib/util/package-rules/base.ts` | — | out-of-scope | Abstract base class — internal TypeScript abstraction |

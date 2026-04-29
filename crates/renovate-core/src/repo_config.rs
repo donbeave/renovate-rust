@@ -13,7 +13,6 @@
 //! Rule types, matchers, and the dependency context live in
 //! [`crate::package_rule`]; this module re-exports them for convenience.
 
-use regex::Regex;
 use serde::Deserialize;
 
 // Re-export rule/context types so callers can keep using `repo_config::*`.
@@ -489,42 +488,18 @@ impl RepoConfig {
                     || !r.match_package_patterns.is_empty()
                     || !r.match_package_prefixes.is_empty();
 
-                // Compile each `matchPackageNames` entry as Exact / Regex / Glob.
-                let mut match_package_names: Vec<PackageNameMatcher> = r
-                    .match_package_names
-                    .iter()
-                    .map(|s| compile_name_matcher(s))
-                    .collect();
-                // Convert deprecated `matchPackagePrefixes` → glob `prefix**`.
-                for prefix in &r.match_package_prefixes {
-                    let pattern = format!("{prefix}**");
-                    match globset::Glob::new(&pattern) {
-                        Ok(g) => {
-                            match_package_names.push(PackageNameMatcher::Glob(g.compile_matcher()))
-                        }
-                        Err(e) => tracing::warn!(
-                            prefix,
-                            %e,
-                            "invalid matchPackagePrefixes glob"
-                        ),
-                    }
+                // Merge matchPackageNames, deprecated matchPackagePrefixes, and
+                // deprecated matchPackagePatterns into one Vec<String> so that
+                // match_regex_or_glob_list can apply positive/negative semantics.
+                let mut match_package_names: Vec<String> = r.match_package_names;
+                // matchPackagePrefixes → "prefix**" glob strings
+                for prefix in r.match_package_prefixes {
+                    match_package_names.push(format!("{prefix}**"));
                 }
-
-                let match_package_patterns = r
-                    .match_package_patterns
-                    .iter()
-                    .filter_map(|pat| {
-                        Regex::new(pat)
-                            .map_err(|e| {
-                                tracing::warn!(
-                                    pattern = pat,
-                                    %e,
-                                    "invalid packageRules matchPackagePatterns regex"
-                                );
-                            })
-                            .ok()
-                    })
-                    .collect();
+                // matchPackagePatterns → "/raw_regex/" inline strings
+                for pat in r.match_package_patterns {
+                    match_package_names.push(format!("/{pat}/"));
+                }
                 let match_update_types = r
                     .match_update_types
                     .iter()
@@ -540,7 +515,6 @@ impl RepoConfig {
                 // store raw strings so match_regex_or_glob_list can apply negation.
                 PackageRule {
                     match_package_names,
-                    match_package_patterns,
                     match_dep_names: r.match_dep_names,
                     match_source_urls: r.match_source_urls,
                     match_current_value: r.match_current_value.map(|s| compile_name_matcher(&s)),
@@ -1385,6 +1359,26 @@ mod tests {
         assert!(c.is_dep_ignored("@babel/core"));
         assert!(c.is_dep_ignored("@babel/preset-env"));
         assert!(!c.is_dep_ignored("babel-loader"));
+    }
+
+    #[test]
+    fn match_package_names_negation() {
+        // "!lodash" in matchPackageNames excludes lodash, allows others
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["!lodash"], "enabled": false}]}"#,
+        );
+        assert!(!c.is_dep_ignored("lodash"));
+        assert!(c.is_dep_ignored("express"));
+    }
+
+    #[test]
+    fn match_package_names_glob_negation() {
+        // "!@babel/**" excludes the whole @babel scope
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["!@babel/**"], "enabled": false}]}"#,
+        );
+        assert!(!c.is_dep_ignored("@babel/core"));
+        assert!(c.is_dep_ignored("lodash"));
     }
 
     #[test]
