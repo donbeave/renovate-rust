@@ -108,6 +108,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             labels: Vec::new(),
                             assignees: Vec::new(),
                             reviewers: Vec::new(),
+                            update_type: None,
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,

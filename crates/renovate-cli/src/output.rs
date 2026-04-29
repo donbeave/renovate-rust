@@ -65,6 +65,13 @@ pub(crate) struct DepReport {
     /// PR reviewers from the effective packageRule or repo config.
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub reviewers: Vec<String>,
+    /// Semver update classification: `"major"`, `"minor"`, or `"patch"`.
+    /// Set only for `UpdateAvailable` deps with parseable semver versions.
+    /// `null` for non-semver deps (Docker tags, calendar versions, etc.).
+    ///
+    /// Mirrors Renovate's `updateType` field.
+    #[serde(rename = "updateType", skip_serializing_if = "Option::is_none")]
+    pub update_type: Option<String>,
     /// Generated PR title following Renovate's default commitMessage template.
     /// Set only for `UpdateAvailable` deps.
     #[serde(rename = "prTitle", skip_serializing_if = "Option::is_none")]
@@ -438,39 +445,21 @@ fn format_file_counts(updates: usize, skipped: usize, errors: usize, use_color: 
 fn format_dep(dep: &DepReport, use_color: bool) -> String {
     match &dep.status {
         DepStatus::UpdateAvailable { current, latest } => {
-            use renovate_core::versioning::semver_generic::{UpdateType, classify_semver_update};
-            let type_label = match classify_semver_update(current, latest) {
-                Some(UpdateType::Major) => {
-                    format!(
-                        "  {}",
-                        if use_color {
-                            "\x1b[31mmajor\x1b[0m"
-                        } else {
-                            "major"
-                        }
-                    )
-                }
-                Some(UpdateType::Minor) => {
-                    format!(
-                        "  {}",
-                        if use_color {
-                            "\x1b[33mminor\x1b[0m"
-                        } else {
-                            "minor"
-                        }
-                    )
-                }
-                Some(UpdateType::Patch) => {
-                    format!(
-                        "  {}",
-                        if use_color {
-                            "\x1b[32mpatch\x1b[0m"
-                        } else {
-                            "patch"
-                        }
-                    )
-                }
-                None => String::new(),
+            // Prefer the pre-computed update_type over recomputing.
+            let type_label = match dep.update_type.as_deref() {
+                Some("major") => format!(
+                    "  {}",
+                    if use_color { "\x1b[31mmajor\x1b[0m" } else { "major" }
+                ),
+                Some("minor") => format!(
+                    "  {}",
+                    if use_color { "\x1b[33mminor\x1b[0m" } else { "minor" }
+                ),
+                Some("patch") => format!(
+                    "  {}",
+                    if use_color { "\x1b[32mpatch\x1b[0m" } else { "patch" }
+                ),
+                _ => String::new(),
             };
             let mut annotations = type_label;
             if dep.automerge == Some(true) {
@@ -580,6 +569,7 @@ mod tests {
                             labels: Vec::new(),
                             assignees: Vec::new(),
                             reviewers: Vec::new(),
+                            update_type: None,
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
@@ -596,6 +586,7 @@ mod tests {
                             labels: Vec::new(),
                             assignees: Vec::new(),
                             reviewers: Vec::new(),
+                            update_type: None,
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
@@ -611,6 +602,7 @@ mod tests {
                             labels: Vec::new(),
                             assignees: Vec::new(),
                             reviewers: Vec::new(),
+                            update_type: None,
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
@@ -631,6 +623,7 @@ mod tests {
                         labels: Vec::new(),
                         assignees: Vec::new(),
                         reviewers: Vec::new(),
+                        update_type: None,
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
@@ -699,6 +692,7 @@ mod tests {
                     labels: Vec::new(),
                     assignees: Vec::new(),
                     reviewers: Vec::new(),
+                    update_type: None,
                     pr_title: None,
                     release_timestamp: None,
                     current_version_timestamp: None,
@@ -730,6 +724,7 @@ mod tests {
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            update_type: None,
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
@@ -755,6 +750,7 @@ mod tests {
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            update_type: None,
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
@@ -778,6 +774,7 @@ mod tests {
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            update_type: None,
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
@@ -800,6 +797,7 @@ mod tests {
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            update_type: None,
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
@@ -851,6 +849,7 @@ mod tests {
                 labels: Vec::new(),
                 assignees: Vec::new(),
                 reviewers: Vec::new(),
+                update_type: None,
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
@@ -867,6 +866,7 @@ mod tests {
                 labels: Vec::new(),
                 assignees: Vec::new(),
                 reviewers: Vec::new(),
+                update_type: None,
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
@@ -880,6 +880,7 @@ mod tests {
                 labels: Vec::new(),
                 assignees: Vec::new(),
                 reviewers: Vec::new(),
+                update_type: None,
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
@@ -895,6 +896,7 @@ mod tests {
                 labels: Vec::new(),
                 assignees: Vec::new(),
                 reviewers: Vec::new(),
+                update_type: None,
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
@@ -962,6 +964,7 @@ mod tests {
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            update_type: None,
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
@@ -981,6 +984,7 @@ mod tests {
             labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            update_type: None,
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,

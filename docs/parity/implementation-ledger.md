@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0215  | 2026-04-29 | `updateType` field in JSON output + DRY human output rendering | Complete | See below. |
 | 0214  | 2026-04-29 | `addLabels` + `assignees`/`reviewers` per-rule in `packageRules`; exposed in output | Complete | See below. |
 | 0213  | 2026-04-29 | Per-rule `schedule` + `minimumReleaseAge` in `packageRules` | Complete | See below. |
 | 0212  | 2026-04-29 | `hashedBranchLength` config option — SHA-512 branch name hashing | Complete | See below. |
@@ -4957,6 +4958,29 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0215 - `updateType` in JSON output; DRY human output rendering
+
+### Renovate reference
+- `lib/workers/repository/updates/generate.ts` — `updateType` field
+
+### What landed
+- `output.rs` `DepReport`: added `update_type: Option<String>` (serde: `updateType`).
+  Values: `"major"`, `"minor"`, `"patch"`, or absent for non-semver deps.
+  Uses `skip_serializing_if = "Option::is_none"` (omitted for non-semver Docker tags etc.)
+- `pipeline_utils.rs`: sets `dep.update_type` from `classify_semver_update` after
+  computing all other effects — single computation, stored once
+- All DepReport construction sites: `update_type: None` default added
+- `output.rs` `format_dep`: now uses pre-computed `dep.update_type` instead of
+  calling `classify_semver_update` a second time (DRY improvement)
+- Removed the redundant `use renovate_core::versioning::semver_generic::...` import
+  from `format_dep`
+
+### Verification
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` ✓
+- `cargo nextest run --workspace --all-features` → 1402 tests pass
 
 ---
 

@@ -141,6 +141,8 @@ pub(crate) fn apply_update_blocking_to_report(
                 dep.labels = effects.labels;
                 dep.assignees = effects.assignees;
                 dep.reviewers = effects.reviewers;
+                dep.update_type = classify_semver_update(current, latest)
+                    .map(|ut| format!("{ut:?}").to_lowercase());
             }
         }
     }
@@ -226,6 +228,7 @@ pub(crate) async fn docker_hub_reports(
                 labels: Vec::new(),
                 assignees: Vec::new(),
                 reviewers: Vec::new(),
+                update_type: None,
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
@@ -264,6 +267,7 @@ pub(crate) async fn docker_hub_reports(
                 labels: Vec::new(),
                 assignees: Vec::new(),
                 reviewers: Vec::new(),
+                update_type: None,
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
