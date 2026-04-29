@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 48 / 108 actionable tests ported (44%) — updated 2026-04-29
+**Overall progress:** 61 / 126 actionable tests ported (48%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -357,6 +357,60 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/bitbucket-pipelines/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bitbucket-pipelines/extract.spec.ts
+**Total tests:** 4 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | ported | `bitbucket_pipelines.rs` | `empty_returns_empty` | — |
+| returns null for malformed | 12 | pending | — | — | — |
+| extracts dependencies | 22 | pending | — | — | — |
+| extracts dependencies with registryAlias | 82 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bitrise/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bitrise/extract.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null on an empty file | 7 | ported | `bitrise.rs` | `empty_file_returns_empty` | — |
+| returns a valid file | 11 | ported | `bitrise.rs` | `extracts_plain_step` | — |
+| returns a valid file with custom default_step_lib_source | 34 | ported | `bitrise.rs` | `extracts_custom_default_registry` | — |
+| extracts git and path prefixes | 75 | ported | `bitrise.rs` | `extracts_git_step` | — |
+| handles workflows without steps | 114 | ported | `bitrise.rs` | `workflow_without_steps_ignored` | — |
+| extracts Bitrise library reference | 142 | ported | `bitrise.rs` | `custom_steplib_reference` | — |
+
+---
+
+## `lib/modules/manager/gradle-wrapper/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/extract.spec.ts
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for property file without distributionUrl | 24 | ported | `gradle_wrapper.rs` | `no_distribution_url_returns_none` | — |
+| returns null for property file with unsupported distributionUrl format | 28 | ported | `gradle_wrapper.rs` | `unsupported_url_format_returns_none` | — |
+| extracts version for property file with distribution type "bin" in distributionUrl | 33 | ported | `gradle_wrapper.rs` | `extracts_bin_version` | — |
+| extracts version for property file with distribution type "all" in distributionUrl | 47 | ported | `gradle_wrapper.rs` | `extracts_all_version` | — |
+| extracts version for property file with prerelease version in distributionUrl | 61 | ported | `gradle_wrapper.rs` | `prerelease_version_extracted` | — |
+| extracts version for property file with unnecessary whitespace in distributionUrl | 75 | ported | `gradle_wrapper.rs` | `whitespace_around_value_handled` | — |
+| extracts version for property file with custom distribution of type "bin" in distributionUrl | 89 | pending | — | — | — |
+| extracts version for property file with custom distribution of type "all" in distributionUrl | 103 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -369,8 +423,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
 | `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 10 | partial |
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
-| `lib/modules/manager/bitbucket-pipelines/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/bitbucket_pipelines.rs` | 8 | partial |
-| `lib/modules/manager/bitrise/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/bitrise.rs` | 10 | partial |
 | `lib/modules/manager/buildkite/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/buildkite.rs` | 7 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
 | `lib/modules/manager/circleci/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/circleci.rs` | 10 | partial |
@@ -388,7 +440,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
 | `lib/modules/manager/github-actions/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/github_actions.rs` | 28 | partial |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/gitlabci.rs` | 8 | partial |
-| `lib/modules/manager/gradle-wrapper/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | 8 | partial |
 | `lib/modules/manager/gradle/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/gradle.rs` | 20 | partial |
 | `lib/modules/manager/helm-requirements/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/helm.rs` | 10 | partial |
 | `lib/modules/manager/helmfile/extract.spec.ts` | 19 | `crates/renovate-core/src/extractors/helmfile.rs` | 10 | partial |

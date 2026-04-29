@@ -200,6 +200,7 @@ pipelines:
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "returns null for empty" — bitbucket-pipelines/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

@@ -287,6 +287,7 @@ pub fn extract(content: &str) -> Vec<BitriseDep> {
 mod tests {
     use super::*;
 
+    // Ported: "returns a valid file" — bitrise/extract.spec.ts line 11
     #[test]
     fn extracts_plain_step() {
         let content = "workflows:\n  test:\n    steps:\n    - script@1.1.5:\n";
@@ -300,6 +301,7 @@ mod tests {
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "returns a valid file with custom default_step_lib_source" — bitrise/extract.spec.ts line 34
     #[test]
     fn extracts_custom_default_registry() {
         let content = "default_step_lib_source: https://github.com/custom/steplib.git\nworkflows:\n  test:\n    steps:\n    - restore-cache@1.1.2:\n";
@@ -316,6 +318,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts git and path prefixes" — bitrise/extract.spec.ts line 75
     #[test]
     fn extracts_git_step() {
         let content = "workflows:\n  test:\n    steps:\n    - git::https://github.com/bitrise-io/steps-script.git@1.1.3:\n";
@@ -342,6 +345,7 @@ mod tests {
         assert_eq!(d.source, BitriseSource::Local);
     }
 
+    // Ported: "extracts Bitrise library reference" — bitrise/extract.spec.ts line 142
     #[test]
     fn custom_steplib_reference() {
         let content =
@@ -359,6 +363,7 @@ mod tests {
         );
     }
 
+    // Ported: "returns null on an empty file" — bitrise/extract.spec.ts line 7
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
@@ -384,6 +389,7 @@ mod tests {
         assert_eq!(deps[0].current_value.as_deref(), Some("1.0.0"));
     }
 
+    // Ported: "handles workflows without steps" — bitrise/extract.spec.ts line 114
     #[test]
     fn workflow_without_steps_ignored() {
         let content = "workflows:\n  deploy_staging:\n    envs:\n    - SCHEME: Staging\n    after_run:\n    - deploy\n  deploy:\n    steps:\n    - activate-ssh-key@1.0.0: {}\n";

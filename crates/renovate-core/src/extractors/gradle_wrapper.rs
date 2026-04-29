@@ -78,6 +78,7 @@ fn parse_distribution_url(url: &str) -> Option<String> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts version for property file with distribution type \"bin\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 33
     #[test]
     fn extracts_bin_version() {
         let content =
@@ -86,6 +87,7 @@ mod tests {
         assert_eq!(dep.version, "8.4");
     }
 
+    // Ported: "extracts version for property file with distribution type \"all\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 47
     #[test]
     fn extracts_all_version() {
         let content =
@@ -107,6 +109,7 @@ zipStorePath=wrapper/dists
         assert_eq!(dep.version, "8.3");
     }
 
+    // Ported: "returns null for property file without distributionUrl" — gradle-wrapper/extract.spec.ts line 24
     #[test]
     fn no_distribution_url_returns_none() {
         assert!(extract("distributionBase=GRADLE_USER_HOME\n").is_none());
@@ -117,26 +120,26 @@ zipStorePath=wrapper/dists
         assert!(extract("").is_none());
     }
 
+    // Ported: "extracts version for property file with prerelease version in distributionUrl" — gradle-wrapper/extract.spec.ts line 61
     #[test]
     fn prerelease_version_extracted() {
-        // Ported: "extracts version for property file with prerelease version" — gradle-wrapper/extract.spec.ts line 61
         let content = "distributionUrl=https\\://services.gradle.org/distributions/gradle-7.0-milestone-1-bin.zip\n";
         let dep = extract(content).unwrap();
         assert_eq!(dep.version, "7.0-milestone-1");
     }
 
+    // Ported: "extracts version for property file with unnecessary whitespace in distributionUrl" — gradle-wrapper/extract.spec.ts line 75
     #[test]
     fn whitespace_around_value_handled() {
-        // Ported: "extracts version for property file with unnecessary whitespace" — gradle-wrapper/extract.spec.ts line 75
         let content =
             "distributionUrl= https\\://services.gradle.org/distributions/gradle-4.10.3-all.zip \n";
         let dep = extract(content).unwrap();
         assert_eq!(dep.version, "4.10.3");
     }
 
+    // Ported: "returns null for property file with unsupported distributionUrl format" — gradle-wrapper/extract.spec.ts line 28
     #[test]
     fn unsupported_url_format_returns_none() {
-        // Ported: "returns null for property file with unsupported distributionUrl format" — spec line 28
         let content = "distributionUrl=https://example.com/gradle/custom-gradle.zip\n";
         assert!(extract(content).is_none());
     }
