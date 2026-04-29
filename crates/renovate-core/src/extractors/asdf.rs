@@ -390,6 +390,25 @@ unknowntool 9.9.9
     }
 
     #[test]
+    fn only_captures_first_version() {
+        // Ported: "only captures the first version" — asdf/extract.spec.ts line 31
+        // When multiple versions are on one line, only the first is used.
+        let deps = extract("nodejs 16.16.0 16.15.1\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "16.16.0");
+    }
+
+    #[test]
+    fn provides_skip_reason_for_unsupported_tooling() {
+        // Ported: "provides skipReason for lines with unsupported tooling" — asdf/extract.spec.ts line 19
+        let deps = extract("unsupported 1.22.5\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].tool_name, "unsupported");
+        assert_eq!(deps[0].skip_reason, Some(AsdfSkipReason::UnsupportedTool));
+        assert!(deps[0].datasource.is_none());
+    }
+
+    #[test]
     fn renovate_ignore_comment_skips_dep() {
         // Ported: asdf/extract.spec.ts line 1096 — "ignores supported tooling with a renovate:ignore comment"
         let deps = extract("nodejs 16.16.0 # renovate:ignore\npython 3.11.5\n");
