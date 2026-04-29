@@ -118,7 +118,7 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` case-insensitive URL matching (bare string) | `crates/renovate-core/src/string_match.rs` | `exact_match_is_case_insensitive` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` with glob patterns (case-insensitive) | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_glob` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` missing sourceUrl → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_empty_matches_all` | ported |
-| `lib/util/package-rules/index.spec.ts` | — | `matchFileNames: ['yarn.lock']` matches `lockFiles: ['yarn.lock']` | `crates/renovate-core/src/repo_config.rs` | (not implemented — lockFiles not in DepContext) | pending |
+| `lib/util/package-rules/index.spec.ts` | — | `matchFileNames: ['yarn.lock']` matches `lockFiles: ['yarn.lock']` | `crates/renovate-core/src/repo_config.rs` | `match_file_names_matches_lock_files`, `match_file_names_lock_file_pattern_with_glob` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `force.enabled: true` overrides `enabled: false` | — | (not implemented — force field not in PackageRule/RuleEffects) | pending |
 | `lib/util/package-rules/index.spec.ts` | — | `overridePackageName` / `overrideDepName` / `overrideDatasource` | — | (not implemented — override fields not supported) | pending |
 | `lib/util/package-rules/index.spec.ts` | — | Handlebars template in `overrideDepName` (`{{replace}}`) | — | (not implemented — template engine not integrated) | pending |

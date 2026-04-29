@@ -7995,6 +7995,59 @@ mod source_url_tests {
             "rule must fire when file_path matches"
         );
     }
+
+    // ── Ported from Renovate index.spec.ts "matches lock files" ──────────────
+
+    #[test]
+    fn match_file_names_matches_lock_files() {
+        // Ported: "matches lock files" test from index.spec.ts.
+        // Rule matchFileNames: ['yarn.lock'] should fire when lockFiles contains 'yarn.lock'.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchFileNames": ["yarn.lock"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "dep",
+            file_path: Some("examples/foo/package.json"),
+            lock_files: &["yarn.lock"],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "rule must fire when lockFiles contains matched pattern"
+        );
+    }
+
+    #[test]
+    fn match_file_names_lock_file_pattern_with_glob() {
+        // matchFileNames with glob against lockFiles.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchFileNames": ["**/yarn.lock"], "automerge": true}]}"#,
+        );
+        let ctx_lock = DepContext {
+            dep_name: "dep",
+            file_path: Some("package.json"),
+            lock_files: &["packages/web/yarn.lock"],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx_lock).automerge,
+            Some(true),
+            "rule must fire when lockFiles glob matches"
+        );
+        // No lock files → falls back to packageFile matching only.
+        let ctx_no_lock = DepContext {
+            dep_name: "dep",
+            file_path: Some("package.json"),
+            lock_files: &[],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx_no_lock).automerge,
+            None,
+            "rule must not fire when neither packageFile nor lockFiles match"
+        );
+    }
 }
 
 #[cfg(test)]

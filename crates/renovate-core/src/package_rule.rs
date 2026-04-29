@@ -529,9 +529,19 @@ impl PackageRule {
             return false;
         }
 
-        let file = ctx.file_path.unwrap_or("");
-        if !self.file_name_matches(file) {
-            return false;
+        // matchFileNames checks packageFile first, then falls back to lockFiles.
+        // Mirrors Renovate's FileNamesMatcher which calls anyMatchRegexOrGlobList(lockFiles, patterns).
+        if !self.match_file_names.is_empty() {
+            let file = ctx.file_path.unwrap_or("");
+            let pkg_matches = !file.is_empty() && self.file_name_matches(file);
+            if !pkg_matches {
+                use crate::string_match::any_match_regex_or_glob_list;
+                if ctx.lock_files.is_empty()
+                    || !any_match_regex_or_glob_list(ctx.lock_files, &self.match_file_names)
+                {
+                    return false;
+                }
+            }
         }
 
         match ctx.source_url {
@@ -671,6 +681,10 @@ pub struct DepContext<'a> {
     pub dep_type: Option<&'a str>,
     /// Relative manifest file path.
     pub file_path: Option<&'a str>,
+    /// Lock file paths associated with this dep (e.g. `["yarn.lock", "package-lock.json"]`).
+    /// Mirrors Renovate's `lockFiles` field; checked by `matchFileNames` when
+    /// `packageFile` (our `file_path`) doesn't match.
+    pub lock_files: &'a [&'a str],
     /// Source repository URL reported by the datasource.
     pub source_url: Option<&'a str>,
     /// Registry URLs used by the dep (from manifest or datasource).
