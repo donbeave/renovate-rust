@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0281  | 2026-04-29 | `ignoreUnstable` pipeline enforcement: when config is `true` and current version is stable semver, skip proposals where latest is a semver pre-release; 3 pipeline tests | Complete | See below. |
 | 0280  | 2026-04-29 | `:timezone(zone)` parameterized preset → sets `timezone` field; `:disableRenovate` / `:enableRenovate` presets → override `enabled` field; 4 tests | Complete | See below. |
 | 0279  | 2026-04-29 | `:widenPeerDependencies` preset (widen rangeStrategy for peerDependencies); `ignoreUnstable` field + `:ignoreUnstable` preset; `updateNotScheduled` field (default: true) + `:noUnscheduledUpdates` preset; 6 tests | Complete | See below. |
 | 0278  | 2026-04-29 | `separateMultipleMinor` config field + `:separateMultipleMinorReleases` preset; `branch_topic()` extended with `is_minor`/`separate_multiple_minor` params so minor updates get `dep-{major}.{minor}.x` topics; `ScalarOverrides` type extended to 6-tuple; 3 tests | Complete | See below. |

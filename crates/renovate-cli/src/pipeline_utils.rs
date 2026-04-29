@@ -48,6 +48,23 @@ pub(crate) fn apply_update_blocking_to_report(
                     ..Default::default()
                 };
 
+                // ignoreUnstable: if current is stable and proposed latest is a
+                // pre-release semver, skip the update.
+                if repo_cfg.ignore_unstable {
+                    use renovate_core::versioning::semver_generic::parse_padded;
+                    let current_stable = parse_padded(current)
+                        .map(|v| v.pre.is_empty())
+                        .unwrap_or(false);
+                    let latest_prerelease = parse_padded(latest)
+                        .map(|v| !v.pre.is_empty())
+                        .unwrap_or(false);
+                    if current_stable && latest_prerelease {
+                        dep.status = output::DepStatus::Skipped {
+                            reason: "ignoreUnstable: proposed version is pre-release".into(),
+                        };
+                        continue;
+                    }
+                }
                 // Check allowedVersions restriction (full context).
                 if repo_cfg.is_version_restricted_ctx(&ctx, latest) {
                     dep.status = output::DepStatus::Skipped {
@@ -503,5 +520,70 @@ mod tests {
             &report.files[0].deps[0].status,
             DepStatus::UpdateAvailable { .. }
         ));
+    }
+
+    #[test]
+    fn ignore_unstable_skips_prerelease_when_current_stable() {
+        let cfg = RepoConfig::parse(r#"{"ignoreUnstable": true}"#);
+        let mut report = make_report(vec![
+            (
+                "pkg",
+                DepStatus::UpdateAvailable {
+                    current: "1.0.0".into(),
+                    latest: "2.0.0-beta.1".into(),
+                },
+            ),
+            (
+                "pkg2",
+                DepStatus::UpdateAvailable {
+                    current: "1.0.0".into(),
+                    latest: "2.0.0".into(),
+                },
+            ),
+        ]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        let deps = &report.files[0].deps;
+        assert!(
+            matches!(&deps[0].status, DepStatus::Skipped { reason } if reason.contains("ignoreUnstable")),
+            "should skip pre-release when current is stable"
+        );
+        assert!(
+            matches!(&deps[1].status, DepStatus::UpdateAvailable { .. }),
+            "stable→stable update should pass through"
+        );
+    }
+
+    #[test]
+    fn ignore_unstable_allows_prerelease_when_current_is_prerelease() {
+        let cfg = RepoConfig::parse(r#"{"ignoreUnstable": true}"#);
+        let mut report = make_report(vec![(
+            "pkg",
+            DepStatus::UpdateAvailable {
+                current: "1.0.0-alpha.1".into(),
+                latest: "1.0.0-beta.1".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert!(
+            matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
+            "pre-release→pre-release update should not be blocked when current is already unstable"
+        );
+    }
+
+    #[test]
+    fn ignore_unstable_false_allows_prerelease() {
+        let cfg = RepoConfig::parse(r#"{"ignoreUnstable": false}"#);
+        let mut report = make_report(vec![(
+            "pkg",
+            DepStatus::UpdateAvailable {
+                current: "1.0.0".into(),
+                latest: "2.0.0-beta.1".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert!(
+            matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
+            "with ignoreUnstable=false, pre-release proposals should not be blocked"
+        );
     }
 }
