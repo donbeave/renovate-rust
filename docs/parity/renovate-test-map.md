@@ -89,6 +89,8 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` absent → matches all | `crates/renovate-core/src/repo_config.rs` | `match_current_version_absent_matches_all` | ported |
 | `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` negated regex `!/^0/` | `crates/renovate-core/src/repo_config.rs` | `match_current_version_negated_regex` | ported |
 | `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` pep440 / ruby / same-major versioning | — | (not fully ported — versioning schemes not in scope) | pending |
+| `lib/util/package-rules/current-version.spec.ts` | — | regex matched against `lockedVersion` when set (vs `currentValue`) | — | (not implemented — `lockedVersion` not in DepContext) | pending |
+| `lib/util/package-rules/current-version.spec.ts` | — | regex returns false when no parseable version (no `lockedVersion`) | — | (partial — our impl uses `currentValue` directly which may behave differently) | partial |
 | `lib/util/package-rules/files.spec.ts` | — | `matchFileNames` undefined packageFile → false | `crates/renovate-core/src/repo_config.rs` | `match_file_names_blocks_matching_path` | ported |
 | `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` negation | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation`, `match_package_names_glob_negation` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDatasources` list | `crates/renovate-core/src/repo_config.rs` | `match_datasources_method_matches_listed_datasource`, `match_datasources_empty_matches_all` | ported |
@@ -122,7 +124,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | — | Handlebars template in `overrideDepName` (`{{replace}}`) | — | (not implemented — template engine not integrated) | pending |
 | `lib/util/package-rules/index.spec.ts` | — | `matchBaseBranches` filters by base branch | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_exact_hit` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchCategories` filters by category | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_exact_hit` | ported |
-| `lib/util/package-rules/index.spec.ts` | — | `matchCategories` undefined categories → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchCategories` undefined categories → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all`, `needs_categories_to_match_rule_does_not_fire_without_it` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchBaseBranches` absent baseBranch → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `needs_base_branch_to_match_rule_does_not_fire_without_it` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchManagers` absent manager → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `needs_manager_to_match_rule_does_not_fire_without_it` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | rule with no matchers → fires for all deps | `crates/renovate-core/src/repo_config.rs` | `package_rules_enabled_true_does_not_ignore` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | only-negative matchPackageNames → others pass | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchCurrentVersion` regex `/^4/` match | `crates/renovate-core/src/repo_config.rs` | `match_current_version_regex_against_current_value` | ported |

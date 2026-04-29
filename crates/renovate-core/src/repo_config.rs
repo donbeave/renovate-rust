@@ -7999,6 +7999,65 @@ mod categories_base_branch_tests {
         assert!(rule.base_branch_matches("develop"));
         assert!(!rule.base_branch_matches("feature/foo"));
     }
+
+    // ── Ported from Renovate index.spec.ts ───────────────────────────────────
+
+    #[test]
+    fn needs_base_branch_to_match_rule_does_not_fire_without_it() {
+        // Ported: "needs baseBranch to match" — when baseBranch is absent from context
+        // and matchBaseBranches is set, the rule must not fire.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["abc"], "matchBaseBranches": ["dev"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "abc",
+            base_branch: None,
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when base_branch is None and matchBaseBranches is set"
+        );
+    }
+
+    #[test]
+    fn needs_manager_to_match_rule_does_not_fire_without_it() {
+        // Ported: "needs manager to match" — when manager is absent from context
+        // and matchManagers is set, the rule must not fire.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["abc"], "matchManagers": ["npm"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "abc",
+            manager: None,
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when manager is None and matchManagers is set"
+        );
+    }
+
+    #[test]
+    fn needs_categories_to_match_rule_does_not_fire_without_it() {
+        // Ported: "filters categories with undefined category" — when categories is empty
+        // but matchCategories is set, rule must not fire.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCategories": ["docker"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "my-dep",
+            ..Default::default()
+        };
+        // Empty categories (default) — rule must NOT fire
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when categories is empty and matchCategories is set"
+        );
+    }
 }
 
 #[cfg(test)]
