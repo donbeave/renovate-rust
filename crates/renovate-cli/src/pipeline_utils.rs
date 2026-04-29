@@ -273,7 +273,7 @@ pub(crate) async fn docker_hub_reports(
                 current_version_timestamp: None,
 
                 dep_type: None,
-                  package_name: None,
+                package_name: None,
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -316,7 +316,7 @@ pub(crate) async fn docker_hub_reports(
                 current_version_timestamp: None,
 
                 dep_type: None,
-                  package_name: None,
+                package_name: None,
                 name: dep_name,
                 status,
             });

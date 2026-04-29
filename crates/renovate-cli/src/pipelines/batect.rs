@@ -92,7 +92,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             current_version_timestamp: None,
 
                             dep_type: None,
-                             package_name: None,
+                            package_name: None,
                             name: renovate_core::extractors::batect_wrapper::BATECT_REPO.to_owned(),
                             status,
                         }],
@@ -163,7 +163,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         current_version_timestamp: None,
 
                         dep_type: None,
-                         package_name: None,
+                        package_name: None,
                         name: "Unity Editor".to_owned(),
                         status,
                     }],

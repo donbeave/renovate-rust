@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0238  | 2026-04-29 | Indentation cleanup: fix misaligned `package_name: None` fields across 33 pipeline files | Complete | See below. |
 | 0237  | 2026-04-29 | `release_timestamp` for pep621 + PEP 723 inline scripts; indentation cleanup for `package_name` fields | Complete | See below. |
 | 0236  | 2026-04-29 | `is_version_ignored_ctx` with full `DepContext`; `apply_version_ignore_to_report` takes `repo_slug` for `matchDepTypes`/`matchRepositories` + `ignoreVersions` | Complete | See below. |
 | 0235  | 2026-04-29 | `current_version_timestamp` for Poetry, setup.cfg, Pipfile builders — `matchCurrentAge` + `minimumReleaseAge` now work for all Python managers | Complete | See below. |

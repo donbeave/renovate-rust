@@ -598,7 +598,7 @@ mod tests {
                             current_version_timestamp: None,
 
                             dep_type: None,
-                               package_name: None,
+                            package_name: None,
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -619,7 +619,7 @@ mod tests {
                             current_version_timestamp: None,
 
                             dep_type: None,
-                               package_name: None,
+                            package_name: None,
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
@@ -639,7 +639,7 @@ mod tests {
                             current_version_timestamp: None,
 
                             dep_type: None,
-                               package_name: None,
+                            package_name: None,
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -664,7 +664,7 @@ mod tests {
                         current_version_timestamp: None,
 
                         dep_type: None,
-                           package_name: None,
+                        package_name: None,
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -737,7 +737,7 @@ mod tests {
                     current_version_timestamp: None,
 
                     dep_type: None,
-                       package_name: None,
+                    package_name: None,
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -773,7 +773,7 @@ mod tests {
             current_version_timestamp: None,
 
             dep_type: None,
-               package_name: None,
+            package_name: None,
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -803,7 +803,7 @@ mod tests {
             current_version_timestamp: None,
 
             dep_type: None,
-               package_name: None,
+            package_name: None,
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -831,7 +831,7 @@ mod tests {
             current_version_timestamp: None,
 
             dep_type: None,
-               package_name: None,
+            package_name: None,
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -858,7 +858,7 @@ mod tests {
             current_version_timestamp: None,
 
             dep_type: None,
-               package_name: None,
+            package_name: None,
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -914,7 +914,7 @@ mod tests {
                 current_version_timestamp: None,
 
                 dep_type: None,
-                   package_name: None,
+                package_name: None,
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -935,7 +935,7 @@ mod tests {
                 current_version_timestamp: None,
 
                 dep_type: None,
-                   package_name: None,
+                package_name: None,
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
@@ -953,7 +953,7 @@ mod tests {
                 current_version_timestamp: None,
 
                 dep_type: None,
-                   package_name: None,
+                package_name: None,
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
@@ -973,7 +973,7 @@ mod tests {
                 current_version_timestamp: None,
 
                 dep_type: None,
-                   package_name: None,
+                package_name: None,
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),
@@ -1045,7 +1045,7 @@ mod tests {
             current_version_timestamp: None,
 
             dep_type: None,
-               package_name: None,
+            package_name: None,
             status: DepStatus::UpdateAvailable {
                 current: "1.0.0".into(),
                 latest: "2.0.0".into(),
@@ -1069,7 +1069,7 @@ mod tests {
             current_version_timestamp: None,
 
             dep_type: None,
-               package_name: None,
+            package_name: None,
             status: DepStatus::UpToDate { latest: None },
         }
     }
