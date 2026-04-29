@@ -137,6 +137,13 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `assignAutomerge`.
     pub assign_automerge: bool,
 
+    /// Use the platform's native automerge feature instead of Renovate's own.
+    /// Default: `true`.
+    /// Migrated from deprecated `azureAutoComplete` and `gitLabAutomerge` fields.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `platformAutomerge`.
+    pub platform_automerge: bool,
+
     // ── Branch behavior ──────────────���───────────────────────────────────────
     /// Branch name prefix for update branches.  Default: `"renovate/"`.
     ///
@@ -3724,6 +3731,15 @@ impl RepoConfig {
             draft_pr: bool,
             #[serde(rename = "assignAutomerge", default)]
             assign_automerge: bool,
+            /// Use platform-native automerge (e.g. GitHub's merge queue, Azure's auto-complete).
+            #[serde(rename = "platformAutomerge")]
+            platform_automerge: Option<bool>,
+            /// Deprecated: azureAutoComplete → platformAutomerge.
+            #[serde(rename = "azureAutoComplete")]
+            azure_auto_complete: Option<bool>,
+            /// Deprecated: gitLabAutomerge → platformAutomerge.
+            #[serde(rename = "gitLabAutomerge")]
+            git_lab_automerge: Option<bool>,
             #[serde(rename = "branchPrefix", default = "default_branch_prefix")]
             branch_prefix: String,
             #[serde(rename = "additionalBranchPrefix", default)]
@@ -4444,6 +4460,11 @@ impl RepoConfig {
             },
             draft_pr: raw.draft_pr,
             assign_automerge: raw.assign_automerge,
+            platform_automerge: raw
+                .platform_automerge
+                .or(raw.azure_auto_complete)
+                .or(raw.git_lab_automerge)
+                .unwrap_or(true),
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: {
@@ -5105,6 +5126,7 @@ impl Default for RepoConfig {
             reviewers: Vec::new(),
             draft_pr: false,
             assign_automerge: false,
+            platform_automerge: true,
             branch_prefix: "renovate/".to_owned(),
             additional_branch_prefix: String::new(),
             base_branches: Vec::new(),
@@ -7483,6 +7505,43 @@ mod tests {
     fn assign_automerge_config() {
         let c = RepoConfig::parse(r#"{"assignAutomerge": true}"#);
         assert!(c.assign_automerge);
+    }
+
+    #[test]
+    fn platform_automerge_default_true() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(c.platform_automerge, "platformAutomerge defaults to true");
+    }
+
+    #[test]
+    fn platform_automerge_explicit() {
+        let c = RepoConfig::parse(r#"{"platformAutomerge": false}"#);
+        assert!(!c.platform_automerge);
+    }
+
+    #[test]
+    fn azure_auto_complete_migrated_to_platform_automerge() {
+        // Ported: "migrates azureAutoComplete" — migration.spec.ts line 762
+        let c = RepoConfig::parse(r#"{"azureAutoComplete": true}"#);
+        assert!(c.platform_automerge);
+        let c2 = RepoConfig::parse(r#"{"azureAutoComplete": false}"#);
+        assert!(!c2.platform_automerge);
+    }
+
+    #[test]
+    fn git_lab_automerge_migrated_to_platform_automerge() {
+        // Ported: "migrates gitLabAutomerge" — migration.spec.ts line 791
+        let c = RepoConfig::parse(r#"{"gitLabAutomerge": true}"#);
+        assert!(c.platform_automerge);
+        let c2 = RepoConfig::parse(r#"{"gitLabAutomerge": false}"#);
+        assert!(!c2.platform_automerge);
+    }
+
+    #[test]
+    fn platform_automerge_takes_precedence_over_deprecated_aliases() {
+        // Explicit platformAutomerge overrides azureAutoComplete.
+        let c = RepoConfig::parse(r#"{"platformAutomerge": false, "azureAutoComplete": true}"#);
+        assert!(!c.platform_automerge, "explicit platformAutomerge wins");
     }
 
     #[test]
