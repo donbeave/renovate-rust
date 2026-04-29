@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0302  | 2026-04-29 | Remaining Spring presets (amqp/android/batch/hateoas/integration/kafka/ldap/mobile/osgi/restdocs/roo/scala/session/shell/social/statemachine/webflow/ws), `group:illuminate`, `group:rubyOmniauth`, `group:jestPlusTSJest`, `group:jestPlusTypes`, `group:recommended` compound expansion; 3 tests | Complete | See below. |
 | 0301  | 2026-04-29 | `group:react`, `group:puppeteer`, `group:remark`, `group:socketio`, `group:micrometer`, `group:resilience4j`, `group:hibernateValidator`, `group:hibernateOgm`, `group:springBoot` (2 rules), `group:springCore/Cloud/Data/Security`; 4 tests | Complete | See below. |
 | 0300  | 2026-04-29 | `group:jsTestNonMajor`, `group:jsUnitTest`, `group:jsUnitTestNonMajor`, `group:gradle`, `group:hibernateCore`, `group:hibernateCommons`, `group:definitelyTyped`; refactor to shared `JS_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |
 | 0299  | 2026-04-29 | `group:allDigest`, `group:nodeJs`, `group:jsTest` presets; `group:nodeJs` uses regex+negation match_package_names with docker+node-version datasources; `group:jsTest` inlines jsUnitTest package list; 3 tests | Complete | See below. |
@@ -5662,6 +5663,26 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
   - `group:springBoot`: **two rules** — one with `matchDepNames` (BOM parent artifact), one with `matchPackageNames: ["org.springframework.boot:**"]`
   - `group:springCore/Cloud/Data/Security`: each with their `org.springframework.*` maven coordinate glob
 - 4 tests: react types (not react itself), springBoot injects 2 rules, springCore matches spring-core coords, definitelyTyped check
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0302 - Complete Spring preset family + group:recommended compound expansion
+
+### Renovate reference
+- `lib/config/presets/internal/group.preset.ts`: All remaining Spring presets, illuminate, rubyOmniauth, jestPlusTSJest, jestPlusTypes, recommended (compound)
+
+### Implementation
+- Added 19 remaining Spring group presets (all `org.springframework.X:**` pattern): springAmqp, springAndroid, springBatch, springHateoas, springIntegration, springKafka, springLdap, springMobile, springOsgi, springRestDocs, springRoo, springScala, springSession, springShell, springSocial, springStatemachine, springWebflow, springWs
+- Added `group:illuminate`: `matchPackageNames: ["illuminate/**"]` (PHP Laravel packages)
+- Added `group:rubyOmniauth`: rubygems datasource + `omniauth**` pattern
+- Added `group:jestPlusTSJest`: ts-jest source URL + major-only constraint
+- Added `group:jestPlusTypes`: `@types/jest` + major/minor/patch (non-digest/pin) constraint
+- Added `group:recommended`: compound preset that expands all 39 sub-presets by recursively calling `resolve_extends_group_presets` for each member
+- 3 tests: group:recommended injects ≥30 rules with specific group names; jestPlusTSJest is major-only
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

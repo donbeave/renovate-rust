@@ -1333,6 +1333,267 @@ fn resolve_extends_group_presets(
                     ..Default::default()
                 });
             }
+            // Remaining Spring presets (all follow the org.springframework.X:** pattern).
+            "group:springAmqp" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring amqp".to_owned()),
+                    group_slug: Some("spring-amqp".to_owned()),
+                    match_package_names: vec!["org.springframework.amqp:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springAndroid" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring android".to_owned()),
+                    group_slug: Some("spring-android".to_owned()),
+                    match_package_names: vec!["org.springframework.android:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springBatch" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring batch".to_owned()),
+                    group_slug: Some("spring-batch".to_owned()),
+                    match_package_names: vec!["org.springframework.batch:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springHateoas" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring hateoas".to_owned()),
+                    group_slug: Some("spring-hateoas".to_owned()),
+                    match_package_names: vec!["org.springframework.hateoas:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springIntegration" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring integration".to_owned()),
+                    group_slug: Some("spring-integration".to_owned()),
+                    match_package_names: vec!["org.springframework.integration:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springKafka" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring kafka".to_owned()),
+                    group_slug: Some("spring-kafka".to_owned()),
+                    match_package_names: vec!["org.springframework.kafka:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springLdap" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring ldap".to_owned()),
+                    group_slug: Some("spring-ldap".to_owned()),
+                    match_package_names: vec!["org.springframework.ldap:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springMobile" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring mobile".to_owned()),
+                    group_slug: Some("spring-mobile".to_owned()),
+                    match_package_names: vec!["org.springframework.mobile:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springOsgi" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring osgi".to_owned()),
+                    group_slug: Some("spring-osgi".to_owned()),
+                    match_package_names: vec!["org.springframework.osgi:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springRestDocs" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring restdocs".to_owned()),
+                    group_slug: Some("spring-restdocs".to_owned()),
+                    match_package_names: vec!["org.springframework.restdocs:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springRoo" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring roo".to_owned()),
+                    group_slug: Some("spring-roo".to_owned()),
+                    match_package_names: vec!["org.springframework.roo:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springScala" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring scala".to_owned()),
+                    group_slug: Some("spring-scala".to_owned()),
+                    match_package_names: vec!["org.springframework.scala:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springSession" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring session".to_owned()),
+                    group_slug: Some("spring-session".to_owned()),
+                    match_package_names: vec!["org.springframework.session:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springShell" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring shell".to_owned()),
+                    group_slug: Some("spring-shell".to_owned()),
+                    match_package_names: vec!["org.springframework.shell:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springSocial" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring social".to_owned()),
+                    group_slug: Some("spring-social".to_owned()),
+                    match_package_names: vec!["org.springframework.social:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springStatemachine" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring statemachine".to_owned()),
+                    group_slug: Some("spring-statemachine".to_owned()),
+                    match_package_names: vec!["org.springframework.statemachine:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springWebflow" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring webflow".to_owned()),
+                    group_slug: Some("spring-webflow".to_owned()),
+                    match_package_names: vec!["org.springframework.webflow:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            "group:springWs" => {
+                rules.push(PackageRule {
+                    group_name: Some("spring ws".to_owned()),
+                    group_slug: Some("spring-ws".to_owned()),
+                    match_package_names: vec!["org.springframework.ws:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:illuminate — group PHP Illuminate packages.
+            "group:illuminate" => {
+                rules.push(PackageRule {
+                    group_name: Some("illuminate packages".to_owned()),
+                    group_slug: Some("illuminate".to_owned()),
+                    match_package_names: vec!["illuminate/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:rubyOmniauth — group OmniAuth packages.
+            "group:rubyOmniauth" => {
+                rules.push(PackageRule {
+                    group_name: Some("omniauth packages".to_owned()),
+                    group_slug: Some("ruby-omniauth".to_owned()),
+                    match_datasources: vec!["rubygems".to_owned()],
+                    match_package_names: vec!["omniauth**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:jestPlusTSJest — add ts-jest major to jest monorepo group.
+            "group:jestPlusTSJest" => {
+                rules.push(PackageRule {
+                    group_name: Some("jest monorepo".to_owned()),
+                    group_slug: Some("jest".to_owned()),
+                    match_source_urls: vec!["https://github.com/kulshekhar/ts-jest".to_owned()],
+                    match_update_types: vec![UpdateType::Major],
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:jestPlusTypes — add @types/jest non-pin updates to jest monorepo.
+            "group:jestPlusTypes" => {
+                rules.push(PackageRule {
+                    group_name: Some("jest monorepo".to_owned()),
+                    group_slug: Some("jest".to_owned()),
+                    match_package_names: vec!["@types/jest".to_owned()],
+                    has_name_constraint: true,
+                    match_update_types: vec![
+                        UpdateType::Major,
+                        UpdateType::Minor,
+                        UpdateType::Patch,
+                    ],
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:recommended — expand all recommended grouping presets.
+            // This mirrors Renovate's group:recommended which extends many sub-presets.
+            "group:recommended" => {
+                let recommended_presets: &[&str] = &[
+                    "group:nodeJs",
+                    "group:gradle",
+                    "group:hibernateCore",
+                    "group:hibernateValidator",
+                    "group:hibernateOgm",
+                    "group:hibernateCommons",
+                    "group:illuminate",
+                    "group:jestPlusTSJest",
+                    "group:jestPlusTypes",
+                    "group:micrometer",
+                    "group:puppeteer",
+                    "group:react",
+                    "group:remark",
+                    "group:resilience4j",
+                    "group:rubyOmniauth",
+                    "group:socketio",
+                    "group:springAmqp",
+                    "group:springAndroid",
+                    "group:springBatch",
+                    "group:springBoot",
+                    "group:springCloud",
+                    "group:springCore",
+                    "group:springData",
+                    "group:springHateoas",
+                    "group:springIntegration",
+                    "group:springKafka",
+                    "group:springLdap",
+                    "group:springMobile",
+                    "group:springOsgi",
+                    "group:springRestDocs",
+                    "group:springRoo",
+                    "group:springScala",
+                    "group:springSecurity",
+                    "group:springSession",
+                    "group:springShell",
+                    "group:springSocial",
+                    "group:springStatemachine",
+                    "group:springWebflow",
+                    "group:springWs",
+                ];
+                for sub_preset in recommended_presets {
+                    let sub_extends = vec![sub_preset.to_string()];
+                    let (sub_rules, _) = resolve_extends_group_presets(&sub_extends);
+                    rules.extend(sub_rules);
+                }
+            }
             _ => {}
         }
     }
@@ -6129,6 +6390,42 @@ mod rule_effects_tests {
         assert_eq!(rule.group_name.as_deref(), Some("spring core"));
         assert!(rule.name_matches("org.springframework:spring-core"));
         assert!(!rule.name_matches("org.springframework.boot:spring-boot"));
+    }
+
+    #[test]
+    fn group_recommended_expands_many_presets() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:recommended"]}"#);
+        // group:recommended should expand to many sub-presets (at least 30 rules).
+        assert!(
+            c.package_rules.len() >= 30,
+            "group:recommended should inject many rules, got {}",
+            c.package_rules.len()
+        );
+        // Verify some specific group names are present.
+        let group_names: Vec<&str> = c
+            .package_rules
+            .iter()
+            .filter_map(|r| r.group_name.as_deref())
+            .collect();
+        assert!(group_names.contains(&"Node.js"), "nodeJs rule missing");
+        assert!(
+            group_names.contains(&"spring boot"),
+            "springBoot rule missing"
+        );
+        assert!(
+            group_names.contains(&"spring security"),
+            "springSecurity missing"
+        );
+    }
+
+    #[test]
+    fn group_jest_plus_ts_jest_matches_major_only() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["group:jestPlusTSJest"]}"#);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("jest monorepo"));
+        assert!(rule.update_type_matches(UpdateType::Major));
+        assert!(!rule.update_type_matches(UpdateType::Minor));
     }
 
     #[test]
