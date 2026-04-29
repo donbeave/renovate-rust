@@ -668,7 +668,10 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
             // config:recommended expands to its constituent supported presets.
             "config:recommended" | "config:base" => {
                 if seen.insert("config:recommended") {
-                    // Key behavioral presets from config:recommended that we support:
+                    // Key behavioral presets from config:recommended that we support
+                    // (mergeConfidence:*, helpers:goXPackages* use prBodyDefinitions
+                    // and are out of scope for scanning).
+                    result.push(":dependencyDashboard".to_owned());
                     result.push(":semanticPrefixFixDepsChoreOthers".to_owned());
                     result.push(":ignoreModulesAndTests".to_owned());
                     result.push("group:monorepos".to_owned());
@@ -686,8 +689,10 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                     result.push("config:recommended".to_owned());
                     result.push("docker:pinDigests".to_owned());
                     result.push("helpers:pinGitHubActionDigests".to_owned());
+                    result.push(":configMigration".to_owned());
                     result.push(":pinDevDependencies".to_owned());
                     result.push("security:minimumReleaseAgeNpm".to_owned());
+                    result.push(":maintainLockFilesWeekly".to_owned());
                     // Keep for downstream handlers.
                     result.push("config:best-practices".to_owned());
                 }
@@ -1492,6 +1497,19 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                 rules.push(PackageRule {
                     match_dep_types: vec!["action".to_owned()],
                     pin_digests: Some(true),
+                    ..Default::default()
+                });
+            }
+            // helpers:pinGitHubActionDigestsToSemver — pin Actions digests with SemVer
+            // extraction. Combines pinGitHubActionDigests + versioning + extractVersion.
+            // Renovate reference: lib/config/presets/internal/helpers.preset.ts
+            "helpers:pinGitHubActionDigestsToSemver" => {
+                rules.push(PackageRule {
+                    match_dep_types: vec!["action".to_owned()],
+                    pin_digests: Some(true),
+                    versioning: Some(
+                        r"regex:^v?(?<major>\d+)(\.(?<minor>\d+)\.(?<patch>\d+))?$".to_owned(),
+                    ),
                     ..Default::default()
                 });
             }
@@ -6524,6 +6542,45 @@ mod tests {
         assert!(c.ignore_paths.contains(&"**/vendor/**".to_owned()));
         assert!(c.ignore_paths.contains(&"**/test/**".to_owned()));
         assert!(c.ignore_paths.contains(&"**/__tests__/**".to_owned()));
+    }
+
+    #[test]
+    fn config_recommended_enables_dependency_dashboard() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
+        assert!(
+            c.dependency_dashboard,
+            "config:recommended must enable dependency dashboard (via :dependencyDashboard)"
+        );
+    }
+
+    #[test]
+    fn config_best_practices_includes_config_migration() {
+        let c = RepoConfig::parse(r#"{"extends": ["config:best-practices"]}"#);
+        assert!(
+            c.config_migration,
+            "config:best-practices must include :configMigration"
+        );
+    }
+
+    #[test]
+    fn helpers_pin_github_action_digests_to_semver_injects_rule() {
+        let c =
+            RepoConfig::parse(r#"{"extends": ["helpers:pinGitHubActionDigestsToSemver"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| {
+                r.match_dep_types.contains(&"action".to_owned())
+                    && r.pin_digests == Some(true)
+                    && r.versioning.is_some()
+            })
+            .expect(
+                "helpers:pinGitHubActionDigestsToSemver must inject an action rule with versioning",
+            );
+        assert!(
+            rule.versioning.as_deref().unwrap().starts_with("regex:"),
+            "versioning must be a regex: scheme"
+        );
     }
 
     #[test]
