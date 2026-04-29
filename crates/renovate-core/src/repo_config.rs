@@ -8175,6 +8175,51 @@ mod source_url_tests {
         assert!(!rule.source_url_matches("https://github.com/other/repo"));
     }
 
+    // ── Ported from Renovate index.spec.ts matchSourceUrls tests ─────────────
+
+    #[test]
+    fn match_source_urls_with_double_star_glob() {
+        // Ported: "matches matchSourceUrls with glob" from index.spec.ts
+        // 'https://github.com/renovatebot/**' matches sub-repos.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/foo/bar**", "https://github.com/renovatebot/**"], "automerge": true}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.source_url_matches("https://github.com/renovatebot/presets"));
+        // Doesn't match different org.
+        assert!(!rule.source_url_matches("https://github.com/vuejs/vue"));
+    }
+
+    #[test]
+    fn match_source_urls_case_insensitive() {
+        // Ported: "matches matchSourceUrls with patterns (case-insensitive)" from index.spec.ts
+        // Glob matching is case-insensitive (Renovate: minimatch nocase:true).
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/Renovatebot/**"], "automerge": true}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.source_url_matches("https://github.com/renovatebot/Presets"));
+    }
+
+    #[test]
+    fn match_source_urls_missing_returns_false() {
+        // Ported: "handles matchSourceUrls when missing sourceUrl" — when sourceUrl is absent,
+        // rule with matchSourceUrls set must NOT fire.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/**"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "dep",
+            source_url: None,
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when sourceUrl is absent"
+        );
+    }
+
     #[test]
     fn match_source_urls_regex() {
         let c = RepoConfig::parse(
