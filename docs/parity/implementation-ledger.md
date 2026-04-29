@@ -21,7 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
-| 0296  | 2026-04-29 | `docker:disableMajor`, `docker:enableMajor`, `docker:disable` presets: inject matchDatasources+matchUpdateTypes packageRules; last-rule-wins composes them correctly; 5 tests | Complete | See below. |
+| 0297  | 2026-04-29 | Fix `docker:disable`: disables `dockerfile`/`docker-compose`/`circleci` managers (not packageRules); add `disabledManagers` JSON config field (denylist overrides allowlist); 4 tests | Complete | See below. |
+| 0296  | 2026-04-29 | `docker:disableMajor`, `docker:enableMajor`, `docker:disable` presets: matchDatasources+matchUpdateTypes packageRules for disableMajor/enableMajor; 5 tests | Complete | See below. |
 | 0295  | 2026-04-29 | `:enablePreCommit` preset adds `"pre-commit"` to `enabled_managers` at parse time; 2 tests confirming pre-commit is gated by default and enabled when preset is active | Complete | See below. |
 | 0294  | 2026-04-29 | Bug fix: disabled-by-default managers (pre-commit, nix, html, travis, etc.) now correctly excluded even when `enabledManagers` is empty; always apply `is_manager_enabled()` filter | Complete | See below. |
 | 0293  | 2026-04-29 | `resolve_extends_parameterized_rules()`: `:doNotPinPackage(name)`, `:semanticCommitTypeAll(type)`, `:pathSemanticCommitType(path, type)` inject packageRules from preset arguments; 2 tests | Complete | See below. |
@@ -5539,6 +5540,31 @@ Previous implementation silently returned `false` (= not restricted) for
   - `docker:disable`: injects `PackageRule` with `match_datasources: ["docker"]`, `enabled: Some(false)` — no `matchUpdateTypes`, blocks all update types
 - Last-rule-wins semantics (already implemented in `is_update_blocked_ctx`) ensure `docker:enableMajor` after `docker:disableMajor` correctly re-enables major updates
 - 5 tests: disableMajor blocks docker major, disableMajor allows docker minor, disableMajor doesn't affect npm, enableMajor counteracts disableMajor, docker:disable blocks all update types, docker:disable doesn't block npm
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0297 - Fix `docker:disable` + `disabledManagers` user-facing config
+
+### Renovate reference
+- `lib/config/presets/internal/docker.preset.ts` — `disable` preset sets per-manager `enabled: false` on `circleci`, `docker-compose`, `dockerfile`; NOT a `matchDatasources` packageRule
+- `lib/config/options/index.ts` — conceptual manager-level config enables per-manager overrides
+
+### What was wrong
+Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` packageRule, which is incorrect. The real preset disables specific docker-related managers at the manager level.
+
+### Implementation
+- Added `disabled_managers: Vec<String>` field to `RepoConfig` struct — a manager denylist
+- Added `#[serde(rename = "disabledManagers", default)]` to `Raw` inner struct — exposes `disabledManagers` as a user-facing JSON config field
+- Added `disabled_managers: Vec::new()` to `Default` impl
+- In `parse()`: `disabled_managers` initializes from `raw.disabled_managers`, then presets append to it
+- Updated `docker:disable` handler in manager-resolution loop (not in `resolve_extends_common_rules`): pushes `"circleci"`, `"docker-compose"`, `"dockerfile"` to `disabled_managers`
+- Removed incorrect `docker:disable` packageRule arm from `resolve_extends_common_rules`
+- Updated `is_manager_enabled()`: denylist check runs first — if manager is in `disabled_managers`, returns `false` before allowlist check
+- 4 tests: `docker:disable` disables three docker managers; doesn't affect cargo/npm; `disabledManagers` JSON field works; denylist overrides allowlist when same manager in both
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

@@ -68,6 +68,10 @@ pub struct RepoConfig {
     /// When non-empty, only these manager names are active.
     /// Empty means all managers are active.
     pub enabled_managers: Vec<String>,
+    /// Explicit manager denylist — managers in this list are disabled even
+    /// when `enabled_managers` is empty.  Populated by presets like
+    /// `docker:disable`.
+    pub disabled_managers: Vec<String>,
     /// Global version ignore list.  If the proposed latest version matches any
     /// entry, the update is suppressed for all packages.
     /// Entries may be semver ranges (`"< 2.0"`) or `/regex/` patterns.
@@ -650,14 +654,10 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
-            // docker:disable — disable all Docker updates across managers
-            "docker:disable" => {
-                rules.push(PackageRule {
-                    match_datasources: vec!["docker".to_owned()],
-                    enabled: Some(false),
-                    ..Default::default()
-                });
-            }
+            // docker:disable disables the dockerfile, docker-compose, and circleci
+            // managers at the manager level (not via packageRules). Handled in parse()
+            // via disabled_managers. No packageRule needed here.
+            "docker:disable" => {}
             _ => {}
         }
     }
@@ -1243,6 +1243,8 @@ impl RepoConfig {
             package_rules: Vec<RawPackageRule>,
             #[serde(rename = "enabledManagers", default)]
             enabled_managers: Vec<String>,
+            #[serde(rename = "disabledManagers", default)]
+            disabled_managers: Vec<String>,
             #[serde(rename = "ignoreVersions", default)]
             ignore_versions: Vec<String>,
             #[serde(default)]
@@ -1565,15 +1567,26 @@ impl RepoConfig {
             }
         });
 
-        // Resolve managers enabled via presets like enablePreCommit.
-        // These presets set `'manager-name': { enabled: true }` which is equivalent
-        // to adding the manager to enabledManagers.
+        // Resolve managers enabled/disabled via presets.
         let mut enabled_managers = raw.enabled_managers;
+        // Start with any managers explicitly disabled in the JSON config.
+        let mut disabled_managers: Vec<String> = raw.disabled_managers;
         for preset in &effective_extends {
             match preset.as_str() {
                 ":enablePreCommit" | "enablePreCommit" => {
                     if !enabled_managers.contains(&"pre-commit".to_owned()) {
                         enabled_managers.push("pre-commit".to_owned());
+                    }
+                }
+                // docker:disable disables specific docker-related managers.
+                // Mirrors Renovate's docker.preset.ts: { circleci: { enabled: false },
+                // 'docker-compose': { enabled: false }, dockerfile: { enabled: false } }
+                "docker:disable" => {
+                    for m in ["circleci", "docker-compose", "dockerfile"] {
+                        let s = m.to_owned();
+                        if !disabled_managers.contains(&s) {
+                            disabled_managers.push(s);
+                        }
                     }
                 }
                 ":includeNodeModules" | "includeNodeModules" => {
@@ -1588,6 +1601,7 @@ impl RepoConfig {
             ignore_deps: raw.ignore_deps,
             package_rules,
             enabled_managers,
+            disabled_managers,
             ignore_versions: raw.ignore_versions,
             schedule: if raw.schedule.is_empty() {
                 // No explicit schedule → use schedule preset if any.
@@ -1719,11 +1733,15 @@ impl RepoConfig {
     /// `disabled_by_default` should come from
     /// [`renovate_core::managers::is_disabled_by_default`].
     pub fn is_manager_enabled(&self, manager_name: &str, disabled_by_default: bool) -> bool {
+        // Denylist takes precedence over everything.
+        if self.disabled_managers.iter().any(|m| m == manager_name) {
+            return false;
+        }
         if !self.enabled_managers.is_empty() {
-            // Explicit whitelist: manager must be listed.
+            // Explicit allowlist: manager must be listed.
             self.enabled_managers.iter().any(|m| m == manager_name)
         } else {
-            // No whitelist: opt-out managers are skipped unless explicitly enabled.
+            // No allowlist: opt-out managers are skipped unless explicitly enabled.
             !disabled_by_default
         }
     }
@@ -2073,6 +2091,7 @@ impl Default for RepoConfig {
             include_paths: Vec::new(),
             package_rules: Vec::new(),
             enabled_managers: Vec::new(),
+            disabled_managers: Vec::new(),
             ignore_versions: Vec::new(),
             schedule: Vec::new(),
             timezone: None,
@@ -4473,7 +4492,10 @@ mod schedule_preset_tests {
             .package_rules
             .iter()
             .find(|r| r.range_strategy.as_deref() == Some("replace"));
-        assert!(rule.is_some(), "expected a replace rangeStrategy rule for react");
+        assert!(
+            rule.is_some(),
+            "expected a replace rangeStrategy rule for react"
+        );
         let rule = rule.unwrap();
         assert!(rule.match_package_names.contains(&"react".to_owned()));
     }
@@ -5807,9 +5829,7 @@ mod rule_effects_tests {
     fn docker_enable_major_counteracts_disable_major() {
         use crate::versioning::semver_generic::UpdateType;
         // Last-rule-wins: disableMajor then enableMajor → major is allowed.
-        let c = RepoConfig::parse(
-            r#"{"extends": ["docker:disableMajor", "docker:enableMajor"]}"#,
-        );
+        let c = RepoConfig::parse(r#"{"extends": ["docker:disableMajor", "docker:enableMajor"]}"#);
         let ctx = DepContext {
             dep_name: "nginx",
             datasource: Some("docker"),
@@ -5823,36 +5843,70 @@ mod rule_effects_tests {
     }
 
     #[test]
-    fn docker_disable_blocks_all_docker_update_types() {
-        use crate::versioning::semver_generic::UpdateType;
+    fn docker_disable_disables_docker_managers() {
+        // docker:disable mirrors Renovate's docker.preset.ts which sets
+        // dockerfile/docker-compose/circleci enabled: false at manager level.
         let c = RepoConfig::parse(r#"{"extends": ["docker:disable"]}"#);
-        for update_type in [UpdateType::Major, UpdateType::Minor, UpdateType::Patch] {
-            let ctx = DepContext {
-                dep_name: "alpine",
-                datasource: Some("docker"),
-                update_type: Some(update_type),
-                ..Default::default()
-            };
-            assert!(
-                c.is_update_blocked_ctx(&ctx),
-                "docker:disable must block {update_type:?} docker updates"
-            );
-        }
+        assert!(
+            !c.is_manager_enabled("dockerfile", false),
+            "docker:disable must disable dockerfile manager"
+        );
+        assert!(
+            !c.is_manager_enabled("docker-compose", false),
+            "docker:disable must disable docker-compose manager"
+        );
+        assert!(
+            !c.is_manager_enabled("circleci", false),
+            "docker:disable must disable circleci manager"
+        );
     }
 
     #[test]
-    fn docker_disable_does_not_block_non_docker() {
-        use crate::versioning::semver_generic::UpdateType;
+    fn docker_disable_does_not_affect_other_managers() {
         let c = RepoConfig::parse(r#"{"extends": ["docker:disable"]}"#);
-        let ctx = DepContext {
-            dep_name: "lodash",
-            datasource: Some("npm"),
-            update_type: Some(UpdateType::Minor),
-            ..Default::default()
-        };
         assert!(
-            !c.is_update_blocked_ctx(&ctx),
-            "docker:disable must not affect non-docker datasources"
+            c.is_manager_enabled("cargo", false),
+            "docker:disable must not disable non-docker managers"
+        );
+        assert!(
+            c.is_manager_enabled("npm", false),
+            "docker:disable must not disable npm"
+        );
+    }
+
+    // ── disabledManagers JSON config field ───────────────────────────────────
+
+    #[test]
+    fn disabled_managers_from_json_config() {
+        let c = RepoConfig::parse(r#"{"disabledManagers": ["dockerfile", "maven"]}"#);
+        assert!(
+            !c.is_manager_enabled("dockerfile", false),
+            "dockerfile in disabledManagers must be disabled"
+        );
+        assert!(
+            !c.is_manager_enabled("maven", false),
+            "maven in disabledManagers must be disabled"
+        );
+        assert!(
+            c.is_manager_enabled("cargo", false),
+            "cargo not in disabledManagers must remain enabled"
+        );
+    }
+
+    #[test]
+    fn disabled_managers_denylist_overrides_enabled_managers_allowlist() {
+        // If a manager appears in both disabledManagers and enabledManagers,
+        // disabled takes precedence (denylist wins).
+        let c = RepoConfig::parse(
+            r#"{"enabledManagers": ["cargo", "npm"], "disabledManagers": ["npm"]}"#,
+        );
+        assert!(
+            c.is_manager_enabled("cargo", false),
+            "cargo in enabledManagers must be allowed"
+        );
+        assert!(
+            !c.is_manager_enabled("npm", false),
+            "npm in both lists: disabled takes precedence"
         );
     }
 }
