@@ -436,6 +436,61 @@ fn resolve_extends_automerge_rules(extends: &[String]) -> Vec<PackageRule> {
     rules
 }
 
+/// Resolve packageRules injected by common built-in presets.
+///
+/// Handles presets that expand to `packageRules` blocks:
+/// - `:disableDevDependencies` — disable dev dep updates
+/// - `:disablePeerDependencies` — disable peer dep updates
+/// - `:disableMajorUpdates` — disable all major updates
+/// - `:automergeStableNonMajor` — automerge stable non-major updates
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts`
+fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
+    use crate::versioning::semver_generic::UpdateType;
+    let mut rules: Vec<PackageRule> = Vec::new();
+
+    for preset in extends {
+        match preset.as_str() {
+            ":disableDevDependencies" => {
+                rules.push(PackageRule {
+                    match_dep_types: vec![
+                        "devDependencies".to_owned(),
+                        "dev-dependencies".to_owned(),
+                        "dev".to_owned(),
+                    ],
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+            ":disablePeerDependencies" => {
+                rules.push(PackageRule {
+                    match_dep_types: vec!["peerDependencies".to_owned()],
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+            ":disableMajorUpdates" => {
+                rules.push(PackageRule {
+                    match_update_types: vec![UpdateType::Major],
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+            ":automergeStableNonMajor" => {
+                rules.push(PackageRule {
+                    match_current_version: Some("!/^0/".to_owned()),
+                    match_update_types: vec![UpdateType::Minor, UpdateType::Patch],
+                    automerge: Some(true),
+                    ..Default::default()
+                });
+            }
+            _ => {}
+        }
+    }
+
+    rules
+}
+
 /// Resolve semantic commit type/scope from built-in `semantic*` presets.
 ///
 /// Returns `(type_override, scope_override)` from the last matching preset.
@@ -786,6 +841,9 @@ impl RepoConfig {
         // Inject selective automerge rules from :automergeMinor / :automergePatch.
         let automerge_rules = resolve_extends_automerge_rules(&raw.extends);
         preset_rules.extend(automerge_rules);
+        // Inject rules from other common presets (:disableDevDependencies, etc.).
+        let common_rules = resolve_extends_common_rules(&raw.extends);
+        preset_rules.extend(common_rules);
         // :automergePatch sets separateMinorPatch: true.
         let preset_separate_minor_patch = raw.extends.iter().any(|p| p == ":automergePatch");
 
@@ -3040,6 +3098,34 @@ mod schedule_preset_tests {
     fn unknown_schedule_preset_leaves_empty() {
         let c = RepoConfig::parse(r#"{"extends": ["schedule:unknown"]}"#);
         assert!(c.schedule.is_empty());
+    }
+
+    #[test]
+    fn disable_dev_dependencies_preset_blocks_dev_deps() {
+        let c = RepoConfig::parse(r#"{"extends": [":disableDevDependencies"]}"#);
+        let ctx = DepContext { dep_name: "lodash", dep_type: Some("devDependencies"), ..Default::default() };
+        assert!(c.is_update_blocked_ctx(&ctx), "devDependencies should be blocked");
+        let ctx2 = DepContext { dep_name: "lodash", dep_type: Some("dependencies"), ..Default::default() };
+        assert!(!c.is_update_blocked_ctx(&ctx2), "regular dependencies must not be blocked");
+    }
+
+    #[test]
+    fn disable_major_updates_preset_blocks_major() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": [":disableMajorUpdates"]}"#);
+        let ctx = DepContext { dep_name: "react", update_type: Some(UpdateType::Major), ..Default::default() };
+        assert!(c.is_update_blocked_ctx(&ctx));
+        let ctx2 = DepContext { dep_name: "react", update_type: Some(UpdateType::Minor), ..Default::default() };
+        assert!(!c.is_update_blocked_ctx(&ctx2));
+    }
+
+    #[test]
+    fn disable_peer_dependencies_preset() {
+        let c = RepoConfig::parse(r#"{"extends": [":disablePeerDependencies"]}"#);
+        let ctx = DepContext { dep_name: "react", dep_type: Some("peerDependencies"), ..Default::default() };
+        assert!(c.is_update_blocked_ctx(&ctx));
+        let ctx2 = DepContext { dep_name: "react", dep_type: Some("dependencies"), ..Default::default() };
+        assert!(!c.is_update_blocked_ctx(&ctx2));
     }
 }
 
