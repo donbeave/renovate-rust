@@ -153,16 +153,15 @@ async fn fetch_update_summary(
 
 // ── index.yaml line-scanner ───────────────────────────────────────────────────
 
-/// Parse a Helm `index.yaml` and return the latest version of `chart_name`.
+/// Parse the latest version and its `created` timestamp from a Helm
+/// `index.yaml` for the given `chart_name`.
 ///
 /// The scanner uses three states:
 /// 1. Searching for `entries:` at indent 0.
 /// 2. Searching for `  {chart_name}:` at indent 2.
-/// 3. Searching for the first `    version:` value (entries are newest-first).
-/// Parse the latest version (and optionally its `created` timestamp) from a
-/// Helm `index.yaml` for the given `chart_name`.
+/// 3. Collecting `version:` and `created:` from the first entry (newest).
 ///
-/// Returns `(version, created_at)`.
+/// Returns `Some((version, created_at))` or `None` if the chart is not found.
 pub fn parse_latest_version(
     index_yaml: &str,
     chart_name: &str,
@@ -206,25 +205,21 @@ pub fn parse_latest_version(
             State::Version => {
                 // Collect version and created fields from the first chart entry.
                 if indent >= 4 {
-                    if trimmed.starts_with("version:") {
-                        let val = trimmed["version:".len()..].trim().trim_matches('"');
+                    if let Some(rest) = trimmed.strip_prefix("version:") {
+                        let val = rest.trim().trim_matches('"');
                         if !val.is_empty() && found_version.is_none() {
                             found_version = Some(val.to_owned());
                         }
-                    } else if trimmed.starts_with("created:") {
-                        let val = trimmed["created:".len()..].trim().trim_matches('"');
+                    } else if let Some(rest) = trimmed.strip_prefix("created:") {
+                        let val = rest.trim().trim_matches('"');
                         if !val.is_empty() && found_created.is_none() {
                             found_created = Some(val.to_owned());
                         }
                     }
                 }
-                // Return as soon as we have the version (created may come before or after).
                 // Stop collecting when we reach the second entry (indent 2, starts with `-`).
-                if indent == 2 && (trimmed == "-" || trimmed.starts_with('-')) {
-                    if found_version.is_some() {
-                        break; // first entry complete
-                    }
-                    // Still in first entry header, continue
+                if indent == 2 && (trimmed == "-" || trimmed.starts_with('-')) && found_version.is_some() {
+                    break; // first entry complete
                 }
                 // If we hit another indent-2 non-list key, we've left this chart's block.
                 if indent == 2 && trimmed != "-" && !trimmed.starts_with('-') {

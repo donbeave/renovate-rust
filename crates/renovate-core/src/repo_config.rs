@@ -353,6 +353,75 @@ fn resolve_extends_automerge(extends: &[String]) -> Option<bool> {
     result
 }
 
+/// Resolve built-in `group:*` presets from `extends`.
+///
+/// Returns `(package_rules, separate_major_minor_override)` where:
+/// - `package_rules` are the `PackageRule` entries injected by the preset
+/// - `separate_major_minor_override` is `Some(false)` when `group:all` implies
+///   `separateMajorMinor: false`
+///
+/// Renovate reference: `lib/config/presets/internal/group.preset.ts`
+fn resolve_extends_group_presets(
+    extends: &[String],
+) -> (Vec<crate::package_rule::PackageRule>, Option<bool>) {
+    use crate::package_rule::PackageRule;
+    use crate::versioning::semver_generic::UpdateType;
+
+    fn group_rule(group_name: &str, group_slug: &str) -> PackageRule {
+        PackageRule {
+            match_package_names: vec!["*".to_owned()],
+            has_name_constraint: true,
+            group_name: Some(group_name.to_owned()),
+            group_slug: Some(group_slug.to_owned()),
+            ..Default::default()
+        }
+    }
+
+    fn group_rule_update_types(
+        group_name: &str,
+        group_slug: &str,
+        types: Vec<UpdateType>,
+    ) -> PackageRule {
+        PackageRule {
+            match_package_names: vec!["*".to_owned()],
+            has_name_constraint: true,
+            group_name: Some(group_name.to_owned()),
+            group_slug: Some(group_slug.to_owned()),
+            match_update_types: types,
+            ..Default::default()
+        }
+    }
+
+    let mut rules: Vec<PackageRule> = Vec::new();
+    let mut separate_major_minor: Option<bool> = None;
+
+    for preset in extends {
+        match preset.as_str() {
+            "group:all" => {
+                rules.push(group_rule("all dependencies", "all"));
+                separate_major_minor = Some(false);
+            }
+            "group:allNonMajor" => {
+                rules.push(group_rule_update_types(
+                    "all non-major dependencies",
+                    "all-minor-patch",
+                    vec![UpdateType::Minor, UpdateType::Patch],
+                ));
+            }
+            "group:monorepos" => {
+                // monorepos groups monorepo packages together via large matchPackageNames lists.
+                // Skip full expansion — those lists require network access to resolve.
+                tracing::debug!(
+                    "group:monorepos preset — partial support (grouped dep names not expanded)"
+                );
+            }
+            _ => {}
+        }
+    }
+
+    (rules, separate_major_minor)
+}
+
 /// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
 ///
 /// - `/pattern/` → inline regex
@@ -527,7 +596,12 @@ impl RepoConfig {
             }
         };
 
-        let package_rules = raw
+        // Resolve group presets before building user-defined rules.
+        // Preset rules are prepended so user-defined rules take precedence (later rules win).
+        let (mut preset_rules, group_separate_major_minor) =
+            resolve_extends_group_presets(&raw.extends);
+
+        let package_rules: Vec<PackageRule> = raw
             .package_rules
             .into_iter()
             .map(|r| {
@@ -598,6 +672,10 @@ impl RepoConfig {
             })
             .collect();
 
+        // Prepend preset rules so user-defined rules have higher precedence (last rule wins).
+        preset_rules.extend(package_rules);
+        let package_rules = preset_rules;
+
         Self {
             enabled: raw.enabled,
             ignore_deps: raw.ignore_deps,
@@ -627,7 +705,11 @@ impl RepoConfig {
             pr_concurrent_limit: raw.pr_concurrent_limit,
             pr_hourly_limit: raw.pr_hourly_limit,
             group_name: raw.group_name,
-            separate_major_minor: raw.separate_major_minor,
+            // group:all preset implies separateMajorMinor: false.
+            // Explicit user config overrides the preset (but default true from serde means
+            // we can't distinguish user-set vs default; group preset wins only when
+            // the user hasn't explicitly set it to true in the raw JSON).
+            separate_major_minor: group_separate_major_minor.unwrap_or(raw.separate_major_minor),
             separate_multiple_major: raw.separate_multiple_major,
             separate_minor_patch: raw.separate_minor_patch,
             semantic_commits: raw.semantic_commits.or_else(|| {
@@ -3608,6 +3690,50 @@ mod rule_effects_tests {
             Some("fix(deps):"),
             "last matching rule's commitMessagePrefix should win"
         );
+    }
+
+    // ── group:* preset tests ────────────────────────────────────────────────
+
+    #[test]
+    fn group_all_preset_injects_group_rule() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:all"]}"#);
+        // group:all should set separateMajorMinor: false
+        assert!(!c.separate_major_minor, "group:all implies separateMajorMinor: false");
+        // group:all should inject a packageRule grouping everything
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.group_name.as_deref(), Some("all dependencies"));
+        assert_eq!(effects.group_slug.as_deref(), Some("all"));
+    }
+
+    #[test]
+    fn group_all_non_major_preset_injects_group_rule_for_minor() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:allNonMajor"]}"#);
+        // separateMajorMinor should remain true (not overridden)
+        assert!(c.separate_major_minor);
+        let ctx = DepContext {
+            dep_name: "react",
+            update_type: Some(crate::versioning::semver_generic::UpdateType::Minor),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.group_name.as_deref(), Some("all non-major dependencies"));
+    }
+
+    #[test]
+    fn group_all_non_major_does_not_apply_to_major() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:allNonMajor"]}"#);
+        let ctx = DepContext {
+            dep_name: "react",
+            update_type: Some(crate::versioning::semver_generic::UpdateType::Major),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        // Major update should not be grouped
+        assert!(effects.group_name.is_none());
     }
 
     #[test]

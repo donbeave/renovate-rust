@@ -30,7 +30,7 @@ use crate::versioning::semver_generic::UpdateType;
 /// `matchPackageNames` targets `packageName`; `matchDepNames` targets
 /// `depName`.  For most managers these are identical, but for Docker/Helm
 /// images they may differ.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct PackageRule {
     /// Package name patterns targeting the `packageName` / `depName` field.
     ///
