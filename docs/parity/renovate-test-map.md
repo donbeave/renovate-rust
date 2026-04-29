@@ -85,6 +85,10 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/new-value.spec.ts` | — | `matchNewValue` exact, glob, regex, flags | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_new_value_glob`, `match_current_value_regex_with_flags` | ported |
 | `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` regex against currentValue | `crates/renovate-core/src/repo_config.rs` | `match_current_version_regex_against_current_value` | ported |
 | `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` semver range match | `crates/renovate-core/src/repo_config.rs` | `match_current_version_blocks_when_below_range` | ported |
+| `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` caret range + currentValue | `crates/renovate-core/src/repo_config.rs` | `match_current_version_with_caret_range_current` | ported |
+| `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` absent → matches all | `crates/renovate-core/src/repo_config.rs` | `match_current_version_absent_matches_all` | ported |
+| `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` negated regex `!/^0/` | `crates/renovate-core/src/repo_config.rs` | `match_current_version_negated_regex` | ported |
+| `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` pep440 / ruby / same-major versioning | — | (not fully ported — versioning schemes not in scope) | pending |
 | `lib/util/package-rules/files.spec.ts` | — | `matchFileNames` undefined packageFile → false | `crates/renovate-core/src/repo_config.rs` | `match_file_names_blocks_matching_path` | ported |
 | `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` negation | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation`, `match_package_names_glob_negation` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDatasources` list | `crates/renovate-core/src/repo_config.rs` | `match_datasources_method_matches_listed_datasource`, `match_datasources_empty_matches_all` | ported |
@@ -243,6 +247,11 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/options/index.ts` | 2368 | `separateMinorPatch=true` + patch → `{dep}-{major}.{minor}.x` | `crates/renovate-core/src/branch.rs` | `branch_topic_separate_minor_patch_for_patch_update` | ported |
 | `lib/config/options/index.ts` | 2348 | Default `branchName` = `{prefix}{topic}` | `crates/renovate-core/src/branch.rs` | `branch_name_default_prefix`, `branch_name_roundtrip` | ported |
 | `lib/workers/repository/updates/branch-name.spec.ts` | — | `cleanBranchName` strips leading/trailing dots | `crates/renovate-core/src/branch.rs` | `branch_name_roundtrip` | partial |
+| `lib/workers/repository/updates/branch-name.spec.ts` | 269 | realistic defaults: `renovate/jest-42.x` | `crates/renovate-core/src/branch.rs` | `branch_name_roundtrip` | partial (no Handlebars template) |
+| `lib/workers/repository/updates/branch-name.spec.ts` | 316 | `hashedBranchLength` produces truncated hash | `crates/renovate-core/src/branch.rs` | `hashed_branch_length_produces_exact_length` | ported |
+| `lib/workers/repository/updates/branch-name.spec.ts` | 350 | `hashedBranchLength` too short → minimum applied | `crates/renovate-core/src/branch.rs` | `hashed_branch_length_too_small_uses_min` | ported |
+| `lib/workers/repository/updates/branch-name.spec.ts` | 405 | enforces valid git branch name (no reserved chars) | `crates/renovate-core/src/branch.rs` | `clean_branch_name_*` tests | ported |
+| `lib/workers/repository/updates/branch-name.spec.ts` | — | group branch names with template compilation | — | (pending — requires Handlebars template engine) | pending |
 
 ---
 
