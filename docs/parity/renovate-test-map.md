@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 19 / 39 actionable tests ported (49%) — updated 2026-04-29
+**Overall progress:** 22 / 39 actionable tests ported (56%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -113,13 +113,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/buildpacks/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/buildpacks/extract.spec.ts
-**Total tests:** 3 | **Ported:** 1 | **Actionable:** 3 | **Status:** partial
+**Total tests:** 3 | **Ported:** 2 | **Actionable:** 3 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for invalid files | 7 | pending | — | — | — |
+| returns null for invalid files | 7 | ported | `buildpacks.rs` | `invalid_toml_returns_empty` | — |
 | returns null for empty package.toml | 11 | ported | `buildpacks.rs` | `no_io_buildpacks_returns_empty` | — |
 | extracts builder and buildpack images | 20 | pending | — | — | — |
 
@@ -128,14 +128,14 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/cloudbuild/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cloudbuild/extract.spec.ts
-**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 6 | ported | `cloudbuild.rs` | `empty_returns_empty` | — |
-| extracts multiple image lines | 10 | pending | — | — | — |
+| extracts multiple image lines | 10 | ported | `cloudbuild.rs` | `extracts_three_step_images` | — |
 
 ---
 

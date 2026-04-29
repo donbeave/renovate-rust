@@ -159,4 +159,37 @@ steps:
         assert_eq!(deps[0].image, "ubuntu");
         assert_eq!(deps[0].tag.as_deref(), Some("22.04"));
     }
+
+    const CLOUDBUILD_FIXTURE: &str = r"steps:
+  - name: 'gcr.io/cloud-builders/docker:19.03.8'
+    args: ['build', '-t', 'gcr.io/my-project/my-image', '.']
+    timeout: 500s
+  - name: 'node:12'
+    entrypoint: npm
+    args: ['test']
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: ['set', 'image', 'deployment/my-deployment', 'my-container=gcr.io/my-project/my-image']
+options:
+  machineType: 'N1_HIGHCPU_8'
+";
+
+    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
+    #[test]
+    fn extracts_three_step_images() {
+        let deps = extract(CLOUDBUILD_FIXTURE);
+        assert_eq!(deps.len(), 3);
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "gcr.io/cloud-builders/docker"
+                    && d.tag.as_deref() == Some("19.03.8"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "node" && d.tag.as_deref() == Some("12"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "gcr.io/cloud-builders/kubectl" && d.tag.is_none())
+        );
+    }
 }

@@ -270,4 +270,10 @@ id = "no/version"
     fn no_io_buildpacks_returns_empty() {
         assert!(extract("[_]\nschema-version = \"0.2\"\n").is_empty());
     }
+
+    // Ported: "returns null for invalid files" — buildpacks/extract.spec.ts line 7
+    #[test]
+    fn invalid_toml_returns_empty() {
+        assert!(extract("not a project toml").is_empty());
+    }
 }
