@@ -984,11 +984,14 @@ impl RepoConfig {
             if !rule.matches_context(ctx) {
                 continue;
             }
-            if effects.group_name.is_none() {
-                effects.group_name = rule.group_name.clone();
+            // Renovate applies packageRules as "last rule wins" for scalar fields
+            // (mergeChildConfig in lib/util/package-rules/index.ts). Each matching
+            // rule fully overrides earlier matching rules for the same field.
+            if rule.group_name.is_some() {
+                effects.group_name.clone_from(&rule.group_name);
             }
-            if effects.group_slug.is_none() {
-                effects.group_slug = rule.group_slug.clone();
+            if rule.group_slug.is_some() {
+                effects.group_slug.clone_from(&rule.group_slug);
             }
             if let Some(am) = rule.automerge {
                 effects.automerge = Some(am);
@@ -3187,7 +3190,7 @@ mod rule_effects_tests {
     }
 
     #[test]
-    fn group_name_first_matching_rule_wins() {
+    fn group_name_last_matching_rule_wins() {
         let c = RepoConfig::parse(
             r#"{"packageRules": [
                 {"matchPackageNames": ["express"], "groupName": "first"},
@@ -3196,8 +3199,8 @@ mod rule_effects_tests {
         );
         let ctx = DepContext::for_dep("express");
         let effects = c.collect_rule_effects(&ctx);
-        // First matching rule wins for groupName.
-        assert_eq!(effects.group_name.as_deref(), Some("first"));
+        // Last matching rule wins for groupName (Renovate mergeChildConfig semantics).
+        assert_eq!(effects.group_name.as_deref(), Some("second"));
     }
 
     #[test]
@@ -3569,7 +3572,7 @@ mod rule_effects_tests {
     }
 
     #[test]
-    fn group_slug_first_matching_rule_wins() {
+    fn group_slug_last_matching_rule_wins() {
         let c = RepoConfig::parse(
             r#"{"packageRules": [
                 {"matchPackageNames": ["lodash"], "groupName": "A", "groupSlug": "first"},
@@ -3583,8 +3586,8 @@ mod rule_effects_tests {
         let effects = c.collect_rule_effects(&ctx);
         assert_eq!(
             effects.group_slug.as_deref(),
-            Some("first"),
-            "first matching rule's groupSlug should win"
+            Some("second"),
+            "last matching rule's groupSlug should win (Renovate mergeChildConfig semantics)"
         );
     }
 
