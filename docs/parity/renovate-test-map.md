@@ -184,6 +184,26 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/pretty-time.ts` | 50 | `satisfiesDateRange(recent, "<= 1 week")` → true | `crates/renovate-core/src/schedule.rs` | `date_range_lte_future_is_true` | ported |
 | `lib/util/pretty-time.ts` | 50 | invalid operator → false | `crates/renovate-core/src/schedule.rs` | `date_range_invalid_operator_returns_false` | ported |
 | `lib/util/pretty-time.ts` | 50 | invalid timestamp → false | `crates/renovate-core/src/schedule.rs` | `date_range_invalid_timestamp_returns_false` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 184 | `before 4:00pm` at 10am → true | `crates/renovate-core/src/schedule.rs` | `spec_supports_before_hours_true` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 190 | `before 4:00am` at 10am → false | `crates/renovate-core/src/schedule.rs` | `spec_supports_before_hours_false` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 196 | `after 4:00pm` at 10am → false | `crates/renovate-core/src/schedule.rs` | `spec_supports_outside_hours` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 203 | cron `* 10 * * *` at hour=10 → true | `crates/renovate-core/src/schedule.rs` | `spec_cron_with_hours_match` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 215 | cron `* * 30 * *` at dom=30 → true | `crates/renovate-core/src/schedule.rs` | `spec_cron_with_days_match` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 225 | cron `* * * 6 *` at month=6 → true | `crates/renovate-core/src/schedule.rs` | `spec_cron_with_months_match` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 235 | cron `* * * * 5` at weekday=5 (Friday) → true | `crates/renovate-core/src/schedule.rs` | `spec_cron_with_weekdays_match` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 249 | cron `* * * * 0` on Sunday → true | `crates/renovate-core/src/schedule.rs` | `spec_cron_on_sunday_weekday_0` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 154 | no schedule → true | `crates/renovate-core/src/schedule.rs` | `spec_returns_true_if_no_schedule` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 159 | "at any time" → true | `crates/renovate-core/src/schedule.rs` | `spec_returns_true_for_at_any_time` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 348 | multiple schedules: any one true → true | `crates/renovate-core/src/schedule.rs` | `spec_supports_multiple_schedules` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 355 | "on friday and saturday" on Friday → true | `crates/renovate-core/src/schedule.rs` | `spec_supports_day_match_friday` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 361 | "on monday and tuesday" on Friday → false | `crates/renovate-core/src/schedule.rs` | `spec_supports_day_mismatch` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 367 | "every weekday" on Friday → true | `crates/renovate-core/src/schedule.rs` | `spec_every_weekday_matches_friday` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 373 | "every weekend" on Friday → false | `crates/renovate-core/src/schedule.rs` | `spec_every_weekend_rejects_friday` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 379 | "before 11:00am every weekday" at 10am → true | `crates/renovate-core/src/schedule.rs` | `spec_before_11am_every_weekday_matches` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 344 | cron dom mismatch → false | `crates/renovate-core/src/schedule.rs` | `spec_cron_dom_mismatch_false` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 349 | cron month mismatch → false | `crates/renovate-core/src/schedule.rs` | `spec_cron_month_mismatch_false` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 396 | first day of month rejects June 30 | `crates/renovate-core/src/schedule.rs` | `spec_first_day_of_month_rejects_non_first` | ported |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 402 | first day of month approves October 1 | `crates/renovate-core/src/schedule.rs` | `spec_first_day_of_month_approves_first` | ported |
 | `lib/modules/platform/local/index.ts` | — | `--platform=local` scans CWD | `crates/renovate-core/src/platform/local.rs` | (integration, verified via `renovate --platform=local --dry-run=full`) | ported |
 | `lib/util/ignore.spec.ts` | — | `isSkipComment('renovate:ignore')` → true | `crates/renovate-core/src/string_match.rs` | `skip_comment_renovate_ignore_returns_true` | ported |
 | `lib/util/ignore.spec.ts` | — | `isSkipComment('other:ignore')` → false | `crates/renovate-core/src/string_match.rs` | `skip_comment_other_prefix_returns_false` | ported |
