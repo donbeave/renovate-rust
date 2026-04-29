@@ -109,6 +109,7 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/string-match.ts` | — | `matchRegexOrGlobList` positive list | `crates/renovate-core/src/string_match.rs` | `positive_list_matches` | ported |
 | `lib/util/string-match.ts` | — | `matchRegexOrGlobList` negation `!pattern` | `crates/renovate-core/src/string_match.rs` | `negation_excludes_input`, `all_negative_patterns_allow_non_matching` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` case-insensitive glob `'TEST'` vs `'t*'` → true | `crates/renovate-core/src/string_match.rs` | `glob_is_case_insensitive_matching_renovate_nocase` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` case-insensitive URL matching (bare string) | `crates/renovate-core/src/string_match.rs` | `exact_match_is_case_insensitive` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` two negative regex patterns that fail | `crates/renovate-core/src/string_match.rs` | `all_negative_patterns_both_must_not_match` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` two negative glob patterns that fail | `crates/renovate-core/src/string_match.rs` | `all_negative_patterns_both_must_not_match_glob` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` positive + negative regex → true | `crates/renovate-core/src/string_match.rs` | `negative_regex_positive_pattern_returns_true` | ported |

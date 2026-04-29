@@ -4,7 +4,7 @@
 //! - `/regex/` or `/regex/flags` — compiled and tested as a regex.
 //! - Glob patterns (`*`, `?`, `**`, `{a,b}`, character classes) — matched via
 //!   [`globset`] with case-insensitive mode (matching Renovate's minimatch `nocase:true`).
-//! - Bare strings — exact equality (case-sensitive).
+//! - Bare strings — case-insensitive exact match, matching minimatch `nocase:true` behavior.
 //!
 //! `match_regex_or_glob_list` additionally supports Renovate's negation
 //! semantics: patterns starting with `!` are negative exclusions.
@@ -21,9 +21,9 @@ use regex::Regex;
 ///
 /// Pattern forms:
 /// - `"*"` → always true
-/// - `"/pattern/"` or `"/pattern/i"` → compiled regex
-/// - Contains `*`, `?`, `[`, `{`, or `**` → glob
-/// - Otherwise → exact equality (case-sensitive)
+/// - `"/pattern/"` or `"/pattern/i"` → compiled regex (case depends on flags)
+/// - Contains `*`, `?`, `[`, `{`, or `**` → case-insensitive glob
+/// - Otherwise → case-insensitive exact match (mirrors minimatch `nocase:true`)
 pub fn match_regex_or_glob(input: &str, pattern: &str) -> bool {
     if pattern == "*" {
         return true;
@@ -54,8 +54,11 @@ pub fn match_regex_or_glob(input: &str, pattern: &str) -> bool {
             .unwrap_or(false);
     }
 
-    // Exact match (case-sensitive, same as Renovate for bare strings)
-    input == pattern
+    // Exact match — case-insensitive to mirror minimatch's nocase:true behavior.
+    // Renovate routes ALL non-regex patterns through minimatch({nocase: true}),
+    // so bare-string patterns like "https://github.com/Foo/bar" match
+    // "https://github.com/foo/Bar" (verified in index.spec.ts).
+    input.eq_ignore_ascii_case(pattern)
 }
 
 /// Return `true` if any element of `inputs` matches at least one of `patterns`
@@ -157,6 +160,18 @@ mod tests {
     fn exact_match() {
         assert!(match_regex_or_glob("npm", "npm"));
         assert!(!match_regex_or_glob("npm", "cargo"));
+    }
+
+    #[test]
+    fn exact_match_is_case_insensitive() {
+        // Mirrors Renovate's minimatch({nocase:true}) — even bare string patterns are case-insensitive.
+        // Verified in Renovate index.spec.ts: "matches matchSourceUrls(case-insensitive)"
+        assert!(match_regex_or_glob(
+            "https://github.com/renovatebot/Renovate",
+            "https://github.com/Renovatebot/renovate"
+        ));
+        // Package names: npm != NPM in strict sense but our impl follows Renovate's minimatch.
+        assert!(match_regex_or_glob("NPM", "npm"));
     }
 
     #[test]
