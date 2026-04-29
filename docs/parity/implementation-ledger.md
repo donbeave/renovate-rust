@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0221  | 2026-04-29 | `allowedVersions` regex + exact-string support; fix silent pass-through for `/pattern/` values | Complete | See below. |
 | 0220  | 2026-04-29 | `depType` in `DepReport` JSON; cargo+npm dep types propagated into `DepContext` for `matchDepTypes` | Complete | See below. |
 | 0219  | 2026-04-29 | `commitMessageAction` + `commitMessagePrefix` in `packageRules` — per-rule PR title overrides | Complete | See below. |
 | 0218  | 2026-04-29 | `commitMessageTopic` in `packageRules` — custom PR title topic with `{{depName}}` support | Complete | See below. |
@@ -5294,3 +5295,24 @@ re-exported from `repo_config` for backward compatibility.
 
 ### End-to-end flow
 Extractor enum → `as_renovate_str()` string → `DepReport.dep_type` → `DepContext.dep_type` → `PackageRule::dep_type_matches()`
+
+---
+
+## Slice 0221 - `allowedVersions` regex + exact-string support
+
+### Bug fixed
+Previous implementation silently returned `false` (= not restricted) for
+`allowedVersions: "/regex/"` patterns, letting all versions through regardless.
+
+### Renovate reference
+- `lib/config/options/index.ts` — `allowedVersions`
+- Supports semver ranges, `/regex/` patterns, and exact strings
+
+### Implementation
+- New `version_matches_allowed(proposed, av)` helper in `package_rule.rs`
+  - `/pattern/[flags]` → regex match against proposed version string
+  - Semver range prefix (`<>~^=*`) → semver satisfaction check
+  - Otherwise → exact string equality
+- `is_version_restricted_for_file` now calls `!version_matches_allowed()` instead of inline logic
+- Removes early-return for non-semver versions: regex/exact-match now work on Docker tags too
+- 3 new tests: regex allows/blocks, non-semver Docker tags, exact-string match

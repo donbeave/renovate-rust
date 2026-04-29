@@ -699,6 +699,45 @@ pub struct RuleEffects {
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────
 
+/// Return `true` if `proposed_version` is within the `allowedVersions` constraint.
+///
+/// Supports:
+/// - `/regex/[flags]` — version must match the regex
+/// - Semver range (`<`, `>`, `~`, `^`, `=`, `*` prefix) — version must satisfy range
+/// - Exact string — version must equal the constraint exactly
+///
+/// Returns `true` (allowed) if the constraint is satisfied, `false` if blocked.
+/// Called from `RepoConfig::is_version_restricted_for_file`; a `false` return
+/// means the version is NOT in the allowed set → it should be blocked.
+pub(crate) fn version_matches_allowed(proposed_version: &str, allowed: &str) -> bool {
+    use crate::versioning::semver_generic::parse_padded;
+    let av = allowed.trim();
+    if av.starts_with('/') {
+        // `/pattern/[flags]` — extract pattern between the slashes
+        let inner = av.trim_start_matches('/');
+        let pat = inner
+            .trim_end_matches(|c: char| c.is_alphabetic())
+            .trim_end_matches('/');
+        return Regex::new(pat)
+            .map(|re| re.is_match(proposed_version))
+            .unwrap_or(true); // malformed regex → don't restrict
+    }
+    if av == proposed_version {
+        return true;
+    }
+    let first = av.chars().next().unwrap_or(' ');
+    if matches!(first, '<' | '>' | '~' | '^' | '=' | '*') {
+        if let Ok(req) = semver::VersionReq::parse(av)
+            && let Some(sv) = parse_padded(proposed_version)
+        {
+            return req.matches(&sv);
+        }
+        // semver range but proposed_version is not parseable → don't restrict
+        return true;
+    }
+    false
+}
+
 /// Return `true` if `proposed_version` is matched by any entry in `ignore_list`.
 ///
 /// Entries may be:

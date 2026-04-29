@@ -16,7 +16,7 @@
 use serde::Deserialize;
 
 // Re-export rule/context types so callers can keep using `repo_config::*`.
-use crate::package_rule::version_matches_ignore_list;
+use crate::package_rule::{version_matches_allowed, version_matches_ignore_list};
 pub use crate::package_rule::{DepContext, PackageRule, PathMatcher, RuleEffects};
 use crate::versioning::semver_generic::UpdateType;
 
@@ -763,9 +763,10 @@ impl RepoConfig {
     /// Return `true` when `proposed_version` does NOT satisfy the
     /// `allowedVersions` constraint of any matching rule.
     ///
-    /// Only semver range strings are supported (regex `/pattern/` values are
-    /// silently ignored).  If no rule has `allowedVersions`, this returns
-    /// `false` (no restriction).
+    /// Returns `true` (restricted) when the proposed version is NOT within the
+    /// `allowedVersions` constraint of the first matching rule that sets it.
+    /// Supports `/regex/` patterns, semver ranges, and exact string equality.
+    /// If no rule has `allowedVersions`, this returns `false` (no restriction).
     pub fn is_version_restricted(&self, name: &str, manager: &str, proposed_version: &str) -> bool {
         self.is_version_restricted_for_file(name, manager, proposed_version, "")
     }
@@ -778,10 +779,6 @@ impl RepoConfig {
         proposed_version: &str,
         file_path: &str,
     ) -> bool {
-        use crate::versioning::semver_generic::parse_padded;
-        let Some(proposed_sv) = parse_padded(proposed_version) else {
-            return false; // can't parse → don't restrict
-        };
         let ctx = DepContext {
             dep_name: name,
             manager: Some(manager),
@@ -795,13 +792,7 @@ impl RepoConfig {
             let Some(ref av) = rule.allowed_versions else {
                 return false;
             };
-            if av.starts_with('/') {
-                return false;
-            }
-            match semver::VersionReq::parse(av) {
-                Ok(req) => !req.matches(&proposed_sv),
-                Err(_) => false,
-            }
+            !version_matches_allowed(proposed_version, av)
         })
     }
 
@@ -1768,12 +1759,33 @@ mod tests {
     }
 
     #[test]
-    fn allowed_versions_regex_pattern_skipped() {
+    fn allowed_versions_regex_allows_matching_version() {
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchPackageNames": ["foo"], "allowedVersions": "/^1\\./"}]}"#,
         );
-        // Regex patterns are not yet supported — no restriction applies
-        assert!(!c.is_version_restricted("foo", "cargo", "2.0.0"));
+        // 1.x versions match the regex → not restricted
+        assert!(!c.is_version_restricted("foo", "cargo", "1.2.3"));
+        // 2.x versions don't match → restricted
+        assert!(c.is_version_restricted("foo", "cargo", "2.0.0"));
+    }
+
+    #[test]
+    fn allowed_versions_regex_non_semver_version() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["img"], "allowedVersions": "/^v1\\./"}]}"#,
+        );
+        // Docker tags with v-prefix (non-semver)
+        assert!(!c.is_version_restricted("img", "docker", "v1.2.3"));
+        assert!(c.is_version_restricted("img", "docker", "v2.0.0"));
+    }
+
+    #[test]
+    fn allowed_versions_exact_string_match() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["foo"], "allowedVersions": "1.2.3"}]}"#,
+        );
+        assert!(!c.is_version_restricted("foo", "cargo", "1.2.3"));
+        assert!(c.is_version_restricted("foo", "cargo", "1.2.4"));
     }
 
     #[test]
