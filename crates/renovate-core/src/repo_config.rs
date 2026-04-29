@@ -435,7 +435,9 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                     result.push("replacements:all".to_owned());
                 }
             }
-            // workarounds:all expands to all known crowd-sourced workaround presets.
+            // workarounds:all expands to all 19 individual sub-presets so that
+            // ignorePresets:["workarounds:typesNodeVersioning"] can suppress individual ones.
+            // ignorePresets:["workarounds:all"] is handled via the pre-expansion filter.
             // Renovate reference: lib/config/presets/internal/workarounds.preset.ts
             "workarounds:all" => {
                 for wa in &[
@@ -947,7 +949,8 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
             }
 
             // ── workarounds:* presets ─────────────────────────────────────────
-            // Each sub-preset of workarounds:all is also individually addressable.
+            // workarounds:all is expanded to individual sub-presets in expand_compound_presets.
+            // Individual sub-presets are addressable here for fine-grained ignorePresets.
             // Renovate reference: lib/config/presets/internal/workarounds.preset.ts
             "workarounds:mavenCommonsAncientVersion" => {
                 rules.push(PackageRule {
@@ -3029,15 +3032,23 @@ impl RepoConfig {
             }
         };
 
-        // Expand compound presets (presets that themselves extend other presets)
-        // before filtering. This handles presets like config:js-app, config:js-lib,
-        // config:semverAllMonthly, config:semverAllWeekly which are defined as
-        // `extends: [other presets...]` in Renovate's preset registry.
-        let expanded_extends = expand_compound_presets(&raw.extends);
+        // Two-pass ignorePresets filtering:
+        // Pass 1: Filter BEFORE expansion so ignorePresets:["workarounds:all"] prevents
+        //         the compound from being expanded at all.
+        let pre_filtered_extends: Vec<String> = raw
+            .extends
+            .iter()
+            .filter(|p| !raw.ignore_presets.contains(p))
+            .cloned()
+            .collect();
 
-        // Filter the extends list to remove any presets in `ignorePresets`.
-        // This is evaluated before all preset resolution so ignored presets are
-        // never expanded, matching Renovate's behaviour.
+        // Expand compound presets after pre-filtering. This handles config:js-app,
+        // config:recommended (→ workarounds:all, replacements:all, etc.), etc.
+        let expanded_extends = expand_compound_presets(&pre_filtered_extends);
+
+        // Pass 2: Filter AFTER expansion so ignorePresets:["workarounds:typesNodeVersioning"]
+        //         suppresses that individual sub-preset even when it came from expanding
+        //         a compound like workarounds:all.
         let effective_extends: Vec<String> = expanded_extends
             .into_iter()
             .filter(|p| !raw.ignore_presets.contains(p))
@@ -8408,6 +8419,55 @@ mod rule_effects_tests {
             c.package_rules.len() >= 400,
             "group:monorepos must inject at least 400 rules, got {}",
             c.package_rules.len()
+        );
+    }
+
+    // ── ignorePresets interaction with compound presets ───────────────────────
+
+    #[test]
+    fn ignore_presets_workarounds_all_suppresses_all_workaround_rules() {
+        let c = RepoConfig::parse(
+            r#"{"extends": ["workarounds:all"], "ignorePresets": ["workarounds:all"]}"#,
+        );
+        let has_commons_workaround = c.package_rules.iter().any(|r| {
+            r.match_datasources.contains(&"maven".to_owned())
+                && r.match_package_names.contains(&"commons-**".to_owned())
+        });
+        assert!(
+            !has_commons_workaround,
+            "ignorePresets: workarounds:all must suppress all workaround rules"
+        );
+    }
+
+    #[test]
+    fn ignore_presets_replacements_all_suppresses_replacement_rules() {
+        let with_c = RepoConfig::parse(r#"{"extends": ["replacements:all"]}"#);
+        let without_c = RepoConfig::parse(
+            r#"{"extends": ["replacements:all"], "ignorePresets": ["replacements:all"]}"#,
+        );
+        assert!(
+            with_c.package_rules.len() > without_c.package_rules.len(),
+            "ignorePresets: replacements:all must suppress replacement rules"
+        );
+        let has_replacement = without_c
+            .package_rules
+            .iter()
+            .any(|r| r.replacement_name.is_some());
+        assert!(
+            !has_replacement,
+            "ignorePresets: replacements:all must remove all replacementName rules"
+        );
+    }
+
+    #[test]
+    fn ignore_presets_individual_workaround_suppresses_just_that_preset() {
+        let all_c = RepoConfig::parse(r#"{"extends": ["workarounds:all"]}"#);
+        let partial_c = RepoConfig::parse(
+            r#"{"extends": ["workarounds:all"], "ignorePresets": ["workarounds:typesNodeVersioning"]}"#,
+        );
+        assert!(
+            partial_c.package_rules.len() < all_c.package_rules.len(),
+            "ignorePresets: individual workaround must remove just that preset's rules"
         );
     }
 }

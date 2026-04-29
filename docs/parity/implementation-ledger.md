@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0327  | 2026-04-29 | Two-pass `ignorePresets` filtering: pre-expansion pass handles `ignorePresets:["workarounds:all"]`; post-expansion pass handles `ignorePresets:["workarounds:typesNodeVersioning"]`; both individual and compound preset suppression now work correctly; 3 tests | Complete | See below. |
 | 0326  | 2026-04-29 | `automergeSchedule` gate in pipeline: when `automerge: true` AND `automergeSchedule` is set AND outside the window, dep's `automerge` output is set to `false`; 2 new pipeline tests | Complete | See below. |
 | 0325  | 2026-04-29 | `UpdateType::Digest` + `UpdateType::Pin` variants; parse `"digest"`/`"pin"` in `matchUpdateTypes`; `helpers:githubDigestChangelogs`, `helpers:forgejoDigestChangelogs`, `helpers:giteaDigestChangelogs` presets (inject `changelogUrl` packageRules for digest updates); monorepo `nonPinUpdateTypes` now includes `Digest`; all included in `config:recommended` | Complete | See below. |
 | 0324  | 2026-04-29 | Global schedule gate: `updateNotScheduled: false` + non-empty `schedule` now blocks updates outside the window (previously only per-rule schedules gated updates); batch JSON parse in `all_monorepo_rules()` (O(1) vs O(n) parses); batch parse in `all_replacement_rules()` for `replacements:all`; 3 new pipeline tests | Complete | See below. |
