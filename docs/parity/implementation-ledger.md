@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0266  | 2026-04-29 | `{{currentVersion}}` template in `commitMessageExtra`/`commitMessageTopic`; `PrTitleConfig.current_version` field; `{{newVersion}}` in topic templates; pipeline passes current version; 2 tests | Complete | See below. |
 | 0265  | 2026-04-29 | Common preset expansion: `:disableDevDependencies`, `:disablePeerDependencies`, `:disableMajorUpdates`, `:automergeStableNonMajor` → `resolve_extends_common_rules()` injects packageRules; 3 tests | Complete | See below. |
 | 0264  | 2026-04-29 | Fix `:automergeMinor`/`:automergePatch` presets: inject per-update-type packageRules instead of global automerge; `:automergePatch` also sets `separateMinorPatch: true`; `resolve_extends_automerge_rules()` | Complete | See below. |
 | 0263  | 2026-04-29 | `prPriority`-based output sorting: ungrouped UpdateAvailable deps sorted by prPriority desc then update severity (major > minor > patch) to match Renovate PR creation order | Complete | See below. |
