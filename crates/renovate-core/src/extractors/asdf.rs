@@ -217,7 +217,24 @@ fn try_dynamic_tool(tool: &str, version: &str) -> Option<AsdfDep> {
     }
 }
 
+/// Parse a `java` tool entry (mise/asdf share the same java version format).
+pub fn parse_java_dep(tool_name: &str, version: &str) -> AsdfDep {
+    parse_java_inner(tool_name, version)
+}
+
+/// Parse a `scala` tool entry (mise/asdf share the same scala version format).
+pub fn parse_scala_dep(tool_name: &str, version: &str) -> AsdfDep {
+    let mut dep = parse_scala(version);
+    dep.tool_name = tool_name.to_owned();
+    dep.dep_name = tool_name.to_owned();
+    dep
+}
+
 fn parse_java(version: &str) -> AsdfDep {
+    parse_java_inner("java", version)
+}
+
+fn parse_java_inner(_tool_name: &str, version: &str) -> AsdfDep {
     let base = AsdfDep {
         tool_name: "java".to_owned(),
         dep_name: "java".to_owned(),

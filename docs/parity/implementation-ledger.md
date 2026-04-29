@@ -5999,3 +5999,36 @@ Rewrote the asdf extractor to match Renovate's full output format from `upgradea
 - `crates/renovate-core/src/extractors/mise.rs` — updated struct construction
 - `docs/parity/renovate-test-map.md`
 - `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0378 — mise extractor refactor with correct datasources
+
+### Summary
+Refactored the mise extractor to use the proper datasource mapping from Renovate's `miseCoreTooling` and fall through to the asdf `TOOL_TABLE` for common tools.
+
+### Key changes
+
+**`MISE_CORE_TABLE`**: mise-specific tool names with correct datasources:
+- `node` → `node-version` (was wrongly GithubReleases nodejs/node)
+- `elixir` → `hexpm-bob` (was wrongly GithubReleases)
+- `erlang` → `github-tags` with `^OTP-` pattern and regex versioning
+- `ruby` → `ruby-version` (was wrongly GithubTags)
+- `go`, `python`, `rust`, `zig`, `bun`, `deno`, `swift` — correct datasources
+
+**Fallthrough to `asdf::TOOL_TABLE`**: Tools not in mise core (e.g., `terraform`, `helm`, `argocd`) are looked up in the asdf table directly, since both managers accept the same tool names.
+
+**Dynamic tools**: `java` and `scala` handled via shared `parse_java_dep` / `parse_scala_dep` public functions exported from `asdf.rs`.
+
+### Tests ported (5 new from mise/extract.spec.ts)
+- `extracts_erlang_core_plugin` — core plugin test (line 28)
+- `extracts_node_version` — node → node-version (line 28)
+- `asdf_tools_fall_through_to_asdf_table` — terraform/helm via asdf table
+- `java_core_plugin_jdk` — java adoptopenjdk parsing (line 911)
+- Updated all existing tests to check `datasource_id` field
+
+### Files changed
+- `crates/renovate-core/src/extractors/mise.rs` — complete rewrite
+- `crates/renovate-core/src/extractors/asdf.rs` — added `parse_java_dep`, `parse_scala_dep` public helpers
+- `docs/parity/renovate-test-map.md`
+- `docs/parity/implementation-ledger.md`

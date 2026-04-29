@@ -222,6 +222,11 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/modules/manager/asdf/extract.spec.ts` | 1096 | `renovate:ignore` comment skips dep | `crates/renovate-core/src/extractors/asdf.rs` | `renovate_ignore_comment_skips_dep` | ported |
 | `lib/modules/manager/pip_requirements/index.spec.ts` | — | pip_requirements file patterns match all expected paths | `crates/renovate-core/src/managers.rs` | `pip_requirements_file_patterns_match_spec` | ported |
 | `lib/modules/manager/mise/index.spec.ts` | — | mise file patterns match all expected paths | `crates/renovate-core/src/managers.rs` | `mise_file_patterns_match_spec` | ported |
+| `lib/modules/manager/mise/extract.spec.ts` | 13 | returns null for empty | `crates/renovate-core/src/extractors/mise.rs` | `empty_returns_empty` | ported |
+| `lib/modules/manager/mise/extract.spec.ts` | 28 | extracts core plugins (erlang→github-tags, node→node-version) | `crates/renovate-core/src/extractors/mise.rs` | `extracts_erlang_core_plugin`, `extracts_node_version`, `extracts_multiple_tools` | ported |
+| `lib/modules/manager/mise/extract.spec.ts` | 781 | provides skipReason for unsupported tooling | `crates/renovate-core/src/extractors/mise.rs` | `unknown_tool_skipped` | ported |
+| `lib/modules/manager/mise/extract.spec.ts` | 409 | tools with multiple versions (array) — skipped | `crates/renovate-core/src/extractors/mise.rs` | `ignores_array_versions` | ported |
+| `lib/modules/manager/mise/extract.spec.ts` | 911 | java core plugin — adoptopenjdk/temurin jdk | `crates/renovate-core/src/extractors/mise.rs` | `java_core_plugin_jdk` | partial |
 | `lib/modules/manager/circleci/index.spec.ts` | — | circleci file patterns match all expected paths | `crates/renovate-core/src/managers.rs` | `circleci_file_patterns_match_spec` | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` exact hit | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_exact_hit` | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` any-of-many | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_any_of_many` | ported |
