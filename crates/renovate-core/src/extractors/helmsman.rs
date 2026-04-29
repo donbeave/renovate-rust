@@ -311,6 +311,7 @@ apps:
         assert!(no_repo.iter().any(|d| d.dep_name == "unknown-repo"));
     }
 
+    // Ported: "returns null if empty" — helmsman/extract.spec.ts line 9
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());

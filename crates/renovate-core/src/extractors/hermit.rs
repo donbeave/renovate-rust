@@ -91,6 +91,7 @@ pub fn extract_from_file_list(files: &[String]) -> Vec<HermitDep> {
 mod tests {
     use super::*;
 
+    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
     #[test]
     fn extracts_versioned_packages() {
         let files = vec![

@@ -209,8 +209,25 @@ image:
         assert_eq!(deps[0].image, "gcr.io/myproject/app");
     }
 
+    // Ported: "returns null for empty yaml file content" — helm-values/extract.spec.ts line 31
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
+    }
+
+    // Ported: "returns null for invalid yaml file content" — helm-values/extract.spec.ts line 26
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        assert!(extract("nothing here: [").is_empty());
+    }
+
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
+    #[test]
+    fn helm_create_default_values() {
+        let content = "image:\n  repository: nginx\n  tag: 1.16.1\n  pullPolicy: IfNotPresent\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "nginx");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.16.1"));
     }
 }

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 42 / 96 actionable tests ported (44%) — updated 2026-04-29
+**Overall progress:** 48 / 108 actionable tests ported (44%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -254,7 +254,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/git-submodules/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/extract.spec.ts
-**Total tests:** 8 | **Ported:** 4 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 5 | **Actionable:** 8 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -309,6 +309,54 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/helm-values/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helm-values/extract.spec.ts
+**Total tests:** 6 | **Ported:** 3 | **Actionable:** 6 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid yaml file content | 26 | ported | `helm_values.rs` | `invalid_yaml_returns_empty` | — |
+| returns null for empty yaml file content | 31 | ported | `helm_values.rs` | `empty_returns_empty` | — |
+| extracts from values.yaml correctly with same structure as "helm create" | 36 | ported | `helm_values.rs` | `helm_create_default_values` | — |
+| extracts from complex values file correctly | 52 | pending | — | — | — |
+| extract data from file with multiple documents | 62 | pending | — | — | — |
+| extract data from file with registry aliases | 85 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/helmsman/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmsman/extract.spec.ts
+**Total tests:** 4 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if empty | 9 | ported | `helmsman.rs` | `empty_file_returns_empty` | — |
+| returns null if extracting non helmsman yaml file | 16 | pending | — | — | — |
+| returns null if apps not defined | 23 | pending | — | — | — |
+| extract deps | 29 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/hermit/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/hermit/extract.spec.ts
+**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
+
+### `extractPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should list packages on command success | 11 | ported | `hermit.rs` | `extracts_versioned_packages` | — |
+| should throw error on execution failure | 75 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -342,11 +390,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/gitlabci.rs` | 8 | partial |
 | `lib/modules/manager/gradle-wrapper/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | 8 | partial |
 | `lib/modules/manager/gradle/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/gradle.rs` | 20 | partial |
-| `lib/modules/manager/helm-values/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/helm_values.rs` | 7 | partial |
 | `lib/modules/manager/helm-requirements/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/helm.rs` | 10 | partial |
 | `lib/modules/manager/helmfile/extract.spec.ts` | 19 | `crates/renovate-core/src/extractors/helmfile.rs` | 10 | partial |
-| `lib/modules/manager/helmsman/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/helmsman.rs` | 4 | partial |
-| `lib/modules/manager/hermit/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/hermit.rs` | 5 | partial |
 | `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/homeassistant.rs` | 4 | partial |
 | `lib/modules/manager/homebrew/extract.spec.ts` | 17 | `crates/renovate-core/src/extractors/homebrew.rs` | 9 | partial |
 | `lib/modules/manager/html/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/html.rs` | 6 | partial |
