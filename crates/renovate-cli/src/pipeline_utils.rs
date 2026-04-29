@@ -63,37 +63,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     };
                     continue;
                 }
-                // Compute the proposed branch name for this update.
-                if let Some(new_ver) = parse_padded(latest) {
-                    let is_patch = classify_semver_update(current, latest)
-                        == Some(renovate_core::versioning::semver_generic::UpdateType::Patch);
-                    let topic = branch::branch_topic(
-                        &dep.name,
-                        new_ver.major,
-                        new_ver.minor,
-                        is_patch,
-                        repo_cfg.separate_minor_patch,
-                    );
-                    dep.branch_name = Some(branch::branch_name(
-                        &repo_cfg.branch_prefix,
-                        &repo_cfg.additional_branch_prefix,
-                        &topic,
-                    ));
-                }
-                // Generate PR title following Renovate's default commitMessage template.
-                let is_major = classify_semver_update(current, latest)
-                    == Some(renovate_core::versioning::semver_generic::UpdateType::Major);
-                dep.pr_title = Some(branch::pr_title(
-                    &dep.name,
-                    latest,
-                    is_major,
-                    repo_cfg.semantic_commits.as_deref(),
-                    Some(repo_cfg.commit_message_action.as_str()).filter(|s| *s != "Update"),
-                    repo_cfg.commit_message_prefix.as_deref(),
-                ));
-                // Collect positive packageRule effects (groupName, automerge, labels).
-                // Include version context so matchCurrentVersion/matchUpdateTypes
-                // rules can gate effect application correctly.
+                // Collect packageRule effects first — groupName affects branch naming.
                 let ctx = renovate_core::repo_config::DepContext {
                     dep_name: &dep.name,
                     manager: Some(manager.as_str()),
@@ -105,6 +75,41 @@ pub(crate) fn apply_update_blocking_to_report(
                     ..Default::default()
                 };
                 let effects = repo_cfg.collect_rule_effects(&ctx);
+
+                // Compute the proposed branch name.
+                // When groupName is set, use the group slug as the topic so all
+                // grouped deps share one branch (matching Renovate's behaviour).
+                if let Some(new_ver) = parse_padded(latest) {
+                    let topic = if let Some(ref gname) = effects.group_name {
+                        branch::group_branch_topic(gname)
+                    } else {
+                        let is_patch = classify_semver_update(current, latest)
+                            == Some(renovate_core::versioning::semver_generic::UpdateType::Patch);
+                        branch::branch_topic(
+                            &dep.name,
+                            new_ver.major,
+                            new_ver.minor,
+                            is_patch,
+                            repo_cfg.separate_minor_patch,
+                        )
+                    };
+                    dep.branch_name = Some(branch::branch_name(
+                        &repo_cfg.branch_prefix,
+                        &repo_cfg.additional_branch_prefix,
+                        &topic,
+                    ));
+                }
+                // Generate PR title.
+                let is_major = classify_semver_update(current, latest)
+                    == Some(renovate_core::versioning::semver_generic::UpdateType::Major);
+                dep.pr_title = Some(branch::pr_title(
+                    &dep.name,
+                    latest,
+                    is_major,
+                    repo_cfg.semantic_commits.as_deref(),
+                    Some(repo_cfg.commit_message_action.as_str()).filter(|s| *s != "Update"),
+                    repo_cfg.commit_message_prefix.as_deref(),
+                ));
                 dep.group_name = effects.group_name;
                 dep.automerge = effects.automerge;
                 dep.labels = effects.labels;

@@ -95,6 +95,49 @@ pub fn branch_topic(
     }
 }
 
+/// Compute the branch topic for a grouped update.
+///
+/// Mirrors Renovate's `slugify(groupName, { lower: true })`:
+/// - Lowercases the group name
+/// - Replaces spaces, slashes, and other non-alphanumeric characters with `-`
+/// - Collapses multiple consecutive `-` into one
+/// - Strips leading/trailing `-`
+///
+/// Renovate reference:
+/// `lib/workers/repository/updates/branch-name.ts` — `update.groupSlug`
+///
+/// # Examples
+///
+/// ```
+/// # use renovate_core::branch::group_branch_topic;
+/// assert_eq!(group_branch_topic("All Dependencies"), "all-dependencies");
+/// assert_eq!(group_branch_topic("@angular/**"), "angular");
+/// assert_eq!(group_branch_topic("Python packages"), "python-packages");
+/// ```
+pub fn group_branch_topic(group_name: &str) -> String {
+    let lower = group_name.to_lowercase();
+    let slug: String = lower
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect();
+    // Collapse runs of hyphens, strip leading/trailing hyphens.
+    let mut result = String::with_capacity(slug.len());
+    let mut last_was_hyphen = true; // treat start as if preceded by hyphen to trim leading
+    for ch in slug.chars() {
+        if ch == '-' {
+            if !last_was_hyphen {
+                result.push('-');
+                last_was_hyphen = true;
+            }
+        } else {
+            result.push(ch);
+            last_was_hyphen = false;
+        }
+    }
+    // Trim trailing hyphen.
+    result.trim_end_matches('-').to_owned()
+}
+
 /// Compute the full Renovate branch name.
 ///
 /// Mirrors the default `branchName` template:
@@ -283,6 +326,28 @@ mod tests {
     #[test]
     fn branch_topic_major_update() {
         assert_eq!(branch_topic("react", 18, 0, false, false), "react-18.x");
+    }
+
+    // ── group_branch_topic ────────────────────────────────────────────────────
+
+    #[test]
+    fn group_branch_topic_spaces_to_hyphens() {
+        assert_eq!(group_branch_topic("All Dependencies"), "all-dependencies");
+    }
+
+    #[test]
+    fn group_branch_topic_special_chars_stripped() {
+        assert_eq!(group_branch_topic("@angular/**"), "angular");
+    }
+
+    #[test]
+    fn group_branch_topic_no_trailing_hyphen() {
+        assert_eq!(group_branch_topic("Python packages"), "python-packages");
+    }
+
+    #[test]
+    fn group_branch_topic_already_clean() {
+        assert_eq!(group_branch_topic("lodash"), "lodash");
     }
 
     // ── branch_name ──────────────────────────────────────────────────────────

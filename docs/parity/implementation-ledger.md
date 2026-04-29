@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0209  | 2026-04-28 | `groupName` branch slug: grouped deps share one branch name | Complete | See below. |
 | 0208  | 2026-04-28 | `additionalBranchPrefix` config field; fix `matchCurrentVersion` regex; scan spec map | Complete | See below. |
 | 0207  | 2026-04-28 | Fix `labels`/`addLabels` not seeding `collect_rule_effects`; add test map entries | Complete | See below. |
 | 0206  | 2026-04-28 | Fix `matchCurrentValue`/`matchNewValue` regex flags bug; remove `PackageNameMatcher` enum | Complete | See below. |
