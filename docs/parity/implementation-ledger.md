@@ -21,6 +21,9 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0260  | 2026-04-29 | `commitMessageExtra` + `commitMessageSuffix` + `PrTitleConfig` refactor: configurable "to {{newVersion}}" segment with template substitution; free-form suffix; PR title builder uses config struct instead of 9 positional args | Complete | See below. |
+| 0259  | 2026-04-29 | Show proposed branch name in terminal output for `UpdateAvailable` deps — indented secondary line under each dep entry | Complete | See below. |
+| 0258  | 2026-04-29 | `enabled:false` in `major`/`minor`/`patch` config blocks converted to synthetic packageRules at parse time so `is_update_blocked_ctx` handles them correctly | Complete | See below. |
 | 0257  | 2026-04-29 | `major`/`minor`/`patch` top-level config blocks: `UpdateTypeConfig` struct + serde deserialization + `apply_to_effects()` applied AFTER packageRules in `collect_rule_effects`, mirroring `flatten.ts` semantics | Complete | See below. |
 | 0256  | 2026-04-29 | Maven `release_timestamp` via Maven Central search API (`search.maven.org/solrsearch`); secondary per-dep call converts epoch-ms to ISO 8601 for `minimumReleaseAge` gating | Complete | See below. |
 | 0255  | 2026-04-29 | NuGet `release_timestamp` via v3 registration leaf API (`/registration5-gz-semver2/{id}/{version}.json`); extra per-package call fetches `published` date | Complete | See below. |
