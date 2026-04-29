@@ -104,12 +104,13 @@ static NPM_RE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Extract a Homebrew formula dependency from a `.rb` formula file.
+///
+/// Returns `None` when no valid `class Name < Formula` header is found.
 pub fn extract(content: &str) -> Option<HomebrewDep> {
-    // Get formula class name
+    // Get formula class name — must find a valid `class X < Formula` header.
     let formula_name = CLASS_RE
         .captures(content)
-        .map(|cap| cap[1].to_owned())
-        .unwrap_or_default();
+        .map(|cap| cap[1].to_owned())?;
 
     // Get URL
     let url = URL_RE
@@ -280,5 +281,26 @@ end"#;
     fn missing_url_skipped() {
         let dep = extract("class NoUrl < Formula\nend").unwrap();
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::MissingUrl));
+    }
+
+    #[test]
+    fn invalid_class_header_not_formula_returns_none() {
+        // Ported: "returns null for invalid class header 2" — homebrew/extract.spec.ts line 198
+        // "class X < NotFormula" is not a valid Formula class
+        let content = "class Ibazel < NotFormula\n  url \"https://example.com/v1.0.tar.gz\"\n  sha256 \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\nend\n";
+        assert!(extract(content).is_none());
+    }
+
+    #[test]
+    fn empty_content_returns_none() {
+        assert!(extract("").is_none());
+    }
+
+    #[test]
+    fn no_class_header_returns_none() {
+        // Ported: "returns null for invalid class header 1" — homebrew/extract.spec.ts line 183
+        // Invalid class syntax (no " < Formula") → None
+        let content = "class Ibazel !?# Formula\n  url \"https://example.com/v1.0.tar.gz\"\nend\n";
+        assert!(extract(content).is_none());
     }
 }
