@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0355  | 2026-04-29 | Test map expansion: add 14 entries for `index.spec.ts` behaviors (ported: matchSourceUrls glob/missing/case-insensitive, matchBaseBranches, matchCategories, only-negative patterns, matchCurrentVersion regex/negated; pending: lockFiles, force.enabled, overrideDepName/packageName, template engine) | Complete | See test-map. |
 | 0354  | 2026-04-29 | `string_match` case-insensitive exact match: bare string patterns now use `eq_ignore_ascii_case` (matching Renovate's minimatch `nocase:true` which applies to ALL pattern types including bare strings); verified via `index.spec.ts` case-insensitive URL test; 1727 tests | Complete | See below. |
 | 0353  | 2026-04-29 | Port `current-age.spec.ts` tests: "older than bound → false", "younger than bound → false", "invalid timestamp → false" (partial: Renovate returns null→pass, we return false); document divergence; 3 new tests; 1726 tests total | Complete | See below. |
 | 0352  | 2026-04-29 | Port `managers.spec.ts` tests: undefined manager + rule set → doesn't fire; absent matchManagers → fires for any manager; legacy `manager:'regex'` matches `matchManagers:['custom.regex']`; 3 new tests; 1723 tests total | Complete | See below. |

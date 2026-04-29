@@ -110,6 +110,19 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/string-match.ts` | — | `matchRegexOrGlobList` negation `!pattern` | `crates/renovate-core/src/string_match.rs` | `negation_excludes_input`, `all_negative_patterns_allow_non_matching` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` case-insensitive glob `'TEST'` vs `'t*'` → true | `crates/renovate-core/src/string_match.rs` | `glob_is_case_insensitive_matching_renovate_nocase` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` case-insensitive URL matching (bare string) | `crates/renovate-core/src/string_match.rs` | `exact_match_is_case_insensitive` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` with glob patterns (case-insensitive) | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_glob` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` missing sourceUrl → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_empty_matches_all` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchFileNames: ['yarn.lock']` matches `lockFiles: ['yarn.lock']` | `crates/renovate-core/src/repo_config.rs` | (not implemented — lockFiles not in DepContext) | pending |
+| `lib/util/package-rules/index.spec.ts` | — | `force.enabled: true` overrides `enabled: false` | — | (not implemented — force field not in PackageRule/RuleEffects) | pending |
+| `lib/util/package-rules/index.spec.ts` | — | `overridePackageName` / `overrideDepName` / `overrideDatasource` | — | (not implemented — override fields not supported) | pending |
+| `lib/util/package-rules/index.spec.ts` | — | Handlebars template in `overrideDepName` (`{{replace}}`) | — | (not implemented — template engine not integrated) | pending |
+| `lib/util/package-rules/index.spec.ts` | — | `matchBaseBranches` filters by base branch | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_exact_hit` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchCategories` filters by category | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_exact_hit` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchCategories` undefined categories → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | rule with no matchers → fires for all deps | `crates/renovate-core/src/repo_config.rs` | `package_rules_enabled_true_does_not_ignore` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | only-negative matchPackageNames → others pass | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchCurrentVersion` regex `/^4/` match | `crates/renovate-core/src/repo_config.rs` | `match_current_version_regex_against_current_value` | ported |
+| `lib/util/package-rules/index.spec.ts` | — | `matchCurrentVersion` negated regex `!/^4/` | `crates/renovate-core/src/repo_config.rs` | (implicit via negation logic) | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` two negative regex patterns that fail | `crates/renovate-core/src/string_match.rs` | `all_negative_patterns_both_must_not_match` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` two negative glob patterns that fail | `crates/renovate-core/src/string_match.rs` | `all_negative_patterns_both_must_not_match_glob` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` positive + negative regex → true | `crates/renovate-core/src/string_match.rs` | `negative_regex_positive_pattern_returns_true` | ported |
