@@ -67,6 +67,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                                 dep_type: None,
                                 package_name: None,
+                                dependency_dashboard_approval: None,
+                                replacement_name: None,
+                                replacement_version: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -103,6 +106,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -259,6 +265,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -329,6 +338,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                                 dep_type: None,
                                 package_name: None,
+                                dependency_dashboard_approval: None,
+                                replacement_name: None,
+                                replacement_version: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -365,6 +377,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: dep.dep_name.clone(),
                             status,
                         }
@@ -480,6 +495,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: "gradle".into(),
                             status,
                         }],
@@ -538,6 +556,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                         dep_type: None,
                         package_name: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -622,6 +643,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: "scalafmt".into(),
                             status,
                         }],
@@ -699,6 +723,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             current_version_timestamp: None,
                             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: dn,
                             status,
                         }
@@ -779,6 +806,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                         dep_type: None,
                         package_name: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -892,6 +922,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             current_version_timestamp: None,
                             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: dep.dep_name.clone(),
                             status,
                         }

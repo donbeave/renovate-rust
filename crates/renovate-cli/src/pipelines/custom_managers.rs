@@ -281,6 +281,9 @@ async fn lookup_custom_deps(
             current_version_timestamp: None,
             dep_type: None,
             package_name: dep.package_name.clone(),
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
             status,
         });
     }

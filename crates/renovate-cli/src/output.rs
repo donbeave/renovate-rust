@@ -106,6 +106,30 @@ pub(crate) struct DepReport {
     /// Not included in serialized output; used only for rule matching.
     #[serde(skip)]
     pub(crate) package_name: Option<String>,
+    /// When `true`, this update requires Dependency Dashboard approval before
+    /// Renovate will create the PR.  Set by `dependencyDashboardApproval` in
+    /// packageRules (e.g. via the `:approveMajorUpdates` preset).
+    ///
+    /// Mirrors Renovate's `dependencyDashboardApproval` field on dep updates.
+    #[serde(
+        rename = "dependencyDashboardApproval",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub dependency_dashboard_approval: Option<bool>,
+    /// Replacement package name when this dep should migrate to another package.
+    /// E.g. `"@babel/eslint-parser"` for the deprecated `"babel-eslint"`.
+    ///
+    /// Mirrors Renovate's `replacementName` field.
+    #[serde(rename = "replacementName", skip_serializing_if = "Option::is_none")]
+    pub replacement_name: Option<String>,
+    /// Replacement version constraint for the replacement package.
+    ///
+    /// Mirrors Renovate's `replacementVersion` field.
+    #[serde(
+        rename = "replacementVersion",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub replacement_version: Option<String>,
     #[serde(flatten)]
     pub status: DepStatus,
 }
@@ -653,6 +677,9 @@ mod tests {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -674,6 +701,9 @@ mod tests {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
@@ -694,6 +724,9 @@ mod tests {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -719,6 +752,9 @@ mod tests {
 
                         dep_type: None,
                         package_name: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -796,6 +832,9 @@ mod tests {
 
                     dep_type: None,
                     package_name: None,
+                    dependency_dashboard_approval: None,
+                    replacement_name: None,
+                    replacement_version: None,
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -832,6 +871,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -862,6 +904,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -890,6 +935,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -917,6 +965,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -973,6 +1024,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                dependency_dashboard_approval: None,
+                replacement_name: None,
+                replacement_version: None,
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -994,6 +1048,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                dependency_dashboard_approval: None,
+                replacement_name: None,
+                replacement_version: None,
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
@@ -1012,6 +1069,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                dependency_dashboard_approval: None,
+                replacement_name: None,
+                replacement_version: None,
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
@@ -1032,6 +1092,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                dependency_dashboard_approval: None,
+                replacement_name: None,
+                replacement_version: None,
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),
@@ -1104,6 +1167,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
             status: DepStatus::UpdateAvailable {
                 current: "1.0.0".into(),
                 latest: "2.0.0".into(),
@@ -1128,6 +1194,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
             status: DepStatus::UpToDate { latest: None },
         }
     }

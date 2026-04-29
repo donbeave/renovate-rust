@@ -72,6 +72,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                         dep_type: None,
                         package_name: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
                         name: dep.artifact_id.clone(),
                         status,
                     });
@@ -150,6 +153,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                                 dep_type: None,
                                 package_name: None,
+                                dependency_dashboard_approval: None,
+                                replacement_name: None,
+                                replacement_version: None,
                                 name: d.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -186,6 +192,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: d.dep_name.clone(),
                             status,
                         }

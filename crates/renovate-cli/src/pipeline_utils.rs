@@ -308,6 +308,9 @@ pub(crate) fn apply_update_blocking_to_report(
                 dep.update_type = classify_semver_update(current, latest)
                     .map(|ut| format!("{ut:?}").to_lowercase());
                 dep.pr_priority = effects.pr_priority;
+                dep.dependency_dashboard_approval = effects.dependency_dashboard_approval;
+                dep.replacement_name = effects.replacement_name;
+                dep.replacement_version = effects.replacement_version;
             }
         }
     }
@@ -443,6 +446,9 @@ pub(crate) async fn docker_hub_reports(
 
                 dep_type: None,
                 package_name: None,
+                dependency_dashboard_approval: None,
+                replacement_name: None,
+                replacement_version: None,
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -486,6 +492,9 @@ pub(crate) async fn docker_hub_reports(
 
                 dep_type: None,
                 package_name: None,
+                dependency_dashboard_approval: None,
+                replacement_name: None,
+                replacement_version: None,
                 name: dep_name,
                 status,
             });
@@ -518,6 +527,9 @@ mod tests {
                 current_version_timestamp: None,
                 dep_type: None,
                 package_name: None,
+                dependency_dashboard_approval: None,
+                replacement_name: None,
+                replacement_version: None,
                 status,
             })
             .collect();

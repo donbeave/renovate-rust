@@ -189,6 +189,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                         dep_type: None,
                         package_name: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -311,6 +314,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                         dep_type: None,
                         package_name: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -439,6 +445,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            dependency_dashboard_approval: None,
+                            replacement_name: None,
+                            replacement_version: None,
                             name: dep.tool.to_owned(),
                             status,
                         }],
@@ -497,6 +506,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                         dep_type: None,
                         package_name: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
                         name: dep.name.clone(),
                         status,
                     });
