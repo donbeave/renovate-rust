@@ -77,13 +77,19 @@ pub struct RepoConfig {
     /// Entries may be semver ranges (`"< 2.0"`) or `/regex/` patterns.
     pub ignore_versions: Vec<String>,
 
-    // ── Scheduling ────��──────────────────────────��──────────────────────────
+    // ── Scheduling ────────────────────────────────────────────────────────────
     /// Schedule windows for creating PRs.  Entries are Renovate schedule
     /// strings (e.g. `"before 5am"`, `"every weekend"`) or POSIX cron
     /// expressions.  Empty = no schedule restriction (always active).
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `schedule`.
     pub schedule: Vec<String>,
+    /// Schedule windows for *automerging* PRs.  Separate from `schedule`
+    /// (which gates branch creation).  Default `["at any time"]` means
+    /// automerge is unrestricted.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `automergeSchedule`.
+    pub automerge_schedule: Vec<String>,
 
     /// IANA timezone name used when evaluating `schedule` entries.
     /// E.g. `"America/New_York"`.  `None` means use UTC / system timezone.
@@ -491,6 +497,48 @@ fn resolve_extends_schedule(extends: &[String]) -> Option<Vec<String>> {
         }
     }
 
+    result
+}
+
+/// Collect `automergeSchedule` contributed by `schedule:automerge*` presets.
+///
+/// Mirrors the cron constants from `schedule.preset.ts` for the automerge
+/// schedule presets.  Returns `None` if no automerge schedule preset is found.
+fn resolve_extends_automerge_schedule(extends: &[String]) -> Option<Vec<String>> {
+    const DAILY: &[&str] = &["* 0-3 * * *"];
+    const EARLY_MONDAYS: &[&str] = &["* 0-3 * * 1"];
+    const MONTHLY: &[&str] = &["* 0-3 1 * *"];
+    const NON_OFFICE_HOURS: &[&str] = &["* 0-4,22-23 * * 1-5", "* * * * 0,6"];
+    const OFFICE_HOURS: &[&str] = &["* 8-17 * * 1-5"];
+    const QUARTERLY: &[&str] = &["* * 1 */3 *"];
+    const WEEKDAYS: &[&str] = &["* * * * 1-5"];
+    const WEEKENDS: &[&str] = &["* * * * 0,6"];
+    const YEARLY: &[&str] = &["* * 1 */12 *"];
+
+    fn to_string_vec(s: &[&str]) -> Vec<String> {
+        s.iter().map(|&x| x.to_owned()).collect()
+    }
+
+    let mut result: Option<Vec<String>> = None;
+    for preset in extends {
+        let schedule = match preset.as_str() {
+            "schedule:automergeDaily" => Some(to_string_vec(DAILY)),
+            "schedule:automergeEarlyMondays" | "schedule:automergeWeekly" => {
+                Some(to_string_vec(EARLY_MONDAYS))
+            }
+            "schedule:automergeMonthly" => Some(to_string_vec(MONTHLY)),
+            "schedule:automergeNonOfficeHours" => Some(to_string_vec(NON_OFFICE_HOURS)),
+            "schedule:automergeOfficeHours" => Some(to_string_vec(OFFICE_HOURS)),
+            "schedule:automergeQuarterly" => Some(to_string_vec(QUARTERLY)),
+            "schedule:automergeWeekdays" => Some(to_string_vec(WEEKDAYS)),
+            "schedule:automergeWeekends" => Some(to_string_vec(WEEKENDS)),
+            "schedule:automergeYearly" => Some(to_string_vec(YEARLY)),
+            _ => None,
+        };
+        if let Some(s) = schedule {
+            result = Some(s);
+        }
+    }
     result
 }
 
@@ -1249,6 +1297,8 @@ impl RepoConfig {
             ignore_versions: Vec<String>,
             #[serde(default)]
             schedule: Vec<String>,
+            #[serde(rename = "automergeSchedule", default)]
+            automerge_schedule: Vec<String>,
             timezone: Option<String>,
             #[serde(default)]
             automerge: bool,
@@ -1608,6 +1658,13 @@ impl RepoConfig {
                 resolve_extends_schedule(&effective_extends).unwrap_or(raw.schedule)
             } else {
                 raw.schedule
+            },
+            automerge_schedule: if raw.automerge_schedule.is_empty() {
+                // No explicit automergeSchedule → use preset or default "at any time".
+                resolve_extends_automerge_schedule(&effective_extends)
+                    .unwrap_or_else(|| vec!["at any time".to_owned()])
+            } else {
+                raw.automerge_schedule
             },
             timezone: raw.timezone.or(preset_timezone),
             automerge: if raw.automerge {
@@ -2094,6 +2151,7 @@ impl Default for RepoConfig {
             disabled_managers: Vec::new(),
             ignore_versions: Vec::new(),
             schedule: Vec::new(),
+            automerge_schedule: vec!["at any time".to_owned()],
             timezone: None,
             automerge: false,
             automerge_type: None,
@@ -4107,6 +4165,58 @@ mod schedule_preset_tests {
     fn no_schedule_preset_leaves_schedule_empty() {
         let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
         assert!(c.schedule.is_empty());
+    }
+
+    // ── automergeSchedule ────────────────────────────────────────────────────
+
+    #[test]
+    fn automerge_schedule_default_is_at_any_time() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert_eq!(c.automerge_schedule, vec!["at any time"]);
+    }
+
+    #[test]
+    fn automerge_schedule_from_json_config() {
+        let c = RepoConfig::parse(r#"{"automergeSchedule": ["before 5am"]}"#);
+        assert_eq!(c.automerge_schedule, vec!["before 5am"]);
+    }
+
+    #[test]
+    fn automerge_schedule_daily_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:automergeDaily"]}"#);
+        assert_eq!(c.automerge_schedule, vec!["* 0-3 * * *"]);
+    }
+
+    #[test]
+    fn automerge_schedule_weekly_preset() {
+        // schedule:automergeWeekly is an alias for schedule:automergeEarlyMondays
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:automergeWeekly"]}"#);
+        assert_eq!(c.automerge_schedule, vec!["* 0-3 * * 1"]);
+    }
+
+    #[test]
+    fn automerge_schedule_non_office_hours() {
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:automergeNonOfficeHours"]}"#);
+        assert_eq!(
+            c.automerge_schedule,
+            vec!["* 0-4,22-23 * * 1-5", "* * * * 0,6"]
+        );
+    }
+
+    #[test]
+    fn explicit_automerge_schedule_overrides_preset() {
+        let c = RepoConfig::parse(
+            r#"{"automergeSchedule": ["before 5am"], "extends": ["schedule:automergeWeekly"]}"#,
+        );
+        assert_eq!(c.automerge_schedule, vec!["before 5am"]);
+    }
+
+    #[test]
+    fn automerge_schedule_does_not_affect_schedule() {
+        // automergeSchedule and schedule are independent fields.
+        let c = RepoConfig::parse(r#"{"extends": ["schedule:automergeDaily"]}"#);
+        assert!(c.schedule.is_empty(), "schedule must remain empty");
+        assert_eq!(c.automerge_schedule, vec!["* 0-3 * * *"]);
     }
 
     #[test]

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0298  | 2026-04-29 | `automergeSchedule` config field + `schedule:automerge*` preset expansion (9 presets); parallel to `schedule` but gates automerge not branch creation; default `"at any time"`; 7 tests | Complete | See below. |
 | 0297  | 2026-04-29 | Fix `docker:disable`: disables `dockerfile`/`docker-compose`/`circleci` managers (not packageRules); add `disabledManagers` JSON config field (denylist overrides allowlist); 4 tests | Complete | See below. |
 | 0296  | 2026-04-29 | `docker:disableMajor`, `docker:enableMajor`, `docker:disable` presets: matchDatasources+matchUpdateTypes packageRules for disableMajor/enableMajor; 5 tests | Complete | See below. |
 | 0295  | 2026-04-29 | `:enablePreCommit` preset adds `"pre-commit"` to `enabled_managers` at parse time; 2 tests confirming pre-commit is gated by default and enabled when preset is active | Complete | See below. |
@@ -5565,6 +5566,27 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
 - Removed incorrect `docker:disable` packageRule arm from `resolve_extends_common_rules`
 - Updated `is_manager_enabled()`: denylist check runs first — if manager is in `disabled_managers`, returns `false` before allowlist check
 - 4 tests: `docker:disable` disables three docker managers; doesn't affect cargo/npm; `disabledManagers` JSON field works; denylist overrides allowlist when same manager in both
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0298 - `automergeSchedule` config field + `schedule:automerge*` presets
+
+### Renovate reference
+- `lib/config/options/index.ts` — `automergeSchedule`: gates when automerge can run, independent of `schedule` (which gates branch creation); default `["at any time"]`
+- `lib/config/presets/internal/schedule.preset.ts` — `automergeDaily`, `automergeWeekly`, `automergeEarlyMondays`, `automergeMonthly`, `automergeNonOfficeHours`, `automergeOfficeHours`, `automergeQuarterly`, `automergeWeekdays`, `automergeWeekends`, `automergeYearly` all set `automergeSchedule`
+
+### Implementation
+- Added `automerge_schedule: Vec<String>` to `RepoConfig` struct with doc comment
+- Added `#[serde(rename = "automergeSchedule", default)]` to `Raw` struct
+- Default: `vec!["at any time"]` — matches Renovate's default
+- Added `resolve_extends_automerge_schedule()` function with same cron constants as `resolve_extends_schedule()` but matching `schedule:automerge*` preset names
+- Wired into `parse()`: explicit `automergeSchedule` in JSON wins; else preset is applied; else `"at any time"` default
+- `schedule:automergeWeekly` is an alias for `schedule:automergeEarlyMondays` (same as the non-automerge mapping)
+- 7 tests: default, JSON field, daily/weekly/nonOfficeHours presets, explicit JSON overrides preset, automergeSchedule doesn't affect schedule
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`
