@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0236  | 2026-04-29 | `is_version_ignored_ctx` with full `DepContext`; `apply_version_ignore_to_report` takes `repo_slug` for `matchDepTypes`/`matchRepositories` + `ignoreVersions` | Complete | See below. |
 | 0235  | 2026-04-29 | `current_version_timestamp` for Poetry, setup.cfg, Pipfile builders — `matchCurrentAge` + `minimumReleaseAge` now work for all Python managers | Complete | See below. |
 | 0234  | 2026-04-29 | `packageName` field in `DepReport`; Cargo alias support for `matchPackageNames`; all contexts updated | Complete | See below. |
 | 0233  | 2026-04-29 | `depType` for SBT (`SbtDepType`) and Leiningen (`LeinDepType`) — JVM ecosystem matchDepTypes complete | Complete | See below. |

@@ -845,9 +845,20 @@ impl RepoConfig {
             file_path: Some(file_path),
             ..Default::default()
         };
+        self.is_version_ignored_ctx(&ctx, proposed_version)
+    }
+
+    /// Like [`is_version_ignored_for_file`] but accepts a pre-built `DepContext`.
+    ///
+    /// Ensures all matchers (`matchDepTypes`, `matchRepositories`, …) fire when
+    /// per-rule `ignoreVersions` is combined with additional matchers.
+    pub fn is_version_ignored_ctx(&self, ctx: &DepContext<'_>, proposed_version: &str) -> bool {
+        if version_matches_ignore_list(proposed_version, &self.ignore_versions) {
+            return true;
+        }
         self.package_rules
             .iter()
-            .any(|rule| rule.matches_context(&ctx) && rule.version_is_ignored(proposed_version))
+            .any(|rule| rule.matches_context(ctx) && rule.version_is_ignored(proposed_version))
     }
 
     /// Collect merged packageRule effects for a dep.

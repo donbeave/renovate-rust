@@ -173,20 +173,37 @@ pub(crate) fn apply_update_blocking_to_report(
 /// file reports.  For each `UpdateAvailable` dep whose proposed latest version
 /// is in the ignore list, the status is downgraded to `UpToDate` so the update
 /// is silently suppressed (consistent with Renovate's behaviour).
+///
+/// `repo_slug` is passed so `matchRepositories` in per-rule `ignoreVersions`
+/// can fire correctly.
 pub(crate) fn apply_version_ignore_to_report(
     report: &mut output::RepoReport,
     repo_cfg: &renovate_core::repo_config::RepoConfig,
+    repo_slug: &str,
 ) {
     for file in &mut report.files {
         let manager = file.manager.clone();
+        let file_path = file.path.clone();
         for dep in &mut file.deps {
-            if let output::DepStatus::UpdateAvailable { ref latest, .. } = dep.status
-                && repo_cfg.is_version_ignored(&dep.name, &manager, latest)
-            {
-                let latest_str = latest.clone();
-                dep.status = output::DepStatus::UpToDate {
-                    latest: Some(latest_str),
+            if let output::DepStatus::UpdateAvailable { ref latest, .. } = dep.status {
+                let datasource =
+                    renovate_core::managers::manager_default_datasource(manager.as_str());
+                let ctx = renovate_core::repo_config::DepContext {
+                    dep_name: &dep.name,
+                    package_name: dep.package_name.as_deref(),
+                    manager: Some(manager.as_str()),
+                    file_path: Some(file_path.as_str()),
+                    dep_type: dep.dep_type.as_deref(),
+                    repository: Some(repo_slug),
+                    datasource,
+                    ..Default::default()
                 };
+                if repo_cfg.is_version_ignored_ctx(&ctx, latest) {
+                    let latest_str = latest.clone();
+                    dep.status = output::DepStatus::UpToDate {
+                        latest: Some(latest_str),
+                    };
+                }
             }
         }
     }
