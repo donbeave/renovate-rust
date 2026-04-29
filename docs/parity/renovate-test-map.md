@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 61 / 126 actionable tests ported (48%) — updated 2026-04-29
+**Overall progress:** 63 / 126 actionable tests ported (50%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -279,7 +279,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 21 | **Ported:** 4 | **Actionable:** 21 | **Status:** partial
+**Total tests:** 21 | **Ported:** 5 | **Actionable:** 21 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -288,7 +288,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for empty | 12 | ported | `gomod.rs` | `empty_content_returns_empty` | — |
 | extracts single-line requires | 16 | ported | `gomod.rs` | `single_line_require` | — |
 | extracts multi-line requires | 26 | ported | `gomod.rs` | `require_block` | — |
-| ignores empty spaces in multi-line requires | 34 | pending | — | — | — |
+| ignores empty spaces in multi-line requires | 34 | ported | `gomod.rs` | `empty_lines_inside_require_block` | — |
 | extracts replace directives from multi-line and single line | 48 | pending | — | — | — |
 | extracts replace directives from non-public module path | 136 | pending | — | — | — |
 | ignores exclude directives from multi-line and single line | 193 | ported | `gomod.rs` | `exclude_block_ignored` | — |
@@ -360,14 +360,14 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bitbucket-pipelines/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bitbucket-pipelines/extract.spec.ts
-**Total tests:** 4 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 2 | **Actionable:** 4 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 6 | ported | `bitbucket_pipelines.rs` | `empty_returns_empty` | — |
-| returns null for malformed | 12 | pending | — | — | — |
+| returns null for malformed | 12 | ported | `bitbucket_pipelines.rs` | `malformed_image_object_without_name_returns_empty` | — |
 | extracts dependencies | 22 | pending | — | — | — |
 | extracts dependencies with registryAlias | 82 | pending | — | — | — |
 

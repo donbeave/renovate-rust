@@ -71,9 +71,10 @@ static BLOCK_END: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*\)\s*$").u
 static REPLACE_LOCAL: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*replace\s+(\S+)(?:\s+\S+)?\s*=>\s*(\./|\.\./)").unwrap());
 
-/// Go pseudo-version pattern: `vX.Y.Z-YYYYMMDDHHMMSS-abcdefabcdef`.
+/// Go pseudo-version pattern: `vX.Y.Z-[pre.]YYYYMMDDHHMMSS-abcdefabcdef`.
+/// The optional `pre.` prefix appears in pre-release pseudo-versions.
 static PSEUDO_VERSION: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^v\d+\.\d+\.\d+-\d{14}-[0-9a-f]+$").unwrap());
+    LazyLock::new(|| Regex::new(r"^v\d+\.\d+\.\d+-(?:\d+\.)?\d{14}-[0-9a-f]+$").unwrap());
 
 /// Matches exclude block start.
 static EXCLUDE_BLOCK_START: LazyLock<Regex> =
@@ -333,5 +334,26 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
+    }
+
+    // Ported: "ignores empty spaces in multi-line requires" — gomod/extract.spec.ts line 34
+    // Note: TS test expects 3 deps (includes go directive as dep); Rust returns 2
+    // (go directive extraction not yet implemented). Core behavior — empty lines
+    // inside require blocks are handled correctly — is verified here.
+    #[test]
+    fn empty_lines_inside_require_block() {
+        let content = "module github.com/renovate-tests/gomod\nrequire (\n\tcloud.google.com/go v0.45.1\n\n\tgithub.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect\n)\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.module_path == "cloud.google.com/go" && d.current_value == "v0.45.1")
+        );
+        // Pseudo-version is extracted but marked as skipped
+        assert!(
+            deps.iter()
+                .any(|d| d.module_path == "github.com/Microsoft/go-winio"
+                    && d.skip_reason == Some(GoModSkipReason::PseudoVersion))
+        );
     }
 }

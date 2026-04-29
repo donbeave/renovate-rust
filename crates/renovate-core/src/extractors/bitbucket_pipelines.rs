@@ -205,4 +205,11 @@ pipelines:
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
+
+    // Ported: "returns null for malformed" — bitbucket-pipelines/extract.spec.ts line 12
+    #[test]
+    fn malformed_image_object_without_name_returns_empty() {
+        let content = "image:\n  username: ccc\n";
+        assert!(extract(content).is_empty());
+    }
 }
