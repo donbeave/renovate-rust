@@ -21,6 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0201  | 2026-04-28 | Refactor: split `main.rs` and `repo_config.rs` into focused modules | Complete | See below. |
+| 0200  | 2026-04-28 | `matchDatasources` + `matchDepTypes` glob/regex/negation via `match_regex_or_glob_list` | Complete | See below. |
 | 0199  | 2026-04-28 | `matchManagers` glob/regex/negation + custom manager prefix + `string_match` utility module | Complete | See below. |
 | 0198  | 2026-04-28 | PyPI `current_version_timestamp` for `matchCurrentAge` + AGPL-3.0 LICENSE + README goals section | Complete | See below. |
 | 0197  | 2026-04-28 | npm `current_version_timestamp` population for `matchCurrentAge` exact pins | Complete | See below. |
@@ -4943,12 +4945,37 @@ managers should only run when explicitly listed in `enabledManagers`.
 
 ---
 
+---
+
+## Slice 0201 - Refactor: split large files into focused modules
+
+### What landed
+- `crates/renovate-cli/src/report_builders.rs` (new, 948 lines): all
+  `build_dep_reports_*` functions extracted from `main.rs` — 16 functions
+  covering cargo, npm, github-actions, maven, pub, nuget, composer, gomod,
+  poetry, pip, bundler, terraform, helm, gradle, setup-cfg, pipenv.
+- `crates/renovate-cli/src/pipeline_utils.rs` (new, 236 lines):
+  `apply_update_blocking_to_report`, `apply_version_ignore_to_report`,
+  `manager_files`, `docker_hub_reports` extracted from `main.rs`.
+- `crates/renovate-core/src/package_rule.rs` (new, 708 lines):
+  `PackageRule`, `PackageNameMatcher`, `DepContext`, `PathMatcher`,
+  `RuleEffects`, `compile_name_matcher`, `version_matches_ignore_list`,
+  and all `impl PackageRule` matcher methods extracted from `repo_config.rs`.
+- `crates/renovate-cli/src/main.rs`: 9,885 → 8,726 lines (-1,159)
+- `crates/renovate-core/src/repo_config.rs`: 3,673 → 2,882 lines (-791)
+
+### No behavior changes
+All 1363 tests continue to pass.  External API is unchanged: types are
+re-exported from `repo_config` for backward compatibility.
+
+---
+
 ## Next slice candidates
 
 1. **Populate `current_version_timestamp` from npm/pypi cache** — resolve specifier
    to current version string and look up in `version_timestamps`.
-2. **`matchDepTypes` glob/regex** — apply `match_regex_or_glob_list` to dep type matching.
-3. **crates.io release timestamp** — hit `crates.io/api/v1/crates/{name}/versions`
+2. **crates.io release timestamp** — hit `crates.io/api/v1/crates/{name}/versions`
    to get `created_at` per version for minimumReleaseAge support.
-4. **Remote preset resolution** — `github>org/repo//preset` fetching.
-5. **Docker versioning scheme** — proper Docker tag version comparison.
+3. **Remote preset resolution** — `github>org/repo//preset` fetching.
+4. **Docker versioning scheme** — proper Docker tag version comparison.
+5. **Split `process_repo()` in `main.rs`** — further refactor the 8,440-line function.

@@ -6,6 +6,7 @@ pub mod datasources;
 pub mod extractors;
 pub mod http;
 pub mod managers;
+pub mod package_rule;
 pub mod platform;
 pub mod repo_config;
 pub mod schedule;
