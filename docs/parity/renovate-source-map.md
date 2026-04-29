@@ -191,7 +191,8 @@ find where a given TypeScript module is implemented in Rust.
 | TypeScript file | Rust file(s) | Status | Notes |
 |-----------------|-------------|--------|-------|
 | `lib/workers/repository/updates/flatten.ts` | `crates/renovate-core/src/branch.rs` | partial | `sanitize_dep_name`, `branch_topic`, `branch_name` |
-| `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch name generation; group slug via group_branch_topic |
+| `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch name generation; group slug; `hashedBranchLength` hashing |
+| `lib/util/hash.ts` | `crates/renovate-core/src/branch.rs` | full | SHA-512 hex hashing via `sha2` crate |
 | `lib/config/options/index.ts` (`commitMessageAction`, `commitMessagePrefix`) | `crates/renovate-core/src/branch.rs`, `crates/renovate-core/src/repo_config.rs` | partial | PR title generation with semantic commits |
 
 ---

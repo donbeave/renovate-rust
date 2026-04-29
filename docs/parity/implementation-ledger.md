@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0212  | 2026-04-29 | `hashedBranchLength` config option — SHA-512 branch name hashing | Complete | See below. |
 | 0211  | 2026-04-28 | Refactor: split `managers_impl` into 17 focused `pipelines/` sub-modules | Complete | See below. |
 | 0210  | 2026-04-28 | Refactor: extract `managers_impl.rs` + `context.rs`; `main.rs` 8,733→389 lines | Complete | See below. |
 | 0209  | 2026-04-28 | `groupName` branch slug: grouped deps share one branch name | Complete | See below. |
@@ -4954,6 +4955,40 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0212 - `hashedBranchLength` — SHA-512 branch name hashing
+
+### Renovate reference
+- `lib/config/options/index.ts` — `hashedBranchLength` (integer, default `null`)
+- `lib/workers/repository/updates/branch-name.ts` — hash logic, `MIN_HASH_LENGTH = 6`
+- `lib/util/hash.ts` — SHA-512 via Node `crypto`
+
+### What landed
+- `crates/renovate-core/src/repo_config.rs`:
+  - Added `hashed_branch_length: Option<u32>` field with serde rename `hashedBranchLength`
+- `crates/renovate-core/src/branch.rs`:
+  - Added `sha2` import (`Sha512`, `Digest`)
+  - Implemented `hashed_branch_name(prefix, additional_prefix, topic, length) -> String`
+    - Computes `hash_len = length - len(prefix)`, floors at `MIN_HASH_LENGTH = 6`
+    - Hash input = `additionalBranchPrefix + branchTopic` (matching Renovate's template)
+    - SHA-512 digest encoded as lowercase hex, truncated to `hash_len` chars
+    - Result: `prefix + hex[..hash_len]`, always exactly `length` chars (or MIN fallback)
+  - 6 unit tests: exact length, different topics differ, min-length fallback, determinism,
+    additional prefix changes hash, hex-only output
+- `crates/renovate-cli/src/pipeline_utils.rs`:
+  - `apply_update_blocking_to_report`: uses `hashed_branch_name` when
+    `repo_cfg.hashed_branch_length.is_some()`, falls back to `branch_name` otherwise
+- `crates/renovate-core/Cargo.toml`: added `sha2 = "0.11.0"`
+
+### What was deferred
+- Hashing for grouped updates (groupName branch slug) — same path, no separate case needed.
+
+### Verification
+- `cargo build --workspace --all-features` ✓
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` ✓
+- `cargo nextest run --workspace --all-features` → 1391 tests pass (6 new)
 
 ---
 

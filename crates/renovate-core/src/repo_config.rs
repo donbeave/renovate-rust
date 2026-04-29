@@ -203,6 +203,18 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `rangeStrategy`.
     pub range_strategy: String,
+
+    // ── Branch name limits ────────────────────────────────────────────────────
+    /// When set, branch names are hashed (SHA-512) so the full branch name
+    /// (prefix + hash) is exactly this many characters long.  Use on platforms
+    /// that impose strict branch name length limits.
+    ///
+    /// The hash is computed from `additionalBranchPrefix + branchTopic` and
+    /// truncated to `hashedBranchLength - len(branchPrefix)` hex characters.
+    /// Minimum meaningful hash: 6 characters (mirroring Renovate's MIN_HASH_LENGTH).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `hashedBranchLength`.
+    pub hashed_branch_length: Option<u32>,
 }
 // ── Free helpers ─────────────────────────────────────────────────────────────
 
@@ -456,6 +468,8 @@ impl RepoConfig {
             commit_message_prefix: Option<String>,
             #[serde(rename = "rangeStrategy", default = "default_range_strategy")]
             range_strategy: String,
+            #[serde(rename = "hashedBranchLength")]
+            hashed_branch_length: Option<u32>,
         }
 
         fn default_true() -> bool {
@@ -601,6 +615,7 @@ impl RepoConfig {
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
             range_strategy: raw.range_strategy,
+            hashed_branch_length: raw.hashed_branch_length,
         }
     }
 
@@ -883,6 +898,7 @@ impl Default for RepoConfig {
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
             range_strategy: "auto".to_owned(),
+            hashed_branch_length: None,
         }
     }
 }

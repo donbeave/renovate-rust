@@ -12,6 +12,7 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
+use sha2::{Digest as _, Sha512};
 
 static MULTI_DASH: LazyLock<Regex> = LazyLock::new(|| Regex::new("-{2,}").unwrap());
 
@@ -158,6 +159,58 @@ pub fn group_branch_topic(group_name: &str) -> String {
 pub fn branch_name(branch_prefix: &str, additional_prefix: &str, topic: &str) -> String {
     let raw = format!("{branch_prefix}{additional_prefix}{topic}");
     clean_branch_name(&raw)
+}
+
+/// Minimum hash length (in hex chars) after subtracting the prefix length.
+///
+/// Mirrors Renovate's `MIN_HASH_LENGTH = 6`.
+const MIN_HASH_LENGTH: u32 = 6;
+
+/// Compute a length-bounded branch name using SHA-512.
+///
+/// When `hashedBranchLength` is configured, Renovate replaces the branch topic
+/// with a hash of `additionalBranchPrefix + branchTopic` so the full branch
+/// name is exactly `hashed_branch_length` characters long.
+///
+/// Mirrors `lib/workers/repository/updates/branch-name.ts`:
+/// ```text
+/// hash_len = hashedBranchLength - len(branchPrefix)
+/// hashInput = additionalBranchPrefix + branchTopic
+/// branchName = branchPrefix + sha512(hashInput).slice(0, hash_len)
+/// ```
+///
+/// If `hashed_branch_length <= len(branch_prefix) + MIN_HASH_LENGTH`, the
+/// minimum `MIN_HASH_LENGTH` hex chars are used (matching Renovate's warning
+/// fallback).
+///
+/// # Examples
+///
+/// ```
+/// # use renovate_core::branch::hashed_branch_name;
+/// // 20-char limit: "renovate/" (9) + 11 hash chars
+/// let name = hashed_branch_name("renovate/", "", "lodash-4.x", 20);
+/// assert_eq!(name.len(), 20);
+/// assert!(name.starts_with("renovate/"));
+/// ```
+pub fn hashed_branch_name(
+    branch_prefix: &str,
+    additional_prefix: &str,
+    topic: &str,
+    hashed_branch_length: u32,
+) -> String {
+    let prefix_len = branch_prefix.len() as u32;
+    let hash_len = if hashed_branch_length > prefix_len + MIN_HASH_LENGTH {
+        hashed_branch_length - prefix_len
+    } else {
+        MIN_HASH_LENGTH
+    } as usize;
+
+    let hash_input = format!("{additional_prefix}{topic}");
+    let digest = Sha512::digest(hash_input.as_bytes());
+    // GenericArray doesn't implement LowerHex — format byte-by-byte.
+    let hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
+
+    format!("{branch_prefix}{}", &hex[..hash_len.min(hex.len())])
 }
 
 /// Generate the PR title / commit message for a dependency update.
@@ -475,6 +528,58 @@ mod tests {
                 Some("build(deps):")
             ),
             "build(deps): Pin dependency react to 18.0.0"
+        );
+    }
+
+    // ── hashed_branch_name ───────────────────────────────────────────────────
+
+    #[test]
+    fn hashed_branch_length_produces_exact_length() {
+        let name = hashed_branch_name("renovate/", "", "lodash-4.x", 20);
+        assert_eq!(name.len(), 20, "branch name should be exactly 20 chars");
+        assert!(name.starts_with("renovate/"));
+    }
+
+    #[test]
+    fn hashed_branch_length_different_topics_differ() {
+        let a = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
+        let b = hashed_branch_name("renovate/", "", "react-18.x", 30);
+        assert_ne!(a, b, "different topics must produce different hashes");
+    }
+
+    #[test]
+    fn hashed_branch_length_too_small_uses_min() {
+        // hashedBranchLength=10 minus prefix "renovate/"(9) = 1, below MIN_HASH_LENGTH(6)
+        // → use MIN_HASH_LENGTH(6), so result = "renovate/" + 6 hex chars = 15 chars
+        let name = hashed_branch_name("renovate/", "", "lodash-4.x", 10);
+        assert_eq!(name.len(), 9 + 6, "should use minimum 6 hex chars");
+        assert!(name.starts_with("renovate/"));
+    }
+
+    #[test]
+    fn hashed_branch_length_deterministic() {
+        let a = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
+        let b = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
+        assert_eq!(a, b, "same inputs must produce same output");
+    }
+
+    #[test]
+    fn hashed_branch_length_with_additional_prefix() {
+        let without = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
+        let with_prefix = hashed_branch_name("renovate/", "chore-", "lodash-4.x", 30);
+        assert_ne!(without, with_prefix, "additionalBranchPrefix changes hash input");
+        assert_eq!(with_prefix.len(), 30);
+        // Both must start with branch_prefix, not additionalBranchPrefix
+        assert!(with_prefix.starts_with("renovate/"));
+    }
+
+    #[test]
+    fn hashed_branch_is_hex_only() {
+        let name = hashed_branch_name("r/", "", "dep-1.x", 20);
+        let hash_part = &name[2..]; // strip "r/"
+        assert!(
+            hash_part.chars().all(|c| c.is_ascii_hexdigit()),
+            "hash part must be lowercase hex: {hash_part}"
         );
     }
 }

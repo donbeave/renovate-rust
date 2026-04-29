@@ -93,11 +93,20 @@ pub(crate) fn apply_update_blocking_to_report(
                             repo_cfg.separate_minor_patch,
                         )
                     };
-                    dep.branch_name = Some(branch::branch_name(
-                        &repo_cfg.branch_prefix,
-                        &repo_cfg.additional_branch_prefix,
-                        &topic,
-                    ));
+                    dep.branch_name = Some(if let Some(len) = repo_cfg.hashed_branch_length {
+                        branch::hashed_branch_name(
+                            &repo_cfg.branch_prefix,
+                            &repo_cfg.additional_branch_prefix,
+                            &topic,
+                            len,
+                        )
+                    } else {
+                        branch::branch_name(
+                            &repo_cfg.branch_prefix,
+                            &repo_cfg.additional_branch_prefix,
+                            &topic,
+                        )
+                    });
                 }
                 // Generate PR title.
                 let is_major = classify_semver_update(current, latest)
