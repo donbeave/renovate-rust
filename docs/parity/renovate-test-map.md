@@ -460,6 +460,56 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 ---
 
+## Extractor spec tests — cross-extractor batch (slices 0379-0385)
+
+| Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
+|--------------------|------|---------------|---------------|-----------|--------|
+| `lib/modules/manager/cargo/extract.spec.ts` | 539 | extracts original package name of renamed dependencies | `crates/renovate-core/src/extractors/cargo.rs` | `renamed_dep_extracts_original_package_name` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 59 | returns null for empty dev-dependencies | `crates/renovate-core/src/extractors/cargo.rs` | `empty_dev_dependencies_returns_empty` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 66 | returns null for empty custom target | `crates/renovate-core/src/extractors/cargo.rs` | `empty_custom_target_returns_empty` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 212 | extracts dependency with lower-case Version attribute | `crates/renovate-core/src/extractors/nuget.rs` | `lowercase_version_attribute_extracted` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 94 | extracts msbuild sdk from the Sdk attr of Project element | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_from_project_attr` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 117 | does not extract msbuild sdk if version missing | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_missing_version_from_project_attr` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 132 | extracts msbuild sdk from the Sdk element | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_from_sdk_element` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 172 | extracts msbuild sdk from the Import element | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_from_import_element` | ported |
+| `lib/modules/manager/poetry/extract.spec.ts` | 77 | extracts build-system.requires dependencies | `crates/renovate-core/src/extractors/poetry.rs` | `extracts_build_system_requires` | ported |
+| `lib/modules/manager/sveltos/extract.spec.ts` | 254 | returns null for empty | `crates/renovate-core/src/extractors/sveltos.rs` | `empty_content_returns_empty` | ported |
+| `lib/modules/manager/sveltos/extract.spec.ts` | 264 | return null for Kubernetes manifest | `crates/renovate-core/src/extractors/sveltos.rs` | `skips_non_sveltos_files` | ported |
+| `lib/modules/manager/sveltos/extract.spec.ts` | 269 | return null if deps array would be empty | `crates/renovate-core/src/extractors/sveltos.rs` | `malformed_no_charts_returns_empty` | ported |
+| `lib/modules/manager/sveltos/extract.spec.ts` | 288 | double quoted projectsveltos.io apiVersion reference | `crates/renovate-core/src/extractors/sveltos.rs` | `double_quoted_api_version_extracted` | ported |
+| `lib/modules/manager/sveltos/extract.spec.ts` | 320 | single quoted projectsveltos.io apiVersion reference | `crates/renovate-core/src/extractors/sveltos.rs` | `single_quoted_api_version_extracted` | ported |
+| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | 31 | collections with type:git and name as URL | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | `collections_with_git_url_name_and_version` | ported |
+| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | 41 | git@ source field in collections | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | `collections_with_source_field_and_git_at_url` | ported |
+| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | 61 | non-ansible requirements file skipped | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | `non_ansible_content_returns_empty` | ported |
+| `lib/modules/manager/devcontainer/extract.spec.ts` | 263 | returns null when no image or features defined | `crates/renovate-core/src/extractors/devcontainer.rs` | `empty_object_returns_empty` | ported |
+| `lib/modules/manager/devcontainer/extract.spec.ts` | 278 | returns null when features property is null | `crates/renovate-core/src/extractors/devcontainer.rs` | `null_features_value_returns_empty` | ported |
+| `lib/modules/manager/devbox/extract.spec.ts` | 65 | returns invalid-version for semver range operator | `crates/renovate-core/src/extractors/devbox.rs` | `invalid_semver_range_flagged` | ported |
+| `lib/modules/manager/devbox/extract.spec.ts` | 89 | multiple packages all have no skip reason | `crates/renovate-core/src/extractors/devbox.rs` | `valid_versions_have_no_skip_reason` | ported |
+| `lib/modules/manager/tekton/extract.spec.ts` | 96 | ignores file without any deps | `crates/renovate-core/src/extractors/tekton.rs` | `ignores_file_without_deps` | ported |
+| `lib/modules/manager/tekton/extract.spec.ts` | 112 | ignores empty file | `crates/renovate-core/src/extractors/tekton.rs` | `ignores_empty_file` | ported |
+| `lib/modules/manager/gleam/extract.spec.ts` | 65 | returns null when no dependencies are found | `crates/renovate-core/src/extractors/gleam.rs` | `no_deps_section_returns_empty` | ported |
+| `lib/modules/manager/gleam/extract.spec.ts` | 82 | returns null when gleam.toml is invalid | `crates/renovate-core/src/extractors/gleam.rs` | `invalid_toml_returns_empty` | ported |
+| `lib/modules/manager/batect-wrapper/extract.spec.ts` | 31 | returns first version from multiple versions | `crates/renovate-core/src/extractors/batect_wrapper.rs` | `multiple_version_lines_uses_first` | ported |
+| `lib/modules/manager/crossplane/extract.spec.ts` | 12 | returns null for empty | `crates/renovate-core/src/extractors/crossplane.rs` | `empty_content_returns_empty` | ported |
+| `lib/modules/manager/crossplane/extract.spec.ts` | 37 | double quoted pkg.crossplane.io apiVersion | `crates/renovate-core/src/extractors/crossplane.rs` | `double_quoted_api_version_extracted` | ported |
+| `lib/modules/manager/crossplane/extract.spec.ts` | 58 | single quoted pkg.crossplane.io apiVersion | `crates/renovate-core/src/extractors/crossplane.rs` | `single_quoted_api_version_extracted` | ported |
+| `lib/modules/manager/copier/extract.spec.ts` | 25 | SSH URL src_path extracted | `crates/renovate-core/src/extractors/copier.rs` | `ssh_url_src_path_extracted` | ported |
+| `lib/modules/manager/copier/extract.spec.ts` | 119 | returns null for invalid YAML | `crates/renovate-core/src/extractors/copier.rs` | `invalid_yaml_returns_none` | ported |
+| `lib/modules/manager/copier/extract.spec.ts` | 145 | returns null for missing _src_path field | `crates/renovate-core/src/extractors/copier.rs` | `missing_src_path_returns_none` | ported |
+| `lib/modules/manager/velaci/extract.spec.ts` | 6 | handles invalid YAML | `crates/renovate-core/src/extractors/velaci.rs` | `invalid_yaml_returns_empty` | ported |
+| `lib/modules/manager/velaci/extract.spec.ts` | 11 | handles YAML without pipeline | `crates/renovate-core/src/extractors/velaci.rs` | `yaml_without_pipeline_returns_empty` | ported |
+| `lib/modules/manager/vendir/extract.spec.ts` | 10 | returns null for invalid yaml | `crates/renovate-core/src/extractors/vendir.rs` | `invalid_yaml_returns_empty` | ported |
+| `lib/modules/manager/woodpecker/extract.spec.ts` | 12 | returns null for non-object YAML | `crates/renovate-core/src/extractors/woodpecker.rs` | `non_object_yaml_returns_empty` | ported |
+| `lib/modules/manager/woodpecker/extract.spec.ts` | 313 | return null when no dependencies provided | `crates/renovate-core/src/extractors/woodpecker.rs` | `no_steps_or_services_returns_empty` | ported |
+| `lib/modules/manager/osgi/extract.spec.ts` | 143 | returns null for empty file | `crates/renovate-core/src/extractors/osgi.rs` | `empty_returns_empty` | ported |
+| `lib/modules/manager/osgi/extract.spec.ts` | 163 | returns null for a null string | `crates/renovate-core/src/extractors/osgi.rs` | `null_string_returns_empty` | ported |
+| `lib/modules/manager/osgi/extract.spec.ts` | 167 | returns null for file with no artifact definitions | `crates/renovate-core/src/extractors/osgi.rs` | `no_bundles_returns_empty` | ported |
+| `lib/modules/manager/fleet/extract.spec.ts` | 30 | returns null if unknown manifest supplied | `crates/renovate-core/src/extractors/fleet.rs` | `unknown_manifest_returns_empty` | ported |
+| `lib/modules/manager/buildkite/extract.spec.ts` | 22 | extracts multiple plugins in same file | `crates/renovate-core/src/extractors/buildkite.rs` | `multiple_plugins_extracted` | ported |
+| `lib/modules/manager/buildkite/extract.spec.ts` | 70 | extracts arrays of plugins | `crates/renovate-core/src/extractors/buildkite.rs` | `array_plugins_extracted` | ported |
+
+---
+
 ## Cargo.toml extractor — additional tests
 
 | Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
