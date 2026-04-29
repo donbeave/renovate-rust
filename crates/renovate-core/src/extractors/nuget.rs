@@ -56,7 +56,6 @@ impl NuGetDepType {
     }
 }
 
-
 /// Why a NuGet package reference is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NuGetSkipReason {

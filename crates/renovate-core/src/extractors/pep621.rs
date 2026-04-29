@@ -53,7 +53,6 @@ impl Pep621DepType {
     }
 }
 
-
 /// Why a pyproject.toml dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Pep621SkipReason {

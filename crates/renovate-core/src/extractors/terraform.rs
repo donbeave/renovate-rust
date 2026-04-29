@@ -46,7 +46,6 @@ impl TerraformDepType {
     }
 }
 
-
 /// Why a Terraform dep is skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TerraformSkipReason {

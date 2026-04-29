@@ -148,9 +148,7 @@ pub fn manager_default_datasource(manager_name: &str) -> Option<&'static str> {
         "npm" | "bun" | "meteor" | "mint" => Some("npm"),
         "pip_requirements" | "pip-compile" | "pip_setup" | "pipenv" | "poetry" | "pep621"
         | "pep723" | "setup-cfg" => Some("pypi"),
-        "maven" | "maven-wrapper" | "ant" | "sbt" | "leiningen" | "kotlin-script" => {
-            Some("maven")
-        }
+        "maven" | "maven-wrapper" | "ant" | "sbt" | "leiningen" | "kotlin-script" => Some("maven"),
         "gradle" | "gradle-wrapper" => Some("maven"),
         "gomod" => Some("go"),
         "bundler" | "gemspec" => Some("rubygems"),
@@ -896,7 +894,10 @@ mod tests {
         assert_eq!(manager_default_datasource("maven"), Some("maven"));
         assert_eq!(manager_default_datasource("gradle"), Some("maven"));
         assert_eq!(manager_default_datasource("dockerfile"), Some("docker"));
-        assert_eq!(manager_default_datasource("github-actions"), Some("github-tags"));
+        assert_eq!(
+            manager_default_datasource("github-actions"),
+            Some("github-tags")
+        );
         assert_eq!(manager_default_datasource("bundler"), Some("rubygems"));
         assert_eq!(manager_default_datasource("composer"), Some("packagist"));
         assert_eq!(manager_default_datasource("nuget"), Some("nuget"));

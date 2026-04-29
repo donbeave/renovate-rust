@@ -47,7 +47,6 @@ impl BundlerDepType {
     }
 }
 
-
 /// Why a gem is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BundlerSkipReason {

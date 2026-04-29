@@ -89,5 +89,4 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             }
         }
     }
-
 }

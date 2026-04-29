@@ -42,7 +42,6 @@ impl ComposerDepType {
     }
 }
 
-
 /// Why a Composer dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ComposerSkipReason {

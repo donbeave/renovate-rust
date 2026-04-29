@@ -628,7 +628,10 @@ mod tests {
 
     #[test]
     fn pr_title_semantic_minor() {
-        let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("enabled"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
             pr_title("express", "4.18.2", false, &cfg),
             "chore(deps): Update dependency express to 4.18.2"
@@ -637,7 +640,10 @@ mod tests {
 
     #[test]
     fn pr_title_semantic_major_breaking() {
-        let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("enabled"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
             pr_title("lodash", "5.0.0", true, &cfg),
             "chore(deps)!: Update dependency lodash to 5.0.0"
@@ -647,7 +653,10 @@ mod tests {
     #[test]
     fn pr_title_semantic_disabled() {
         // "disabled" semantic_commits → no prefix
-        let cfg = PrTitleConfig { semantic_commits: Some("disabled"), ..PrTitleConfig::with_defaults() };
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("disabled"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
             pr_title("react", "18.0.0", true, &cfg),
             "Update dependency react to 18.0.0"
@@ -656,7 +665,10 @@ mod tests {
 
     #[test]
     fn pr_title_scoped_package() {
-        let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("enabled"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
             pr_title("@angular/core", "17.1.0", false, &cfg),
             "chore(deps): Update dependency @angular/core to 17.1.0"
@@ -666,7 +678,10 @@ mod tests {
     #[test]
     fn pr_title_custom_action() {
         // commitMessageAction: "Bump" → custom action verb
-        let cfg = PrTitleConfig { action: Some("Bump"), ..PrTitleConfig::with_defaults() };
+        let cfg = PrTitleConfig {
+            action: Some("Bump"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
             pr_title("lodash", "4.17.21", false, &cfg),
             "Bump dependency lodash to 4.17.21"
@@ -678,8 +693,15 @@ mod tests {
         // semanticCommitType: "fix", semanticCommitScope: "security"
         assert_eq!(
             pr_title_full(
-                "express", "4.18.2", false, Some("enabled"), None, None, None,
-                "fix", "security"
+                "express",
+                "4.18.2",
+                false,
+                Some("enabled"),
+                None,
+                None,
+                None,
+                "fix",
+                "security"
             ),
             "fix(security): Update dependency express to 4.18.2"
         );
@@ -690,8 +712,15 @@ mod tests {
         // semanticCommitScope: "" → no parentheses
         assert_eq!(
             pr_title_full(
-                "lodash", "5.0.0", true, Some("enabled"), None, None, None,
-                "chore", ""
+                "lodash",
+                "5.0.0",
+                true,
+                Some("enabled"),
+                None,
+                None,
+                None,
+                "chore",
+                ""
             ),
             "chore!: Update dependency lodash to 5.0.0"
         );
@@ -898,7 +927,10 @@ mod tests {
     fn hashed_branch_length_with_additional_prefix() {
         let without = hashed_branch_name("renovate/", "", "lodash-4.x", 30);
         let with_prefix = hashed_branch_name("renovate/", "chore-", "lodash-4.x", 30);
-        assert_ne!(without, with_prefix, "additionalBranchPrefix changes hash input");
+        assert_ne!(
+            without, with_prefix,
+            "additionalBranchPrefix changes hash input"
+        );
         assert_eq!(with_prefix.len(), 30);
         // Both must start with branch_prefix, not additionalBranchPrefix
         assert!(with_prefix.starts_with("renovate/"));

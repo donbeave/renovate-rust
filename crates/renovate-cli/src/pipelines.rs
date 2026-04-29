@@ -41,26 +41,24 @@
 //! - [`misc`]          — Renovate config extends presets, Hermit
 
 mod ansible;
-mod bazel;
 mod batect;
+mod bazel;
 mod ci;
 mod cnb;
 mod conan;
 mod copier;
 mod cpanfile;
-mod git;
-mod haskell;
-mod heroku;
-mod homebrew;
-mod jenkins;
 mod dart;
-mod typst;
-mod vendir;
 mod docker;
 mod dotnet;
+mod git;
 mod go;
+mod haskell;
 mod helm;
+mod heroku;
+mod homebrew;
 mod javascript;
+mod jenkins;
 mod jvm;
 mod kubernetes;
 mod misc;
@@ -73,6 +71,8 @@ mod python;
 mod ruby;
 mod rust;
 mod terraform;
+mod typst;
+mod vendir;
 mod version_files;
 
 // ── Shared imports re-exported for sub-modules via `use super::*` ──────────
@@ -100,13 +100,13 @@ pub(crate) use renovate_core::datasources::rubygems as rubygems_datasource;
 pub(crate) use renovate_core::datasources::terraform as terraform_datasource;
 pub(crate) use renovate_core::extractors::bundler as bundler_extractor;
 pub(crate) use renovate_core::extractors::cargo as cargo_extractor;
-pub(crate) use renovate_core::extractors::homebrew as homebrew_extractor;
 pub(crate) use renovate_core::extractors::composer as composer_extractor;
 pub(crate) use renovate_core::extractors::github_actions as github_actions_extractor;
 pub(crate) use renovate_core::extractors::gomod as gomod_extractor;
 pub(crate) use renovate_core::extractors::gradle as gradle_extractor;
 pub(crate) use renovate_core::extractors::helm as helm_extractor;
 pub(crate) use renovate_core::extractors::homeassistant as homeassistant_extractor;
+pub(crate) use renovate_core::extractors::homebrew as homebrew_extractor;
 pub(crate) use renovate_core::extractors::maven as maven_extractor;
 pub(crate) use renovate_core::extractors::npm as npm_extractor;
 pub(crate) use renovate_core::extractors::nuget as nuget_extractor;

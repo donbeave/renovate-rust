@@ -490,15 +490,27 @@ fn format_dep(dep: &DepReport, use_color: bool) -> String {
             let type_label = match dep.update_type.as_deref() {
                 Some("major") => format!(
                     "  {}",
-                    if use_color { "\x1b[31mmajor\x1b[0m" } else { "major" }
+                    if use_color {
+                        "\x1b[31mmajor\x1b[0m"
+                    } else {
+                        "major"
+                    }
                 ),
                 Some("minor") => format!(
                     "  {}",
-                    if use_color { "\x1b[33mminor\x1b[0m" } else { "minor" }
+                    if use_color {
+                        "\x1b[33mminor\x1b[0m"
+                    } else {
+                        "minor"
+                    }
                 ),
                 Some("patch") => format!(
                     "  {}",
-                    if use_color { "\x1b[32mpatch\x1b[0m" } else { "patch" }
+                    if use_color {
+                        "\x1b[32mpatch\x1b[0m"
+                    } else {
+                        "patch"
+                    }
                 ),
                 _ => String::new(),
             };

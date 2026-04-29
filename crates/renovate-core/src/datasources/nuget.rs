@@ -18,8 +18,7 @@ use crate::http::HttpClient;
 
 pub const NUGET_API: &str = "https://api.nuget.org/v3-flatcontainer";
 /// NuGet v3 registration index base URL (for per-version metadata including timestamps).
-pub const NUGET_REGISTRATION_API: &str =
-    "https://api.nuget.org/v3/registration5-gz-semver2";
+pub const NUGET_REGISTRATION_API: &str = "https://api.nuget.org/v3/registration5-gz-semver2";
 
 /// Errors from fetching NuGet metadata.
 #[derive(Debug, Error)]
@@ -75,9 +74,7 @@ async fn fetch_published_timestamp(
     http: &HttpClient,
 ) -> Option<String> {
     let lower = package_id.to_ascii_lowercase();
-    let url = format!(
-        "{NUGET_REGISTRATION_API}/{lower}/{version}.json"
-    );
+    let url = format!("{NUGET_REGISTRATION_API}/{lower}/{version}.json");
     let resp = http.get_retrying(&url).await.ok()?;
     if !resp.status().is_success() {
         return None;

@@ -171,7 +171,11 @@ struct MavenSearchDoc {
 
 /// Fetch the publish timestamp for a specific Maven artifact version from the
 /// Maven Central search API.  Returns `None` on any error (best-effort).
-async fn fetch_maven_central_timestamp(dep_name: &str, version: &str, http: &HttpClient) -> Option<String> {
+async fn fetch_maven_central_timestamp(
+    dep_name: &str,
+    version: &str,
+    http: &HttpClient,
+) -> Option<String> {
     let (group_id, artifact_id) = dep_name.split_once(':')?;
     let url = format!(
         "{MAVEN_CENTRAL_SEARCH_API}?q=g:{group_id}+AND+a:{artifact_id}+AND+v:{version}&core=gav&rows=1&wt=json"

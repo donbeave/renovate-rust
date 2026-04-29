@@ -136,9 +136,7 @@ async fn fetch_update_summary(
     http: &HttpClient,
 ) -> Result<HelmUpdateSummary, HelmError> {
     let result = fetch_latest(&dep.name, &dep.repository_url, http).await?;
-    let (latest, release_timestamp) = result
-        .map(|(v, ts)| (Some(v), ts))
-        .unwrap_or((None, None));
+    let (latest, release_timestamp) = result.map(|(v, ts)| (Some(v), ts)).unwrap_or((None, None));
     let current = strip_constraint_operators(&dep.current_value);
     let update_available = latest
         .as_deref()
@@ -218,7 +216,10 @@ pub fn parse_latest_version(
                     }
                 }
                 // Stop collecting when we reach the second entry (indent 2, starts with `-`).
-                if indent == 2 && (trimmed == "-" || trimmed.starts_with('-')) && found_version.is_some() {
+                if indent == 2
+                    && (trimmed == "-" || trimmed.starts_with('-'))
+                    && found_version.is_some()
+                {
                     break; // first entry complete
                 }
                 // If we hit another indent-2 non-list key, we've left this chart's block.

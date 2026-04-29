@@ -107,7 +107,6 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
         }
     }
 
-
     for jb_path in manager_files(detected, "jsonnet-bundler") {
         match client.get_raw_file(owner, repo, &jb_path).await {
             Ok(Some(raw)) => {
@@ -211,5 +210,4 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             }
         }
     }
-
 }

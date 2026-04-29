@@ -138,9 +138,8 @@ async fn fetch_update_summary(
     api_base: &str,
 ) -> Result<GemUpdateSummary, RubyGemsError> {
     let result = fetch_latest(&dep.name, http, api_base).await?;
-    let (latest_version, release_timestamp) = result
-        .map(|(v, ts)| (Some(v), ts))
-        .unwrap_or((None, None));
+    let (latest_version, release_timestamp) =
+        result.map(|(v, ts)| (Some(v), ts)).unwrap_or((None, None));
     let s = crate::versioning::semver_generic::semver_update_summary(
         &dep.current_value,
         latest_version.as_deref(),

@@ -200,9 +200,7 @@ async fn fetch_update_summary(
     proxy_base: &str,
 ) -> Result<GoModUpdateSummary, GoModError> {
     let result = fetch_latest(&dep.module_path, http, proxy_base).await?;
-    let (latest, release_timestamp) = result
-        .map(|(v, ts)| (Some(v), ts))
-        .unwrap_or((None, None));
+    let (latest, release_timestamp) = result.map(|(v, ts)| (Some(v), ts)).unwrap_or((None, None));
     let update_available = latest
         .as_deref()
         .is_some_and(|l| l != dep.current_value && !dep.current_value.is_empty());

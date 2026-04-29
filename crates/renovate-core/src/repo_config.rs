@@ -16,8 +16,8 @@
 use serde::Deserialize;
 
 // Re-export rule/context types so callers can keep using `repo_config::*`.
-use crate::package_rule::{version_matches_allowed, version_matches_ignore_list};
 pub use crate::package_rule::{DepContext, PackageRule, PathMatcher, RuleEffects};
+use crate::package_rule::{version_matches_allowed, version_matches_ignore_list};
 use crate::versioning::semver_generic::UpdateType;
 
 use crate::config::GlobalConfig;
@@ -387,8 +387,8 @@ fn resolve_extends_automerge(extends: &[String]) -> Option<bool> {
     let mut result: Option<bool> = None;
     for preset in extends {
         match preset.as_str() {
-            ":automergeAll" | ":automergeMajor" | ":automergeBranch"
-            | ":automergePr" | ":autoMerge" => {
+            ":automergeAll" | ":automergeMajor" | ":automergeBranch" | ":automergePr"
+            | ":autoMerge" => {
                 result = Some(true);
             }
             ":automergeDisabled" | ":noAutomerge" => {
@@ -523,7 +523,13 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
 
 /// Return type for `resolve_extends_scalar_overrides`:
 /// `(sep_minor_patch, sep_major_minor, sep_multi_major, pr_concurrent, pr_hourly)`.
-type ScalarOverrides = (Option<bool>, Option<bool>, Option<bool>, Option<u32>, Option<u32>);
+type ScalarOverrides = (
+    Option<bool>,
+    Option<bool>,
+    Option<bool>,
+    Option<u32>,
+    Option<u32>,
+);
 
 /// Scalar config overrides contributed by named built-in presets.
 ///
@@ -569,7 +575,13 @@ fn resolve_extends_scalar_overrides(extends: &[String]) -> ScalarOverrides {
         }
     }
 
-    (sep_minor_patch, sep_major_minor, sep_multi_major, pr_concurrent, pr_hourly)
+    (
+        sep_minor_patch,
+        sep_major_minor,
+        sep_multi_major,
+        pr_concurrent,
+        pr_hourly,
+    )
 }
 
 /// Resolve semantic commit type/scope from built-in `semantic*` presets.
@@ -746,7 +758,14 @@ fn parse_preset_args(preset: &str) -> (&str, Vec<&str>) {
 /// Returns `(labels, assignees, reviewers, automerge_type)`.
 ///
 /// Return type for `resolve_extends_parameterized`.
-type ParamOverrides = (Vec<String>, Vec<String>, Vec<String>, Option<String>, Option<String>, Option<String>);
+type ParamOverrides = (
+    Vec<String>,
+    Vec<String>,
+    Vec<String>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+);
 
 /// Renovate reference: `lib/config/presets/internal/default.preset.ts`
 fn resolve_extends_parameterized(extends: &[String]) -> ParamOverrides {
@@ -804,7 +823,14 @@ fn resolve_extends_parameterized(extends: &[String]) -> ParamOverrides {
         }
     }
 
-    (labels, assignees, reviewers, automerge_type, semantic_commit_type, semantic_commit_scope)
+    (
+        labels,
+        assignees,
+        reviewers,
+        automerge_type,
+        semantic_commit_type,
+        semantic_commit_scope,
+    )
 }
 
 /// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
@@ -949,9 +975,15 @@ impl RepoConfig {
             separate_minor_patch: bool,
             #[serde(rename = "semanticCommits")]
             semantic_commits: Option<String>,
-            #[serde(rename = "semanticCommitType", default = "default_semantic_commit_type")]
+            #[serde(
+                rename = "semanticCommitType",
+                default = "default_semantic_commit_type"
+            )]
             semantic_commit_type: String,
-            #[serde(rename = "semanticCommitScope", default = "default_semantic_commit_scope")]
+            #[serde(
+                rename = "semanticCommitScope",
+                default = "default_semantic_commit_scope"
+            )]
             semantic_commit_scope: String,
             #[serde(default)]
             extends: Vec<String>,
@@ -1513,31 +1545,47 @@ impl RepoConfig {
                 }
             }
             if rule.minimum_release_age.is_some() {
-                effects.minimum_release_age.clone_from(&rule.minimum_release_age);
+                effects
+                    .minimum_release_age
+                    .clone_from(&rule.minimum_release_age);
             }
             if rule.pr_priority.is_some() {
                 effects.pr_priority = rule.pr_priority;
             }
             if rule.commit_message_topic.is_some() {
-                effects.commit_message_topic.clone_from(&rule.commit_message_topic);
+                effects
+                    .commit_message_topic
+                    .clone_from(&rule.commit_message_topic);
             }
             if rule.commit_message_action.is_some() {
-                effects.commit_message_action.clone_from(&rule.commit_message_action);
+                effects
+                    .commit_message_action
+                    .clone_from(&rule.commit_message_action);
             }
             if rule.commit_message_prefix.is_some() {
-                effects.commit_message_prefix.clone_from(&rule.commit_message_prefix);
+                effects
+                    .commit_message_prefix
+                    .clone_from(&rule.commit_message_prefix);
             }
             if rule.semantic_commit_type.is_some() {
-                effects.semantic_commit_type.clone_from(&rule.semantic_commit_type);
+                effects
+                    .semantic_commit_type
+                    .clone_from(&rule.semantic_commit_type);
             }
             if rule.semantic_commit_scope.is_some() {
-                effects.semantic_commit_scope.clone_from(&rule.semantic_commit_scope);
+                effects
+                    .semantic_commit_scope
+                    .clone_from(&rule.semantic_commit_scope);
             }
             if rule.commit_message_extra.is_some() {
-                effects.commit_message_extra.clone_from(&rule.commit_message_extra);
+                effects
+                    .commit_message_extra
+                    .clone_from(&rule.commit_message_extra);
             }
             if rule.commit_message_suffix.is_some() {
-                effects.commit_message_suffix.clone_from(&rule.commit_message_suffix);
+                effects
+                    .commit_message_suffix
+                    .clone_from(&rule.commit_message_suffix);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -1558,9 +1606,15 @@ impl RepoConfig {
         // Apply per-update-type config blocks (major/minor/patch) AFTER all
         // packageRules, mirroring Renovate's `flatten.ts` mergeChildConfig order.
         let update_type_cfg = match ctx.update_type {
-            Some(crate::versioning::semver_generic::UpdateType::Major) => self.major_config.as_ref(),
-            Some(crate::versioning::semver_generic::UpdateType::Minor) => self.minor_config.as_ref(),
-            Some(crate::versioning::semver_generic::UpdateType::Patch) => self.patch_config.as_ref(),
+            Some(crate::versioning::semver_generic::UpdateType::Major) => {
+                self.major_config.as_ref()
+            }
+            Some(crate::versioning::semver_generic::UpdateType::Minor) => {
+                self.minor_config.as_ref()
+            }
+            Some(crate::versioning::semver_generic::UpdateType::Patch) => {
+                self.patch_config.as_ref()
+            }
             _ => None,
         };
         if let Some(cfg) = update_type_cfg {
@@ -2494,8 +2548,7 @@ mod tests {
         let ctx = DepContext {
             dep_name: "nginx",
             manager: Some("dockerfile"),
-            ..Default::default()
-            // update_type is None (Docker tag, not parseable as semver)
+            ..Default::default() // update_type is None (Docker tag, not parseable as semver)
         };
         assert!(
             c.is_update_blocked_ctx(&ctx),
@@ -3315,7 +3368,10 @@ mod schedule_preset_tests {
         // packageRules that automerge minor+patch updates.
         use crate::versioning::semver_generic::UpdateType;
         let c = RepoConfig::parse(r#"{"extends": [":automergeMinor"]}"#);
-        assert!(!c.automerge, ":automergeMinor should not set global automerge");
+        assert!(
+            !c.automerge,
+            ":automergeMinor should not set global automerge"
+        );
         // Minor update context should get automerge=true from injected rule.
         let ctx = DepContext {
             dep_name: "react",
@@ -3323,7 +3379,11 @@ mod schedule_preset_tests {
             ..Default::default()
         };
         let effects = c.collect_rule_effects(&ctx);
-        assert_eq!(effects.automerge, Some(true), "minor update should automerge");
+        assert_eq!(
+            effects.automerge,
+            Some(true),
+            "minor update should automerge"
+        );
         // Major update should NOT get automerge.
         let ctx_major = DepContext {
             dep_name: "react",
@@ -3341,14 +3401,28 @@ mod schedule_preset_tests {
     fn automerge_patch_preset_injects_packagerules_for_patch_only() {
         use crate::versioning::semver_generic::UpdateType;
         let c = RepoConfig::parse(r#"{"extends": [":automergePatch"]}"#);
-        assert!(!c.automerge, ":automergePatch should not set global automerge");
-        assert!(c.separate_minor_patch, ":automergePatch should set separateMinorPatch");
+        assert!(
+            !c.automerge,
+            ":automergePatch should not set global automerge"
+        );
+        assert!(
+            c.separate_minor_patch,
+            ":automergePatch should set separateMinorPatch"
+        );
         // Patch update → automerge.
-        let ctx = DepContext { dep_name: "express", update_type: Some(UpdateType::Patch), ..Default::default() };
+        let ctx = DepContext {
+            dep_name: "express",
+            update_type: Some(UpdateType::Patch),
+            ..Default::default()
+        };
         let effects = c.collect_rule_effects(&ctx);
         assert_eq!(effects.automerge, Some(true));
         // Minor update → no automerge.
-        let ctx_minor = DepContext { dep_name: "express", update_type: Some(UpdateType::Minor), ..Default::default() };
+        let ctx_minor = DepContext {
+            dep_name: "express",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
         let effects_minor = c.collect_rule_effects(&ctx_minor);
         assert!(effects_minor.automerge.is_none() || effects_minor.automerge == Some(false));
     }
@@ -3370,28 +3444,58 @@ mod schedule_preset_tests {
     #[test]
     fn disable_dev_dependencies_preset_blocks_dev_deps() {
         let c = RepoConfig::parse(r#"{"extends": [":disableDevDependencies"]}"#);
-        let ctx = DepContext { dep_name: "lodash", dep_type: Some("devDependencies"), ..Default::default() };
-        assert!(c.is_update_blocked_ctx(&ctx), "devDependencies should be blocked");
-        let ctx2 = DepContext { dep_name: "lodash", dep_type: Some("dependencies"), ..Default::default() };
-        assert!(!c.is_update_blocked_ctx(&ctx2), "regular dependencies must not be blocked");
+        let ctx = DepContext {
+            dep_name: "lodash",
+            dep_type: Some("devDependencies"),
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "devDependencies should be blocked"
+        );
+        let ctx2 = DepContext {
+            dep_name: "lodash",
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx2),
+            "regular dependencies must not be blocked"
+        );
     }
 
     #[test]
     fn disable_major_updates_preset_blocks_major() {
         use crate::versioning::semver_generic::UpdateType;
         let c = RepoConfig::parse(r#"{"extends": [":disableMajorUpdates"]}"#);
-        let ctx = DepContext { dep_name: "react", update_type: Some(UpdateType::Major), ..Default::default() };
+        let ctx = DepContext {
+            dep_name: "react",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
         assert!(c.is_update_blocked_ctx(&ctx));
-        let ctx2 = DepContext { dep_name: "react", update_type: Some(UpdateType::Minor), ..Default::default() };
+        let ctx2 = DepContext {
+            dep_name: "react",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
         assert!(!c.is_update_blocked_ctx(&ctx2));
     }
 
     #[test]
     fn disable_peer_dependencies_preset() {
         let c = RepoConfig::parse(r#"{"extends": [":disablePeerDependencies"]}"#);
-        let ctx = DepContext { dep_name: "react", dep_type: Some("peerDependencies"), ..Default::default() };
+        let ctx = DepContext {
+            dep_name: "react",
+            dep_type: Some("peerDependencies"),
+            ..Default::default()
+        };
         assert!(c.is_update_blocked_ctx(&ctx));
-        let ctx2 = DepContext { dep_name: "react", dep_type: Some("dependencies"), ..Default::default() };
+        let ctx2 = DepContext {
+            dep_name: "react",
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
         assert!(!c.is_update_blocked_ctx(&ctx2));
     }
 
@@ -3400,17 +3504,29 @@ mod schedule_preset_tests {
     #[test]
     fn security_minimum_release_age_npm_injects_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["security:minimumReleaseAgeNpm"]}"#);
-        let npm_rule = c.package_rules.iter().find(|r| r.match_datasources == vec!["npm"]);
+        let npm_rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.match_datasources == vec!["npm"]);
         assert!(npm_rule.is_some(), "should have a rule for npm datasource");
-        assert_eq!(npm_rule.unwrap().minimum_release_age.as_deref(), Some("3 days"));
+        assert_eq!(
+            npm_rule.unwrap().minimum_release_age.as_deref(),
+            Some("3 days")
+        );
     }
 
     #[test]
     fn unpublish_safe_preset_injects_npm_minimum_release_age() {
         let c = RepoConfig::parse(r#"{"extends": [":unpublishSafe"]}"#);
-        let npm_rule = c.package_rules.iter().find(|r| r.match_datasources == vec!["npm"]);
+        let npm_rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.match_datasources == vec!["npm"]);
         assert!(npm_rule.is_some());
-        assert_eq!(npm_rule.unwrap().minimum_release_age.as_deref(), Some("3 days"));
+        assert_eq!(
+            npm_rule.unwrap().minimum_release_age.as_deref(),
+            Some("3 days")
+        );
     }
 
     // ── scalar config presets ─────────────────────────────────────────────────
@@ -4076,7 +4192,10 @@ mod rule_effects_tests {
         let ctx = DepContext::for_dep("express");
         let effects = c.collect_rule_effects(&ctx);
         // After the rule, labels = ["frontend"] (replaced "base").
-        assert!(!effects.labels.contains(&"base".to_owned()), "rule `labels` should replace repo labels");
+        assert!(
+            !effects.labels.contains(&"base".to_owned()),
+            "rule `labels` should replace repo labels"
+        );
         assert!(effects.labels.contains(&"frontend".to_owned()));
     }
 
@@ -4520,7 +4639,10 @@ mod rule_effects_tests {
     fn group_all_preset_injects_group_rule() {
         let c = RepoConfig::parse(r#"{"extends": ["group:all"]}"#);
         // group:all should set separateMajorMinor: false
-        assert!(!c.separate_major_minor, "group:all implies separateMajorMinor: false");
+        assert!(
+            !c.separate_major_minor,
+            "group:all implies separateMajorMinor: false"
+        );
         // group:all should inject a packageRule grouping everything
         let ctx = DepContext {
             dep_name: "lodash",
@@ -4542,7 +4664,10 @@ mod rule_effects_tests {
             ..Default::default()
         };
         let effects = c.collect_rule_effects(&ctx);
-        assert_eq!(effects.group_name.as_deref(), Some("all non-major dependencies"));
+        assert_eq!(
+            effects.group_name.as_deref(),
+            Some("all non-major dependencies")
+        );
     }
 
     #[test]
@@ -4579,7 +4704,10 @@ mod rule_effects_tests {
     #[test]
     fn major_config_parsed() {
         let c = RepoConfig::parse(r#"{"major": {"automerge": false, "labels": ["breaking"]}}"#);
-        let cfg = c.major_config.as_ref().expect("major config should be present");
+        let cfg = c
+            .major_config
+            .as_ref()
+            .expect("major config should be present");
         assert_eq!(cfg.automerge, Some(false));
         assert_eq!(cfg.labels, vec!["breaking".to_owned()]);
     }
@@ -4587,14 +4715,20 @@ mod rule_effects_tests {
     #[test]
     fn minor_config_parsed() {
         let c = RepoConfig::parse(r#"{"minor": {"automerge": true}}"#);
-        let cfg = c.minor_config.as_ref().expect("minor config should be present");
+        let cfg = c
+            .minor_config
+            .as_ref()
+            .expect("minor config should be present");
         assert_eq!(cfg.automerge, Some(true));
     }
 
     #[test]
     fn patch_config_parsed() {
         let c = RepoConfig::parse(r#"{"patch": {"automerge": true, "prPriority": 5}}"#);
-        let cfg = c.patch_config.as_ref().expect("patch config should be present");
+        let cfg = c
+            .patch_config
+            .as_ref()
+            .expect("patch config should be present");
         assert_eq!(cfg.automerge, Some(true));
         assert_eq!(cfg.pr_priority, Some(5));
     }
@@ -4658,10 +4792,12 @@ mod rule_effects_tests {
         // packageRule sets automerge=true but major config sets automerge=false.
         // major config applies AFTER packageRules → false wins.
         use crate::versioning::semver_generic::UpdateType;
-        let c = RepoConfig::parse(r#"{
+        let c = RepoConfig::parse(
+            r#"{
             "packageRules": [{"matchPackageNames": ["lodash"], "automerge": true}],
             "major": {"automerge": false}
-        }"#);
+        }"#,
+        );
         let ctx = DepContext {
             dep_name: "lodash",
             update_type: Some(UpdateType::Major),
@@ -4675,7 +4811,8 @@ mod rule_effects_tests {
     fn update_type_config_add_labels_accumulates() {
         // addLabels in major config should append to existing labels.
         use crate::versioning::semver_generic::UpdateType;
-        let c = RepoConfig::parse(r#"{"labels": ["renovate"], "major": {"addLabels": ["breaking"]}}"#);
+        let c =
+            RepoConfig::parse(r#"{"labels": ["renovate"], "major": {"addLabels": ["breaking"]}}"#);
         let ctx = DepContext {
             dep_name: "lodash",
             update_type: Some(UpdateType::Major),

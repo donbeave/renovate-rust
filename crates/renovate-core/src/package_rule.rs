@@ -811,28 +811,44 @@ impl UpdateTypeConfig {
             effects.pr_priority = Some(p);
         }
         if self.minimum_release_age.is_some() {
-            effects.minimum_release_age.clone_from(&self.minimum_release_age);
+            effects
+                .minimum_release_age
+                .clone_from(&self.minimum_release_age);
         }
         if self.commit_message_topic.is_some() {
-            effects.commit_message_topic.clone_from(&self.commit_message_topic);
+            effects
+                .commit_message_topic
+                .clone_from(&self.commit_message_topic);
         }
         if self.commit_message_action.is_some() {
-            effects.commit_message_action.clone_from(&self.commit_message_action);
+            effects
+                .commit_message_action
+                .clone_from(&self.commit_message_action);
         }
         if self.commit_message_prefix.is_some() {
-            effects.commit_message_prefix.clone_from(&self.commit_message_prefix);
+            effects
+                .commit_message_prefix
+                .clone_from(&self.commit_message_prefix);
         }
         if self.semantic_commit_type.is_some() {
-            effects.semantic_commit_type.clone_from(&self.semantic_commit_type);
+            effects
+                .semantic_commit_type
+                .clone_from(&self.semantic_commit_type);
         }
         if self.semantic_commit_scope.is_some() {
-            effects.semantic_commit_scope.clone_from(&self.semantic_commit_scope);
+            effects
+                .semantic_commit_scope
+                .clone_from(&self.semantic_commit_scope);
         }
         if self.commit_message_extra.is_some() {
-            effects.commit_message_extra.clone_from(&self.commit_message_extra);
+            effects
+                .commit_message_extra
+                .clone_from(&self.commit_message_extra);
         }
         if self.commit_message_suffix.is_some() {
-            effects.commit_message_suffix.clone_from(&self.commit_message_suffix);
+            effects
+                .commit_message_suffix
+                .clone_from(&self.commit_message_suffix);
         }
     }
 }

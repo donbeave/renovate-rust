@@ -62,11 +62,8 @@ pub(crate) fn apply_update_blocking_to_report(
                 if repo_cfg.is_update_blocked_ctx(&ctx) {
                     dep.status = output::DepStatus::Skipped {
                         reason: if let Some(ut) = update_type {
-                            format!(
-                                "blocked by packageRules (matchUpdateTypes: {:?})",
-                                ut
-                            )
-                            .to_lowercase()
+                            format!("blocked by packageRules (matchUpdateTypes: {:?})", ut)
+                                .to_lowercase()
                         } else {
                             "blocked by packageRules (enabled: false)".into()
                         },
@@ -195,9 +192,7 @@ pub(crate) fn apply_update_blocking_to_report(
                 // For grouped deps, use the group name as the commit message topic
                 // with an empty extra segment, mirroring Renovate's group PR title behaviour.
                 let (effective_topic, effective_extra_final) =
-                    if effects.commit_message_topic.is_none()
-                        && effects.group_name.is_some()
-                    {
+                    if effects.commit_message_topic.is_none() && effects.group_name.is_some() {
                         (effects.group_name.as_deref(), Some(""))
                     } else {
                         (effects.commit_message_topic.as_deref(), effective_extra)
@@ -412,7 +407,6 @@ pub(crate) async fn docker_hub_reports(
     reports
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -420,23 +414,26 @@ mod tests {
     use renovate_core::repo_config::RepoConfig;
 
     fn make_report(deps: Vec<(&str, DepStatus)>) -> RepoReport {
-        let dep_reports = deps.into_iter().map(|(name, status)| DepReport {
-            name: name.to_owned(),
-            branch_name: None,
-            group_name: None,
-            automerge: None,
-            labels: Vec::new(),
-            assignees: Vec::new(),
-            reviewers: Vec::new(),
-            update_type: None,
-            pr_priority: None,
-            pr_title: None,
-            release_timestamp: None,
-            current_version_timestamp: None,
-            dep_type: None,
-            package_name: None,
-            status,
-        }).collect();
+        let dep_reports = deps
+            .into_iter()
+            .map(|(name, status)| DepReport {
+                name: name.to_owned(),
+                branch_name: None,
+                group_name: None,
+                automerge: None,
+                labels: Vec::new(),
+                assignees: Vec::new(),
+                reviewers: Vec::new(),
+                update_type: None,
+                pr_priority: None,
+                pr_title: None,
+                release_timestamp: None,
+                current_version_timestamp: None,
+                dep_type: None,
+                package_name: None,
+                status,
+            })
+            .collect();
         RepoReport {
             repo_slug: "test/repo".to_owned(),
             files: vec![FileReport {
@@ -451,8 +448,20 @@ mod tests {
     fn ignore_deps_skips_matching_dep() {
         let cfg = RepoConfig::parse(r#"{"ignoreDeps": ["lodash"]}"#);
         let mut report = make_report(vec![
-            ("lodash", DepStatus::UpdateAvailable { current: "4.0.0".into(), latest: "4.17.21".into() }),
-            ("react", DepStatus::UpdateAvailable { current: "17.0.0".into(), latest: "18.0.0".into() }),
+            (
+                "lodash",
+                DepStatus::UpdateAvailable {
+                    current: "4.0.0".into(),
+                    latest: "4.17.21".into(),
+                },
+            ),
+            (
+                "react",
+                DepStatus::UpdateAvailable {
+                    current: "17.0.0".into(),
+                    latest: "18.0.0".into(),
+                },
+            ),
         ]);
         apply_ignore_deps_to_report(&mut report, &cfg);
         let deps = &report.files[0].deps;
@@ -463,9 +472,12 @@ mod tests {
     #[test]
     fn ignore_deps_skips_up_to_date_dep_too() {
         let cfg = RepoConfig::parse(r#"{"ignoreDeps": ["express"]}"#);
-        let mut report = make_report(vec![
-            ("express", DepStatus::UpToDate { latest: Some("4.18.2".into()) }),
-        ]);
+        let mut report = make_report(vec![(
+            "express",
+            DepStatus::UpToDate {
+                latest: Some("4.18.2".into()),
+            },
+        )]);
         apply_ignore_deps_to_report(&mut report, &cfg);
         let deps = &report.files[0].deps;
         assert!(matches!(&deps[0].status, DepStatus::Skipped { reason } if reason == "ignoreDeps"));
@@ -474,10 +486,17 @@ mod tests {
     #[test]
     fn ignore_deps_empty_list_is_noop() {
         let cfg = RepoConfig::parse(r#"{}"#);
-        let mut report = make_report(vec![
-            ("lodash", DepStatus::UpdateAvailable { current: "4.0.0".into(), latest: "4.17.21".into() }),
-        ]);
+        let mut report = make_report(vec![(
+            "lodash",
+            DepStatus::UpdateAvailable {
+                current: "4.0.0".into(),
+                latest: "4.17.21".into(),
+            },
+        )]);
         apply_ignore_deps_to_report(&mut report, &cfg);
-        assert!(matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }));
+        assert!(matches!(
+            &report.files[0].deps[0].status,
+            DepStatus::UpdateAvailable { .. }
+        ));
     }
 }

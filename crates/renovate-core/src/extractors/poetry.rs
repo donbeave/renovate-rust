@@ -52,7 +52,6 @@ impl PoetryDepType {
     }
 }
 
-
 /// Why a Poetry dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PoetrySkipReason {

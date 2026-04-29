@@ -47,7 +47,6 @@ impl LeinDepType {
     }
 }
 
-
 /// A single extracted Leiningen dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LeinDep {

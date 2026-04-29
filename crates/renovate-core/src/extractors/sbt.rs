@@ -51,7 +51,6 @@ impl SbtDepType {
     }
 }
 
-
 /// A single extracted SBT dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SbtDep {
