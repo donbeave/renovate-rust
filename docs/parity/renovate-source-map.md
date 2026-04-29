@@ -61,7 +61,7 @@ find where a given TypeScript module is implemented in Rust.
 
 | TypeScript file | Rust file(s) | Status | Notes |
 |-----------------|-------------|--------|-------|
-| `lib/util/package-rules/index.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `matches_context()` + `collect_rule_effects()` |
+| `lib/util/package-rules/index.ts` | `crates/renovate-core/src/repo_config.rs` | partial | `matches_context()` + `collect_rule_effects()`; `is_update_blocked_ctx()` + `is_version_restricted_ctx()` for full-context checks |
 | `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchDepNames` exact/regex/glob/negation |
 | `lib/util/package-rules/package-names.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchPackageNames` exact/regex/glob/negation; deprecated fields merged |
 | `lib/util/package-rules/files.ts` | `crates/renovate-core/src/package_rule.rs` | full | `matchFileNames` |

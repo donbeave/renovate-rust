@@ -739,6 +739,9 @@ impl RepoConfig {
     }
 
     /// Like [`is_update_blocked`] but also checks `matchFileNames`.
+    ///
+    /// Note: this builds a minimal `DepContext`.  For full context including
+    /// `dep_type`, `repository`, etc., use [`is_update_blocked_ctx`].
     pub fn is_update_blocked_for_file(
         &self,
         name: &str,
@@ -755,9 +758,18 @@ impl RepoConfig {
             file_path: Some(file_path),
             ..Default::default()
         };
+        self.is_update_blocked_ctx(&ctx)
+    }
+
+    /// Like [`is_update_blocked_for_file`] but accepts a pre-built `DepContext`.
+    ///
+    /// Prefer this when the caller already holds a fully populated context
+    /// (with `dep_type`, `repository`, `datasource`, etc.) to avoid re-constructing
+    /// it and to ensure all matchers (`matchDepTypes`, `matchRepositories`, …) fire.
+    pub fn is_update_blocked_ctx(&self, ctx: &DepContext<'_>) -> bool {
         self.package_rules
             .iter()
-            .any(|rule| rule.matches_context(&ctx) && rule.enabled == Some(false))
+            .any(|rule| rule.matches_context(ctx) && rule.enabled == Some(false))
     }
 
     /// Return `true` when `proposed_version` does NOT satisfy the
@@ -772,6 +784,9 @@ impl RepoConfig {
     }
 
     /// Like [`is_version_restricted`] but also checks `matchFileNames`.
+    ///
+    /// Note: this builds a minimal `DepContext`.  Use [`is_version_restricted_ctx`]
+    /// when the caller already holds a fully populated context.
     pub fn is_version_restricted_for_file(
         &self,
         name: &str,
@@ -785,8 +800,15 @@ impl RepoConfig {
             file_path: Some(file_path),
             ..Default::default()
         };
+        self.is_version_restricted_ctx(&ctx, proposed_version)
+    }
+
+    /// Like [`is_version_restricted_for_file`] but accepts a pre-built `DepContext`.
+    ///
+    /// Ensures all matchers (`matchDepTypes`, `matchRepositories`, …) fire correctly.
+    pub fn is_version_restricted_ctx(&self, ctx: &DepContext<'_>, proposed_version: &str) -> bool {
         self.package_rules.iter().any(|rule| {
-            if !rule.matches_context(&ctx) {
+            if !rule.matches_context(ctx) {
                 return false;
             }
             let Some(ref av) = rule.allowed_versions else {
@@ -1597,6 +1619,66 @@ mod tests {
         let rule = &c.package_rules[0];
         assert!(rule.dep_type_matches("dependencies"));
         assert!(!rule.dep_type_matches("devDependencies"));
+    }
+
+    #[test]
+    fn match_dep_types_enabled_false_via_ctx_blocks_dev_dep() {
+        // Regression: is_update_blocked_ctx must include dep_type in context so
+        // matchDepTypes + enabled:false actually fires.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["devDependencies"], "enabled": false}]}"#,
+        );
+        // devDependency → should be blocked
+        let ctx_dev = DepContext {
+            dep_name: "jest",
+            dep_type: Some("devDependencies"),
+            update_type: Some(crate::versioning::semver_generic::UpdateType::Minor),
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx_dev),
+            "matchDepTypes:devDependencies + enabled:false should block devDependencies"
+        );
+        // Regular dependency → should NOT be blocked
+        let ctx_prod = DepContext {
+            dep_name: "react",
+            dep_type: Some("dependencies"),
+            update_type: Some(crate::versioning::semver_generic::UpdateType::Minor),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx_prod),
+            "rule should not block production dependencies"
+        );
+    }
+
+    #[test]
+    fn is_version_restricted_ctx_uses_dep_type() {
+        // Regression: is_version_restricted_ctx must use the dep_type in context
+        // so matchDepTypes + allowedVersions correctly applies only to matching dep types.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["devDependencies"], "allowedVersions": "< 2.0"}]}"#,
+        );
+        // devDependency proposing v2.0.0 → restricted (2.0 not < 2.0)
+        let ctx_dev = DepContext {
+            dep_name: "jest",
+            dep_type: Some("devDependencies"),
+            ..Default::default()
+        };
+        assert!(
+            c.is_version_restricted_ctx(&ctx_dev, "2.0.0"),
+            "allowedVersions should restrict devDependency version"
+        );
+        // Production dependency → rule doesn't match → not restricted
+        let ctx_prod = DepContext {
+            dep_name: "jest",
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_version_restricted_ctx(&ctx_prod, "2.0.0"),
+            "rule should not restrict production dependency"
+        );
     }
 
     #[test]

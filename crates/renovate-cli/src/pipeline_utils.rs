@@ -27,46 +27,43 @@ pub(crate) fn apply_update_blocking_to_report(
                 ref latest,
             } = dep.status
             {
-                // Check allowedVersions restriction (file-path-aware).
-                if repo_cfg.is_version_restricted_for_file(&dep.name, &manager, latest, &file_path)
-                {
-                    dep.status = output::DepStatus::Skipped {
-                        reason: "blocked by packageRules (allowedVersions)".into(),
-                    };
-                    continue;
-                }
-                // Check matchUpdateTypes + matchCurrentVersion + matchFileNames + enabled:false.
-                if let Some(update_type) = classify_semver_update(current, latest)
-                    && repo_cfg.is_update_blocked_for_file(
-                        &dep.name,
-                        current,
-                        update_type,
-                        &manager,
-                        &file_path,
-                    )
-                {
-                    dep.status = output::DepStatus::Skipped {
-                        reason: format!(
-                            "blocked by packageRules (matchUpdateTypes: {:?})",
-                            update_type
-                        )
-                        .to_lowercase(),
-                    };
-                    continue;
-                }
-                // Collect packageRule effects first — groupName affects branch naming.
+                // Build the full context once — reused for all blocking checks AND
+                // effect collection so matchers like matchDepTypes / matchRepositories
+                // fire consistently across every check.
+                let update_type = classify_semver_update(current, latest);
                 let ctx = renovate_core::repo_config::DepContext {
                     dep_name: &dep.name,
                     manager: Some(manager.as_str()),
                     file_path: Some(file_path.as_str()),
                     current_value: Some(current.as_str()),
                     new_value: Some(latest.as_str()),
-                    update_type: classify_semver_update(current, latest),
+                    update_type,
                     current_version_timestamp: dep.current_version_timestamp.as_deref(),
                     dep_type: dep.dep_type.as_deref(),
                     repository: Some(repo_slug),
                     ..Default::default()
                 };
+
+                // Check allowedVersions restriction (full context).
+                if repo_cfg.is_version_restricted_ctx(&ctx, latest) {
+                    dep.status = output::DepStatus::Skipped {
+                        reason: "blocked by packageRules (allowedVersions)".into(),
+                    };
+                    continue;
+                }
+                // Check enabled:false rules with full context (matchDepTypes,
+                // matchRepositories, etc. now correctly included).
+                if update_type.is_some() && repo_cfg.is_update_blocked_ctx(&ctx) {
+                    dep.status = output::DepStatus::Skipped {
+                        reason: format!(
+                            "blocked by packageRules (matchUpdateTypes: {:?})",
+                            update_type.unwrap()
+                        )
+                        .to_lowercase(),
+                    };
+                    continue;
+                }
+                // Collect packageRule effects — groupName affects branch naming.
                 let effects = repo_cfg.collect_rule_effects(&ctx);
 
                 // Per-rule schedule gate: if a matching packageRule specifies a
