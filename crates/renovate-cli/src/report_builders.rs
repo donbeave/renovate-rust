@@ -37,7 +37,7 @@ pub(crate) fn build_dep_reports_cargo(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -129,7 +129,7 @@ pub(crate) fn build_dep_reports_npm(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -183,7 +183,7 @@ pub(crate) fn build_dep_reports_npm(
             release_timestamp,
             current_version_timestamp,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -218,7 +218,7 @@ pub(crate) fn build_dep_reports_github_actions(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.action.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -253,7 +253,7 @@ pub(crate) fn build_dep_reports_github_actions(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.action.clone(),
             status,
         });
@@ -288,7 +288,7 @@ pub(crate) fn build_dep_reports_maven(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -322,7 +322,7 @@ pub(crate) fn build_dep_reports_maven(
             release_timestamp: None,
             current_version_timestamp: None,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -357,7 +357,7 @@ pub(crate) fn build_dep_reports_pub(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -391,7 +391,7 @@ pub(crate) fn build_dep_reports_pub(
             release_timestamp: None,
             current_version_timestamp: None,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -426,7 +426,7 @@ pub(crate) fn build_dep_reports_nuget(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.package_id.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -461,7 +461,7 @@ pub(crate) fn build_dep_reports_nuget(
             current_version_timestamp: None,
 
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.package_id.clone(),
             status,
         });
@@ -496,7 +496,7 @@ pub(crate) fn build_dep_reports_composer(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -531,7 +531,7 @@ pub(crate) fn build_dep_reports_composer(
             current_version_timestamp: None,
 
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -566,7 +566,7 @@ pub(crate) fn build_dep_reports_gomod(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.module_path.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -601,7 +601,7 @@ pub(crate) fn build_dep_reports_gomod(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.module_path.clone(),
             status,
         });
@@ -636,7 +636,7 @@ pub(crate) fn build_dep_reports_poetry(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -648,6 +648,9 @@ pub(crate) fn build_dep_reports_poetry(
         let release_timestamp = summary
             .and_then(|r| r.as_ref().ok())
             .and_then(|s| s.latest_timestamp.clone());
+        let current_version_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.current_version_timestamp.clone());
         let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
@@ -672,10 +675,9 @@ pub(crate) fn build_dep_reports_poetry(
             pr_priority: None,
             pr_title: None,
             release_timestamp,
-            current_version_timestamp: None,
-
+            current_version_timestamp,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -710,7 +712,7 @@ pub(crate) fn build_dep_reports_pip(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -751,7 +753,7 @@ pub(crate) fn build_dep_reports_pip(
             release_timestamp,
             current_version_timestamp,
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -786,7 +788,7 @@ pub(crate) fn build_dep_reports_bundler(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -821,7 +823,7 @@ pub(crate) fn build_dep_reports_bundler(
             current_version_timestamp: None,
 
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -856,7 +858,7 @@ pub(crate) fn build_dep_reports_terraform(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -891,7 +893,7 @@ pub(crate) fn build_dep_reports_terraform(
             current_version_timestamp: None,
 
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -926,7 +928,7 @@ pub(crate) fn build_dep_reports_helm(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -961,7 +963,7 @@ pub(crate) fn build_dep_reports_helm(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -996,7 +998,7 @@ pub(crate) fn build_dep_reports_gradle(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.dep_name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -1031,7 +1033,7 @@ pub(crate) fn build_dep_reports_gradle(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.dep_name.clone(),
             status,
         });
@@ -1066,7 +1068,7 @@ pub(crate) fn build_dep_reports_setup_cfg(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -1078,6 +1080,9 @@ pub(crate) fn build_dep_reports_setup_cfg(
         let release_timestamp = summary
             .and_then(|r| r.as_ref().ok())
             .and_then(|s| s.latest_timestamp.clone());
+        let current_version_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.current_version_timestamp.clone());
         let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
@@ -1102,10 +1107,9 @@ pub(crate) fn build_dep_reports_setup_cfg(
             pr_priority: None,
             pr_title: None,
             release_timestamp,
-            current_version_timestamp: None,
-
+            current_version_timestamp,
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
@@ -1140,7 +1144,7 @@ pub(crate) fn build_dep_reports_pipfile(
             current_version_timestamp: None,
 
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status: output::DepStatus::Skipped {
                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap()).to_lowercase(),
@@ -1152,6 +1156,9 @@ pub(crate) fn build_dep_reports_pipfile(
         let release_timestamp = summary
             .and_then(|r| r.as_ref().ok())
             .and_then(|s| s.latest_timestamp.clone());
+        let current_version_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.current_version_timestamp.clone());
         let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_specifier.clone(),
@@ -1176,10 +1183,9 @@ pub(crate) fn build_dep_reports_pipfile(
             pr_priority: None,
             pr_title: None,
             release_timestamp,
-            current_version_timestamp: None,
-
+            current_version_timestamp,
             dep_type: None,
-          package_name: None,
+            package_name: None,
             name: dep.name.clone(),
             status,
         });
