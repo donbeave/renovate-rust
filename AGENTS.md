@@ -110,6 +110,24 @@ the smallest possible diff.
 - When a refactor touches many files, commit it as a single atomic change with
   a clear description of the motivation.
 
+## Test Coverage Parity Goal (agent-only)
+
+The Rust implementation must reach **at minimum the same test coverage as the
+original Renovate TypeScript repository**. Every `it()` test case in every
+`.spec.ts` file in the Renovate reference is a porting requirement.
+
+- A TypeScript test may be satisfied by a Rust test that covers the same
+  behavior, even if the Rust test has a different name or structure.
+- A TypeScript test may be marked `not-applicable` when: the feature is
+  explicitly out of scope for the Rust CLI; or the test exercises TypeScript-
+  internal behavior with no runtime equivalent (type guards, mock infrastructure,
+  generic constraint tests, module resolution). Always record the reason in the
+  test map's Reason column. When in doubt, port the test.
+- Additional Rust tests beyond the TypeScript baseline are welcome and
+  encouraged, but they do not count toward closing parity gaps.
+- Track coverage in `docs/parity/renovate-test-map.md` using the per-test
+  format. The file is the source of truth for parity status.
+
 ## Ported Test Attribution (agent-only)
 
 Every Rust test that was ported from a Renovate TypeScript spec file **must**
