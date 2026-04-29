@@ -223,4 +223,29 @@ mod tests {
         assert_eq!(deps.docker_deps.len(), 2);
         assert_eq!(deps.version_deps.len(), 1);
     }
+
+    #[test]
+    fn empty_object_returns_empty() {
+        // Ported: "returns null when no image or features properties are defined" — devcontainer/extract.spec.ts line 263
+        let deps = extract("{}");
+        assert!(deps.docker_deps.is_empty());
+        assert!(deps.version_deps.is_empty());
+    }
+
+    #[test]
+    fn null_features_value_returns_empty() {
+        // Ported: "returns null when the features property is null" — devcontainer/extract.spec.ts line 278
+        let content = r#"{"features": null}"#;
+        let deps = extract(content);
+        assert!(deps.docker_deps.is_empty());
+    }
+
+    #[test]
+    fn local_feature_path_excluded_from_version_deps() {
+        // Local features (./localfeature) are Docker-classified but produce no version dep.
+        let content = r#"{"features": {"./localfeature": {}}}"#;
+        let deps = extract(content);
+        // Local path is classified as a Docker dep (image: "./localfeature") but not a version dep.
+        assert!(deps.version_deps.is_empty());
+    }
 }
