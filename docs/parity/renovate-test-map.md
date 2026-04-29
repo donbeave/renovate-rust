@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 34 / 67 actionable tests ported (51%) — updated 2026-04-29
+**Overall progress:** 42 / 96 actionable tests ported (44%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -251,6 +251,64 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/git-submodules/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/extract.spec.ts
+**Total tests:** 8 | **Ported:** 4 | **Actionable:** 8 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| empty submodule returns null | 48 | ported | `git_submodules.rs` | `empty_content_returns_no_deps` | — |
+| currentValue is unset when no branch is specified | 52 | ported | `git_submodules.rs` | `single_submodule_no_branch` | — |
+| given branch is used when branch is specified | 58 | ported | `git_submodules.rs` | `single_submodule_with_branch` | — |
+| submodule packageName is constructed from relative path | 64 | pending | — | — | — |
+| fallback to current branch if special value is detected | 89 | ported | `git_submodules.rs` | `branch_dot_normalized_to_none` | — |
+| given semver version is extracted from branch and versioning is set to semver | 127 | ported | `git_submodules.rs` | `semver_and_non_semver_branches` | — |
+
+### `extractPackageFile() › submodule sourceUrl is determined from packageName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| when using SSH clone URL | 73 | pending | — | — | — |
+| when using a relative path | 80 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gomod/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
+**Total tests:** 21 | **Ported:** 4 | **Actionable:** 21 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 12 | ported | `gomod.rs` | `empty_content_returns_empty` | — |
+| extracts single-line requires | 16 | ported | `gomod.rs` | `single_line_require` | — |
+| extracts multi-line requires | 26 | ported | `gomod.rs` | `require_block` | — |
+| ignores empty spaces in multi-line requires | 34 | pending | — | — | — |
+| extracts replace directives from multi-line and single line | 48 | pending | — | — | — |
+| extracts replace directives from non-public module path | 136 | pending | — | — | — |
+| ignores exclude directives from multi-line and single line | 193 | ported | `gomod.rs` | `exclude_block_ignored` | — |
+| extracts the toolchain directive | 212 | pending | — | — | — |
+| extracts single-line tool directives | 263 | pending | — | — | — |
+| extracts multi-line tool directives | 282 | pending | — | — | — |
+| extracts tool directives with required modules | 304 | pending | — | — | — |
+| extracts tool directives of sub-modules | 323 | pending | — | — | — |
+| extracts tool directives with exact match | 370 | pending | — | — | — |
+| extracts tool directives with no matching dependencies | 389 | pending | — | — | — |
+| ignores directives unrelated to dependencies | 402 | pending | — | — | — |
+| marks placeholder pseudo versions with skipReason invalid-version | 426 | pending | — | — | — |
+| parses go $version directive | 528 | pending | — | — | — |
+| the extracted version can be used as a SemVer constraint | 582 | pending | — | — | — |
+| matches version 1.19, even though it is not valid SemVer | 586 | pending | — | — | — |
+| matches the current SemVer minor | 590 | pending | — | — | — |
+| does not match the next SemVer minor | 595 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -280,10 +338,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/dockerfile/extract.spec.ts` | 75 | `crates/renovate-core/src/extractors/dockerfile.rs` | 16 | partial |
 | `lib/modules/manager/fleet/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/fleet.rs` | 10 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
-| `lib/modules/manager/git-submodules/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/git_submodules.rs` | 11 | partial |
 | `lib/modules/manager/github-actions/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/github_actions.rs` | 28 | partial |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/gitlabci.rs` | 8 | partial |
-| `lib/modules/manager/gomod/extract.spec.ts` | 21 | `crates/renovate-core/src/extractors/gomod.rs` | 9 | partial |
 | `lib/modules/manager/gradle-wrapper/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | 8 | partial |
 | `lib/modules/manager/gradle/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/gradle.rs` | 20 | partial |
 | `lib/modules/manager/helm-values/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/helm_values.rs` | 7 | partial |

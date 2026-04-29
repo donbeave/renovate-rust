@@ -191,6 +191,7 @@ fn strip_comment(line: &str) -> &str {
 mod tests {
     use super::*;
 
+    // Ported: "extracts single-line requires" — gomod/extract.spec.ts line 16
     #[test]
     fn single_line_require() {
         let content = r#"
@@ -211,6 +212,7 @@ require github.com/pkg/errors v0.9.1
         );
     }
 
+    // Ported: "extracts multi-line requires" — gomod/extract.spec.ts line 26
     #[test]
     fn require_block() {
         let content = r#"
@@ -256,6 +258,7 @@ replace github.com/pkg/errors => ../errors
         assert_eq!(deps[0].skip_reason, Some(GoModSkipReason::LocalReplace));
     }
 
+    // Ported: "ignores exclude directives from multi-line and single line" — gomod/extract.spec.ts line 193
     #[test]
     fn exclude_block_ignored() {
         let content = r#"
@@ -326,6 +329,7 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         assert!(spew.is_indirect);
     }
 
+    // Ported: "returns null for empty" — gomod/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());

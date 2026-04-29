@@ -158,11 +158,13 @@ pub fn extract(content: &str) -> Vec<GitSubmoduleDep> {
 mod tests {
     use super::*;
 
+    // Ported: "empty submodule returns null" — git-submodules/extract.spec.ts line 48
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "currentValue is unset when no branch is specified" — git-submodules/extract.spec.ts line 52
     #[test]
     fn single_submodule_no_branch() {
         let content = r#"
@@ -178,6 +180,7 @@ mod tests {
         assert_eq!(deps[0].branch, None);
     }
 
+    // Ported: "given branch is used when branch is specified" — git-submodules/extract.spec.ts line 58
     #[test]
     fn single_submodule_with_branch() {
         let content = r#"
@@ -190,6 +193,7 @@ mod tests {
         assert_eq!(deps[0].branch.as_deref(), Some("staging"));
     }
 
+    // Ported: "fallback to current branch if special value is detected" — git-submodules/extract.spec.ts line 89
     #[test]
     fn branch_dot_normalized_to_none() {
         let content = r#"
@@ -274,6 +278,7 @@ mod tests {
         assert_eq!(deps[0].url, "../../PowerShell/PowerShell-Docs");
     }
 
+    // Ported: "given semver version is extracted from branch and versioning is set to semver" — git-submodules/extract.spec.ts line 127
     #[test]
     fn semver_and_non_semver_branches() {
         let content = r#"
