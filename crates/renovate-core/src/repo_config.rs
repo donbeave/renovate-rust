@@ -417,8 +417,12 @@ impl CustomManager {
     }
 
     /// Apply this custom manager's regex patterns to `content` and return
-    /// all extracted dependencies.  Implements the `"any"` strategy:
-    /// each pattern is applied globally and each match yields one dep.
+    /// all extracted dependencies.
+    ///
+    /// Supports two strategies (controlled by `match_strings_strategy`):
+    /// - `"any"` (default): each pattern is applied globally; each match yields one dep.
+    /// - `"combination"`: all patterns are applied globally; all captures are merged
+    ///   into a single dep (last capture of each named group wins).
     ///
     /// Named capture groups recognised:
     /// `datasource`, `depName`, `packageName`, `currentValue`,
@@ -426,10 +430,13 @@ impl CustomManager {
     /// Template fields fill in for missing capture groups.
     ///
     /// Renovate reference:
-    /// `lib/modules/manager/custom/regex/strategies.ts` — `handleAny`.
+    /// `lib/modules/manager/custom/regex/strategies.ts` — `handleAny`, `handleCombination`.
     pub fn extract_deps(&self, content: &str) -> Vec<CustomExtractedDep> {
         if self.custom_type != "regex" || self.match_strings.is_empty() {
             return Vec::new();
+        }
+        if self.match_strings_strategy == "combination" {
+            return self.extract_deps_combination(content);
         }
         let mut deps = Vec::new();
         for pattern in &self.match_strings {
@@ -495,6 +502,81 @@ impl CustomManager {
             }
         }
         deps
+    }
+
+    /// Combination strategy: apply all patterns globally, merge all captures
+    /// into one dep (last capture of each group wins), then build a single dep.
+    ///
+    /// Renovate reference: `lib/modules/manager/custom/regex/strategies.ts` — `handleCombination`.
+    fn extract_deps_combination(&self, content: &str) -> Vec<CustomExtractedDep> {
+        let mut merged: std::collections::HashMap<&str, String> = std::collections::HashMap::new();
+
+        for pattern in &self.match_strings {
+            let bare = if pattern.starts_with('/') {
+                pattern
+                    .trim_start_matches('/')
+                    .rsplit_once('/')
+                    .map(|(p, _flags)| p)
+                    .unwrap_or(pattern.as_str())
+            } else {
+                pattern.as_str()
+            };
+            let Ok(re) = regex::Regex::new(bare) else {
+                tracing::debug!(pattern = %bare, "customManagers combination: invalid regex; skipping");
+                continue;
+            };
+            for caps in re.captures_iter(content) {
+                for name in &[
+                    "datasource",
+                    "depName",
+                    "packageName",
+                    "currentValue",
+                    "versioning",
+                    "registryUrl",
+                    "extractVersion",
+                ] {
+                    if let Some(m) = caps.name(name) {
+                        merged.insert(name, m.as_str().to_owned());
+                    }
+                }
+            }
+        }
+
+        // Apply template defaults for any missing groups.
+        let datasource = merged
+            .remove("datasource")
+            .or_else(|| self.datasource_template.clone())
+            .unwrap_or_default();
+        let dep_name = merged
+            .remove("depName")
+            .or_else(|| self.dep_name_template.clone())
+            .unwrap_or_default();
+        let current_value = merged.remove("currentValue").unwrap_or_default();
+        if dep_name.is_empty() || current_value.is_empty() || datasource.is_empty() {
+            return Vec::new();
+        }
+        let package_name = merged
+            .remove("packageName")
+            .or_else(|| self.package_name_template.clone());
+        let versioning = merged
+            .remove("versioning")
+            .or_else(|| self.versioning_template.clone());
+        let registry_url = merged
+            .remove("registryUrl")
+            .or_else(|| self.registry_url_template.clone());
+        let extract_version = merged
+            .remove("extractVersion")
+            .or_else(|| self.extract_version_template.clone());
+
+        vec![CustomExtractedDep {
+            dep_name,
+            package_name,
+            current_value,
+            datasource,
+            versioning,
+            registry_url,
+            extract_version,
+        }]
     }
 }
 
@@ -8792,6 +8874,55 @@ mod rule_effects_tests {
         assert!(
             !cm.matches_file("package.json"),
             "package.json must not match"
+        );
+    }
+
+    #[test]
+    fn custom_manager_combination_strategy_merges_captures() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            file_patterns: vec![".env".to_owned()],
+            match_strings: vec![
+                r"datasource=(?P<datasource>[\w-]+)".to_owned(),
+                r"depName=(?P<depName>[\w-]+)".to_owned(),
+                r"VERSION=(?P<currentValue>[^\s]+)".to_owned(),
+            ],
+            match_strings_strategy: "combination".to_owned(),
+            ..Default::default()
+        };
+        // Each pattern matches on a different line; combination merges them.
+        let content = "datasource=github-releases\ndepName=my-tool\nVERSION=1.2.3\n";
+        let deps = cm.extract_deps(content);
+        assert_eq!(
+            deps.len(),
+            1,
+            "combination strategy must produce exactly one dep"
+        );
+        let dep = &deps[0];
+        assert_eq!(dep.datasource, "github-releases");
+        assert_eq!(dep.dep_name, "my-tool");
+        assert_eq!(dep.current_value, "1.2.3");
+    }
+
+    #[test]
+    fn custom_manager_combination_incomplete_match_returns_empty() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            file_patterns: vec![".env".to_owned()],
+            match_strings: vec![
+                r"datasource=(?P<datasource>[\w-]+)".to_owned(),
+                // No depName pattern → dep_name will be empty
+                r"VERSION=(?P<currentValue>[^\s]+)".to_owned(),
+            ],
+            match_strings_strategy: "combination".to_owned(),
+            ..Default::default()
+        };
+        let content = "datasource=npm\nVERSION=1.0.0\n";
+        // Missing depName and no depNameTemplate → dep is incomplete → empty result.
+        let deps = cm.extract_deps(content);
+        assert!(
+            deps.is_empty(),
+            "incomplete combination match must return empty"
         );
     }
 }

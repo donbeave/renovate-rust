@@ -166,6 +166,95 @@ async fn lookup_custom_deps(
                     },
                 }
             }
+            "pypi" => {
+                use renovate_core::datasources::pypi as pypi_datasource;
+                match pypi_datasource::fetch_versions(http, pkg, pypi_datasource::PYPI_API).await {
+                    Ok(entry) => version_status(&dep.current_value, &entry.latest),
+                    Err(e) => output::DepStatus::LookupError {
+                        message: format!("PyPI lookup failed: {e}"),
+                    },
+                }
+            }
+            "maven" => {
+                use renovate_core::datasources::maven as maven_datasource;
+                match maven_datasource::fetch_latest(pkg, http).await {
+                    Ok(Some(ver)) => version_status(&dep.current_value, &ver),
+                    Ok(None) => output::DepStatus::LookupError {
+                        message: format!("Maven Central: artifact '{pkg}' not found"),
+                    },
+                    Err(e) => output::DepStatus::LookupError {
+                        message: format!("Maven lookup failed: {e}"),
+                    },
+                }
+            }
+            "nuget" => {
+                use renovate_core::datasources::nuget as nuget_datasource;
+                match nuget_datasource::fetch_latest(pkg, http, nuget_datasource::NUGET_API).await {
+                    Ok(Some(ver)) => version_status(&dep.current_value, &ver),
+                    Ok(None) => output::DepStatus::LookupError {
+                        message: format!("NuGet: package '{pkg}' not found"),
+                    },
+                    Err(e) => output::DepStatus::LookupError {
+                        message: format!("NuGet lookup failed: {e}"),
+                    },
+                }
+            }
+            "gitlab-tags" => {
+                use renovate_core::datasources::gitlab_tags as gitlab_tags_datasource;
+                match gitlab_tags_datasource::fetch_latest_tag(
+                    pkg,
+                    http,
+                    gitlab_tags_datasource::GITLAB_API,
+                )
+                .await
+                {
+                    Ok(Some(tag)) => version_status(&dep.current_value, &tag),
+                    Ok(None) => output::DepStatus::LookupError {
+                        message: format!("GitLab tags: no tags for '{pkg}'"),
+                    },
+                    Err(e) => output::DepStatus::LookupError {
+                        message: format!("GitLab tags lookup failed: {e}"),
+                    },
+                }
+            }
+            // docker/docker-hub — use the dep's registryUrl or the docker hub API.
+            // customManagers provides image name as depName and tag as currentValue.
+            "docker" => {
+                let image = pkg;
+                let tag = dep.current_value.trim_start_matches('v');
+                use renovate_core::datasources::docker_hub;
+                let dep_input = docker_hub::DockerDepInput {
+                    dep_name: format!("{image}:{tag}"),
+                    image: image.to_owned(),
+                    tag: tag.to_owned(),
+                };
+                match docker_hub::fetch_updates_concurrent(
+                    http,
+                    &[dep_input],
+                    docker_hub::DOCKER_HUB_API,
+                    1,
+                )
+                .await
+                .into_iter()
+                .next()
+                {
+                    Some(update) => match update.summary {
+                        Ok(summary) => {
+                            if let Some(latest) = summary.latest {
+                                version_status(&dep.current_value, &latest)
+                            } else {
+                                output::DepStatus::UpToDate { latest: None }
+                            }
+                        }
+                        Err(e) => output::DepStatus::LookupError {
+                            message: format!("Docker Hub lookup failed: {e}"),
+                        },
+                    },
+                    None => output::DepStatus::LookupError {
+                        message: format!("Docker Hub: image '{image}' not found or no tags"),
+                    },
+                }
+            }
             other => {
                 tracing::debug!(
                     repo = %repo_slug,
