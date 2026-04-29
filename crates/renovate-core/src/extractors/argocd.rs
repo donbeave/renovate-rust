@@ -300,4 +300,41 @@ spec:
             Some(ArgocdSkipReason::UnspecifiedVersion)
         );
     }
+
+    #[test]
+    fn empty_content_returns_empty() {
+        // Ported: "returns null for empty" — argocd/extract.spec.ts line 11
+        assert!(extract("nothing here").is_empty());
+        assert!(extract("").is_empty());
+    }
+
+    #[test]
+    fn double_quoted_apiversion_accepted() {
+        // Ported: "return result for double quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 34
+        let content = r#"
+apiVersion: "argoproj.io/v1alpha1"
+kind: Application
+spec:
+  source:
+    chart: kube-state-metrics
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 2.4.1
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "kube-state-metrics");
+        assert_eq!(deps[0].current_value, "2.4.1");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    #[test]
+    fn single_quoted_apiversion_accepted() {
+        // Ported: "return result for single quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 61
+        let content = "apiVersion: 'argoproj.io/v1alpha1'\nkind: Application\nspec:\n  source:\n    chart: kube-state-metrics\n    repoURL: https://prometheus-community.github.io/helm-charts\n    targetRevision: 2.4.1\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "kube-state-metrics");
+        assert_eq!(deps[0].current_value, "2.4.1");
+        assert!(deps[0].skip_reason.is_none());
+    }
 }

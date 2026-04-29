@@ -51,13 +51,13 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/defaults.ts` | — | `prHourlyLimit` default `2` | `crates/renovate-core/src/repo_config.rs` | `pr_hourly_limit_default` | ported |
 | `lib/config/defaults.ts` | — | `separateMajorMinor` default `true` | `crates/renovate-core/src/repo_config.rs` | `separate_major_minor_default_true` | ported |
 | `lib/config/defaults.ts` | — | `separateMinorPatch` default `false` | `crates/renovate-core/src/repo_config.rs` | `separate_minor_patch_default_false` | ported |
-| `lib/config/options/index.ts` | — | `schedule`, `timezone` config fields | `crates/renovate-core/src/repo_config.rs` | `schedule_parsed_into_repo_config`, `timezone_parsed` | ported |
-| `lib/config/options/index.ts` | — | `automerge` defaults false | `crates/renovate-core/src/repo_config.rs` | `automerge_defaults_false`, `automerge_parsed_true` | ported |
-| `lib/config/options/index.ts` | — | `labels`, `assignees`, `reviewers` | `crates/renovate-core/src/repo_config.rs` | `labels_parsed`, `reviewers_and_assignees_parsed` | ported |
-| `lib/config/options/index.ts` | — | `groupName` at repo and rule level | `crates/renovate-core/src/repo_config.rs` | `group_name_parsed_at_repo_level`, `package_rule_group_name_parsed` | ported |
-| `lib/config/options/index.ts` | — | `baseBranches` list | `crates/renovate-core/src/repo_config.rs` | `base_branches_parsed` | ported |
-| `lib/config/options/index.ts` | — | `additionalBranchPrefix` parsed + wired to branch_name | `crates/renovate-core/src/repo_config.rs` | `additional_branch_prefix_default_empty`, `additional_branch_prefix_parsed` | ported |
-| `lib/config/options/index.ts` | — | `labels` + `addLabels` seed rule effects | `crates/renovate-core/src/repo_config.rs` | `repo_level_labels_seed_effects`, `add_labels_merged_with_labels`, `rule_labels_append_to_repo_labels` | ported |
+| `lib/config/options/index.spec.ts` | — | `schedule`, `timezone` config fields | `crates/renovate-core/src/repo_config.rs` | `schedule_parsed_into_repo_config`, `timezone_parsed` | ported |
+| `lib/config/options/index.spec.ts` | — | `automerge` defaults false | `crates/renovate-core/src/repo_config.rs` | `automerge_defaults_false`, `automerge_parsed_true` | ported |
+| `lib/config/options/index.spec.ts` | — | `labels`, `assignees`, `reviewers` | `crates/renovate-core/src/repo_config.rs` | `labels_parsed`, `reviewers_and_assignees_parsed` | ported |
+| `lib/config/options/index.spec.ts` | — | `groupName` at repo and rule level | `crates/renovate-core/src/repo_config.rs` | `group_name_parsed_at_repo_level`, `package_rule_group_name_parsed` | ported |
+| `lib/config/options/index.spec.ts` | — | `baseBranches` list | `crates/renovate-core/src/repo_config.rs` | `base_branches_parsed` | ported |
+| `lib/config/options/index.spec.ts` | — | `additionalBranchPrefix` parsed + wired to branch_name | `crates/renovate-core/src/repo_config.rs` | `additional_branch_prefix_default_empty`, `additional_branch_prefix_parsed` | ported |
+| `lib/config/options/index.spec.ts` | — | `labels` + `addLabels` seed rule effects | `crates/renovate-core/src/repo_config.rs` | `repo_level_labels_seed_effects`, `add_labels_merged_with_labels`, `rule_labels_append_to_repo_labels` | ported |
 
 ---
 
@@ -107,13 +107,13 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/managers.spec.ts` | — | undefined manager + `matchManagers` set → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `match_managers_no_manager_no_rule_fire` | ported |
 | `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` absent → fires for any manager | `crates/renovate-core/src/repo_config.rs` | `match_managers_undefined_rule_fires_for_any_manager` | ported |
 | `lib/util/package-rules/managers.spec.ts` | — | legacy `manager:'regex'` matches `matchManagers:['custom.regex']` | `crates/renovate-core/src/repo_config.rs` | `match_managers_legacy_regex_matches_custom_regex_rule` | ported |
-| `lib/util/string-match.ts` | — | `matchRegexOrGlob` exact | `crates/renovate-core/src/string_match.rs` | `exact_match` | ported |
-| `lib/util/string-match.ts` | — | `matchRegexOrGlob` regex `/pattern/` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_match` | ported |
-| `lib/util/string-match.ts` | — | `matchRegexOrGlob` regex `/pattern/flags` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_with_flags_match` | ported |
-| `lib/util/string-match.ts` | — | `matchRegexOrGlob` glob `npm*` | `crates/renovate-core/src/string_match.rs` | `glob_star_prefix` | ported |
-| `lib/util/string-match.ts` | — | `matchRegexOrGlobList` empty → false | `crates/renovate-core/src/string_match.rs` | `empty_list_returns_false` | ported |
-| `lib/util/string-match.ts` | — | `matchRegexOrGlobList` positive list | `crates/renovate-core/src/string_match.rs` | `positive_list_matches` | ported |
-| `lib/util/string-match.ts` | — | `matchRegexOrGlobList` negation `!pattern` | `crates/renovate-core/src/string_match.rs` | `negation_excludes_input`, `all_negative_patterns_allow_non_matching` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlob` exact | `crates/renovate-core/src/string_match.rs` | `exact_match` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlob` regex `/pattern/` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_match` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlob` regex `/pattern/flags` | `crates/renovate-core/src/string_match.rs` | `regex_pattern_with_flags_match` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlob` glob `npm*` | `crates/renovate-core/src/string_match.rs` | `glob_star_prefix` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` empty → false | `crates/renovate-core/src/string_match.rs` | `empty_list_returns_false` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` positive list | `crates/renovate-core/src/string_match.rs` | `positive_list_matches` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` negation `!pattern` | `crates/renovate-core/src/string_match.rs` | `negation_excludes_input`, `all_negative_patterns_allow_non_matching` | ported |
 | `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` case-insensitive glob `'TEST'` vs `'t*'` → true | `crates/renovate-core/src/string_match.rs` | `glob_is_case_insensitive_matching_renovate_nocase` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` case-insensitive URL matching (bare string) | `crates/renovate-core/src/string_match.rs` | `exact_match_is_case_insensitive` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchSourceUrls` with glob patterns (case-insensitive) | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_glob` | ported |
@@ -367,8 +367,8 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 | Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
 |--------------------|------|---------------|---------------|-----------|--------|
-| `lib/config/options/index.ts` | — | Empty `enabledManagers` → all non-disabled active | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_empty_means_all_active` | ported |
-| `lib/config/options/index.ts` | — | Non-empty `enabledManagers` → whitelist | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_parsed` | ported |
+| `lib/config/options/index.spec.ts` | — | Empty `enabledManagers` → all non-disabled active | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_empty_means_all_active` | ported |
+| `lib/config/options/index.spec.ts` | — | Non-empty `enabledManagers` → whitelist | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_parsed` | ported |
 | `lib/modules/manager/git-submodules/index.ts` | — | Disabled-by-default manager skipped without explicit list | `crates/renovate-core/src/repo_config.rs` | `disabled_by_default_manager_skipped_without_explicit_list` | ported |
 | `lib/modules/manager/git-submodules/index.ts` | — | Disabled-by-default manager enabled when listed | `crates/renovate-core/src/repo_config.rs` | `disabled_by_default_manager_enabled_when_explicitly_listed` | ported |
 
@@ -381,9 +381,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/workers/repository/updates/flatten.spec.ts` | 20 | `sanitizeDepName` sanitizes URLs | `crates/renovate-core/src/branch.rs` | `sanitize_url_style_dep` | ported |
 | `lib/workers/repository/updates/flatten.spec.ts` | — | Scoped npm package `@org/pkg` → `org-pkg` | `crates/renovate-core/src/branch.rs` | `sanitize_scoped_npm_package` | ported |
 | `lib/workers/repository/updates/flatten.spec.ts` | — | `@types/pkg` → strips `@types/` prefix | `crates/renovate-core/src/branch.rs` | `sanitize_types_prefix_stripped` | ported |
-| `lib/config/options/index.ts` | 2368 | Default `branchTopic` = `{dep}-{major}.x` | `crates/renovate-core/src/branch.rs` | `branch_topic_default_no_minor_component` | ported |
-| `lib/config/options/index.ts` | 2368 | `separateMinorPatch=true` + patch → `{dep}-{major}.{minor}.x` | `crates/renovate-core/src/branch.rs` | `branch_topic_separate_minor_patch_for_patch_update` | ported |
-| `lib/config/options/index.ts` | 2348 | Default `branchName` = `{prefix}{topic}` | `crates/renovate-core/src/branch.rs` | `branch_name_default_prefix`, `branch_name_roundtrip` | ported |
+| `lib/config/options/index.spec.ts` | 2368 | Default `branchTopic` = `{dep}-{major}.x` | `crates/renovate-core/src/branch.rs` | `branch_topic_default_no_minor_component` | ported |
+| `lib/config/options/index.spec.ts` | 2368 | `separateMinorPatch=true` + patch → `{dep}-{major}.{minor}.x` | `crates/renovate-core/src/branch.rs` | `branch_topic_separate_minor_patch_for_patch_update` | ported |
+| `lib/config/options/index.spec.ts` | 2348 | Default `branchName` = `{prefix}{topic}` | `crates/renovate-core/src/branch.rs` | `branch_name_default_prefix`, `branch_name_roundtrip` | ported |
 | `lib/workers/repository/updates/branch-name.spec.ts` | — | `cleanBranchName` strips leading/trailing dots | `crates/renovate-core/src/branch.rs` | `branch_name_roundtrip` | partial |
 | `lib/workers/repository/updates/branch-name.spec.ts` | 269 | realistic defaults: `renovate/jest-42.x` | `crates/renovate-core/src/branch.rs` | `branch_name_roundtrip` | partial (no Handlebars template) |
 | `lib/workers/repository/updates/branch-name.spec.ts` | 316 | `hashedBranchLength` produces truncated hash | `crates/renovate-core/src/branch.rs` | `hashed_branch_length_produces_exact_length` | ported |
@@ -454,9 +454,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 | Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
 |--------------------|------|---------------|---------------|-----------|--------|
-| `lib/config/options/index.ts` | — | `ignorePaths` glob pattern match | `crates/renovate-core/src/repo_config.rs` | `ignore_paths_glob_excludes`, `ignore_paths_plain_prefix` | ported |
-| `lib/config/options/index.ts` | — | `ignoreDeps` exact match | `crates/renovate-core/src/repo_config.rs` | `ignore_deps_parsed` | ported |
-| `lib/config/options/index.ts` | — | `ignoreVersions` global list | `crates/renovate-core/src/repo_config.rs` | `ignore_versions_regex_glob`, `ignore_versions_semver_range` | ported |
+| `lib/config/options/index.spec.ts` | — | `ignorePaths` glob pattern match | `crates/renovate-core/src/repo_config.rs` | `ignore_paths_glob_excludes`, `ignore_paths_plain_prefix` | ported |
+| `lib/config/options/index.spec.ts` | — | `ignoreDeps` exact match | `crates/renovate-core/src/repo_config.rs` | `ignore_deps_parsed` | ported |
+| `lib/config/options/index.spec.ts` | — | `ignoreVersions` global list | `crates/renovate-core/src/repo_config.rs` | `ignore_versions_regex_glob`, `ignore_versions_semver_range` | ported |
 
 ---
 
