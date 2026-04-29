@@ -149,4 +149,25 @@ pipeline:
         assert_eq!(deps.len(), 1);
         assert!(deps[0].skip_reason.is_some());
     }
+
+    #[test]
+    fn no_image_keys_returns_empty() {
+        // Ported: "returns null for non-object YAML" — crow/extract.spec.ts line 10
+        assert!(extract("nothing here").is_empty());
+        assert!(extract("clone: null").is_empty());
+    }
+
+    #[test]
+    fn no_dependencies_returns_empty() {
+        // Ported: "return null when no dependencies are provided" — crow/extract.spec.ts line 348
+        let content = "info:\n  version:\n    3.5\n";
+        assert!(extract(content).is_empty());
+    }
+
+    #[test]
+    fn pipeline_without_valid_images_returns_empty() {
+        // Ported: "returns null when pipeline keys exist but contain no valid images" — crow/extract.spec.ts line 390
+        let content = "pipeline:\n  test:\n    script: echo 'hello'\n";
+        assert!(extract(content).is_empty());
+    }
 }

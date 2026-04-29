@@ -105,11 +105,17 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
                     });
                 }
                 Some(tag_val) => {
-                    let source = if git_url.contains("github.com") {
+                    // Only use GitHub datasource when the host is exactly "github.com"
+                    // (not subdomains like github.com.example.com).
+                    let is_github = git_url.starts_with("https://github.com/")
+                        || git_url.starts_with("http://github.com/")
+                        || git_url.starts_with("git@github.com:");
+                    let source = if is_github {
                         let repo = git_url
                             .trim_end_matches(".git")
                             .trim_start_matches("https://github.com/")
                             .trim_start_matches("http://github.com/")
+                            .trim_start_matches("git@github.com:")
                             .to_owned();
                         PuppetSource::GitHub(repo)
                     } else {
@@ -188,6 +194,14 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
             pending_version = cap.get(2).map(|m| m.as_str().to_owned());
             pending_git = None;
             pending_tag = None;
+            // Also extract inline symbol key-value pairs on the same line (e.g. :git => '...' :tag => '...')
+            for kv in SYMBOL_KV_RE.captures_iter(trimmed) {
+                match &kv[1] {
+                    "git" => pending_git = Some(kv[2].to_owned()),
+                    "tag" => pending_tag = Some(kv[2].to_owned()),
+                    _ => {}
+                }
+            }
             continuation = trimmed.ends_with(',');
         } else if continuation || trimmed.starts_with(':') {
             // Continuation line — extract symbol key-value pairs
@@ -303,5 +317,24 @@ mod 'puppetlabs/concat', '7.1.1'
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "puppetlabs/apache");
+    }
+
+    #[test]
+    fn empty_returns_empty() {
+        // Ported: "returns null for empty Puppetfile" — puppet/extract.spec.ts line 10
+        assert!(extract("").is_empty());
+    }
+
+    #[test]
+    fn non_github_host_uses_git_tags_datasource() {
+        // Ported: "Use GithubTagsDatasource only if host is exactly github.com" — spec line 125
+        // github.com.example.com is NOT github.com → should use GitTags
+        let content = "mod 'apache', :git => 'https://github.com.example.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "apache");
+        assert_eq!(deps[0].current_value, "0.9.0");
+        // should NOT be GitHub datasource since host is not exactly github.com
+        assert!(!matches!(deps[0].source, PuppetSource::GitHub { .. }));
     }
 }
