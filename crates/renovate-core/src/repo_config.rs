@@ -897,6 +897,12 @@ fn migrate_schedule_string(s: String) -> String {
         "saturday",
         "sunday",
     ];
+    // "on every weekday" → "every weekday"
+    let s = if s.contains("on every weekday") {
+        s.replace("on every weekday", "every weekday")
+    } else {
+        s
+    };
     for day in DAYS {
         let every_day = format!("every {day}");
         if s.ends_with(&every_day) {
@@ -905,6 +911,77 @@ fn migrate_schedule_string(s: String) -> String {
         }
     }
     s
+}
+
+/// Parse a schedule time expression like "10pm", "7am", "10:00pm" → hour in 0–23 range.
+/// Returns `None` when the format is not recognized.
+fn parse_schedule_hour(s: &str) -> Option<u32> {
+    let s = s.trim();
+    if let Some(h) = s.strip_suffix("pm") {
+        let (h, _) = h.split_once(':').unwrap_or((h, ""));
+        let hour: u32 = h.parse().ok()?;
+        Some(if hour == 12 { 12 } else { hour + 12 })
+    } else if let Some(h) = s.strip_suffix("am") {
+        let (h, _) = h.split_once(':').unwrap_or((h, ""));
+        let hour: u32 = h.parse().ok()?;
+        Some(if hour == 12 { 0 } else { hour })
+    } else {
+        None
+    }
+}
+
+/// Migrate a list of schedule strings, splitting compound "after X and before Y"
+/// patterns when the after-time is past midnight relative to the before-time
+/// (i.e. the schedule straddles midnight, like "after 10pm and before 7am").
+///
+/// Mirrors Renovate's `ScheduleMigration.run()`.
+fn migrate_schedule_list(schedules: Vec<String>) -> Vec<String> {
+    use regex::Regex;
+    // Pattern: optional prefix, (after|before) TIME and (after|before) TIME, optional suffix
+    let re = Regex::new(r"^(.*?)(after|before) (\S+) and (after|before) (\S+)(?: (.+))?$")
+        .expect("valid regex");
+
+    let mut result: Vec<String> = Vec::with_capacity(schedules.len());
+    for s in schedules {
+        if s.contains(" and ")
+            && s.contains("before ")
+            && s.contains("after ")
+            && let Some(caps) = re.captures(&s)
+        {
+            let prefix = caps.get(1).map_or("", |m| m.as_str());
+            let kw1 = caps.get(2).map_or("", |m| m.as_str());
+            let t1 = caps.get(3).map_or("", |m| m.as_str());
+            let kw2 = caps.get(4).map_or("", |m| m.as_str());
+            let t2 = caps.get(5).map_or("", |m| m.as_str());
+            let suffix = caps.get(6).map_or("", |m| m.as_str());
+
+            // Find after/before times and check if after_hour > before_hour
+            let (after_t, before_t) = if kw1 == "after" { (t1, t2) } else { (t2, t1) };
+            let after_h = parse_schedule_hour(after_t);
+            let before_h = parse_schedule_hour(before_t);
+
+            if let (Some(ah), Some(bh)) = (after_h, before_h)
+                && ah > bh
+            {
+                // Split: straddling midnight schedule
+                let s1 = if suffix.is_empty() {
+                    format!("{prefix}{kw1} {t1}").trim().to_owned()
+                } else {
+                    format!("{prefix}{kw1} {t1} {suffix}").trim().to_owned()
+                };
+                let s2 = if suffix.is_empty() {
+                    format!("{prefix}{kw2} {t2}").trim().to_owned()
+                } else {
+                    format!("{prefix}{kw2} {t2} {suffix}").trim().to_owned()
+                };
+                result.push(migrate_schedule_string(s1));
+                result.push(migrate_schedule_string(s2));
+                continue;
+            }
+        }
+        result.push(migrate_schedule_string(s));
+    }
+    result
 }
 
 /// When the user has an explicit non-empty `schedule` in their config,
@@ -4273,7 +4350,7 @@ impl RepoConfig {
                     group_name: r.group_name,
                     group_slug: r.group_slug,
                     automerge: r.automerge,
-                    schedule: r.schedule,
+                    schedule: migrate_schedule_list(r.schedule),
                     labels: r.labels,
                     add_labels: r.add_labels,
                     assignees: r.assignees,
@@ -4411,10 +4488,9 @@ impl RepoConfig {
                 // No explicit schedule → use schedule preset if any.
                 resolve_extends_schedule(&effective_extends).unwrap_or(raw.schedule)
             } else {
-                raw.schedule
-                    .into_iter()
-                    .map(migrate_schedule_string)
-                    .collect()
+                // Apply compound schedule splitting (e.g. "after 10pm and before 7am" →
+                // ["after 10pm", "before 7am"]) before single-string migration.
+                migrate_schedule_list(raw.schedule)
             },
             automerge_schedule: if raw.automerge_schedule.is_empty() {
                 // No explicit automergeSchedule → use preset or default "at any time".
@@ -4643,9 +4719,18 @@ impl RepoConfig {
                 }
             },
             hashed_branch_length: raw.hashed_branch_length,
-            major_config: raw.major,
-            minor_config: raw.minor,
-            patch_config: raw.patch,
+            major_config: raw.major.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
+            minor_config: raw.minor.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
+            patch_config: raw.patch.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
             custom_managers: {
                 // Preset managers come first (lower precedence); user-defined
                 // managers appended after so they can shadow preset ones.
@@ -7259,6 +7344,47 @@ mod tests {
     fn schedule_default_is_empty() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(c.schedule.is_empty());
+    }
+
+    #[test]
+    fn schedule_compound_after_before_splits_at_midnight_boundary() {
+        // Ported: "migrates before and after schedules" — migration.spec.ts line 184
+        // "after 10pm and before 7am" — 10pm (22) > 7am (7) → straddling midnight → split
+        let c = RepoConfig::parse(r#"{"major": {"schedule": ["after 10pm and before 7am"]}}"#);
+        // The major.schedule should be split into ["after 10pm", "before 7am"]
+        let schedule = c.major_config.as_ref().map(|m| &m.schedule);
+        assert_eq!(
+            schedule,
+            Some(&vec!["after 10pm".to_owned(), "before 7am".to_owned()])
+        );
+    }
+
+    #[test]
+    fn schedule_compound_split_with_day_suffix() {
+        // "after 10pm and before 7am on every weekday" → split + "on every weekday" → "every weekday"
+        let c = RepoConfig::parse(r#"{"schedule": "after 10pm and before 7am on every weekday"}"#);
+        assert_eq!(
+            c.schedule,
+            vec![
+                "after 10pm every weekday".to_owned(),
+                "before 7am every weekday".to_owned()
+            ]
+        );
+    }
+
+    #[test]
+    fn schedule_compound_non_straddling_not_split() {
+        // Ported: "does not migrate hour range" — migration.spec.ts line 247
+        // "after 1:00pm and before 5:00pm" — 13:00 < 17:00 → not straddling → no split
+        let c = RepoConfig::parse(r#"{"schedule": "after 1:00pm and before 5:00pm"}"#);
+        assert_eq!(c.schedule, vec!["after 1:00pm and before 5:00pm"]);
+    }
+
+    #[test]
+    fn schedule_every_weekday_not_migrated_by_list() {
+        // "every weekday" is left as-is (handled natively by the scheduler)
+        let c = RepoConfig::parse(r#"{"schedule": ["every weekday"]}"#);
+        assert_eq!(c.schedule, vec!["every weekday"]);
     }
 
     #[test]
