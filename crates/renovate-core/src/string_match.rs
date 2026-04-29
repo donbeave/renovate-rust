@@ -29,6 +29,11 @@ pub fn match_regex_or_glob(input: &str, pattern: &str) -> bool {
         return true;
     }
 
+    // Negated form: !expr  — invert the result of matching the inner expression.
+    if let Some(inner) = pattern.strip_prefix('!') {
+        return !match_regex_or_glob(input, inner);
+    }
+
     // Inline regex: /pattern/ or /pattern/flags
     if let Some(regex_body) = extract_regex_pattern(pattern) {
         return Regex::new(&regex_body)
@@ -214,5 +219,26 @@ mod tests {
         assert!(match_regex_or_glob_list("cargo", &pats));
         assert!(!match_regex_or_glob_list("npm", &pats));
         assert!(!match_regex_or_glob_list("npm-check", &pats));
+    }
+
+    // ── match_regex_or_glob negation support ─────────────────────────────────
+
+    #[test]
+    fn single_negated_regex_inverts_match() {
+        // !/^0/ should match strings NOT starting with "0"
+        assert!(match_regex_or_glob("1.2.3", "!/^0/"));
+        assert!(!match_regex_or_glob("0.5.0", "!/^0/"));
+    }
+
+    #[test]
+    fn single_negated_exact_inverts_match() {
+        assert!(match_regex_or_glob("cargo", "!npm"));
+        assert!(!match_regex_or_glob("npm", "!npm"));
+    }
+
+    #[test]
+    fn single_negated_glob_inverts_match() {
+        assert!(match_regex_or_glob("cargo", "!npm*"));
+        assert!(!match_regex_or_glob("npm-check", "!npm*"));
     }
 }
