@@ -21,6 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0273  | 2026-04-29 | Fix non-semver branch name generation (Docker tags, calendar versions): fallback to `{sanitized_name}-{sanitized_version}` topic; groupSlug path no longer requires parseable semver | Complete | See below. |
+| 0272  | 2026-04-29 | Show PR title as secondary line in terminal output for UpdateAvailable deps (below branch name) | Complete | See below. |
 | 0271  | 2026-04-29 | `:semanticCommitType(arg)`, `:semanticCommitScope(arg)`, `:semanticCommitScopeDisabled` parameterized presets applied at parse time; `ParamOverrides` type alias; 3 tests | Complete | See below. |
 | 0270  | 2026-04-29 | Scalar preset expansion: `combinePatchMinorReleases`, `separatePatchReleases`, `separateMajorReleases`, `separateMultipleMajorReleases`, `prConcurrentLimit*`, `prHourlyLimit*`, `disableRateLimiting`; 6 tests | Complete | See below. |
 | 0269  | 2026-04-29 | Parameterized preset expansion: `label(val)`, `labels(a,b)`, `:assignee(user)`, `:reviewer(user)`, `:automergeType(type)` — `parse_preset_args()` + `resolve_extends_parameterized()`; 8 tests | Complete | See below. |
