@@ -24,11 +24,15 @@
 //! - [`bazel`]         — Bazel Module, Bazel WORKSPACE
 //! - [`ansible`]       — ansible-galaxy, ansible task files
 //! - [`nix`]           — Nix flakes
-//! - [`misc`]          — Typst, cpanfile, pre-commit, Conan, Haskell, Jsonnet, Puppet, Jenkins, …
+//! - [`pre_commit`]    — pre-commit
+//! - [`git`]           — Git submodules
+//! - [`puppet`]        — Puppet
+//! - [`misc`]          — Typst, cpanfile, Conan, Haskell, Jsonnet, Jenkins, OCB, Homebrew, …
 
 mod ansible;
 mod bazel;
 mod ci;
+mod git;
 mod dart;
 mod docker;
 mod dotnet;
@@ -41,6 +45,8 @@ mod misc;
 mod mobile;
 mod nix;
 mod php;
+mod pre_commit;
+mod puppet;
 mod python;
 mod ruby;
 mod rust;
@@ -111,5 +117,8 @@ pub(crate) async fn process_all_managers(ctx: &mut RepoPipelineCtx<'_>) {
     bazel::process(ctx).await;
     ansible::process(ctx).await;
     nix::process(ctx).await;
+    pre_commit::process(ctx).await;
+    git::process(ctx).await;
+    puppet::process(ctx).await;
     misc::process(ctx).await;
 }

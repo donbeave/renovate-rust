@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0223  | 2026-04-29 | Refactor: split `misc.rs` → `pre_commit.rs` + `git.rs` + `puppet.rs` (1522 lines, was 1888) | Complete | See below. |
 | 0222  | 2026-04-29 | Refactor: split `misc.rs` → `bazel.rs` + `ansible.rs` + `nix.rs` (1888 lines, was 2398) | Complete | See below. |
 | 0221  | 2026-04-29 | `allowedVersions` regex + exact-string support; fix silent pass-through for `/pattern/` values | Complete | See below. |
 | 0220  | 2026-04-29 | `depType` in `DepReport` JSON; cargo+npm dep types propagated into `DepContext` for `matchDepTypes` | Complete | See below. |
