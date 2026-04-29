@@ -439,6 +439,38 @@ packages:
 
     #[test]
     fn no_packages_returns_empty() {
+        // Ported: "returns null for YAML without packages" — xcodegen/extract.spec.ts line 22
         assert!(extract("name: MyApp\ntargets: {}").is_empty());
+    }
+
+    #[test]
+    fn empty_content_returns_empty() {
+        // Ported: "returns null for empty content" — xcodegen/extract.spec.ts line 7
+        assert!(extract("").is_empty());
+    }
+
+    #[test]
+    fn empty_packages_section_returns_empty() {
+        // Ported: "returns null for empty packages" — xcodegen/extract.spec.ts line 36
+        let content = "name: MyProject\npackages: {}\n";
+        assert!(extract(content).is_empty());
+    }
+
+    #[test]
+    fn revision_reference_skipped() {
+        // Ported: "skips packages with revision reference" — xcodegen/extract.spec.ts line 233
+        let content = "packages:\n  MyLib:\n    url: https://github.com/owner/repo.git\n    revision: abc123\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(XcodeGenSkipReason::NoSemverVersion));
+    }
+
+    #[test]
+    fn package_without_url_or_github_skipped() {
+        // Ported: "skips packages without url or github" — xcodegen/extract.spec.ts line 356
+        let content = "packages:\n  MyLib:\n    from: \"1.0.0\"\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(XcodeGenSkipReason::MissingSource));
     }
 }
