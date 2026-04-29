@@ -223,6 +223,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/migration.spec.ts` | 17 | `upgradeInRange: true` → `rangeStrategy: 'bump'` | `crates/renovate-core/src/repo_config.rs` | `upgrade_in_range_true_sets_range_strategy_bump` | ported |
 | `lib/config/migration.spec.ts` | 17 | `baseBranch: 'next'` → `baseBranches: ['next']` | `crates/renovate-core/src/repo_config.rs` | `base_branch_singular_migrated_to_base_branches` | ported |
 | `lib/config/migration.spec.ts` | 17 | `rebaseStalePrs: true` → `rebaseWhen: 'behind-base-branch'` | `crates/renovate-core/src/repo_config.rs` | `rebase_stale_prs_true_sets_rebase_when` | ported |
+| `lib/config/migration.spec.ts` | 205 | `"every friday"` → `"on friday"` schedule migration | `crates/renovate-core/src/repo_config.rs` | `schedule_every_friday_migrated_to_on_friday`, `schedule_every_monday_migrated` | ported |
+| `lib/config/migration.spec.ts` | 226 | `"every weekday"` → no migration (handled natively) | `crates/renovate-core/src/repo_config.rs` | `schedule_every_weekday_not_migrated` | ported |
+| `lib/config/migration.spec.ts` | — | `schedule: "string"` → `schedule: ["string"]` (string coerced to array) | `crates/renovate-core/src/repo_config.rs` | `schedule_every_friday_migrated_to_on_friday` | ported |
 | `lib/config/migration.spec.ts` | 17 | `rebaseConflictedPrs: false` → `rebaseWhen: 'never'` | `crates/renovate-core/src/repo_config.rs` | `rebase_conflicted_prs_false_sets_rebase_when_never` | ported |
 | `lib/config/migration.spec.ts` | 17 | `ignoreNodeModules: true` → adds `node_modules/` to `ignorePaths` | `crates/renovate-core/src/repo_config.rs` | `ignore_node_modules_true_adds_to_ignore_paths` | ported |
 | `lib/config/migration.spec.ts` | 17 | `enabledManagers: ['yarn']` → `['npm']` | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_yarn_migrated_to_npm` | ported |

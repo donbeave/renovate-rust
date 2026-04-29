@@ -820,6 +820,30 @@ fn resolve_extends_ignore_paths(extends: &[String]) -> Vec<String> {
 /// schedule the user configured, or none).  Returns `Some(schedule)` when
 /// a preset contributes schedule entries.
 ///
+/// Migrate a legacy schedule string to the current format.
+///
+/// - `"every friday"` → `"on friday"` (Renovate: schedule-migration.ts dayRegex)
+///   Only specific day names are migrated; "every weekday" etc. are handled natively.
+fn migrate_schedule_string(s: String) -> String {
+    const DAYS: &[&str] = &[
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+    ];
+    for day in DAYS {
+        let every_day = format!("every {day}");
+        if s.ends_with(&every_day) {
+            let on_day = format!("on {day}");
+            return s.replacen(&every_day, &on_day, 1);
+        }
+    }
+    s
+}
+
 /// When the user has an explicit non-empty `schedule` in their config,
 /// the caller should prefer it over the preset value.
 ///
@@ -3601,9 +3625,13 @@ impl RepoConfig {
             disabled_managers: Vec<String>,
             #[serde(rename = "ignoreVersions", default)]
             ignore_versions: Vec<String>,
-            #[serde(default)]
+            #[serde(default, deserialize_with = "deserialize_string_or_vec")]
             schedule: Vec<String>,
-            #[serde(rename = "automergeSchedule", default)]
+            #[serde(
+                rename = "automergeSchedule",
+                default,
+                deserialize_with = "deserialize_string_or_vec"
+            )]
             automerge_schedule: Vec<String>,
             timezone: Option<String>,
             #[serde(default, deserialize_with = "deserialize_automerge_bool")]
@@ -3786,6 +3814,24 @@ impl RepoConfig {
 
         /// Deserialize semanticCommits from bool or string.
         /// Renovate reference: lib/config/migrations/custom/semantic-commits-migration.ts
+        /// Deserialize a field that Renovate accepts as either a bare string or an array.
+        /// `"every friday"` and `["every friday"]` both parse to `vec!["every friday"]`.
+        fn deserialize_string_or_vec<'de, D>(d: D) -> Result<Vec<String>, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            use serde_json::Value;
+            let val = Value::deserialize(d)?;
+            Ok(match val {
+                Value::String(s) => vec![s],
+                Value::Array(arr) => arr
+                    .into_iter()
+                    .filter_map(|v| v.as_str().map(str::to_owned))
+                    .collect(),
+                _ => vec![],
+            })
+        }
+
         fn deserialize_semantic_commits_opt<'de, D>(d: D) -> Result<Option<String>, D::Error>
         where
             D: serde::Deserializer<'de>,
@@ -4229,6 +4275,9 @@ impl RepoConfig {
                 resolve_extends_schedule(&effective_extends).unwrap_or(raw.schedule)
             } else {
                 raw.schedule
+                    .into_iter()
+                    .map(migrate_schedule_string)
+                    .collect()
             },
             automerge_schedule: if raw.automerge_schedule.is_empty() {
                 // No explicit automergeSchedule → use preset or default "at any time".
@@ -6625,6 +6674,28 @@ mod tests {
     fn schedule_parsed_into_repo_config() {
         let c = RepoConfig::parse(r#"{"schedule": ["before 5am", "every weekend"]}"#);
         assert_eq!(c.schedule, vec!["before 5am", "every weekend"]);
+    }
+
+    // ── Ported from migration.spec.ts schedule migration ─────────────────────
+
+    #[test]
+    fn schedule_every_friday_migrated_to_on_friday() {
+        // Ported: "migrates every friday" from migration.spec.ts
+        let c = RepoConfig::parse(r#"{"schedule": "every friday"}"#);
+        assert_eq!(c.schedule, vec!["on friday"]);
+    }
+
+    #[test]
+    fn schedule_every_weekday_not_migrated() {
+        // Ported: "does not migrate every weekday" — "every weekday" stays unchanged.
+        let c = RepoConfig::parse(r#"{"schedule": "every weekday"}"#);
+        assert_eq!(c.schedule, vec!["every weekday"]);
+    }
+
+    #[test]
+    fn schedule_every_monday_migrated() {
+        let c = RepoConfig::parse(r#"{"schedule": ["every monday"]}"#);
+        assert_eq!(c.schedule, vec!["on monday"]);
     }
 
     #[test]
