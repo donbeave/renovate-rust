@@ -189,6 +189,20 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `commitMessageTopic`.
     pub commit_message_topic: Option<String>,
+
+    /// Per-rule override for the commit-message action verb (e.g. `"Pin"`,
+    /// `"Roll back"`).  `None` = no override (use repo-level or default).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageAction`.
+    pub commit_message_action: Option<String>,
+
+    /// Per-rule prefix prepended to the commit message / PR title
+    /// (e.g. `"fix(deps):"` for security presets).
+    /// When set, it replaces `semanticCommits`-generated prefixes.
+    /// `None` = no override.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessagePrefix`.
+    pub commit_message_prefix: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -677,6 +691,10 @@ pub struct RuleEffects {
     pub pr_priority: Option<i32>,
     /// Per-rule commit message topic override.  The last matching rule wins.
     pub commit_message_topic: Option<String>,
+    /// Per-rule action verb override (e.g. `"Pin"`).  Last rule wins.
+    pub commit_message_action: Option<String>,
+    /// Per-rule commit message prefix (e.g. `"fix(deps):"`).  Last rule wins.
+    pub commit_message_prefix: Option<String>,
 }
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────

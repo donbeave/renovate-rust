@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0219  | 2026-04-29 | `commitMessageAction` + `commitMessagePrefix` in `packageRules` — per-rule PR title overrides | Complete | See below. |
 | 0218  | 2026-04-29 | `commitMessageTopic` in `packageRules` — custom PR title topic with `{{depName}}` support | Complete | See below. |
 | 0217  | 2026-04-29 | `prPriority` in `packageRules` — PR priority in output | Complete | See below. |
 | 0216  | 2026-04-29 | `groupSlug` in `packageRules` — explicit group branch topic override | Complete | See below. |
@@ -5248,3 +5249,27 @@ re-exported from `repo_config` for backward compatibility.
 3. **Remote preset resolution** — `github>org/repo//preset` fetching.
 4. **Docker versioning scheme** — proper Docker tag version comparison.
 5. **Split `process_repo()` in `main.rs`** — further refactor the 8,440-line function.
+
+---
+
+## Slice 0219 - per-rule `commitMessageAction` + `commitMessagePrefix`
+
+### Renovate reference
+- `lib/config/options/index.ts` — `commitMessageAction` (default: `"Update"`), `commitMessagePrefix`
+- Used by `:pin` preset (action → "Pin"), security presets (prefix → "fix(deps):")
+- Last matching rule wins (same semantics as `commitMessageTopic`, `prPriority`)
+
+### Implementation
+- `PackageRule`: `commit_message_action: Option<String>` + `commit_message_prefix: Option<String>`
+- `RuleEffects`: same two optional fields; last matching rule wins
+- `repo_config.rs` `RawPackageRule`: serde fields `commitMessageAction` / `commitMessagePrefix`
+- `collect_rule_effects()`: propagates both fields
+- `pipeline_utils.rs`: effective action = per-rule override OR repo-level default;
+  effective prefix = per-rule override OR repo-level default
+
+### Tests (8 new)
+- Parse `commitMessageAction` and `commitMessagePrefix` from `packageRules` JSON
+- Collect both into `RuleEffects` for matching dep
+- Last-rule-wins for both fields
+- Non-matching dep gets no override
+- Absent fields leave `None` in effects

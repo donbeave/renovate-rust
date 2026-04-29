@@ -132,13 +132,22 @@ pub(crate) fn apply_update_blocking_to_report(
                 // Generate PR title.
                 let is_major = classify_semver_update(current, latest)
                     == Some(renovate_core::versioning::semver_generic::UpdateType::Major);
+                // Per-rule overrides win over repo-level settings.
+                let effective_action = effects
+                    .commit_message_action
+                    .as_deref()
+                    .unwrap_or(repo_cfg.commit_message_action.as_str());
+                let effective_prefix = effects
+                    .commit_message_prefix
+                    .as_deref()
+                    .or(repo_cfg.commit_message_prefix.as_deref());
                 dep.pr_title = Some(branch::pr_title(
                     &dep.name,
                     latest,
                     is_major,
                     repo_cfg.semantic_commits.as_deref(),
-                    Some(repo_cfg.commit_message_action.as_str()).filter(|s| *s != "Update"),
-                    repo_cfg.commit_message_prefix.as_deref(),
+                    Some(effective_action).filter(|s| *s != "Update"),
+                    effective_prefix,
                     effects.commit_message_topic.as_deref(),
                 ));
                 dep.group_name = effects.group_name;

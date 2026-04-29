@@ -423,6 +423,10 @@ impl RepoConfig {
             pr_priority: Option<i32>,
             #[serde(rename = "commitMessageTopic")]
             commit_message_topic: Option<String>,
+            #[serde(rename = "commitMessageAction")]
+            commit_message_action: Option<String>,
+            #[serde(rename = "commitMessagePrefix")]
+            commit_message_prefix: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -579,6 +583,8 @@ impl RepoConfig {
                     minimum_release_age: r.minimum_release_age,
                     pr_priority: r.pr_priority,
                     commit_message_topic: r.commit_message_topic,
+                    commit_message_action: r.commit_message_action,
+                    commit_message_prefix: r.commit_message_prefix,
                 }
             })
             .collect();
@@ -893,6 +899,12 @@ impl RepoConfig {
             }
             if rule.commit_message_topic.is_some() {
                 effects.commit_message_topic.clone_from(&rule.commit_message_topic);
+            }
+            if rule.commit_message_action.is_some() {
+                effects.commit_message_action.clone_from(&rule.commit_message_action);
+            }
+            if rule.commit_message_prefix.is_some() {
+                effects.commit_message_prefix.clone_from(&rule.commit_message_prefix);
             }
             if !rule.assignees.is_empty() {
                 effects.assignees.clone_from(&rule.assignees);
@@ -3299,6 +3311,126 @@ mod rule_effects_tests {
             effects.group_slug.as_deref(),
             Some("first"),
             "first matching rule's groupSlug should win"
+        );
+    }
+
+    // ── per-rule commitMessageAction / commitMessagePrefix ────────────────────
+
+    #[test]
+    fn per_rule_commit_message_action_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "commitMessageAction": "Pin"}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].commit_message_action.as_deref(),
+            Some("Pin")
+        );
+    }
+
+    #[test]
+    fn per_rule_commit_message_prefix_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "commitMessagePrefix": "fix(deps):"}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].commit_message_prefix.as_deref(),
+            Some("fix(deps):")
+        );
+    }
+
+    #[test]
+    fn per_rule_commit_message_action_collected_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "commitMessageAction": "Pin"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.commit_message_action.as_deref(), Some("Pin"));
+    }
+
+    #[test]
+    fn per_rule_commit_message_prefix_collected_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "commitMessagePrefix": "fix(deps):"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.commit_message_prefix.as_deref(), Some("fix(deps):"));
+    }
+
+    #[test]
+    fn per_rule_commit_message_action_absent_when_not_set() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"matchPackageNames": ["lodash"]}]}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.commit_message_action.is_none(),
+            "commit_message_action should be None when not configured"
+        );
+    }
+
+    #[test]
+    fn per_rule_commit_message_action_last_rule_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["lodash"], "commitMessageAction": "Pin"},
+                {"matchPackageNames": ["lodash"], "commitMessageAction": "Roll back"}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.commit_message_action.as_deref(),
+            Some("Roll back"),
+            "last matching rule's commitMessageAction should win"
+        );
+    }
+
+    #[test]
+    fn per_rule_commit_message_prefix_last_rule_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["lodash"], "commitMessagePrefix": "chore:"},
+                {"matchPackageNames": ["lodash"], "commitMessagePrefix": "fix(deps):"}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.commit_message_prefix.as_deref(),
+            Some("fix(deps):"),
+            "last matching rule's commitMessagePrefix should win"
+        );
+    }
+
+    #[test]
+    fn per_rule_commit_message_action_not_applied_to_non_matching() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "commitMessageAction": "Pin"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "react",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.commit_message_action.is_none(),
+            "non-matching dep should not get commitMessageAction override"
         );
     }
 }
