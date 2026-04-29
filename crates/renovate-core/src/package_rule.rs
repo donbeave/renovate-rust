@@ -413,48 +413,76 @@ impl PackageRule {
         PathMatcher::new(&self.match_file_names).is_ignored(path)
     }
 
-    /// Return `true` when `current_value` satisfies this rule's `matchCurrentVersion`.
-    /// Match `matchCurrentVersion` against the dep's version context.
+    /// Return `true` when the dep's version context satisfies this rule's `matchCurrentVersion`.
     ///
-    /// Mirrors Renovate's `CurrentVersionMatcher`:
-    /// - Regex patterns: test against `locked_version ?? current_value`
-    /// - Semver range: extract lower-bound of `current_value` and check if in range
+    /// Mirrors Renovate's `CurrentVersionMatcher` three-way dispatch:
+    ///
+    /// 1. **Regex pattern** (`/re/` or `!/re/`):
+    ///    Test against `locked_version ?? current_version ?? current_value`.
+    ///
+    /// 2. **Plain version** (matchCurrentVersion parses as a semver version):
+    ///    Returns true when `matchCurrentVersion` is a version that satisfies the
+    ///    `current_value` constraint (i.e. the installed version is in the declared range).
+    ///    `isUnconstrainedValue` short-circuit: if lockedVersion is set and currentValue
+    ///    is absent, return true.
+    ///
+    /// 3. **Semver range** (matchCurrentVersion is a constraint like `<= 2.0.0`):
+    ///    Compare against `current_value` if it parses as a version, otherwise fall back
+    ///    to `locked_version ?? current_version`.  Return false if no comparable version.
     pub fn current_version_matches(
         &self,
         current_value: &str,
+        current_version: Option<&str>,
         locked_version: Option<&str>,
     ) -> bool {
         use crate::string_match::match_regex_or_glob;
-        use crate::versioning::semver_generic::{lower_bound, parse_padded};
+        use crate::versioning::semver_generic::parse_padded;
         let Some(ref mcv) = self.match_current_version else {
             return true;
         };
-        // Regex patterns: use lockedVersion ?? currentValue as the string to test.
+
+        // Case 1: regex pattern — test against lockedVersion ?? currentVersion ?? currentValue.
         if mcv.starts_with('/') || mcv.starts_with("!/") {
-            let compare = locked_version.unwrap_or(current_value);
+            let compare = locked_version.or(current_version).unwrap_or(current_value);
             if compare.is_empty() {
                 return false;
             }
             return match_regex_or_glob(compare, mcv);
         }
-        // Semver range: extract the lower-bound version and compare.
-        let lb = lower_bound(current_value);
-        let Some(current_sv) = parse_padded(lb) else {
-            // Can't parse currentValue as version — try lockedVersion.
-            if let Some(lv) = locked_version {
-                let Some(locked_sv) = parse_padded(lv) else {
-                    return false;
-                };
-                return semver::VersionReq::parse(mcv)
-                    .map(|req| req.matches(&locked_sv))
-                    .unwrap_or(false);
+
+        // Case 2: matchCurrentVersion is itself a plain version (e.g. "2.1.0", "4.6.0").
+        // Check whether that version satisfies the currentValue range.
+        if let Some(mcv_sv) = parse_padded(mcv) {
+            // isUnconstrainedValue: lockedVersion set but currentValue absent → always match.
+            if locked_version.is_some() && current_value.is_empty() {
+                return true;
             }
-            return false;
-        };
-        match semver::VersionReq::parse(mcv) {
-            Ok(req) => req.matches(&current_sv),
-            Err(_) => false,
+            if current_value.is_empty() {
+                return false;
+            }
+            // currentValue must be a valid semver range; check if matchCurrentVersion is in it.
+            return semver::VersionReq::parse(current_value)
+                .map(|req| req.matches(&mcv_sv))
+                .unwrap_or(false);
         }
+
+        // Case 3: matchCurrentVersion is a semver range (e.g. "<= 2.0.0", ">= 1.0").
+        // Use currentValue if it's a plain version, else fall back to lockedVersion ?? currentVersion.
+        let compare_sv = if let Some(cv_sv) = parse_padded(current_value) {
+            cv_sv
+        } else {
+            // currentValue is a range — use lockedVersion ?? currentVersion.
+            let Some(fallback) = locked_version.or(current_version) else {
+                return false;
+            };
+            let Some(sv) = parse_padded(fallback) else {
+                return false;
+            };
+            sv
+        };
+        semver::VersionReq::parse(mcv)
+            .map(|req| req.matches(&compare_sv))
+            .unwrap_or(false)
     }
 
     /// Return `true` when this rule's `matchRegistryUrls` condition matches.
@@ -499,14 +527,28 @@ impl PackageRule {
                 if !self.manager_matches(mgr) {
                     return false;
                 }
-                let cats = manager_categories(mgr);
+                // Prefer explicitly-provided dep categories; fall back to manager-derived.
+                let cats: &[&str] = if !ctx.categories.is_empty() {
+                    ctx.categories
+                } else {
+                    manager_categories(mgr)
+                };
                 if !self.categories_match(cats) {
                     return false;
                 }
             }
             None => {
-                if !self.match_managers.is_empty() || !self.match_categories.is_empty() {
+                if !self.match_managers.is_empty() {
                     return false;
+                }
+                // No manager: use explicit dep categories if provided.
+                if !self.match_categories.is_empty() {
+                    if ctx.categories.is_empty() {
+                        return false;
+                    }
+                    if !self.categories_match(ctx.categories) {
+                        return false;
+                    }
                 }
             }
         }
@@ -592,7 +634,7 @@ impl PackageRule {
         if !self.current_value_matches(current_val) {
             return false;
         }
-        if !self.current_version_matches(current_val, ctx.locked_version) {
+        if !self.current_version_matches(current_val, ctx.current_version, ctx.locked_version) {
             return false;
         }
 
@@ -695,6 +737,11 @@ pub struct DepContext<'a> {
     pub base_branch: Option<&'a str>,
     /// Raw current version string from the manifest (may be a range like `"^1.0.0"`).
     pub current_value: Option<&'a str>,
+    /// Resolved current version for the dep (e.g. `"1.0.3"`).
+    /// Mirrors Renovate's `currentVersion` field — the exact version in use,
+    /// which may differ from `current_value` when `current_value` is a range.
+    /// Used by `matchCurrentVersion` semver-range matching as the compare target.
+    pub current_version: Option<&'a str>,
     /// Resolved exact version pinned in the lockfile (e.g. `"1.2.3"`).
     /// When present, `matchCurrentVersion` regex patterns test against this
     /// instead of `currentValue`, matching Renovate's `lockedVersion` field.
@@ -709,6 +756,11 @@ pub struct DepContext<'a> {
     /// Mirrors Renovate's `isBump` field; adds virtual `"bump"` update type to
     /// `matchUpdateTypes` matching.
     pub is_bump: bool,
+    /// Explicit ecosystem categories for this dep (e.g. `&["javascript", "node"]`).
+    /// When non-empty, used directly by `matchCategories` instead of the
+    /// manager-derived categories from `manager_categories()`.
+    /// Mirrors Renovate's `categories` field in `PackageRuleInputConfig`.
+    pub categories: &'a [&'a str],
 }
 
 impl<'a> DepContext<'a> {

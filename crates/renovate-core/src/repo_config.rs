@@ -6318,14 +6318,51 @@ mod tests {
     }
 
     #[test]
-    fn match_current_version_with_caret_range_current() {
+    fn match_current_version_range_requires_current_version() {
+        // Mirrors Renovate index.spec.ts: "checks if matchCurrentVersion selector is valid
+        // and satisfies the condition on range overlap".
+        // When matchCurrentVersion is a semver range and currentValue is a range (not version),
+        // Renovate requires currentVersion to be set. Without it → false (no match).
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchCurrentVersion": ">= 1.0", "enabled": false}]}"#,
         );
-        // current "^1.2.3" has lower bound 1.2.3 which satisfies >= 1.0 → rule applies
-        assert!(c.is_update_blocked("pkg", "^1.2.3", UpdateType::Major, "cargo"));
-        // current "^0.9.0" lower bound 0.9.0 does NOT satisfy >= 1.0 → rule doesn't apply
-        assert!(!c.is_update_blocked("pkg", "^0.9.0", UpdateType::Major, "cargo"));
+        // "^1.2.3" is a range, no currentVersion provided → Renovate returns false.
+        assert!(!c.is_update_blocked("pkg", "^1.2.3", UpdateType::Major, "cargo"));
+        // Plain version "1.2.3" IS parseable → does satisfy >= 1.0 → rule applies.
+        assert!(c.is_update_blocked("pkg", "1.2.3", UpdateType::Major, "cargo"));
+        // Plain version "0.9.0" does NOT satisfy >= 1.0 → rule doesn't apply.
+        assert!(!c.is_update_blocked("pkg", "0.9.0", UpdateType::Major, "cargo"));
+    }
+
+    #[test]
+    fn match_current_version_range_uses_current_version_field() {
+        // Mirrors: "satisfies the condition on range overlap" — when currentVersion is set,
+        // the semver range match uses it even if currentValue is a range.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "<= 2.0.0", "enabled": false}]}"#,
+        );
+        // currentVersion "1.0.3" satisfies <= 2.0.0 → rule applies.
+        let ctx = DepContext {
+            dep_name: "test",
+            current_value: Some("^1.0.0"),
+            current_version: Some("1.0.3"),
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "currentVersion 1.0.3 satisfies <= 2.0.0"
+        );
+        // Without currentVersion → no match (range can't be used directly).
+        let ctx_no_cv = DepContext {
+            dep_name: "test",
+            current_value: Some("^1.0.0"),
+            current_version: None,
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx_no_cv),
+            "without currentVersion, range currentValue can't match a range pattern"
+        );
     }
 
     #[test]
@@ -6348,9 +6385,9 @@ mod tests {
         );
         let rule = &c.package_rules[0];
         // "0.1.0" starts with "0" → matches /^0/
-        assert!(rule.current_version_matches("0.1.0", None));
+        assert!(rule.current_version_matches("0.1.0", None, None));
         // "1.0.0" starts with "1", does NOT match /^0/
-        assert!(!rule.current_version_matches("1.0.0", None));
+        assert!(!rule.current_version_matches("1.0.0", None, None));
     }
 
     #[test]
@@ -6362,11 +6399,11 @@ mod tests {
         );
         let rule = &c.package_rules[0];
         // "0.1.0" matches /^0/ → !/^0/ is FALSE for this version
-        assert!(!rule.current_version_matches("0.1.0", None));
+        assert!(!rule.current_version_matches("0.1.0", None, None));
         // "1.0.0" does NOT match /^0/ → !/^0/ is TRUE
-        assert!(rule.current_version_matches("1.0.0", None));
+        assert!(rule.current_version_matches("1.0.0", None, None));
         // "2.5.3" does NOT match /^0/ → !/^0/ is TRUE
-        assert!(rule.current_version_matches("2.5.3", None));
+        assert!(rule.current_version_matches("2.5.3", None, None));
     }
 
     #[test]
@@ -6411,7 +6448,7 @@ mod tests {
         );
         let rule = &c.package_rules[0];
         // With lockedVersion="0.1.0" — regex should match.
-        assert!(rule.current_version_matches(r#""~> 0.1.0""#, Some("0.1.0")));
+        assert!(rule.current_version_matches(r#""~> 0.1.0""#, None, Some("0.1.0")));
     }
 
     #[test]
@@ -6423,7 +6460,7 @@ mod tests {
             r#"{"packageRules": [{"matchCurrentVersion": "/^v?[~ -]?0/", "automerge": true}]}"#,
         );
         let rule = &c.package_rules[0];
-        assert!(!rule.current_version_matches(r#""~> 0.1.0""#, None));
+        assert!(!rule.current_version_matches(r#""~> 0.1.0""#, None, None));
     }
 
     #[test]
@@ -6453,6 +6490,108 @@ mod tests {
         assert!(
             !c.is_dep_ignored_ctx(&ctx_locked_1x),
             "rule should not fire when lockedVersion does not match regex"
+        );
+    }
+
+    // ── Ported from Renovate index.spec.ts (matchCurrentVersion) ─────────────
+
+    #[test]
+    fn match_current_version_index_spec_regex_matches() {
+        // Ported: "checks if matchCurrentVersion selector works with regular expressions"
+        // index.spec.ts line ~1101
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "/^4/", "automerge": true}]}"#,
+        );
+        // currentValue: '4.6.0', currentVersion: '4.6.0' → regex /^4/ matches → rule fires
+        let ctx1 = DepContext {
+            dep_name: "test",
+            current_value: Some("4.6.0"),
+            current_version: Some("4.6.0"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx1).automerge, Some(true));
+        // currentValue: '5.6.0', currentVersion: '5.6.0' → regex /^4/ does not match
+        let ctx2 = DepContext {
+            dep_name: "test",
+            current_value: Some("5.6.0"),
+            current_version: Some("5.6.0"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx2).automerge, None);
+    }
+
+    #[test]
+    fn match_current_version_index_spec_negated_regex() {
+        // Ported: "checks if matchCurrentVersion selector works with negated regular expressions"
+        // index.spec.ts line ~1132
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "!/^4/", "automerge": true}]}"#,
+        );
+        // currentVersion starts with '4' → negated regex !/^4/ → false → rule doesn't fire
+        let ctx1 = DepContext {
+            dep_name: "test",
+            current_value: Some("4.6.0"),
+            current_version: Some("4.6.0"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx1).automerge, None);
+        // currentVersion starts with '5' → !/^4/ → true → rule fires
+        let ctx2 = DepContext {
+            dep_name: "test",
+            current_value: Some("5.6.0"),
+            current_version: Some("5.6.0"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx2).automerge, Some(true));
+    }
+
+    #[test]
+    fn match_current_version_index_spec_static_value() {
+        // Ported: "checks if matchCurrentVersion selector works with static values"
+        // index.spec.ts line ~1079
+        // matchCurrentVersion is a plain version → checks if it satisfies currentValue range.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "4.6.0", "automerge": true}]}"#,
+        );
+        // currentValue: '4.6.0' (valid version) — 4.6.0 matches the "=4.6.0" range → rule fires
+        let ctx = DepContext {
+            dep_name: "test",
+            current_value: Some("4.6.0"),
+            current_version: Some("4.6.0"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
+    }
+
+    #[test]
+    fn match_current_version_index_spec_version_matches_range() {
+        // Ported: "checks if matchCurrentVersion selector is a version and matches if currentValue is a range"
+        // index.spec.ts line ~1049
+        // matchCurrentVersion='2.1.0' is a version → is it within currentValue range?
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "2.1.0", "automerge": true}]}"#,
+        );
+        // currentValue: '^2.0.0' → is 2.1.0 in ^2.0.0? Yes → rule fires
+        let ctx1 = DepContext {
+            dep_name: "test",
+            current_value: Some("^2.0.0"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx1).automerge,
+            Some(true),
+            "2.1.0 should be in ^2.0.0"
+        );
+        // currentValue: '~2.0.0' → is 2.1.0 in ~2.0.0 (>=2.0.0 <2.1.0)? No → rule doesn't fire
+        let ctx2 = DepContext {
+            dep_name: "test",
+            current_value: Some("~2.0.0"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx2).automerge,
+            None,
+            "2.1.0 should NOT be in ~2.0.0"
         );
     }
 
@@ -8612,6 +8751,66 @@ mod categories_base_branch_tests {
             c.collect_rule_effects(&ctx).automerge,
             None,
             "rule must not fire when categories is empty and matchCategories is set"
+        );
+    }
+
+    #[test]
+    fn match_categories_dep_provided_categories_override_manager_derived() {
+        // Ported: "filters categories with matching category"
+        // Dep provides explicit categories: ['javascript', 'node']; rule matches 'node'.
+        // Even though meteor manager only derives ['js'], the explicit dep categories win.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCategories": ["node"], "matchPackageNames": ["node"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "node",
+            manager: Some("meteor"),
+            categories: &["javascript", "node"],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "matchCategories:node must fire when dep has explicit categories=['javascript','node']"
+        );
+    }
+
+    #[test]
+    fn match_categories_dep_provided_categories_non_matching() {
+        // Ported: "filters categories with non-matching category"
+        // Dep has categories: ['python'], rule requires 'docker' → must not fire.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCategories": ["docker"], "matchPackageNames": ["node"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "node",
+            manager: Some("pipenv"),
+            categories: &["python"],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "matchCategories:docker must NOT fire when dep categories=['python']"
+        );
+    }
+
+    #[test]
+    fn match_categories_no_manager_dep_provided_categories_match() {
+        // matchCategories fires even without a manager when dep has explicit categories.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCategories": ["node"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "some-dep",
+            manager: None,
+            categories: &["javascript", "node"],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "matchCategories must fire when dep provides explicit categories and no manager"
         );
     }
 }

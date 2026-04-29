@@ -192,6 +192,14 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/base-branch.ts` | — | `matchBaseBranches` glob `release/*` | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_glob` | ported |
 | `lib/util/package-rules/base-branch.ts` | — | empty `matchBaseBranches` matches all | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_empty_matches_all` | ported |
 | `lib/util/package-rules/base-branch.ts` | — | `matchBaseBranches` multiple entries | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_base_branches_multiple_entries` | ported |
+| `lib/util/package-rules/index.spec.ts` | 468 | `matchCategories` dep-provided categories override manager-derived | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_dep_provided_categories_override_manager_derived` | ported |
+| `lib/util/package-rules/index.spec.ts` | 489 | `matchCategories` non-matching dep-provided categories → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_dep_provided_categories_non_matching` | ported |
+| `lib/util/package-rules/index.spec.ts` | 510 | `matchCategories` undefined/absent categories → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::needs_categories_to_match_rule_does_not_fire_without_it` | ported |
+| `lib/util/package-rules/index.spec.ts` | 1101 | `matchCurrentVersion` regex `/^4/` with currentVersion field | `crates/renovate-core/src/repo_config.rs` | `match_current_version_index_spec_regex_matches` | ported |
+| `lib/util/package-rules/index.spec.ts` | 1132 | `matchCurrentVersion` negated regex `!/^4/` with currentVersion field | `crates/renovate-core/src/repo_config.rs` | `match_current_version_index_spec_negated_regex` | ported |
+| `lib/util/package-rules/index.spec.ts` | 1079 | `matchCurrentVersion` static version value matches currentValue range | `crates/renovate-core/src/repo_config.rs` | `match_current_version_index_spec_static_value` | ported |
+| `lib/util/package-rules/index.spec.ts` | 1049 | `matchCurrentVersion` version pattern matches/mismatches currentValue range | `crates/renovate-core/src/repo_config.rs` | `match_current_version_index_spec_version_matches_range` | ported |
+| `lib/util/package-rules/index.spec.ts` | 987 | `matchCurrentVersion` range overlap requires currentVersion field | `crates/renovate-core/src/repo_config.rs` | `match_current_version_range_requires_current_version`, `match_current_version_range_uses_current_version_field` | ported |
 
 ---
 

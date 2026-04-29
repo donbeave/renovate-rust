@@ -21,7 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
-| 0367  | 2026-04-29 | Port 2 matchDepTypes tests from index.spec.ts: multiple types in list, absent depType → rule doesn't fire; also fix missing #[test] for previously skipped test; 1758 tests | Complete | See below. |
+| 0370  | 2026-04-29 | `matchCategories` dep-provided categories + `matchCurrentVersion` 3-case dispatch + DepContext `categories`/`current_version` fields; 8 new tests from index.spec.ts; 1766 tests | Complete | See below. |
+| 0369  | 2026-04-29 | Port 2 matchDepTypes tests from index.spec.ts: multiple types in list, absent depType → rule doesn't fire; also fix missing #[test] for previously skipped test; 1758 tests | Complete | See below. |
 | 0366  | 2026-04-29 | Port 3 `matchSourceUrls` tests from index.spec.ts: double-star glob matching sub-repos, case-insensitive URL matching, absent sourceUrl → rule doesn't fire; 1756 tests | Complete | See below. |
 | 0365  | 2026-04-29 | Test map expansion: add cargo extractor section (12 entries from cargo/extract.spec.ts), fix future-planned table entries, update cargo/extract entry format | Complete | See test-map. |
 | 0364  | 2026-04-29 | Port `migration.spec.ts` packages + groupName migration: deprecated `packages` field merged into `packageRules`; `groupName: ["name"]` (array) deserialized as first element string; 2 new tests; 1753 tests | Complete | See below. |
@@ -5907,4 +5908,41 @@ The `resolve_extends_semantic_prefix_rules` and `resolve_extends_ignore_paths` c
 ### Files changed
 - `crates/renovate-core/src/package_rule.rs`
 - `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0370 - `matchCategories` dep-provided categories + `matchCurrentVersion` 3-case dispatch
+
+### Renovate reference
+- `lib/util/package-rules/categories.ts` — `CategoriesMatcher` uses `categories` from `PackageRuleInputConfig` directly (not manager-derived)
+- `lib/util/package-rules/current-version.ts` — `CurrentVersionMatcher` three-case dispatch: regex, plain version, semver range
+- `lib/util/package-rules/index.spec.ts` — lines 468, 489, 510, 987, 1049, 1079, 1101, 1132
+
+### What landed
+
+**`DepContext.categories`** (`package_rule.rs`):
+- Added `pub categories: &'a [&'a str]` to `DepContext` — explicit dep ecosystem categories
+- In `matches_context`: prefer `ctx.categories` when non-empty; fall back to `manager_categories(mgr)` for manager-derived categories
+- No-manager case: if `matchCategories` is set and `ctx.categories` is non-empty, use those; if empty, return false
+- 3 new tests: dep-provided override manager-derived, non-matching dep categories, no-manager with explicit categories
+
+**`DepContext.current_version`** (`package_rule.rs`):
+- Added `pub current_version: Option<&'a str>` to `DepContext` — resolved current version (distinct from `current_value` range)
+
+**`current_version_matches` 3-case rewrite** (`package_rule.rs`):
+- Case 1 (regex `/re/` or `!/re/`): compare against `locked_version ?? current_version ?? current_value`
+- Case 2 (plain version pattern): if `matchCurrentVersion` parses as a semver version, check whether it satisfies the `currentValue` constraint (version-in-range check)
+- Case 3 (semver range pattern): if `currentValue` is itself a version, use it; else fall back to `locked_version ?? current_version`; if no version available → false
+
+**Fixes from case 3**:
+- Previous impl used `lower_bound(currentValue)` which incorrectly matched ranges without `currentVersion`
+- Renovate's contract: range matching requires explicit `currentVersion` or `lockedVersion`
+- Updated `match_current_version_with_caret_range_current` test → `match_current_version_range_requires_current_version` + `match_current_version_range_uses_current_version_field`
+- 4 new tests ported from index.spec.ts: regex match/no-match, negated regex, static version value, version-in-range check
+
+### Files changed
+- `crates/renovate-core/src/package_rule.rs`
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/renovate-test-map.md`
 - `docs/parity/implementation-ledger.md`
