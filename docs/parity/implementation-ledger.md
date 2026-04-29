@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0376  | 2026-04-29 | Manager file pattern tests + asdf spec + is_skip_comment: mise pattern fix (added 3 missing patterns); port circleci/mise/pip_requirements/asdf spec file tests; is_skip_comment for renovate:ignore/pyup:ignore; jenkins+pip extractors use is_skip_comment; 1804 tests | Complete | See below. |
 | 0375  | 2026-04-29 | renovate-config-presets → renovate-config migration; whitesource/merge-confidence:beta → mergeConfidence:all-badges preset normalization; pathRules deprecated field merged into packageRules; 4 new tests; 1791 tests | Complete | See below. |
 | 0374  | 2026-04-29 | Compound schedule splitting: "after 10pm and before 7am" → ["after 10pm", "before 7am"] (straddling-midnight detection); "on every weekday" → "every weekday"; applied to schedule/automergeSchedule/packageRule.schedule/major+minor+patch configs; 4 new tests from migration.spec.ts; 1787 tests | Complete | See below. |
 | 0373  | 2026-04-29 | `force.enabled` in packageRules: `force_enabled: Option<bool>` on PackageRule/RuleEffects; `is_update_blocked_ctx` respects force precedence; `baseBranchPatterns` as canonical alias for `baseBranches`; 4 force.enabled tests + 2 baseBranchPatterns tests; 1778 tests | Complete | See below. |
