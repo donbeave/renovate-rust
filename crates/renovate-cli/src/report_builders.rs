@@ -321,7 +321,7 @@ pub(crate) fn build_dep_reports_maven(
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
-            dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
+            dep_type: Some(dep.renovate_dep_type().to_owned()),
             package_name: None,
             name: dep.dep_name.clone(),
             status,

@@ -56,15 +56,21 @@ pub enum MavenDepType {
 impl MavenDepType {
     /// Return the Renovate-canonical `depType` string for this Maven dep type.
     ///
-    /// Renovate reference: `lib/modules/manager/maven/index.ts` — `extractAllPackageFiles`.
+    /// For `Regular` deps the actual scope (compile/test/provided/runtime/system)
+    /// is more accurate but requires the scope string.  Use `renovate_dep_type_str`
+    /// for the full string including scope.
+    ///
+    /// Renovate reference: `lib/modules/manager/maven/extract.ts`
     pub fn as_renovate_str(&self) -> &'static str {
         match self {
-            MavenDepType::Regular => "dependencies",
+            // Regular deps are "compile" by Maven default; scope overrides this.
+            MavenDepType::Regular => "compile",
+            // dependencyManagement section.
             MavenDepType::Management => "dependency-management",
-            MavenDepType::Plugin => "plugins",
-            MavenDepType::Extension => "extensions",
+            // Plugins and extensions map to Renovate's "build" dep type.
+            MavenDepType::Plugin | MavenDepType::Extension => "build",
             MavenDepType::Parent => "parent",
-            MavenDepType::Profile => "profiles",
+            MavenDepType::Profile => "compile",
         }
     }
 }
@@ -85,8 +91,28 @@ pub struct MavenExtractedDep {
     pub current_value: String,
     /// Which POM section this dep came from.
     pub dep_type: MavenDepType,
+    /// Maven scope value for `<dependency>` elements (e.g. "compile", "test").
+    /// `None` for plugins, extensions, and parent POM entries.
+    pub scope: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<MavenSkipReason>,
+}
+
+impl MavenExtractedDep {
+    /// Return the Renovate-canonical `depType` string, incorporating the
+    /// Maven scope when available.
+    ///
+    /// Mirrors Renovate's behavior where `depType` is set to the scope value
+    /// (e.g. `"compile"`, `"test"`, `"provided"`) for `<dependency>` elements,
+    /// and `"build"` for plugins/extensions, `"parent"` for parent POM.
+    pub fn renovate_dep_type(&self) -> &str {
+        match self.dep_type {
+            MavenDepType::Regular | MavenDepType::Profile => {
+                self.scope.as_deref().unwrap_or("compile")
+            }
+            _ => self.dep_type.as_renovate_str(),
+        }
+    }
 }
 
 /// Errors from parsing a `pom.xml`.
@@ -241,6 +267,7 @@ fn parse_pom(
                         Some("groupId") => dep.group_id = text,
                         Some("artifactId") => dep.artifact_id = text,
                         Some("version") => dep.version = text,
+                        Some("scope") => dep.scope = Some(text),
                         _ => {}
                     }
                 }
@@ -303,6 +330,8 @@ struct CurrentDep {
     group_id: String,
     artifact_id: String,
     version: String,
+    /// Maven `<scope>` value for `<dependency>` elements (e.g. "compile", "test").
+    scope: Option<String>,
 }
 
 impl CurrentDep {
@@ -312,6 +341,7 @@ impl CurrentDep {
             group_id: String::new(),
             artifact_id: String::new(),
             version: String::new(),
+            scope: None,
         }
     }
 }
@@ -342,6 +372,7 @@ fn build_dep(dep: &CurrentDep) -> Option<MavenExtractedDep> {
         dep_name,
         current_value,
         dep_type: dep.dep_type,
+        scope: dep.scope.clone(),
         skip_reason,
     })
 }
@@ -799,14 +830,41 @@ mod tests {
 
     #[test]
     fn dep_type_as_renovate_str() {
-        assert_eq!(MavenDepType::Regular.as_renovate_str(), "dependencies");
+        // Renovate uses scope-based dep types for Maven (compile, test, etc.)
+        // The as_renovate_str() returns the default when no scope is available.
+        assert_eq!(MavenDepType::Regular.as_renovate_str(), "compile");
         assert_eq!(
             MavenDepType::Management.as_renovate_str(),
             "dependency-management"
         );
-        assert_eq!(MavenDepType::Plugin.as_renovate_str(), "plugins");
-        assert_eq!(MavenDepType::Extension.as_renovate_str(), "extensions");
+        // Plugins and extensions both map to "build" in Renovate's maven extractor.
+        assert_eq!(MavenDepType::Plugin.as_renovate_str(), "build");
+        assert_eq!(MavenDepType::Extension.as_renovate_str(), "build");
         assert_eq!(MavenDepType::Parent.as_renovate_str(), "parent");
-        assert_eq!(MavenDepType::Profile.as_renovate_str(), "profiles");
+        assert_eq!(MavenDepType::Profile.as_renovate_str(), "compile");
+    }
+
+    #[test]
+    fn renovate_dep_type_uses_scope() {
+        let dep = MavenExtractedDep {
+            dep_name: "org.example:lib".to_owned(),
+            current_value: "1.0.0".to_owned(),
+            dep_type: MavenDepType::Regular,
+            scope: Some("test".to_owned()),
+            skip_reason: None,
+        };
+        assert_eq!(dep.renovate_dep_type(), "test");
+    }
+
+    #[test]
+    fn renovate_dep_type_defaults_to_compile_without_scope() {
+        let dep = MavenExtractedDep {
+            dep_name: "org.example:lib".to_owned(),
+            current_value: "1.0.0".to_owned(),
+            dep_type: MavenDepType::Regular,
+            scope: None,
+            skip_reason: None,
+        };
+        assert_eq!(dep.renovate_dep_type(), "compile");
     }
 }
