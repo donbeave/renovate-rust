@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0329  | 2026-04-29 | `customManagers` pipeline: `custom_managers.rs` pipeline scans files matching `file_patterns`, extracts deps via regex, dispatches to npm/crate/github-releases/github-tags datasources; wired into `process_all_managers()`; runs last to avoid duplicating deps | Complete | See below. |
 | 0328  | 2026-04-29 | `customManagers` with `customType: "regex"`: `CustomManager` + `CustomExtractedDep` structs; `RawCustomManager` deserialized from `customManagers` JSON; `managerFilePatterns`/`fileMatch` merged; regex "any" strategy via `extract_deps()`; `matches_file()` for file gating; template fields for missing capture groups; 5 tests | Complete | See below. |
 | 0327  | 2026-04-29 | Two-pass `ignorePresets` filtering: pre-expansion pass handles `ignorePresets:["workarounds:all"]`; post-expansion pass handles `ignorePresets:["workarounds:typesNodeVersioning"]`; both individual and compound preset suppression now work correctly; 3 tests | Complete | See below. |
 | 0326  | 2026-04-29 | `automergeSchedule` gate in pipeline: when `automerge: true` AND `automergeSchedule` is set AND outside the window, dep's `automerge` output is set to `false`; 2 new pipeline tests | Complete | See below. |

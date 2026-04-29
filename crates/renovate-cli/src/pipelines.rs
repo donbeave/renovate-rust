@@ -48,6 +48,7 @@ mod cnb;
 mod conan;
 mod copier;
 mod cpanfile;
+mod custom_managers;
 mod dart;
 mod docker;
 mod dotnet;
@@ -154,4 +155,6 @@ pub(crate) async fn process_all_managers(ctx: &mut RepoPipelineCtx<'_>) {
     batect::process(ctx).await;
     heroku::process(ctx).await;
     misc::process(ctx).await;
+    // customManagers runs last so it can pick up files not matched by built-in managers.
+    custom_managers::process(ctx).await;
 }
