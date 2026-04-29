@@ -125,6 +125,13 @@ pub(crate) struct DepReport {
     /// Mirrors Renovate's `pinDigests` field.
     #[serde(rename = "pinDigests", skip_serializing_if = "Option::is_none")]
     pub pin_digests: Option<bool>,
+    /// Versioning scheme override from a matching packageRule.
+    /// E.g. `"docker"`, `"semver"`, `"regex:^v?(?<major>\\d+)..."`.
+    /// `None` = use the manager's default versioning scheme.
+    ///
+    /// Mirrors Renovate's `versioning` field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub versioning: Option<String>,
     /// When `true`, this update requires Dependency Dashboard approval before
     /// Renovate will create the PR.  Set by `dependencyDashboardApproval` in
     /// packageRules (e.g. via the `:approveMajorUpdates` preset).
@@ -699,6 +706,7 @@ mod tests {
                             range_strategy: None,
                             follow_tag: None,
                             pin_digests: None,
+                            versioning: None,
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
@@ -726,6 +734,7 @@ mod tests {
                             range_strategy: None,
                             follow_tag: None,
                             pin_digests: None,
+                            versioning: None,
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
@@ -752,6 +761,7 @@ mod tests {
                             range_strategy: None,
                             follow_tag: None,
                             pin_digests: None,
+                            versioning: None,
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
@@ -783,6 +793,7 @@ mod tests {
                         range_strategy: None,
                         follow_tag: None,
                         pin_digests: None,
+                        versioning: None,
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
@@ -866,6 +877,7 @@ mod tests {
                     range_strategy: None,
                     follow_tag: None,
                     pin_digests: None,
+                    versioning: None,
                     dependency_dashboard_approval: None,
                     replacement_name: None,
                     replacement_version: None,
@@ -908,6 +920,7 @@ mod tests {
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,
+            versioning: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -944,6 +957,7 @@ mod tests {
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,
+            versioning: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -978,6 +992,7 @@ mod tests {
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,
+            versioning: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -1011,6 +1026,7 @@ mod tests {
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,
+            versioning: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -1073,6 +1089,7 @@ mod tests {
                 range_strategy: None,
                 follow_tag: None,
                 pin_digests: None,
+                versioning: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1100,6 +1117,7 @@ mod tests {
                 range_strategy: None,
                 follow_tag: None,
                 pin_digests: None,
+                versioning: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1124,6 +1142,7 @@ mod tests {
                 range_strategy: None,
                 follow_tag: None,
                 pin_digests: None,
+                versioning: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1150,6 +1169,7 @@ mod tests {
                 range_strategy: None,
                 follow_tag: None,
                 pin_digests: None,
+                versioning: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1228,6 +1248,7 @@ mod tests {
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,
+            versioning: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -1258,6 +1279,7 @@ mod tests {
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,
+            versioning: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,

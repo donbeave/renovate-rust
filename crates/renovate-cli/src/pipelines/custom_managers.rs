@@ -284,6 +284,7 @@ async fn lookup_custom_deps(
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,
+            versioning: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
