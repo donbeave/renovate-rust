@@ -1332,16 +1332,40 @@ impl RepoConfig {
         preset_rules.extend(package_rules);
         let package_rules = preset_rules;
 
-        // Resolve scalar presets that set ignoreUnstable / updateNotScheduled.
+        // Resolve scalar presets that set ignoreUnstable / updateNotScheduled / enabled.
         let preset_ignore_unstable =
             effective_extends.iter().any(|p| p == ":ignoreUnstable");
         let preset_update_not_scheduled = effective_extends
             .iter()
             .any(|p| p == ":noUnscheduledUpdates")
             .then_some(false); // :noUnscheduledUpdates → updateNotScheduled: false
+        // :disableRenovate / :enableRenovate override the enabled flag.
+        let preset_enabled: Option<bool> = if effective_extends
+            .iter()
+            .any(|p| p == ":disableRenovate" || p == "disableRenovate")
+        {
+            Some(false)
+        } else if effective_extends
+            .iter()
+            .any(|p| p == ":enableRenovate" || p == "enableRenovate")
+        {
+            Some(true)
+        } else {
+            None
+        };
+
+        // Resolve :timezone(zone) parameterized preset.
+        let preset_timezone: Option<String> = effective_extends.iter().find_map(|p| {
+            let (name, args) = parse_preset_args(p.as_str());
+            if name == ":timezone" || name == "timezone" {
+                args.into_iter().next().filter(|s| !s.is_empty()).map(String::from)
+            } else {
+                None
+            }
+        });
 
         Self {
-            enabled: raw.enabled,
+            enabled: preset_enabled.unwrap_or(raw.enabled),
             ignore_deps: raw.ignore_deps,
             package_rules,
             enabled_managers: raw.enabled_managers,
@@ -1352,7 +1376,7 @@ impl RepoConfig {
             } else {
                 raw.schedule
             },
-            timezone: raw.timezone,
+            timezone: raw.timezone.or(preset_timezone),
             automerge: if raw.automerge {
                 true // explicit automerge: true wins
             } else {
@@ -3889,6 +3913,33 @@ mod schedule_preset_tests {
     fn update_not_scheduled_direct_config() {
         let c = RepoConfig::parse(r#"{"updateNotScheduled": false}"#);
         assert!(!c.update_not_scheduled);
+    }
+
+    #[test]
+    fn timezone_parameterized_preset_sets_field() {
+        let c = RepoConfig::parse(r#"{"extends": [":timezone(America/New_York)"]}"#);
+        assert_eq!(c.timezone.as_deref(), Some("America/New_York"));
+    }
+
+    #[test]
+    fn timezone_preset_does_not_override_explicit() {
+        // Explicit timezone in JSON wins over preset.
+        let c = RepoConfig::parse(
+            r#"{"timezone": "Europe/London", "extends": [":timezone(America/New_York)"]}"#,
+        );
+        assert_eq!(c.timezone.as_deref(), Some("Europe/London"));
+    }
+
+    #[test]
+    fn disable_renovate_preset_sets_enabled_false() {
+        let c = RepoConfig::parse(r#"{"extends": [":disableRenovate"]}"#);
+        assert!(!c.enabled);
+    }
+
+    #[test]
+    fn enable_renovate_preset_sets_enabled_true() {
+        let c = RepoConfig::parse(r#"{"extends": [":enableRenovate"]}"#);
+        assert!(c.enabled);
     }
 
     #[test]
