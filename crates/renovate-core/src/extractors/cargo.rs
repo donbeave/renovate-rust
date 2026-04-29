@@ -404,7 +404,8 @@ libc = "0.2"
     #[test]
     fn renamed_dep_extracts_original_package_name() {
         // Ported: "extracts original package name of renamed dependencies" — cargo/extract.spec.ts line 539
-        let toml = "[dependencies]\nboolector-solver = { package = \"boolector\", version = \"0.4.0\" }";
+        let toml =
+            "[dependencies]\nboolector-solver = { package = \"boolector\", version = \"0.4.0\" }";
         let deps = extract(toml).unwrap();
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "boolector-solver");

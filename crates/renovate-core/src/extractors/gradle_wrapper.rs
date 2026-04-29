@@ -128,7 +128,8 @@ zipStorePath=wrapper/dists
     #[test]
     fn whitespace_around_value_handled() {
         // Ported: "extracts version for property file with unnecessary whitespace" — gradle-wrapper/extract.spec.ts line 75
-        let content = "distributionUrl= https\\://services.gradle.org/distributions/gradle-4.10.3-all.zip \n";
+        let content =
+            "distributionUrl= https\\://services.gradle.org/distributions/gradle-4.10.3-all.zip \n";
         let dep = extract(content).unwrap();
         assert_eq!(dep.version, "4.10.3");
     }

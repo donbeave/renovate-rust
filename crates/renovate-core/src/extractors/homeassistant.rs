@@ -115,7 +115,8 @@ mod tests {
     #[test]
     fn missing_name_returns_empty() {
         // Ported: "returns null for non-Home Assistant manifest (missing name)" — spec line 24
-        let content = r#"{"domain": "test", "version": "1.0.0", "requirements": ["some-package==1.0.0"]}"#;
+        let content =
+            r#"{"domain": "test", "version": "1.0.0", "requirements": ["some-package==1.0.0"]}"#;
         assert!(extract(content).is_empty());
     }
 
@@ -129,7 +130,8 @@ mod tests {
     #[test]
     fn extracts_single_requirement_exact_version() {
         // Ported: "extracts single requirement with exact version" — spec line 64
-        let content = r#"{"domain": "hue", "name": "Philips Hue", "requirements": ["aiohue==1.9.1"]}"#;
+        let content =
+            r#"{"domain": "hue", "name": "Philips Hue", "requirements": ["aiohue==1.9.1"]}"#;
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "aiohue");

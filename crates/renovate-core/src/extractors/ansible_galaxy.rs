@@ -126,7 +126,8 @@ pub fn extract(content: &str) -> Vec<AnsibleGalaxyDep> {
         // Continuation key inside current list item.
         if let Some(val) = strip_key(trimmed, "name") {
             current_name = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
-        } else if let Some(val) = strip_key(trimmed, "src").or_else(|| strip_key(trimmed, "source")) {
+        } else if let Some(val) = strip_key(trimmed, "src").or_else(|| strip_key(trimmed, "source"))
+        {
             current_src = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
         } else if let Some(val) = strip_key(trimmed, "version") {
             current_ver = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
@@ -295,24 +296,24 @@ collections:
         );
     }
 
+    // Ported: "returns null for empty" — ansible-galaxy/extract.spec.ts line 15
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts dependencies from requirements.yml with a space at the end of line" — ansible-galaxy/extract.spec.ts line 31
     #[test]
     fn collections_with_git_url_name_and_version() {
-        // Ported: "extracts dependencies from requirements.yml with a space at the end of line"
-        // ansible-galaxy/extract.spec.ts line 31 — type:git with name as URL
         let content = "collections:\n- name: https://github.com/lowlydba/lowlydba.sqlserver.git\n  type: git\n  version: 1.1.3\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].current_value, "1.1.3");
     }
 
+    // Ported: "extracts git@ dependencies" — ansible-galaxy/extract.spec.ts line 41
     #[test]
     fn collections_with_source_field_and_git_at_url() {
-        // Ported: "extracts git@ dependencies" — ansible-galaxy/extract.spec.ts line 41
         let content = "collections:\n- name: community.docker\n  source: git@github.com:ansible-collections/community.docker\n  type: git\n  version: 2.7.5\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
@@ -324,10 +325,9 @@ collections:
         );
     }
 
+    // Ported: "check if a requirements file of other systems returns null" — ansible-galaxy/extract.spec.ts line 61
     #[test]
     fn non_ansible_content_returns_empty() {
-        // Ported: "check if a requirements file of other systems returns null" — spec line 61
-        // Helm requirements file doesn't have roles: or collections: sections
         let content = "dependencies:\n- name: nginx\n  version: 1.2.3\n  repository: https://charts.example.com\n";
         let deps = extract(content);
         assert!(deps.is_empty());

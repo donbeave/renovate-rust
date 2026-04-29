@@ -127,12 +127,14 @@ pub fn extract(content: &str) -> Result<Vec<PoetryExtractedDep>, PoetryExtractEr
     }
 
     // [build-system].requires
-    if let Some(requires) = doc.get("build-system").and_then(|bs| bs.get("requires")).and_then(|r| r.as_array()) {
+    if let Some(requires) = doc
+        .get("build-system")
+        .and_then(|bs| bs.get("requires"))
+        .and_then(|r| r.as_array())
+    {
         for req in requires {
-            if let Some(s) = req.as_str() {
-                if let Some(dep) = parse_build_system_req(s) {
-                    deps.push(dep);
-                }
+            if let Some(s) = req.as_str() && let Some(dep) = parse_build_system_req(s) {
+                deps.push(dep);
             }
         }
     }

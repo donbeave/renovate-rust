@@ -108,9 +108,7 @@ static NPM_RE: LazyLock<Regex> = LazyLock::new(|| {
 /// Returns `None` when no valid `class Name < Formula` header is found.
 pub fn extract(content: &str) -> Option<HomebrewDep> {
     // Get formula class name — must find a valid `class X < Formula` header.
-    let formula_name = CLASS_RE
-        .captures(content)
-        .map(|cap| cap[1].to_owned())?;
+    let formula_name = CLASS_RE.captures(content).map(|cap| cap[1].to_owned())?;
 
     // Get URL
     let url = URL_RE

@@ -34,8 +34,9 @@ pub struct SveltosDep {
 
 // ── Regexes ───────────────────────────────────────────────────────────────────
 
-static SVELTOS_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"apiVersion:\s*["']?(config|lib)\.projectsveltos\.io/"#).unwrap());
+static SVELTOS_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"apiVersion:\s*["']?(config|lib)\.projectsveltos\.io/"#).unwrap()
+});
 
 static HELM_CHARTS_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s+helmCharts:\s*$").unwrap());

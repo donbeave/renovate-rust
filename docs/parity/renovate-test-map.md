@@ -1,22 +1,51 @@
 # Renovate Test Map
 
-Maps Renovate TypeScript **spec** test files to Rust test coverage.
-This file tracks test-level port coverage. Only `.spec.ts` files appear here (never plain `.ts`).
+**Overall progress:** 4 / 10 actionable tests ported (40%) — updated 2026-04-29
 
-**Status:** `ported` · `partial` · `pending` · `not-applicable`
+Status key: `ported` · `pending` · `not-applicable`
 
-Renovate test counts use `it(` occurrences in the spec file.
-Rust test counts use `#[test]` occurrences in the corresponding Rust file.
+> Note: Files below the per-test sections are in the legacy summary format and
+> will be converted to per-test format in future iterations.
 
 ---
 
-## Managers (`lib/modules/manager/`)
+## `lib/modules/manager/ansible-galaxy/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible-galaxy/extract.spec.ts
+**Total tests:** 14 | **Ported:** 4 | **Actionable:** 10 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 15 | ported | `ansible_galaxy.rs` | `empty_content_returns_no_deps` | — |
+| extracts multiple dependencies from requirements.yml | 19 | pending | — | — | — |
+| extracts dependencies from a not beautified requirements file | 25 | pending | — | — | — |
+| extracts dependencies from requirements.yml with a space at the end of line | 31 | ported | `ansible_galaxy.rs` | `collections_with_git_url_name_and_version` | — |
+| extracts git@ dependencies | 41 | ported | `ansible_galaxy.rs` | `collections_with_source_field_and_git_at_url` | — |
+| check if an empty file returns null | 56 | pending | — | — | — |
+| check if a requirements file of other systems returns null | 61 | ported | `ansible_galaxy.rs` | `non_ansible_content_returns_empty` | — |
+| check collection style requirements file | 66 | pending | — | — | — |
+| check collection style requirements file in reverse order and missing empty line | 73 | pending | — | — | — |
+| check galaxy definition file | 79 | pending | — | — | — |
+
+### `getSliceEndNumber()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| negative start number returns -1 | 87 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
+| a start number bigger then number of lines return -1 | 92 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
+| choose first block | 97 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
+| choose second block | 102 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
+
+---
+
+## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
-| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/ansible_galaxy.rs` | 9 | partial |
 | `lib/modules/manager/ansible/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/ansible.rs` | 5 | partial |
 | `lib/modules/manager/ant/extract.spec.ts` | 44 | `crates/renovate-core/src/extractors/ant.rs` | 6 | partial |
 | `lib/modules/manager/argocd/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/argocd.rs` | 7 | partial |

@@ -16,10 +16,10 @@
 //! 2. `asdf::TOOL_TABLE` — asdf-compatible tool names reused for mise.
 //! 3. Dynamic tools: `java`, `scala` (version-dependent datasource).
 
+use crate::extractors::asdf::AsdfDatasource;
 use crate::extractors::asdf::{
     self, AsdfDep, AsdfSkipReason, AsdfToolDef, datasource_id, tag_strip_from_extract_version,
 };
-use crate::extractors::asdf::AsdfDatasource;
 
 /// Mise-specific core tool names that differ from the asdf tool key.
 ///
@@ -279,9 +279,18 @@ mod tests {
         let content = "[tools]\nnode = \"20.9.0\"\npython = \"3.11.5\"\ngo = \"1.21.0\"\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 3);
-        assert!(deps.iter().any(|d| d.tool_name == "node" && d.datasource_id == Some("node-version")));
-        assert!(deps.iter().any(|d| d.tool_name == "python" && d.datasource_id == Some("github-tags")));
-        assert!(deps.iter().any(|d| d.tool_name == "go" && d.datasource_id == Some("github-tags")));
+        assert!(
+            deps.iter()
+                .any(|d| d.tool_name == "node" && d.datasource_id == Some("node-version"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.tool_name == "python" && d.datasource_id == Some("github-tags"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.tool_name == "go" && d.datasource_id == Some("github-tags"))
+        );
     }
 
     #[test]

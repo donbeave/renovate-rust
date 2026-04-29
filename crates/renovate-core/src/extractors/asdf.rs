@@ -117,10 +117,11 @@ impl AsdfToolDef {
 /// Extract the simple literal prefix from an `extractVersion` regex.
 ///
 /// `"^v(?<version>\\S+)"` → `"v"`, `"^go(?<version>..."` → `"go"`, `None` → `""`
-pub(crate) fn tag_strip_from_extract_version(extract_version: Option<&'static str>) -> &'static str {
-    let ev = match extract_version {
-        Some(s) => s,
-        None => return "",
+pub(crate) fn tag_strip_from_extract_version(
+    extract_version: Option<&'static str>,
+) -> &'static str {
+    let Some(ev) = extract_version else {
+        return "";
     };
     let rest = ev.strip_prefix('^').unwrap_or(ev);
     let pos = rest.find("(?<").unwrap_or(rest.len());
@@ -483,7 +484,9 @@ pub(crate) static TOOL_TABLE: &[(&str, AsdfToolDef)] = &[
             package_name: Some("clojure/brew-install"),
             dep_name: None,
             extract_version: None,
-            versioning: Some("regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$"),
+            versioning: Some(
+                "regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$",
+            ),
         },
     ),
     (

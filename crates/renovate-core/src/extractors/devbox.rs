@@ -173,7 +173,8 @@ mod tests {
     #[test]
     fn mixed_valid_and_invalid_versions() {
         // Ported: "returns invalid dependencies" — devbox/extract.spec.ts line 177
-        let content = r#"{"packages": {"nodejs": "20.1.8", "yarn": "1.22.10", "invalid": "invalid"}}"#;
+        let content =
+            r#"{"packages": {"nodejs": "20.1.8", "yarn": "1.22.10", "invalid": "invalid"}}"#;
         let deps = extract(content);
         assert_eq!(deps.len(), 3);
         let node = deps.iter().find(|d| d.name == "nodejs").unwrap();

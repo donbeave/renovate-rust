@@ -462,7 +462,10 @@ packages:
         let content = "packages:\n  MyLib:\n    url: https://github.com/owner/repo.git\n    revision: abc123\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
-        assert_eq!(deps[0].skip_reason, Some(XcodeGenSkipReason::NoSemverVersion));
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(XcodeGenSkipReason::NoSemverVersion)
+        );
     }
 
     #[test]

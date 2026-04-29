@@ -127,10 +127,14 @@ mod tests {
     fn ssh_url_src_path_extracted() {
         // Ported: "extracts repository and version from .copier-answers.yml with ssh URL"
         // copier/extract.spec.ts line 25
-        let content = "_commit: v1.0.0\n_src_path: git@github.com:renovatebot/somedir/renovate.git\n";
+        let content =
+            "_commit: v1.0.0\n_src_path: git@github.com:renovatebot/somedir/renovate.git\n";
         let dep = extract(content).unwrap();
         assert_eq!(dep.current_value, "v1.0.0");
-        assert_eq!(dep.src_path, "git@github.com:renovatebot/somedir/renovate.git");
+        assert_eq!(
+            dep.src_path,
+            "git@github.com:renovatebot/somedir/renovate.git"
+        );
     }
 
     #[test]

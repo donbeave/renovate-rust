@@ -86,9 +86,8 @@ static GH_RELEASE_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"github\.com/([^/]+/[^/]+)/releases/download/([^/]+)/").unwrap());
 
 /// GitLab archive URL (anchored to https://gitlab.com): owner/repo and ref.
-static GL_ARCHIVE_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"https?://gitlab\.com/([^/]+/[^/]+)/-/archive/([^/]+)/").unwrap()
-});
+static GL_ARCHIVE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"https?://gitlab\.com/([^/]+/[^/]+)/-/archive/([^/]+)/").unwrap());
 
 // ── Parsing ───────────────────────────────────────────────────────────────────
 
