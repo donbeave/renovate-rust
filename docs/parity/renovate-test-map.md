@@ -212,6 +212,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/migration.spec.ts` | 762 | `azureAutoComplete: true/false` → `platformAutomerge` | `crates/renovate-core/src/repo_config.rs` | `azure_auto_complete_migrated_to_platform_automerge` | ported |
 | `lib/config/migration.spec.ts` | 791 | `gitLabAutomerge: true/false` → `platformAutomerge` | `crates/renovate-core/src/repo_config.rs` | `git_lab_automerge_migrated_to_platform_automerge` | ported |
 | `lib/config/migration.spec.ts` | 184 | compound schedule splitting: "after 10pm and before 7am" → ["after 10pm", "before 7am"] | `crates/renovate-core/src/repo_config.rs` | `schedule_compound_after_before_splits_at_midnight_boundary`, `schedule_compound_split_with_day_suffix`, `schedule_compound_non_straddling_not_split` | ported |
+| `lib/config/migrations/custom/path-rules-migration.spec.ts` | — | `pathRules: [...]` → merged into `packageRules` | `crates/renovate-core/src/repo_config.rs` | `deprecated_path_rules_field_merged_into_package_rules`, `path_rules_concat_with_existing_package_rules` | ported |
+| `lib/config/migrations/custom/match-managers-migration.spec.ts` | — | `matchManagers: ["renovate-config-presets"]` → `["renovate-config"]` | `crates/renovate-core/src/repo_config.rs` | `match_managers_renovate_config_presets_migrated_to_renovate_config` | ported |
+| `lib/config/migrations/custom/extends-migration.spec.ts` | — | `github>whitesource/merge-confidence:beta` → `mergeConfidence:all-badges` | `crates/renovate-core/src/repo_config.rs` | `extend_whitesource_merge_confidence_preset_normalized` | ported |
 
 ---
 
