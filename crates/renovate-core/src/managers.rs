@@ -852,6 +852,54 @@ mod tests {
     }
 
     #[test]
+    fn pip_requirements_file_patterns_match_spec() {
+        // Ported: "default config file pattern" — pip_requirements/index.spec.ts
+        // Verifies our managerFilePatterns regex matches the same files as Renovate.
+        let all_files = files(&[
+            "requirements.txt",
+            "requirements-dev.txt",
+            "requirements_test.txt",
+            "requirements_test_all.txt",
+            "requirements.dev.txt",
+            "requirements-dev.pip",
+            "requirements_test.pip",
+            "requirements_test_all.pip",
+            "requirements.dev.pip",
+            // Negative cases
+            "setup.py",
+            "pyproject.toml",
+            "requirements.in",
+        ]);
+        let result = detect(&all_files);
+        let pip = result
+            .iter()
+            .find(|m| m.name == "pip_requirements")
+            .unwrap();
+        for name in &[
+            "requirements.txt",
+            "requirements-dev.txt",
+            "requirements_test.txt",
+            "requirements_test_all.txt",
+            "requirements.dev.txt",
+            "requirements-dev.pip",
+            "requirements_test.pip",
+            "requirements_test_all.pip",
+            "requirements.dev.pip",
+        ] {
+            assert!(
+                pip.matched_files.contains(&name.to_string()),
+                "{name} should match pip_requirements"
+            );
+        }
+        for name in &["setup.py", "pyproject.toml"] {
+            assert!(
+                !pip.matched_files.contains(&name.to_string()),
+                "{name} should NOT match pip_requirements"
+            );
+        }
+    }
+
+    #[test]
     fn detects_github_actions_workflow() {
         let f = files(&[
             ".github/workflows/ci.yml",

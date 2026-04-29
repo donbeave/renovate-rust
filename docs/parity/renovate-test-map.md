@@ -185,6 +185,11 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/pretty-time.ts` | 50 | invalid operator → false | `crates/renovate-core/src/schedule.rs` | `date_range_invalid_operator_returns_false` | ported |
 | `lib/util/pretty-time.ts` | 50 | invalid timestamp → false | `crates/renovate-core/src/schedule.rs` | `date_range_invalid_timestamp_returns_false` | ported |
 | `lib/modules/platform/local/index.ts` | — | `--platform=local` scans CWD | `crates/renovate-core/src/platform/local.rs` | (integration, verified via `renovate --platform=local --dry-run=full`) | ported |
+| `lib/util/ignore.spec.ts` | — | `isSkipComment('renovate:ignore')` → true | `crates/renovate-core/src/string_match.rs` | `skip_comment_renovate_ignore_returns_true` | ported |
+| `lib/util/ignore.spec.ts` | — | `isSkipComment('other:ignore')` → false | `crates/renovate-core/src/string_match.rs` | `skip_comment_other_prefix_returns_false` | ported |
+| `lib/util/ignore.spec.ts` | — | `isSkipComment('renovate:update')` → false | `crates/renovate-core/src/string_match.rs` | `skip_comment_renovate_non_ignore_returns_false` | ported |
+| `lib/util/ignore.spec.ts` | — | `isSkipComment(undefined)` → false | `crates/renovate-core/src/string_match.rs` | `skip_comment_empty_returns_false` | ported |
+| `lib/modules/manager/asdf/extract.spec.ts` | 1096 | `renovate:ignore` comment skips dep | `crates/renovate-core/src/extractors/asdf.rs` | `renovate_ignore_comment_skips_dep` | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` exact hit | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_exact_hit` | ported |
 | `lib/util/package-rules/categories.ts` | — | `matchCategories` any-of-many | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_any_of_many` | ported |
 | `lib/util/package-rules/categories.ts` | — | empty `matchCategories` matches all | `crates/renovate-core/src/repo_config.rs` | `categories_base_branch_tests::match_categories_empty_matches_all` | ported |
