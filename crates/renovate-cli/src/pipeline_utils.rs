@@ -78,8 +78,13 @@ pub(crate) fn apply_update_blocking_to_report(
 
                 // Per-rule schedule gate: if a matching packageRule specifies a
                 // schedule, only allow this update during that window.
+                // Use the repo-level `timezone` (IANA name) so schedule entries
+                // like "after 9am" fire at the right local time.
                 if !effects.schedule.is_empty()
-                    && !renovate_core::schedule::is_within_schedule(&effects.schedule)
+                    && !renovate_core::schedule::is_within_schedule_tz(
+                        &effects.schedule,
+                        repo_cfg.timezone.as_deref(),
+                    )
                 {
                     dep.status = output::DepStatus::Skipped {
                         reason: "outside schedule window (packageRule)".into(),

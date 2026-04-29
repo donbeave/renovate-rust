@@ -276,7 +276,12 @@ async fn process_repo(
                 return (None, false);
             }
             // Check schedule: if configured, only process during the scheduled window.
-            if !rc.schedule.is_empty() && !renovate_core::schedule::is_within_schedule(&rc.schedule)
+            // Pass the repo-level `timezone` so "after 9am" fires at the right local time.
+            if !rc.schedule.is_empty()
+                && !renovate_core::schedule::is_within_schedule_tz(
+                    &rc.schedule,
+                    rc.timezone.as_deref(),
+                )
             {
                 tracing::info!(
                     repo = %repo_slug,

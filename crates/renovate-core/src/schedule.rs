@@ -23,7 +23,8 @@
 //! Both `0` and `7` map to Sunday (ISO week: Monday = 1, Sunday = 7) is
 //! normalised to 0.
 
-use chrono::{DateTime, Datelike, Duration, Timelike, Utc, Weekday};
+use chrono::{DateTime, Datelike, Duration, TimeZone, Timelike, Utc, Weekday};
+use chrono_tz::Tz;
 
 /// Parse a Renovate `minimumReleaseAge` string into a [`Duration`].
 ///
@@ -146,15 +147,61 @@ pub fn is_within_schedule(schedule: &[String]) -> bool {
 
 /// Like [`is_within_schedule`] but takes an explicit `DateTime` for testability.
 pub fn is_within_schedule_at(schedule: &[String], now: DateTime<Utc>) -> bool {
+    is_within_schedule_tz_at(schedule, None, now)
+}
+
+/// Return `true` when any entry in `schedule` matches the current time in
+/// `timezone`.  When `timezone` is `None` or unrecognised, falls back to UTC.
+///
+/// Renovate reference: `lib/workers/repository/update/branch/schedule.ts` —
+/// schedule evaluation with `later.schedule()`.  Renovate uses the repository's
+/// `timezone` config option (IANA timezone name) to convert the current time
+/// before checking.  An unrecognised timezone name is treated as UTC (fail-open)
+/// to match Renovate's behaviour of logging a warning and continuing.
+pub fn is_within_schedule_tz(schedule: &[String], timezone: Option<&str>) -> bool {
+    is_within_schedule_tz_at(schedule, timezone, Utc::now())
+}
+
+/// Like [`is_within_schedule_tz`] but takes an explicit `DateTime<Utc>` for
+/// testability.
+pub fn is_within_schedule_tz_at(
+    schedule: &[String],
+    timezone: Option<&str>,
+    now: DateTime<Utc>,
+) -> bool {
     if schedule.is_empty() || schedule.iter().any(|s| s == "at any time" || s.is_empty()) {
         return true;
     }
 
-    let hour = now.hour() as u8;
-    let dom = now.day() as u8;
-    let month = now.month() as u8;
-    // chrono: Monday=1..Sunday=7; convert to Unix: Sunday=0..Saturday=6
-    let weekday: u8 = match now.weekday() {
+    let (hour, dom, month, weekday) = match timezone.and_then(|tz| tz.parse::<Tz>().ok()) {
+        Some(tz) => {
+            let local = tz.from_utc_datetime(&now.naive_utc());
+            (
+                local.hour() as u8,
+                local.day() as u8,
+                local.month() as u8,
+                weekday_to_unix(local.weekday()),
+            )
+        }
+        None => (
+            now.hour() as u8,
+            now.day() as u8,
+            now.month() as u8,
+            weekday_to_unix(now.weekday()),
+        ),
+    };
+
+    schedule.iter().any(|entry| {
+        if looks_like_cron(entry) {
+            cron_matches(entry, hour, dom, month, weekday)
+        } else {
+            text_schedule_matches(entry, hour, dom, weekday)
+        }
+    })
+}
+
+fn weekday_to_unix(w: Weekday) -> u8 {
+    match w {
         Weekday::Mon => 1,
         Weekday::Tue => 2,
         Weekday::Wed => 3,
@@ -162,17 +209,7 @@ pub fn is_within_schedule_at(schedule: &[String], now: DateTime<Utc>) -> bool {
         Weekday::Fri => 5,
         Weekday::Sat => 6,
         Weekday::Sun => 0,
-    };
-
-    schedule.iter().any(|entry| {
-        // Try cron first (5 space-separated fields starting with a digit or `*`).
-        // Fall back to later.js text format.
-        if looks_like_cron(entry) {
-            cron_matches(entry, hour, dom, month, weekday)
-        } else {
-            text_schedule_matches(entry, hour, dom, weekday)
-        }
-    })
+    }
 }
 
 /// Return `true` if `cron_expr` matches the given time components.
@@ -811,5 +848,70 @@ mod tests {
     fn date_range_naive_timestamp_accepted_with_z_suffix() {
         // PyPI-style naive timestamp gets Z appended internally
         assert!(satisfies_date_range("2020-01-01T00:00:00", "> 3 days"));
+    }
+
+    // ── is_within_schedule_tz_at ─────────────────────────────────────────────
+
+    #[test]
+    fn timezone_shifts_hour_correctly() {
+        // UTC midnight on a Wednesday (weekday=3 in Unix).
+        // In America/New_York (UTC-5 during standard time) it's Tuesday 19:00.
+        let utc_midnight_wed = utc(2026, 1, 7, 0); // 2026-01-07 is a Wednesday
+        // Schedule that only fires Mon-Fri 9am-5pm in UTC: should be false at UTC midnight
+        let schedule_utc = vec!["* 9-17 * * 1-5".to_owned()];
+        assert!(
+            !is_within_schedule_tz_at(&schedule_utc, None, utc_midnight_wed),
+            "UTC midnight should be outside 9-17 UTC"
+        );
+        // With timezone = America/New_York, UTC midnight = NY Tuesday 19:00 — still outside
+        assert!(
+            !is_within_schedule_tz_at(&schedule_utc, Some("America/New_York"), utc_midnight_wed),
+            "NY 19:00 should be outside 9-17"
+        );
+    }
+
+    #[test]
+    fn timezone_fires_during_local_business_hours() {
+        // UTC 14:00 on a Wednesday = America/New_York 09:00 (EST, UTC-5)
+        let utc_2pm_wed = utc(2026, 1, 7, 14);
+        let schedule = vec!["* 9-17 * * 1-5".to_owned()];
+        // In UTC 14:00 is within 9-17 window
+        assert!(
+            is_within_schedule_tz_at(&schedule, None, utc_2pm_wed),
+            "UTC 14:00 is within 9-17"
+        );
+        // In America/New_York (UTC-5 EST) it is 09:00 — also within 9-17
+        assert!(
+            is_within_schedule_tz_at(&schedule, Some("America/New_York"), utc_2pm_wed),
+            "NY 09:00 (UTC 14:00) is within 9-17"
+        );
+    }
+
+    #[test]
+    fn timezone_unknown_tz_falls_back_to_utc() {
+        let utc_10am_wed = utc(2026, 1, 7, 10);
+        let schedule = vec!["* 9-11 * * *".to_owned()];
+        // Unknown timezone → UTC fallback → UTC 10:00 matches 9-11
+        assert!(
+            is_within_schedule_tz_at(&schedule, Some("Not/AReal_TZ"), utc_10am_wed),
+            "unknown timezone falls back to UTC, 10am UTC matches 9-11"
+        );
+    }
+
+    #[test]
+    fn text_schedule_respects_timezone() {
+        // "after 9am" = hour >= 9
+        // UTC 08:00 on a weekday = NOT within "after 9am" UTC
+        let utc_8am = utc(2026, 1, 7, 8); // Wednesday
+        let schedule = vec!["after 9am".to_owned()];
+        assert!(
+            !is_within_schedule_tz_at(&schedule, None, utc_8am),
+            "UTC 08:00 is before 9am UTC"
+        );
+        // With UTC+2 timezone (e.g. Europe/Berlin standard winter) it would be 10:00 → matches
+        assert!(
+            is_within_schedule_tz_at(&schedule, Some("Europe/Berlin"), utc_8am),
+            "Berlin 10:00 (UTC+2 CET) is after 9am"
+        );
     }
 }

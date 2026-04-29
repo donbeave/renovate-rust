@@ -94,7 +94,7 @@ find where a given TypeScript module is implemented in Rust.
 
 | TypeScript file | Rust file(s) | Status | Notes |
 |-----------------|-------------|--------|-------|
-| `lib/workers/repository/updates/schedule.ts` | `crates/renovate-core/src/schedule.rs` | partial | POSIX cron + later.js text DSL; missing: timezone-aware evaluation |
+| `lib/workers/repository/updates/schedule.ts` | `crates/renovate-core/src/schedule.rs` | partial | POSIX cron + later.js text DSL; timezone-aware via `chrono-tz`; missing: full later.js coverage |
 | `lib/util/pretty-time.ts` | `crates/renovate-core/src/schedule.rs` | partial | `parse_age_duration`, `satisfies_date_range`, `is_within_release_age` |
 | `lib/config/options/index.ts` (`minimumReleaseAge`) | `crates/renovate-core/src/schedule.rs`, `crates/renovate-cli/src/main.rs` | partial | Implemented for npm/pypi; crates.io pending |
 
