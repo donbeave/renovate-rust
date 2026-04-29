@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0255  | 2026-04-29 | NuGet `release_timestamp` via v3 registration leaf API (`/registration5-gz-semver2/{id}/{version}.json`); extra per-package call fetches `published` date | Complete | See below. |
 | 0254  | 2026-04-29 | Fix Maven dep types: scope-aware `renovate_dep_type()` — `<scope>test</scope>` → `"test"`, no scope → `"compile"`; plugin/extension → `"build"` matching Renovate's maven extractor | Complete | See below. |
 | 0253  | 2026-04-29 | `semanticCommitType`/`Scope` in packageRules + `RuleEffects` + `:semanticPrefixFixDepsChoreOthers` preset expansion injects production-dep `fix` / other-dep `chore` rules | Complete | See below. |
 | 0252  | 2026-04-29 | `semanticCommitType` + `semanticCommitScope` config options + `pr_title_full()` — configurable semantic commit type/scope, enabling `:semanticPrefixFixDepsChoreOthers` patterns | Complete | See below. |

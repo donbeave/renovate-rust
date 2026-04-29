@@ -17,6 +17,9 @@ use tokio::task::JoinSet;
 use crate::http::HttpClient;
 
 pub const NUGET_API: &str = "https://api.nuget.org/v3-flatcontainer";
+/// NuGet v3 registration index base URL (for per-version metadata including timestamps).
+pub const NUGET_REGISTRATION_API: &str =
+    "https://api.nuget.org/v3/registration5-gz-semver2";
 
 /// Errors from fetching NuGet metadata.
 #[derive(Debug, Error)]
@@ -40,6 +43,8 @@ pub struct NuGetUpdateSummary {
     pub current_value: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 publication timestamp for the latest stable version, when available.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result from `fetch_updates_concurrent`.
@@ -52,6 +57,33 @@ pub struct NuGetUpdateResult {
 #[derive(Debug, Deserialize)]
 struct FlatContainerIndex {
     versions: Vec<String>,
+}
+
+/// NuGet v3 registration leaf — returned by
+/// `https://api.nuget.org/v3/registration5-gz-semver2/{id}/{version}.json`.
+#[derive(Debug, Deserialize)]
+struct RegistrationLeaf {
+    published: Option<String>,
+}
+
+/// Fetch the `published` timestamp for a specific NuGet package version from
+/// the v3 registration leaf endpoint.  Returns `None` on any error (the
+/// timestamp is best-effort and should not block the update summary).
+async fn fetch_published_timestamp(
+    package_id: &str,
+    version: &str,
+    http: &HttpClient,
+) -> Option<String> {
+    let lower = package_id.to_ascii_lowercase();
+    let url = format!(
+        "{NUGET_REGISTRATION_API}/{lower}/{version}.json"
+    );
+    let resp = http.get_retrying(&url).await.ok()?;
+    if !resp.status().is_success() {
+        return None;
+    }
+    let leaf: RegistrationLeaf = resp.json().await.ok()?;
+    leaf.published
 }
 
 /// Fetch the latest stable version of a NuGet package.
@@ -133,10 +165,16 @@ async fn fetch_update_summary(
 ) -> Result<NuGetUpdateSummary, NuGetError> {
     let latest = fetch_latest(&dep.package_id, http, api_base).await?;
     let s = crate::versioning::nuget::nuget_update_summary(&dep.current_value, latest.as_deref());
+    let release_timestamp = if let Some(ref ver) = s.latest {
+        fetch_published_timestamp(&dep.package_id, ver, http).await
+    } else {
+        None
+    };
     Ok(NuGetUpdateSummary {
         current_value: s.current_value,
         latest: s.latest,
         update_available: s.update_available,
+        release_timestamp,
     })
 }
 
@@ -183,12 +221,14 @@ pub async fn fetch_latest_batch(
 }
 
 /// Compute a `NuGetUpdateSummary` from a pre-fetched latest version entry.
+/// Timestamps are not available from the cache — use `fetch_update_summary` when needed.
 pub fn summary_from_cache(current_value: &str, latest: &NuGetLatestEntry) -> NuGetUpdateSummary {
     let s = crate::versioning::nuget::nuget_update_summary(current_value, latest.as_deref());
     NuGetUpdateSummary {
         current_value: s.current_value,
         latest: s.latest,
         update_available: s.update_available,
+        release_timestamp: None,
     }
 }
 
