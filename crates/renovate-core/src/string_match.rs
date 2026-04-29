@@ -109,6 +109,28 @@ pub fn match_regex_or_glob_list(input: &str, patterns: &[String]) -> bool {
     true
 }
 
+/// Return `true` when an inline comment should cause the dep to be skipped.
+///
+/// Mirrors Renovate's `isSkipComment()` from `lib/util/ignore.ts`.
+/// Returns `true` when `comment` starts with `renovate:` or `pyup:` and the
+/// command after the colon is `"ignore"`.  Case-sensitive (matches Renovate's
+/// `regEx(/^(renovate|pyup):/)` + `command === 'ignore'` check).
+///
+/// Renovate reference: `lib/util/ignore.ts`
+pub fn is_skip_comment(comment: &str) -> bool {
+    let comment = comment.trim();
+    let body = if let Some(rest) = comment.strip_prefix("renovate:") {
+        rest
+    } else if let Some(rest) = comment.strip_prefix("pyup:") {
+        rest
+    } else {
+        return false;
+    };
+    // The command ends at the first '#' (nested comment) or at whitespace.
+    let cmd = body.split('#').next().unwrap_or(body).trim();
+    cmd == "ignore"
+}
+
 /// Extract a Rust-compatible regex string from a `/pattern/` or `/pattern/flags` literal.
 ///
 /// Supported flags: `i` (case-insensitive), `m` (multi-line), `s` (dot-all).
@@ -401,5 +423,42 @@ mod tests {
             "@opentelemetry/http",
             "@opentelemetry**"
         ));
+    }
+
+    // ── is_skip_comment (ported from Renovate util/ignore.spec.ts) ────────────
+
+    #[test]
+    fn skip_comment_renovate_ignore_returns_true() {
+        // Ported: "returns true for 'renovate:ignore' comments" — util/ignore.spec.ts
+        assert!(is_skip_comment("renovate:ignore"));
+    }
+
+    #[test]
+    fn skip_comment_pyup_ignore_returns_true() {
+        assert!(is_skip_comment("pyup:ignore"));
+    }
+
+    #[test]
+    fn skip_comment_other_prefix_returns_false() {
+        // Ported: "returns false for comments not starting with 'renovate:' or 'pyup:'"
+        assert!(!is_skip_comment("other:ignore"));
+    }
+
+    #[test]
+    fn skip_comment_renovate_non_ignore_returns_false() {
+        // Ported: "returns false for 'renovate:' comments without 'ignore'"
+        assert!(!is_skip_comment("renovate:update"));
+    }
+
+    #[test]
+    fn skip_comment_empty_returns_false() {
+        // Ported: "returns false when comment is undefined"
+        assert!(!is_skip_comment(""));
+    }
+
+    #[test]
+    fn skip_comment_with_leading_whitespace() {
+        // Inline comment: "  renovate:ignore  " (with spaces)
+        assert!(is_skip_comment("  renovate:ignore  "));
     }
 }

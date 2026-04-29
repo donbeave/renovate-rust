@@ -66,11 +66,19 @@ pub struct AsdfDep {
 
 /// Extract dependencies from a `.tool-versions` file.
 pub fn extract(content: &str) -> Vec<AsdfDep> {
+    use crate::string_match::is_skip_comment;
     let mut out = Vec::new();
 
     for raw in content.lines() {
-        let line = raw.split('#').next().unwrap_or("").trim();
+        // Check for renovate:ignore comment before discarding it.
+        let mut parts = raw.splitn(2, '#');
+        let line = parts.next().unwrap_or("").trim();
+        let comment = parts.next().unwrap_or("").trim();
+
         if line.is_empty() {
+            continue;
+        }
+        if is_skip_comment(comment) {
             continue;
         }
 
@@ -379,5 +387,20 @@ unknowntool 9.9.9
     fn comment_lines_skipped() {
         let deps = extract("# this is a comment\npython 3.11.5\n");
         assert_eq!(deps.len(), 1);
+    }
+
+    #[test]
+    fn renovate_ignore_comment_skips_dep() {
+        // Ported: asdf/extract.spec.ts line 1096 — "ignores supported tooling with a renovate:ignore comment"
+        let deps = extract("nodejs 16.16.0 # renovate:ignore\npython 3.11.5\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].tool_name, "python");
+    }
+
+    #[test]
+    fn pyup_ignore_comment_skips_dep() {
+        let deps = extract("python 3.11.5 # pyup:ignore\nnodejs 20.9.0\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].tool_name, "nodejs");
     }
 }

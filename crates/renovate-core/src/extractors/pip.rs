@@ -79,10 +79,16 @@ pub fn extract(content: &str) -> Result<Vec<PipExtractedDep>, PipExtractError> {
 /// Returns `None` for blank lines, comment-only lines, and directive lines
 /// that don't represent a dependency (e.g. `--index-url …`, `--trusted-host`).
 fn parse_line(raw: &str) -> Option<PipExtractedDep> {
+    use crate::string_match::is_skip_comment;
     // Strip inline comment (split on first `#`, take left side).
-    let line = raw.split('#').next().unwrap_or("").trim();
+    let mut parts = raw.splitn(2, '#');
+    let line = parts.next().unwrap_or("").trim();
+    let comment = parts.next().unwrap_or("").trim();
 
     if line.is_empty() {
+        return None;
+    }
+    if is_skip_comment(comment) {
         return None;
     }
 

@@ -53,10 +53,17 @@ pub enum JenkinsSkipReason {
 pub fn extract_txt(content: &str) -> Vec<JenkinsPluginDep> {
     let mut out = Vec::new();
 
+    use crate::string_match::is_skip_comment;
     for raw in content.lines() {
-        // Strip inline comments.
-        let line = raw.split('#').next().unwrap_or(raw).trim();
+        // Extract comment before discarding it (needed for renovate:ignore check).
+        let mut parts = raw.splitn(2, '#');
+        let line = parts.next().unwrap_or(raw).trim();
+        let comment = parts.next().unwrap_or("").trim();
+
         if line.is_empty() {
+            continue;
+        }
+        if is_skip_comment(comment) {
             continue;
         }
 
