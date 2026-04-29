@@ -265,6 +265,7 @@ id = "no/version"
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns null for empty package.toml" — buildpacks/extract.spec.ts line 11
     #[test]
     fn no_io_buildpacks_returns_empty() {
         assert!(extract("[_]\nschema-version = \"0.2\"\n").is_empty());

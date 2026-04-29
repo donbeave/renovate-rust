@@ -145,6 +145,7 @@ steps:
         assert_eq!(deps[0].image, "node");
     }
 
+    // Ported: "returns null for empty" — cloudbuild/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

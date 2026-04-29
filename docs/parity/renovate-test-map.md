@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 17 / 32 actionable tests ported (53%) — updated 2026-04-29
+**Overall progress:** 19 / 39 actionable tests ported (49%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -110,6 +110,49 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/buildpacks/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/buildpacks/extract.spec.ts
+**Total tests:** 3 | **Ported:** 1 | **Actionable:** 3 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid files | 7 | pending | — | — | — |
+| returns null for empty package.toml | 11 | ported | `buildpacks.rs` | `no_io_buildpacks_returns_empty` | — |
+| extracts builder and buildpack images | 20 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cloudbuild/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cloudbuild/extract.spec.ts
+**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | ported | `cloudbuild.rs` | `empty_returns_empty` | — |
+| extracts multiple image lines | 10 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cocoapods/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cocoapods/extract.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts from simple file | 13 | pending | — | — | — |
+| extracts from complex file | 42 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -125,11 +168,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bitbucket-pipelines/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/bitbucket_pipelines.rs` | 8 | partial |
 | `lib/modules/manager/bitrise/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/bitrise.rs` | 10 | partial |
 | `lib/modules/manager/buildkite/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/buildkite.rs` | 7 | partial |
-| `lib/modules/manager/buildpacks/extract.spec.ts` | 3 | `crates/renovate-core/src/extractors/buildpacks.rs` | 5 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
 | `lib/modules/manager/circleci/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/circleci.rs` | 10 | partial |
-| `lib/modules/manager/cloudbuild/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/cloudbuild.rs` | 5 | partial |
-| `lib/modules/manager/cocoapods/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/cocoapods.rs` | 10 | partial |
 | `lib/modules/manager/composer/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/composer.rs` | 9 | partial |
 | `lib/modules/manager/conan/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/conan.rs` | 5 | partial |
 | `lib/modules/manager/copier/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/copier.rs` | 8 | partial |
