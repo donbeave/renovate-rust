@@ -907,6 +907,190 @@ fn resolve_extends_automerge_schedule(extends: &[String]) -> Option<Vec<String>>
 /// Only `:automergeAll` / `:automergeMajor` / `:autoMerge` / `:automergeBranch`
 /// set global `automerge: true`.  `:automergeMinor` and `:automergePatch`
 /// inject per-update-type packageRules instead (see `resolve_extends_automerge_rules`).
+
+/// Matcher fields resolved from a `packages:*` preset reference inside a `packageRule`.
+///
+/// When a packageRule contains `extends: ["packages:react"]`, these fields are
+/// merged (union) into the rule's own matcher conditions.
+#[derive(Default)]
+struct PackagePresetMatchers {
+    match_package_names: Vec<String>,
+    match_datasources: Vec<String>,
+    match_source_urls: Vec<String>,
+}
+
+/// Resolve `packages:*` preset references from a packageRule's `extends` list.
+///
+/// Returns aggregated matcher fields to merge into the enclosing rule.
+/// Only the `packages:` namespace is handled; other presets are silently ignored.
+///
+/// Renovate reference: `lib/config/presets/internal/packages.preset.ts`
+fn resolve_package_rule_extends(extends: &[String]) -> PackagePresetMatchers {
+    let mut out = PackagePresetMatchers::default();
+    for preset in extends {
+        match preset.as_str() {
+            "packages:angularJs" => {
+                out.match_package_names.extend([
+                    "angular".to_owned(),
+                    "@angular/**".to_owned(),
+                    "angular-**".to_owned(),
+                ]);
+            }
+            "packages:apollographql" => {
+                out.match_source_urls
+                    .push("https://github.com/apollographql/**".to_owned());
+            }
+            "packages:atlaskit" => {
+                out.match_package_names.push("@atlaskit/**".to_owned());
+            }
+            "packages:emberTemplateLint" => {
+                out.match_package_names
+                    .push("ember-template-lint**".to_owned());
+            }
+            "packages:eslint" => {
+                out.match_package_names.extend([
+                    "eslint".to_owned(),
+                    "eslint-config-**".to_owned(),
+                    "eslint-import-resolver-**".to_owned(),
+                    "eslint-plugin-**".to_owned(),
+                    "@typescript-eslint/**".to_owned(),
+                    "@eslint/**".to_owned(),
+                    "@eslint-community/**".to_owned(),
+                ]);
+            }
+            "packages:gatsby" => {
+                // gatsby is a monorepo; resolved by monorepo:gatsby
+                out.match_package_names
+                    .extend(["gatsby".to_owned(), "gatsby-**".to_owned()]);
+            }
+            "packages:googleapis" => {
+                out.match_datasources.push("npm".to_owned());
+                out.match_package_names.extend([
+                    "@google-cloud/**".to_owned(),
+                    "google-auth-library".to_owned(),
+                    "googleapis".to_owned(),
+                ]);
+            }
+            "packages:jsTest" | "packages:jsUnitTest" => {
+                out.match_package_names.extend([
+                    "@jest/**".to_owned(),
+                    "@sinonjs/**".to_owned(),
+                    "@testing-library/**".to_owned(),
+                    "@types/enzyme".to_owned(),
+                    "@types/jest".to_owned(),
+                    "@types/mocha".to_owned(),
+                    "@types/node".to_owned(),
+                    "@types/supertest".to_owned(),
+                    "ava".to_owned(),
+                    "chai".to_owned(),
+                    "enzyme".to_owned(),
+                    "expect".to_owned(),
+                    "jasmine**".to_owned(),
+                    "jest**".to_owned(),
+                    "mocha**".to_owned(),
+                    "mock-fs".to_owned(),
+                    "nock".to_owned(),
+                    "proxyquire".to_owned(),
+                    "should".to_owned(),
+                    "sinon**".to_owned(),
+                    "supertest".to_owned(),
+                    "testdouble".to_owned(),
+                    "ts-jest".to_owned(),
+                    "vitest".to_owned(),
+                    "@vitest/**".to_owned(),
+                ]);
+            }
+            "packages:linters" => {
+                // extends emberTemplateLint, eslint, phpLinters, stylelint, tslint
+                out.match_package_names.extend([
+                    "ember-template-lint**".to_owned(),
+                    "eslint".to_owned(),
+                    "eslint-config-**".to_owned(),
+                    "eslint-import-resolver-**".to_owned(),
+                    "eslint-plugin-**".to_owned(),
+                    "@typescript-eslint/**".to_owned(),
+                    "@eslint/**".to_owned(),
+                    "@eslint-community/**".to_owned(),
+                    "friendsofphp/php-cs-fixer".to_owned(),
+                    "squizlabs/php_codesniffer".to_owned(),
+                    "symplify/easy-coding-standard".to_owned(),
+                    "stylelint**".to_owned(),
+                    "codelyzer".to_owned(),
+                    "/\\btslint\\b/".to_owned(),
+                    "oxlint".to_owned(),
+                    "prettier".to_owned(),
+                    "remark-lint".to_owned(),
+                    "standard".to_owned(),
+                ]);
+            }
+            "packages:mapbox" => {
+                out.match_package_names
+                    .extend(["leaflet**".to_owned(), "mapbox**".to_owned()]);
+            }
+            "packages:phpLinters" => {
+                out.match_package_names.extend([
+                    "friendsofphp/php-cs-fixer".to_owned(),
+                    "squizlabs/php_codesniffer".to_owned(),
+                    "symplify/easy-coding-standard".to_owned(),
+                ]);
+            }
+            "packages:phpUnitTest" => {
+                out.match_package_names.extend([
+                    "behat/behat".to_owned(),
+                    "brianium/paratest".to_owned(),
+                    "facile-it/paraunit".to_owned(),
+                    "mockery/mockery".to_owned(),
+                    "phpspec/prophecy".to_owned(),
+                    "phpspec/prophecy-phpunit".to_owned(),
+                    "phpspec/phpspec".to_owned(),
+                    "phpunit/phpunit".to_owned(),
+                    "pestphp/**".to_owned(),
+                    "php-mock/**".to_owned(),
+                ]);
+            }
+            "packages:postcss" => {
+                out.match_package_names
+                    .extend(["postcss".to_owned(), "postcss-**".to_owned()]);
+            }
+            "packages:react" => {
+                out.match_datasources.push("npm".to_owned());
+                out.match_package_names
+                    .extend(["@types/react**".to_owned(), "react**".to_owned()]);
+            }
+            "packages:stylelint" => {
+                out.match_package_names.push("stylelint**".to_owned());
+            }
+            "packages:test" | "packages:unitTest" => {
+                // extends jsUnitTest + phpUnitTest
+                out.match_package_names.extend([
+                    "@jest/**".to_owned(),
+                    "jest**".to_owned(),
+                    "vitest".to_owned(),
+                    "@vitest/**".to_owned(),
+                    "mocha**".to_owned(),
+                    "jasmine**".to_owned(),
+                    "phpunit/phpunit".to_owned(),
+                    "pestphp/**".to_owned(),
+                ]);
+            }
+            "packages:tslint" => {
+                out.match_package_names
+                    .extend(["codelyzer".to_owned(), "/\\btslint\\b/".to_owned()]);
+            }
+            "packages:vite" => {
+                out.match_datasources.push("npm".to_owned());
+                out.match_package_names.extend([
+                    "vite".to_owned(),
+                    "**vite-plugin**".to_owned(),
+                    "@vitejs/**".to_owned(),
+                ]);
+            }
+            _ => {}
+        }
+    }
+    out
+}
+
 ///
 /// Collect `CustomManager` entries contributed by `custom-managers:*` presets.
 ///
@@ -3334,6 +3518,8 @@ impl RepoConfig {
             version_compatibility: Option<String>,
             #[serde(rename = "changelogUrl")]
             changelog_url: Option<String>,
+            #[serde(default)]
+            extends: Vec<String>,
             #[serde(rename = "dependencyDashboardApproval")]
             dependency_dashboard_approval: Option<bool>,
         }
@@ -3616,14 +3802,19 @@ impl RepoConfig {
             .package_rules
             .into_iter()
             .map(|r| {
+                // Resolve packages:* (and other recognized) presets from the
+                // rule's own `extends` list and merge their matchers in.
+                let preset_matchers = resolve_package_rule_extends(&r.extends);
+
                 let has_name_constraint = !r.match_package_names.is_empty()
                     || !r.match_package_patterns.is_empty()
-                    || !r.match_package_prefixes.is_empty();
+                    || !r.match_package_prefixes.is_empty()
+                    || !preset_matchers.match_package_names.is_empty();
 
-                // Merge matchPackageNames, deprecated matchPackagePrefixes, and
                 // deprecated matchPackagePatterns into one Vec<String> so that
                 // match_regex_or_glob_list can apply positive/negative semantics.
                 let mut match_package_names: Vec<String> = r.match_package_names;
+                match_package_names.extend(preset_matchers.match_package_names);
                 // matchPackagePrefixes → "prefix**" glob strings
                 for prefix in r.match_package_prefixes {
                     match_package_names.push(format!("{prefix}**"));
@@ -3659,13 +3850,17 @@ impl RepoConfig {
 
                 // matchDepNames, matchSourceUrls, matchRegistryUrls, matchRepositories
                 // store raw strings so match_regex_or_glob_list can apply negation.
+                let mut match_datasources = r.match_datasources;
+                match_datasources.extend(preset_matchers.match_datasources);
+                let mut match_source_urls = r.match_source_urls;
+                match_source_urls.extend(preset_matchers.match_source_urls);
                 PackageRule {
                     match_package_names,
                     match_dep_names,
-                    match_source_urls: r.match_source_urls,
+                    match_source_urls,
                     match_current_value: r.match_current_value,
                     match_new_value: r.match_new_value,
-                    match_datasources: r.match_datasources,
+                    match_datasources,
                     match_managers: r.match_managers,
                     match_update_types,
                     allowed_versions: r.allowed_versions,
@@ -9358,6 +9553,88 @@ mod rule_effects_tests {
         assert!(
             rule.match_update_types.contains(&UpdateType::Major),
             ":approveMajorUpdates rule must match major updates"
+        );
+    }
+
+    // ── packageRule extends (packages:*) tests ────────────────────────────────
+
+    #[test]
+    fn package_rule_extends_packages_react_adds_matchers() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"extends": ["packages:react"], "automerge": true}]}"#,
+        );
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.automerge == Some(true))
+            .expect("must have a rule with automerge: true");
+        assert!(
+            rule.match_package_names
+                .iter()
+                .any(|p| p.contains("react")),
+            "packages:react extends must inject react into matchPackageNames"
+        );
+        assert!(
+            rule.match_datasources.contains(&"npm".to_owned()),
+            "packages:react extends must inject npm into matchDatasources"
+        );
+        assert!(rule.has_name_constraint, "has_name_constraint must be true");
+    }
+
+    #[test]
+    fn package_rule_extends_packages_eslint_adds_matchers() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"extends": ["packages:eslint"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(
+            rule.match_package_names.contains(&"eslint".to_owned()),
+            "packages:eslint extends must inject eslint"
+        );
+        assert!(
+            rule.match_package_names
+                .iter()
+                .any(|p| p.contains("typescript-eslint")),
+            "packages:eslint extends must include @typescript-eslint/**"
+        );
+    }
+
+    #[test]
+    fn package_rule_extends_combined_with_own_matchers() {
+        // User's own matchPackageNames should be merged with preset's.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{
+                "matchPackageNames": ["my-custom-lib"],
+                "extends": ["packages:eslint"],
+                "automerge": true
+            }]}"#,
+        );
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.automerge == Some(true))
+            .unwrap();
+        assert!(
+            rule.match_package_names.contains(&"my-custom-lib".to_owned()),
+            "own matchPackageNames must be kept"
+        );
+        assert!(
+            rule.match_package_names.contains(&"eslint".to_owned()),
+            "preset matchPackageNames must be merged in"
+        );
+    }
+
+    #[test]
+    fn package_rule_extends_apollographql_adds_source_urls() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"extends": ["packages:apollographql"], "groupName": "apollo"}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(
+            rule.match_source_urls
+                .iter()
+                .any(|u| u.contains("apollographql")),
+            "packages:apollographql extends must inject apollographql source URL"
         );
     }
 
