@@ -98,6 +98,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                             dep_type: None,
                             package_name: None,
+                            range_strategy: None,
+                            follow_tag: None,
+                            pin_digests: None,
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
@@ -172,6 +175,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
 
                         dep_type: None,
                         package_name: None,
+                        range_strategy: None,
+                        follow_tag: None,
+                        pin_digests: None,
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,

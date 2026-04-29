@@ -106,6 +106,25 @@ pub(crate) struct DepReport {
     /// Not included in serialized output; used only for rule matching.
     #[serde(skip)]
     pub(crate) package_name: Option<String>,
+    /// Range strategy override from a matching packageRule.
+    /// E.g. `"pin"`, `"replace"`, `"widen"`, `"bump"`, `"auto"`.
+    /// `None` = use the repo-level default (`rangeStrategy` config field).
+    ///
+    /// Mirrors Renovate's `rangeStrategy` field.
+    #[serde(rename = "rangeStrategy", skip_serializing_if = "Option::is_none")]
+    pub range_strategy: Option<String>,
+    /// Dist-tag to follow (e.g. `"next"`, `"beta"`), set by `followTag` packageRule.
+    /// When set, Renovate pins the package to the specified dist-tag version.
+    ///
+    /// Mirrors Renovate's `followTag` field.
+    #[serde(rename = "followTag", skip_serializing_if = "Option::is_none")]
+    pub follow_tag: Option<String>,
+    /// Whether this dep's Docker image digest should be pinned.
+    /// Set by `pinDigests: true` packageRule or preset.
+    ///
+    /// Mirrors Renovate's `pinDigests` field.
+    #[serde(rename = "pinDigests", skip_serializing_if = "Option::is_none")]
+    pub pin_digests: Option<bool>,
     /// When `true`, this update requires Dependency Dashboard approval before
     /// Renovate will create the PR.  Set by `dependencyDashboardApproval` in
     /// packageRules (e.g. via the `:approveMajorUpdates` preset).
@@ -677,6 +696,9 @@ mod tests {
 
                             dep_type: None,
                             package_name: None,
+                            range_strategy: None,
+                            follow_tag: None,
+                            pin_digests: None,
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
@@ -701,6 +723,9 @@ mod tests {
 
                             dep_type: None,
                             package_name: None,
+                            range_strategy: None,
+                            follow_tag: None,
+                            pin_digests: None,
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
@@ -724,6 +749,9 @@ mod tests {
 
                             dep_type: None,
                             package_name: None,
+                            range_strategy: None,
+                            follow_tag: None,
+                            pin_digests: None,
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
@@ -752,6 +780,9 @@ mod tests {
 
                         dep_type: None,
                         package_name: None,
+                        range_strategy: None,
+                        follow_tag: None,
+                        pin_digests: None,
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
@@ -832,6 +863,9 @@ mod tests {
 
                     dep_type: None,
                     package_name: None,
+                    range_strategy: None,
+                    follow_tag: None,
+                    pin_digests: None,
                     dependency_dashboard_approval: None,
                     replacement_name: None,
                     replacement_version: None,
@@ -871,6 +905,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -904,6 +941,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -935,6 +975,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -965,6 +1008,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -1024,6 +1070,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                range_strategy: None,
+                follow_tag: None,
+                pin_digests: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1048,6 +1097,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                range_strategy: None,
+                follow_tag: None,
+                pin_digests: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1069,6 +1121,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                range_strategy: None,
+                follow_tag: None,
+                pin_digests: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1092,6 +1147,9 @@ mod tests {
 
                 dep_type: None,
                 package_name: None,
+                range_strategy: None,
+                follow_tag: None,
+                pin_digests: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -1167,6 +1225,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
@@ -1194,6 +1255,9 @@ mod tests {
 
             dep_type: None,
             package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,

@@ -308,6 +308,9 @@ pub(crate) fn apply_update_blocking_to_report(
                 dep.update_type = classify_semver_update(current, latest)
                     .map(|ut| format!("{ut:?}").to_lowercase());
                 dep.pr_priority = effects.pr_priority;
+                dep.range_strategy = effects.range_strategy;
+                dep.follow_tag = effects.follow_tag;
+                dep.pin_digests = effects.pin_digests;
                 dep.dependency_dashboard_approval = effects.dependency_dashboard_approval;
                 dep.replacement_name = effects.replacement_name;
                 dep.replacement_version = effects.replacement_version;
@@ -446,6 +449,9 @@ pub(crate) async fn docker_hub_reports(
 
                 dep_type: None,
                 package_name: None,
+                range_strategy: None,
+                follow_tag: None,
+                pin_digests: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -492,6 +498,9 @@ pub(crate) async fn docker_hub_reports(
 
                 dep_type: None,
                 package_name: None,
+                range_strategy: None,
+                follow_tag: None,
+                pin_digests: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
@@ -527,6 +536,9 @@ mod tests {
                 current_version_timestamp: None,
                 dep_type: None,
                 package_name: None,
+                range_strategy: None,
+                follow_tag: None,
+                pin_digests: None,
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
