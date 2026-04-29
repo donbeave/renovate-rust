@@ -226,6 +226,13 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `commitMessageSuffix`.
     pub commit_message_suffix: Option<String>,
+
+    /// Version range strategy override for matching packages.
+    /// Values: `"auto"`, `"pin"`, `"replace"`, `"widen"`, `"bump"`, `"in-range-only"`.
+    /// `None` = use repo-level `rangeStrategy`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `rangeStrategy`.
+    pub range_strategy: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -727,6 +734,10 @@ pub struct RuleEffects {
     pub commit_message_extra: Option<String>,
     /// Per-rule suffix appended to the commit message.  Last rule wins.
     pub commit_message_suffix: Option<String>,
+
+    /// Per-rule rangeStrategy override.  Values: `"pin"`, `"replace"`, `"widen"`,
+    /// `"bump"`, `"auto"`, `"in-range-only"`.  `None` = use repo-level default.
+    pub range_strategy: Option<String>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────

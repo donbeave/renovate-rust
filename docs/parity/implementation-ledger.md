@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0277  | 2026-04-29 | `rangeStrategy` in packageRules + `RuleEffects`; pin/preserve preset expansion: `:pinDependencies`, `:pinDevDependencies`, `:pinAllExceptPeerDependencies`, `:pinOnlyDevDependencies`, `:preserveSemverRanges`, `:pinVersions` inject rangeStrategy packageRules; 5 tests | Complete | See below. |
 | 0276  | 2026-04-29 | `ignorePresets`: filter extends list before all preset resolution; `effective_extends` replaces all `raw.extends` references in parse; `ignore_presets` field on `RepoConfig`; 4 tests | Complete | See below. |
 | 0275  | 2026-04-29 | Security presets: `security:minimumReleaseAgeNpm`, `:unpublishSafe`, `security:minimumReleaseAgeCratesio/PyPI` inject `minimumReleaseAge: "3 days"` packageRules; 2 tests | Complete | See below. |
 | 0274  | 2026-04-29 | Group PR title uses group name as topic: when dep is grouped and no explicit `commitMessageTopic`, use `groupName` as topic with empty extra, matching Renovate group PR title semantics | Complete | See below. |
@@ -5443,4 +5444,32 @@ Previous implementation silently returned `false` (= not restricted) for
 - 4 tests: suppress all effects of `:semanticCommits`, partial suppression (one preset suppressed, another still active), field stored on parsed config, `:automergePatch` → `separateMinorPatch` suppressed
 
 ### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+
+---
+
+## Slice 0277 - `rangeStrategy` in packageRules + pin/preserve preset expansion
+
+### Renovate reference
+- `lib/config/options/index.ts` — `rangeStrategy`: `"auto"`, `"pin"`, `"replace"`, `"widen"`, `"bump"`, `"in-range-only"`
+- `lib/config/presets/internal/default.preset.ts` — pin/preserve presets inject packageRules with `rangeStrategy`
+
+### Implementation
+- Added `range_strategy: Option<String>` to `PackageRule` struct
+- Added `range_strategy: Option<String>` to `RuleEffects` struct
+- Added `#[serde(rename = "rangeStrategy")] range_strategy: Option<String>` to `RawPackageRule`
+- Wired `range_strategy` through `RawPackageRule` → `PackageRule` conversion
+- Applied in `collect_rule_effects`: last matching rule wins (same as other scalar fields)
+- Added `resolve_extends_range_strategy_rules()` implementing:
+  - `:pinAllExceptPeerDependencies` → pin all + auto for engines/peerDependencies
+  - `:pinDependencies` → pin `dependencies` dep type
+  - `:pinDevDependencies` → pin `devDependencies`/`dev-dependencies`/`dev` dep types
+  - `:pinOnlyDevDependencies` → replace all + pin dev + widen peers
+  - `:preserveSemverRanges` → replace for all packages (`matchPackageNames: ["*"]`)
+  - `:pinVersions` → pin for all packages
+- Wired into `parse()` after common rules
+- 5 tests: preset injects rule, rule collects into effects, last-rule-wins
+
+### Files changed
+- `crates/renovate-core/src/package_rule.rs`
 - `crates/renovate-core/src/repo_config.rs`

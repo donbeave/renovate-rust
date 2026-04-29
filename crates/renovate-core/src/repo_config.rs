@@ -527,6 +527,98 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
     rules
 }
 
+/// Resolve packageRules injected by range-strategy built-in presets.
+///
+/// Handles presets that inject `rangeStrategy` into packageRules:
+/// - `:pinAllExceptPeerDependencies` — pin all except peer/engines
+/// - `:pinDependencies` — pin `dependencies` dep type
+/// - `:pinDevDependencies` — pin `devDependencies` dep types
+/// - `:pinOnlyDevDependencies` — pin dev, widen peers, replace others
+/// - `:preserveSemverRanges` — set `replace` for all packages
+/// - `:pinVersions` — set global `rangeStrategy: pin` (returned as packageRules)
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts`
+fn resolve_extends_range_strategy_rules(extends: &[String]) -> Vec<PackageRule> {
+    let mut rules: Vec<PackageRule> = Vec::new();
+
+    for preset in extends {
+        match preset.as_str() {
+            ":pinAllExceptPeerDependencies" => {
+                rules.push(PackageRule {
+                    match_package_names: vec!["*".to_owned()],
+                    has_name_constraint: true,
+                    range_strategy: Some("pin".to_owned()),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_dep_types: vec!["engines".to_owned(), "peerDependencies".to_owned()],
+                    range_strategy: Some("auto".to_owned()),
+                    ..Default::default()
+                });
+            }
+            ":pinDependencies" => {
+                rules.push(PackageRule {
+                    match_dep_types: vec!["dependencies".to_owned()],
+                    range_strategy: Some("pin".to_owned()),
+                    ..Default::default()
+                });
+            }
+            ":pinDevDependencies" => {
+                rules.push(PackageRule {
+                    match_dep_types: vec![
+                        "devDependencies".to_owned(),
+                        "dev-dependencies".to_owned(),
+                        "dev".to_owned(),
+                    ],
+                    range_strategy: Some("pin".to_owned()),
+                    ..Default::default()
+                });
+            }
+            ":pinOnlyDevDependencies" => {
+                rules.push(PackageRule {
+                    match_package_names: vec!["*".to_owned()],
+                    has_name_constraint: true,
+                    range_strategy: Some("replace".to_owned()),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_dep_types: vec![
+                        "devDependencies".to_owned(),
+                        "dev-dependencies".to_owned(),
+                        "dev".to_owned(),
+                    ],
+                    range_strategy: Some("pin".to_owned()),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_dep_types: vec!["peerDependencies".to_owned()],
+                    range_strategy: Some("widen".to_owned()),
+                    ..Default::default()
+                });
+            }
+            ":preserveSemverRanges" => {
+                rules.push(PackageRule {
+                    match_package_names: vec!["*".to_owned()],
+                    has_name_constraint: true,
+                    range_strategy: Some("replace".to_owned()),
+                    ..Default::default()
+                });
+            }
+            ":pinVersions" => {
+                rules.push(PackageRule {
+                    match_package_names: vec!["*".to_owned()],
+                    has_name_constraint: true,
+                    range_strategy: Some("pin".to_owned()),
+                    ..Default::default()
+                });
+            }
+            _ => {}
+        }
+    }
+
+    rules
+}
+
 /// Return type for `resolve_extends_scalar_overrides`:
 /// `(sep_minor_patch, sep_major_minor, sep_multi_major, pr_concurrent, pr_hourly)`.
 type ScalarOverrides = (
@@ -928,6 +1020,8 @@ impl RepoConfig {
             semantic_commit_type: Option<String>,
             #[serde(rename = "semanticCommitScope")]
             semantic_commit_scope: Option<String>,
+            #[serde(rename = "rangeStrategy")]
+            range_strategy: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -1074,6 +1168,9 @@ impl RepoConfig {
         // Inject rules from other common presets (:disableDevDependencies, etc.).
         let common_rules = resolve_extends_common_rules(&effective_extends);
         preset_rules.extend(common_rules);
+        // Inject range-strategy rules from pin/preserve presets.
+        let range_rules = resolve_extends_range_strategy_rules(&effective_extends);
+        preset_rules.extend(range_rules);
         // :automergePatch sets separateMinorPatch: true.
         let preset_separate_minor_patch = effective_extends.iter().any(|p| p == ":automergePatch");
         let (
@@ -1184,6 +1281,7 @@ impl RepoConfig {
                     semantic_commit_scope: r.semantic_commit_scope,
                     commit_message_extra: r.commit_message_extra,
                     commit_message_suffix: r.commit_message_suffix,
+                    range_strategy: r.range_strategy,
                 }
             })
             .collect();
@@ -1605,6 +1703,9 @@ impl RepoConfig {
                 effects
                     .commit_message_suffix
                     .clone_from(&rule.commit_message_suffix);
+            }
+            if rule.range_strategy.is_some() {
+                effects.range_strategy.clone_from(&rule.range_strategy);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -3263,6 +3364,69 @@ mod tests {
             r#"{"extends": [":automergePatch"], "ignorePresets": [":automergePatch"]}"#,
         );
         assert!(!c.separate_minor_patch);
+    }
+
+    #[test]
+    fn pin_dependencies_preset_injects_range_strategy_rule() {
+        let c = RepoConfig::parse(r#"{"extends": [":pinDependencies"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.range_strategy.as_deref() == Some("pin"));
+        assert!(rule.is_some(), "expected a pin rangeStrategy rule");
+        let rule = rule.unwrap();
+        assert!(
+            rule.match_dep_types.contains(&"dependencies".to_owned()),
+            "rule should match 'dependencies' dep type"
+        );
+    }
+
+    #[test]
+    fn pin_dev_dependencies_preset_injects_rule() {
+        let c = RepoConfig::parse(r#"{"extends": [":pinDevDependencies"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.range_strategy.as_deref() == Some("pin"));
+        assert!(rule.is_some(), "expected a pin rangeStrategy rule");
+        let rule = rule.unwrap();
+        assert!(
+            rule.match_dep_types.contains(&"devDependencies".to_owned()),
+            "rule should match 'devDependencies'"
+        );
+    }
+
+    #[test]
+    fn preserve_semver_ranges_preset_injects_replace_rule() {
+        let c = RepoConfig::parse(r#"{"extends": [":preserveSemverRanges"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.range_strategy.as_deref() == Some("replace"));
+        assert!(rule.is_some(), "expected a replace rangeStrategy rule");
+    }
+
+    #[test]
+    fn range_strategy_in_package_rule_collects_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["react"], "rangeStrategy": "pin"}]}"#,
+        );
+        let ctx = DepContext::for_dep("react");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.range_strategy.as_deref(), Some("pin"));
+    }
+
+    #[test]
+    fn range_strategy_last_rule_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["*"], "rangeStrategy": "pin"},
+                {"matchPackageNames": ["react"], "rangeStrategy": "replace"}
+            ]}"#,
+        );
+        let ctx = DepContext::for_dep("react");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.range_strategy.as_deref(), Some("replace"));
     }
 
     #[test]
