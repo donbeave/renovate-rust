@@ -215,6 +215,17 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `commitMessagePrefix`.
     pub commit_message_prefix: Option<String>,
 
+    /// Override for the extra segment of the commit message (default `"to {{newVersion}}"`).
+    /// Supports `{{newVersion}}` and `{{depName}}` substitution.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageExtra`.
+    pub commit_message_extra: Option<String>,
+
+    /// Free-form suffix appended to the end of the commit message / PR title.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageSuffix`.
+    pub commit_message_suffix: Option<String>,
+
     // ── Range / version strategy ──────────────────────────────────────────────
     /// Range update strategy. Controls how existing version ranges are modified.
     /// Accepted: `"auto"`, `"pin"`, `"bump"`, `"replace"`, `"widen"`,
@@ -598,6 +609,10 @@ impl RepoConfig {
             commit_message_action: Option<String>,
             #[serde(rename = "commitMessagePrefix")]
             commit_message_prefix: Option<String>,
+            #[serde(rename = "commitMessageExtra")]
+            commit_message_extra: Option<String>,
+            #[serde(rename = "commitMessageSuffix")]
+            commit_message_suffix: Option<String>,
             #[serde(rename = "semanticCommitType")]
             semantic_commit_type: Option<String>,
             #[serde(rename = "semanticCommitScope")]
@@ -665,6 +680,10 @@ impl RepoConfig {
             commit_message_action: String,
             #[serde(rename = "commitMessagePrefix")]
             commit_message_prefix: Option<String>,
+            #[serde(rename = "commitMessageExtra")]
+            commit_message_extra: Option<String>,
+            #[serde(rename = "commitMessageSuffix")]
+            commit_message_suffix: Option<String>,
             #[serde(rename = "rangeStrategy", default = "default_range_strategy")]
             range_strategy: String,
             #[serde(rename = "hashedBranchLength")]
@@ -809,6 +828,8 @@ impl RepoConfig {
                     commit_message_prefix: r.commit_message_prefix,
                     semantic_commit_type: r.semantic_commit_type,
                     semantic_commit_scope: r.semantic_commit_scope,
+                    commit_message_extra: r.commit_message_extra,
+                    commit_message_suffix: r.commit_message_suffix,
                 }
             })
             .collect();
@@ -876,6 +897,8 @@ impl RepoConfig {
             minimum_release_age: raw.minimum_release_age,
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
+            commit_message_extra: raw.commit_message_extra,
+            commit_message_suffix: raw.commit_message_suffix,
             range_strategy: raw.range_strategy,
             hashed_branch_length: raw.hashed_branch_length,
             major_config: raw.major,
@@ -1178,6 +1201,12 @@ impl RepoConfig {
             if rule.semantic_commit_scope.is_some() {
                 effects.semantic_commit_scope.clone_from(&rule.semantic_commit_scope);
             }
+            if rule.commit_message_extra.is_some() {
+                effects.commit_message_extra.clone_from(&rule.commit_message_extra);
+            }
+            if rule.commit_message_suffix.is_some() {
+                effects.commit_message_suffix.clone_from(&rule.commit_message_suffix);
+            }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
                 effects.assignees.clone_from(&rule.assignees);
@@ -1242,6 +1271,8 @@ impl Default for RepoConfig {
             minimum_release_age: None,
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
+            commit_message_extra: None,
+            commit_message_suffix: None,
             range_strategy: "auto".to_owned(),
             hashed_branch_length: None,
             major_config: None,

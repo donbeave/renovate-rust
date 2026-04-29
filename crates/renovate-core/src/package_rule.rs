@@ -215,6 +215,17 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `semanticCommitScope`.
     pub semantic_commit_scope: Option<String>,
+
+    /// Per-rule override for the extra segment of the commit message
+    /// (e.g. `"({{newVersion}})"` or `""`).  `None` = use default "to {version}".
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageExtra`.
+    pub commit_message_extra: Option<String>,
+
+    /// Free-form suffix appended at the end of the commit message / PR title.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageSuffix`.
+    pub commit_message_suffix: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -711,6 +722,10 @@ pub struct RuleEffects {
     pub semantic_commit_type: Option<String>,
     /// Per-rule semantic commit scope (e.g. `"security"`, `"deps"`).  Last rule wins.
     pub semantic_commit_scope: Option<String>,
+    /// Per-rule override for the "to {{newVersion}}" extra segment.  Last rule wins.
+    pub commit_message_extra: Option<String>,
+    /// Per-rule suffix appended to the commit message.  Last rule wins.
+    pub commit_message_suffix: Option<String>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────
@@ -754,6 +769,10 @@ pub struct UpdateTypeConfig {
     pub semantic_commit_type: Option<String>,
     #[serde(rename = "semanticCommitScope")]
     pub semantic_commit_scope: Option<String>,
+    #[serde(rename = "commitMessageExtra")]
+    pub commit_message_extra: Option<String>,
+    #[serde(rename = "commitMessageSuffix")]
+    pub commit_message_suffix: Option<String>,
 }
 
 impl UpdateTypeConfig {
@@ -807,6 +826,12 @@ impl UpdateTypeConfig {
         }
         if self.semantic_commit_scope.is_some() {
             effects.semantic_commit_scope.clone_from(&self.semantic_commit_scope);
+        }
+        if self.commit_message_extra.is_some() {
+            effects.commit_message_extra.clone_from(&self.commit_message_extra);
+        }
+        if self.commit_message_suffix.is_some() {
+            effects.commit_message_suffix.clone_from(&self.commit_message_suffix);
         }
     }
 }

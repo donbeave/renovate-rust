@@ -258,22 +258,73 @@ pub fn hashed_branch_name(
     format!("{branch_prefix}{}", &hex[..hash_len.min(hex.len())])
 }
 
+/// Configuration for PR title / commit message generation.
+///
+/// Mirrors the `commitMessage*` options from Renovate's config schema.
+///
+/// Renovate reference:
+/// - `lib/config/options/index.ts` — `commitMessageAction`, `commitMessageTopic`,
+///   `commitMessageExtra`, `commitMessageSuffix`, `commitMessagePrefix`,
+///   `semanticCommits`, `semanticCommitType`, `semanticCommitScope`.
+#[derive(Debug, Default)]
+pub struct PrTitleConfig<'a> {
+    /// `"enabled"` adds semantic-commit prefix; anything else skips it.
+    pub semantic_commits: Option<&'a str>,
+    /// Action verb override (e.g. `"Pin"`).  `None` → `"Update"`.
+    pub action: Option<&'a str>,
+    /// Explicit prefix (e.g. `"fix(deps):"`).  When set, overrides semantic prefix.
+    pub custom_prefix: Option<&'a str>,
+    /// Custom topic template.  Supports `{{depName}}` / `{{{depName}}}`.
+    /// `None` → `"dependency {dep_name}"`.
+    pub commit_message_topic: Option<&'a str>,
+    /// Semantic-commit type (default `"chore"`).
+    pub semantic_commit_type: &'a str,
+    /// Semantic-commit scope (default `"deps"`).  Empty string → no parentheses.
+    pub semantic_commit_scope: &'a str,
+    /// Overrides the "to {{newVersion}}" extra segment.
+    /// Supports `{{newVersion}}`, `{{currentVersion}}`, `{{depName}}` substitution.
+    /// `None` → default `"to {new_version}"`.
+    pub commit_message_extra: Option<&'a str>,
+    /// Free-form suffix appended after the complete commit message.
+    /// `None` → no suffix.
+    pub commit_message_suffix: Option<&'a str>,
+}
+
+impl<'a> PrTitleConfig<'a> {
+    /// Return a config with the default semantic-commit type/scope.
+    pub fn with_defaults() -> Self {
+        Self {
+            semantic_commit_type: "chore",
+            semantic_commit_scope: "deps",
+            ..Default::default()
+        }
+    }
+}
+
 /// Generate the PR title / commit message for a dependency update.
 ///
 /// Mirrors Renovate's default `commitMessage` template:
 /// ```text
-/// {commitMessagePrefix} {commitMessageAction} {commitMessageTopic} {commitMessageExtra}
+/// {commitMessagePrefix} {commitMessageAction} {commitMessageTopic} {commitMessageExtra} {commitMessageSuffix}
 /// ```
 ///
-/// Parameters:
-/// - `dep_name` — display name of the dependency (as-is, not sanitized)
-/// - `new_version` — proposed new version string (e.g. `"4.17.21"`, `"v5"`)
-/// - `is_major` — `true` when this is a major-version bump (adds `!` in semantic mode)
-/// - `semantic_commits` — `"enabled"` adds `"chore(deps)"` prefix; other values skip it
-/// - `action` — action verb; `None` uses the default `"Update"`
-/// - `custom_prefix` — explicit prefix; when `Some`, overrides semantic prefix entirely
-/// - `commit_message_topic` — custom topic template; supports `{{depName}}` /
-///   `{{{depName}}}` substitution.  `None` uses the default `"dependency {dep_name}"`.
+/// # Examples
+///
+/// ```
+/// # use renovate_core::branch::{pr_title, PrTitleConfig};
+/// // Default plain title.
+/// assert_eq!(
+///     pr_title("express", "4.18.2", false, &PrTitleConfig::with_defaults()),
+///     "Update dependency express to 4.18.2",
+/// );
+///
+/// // Semantic commits enabled.
+/// let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
+/// assert_eq!(
+///     pr_title("express", "4.18.2", false, &cfg),
+///     "chore(deps): Update dependency express to 4.18.2",
+/// );
+/// ```
 ///
 /// Renovate reference:
 /// - `lib/config/options/index.ts` — `commitMessage`, `commitMessageAction`,
@@ -283,28 +334,65 @@ pub fn pr_title(
     dep_name: &str,
     new_version: &str,
     is_major: bool,
-    semantic_commits: Option<&str>,
-    action: Option<&str>,
-    custom_prefix: Option<&str>,
-    commit_message_topic: Option<&str>,
+    cfg: &PrTitleConfig<'_>,
 ) -> String {
-    pr_title_full(
-        dep_name,
-        new_version,
-        is_major,
-        semantic_commits,
-        action,
-        custom_prefix,
-        commit_message_topic,
-        "chore",
-        "deps",
-    )
+    let action = cfg.action.unwrap_or("Update");
+    let topic = if let Some(t) = cfg.commit_message_topic {
+        // Basic Handlebars substitution: {{depName}} and {{{depName}}}.
+        t.replace("{{{depName}}}", dep_name)
+            .replace("{{depName}}", dep_name)
+    } else {
+        format!("dependency {dep_name}")
+    };
+
+    // Build `extra` — either from the template or the default "to {version}".
+    let extra = if let Some(tmpl) = cfg.commit_message_extra {
+        if tmpl.is_empty() {
+            String::new()
+        } else {
+            tmpl.replace("{{{newVersion}}}", new_version)
+                .replace("{{newVersion}}", new_version)
+                .replace("{{{depName}}}", dep_name)
+                .replace("{{depName}}", dep_name)
+        }
+    } else {
+        format!("to {new_version}")
+    };
+
+    let body = if extra.is_empty() {
+        format!("{action} {topic}")
+    } else {
+        format!("{action} {topic} {extra}")
+    };
+
+    let full = if let Some(prefix) = cfg.custom_prefix {
+        // Explicit prefix overrides semantic prefix entirely.
+        format!("{prefix} {body}")
+    } else {
+        match cfg.semantic_commits {
+            Some("enabled") => {
+                let breaking = if is_major { "!" } else { "" };
+                let scope = if cfg.semantic_commit_scope.is_empty() {
+                    String::new()
+                } else {
+                    format!("({})", cfg.semantic_commit_scope)
+                };
+                format!("{}{scope}{breaking}: {body}", cfg.semantic_commit_type)
+            }
+            _ => body,
+        }
+    };
+
+    match cfg.commit_message_suffix {
+        Some(suffix) if !suffix.is_empty() => format!("{full} {suffix}"),
+        _ => full,
+    }
 }
 
-/// Full `pr_title` with configurable semantic commit type and scope.
+/// Thin wrapper around `pr_title` for callers that need a simple call with
+/// minimal configuration, kept for internal convenience.
 ///
-/// Used internally and by the CLI pipeline when `semanticCommitType` or
-/// `semanticCommitScope` are set in the config.
+/// Uses the old 9-parameter signature internally by building a `PrTitleConfig`.
 #[allow(clippy::too_many_arguments)]
 pub fn pr_title_full(
     dep_name: &str,
@@ -317,34 +405,21 @@ pub fn pr_title_full(
     semantic_commit_type: &str,
     semantic_commit_scope: &str,
 ) -> String {
-    let action = action.unwrap_or("Update");
-    let topic = if let Some(t) = commit_message_topic {
-        // Basic Handlebars substitution: {{depName}} and {{{depName}}}.
-        t.replace("{{{depName}}}", dep_name)
-            .replace("{{depName}}", dep_name)
-    } else {
-        format!("dependency {dep_name}")
-    };
-    let extra = format!("to {new_version}");
-    let body = format!("{action} {topic} {extra}");
-
-    if let Some(prefix) = custom_prefix {
-        // Explicit prefix overrides semantic prefix entirely.
-        return format!("{prefix} {body}");
-    }
-
-    match semantic_commits {
-        Some("enabled") => {
-            let breaking = if is_major { "!" } else { "" };
-            let scope = if semantic_commit_scope.is_empty() {
-                String::new()
-            } else {
-                format!("({semantic_commit_scope})")
-            };
-            format!("{semantic_commit_type}{scope}{breaking}: {body}")
-        }
-        _ => body,
-    }
+    pr_title(
+        dep_name,
+        new_version,
+        is_major,
+        &PrTitleConfig {
+            semantic_commits,
+            action,
+            custom_prefix,
+            commit_message_topic,
+            semantic_commit_type,
+            semantic_commit_scope,
+            commit_message_extra: None,
+            commit_message_suffix: None,
+        },
+    )
 }
 
 /// Remove characters that are invalid or disruptive in git branch names.
@@ -526,7 +601,7 @@ mod tests {
     #[test]
     fn pr_title_plain_minor() {
         assert_eq!(
-            pr_title("express", "4.18.2", false, None, None, None, None),
+            pr_title("express", "4.18.2", false, &PrTitleConfig::with_defaults()),
             "Update dependency express to 4.18.2"
         );
     }
@@ -534,23 +609,25 @@ mod tests {
     #[test]
     fn pr_title_plain_major() {
         assert_eq!(
-            pr_title("lodash", "5.0.0", true, None, None, None, None),
+            pr_title("lodash", "5.0.0", true, &PrTitleConfig::with_defaults()),
             "Update dependency lodash to 5.0.0"
         );
     }
 
     #[test]
     fn pr_title_semantic_minor() {
+        let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
         assert_eq!(
-            pr_title("express", "4.18.2", false, Some("enabled"), None, None, None),
+            pr_title("express", "4.18.2", false, &cfg),
             "chore(deps): Update dependency express to 4.18.2"
         );
     }
 
     #[test]
     fn pr_title_semantic_major_breaking() {
+        let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
         assert_eq!(
-            pr_title("lodash", "5.0.0", true, Some("enabled"), None, None, None),
+            pr_title("lodash", "5.0.0", true, &cfg),
             "chore(deps)!: Update dependency lodash to 5.0.0"
         );
     }
@@ -558,24 +635,18 @@ mod tests {
     #[test]
     fn pr_title_semantic_disabled() {
         // "disabled" semantic_commits → no prefix
+        let cfg = PrTitleConfig { semantic_commits: Some("disabled"), ..PrTitleConfig::with_defaults() };
         assert_eq!(
-            pr_title("react", "18.0.0", true, Some("disabled"), None, None, None),
+            pr_title("react", "18.0.0", true, &cfg),
             "Update dependency react to 18.0.0"
         );
     }
 
     #[test]
     fn pr_title_scoped_package() {
+        let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
         assert_eq!(
-            pr_title(
-                "@angular/core",
-                "17.1.0",
-                false,
-                Some("enabled"),
-                None,
-                None,
-                None
-            ),
+            pr_title("@angular/core", "17.1.0", false, &cfg),
             "chore(deps): Update dependency @angular/core to 17.1.0"
         );
     }
@@ -583,8 +654,9 @@ mod tests {
     #[test]
     fn pr_title_custom_action() {
         // commitMessageAction: "Bump" → custom action verb
+        let cfg = PrTitleConfig { action: Some("Bump"), ..PrTitleConfig::with_defaults() };
         assert_eq!(
-            pr_title("lodash", "4.17.21", false, None, Some("Bump"), None, None),
+            pr_title("lodash", "4.17.21", false, &cfg),
             "Bump dependency lodash to 4.17.21"
         );
     }
@@ -616,32 +688,27 @@ mod tests {
     #[test]
     fn pr_title_custom_prefix_overrides_semantic() {
         // commitMessagePrefix: "fix(deps):" overrides chore(deps) even with semantic enabled
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("enabled"),
+            custom_prefix: Some("fix(deps):"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
-            pr_title(
-                "express",
-                "4.18.2",
-                false,
-                Some("enabled"),
-                None,
-                Some("fix(deps):"),
-                None
-            ),
+            pr_title("express", "4.18.2", false, &cfg),
             "fix(deps): Update dependency express to 4.18.2"
         );
     }
 
     #[test]
     fn pr_title_custom_prefix_and_action() {
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("enabled"),
+            action: Some("Pin"),
+            custom_prefix: Some("build(deps):"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
-            pr_title(
-                "react",
-                "18.0.0",
-                true,
-                Some("enabled"),
-                Some("Pin"),
-                Some("build(deps):"),
-                None
-            ),
+            pr_title("react", "18.0.0", true, &cfg),
             "build(deps): Pin dependency react to 18.0.0"
         );
     }
@@ -650,40 +717,36 @@ mod tests {
 
     #[test]
     fn pr_title_custom_topic_literal() {
+        let cfg = PrTitleConfig {
+            commit_message_topic: Some("Docker image nginx"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
-            pr_title("nginx", "1.25", false, None, None, None, Some("Docker image nginx")),
+            pr_title("nginx", "1.25", false, &cfg),
             "Update Docker image nginx to 1.25"
         );
     }
 
     #[test]
     fn pr_title_custom_topic_with_dep_name_template() {
+        let cfg = PrTitleConfig {
+            commit_message_topic: Some("Docker image {{depName}}"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
-            pr_title(
-                "nginx",
-                "1.25",
-                false,
-                None,
-                None,
-                None,
-                Some("Docker image {{depName}}")
-            ),
+            pr_title("nginx", "1.25", false, &cfg),
             "Update Docker image nginx to 1.25"
         );
     }
 
     #[test]
     fn pr_title_custom_topic_triple_brace() {
+        let cfg = PrTitleConfig {
+            commit_message_topic: Some("Docker image {{{depName}}}"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
-            pr_title(
-                "nginx",
-                "1.25",
-                false,
-                None,
-                None,
-                None,
-                Some("Docker image {{{depName}}}")
-            ),
+            pr_title("nginx", "1.25", false, &cfg),
             "Update Docker image nginx to 1.25"
         );
     }
@@ -692,24 +755,72 @@ mod tests {
     fn pr_title_default_topic_when_none() {
         // None → uses default "dependency {dep_name}"
         assert_eq!(
-            pr_title("nginx", "1.25", false, None, None, None, None),
+            pr_title("nginx", "1.25", false, &PrTitleConfig::with_defaults()),
             "Update dependency nginx to 1.25"
         );
     }
 
     #[test]
     fn pr_title_semantic_with_custom_topic() {
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("enabled"),
+            commit_message_topic: Some("Helm chart {{depName}}"),
+            ..PrTitleConfig::with_defaults()
+        };
         assert_eq!(
-            pr_title(
-                "nginx",
-                "1.25",
-                true,
-                Some("enabled"),
-                None,
-                None,
-                Some("Helm chart {{depName}}")
-            ),
+            pr_title("nginx", "1.25", true, &cfg),
             "chore(deps)!: Update Helm chart nginx to 1.25"
+        );
+    }
+
+    // ── pr_title commitMessageExtra / commitMessageSuffix ────────────────────
+
+    #[test]
+    fn pr_title_custom_extra_with_version_template() {
+        let cfg = PrTitleConfig {
+            commit_message_extra: Some("({{newVersion}})"),
+            ..PrTitleConfig::with_defaults()
+        };
+        assert_eq!(
+            pr_title("lodash", "4.17.21", false, &cfg),
+            "Update dependency lodash (4.17.21)"
+        );
+    }
+
+    #[test]
+    fn pr_title_empty_extra_omits_version_segment() {
+        let cfg = PrTitleConfig {
+            commit_message_extra: Some(""),
+            ..PrTitleConfig::with_defaults()
+        };
+        assert_eq!(
+            pr_title("lodash", "4.17.21", false, &cfg),
+            "Update dependency lodash"
+        );
+    }
+
+    #[test]
+    fn pr_title_commit_message_suffix_appended() {
+        let cfg = PrTitleConfig {
+            commit_message_suffix: Some("[skip ci]"),
+            ..PrTitleConfig::with_defaults()
+        };
+        assert_eq!(
+            pr_title("express", "4.18.2", false, &cfg),
+            "Update dependency express to 4.18.2 [skip ci]"
+        );
+    }
+
+    #[test]
+    fn pr_title_suffix_with_semantic_commits() {
+        let cfg = PrTitleConfig {
+            semantic_commits: Some("enabled"),
+            commit_message_suffix: Some("[skip ci]"),
+            ..PrTitleConfig::with_defaults()
+        };
+        assert_eq!(
+            pr_title("express", "4.18.2", false, &cfg),
+            "chore(deps): Update dependency express to 4.18.2 [skip ci]"
         );
     }
 

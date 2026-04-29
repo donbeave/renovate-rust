@@ -175,16 +175,28 @@ pub(crate) fn apply_update_blocking_to_report(
                     .semantic_commit_scope
                     .as_deref()
                     .unwrap_or(&repo_cfg.semantic_commit_scope);
-                dep.pr_title = Some(branch::pr_title_full(
+                let effective_extra = effects
+                    .commit_message_extra
+                    .as_deref()
+                    .or(repo_cfg.commit_message_extra.as_deref());
+                let effective_suffix = effects
+                    .commit_message_suffix
+                    .as_deref()
+                    .or(repo_cfg.commit_message_suffix.as_deref());
+                dep.pr_title = Some(branch::pr_title(
                     &dep.name,
                     latest,
                     is_major,
-                    repo_cfg.semantic_commits.as_deref(),
-                    Some(effective_action).filter(|s| *s != "Update"),
-                    effective_prefix,
-                    effects.commit_message_topic.as_deref(),
-                    effective_sem_type,
-                    effective_sem_scope,
+                    &branch::PrTitleConfig {
+                        semantic_commits: repo_cfg.semantic_commits.as_deref(),
+                        action: Some(effective_action).filter(|s| *s != "Update"),
+                        custom_prefix: effective_prefix,
+                        commit_message_topic: effects.commit_message_topic.as_deref(),
+                        semantic_commit_type: effective_sem_type,
+                        semantic_commit_scope: effective_sem_scope,
+                        commit_message_extra: effective_extra,
+                        commit_message_suffix: effective_suffix,
+                    },
                 ));
                 dep.group_name = effects.group_name;
                 dep.automerge = effects.automerge;
