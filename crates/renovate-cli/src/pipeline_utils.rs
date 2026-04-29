@@ -282,7 +282,26 @@ pub(crate) fn apply_update_blocking_to_report(
                     },
                 ));
                 dep.group_name = effects.group_name;
-                dep.automerge = effects.automerge;
+                // automergeSchedule gate: when the effective automerge is true
+                // but we're outside the automerge window, disable automerge for
+                // this dep's output. This mirrors Renovate's automergeSchedule
+                // semantics where automerge is gated by a separate schedule.
+                let automerge_schedule = if repo_cfg.automerge_schedule.is_empty() {
+                    None
+                } else {
+                    Some(&repo_cfg.automerge_schedule)
+                };
+                dep.automerge = match (effects.automerge, automerge_schedule) {
+                    (Some(true), Some(sched))
+                        if !renovate_core::schedule::is_within_schedule_tz(
+                            sched,
+                            repo_cfg.timezone.as_deref(),
+                        ) =>
+                    {
+                        Some(false)
+                    }
+                    (am, _) => am,
+                };
                 dep.labels = effects.labels;
                 dep.assignees = effects.assignees;
                 dep.reviewers = effects.reviewers;
@@ -780,6 +799,50 @@ mod tests {
                 DepStatus::UpdateAvailable { .. }
             ),
             "empty schedule must not block even with updateNotScheduled: false"
+        );
+    }
+
+    // ── automergeSchedule gate tests ──────────────────────────────────────────
+
+    #[test]
+    fn no_automerge_schedule_preserves_automerge_flag() {
+        // Without automergeSchedule, automerge: true from packageRules should pass through.
+        let cfg = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["*"], "automerge": true}]}"#,
+        );
+        let mut report = make_report(vec![(
+            "lodash",
+            DepStatus::UpdateAvailable {
+                current: "4.0.0".into(),
+                latest: "4.17.21".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert_eq!(
+            report.files[0].deps[0].automerge,
+            Some(true),
+            "without automergeSchedule, automerge: true must be preserved"
+        );
+    }
+
+    #[test]
+    fn automerge_false_is_never_gated_by_schedule() {
+        // automerge: false should stay false regardless of automergeSchedule.
+        let cfg = RepoConfig::parse(
+            r#"{"automergeSchedule": ["at any time"], "packageRules": [{"matchPackageNames": ["*"], "automerge": false}]}"#,
+        );
+        let mut report = make_report(vec![(
+            "lodash",
+            DepStatus::UpdateAvailable {
+                current: "4.0.0".into(),
+                latest: "4.17.21".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert_eq!(
+            report.files[0].deps[0].automerge,
+            Some(false),
+            "automerge: false must not be flipped by automergeSchedule"
         );
     }
 }
