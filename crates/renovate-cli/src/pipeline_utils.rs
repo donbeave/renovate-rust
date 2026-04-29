@@ -110,11 +110,20 @@ pub(crate) fn apply_update_blocking_to_report(
                 // grouped deps share one branch (matching Renovate's behaviour).
                 // Explicit groupSlug overrides the auto-derived slug from groupName.
                 if let Some(new_ver) = parse_padded(latest) {
+                    let this_is_major = update_type
+                        == Some(renovate_core::versioning::semver_generic::UpdateType::Major);
                     let topic = if let Some(ref slug) = effects.group_slug {
-                        // Explicit groupSlug — already the final topic string.
+                        // Explicit groupSlug — already the final topic string; no prefix.
                         slug.clone()
                     } else if let Some(ref gname) = effects.group_name {
-                        branch::group_branch_topic(gname)
+                        let base = branch::group_branch_topic(gname);
+                        branch::major_group_slug(
+                            &base,
+                            repo_cfg.separate_major_minor,
+                            repo_cfg.separate_multiple_major,
+                            this_is_major,
+                            new_ver.major,
+                        )
                     } else {
                         let is_patch = classify_semver_update(current, latest)
                             == Some(renovate_core::versioning::semver_generic::UpdateType::Patch);

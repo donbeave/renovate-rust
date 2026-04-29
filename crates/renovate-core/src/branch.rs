@@ -139,6 +139,51 @@ pub fn group_branch_topic(group_name: &str) -> String {
     result.trim_end_matches('-').to_owned()
 }
 
+/// Apply Renovate's `separateMajorMinor` / `separateMultipleMajor` prefix to a
+/// computed group slug.
+///
+/// Mirrors the logic in `branch-name.ts` `generateBranchName`:
+/// ```text
+/// if (updateType === 'major' && separateMajorMinor) {
+///   if (separateMultipleMajor) groupSlug = `major-${newMajor}-${groupSlug}`;
+///   else                       groupSlug = `major-${groupSlug}`;
+/// }
+/// ```
+///
+/// Note: this is applied **only to computed slugs** (derived from `groupName`).
+/// Explicit `groupSlug` overrides from `packageRules` bypass this logic.
+///
+/// # Examples
+///
+/// ```
+/// # use renovate_core::branch::major_group_slug;
+/// // Default: separateMajorMinor=true, separateMultipleMajor=false.
+/// assert_eq!(major_group_slug("all-deps", true, false, true, 5), "major-all-deps");
+/// // separateMultipleMajor=true → include major version number.
+/// assert_eq!(major_group_slug("all-deps", true, true, true, 5), "major-5-all-deps");
+/// // separateMajorMinor=false → no prefix.
+/// assert_eq!(major_group_slug("all-deps", false, false, true, 5), "all-deps");
+/// // Minor update → no prefix regardless of config.
+/// assert_eq!(major_group_slug("all-deps", true, false, false, 5), "all-deps");
+/// ```
+pub fn major_group_slug(
+    base: &str,
+    separate_major_minor: bool,
+    separate_multiple_major: bool,
+    is_major: bool,
+    new_major: u64,
+) -> String {
+    if is_major && separate_major_minor {
+        if separate_multiple_major {
+            format!("major-{new_major}-{base}")
+        } else {
+            format!("major-{base}")
+        }
+    } else {
+        base.to_owned()
+    }
+}
+
 /// Compute the full Renovate branch name.
 ///
 /// Mirrors the default `branchName` template:

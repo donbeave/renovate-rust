@@ -11,7 +11,7 @@
 //!
 //! ## Supported forms
 //!
-//! ```
+//! ```text
 //! [requires]
 //! zlib/1.2.11
 //! boost/1.79.0@_/_

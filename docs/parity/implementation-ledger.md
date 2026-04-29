@@ -21,6 +21,9 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0242  | 2026-04-29 | Fix doctest code blocks in `cake.rs` and `conan.rs` — add `text` language tag to avoid compilation as Rust | Complete | See below. |
+| 0241  | 2026-04-29 | `separateMultipleMajor` config option + `major_group_slug()` helper — group branch names get `major-N-` or `major-` prefix for major updates | Complete | See below. |
+| 0240  | 2026-04-29 | RubyGems `release_timestamp`: `created_at` field propagated through `fetch_latest` → `GemUpdateSummary` → `build_dep_reports_bundler`; Pixi PyPI `release_timestamp` + `current_version_timestamp` wired | Complete | See below. |
 | 0239  | 2026-04-29 | Fix: `enabled:false` now fires for non-semver deps (Docker, calendar versions) — removed incorrect `update_type.is_some()` guard | Complete | See below. |
 | 0238  | 2026-04-29 | Indentation cleanup: fix misaligned `package_name: None` fields across 33 pipeline files | Complete | See below. |
 | 0237  | 2026-04-29 | `release_timestamp` for pep621 + PEP 723 inline scripts; indentation cleanup for `package_name` fields | Complete | See below. |

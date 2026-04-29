@@ -730,7 +730,14 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 status,
                             };
                         }
-                        let status = match pypi_map.get(&dep.dep_name) {
+                        let pypi_summary = pypi_map.get(&dep.dep_name);
+                        let release_timestamp = pypi_summary
+                            .and_then(|r| r.as_ref().ok())
+                            .and_then(|s| s.latest_timestamp.clone());
+                        let current_version_timestamp = pypi_summary
+                            .and_then(|r| r.as_ref().ok())
+                            .and_then(|s| s.current_version_timestamp.clone());
+                        let status = match pypi_summary {
                             Some(Ok(s)) if s.update_available => {
                                 output::DepStatus::UpdateAvailable {
                                     current: s.current_specifier.clone(),
@@ -755,8 +762,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             update_type: None,
                             pr_priority: None,
                             pr_title: None,
-                            release_timestamp: None,
-                            current_version_timestamp: None,
+                            release_timestamp,
+                            current_version_timestamp,
 
                             dep_type: None,
                             package_name: None,

@@ -153,6 +153,13 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `separateMajorMinor`.
     pub separate_major_minor: bool,
 
+    /// When `true`, a separate PR/branch is created for each available major
+    /// version instead of one shared `major-` branch for all majors.
+    /// Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `separateMultipleMajor`.
+    pub separate_multiple_major: bool,
+
     /// When `true`, minor and patch updates are split into separate PRs.
     /// Default: `false`.
     ///
@@ -472,6 +479,8 @@ impl RepoConfig {
             group_name: Option<String>,
             #[serde(rename = "separateMajorMinor", default = "default_true")]
             separate_major_minor: bool,
+            #[serde(rename = "separateMultipleMajor", default)]
+            separate_multiple_major: bool,
             #[serde(rename = "separateMinorPatch", default)]
             separate_minor_patch: bool,
             #[serde(rename = "semanticCommits")]
@@ -619,6 +628,7 @@ impl RepoConfig {
             pr_hourly_limit: raw.pr_hourly_limit,
             group_name: raw.group_name,
             separate_major_minor: raw.separate_major_minor,
+            separate_multiple_major: raw.separate_multiple_major,
             separate_minor_patch: raw.separate_minor_patch,
             semantic_commits: raw.semantic_commits.or_else(|| {
                 // `:semanticCommits` preset implies semanticCommits = "enabled"
@@ -978,6 +988,7 @@ impl Default for RepoConfig {
             pr_hourly_limit: 2,
             group_name: None,
             separate_major_minor: true,
+            separate_multiple_major: false,
             separate_minor_patch: false,
             semantic_commits: None,
             extends: Vec::new(),

@@ -129,7 +129,7 @@ find where a given TypeScript module is implemented in Rust.
 | `lib/modules/datasource/terraform-module/index.ts` | `crates/renovate-core/src/datasources/terraform.rs` | partial | Terraform Registry |
 | `lib/modules/datasource/helm/index.ts` | `crates/renovate-core/src/datasources/helm.rs` | partial | Helm chart index.yaml |
 | `lib/modules/datasource/go/index.ts` | `crates/renovate-core/src/datasources/gomod.rs` | partial | `go list -m` style fetch |
-| `lib/modules/datasource/rubygems/index.ts` | `crates/renovate-core/src/datasources/rubygems.rs` | partial | RubyGems API |
+| `lib/modules/datasource/rubygems/index.ts` | `crates/renovate-core/src/datasources/rubygems.rs` | partial | RubyGems API; `release_timestamp` via `created_at` field |
 | `lib/modules/datasource/packagist/index.ts` | `crates/renovate-core/src/datasources/packagist.rs` | partial | Packagist v2 API |
 | `lib/modules/datasource/pub/index.ts` | `crates/renovate-core/src/datasources/pub_dev.rs` | partial | pub.dev API |
 | `lib/modules/datasource/crate/index.ts` | `crates/renovate-core/src/datasources/crates_io.rs` | partial | Sparse index + REST API timestamps (`/api/v1/crates/{name}/versions`) |
@@ -191,7 +191,7 @@ find where a given TypeScript module is implemented in Rust.
 | TypeScript file | Rust file(s) | Status | Notes |
 |-----------------|-------------|--------|-------|
 | `lib/workers/repository/updates/flatten.ts` | `crates/renovate-core/src/branch.rs` | partial | `sanitize_dep_name`, `branch_topic`, `branch_name` |
-| `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch name generation; group slug; `hashedBranchLength` hashing |
+| `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch name generation; group slug; `hashedBranchLength` hashing; `major_group_slug()` prefix for `separateMajorMinor`/`separateMultipleMajor` |
 | `lib/util/hash.ts` | `crates/renovate-core/src/branch.rs` | full | SHA-512 hex hashing via `sha2` crate |
 | `lib/config/options/index.ts` (`commitMessageAction`, `commitMessagePrefix`) | `crates/renovate-core/src/branch.rs`, `crates/renovate-core/src/repo_config.rs` | partial | PR title generation with semantic commits |
 

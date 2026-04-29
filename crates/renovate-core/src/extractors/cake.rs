@@ -10,7 +10,7 @@
 //!
 //! ## Supported forms
 //!
-//! ```
+//! ```text
 //! #addin nuget:?package=Foo.Bar&version=1.2.3
 //! #tool nuget:https://api.nuget.org/v3/index.json?package=Foo.Bar&version=1.2.3
 //! #load nuget:?package=Foo.Bar&version=1.0.0
