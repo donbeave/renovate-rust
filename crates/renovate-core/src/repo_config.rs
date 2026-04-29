@@ -1588,9 +1588,8 @@ impl RepoConfig {
         if self.ignore_deps.iter().any(|p| p == ctx.dep_name) {
             return true;
         }
-        self.package_rules
-            .iter()
-            .any(|rule| rule.matches_context(ctx) && rule.enabled == Some(false))
+        // Delegate to is_update_blocked_ctx so last-rule-wins semantics apply.
+        self.is_update_blocked_ctx(ctx)
     }
 
     /// Return `true` when a specific update (name + current + update type + manager)
