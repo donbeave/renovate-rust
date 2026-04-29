@@ -627,6 +627,95 @@ fn resolve_extends_group_presets(
     (rules, separate_major_minor)
 }
 
+/// Parse a parameterized preset string into its name and arguments.
+///
+/// Format: `[namespace:]name(arg0, arg1, ...)` or `[namespace:]name`.
+///
+/// Returns `(full_name_without_args, Vec<arg_strings>)`.
+///
+/// Examples:
+/// - `"label(renovate)"` → `("label", ["renovate"])`
+/// - `":assignee(bot)"` → `(":assignee", ["bot"])`
+/// - `"group:all"` → `("group:all", [])`
+fn parse_preset_args(preset: &str) -> (&str, Vec<&str>) {
+    if let Some(open) = preset.find('(') {
+        let name = &preset[..open];
+        let rest = &preset[open + 1..];
+        let args_str = rest.trim_end_matches(')');
+        let args: Vec<&str> = args_str
+            .split(',')
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .collect();
+        (name, args)
+    } else {
+        (preset, Vec::new())
+    }
+}
+
+/// Resolve parameterized built-in presets from `extends`.
+///
+/// Handles presets that take arguments, e.g.:
+/// - `label(renovate)` → `labels: ["renovate"]`
+/// - `labels(renovate, deps)` → `labels: ["renovate", "deps"]`
+/// - `:assignee(myuser)` → `assignees: ["myuser"]`
+/// - `:reviewer(myuser)` → `reviewers: ["myuser"]`
+/// - `:automergeType(pr)` → sets automerge_type (returned separately)
+///
+/// Returns `(labels, assignees, reviewers, automerge_type)`.
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts`
+fn resolve_extends_parameterized(
+    extends: &[String],
+) -> (Vec<String>, Vec<String>, Vec<String>, Option<String>) {
+    let mut labels: Vec<String> = Vec::new();
+    let mut assignees: Vec<String> = Vec::new();
+    let mut reviewers: Vec<String> = Vec::new();
+    let mut automerge_type: Option<String> = None;
+
+    for preset in extends {
+        let (name, args) = parse_preset_args(preset.as_str());
+        match name {
+            "label" => {
+                for arg in &args {
+                    if !arg.is_empty() && !labels.contains(&arg.to_string()) {
+                        labels.push(arg.to_string());
+                    }
+                }
+            }
+            "labels" => {
+                for arg in &args {
+                    if !arg.is_empty() && !labels.contains(&arg.to_string()) {
+                        labels.push(arg.to_string());
+                    }
+                }
+            }
+            ":assignee" | "assignee" => {
+                for arg in &args {
+                    if !arg.is_empty() && !assignees.contains(&arg.to_string()) {
+                        assignees.push(arg.to_string());
+                    }
+                }
+            }
+            ":reviewer" | "reviewer" => {
+                for arg in &args {
+                    if !arg.is_empty() && !reviewers.contains(&arg.to_string()) {
+                        reviewers.push(arg.to_string());
+                    }
+                }
+            }
+            ":automergeType" => {
+                if let Some(ty) = args.first().filter(|s| !s.is_empty()) {
+                    automerge_type = Some(ty.to_string());
+                }
+            }
+            _ => {}
+        }
+    }
+
+    (labels, assignees, reviewers, automerge_type)
+}
+
 /// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
 ///
 /// - `/pattern/` → inline regex
@@ -846,6 +935,8 @@ impl RepoConfig {
         preset_rules.extend(common_rules);
         // :automergePatch sets separateMinorPatch: true.
         let preset_separate_minor_patch = raw.extends.iter().any(|p| p == ":automergePatch");
+        let (param_labels, param_assignees, param_reviewers, param_automerge_type) =
+            resolve_extends_parameterized(&raw.extends);
 
         // Convert `enabled: false` inside major/minor/patch blocks to synthetic
         // packageRules so the existing is_update_blocked_ctx path handles them.
@@ -965,11 +1056,35 @@ impl RepoConfig {
             } else {
                 resolve_extends_automerge(&raw.extends).unwrap_or(false)
             },
-            automerge_type: raw.automerge_type,
-            labels: raw.labels,
+            automerge_type: raw.automerge_type.or(param_automerge_type),
+            labels: {
+                let mut l = raw.labels;
+                for pl in param_labels {
+                    if !l.contains(&pl) {
+                        l.push(pl);
+                    }
+                }
+                l
+            },
             add_labels: raw.add_labels,
-            assignees: raw.assignees,
-            reviewers: raw.reviewers,
+            assignees: {
+                let mut a = raw.assignees;
+                for pa in param_assignees {
+                    if !a.contains(&pa) {
+                        a.push(pa);
+                    }
+                }
+                a
+            },
+            reviewers: {
+                let mut r = raw.reviewers;
+                for pr in param_reviewers {
+                    if !r.contains(&pr) {
+                        r.push(pr);
+                    }
+                }
+                r
+            },
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: raw.base_branches,
@@ -3171,6 +3286,61 @@ mod schedule_preset_tests {
         assert!(c.is_update_blocked_ctx(&ctx));
         let ctx2 = DepContext { dep_name: "react", dep_type: Some("dependencies"), ..Default::default() };
         assert!(!c.is_update_blocked_ctx(&ctx2));
+    }
+
+    // ── parameterized presets ─────────────────────────────────────────────────
+
+    #[test]
+    fn label_preset_adds_label() {
+        let c = RepoConfig::parse(r#"{"extends": ["label(renovate)"]}"#);
+        assert!(c.labels.contains(&"renovate".to_owned()));
+    }
+
+    #[test]
+    fn labels_preset_adds_multiple() {
+        let c = RepoConfig::parse(r#"{"extends": ["labels(renovate, deps)"]}"#);
+        assert!(c.labels.contains(&"renovate".to_owned()));
+        assert!(c.labels.contains(&"deps".to_owned()));
+    }
+
+    #[test]
+    fn label_preset_combined_with_existing_labels() {
+        let c = RepoConfig::parse(r#"{"labels": ["existing"], "extends": ["label(renovate)"]}"#);
+        assert!(c.labels.contains(&"existing".to_owned()));
+        assert!(c.labels.contains(&"renovate".to_owned()));
+    }
+
+    #[test]
+    fn assignee_preset_adds_assignee() {
+        let c = RepoConfig::parse(r#"{"extends": [":assignee(renovate-bot)"]}"#);
+        assert!(c.assignees.contains(&"renovate-bot".to_owned()));
+    }
+
+    #[test]
+    fn reviewer_preset_adds_reviewer() {
+        let c = RepoConfig::parse(r#"{"extends": [":reviewer(myteam)"]}"#);
+        assert!(c.reviewers.contains(&"myteam".to_owned()));
+    }
+
+    #[test]
+    fn parse_preset_args_no_parens() {
+        let (name, args) = super::parse_preset_args("group:all");
+        assert_eq!(name, "group:all");
+        assert!(args.is_empty());
+    }
+
+    #[test]
+    fn parse_preset_args_single_arg() {
+        let (name, args) = super::parse_preset_args("label(renovate)");
+        assert_eq!(name, "label");
+        assert_eq!(args, vec!["renovate"]);
+    }
+
+    #[test]
+    fn parse_preset_args_multiple_args() {
+        let (name, args) = super::parse_preset_args("labels(a, b, c)");
+        assert_eq!(name, "labels");
+        assert_eq!(args, vec!["a", "b", "c"]);
     }
 }
 
