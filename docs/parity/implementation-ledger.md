@@ -21,6 +21,8 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0257  | 2026-04-29 | `major`/`minor`/`patch` top-level config blocks: `UpdateTypeConfig` struct + serde deserialization + `apply_to_effects()` applied AFTER packageRules in `collect_rule_effects`, mirroring `flatten.ts` semantics | Complete | See below. |
+| 0256  | 2026-04-29 | Maven `release_timestamp` via Maven Central search API (`search.maven.org/solrsearch`); secondary per-dep call converts epoch-ms to ISO 8601 for `minimumReleaseAge` gating | Complete | See below. |
 | 0255  | 2026-04-29 | NuGet `release_timestamp` via v3 registration leaf API (`/registration5-gz-semver2/{id}/{version}.json`); extra per-package call fetches `published` date | Complete | See below. |
 | 0254  | 2026-04-29 | Fix Maven dep types: scope-aware `renovate_dep_type()` — `<scope>test</scope>` → `"test"`, no scope → `"compile"`; plugin/extension → `"build"` matching Renovate's maven extractor | Complete | See below. |
 | 0253  | 2026-04-29 | `semanticCommitType`/`Scope` in packageRules + `RuleEffects` + `:semanticPrefixFixDepsChoreOthers` preset expansion injects production-dep `fix` / other-dep `chore` rules | Complete | See below. |
@@ -5350,3 +5352,49 @@ Previous implementation silently returned `false` (= not restricted) for
 - `is_version_restricted_for_file` now calls `!version_matches_allowed()` instead of inline logic
 - Removes early-return for non-semver versions: regex/exact-match now work on Docker tags too
 - 3 new tests: regex allows/blocks, non-semver Docker tags, exact-string match
+
+---
+
+## Slice 0256 - Maven `release_timestamp` via Maven Central search API
+
+### Renovate reference
+- `lib/modules/datasource/maven/index.ts` — fetches per-version timestamps from Maven Central
+- Timestamp enables `minimumReleaseAge` gating for Maven dependencies
+
+### Implementation
+- Added `release_timestamp: Option<String>` to `MavenUpdateSummary`
+- Added `MAVEN_CENTRAL_SEARCH_API` constant pointing to `search.maven.org/solrsearch`
+- Added serde structs `MavenSearchResponse`, `MavenSearchResponseBody`, `MavenSearchDoc`
+- Added `fetch_maven_central_timestamp(dep_name, version, http)` async function:
+  - Builds query `g:{groupId}+AND+a:{artifactId}+AND+v:{version}&core=gav&rows=1&wt=json`
+  - Parses `timestamp` field (epoch milliseconds) from first search result doc
+  - Converts to ISO 8601 via `chrono::DateTime::from_timestamp`
+- `fetch_update_summary` makes secondary call when a latest version is found
+- `summary_from_cache` sets `release_timestamp: None` (cache path skips timestamp)
+- `build_dep_reports_maven` in `report_builders.rs` propagates `release_timestamp` to `DepReport`
+
+### Files changed
+- `crates/renovate-core/src/datasources/maven.rs`
+- `crates/renovate-cli/src/report_builders.rs`
+
+---
+
+## Slice 0257 - `major`/`minor`/`patch` top-level config blocks
+
+### Renovate reference
+- `lib/config/options/index.ts` — `major`, `minor`, `patch` config objects (`type: 'object'`, `mergeable: true`)
+- `lib/workers/repository/updates/flatten.ts` — applied via `mergeChildConfig(updateConfig, updateConfig[updateType])` after `applyPackageRules`
+
+### Implementation
+- Added `UpdateTypeConfig` struct to `crates/renovate-core/src/package_rule.rs`:
+  - Deserializes from `"major"/"minor"/"patch"` keys in `renovate.json`
+  - Fields: `automerge`, `enabled`, `labels`, `addLabels`, `assignees`, `reviewers`, `groupName`, `groupSlug`, `schedule`, `prPriority`, `minimumReleaseAge`, `commitMessageTopic`, `commitMessageAction`, `commitMessagePrefix`, `semanticCommitType`, `semanticCommitScope`
+  - `apply_to_effects(&self, effects: &mut RuleEffects)` method — last-writer-wins for scalars, `labels` replaces, `addLabels` appends
+- Added `major_config`, `minor_config`, `patch_config: Option<UpdateTypeConfig>` to `RepoConfig`
+- Added serde deserialization via `Raw` struct fields `major`, `minor`, `patch`
+- In `collect_rule_effects`: after all packageRules applied, matches `ctx.update_type` to the relevant config block and calls `apply_to_effects()` — mirrors Renovate's AFTER-packageRules application order
+- 9 tests: parse, type-correct application, cross-type isolation, override ordering (major-config beats packageRule), addLabels accumulation
+
+### Files changed
+- `crates/renovate-core/src/package_rule.rs`
+- `crates/renovate-core/src/repo_config.rs`

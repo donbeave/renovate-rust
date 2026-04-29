@@ -39,7 +39,7 @@ find where a given TypeScript module is implemented in Rust.
 | `lib/config/global.ts` | `crates/renovate-core/src/config.rs` | partial | `GlobalConfig` struct with major fields |
 | `lib/config/index.ts` | `crates/renovate-cli/src/config_builder.rs` | partial | merge pipeline: defaults → file → CLI |
 | `lib/config/app-strings.ts` | `crates/renovate-core/src/repo_config.rs` | full | `CONFIG_FILE_CANDIDATES` list |
-| `lib/config/options/index.ts` | `crates/renovate-core/src/repo_config.rs`, `crates/renovate-core/src/config.rs` | partial | All packageRule matchers, most global options |
+| `lib/config/options/index.ts` | `crates/renovate-core/src/repo_config.rs`, `crates/renovate-core/src/config.rs` | partial | All packageRule matchers, most global options; `major`/`minor`/`patch` config blocks added |
 
 ---
 
