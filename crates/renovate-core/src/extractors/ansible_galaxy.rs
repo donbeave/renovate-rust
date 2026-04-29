@@ -332,4 +332,34 @@ collections:
         let deps = extract(content);
         assert!(deps.is_empty());
     }
+
+    // Ported: "check if an empty file returns null" — ansible-galaxy/extract.spec.ts line 56
+    #[test]
+    fn blank_file_returns_no_deps() {
+        assert!(extract("\n").is_empty());
+    }
+
+    const COLLECTIONS2: &str = r"---
+collections:
+  - name: geerlingguy.php_roles
+    version: 0.9.3
+    source: https://galaxy.ansible.com
+  - name: davidban77.gns3
+    version: 1.2.2
+roles:
+  - name: geerlingguy.java
+    version: 1.9.6
+  - name: geerlingguy.docker
+    version: 2.9.0
+";
+
+    // Ported: "check collection style requirements file in reverse order and missing empty line" — ansible-galaxy/extract.spec.ts line 73
+    #[test]
+    fn collections_before_roles_extracts_all_four() {
+        let deps = extract(COLLECTIONS2);
+        assert_eq!(deps.len(), 4);
+        assert!(deps
+            .iter()
+            .all(|d| d.skip_reason == Some(AnsibleGalaxySkipReason::GalaxyHosted)));
+    }
 }
