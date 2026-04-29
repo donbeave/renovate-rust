@@ -163,39 +163,26 @@ They are the primary tool for understanding what is done and what remains.
 - `docs/parity/implementation-ledger.md` — one row per completed slice, newest
   first.  Record what was implemented, what was deferred, and any blockers.
 
-- `docs/parity/renovate-test-map.md` — maps Renovate TypeScript test cases
-  (file + line + test name) to their Rust counterparts (file + line + test
-  name).  **IMPORTANT rules:**
-  - At the START of each loop iteration, scan the Renovate reference directory
-    for any `.spec.ts` files you referenced or read during this or the previous
-    iteration and add them to this file (even as `pending` with no Rust test yet).
-  - List every Rust test you write under the correct section, whether or not
-    it corresponds to a specific Renovate test case.
-  - When you read a `.spec.ts` file during implementation, immediately add all
-    test cases from that file to this map (with `pending` status if not yet
-    ported, `ported` if you are porting them now).
-  - Do NOT wait until the end of the loop to update this file.
-  - One Renovate `it()` may map to multiple Rust tests; list each Rust test
-    on its own row.
-  - Include the line number in the Renovate file when you read it; use `—`
-    if you did not look up the exact line.
-  - Use status values: `ported` · `partial` · `pending` · `not-applicable`.
+- `docs/parity/renovate-test-map.md` — maps Renovate TypeScript **spec** test
+  files to their Rust test coverage.  **CRITICAL: this file MUST contain ONLY
+  `.spec.ts` file references — NEVER plain `.ts` source files.**
+  - One row per spec file. Track: how many `it()` tests total, how many ported.
+  - When you port tests from a spec file, update the Rust test count and status.
+  - Use status values: `ported` (all tests done) · `partial` (some done) ·
+    `pending` (none done yet) · `not-applicable` (out-of-scope feature).
+  - **Enforcement:** Before committing, verify no row references a plain `.ts`
+    (non-spec) file. If you find one, move it to `renovate-source-map.md`.
 
 - `docs/parity/renovate-source-map.md` — maps Renovate TypeScript **source**
-  files (not test files) to their Rust counterparts.  **IMPORTANT rules:**
-  - At the START of each loop iteration, scan the Renovate reference directory
-    for any non-test TypeScript files you reference and add them to this file
-    (even with `not-started` status if you have not implemented them yet).
-  - When you read a TypeScript source file to understand behavior, immediately
-    add it to this map with its current status.
-  - When you implement behavior from a TypeScript file, update its status.
-  - Never implement behavior from a TypeScript file without first recording
-    that file in the source map.
+  files (not test files) to their Rust counterparts.  **CRITICAL: this file
+  MUST contain ONLY plain `.ts` source file references — NEVER `.spec.ts` test
+  files.**
+  - One row per TypeScript source file. Track which Rust file implements it.
+  - When you implement behavior from a TypeScript source file, update its status.
   - Use status: `full` · `partial` · `stub` · `not-started` · `out-of-scope`.
   - Status reflects observable behavior coverage, not line count.
-  - One TypeScript file may map to many Rust files; one Rust file may cover
-    many TypeScript files.  List all relationships, one row per TypeScript file.
-  - Keep the "Out of scope" section up to date for hosted/infra-only features.
+  - **Enforcement:** Before committing, verify no row references a `.spec.ts`
+    file. If you find one, move it to `renovate-test-map.md`.
 
 - `docs/parity/compatibility-decisions.md` — documents explicit decisions where
   the Rust implementation intentionally diverges from Renovate and why.
