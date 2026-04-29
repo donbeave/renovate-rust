@@ -16,10 +16,10 @@ mod cli;
 mod config_builder;
 mod context;
 mod logging;
-mod managers_impl;
 mod migrate;
 mod output;
 mod pipeline_utils;
+mod pipelines;
 mod report_builders;
 
 use std::path::Path;
@@ -377,7 +377,7 @@ async fn process_repo(
         },
         had_error: false,
     };
-    managers_impl::process_all_managers(&mut ctx).await;
+    pipelines::process_all_managers(&mut ctx).await;
     let (mut repo_report, had_error) = (ctx.report, ctx.had_error);
 
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.

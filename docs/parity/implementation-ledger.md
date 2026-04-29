@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0211  | 2026-04-28 | Refactor: split `managers_impl` into 17 focused `pipelines/` sub-modules | Complete | See below. |
 | 0210  | 2026-04-28 | Refactor: extract `managers_impl.rs` + `context.rs`; `main.rs` 8,733→389 lines | Complete | See below. |
 | 0209  | 2026-04-28 | `groupName` branch slug: grouped deps share one branch name | Complete | See below. |
 | 0208  | 2026-04-28 | `additionalBranchPrefix` config field; fix `matchCurrentVersion` regex; scan spec map | Complete | See below. |
@@ -4953,6 +4954,45 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0211 - Refactor: split managers into focused `pipelines/` sub-modules
+
+### What landed
+- `managers_impl.rs` (8,387 lines) deleted.
+- `pipelines.rs` (new, 103 lines): flat module entry point declaring all 17 sub-modules;
+  re-exports all shared imports (`pub(crate) use`) so sub-modules can do `use super::*`.
+- `pipelines/` directory with 17 focused sub-module files:
+
+| File | Lines | Ecosystems covered |
+|------|-------|--------------------|
+| `rust.rs` | 102 | Cargo |
+| `php.rs` | 72 | Composer |
+| `dotnet.rs` | 178 | NuGet, Cake |
+| `dart.rs` | 125 | pub/pubspec, FVM |
+| `go.rs` | 94 | Go modules |
+| `ruby.rs` | 232 | Bundler, gemspec, CocoaPods |
+| `docker.rs` | 279 | Dockerfile, docker-compose, Dev Container, Quadlet |
+| `javascript.rs` | 388 | npm, Bun, Meteor, HTML CDN, CDN URLs |
+| `terraform.rs` | 348 | Terraform, Terragrunt, TFLint, Azure Bicep |
+| `helm.rs` | 391 | Helm, Helm Values, Helmfile, Helmsman, Fleet |
+| `mobile.rs` | 500 | Swift, Mint, XcodeGen, Mix (Elixir), Gleam |
+| `version_files.rs` | 488 | asdf, mise, version files, Devbox |
+| `python.rs` | 727 | pip, pip-compile, setup.py/cfg, Pipfile, pep621, Poetry, PEP 723, Pixi |
+| `kubernetes.rs` | 782 | Kustomize, K8s manifests, FluxCD, Tekton, ArgoCD, Crossplane, Glasskube, Sveltos |
+| `jvm.rs` | 840 | Maven, Gradle, Kotlin Script, Ant, SBT, OSGi, Scalafmt, Clojure, Leiningen |
+| `ci.rs` | 887 | GitHub Actions + 13 CI/CD platforms |
+| `misc.rs` | 2,188 | Bazel, Nix, pre-commit, Ansible, Puppet, Jenkins, Conan, Homebrew, and 16 more |
+
+- Module renamed from `managers_impl` to `pipelines` — cleaner, idiomatic Rust naming.
+- Each sub-module uses `use super::*` to get the shared imports from `pipelines.rs`.
+- SETUP in each sub-module is minimal: only includes `gh_http`/`gh_api_base` if the
+  module actually uses GitHub API calls; `filtered_files` only in `misc.rs` (Hermit).
+- `context.rs` updated: all originally-shared variables still accessible via `ctx`.
+
+### No behavior changes
+All 1385 tests pass. External API unchanged.
 
 ---
 
