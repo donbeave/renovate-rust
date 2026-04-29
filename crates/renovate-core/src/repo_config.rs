@@ -6284,6 +6284,27 @@ mod tests {
         assert!(!c.is_dep_ignored("express"));
     }
 
+    // ── Ported from Renovate dep-names.spec.ts ────────────────────────────────
+
+    #[test]
+    fn match_dep_names_undefined_dep_name_does_not_fire() {
+        // Ported: "should return false if packageFile is not defined" (depName: undefined).
+        // When dep_name is absent/empty and matchDepNames is set → rule doesn't fire.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepNames": ["@opentelemetry/http"], "automerge": true}]}"#,
+        );
+        // Empty dep_name (simulates undefined) with matchDepNames set → rule must not fire.
+        let ctx = DepContext {
+            dep_name: "",
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when dep_name is empty/absent and matchDepNames is set"
+        );
+    }
+
     #[test]
     fn match_dep_names_regex_disables_dep() {
         let c = RepoConfig::parse(
