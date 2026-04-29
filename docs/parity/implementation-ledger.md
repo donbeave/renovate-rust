@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0269  | 2026-04-29 | Parameterized preset expansion: `label(val)`, `labels(a,b)`, `:assignee(user)`, `:reviewer(user)`, `:automergeType(type)` — `parse_preset_args()` + `resolve_extends_parameterized()`; 8 tests | Complete | See below. |
 | 0268  | 2026-04-29 | Fix `match_regex_or_glob` negation: `!expr` now recursively inverts match result, fixing `matchCurrentValue`/`matchNewValue` negated patterns (`!npm`, `!npm*`, `!/regex/`); 3 tests in `string_match` | Complete | See below. |
 | 0267  | 2026-04-29 | Fix `matchCurrentVersion` negated regex `!/pattern/`: was silently ignoring the negation (returning true), now correctly inverts the regex match; validates `:automergeStableNonMajor` !/^0/ exclusion; 3 tests | Complete | See below. |
 | 0266  | 2026-04-29 | `{{currentVersion}}` template in `commitMessageExtra`/`commitMessageTopic`; `PrTitleConfig.current_version` field; `{{newVersion}}` in topic templates; pipeline passes current version; 2 tests | Complete | See below. |
