@@ -122,4 +122,27 @@ mod tests {
     fn empty_returns_none() {
         assert!(extract("").is_none());
     }
+
+    #[test]
+    fn ssh_url_src_path_extracted() {
+        // Ported: "extracts repository and version from .copier-answers.yml with ssh URL"
+        // copier/extract.spec.ts line 25
+        let content = "_commit: v1.0.0\n_src_path: git@github.com:renovatebot/somedir/renovate.git\n";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.src_path, "git@github.com:renovatebot/somedir/renovate.git");
+    }
+
+    #[test]
+    fn missing_src_path_returns_none() {
+        // Ported: "returns null for missing _src_path field" — copier/extract.spec.ts line 145
+        let content = "_commit: v1.0.0\n";
+        assert!(extract(content).is_none());
+    }
+
+    #[test]
+    fn invalid_yaml_returns_none() {
+        // Ported: "returns null for invalid .copier-answers.yml" — copier/extract.spec.ts line 119
+        assert!(extract("foo: bar: 123").is_none());
+    }
 }
