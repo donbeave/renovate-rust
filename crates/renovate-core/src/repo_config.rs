@@ -3440,8 +3440,20 @@ impl RepoConfig {
         struct RawPackageRule {
             #[serde(rename = "matchPackageNames", default)]
             match_package_names: Vec<String>,
+            // Deprecated: packageNames → matchPackageNames
+            #[serde(rename = "packageNames", default)]
+            package_names_deprecated: Vec<String>,
+            // Deprecated: excludePackageNames → !name in matchPackageNames
+            #[serde(rename = "excludePackageNames", default)]
+            exclude_package_names: Vec<String>,
             #[serde(rename = "matchPackagePatterns", default)]
             match_package_patterns: Vec<String>,
+            // Deprecated: packagePatterns → /pattern/ in matchPackageNames
+            #[serde(rename = "packagePatterns", default)]
+            package_patterns_deprecated: Vec<String>,
+            // Deprecated: excludePackagePatterns → !/pattern/ in matchPackageNames
+            #[serde(rename = "excludePackagePatterns", default)]
+            exclude_package_patterns: Vec<String>,
             /// Deprecated; converted to glob patterns in `matchPackageNames`.
             #[serde(rename = "matchPackagePrefixes", default)]
             match_package_prefixes: Vec<String>,
@@ -3453,14 +3465,39 @@ impl RepoConfig {
             /// Deprecated; converted to `prefix**` globs in `matchDepNames`.
             #[serde(rename = "matchDepPrefixes", default)]
             match_dep_prefixes: Vec<String>,
+            // Deprecated aliases for matchDatasources, matchManagers, etc.
+            // Renovate reference: lib/config/migrations/custom/
+            #[serde(default)]
+            datasources: Vec<String>,
             #[serde(rename = "matchDatasources", default)]
             match_datasources: Vec<String>,
+            #[serde(rename = "sourceUrlPrefixes", default)]
+            source_url_prefixes: Vec<String>,
             #[serde(rename = "matchSourceUrls", default)]
             match_source_urls: Vec<String>,
+            #[serde(default)]
+            managers: Vec<String>,
             #[serde(rename = "matchManagers", default)]
             match_managers: Vec<String>,
+            #[serde(rename = "updateTypes", default)]
+            update_types_deprecated: Vec<String>,
             #[serde(rename = "matchUpdateTypes", default)]
             match_update_types: Vec<String>,
+            // Deprecated aliases for matchFileNames and matchBaseBranches
+            #[serde(default)]
+            paths: Vec<String>,
+            #[serde(rename = "matchFiles", default)]
+            match_files: Vec<String>,
+            #[serde(rename = "matchPaths", default)]
+            match_paths: Vec<String>,
+            #[serde(rename = "baseBranchList", default)]
+            base_branch_list: Vec<String>,
+            // Deprecated aliases for matchCategories
+            #[serde(default)]
+            languages: Vec<String>,
+            // Deprecated aliases for matchDepTypes
+            #[serde(rename = "depTypeList", default)]
+            dep_type_list: Vec<String>,
             #[serde(rename = "allowedVersions")]
             allowed_versions: Option<String>,
             #[serde(rename = "matchCurrentVersion")]
@@ -3499,6 +3536,9 @@ impl RepoConfig {
             match_registry_urls: Vec<String>,
             #[serde(rename = "matchRepositories", default)]
             match_repositories: Vec<String>,
+            // Deprecated: excludeRepositories → !repo in matchRepositories
+            #[serde(rename = "excludeRepositories", default)]
+            exclude_repositories: Vec<String>,
             #[serde(rename = "matchCurrentAge")]
             match_current_age: Option<String>,
             #[serde(rename = "minimumReleaseAge")]
@@ -3925,18 +3965,35 @@ impl RepoConfig {
                 // match_regex_or_glob_list can apply positive/negative semantics.
                 let mut match_package_names: Vec<String> = r.match_package_names;
                 match_package_names.extend(preset_matchers.match_package_names);
+                // Deprecated: packageNames → matchPackageNames (plain alias)
+                match_package_names.extend(r.package_names_deprecated);
                 // matchPackagePrefixes → "prefix**" glob strings
                 for prefix in r.match_package_prefixes {
                     match_package_names.push(format!("{prefix}**"));
                 }
-                // matchPackagePatterns → "/raw_regex/" inline strings
-                for pat in r.match_package_patterns {
+                // matchPackagePatterns + packagePatterns (deprecated) → "/raw_regex/" inline strings
+                for pat in r
+                    .match_package_patterns
+                    .into_iter()
+                    .chain(r.package_patterns_deprecated)
+                {
                     match_package_names.push(format!("/{pat}/"));
                 }
-                let has_update_type_constraint = !r.match_update_types.is_empty();
+                // Deprecated: excludePackageNames → "!name" negation
+                for name in r.exclude_package_names {
+                    match_package_names.push(format!("!{name}"));
+                }
+                // Deprecated: excludePackagePatterns → "!/pattern/" negation
+                for pat in r.exclude_package_patterns {
+                    match_package_names.push(format!("!/{pat}/"));
+                }
+
+                let has_update_type_constraint =
+                    !r.match_update_types.is_empty() || !r.update_types_deprecated.is_empty();
                 let match_update_types = r
                     .match_update_types
-                    .iter()
+                    .into_iter()
+                    .chain(r.update_types_deprecated)
                     .filter_map(|s| match s.as_str() {
                         "major" => Some(UpdateType::Major),
                         "minor" => Some(UpdateType::Minor),
@@ -3963,9 +4020,11 @@ impl RepoConfig {
                 // store raw strings so match_regex_or_glob_list can apply negation.
                 // Migrate deprecated datasource names in matchDatasources.
                 // Renovate reference: lib/config/migrations/custom/datasource-migration.ts
+                // Deprecated: datasources → matchDatasources (plain alias)
                 let mut match_datasources: Vec<String> = r
                     .match_datasources
                     .into_iter()
+                    .chain(r.datasources)
                     .map(|ds| match ds.as_str() {
                         "adoptium-java" => "java-version".to_owned(),
                         "dotnet" => "dotnet-version".to_owned(),
@@ -3974,7 +4033,14 @@ impl RepoConfig {
                     })
                     .collect();
                 match_datasources.extend(preset_matchers.match_datasources);
+                // Deprecated: sourceUrlPrefixes → matchSourceUrls with {/,}** appended
                 let mut match_source_urls = r.match_source_urls;
+                for prefix in r.source_url_prefixes {
+                    // Renovate migration: sourceUrlPrefixes add glob that matches the URL
+                    // with any path below it. The {/,}** pattern matches either a direct
+                    // suffix or with a path separator, covering both trailing slash variants.
+                    match_source_urls.push(format!("{prefix}{{/,}}**"));
+                }
                 match_source_urls.extend(preset_matchers.match_source_urls);
                 PackageRule {
                     match_package_names,
@@ -3984,10 +4050,12 @@ impl RepoConfig {
                     match_new_value: r.match_new_value,
                     match_datasources,
                     // Migrate deprecated "regex" manager name → "custom.regex".
+                    // Also merge deprecated `managers` alias (plain rename).
                     // Renovate reference: lib/config/migrations/custom/match-managers-migration.ts
                     match_managers: r
                         .match_managers
                         .into_iter()
+                        .chain(r.managers)
                         .map(|m| {
                             if m == "regex" {
                                 "custom.regex".to_owned()
@@ -3999,8 +4067,27 @@ impl RepoConfig {
                     match_update_types,
                     allowed_versions: r.allowed_versions,
                     match_current_version: r.match_current_version,
-                    match_file_names: r.match_file_names,
-                    match_dep_types: r.match_dep_types,
+                    // Deprecated aliases for matchFileNames:
+                    // paths → matchFileNames (exact; matchFiles/matchPaths are Renovate-internal)
+                    // matchFiles is the newer preferred field in some versions
+                    // matchPaths takes precedence over matchFiles in Renovate's migration
+                    match_file_names: {
+                        let mut f = r.match_file_names;
+                        f.extend(r.paths);
+                        // matchPaths takes precedence when both present; prefer matchFiles second
+                        if !r.match_paths.is_empty() {
+                            f.extend(r.match_paths);
+                        } else {
+                            f.extend(r.match_files);
+                        }
+                        f
+                    },
+                    // Deprecated: depTypeList → matchDepTypes (plain alias)
+                    match_dep_types: {
+                        let mut d = r.match_dep_types;
+                        d.extend(r.dep_type_list);
+                        d
+                    },
                     ignore_versions: r.ignore_versions,
                     enabled: r.enabled,
                     has_name_constraint,
@@ -4013,10 +4100,27 @@ impl RepoConfig {
                     add_labels: r.add_labels,
                     assignees: r.assignees,
                     reviewers: r.reviewers,
-                    match_categories: r.match_categories,
-                    match_base_branches: r.match_base_branches,
+                    // Deprecated: languages → matchCategories (plain alias)
+                    match_categories: {
+                        let mut c = r.match_categories;
+                        c.extend(r.languages);
+                        c
+                    },
+                    // Deprecated: baseBranchList → matchBaseBranches (plain alias)
+                    match_base_branches: {
+                        let mut b = r.match_base_branches;
+                        b.extend(r.base_branch_list);
+                        b
+                    },
                     match_registry_urls: r.match_registry_urls,
-                    match_repositories: r.match_repositories,
+                    // Deprecated: excludeRepositories → !repo negation in matchRepositories
+                    match_repositories: {
+                        let mut repos = r.match_repositories;
+                        for repo in r.exclude_repositories {
+                            repos.push(format!("!{repo}"));
+                        }
+                        repos
+                    },
                     match_current_age: r.match_current_age,
                     minimum_release_age: r.minimum_release_age,
                     pr_priority: r.pr_priority,
@@ -8767,6 +8871,118 @@ mod rule_effects_tests {
         assert!(
             effects.schedule.is_empty(),
             "non-matching dep should not get schedule"
+        );
+    }
+
+    // ── Ported from Renovate migration.spec.ts "migrates packageRules" ────────
+
+    #[test]
+    fn migrates_package_rules_all_deprecated_fields() {
+        // Ported from migration.spec.ts "migrates packageRules" test.
+        // Verifies that all deprecated packageRule fields are migrated correctly.
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{
+                    "paths": ["package.json"],
+                    "languages": ["python"],
+                    "baseBranchList": ["master"],
+                    "managers": ["dockerfile"],
+                    "datasources": ["orb"],
+                    "depTypeList": ["peerDependencies"],
+                    "packageNames": ["foo"],
+                    "packagePatterns": ["^bar"],
+                    "excludePackageNames": ["baz"],
+                    "excludePackagePatterns": ["^baz"],
+                    "excludeRepositories": ["abc/def"],
+                    "sourceUrlPrefixes": ["https://github.com/lodash"],
+                    "updateTypes": ["major"],
+                    "automerge": true
+                }]
+            }"#,
+        );
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+
+        // matchPackageNames = foo + /^bar/ + !baz + !/^baz/
+        assert!(rule.match_package_names.contains(&"foo".to_owned()));
+        assert!(rule.match_package_names.contains(&"/^bar/".to_owned()));
+        assert!(rule.match_package_names.contains(&"!baz".to_owned()));
+        assert!(rule.match_package_names.contains(&"!/^baz/".to_owned()));
+
+        // matchFileNames = package.json
+        assert!(rule.match_file_names.contains(&"package.json".to_owned()));
+
+        // matchCategories = python
+        assert!(rule.match_categories.contains(&"python".to_owned()));
+
+        // matchBaseBranches = master
+        assert!(rule.match_base_branches.contains(&"master".to_owned()));
+
+        // matchManagers = dockerfile
+        assert!(rule.match_managers.contains(&"dockerfile".to_owned()));
+
+        // matchDatasources = orb
+        assert!(rule.match_datasources.contains(&"orb".to_owned()));
+
+        // matchDepTypes = peerDependencies
+        assert!(
+            rule.match_dep_types
+                .contains(&"peerDependencies".to_owned())
+        );
+
+        // matchRepositories = !abc/def
+        assert!(rule.match_repositories.contains(&"!abc/def".to_owned()));
+
+        // matchSourceUrls = https://github.com/lodash{/,}**
+        let has_source_url = rule
+            .match_source_urls
+            .iter()
+            .any(|u| u.contains("github.com/lodash"));
+        assert!(
+            has_source_url,
+            "sourceUrlPrefixes must be converted to matchSourceUrls glob"
+        );
+
+        // matchUpdateTypes = major
+        assert!(rule.match_update_types.contains(&UpdateType::Major));
+    }
+
+    #[test]
+    fn deprecated_package_names_merged_with_match_package_names() {
+        // packageNames: ['foo'] + matchPackageNames: ['bar'] → matchPackageNames: ['bar', 'foo']
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["bar"], "packageNames": ["foo"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.match_package_names.contains(&"bar".to_owned()));
+        assert!(rule.match_package_names.contains(&"foo".to_owned()));
+    }
+
+    #[test]
+    fn deprecated_exclude_repositories_negation() {
+        // excludeRepositories: ['abc/def'] → matchRepositories: ['!abc/def']
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"excludeRepositories": ["abc/def"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.match_repositories.contains(&"!abc/def".to_owned()));
+    }
+
+    #[test]
+    fn deprecated_source_url_prefixes_become_glob() {
+        // sourceUrlPrefixes: ['https://github.com/lodash'] → matchSourceUrls: ['https://github.com/lodash{/,}**']
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"sourceUrlPrefixes": ["https://github.com/lodash"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        let url = rule.match_source_urls.iter().find(|u| u.contains("lodash"));
+        assert!(
+            url.is_some(),
+            "sourceUrlPrefixes must produce a matchSourceUrls entry"
+        );
+        assert!(
+            url.unwrap().contains("{/,}**"),
+            "sourceUrlPrefixes entry must end with glob"
         );
     }
 

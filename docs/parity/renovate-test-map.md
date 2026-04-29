@@ -228,6 +228,19 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/migration.spec.ts` | 17 | `enabledManagers: ['yarn']` → `['npm']` | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_yarn_migrated_to_npm` | ported |
 | `lib/config/migration.spec.ts` | 17 | `semanticCommits: true` → `semanticCommits: 'enabled'` | `crates/renovate-core/src/repo_config.rs` | `semantic_commits_bool_true_migrated` | ported |
 | `lib/config/migration.spec.ts` | — | `stabilityDays: N` → `minimumReleaseAge: 'N days'` | `crates/renovate-core/src/repo_config.rs` | `stability_days_migrated_to_minimum_release_age` | ported |
+| `lib/config/migration.spec.ts` | 551 | `paths` → `matchFileNames` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `languages` → `matchCategories` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `baseBranchList` → `matchBaseBranches` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `managers` → `matchManagers` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `datasources` → `matchDatasources` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `depTypeList` → `matchDepTypes` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `packageNames` → `matchPackageNames` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields`, `deprecated_package_names_merged_with_match_package_names` | ported |
+| `lib/config/migration.spec.ts` | 551 | `packagePatterns` → `/pattern/` in `matchPackageNames` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `excludePackageNames` → `!name` in `matchPackageNames` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `excludePackagePatterns` → `!/pattern/` in `matchPackageNames` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 551 | `excludeRepositories` → `!repo` in `matchRepositories` | `crates/renovate-core/src/repo_config.rs` | `deprecated_exclude_repositories_negation` | ported |
+| `lib/config/migration.spec.ts` | 551 | `sourceUrlPrefixes` → `url{/,}**` in `matchSourceUrls` | `crates/renovate-core/src/repo_config.rs` | `deprecated_source_url_prefixes_become_glob` | ported |
+| `lib/config/migration.spec.ts` | 551 | `updateTypes` → `matchUpdateTypes` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
 
 ---
 
