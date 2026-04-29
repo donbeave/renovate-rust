@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0274  | 2026-04-29 | Group PR title uses group name as topic: when dep is grouped and no explicit `commitMessageTopic`, use `groupName` as topic with empty extra, matching Renovate group PR title semantics | Complete | See below. |
 | 0273  | 2026-04-29 | Fix non-semver branch name generation (Docker tags, calendar versions): fallback to `{sanitized_name}-{sanitized_version}` topic; groupSlug path no longer requires parseable semver | Complete | See below. |
 | 0272  | 2026-04-29 | Show PR title as secondary line in terminal output for UpdateAvailable deps (below branch name) | Complete | See below. |
 | 0271  | 2026-04-29 | `:semanticCommitType(arg)`, `:semanticCommitScope(arg)`, `:semanticCommitScopeDisabled` parameterized presets applied at parse time; `ParamOverrides` type alias; 3 tests | Complete | See below. |
