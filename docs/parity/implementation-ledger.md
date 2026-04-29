@@ -6032,3 +6032,27 @@ Refactored the mise extractor to use the proper datasource mapping from Renovate
 - `crates/renovate-core/src/extractors/asdf.rs` — added `parse_java_dep`, `parse_scala_dep` public helpers
 - `docs/parity/renovate-test-map.md`
 - `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0379 — cargo, nuget, and misc extractor test improvements
+
+### Summary
+Ported additional tests from cargo and nuget spec files, and added MSBuild SDK support to the nuget extractor.
+
+### nuget: MSBuild SDK extraction (`extractors/nuget.rs`)
+- Added `NuGetDepType::MsbuildSdk` variant
+- Handle `<Project Sdk="Name/Version">` attribute extraction
+- Handle `<Sdk Name="..." Version="...">` element extraction
+- Handle `<Import Sdk="..." Version="...">` element extraction
+- Fixed case-insensitive attribute matching (handles lowercase `version`)
+
+### Tests ported (8 new)
+**cargo**: `renamed_dep_extracts_original_package_name`, `empty_dev_dependencies_returns_empty`, `empty_custom_target_returns_empty`
+**nuget**: `lowercase_version_attribute_extracted`, `msbuild_sdk_from_project_attr`, `msbuild_sdk_missing_version_from_project_attr`, `msbuild_sdk_from_sdk_element`, `msbuild_sdk_from_import_element`
+
+### Files changed
+- `crates/renovate-core/src/extractors/cargo.rs` — 3 new tests
+- `crates/renovate-core/src/extractors/nuget.rs` — MSBuild SDK support + 5 new tests
+- `docs/parity/renovate-test-map.md`
+- `docs/parity/implementation-ledger.md`

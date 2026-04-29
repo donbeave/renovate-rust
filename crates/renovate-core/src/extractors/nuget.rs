@@ -43,6 +43,8 @@ pub enum NuGetDepType {
     CliTool,
     /// `<GlobalPackageReference>`
     Global,
+    /// MSBuild SDK reference (`<Project Sdk="…/version">`, `<Sdk Name="…" Version="…">`, `<Import Sdk="…" Version="…">`)
+    MsbuildSdk,
 }
 
 impl NuGetDepType {
@@ -52,6 +54,7 @@ impl NuGetDepType {
             NuGetDepType::PackageVersion => "PackageVersion",
             NuGetDepType::CliTool => "DotNetCliToolReference",
             NuGetDepType::Global => "GlobalPackageReference",
+            NuGetDepType::MsbuildSdk => "msbuild-sdk",
         }
     }
 }
@@ -109,7 +112,12 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
             // Self-closing element: emit immediately.
             Event::Empty(ref e) => {
                 let elem = elem_name(e);
-                if let Some(dep_type) = dep_type_for(&elem)
+                // MSBuild SDK: `<Sdk Name="..." Version="...">` or `<Import Sdk="..." Version="...">`
+                if elem == "Sdk" || elem == "Import" {
+                    if let Some(pending) = attrs_to_sdk_pending(e) {
+                        deps.push(build_dep(pending));
+                    }
+                } else if let Some(dep_type) = dep_type_for(&elem)
                     && let Some(pending) = attrs_to_pending(e, dep_type)
                     && !pending.package_id.is_empty()
                 {
@@ -120,6 +128,12 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
             // Opening element: may have child elements.
             Event::Start(ref e) => {
                 let elem = elem_name(e);
+                // MSBuild SDK: `<Project Sdk="Name/Version">` on the root element
+                if elem == "Project" {
+                    if let Some(pending) = attrs_to_project_sdk(e) {
+                        deps.push(build_dep(pending));
+                    }
+                }
                 if let Some(dep_type) = dep_type_for(&elem) {
                     current = attrs_to_pending(e, dep_type);
                 } else if current.is_some() && (elem == "Version" || elem == "VersionOverride") {
@@ -172,6 +186,60 @@ fn elem_name(e: &BytesStart<'_>) -> String {
     String::from_utf8_lossy(e.name().as_ref()).into_owned()
 }
 
+/// Parse MSBuild SDK from `<Project Sdk="Name/Version">`.
+fn attrs_to_project_sdk(e: &BytesStart<'_>) -> Option<PendingDep> {
+    for attr in e.attributes().flatten() {
+        let key = String::from_utf8_lossy(attr.key.as_ref()).into_owned();
+        if key.to_lowercase() != "sdk" {
+            continue;
+        }
+        let val = attr.unescape_value().unwrap_or_default().into_owned();
+        // Format: "Name/Version" — version after the last slash.
+        let slash = val.rfind('/')?;
+        let name = val[..slash].to_owned();
+        let version = val[slash + 1..].to_owned();
+        if name.is_empty() || version.is_empty() {
+            return None;
+        }
+        return Some(PendingDep {
+            package_id: name,
+            version,
+            dep_type: NuGetDepType::MsbuildSdk,
+        });
+    }
+    None
+}
+
+/// Parse MSBuild SDK from `<Sdk Name="..." Version="...">` or `<Import Sdk="..." Version="...">`.
+fn attrs_to_sdk_pending(e: &BytesStart<'_>) -> Option<PendingDep> {
+    let mut name = String::new();
+    let mut version = String::new();
+
+    for attr in e.attributes().flatten() {
+        let key = String::from_utf8_lossy(attr.key.as_ref()).into_owned();
+        let val = attr.unescape_value().unwrap_or_default().into_owned();
+        match key.to_lowercase().as_str() {
+            "name" | "sdk" => {
+                if name.is_empty() {
+                    name = val;
+                }
+            }
+            "version" => version = val,
+            _ => {}
+        }
+    }
+
+    if name.is_empty() || version.is_empty() {
+        return None;
+    }
+
+    Some(PendingDep {
+        package_id: name,
+        version,
+        dep_type: NuGetDepType::MsbuildSdk,
+    })
+}
+
 fn dep_type_for(elem: &str) -> Option<NuGetDepType> {
     match elem {
         "PackageReference" => Some(NuGetDepType::Package),
@@ -190,10 +258,10 @@ fn attrs_to_pending(e: &BytesStart<'_>, dep_type: NuGetDepType) -> Option<Pendin
     for attr in e.attributes().flatten() {
         let key = String::from_utf8_lossy(attr.key.as_ref()).into_owned();
         let val = attr.unescape_value().unwrap_or_default().into_owned();
-        match key.as_str() {
-            "Include" | "Update" => package_id = val,
-            "Version" => version = val,
-            "VersionOverride" => version_override = val,
+        match key.to_lowercase().as_str() {
+            "include" | "update" => package_id = val,
+            "version" => version = val,
+            "versionoverride" => version_override = val,
             _ => {}
         }
     }
@@ -445,5 +513,80 @@ mod tests {
     fn normalize_minimum_ranges() {
         assert_eq!(normalize_version("[1.2.3,]"), ("1.2.3".to_owned(), None));
         assert_eq!(normalize_version("[1.2.3,)"), ("1.2.3".to_owned(), None));
+    }
+
+    #[test]
+    fn lowercase_version_attribute_extracted() {
+        // Ported: "extracts dependency with lower-case Version attribute" — nuget/extract.spec.ts line 212
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Moq" version="4.18.4" />
+  </ItemGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "Moq");
+        assert_eq!(deps[0].current_value, "4.18.4");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    #[test]
+    fn msbuild_sdk_from_project_attr() {
+        // Ported: "extracts msbuild sdk from the Sdk attr of Project element" — nuget/extract.spec.ts line 94
+        let content = r#"<Project Sdk="Microsoft.Build.NoTargets/3.4.0">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "Microsoft.Build.NoTargets");
+        assert_eq!(deps[0].current_value, "3.4.0");
+        assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    #[test]
+    fn msbuild_sdk_missing_version_from_project_attr() {
+        // Ported: "does not extract msbuild sdk from the Sdk attr of Project element if version is missing" — line 117
+        let content = r#"<Project Sdk="Microsoft.Build.NoTargets">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert!(deps.is_empty());
+    }
+
+    #[test]
+    fn msbuild_sdk_from_sdk_element() {
+        // Ported: "extracts msbuild sdk from the Sdk element" — nuget/extract.spec.ts line 132
+        let content = r#"<Project>
+  <Sdk Name="Microsoft.Build.NoTargets" Version="3.4.0" />
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "Microsoft.Build.NoTargets");
+        assert_eq!(deps[0].current_value, "3.4.0");
+        assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
+    }
+
+    #[test]
+    fn msbuild_sdk_from_import_element() {
+        // Ported: "extracts msbuild sdk from the Import element" — nuget/extract.spec.ts line 172
+        let content = r#"<Project>
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="My.Custom.Sdk" Version="1.2.3" />
+</Project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "My.Custom.Sdk");
+        assert_eq!(deps[0].current_value, "1.2.3");
+        assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
     }
 }

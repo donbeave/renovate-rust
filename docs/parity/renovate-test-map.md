@@ -460,6 +460,28 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 ---
 
+## Cargo.toml extractor — additional tests
+
+| Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
+|--------------------|------|---------------|---------------|-----------|--------|
+| `lib/modules/manager/cargo/extract.spec.ts` | 539 | extracts original package name of renamed dependencies | `crates/renovate-core/src/extractors/cargo.rs` | `renamed_dep_extracts_original_package_name` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 59 | returns null for empty dev-dependencies | `crates/renovate-core/src/extractors/cargo.rs` | `empty_dev_dependencies_returns_empty` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 66 | returns null for empty custom target | `crates/renovate-core/src/extractors/cargo.rs` | `empty_custom_target_returns_empty` | ported |
+
+---
+
+## NuGet extractor — additional tests
+
+| Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
+|--------------------|------|---------------|---------------|-----------|--------|
+| `lib/modules/manager/nuget/extract.spec.ts` | 212 | extracts dependency with lower-case Version attribute | `crates/renovate-core/src/extractors/nuget.rs` | `lowercase_version_attribute_extracted` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 94 | extracts msbuild sdk from the Sdk attr of Project element | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_from_project_attr` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 117 | does not extract msbuild sdk from Sdk attr if version missing | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_missing_version_from_project_attr` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 132 | extracts msbuild sdk from the Sdk element | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_from_sdk_element` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 172 | extracts msbuild sdk from the Import element | `crates/renovate-core/src/extractors/nuget.rs` | `msbuild_sdk_from_import_element` | ported |
+
+---
+
 ## Pending / not yet ported
 
 The following Renovate test areas have no current Rust coverage and are planned

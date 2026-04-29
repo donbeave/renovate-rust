@@ -400,4 +400,31 @@ libc = "0.2"
         assert_eq!(libc.current_value, "0.2");
         assert_eq!(libc.dep_type, DepType::Dev);
     }
+
+    #[test]
+    fn renamed_dep_extracts_original_package_name() {
+        // Ported: "extracts original package name of renamed dependencies" — cargo/extract.spec.ts line 539
+        let toml = "[dependencies]\nboolector-solver = { package = \"boolector\", version = \"0.4.0\" }";
+        let deps = extract(toml).unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "boolector-solver");
+        assert_eq!(deps[0].package_name, "boolector");
+        assert_eq!(deps[0].current_value, "0.4.0");
+    }
+
+    #[test]
+    fn empty_dev_dependencies_returns_empty() {
+        // Ported: "returns null for empty dev-dependencies" — cargo/extract.spec.ts line 59
+        let toml = "[dev-dependencies]";
+        let deps = extract(toml).unwrap();
+        assert!(deps.is_empty());
+    }
+
+    #[test]
+    fn empty_custom_target_returns_empty() {
+        // Ported: "returns null for empty custom target" — cargo/extract.spec.ts line 66
+        let toml = "[target.'cfg(windows)'.dependencies]";
+        let deps = extract(toml).unwrap();
+        assert!(deps.is_empty());
+    }
 }
