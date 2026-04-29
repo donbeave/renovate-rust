@@ -192,6 +192,16 @@ pub(crate) fn apply_update_blocking_to_report(
                     .commit_message_suffix
                     .as_deref()
                     .or(repo_cfg.commit_message_suffix.as_deref());
+                // For grouped deps, use the group name as the commit message topic
+                // with an empty extra segment, mirroring Renovate's group PR title behaviour.
+                let (effective_topic, effective_extra_final) =
+                    if effects.commit_message_topic.is_none()
+                        && effects.group_name.is_some()
+                    {
+                        (effects.group_name.as_deref(), Some(""))
+                    } else {
+                        (effects.commit_message_topic.as_deref(), effective_extra)
+                    };
                 dep.pr_title = Some(branch::pr_title(
                     &dep.name,
                     latest,
@@ -200,10 +210,10 @@ pub(crate) fn apply_update_blocking_to_report(
                         semantic_commits: repo_cfg.semantic_commits.as_deref(),
                         action: Some(effective_action).filter(|s| *s != "Update"),
                         custom_prefix: effective_prefix,
-                        commit_message_topic: effects.commit_message_topic.as_deref(),
+                        commit_message_topic: effective_topic,
                         semantic_commit_type: effective_sem_type,
                         semantic_commit_scope: effective_sem_scope,
-                        commit_message_extra: effective_extra,
+                        commit_message_extra: effective_extra_final,
                         commit_message_suffix: effective_suffix,
                         current_version: Some(current.as_str()),
                     },
