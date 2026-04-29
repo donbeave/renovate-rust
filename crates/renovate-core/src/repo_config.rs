@@ -3595,6 +3595,12 @@ impl RepoConfig {
             base_branch: Option<String>,
             #[serde(rename = "rebaseWhen")]
             rebase_when: Option<String>,
+            /// Deprecated: rebaseStalePrs: true → rebaseWhen: "behind-base-branch".
+            #[serde(rename = "rebaseStalePrs")]
+            rebase_stale_prs: Option<bool>,
+            /// Deprecated: rebaseConflictedPrs: false → rebaseWhen: "never".
+            #[serde(rename = "rebaseConflictedPrs")]
+            rebase_conflicted_prs: Option<bool>,
             #[serde(rename = "prCreation")]
             pr_creation: Option<String>,
             #[serde(rename = "prConcurrentLimit", default)]
@@ -4172,6 +4178,16 @@ impl RepoConfig {
                 branches
             },
             rebase_when: raw.rebase_when.or_else(|| {
+                // Deprecated rebaseConflictedPrs: false → rebaseWhen: "never".
+                // Renovate reference: lib/config/migrations/custom/rebase-conflicted-prs-migration.ts
+                if raw.rebase_conflicted_prs == Some(false) {
+                    return Some("never".to_owned());
+                }
+                // Deprecated rebaseStalePrs → rebaseWhen mapping.
+                // Renovate reference: lib/config/migrations/custom/rebase-stale-prs-migration.ts
+                if let Some(stale) = raw.rebase_stale_prs {
+                    return Some(if stale { "behind-base-branch" } else { "conflicted" }.to_owned());
+                }
                 // :rebaseStalePrs preset sets rebaseWhen: "behind-base-branch".
                 if effective_extends
                     .iter()
