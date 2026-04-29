@@ -196,6 +196,7 @@ pub(crate) fn apply_update_blocking_to_report(
                         semantic_commit_scope: effective_sem_scope,
                         commit_message_extra: effective_extra,
                         commit_message_suffix: effective_suffix,
+                        current_version: Some(current.as_str()),
                     },
                 ));
                 dep.group_name = effects.group_name;

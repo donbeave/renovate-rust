@@ -288,6 +288,9 @@ pub struct PrTitleConfig<'a> {
     /// Free-form suffix appended after the complete commit message.
     /// `None` → no suffix.
     pub commit_message_suffix: Option<&'a str>,
+    /// Currently installed version — used for `{{currentVersion}}` template substitution
+    /// in `commitMessageExtra` and `commitMessageTopic`.  `None` when not available.
+    pub current_version: Option<&'a str>,
 }
 
 impl<'a> PrTitleConfig<'a> {
@@ -338,9 +341,14 @@ pub fn pr_title(
 ) -> String {
     let action = cfg.action.unwrap_or("Update");
     let topic = if let Some(t) = cfg.commit_message_topic {
-        // Basic Handlebars substitution: {{depName}} and {{{depName}}}.
+        let cur = cfg.current_version.unwrap_or("");
+        // Basic Handlebars substitution.
         t.replace("{{{depName}}}", dep_name)
             .replace("{{depName}}", dep_name)
+            .replace("{{{currentVersion}}}", cur)
+            .replace("{{currentVersion}}", cur)
+            .replace("{{{newVersion}}}", new_version)
+            .replace("{{newVersion}}", new_version)
     } else {
         format!("dependency {dep_name}")
     };
@@ -350,8 +358,11 @@ pub fn pr_title(
         if tmpl.is_empty() {
             String::new()
         } else {
+            let cur = cfg.current_version.unwrap_or("");
             tmpl.replace("{{{newVersion}}}", new_version)
                 .replace("{{newVersion}}", new_version)
+                .replace("{{{currentVersion}}}", cur)
+                .replace("{{currentVersion}}", cur)
                 .replace("{{{depName}}}", dep_name)
                 .replace("{{depName}}", dep_name)
         }
@@ -418,6 +429,7 @@ pub fn pr_title_full(
             semantic_commit_scope,
             commit_message_extra: None,
             commit_message_suffix: None,
+            current_version: None,
         },
     )
 }
@@ -821,6 +833,32 @@ mod tests {
         assert_eq!(
             pr_title("express", "4.18.2", false, &cfg),
             "chore(deps): Update dependency express to 4.18.2 [skip ci]"
+        );
+    }
+
+    #[test]
+    fn pr_title_current_version_template_in_extra() {
+        let cfg = PrTitleConfig {
+            commit_message_extra: Some("{{currentVersion}} → {{newVersion}}"),
+            current_version: Some("4.0.0"),
+            ..PrTitleConfig::with_defaults()
+        };
+        assert_eq!(
+            pr_title("lodash", "4.17.21", false, &cfg),
+            "Update dependency lodash 4.0.0 → 4.17.21"
+        );
+    }
+
+    #[test]
+    fn pr_title_current_version_in_topic_template() {
+        let cfg = PrTitleConfig {
+            commit_message_topic: Some("{{depName}} from {{currentVersion}}"),
+            current_version: Some("1.0.0"),
+            ..PrTitleConfig::with_defaults()
+        };
+        assert_eq!(
+            pr_title("express", "2.0.0", false, &cfg),
+            "Update express from 1.0.0 to 2.0.0"
         );
     }
 
