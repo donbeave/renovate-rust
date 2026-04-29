@@ -89,6 +89,7 @@ mod tests {
         assert!(deps.iter().any(|d| d.image.contains("myapp")));
     }
 
+    // Ported: "returns null for empty" — ansible/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

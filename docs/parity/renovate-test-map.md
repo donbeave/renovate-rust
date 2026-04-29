@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 6 / 10 actionable tests ported (60%) — updated 2026-04-29
+**Overall progress:** 7 / 16 actionable tests ported (44%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -40,13 +40,30 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/ansible/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible/extract.spec.ts
+**Total tests:** 6 | **Ported:** 1 | **Actionable:** 6 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | ported | `ansible.rs` | `empty_returns_empty` | — |
+| extracts multiple image lines from docker_container | 10 | pending | — | — | — |
+| extracts multiple image lines from docker_service | 16 | pending | — | — | — |
+| extracts image and replaces registry | 22 | pending | — | — | — |
+| extracts image but no replacement | 52 | pending | — | — | — |
+| extracts image and no double replacement | 82 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
-| `lib/modules/manager/ansible/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/ansible.rs` | 5 | partial |
 | `lib/modules/manager/ant/extract.spec.ts` | 44 | `crates/renovate-core/src/extractors/ant.rs` | 6 | partial |
 | `lib/modules/manager/argocd/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/argocd.rs` | 7 | partial |
 | `lib/modules/manager/asdf/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/asdf.rs` | 28 | partial |
