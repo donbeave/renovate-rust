@@ -719,6 +719,27 @@ impl RepoConfig {
         preset_rules.extend(sem_prefix_rules);
         let _ = resolve_extends_semantic_type_scope(&raw.extends); // placeholder for future use
 
+        // Convert `enabled: false` inside major/minor/patch blocks to synthetic
+        // packageRules so the existing is_update_blocked_ctx path handles them.
+        for (update_type_str, cfg) in [
+            ("major", raw.major.as_ref()),
+            ("minor", raw.minor.as_ref()),
+            ("patch", raw.patch.as_ref()),
+        ] {
+            if matches!(cfg, Some(c) if c.enabled == Some(false)) {
+                let ut = match update_type_str {
+                    "major" => crate::versioning::semver_generic::UpdateType::Major,
+                    "minor" => crate::versioning::semver_generic::UpdateType::Minor,
+                    _ => crate::versioning::semver_generic::UpdateType::Patch,
+                };
+                preset_rules.push(PackageRule {
+                    match_update_types: vec![ut],
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+        }
+
         let package_rules: Vec<PackageRule> = raw
             .package_rules
             .into_iter()
@@ -4024,5 +4045,50 @@ mod rule_effects_tests {
         let effects = c.collect_rule_effects(&ctx);
         assert!(effects.labels.contains(&"renovate".to_owned()));
         assert!(effects.labels.contains(&"breaking".to_owned()));
+    }
+
+    #[test]
+    fn major_enabled_false_blocks_major_updates() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"major": {"enabled": false}}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "major update should be blocked when major.enabled=false"
+        );
+    }
+
+    #[test]
+    fn major_enabled_false_does_not_block_minor() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"major": {"enabled": false}}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "minor update must not be blocked by major.enabled=false"
+        );
+    }
+
+    #[test]
+    fn minor_enabled_false_blocks_minor_updates() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"minor": {"enabled": false}}"#);
+        let ctx = DepContext {
+            dep_name: "react",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "minor update should be blocked when minor.enabled=false"
+        );
     }
 }
