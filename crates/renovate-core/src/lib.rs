@@ -8,6 +8,7 @@ pub mod http;
 pub mod managers;
 pub mod package_rule;
 pub mod platform;
+pub mod replacements;
 pub mod repo_config;
 pub mod schedule;
 pub mod string_match;

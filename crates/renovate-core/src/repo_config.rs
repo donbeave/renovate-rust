@@ -408,10 +408,14 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                 }
             }
             // config:best-practices extends config:recommended plus additional presets.
+            // Renovate reference: lib/config/presets/internal/config.preset.ts
             "config:best-practices" => {
                 if seen.insert("config:best-practices") {
                     result.push("config:recommended".to_owned());
+                    result.push("docker:pinDigests".to_owned());
+                    result.push("helpers:pinGitHubActionDigests".to_owned());
                     result.push(":pinDevDependencies".to_owned());
+                    result.push("security:minimumReleaseAgeNpm".to_owned());
                     // Keep for downstream handlers.
                     result.push("config:best-practices".to_owned());
                 }
@@ -423,6 +427,13 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
             }
             "helpers:followTypescriptRc" => {
                 result.push(":followTag(typescript, rc)".to_owned());
+            }
+            // replacements:all expands to all crowd-sourced package replacement presets.
+            // Renovate reference: lib/data/replacements.json
+            "replacements:all" => {
+                if seen.insert("replacements:all") {
+                    result.extend(crate::replacements::replacements_all_names());
+                }
             }
             // workarounds:all expands to all known crowd-sourced workaround presets.
             // Renovate reference: lib/config/presets/internal/workarounds.preset.ts
@@ -867,6 +878,13 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                     enabled: Some(false),
                     ..Default::default()
                 });
+            }
+
+            // ── replacements:* presets ────────────────────────────────────────
+            // Individual crowd-sourced package replacement presets from replacements.json.
+            // Renovate reference: lib/data/replacements.json + replacements.preset.ts
+            p if p.starts_with("replacements:") && p != "replacements:all" => {
+                rules.extend(crate::replacements::rules_for_preset(p));
             }
 
             // ── workarounds:* presets ─────────────────────────────────────────
@@ -8124,6 +8142,46 @@ mod rule_effects_tests {
         assert!(
             rule_matches,
             "workarounds:mavenCommonsAncientVersion must match commons-lang and set allowedVersions"
+        );
+    }
+
+    // ── replacements:* preset integration tests ───────────────────────────────
+
+    #[test]
+    fn replacements_all_injects_replacement_rules() {
+        let c = RepoConfig::parse(r#"{"extends": ["replacements:all"]}"#);
+        // replacements:all must inject at least some replacement rules.
+        let has_replacement = c.package_rules.iter().any(|r| r.replacement_name.is_some());
+        assert!(
+            has_replacement,
+            "replacements:all must inject packageRules with replacementName"
+        );
+    }
+
+    #[test]
+    fn replacements_babel_eslint_injected_via_all() {
+        let c = RepoConfig::parse(r#"{"extends": ["replacements:all"]}"#);
+        // The babel-eslint-to-eslint-parser rule should be present.
+        let has_babel_rule = c.package_rules.iter().any(|r| {
+            r.match_package_names.contains(&"babel-eslint".to_owned())
+                && r.replacement_name.as_deref() == Some("@babel/eslint-parser")
+        });
+        assert!(
+            has_babel_rule,
+            "replacements:all must include babel-eslint → @babel/eslint-parser replacement"
+        );
+    }
+
+    #[test]
+    fn replacements_individual_preset_also_works() {
+        let c = RepoConfig::parse(r#"{"extends": ["replacements:babel-eslint-to-eslint-parser"]}"#);
+        let has_babel_rule = c
+            .package_rules
+            .iter()
+            .any(|r| r.match_package_names.contains(&"babel-eslint".to_owned()));
+        assert!(
+            has_babel_rule,
+            "individual replacements:babel-eslint-to-eslint-parser must inject the rule"
         );
     }
 
