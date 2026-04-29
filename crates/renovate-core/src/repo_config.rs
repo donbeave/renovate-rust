@@ -1058,6 +1058,87 @@ fn resolve_extends_group_presets(
                     "group:monorepos preset — partial support (grouped dep names not expanded)"
                 );
             }
+            // group:allDigest — group all digest-pinned updates into one branch.
+            // Digest updates are not yet implemented in the pipeline, so this rule
+            // has no match_update_types constraint (digest is not an UpdateType variant).
+            // The rule is parsed and stored correctly; it becomes active when digest
+            // update support is added.
+            "group:allDigest" => {
+                rules.push(PackageRule {
+                    group_name: Some("all digest updates".to_owned()),
+                    group_slug: Some("all-digest".to_owned()),
+                    match_package_names: vec!["*".to_owned()],
+                    has_name_constraint: true,
+                    // matchUpdateTypes: ["digest"] — digest not yet modelled as UpdateType
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:nodeJs — group Node.js runtime + related docker images together.
+            "group:nodeJs" => {
+                rules.push(PackageRule {
+                    group_name: Some("Node.js".to_owned()),
+                    group_slug: Some("node-js".to_owned()),
+                    match_datasources: vec!["docker".to_owned(), "node-version".to_owned()],
+                    match_package_names: vec![
+                        "/(?:^|/)node$/".to_owned(),
+                        "!calico/node".to_owned(),
+                        "!docker.io/calico/node".to_owned(),
+                        "!ghcr.io/devcontainers/features/node".to_owned(),
+                        "!kindest/node".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    commit_message_topic: Some("Node.js".to_owned()),
+                    ..Default::default()
+                });
+            }
+            // group:jsTest — group JS test packages together.
+            // Mirrors packages:jsTest → packages:jsUnitTest in packages.preset.ts.
+            "group:jsTest" => {
+                rules.push(PackageRule {
+                    group_name: Some("JS test packages".to_owned()),
+                    group_slug: Some("js-test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: vec![
+                        "@types/chai".to_owned(),
+                        "@types/ember-mocha".to_owned(),
+                        "@types/ember-qunit".to_owned(),
+                        "@types/enzyme".to_owned(),
+                        "@types/istanbul".to_owned(),
+                        "@types/jest".to_owned(),
+                        "@types/mocha".to_owned(),
+                        "@types/mock-fs".to_owned(),
+                        "@types/proxyquire".to_owned(),
+                        "@types/sinon".to_owned(),
+                        "@types/supertest".to_owned(),
+                        "coveralls".to_owned(),
+                        "ember-exam".to_owned(),
+                        "ember-mocha".to_owned(),
+                        "ember-qunit".to_owned(),
+                        "enzyme".to_owned(),
+                        "istanbul".to_owned(),
+                        "mock-fs".to_owned(),
+                        "nock".to_owned(),
+                        "nyc".to_owned(),
+                        "proxyquire".to_owned(),
+                        "supertest".to_owned(),
+                        "ts-auto-mock".to_owned(),
+                        "ts-jest".to_owned(),
+                        "vitest".to_owned(),
+                        "@jest/**".to_owned(),
+                        "@testing-library/**".to_owned(),
+                        "@types/testing-library__**".to_owned(),
+                        "@vitest/**".to_owned(),
+                        "chai**".to_owned(),
+                        "jest**".to_owned(),
+                        "mocha**".to_owned(),
+                        "qunit**".to_owned(),
+                        "should**".to_owned(),
+                        "sinon**".to_owned(),
+                    ],
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -5704,6 +5785,47 @@ mod rule_effects_tests {
         let effects = c.collect_rule_effects(&ctx);
         // Major update should not be grouped
         assert!(effects.group_name.is_none());
+    }
+
+    // ── Additional group presets ─────────────────────────────────────────────
+
+    #[test]
+    fn group_all_digest_preset_injects_group_rule() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:allDigest"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("all digest updates"));
+        assert_eq!(rule.group_slug.as_deref(), Some("all-digest"));
+        // The rule has a constraint but no known update types (digest not yet modelled)
+        assert!(rule.has_update_type_constraint);
+        assert!(rule.match_update_types.is_empty());
+    }
+
+    #[test]
+    fn group_node_js_preset_matches_node_datasource() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:nodeJs"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("Node.js"));
+        assert!(rule.match_datasources.contains(&"docker".to_owned()));
+        assert!(rule.match_datasources.contains(&"node-version".to_owned()));
+        // Positive pattern matches "node"
+        assert!(rule.name_matches("node"));
+        // Negation exclusions prevent "calico/node"
+        assert!(!rule.name_matches("calico/node"));
+    }
+
+    #[test]
+    fn group_js_test_preset_matches_jest_packages() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:jsTest"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("JS test packages"));
+        assert!(rule.name_matches("jest"));
+        assert!(rule.name_matches("@types/jest"));
+        assert!(rule.name_matches("vitest"));
+        assert!(rule.name_matches("ts-jest"));
+        assert!(!rule.name_matches("lodash"));
     }
 
     #[test]

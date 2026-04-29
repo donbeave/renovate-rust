@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0299  | 2026-04-29 | `group:allDigest`, `group:nodeJs`, `group:jsTest` presets; `group:nodeJs` uses regex+negation match_package_names with docker+node-version datasources; `group:jsTest` inlines jsUnitTest package list; 3 tests | Complete | See below. |
 | 0298  | 2026-04-29 | `automergeSchedule` config field + `schedule:automerge*` preset expansion (9 presets); parallel to `schedule` but gates automerge not branch creation; default `"at any time"`; 7 tests | Complete | See below. |
 | 0297  | 2026-04-29 | Fix `docker:disable`: disables `dockerfile`/`docker-compose`/`circleci` managers (not packageRules); add `disabledManagers` JSON config field (denylist overrides allowlist); 4 tests | Complete | See below. |
 | 0296  | 2026-04-29 | `docker:disableMajor`, `docker:enableMajor`, `docker:disable` presets: matchDatasources+matchUpdateTypes packageRules for disableMajor/enableMajor; 5 tests | Complete | See below. |
@@ -5587,6 +5588,28 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
 - Wired into `parse()`: explicit `automergeSchedule` in JSON wins; else preset is applied; else `"at any time"` default
 - `schedule:automergeWeekly` is an alias for `schedule:automergeEarlyMondays` (same as the non-automerge mapping)
 - 7 tests: default, JSON field, daily/weekly/nonOfficeHours presets, explicit JSON overrides preset, automergeSchedule doesn't affect schedule
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0299 - `group:allDigest`, `group:nodeJs`, `group:jsTest` presets
+
+### Renovate reference
+- `lib/config/presets/internal/group.preset.ts`:
+  - `allDigest`: `{matchPackageNames: ["*"], matchUpdateTypes: ["digest"]}` with group "all digest updates"
+  - `nodeJs`: `{matchDatasources: ["docker","node-version"], matchPackageNames: ["/(?:^|/)node$/", "!calico/node", ...], commitMessageTopic: "Node.js"}`
+  - `jsTest`: delegates to `packages:jsTest` → `packages:jsUnitTest` for package list
+- `lib/config/presets/internal/packages.preset.ts`: `jsUnitTest` defines the package name list
+
+### Implementation
+- Added three cases to `resolve_extends_group_presets()`:
+  - `group:allDigest`: `PackageRule` with group "all digest updates" / "all-digest"; `has_update_type_constraint: true` with empty `match_update_types` (digest is not yet a `UpdateType` variant — rule is stored correctly but never fires until digest support lands)
+  - `group:nodeJs`: `PackageRule` with `match_datasources: ["docker", "node-version"]`, `match_package_names` with `/(?:^|/)node$/` positive regex plus 4 `!`-negation exclusions; `has_name_constraint: true`; `commit_message_topic: "Node.js"`
+  - `group:jsTest`: `PackageRule` with full 36-entry `match_package_names` list inlined from `packages:jsUnitTest` reference; `has_name_constraint: true`
+- 3 tests: allDigest rule structure; nodeJs matches "node" but not "calico/node"; jsTest matches jest/vitest/ts-jest but not lodash
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`
