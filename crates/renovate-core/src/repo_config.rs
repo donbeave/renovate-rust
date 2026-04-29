@@ -2332,6 +2332,7 @@ impl RepoConfig {
             semantic_commit_scope: Option<String>,
             #[serde(rename = "rangeStrategy")]
             range_strategy: Option<String>,
+            versioning: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -2632,6 +2633,7 @@ impl RepoConfig {
                     commit_message_extra: r.commit_message_extra,
                     commit_message_suffix: r.commit_message_suffix,
                     range_strategy: r.range_strategy,
+                    versioning: r.versioning,
                 }
             })
             .collect();
@@ -3158,6 +3160,9 @@ impl RepoConfig {
             }
             if rule.range_strategy.is_some() {
                 effects.range_strategy.clone_from(&rule.range_strategy);
+            }
+            if rule.versioning.is_some() {
+                effects.versioning.clone_from(&rule.versioning);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -5014,6 +5019,29 @@ mod tests {
         let ctx = DepContext::for_dep("react");
         let effects = c.collect_rule_effects(&ctx);
         assert_eq!(effects.range_strategy.as_deref(), Some("replace"));
+    }
+
+    #[test]
+    fn versioning_in_package_rule_collects_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["alpine"], "versioning": "docker"}]}"#,
+        );
+        let ctx = DepContext::for_dep("alpine");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.versioning.as_deref(), Some("docker"));
+    }
+
+    #[test]
+    fn versioning_last_rule_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["*"], "versioning": "semver"},
+                {"matchPackageNames": ["alpine"], "versioning": "docker"}
+            ]}"#,
+        );
+        let ctx = DepContext::for_dep("alpine");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.versioning.as_deref(), Some("docker"));
     }
 
     #[test]

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0309  | 2026-04-29 | `versioning` field in `packageRules`: parsed from JSON, stored in `PackageRule` and `RuleEffects`, collected with last-rule-wins; 2 tests | Complete | See below. |
 | 0308  | 2026-04-29 | Fix `config:recommended` to expand `:semanticPrefixFixDepsChoreOthers`, `:ignoreModulesAndTests`, `group:monorepos`, `group:recommended` in `expand_compound_presets`; `config:best-practices` also expanded; 2 tests | Complete | See below. |
 | 0307  | 2026-04-29 | 12 more group presets: `jwtFramework`, `atlaskit`, `dotNetCore`, `googleapis`, `jekyllEcosystem`, `postcss`, `vite`, `pulumi` (5 rules), `test`, `testNonMajor`, `unitTest`, `unitTestNonMajor`; `PHP_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |
 | 0306  | 2026-04-29 | Fix `config:recommended` to inject `group:recommended` rules; `resolve_extends_group_presets` now expands `config:recommended/base/best-practices` to their group rules; 1 test | Complete | See below. |
@@ -5825,5 +5826,27 @@ The `resolve_extends_semantic_prefix_rules` and `resolve_extends_ignore_paths` c
 - 2 tests: config:recommended production deps get semanticCommitType "fix"; group rules still present
 
 ### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0309 - `versioning` per-rule field
+
+### Renovate reference
+- `lib/config/options/index.ts` — `versioning`: string naming the versioning scheme (e.g., `"semver"`, `"docker"`, `"regex:..."`)
+- Per `packageRules` to override the manager's default versioning for specific packages
+
+### Implementation
+- Added `versioning: Option<String>` to `PackageRule` struct with doc comment
+- Added `versioning: Option<String>` to `RuleEffects` struct with doc comment
+- Added `versioning: Option<String>` to `RawPackageRule` inner struct in `parse()` (no rename needed — JSON key is `"versioning"`)
+- Wired through `RawPackageRule` → `PackageRule` conversion: `versioning: r.versioning`
+- Applied in `collect_rule_effects`: last-rule-wins (if rule's versioning is Some, overwrite effects)
+- Note: Versioning scheme is stored but NOT yet used to change how updates are classified — that requires deeper pipeline integration (future slice)
+- 2 tests: versioning collected from packageRule; last-rule-wins for overlapping rules
+
+### Files changed
+- `crates/renovate-core/src/package_rule.rs`
 - `crates/renovate-core/src/repo_config.rs`
 - `docs/parity/implementation-ledger.md`

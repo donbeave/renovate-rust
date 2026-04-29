@@ -237,6 +237,12 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `rangeStrategy`.
     pub range_strategy: Option<String>,
+    /// Versioning scheme override for matching packages.
+    /// E.g. `"semver"`, `"docker"`, `"regex:..."`.
+    /// `None` = use the manager's default versioning.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `versioning`.
+    pub versioning: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -747,6 +753,9 @@ pub struct RuleEffects {
     /// Per-rule rangeStrategy override.  Values: `"pin"`, `"replace"`, `"widen"`,
     /// `"bump"`, `"auto"`, `"in-range-only"`.  `None` = use repo-level default.
     pub range_strategy: Option<String>,
+    /// Per-rule versioning scheme override (e.g. `"docker"`, `"semver"`, `"regex:..."`).
+    /// `None` = use the manager's default versioning.
+    pub versioning: Option<String>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────
