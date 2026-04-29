@@ -3684,7 +3684,7 @@ impl RepoConfig {
 
         #[derive(Deserialize, Default)]
         struct RawCustomManager {
-            #[serde(rename = "customType", default)]
+            #[serde(rename = "customType", default = "default_custom_type")]
             custom_type: String,
             /// managerFilePatterns (Renovate 39+) or legacy fileMatch.
             #[serde(rename = "managerFilePatterns", default)]
@@ -3730,6 +3730,10 @@ impl RepoConfig {
 
         fn default_range_strategy() -> String {
             "auto".to_owned()
+        }
+
+        fn default_custom_type() -> String {
+            "regex".to_owned()
         }
 
         /// Deserialize semanticCommits from bool or string.
