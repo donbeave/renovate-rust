@@ -5952,3 +5952,50 @@ The `resolve_extends_semantic_prefix_rules` and `resolve_extends_ignore_paths` c
 - `crates/renovate-core/src/repo_config.rs`
 - `docs/parity/renovate-test-map.md`
 - `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0377 — asdf extractor comprehensive refactor
+
+### Summary
+Rewrote the asdf extractor to match Renovate's full output format from `upgradeable-tooling.ts`.
+
+### Key changes
+
+**`AsdfDep` new fields** (`extractors/asdf.rs`):
+- `dep_name: String` — may differ from `tool_name` (e.g., `"nodejs"` → `"node"`)
+- `datasource_id: Option<&'static str>` — full datasource ID string (`"node-version"`, `"github-releases"`, etc.)
+- `package_name: Option<&'static str>` — lookup name (e.g., `"hashicorp/terraform"`)
+- `extract_version: Option<&'static str>` — regex pattern (e.g., `"^v(?<version>\\S+)"`)
+- `versioning: Option<&'static str>` — versioning scheme override
+
+**Backward compat**: `datasource: Option<AsdfDatasource>` retained for pipeline compatibility; derived from new fields for GitHub tools.
+
+**`tag_strip_from_extract_version`**: helper that extracts literal prefix from `extractVersion` regex for pipeline use.
+
+**Dynamic tools** (java, flutter, scala, hugo/gohugo): handled via `try_dynamic_tool()` with version-dependent logic:
+- `java`: parses `adoptopenjdk-/temurin-[jre-]<version>` → `java-jdk` or `java-jre` package
+- `flutter`: strips `-stable/-beta/-dev` channel suffix  
+- `scala`: 2.x → `scala/scala` with `^v(?<version>\\S+)`, 3.x → `lampepfl/dotty`, else unsupported
+- `hugo/gohugo`: strips `extended_` prefix
+
+**`AsdfToolDef` struct** replaces the old `AsdfDatasource`-based tool table.
+
+**Comprehensive TOOL_TABLE**: 80+ tools from `upgradeable-tooling.ts` with proper `datasource`, `package_name`, `extract_version`, `versioning` fields.
+
+**`AsdfSkipReason` expanded**: added `UnsupportedDatasource` variant (for java unknown distribution, scala unknown major).
+
+### Tests ported (11 new)
+- `nodejs_maps_to_node_version_datasource` — "returns a result" (spec line 6)
+- `indented_spacing_still_parses` — spec line 890
+- `flutter_strips_channel_suffix` — spec line 923  
+- `java_adoptopenjdk_jdk/jre`, `java_temurin_jdk/jre`, `java_unknown_distribution_unsupported` — spec line 946
+- `scala_v2_uses_scala_scala`, `scala_v3_uses_lampepfl_dotty`, `scala_unknown_version_unsupported` — spec line 1004
+- `ignores_comments_across_multiple_lines` — spec line 1081
+- `bun_extract_version_pattern`, `erlang_extract_version_and_versioning`, `hugo_strips_extended_prefix`, `tag_strip_derives_correctly` — various
+
+### Files changed
+- `crates/renovate-core/src/extractors/asdf.rs` — complete rewrite
+- `crates/renovate-core/src/extractors/mise.rs` — updated struct construction
+- `docs/parity/renovate-test-map.md`
+- `docs/parity/implementation-ledger.md`

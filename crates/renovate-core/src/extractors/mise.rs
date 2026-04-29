@@ -165,9 +165,11 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
 
         out.push(AsdfDep {
             tool_name: tool_name.to_owned(),
+            dep_name: tool_name.to_owned(),
             current_value: version.to_owned(),
             datasource,
             skip_reason,
+            ..Default::default()
         });
     }
 
