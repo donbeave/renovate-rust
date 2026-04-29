@@ -27,12 +27,20 @@
 //! - [`pre_commit`]    — pre-commit
 //! - [`git`]           — Git submodules
 //! - [`puppet`]        — Puppet
-//! - [`misc`]          — Typst, cpanfile, Conan, Haskell, Jsonnet, Jenkins, OCB, Homebrew, …
+//! - [`conan`]         — Conan C++ package manager
+//! - [`haskell`]       — Haskell Cabal
+//! - [`jenkins`]       — Jenkins plugins + OCB (OpenTelemetry Collector Builder)
+//! - [`homebrew`]      — Homebrew formula
+//! - [`misc`]          — Typst, cpanfile, Jsonnet, Vendir, Copier, Batect, Unity3D, CNB, Heroku, …
 
 mod ansible;
 mod bazel;
 mod ci;
+mod conan;
 mod git;
+mod haskell;
+mod homebrew;
+mod jenkins;
 mod dart;
 mod docker;
 mod dotnet;
@@ -78,13 +86,13 @@ pub(crate) use renovate_core::datasources::rubygems as rubygems_datasource;
 pub(crate) use renovate_core::datasources::terraform as terraform_datasource;
 pub(crate) use renovate_core::extractors::bundler as bundler_extractor;
 pub(crate) use renovate_core::extractors::cargo as cargo_extractor;
+pub(crate) use renovate_core::extractors::homebrew as homebrew_extractor;
 pub(crate) use renovate_core::extractors::composer as composer_extractor;
 pub(crate) use renovate_core::extractors::github_actions as github_actions_extractor;
 pub(crate) use renovate_core::extractors::gomod as gomod_extractor;
 pub(crate) use renovate_core::extractors::gradle as gradle_extractor;
 pub(crate) use renovate_core::extractors::helm as helm_extractor;
 pub(crate) use renovate_core::extractors::homeassistant as homeassistant_extractor;
-pub(crate) use renovate_core::extractors::homebrew as homebrew_extractor;
 pub(crate) use renovate_core::extractors::maven as maven_extractor;
 pub(crate) use renovate_core::extractors::npm as npm_extractor;
 pub(crate) use renovate_core::extractors::nuget as nuget_extractor;
@@ -120,5 +128,9 @@ pub(crate) async fn process_all_managers(ctx: &mut RepoPipelineCtx<'_>) {
     pre_commit::process(ctx).await;
     git::process(ctx).await;
     puppet::process(ctx).await;
+    conan::process(ctx).await;
+    haskell::process(ctx).await;
+    jenkins::process(ctx).await;
+    homebrew::process(ctx).await;
     misc::process(ctx).await;
 }

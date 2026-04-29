@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0226  | 2026-04-29 | Refactor: split `misc.rs` → `conan.rs` + `haskell.rs` + `jenkins.rs` + `homebrew.rs` (1015 lines, was 1522) | Complete | See below. |
 | 0225  | 2026-04-29 | Fix: `is_update_blocked_ctx` + `is_version_restricted_ctx` use full context; `matchDepTypes` + `enabled:false` now works end-to-end | Complete | See below. |
 | 0224  | 2026-04-29 | `matchRepositories` wired into `DepContext`; `apply_update_blocking_to_report` takes repo_slug | Complete | See below. |
 | 0223  | 2026-04-29 | Refactor: split `misc.rs` → `pre_commit.rs` + `git.rs` + `puppet.rs` (1522 lines, was 1888) | Complete | See below. |
