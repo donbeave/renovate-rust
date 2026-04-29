@@ -243,6 +243,12 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `versioning`.
     pub versioning: Option<String>,
+    /// When `Some(true)`, pin Docker images to their digest.
+    /// When `Some(false)`, disable digest pinning.
+    /// `None` = use the manager's default behavior.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `pinDigests`.
+    pub pin_digests: Option<bool>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -756,6 +762,9 @@ pub struct RuleEffects {
     /// Per-rule versioning scheme override (e.g. `"docker"`, `"semver"`, `"regex:..."`).
     /// `None` = use the manager's default versioning.
     pub versioning: Option<String>,
+    /// Per-rule digest pinning override.
+    /// `None` = use manager default behavior.
+    pub pin_digests: Option<bool>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────

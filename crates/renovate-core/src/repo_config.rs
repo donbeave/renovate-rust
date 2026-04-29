@@ -730,6 +730,26 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
             // managers at the manager level (not via packageRules). Handled in parse()
             // via disabled_managers. No packageRule needed here.
             "docker:disable" => {}
+            // docker:pinDigests — pin Docker images to their digest.
+            // Mirrors Renovate's docker.preset.ts pinDigests preset.
+            "docker:pinDigests" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    pin_digests: Some(true),
+                    ..Default::default()
+                });
+                // Undo pinDigests for ArgoCD, devcontainer, helmv3, pyenv.
+                rules.push(PackageRule {
+                    match_managers: vec![
+                        "argocd".to_owned(),
+                        "devcontainer".to_owned(),
+                        "helmv3".to_owned(),
+                        "pyenv".to_owned(),
+                    ],
+                    pin_digests: Some(false),
+                    ..Default::default()
+                });
+            }
             // helpers:disableTypesNodeMajor — disable @types/node major updates.
             "helpers:disableTypesNodeMajor" => {
                 rules.push(PackageRule {
@@ -2329,6 +2349,8 @@ impl RepoConfig {
             #[serde(rename = "rangeStrategy")]
             range_strategy: Option<String>,
             versioning: Option<String>,
+            #[serde(rename = "pinDigests")]
+            pin_digests: Option<bool>,
         }
 
         #[derive(Deserialize)]
@@ -2630,6 +2652,7 @@ impl RepoConfig {
                     commit_message_suffix: r.commit_message_suffix,
                     range_strategy: r.range_strategy,
                     versioning: r.versioning,
+                    pin_digests: r.pin_digests,
                 }
             })
             .collect();
@@ -3159,6 +3182,9 @@ impl RepoConfig {
             }
             if rule.versioning.is_some() {
                 effects.versioning.clone_from(&rule.versioning);
+            }
+            if rule.pin_digests.is_some() {
+                effects.pin_digests = rule.pin_digests;
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -5038,6 +5064,31 @@ mod tests {
         let ctx = DepContext::for_dep("alpine");
         let effects = c.collect_rule_effects(&ctx);
         assert_eq!(effects.versioning.as_deref(), Some("docker"));
+    }
+
+    // ── pinDigests ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn pin_digests_in_package_rule_collects_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["docker"], "pinDigests": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "alpine",
+            datasource: Some("docker"),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.pin_digests, Some(true));
+    }
+
+    #[test]
+    fn docker_pin_digests_preset_injects_docker_rule() {
+        let c = RepoConfig::parse(r#"{"extends": ["docker:pinDigests"]}"#);
+        assert_eq!(c.package_rules.len(), 2);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.pin_digests, Some(true));
+        assert!(rule.match_datasources.contains(&"docker".to_owned()));
     }
 
     #[test]
