@@ -73,6 +73,9 @@ pub enum UpdateType {
     Major,
     Minor,
     Patch,
+    /// Package is being replaced by a different package name.
+    /// Set via `matchUpdateTypes: ["replacement"]`.
+    Replacement,
 }
 
 /// Classify a version bump as major, minor, or patch using semver comparison.

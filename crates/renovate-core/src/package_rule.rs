@@ -263,6 +263,12 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `replacementVersion`.
     pub replacement_version: Option<String>,
+    /// Regex pattern used to separate a version from its compatibility suffix
+    /// (e.g. `"^(?<version>[^-]+)(?<compatibility>-.*)?$"` for node images).
+    /// Stored and forwarded to the updater; not evaluated during dep scanning.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `versionCompatibility`.
+    pub version_compatibility: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -786,6 +792,8 @@ pub struct RuleEffects {
     pub replacement_name: Option<String>,
     /// Replacement version constraint for migration suggestions.
     pub replacement_version: Option<String>,
+    /// Version-compatibility regex pattern (forwarded to updater; not evaluated here).
+    pub version_compatibility: Option<String>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────

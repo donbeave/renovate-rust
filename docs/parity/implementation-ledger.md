@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0320  | 2026-04-29 | `workarounds:*` preset namespace (19 presets + `workarounds:all` compound): `mavenCommonsAncientVersion`, `ignoreSpringCloudNumeric`, `ignoreWeb3jCoreWithOldReleaseTimestamp`, `ignoreHttp4sDigestMilestones`, `typesNodeVersioning`, `nodeDockerVersioning`, `doNotUpgradeFromAlpineStableToEdge`, `supportRedHatImageVersion`, `javaLTSVersions`, `disableEclipseLifecycleMapping`, `disableGradleReplacements`, `disableMavenParentRoot`, `containerbase`, `bitnamiDockerImageVersioning`, `clamavDockerImageVersioning`, `k3sKubernetesVersioning`, `rke2KubernetesVersioning`, `libericaJdkDockerVersioning`, `ubuntuDockerVersioning`; `versionCompatibility` per-rule field; `UpdateType::Replacement`; `config:recommended` now expands `workarounds:all`; 6 tests | Complete | See below. |
 | 0319  | 2026-04-29 | Fix: strip leading `:` in `resolve_extends_scalar_overrides` so `:combinePatchMinorReleases`, `:disableRateLimiting` etc. work with canonical colon prefix; 2 tests | Complete | See below. |
 | 0318  | 2026-04-29 | `prCreation` config field; `:prImmediately` sets `"immediate"`, `:prNotPending` sets `"not-pending"` | Complete | See below. |
 | 0317  | 2026-04-29 | `replacementName` + `replacementVersion` per-rule fields (parsed, stored in `PackageRule` and `RuleEffects`); enables replacement suggestion rules | Complete | See below. |

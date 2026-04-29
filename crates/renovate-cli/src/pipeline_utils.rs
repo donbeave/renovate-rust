@@ -62,17 +62,17 @@ pub(crate) fn apply_update_blocking_to_report(
                     if let (Some(cur_v), Some(lat_v)) =
                         (parse_padded(current), parse_padded(latest))
                     {
-                        if lat_v.major > cur_v.major {
+                        let jump_exceeds = lat_v.major > cur_v.major
+                            && lat_v.major - cur_v.major > u64::from(repo_cfg.max_major_increment);
+                        if jump_exceeds {
                             let jump = lat_v.major - cur_v.major;
-                            if jump > u64::from(repo_cfg.max_major_increment) {
-                                dep.status = output::DepStatus::Skipped {
-                                    reason: format!(
-                                        "maxMajorIncrement: version jump of {} majors exceeds limit of {}",
-                                        jump, repo_cfg.max_major_increment
-                                    ),
-                                };
-                                continue;
-                            }
+                            dep.status = output::DepStatus::Skipped {
+                                reason: format!(
+                                    "maxMajorIncrement: version jump of {} majors exceeds limit of {}",
+                                    jump, repo_cfg.max_major_increment
+                                ),
+                            };
+                            continue;
                         }
                     }
                 }

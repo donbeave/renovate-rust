@@ -394,8 +394,6 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                 result.push(":semanticCommitType(fix)".to_owned());
             }
             // config:recommended expands to its constituent supported presets.
-            // The real preset also extends mergeConfidence, replacements, workarounds, and
-            // helpers — those are either unsupported or deferred.
             "config:recommended" | "config:base" => {
                 if seen.insert("config:recommended") {
                     // Key behavioral presets from config:recommended that we support:
@@ -403,6 +401,7 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                     result.push(":ignoreModulesAndTests".to_owned());
                     result.push("group:monorepos".to_owned());
                     result.push("group:recommended".to_owned());
+                    result.push("workarounds:all".to_owned());
                     // Keep the preset itself so downstream handlers (ignorePaths,
                     // group expansion) that match on "config:recommended" still fire.
                     result.push("config:recommended".to_owned());
@@ -415,6 +414,33 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                     result.push(":pinDevDependencies".to_owned());
                     // Keep for downstream handlers.
                     result.push("config:best-practices".to_owned());
+                }
+            }
+            // workarounds:all expands to all known crowd-sourced workaround presets.
+            // Renovate reference: lib/config/presets/internal/workarounds.preset.ts
+            "workarounds:all" => {
+                for wa in &[
+                    "workarounds:mavenCommonsAncientVersion",
+                    "workarounds:ignoreSpringCloudNumeric",
+                    "workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp",
+                    "workarounds:ignoreHttp4sDigestMilestones",
+                    "workarounds:typesNodeVersioning",
+                    "workarounds:nodeDockerVersioning",
+                    "workarounds:doNotUpgradeFromAlpineStableToEdge",
+                    "workarounds:supportRedHatImageVersion",
+                    "workarounds:javaLTSVersions",
+                    "workarounds:disableEclipseLifecycleMapping",
+                    "workarounds:disableGradleReplacements",
+                    "workarounds:disableMavenParentRoot",
+                    "workarounds:containerbase",
+                    "workarounds:bitnamiDockerImageVersioning",
+                    "workarounds:clamavDockerImageVersioning",
+                    "workarounds:k3sKubernetesVersioning",
+                    "workarounds:rke2KubernetesVersioning",
+                    "workarounds:libericaJdkDockerVersioning",
+                    "workarounds:ubuntuDockerVersioning",
+                ] {
+                    result.push(wa.to_string());
                 }
             }
             other => {
@@ -834,6 +860,315 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
+
+            // ── workarounds:* presets ─────────────────────────────────────────
+            // Each sub-preset of workarounds:all is also individually addressable.
+            // Renovate reference: lib/config/presets/internal/workarounds.preset.ts
+            "workarounds:mavenCommonsAncientVersion" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["maven".to_owned(), "sbt-package".to_owned()],
+                    match_package_names: vec!["commons-**".to_owned()],
+                    has_name_constraint: true,
+                    allowed_versions: Some("!/^200\\d{5}(\\.\\d+)?/".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:ignoreSpringCloudNumeric" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["maven".to_owned()],
+                    match_package_names: vec![
+                        "org.springframework.cloud:spring-cloud-starter-parent".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    allowed_versions: Some("/^[A-Z]/".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["maven".to_owned()],
+                    match_package_names: vec!["org.web3j:core".to_owned()],
+                    has_name_constraint: true,
+                    allowed_versions: Some("!/^5\\.0\\.0/".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:ignoreHttp4sDigestMilestones" => {
+                rules.push(PackageRule {
+                    match_managers: vec!["sbt".to_owned()],
+                    match_package_names: vec!["org.http4s:**".to_owned()],
+                    has_name_constraint: true,
+                    allowed_versions: Some("!/^1\\.0-\\d+-[a-fA-F0-9]{7}$/".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:typesNodeVersioning" => {
+                rules.push(PackageRule {
+                    match_managers: vec!["npm".to_owned()],
+                    match_package_names: vec!["@types/node".to_owned()],
+                    has_name_constraint: true,
+                    versioning: Some("node".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:nodeDockerVersioning" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "/(?:^|/)node$/".to_owned(),
+                        "!calico/node".to_owned(),
+                        "!docker.io/calico/node".to_owned(),
+                        "!ghcr.io/devcontainers/features/node".to_owned(),
+                        "!kindest/node".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    version_compatibility: Some(
+                        "^(?<version>[^-]+)(?<compatibility>-.*)?$".to_owned(),
+                    ),
+                    versioning: Some("node".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:doNotUpgradeFromAlpineStableToEdge" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_dep_names: vec!["alpine".to_owned()],
+                    match_current_version: Some("!/^\\d{8}$/".to_owned()),
+                    allowed_versions: Some("<20000000".to_owned()),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec!["alpine".to_owned()],
+                    has_name_constraint: true,
+                    match_current_version: Some("!/^\\d{8}$/".to_owned()),
+                    allowed_versions: Some("<20000000".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:supportRedHatImageVersion" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "registry.access.redhat.com/rhel".to_owned(),
+                        "registry.access.redhat.com/rhel-atomic".to_owned(),
+                        "registry.access.redhat.com/rhel-init".to_owned(),
+                        "registry.access.redhat.com/rhel-minimal".to_owned(),
+                        "registry.access.redhat.com/rhceph/**".to_owned(),
+                        "registry.access.redhat.com/rhgs3/**".to_owned(),
+                        "registry.access.redhat.com/rhel7**".to_owned(),
+                        "registry.access.redhat.com/rhel8/**".to_owned(),
+                        "registry.access.redhat.com/rhel9/**".to_owned(),
+                        "registry.access.redhat.com/rhscl/**".to_owned(),
+                        "registry.access.redhat.com/ubi*{,/}**".to_owned(),
+                        "redhat/**".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    versioning: Some("redhat".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:javaLTSVersions" => {
+                let java_versioning = "regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$".to_owned();
+                let java_lts_versions = "/^(?:8|11|17|21|25)(?:\\.|-|$)/".to_owned();
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned(), "java-version".to_owned()],
+                    match_package_names: vec![
+                        "eclipse-temurin".to_owned(),
+                        "amazoncorretto".to_owned(),
+                        "adoptopenjdk".to_owned(),
+                        "openjdk".to_owned(),
+                        "java".to_owned(),
+                        "java-jdk".to_owned(),
+                        "java-jre".to_owned(),
+                        "sapmachine".to_owned(),
+                        "/^azul/zulu-openjdk/".to_owned(),
+                        "/^bellsoft/liberica-openj(dk|re)-/".to_owned(),
+                        "/^cimg/openjdk/".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    allowed_versions: Some(java_lts_versions.clone()),
+                    versioning: Some(java_versioning.clone()),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned(), "java-version".to_owned()],
+                    match_dep_names: vec![
+                        "eclipse-temurin".to_owned(),
+                        "amazoncorretto".to_owned(),
+                        "adoptopenjdk".to_owned(),
+                        "openjdk".to_owned(),
+                        "java".to_owned(),
+                        "java-jre".to_owned(),
+                        "sapmachine".to_owned(),
+                    ],
+                    allowed_versions: Some(java_lts_versions.clone()),
+                    versioning: Some(java_versioning),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "bellsoft/hardened-liberica-runtime-container".to_owned(),
+                        "bellsoft/liberica-runtime-container".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    allowed_versions: Some(
+                        "/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/".to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            "workarounds:disableEclipseLifecycleMapping" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["maven".to_owned()],
+                    match_package_names: vec!["org.eclipse.m2e:lifecycle-mapping".to_owned()],
+                    has_name_constraint: true,
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+            "workarounds:disableGradleReplacements" => {
+                rules.push(PackageRule {
+                    match_managers: vec!["gradle".to_owned()],
+                    match_update_types: vec![UpdateType::Replacement],
+                    has_update_type_constraint: true,
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+            "workarounds:disableMavenParentRoot" => {
+                rules.push(PackageRule {
+                    match_managers: vec!["maven".to_owned()],
+                    match_dep_types: vec!["parent-root".to_owned()],
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+            "workarounds:containerbase" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "/^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$/".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    versioning: Some("node".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "workarounds:bitnamiDockerImageVersioning" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "bitnami/**".to_owned(),
+                        "docker.io/bitnami/**".to_owned(),
+                        "gcr.io/bitnami-containers/**".to_owned(),
+                        "*-docker.pkg.dev/vmw-app-catalog/**".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    match_current_value: Some(
+                        "/^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?$/"
+                            .to_owned(),
+                    ),
+                    versioning: Some(
+                        "regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$"
+                            .to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            "workarounds:clamavDockerImageVersioning" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "clamav/clamav".to_owned(),
+                        "clamav/clamav-debian".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    versioning: Some(
+                        "regex:^(?<major>\\d+)\\.(?<minor>\\d+)(\\.(?<patch>\\d+))?(-(?<build>\\d+))?(_(?<compatibility>.+))?$"
+                            .to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            "workarounds:k3sKubernetesVersioning" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["github-releases".to_owned()],
+                    match_package_names: vec!["k3s-io/k3s".to_owned()],
+                    has_name_constraint: true,
+                    versioning: Some(
+                        "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+k3s)(?<build>\\d+)$"
+                            .to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            "workarounds:rke2KubernetesVersioning" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["github-releases".to_owned()],
+                    match_package_names: vec!["rancher/rke2".to_owned()],
+                    has_name_constraint: true,
+                    versioning: Some(
+                        "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<prerelease>[a-z]+\\d+))?(?<compatibility>\\+rke2r)(?<build>\\d+)$"
+                            .to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            "workarounds:libericaJdkDockerVersioning" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "bellsoft/hardened-liberica-runtime-container".to_owned(),
+                        "bellsoft/liberica-runtime-container".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    match_current_value: Some("/^jdk-[^a][^l]{2}/".to_owned()),
+                    versioning: Some(
+                        "regex:^jdk-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$"
+                            .to_owned(),
+                    ),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "bellsoft/hardened-liberica-runtime-container".to_owned(),
+                        "bellsoft/liberica-runtime-container".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    match_current_value: Some("/^jdk-all/".to_owned()),
+                    versioning: Some(
+                        "regex:^jdk-all-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$"
+                            .to_owned(),
+                    ),
+                    ..Default::default()
+                });
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec![
+                        "bellsoft/hardened-liberica-runtime-container".to_owned(),
+                        "bellsoft/liberica-runtime-container".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    match_current_value: Some("/^jre-/".to_owned()),
+                    versioning: Some(
+                        "regex:^jre-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$"
+                            .to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            "workarounds:ubuntuDockerVersioning" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_dep_names: vec!["ubuntu".to_owned()],
+                    versioning: Some("ubuntu".to_owned()),
+                    ..Default::default()
+                });
+            }
+
             _ => {}
         }
     }
@@ -973,14 +1308,14 @@ fn resolve_extends_parameterized_rules(extends: &[String]) -> Vec<PackageRule> {
                     });
                 }
             }
-            ":pathSemanticCommitType" | "pathSemanticCommitType" => {
-                if args.len() >= 2 && !args[0].is_empty() && !args[1].is_empty() {
-                    rules.push(PackageRule {
-                        match_file_names: vec![args[0].to_string()],
-                        semantic_commit_type: Some(args[1].to_string()),
-                        ..Default::default()
-                    });
-                }
+            ":pathSemanticCommitType" | "pathSemanticCommitType"
+                if args.len() >= 2 && !args[0].is_empty() && !args[1].is_empty() =>
+            {
+                rules.push(PackageRule {
+                    match_file_names: vec![args[0].to_owned()],
+                    semantic_commit_type: Some(args[1].to_owned()),
+                    ..Default::default()
+                });
             }
             _ => {}
         }
@@ -2444,6 +2779,8 @@ impl RepoConfig {
             replacement_name: Option<String>,
             #[serde(rename = "replacementVersion")]
             replacement_version: Option<String>,
+            #[serde(rename = "versionCompatibility")]
+            version_compatibility: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -2694,6 +3031,7 @@ impl RepoConfig {
                         "major" => Some(UpdateType::Major),
                         "minor" => Some(UpdateType::Minor),
                         "patch" => Some(UpdateType::Patch),
+                        "replacement" => Some(UpdateType::Replacement),
                         _ => None,
                     })
                     .collect();
@@ -2755,6 +3093,7 @@ impl RepoConfig {
                     follow_tag: r.follow_tag,
                     replacement_name: r.replacement_name,
                     replacement_version: r.replacement_version,
+                    version_compatibility: r.version_compatibility,
                 }
             })
             .collect();
@@ -2803,10 +3142,10 @@ impl RepoConfig {
         let mut disabled_managers: Vec<String> = raw.disabled_managers;
         for preset in &effective_extends {
             match preset.as_str() {
-                ":enablePreCommit" | "enablePreCommit" => {
-                    if !enabled_managers.contains(&"pre-commit".to_owned()) {
-                        enabled_managers.push("pre-commit".to_owned());
-                    }
+                ":enablePreCommit" | "enablePreCommit"
+                    if !enabled_managers.contains(&"pre-commit".to_owned()) =>
+                {
+                    enabled_managers.push("pre-commit".to_owned());
                 }
                 // docker:disable disables specific docker-related managers.
                 // Mirrors Renovate's docker.preset.ts: { circleci: { enabled: false },
@@ -3336,6 +3675,11 @@ impl RepoConfig {
                 effects
                     .replacement_version
                     .clone_from(&rule.replacement_version);
+            }
+            if rule.version_compatibility.is_some() {
+                effects
+                    .version_compatibility
+                    .clone_from(&rule.version_compatibility);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -5518,13 +5862,13 @@ mod schedule_preset_tests {
             "config:recommended must inject group:recommended rules, got {}",
             c.package_rules.len()
         );
-        let group_names: Vec<&str> = c
-            .package_rules
-            .iter()
-            .filter_map(|r| r.group_name.as_deref())
-            .collect();
+        let has_group = |name: &str| {
+            c.package_rules
+                .iter()
+                .any(|r| r.group_name.as_deref() == Some(name))
+        };
         assert!(
-            group_names.contains(&"Node.js"),
+            has_group("Node.js"),
             "group:recommended nodeJs rule missing from config:recommended"
         );
     }
@@ -7700,6 +8044,95 @@ mod rule_effects_tests {
         assert!(
             !c.is_manager_enabled("npm", false),
             "npm in both lists: disabled takes precedence"
+        );
+    }
+
+    // ── workarounds:* preset tests ────────────────────────────────────────────
+
+    #[test]
+    fn workarounds_types_node_versioning_sets_node_versioning_for_types_node() {
+        let c = RepoConfig::parse(r#"{"extends": ["workarounds:typesNodeVersioning"]}"#);
+        let ctx = DepContext::for_dep("@types/node")
+            .with_manager("npm")
+            .with_datasource("npm");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.versioning.as_deref(),
+            Some("node"),
+            "workarounds:typesNodeVersioning must set versioning=node for @types/node"
+        );
+    }
+
+    #[test]
+    fn workarounds_ubuntu_docker_versioning_sets_ubuntu_versioning() {
+        let c = RepoConfig::parse(r#"{"extends": ["workarounds:ubuntuDockerVersioning"]}"#);
+        let ctx = DepContext::for_dep("ubuntu").with_datasource("docker");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.versioning.as_deref(),
+            Some("ubuntu"),
+            "workarounds:ubuntuDockerVersioning must set versioning=ubuntu for ubuntu"
+        );
+    }
+
+    #[test]
+    fn workarounds_disable_eclipse_lifecycle_mapping_disables_package() {
+        let c = RepoConfig::parse(r#"{"extends": ["workarounds:disableEclipseLifecycleMapping"]}"#);
+        let ctx = DepContext::for_dep("org.eclipse.m2e:lifecycle-mapping").with_datasource("maven");
+        assert!(
+            c.is_dep_ignored_ctx(&ctx),
+            "workarounds:disableEclipseLifecycleMapping must disable lifecycle-mapping"
+        );
+    }
+
+    #[test]
+    fn workarounds_maven_commons_ancient_version_sets_allowed_versions() {
+        let c = RepoConfig::parse(r#"{"extends": ["workarounds:mavenCommonsAncientVersion"]}"#);
+        let ctx = DepContext::for_dep("commons-lang").with_datasource("maven");
+        let rule_matches = c
+            .package_rules
+            .iter()
+            .any(|r| r.matches_context(&ctx) && r.allowed_versions.is_some());
+        assert!(
+            rule_matches,
+            "workarounds:mavenCommonsAncientVersion must match commons-lang and set allowedVersions"
+        );
+    }
+
+    #[test]
+    fn workarounds_all_expands_to_all_sub_presets() {
+        let c = RepoConfig::parse(r#"{"extends": ["workarounds:all"]}"#);
+        // workarounds:all should include typesNodeVersioning, ubuntuDockerVersioning, etc.
+        // Verify a few key rule effects from different sub-presets are present.
+        let ctx_types_node = DepContext::for_dep("@types/node")
+            .with_manager("npm")
+            .with_datasource("npm");
+        let effects_types_node = c.collect_rule_effects(&ctx_types_node);
+        assert_eq!(
+            effects_types_node.versioning.as_deref(),
+            Some("node"),
+            "workarounds:all must include typesNodeVersioning"
+        );
+        let ctx_ubuntu = DepContext::for_dep("ubuntu").with_datasource("docker");
+        let effects_ubuntu = c.collect_rule_effects(&ctx_ubuntu);
+        assert_eq!(
+            effects_ubuntu.versioning.as_deref(),
+            Some("ubuntu"),
+            "workarounds:all must include ubuntuDockerVersioning"
+        );
+    }
+
+    #[test]
+    fn workarounds_k3s_kubernetes_versioning_sets_regex_versioning() {
+        let c = RepoConfig::parse(r#"{"extends": ["workarounds:k3sKubernetesVersioning"]}"#);
+        let ctx = DepContext::for_dep("k3s-io/k3s").with_datasource("github-releases");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects
+                .versioning
+                .as_deref()
+                .is_some_and(|v| v.starts_with("regex:")),
+            "workarounds:k3sKubernetesVersioning must set a regex versioning scheme"
         );
     }
 }
