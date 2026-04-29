@@ -38,6 +38,9 @@ pub struct MavenUpdateSummary {
     pub current_version: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 publication timestamp for the latest stable version, when available.
+    /// Fetched from the Maven Central search API for Maven Central packages.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result returned by `fetch_updates_concurrent`.
@@ -134,11 +137,55 @@ async fn fetch_update_summary(
     let latest = fetch_latest(&dep.dep_name, http).await?;
     let summary =
         crate::versioning::maven::maven_update_summary(&dep.current_version, latest.as_deref());
+    let release_timestamp = if let Some(ref ver) = summary.latest {
+        fetch_maven_central_timestamp(&dep.dep_name, ver, http).await
+    } else {
+        None
+    };
     Ok(MavenUpdateSummary {
         current_version: summary.current_version,
         latest: summary.latest,
         update_available: summary.update_available,
+        release_timestamp,
     })
+}
+
+/// Maven Central search API URL for per-version timestamp lookup.
+const MAVEN_CENTRAL_SEARCH_API: &str = "https://search.maven.org/solrsearch/select";
+
+#[derive(serde::Deserialize)]
+struct MavenSearchResponse {
+    response: MavenSearchResponseBody,
+}
+
+#[derive(serde::Deserialize)]
+struct MavenSearchResponseBody {
+    docs: Vec<MavenSearchDoc>,
+}
+
+#[derive(serde::Deserialize)]
+struct MavenSearchDoc {
+    /// Unix epoch in **milliseconds** — Maven Central search API convention.
+    timestamp: Option<i64>,
+}
+
+/// Fetch the publish timestamp for a specific Maven artifact version from the
+/// Maven Central search API.  Returns `None` on any error (best-effort).
+async fn fetch_maven_central_timestamp(dep_name: &str, version: &str, http: &HttpClient) -> Option<String> {
+    let (group_id, artifact_id) = dep_name.split_once(':')?;
+    let url = format!(
+        "{MAVEN_CENTRAL_SEARCH_API}?q=g:{group_id}+AND+a:{artifact_id}+AND+v:{version}&core=gav&rows=1&wt=json"
+    );
+    let resp = http.get_retrying(&url).await.ok()?;
+    if !resp.status().is_success() {
+        return None;
+    }
+    let data: MavenSearchResponse = resp.json().await.ok()?;
+    let ts_ms = data.response.docs.first()?.timestamp?;
+    // Convert epoch milliseconds to ISO 8601.
+    let secs = ts_ms / 1000;
+    let dt = chrono::DateTime::<chrono::Utc>::from_timestamp(secs, 0)?;
+    Some(dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())
 }
 
 /// Cached latest-version entry: `Option<String>` (None if not found).
@@ -192,6 +239,7 @@ pub fn summary_from_cache(current_version: &str, latest: &MavenLatestEntry) -> M
         current_version: summary.current_version,
         latest: summary.latest,
         update_available: summary.update_available,
+        release_timestamp: None,
     }
 }
 

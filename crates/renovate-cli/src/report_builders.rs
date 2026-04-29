@@ -296,7 +296,11 @@ pub(crate) fn build_dep_reports_maven(
         });
     }
     for dep in actionable {
-        let status = match update_map.get(&dep.dep_name) {
+        let summary = update_map.get(&dep.dep_name);
+        let release_timestamp = summary
+            .and_then(|r| r.as_ref().ok())
+            .and_then(|s| s.release_timestamp.clone());
+        let status = match summary {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_version.clone(),
                 latest: s.latest.clone().unwrap_or_default(),
@@ -319,7 +323,7 @@ pub(crate) fn build_dep_reports_maven(
             update_type: None,
             pr_priority: None,
             pr_title: None,
-            release_timestamp: None,
+            release_timestamp,
             current_version_timestamp: None,
             dep_type: Some(dep.renovate_dep_type().to_owned()),
             package_name: None,
