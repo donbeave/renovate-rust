@@ -384,4 +384,24 @@ repos:
             Some(PreCommitSkipReason::UnknownRegistry)
         );
     }
+
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        // Ported: "returns null for invalid yaml file content" — pre-commit/extract.spec.ts line 52
+        assert!(extract("nothing here: [").is_empty());
+    }
+
+    #[test]
+    fn empty_repos_list_returns_empty() {
+        // Ported: "returns null for empty repos" — pre-commit/extract.spec.ts line 73
+        assert!(extract("repos: []\n").is_empty());
+    }
+
+    #[test]
+    fn repo_entry_without_repo_key_returns_empty() {
+        // Ported: "returns null for invalid repo" — pre-commit/extract.spec.ts line 78
+        // A repo entry missing the `repo:` key should be ignored.
+        let content = "repos:\n- hooks:\n  - id: some-hook\n";
+        assert!(extract(content).is_empty());
+    }
 }

@@ -146,4 +146,25 @@ mod tests {
     fn no_imports_returns_empty() {
         assert!(extract("= Hello, World!\n\nThis is a Typst document.").is_empty());
     }
+
+    #[test]
+    fn ignores_invalid_import_formats() {
+        // Ported: "ignores invalid import formats" — typst/extract.spec.ts line 147
+        let content = "#import \"regular/path\": *\nimport \"@preview/pkg:1.0.0\": *\n#import @preview/pkg:1.0.0: *\n#import \"@preview/valid:1.0.0\": *\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_name, "valid");
+        assert_eq!(deps[0].current_value, "1.0.0");
+    }
+
+    #[test]
+    fn non_preview_namespaces_get_skip_reasons() {
+        // Ported: "adds skipReason for non-preview namespaces" — typst/extract.spec.ts line 167
+        let content = "#import \"@preview/valid:1.0.0\": *\n#import \"@local/local-pkg:2.0.0\": *\n#import \"@custom/custom-pkg:3.0.0\": *\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert!(deps[0].skip_reason.is_none());
+        assert_eq!(deps[1].skip_reason, Some(TypstSkipReason::Local));
+        assert_eq!(deps[2].skip_reason, Some(TypstSkipReason::Unsupported));
+    }
 }
