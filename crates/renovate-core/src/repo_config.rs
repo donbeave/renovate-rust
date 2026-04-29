@@ -1537,11 +1537,29 @@ impl RepoConfig {
             }
         });
 
+        // Resolve managers enabled via presets like enablePreCommit.
+        // These presets set `'manager-name': { enabled: true }` which is equivalent
+        // to adding the manager to enabledManagers.
+        let mut enabled_managers = raw.enabled_managers;
+        for preset in &effective_extends {
+            match preset.as_str() {
+                ":enablePreCommit" | "enablePreCommit" => {
+                    if !enabled_managers.contains(&"pre-commit".to_owned()) {
+                        enabled_managers.push("pre-commit".to_owned());
+                    }
+                }
+                ":includeNodeModules" | "includeNodeModules" => {
+                    // includeNodeModules clears ignorePaths — handled below via ignorePaths: []
+                }
+                _ => {}
+            }
+        }
+
         Self {
             enabled: preset_enabled.unwrap_or(raw.enabled),
             ignore_deps: raw.ignore_deps,
             package_rules,
-            enabled_managers: raw.enabled_managers,
+            enabled_managers,
             ignore_versions: raw.ignore_versions,
             schedule: if raw.schedule.is_empty() {
                 // No explicit schedule → use schedule preset if any.
@@ -3632,6 +3650,28 @@ mod tests {
     fn draft_pr_default_false() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.draft_pr);
+    }
+
+    #[test]
+    fn enable_pre_commit_preset_adds_to_enabled_managers() {
+        let c = RepoConfig::parse(r#"{"extends": [":enablePreCommit"]}"#);
+        assert!(
+            c.enabled_managers.contains(&"pre-commit".to_owned()),
+            "enablePreCommit should add pre-commit to enabled_managers"
+        );
+        assert!(
+            c.is_manager_enabled("pre-commit", true),
+            "pre-commit should be enabled via preset"
+        );
+    }
+
+    #[test]
+    fn pre_commit_disabled_by_default_without_preset() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(
+            !c.is_manager_enabled("pre-commit", true),
+            "pre-commit should NOT be enabled without explicit config"
+        );
     }
 
     #[test]

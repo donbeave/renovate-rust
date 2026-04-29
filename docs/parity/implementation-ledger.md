@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0295  | 2026-04-29 | `:enablePreCommit` preset adds `"pre-commit"` to `enabled_managers` at parse time; 2 tests confirming pre-commit is gated by default and enabled when preset is active | Complete | See below. |
 | 0294  | 2026-04-29 | Bug fix: disabled-by-default managers (pre-commit, nix, html, travis, etc.) now correctly excluded even when `enabledManagers` is empty; always apply `is_manager_enabled()` filter | Complete | See below. |
 | 0293  | 2026-04-29 | `resolve_extends_parameterized_rules()`: `:doNotPinPackage(name)`, `:semanticCommitTypeAll(type)`, `:pathSemanticCommitType(path, type)` inject packageRules from preset arguments; 2 tests | Complete | See below. |
 | 0292  | 2026-04-29 | Extended compound preset expansion: `:semanticPrefixChore`, `:semanticPrefixFix`, `:assignAndReview(user)` (parameterized) all expand into constituent presets; 3 tests | Complete | See below. |
