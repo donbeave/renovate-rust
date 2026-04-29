@@ -89,6 +89,8 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` negation | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation`, `match_package_names_glob_negation` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDatasources` list | `crates/renovate-core/src/repo_config.rs` | `match_datasources_method_matches_listed_datasource`, `match_datasources_empty_matches_all` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchUpdateTypes` major/minor/patch | `crates/renovate-core/src/repo_config.rs` | `is_update_blocked_for_major_but_not_minor` | ported |
+| `lib/util/package-rules/index.spec.ts` | 42 | `matchUpdateTypes: ['bump']` with `isBump: true` → rule applies | `crates/renovate-core/src/repo_config.rs` | `is_bump_matches_bump_update_type_rule`, `match_update_types_bump_parses` | ported |
+| `lib/util/package-rules/update-types.ts` | — | `isBump: true` adds virtual `'bump'` update type | `crates/renovate-core/src/package_rule.rs` | `update_type_matches(ut, is_bump)` logic | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchFileNames` glob | `crates/renovate-core/src/repo_config.rs` | `is_update_blocked_for_file_with_filename_rule` | ported |
 | `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` exact match | `crates/renovate-core/src/repo_config.rs` | `package_rules_match_managers_respected` | ported |
 | `lib/util/package-rules/managers.spec.ts` | — | `matchManagers` null for undefined matchManagers | `crates/renovate-core/src/repo_config.rs` | `package_rules_match_managers_respected` | ported |

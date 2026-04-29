@@ -3944,6 +3944,7 @@ impl RepoConfig {
                         "replacement" => Some(UpdateType::Replacement),
                         "digest" => Some(UpdateType::Digest),
                         "pin" => Some(UpdateType::Pin),
+                        "bump" => Some(UpdateType::Bump),
                         _ => None,
                     })
                     .collect();
@@ -5680,6 +5681,38 @@ mod tests {
         assert!(c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
         // Different package — not blocked
         assert!(!c.is_update_blocked("tokio", "1.0.0", UpdateType::Major, "cargo"));
+    }
+
+    #[test]
+    fn match_update_types_bump_parses() {
+        // "bump" must be recognized as UpdateType::Bump (not filtered out as unknown).
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchUpdateTypes": ["bump"], "labels": ["bump"]}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].match_update_types,
+            vec![UpdateType::Bump]
+        );
+    }
+
+    #[test]
+    fn is_bump_matches_bump_update_type_rule() {
+        // Ported from Renovate index.spec.ts "applies" test:
+        // isBump: true + matchUpdateTypes: ["bump"] → rule should apply.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchUpdateTypes": ["bump"], "labels": ["bump"]}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        // Without is_bump, a minor update does NOT match.
+        assert!(!rule.update_type_matches(UpdateType::Minor, false));
+        // With is_bump, the same update DOES match the "bump" rule.
+        assert!(rule.update_type_matches(UpdateType::Minor, true));
+        // is_bump has no effect when the rule doesn't mention "bump".
+        let c2 = RepoConfig::parse(
+            r#"{"packageRules": [{"matchUpdateTypes": ["major"], "enabled": false}]}"#,
+        );
+        let rule2 = &c2.package_rules[0];
+        assert!(!rule2.update_type_matches(UpdateType::Minor, true));
     }
 
     #[test]
@@ -8774,9 +8807,9 @@ mod rule_effects_tests {
         let rule = &c.package_rules[0];
         assert!(rule.name_matches("jest"));
         // The rule has a minor+patch update type constraint
-        assert!(rule.update_type_matches(UpdateType::Minor));
-        assert!(rule.update_type_matches(UpdateType::Patch));
-        assert!(!rule.update_type_matches(UpdateType::Major));
+        assert!(rule.update_type_matches(UpdateType::Minor, false));
+        assert!(rule.update_type_matches(UpdateType::Patch, false));
+        assert!(!rule.update_type_matches(UpdateType::Major, false));
     }
 
     #[test]
@@ -8915,8 +8948,8 @@ mod rule_effects_tests {
         let c = RepoConfig::parse(r#"{"extends": ["group:jestPlusTSJest"]}"#);
         let rule = &c.package_rules[0];
         assert_eq!(rule.group_name.as_deref(), Some("jest monorepo"));
-        assert!(rule.update_type_matches(UpdateType::Major));
-        assert!(!rule.update_type_matches(UpdateType::Minor));
+        assert!(rule.update_type_matches(UpdateType::Major, false));
+        assert!(!rule.update_type_matches(UpdateType::Minor, false));
     }
 
     #[test]

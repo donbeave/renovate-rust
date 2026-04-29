@@ -82,6 +82,25 @@ pub enum UpdateType {
     /// Package is being pinned to an exact version from a range.
     /// Set via `matchUpdateTypes: ["pin"]`.
     Pin,
+    /// Range bump: dep range was widened to include current version without a
+    /// new upstream release.  Used via `matchUpdateTypes: ["bump"]` together
+    /// with `isBump: true` on the dep context.
+    Bump,
+}
+
+impl UpdateType {
+    /// Return the Renovate-compatible lowercase string name for this variant.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            UpdateType::Major => "major",
+            UpdateType::Minor => "minor",
+            UpdateType::Patch => "patch",
+            UpdateType::Replacement => "replacement",
+            UpdateType::Digest => "digest",
+            UpdateType::Pin => "pin",
+            UpdateType::Bump => "bump",
+        }
+    }
 }
 
 /// Classify a version bump as major, minor, or patch using semver comparison.

@@ -376,14 +376,23 @@ impl PackageRule {
         match_regex_or_glob_list(&effective, &self.match_managers)
     }
 
-    /// Return `true` when this rule's update type condition matches `update_type`.
-    pub fn update_type_matches(&self, update_type: UpdateType) -> bool {
+    /// Return `true` when this rule's update type condition matches.
+    ///
+    /// When `is_bump` is true, `UpdateType::Bump` is also checked, mirroring
+    /// Renovate's `UpdateTypesMatcher` which adds `'bump'` to the checked set
+    /// when `isBump` is set on the dep.
+    pub fn update_type_matches(&self, update_type: UpdateType, is_bump: bool) -> bool {
         if self.has_update_type_constraint && self.match_update_types.is_empty() {
-            // All specified update types were unrecognized (e.g. ["pin", "digest"]).
-            // An unrecognized-only constraint never matches our known update types.
+            // All specified update types were unrecognized — constraint never matches.
             return false;
         }
-        self.match_update_types.is_empty() || self.match_update_types.contains(&update_type)
+        if self.match_update_types.is_empty() {
+            return true;
+        }
+        if self.match_update_types.contains(&update_type) {
+            return true;
+        }
+        is_bump && self.match_update_types.contains(&UpdateType::Bump)
     }
 
     /// Return `true` when this rule's dep type condition matches `dep_type`.
@@ -562,7 +571,7 @@ impl PackageRule {
         }
 
         if let Some(ut) = ctx.update_type
-            && !self.update_type_matches(ut)
+            && !self.update_type_matches(ut, ctx.is_bump)
         {
             return false;
         }
@@ -657,6 +666,10 @@ pub struct DepContext<'a> {
     pub update_type: Option<UpdateType>,
     /// ISO 8601 release timestamp for the **currently installed** version.
     pub current_version_timestamp: Option<&'a str>,
+    /// When `true`, this dep represents a range bump (no new upstream version).
+    /// Mirrors Renovate's `isBump` field; adds virtual `"bump"` update type to
+    /// `matchUpdateTypes` matching.
+    pub is_bump: bool,
 }
 
 impl<'a> DepContext<'a> {
