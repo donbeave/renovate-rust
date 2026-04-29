@@ -234,6 +234,22 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `hashedBranchLength`.
     pub hashed_branch_length: Option<u32>,
+
+    // ── Per-update-type config blocks ──────────────────────────────────────────
+    /// Config applied to all major-version updates (after packageRules).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `major`.
+    pub major_config: Option<crate::package_rule::UpdateTypeConfig>,
+
+    /// Config applied to all minor-version updates (after packageRules).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `minor`.
+    pub minor_config: Option<crate::package_rule::UpdateTypeConfig>,
+
+    /// Config applied to all patch-version updates (after packageRules).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `patch`.
+    pub patch_config: Option<crate::package_rule::UpdateTypeConfig>,
 }
 // ── Free helpers ─────────────────────────────────────────────────────────────
 
@@ -653,6 +669,9 @@ impl RepoConfig {
             range_strategy: String,
             #[serde(rename = "hashedBranchLength")]
             hashed_branch_length: Option<u32>,
+            major: Option<crate::package_rule::UpdateTypeConfig>,
+            minor: Option<crate::package_rule::UpdateTypeConfig>,
+            patch: Option<crate::package_rule::UpdateTypeConfig>,
         }
 
         fn default_true() -> bool {
@@ -838,6 +857,9 @@ impl RepoConfig {
             commit_message_prefix: raw.commit_message_prefix,
             range_strategy: raw.range_strategy,
             hashed_branch_length: raw.hashed_branch_length,
+            major_config: raw.major,
+            minor_config: raw.minor,
+            patch_config: raw.patch,
         }
     }
 
@@ -1151,6 +1173,17 @@ impl RepoConfig {
         if effects.automerge.is_none() && self.automerge {
             effects.automerge = Some(true);
         }
+        // Apply per-update-type config blocks (major/minor/patch) AFTER all
+        // packageRules, mirroring Renovate's `flatten.ts` mergeChildConfig order.
+        let update_type_cfg = match ctx.update_type {
+            Some(crate::versioning::semver_generic::UpdateType::Major) => self.major_config.as_ref(),
+            Some(crate::versioning::semver_generic::UpdateType::Minor) => self.minor_config.as_ref(),
+            Some(crate::versioning::semver_generic::UpdateType::Patch) => self.patch_config.as_ref(),
+            _ => None,
+        };
+        if let Some(cfg) = update_type_cfg {
+            cfg.apply_to_effects(&mut effects);
+        }
         effects
     }
 }
@@ -1190,6 +1223,9 @@ impl Default for RepoConfig {
             commit_message_prefix: None,
             range_strategy: "auto".to_owned(),
             hashed_branch_length: None,
+            major_config: None,
+            minor_config: None,
+            patch_config: None,
         }
     }
 }
@@ -3876,5 +3912,117 @@ mod rule_effects_tests {
             effects.commit_message_action.is_none(),
             "non-matching dep should not get commitMessageAction override"
         );
+    }
+
+    // ── major/minor/patch config blocks ──────────────────────────────────────
+
+    #[test]
+    fn major_config_parsed() {
+        let c = RepoConfig::parse(r#"{"major": {"automerge": false, "labels": ["breaking"]}}"#);
+        let cfg = c.major_config.as_ref().expect("major config should be present");
+        assert_eq!(cfg.automerge, Some(false));
+        assert_eq!(cfg.labels, vec!["breaking".to_owned()]);
+    }
+
+    #[test]
+    fn minor_config_parsed() {
+        let c = RepoConfig::parse(r#"{"minor": {"automerge": true}}"#);
+        let cfg = c.minor_config.as_ref().expect("minor config should be present");
+        assert_eq!(cfg.automerge, Some(true));
+    }
+
+    #[test]
+    fn patch_config_parsed() {
+        let c = RepoConfig::parse(r#"{"patch": {"automerge": true, "prPriority": 5}}"#);
+        let cfg = c.patch_config.as_ref().expect("patch config should be present");
+        assert_eq!(cfg.automerge, Some(true));
+        assert_eq!(cfg.pr_priority, Some(5));
+    }
+
+    #[test]
+    fn major_config_applied_to_major_update() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"major": {"labels": ["breaking"], "automerge": false}}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.labels.contains(&"breaking".to_owned()));
+        assert_eq!(effects.automerge, Some(false));
+    }
+
+    #[test]
+    fn major_config_not_applied_to_minor_update() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"major": {"labels": ["breaking"]}}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(!effects.labels.contains(&"breaking".to_owned()));
+    }
+
+    #[test]
+    fn minor_config_applied_to_minor_update() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"minor": {"automerge": true, "prPriority": 3}}"#);
+        let ctx = DepContext {
+            dep_name: "react",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.automerge, Some(true));
+        assert_eq!(effects.pr_priority, Some(3));
+    }
+
+    #[test]
+    fn patch_config_applied_to_patch_update() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"patch": {"automerge": true}}"#);
+        let ctx = DepContext {
+            dep_name: "express",
+            update_type: Some(UpdateType::Patch),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.automerge, Some(true));
+    }
+
+    #[test]
+    fn major_config_overrides_package_rule() {
+        // packageRule sets automerge=true but major config sets automerge=false.
+        // major config applies AFTER packageRules → false wins.
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{
+            "packageRules": [{"matchPackageNames": ["lodash"], "automerge": true}],
+            "major": {"automerge": false}
+        }"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.automerge, Some(false));
+    }
+
+    #[test]
+    fn update_type_config_add_labels_accumulates() {
+        // addLabels in major config should append to existing labels.
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"labels": ["renovate"], "major": {"addLabels": ["breaking"]}}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.labels.contains(&"renovate".to_owned()));
+        assert!(effects.labels.contains(&"breaking".to_owned()));
     }
 }

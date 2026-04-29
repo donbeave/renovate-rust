@@ -713,6 +713,104 @@ pub struct RuleEffects {
     pub semantic_commit_scope: Option<String>,
 }
 
+// ── UpdateTypeConfig ──────────────────────────────────────────────────────────
+
+/// Per-update-type configuration block.
+///
+/// Maps the top-level `major`, `minor`, and `patch` config objects from
+/// `renovate.json`.  These blocks apply their settings to all updates of the
+/// matching type, *after* all `packageRules` have been evaluated.
+///
+/// Renovate reference: `lib/config/options/index.ts` — `major`, `minor`, `patch`.
+#[derive(Debug, Clone, Default, serde::Deserialize)]
+pub struct UpdateTypeConfig {
+    pub automerge: Option<bool>,
+    pub enabled: Option<bool>,
+    #[serde(default)]
+    pub labels: Vec<String>,
+    #[serde(rename = "addLabels", default)]
+    pub add_labels: Vec<String>,
+    #[serde(default)]
+    pub assignees: Vec<String>,
+    #[serde(default)]
+    pub reviewers: Vec<String>,
+    #[serde(rename = "groupName")]
+    pub group_name: Option<String>,
+    #[serde(rename = "groupSlug")]
+    pub group_slug: Option<String>,
+    #[serde(default)]
+    pub schedule: Vec<String>,
+    #[serde(rename = "prPriority")]
+    pub pr_priority: Option<i32>,
+    #[serde(rename = "minimumReleaseAge")]
+    pub minimum_release_age: Option<String>,
+    #[serde(rename = "commitMessageTopic")]
+    pub commit_message_topic: Option<String>,
+    #[serde(rename = "commitMessageAction")]
+    pub commit_message_action: Option<String>,
+    #[serde(rename = "commitMessagePrefix")]
+    pub commit_message_prefix: Option<String>,
+    #[serde(rename = "semanticCommitType")]
+    pub semantic_commit_type: Option<String>,
+    #[serde(rename = "semanticCommitScope")]
+    pub semantic_commit_scope: Option<String>,
+}
+
+impl UpdateTypeConfig {
+    /// Merge this config into `effects` (last-writer-wins for scalar fields;
+    /// `addLabels` appends, `labels` replaces when non-empty).
+    pub fn apply_to_effects(&self, effects: &mut RuleEffects) {
+        if let Some(am) = self.automerge {
+            effects.automerge = Some(am);
+        }
+        if let Some(gn) = &self.group_name {
+            effects.group_name = Some(gn.clone());
+        }
+        if let Some(gs) = &self.group_slug {
+            effects.group_slug = Some(gs.clone());
+        }
+        if !self.schedule.is_empty() {
+            effects.schedule.clone_from(&self.schedule);
+        }
+        // `labels` replaces; `addLabels` appends.
+        if !self.labels.is_empty() {
+            effects.labels.clone_from(&self.labels);
+        }
+        for label in &self.add_labels {
+            if !effects.labels.contains(label) {
+                effects.labels.push(label.clone());
+            }
+        }
+        if !self.assignees.is_empty() {
+            effects.assignees.clone_from(&self.assignees);
+        }
+        if !self.reviewers.is_empty() {
+            effects.reviewers.clone_from(&self.reviewers);
+        }
+        if let Some(p) = self.pr_priority {
+            effects.pr_priority = Some(p);
+        }
+        if self.minimum_release_age.is_some() {
+            effects.minimum_release_age.clone_from(&self.minimum_release_age);
+        }
+        if self.commit_message_topic.is_some() {
+            effects.commit_message_topic.clone_from(&self.commit_message_topic);
+        }
+        if self.commit_message_action.is_some() {
+            effects.commit_message_action.clone_from(&self.commit_message_action);
+        }
+        if self.commit_message_prefix.is_some() {
+            effects.commit_message_prefix.clone_from(&self.commit_message_prefix);
+        }
+        if self.semantic_commit_type.is_some() {
+            effects.semantic_commit_type.clone_from(&self.semantic_commit_type);
+        }
+        if self.semantic_commit_scope.is_some() {
+            effects.semantic_commit_scope.clone_from(&self.semantic_commit_scope);
+        }
+    }
+}
+
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────
 
 /// Return `true` if `proposed_version` is within the `allowedVersions` constraint.
