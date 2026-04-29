@@ -58,8 +58,8 @@ fn non_pin_update_types() -> Vec<UpdateType> {
 }
 
 /// Return the names of all `group:${name}Monorepo` presets that are part of
-/// `group:monorepos`. Used by `expand_compound_presets` to expand
-/// `group:monorepos` into its constituent group presets.
+/// `group:monorepos`. Used by tests only — prefer `all_monorepo_rules()` in
+/// production paths to avoid parsing the JSON multiple times.
 pub fn all_monorepo_group_names() -> Vec<String> {
     let Some(data) = load_data() else {
         return Vec::new();
@@ -77,6 +77,62 @@ pub fn all_monorepo_group_names() -> Vec<String> {
     names
 }
 
+/// Generate all monorepo `PackageRule` instances in a single JSON parse.
+///
+/// This is the efficient batch version used by `resolve_extends_group_presets`
+/// when expanding `group:monorepos`. It parses the embedded JSON exactly once
+/// rather than once per monorepo entry.
+pub fn all_monorepo_rules() -> Vec<PackageRule> {
+    let Some(data) = load_data() else {
+        return Vec::new();
+    };
+    let update_types = non_pin_update_types();
+    let mut rules = Vec::with_capacity(
+        data.pattern_groups.len() + data.org_groups.len() + data.repo_groups.len(),
+    );
+
+    for (key, patterns) in &data.pattern_groups {
+        let match_package_names = patterns.to_vec();
+        let has_name = !match_package_names.is_empty();
+        rules.push(PackageRule {
+            match_package_names,
+            has_name_constraint: has_name,
+            match_update_types: update_types.clone(),
+            has_update_type_constraint: true,
+            group_name: Some(format!("{key} monorepo")),
+            ..Default::default()
+        });
+    }
+
+    for (key, urls) in &data.org_groups {
+        let match_source_urls = urls
+            .to_vec()
+            .into_iter()
+            .map(|u| format!("{u}**"))
+            .collect::<Vec<_>>();
+        rules.push(PackageRule {
+            match_source_urls,
+            match_update_types: update_types.clone(),
+            has_update_type_constraint: true,
+            group_name: Some(format!("{key} monorepo")),
+            ..Default::default()
+        });
+    }
+
+    for (key, urls) in &data.repo_groups {
+        let match_source_urls = urls.to_vec();
+        rules.push(PackageRule {
+            match_source_urls,
+            match_update_types: update_types.clone(),
+            has_update_type_constraint: true,
+            group_name: Some(format!("{key} monorepo")),
+            ..Default::default()
+        });
+    }
+
+    rules
+}
+
 /// Return the `PackageRule` instances for a specific `group:${name}Monorepo`
 /// or `monorepo:${name}` preset.
 ///
@@ -85,6 +141,7 @@ pub fn all_monorepo_group_names() -> Vec<String> {
 /// - Repo groups: matched by `matchSourceUrls` (exact or list)
 ///
 /// Returns an empty vec when the monorepo name is unknown.
+/// Prefer `all_monorepo_rules()` when expanding all monorepos at once.
 pub fn rules_for_monorepo(name: &str) -> Vec<PackageRule> {
     let Some(data) = load_data() else {
         return Vec::new();

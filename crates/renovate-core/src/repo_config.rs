@@ -428,11 +428,11 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
             "helpers:followTypescriptRc" => {
                 result.push(":followTag(typescript, rc)".to_owned());
             }
-            // replacements:all expands to all crowd-sourced package replacement presets.
-            // Renovate reference: lib/data/replacements.json
+            // replacements:all is handled directly in resolve_extends_common_rules
+            // using a batch parse — no expansion needed here.
             "replacements:all" => {
                 if seen.insert("replacements:all") {
-                    result.extend(crate::replacements::replacements_all_names());
+                    result.push("replacements:all".to_owned());
                 }
             }
             // workarounds:all expands to all known crowd-sourced workaround presets.
@@ -881,9 +881,14 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
             }
 
             // ── replacements:* presets ────────────────────────────────────────
-            // Individual crowd-sourced package replacement presets from replacements.json.
+            // Crowd-sourced package replacement presets from replacements.json.
             // Renovate reference: lib/data/replacements.json + replacements.preset.ts
-            p if p.starts_with("replacements:") && p != "replacements:all" => {
+            "replacements:all" => {
+                // Batch: parse JSON once for all 60 replacements.
+                rules.extend(crate::replacements::all_replacement_rules());
+            }
+            p if p.starts_with("replacements:") => {
+                // Individual replacement preset (e.g. replacements:babel-eslint-to-eslint-parser).
                 rules.extend(crate::replacements::rules_for_preset(p));
             }
 
@@ -1558,13 +1563,10 @@ fn resolve_extends_group_presets(
                 ));
             }
             "group:monorepos" => {
-                // Expand all individual monorepo group presets.
+                // Expand all monorepo group presets in a single JSON parse (O(1) not O(n)).
                 // patternGroups use matchPackageNames (resolved locally);
                 // orgGroups/repoGroups use matchSourceUrls (resolved when source URL is available).
-                for name in crate::monorepos::all_monorepo_group_names() {
-                    let key = name.strip_prefix("group:").unwrap_or(&name);
-                    rules.extend(crate::monorepos::rules_for_monorepo(key));
-                }
+                rules.extend(crate::monorepos::all_monorepo_rules());
             }
             // config:recommended is expanded by expand_compound_presets() before this
             // function is called, so "group:recommended" is already in effective_extends
@@ -8336,7 +8338,7 @@ mod rule_effects_tests {
             effects
                 .group_name
                 .as_deref()
-                .map_or(false, |g| g.contains("angularmaterial")),
+                .is_some_and(|g| g.contains("angularmaterial")),
             "group must be the angularmaterial monorepo, got: {:?}",
             effects.group_name
         );

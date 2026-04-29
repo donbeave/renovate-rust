@@ -73,9 +73,48 @@ pub fn replacements_all_names() -> Vec<String> {
         .collect()
 }
 
+/// Generate all replacement `PackageRule` instances in a single JSON parse.
+///
+/// Efficient batch version used by `resolve_extends_common_rules` when
+/// processing `replacements:all` — parses the embedded JSON exactly once
+/// rather than once per replacement preset.
+pub fn all_replacement_rules() -> Vec<PackageRule> {
+    let Ok(data) = serde_json::from_str::<serde_json::Value>(REPLACEMENTS_JSON) else {
+        return Vec::new();
+    };
+    let Some(names) = data
+        .get("all")
+        .and_then(|v| v.get("extends"))
+        .and_then(|e| e.as_array())
+    else {
+        return Vec::new();
+    };
+    let mut rules = Vec::new();
+    for name_val in names {
+        let Some(name) = name_val.as_str() else {
+            continue;
+        };
+        let key = name.strip_prefix("replacements:").unwrap_or(name);
+        let Some(preset_value) = data.get(key) else {
+            continue;
+        };
+        let Ok(preset) = serde_json::from_value::<RawPreset>(preset_value.clone()) else {
+            continue;
+        };
+        rules.extend(
+            preset
+                .package_rules
+                .into_iter()
+                .map(raw_rule_to_package_rule),
+        );
+    }
+    rules
+}
+
 /// Return the `PackageRule` instances for a specific `replacements:X` preset.
 ///
 /// Returns an empty vec when the preset is unknown or has no packageRules.
+/// Prefer `all_replacement_rules()` when processing `replacements:all`.
 pub fn rules_for_preset(preset_name: &str) -> Vec<PackageRule> {
     let Ok(data) = serde_json::from_str::<serde_json::Value>(REPLACEMENTS_JSON) else {
         return Vec::new();
