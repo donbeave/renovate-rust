@@ -393,9 +393,25 @@ pub(crate) fn print_run_summary(stats: &RunStats, use_color: bool) {
     println!("{}", dim(&bar, use_color));
 }
 
+/// Priority key for sorting update deps: higher prPriority → lower sort key.
+/// Update type severity: major(0) > minor(1) > patch(2) > unknown(3).
+fn dep_sort_key(dep: &DepReport) -> (i32, u8) {
+    let priority = -(dep.pr_priority.unwrap_or(0)); // negate so higher priority sorts first
+    let type_rank = match dep.update_type.as_deref() {
+        Some("major") => 0,
+        Some("minor") => 1,
+        Some("patch") => 2,
+        _ => 3,
+    };
+    (priority, type_rank)
+}
+
 /// Print per-dep lines for one manifest file, grouping `UpdateAvailable` deps
 /// that share a `groupName` under a header line.  Non-update deps (UpToDate,
 /// Skipped, LookupError) are always shown flat after the grouped updates.
+///
+/// Updates are sorted by `prPriority` (descending) then update severity
+/// (major > minor > patch) to match Renovate's PR creation order.
 fn print_file_deps(deps: &[DepReport], use_color: bool) {
     // Partition: updates with group, updates without, non-updates.
     let mut group_order: Vec<String> = Vec::new();
@@ -420,6 +436,9 @@ fn print_file_deps(deps: &[DepReport], use_color: bool) {
         }
     }
 
+    // Sort ungrouped updates by priority then severity.
+    ungrouped_updates.sort_by_key(|d| dep_sort_key(d));
+
     // Print grouped updates.
     for group_name in &group_order {
         if let Some(group_deps) = groups.get(group_name) {
@@ -436,7 +455,7 @@ fn print_file_deps(deps: &[DepReport], use_color: bool) {
         }
     }
 
-    // Print ungrouped updates.
+    // Print ungrouped updates (sorted).
     for dep in &ungrouped_updates {
         println!("    {}", format_dep(dep, use_color));
     }
