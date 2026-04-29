@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0305  | 2026-04-29 | 13 more group presets: `codemirror`, `flyway`, `fortawesome`, `fusionjs`, `githubArtifactActions`, `glimmer`, `goOpenapi`, `polymer`, `allApollographql`, `apiPlatform`, `phpstan`, `symfony` (with exclusions), `rubyOnRails`; update `group:recommended` to include all; 3 tests | Complete | See below. |
 | 0304  | 2026-04-29 | `group:linters` preset: inlines expanded `packages:linters` (emberTemplateLint + eslint + phpLinters + stylelint + tslint + prettier/oxlint) via `LINTER_PACKAGES` const; 1 test | Complete | See below. |
 | 0303  | 2026-04-29 | `helpers:disableTypesNodeMajor` preset: disables `@types/node` major updates via packageRule; 2 tests (major blocked, other packages unaffected) | Complete | See below. |
 | 0302  | 2026-04-29 | Remaining Spring presets (amqp/android/batch/hateoas/integration/kafka/ldap/mobile/osgi/restdocs/roo/scala/session/shell/social/statemachine/webflow/ws), `group:illuminate`, `group:rubyOmniauth`, `group:jestPlusTSJest`, `group:jestPlusTypes`, `group:recommended` compound expansion; 3 tests | Complete | See below. |
@@ -5718,6 +5719,34 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
 - Added `LINTER_PACKAGES: &[&str]` file-level constant with the 28-entry expanded package list
 - Added `"group:linters"` case to `resolve_extends_group_presets()` using the constant
 - 1 test: matches eslint, @typescript-eslint/parser, prettier, stylelint; doesn't match lodash or jest
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0305 - 13 more group presets completing group:recommended
+
+### Renovate reference
+- `lib/config/presets/internal/group.preset.ts`: codemirror, flyway, fortawesome, fusionjs, githubArtifactActions, glimmer, goOpenapi, polymer, allApollographql, apiPlatform, phpstan, symfony, rubyOnRails
+
+### Implementation
+- Added `group:codemirror`: `@codemirror/**`
+- Added `group:flyway`: `org.flywaydb:*` + `org.flywaydb.flyway:*`
+- Added `group:fortawesome`: `@fortawesome/**`
+- Added `group:fusionjs`: fusion-cli, fusion-core, fusion-plugin-**, etc.
+- Added `group:githubArtifactActions`: github-actions manager + download/upload-artifact + major-only
+- Added `group:glimmer`: `@glimmer/component` + `@glimmer/tracking`
+- Added `group:goOpenapi`: go datasource + `github.com/go-openapi/**`
+- Added `group:polymer`: `@polymer/**`
+- Added `group:allApollographql`: `matchSourceUrls: ["https://github.com/apollographql/**"]`
+- Added `group:apiPlatform`: packagist + `api-platform/*` with 7 exclusions
+- Added `group:phpstan`: packagist + phpstan/phpstan + regex-slug patterns
+- Added `group:symfony`: packagist + `symfony/*` with 14 exclusions
+- Added `group:rubyOnRails`: rubygems + 13 Rails gem names
+- Updated `group:recommended` to include all 52 sub-presets
+- 3 tests: group:recommended ≥40 rules with symfony/rubyOnRails; symfony exclusion matching; Rails gem matching
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

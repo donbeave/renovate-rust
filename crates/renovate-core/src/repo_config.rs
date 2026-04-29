@@ -1560,6 +1560,15 @@ fn resolve_extends_group_presets(
             "group:recommended" => {
                 let recommended_presets: &[&str] = &[
                     "group:nodeJs",
+                    "group:allApollographql",
+                    "group:apiPlatform",
+                    "group:codemirror",
+                    "group:flyway",
+                    "group:fortawesome",
+                    "group:fusionjs",
+                    "group:githubArtifactActions",
+                    "group:glimmer",
+                    "group:goOpenapi",
                     "group:gradle",
                     "group:hibernateCore",
                     "group:hibernateValidator",
@@ -1569,10 +1578,13 @@ fn resolve_extends_group_presets(
                     "group:jestPlusTSJest",
                     "group:jestPlusTypes",
                     "group:micrometer",
+                    "group:phpstan",
+                    "group:polymer",
                     "group:puppeteer",
                     "group:react",
                     "group:remark",
                     "group:resilience4j",
+                    "group:rubyOnRails",
                     "group:rubyOmniauth",
                     "group:socketio",
                     "group:springAmqp",
@@ -1598,6 +1610,7 @@ fn resolve_extends_group_presets(
                     "group:springStatemachine",
                     "group:springWebflow",
                     "group:springWs",
+                    "group:symfony",
                 ];
                 for sub_preset in recommended_presets {
                     let sub_extends = vec![sub_preset.to_string()];
@@ -1614,6 +1627,204 @@ fn resolve_extends_group_presets(
                     group_slug: Some("linters".to_owned()),
                     has_name_constraint: true,
                     match_package_names: LINTER_PACKAGES.iter().map(|&s| s.to_owned()).collect(),
+                    ..Default::default()
+                });
+            }
+            // group:codemirror — group all CodeMirror packages.
+            "group:codemirror" => {
+                rules.push(PackageRule {
+                    group_name: Some("CodeMirror".to_owned()),
+                    group_slug: Some("codemirror".to_owned()),
+                    match_package_names: vec!["@codemirror/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:flyway — group Java Flyway migration packages.
+            "group:flyway" => {
+                rules.push(PackageRule {
+                    group_name: Some("flyway".to_owned()),
+                    group_slug: Some("flyway".to_owned()),
+                    match_package_names: vec![
+                        "org.flywaydb:*".to_owned(),
+                        "org.flywaydb.flyway:*".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:fortawesome — group all Font Awesome packages.
+            "group:fortawesome" => {
+                rules.push(PackageRule {
+                    group_name: Some("Font Awesome".to_owned()),
+                    group_slug: Some("fortawesome".to_owned()),
+                    match_package_names: vec!["@fortawesome/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:fusionjs — group Fusion.js packages.
+            "group:fusionjs" => {
+                rules.push(PackageRule {
+                    group_name: Some("Fusion.js packages".to_owned()),
+                    group_slug: Some("fusionjs".to_owned()),
+                    match_package_names: vec![
+                        "fusion-cli".to_owned(),
+                        "fusion-core".to_owned(),
+                        "fusion-test-utils".to_owned(),
+                        "fusion-tokens".to_owned(),
+                        "fusion-plugin-**".to_owned(),
+                        "fusion-react**".to_owned(),
+                        "fusion-apollo**".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:githubArtifactActions — group upload/download-artifact major updates.
+            "group:githubArtifactActions" => {
+                rules.push(PackageRule {
+                    group_name: Some("GitHub Artifact Actions".to_owned()),
+                    group_slug: Some("github-artifact-actions".to_owned()),
+                    match_managers: vec!["github-actions".to_owned()],
+                    match_package_names: vec![
+                        "actions/download-artifact".to_owned(),
+                        "actions/upload-artifact".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    match_update_types: vec![UpdateType::Major],
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:glimmer — group Glimmer.js packages.
+            "group:glimmer" => {
+                rules.push(PackageRule {
+                    group_name: Some("Glimmer.js packages".to_owned()),
+                    group_slug: Some("glimmer".to_owned()),
+                    match_package_names: vec![
+                        "@glimmer/component".to_owned(),
+                        "@glimmer/tracking".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:goOpenapi — group go-openapi packages.
+            "group:goOpenapi" => {
+                rules.push(PackageRule {
+                    group_name: Some("go-openapi packages".to_owned()),
+                    group_slug: Some("go-openapi".to_owned()),
+                    match_datasources: vec!["go".to_owned()],
+                    match_package_names: vec!["github.com/go-openapi/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:polymer — group all @polymer packages.
+            "group:polymer" => {
+                rules.push(PackageRule {
+                    group_name: Some("polymer packages".to_owned()),
+                    group_slug: Some("polymer".to_owned()),
+                    match_package_names: vec!["@polymer/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:apiPlatform — group PHP API Platform packages (packagist, with exclusions).
+            "group:apiPlatform" => {
+                rules.push(PackageRule {
+                    group_name: Some("api-platform packages".to_owned()),
+                    group_slug: Some("api-platform".to_owned()),
+                    match_datasources: vec!["packagist".to_owned()],
+                    match_package_names: vec![
+                        "api-platform/*".to_owned(),
+                        "!api-platform/admin-meta".to_owned(),
+                        "!api-platform/admin-pack".to_owned(),
+                        "!api-platform/api-pack".to_owned(),
+                        "!api-platform/api-platform".to_owned(),
+                        "!api-platform/parameter-validator".to_owned(),
+                        "!api-platform/postman-collection-generator".to_owned(),
+                        "!api-platform/schema-generator".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:allApollographql — group Apollo GraphQL packages (matchSourceUrls).
+            "group:allApollographql" => {
+                rules.push(PackageRule {
+                    group_name: Some("Apollo GraphQL packages".to_owned()),
+                    group_slug: Some("apollo-graphql".to_owned()),
+                    match_source_urls: vec!["https://github.com/apollographql/**".to_owned()],
+                    ..Default::default()
+                });
+            }
+            // group:phpstan — group PHPStan packages (packagist).
+            "group:phpstan" => {
+                rules.push(PackageRule {
+                    group_name: Some("PHPStan packages".to_owned()),
+                    group_slug: Some("phpstan".to_owned()),
+                    match_datasources: vec!["packagist".to_owned()],
+                    match_package_names: vec![
+                        "phpstan/phpstan".to_owned(),
+                        "//phpstan-/".to_owned(),
+                        "//larastan/".to_owned(),
+                        "phpstan/extension-installer".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:symfony — group PHP Symfony packages (packagist, with exclusions).
+            "group:symfony" => {
+                rules.push(PackageRule {
+                    group_name: Some("symfony packages".to_owned()),
+                    group_slug: Some("symfony".to_owned()),
+                    match_datasources: vec!["packagist".to_owned()],
+                    match_package_names: vec![
+                        "symfony/*".to_owned(),
+                        "!symfony/*contracts".to_owned(),
+                        "!symfony/*pack".to_owned(),
+                        "!symfony/flex".to_owned(),
+                        "!symfony/maker-bundle".to_owned(),
+                        "!symfony/monolog-bundle".to_owned(),
+                        "!symfony/panther".to_owned(),
+                        "!symfony/polyfill*".to_owned(),
+                        "!symfony/proxy-manager-bridge".to_owned(),
+                        "!symfony/security-guard".to_owned(),
+                        "!symfony/stimulus-bundle".to_owned(),
+                        "!symfony/templating".to_owned(),
+                        "!symfony/thanks".to_owned(),
+                        "!symfony/ux*".to_owned(),
+                        "!symfony/webpack-encore-bundle".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:rubyOnRails — group Ruby on Rails gem packages.
+            "group:rubyOnRails" => {
+                rules.push(PackageRule {
+                    group_name: Some("Ruby on Rails packages".to_owned()),
+                    group_slug: Some("ruby-on-rails".to_owned()),
+                    match_datasources: vec!["rubygems".to_owned()],
+                    match_package_names: vec![
+                        "actioncable".to_owned(),
+                        "actionmailbox".to_owned(),
+                        "actionmailer".to_owned(),
+                        "actionpack".to_owned(),
+                        "actiontext".to_owned(),
+                        "actionview".to_owned(),
+                        "activejob".to_owned(),
+                        "activemodel".to_owned(),
+                        "activerecord".to_owned(),
+                        "activestorage".to_owned(),
+                        "activesupport".to_owned(),
+                        "railties".to_owned(),
+                        "rails".to_owned(),
+                    ],
+                    has_name_constraint: true,
                     ..Default::default()
                 });
             }
@@ -6465,9 +6676,9 @@ mod rule_effects_tests {
     #[test]
     fn group_recommended_expands_many_presets() {
         let c = RepoConfig::parse(r#"{"extends": ["group:recommended"]}"#);
-        // group:recommended should expand to many sub-presets (at least 30 rules).
+        // group:recommended should expand to many sub-presets (at least 40 rules after additions).
         assert!(
-            c.package_rules.len() >= 30,
+            c.package_rules.len() >= 40,
             "group:recommended should inject many rules, got {}",
             c.package_rules.len()
         );
@@ -6486,6 +6697,39 @@ mod rule_effects_tests {
             group_names.contains(&"spring security"),
             "springSecurity missing"
         );
+        assert!(
+            group_names.contains(&"symfony packages"),
+            "symfony rule missing"
+        );
+        assert!(
+            group_names.contains(&"Ruby on Rails packages"),
+            "rubyOnRails rule missing"
+        );
+    }
+
+    #[test]
+    fn group_symfony_matches_with_exclusions() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:symfony"]}"#);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("symfony packages"));
+        // symfony/* matches
+        assert!(rule.name_matches("symfony/console"));
+        assert!(rule.name_matches("symfony/http-kernel"));
+        // excluded packages don't match
+        assert!(!rule.name_matches("symfony/flex"));
+        assert!(!rule.name_matches("symfony/ux-turbo"));
+        assert!(!rule.name_matches("symfony/polyfill-mbstring"));
+    }
+
+    #[test]
+    fn group_ruby_on_rails_matches_rails_gems() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:rubyOnRails"]}"#);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("Ruby on Rails packages"));
+        assert!(rule.name_matches("rails"));
+        assert!(rule.name_matches("activerecord"));
+        assert!(rule.name_matches("activesupport"));
+        assert!(!rule.name_matches("devise"));
     }
 
     #[test]
