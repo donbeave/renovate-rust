@@ -19,6 +19,7 @@ pub(crate) fn build_dep_reports_cargo(
             renovate_core::datasources::crates_io::CratesIoError,
         >,
     >,
+    timestamps: &HashMap<String, renovate_core::datasources::crates_io::CrateTimestamps>,
 ) -> Vec<output::DepReport> {
     let mut reports = Vec::new();
     for dep in all_deps.iter().filter(|d| d.skip_reason.is_some()) {
@@ -37,6 +38,7 @@ pub(crate) fn build_dep_reports_cargo(
         });
     }
     for dep in actionable {
+        let summary = update_map.get(&dep.dep_name).and_then(|r| r.as_ref().ok());
         let status = match update_map.get(&dep.dep_name) {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_constraint.clone(),
@@ -50,13 +52,17 @@ pub(crate) fn build_dep_reports_cargo(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
+        // Look up the release timestamp for the latest compatible version.
+        let release_timestamp = summary
+            .and_then(|s| s.latest_compatible.as_deref())
+            .and_then(|latest| timestamps.get(&dep.package_name)?.get(latest).cloned());
         reports.push(output::DepReport {
             branch_name: None,
             group_name: None,
             automerge: None,
             labels: Vec::new(),
             pr_title: None,
-            release_timestamp: None,
+            release_timestamp,
             current_version_timestamp: None,
             name: dep.dep_name.clone(),
             status,

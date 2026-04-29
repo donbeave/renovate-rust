@@ -239,6 +239,110 @@ pub fn summary_from_cache(constraint: &str, versions: &CrateVersionsEntry) -> Up
     update_summary(constraint, versions)
 }
 
+// ── Release timestamps via crates.io REST API ─────────────────────────────────
+
+/// crates.io REST API base URL (not the sparse index).
+pub const CRATES_IO_API: &str = "https://crates.io";
+
+/// Per-version release timestamps: `version_string → ISO-8601 created_at`.
+pub type CrateTimestamps = HashMap<String, String>;
+
+/// One entry from `GET /api/v1/crates/{name}/versions`.
+#[derive(Deserialize)]
+struct CratesIoVersionInfo {
+    #[serde(rename = "num")]
+    version: String,
+    created_at: String,
+}
+
+/// Response wrapper for `GET /api/v1/crates/{name}/versions`.
+#[derive(Deserialize)]
+struct CratesIoVersionsResponse {
+    versions: Vec<CratesIoVersionInfo>,
+}
+
+/// Fetch release timestamps for all versions of a crate via the REST API.
+///
+/// Returns a map from version string to ISO-8601 `created_at` timestamp.
+/// Non-200 responses return an error; missing fields are silently skipped.
+///
+/// Renovate reference:
+/// `lib/modules/datasource/crate/schema.ts` — `ReleaseTimestamp`
+pub async fn fetch_version_timestamps(
+    http: &HttpClient,
+    crate_name: &str,
+    api_base: &str,
+) -> Result<CrateTimestamps, CratesIoError> {
+    let url = format!(
+        "{}/api/v1/crates/{}/versions",
+        api_base.trim_end_matches('/'),
+        crate_name
+    );
+    let resp = http.get_retrying(&url).await?;
+    if !resp.status().is_success() {
+        return Err(CratesIoError::Http(HttpError::Status {
+            status: resp.status(),
+            url,
+        }));
+    }
+    let body: CratesIoVersionsResponse = resp
+        .json()
+        .await
+        .map_err(|e| CratesIoError::Parse(e.to_string()))?;
+    Ok(body
+        .versions
+        .into_iter()
+        .map(|v| (v.version, v.created_at))
+        .collect())
+}
+
+/// Fetch release timestamps for a batch of crate names concurrently.
+///
+/// Returns a map from crate name to its per-version timestamp map.
+/// Crates that fail are silently omitted.
+pub async fn fetch_timestamps_batch(
+    http: &HttpClient,
+    crate_names: &[String],
+    api_base: &str,
+    concurrency: usize,
+) -> HashMap<String, CrateTimestamps> {
+    if crate_names.is_empty() {
+        return HashMap::new();
+    }
+
+    let sem = Arc::new(Semaphore::new(concurrency));
+    let mut set: JoinSet<(String, Option<CrateTimestamps>)> = JoinSet::new();
+
+    for name in crate_names {
+        let http = http.clone();
+        let sem = Arc::clone(&sem);
+        let name = name.clone();
+        let api_base = api_base.to_owned();
+
+        set.spawn(async move {
+            let _permit = sem.acquire_owned().await.expect("semaphore closed");
+            let ts = fetch_version_timestamps(&http, &name, &api_base).await.ok();
+            (name, ts)
+        });
+    }
+
+    let mut result = HashMap::with_capacity(crate_names.len());
+    while let Some(outcome) = set.join_next().await {
+        match outcome {
+            Ok((name, Some(ts))) => {
+                result.insert(name, ts);
+            }
+            Ok((name, None)) => {
+                tracing::debug!(crate_name = %name, "crates.io timestamp fetch failed (skipped)");
+            }
+            Err(join_err) => {
+                tracing::error!(%join_err, "crates.io timestamp batch task panicked");
+            }
+        }
+    }
+    result
+}
+
 fn parse_index_body(body: &str) -> Result<Vec<CrateRecord>, CratesIoError> {
     body.lines()
         .filter(|l| !l.trim().is_empty())
@@ -391,5 +495,80 @@ mod tests {
         let http = HttpClient::new().unwrap();
         let result = fetch_versions(&http, "nonexistent", &server.uri()).await;
         assert!(result.is_err());
+    }
+
+    // ── fetch_version_timestamps ──────────────────────────────────────────────
+
+    #[tokio::test]
+    async fn fetch_version_timestamps_parses_created_at() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v1/crates/serde/versions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "versions": [
+                    {"num": "1.0.0", "created_at": "2015-04-15T23:26:28.000000+00:00"},
+                    {"num": "1.0.193", "created_at": "2023-10-17T00:00:00.000000+00:00"}
+                ]
+            })))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let ts = fetch_version_timestamps(&http, "serde", &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(
+            ts.get("1.0.0").map(String::as_str),
+            Some("2015-04-15T23:26:28.000000+00:00")
+        );
+        assert_eq!(
+            ts.get("1.0.193").map(String::as_str),
+            Some("2023-10-17T00:00:00.000000+00:00")
+        );
+        assert_eq!(ts.len(), 2);
+    }
+
+    #[tokio::test]
+    async fn fetch_version_timestamps_404_returns_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v1/crates/nonexistent/versions"))
+            .respond_with(ResponseTemplate::new(404))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_version_timestamps(&http, "nonexistent", &server.uri()).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn fetch_timestamps_batch_collects_results() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/api/v1/crates/serde/versions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "versions": [
+                    {"num": "1.0.193", "created_at": "2023-10-17T00:00:00.000000+00:00"}
+                ]
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("GET"))
+            .and(path("/api/v1/crates/tokio/versions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "versions": [
+                    {"num": "1.40.0", "created_at": "2024-01-01T00:00:00.000000+00:00"}
+                ]
+            })))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let names = vec!["serde".to_owned(), "tokio".to_owned()];
+        let result = fetch_timestamps_batch(&http, &names, &server.uri(), 2).await;
+        assert_eq!(result.len(), 2);
+        assert!(result["serde"].contains_key("1.0.193"));
+        assert!(result["tokio"].contains_key("1.40.0"));
     }
 }

@@ -213,6 +213,16 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 ---
 
+## Datasource release timestamps
+
+| Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
+|--------------------|------|---------------|---------------|-----------|--------|
+| `lib/modules/datasource/crate/index.spec.ts` | — | `releaseTimestamp` populated from API | `crates/renovate-core/src/datasources/crates_io.rs` | `fetch_version_timestamps_parses_created_at` | ported |
+| `lib/modules/datasource/crate/index.spec.ts` | — | 404 returns error | `crates/renovate-core/src/datasources/crates_io.rs` | `fetch_version_timestamps_404_returns_error` | ported |
+| `lib/modules/datasource/crate/index.spec.ts` | — | Batch timestamp fetch collects results | `crates/renovate-core/src/datasources/crates_io.rs` | `fetch_timestamps_batch_collects_results` | ported |
+
+---
+
 ## `ignorePaths` / `ignoreDeps`
 
 | Renovate test file | Line | Renovate test | Rust location | Rust test | Status |

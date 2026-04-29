@@ -125,7 +125,8 @@ find where a given TypeScript module is implemented in Rust.
 | `lib/modules/datasource/rubygems/index.ts` | `crates/renovate-core/src/datasources/rubygems.rs` | partial | RubyGems API |
 | `lib/modules/datasource/packagist/index.ts` | `crates/renovate-core/src/datasources/packagist.rs` | partial | Packagist v2 API |
 | `lib/modules/datasource/pub/index.ts` | `crates/renovate-core/src/datasources/pub_dev.rs` | partial | pub.dev API |
-| `lib/modules/datasource/crate/index.ts` | `crates/renovate-core/src/datasources/crates_io.rs` | partial | Sparse index; no timestamps yet |
+| `lib/modules/datasource/crate/index.ts` | `crates/renovate-core/src/datasources/crates_io.rs` | partial | Sparse index + REST API timestamps (`/api/v1/crates/{name}/versions`) |
+| `lib/modules/datasource/crate/schema.ts` | `crates/renovate-core/src/datasources/crates_io.rs` | partial | `ReleaseTimestamp` / `created_at` via REST API |
 | `lib/modules/datasource/bitrise-step/index.ts` | `crates/renovate-core/src/datasources/bitrise.rs` | partial | Bitrise steplib |
 | `lib/modules/datasource/conda/index.ts` | `crates/renovate-core/src/datasources/conda.rs` | partial | Anaconda API |
 | `lib/modules/datasource/jsr/index.ts` | `crates/renovate-core/src/datasources/jsr.rs` | partial | JSR registry |

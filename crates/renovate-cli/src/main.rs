@@ -446,13 +446,20 @@ async fn process_repo(
             unique_crates = unique_crate_names.len(),
             "fetching crate versions (deduplicated)"
         );
-        let versions_cache = crates_io::fetch_versions_batch(
-            http,
-            &unique_crate_names,
-            crates_io::CRATES_IO_SPARSE_INDEX,
-            10,
-        )
-        .await;
+        let (versions_cache, timestamps_cache) = tokio::join!(
+            crates_io::fetch_versions_batch(
+                http,
+                &unique_crate_names,
+                crates_io::CRATES_IO_SPARSE_INDEX,
+                10,
+            ),
+            crates_io::fetch_timestamps_batch(
+                http,
+                &unique_crate_names,
+                crates_io::CRATES_IO_API,
+                10,
+            ),
+        );
         for (cargo_file_path, deps) in cargo_file_deps {
             let actionable: Vec<_> = deps
                 .iter()
@@ -477,7 +484,7 @@ async fn process_repo(
             repo_report.files.push(output::FileReport {
                 path: cargo_file_path.clone(),
                 manager: "cargo".into(),
-                deps: build_dep_reports_cargo(&deps, &actionable, &update_map),
+                deps: build_dep_reports_cargo(&deps, &actionable, &update_map, &timestamps_cache),
             });
         }
     }

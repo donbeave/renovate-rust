@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0202  | 2026-04-28 | crates.io release timestamps via REST API — `minimumReleaseAge` for Cargo | Complete | See below. |
 | 0201  | 2026-04-28 | Refactor: split `main.rs` and `repo_config.rs` into focused modules | Complete | See below. |
 | 0200  | 2026-04-28 | `matchDatasources` + `matchDepTypes` glob/regex/negation via `match_regex_or_glob_list` | Complete | See below. |
 | 0199  | 2026-04-28 | `matchManagers` glob/regex/negation + custom manager prefix + `string_match` utility module | Complete | See below. |
