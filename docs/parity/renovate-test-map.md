@@ -77,7 +77,11 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/sourceurls.ts` | — | empty `matchSourceUrls` matches all | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_source_urls_empty_matches_all` | ported |
 | `lib/util/package-rules/current-value.ts` | — | `matchCurrentValue` regex match | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_current_value_regex` | ported |
 | `lib/util/package-rules/current-value.ts` | — | `matchCurrentValue` exact match | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_current_value_exact` | ported |
+| `lib/util/package-rules/current-value.spec.ts` | — | `matchCurrentValue` case-insensitive `/^"v/i` | `crates/renovate-core/src/repo_config.rs` | `match_current_value_regex_with_flags` | ported |
+| `lib/util/package-rules/current-value.spec.ts` | — | `matchCurrentValue` glob match `1.2.*` | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_current_value_regex` | ported |
 | `lib/util/package-rules/new-value.ts` | — | `matchNewValue` glob match | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_new_value_glob` | ported |
+| `lib/util/package-rules/files.spec.ts` | — | `matchFileNames` undefined packageFile → false | `crates/renovate-core/src/repo_config.rs` | `match_file_names_blocks_matching_path` | ported |
+| `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` negation | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation`, `match_package_names_glob_negation` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDatasources` list | `crates/renovate-core/src/repo_config.rs` | `match_datasources_method_matches_listed_datasource`, `match_datasources_empty_matches_all` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchUpdateTypes` major/minor/patch | `crates/renovate-core/src/repo_config.rs` | `is_update_blocked_for_major_but_not_minor` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchFileNames` glob | `crates/renovate-core/src/repo_config.rs` | `is_update_blocked_for_file_with_filename_rule` | ported |

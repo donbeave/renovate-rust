@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0207  | 2026-04-28 | Fix `labels`/`addLabels` not seeding `collect_rule_effects`; add test map entries | Complete | See below. |
 | 0206  | 2026-04-28 | Fix `matchCurrentValue`/`matchNewValue` regex flags bug; remove `PackageNameMatcher` enum | Complete | See below. |
 | 0205  | 2026-04-28 | Fix negation in `matchPackageNames` — merge deprecated fields + migrate to raw strings | Complete | See below. |
 | 0204  | 2026-04-28 | Fix negation in `matchDepNames` — migrate to raw strings + `match_regex_or_glob_list` | Complete | See below. |

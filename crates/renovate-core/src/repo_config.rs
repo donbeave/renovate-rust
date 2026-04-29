@@ -800,7 +800,19 @@ impl RepoConfig {
     /// Renovate reference: `lib/util/package-rules/index.ts` —
     /// `applyPackageRules()` merging logic.
     pub fn collect_rule_effects(&self, ctx: &DepContext<'_>) -> RuleEffects {
-        let mut effects = RuleEffects::default();
+        // Seed with repo-level labels (labels ∪ addLabels) as the base.
+        let mut effects = RuleEffects {
+            labels: {
+                let mut base = self.labels.clone();
+                for l in &self.add_labels {
+                    if !base.contains(l) {
+                        base.push(l.clone());
+                    }
+                }
+                base
+            },
+            ..RuleEffects::default()
+        };
         for rule in &self.package_rules {
             if !rule.matches_context(ctx) {
                 continue;
@@ -2826,6 +2838,47 @@ mod rule_effects_tests {
         assert!(effects.labels.contains(&"backend".to_owned()));
         assert!(effects.labels.contains(&"web".to_owned()));
         assert_eq!(effects.labels.len(), 2);
+    }
+
+    #[test]
+    fn repo_level_labels_seed_effects() {
+        // Repo-level labels should appear in effects even without matching rules.
+        let c = RepoConfig::parse(r#"{"labels": ["renovate", "dependencies"]}"#);
+        let ctx = DepContext::for_dep("lodash");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.labels.contains(&"renovate".to_owned()));
+        assert!(effects.labels.contains(&"dependencies".to_owned()));
+    }
+
+    #[test]
+    fn add_labels_merged_with_labels() {
+        // addLabels union-merges with labels — no duplicates.
+        let c = RepoConfig::parse(r#"{"labels": ["renovate"], "addLabels": ["deps", "renovate"]}"#);
+        let ctx = DepContext::for_dep("lodash");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.labels.contains(&"renovate".to_owned()));
+        assert!(effects.labels.contains(&"deps".to_owned()));
+        // "renovate" deduped — appears only once
+        assert_eq!(
+            effects
+                .labels
+                .iter()
+                .filter(|l| l.as_str() == "renovate")
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn rule_labels_append_to_repo_labels() {
+        // Per-rule labels union with repo-level labels.
+        let c = RepoConfig::parse(
+            r#"{"labels": ["base"], "packageRules": [{"matchPackageNames": ["express"], "labels": ["frontend"]}]}"#,
+        );
+        let ctx = DepContext::for_dep("express");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.labels.contains(&"base".to_owned()));
+        assert!(effects.labels.contains(&"frontend".to_owned()));
     }
 
     #[test]
