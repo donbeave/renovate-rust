@@ -44,6 +44,9 @@ pub struct GemUpdateSummary {
     pub current_value: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 timestamp when the latest stable version was published.
+    /// Used for `minimumReleaseAge` evaluation.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result from `fetch_updates_concurrent`.
@@ -57,14 +60,17 @@ pub struct GemUpdateResult {
 struct GemVersion {
     number: String,
     prerelease: bool,
+    /// ISO 8601 creation timestamp, e.g. `"2024-01-15T10:30:00.000Z"`.
+    /// Available from `/api/v1/versions/{gem}.json`.
+    created_at: Option<String>,
 }
 
-/// Fetch the latest stable version of a gem.
+/// Fetch the latest stable version of a gem and its release timestamp.
 pub async fn fetch_latest(
     gem_name: &str,
     http: &HttpClient,
     api_base: &str,
-) -> Result<Option<String>, RubyGemsError> {
+) -> Result<Option<(String, Option<String>)>, RubyGemsError> {
     let url = format!("{api_base}/versions/{gem_name}.json");
 
     let resp = http.get_retrying(&url).await?;
@@ -81,7 +87,7 @@ pub async fn fetch_latest(
     let latest = versions
         .into_iter()
         .find(|v| !v.prerelease)
-        .map(|v| v.number);
+        .map(|v| (v.number, v.created_at));
 
     Ok(latest)
 }
@@ -131,15 +137,19 @@ async fn fetch_update_summary(
     http: &HttpClient,
     api_base: &str,
 ) -> Result<GemUpdateSummary, RubyGemsError> {
-    let latest = fetch_latest(&dep.name, http, api_base).await?;
+    let result = fetch_latest(&dep.name, http, api_base).await?;
+    let (latest_version, release_timestamp) = result
+        .map(|(v, ts)| (Some(v), ts))
+        .unwrap_or((None, None));
     let s = crate::versioning::semver_generic::semver_update_summary(
         &dep.current_value,
-        latest.as_deref(),
+        latest_version.as_deref(),
     );
     Ok(GemUpdateSummary {
         current_value: s.current_value,
         latest: s.latest,
         update_available: s.update_available,
+        release_timestamp,
     })
 }
 
@@ -175,7 +185,7 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_latest("rails", &http, &server.uri()).await.unwrap();
-        assert_eq!(result, Some("7.0.8".to_owned()));
+        assert_eq!(result.map(|(v, _)| v), Some("7.0.8".to_owned()));
     }
 
     #[tokio::test]
