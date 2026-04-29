@@ -176,6 +176,12 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `minimumReleaseAge`.
     pub minimum_release_age: Option<String>,
+
+    /// Pull Request creation priority.  Higher numbers are created first.
+    /// Negative values are created last.  Default: `0`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prPriority`.
+    pub pr_priority: Option<i32>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -659,6 +665,9 @@ pub struct RuleEffects {
     /// PR reviewers from the last matching rule that sets them.
     /// Empty = use repo-level reviewers.
     pub reviewers: Vec<String>,
+    /// PR creation priority.  Higher numbers → created first.
+    /// `None` = not configured (treat as 0).  The last matching rule wins.
+    pub pr_priority: Option<i32>,
 }
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────

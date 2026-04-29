@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0217  | 2026-04-29 | `prPriority` in `packageRules` — PR priority in output | Complete | See below. |
 | 0216  | 2026-04-29 | `groupSlug` in `packageRules` — explicit group branch topic override | Complete | See below. |
 | 0215  | 2026-04-29 | `updateType` field in JSON output + DRY human output rendering | Complete | See below. |
 | 0214  | 2026-04-29 | `addLabels` + `assignees`/`reviewers` per-rule in `packageRules`; exposed in output | Complete | See below. |
@@ -4959,6 +4960,26 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0217 - `prPriority` in `packageRules`; exposed in JSON output
+
+### Renovate reference
+- `lib/config/options/index.ts` — `prPriority` (integer, default 0, parents: packageRules)
+
+### What landed
+- `PackageRule`: `pr_priority: Option<i32>` (serde: `prPriority`)
+- `RuleEffects`: `pr_priority: Option<i32>`; last matching rule wins
+- `collect_rule_effects`: collects `pr_priority` from matching rules
+- `pipeline_utils`: sets `dep.pr_priority = effects.pr_priority`
+- `output.rs` `DepReport`: `pr_priority: Option<i32>` (serde: `prPriority`,
+  `skip_serializing_if = "Option::is_none"`)
+- All DepReport construction sites updated (`pr_priority: None`)
+
+### Verification
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` ✓
+- `cargo nextest run --workspace --all-features` → 1406 tests pass
 
 ---
 

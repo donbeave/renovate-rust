@@ -419,6 +419,8 @@ impl RepoConfig {
             match_current_age: Option<String>,
             #[serde(rename = "minimumReleaseAge")]
             minimum_release_age: Option<String>,
+            #[serde(rename = "prPriority")]
+            pr_priority: Option<i32>,
         }
 
         #[derive(Deserialize)]
@@ -573,6 +575,7 @@ impl RepoConfig {
                     match_repositories: r.match_repositories,
                     match_current_age: r.match_current_age,
                     minimum_release_age: r.minimum_release_age,
+                    pr_priority: r.pr_priority,
                 }
             })
             .collect();
@@ -881,6 +884,9 @@ impl RepoConfig {
             }
             if rule.minimum_release_age.is_some() {
                 effects.minimum_release_age.clone_from(&rule.minimum_release_age);
+            }
+            if rule.pr_priority.is_some() {
+                effects.pr_priority = rule.pr_priority;
             }
             if !rule.assignees.is_empty() {
                 effects.assignees.clone_from(&rule.assignees);
