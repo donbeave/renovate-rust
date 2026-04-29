@@ -1836,12 +1836,194 @@ fn resolve_extends_group_presets(
                     ..Default::default()
                 });
             }
+            // group:jwtFramework — group JWT Framework packages (packagist, web-token/**).
+            "group:jwtFramework" => {
+                rules.push(PackageRule {
+                    group_name: Some("JWT Framework packages".to_owned()),
+                    group_slug: Some("jwt-framework".to_owned()),
+                    match_datasources: vec!["packagist".to_owned()],
+                    match_package_names: vec!["web-token/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:atlaskit — group all @atlaskit packages.
+            "group:atlaskit" => {
+                rules.push(PackageRule {
+                    group_name: Some("Atlassian Atlaskit packages".to_owned()),
+                    group_slug: Some("atlaskit".to_owned()),
+                    match_package_names: vec!["@atlaskit/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:dotNetCore — group .NET Core Docker containers.
+            "group:dotNetCore" => {
+                rules.push(PackageRule {
+                    group_name: Some(".NET Core Docker containers".to_owned()),
+                    group_slug: Some("dot-net-core".to_owned()),
+                    match_datasources: vec!["docker".to_owned()],
+                    match_package_names: vec!["mcr.microsoft.com/dotnet/**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:googleapis — group googleapis npm packages.
+            "group:googleapis" => {
+                rules.push(PackageRule {
+                    group_name: Some("googleapis packages".to_owned()),
+                    group_slug: Some("googleapis".to_owned()),
+                    match_datasources: vec!["npm".to_owned()],
+                    match_package_names: vec![
+                        "@google-cloud/**".to_owned(),
+                        "google-auth-library".to_owned(),
+                        "googleapis".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:jekyllEcosystem — group Jekyll and related Ruby packages.
+            "group:jekyllEcosystem" => {
+                rules.push(PackageRule {
+                    group_name: Some("jekyll ecosystem packages".to_owned()),
+                    group_slug: Some("jekyll-ecosystem".to_owned()),
+                    match_source_urls: vec![
+                        "https://github.com/jekyll/**".to_owned(),
+                        "https://github.com/github/pages-gem**".to_owned(),
+                    ],
+                    ..Default::default()
+                });
+            }
+            // group:postcss — group PostCSS packages.
+            "group:postcss" => {
+                rules.push(PackageRule {
+                    group_name: Some("postcss packages".to_owned()),
+                    group_slug: Some("postcss".to_owned()),
+                    match_package_names: vec!["postcss".to_owned(), "postcss-**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:vite — group all Vite-related npm packages.
+            "group:vite" => {
+                rules.push(PackageRule {
+                    group_name: Some("Vite packages".to_owned()),
+                    group_slug: Some("vite".to_owned()),
+                    match_datasources: vec!["npm".to_owned()],
+                    match_package_names: vec![
+                        "vite".to_owned(),
+                        "**vite-plugin**".to_owned(),
+                        "@vitejs/**".to_owned(),
+                    ],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:pulumi — group Pulumi packages across npm/pypi/go/maven/nuget.
+            "group:pulumi" => {
+                for (slug, datasource, pkg_pattern) in [
+                    ("pulumi-node", "npm", "@pulumi/**"),
+                    ("pulumi-python", "pypi", "pulumi-**"),
+                    ("pulumi-go", "go", "github.com/pulumi/**"),
+                    ("pulumi-java", "maven", "com.pulumi**"),
+                    ("pulumi-dotnet", "nuget", "Pulumi**"),
+                ] {
+                    rules.push(PackageRule {
+                        group_name: Some("Pulumi".to_owned()),
+                        group_slug: Some(slug.to_owned()),
+                        match_datasources: vec![datasource.to_owned()],
+                        match_package_names: vec![pkg_pattern.to_owned()],
+                        has_name_constraint: true,
+                        ..Default::default()
+                    });
+                }
+            }
+            // group:test — group all test packages (js + php unit tests).
+            "group:test" => {
+                let mut pkgs: Vec<String> = JS_UNIT_TEST_PACKAGES
+                    .iter()
+                    .map(|&s| s.to_owned())
+                    .collect();
+                pkgs.extend(PHP_UNIT_TEST_PACKAGES.iter().map(|&s| s.to_owned()));
+                rules.push(PackageRule {
+                    group_name: Some("test packages".to_owned()),
+                    group_slug: Some("test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: pkgs,
+                    ..Default::default()
+                });
+            }
+            // group:testNonMajor — same as test but minor+patch only.
+            "group:testNonMajor" => {
+                let mut pkgs: Vec<String> = JS_UNIT_TEST_PACKAGES
+                    .iter()
+                    .map(|&s| s.to_owned())
+                    .collect();
+                pkgs.extend(PHP_UNIT_TEST_PACKAGES.iter().map(|&s| s.to_owned()));
+                rules.push(PackageRule {
+                    group_name: Some("test packages".to_owned()),
+                    group_slug: Some("test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: pkgs,
+                    match_update_types: vec![UpdateType::Minor, UpdateType::Patch],
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:unitTest — group all unit test packages (js + php).
+            "group:unitTest" => {
+                let mut pkgs: Vec<String> = JS_UNIT_TEST_PACKAGES
+                    .iter()
+                    .map(|&s| s.to_owned())
+                    .collect();
+                pkgs.extend(PHP_UNIT_TEST_PACKAGES.iter().map(|&s| s.to_owned()));
+                rules.push(PackageRule {
+                    group_name: Some("unit test packages".to_owned()),
+                    group_slug: Some("unit-test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: pkgs,
+                    ..Default::default()
+                });
+            }
+            // group:unitTestNonMajor — unit test packages, minor+patch only.
+            "group:unitTestNonMajor" => {
+                let mut pkgs: Vec<String> = JS_UNIT_TEST_PACKAGES
+                    .iter()
+                    .map(|&s| s.to_owned())
+                    .collect();
+                pkgs.extend(PHP_UNIT_TEST_PACKAGES.iter().map(|&s| s.to_owned()));
+                rules.push(PackageRule {
+                    group_name: Some("unit test packages".to_owned()),
+                    group_slug: Some("unit-test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: pkgs,
+                    match_update_types: vec![UpdateType::Minor, UpdateType::Patch],
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
 
     (rules, separate_major_minor)
 }
+
+/// PHP unit test package list for `group:test`, `group:unitTest` etc.
+/// Mirrors `packages:phpUnitTest` in packages.preset.ts.
+const PHP_UNIT_TEST_PACKAGES: &[&str] = &[
+    "behat/behat",
+    "brianium/paratest",
+    "facile-it/paraunit",
+    "mockery/mockery",
+    "phpspec/prophecy",
+    "phpspec/prophecy-phpunit",
+    "phpspec/phpspec",
+    "phpunit/phpunit",
+    "pestphp/**",
+    "php-mock/**",
+];
 
 /// Shared package list for `group:jsTest`, `group:jsTestNonMajor`, `group:jsUnitTest`,
 /// and `group:jsUnitTestNonMajor`. Mirrors `packages:jsUnitTest` in packages.preset.ts.
@@ -6769,6 +6951,38 @@ mod rule_effects_tests {
         assert_eq!(rule.group_name.as_deref(), Some("jest monorepo"));
         assert!(rule.update_type_matches(UpdateType::Major));
         assert!(!rule.update_type_matches(UpdateType::Minor));
+    }
+
+    #[test]
+    fn group_vite_matches_vite_packages() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:vite"]}"#);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("Vite packages"));
+        assert!(rule.name_matches("vite"));
+        assert!(rule.name_matches("@vitejs/plugin-react"));
+        assert!(rule.name_matches("vite-plugin-dts"));
+        assert!(!rule.name_matches("webpack"));
+    }
+
+    #[test]
+    fn group_pulumi_injects_five_rules() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:pulumi"]}"#);
+        // 5 rules: npm, pypi, go, maven, nuget
+        assert_eq!(c.package_rules.len(), 5);
+        assert!(
+            c.package_rules
+                .iter()
+                .all(|r| r.group_name.as_deref() == Some("Pulumi"))
+        );
+    }
+
+    #[test]
+    fn group_jwt_framework_matches_packagist() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:jwtFramework"]}"#);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("JWT Framework packages"));
+        assert!(rule.datasource_matches("packagist"));
+        assert!(!rule.datasource_matches("npm"));
     }
 
     #[test]

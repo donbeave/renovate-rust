@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0307  | 2026-04-29 | 12 more group presets: `jwtFramework`, `atlaskit`, `dotNetCore`, `googleapis`, `jekyllEcosystem`, `postcss`, `vite`, `pulumi` (5 rules), `test`, `testNonMajor`, `unitTest`, `unitTestNonMajor`; `PHP_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |
 | 0306  | 2026-04-29 | Fix `config:recommended` to inject `group:recommended` rules; `resolve_extends_group_presets` now expands `config:recommended/base/best-practices` to their group rules; 1 test | Complete | See below. |
 | 0305  | 2026-04-29 | 13 more group presets: `codemirror`, `flyway`, `fortawesome`, `fusionjs`, `githubArtifactActions`, `glimmer`, `goOpenapi`, `polymer`, `allApollographql`, `apiPlatform`, `phpstan`, `symfony` (with exclusions), `rubyOnRails`; update `group:recommended` to include all; 3 tests | Complete | See below. |
 | 0304  | 2026-04-29 | `group:linters` preset: inlines expanded `packages:linters` (emberTemplateLint + eslint + phpLinters + stylelint + tslint + prettier/oxlint) via `LINTER_PACKAGES` const; 1 test | Complete | See below. |
@@ -5769,6 +5770,31 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
   - Recursively calls `resolve_extends_group_presets(["group:recommended"])` and merges the results
 - This means configs with `extends: ["config:recommended"]` now correctly get all group:recommended rules (Node.js, Gradle, Spring, React, etc.)
 - 1 test: `config:recommended` injects ≥40 package rules including "Node.js" group
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0307 - 12 more group presets + PHP_UNIT_TEST_PACKAGES const
+
+### Renovate reference
+- `lib/config/presets/internal/group.preset.ts`: jwtFramework, atlaskit, dotNetCore, googleapis, jekyllEcosystem, postcss, vite, pulumi, test, testNonMajor, unitTest, unitTestNonMajor
+- `lib/config/presets/internal/packages.preset.ts`: phpUnitTest (PHP unit test package list)
+
+### Implementation
+- Added `PHP_UNIT_TEST_PACKAGES: &[&str]` constant (11 PHP test packages from packages:phpUnitTest)
+- Added `group:jwtFramework`: packagist + `web-token/**`
+- Added `group:atlaskit`: `@atlaskit/**`
+- Added `group:dotNetCore`: docker datasource + `mcr.microsoft.com/dotnet/**`
+- Added `group:googleapis`: npm + @google-cloud/**, google-auth-library, googleapis
+- Added `group:jekyllEcosystem`: matchSourceUrls from jekyll/** and pages-gem**
+- Added `group:postcss`: `postcss` + `postcss-**`
+- Added `group:vite`: npm + vite, **vite-plugin**, @vitejs/**
+- Added `group:pulumi`: **5 rules** — npm @pulumi/**, pypi pulumi-**, go github.com/pulumi/**, maven com.pulumi**, nuget Pulumi**
+- Added `group:test`, `group:testNonMajor`, `group:unitTest`, `group:unitTestNonMajor`: combine JS_UNIT_TEST_PACKAGES + PHP_UNIT_TEST_PACKAGES; Non-major variants add minor/patch update type constraint
+- 3 tests: vite matches vite/vite-plugin/@vitejs; pulumi has 5 rules; jwtFramework is packagist-only
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`
