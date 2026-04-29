@@ -134,6 +134,42 @@ pub fn manager_categories(manager_name: &str) -> &'static [&'static str] {
     }
 }
 
+/// Return the primary Renovate datasource ID for a manager.
+///
+/// Used to populate `DepContext.datasource` so `matchDatasources` rules fire
+/// correctly when evaluating packageRules for a dep.  Returns `None` for
+/// managers that don't have a single well-known datasource.
+///
+/// Renovate reference: each manager's `defaultConfig.datasource` in
+/// `lib/modules/manager/*/index.ts`.
+pub fn manager_default_datasource(manager_name: &str) -> Option<&'static str> {
+    match manager_name {
+        "cargo" => Some("crate"),
+        "npm" | "bun" | "meteor" | "mint" => Some("npm"),
+        "pip_requirements" | "pip-compile" | "pip_setup" | "pipenv" | "poetry" | "pep621"
+        | "pep723" | "setup-cfg" => Some("pypi"),
+        "maven" | "maven-wrapper" | "ant" | "sbt" | "leiningen" | "kotlin-script" => {
+            Some("maven")
+        }
+        "gradle" | "gradle-wrapper" => Some("maven"),
+        "gomod" => Some("go"),
+        "bundler" | "gemspec" => Some("rubygems"),
+        "composer" => Some("packagist"),
+        "nuget" => Some("nuget"),
+        "pub" => Some("dart"),
+        "dockerfile" | "docker-compose" | "devcontainer" | "quadlet" | "batect" => Some("docker"),
+        "github-actions" => Some("github-tags"),
+        "terraform" | "terragrunt" => Some("terraform"),
+        "helm-requirements" | "helm-values" | "helmfile" => Some("helm"),
+        "cabal" => Some("hackage"),
+        "cpanfile" => Some("cpan"),
+        "hex" | "mix" => Some("hex"),
+        "spm" | "xcodegen" => Some("github-tags"),
+        "bazel-module" => Some("bazel"),
+        _ => None,
+    }
+}
+
 /// Pre-compiled manager patterns.  Compiled once at first use via
 /// `LazyLock` — avoids re-compilation on every `detect()` call.
 static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {
@@ -850,5 +886,25 @@ mod tests {
         assert!(result.iter().any(|m| m.name == "cargo"));
         assert!(result.iter().any(|m| m.name == "npm"));
         assert!(result.iter().any(|m| m.name == "github-actions"));
+    }
+
+    #[test]
+    fn manager_default_datasource_known_managers() {
+        assert_eq!(manager_default_datasource("cargo"), Some("crate"));
+        assert_eq!(manager_default_datasource("npm"), Some("npm"));
+        assert_eq!(manager_default_datasource("pip_requirements"), Some("pypi"));
+        assert_eq!(manager_default_datasource("maven"), Some("maven"));
+        assert_eq!(manager_default_datasource("gradle"), Some("maven"));
+        assert_eq!(manager_default_datasource("dockerfile"), Some("docker"));
+        assert_eq!(manager_default_datasource("github-actions"), Some("github-tags"));
+        assert_eq!(manager_default_datasource("bundler"), Some("rubygems"));
+        assert_eq!(manager_default_datasource("composer"), Some("packagist"));
+        assert_eq!(manager_default_datasource("nuget"), Some("nuget"));
+    }
+
+    #[test]
+    fn manager_default_datasource_unknown_returns_none() {
+        assert_eq!(manager_default_datasource("unknown-manager"), None);
+        assert_eq!(manager_default_datasource("hermit"), None);
     }
 }

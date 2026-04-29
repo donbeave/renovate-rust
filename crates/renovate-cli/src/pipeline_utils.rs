@@ -29,8 +29,10 @@ pub(crate) fn apply_update_blocking_to_report(
             {
                 // Build the full context once — reused for all blocking checks AND
                 // effect collection so matchers like matchDepTypes / matchRepositories
-                // fire consistently across every check.
+                // / matchDatasources fire consistently across every check.
                 let update_type = classify_semver_update(current, latest);
+                let datasource =
+                    renovate_core::managers::manager_default_datasource(manager.as_str());
                 let ctx = renovate_core::repo_config::DepContext {
                     dep_name: &dep.name,
                     manager: Some(manager.as_str()),
@@ -41,6 +43,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     current_version_timestamp: dep.current_version_timestamp.as_deref(),
                     dep_type: dep.dep_type.as_deref(),
                     repository: Some(repo_slug),
+                    datasource,
                     ..Default::default()
                 };
 
