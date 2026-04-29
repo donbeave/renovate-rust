@@ -558,4 +558,13 @@ spec:
         let deps = extract("", false);
         assert!(deps.git_deps.is_empty());
     }
+
+    #[test]
+    fn unknown_manifest_returns_empty() {
+        // Ported: "should return null if a unknown manifest is supplied" — fleet/extract.spec.ts line 30
+        // A Kubernetes manifest without 'kind: GitRepo' → no deps extracted
+        let content = "apiVersion: v1\nkind: Service\nspec:\n  selector: {}\n";
+        let deps = extract(content, false);
+        assert!(deps.git_deps.is_empty());
+    }
 }
