@@ -878,6 +878,10 @@ fn normalize_preset(preset: &str) -> Option<String> {
         "regexManagers:mavenPropertyVersions" => Some("customManagers:mavenPropertyVersions"),
         "regexManagers:tfvarsVersions" => Some("customManagers:tfvarsVersions"),
         "regexManagers:tsconfigNodeVersions" => Some("customManagers:tsconfigNodeVersions"),
+        // merge-confidence: old GitHub-hosted preset → internal preset
+        "github>whitesource/merge-confidence:beta"
+        | "github>whitesource/merge-confidence"
+        | "github>whitesource/merge-confidence:beta2" => Some("mergeConfidence:all-badges"),
         _ => None,
     };
     Some(renamed.unwrap_or(preset).to_owned())
@@ -4321,12 +4325,10 @@ impl RepoConfig {
                         .match_managers
                         .into_iter()
                         .chain(r.managers)
-                        .map(|m| {
-                            if m == "regex" {
-                                "custom.regex".to_owned()
-                            } else {
-                                m
-                            }
+                        .map(|m| match m.as_str() {
+                            "regex" => "custom.regex".to_owned(),
+                            "renovate-config-presets" => "renovate-config".to_owned(),
+                            _ => m,
                         })
                         .collect(),
                     match_update_types,
@@ -6064,6 +6066,33 @@ mod tests {
             c.collect_rule_effects(&ctx).automerge,
             Some(true),
             "legacy 'regex' manager should match 'custom.regex' rule"
+        );
+    }
+
+    #[test]
+    fn match_managers_renovate_config_presets_migrated_to_renovate_config() {
+        // Ported: "migrates old custom manager syntax to new one" (renovate-config-presets → renovate-config)
+        // match-managers-migration.spec.ts
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["renovate-config-presets"], "automerge": true}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].match_managers,
+            vec!["renovate-config".to_owned()],
+            "renovate-config-presets must be migrated to renovate-config"
+        );
+    }
+
+    #[test]
+    fn extend_whitesource_merge_confidence_preset_normalized() {
+        // Ported: "migrate merge confidence config preset to internal preset"
+        // extends-migration.spec.ts — github>whitesource/merge-confidence:beta → mergeConfidence:all-badges
+        let c = RepoConfig::parse(r#"{"extends": ["github>whitesource/merge-confidence:beta"]}"#);
+        // The preset should be normalized (and since we don't expand mergeConfidence:all-badges
+        // further, it should remain in extends)
+        assert!(
+            c.extends.iter().any(|p| p == "mergeConfidence:all-badges"),
+            "whitesource merge-confidence preset must normalize to mergeConfidence:all-badges"
         );
     }
 
