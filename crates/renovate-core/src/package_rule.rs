@@ -265,16 +265,19 @@ impl PackageRule {
 
     /// Return `true` when `current_value` satisfies this rule's `matchCurrentVersion`.
     pub fn current_version_matches(&self, current_value: &str) -> bool {
+        use crate::string_match::match_regex_or_glob;
         use crate::versioning::semver_generic::{lower_bound, parse_padded};
         let Some(ref mcv) = self.match_current_version else {
             return true;
         };
+        // Regex patterns are matched directly against currentValue string.
         if mcv.starts_with('/') {
-            return true; // regex not yet supported — treat as match
+            return match_regex_or_glob(current_value, mcv);
         }
+        // Semver range: extract the lower-bound version and compare.
         let lb = lower_bound(current_value);
         let Some(current_sv) = parse_padded(lb) else {
-            return true;
+            return true; // can't parse → don't restrict
         };
         match semver::VersionReq::parse(mcv) {
             Ok(req) => req.matches(&current_sv),

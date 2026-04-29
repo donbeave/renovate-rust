@@ -74,8 +74,11 @@ pub(crate) fn apply_update_blocking_to_report(
                         is_patch,
                         repo_cfg.separate_minor_patch,
                     );
-                    dep.branch_name =
-                        Some(branch::branch_name(&repo_cfg.branch_prefix, "", &topic));
+                    dep.branch_name = Some(branch::branch_name(
+                        &repo_cfg.branch_prefix,
+                        &repo_cfg.additional_branch_prefix,
+                        &topic,
+                    ));
                 }
                 // Generate PR title following Renovate's default commitMessage template.
                 let is_major = classify_semver_update(current, latest)

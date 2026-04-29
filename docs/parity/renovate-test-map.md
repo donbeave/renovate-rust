@@ -56,6 +56,8 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/options/index.ts` | — | `labels`, `assignees`, `reviewers` | `crates/renovate-core/src/repo_config.rs` | `labels_parsed`, `reviewers_and_assignees_parsed` | ported |
 | `lib/config/options/index.ts` | — | `groupName` at repo and rule level | `crates/renovate-core/src/repo_config.rs` | `group_name_parsed_at_repo_level`, `package_rule_group_name_parsed` | ported |
 | `lib/config/options/index.ts` | — | `baseBranches` list | `crates/renovate-core/src/repo_config.rs` | `base_branches_parsed` | ported |
+| `lib/config/options/index.ts` | — | `additionalBranchPrefix` parsed + wired to branch_name | `crates/renovate-core/src/repo_config.rs` | `additional_branch_prefix_default_empty`, `additional_branch_prefix_parsed` | ported |
+| `lib/config/options/index.ts` | — | `labels` + `addLabels` seed rule effects | `crates/renovate-core/src/repo_config.rs` | `repo_level_labels_seed_effects`, `add_labels_merged_with_labels`, `rule_labels_append_to_repo_labels` | ported |
 
 ---
 
@@ -80,6 +82,9 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/current-value.spec.ts` | — | `matchCurrentValue` case-insensitive `/^"v/i` | `crates/renovate-core/src/repo_config.rs` | `match_current_value_regex_with_flags` | ported |
 | `lib/util/package-rules/current-value.spec.ts` | — | `matchCurrentValue` glob match `1.2.*` | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_current_value_regex` | ported |
 | `lib/util/package-rules/new-value.ts` | — | `matchNewValue` glob match | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_new_value_glob` | ported |
+| `lib/util/package-rules/new-value.spec.ts` | — | `matchNewValue` exact, glob, regex, flags | `crates/renovate-core/src/repo_config.rs` | `source_url_tests::match_new_value_glob`, `match_current_value_regex_with_flags` | ported |
+| `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` regex against currentValue | `crates/renovate-core/src/repo_config.rs` | `match_current_version_regex_against_current_value` | ported |
+| `lib/util/package-rules/current-version.spec.ts` | — | `matchCurrentVersion` semver range match | `crates/renovate-core/src/repo_config.rs` | `match_current_version_blocks_when_below_range` | ported |
 | `lib/util/package-rules/files.spec.ts` | — | `matchFileNames` undefined packageFile → false | `crates/renovate-core/src/repo_config.rs` | `match_file_names_blocks_matching_path` | ported |
 | `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` negation | `crates/renovate-core/src/repo_config.rs` | `match_package_names_negation`, `match_package_names_glob_negation` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDatasources` list | `crates/renovate-core/src/repo_config.rs` | `match_datasources_method_matches_listed_datasource`, `match_datasources_empty_matches_all` | ported |

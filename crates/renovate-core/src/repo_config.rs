@@ -117,6 +117,12 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `branchPrefix`.
     pub branch_prefix: String,
 
+    /// Additional string appended after `branchPrefix` and before the
+    /// branch topic.  Default: `""`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `additionalBranchPrefix`.
+    pub additional_branch_prefix: String,
+
     /// Branches to process (alternative base branches).  Empty = default
     /// branch only.
     ///
@@ -424,6 +430,8 @@ impl RepoConfig {
             reviewers: Vec<String>,
             #[serde(rename = "branchPrefix", default = "default_branch_prefix")]
             branch_prefix: String,
+            #[serde(rename = "additionalBranchPrefix", default)]
+            additional_branch_prefix: String,
             #[serde(rename = "baseBranches", default)]
             base_branches: Vec<String>,
             #[serde(rename = "prConcurrentLimit", default)]
@@ -564,6 +572,7 @@ impl RepoConfig {
             assignees: raw.assignees,
             reviewers: raw.reviewers,
             branch_prefix: raw.branch_prefix,
+            additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: raw.base_branches,
             pr_concurrent_limit: raw.pr_concurrent_limit,
             pr_hourly_limit: raw.pr_hourly_limit,
@@ -861,6 +870,7 @@ impl Default for RepoConfig {
             assignees: Vec::new(),
             reviewers: Vec::new(),
             branch_prefix: "renovate/".to_owned(),
+            additional_branch_prefix: String::new(),
             base_branches: Vec::new(),
             pr_concurrent_limit: 0,
             pr_hourly_limit: 2,
@@ -1741,6 +1751,21 @@ mod tests {
         assert!(c.is_update_blocked("pkg", "99.0.0", UpdateType::Major, "npm"));
     }
 
+    #[test]
+    fn match_current_version_regex_against_current_value() {
+        // Regex pattern in matchCurrentVersion is matched against the raw currentValue
+        // string (not parsed as semver). Previously we returned true for all regex
+        // patterns — now they're properly evaluated.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "/^0/", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        // "0.1.0" starts with "0" → matches /^0/
+        assert!(rule.current_version_matches("0.1.0"));
+        // "1.0.0" starts with "1", does NOT match /^0/
+        assert!(!rule.current_version_matches("1.0.0"));
+    }
+
     // ── matchFileNames tests ──────────────────────────────────────────────────
 
     #[test]
@@ -2103,6 +2128,18 @@ mod tests {
     fn branch_prefix_custom() {
         let c = RepoConfig::parse(r#"{"branchPrefix": "deps/"}"#);
         assert_eq!(c.branch_prefix, "deps/");
+    }
+
+    #[test]
+    fn additional_branch_prefix_default_empty() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert_eq!(c.additional_branch_prefix, "");
+    }
+
+    #[test]
+    fn additional_branch_prefix_parsed() {
+        let c = RepoConfig::parse(r#"{"additionalBranchPrefix": "chore-"}"#);
+        assert_eq!(c.additional_branch_prefix, "chore-");
     }
 
     #[test]
