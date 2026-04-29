@@ -53,6 +53,22 @@ pub enum MavenDepType {
     Profile,
 }
 
+impl MavenDepType {
+    /// Return the Renovate-canonical `depType` string for this Maven dep type.
+    ///
+    /// Renovate reference: `lib/modules/manager/maven/index.ts` — `extractAllPackageFiles`.
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            MavenDepType::Regular => "dependencies",
+            MavenDepType::Management => "dependency-management",
+            MavenDepType::Plugin => "plugins",
+            MavenDepType::Extension => "extensions",
+            MavenDepType::Parent => "parent",
+            MavenDepType::Profile => "profiles",
+        }
+    }
+}
+
 /// Why a Maven dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MavenSkipReason {
@@ -779,5 +795,18 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "org.example:bar");
         assert_eq!(deps[0].current_value, "1.0.0");
+    }
+
+    #[test]
+    fn dep_type_as_renovate_str() {
+        assert_eq!(MavenDepType::Regular.as_renovate_str(), "dependencies");
+        assert_eq!(
+            MavenDepType::Management.as_renovate_str(),
+            "dependency-management"
+        );
+        assert_eq!(MavenDepType::Plugin.as_renovate_str(), "plugins");
+        assert_eq!(MavenDepType::Extension.as_renovate_str(), "extensions");
+        assert_eq!(MavenDepType::Parent.as_renovate_str(), "parent");
+        assert_eq!(MavenDepType::Profile.as_renovate_str(), "profiles");
     }
 }

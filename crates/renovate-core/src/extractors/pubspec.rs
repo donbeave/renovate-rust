@@ -34,6 +34,16 @@ pub enum PubspecDepType {
     Dev,
 }
 
+impl PubspecDepType {
+    /// Return the Renovate-canonical `depType` string.
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            PubspecDepType::Regular => "dependencies",
+            PubspecDepType::Dev => "dev_dependencies",
+        }
+    }
+}
+
 /// Why a pub package is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PubspecSkipReason {
