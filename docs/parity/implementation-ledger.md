@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0213  | 2026-04-29 | Per-rule `schedule` + `minimumReleaseAge` in `packageRules` | Complete | See below. |
 | 0212  | 2026-04-29 | `hashedBranchLength` config option — SHA-512 branch name hashing | Complete | See below. |
 | 0211  | 2026-04-28 | Refactor: split `managers_impl` into 17 focused `pipelines/` sub-modules | Complete | See below. |
 | 0210  | 2026-04-28 | Refactor: extract `managers_impl.rs` + `context.rs`; `main.rs` 8,733→389 lines | Complete | See below. |
@@ -4955,6 +4956,36 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0213 - Per-rule `schedule` and `minimumReleaseAge` in `packageRules`
+
+### Renovate reference
+- `lib/config/options/index.ts` — `schedule` and `minimumReleaseAge` in `packageRules`
+- `lib/util/package-rules/index.ts` — rule application merges schedule + minimumReleaseAge
+
+### What landed
+- `PackageRule`: added `minimum_release_age: Option<String>` (serde: `minimumReleaseAge`)
+- `RuleEffects`: added `minimum_release_age: Option<String>` — collected by `collect_rule_effects`;
+  the last matching rule that sets it wins (same semantics as `schedule`)
+- `repo_config.rs::collect_rule_effects`: propagates `minimum_release_age` from matching rules
+- `pipeline_utils.rs::apply_update_blocking_to_report`: two new checks after `collect_rule_effects`:
+  1. **Per-rule schedule**: if `effects.schedule` is non-empty and we're outside the window →
+     skip with reason `"outside schedule window (packageRule)"`
+  2. **Effective minimumReleaseAge**: uses per-rule override when set, falls back to global;
+     replaces the old pre-effects global-only check so both code paths are unified
+- 6 new unit tests covering: schedule collected for matching dep, not-collected for non-matching,
+  per-rule minimumReleaseAge parsed/collected, last-rule-wins semantics
+
+### Behavior notes
+- Per-rule schedule is checked AFTER `collect_rule_effects` so it only fires when the rule
+  actually matches the dep (correct behavior — matches Renovate's evaluation order)
+- `minimumReleaseAge` now supports both global and per-rule values; per-rule takes precedence
+
+### Verification
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` ✓
+- `cargo nextest run --workspace --all-features` → 1397 tests pass (6 new)
 
 ---
 

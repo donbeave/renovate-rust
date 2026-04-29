@@ -24,18 +24,6 @@ pub(crate) fn apply_update_blocking_to_report(
                 ref latest,
             } = dep.status
             {
-                // Check minimumReleaseAge: skip updates to too-new releases.
-                if repo_cfg.minimum_release_age.is_some()
-                    && !renovate_core::schedule::is_within_release_age(
-                        dep.release_timestamp.as_deref(),
-                        repo_cfg.minimum_release_age.as_deref(),
-                    )
-                {
-                    dep.status = output::DepStatus::Skipped {
-                        reason: "newer than minimumReleaseAge".into(),
-                    };
-                    continue;
-                }
                 // Check allowedVersions restriction (file-path-aware).
                 if repo_cfg.is_version_restricted_for_file(&dep.name, &manager, latest, &file_path)
                 {
@@ -75,6 +63,35 @@ pub(crate) fn apply_update_blocking_to_report(
                     ..Default::default()
                 };
                 let effects = repo_cfg.collect_rule_effects(&ctx);
+
+                // Per-rule schedule gate: if a matching packageRule specifies a
+                // schedule, only allow this update during that window.
+                if !effects.schedule.is_empty()
+                    && !renovate_core::schedule::is_within_schedule(&effects.schedule)
+                {
+                    dep.status = output::DepStatus::Skipped {
+                        reason: "outside schedule window (packageRule)".into(),
+                    };
+                    continue;
+                }
+
+                // Per-rule minimumReleaseAge: last matching rule with minimumReleaseAge
+                // wins; overrides the global setting for this dep.
+                let effective_min_age = effects
+                    .minimum_release_age
+                    .as_deref()
+                    .or(repo_cfg.minimum_release_age.as_deref());
+                if effective_min_age.is_some()
+                    && !renovate_core::schedule::is_within_release_age(
+                        dep.release_timestamp.as_deref(),
+                        effective_min_age,
+                    )
+                {
+                    dep.status = output::DepStatus::Skipped {
+                        reason: "newer than minimumReleaseAge".into(),
+                    };
+                    continue;
+                }
 
                 // Compute the proposed branch name.
                 // When groupName is set, use the group slug as the topic so all

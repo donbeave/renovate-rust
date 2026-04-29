@@ -145,6 +145,13 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/util/package-rules/current-age.ts`
     pub match_current_age: Option<String>,
+
+    // ── Per-rule update controls ──────────────────────────────────────────────
+    /// Per-rule minimum release age.  When set, supersedes the global
+    /// `minimumReleaseAge` for matching packages.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `minimumReleaseAge`.
+    pub minimum_release_age: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -615,6 +622,9 @@ pub struct RuleEffects {
     pub schedule: Vec<String>,
     /// Labels accumulated (union) from all matching rules.
     pub labels: Vec<String>,
+    /// Per-rule `minimumReleaseAge` override.  `None` = use repo-level default.
+    /// The last matching rule that sets this wins.
+    pub minimum_release_age: Option<String>,
 }
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────

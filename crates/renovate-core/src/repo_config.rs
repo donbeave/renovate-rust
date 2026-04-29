@@ -409,6 +409,8 @@ impl RepoConfig {
             match_repositories: Vec<String>,
             #[serde(rename = "matchCurrentAge")]
             match_current_age: Option<String>,
+            #[serde(rename = "minimumReleaseAge")]
+            minimum_release_age: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -558,6 +560,7 @@ impl RepoConfig {
                     match_registry_urls: r.match_registry_urls,
                     match_repositories: r.match_repositories,
                     match_current_age: r.match_current_age,
+                    minimum_release_age: r.minimum_release_age,
                 }
             })
             .collect();
@@ -854,6 +857,9 @@ impl RepoConfig {
                 if !effects.labels.contains(label) {
                     effects.labels.push(label.clone());
                 }
+            }
+            if rule.minimum_release_age.is_some() {
+                effects.minimum_release_age.clone_from(&rule.minimum_release_age);
             }
         }
         // Apply repo-level defaults if no rule overrode them.
@@ -3025,5 +3031,95 @@ mod rule_effects_tests {
             ..Default::default()
         };
         assert!(!c.is_dep_ignored_ctx(&ctx_no_ts));
+    }
+
+    // ── per-rule schedule in RuleEffects ────────────────────────────────────
+
+    #[test]
+    fn per_rule_schedule_collected_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "schedule": ["before 5am"]}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.schedule, vec!["before 5am"]);
+    }
+
+    #[test]
+    fn per_rule_schedule_not_set_for_non_matching_dep() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "schedule": ["before 5am"]}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "react",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.schedule.is_empty(),
+            "non-matching dep should not get schedule"
+        );
+    }
+
+    // ── per-rule minimumReleaseAge in RuleEffects ────────────────────────────
+
+    #[test]
+    fn per_rule_minimum_release_age_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "minimumReleaseAge": "3 days"}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].minimum_release_age.as_deref(),
+            Some("3 days")
+        );
+    }
+
+    #[test]
+    fn per_rule_minimum_release_age_collected_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "minimumReleaseAge": "1 week"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.minimum_release_age.as_deref(), Some("1 week"));
+    }
+
+    #[test]
+    fn per_rule_minimum_release_age_not_set_when_rule_does_not_match() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "minimumReleaseAge": "3 days"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "react",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(effects.minimum_release_age.is_none());
+    }
+
+    #[test]
+    fn last_matching_rule_minimum_release_age_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["lodash"], "minimumReleaseAge": "3 days"},
+                {"matchPackageNames": ["lodash"], "minimumReleaseAge": "1 week"}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.minimum_release_age.as_deref(),
+            Some("1 week"),
+            "last matching rule should win"
+        );
     }
 }
