@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0210  | 2026-04-28 | Refactor: extract `managers_impl.rs` + `context.rs`; `main.rs` 8,733→389 lines | Complete | See below. |
 | 0209  | 2026-04-28 | `groupName` branch slug: grouped deps share one branch name | Complete | See below. |
 | 0208  | 2026-04-28 | `additionalBranchPrefix` config field; fix `matchCurrentVersion` regex; scan spec map | Complete | See below. |
 | 0207  | 2026-04-28 | Fix `labels`/`addLabels` not seeding `collect_rule_effects`; add test map entries | Complete | See below. |
@@ -4952,6 +4953,34 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0210 - Refactor: extract `managers_impl.rs` + `context.rs`; main.rs 8,733→389 lines
+
+### What landed
+- `crates/renovate-cli/src/context.rs` (new, 33 lines): `RepoPipelineCtx<'a>`
+  struct capturing all shared state for the manager pipeline — immutable borrows
+  (`client`, `http`, `config`, `owner`, `repo`, `repo_slug`, `repo_cfg`,
+  `detected`, `filtered_files`) plus owned mutable state (`report`, `had_error`).
+- `crates/renovate-cli/src/managers_impl.rs` (new, 8,387 lines): all 70+
+  manager pipeline blocks extracted from `process_repo()` into a single
+  `process_all_managers(ctx: &mut RepoPipelineCtx<'_>)` function. Local variable
+  bindings are created at the top so every manager block is syntactically
+  identical to its original form; only `repo_report.files.push` →
+  `ctx.report.files.push` and `had_error = true` → `ctx.had_error = true`
+  were substituted.
+- `crates/renovate-cli/src/main.rs`: 8,733 → 389 lines (-8,344 lines).
+  `process_repo()` now creates the context struct and delegates to
+  `managers_impl::process_all_managers()`.
+
+### No behavior changes
+All 1385 tests continue to pass. External API is unchanged.
+
+### Next steps (deferred)
+- Split `managers_impl.rs` into per-ecosystem sub-modules
+  (`python.rs`, `jvm.rs`, `ci.rs`, `container.rs`, etc.) for finer-grained
+  ownership. This is safe to do incrementally.
 
 ---
 
