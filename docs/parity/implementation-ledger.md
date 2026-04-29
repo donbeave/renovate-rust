@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0312  | 2026-04-29 | `helpers:pinGitHubActionDigests` preset: injects `{matchDepTypes: ["action"], pinDigests: true}` rule; 1 test | Complete | See below. |
 | 0311  | 2026-04-29 | `pinDigests` field in `packageRules` + `docker:pinDigests` preset (2 rules: docker datasource + undo for argocd/devcontainer/helmv3/pyenv); 2 tests | Complete | See below. |
 | 0310  | 2026-04-29 | Bug fix: remove duplicate group:recommended expansion in `resolve_extends_group_presets` — the handler for `config:recommended` was running in both `expand_compound_presets` AND `resolve_extends_group_presets`, injecting rules twice | Complete | See below. |
 | 0309  | 2026-04-29 | `versioning` field in `packageRules`: parsed from JSON, stored in `PackageRule` and `RuleEffects`, collected with last-rule-wins; 2 tests | Complete | See below. |

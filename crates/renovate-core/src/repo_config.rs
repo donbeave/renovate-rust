@@ -750,6 +750,14 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
+            // helpers:pinGitHubActionDigests — pin GitHub Actions to their digest.
+            "helpers:pinGitHubActionDigests" => {
+                rules.push(PackageRule {
+                    match_dep_types: vec!["action".to_owned()],
+                    pin_digests: Some(true),
+                    ..Default::default()
+                });
+            }
             // helpers:disableTypesNodeMajor — disable @types/node major updates.
             "helpers:disableTypesNodeMajor" => {
                 rules.push(PackageRule {
@@ -5089,6 +5097,15 @@ mod tests {
         let rule = &c.package_rules[0];
         assert_eq!(rule.pin_digests, Some(true));
         assert!(rule.match_datasources.contains(&"docker".to_owned()));
+    }
+
+    #[test]
+    fn helpers_pin_github_action_digests_preset_pins_actions() {
+        let c = RepoConfig::parse(r#"{"extends": ["helpers:pinGitHubActionDigests"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.pin_digests, Some(true));
+        assert!(rule.match_dep_types.contains(&"action".to_owned()));
     }
 
     #[test]
