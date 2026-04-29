@@ -44,6 +44,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.package_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -82,6 +84,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -127,6 +131,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -165,6 +171,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -210,6 +218,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -248,6 +258,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -301,6 +313,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -391,6 +405,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -512,6 +528,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.dep_name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -545,6 +563,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -657,6 +677,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -819,6 +841,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.input_name.clone(),
                             status,
                         }
@@ -876,6 +900,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -919,6 +945,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -1002,6 +1030,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.package_name.clone(),
                         status,
                     });
@@ -1101,6 +1131,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.remote.clone(),
                             status,
                         }
@@ -1178,6 +1210,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.chart_name.clone(),
                             status,
                         }
@@ -1251,6 +1285,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.src_path.clone(),
                             status,
                         }],
@@ -1338,6 +1374,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: renovate_core::extractors::batect_wrapper::BATECT_REPO.to_owned(),
                             status,
                         }],
@@ -1382,6 +1420,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: "ignored".into(),
@@ -1410,6 +1450,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.path.clone(),
                         status,
                     });
@@ -1457,6 +1499,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -1535,6 +1579,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -1609,6 +1655,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.artifact_id.clone(),
                         status,
                     });
@@ -1684,6 +1732,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 pr_title: None,
                                 release_timestamp: None,
                                 current_version_timestamp: None,
+
+                                dep_type: None,
                                 name: d.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -1717,6 +1767,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: d.dep_name.clone(),
                             status,
                         }
@@ -1851,6 +1903,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.formula_name.clone(),
                         status,
                     }],
@@ -1919,6 +1973,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: "Unity Editor".to_owned(),
                         status,
                     }],
@@ -1962,6 +2018,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -2010,6 +2068,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -2085,6 +2145,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.dep_name.clone(),
                         status,
                     }],
@@ -2137,6 +2199,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: dep.repo.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -2226,6 +2290,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: dep.repo.clone(),
                         status,
                     });
@@ -2274,6 +2340,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     pr_title: None,
                     release_timestamp: None,
                     current_version_timestamp: None,
+
+                    dep_type: None,
                     name: dep.name.clone(),
                     status: output::DepStatus::Skipped {
                         reason: format!("{reason:?}").to_lowercase(),
@@ -2313,6 +2381,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
+
+                dep_type: None,
                 name: dep.name.clone(),
                 status,
             });

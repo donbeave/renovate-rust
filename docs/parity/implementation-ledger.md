@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0220  | 2026-04-29 | `depType` in `DepReport` JSON; cargo+npm dep types propagated into `DepContext` for `matchDepTypes` | Complete | See below. |
 | 0219  | 2026-04-29 | `commitMessageAction` + `commitMessagePrefix` in `packageRules` — per-rule PR title overrides | Complete | See below. |
 | 0218  | 2026-04-29 | `commitMessageTopic` in `packageRules` — custom PR title topic with `{{depName}}` support | Complete | See below. |
 | 0217  | 2026-04-29 | `prPriority` in `packageRules` — PR priority in output | Complete | See below. |
@@ -5273,3 +5274,23 @@ re-exported from `repo_config` for backward compatibility.
 - Last-rule-wins for both fields
 - Non-matching dep gets no override
 - Absent fields leave `None` in effects
+
+---
+
+## Slice 0220 - `depType` in output + end-to-end `matchDepTypes` wiring
+
+### Renovate reference
+- `lib/config/options/index.ts` — `matchDepTypes` matcher
+- Cargo: `dependencies`, `devDependencies`, `buildDependencies`
+- npm: `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`, `resolutions`, `overrides`
+
+### Implementation
+- `DepReport.dep_type: Option<String>` (serde: `depType`, skip_serializing_if None)
+- `cargo::DepType::as_renovate_str()` new method
+- `build_dep_reports_cargo`: actionable deps get `dep_type: Some(dep.dep_type.as_renovate_str().to_owned())`
+- `build_dep_reports_npm`: actionable deps get `dep_type: Some(dep.dep_type.as_renovate_str().to_owned())`
+- All 163 other `DepReport` construction sites: `dep_type: None`
+- `pipeline_utils.rs`: `DepContext.dep_type = dep.dep_type.as_deref()` → `matchDepTypes` now filters correctly
+
+### End-to-end flow
+Extractor enum → `as_renovate_str()` string → `DepReport.dep_type` → `DepContext.dep_type` → `PackageRule::dep_type_matches()`

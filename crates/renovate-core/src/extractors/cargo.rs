@@ -33,6 +33,17 @@ pub enum DepType {
     Build,
 }
 
+impl DepType {
+    /// Return the Renovate-canonical string for this dep type.
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            DepType::Regular => "dependencies",
+            DepType::Dev => "devDependencies",
+            DepType::Build => "buildDependencies",
+        }
+    }
+}
+
 /// A single extracted dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExtractedDep {

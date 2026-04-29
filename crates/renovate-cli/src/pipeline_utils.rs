@@ -60,6 +60,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     new_value: Some(latest.as_str()),
                     update_type: classify_semver_update(current, latest),
                     current_version_timestamp: dep.current_version_timestamp.as_deref(),
+                    dep_type: dep.dep_type.as_deref(),
                     ..Default::default()
                 };
                 let effects = repo_cfg.collect_rule_effects(&ctx);
@@ -248,6 +249,8 @@ pub(crate) async fn docker_hub_reports(
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
+
+                dep_type: None,
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -288,6 +291,8 @@ pub(crate) async fn docker_hub_reports(
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
+
+                dep_type: None,
                 name: dep_name,
                 status,
             });

@@ -113,6 +113,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: "flutter".to_owned(),
                             status,
                         }],

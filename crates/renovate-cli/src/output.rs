@@ -89,6 +89,13 @@ pub(crate) struct DepReport {
     /// Used for `matchCurrentAge` rule evaluation; not included in serialized output.
     #[serde(skip)]
     pub(crate) current_version_timestamp: Option<String>,
+    /// Dependency type string (e.g. `"dependencies"`, `"devDependencies"`, `"dev"`).
+    /// Populated for managers that distinguish dep types (npm, cargo).  `None` for
+    /// managers where all deps are equivalent.
+    ///
+    /// Mirrors Renovate's `depType` field; used for `matchDepTypes` evaluation.
+    #[serde(rename = "depType", skip_serializing_if = "Option::is_none")]
+    pub dep_type: Option<String>,
     #[serde(flatten)]
     pub status: DepStatus,
 }
@@ -579,6 +586,8 @@ mod tests {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -597,6 +606,8 @@ mod tests {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
@@ -614,6 +625,8 @@ mod tests {
                             pr_title: None,
                             release_timestamp: None,
                             current_version_timestamp: None,
+
+                            dep_type: None,
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -636,6 +649,8 @@ mod tests {
                         pr_title: None,
                         release_timestamp: None,
                         current_version_timestamp: None,
+
+                        dep_type: None,
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -706,6 +721,8 @@ mod tests {
                     pr_title: None,
                     release_timestamp: None,
                     current_version_timestamp: None,
+
+                    dep_type: None,
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -739,6 +756,8 @@ mod tests {
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
+
+            dep_type: None,
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -766,6 +785,8 @@ mod tests {
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
+
+            dep_type: None,
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -791,6 +812,8 @@ mod tests {
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
+
+            dep_type: None,
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -815,6 +838,8 @@ mod tests {
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
+
+            dep_type: None,
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -868,6 +893,8 @@ mod tests {
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
+
+                dep_type: None,
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -886,6 +913,8 @@ mod tests {
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
+
+                dep_type: None,
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
@@ -901,6 +930,8 @@ mod tests {
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
+
+                dep_type: None,
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
@@ -918,6 +949,8 @@ mod tests {
                 pr_title: None,
                 release_timestamp: None,
                 current_version_timestamp: None,
+
+                dep_type: None,
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),
@@ -987,6 +1020,8 @@ mod tests {
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
+
+            dep_type: None,
             status: DepStatus::UpdateAvailable {
                 current: "1.0.0".into(),
                 latest: "2.0.0".into(),
@@ -1008,6 +1043,8 @@ mod tests {
             pr_title: None,
             release_timestamp: None,
             current_version_timestamp: None,
+
+            dep_type: None,
             status: DepStatus::UpToDate { latest: None },
         }
     }
