@@ -877,6 +877,175 @@ fn resolve_extends_automerge_schedule(extends: &[String]) -> Option<Vec<String>>
 /// set global `automerge: true`.  `:automergeMinor` and `:automergePatch`
 /// inject per-update-type packageRules instead (see `resolve_extends_automerge_rules`).
 ///
+/// Collect `CustomManager` entries contributed by `custom-managers:*` presets.
+///
+/// Handles all regex-based presets from `custom-managers.preset.ts`.
+/// JSONata-based presets (`biomeVersions`) are silently skipped.
+///
+/// Renovate reference: `lib/config/presets/internal/custom-managers.preset.ts`
+fn resolve_extends_custom_managers(extends: &[String]) -> Vec<CustomManager> {
+    // Standard renovate: annotation regex pattern shared by most presets.
+    // Matches:  # renovate: datasource=X depName=Y [packageName=Z] [versioning=V]
+    //           [extractVersion=E] [registryUrl=R]
+    //           VERSION_VAR=value
+    let standard_pattern =
+        r#"# renovate: datasource=(?P<datasource>[a-zA-Z0-9-._]+?) depName=(?P<depName>[^\s]+?)(?: (?:lookupName|packageName)=(?P<packageName>[^\s]+?))?(?: versioning=(?P<versioning>[^\s]+?))?(?: extractVersion=(?P<extractVersion>[^\s]+?))?(?: registryUrl=(?P<registryUrl>[^\s]+?))?\s+[A-Za-z0-9_]+?_VERSION\s*[:=]?\??[=:]\s*["']?(?P<currentValue>.+?)["']?\s"#;
+
+    let mut managers: Vec<CustomManager> = Vec::new();
+    for preset in extends {
+        match preset.as_str() {
+            "custom-managers:azurePipelinesVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec![
+                        "**/.azuredevops/**/*.{yml,yaml}".to_owned(),
+                        "azure*pipeline*.{yml,yaml}".to_owned(),
+                    ],
+                    match_strings: vec![standard_pattern.to_owned()],
+                    match_strings_strategy: "any".to_owned(),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:bitbucketPipelinesVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec!["**/*-pipelines.yml".to_owned()],
+                    match_strings: vec![standard_pattern.to_owned()],
+                    match_strings_strategy: "any".to_owned(),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:dockerfileVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec![
+                        "**/[Dd]ockerfile*".to_owned(),
+                        "**/[Cc]ontainerfile*".to_owned(),
+                        "**/*.[Dd]ockerfile*".to_owned(),
+                        "**/*.[Cc]ontainerfile*".to_owned(),
+                    ],
+                    // Dockerfile variant: matches ENV/ARG directives with renovate comment.
+                    match_strings: vec![
+                        r#"# renovate: datasource=(?P<datasource>[a-zA-Z0-9-._]+?) depName=(?P<depName>[^\s]+?)(?: (?:lookupName|packageName)=(?P<packageName>[^\s]+?))?(?: versioning=(?P<versioning>[^\s]+?))?(?: extractVersion=(?P<extractVersion>[^\s]+?))?(?: registryUrl=(?P<registryUrl>[^\s]+?))?\s(?:ENV|ARG)\s+[A-Za-z0-9_]+?_VERSION[ =]["']?(?P<currentValue>.+?)["']?\s"#.to_owned(),
+                    ],
+                    match_strings_strategy: "any".to_owned(),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:githubActionsVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec![
+                        r"/(^|/)(workflow-templates|\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\.ya?ml$/"
+                            .to_owned(),
+                        r"/(^|/)action\.ya?ml$/".to_owned(),
+                    ],
+                    match_strings: vec![standard_pattern.to_owned()],
+                    match_strings_strategy: "any".to_owned(),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:gitlabPipelineVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec!["**/*.gitlab-ci.{yml,yaml}".to_owned()],
+                    match_strings: vec![standard_pattern.to_owned()],
+                    match_strings_strategy: "any".to_owned(),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:helmChartYamlAppVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec!["**/Chart.yaml".to_owned()],
+                    match_strings: vec![
+                        r#"#\s*renovate: image=(?P<depName>.*?)\s+appVersion:\s*["']?(?P<currentValue>[\w+\.\-]*)"#
+                            .to_owned(),
+                    ],
+                    match_strings_strategy: "any".to_owned(),
+                    datasource_template: Some("docker".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:makefileVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec![
+                        "**/[Mm]akefile".to_owned(),
+                        "**/GNUMakefile".to_owned(),
+                        "**/*.mk".to_owned(),
+                    ],
+                    match_strings: vec![
+                        r#"# renovate: datasource=(?P<datasource>[a-zA-Z0-9-._]+?) depName=(?P<depName>[^\s]+?)(?: (?:packageName)=(?P<packageName>[^\s]+?))?(?: versioning=(?P<versioning>[^\s]+?))?(?: extractVersion=(?P<extractVersion>[^\s]+?))?(?: registryUrl=(?P<registryUrl>[^\s]+?))?\s+[A-Za-z0-9_]+?_VERSION\s*:*\??=\s*["']?(?P<currentValue>.+?)["']?\s"#
+                            .to_owned(),
+                    ],
+                    match_strings_strategy: "any".to_owned(),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:mavenPropertyVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec!["**/pom.xml".to_owned()],
+                    match_strings: vec![
+                        r"<!--\s?renovate:( datasource=(?P<datasource>[a-zA-Z0-9-._]+?))? depName=(?P<depName>[^\s]+?)(?: packageName=(?P<packageName>[^\s]+?))?(?: versioning=(?P<versioning>[^\s]+?))?(?: extractVersion=(?P<extractVersion>[^\s]+?))?\s+-->\s+<.+\.version>(?P<currentValue>.+)<\/.+\.version>"
+                            .to_owned(),
+                    ],
+                    match_strings_strategy: "any".to_owned(),
+                    // Default to maven when datasource group not captured.
+                    datasource_template: Some("maven".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:tfvarsVersions" => {
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec!["**/*.tfvars".to_owned()],
+                    match_strings: vec![
+                        r#"#\s*renovate: datasource=(?P<datasource>.*?) depName=(?P<depName>.*?)( versioning=(?P<versioning>.*?))?(?: extractVersion=(?P<extractVersion>.*?))?(?: registryUrl=(?P<registryUrl>[^\s]+?))?\s.*?_version\s*=\s*"(?P<currentValue>.*?)""#
+                            .to_owned(),
+                    ],
+                    match_strings_strategy: "any".to_owned(),
+                    ..Default::default()
+                });
+            }
+            "custom-managers:tsconfigNodeVersions" => {
+                // First rule: "@tsconfig/node18/tsconfig.json" pattern
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec![
+                        "**/{j,t}sconfig.json".to_owned(),
+                        "**/{j,t}sconfig.*.json".to_owned(),
+                    ],
+                    match_strings: vec![
+                        r#""(?P<depName>@tsconfig/node(?P<currentValue>\d+))/tsconfig\.json""#
+                            .to_owned(),
+                    ],
+                    match_strings_strategy: "any".to_owned(),
+                    datasource_template: Some("npm".to_owned()),
+                    ..Default::default()
+                });
+                // Second rule: "@tsconfig/node18" without "/tsconfig.json"
+                managers.push(CustomManager {
+                    custom_type: "regex".to_owned(),
+                    file_patterns: vec![
+                        "**/{j,t}sconfig.json".to_owned(),
+                        "**/{j,t}sconfig.*.json".to_owned(),
+                    ],
+                    match_strings: vec![
+                        r#""(?P<depName>@tsconfig/node(?P<currentValue>\d+))""#.to_owned(),
+                    ],
+                    match_strings_strategy: "any".to_owned(),
+                    datasource_template: Some("npm".to_owned()),
+                    ..Default::default()
+                });
+            }
+            _ => {}
+        }
+    }
+    managers
+}
+
 /// Renovate reference: `lib/config/presets/internal/default.preset.ts` —
 /// `:automergeAll`, `:automergeMinor`, `:automergeDisabled`, etc.
 fn resolve_extends_automerge(extends: &[String]) -> Option<bool> {
@@ -3706,11 +3875,11 @@ impl RepoConfig {
             major_config: raw.major,
             minor_config: raw.minor,
             patch_config: raw.patch,
-            custom_managers: raw
-                .custom_managers
-                .into_iter()
-                .map(|cm| {
-                    // Merge managerFilePatterns and legacy fileMatch.
+            custom_managers: {
+                // Preset managers come first (lower precedence); user-defined
+                // managers appended after so they can shadow preset ones.
+                let mut cms = resolve_extends_custom_managers(&effective_extends);
+                cms.extend(raw.custom_managers.into_iter().map(|cm| {
                     let mut file_patterns = cm.manager_file_patterns;
                     file_patterns.extend(cm.file_match);
                     CustomManager {
@@ -3726,8 +3895,9 @@ impl RepoConfig {
                         extract_version_template: cm.extract_version_template,
                         auto_replace_string_template: cm.auto_replace_string_template,
                     }
-                })
-                .collect(),
+                }));
+                cms
+            },
         }
     }
 
@@ -8923,6 +9093,116 @@ mod rule_effects_tests {
         assert!(
             deps.is_empty(),
             "incomplete combination match must return empty"
+        );
+    }
+
+    // ── custom-managers:* preset tests ───────────────────────────────────────
+
+    #[test]
+    fn preset_custom_managers_dockerfile_versions_registered() {
+        let c = RepoConfig::parse(r#"{"extends": ["custom-managers:dockerfileVersions"]}"#);
+        assert!(
+            !c.custom_managers.is_empty(),
+            "dockerfileVersions preset must register at least one custom manager"
+        );
+        let cm = &c.custom_managers[0];
+        assert_eq!(cm.custom_type, "regex");
+        assert!(
+            cm.file_patterns
+                .iter()
+                .any(|p| p.contains("Dockerfile") || p.contains("ockerfile")),
+            "dockerfileVersions manager must target Dockerfile patterns"
+        );
+    }
+
+    #[test]
+    fn preset_custom_managers_makefile_versions_registered() {
+        let c = RepoConfig::parse(r#"{"extends": ["custom-managers:makefileVersions"]}"#);
+        let cm = c
+            .custom_managers
+            .iter()
+            .find(|m| m.file_patterns.iter().any(|p| p.contains("akefile")))
+            .expect("makefileVersions preset must register a Makefile custom manager");
+        assert_eq!(cm.custom_type, "regex");
+        assert_eq!(cm.match_strings_strategy, "any");
+    }
+
+    #[test]
+    fn preset_custom_managers_maven_property_versions_registered() {
+        let c = RepoConfig::parse(r#"{"extends": ["custom-managers:mavenPropertyVersions"]}"#);
+        let cm = c
+            .custom_managers
+            .iter()
+            .find(|m| m.file_patterns.iter().any(|p| p.contains("pom.xml")))
+            .expect("mavenPropertyVersions preset must register a pom.xml custom manager");
+        assert_eq!(
+            cm.datasource_template.as_deref(),
+            Some("maven"),
+            "mavenPropertyVersions must default datasource to maven"
+        );
+    }
+
+    #[test]
+    fn preset_custom_managers_tsconfig_node_versions_registered() {
+        let c = RepoConfig::parse(r#"{"extends": ["custom-managers:tsconfigNodeVersions"]}"#);
+        let tsconfig_managers: Vec<_> = c
+            .custom_managers
+            .iter()
+            .filter(|m| m.file_patterns.iter().any(|p| p.contains("sconfig")))
+            .collect();
+        assert_eq!(
+            tsconfig_managers.len(),
+            2,
+            "tsconfigNodeVersions must register exactly 2 custom managers"
+        );
+        for m in &tsconfig_managers {
+            assert_eq!(m.datasource_template.as_deref(), Some("npm"));
+        }
+    }
+
+    #[test]
+    fn preset_custom_managers_dockerfile_extracts_standard_annotation() {
+        let c = RepoConfig::parse(r#"{"extends": ["custom-managers:dockerfileVersions"]}"#);
+        let cm = c
+            .custom_managers
+            .iter()
+            .find(|m| m.file_patterns.iter().any(|p| p.contains("ockerfile")))
+            .expect("must have dockerfile custom manager");
+        // Simulated Dockerfile content with a renovate annotation.
+        let content = concat!(
+            "# renovate: datasource=github-releases depName=cli/cli\n",
+            "ENV GH_VERSION=2.40.0\n"
+        );
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract one dep from annotated ENV");
+        assert_eq!(deps[0].dep_name, "cli/cli");
+        assert_eq!(deps[0].datasource, "github-releases");
+        assert_eq!(deps[0].current_value, "2.40.0");
+    }
+
+    #[test]
+    fn preset_custom_managers_user_defined_appended_after_preset() {
+        // User-defined managers must appear after preset managers so they take
+        // precedence when the pipeline iterates in order.
+        let c = RepoConfig::parse(
+            r##"{
+            "extends": ["custom-managers:makefileVersions"],
+            "customManagers": [{
+                "customType": "regex",
+                "managerFilePatterns": ["Makefile"],
+                "matchStrings": ["TOOL=(?P<currentValue>[^\\s]+)"],
+                "depNameTemplate": "my-tool",
+                "datasourceTemplate": "npm"
+            }]
+        }"##,
+        );
+        // Preset manager comes first, user manager is appended.
+        assert!(c.custom_managers.len() >= 2, "must have preset + user manager");
+        let user_cm = c.custom_managers.last().expect("must have user manager");
+        assert_eq!(
+            user_cm.dep_name_template.as_deref(),
+            Some("my-tool"),
+            "last manager must be the user-defined one"
         );
     }
 }
