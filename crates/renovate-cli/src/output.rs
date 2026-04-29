@@ -529,6 +529,13 @@ fn format_dep(dep: &DepReport, use_color: bool) -> String {
                     dim(branch, use_color),
                 ));
             }
+            if let Some(ref title) = dep.pr_title {
+                line.push_str(&format!(
+                    "\n      {}   {}",
+                    dim("title:", use_color),
+                    dim(title, use_color),
+                ));
+            }
             line
         }
         DepStatus::UpToDate { latest } => {
