@@ -39,6 +39,8 @@ pub struct PubUpdateSummary {
     pub current_value: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 publication timestamp from the `latest.published` field.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result from `fetch_updates_concurrent`.
@@ -56,14 +58,19 @@ struct PubPackage {
 #[derive(Debug, Deserialize)]
 struct PubVersion {
     version: String,
+    /// ISO 8601 publication timestamp from the pub.dev API.
+    published: Option<String>,
 }
 
 /// Fetch the latest stable version of a pub.dev package.
+///
+/// Returns `(version, published_at)` where `published_at` is the
+/// `latest.published` timestamp from the pub.dev API.
 pub async fn fetch_latest(
     package_name: &str,
     http: &HttpClient,
     api_base: &str,
-) -> Result<Option<String>, PubError> {
+) -> Result<Option<(String, Option<String>)>, PubError> {
     let url = format!("{api_base}/packages/{package_name}");
 
     let resp = http.get_retrying(&url).await?;
@@ -75,7 +82,7 @@ pub async fn fetch_latest(
     }
 
     let pkg: PubPackage = resp.json().await.map_err(PubError::Json)?;
-    Ok(Some(pkg.latest.version))
+    Ok(Some((pkg.latest.version, pkg.latest.published)))
 }
 
 /// Fetch update summaries for multiple pub packages concurrently.
@@ -123,15 +130,19 @@ async fn fetch_update_summary(
     http: &HttpClient,
     api_base: &str,
 ) -> Result<PubUpdateSummary, PubError> {
-    let latest = fetch_latest(&dep.name, http, api_base).await?;
+    let result = fetch_latest(&dep.name, http, api_base).await?;
+    let (latest_version, release_timestamp) = result
+        .map(|(v, ts)| (Some(v), ts))
+        .unwrap_or((None, None));
     let s = crate::versioning::semver_generic::semver_update_summary(
         &dep.current_value,
-        latest.as_deref(),
+        latest_version.as_deref(),
     );
     Ok(PubUpdateSummary {
         current_value: s.current_value,
         latest: s.latest,
         update_available: s.update_available,
+        release_timestamp,
     })
 }
 
@@ -164,7 +175,7 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_latest("http", &http, &server.uri()).await.unwrap();
-        assert_eq!(result, Some("0.13.6".to_owned()));
+        assert_eq!(result.map(|(v, _)| v), Some("0.13.6".to_owned()));
     }
 
     #[tokio::test]
