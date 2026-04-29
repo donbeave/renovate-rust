@@ -1097,7 +1097,9 @@ fn resolve_extends_semantic_prefix_rules(
     let mut rules: Vec<PackageRule> = Vec::new();
 
     for preset in extends {
-        if preset == ":semanticPrefixFixDepsChoreOthers" {
+        if preset == ":semanticPrefixFixDepsChoreOthers"
+            || preset == "semanticPrefixFixDepsChoreOthers"
+        {
             // Rule 1: all packages → semanticCommitType: "chore"
             rules.push(PackageRule {
                 match_package_names: vec!["*".to_owned()],
