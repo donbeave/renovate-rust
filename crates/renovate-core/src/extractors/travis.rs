@@ -136,4 +136,45 @@ node_js:
         let content = "language: python\npython:\n  - \"3.11\"\n";
         assert!(extract(content).is_empty());
     }
+
+    #[test]
+    fn invalid_content_returns_empty() {
+        // Ported: "returns empty if fails to parse" — travis/extract.spec.ts line 13
+        assert!(extract("blahhhhh:foo:@what\n").is_empty());
+    }
+
+    #[test]
+    fn matrix_jobs_include_node_js_string() {
+        // Ported: "handles matrix node_js syntax with node_js string" — travis/extract.spec.ts line 29
+        let content = "jobs:\n  include:\n    - env: js-tests\n      language: node_js\n      node_js: '11.10.1'\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].version, "11.10.1");
+    }
+
+    #[test]
+    fn matrix_jobs_include_node_js_multiline_list() {
+        // Ported: "handles matrix node_js syntax with node_js array 2" — travis/extract.spec.ts line 60
+        let content = "jobs:\n  include:\n    - env: js-tests\n      language: node_js\n      node_js:\n        - '11.10.1'\n        - '11.10.2'\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].version, "11.10.1");
+        assert_eq!(deps[1].version, "11.10.2");
+    }
+
+    #[test]
+    fn matrix_alias_node_js_string() {
+        // Ported: "handles matrix node_js syntax with alias" — travis/extract.spec.ts line 78
+        let content = "matrix:\n  include:\n    - env: js-tests\n      language: node_js\n      node_js: '11.10.1'\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].version, "11.10.1");
+    }
+
+    #[test]
+    fn matrix_without_node_js_returns_empty() {
+        // Ported: "handles invalid matrix node_js syntax" — travis/extract.spec.ts line 91
+        let content = "jobs:\n  include:\n    - invalid: '1.0'\n";
+        assert!(extract(content).is_empty());
+    }
 }

@@ -421,10 +421,34 @@ libc = "0.2"
     }
 
     #[test]
+    fn empty_dependencies_section_returns_empty() {
+        // Ported: "returns null for empty dependencies" — cargo/extract.spec.ts line 52
+        let toml = "[dependencies]\n";
+        let deps = extract(toml).unwrap();
+        assert!(deps.is_empty());
+    }
+
+    #[test]
     fn empty_custom_target_returns_empty() {
         // Ported: "returns null for empty custom target" — cargo/extract.spec.ts line 66
         let toml = "[target.'cfg(windows)'.dependencies]";
         let deps = extract(toml).unwrap();
         assert!(deps.is_empty());
+    }
+
+    #[test]
+    fn invalid_toml_returns_error() {
+        // Ported: "returns null for invalid toml" — cargo/extract.spec.ts line 46
+        assert!(extract("invalid toml [[[").is_err());
+    }
+
+    #[test]
+    fn workspace_true_dep_gets_inherited_skip_reason() {
+        // Ported: "skips workspace dependency" — cargo/extract.spec.ts line 390
+        let toml = "[dependencies]\nfoobar = { workspace = true }";
+        let deps = extract(toml).unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "foobar");
+        assert_eq!(deps[0].skip_reason, Some(SkipReason::WorkspaceInherited));
     }
 }
