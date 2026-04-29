@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 7 / 16 actionable tests ported (44%) — updated 2026-04-29
+**Overall progress:** 11 / 24 actionable tests ported (46%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -58,6 +58,26 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/argocd/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/argocd/extract.spec.ts
+**Total tests:** 8 | **Ported:** 4 | **Actionable:** 8 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 11 | ported | `argocd.rs` | `empty_content_returns_empty` | — |
+| returns null for invalid | 15 | pending | — | — | — |
+| return null for kubernetes manifest | 21 | ported | `argocd.rs` | `skips_non_argocd_file` | — |
+| return null if deps array would be empty | 26 | pending | — | — | — |
+| return result for double quoted argoproj.io apiVersion reference | 34 | ported | `argocd.rs` | `double_quoted_apiversion_accepted` | — |
+| return result for single quoted argoproj.io apiVersion reference | 61 | ported | `argocd.rs` | `single_quoted_apiversion_accepted` | — |
+| full test | 88 | pending | — | — | — |
+| supports applicationsets | 203 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -65,7 +85,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
 | `lib/modules/manager/ant/extract.spec.ts` | 44 | `crates/renovate-core/src/extractors/ant.rs` | 6 | partial |
-| `lib/modules/manager/argocd/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/argocd.rs` | 7 | partial |
 | `lib/modules/manager/asdf/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/asdf.rs` | 28 | partial |
 | `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/azure_pipelines.rs` | 8 | partial |
 | `lib/modules/manager/batect-wrapper/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/batect_wrapper.rs` | 4 | partial |

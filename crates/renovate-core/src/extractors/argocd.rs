@@ -229,6 +229,7 @@ fn flush_source(
 mod tests {
     use super::*;
 
+    // Ported: "return null for kubernetes manifest" — argocd/extract.spec.ts line 21
     #[test]
     fn skips_non_argocd_file() {
         let content = "apiVersion: v1\nkind: ConfigMap\n";
@@ -301,16 +302,16 @@ spec:
         );
     }
 
+    // Ported: "returns null for empty" — argocd/extract.spec.ts line 11
     #[test]
     fn empty_content_returns_empty() {
-        // Ported: "returns null for empty" — argocd/extract.spec.ts line 11
         assert!(extract("nothing here").is_empty());
         assert!(extract("").is_empty());
     }
 
+    // Ported: "return result for double quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 34
     #[test]
     fn double_quoted_apiversion_accepted() {
-        // Ported: "return result for double quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 34
         let content = r#"
 apiVersion: "argoproj.io/v1alpha1"
 kind: Application
@@ -327,9 +328,9 @@ spec:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "return result for single quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 61
     #[test]
     fn single_quoted_apiversion_accepted() {
-        // Ported: "return result for single quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 61
         let content = "apiVersion: 'argoproj.io/v1alpha1'\nkind: Application\nspec:\n  source:\n    chart: kube-state-metrics\n    repoURL: https://prometheus-community.github.io/helm-charts\n    targetRevision: 2.4.1\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
