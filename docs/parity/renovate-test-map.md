@@ -116,8 +116,8 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/string-match.spec.ts` | — | `anyMatchRegexOrGlobList` negative pattern matches any-non-excluded | `crates/renovate-core/src/string_match.rs` | `any_match_negative_list_matches_non_excluded` | ported |
 | `lib/util/package-rules/dep-names.spec.ts` | — | `matchDepNames` undefined depName → false | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_exact_disables_dep` (implicitly via empty) | partial |
 | `lib/util/package-rules/dep-names.spec.ts` | — | `@opentelemetry**` without `/` does NOT match `@opentelemetry/http` | `crates/renovate-core/src/string_match.rs` | `dep_names_no_slash_double_star_does_not_cross_slash` | ported |
-| `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` undefined packageName → false | `crates/renovate-core/src/repo_config.rs` | (implicit in matcher logic) | pending |
-| `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` matches packageName not depName | `crates/renovate-core/src/repo_config.rs` | (implicit in matcher logic) | pending |
+| `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` undefined packageName → false | `crates/renovate-core/src/repo_config.rs` | `match_package_names_uses_package_name_when_set` | ported |
+| `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` uses packageName, not depName | `crates/renovate-core/src/repo_config.rs` | `match_package_names_with_dep_name_and_package_name` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDepTypes` | `crates/renovate-core/src/repo_config.rs` | `dep_type_rule_blocks_dependencies`, `dep_type_rule_does_not_block_dev_dep` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `allowedVersions` semver range | `crates/renovate-core/src/repo_config.rs` | `allowed_versions_blocks_out_of_range_update` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `ignoreVersions` in packageRules | `crates/renovate-core/src/repo_config.rs` | `package_rule_ignore_versions_scoped_to_matched_package` | ported |

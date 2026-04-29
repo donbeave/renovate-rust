@@ -5393,6 +5393,44 @@ mod tests {
         assert!(c.is_dep_ignored("lodash"));
     }
 
+    // ── Ported from Renovate package-names.spec.ts ───────────────────────────
+
+    #[test]
+    fn match_package_names_uses_package_name_when_set() {
+        // "should matchPackageName": packageName='def' matches ['def', 'ghi']
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["def", "ghi"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "other",
+            package_name: Some("def"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "rule should fire when packageName matches"
+        );
+    }
+
+    #[test]
+    fn match_package_names_with_dep_name_and_package_name() {
+        // "should return false if not matching": depName='abc', packageName='def', rule=['ghi']
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["ghi"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "abc",
+            package_name: Some("def"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule should not fire when neither name matches"
+        );
+    }
+
     #[test]
     fn package_rules_enabled_true_does_not_ignore() {
         let c = RepoConfig::parse(
