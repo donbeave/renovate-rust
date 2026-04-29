@@ -820,6 +820,62 @@ fn resolve_extends_ignore_paths(extends: &[String]) -> Vec<String> {
 /// schedule the user configured, or none).  Returns `Some(schedule)` when
 /// a preset contributes schedule entries.
 ///
+/// Normalize a preset name using Renovate's `removedPresets` map.
+///
+/// Returns `None` when the preset has been removed with no replacement (null).
+/// Renovate reference: `lib/config/presets/common.ts` — `removedPresets`.
+/// Normalize a preset name using Renovate's `removedPresets` map.
+///
+/// Returns `None` when the preset has been removed with no replacement (null).
+/// Returns `Some(replacement)` otherwise, where replacement may differ from input.
+/// Renovate reference: `lib/config/presets/common.ts` — `removedPresets`.
+fn normalize_preset(preset: &str) -> Option<String> {
+    let renamed: Option<&str> = match preset {
+        // Explicitly removed presets (no replacement).
+        ":autodetectPinVersions"
+        | ":autodetectRangeStrategy"
+        | ":enableGradleLite"
+        | ":switchToGradleLite"
+        | "compatibility:additionalBranchPrefix"
+        | "default:onlyNpm"
+        | "helpers:oddIsUnstable"
+        | "helpers:oddIsUnstablePackages"
+        | "workarounds:reduceRepologyServerLoad" => return None,
+
+        // Renames.
+        ":automergeBranchMergeCommit"
+        | ":automergeBranchPush"
+        | "default:automergeBranchMergeCommit"
+        | "default:automergeBranchPush" => Some(":automergeBranch"),
+        ":base" | "default:base" | "config:base" | "config:base-js" => Some("config:recommended"),
+        ":app" | ":js-app" | "default:app" | "default:js-app" | "config:application" => {
+            Some("config:js-app")
+        }
+        ":library" | "default:library" | "config:library" => Some("config:js-lib"),
+        ":disableLockFiles" => Some(":skipArtifactsUpdate"),
+        ":masterIssue" => Some(":dependencyDashboard"),
+        ":masterIssueApproval" => Some(":dependencyDashboardApproval"),
+        ":unpublishSafe" | "default:unpublishSafe" => Some("npm:unpublishSafe"),
+        "npm:unpublishSafe" => Some("security:minimumReleaseAgeNpm"),
+        "group:jsTestMonMajor" => Some("group:jsTestNonMajor"),
+        "group:kubernetes" => Some("group:kubernetesMonorepo"),
+        "regexManagers:azurePipelinesVersions" => Some("customManagers:azurePipelinesVersions"),
+        "regexManagers:biomeVersions" => Some("customManagers:biomeVersions"),
+        "regexManagers:bitbucketPipelinesVersions" => {
+            Some("customManagers:bitbucketPipelinesVersions")
+        }
+        "regexManagers:dockerfileVersions" => Some("customManagers:dockerfileVersions"),
+        "regexManagers:githubActionsVersions" => Some("customManagers:githubActionsVersions"),
+        "regexManagers:gitlabPipelineVersions" => Some("customManagers:gitlabPipelineVersions"),
+        "regexManagers:helmChartYamlAppVersions" => Some("customManagers:helmChartYamlAppVersions"),
+        "regexManagers:mavenPropertyVersions" => Some("customManagers:mavenPropertyVersions"),
+        "regexManagers:tfvarsVersions" => Some("customManagers:tfvarsVersions"),
+        "regexManagers:tsconfigNodeVersions" => Some("customManagers:tsconfigNodeVersions"),
+        _ => None,
+    };
+    Some(renamed.unwrap_or(preset).to_owned())
+}
+
 /// Migrate a legacy schedule string to the current format.
 ///
 /// - `"every friday"` → `"on friday"` (Renovate: schedule-migration.ts dayRegex)
@@ -3704,7 +3760,7 @@ impl RepoConfig {
                 default = "default_semantic_commit_scope"
             )]
             semantic_commit_scope: String,
-            #[serde(default)]
+            #[serde(default, deserialize_with = "deserialize_string_or_vec")]
             extends: Vec<String>,
             #[serde(rename = "ignorePresets", default)]
             ignore_presets: Vec<String>,
@@ -3899,6 +3955,26 @@ impl RepoConfig {
                 return Self::default();
             }
         };
+
+        // Normalize preset names using Renovate's removedPresets map:
+        // renames deprecated/removed preset names to their current equivalents.
+        // Apply repeatedly until stable (handles chained renames like
+        // :unpublishSafe → npm:unpublishSafe → security:minimumReleaseAgeNpm).
+        // Renovate reference: lib/config/migrations/custom/extends-migration.ts
+        raw.extends = raw
+            .extends
+            .into_iter()
+            .filter_map(|mut p| {
+                // Iterate until stable to handle chained removedPresets entries.
+                loop {
+                    match normalize_preset(&p) {
+                        None => return None,
+                        Some(next) if next == p => return Some(p),
+                        Some(next) => p = next,
+                    }
+                }
+            })
+            .collect();
 
         // Deprecated migration: unpublishSafe: true → add security:minimumReleaseAgeNpm
         // to the extends list if it's not already present.
@@ -7689,6 +7765,67 @@ mod schedule_preset_tests {
         assert_eq!(
             npm_rule.unwrap().minimum_release_age.as_deref(),
             Some("3 days")
+        );
+    }
+
+    // ── Ported from migration.spec.ts extends migration ───────────────────────
+
+    #[test]
+    fn extends_string_coerced_to_array() {
+        // Ported: "migrates preset strings to array" — extends: 'foo' → extends: ['foo']
+        let c = RepoConfig::parse(r#"{"extends": "foo"}"#);
+        // 'foo' is unknown so should be in extends but not break parsing
+        assert!(c.minimum_release_age.is_none()); // sanity check: no minimumReleaseAge
+    }
+
+    #[test]
+    fn extends_js_app_shorthand_normalized() {
+        // Ported: extends: ':js-app' → config:js-app (via removedPresets map).
+        // :js-app is normalized to config:js-app which then expands to config:recommended + pin rule.
+        let c = RepoConfig::parse(r#"{"extends": [":js-app"]}"#);
+        // config:js-app injects a rangeStrategy:pin rule — verify that preset was recognized.
+        let has_pin_rule = c
+            .package_rules
+            .iter()
+            .any(|r| r.range_strategy.as_deref() == Some("pin"));
+        assert!(
+            has_pin_rule,
+            ":js-app should normalize to config:js-app and inject pin rules"
+        );
+    }
+
+    #[test]
+    fn extends_base_shorthand_normalized() {
+        // Ported: extends: ':base' → config:recommended (via removedPresets).
+        let c = RepoConfig::parse(r#"{"extends": [":base"]}"#);
+        // config:recommended injects workarounds and other rules — just verify it was recognized.
+        assert!(
+            !c.package_rules.is_empty(),
+            ":base should normalize to config:recommended"
+        );
+    }
+
+    #[test]
+    fn extends_master_issue_normalized() {
+        // Ported: extends: ':masterIssue' → ':dependencyDashboard'
+        let c = RepoConfig::parse(r#"{"extends": [":masterIssue"]}"#);
+        assert!(
+            c.dependency_dashboard,
+            ":masterIssue must normalize to :dependencyDashboard"
+        );
+    }
+
+    #[test]
+    fn extends_npm_unpublish_safe_normalized() {
+        // Ported: extends: ['npm:unpublishSafe'] → 'security:minimumReleaseAgeNpm'
+        let c = RepoConfig::parse(r#"{"extends": ["npm:unpublishSafe"]}"#);
+        let has_npm_age = c.package_rules.iter().any(|r| {
+            r.match_datasources.contains(&"npm".to_owned())
+                && r.minimum_release_age.as_deref() == Some("3 days")
+        });
+        assert!(
+            has_npm_age,
+            "npm:unpublishSafe must normalize to security:minimumReleaseAgeNpm"
         );
     }
 

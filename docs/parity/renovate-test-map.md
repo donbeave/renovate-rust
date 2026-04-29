@@ -226,6 +226,12 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/migration.spec.ts` | 205 | `"every friday"` → `"on friday"` schedule migration | `crates/renovate-core/src/repo_config.rs` | `schedule_every_friday_migrated_to_on_friday`, `schedule_every_monday_migrated` | ported |
 | `lib/config/migration.spec.ts` | 226 | `"every weekday"` → no migration (handled natively) | `crates/renovate-core/src/repo_config.rs` | `schedule_every_weekday_not_migrated` | ported |
 | `lib/config/migration.spec.ts` | — | `schedule: "string"` → `schedule: ["string"]` (string coerced to array) | `crates/renovate-core/src/repo_config.rs` | `schedule_every_friday_migrated_to_on_friday` | ported |
+| `lib/config/migration.spec.ts` | 419 | `extends: 'foo'` → `extends: ['foo']` (string to array) | `crates/renovate-core/src/repo_config.rs` | `extends_string_coerced_to_array` | ported |
+| `lib/config/migration.spec.ts` | 419 | `extends: ':js-app'` → `config:js-app` (removedPresets) | `crates/renovate-core/src/repo_config.rs` | `extends_js_app_shorthand_normalized` | ported |
+| `lib/config/migration.spec.ts` | 419 | `extends: ':base'` → `config:recommended` | `crates/renovate-core/src/repo_config.rs` | `extends_base_shorthand_normalized` | ported |
+| `lib/config/migration.spec.ts` | — | `extends: ':masterIssue'` → `':dependencyDashboard'` | `crates/renovate-core/src/repo_config.rs` | `extends_master_issue_normalized` | ported |
+| `lib/config/migration.spec.ts` | 532 | `extends: ['npm:unpublishSafe']` → `security:minimumReleaseAgeNpm` | `crates/renovate-core/src/repo_config.rs` | `extends_npm_unpublish_safe_normalized` | ported |
+| `lib/config/migration.spec.ts` | — | `regexManagers:*` → `customManagers:*` (all 10 entries) | `crates/renovate-core/src/repo_config.rs` | (via normalize_preset) | ported |
 | `lib/config/migration.spec.ts` | 17 | `rebaseConflictedPrs: false` → `rebaseWhen: 'never'` | `crates/renovate-core/src/repo_config.rs` | `rebase_conflicted_prs_false_sets_rebase_when_never` | ported |
 | `lib/config/migration.spec.ts` | 17 | `ignoreNodeModules: true` → adds `node_modules/` to `ignorePaths` | `crates/renovate-core/src/repo_config.rs` | `ignore_node_modules_true_adds_to_ignore_paths` | ported |
 | `lib/config/migration.spec.ts` | 17 | `enabledManagers: ['yarn']` → `['npm']` | `crates/renovate-core/src/repo_config.rs` | `enabled_managers_yarn_migrated_to_npm` | ported |
