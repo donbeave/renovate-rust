@@ -200,6 +200,10 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | 1079 | `matchCurrentVersion` static version value matches currentValue range | `crates/renovate-core/src/repo_config.rs` | `match_current_version_index_spec_static_value` | ported |
 | `lib/util/package-rules/index.spec.ts` | 1049 | `matchCurrentVersion` version pattern matches/mismatches currentValue range | `crates/renovate-core/src/repo_config.rs` | `match_current_version_index_spec_version_matches_range` | ported |
 | `lib/util/package-rules/index.spec.ts` | 987 | `matchCurrentVersion` range overlap requires currentVersion field | `crates/renovate-core/src/repo_config.rs` | `match_current_version_range_requires_current_version`, `match_current_version_range_uses_current_version_field` | ported |
+| `lib/util/package-rules/index.spec.ts` | 389 | `depTypes` (plural array) — any element matches → rule fires | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_plural_array_any_matches`, `match_dep_types_plural_array_no_match` | ported |
+| `lib/util/package-rules/index.spec.ts` | 950 | `filters naked depType` — singular depType matches | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_naked_dep_type_matches` | ported |
+| `lib/util/package-rules/index.spec.ts` | 968 | `filters out unrequested depType` — non-matching dep type → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_out_of_requested_does_not_match` | ported |
+| `lib/util/package-rules/index.spec.ts` | 38 | `applies` — comprehensive integration: isBump+matchCurrentVersion+matchPackageNames negation | `crates/renovate-core/src/repo_config.rs` | `applies_comprehensive_integration` | ported |
 
 ---
 

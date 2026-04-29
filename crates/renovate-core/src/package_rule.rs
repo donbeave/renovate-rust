@@ -566,9 +566,21 @@ impl PackageRule {
             }
         }
 
-        let dep_type = ctx.dep_type.unwrap_or("");
-        if !self.dep_type_matches(dep_type) {
-            return false;
+        // matchDepTypes: use dep_type first; fall back to dep_types (plural array).
+        // Mirrors Renovate's DepTypesMatcher which checks depType then depTypes.
+        if !self.match_dep_types.is_empty() {
+            if let Some(dt) = ctx.dep_type {
+                if !self.dep_type_matches(dt) {
+                    return false;
+                }
+            } else if !ctx.dep_types.is_empty() {
+                use crate::string_match::any_match_regex_or_glob_list;
+                if !any_match_regex_or_glob_list(ctx.dep_types, &self.match_dep_types) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
 
         // matchFileNames checks packageFile first, then falls back to lockFiles.
@@ -720,7 +732,12 @@ pub struct DepContext<'a> {
     /// Datasource identifier (e.g. `"npm"`, `"pypi"`, `"docker"`).
     pub datasource: Option<&'a str>,
     /// Dep classification within the manifest (e.g. `"dependencies"`).
+    /// Mirrors Renovate's `depType` (singular).  Used by `matchDepTypes` first.
     pub dep_type: Option<&'a str>,
+    /// Multiple dep type classifications (e.g. `["build", "test"]`).
+    /// Mirrors Renovate's `depTypes` (plural array) — used by `matchDepTypes`
+    /// when `dep_type` is absent, checking if any element matches.
+    pub dep_types: &'a [&'a str],
     /// Relative manifest file path.
     pub file_path: Option<&'a str>,
     /// Lock file paths associated with this dep (e.g. `["yarn.lock", "package-lock.json"]`).

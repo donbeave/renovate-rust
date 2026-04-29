@@ -5970,6 +5970,120 @@ mod tests {
     }
 
     #[test]
+    fn match_dep_types_plural_array_any_matches() {
+        // Ported: "filters from list of requested depTypes"
+        // index.spec.ts line ~389 — dep has depTypes: ['build', 'test'], rule matchDepTypes: ['test']
+        // anyMatchRegexOrGlobList(['build', 'test'], ['test']) → true
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["test"], "matchPackageNames": ["a"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            dep_type: None,
+            dep_types: &["build", "test"],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "rule must fire when dep_types array contains a matching type"
+        );
+    }
+
+    #[test]
+    fn match_dep_types_plural_array_no_match() {
+        // dep has dep_types: ['build', 'optional'], rule requires ['test'] → no match
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["test"], "matchPackageNames": ["a"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            dep_type: None,
+            dep_types: &["build", "optional"],
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "rule must not fire when no dep_types element matches"
+        );
+    }
+
+    #[test]
+    fn match_dep_types_naked_dep_type_matches() {
+        // Ported: "filters naked depType" — index.spec.ts line ~950
+        // dep has plain dep_type: "dependencies", matchDepTypes: ["dependencies", "peerDependencies"]
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["dependencies", "peerDependencies"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            Some(true),
+            "matchDepTypes must fire for matching singular depType"
+        );
+    }
+
+    #[test]
+    fn match_dep_types_out_of_requested_does_not_match() {
+        // Ported: "filters out unrequested depType" — index.spec.ts line ~968
+        // dep_type: "devDependencies", matchDepTypes: ["dependencies", "peerDependencies"] → no match
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDepTypes": ["dependencies", "peerDependencies"], "matchPackageNames": ["a"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            dep_type: Some("devDependencies"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).automerge,
+            None,
+            "matchDepTypes must not fire for depType not in the list"
+        );
+    }
+
+    #[test]
+    fn applies_comprehensive_integration() {
+        // Ported: "applies" — index.spec.ts line 38
+        // packageName='a', updateType='minor', isBump=true, currentValue='1.0.0'
+        // - Rule 1: matchPackageNames:['*'] + matchCurrentVersion:'<= 2.0.0' → fires (no effect fields)
+        // - Rule 2: matchPackageNames:['b'] → doesn't match 'a' → skipped
+        // - Rule 3: matchUpdateTypes:['bump'] + isBump:true → fires → labels:['bump']
+        // - Rule 4: matchPackageNames:['b', '!a'] → '!a' exclusion → skipped
+        // - Rule 5: matchCurrentVersion:'<= 2.0.0' → fires (no effect fields)
+        // Expected: labels = ["bump"]
+        let c = RepoConfig::parse(
+            r#"{
+            "packageRules": [
+                {"matchPackageNames": ["*"], "matchCurrentVersion": "<= 2.0.0"},
+                {"matchPackageNames": ["b"], "matchCurrentVersion": "<= 2.0.0"},
+                {"matchUpdateTypes": ["bump"], "labels": ["bump"]},
+                {"matchPackageNames": ["b", "!a"]},
+                {"matchCurrentVersion": "<= 2.0.0"}
+            ]
+        }"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            current_value: Some("1.0.0"),
+            update_type: Some(crate::versioning::semver_generic::UpdateType::Minor),
+            is_bump: true,
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.labels,
+            vec!["bump"],
+            "only the bump rule should fire and set labels"
+        );
+    }
+
+    #[test]
     fn match_datasources_glob_pattern() {
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchDatasources": ["npm*"], "enabled": false}]}"#,
