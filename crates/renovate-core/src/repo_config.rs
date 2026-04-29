@@ -7742,6 +7742,88 @@ mod source_url_tests {
         // '"v1.1.0"' should also match
         assert!(rule.current_value_matches("\"v1.1.0\""));
     }
+
+    // ── Ported from current-value.spec.ts ─────────────────────────────────────
+
+    #[test]
+    fn match_current_value_undefined_returns_false() {
+        // Ported: "return false for now value" test.
+        // When currentValue is absent (None), matchCurrentValue constraint → false.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentValue": "/^v?[~ -]?0/", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        // Empty string (None fallback) does not match the regex → false.
+        assert!(!rule.current_value_matches(""));
+    }
+
+    #[test]
+    fn match_current_value_glob_match() {
+        // Ported: "return true for glob match" + "return false for glob non match"
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentValue": "1.2.*", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.current_value_matches("1.2.3"));
+        assert!(!rule.current_value_matches("1.3.0"));
+    }
+
+    // ── Ported from new-value.spec.ts ─────────────────────────────────────────
+
+    #[test]
+    fn match_new_value_undefined_returns_false() {
+        // "return false for now value": when newValue is absent, constraint → false.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchNewValue": "/^v?[~ -]?0/", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.new_value_matches(""));
+    }
+
+    #[test]
+    fn match_new_value_glob_match() {
+        // Ported: "return true for glob match" + "return false for glob non match"
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchNewValue": "1.2.*", "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.new_value_matches("1.2.3"));
+        assert!(!rule.new_value_matches("1.3.0"));
+    }
+
+    // ── Ported from files.spec.ts ─────────────────────────────────────────────
+
+    #[test]
+    fn match_file_names_undefined_returns_false() {
+        // "should return false if packageFile is not defined"
+        // When file_path is None and matchFileNames is set → the rule must NOT fire.
+        // We test via a rule that sets automerge when it matches — if rule fires,
+        // automerge would be Some(true); if not, it stays None.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchFileNames": ["frontend/package.json"], "automerge": true}]}"#,
+        );
+        let ctx_no_file = DepContext {
+            dep_name: "dep",
+            file_path: None,
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx_no_file).automerge,
+            None,
+            "rule must not fire when file_path is None"
+        );
+        // But when file_path matches, the rule fires.
+        let ctx_with_file = DepContext {
+            dep_name: "dep",
+            file_path: Some("frontend/package.json"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx_with_file).automerge,
+            Some(true),
+            "rule must fire when file_path matches"
+        );
+    }
 }
 
 #[cfg(test)]
@@ -7975,6 +8057,43 @@ mod registry_url_repository_tests {
             None,
             "rule should not fire when repository is unknown (None)"
         );
+    }
+
+    // ── repositories.spec.ts additions ───────────────────────────────────────
+
+    #[test]
+    fn match_repositories_invalid_regex_returns_false() {
+        // Invalid regex pattern: /[/ — Renovate returns false (no match).
+        // Our regex crate returns Err, unwrap_or(false) → false.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["/[/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn match_repositories_invalid_negated_regex_returns_true() {
+        // Negated invalid regex: !/[/ — Renovate returns true (passes through).
+        // Our negation logic: try matching the invalid regex → unwrap_or(false) → false,
+        // then negation → true.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["!/[/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn match_repositories_any_of_patterns() {
+        // Matches at least one pattern: regex OR glob.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["/^org/repo$/", "**/*-archived"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.repository_matches("org/repo-archived")); // matches glob
+        assert!(rule.repository_matches("org/repo")); // matches regex
+        assert!(!rule.repository_matches("other/something")); // matches neither
     }
 
     #[test]

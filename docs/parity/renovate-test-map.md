@@ -130,6 +130,15 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` glob | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_glob` | ported |
 | `lib/util/package-rules/repositories.spec.ts` | — | `matchRepositories` regex | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_regex` | ported |
 | `lib/util/package-rules/repositories.spec.ts` | — | empty `matchRepositories` matches all | `crates/renovate-core/src/repo_config.rs` | `registry_url_repository_tests::match_repositories_empty_matches_all` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | undefined repository + `matchRepositories` set → false | `crates/renovate-core/src/repo_config.rs` | `match_repositories_fires_only_for_matching_repo` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | invalid regex `/[/` → false | `crates/renovate-core/src/repo_config.rs` | `match_repositories_invalid_regex_returns_false` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | invalid negated regex `!/[/` → true | `crates/renovate-core/src/repo_config.rs` | `match_repositories_invalid_negated_regex_returns_true` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | — | any-of multiple patterns (regex OR glob) | `crates/renovate-core/src/repo_config.rs` | `match_repositories_any_of_patterns` | ported |
+| `lib/util/package-rules/current-value.spec.ts` | — | undefined currentValue → false | `crates/renovate-core/src/repo_config.rs` | `match_current_value_undefined_returns_false` | ported |
+| `lib/util/package-rules/current-value.spec.ts` | — | glob `1.2.*` match | `crates/renovate-core/src/repo_config.rs` | `match_current_value_glob_match` | ported |
+| `lib/util/package-rules/new-value.spec.ts` | — | undefined newValue → false | `crates/renovate-core/src/repo_config.rs` | `match_new_value_undefined_returns_false` | ported |
+| `lib/util/package-rules/new-value.spec.ts` | — | glob `1.2.*` match | `crates/renovate-core/src/repo_config.rs` | `match_new_value_glob_match` | ported |
+| `lib/util/package-rules/files.spec.ts` | — | undefined packageFile + matchFileNames set → false | `crates/renovate-core/src/repo_config.rs` | `match_file_names_undefined_returns_false` | ported |
 | `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` set without timestamp → false | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_set_without_timestamp_returns_false` | ported |
 | `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` old dep matches `"> 3 days"` | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_old_dep_matches_gt_constraint` | ported |
 | `lib/util/package-rules/current-age.ts` | — | `matchCurrentAge` new dep does not match `"> 3 days"` | `crates/renovate-core/src/repo_config.rs` | `dep_context_tests::match_current_age_new_dep_does_not_match_gt_constraint` | ported |
