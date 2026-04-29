@@ -33,6 +33,13 @@ pub(crate) fn apply_update_blocking_to_report(
                 let update_type = classify_semver_update(current, latest);
                 let datasource =
                     renovate_core::managers::manager_default_datasource(manager.as_str());
+                let registry_urls =
+                    renovate_core::managers::manager_default_registry_urls(manager.as_str());
+                let registry_urls_ref: Option<&[&str]> = if registry_urls.is_empty() {
+                    None
+                } else {
+                    Some(registry_urls)
+                };
                 let ctx = renovate_core::repo_config::DepContext {
                     dep_name: &dep.name,
                     package_name: dep.package_name.as_deref(),
@@ -45,6 +52,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     dep_type: dep.dep_type.as_deref(),
                     repository: Some(repo_slug),
                     datasource,
+                    registry_urls: registry_urls_ref,
                     ..Default::default()
                 };
 
@@ -587,6 +595,27 @@ mod tests {
         assert!(
             matches!(&report.files[0].deps[0].status, DepStatus::UpdateAvailable { .. }),
             "pre-release→pre-release update should not be blocked when current is already unstable"
+        );
+    }
+
+    #[test]
+    fn match_registry_urls_fires_via_pipeline_context() {
+        // matchRegistryUrls: ["https://registry.npmjs.org"] should match npm deps
+        // because manager_default_registry_urls("npm") returns that URL.
+        let cfg = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRegistryUrls": ["https://registry.npmjs.org"], "enabled": false}]}"#,
+        );
+        let mut report = make_report(vec![(
+            "lodash",
+            DepStatus::UpdateAvailable {
+                current: "4.0.0".into(),
+                latest: "4.17.21".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert!(
+            matches!(&report.files[0].deps[0].status, DepStatus::Skipped { .. }),
+            "matchRegistryUrls for npm should fire via default registry URL"
         );
     }
 

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0289  | 2026-04-29 | `matchRegistryUrls` now fires in pipeline: `manager_default_registry_urls()` populates `DepContext.registry_urls` with the manager's default registry, enabling `matchRegistryUrls` rules to match correctly; 1 pipeline test | Complete | See below. |
 | 0288  | 2026-04-29 | Bug fix: `is_dep_ignored_ctx` delegates to `is_update_blocked_ctx` so last-rule-wins `enabled` semantics apply to pre-lookup skipping as well; unified `enabled` rule evaluation path | Complete | See below. |
 | 0287  | 2026-04-29 | Bug fix: `is_update_blocked_ctx` now implements "last matching rule wins" for `enabled` field — a later `enabled: true` overrides an earlier `enabled: false`, mirroring Renovate's `applyPackageRules` behavior; 1 test | Complete | See below. |
 | 0286  | 2026-04-29 | Verify + test brace expansion in `matchPackageNames`/`matchDepNames` glob patterns (e.g. `@opentelemetry{/,}**`); globset handles this natively; 1 test added to `string_match.rs` | Complete | See below. |

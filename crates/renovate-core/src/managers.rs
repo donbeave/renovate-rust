@@ -168,6 +168,33 @@ pub fn manager_default_datasource(manager_name: &str) -> Option<&'static str> {
     }
 }
 
+/// Return the default registry URL(s) for a manager/datasource combination.
+///
+/// Used to populate `DepContext.registry_urls` so `matchRegistryUrls` rules
+/// fire correctly when the dep doesn't specify a custom registry.
+///
+/// Renovate reference: each datasource's `defaultRegistryUrls` in
+/// `lib/modules/datasource/*/index.ts`.
+pub fn manager_default_registry_urls(manager_name: &str) -> &'static [&'static str] {
+    match manager_name {
+        "npm" | "bun" | "meteor" | "mint" => {
+            &["https://registry.npmjs.org"]
+        }
+        "pip_requirements" | "pip-compile" | "pip_setup" | "pipenv" | "poetry" | "pep621"
+        | "pep723" | "setup-cfg" => &["https://pypi.org/simple/"],
+        "cargo" => &["https://crates.io/"],
+        "maven" | "maven-wrapper" | "ant" | "sbt" | "leiningen" | "gradle" | "gradle-wrapper"
+        | "kotlin-script" => &["https://repo.maven.apache.org/maven2/"],
+        "bundler" | "gemspec" => &["https://rubygems.org/"],
+        "composer" => &["https://packagist.org/"],
+        "nuget" => &["https://api.nuget.org/v3/index.json"],
+        "pub" => &["https://pub.dev/"],
+        "cabal" => &["https://hackage.haskell.org/"],
+        "hex" | "mix" => &["https://hex.pm/"],
+        _ => &[],
+    }
+}
+
 /// Pre-compiled manager patterns.  Compiled once at first use via
 /// `LazyLock` — avoids re-compilation on every `detect()` call.
 static COMPILED: LazyLock<Vec<(&'static str, Vec<Regex>)>> = LazyLock::new(|| {
