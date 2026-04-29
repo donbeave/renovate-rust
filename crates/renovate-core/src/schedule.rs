@@ -195,7 +195,7 @@ pub fn is_within_schedule_tz_at(
         if looks_like_cron(entry) {
             cron_matches(entry, hour, dom, month, weekday)
         } else {
-            text_schedule_matches(entry, hour, dom, weekday)
+            text_schedule_matches_month(entry, hour, dom, weekday, month)
         }
     })
 }
@@ -349,6 +349,14 @@ fn parse_day_names(text: &str) -> Option<Vec<u8>> {
 /// Renovate reference: `lib/workers/repository/update/branch/schedule.ts` —
 /// `later.parse.text()` driven schedule evaluation.
 pub fn text_schedule_matches(entry: &str, hour: u8, dom: u8, weekday: u8) -> bool {
+    text_schedule_matches_month(entry, hour, dom, weekday, 0)
+}
+
+/// Like [`text_schedule_matches`] but also considers the current month for
+/// "of MonthName" and "every N months" patterns.
+///
+/// Pass `month = 0` to skip month-based filtering (backward compatibility).
+pub fn text_schedule_matches_month(entry: &str, hour: u8, dom: u8, weekday: u8, month: u8) -> bool {
     let s = entry.trim().to_lowercase();
 
     // "at any time" / "" — always match
@@ -363,7 +371,41 @@ pub fn text_schedule_matches(entry: &str, hour: u8, dom: u8, weekday: u8) -> boo
         } else {
             true
         };
+        // Check "every N months on the first day" — month constraint
+        if month > 0
+            && let Some(n) = extract_every_n_months(&s)
+            && (month as u32) % (n as u32) != 1 % (n as u32)
+        {
+            return false;
+        }
         return dom == 1 && time_ok;
+    }
+
+    // "of MonthName" — only in the specified month
+    if month > 0 {
+        if let Some(named_month) = extract_named_month(&s) {
+            if month != named_month {
+                return false;
+            }
+            // No time/day constraint → just month constraint
+            let (time_ok, has_time) = evaluate_time_constraint(&s, hour);
+            let (day_ok, has_day) = evaluate_day_constraint(&s, weekday);
+            return match (has_time, has_day) {
+                (true, true) => time_ok && day_ok,
+                (true, false) => time_ok,
+                (false, true) => day_ok,
+                (false, false) => true,
+            };
+        }
+
+        // "every N months" — month is in the N-month cycle
+        if let Some(n) = extract_every_n_months(&s) {
+            if (month as u32) % (n as u32) != 1 % (n as u32) {
+                return false;
+            }
+            // No additional time/day constraint
+            return true;
+        }
     }
 
     // Parse time constraints and day constraints separately.
@@ -381,6 +423,43 @@ pub fn text_schedule_matches(entry: &str, hour: u8, dom: u8, weekday: u8) -> boo
         (true, false) => time_ok,
         (false, true) => day_ok,
         (false, false) => true,
+    }
+}
+
+/// Return the month number (1-12) if `s` contains "of <MonthName>".
+fn extract_named_month(s: &str) -> Option<u8> {
+    const MONTHS: &[(&str, u8)] = &[
+        ("january", 1),
+        ("february", 2),
+        ("march", 3),
+        ("april", 4),
+        ("may", 5),
+        ("june", 6),
+        ("july", 7),
+        ("august", 8),
+        ("september", 9),
+        ("october", 10),
+        ("november", 11),
+        ("december", 12),
+    ];
+    for (name, num) in MONTHS {
+        if s.contains(&format!("of {name}")) {
+            return Some(*num);
+        }
+    }
+    None
+}
+
+/// Return N if `s` contains "every N months".
+fn extract_every_n_months(s: &str) -> Option<u8> {
+    let idx = s.find("every ")?;
+    let rest = &s[idx + "every ".len()..];
+    let tok = rest.split_whitespace().next()?;
+    let n: u8 = tok.parse().ok()?;
+    if rest.contains("month") && n > 1 {
+        Some(n)
+    } else {
+        None
     }
 }
 
@@ -1100,5 +1179,38 @@ mod tests {
         let oct_1_5am = utc(2017, 10, 1, 5);
         let sched = vec!["before 11am on the first day of the month".to_owned()];
         assert!(is_within_schedule_at(&sched, oct_1_5am));
+    }
+
+    #[test]
+    fn spec_months_of_year_approves_january() {
+        // "approves on months of year" — "of January" in January
+        let jan_2_6am = utc(2017, 1, 2, 6);
+        let sched = vec!["of January".to_owned()];
+        assert!(is_within_schedule_at(&sched, jan_2_6am));
+    }
+
+    #[test]
+    fn spec_months_of_year_rejects_february() {
+        // "rejects on months of year" — "of January" in February → false
+        let feb_2_6am = utc(2017, 2, 2, 6);
+        let sched = vec!["of January".to_owned()];
+        assert!(!is_within_schedule_at(&sched, feb_2_6am));
+    }
+
+    #[test]
+    fn spec_every_3_months_approves_july() {
+        // "approves schedule longer than 1 month" — "every 3 months" in July 2017
+        // July is the 7th month: 7 % 3 != 0 so quarterly (Jan, Apr, Jul, Oct)
+        let jul_1_6am = utc(2017, 7, 1, 6);
+        let sched = vec!["every 3 months".to_owned()];
+        assert!(is_within_schedule_at(&sched, jul_1_6am));
+    }
+
+    #[test]
+    fn spec_every_6_months_rejects_february() {
+        // "rejects schedule longer than 1 month" — "every 6 months" in Feb (not a 6-month boundary)
+        let feb_1_6am = utc(2017, 2, 1, 6);
+        let sched = vec!["every 6 months".to_owned()];
+        assert!(!is_within_schedule_at(&sched, feb_1_6am));
     }
 }
