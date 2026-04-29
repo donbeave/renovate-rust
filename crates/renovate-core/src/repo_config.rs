@@ -3625,6 +3625,10 @@ impl RepoConfig {
             ignore_presets: Vec<String>,
             #[serde(rename = "minimumReleaseAge")]
             minimum_release_age: Option<String>,
+            /// Deprecated: Renovate migrates stabilityDays → minimumReleaseAge.
+            /// Accepted here for backward-compat; values: 0 (unset), 1 ("1 day"), N ("N days").
+            #[serde(rename = "stabilityDays")]
+            stability_days: Option<u32>,
             #[serde(rename = "ignoreUnstable", default)]
             ignore_unstable: bool,
             #[serde(rename = "respectLatest", default)]
@@ -4118,7 +4122,15 @@ impl RepoConfig {
             include_paths: raw.include_paths,
             extends: raw.extends,
             ignore_presets: raw.ignore_presets,
-            minimum_release_age: raw.minimum_release_age,
+            minimum_release_age: raw.minimum_release_age.or_else(|| {
+                // Migrate deprecated stabilityDays → minimumReleaseAge.
+                // Renovate reference: lib/config/migrations/custom/stability-days-migration.ts
+                match raw.stability_days {
+                    Some(0) | None => None,
+                    Some(1) => Some("1 day".to_owned()),
+                    Some(n) => Some(format!("{n} days")),
+                }
+            }),
             ignore_unstable: raw.ignore_unstable || preset_ignore_unstable,
             respect_latest: raw.respect_latest
                 || effective_extends
@@ -8046,6 +8058,40 @@ mod rule_effects_tests {
     }
 
     // ── per-rule minimumReleaseAge in RuleEffects ────────────────────────────
+
+    // ── stabilityDays migration ───────────────────────────────────────────────
+
+    #[test]
+    fn stability_days_migrated_to_minimum_release_age() {
+        let c = RepoConfig::parse(r#"{"stabilityDays": 3}"#);
+        assert_eq!(
+            c.minimum_release_age.as_deref(),
+            Some("3 days"),
+            "stabilityDays: 3 must migrate to minimumReleaseAge: '3 days'"
+        );
+    }
+
+    #[test]
+    fn stability_days_1_migrated_to_1_day() {
+        let c = RepoConfig::parse(r#"{"stabilityDays": 1}"#);
+        assert_eq!(c.minimum_release_age.as_deref(), Some("1 day"));
+    }
+
+    #[test]
+    fn stability_days_0_means_no_minimum_release_age() {
+        let c = RepoConfig::parse(r#"{"stabilityDays": 0}"#);
+        assert!(c.minimum_release_age.is_none(), "stabilityDays: 0 must not set minimumReleaseAge");
+    }
+
+    #[test]
+    fn minimum_release_age_takes_precedence_over_stability_days() {
+        let c = RepoConfig::parse(r#"{"minimumReleaseAge": "7 days", "stabilityDays": 3}"#);
+        assert_eq!(
+            c.minimum_release_age.as_deref(),
+            Some("7 days"),
+            "explicit minimumReleaseAge must take precedence over stabilityDays migration"
+        );
+    }
 
     #[test]
     fn per_rule_minimum_release_age_parsed() {

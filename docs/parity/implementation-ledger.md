@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0338  | 2026-04-29 | `stabilityDays` → `minimumReleaseAge` migration: deprecated `stabilityDays` config field parsed and migrated at parse time (matching Renovate's stability-days-migration.ts); `minimumReleaseAge` takes precedence when both are set; 4 tests | Complete | See below. |
 | 0337  | 2026-04-29 | Output enhancements: `versioning` added to `DepReport` JSON output and wired from `RuleEffects`; `updateType` now set to `"replacement"` when `replacementName` is present (overrides semver classification); all 34+ files updated; 2 pipeline_utils tests | Complete | See below. |
 | 0336  | 2026-04-29 | Output enhancements: `rangeStrategy`, `followTag`, `pinDigests` added to `DepReport` JSON output and wired from `RuleEffects` via `pipeline_utils`; all 33+ pipeline files updated via Python bulk-insert script | Complete | See below. |
 | 0335  | 2026-04-29 | preset completeness: `config:recommended` now includes `:dependencyDashboard`; `config:best-practices` now includes `:configMigration` + `:maintainLockFilesWeekly`; `helpers:pinGitHubActionDigestsToSemver` implemented (action rule with `pinDigests: true` + semver-regex versioning); 3 new tests | Complete | See below. |
