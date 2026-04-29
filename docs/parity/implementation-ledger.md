@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0318  | 2026-04-29 | `prCreation` config field; `:prImmediately` sets `"immediate"`, `:prNotPending` sets `"not-pending"` | Complete | See below. |
 | 0317  | 2026-04-29 | `replacementName` + `replacementVersion` per-rule fields (parsed, stored in `PackageRule` and `RuleEffects`); enables replacement suggestion rules | Complete | See below. |
 | 0316  | 2026-04-29 | `followTag` per-rule field (parsed, stored, collected in `RuleEffects`); 1 test | Complete | See below. |
 | 0315  | 2026-04-29 | `commitBody` top-level config field; `:gitSignOff` preset sets `commitBody: "Signed-off-by: {{{gitAuthor}}}"` — 1500 tests total; 2 tests | Complete | See below. |

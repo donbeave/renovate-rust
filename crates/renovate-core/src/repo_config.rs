@@ -165,6 +165,12 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `prConcurrentLimit`.
     pub pr_concurrent_limit: u32,
+    /// When to create a PR: `"immediate"` (after branch creation), `"not-pending"`
+    /// (after all tests pass or fail), `"status-success"` (only when all checks pass),
+    /// or `"approval"` (requires dependency dashboard approval).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prCreation`.
+    pub pr_creation: Option<String>,
 
     /// Maximum number of Renovate PRs to create per hour.  `0` = unlimited.
     ///
@@ -2483,6 +2489,8 @@ impl RepoConfig {
             base_branches: Vec<String>,
             #[serde(rename = "rebaseWhen")]
             rebase_when: Option<String>,
+            #[serde(rename = "prCreation")]
+            pr_creation: Option<String>,
             #[serde(rename = "prConcurrentLimit", default)]
             pr_concurrent_limit: u32,
             #[serde(rename = "prHourlyLimit", default = "default_pr_hourly_limit")]
@@ -2887,6 +2895,22 @@ impl RepoConfig {
             }),
             pr_concurrent_limit: scalar_pr_concurrent.unwrap_or(raw.pr_concurrent_limit),
             pr_hourly_limit: scalar_pr_hourly.unwrap_or(raw.pr_hourly_limit),
+            pr_creation: raw.pr_creation.or_else(|| {
+                // :prImmediately and :prNotPending presets set prCreation.
+                if effective_extends
+                    .iter()
+                    .any(|p| p == ":prImmediately" || p == "prImmediately")
+                {
+                    Some("immediate".to_owned())
+                } else if effective_extends
+                    .iter()
+                    .any(|p| p == ":prNotPending" || p == "prNotPending")
+                {
+                    Some("not-pending".to_owned())
+                } else {
+                    None
+                }
+            }),
             group_name: raw.group_name,
             // group:all preset implies separateMajorMinor: false.
             // Explicit user config overrides the preset (but default true from serde means
@@ -3373,6 +3397,7 @@ impl Default for RepoConfig {
             base_branches: Vec::new(),
             rebase_when: None,
             pr_concurrent_limit: 0,
+            pr_creation: None,
             pr_hourly_limit: 2,
             group_name: None,
             separate_major_minor: true,
