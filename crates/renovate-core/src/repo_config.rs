@@ -868,6 +868,60 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
+            // helpers:githubDigestChangelogs — add changelogUrl for GitHub digest updates.
+            // Renovate reference: lib/config/presets/internal/helpers.preset.ts
+            "helpers:githubDigestChangelogs" => {
+                rules.push(PackageRule {
+                    match_datasources: vec![
+                        "github-digest".to_owned(),
+                        "github-releases".to_owned(),
+                        "github-tags".to_owned(),
+                    ],
+                    match_update_types: vec![UpdateType::Digest],
+                    has_update_type_constraint: true,
+                    changelog_url: Some(
+                        "{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}".to_owned(),
+                    ),
+                    ..Default::default()
+                });
+                // git-refs/git-tags from github also get the changelog URL.
+                rules.push(PackageRule {
+                    match_datasources: vec!["git-refs".to_owned(), "git-tags".to_owned()],
+                    match_update_types: vec![UpdateType::Digest],
+                    has_update_type_constraint: true,
+                    changelog_url: Some(
+                        "{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}".to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            // helpers:forgejoDigestChangelogs — add changelogUrl for Forgejo digest updates.
+            "helpers:forgejoDigestChangelogs" => {
+                rules.push(PackageRule {
+                    match_datasources: vec![
+                        "forgejo-releases".to_owned(),
+                        "forgejo-tags".to_owned(),
+                    ],
+                    match_update_types: vec![UpdateType::Digest],
+                    has_update_type_constraint: true,
+                    changelog_url: Some(
+                        "{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}".to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
+            // helpers:giteaDigestChangelogs — add changelogUrl for Gitea digest updates.
+            "helpers:giteaDigestChangelogs" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["gitea-releases".to_owned(), "gitea-tags".to_owned()],
+                    match_update_types: vec![UpdateType::Digest],
+                    has_update_type_constraint: true,
+                    changelog_url: Some(
+                        "{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}".to_owned(),
+                    ),
+                    ..Default::default()
+                });
+            }
             // helpers:disableTypesNodeMajor — disable @types/node major updates.
             "helpers:disableTypesNodeMajor" => {
                 rules.push(PackageRule {
@@ -3078,6 +3132,8 @@ impl RepoConfig {
                         "minor" => Some(UpdateType::Minor),
                         "patch" => Some(UpdateType::Patch),
                         "replacement" => Some(UpdateType::Replacement),
+                        "digest" => Some(UpdateType::Digest),
+                        "pin" => Some(UpdateType::Pin),
                         _ => None,
                     })
                     .collect();

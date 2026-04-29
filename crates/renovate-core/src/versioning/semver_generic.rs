@@ -76,6 +76,12 @@ pub enum UpdateType {
     /// Package is being replaced by a different package name.
     /// Set via `matchUpdateTypes: ["replacement"]`.
     Replacement,
+    /// Docker image or git commit digest is being pinned/updated.
+    /// Set via `matchUpdateTypes: ["digest"]`.
+    Digest,
+    /// Package is being pinned to an exact version from a range.
+    /// Set via `matchUpdateTypes: ["pin"]`.
+    Pin,
 }
 
 /// Classify a version bump as major, minor, or patch using semver comparison.

@@ -53,8 +53,12 @@ fn load_data() -> Option<MonorepoData> {
 /// Used by monorepo group rules to exclude pin updates.
 fn non_pin_update_types() -> Vec<UpdateType> {
     // nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'] in Renovate.
-    // We include Major/Minor/Patch; Digest is not in our UpdateType enum yet.
-    vec![UpdateType::Major, UpdateType::Minor, UpdateType::Patch]
+    vec![
+        UpdateType::Digest,
+        UpdateType::Major,
+        UpdateType::Minor,
+        UpdateType::Patch,
+    ]
 }
 
 /// Return the names of all `group:${name}Monorepo` presets that are part of
