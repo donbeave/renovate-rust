@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0276  | 2026-04-29 | `ignorePresets`: filter extends list before all preset resolution; `effective_extends` replaces all `raw.extends` references in parse; `ignore_presets` field on `RepoConfig`; 4 tests | Complete | See below. |
 | 0275  | 2026-04-29 | Security presets: `security:minimumReleaseAgeNpm`, `:unpublishSafe`, `security:minimumReleaseAgeCratesio/PyPI` inject `minimumReleaseAge: "3 days"` packageRules; 2 tests | Complete | See below. |
 | 0274  | 2026-04-29 | Group PR title uses group name as topic: when dep is grouped and no explicit `commitMessageTopic`, use `groupName` as topic with empty extra, matching Renovate group PR title semantics | Complete | See below. |
 | 0273  | 2026-04-29 | Fix non-semver branch name generation (Docker tags, calendar versions): fallback to `{sanitized_name}-{sanitized_version}` topic; groupSlug path no longer requires parseable semver | Complete | See below. |
@@ -5415,4 +5416,31 @@ Previous implementation silently returned `false` (= not restricted) for
 
 ### Files changed
 - `crates/renovate-core/src/package_rule.rs`
+- `crates/renovate-core/src/repo_config.rs`
+
+---
+
+## Slice 0276 - `ignorePresets` filtering
+
+### Renovate reference
+- `lib/config/options/index.ts` — `ignorePresets` option: presets listed here are excluded from `extends` before any resolution occurs
+- Allows users to extend a large preset bundle but suppress individual behaviors from it
+
+### Implementation
+- Computed `effective_extends: Vec<String>` at the top of `RepoConfig::parse()`:
+  ```rust
+  let effective_extends: Vec<String> = raw.extends.iter()
+      .filter(|p| !raw.ignore_presets.contains(p))
+      .cloned()
+      .collect();
+  ```
+- All preset resolution functions (`resolve_extends_ignore_paths`, `resolve_extends_schedule`, `resolve_extends_automerge`, `resolve_extends_automerge_rules`, `resolve_extends_common_rules`, `resolve_extends_scalar_overrides`, `resolve_extends_semantic_type_scope`, `resolve_extends_group_presets`, `resolve_extends_parameterized`) now receive `&effective_extends` instead of `&raw.extends`
+- Inline checks (`:automergePatch` → `separateMinorPatch`, `:semanticCommits`/`:semanticCommitsDisabled`) also use `effective_extends`
+- Added `ignore_presets: Vec<String>` field to `RepoConfig` struct (public, after `extends`)
+- Added `ignore_presets: Vec::new()` to `Default` impl
+- Added `ignore_presets: raw.ignore_presets` in field mapping block
+- Added `ignore_presets: Vec<String>` to `Raw` inner struct with `#[serde(rename = "ignorePresets", default)]`
+- 4 tests: suppress all effects of `:semanticCommits`, partial suppression (one preset suppressed, another still active), field stored on parsed config, `:automergePatch` → `separateMinorPatch` suppressed
+
+### Files changed
 - `crates/renovate-core/src/repo_config.rs`

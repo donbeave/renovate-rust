@@ -199,6 +199,12 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `extends`.
     pub extends: Vec<String>,
 
+    /// Presets from `extends` that should be suppressed / ignored.
+    /// Listed presets are filtered out before any resolution occurs.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `ignorePresets`.
+    pub ignore_presets: Vec<String>,
+
     // ── Release age / safety ─────────────────────────────────────────────────
     /// Minimum time a release must have been published before it is eligible
     /// for updates.  Format: `"3 days"`, `"1 week"`, `"2 months"`, etc.
@@ -987,6 +993,8 @@ impl RepoConfig {
             semantic_commit_scope: String,
             #[serde(default)]
             extends: Vec<String>,
+            #[serde(rename = "ignorePresets", default)]
+            ignore_presets: Vec<String>,
             #[serde(rename = "minimumReleaseAge")]
             minimum_release_age: Option<String>,
             #[serde(rename = "commitMessageAction", default = "default_commit_action")]
@@ -1042,22 +1050,32 @@ impl RepoConfig {
             }
         };
 
+        // Filter the extends list to remove any presets in `ignorePresets`.
+        // This is evaluated before all preset resolution so ignored presets are
+        // never expanded, matching Renovate's behaviour.
+        let effective_extends: Vec<String> = raw
+            .extends
+            .iter()
+            .filter(|p| !raw.ignore_presets.contains(p))
+            .cloned()
+            .collect();
+
         // Resolve group presets before building user-defined rules.
         // Preset rules are prepended so user-defined rules take precedence (later rules win).
         let (mut preset_rules, group_separate_major_minor) =
-            resolve_extends_group_presets(&raw.extends);
+            resolve_extends_group_presets(&effective_extends);
         // Inject semantic prefix packageRules from `:semanticPrefixFixDepsChoreOthers` etc.
-        let sem_prefix_rules = resolve_extends_semantic_prefix_rules(&raw.extends);
+        let sem_prefix_rules = resolve_extends_semantic_prefix_rules(&effective_extends);
         preset_rules.extend(sem_prefix_rules);
-        let _ = resolve_extends_semantic_type_scope(&raw.extends); // placeholder for future use
+        let _ = resolve_extends_semantic_type_scope(&effective_extends); // placeholder for future use
         // Inject selective automerge rules from :automergeMinor / :automergePatch.
-        let automerge_rules = resolve_extends_automerge_rules(&raw.extends);
+        let automerge_rules = resolve_extends_automerge_rules(&effective_extends);
         preset_rules.extend(automerge_rules);
         // Inject rules from other common presets (:disableDevDependencies, etc.).
-        let common_rules = resolve_extends_common_rules(&raw.extends);
+        let common_rules = resolve_extends_common_rules(&effective_extends);
         preset_rules.extend(common_rules);
         // :automergePatch sets separateMinorPatch: true.
-        let preset_separate_minor_patch = raw.extends.iter().any(|p| p == ":automergePatch");
+        let preset_separate_minor_patch = effective_extends.iter().any(|p| p == ":automergePatch");
         let (
             param_labels,
             param_assignees,
@@ -1065,14 +1083,14 @@ impl RepoConfig {
             param_automerge_type,
             param_sem_type,
             param_sem_scope,
-        ) = resolve_extends_parameterized(&raw.extends);
+        ) = resolve_extends_parameterized(&effective_extends);
         let (
             scalar_sep_minor_patch,
             scalar_sep_major_minor,
             scalar_sep_multi_major,
             scalar_pr_concurrent,
             scalar_pr_hourly,
-        ) = resolve_extends_scalar_overrides(&raw.extends);
+        ) = resolve_extends_scalar_overrides(&effective_extends);
 
         // Convert `enabled: false` inside major/minor/patch blocks to synthetic
         // packageRules so the existing is_update_blocked_ctx path handles them.
@@ -1182,7 +1200,7 @@ impl RepoConfig {
             ignore_versions: raw.ignore_versions,
             schedule: if raw.schedule.is_empty() {
                 // No explicit schedule → use schedule preset if any.
-                resolve_extends_schedule(&raw.extends).unwrap_or(raw.schedule)
+                resolve_extends_schedule(&effective_extends).unwrap_or(raw.schedule)
             } else {
                 raw.schedule
             },
@@ -1190,7 +1208,7 @@ impl RepoConfig {
             automerge: if raw.automerge {
                 true // explicit automerge: true wins
             } else {
-                resolve_extends_automerge(&raw.extends).unwrap_or(false)
+                resolve_extends_automerge(&effective_extends).unwrap_or(false)
             },
             automerge_type: raw.automerge_type.or(param_automerge_type),
             labels: {
@@ -1241,9 +1259,9 @@ impl RepoConfig {
             semantic_commit_scope: param_sem_scope.unwrap_or(raw.semantic_commit_scope),
             semantic_commits: raw.semantic_commits.or_else(|| {
                 // `:semanticCommits` preset implies semanticCommits = "enabled"
-                if raw.extends.iter().any(|e| e == ":semanticCommits") {
+                if effective_extends.iter().any(|e| e == ":semanticCommits") {
                     Some("enabled".to_owned())
-                } else if raw.extends.iter().any(|e| e == ":semanticCommitsDisabled") {
+                } else if effective_extends.iter().any(|e| e == ":semanticCommitsDisabled") {
                     Some("disabled".to_owned())
                 } else {
                     None
@@ -1252,12 +1270,13 @@ impl RepoConfig {
             ignore_paths: {
                 // Prepend ignore paths from resolved built-in presets.
                 // User-configured paths override/extend preset paths.
-                let mut preset_paths = resolve_extends_ignore_paths(&raw.extends);
+                let mut preset_paths = resolve_extends_ignore_paths(&effective_extends);
                 preset_paths.extend(raw.ignore_paths);
                 preset_paths
             },
             include_paths: raw.include_paths,
             extends: raw.extends,
+            ignore_presets: raw.ignore_presets,
             minimum_release_age: raw.minimum_release_age,
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
@@ -1655,6 +1674,7 @@ impl Default for RepoConfig {
             semantic_commit_scope: "deps".to_owned(),
             semantic_commits: None,
             extends: Vec::new(),
+            ignore_presets: Vec::new(),
             minimum_release_age: None,
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
@@ -3195,6 +3215,54 @@ mod tests {
     fn extends_field_stored() {
         let c = RepoConfig::parse(r#"{"extends": ["config:recommended"]}"#);
         assert_eq!(c.extends, vec!["config:recommended"]);
+    }
+
+    #[test]
+    fn ignore_presets_filters_before_resolution() {
+        // :semanticCommits would normally set semantic_commits = "enabled".
+        // Listing it in ignorePresets should suppress the effect.
+        let c = RepoConfig::parse(
+            r#"{"extends": [":semanticCommits"], "ignorePresets": [":semanticCommits"]}"#,
+        );
+        assert!(
+            c.semantic_commits.is_none(),
+            "ignorePresets should suppress :semanticCommits, got: {:?}",
+            c.semantic_commits
+        );
+    }
+
+    #[test]
+    fn ignore_presets_partial_suppression() {
+        // Suppress :semanticCommits but keep :ignoreModulesAndTests.
+        let c = RepoConfig::parse(
+            r#"{
+                "extends": [":semanticCommits", ":ignoreModulesAndTests"],
+                "ignorePresets": [":semanticCommits"]
+            }"#,
+        );
+        assert!(c.semantic_commits.is_none());
+        assert!(c.ignore_paths.contains(&"**/node_modules/**".to_owned()));
+    }
+
+    #[test]
+    fn ignore_presets_stored_on_config() {
+        let c = RepoConfig::parse(
+            r#"{"extends": ["config:recommended"], "ignorePresets": [":semanticPrefixFixDepsChoreOthers"]}"#,
+        );
+        assert_eq!(
+            c.ignore_presets,
+            vec![":semanticPrefixFixDepsChoreOthers"]
+        );
+    }
+
+    #[test]
+    fn ignore_presets_suppresses_separate_minor_patch() {
+        // :automergePatch normally sets preset_separate_minor_patch = true.
+        // Suppressing it with ignorePresets should keep separate_minor_patch = false.
+        let c = RepoConfig::parse(
+            r#"{"extends": [":automergePatch"], "ignorePresets": [":automergePatch"]}"#,
+        );
+        assert!(!c.separate_minor_patch);
     }
 
     #[test]
