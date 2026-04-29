@@ -491,6 +491,57 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
     rules
 }
 
+/// Return type for `resolve_extends_scalar_overrides`:
+/// `(sep_minor_patch, sep_major_minor, sep_multi_major, pr_concurrent, pr_hourly)`.
+type ScalarOverrides = (Option<bool>, Option<bool>, Option<bool>, Option<u32>, Option<u32>);
+
+/// Scalar config overrides contributed by named built-in presets.
+///
+/// Returns overrides for: `separate_minor_patch`, `separate_major_minor`,
+/// `separate_multiple_major`, `pr_concurrent_limit`, `pr_hourly_limit`.
+/// `None` means the preset did not set that field.
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts`
+fn resolve_extends_scalar_overrides(extends: &[String]) -> ScalarOverrides {
+    let mut sep_minor_patch: Option<bool> = None;
+    let mut sep_major_minor: Option<bool> = None;
+    let mut sep_multi_major: Option<bool> = None;
+    let mut pr_concurrent: Option<u32> = None;
+    let mut pr_hourly: Option<u32> = None;
+
+    for preset in extends {
+        match preset.as_str() {
+            // separateMinorPatch
+            "combinePatchMinorReleases" => sep_minor_patch = Some(false),
+            "separatePatchReleases" => sep_minor_patch = Some(true),
+            // separateMajorMinor
+            "separateMajorReleases" => sep_major_minor = Some(true),
+            // separateMajorMinor + separateMultipleMajor
+            "separateMultipleMajorReleases" => {
+                sep_major_minor = Some(true);
+                sep_multi_major = Some(true);
+            }
+            // prConcurrentLimit
+            "prConcurrentLimit10" => pr_concurrent = Some(10),
+            "prConcurrentLimit20" => pr_concurrent = Some(20),
+            "prConcurrentLimitNone" => pr_concurrent = Some(0),
+            // prHourlyLimit
+            "prHourlyLimit1" => pr_hourly = Some(1),
+            "prHourlyLimit2" => pr_hourly = Some(2),
+            "prHourlyLimit4" => pr_hourly = Some(4),
+            "prHourlyLimitNone" => pr_hourly = Some(0),
+            // disableRateLimiting sets both
+            "disableRateLimiting" => {
+                pr_concurrent = Some(0);
+                pr_hourly = Some(0);
+            }
+            _ => {}
+        }
+    }
+
+    (sep_minor_patch, sep_major_minor, sep_multi_major, pr_concurrent, pr_hourly)
+}
+
 /// Resolve semantic commit type/scope from built-in `semantic*` presets.
 ///
 /// Returns `(type_override, scope_override)` from the last matching preset.
@@ -937,6 +988,13 @@ impl RepoConfig {
         let preset_separate_minor_patch = raw.extends.iter().any(|p| p == ":automergePatch");
         let (param_labels, param_assignees, param_reviewers, param_automerge_type) =
             resolve_extends_parameterized(&raw.extends);
+        let (
+            scalar_sep_minor_patch,
+            scalar_sep_major_minor,
+            scalar_sep_multi_major,
+            scalar_pr_concurrent,
+            scalar_pr_hourly,
+        ) = resolve_extends_scalar_overrides(&raw.extends);
 
         // Convert `enabled: false` inside major/minor/patch blocks to synthetic
         // packageRules so the existing is_update_blocked_ctx path handles them.
@@ -1088,16 +1146,19 @@ impl RepoConfig {
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: raw.base_branches,
-            pr_concurrent_limit: raw.pr_concurrent_limit,
-            pr_hourly_limit: raw.pr_hourly_limit,
+            pr_concurrent_limit: scalar_pr_concurrent.unwrap_or(raw.pr_concurrent_limit),
+            pr_hourly_limit: scalar_pr_hourly.unwrap_or(raw.pr_hourly_limit),
             group_name: raw.group_name,
             // group:all preset implies separateMajorMinor: false.
             // Explicit user config overrides the preset (but default true from serde means
             // we can't distinguish user-set vs default; group preset wins only when
             // the user hasn't explicitly set it to true in the raw JSON).
-            separate_major_minor: group_separate_major_minor.unwrap_or(raw.separate_major_minor),
-            separate_multiple_major: raw.separate_multiple_major,
-            separate_minor_patch: raw.separate_minor_patch || preset_separate_minor_patch,
+            separate_major_minor: scalar_sep_major_minor
+                .or(group_separate_major_minor)
+                .unwrap_or(raw.separate_major_minor),
+            separate_multiple_major: scalar_sep_multi_major.unwrap_or(raw.separate_multiple_major),
+            separate_minor_patch: scalar_sep_minor_patch
+                .unwrap_or(raw.separate_minor_patch || preset_separate_minor_patch),
             semantic_commit_type: raw.semantic_commit_type,
             semantic_commit_scope: raw.semantic_commit_scope,
             semantic_commits: raw.semantic_commits.or_else(|| {
@@ -3286,6 +3347,46 @@ mod schedule_preset_tests {
         assert!(c.is_update_blocked_ctx(&ctx));
         let ctx2 = DepContext { dep_name: "react", dep_type: Some("dependencies"), ..Default::default() };
         assert!(!c.is_update_blocked_ctx(&ctx2));
+    }
+
+    // ── scalar config presets ─────────────────────────────────────────────────
+
+    #[test]
+    fn combine_patch_minor_releases_clears_separate_minor_patch() {
+        let c = RepoConfig::parse(r#"{"extends": ["combinePatchMinorReleases"]}"#);
+        assert!(!c.separate_minor_patch);
+    }
+
+    #[test]
+    fn separate_patch_releases_sets_separate_minor_patch() {
+        let c = RepoConfig::parse(r#"{"extends": ["separatePatchReleases"]}"#);
+        assert!(c.separate_minor_patch);
+    }
+
+    #[test]
+    fn separate_multiple_major_releases_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["separateMultipleMajorReleases"]}"#);
+        assert!(c.separate_major_minor);
+        assert!(c.separate_multiple_major);
+    }
+
+    #[test]
+    fn pr_hourly_limit_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["prHourlyLimit1"]}"#);
+        assert_eq!(c.pr_hourly_limit, 1);
+    }
+
+    #[test]
+    fn pr_concurrent_limit_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["prConcurrentLimit10"]}"#);
+        assert_eq!(c.pr_concurrent_limit, 10);
+    }
+
+    #[test]
+    fn disable_rate_limiting_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["disableRateLimiting"]}"#);
+        assert_eq!(c.pr_concurrent_limit, 0);
+        assert_eq!(c.pr_hourly_limit, 0);
     }
 
     // ── parameterized presets ─────────────────────────────────────────────────
