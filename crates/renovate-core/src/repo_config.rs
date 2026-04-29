@@ -1687,15 +1687,22 @@ impl RepoConfig {
     ///
     /// Ensures all matchers (`matchDepTypes`, `matchRepositories`, …) fire correctly.
     pub fn is_version_restricted_ctx(&self, ctx: &DepContext<'_>, proposed_version: &str) -> bool {
-        self.package_rules.iter().any(|rule| {
+        // Renovate uses last-matching-rule-wins for allowedVersions.
+        // The effective allowedVersions is from the LAST matching rule that sets it.
+        // If that last rule allows the version, the update is not restricted.
+        let mut effective_allowed: Option<&str> = None;
+        for rule in &self.package_rules {
             if !rule.matches_context(ctx) {
-                return false;
+                continue;
             }
-            let Some(ref av) = rule.allowed_versions else {
-                return false;
-            };
-            !version_matches_allowed(proposed_version, av)
-        })
+            if let Some(ref av) = rule.allowed_versions {
+                effective_allowed = Some(av.as_str());
+            }
+        }
+        match effective_allowed {
+            None => false, // no rule set allowedVersions → no restriction
+            Some(av) => !version_matches_allowed(proposed_version, av),
+        }
     }
 
     /// Return `true` when `proposed_version` should be ignored according to the
@@ -2896,6 +2903,24 @@ mod tests {
     fn allowed_versions_no_rule_means_no_restriction() {
         let c = RepoConfig::parse(r#"{}"#);
         assert!(!c.is_version_restricted("serde", "cargo", "99.0.0"));
+    }
+
+    #[test]
+    fn allowed_versions_last_rule_wins() {
+        // First rule restricts to < 2.0, second rule (matching serde) allows any >= 1.0.
+        // The second rule should win for serde, allowing 2.0+.
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [
+                    {"matchPackageNames": ["*"], "allowedVersions": "< 2.0"},
+                    {"matchPackageNames": ["serde"], "allowedVersions": ">= 1.0.0"}
+                ]
+            }"#,
+        );
+        // serde: last matching rule (>= 1.0.0) wins → 2.5.0 should be allowed
+        assert!(!c.is_version_restricted("serde", "cargo", "2.5.0"));
+        // react: only first rule matches → < 2.0 still applies
+        assert!(c.is_version_restricted("react", "npm", "2.0.0"));
     }
 
     #[test]
