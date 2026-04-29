@@ -41,9 +41,9 @@ pub fn extract(content: &str) -> Vec<DockerfileExtractedDep> {
         if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with(';') {
             continue;
         }
-        // Section header
+        // Section header — Container, Image, and Volume sections all support Image=
         if trimmed.starts_with('[') {
-            in_container = trimmed == "[Container]";
+            in_container = matches!(trimmed, "[Container]" | "[Image]" | "[Volume]");
             continue;
         }
         if !in_container {
@@ -54,12 +54,19 @@ pub fn extract(content: &str) -> Vec<DockerfileExtractedDep> {
             if image_str.is_empty() {
                 continue;
             }
+            // Skip local file references (foo.image, foo.build)
+            if image_str.ends_with(".image") || image_str.ends_with(".build") {
+                continue;
+            }
             // Skip local transports
             if LOCAL_TRANSPORTS.iter().any(|t| image_str.starts_with(t)) {
                 continue;
             }
-            // Strip docker:// transport prefix
-            let image = image_str.strip_prefix("docker://").unwrap_or(image_str);
+            // Strip docker:// and docker-daemon: transport prefixes
+            let image = image_str
+                .strip_prefix("docker://")
+                .or_else(|| image_str.strip_prefix("docker-daemon:"))
+                .unwrap_or(image_str);
             if !image.is_empty() {
                 out.push(classify_image_ref(image));
             }
@@ -123,5 +130,55 @@ mod tests {
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert!(deps[0].skip_reason.is_some());
+    }
+
+    #[test]
+    fn image_section_extracted() {
+        // Ported: "extracts from quadlet image unit" — quadlet/extract.spec.ts line 47
+        let content = "[Image]\nImage=docker.io/library/alpine:3.22\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "docker.io/library/alpine");
+        assert_eq!(deps[0].tag.as_deref(), Some("3.22"));
+    }
+
+    #[test]
+    fn volume_section_extracted() {
+        // Ported: "extracts from quadlet volume unit" — quadlet/extract.spec.ts line 65
+        let content = "[Volume]\nImage=docker.io/library/alpine:3.22\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "docker.io/library/alpine");
+    }
+
+    #[test]
+    fn docker_daemon_prefix_stripped() {
+        // Ported: "handles docker-daemon prefix" — quadlet/extract.spec.ts line 101
+        let content = "[Volume]\nImage=docker-daemon:docker.io/library/alpine:3.22\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "docker.io/library/alpine");
+        assert_eq!(deps[0].tag.as_deref(), Some("3.22"));
+    }
+
+    #[test]
+    fn image_file_reference_skipped() {
+        // Ported: "does not extract an image file reference" — quadlet/extract.spec.ts line 119
+        let content = "[Container]\nImage=foo.image\n";
+        assert!(extract(content).is_empty());
+    }
+
+    #[test]
+    fn build_file_reference_skipped() {
+        // Ported: "does not extract a build file reference" — quadlet/extract.spec.ts line 129
+        let content = "[Container]\nImage=foo.build\n";
+        assert!(extract(content).is_empty());
+    }
+
+    #[test]
+    fn container_section_without_image_returns_empty() {
+        // Ported: "handles an unsuccessful parse" — quadlet/extract.spec.ts line 158
+        let content = "[Container]\n";
+        assert!(extract(content).is_empty());
     }
 }
