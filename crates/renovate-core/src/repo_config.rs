@@ -3629,6 +3629,15 @@ impl RepoConfig {
             /// Accepted here for backward-compat; values: 0 (unset), 1 ("1 day"), N ("N days").
             #[serde(rename = "stabilityDays")]
             stability_days: Option<u32>,
+            /// Deprecated: unpublishSafe: true → adds security:minimumReleaseAgeNpm to extends.
+            #[serde(rename = "unpublishSafe")]
+            unpublish_safe: Option<bool>,
+            /// Deprecated: upgradeInRange: true → rangeStrategy: "bump".
+            #[serde(rename = "upgradeInRange")]
+            upgrade_in_range: Option<bool>,
+            /// Deprecated: versionStrategy: "widen" → rangeStrategy: "widen".
+            #[serde(rename = "versionStrategy")]
+            version_strategy: Option<String>,
             #[serde(rename = "ignoreUnstable", default)]
             ignore_unstable: bool,
             #[serde(rename = "respectLatest", default)]
@@ -3730,13 +3739,25 @@ impl RepoConfig {
             2
         }
 
-        let raw: Raw = match json5::from_str(content) {
+        let mut raw: Raw = match json5::from_str(content) {
             Ok(r) => r,
             Err(e) => {
                 tracing::debug!(%e, "failed to parse repo renovate config; using defaults");
                 return Self::default();
             }
         };
+
+        // Deprecated migration: unpublishSafe: true → add security:minimumReleaseAgeNpm
+        // to the extends list if it's not already present.
+        // Renovate reference: lib/config/migrations/custom/unpublish-safe-migration.ts
+        if raw.unpublish_safe == Some(true)
+            && !raw
+                .extends
+                .iter()
+                .any(|e| e == "security:minimumReleaseAgeNpm" || e == ":unpublishSafe")
+        {
+            raw.extends.push("security:minimumReleaseAgeNpm".to_owned());
+        }
 
         // Two-pass ignorePresets filtering:
         // Pass 1: Filter BEFORE expansion so ignorePresets:["workarounds:all"] prevents
@@ -4174,7 +4195,20 @@ impl RepoConfig {
                     None
                 }
             }),
-            range_strategy: raw.range_strategy,
+            range_strategy: {
+                // Deprecated upgradeInRange: true → rangeStrategy: "bump".
+                // Deprecated versionStrategy: "widen" → rangeStrategy: "widen".
+                // Explicit rangeStrategy in the config takes precedence.
+                if raw.range_strategy != "auto" {
+                    raw.range_strategy
+                } else if raw.upgrade_in_range == Some(true) {
+                    "bump".to_owned()
+                } else if raw.version_strategy.as_deref() == Some("widen") {
+                    "widen".to_owned()
+                } else {
+                    raw.range_strategy
+                }
+            },
             hashed_branch_length: raw.hashed_branch_length,
             major_config: raw.major,
             minor_config: raw.minor,
@@ -8058,6 +8092,52 @@ mod rule_effects_tests {
     }
 
     // ── per-rule minimumReleaseAge in RuleEffects ────────────────────────────
+
+    // ── deprecated field migrations ───────────────────────────────────────────
+
+    #[test]
+    fn upgrade_in_range_true_sets_range_strategy_bump() {
+        let c = RepoConfig::parse(r#"{"upgradeInRange": true}"#);
+        assert_eq!(
+            c.range_strategy,
+            "bump",
+            "upgradeInRange: true must migrate to rangeStrategy: 'bump'"
+        );
+    }
+
+    #[test]
+    fn version_strategy_widen_sets_range_strategy_widen() {
+        let c = RepoConfig::parse(r#"{"versionStrategy": "widen"}"#);
+        assert_eq!(
+            c.range_strategy,
+            "widen",
+            "versionStrategy: 'widen' must migrate to rangeStrategy: 'widen'"
+        );
+    }
+
+    #[test]
+    fn explicit_range_strategy_overrides_deprecated_upgrade_in_range() {
+        let c = RepoConfig::parse(r#"{"upgradeInRange": true, "rangeStrategy": "replace"}"#);
+        assert_eq!(
+            c.range_strategy, "replace",
+            "explicit rangeStrategy must take precedence over upgradeInRange migration"
+        );
+    }
+
+    #[test]
+    fn unpublish_safe_true_injects_minimum_release_age_preset() {
+        let c = RepoConfig::parse(r#"{"unpublishSafe": true}"#);
+        // The security:minimumReleaseAgeNpm preset should be injected, creating a
+        // packageRule with minimumReleaseAge: "3 days" for npm datasource.
+        let has_npm_age_rule = c.package_rules.iter().any(|r| {
+            r.match_datasources.contains(&"npm".to_owned())
+                && r.minimum_release_age.as_deref() == Some("3 days")
+        });
+        assert!(
+            has_npm_age_rule,
+            "unpublishSafe: true must inject minimumReleaseAge for npm packages"
+        );
+    }
 
     // ── stabilityDays migration ───────────────────────────────────────────────
 

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0339  | 2026-04-29 | Deprecated field migrations: `upgradeInRange: true` → `rangeStrategy: "bump"`, `versionStrategy: "widen"` → `rangeStrategy: "widen"`, `unpublishSafe: true` → injects `security:minimumReleaseAgeNpm` into extends; all 3 matched from Renovate's migration files; 4 tests | Complete | See below. |
 | 0338  | 2026-04-29 | `stabilityDays` → `minimumReleaseAge` migration: deprecated `stabilityDays` config field parsed and migrated at parse time (matching Renovate's stability-days-migration.ts); `minimumReleaseAge` takes precedence when both are set; 4 tests | Complete | See below. |
 | 0337  | 2026-04-29 | Output enhancements: `versioning` added to `DepReport` JSON output and wired from `RuleEffects`; `updateType` now set to `"replacement"` when `replacementName` is present (overrides semver classification); all 34+ files updated; 2 pipeline_utils tests | Complete | See below. |
 | 0336  | 2026-04-29 | Output enhancements: `rangeStrategy`, `followTag`, `pinDigests` added to `DepReport` JSON output and wired from `RuleEffects` via `pipeline_utils`; all 33+ pipeline files updated via Python bulk-insert script | Complete | See below. |
