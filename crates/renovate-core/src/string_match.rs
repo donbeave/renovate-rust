@@ -3,8 +3,8 @@
 //! Supports three pattern forms (same as Renovate):
 //! - `/regex/` or `/regex/flags` — compiled and tested as a regex.
 //! - Glob patterns (`*`, `?`, `**`, `{a,b}`, character classes) — matched via
-//!   [`globset`].
-//! - Bare strings — exact equality.
+//!   [`globset`] with case-insensitive mode (matching Renovate's minimatch `nocase:true`).
+//! - Bare strings — exact equality (case-sensitive).
 //!
 //! `match_regex_or_glob_list` additionally supports Renovate's negation
 //! semantics: patterns starting with `!` are negative exclusions.
@@ -14,7 +14,7 @@
 //!
 //! Renovate reference: `lib/util/string-match.ts`.
 
-use globset::Glob;
+use globset::GlobBuilder;
 use regex::Regex;
 
 /// Match `input` against a single pattern.
@@ -41,15 +41,31 @@ pub fn match_regex_or_glob(input: &str, pattern: &str) -> bool {
             .unwrap_or(false);
     }
 
-    // Glob: contains special characters
+    // Glob: contains special characters.
+    // - case_insensitive: matches Renovate's minimatch {nocase: true}
+    // - literal_separator: makes bare `*` not cross `/`, so `**` must be a full
+    //   path component to span directories — same as minimatch path-boundary rules
     if is_glob_pattern(pattern) {
-        return Glob::new(pattern)
+        return GlobBuilder::new(pattern)
+            .case_insensitive(true)
+            .literal_separator(true)
+            .build()
             .map(|g| g.compile_matcher().is_match(input))
             .unwrap_or(false);
     }
 
-    // Exact match
+    // Exact match (case-sensitive, same as Renovate for bare strings)
     input == pattern
+}
+
+/// Return `true` if any element of `inputs` matches at least one of `patterns`
+/// using [`match_regex_or_glob_list`] semantics.
+///
+/// Mirrors Renovate's `anyMatchRegexOrGlobList`.
+pub fn any_match_regex_or_glob_list(inputs: &[&str], patterns: &[String]) -> bool {
+    inputs
+        .iter()
+        .any(|input| match_regex_or_glob_list(input, patterns))
 }
 
 /// Match `input` against a list of patterns with Renovate's positive/negative
@@ -242,6 +258,46 @@ mod tests {
         assert!(!match_regex_or_glob("npm-check", "!npm*"));
     }
 
+    // ── Ported from Renovate dep-names.spec.ts ────────────────────────────────
+    // These verify our glob/regex semantics match Renovate's behavior.
+
+    #[test]
+    fn dep_names_exact_match() {
+        // Exact string match
+        let pats: Vec<String> = vec!["@opentelemetry/http".into()];
+        assert!(match_regex_or_glob_list("@opentelemetry/http", &pats));
+        assert!(!match_regex_or_glob_list("@opentelemetry/trace", &pats));
+    }
+
+    #[test]
+    fn dep_names_regex_prefix() {
+        // Regex: /^@opentelemetry/ should match @opentelemetry/<anything>
+        let pats: Vec<String> = vec!["/^@opentelemetry/".into()];
+        assert!(match_regex_or_glob_list("@opentelemetry/http", &pats));
+        assert!(match_regex_or_glob_list("@opentelemetry/trace", &pats));
+        assert!(!match_regex_or_glob_list("@other/http", &pats));
+    }
+
+    #[test]
+    fn dep_names_negated_regex_prefix() {
+        // Negated regex: !/^@opentelemetry/ should exclude @opentelemetry scope
+        let pats: Vec<String> = vec!["!/^@opentelemetry/".into()];
+        assert!(!match_regex_or_glob_list("@opentelemetry/http", &pats));
+        assert!(match_regex_or_glob_list("@other/http", &pats));
+    }
+
+    #[test]
+    fn dep_names_scoped_package_glob() {
+        // @typescript-eslint/** should match all packages under the scope
+        let pats: Vec<String> = vec!["@typescript-eslint/**".into()];
+        assert!(match_regex_or_glob_list(
+            "@typescript-eslint/eslint-plugin",
+            &pats
+        ));
+        assert!(match_regex_or_glob_list("@typescript-eslint/parser", &pats));
+        assert!(!match_regex_or_glob_list("typescript-eslint", &pats));
+    }
+
     #[test]
     fn brace_expansion_in_glob() {
         // globset supports brace expansion: {/,} matches '/' or ','
@@ -252,6 +308,83 @@ mod tests {
         assert!(!match_regex_or_glob(
             "@opentelemetry-http",
             "@opentelemetry{/,}**"
+        ));
+    }
+
+    // ── Ported from Renovate string-match.spec.ts ─────────────────────────────
+
+    #[test]
+    fn glob_is_case_insensitive_matching_renovate_nocase() {
+        // Renovate uses minimatch({nocase: true}) for all glob matching.
+        // "TEST" must match "t*".
+        let pats: Vec<String> = vec!["t*".into()];
+        assert!(match_regex_or_glob_list("TEST", &pats));
+    }
+
+    #[test]
+    fn all_negative_patterns_both_must_not_match() {
+        // returns false if not matching every negative pattern (regex)
+        let pats: Vec<String> = vec!["!/test3/".into(), "!/test/".into()];
+        assert!(!match_regex_or_glob_list("test", &pats));
+    }
+
+    #[test]
+    fn all_negative_patterns_both_must_not_match_glob() {
+        // returns false if not matching every negative pattern (glob)
+        let pats: Vec<String> = vec!["!test3".into(), "!te*".into()];
+        assert!(!match_regex_or_glob_list("test", &pats));
+    }
+
+    #[test]
+    fn negative_regex_positive_pattern_returns_true() {
+        // returns true if matching positive and negative patterns
+        let pats: Vec<String> = vec!["test".into(), "!/test3/".into()];
+        assert!(match_regex_or_glob_list("test", &pats));
+    }
+
+    #[test]
+    fn negative_glob_positive_pattern_returns_true() {
+        // returns true if matching every negative pattern (glob)
+        let pats: Vec<String> = vec!["test".into(), "!test3".into(), "!test4".into()];
+        assert!(match_regex_or_glob_list("test", &pats));
+    }
+
+    // ── any_match_regex_or_glob_list ──────────────────────────────────────────
+
+    #[test]
+    fn any_match_empty_patterns_returns_false() {
+        assert!(!any_match_regex_or_glob_list(&["test"], &[]));
+    }
+
+    #[test]
+    fn any_match_empty_inputs_returns_false() {
+        let pats: Vec<String> = vec!["/test2/".into()];
+        assert!(!any_match_regex_or_glob_list(&[], &pats));
+    }
+
+    #[test]
+    fn any_match_positive_list_matches() {
+        let pats: Vec<String> = vec!["b".into()];
+        assert!(any_match_regex_or_glob_list(&["a", "b"], &pats));
+    }
+
+    #[test]
+    fn any_match_negative_list_matches_non_excluded() {
+        // any_match with negative pattern: if any input passes the negative filter, returns true
+        let pats: Vec<String> = vec!["!b".into()];
+        assert!(any_match_regex_or_glob_list(&["a", "b"], &pats));
+    }
+
+    // ── Ported from Renovate dep-names.spec.ts (additional) ──────────────────
+
+    #[test]
+    fn dep_names_no_slash_double_star_does_not_cross_slash() {
+        // "@opentelemetry**" (without path separator) should NOT match "@opentelemetry/http"
+        // Renovate minimatch: ** without path boundary doesn't cross "/"
+        // globset: same behavior — ** must be a whole path segment to be path-spanning
+        assert!(!match_regex_or_glob(
+            "@opentelemetry/http",
+            "@opentelemetry**"
         ));
     }
 }

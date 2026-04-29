@@ -912,7 +912,6 @@ fn resolve_extends_automerge_schedule(extends: &[String]) -> Option<Vec<String>>
 /// Only `:automergeAll` / `:automergeMajor` / `:autoMerge` / `:automergeBranch`
 /// set global `automerge: true`.  `:automergeMinor` and `:automergePatch`
 /// inject per-update-type packageRules instead (see `resolve_extends_automerge_rules`).
-
 /// Matcher fields resolved from a `packages:*` preset reference inside a `packageRule`.
 ///
 /// When a packageRule contains `extends: ["packages:react"]`, these fields are
@@ -1108,8 +1107,7 @@ fn resolve_extends_custom_managers(extends: &[String]) -> Vec<CustomManager> {
     // Matches:  # renovate: datasource=X depName=Y [packageName=Z] [versioning=V]
     //           [extractVersion=E] [registryUrl=R]
     //           VERSION_VAR=value
-    let standard_pattern =
-        r#"# renovate: datasource=(?P<datasource>[a-zA-Z0-9-._]+?) depName=(?P<depName>[^\s]+?)(?: (?:lookupName|packageName)=(?P<packageName>[^\s]+?))?(?: versioning=(?P<versioning>[^\s]+?))?(?: extractVersion=(?P<extractVersion>[^\s]+?))?(?: registryUrl=(?P<registryUrl>[^\s]+?))?\s+[A-Za-z0-9_]+?_VERSION\s*[:=]?\??[=:]\s*["']?(?P<currentValue>.+?)["']?\s"#;
+    let standard_pattern = r#"# renovate: datasource=(?P<datasource>[a-zA-Z0-9-._]+?) depName=(?P<depName>[^\s]+?)(?: (?:lookupName|packageName)=(?P<packageName>[^\s]+?))?(?: versioning=(?P<versioning>[^\s]+?))?(?: extractVersion=(?P<extractVersion>[^\s]+?))?(?: registryUrl=(?P<registryUrl>[^\s]+?))?\s+[A-Za-z0-9_]+?_VERSION\s*[:=]?\??[=:]\s*["']?(?P<currentValue>.+?)["']?\s"#;
 
     let mut managers: Vec<CustomManager> = Vec::new();
     for preset in extends {
@@ -3622,7 +3620,11 @@ impl RepoConfig {
             separate_multiple_minor: bool,
             #[serde(rename = "maxMajorIncrement", default = "default_max_major_increment")]
             max_major_increment: u32,
-            #[serde(rename = "semanticCommits", deserialize_with = "deserialize_semantic_commits_opt", default)]
+            #[serde(
+                rename = "semanticCommits",
+                deserialize_with = "deserialize_semantic_commits_opt",
+                default
+            )]
             semantic_commits: Option<String>,
             #[serde(
                 rename = "semanticCommitType",
@@ -3985,7 +3987,13 @@ impl RepoConfig {
                     match_managers: r
                         .match_managers
                         .into_iter()
-                        .map(|m| if m == "regex" { "custom.regex".to_owned() } else { m })
+                        .map(|m| {
+                            if m == "regex" {
+                                "custom.regex".to_owned()
+                            } else {
+                                m
+                            }
+                        })
                         .collect(),
                     match_update_types,
                     allowed_versions: r.allowed_versions,
@@ -4170,10 +4178,10 @@ impl RepoConfig {
             base_branches: {
                 // Deprecated singular baseBranch → prepend to baseBranches array.
                 let mut branches = raw.base_branches;
-                if let Some(b) = raw.base_branch {
-                    if !branches.contains(&b) {
-                        branches.insert(0, b);
-                    }
+                if let Some(b) = raw.base_branch
+                    && !branches.contains(&b)
+                {
+                    branches.insert(0, b);
                 }
                 branches
             },
@@ -4186,7 +4194,14 @@ impl RepoConfig {
                 // Deprecated rebaseStalePrs → rebaseWhen mapping.
                 // Renovate reference: lib/config/migrations/custom/rebase-stale-prs-migration.ts
                 if let Some(stale) = raw.rebase_stale_prs {
-                    return Some(if stale { "behind-base-branch" } else { "conflicted" }.to_owned());
+                    return Some(
+                        if stale {
+                            "behind-base-branch"
+                        } else {
+                            "conflicted"
+                        }
+                        .to_owned(),
+                    );
                 }
                 // :rebaseStalePrs preset sets rebaseWhen: "behind-base-branch".
                 if effective_extends
@@ -6803,8 +6818,7 @@ mod tests {
 
     #[test]
     fn helpers_pin_github_action_digests_to_semver_injects_rule() {
-        let c =
-            RepoConfig::parse(r#"{"extends": ["helpers:pinGitHubActionDigestsToSemver"]}"#);
+        let c = RepoConfig::parse(r#"{"extends": ["helpers:pinGitHubActionDigestsToSemver"]}"#);
         let rule = c
             .package_rules
             .iter()
@@ -8292,8 +8306,7 @@ mod rule_effects_tests {
     fn upgrade_in_range_true_sets_range_strategy_bump() {
         let c = RepoConfig::parse(r#"{"upgradeInRange": true}"#);
         assert_eq!(
-            c.range_strategy,
-            "bump",
+            c.range_strategy, "bump",
             "upgradeInRange: true must migrate to rangeStrategy: 'bump'"
         );
     }
@@ -8302,8 +8315,7 @@ mod rule_effects_tests {
     fn version_strategy_widen_sets_range_strategy_widen() {
         let c = RepoConfig::parse(r#"{"versionStrategy": "widen"}"#);
         assert_eq!(
-            c.range_strategy,
-            "widen",
+            c.range_strategy, "widen",
             "versionStrategy: 'widen' must migrate to rangeStrategy: 'widen'"
         );
     }
@@ -8353,7 +8365,10 @@ mod rule_effects_tests {
     #[test]
     fn stability_days_0_means_no_minimum_release_age() {
         let c = RepoConfig::parse(r#"{"stabilityDays": 0}"#);
-        assert!(c.minimum_release_age.is_none(), "stabilityDays: 0 must not set minimumReleaseAge");
+        assert!(
+            c.minimum_release_age.is_none(),
+            "stabilityDays: 0 must not set minimumReleaseAge"
+        );
     }
 
     #[test]
@@ -9855,7 +9870,10 @@ mod rule_effects_tests {
         }"##,
         );
         // Preset manager comes first, user manager is appended.
-        assert!(c.custom_managers.len() >= 2, "must have preset + user manager");
+        assert!(
+            c.custom_managers.len() >= 2,
+            "must have preset + user manager"
+        );
         let user_cm = c.custom_managers.last().expect("must have user manager");
         assert_eq!(
             user_cm.dep_name_template.as_deref(),
@@ -9869,7 +9887,10 @@ mod rule_effects_tests {
     #[test]
     fn preset_respect_latest_sets_flag() {
         let c = RepoConfig::parse(r#"{"extends": [":respectLatest"]}"#);
-        assert!(c.respect_latest, ":respectLatest must set respect_latest = true");
+        assert!(
+            c.respect_latest,
+            ":respectLatest must set respect_latest = true"
+        );
     }
 
     #[test]
@@ -9881,7 +9902,10 @@ mod rule_effects_tests {
     #[test]
     fn preset_dependency_dashboard_sets_flag() {
         let c = RepoConfig::parse(r#"{"extends": [":dependencyDashboard"]}"#);
-        assert!(c.dependency_dashboard, ":dependencyDashboard must enable dependency dashboard");
+        assert!(
+            c.dependency_dashboard,
+            ":dependencyDashboard must enable dependency dashboard"
+        );
     }
 
     #[test]
@@ -9899,13 +9923,19 @@ mod rule_effects_tests {
     #[test]
     fn raw_dependency_dashboard_parsed() {
         let c = RepoConfig::parse(r#"{"dependencyDashboard": true}"#);
-        assert!(c.dependency_dashboard, "raw dependencyDashboard: true must be parsed");
+        assert!(
+            c.dependency_dashboard,
+            "raw dependencyDashboard: true must be parsed"
+        );
     }
 
     #[test]
     fn preset_config_migration_sets_flag() {
         let c = RepoConfig::parse(r#"{"extends": [":configMigration"]}"#);
-        assert!(c.config_migration, ":configMigration must set config_migration = true");
+        assert!(
+            c.config_migration,
+            ":configMigration must set config_migration = true"
+        );
     }
 
     #[test]
@@ -9945,9 +9975,7 @@ mod rule_effects_tests {
             .find(|r| r.automerge == Some(true))
             .expect("must have a rule with automerge: true");
         assert!(
-            rule.match_package_names
-                .iter()
-                .any(|p| p.contains("react")),
+            rule.match_package_names.iter().any(|p| p.contains("react")),
             "packages:react extends must inject react into matchPackageNames"
         );
         assert!(
@@ -9991,7 +10019,8 @@ mod rule_effects_tests {
             .find(|r| r.automerge == Some(true))
             .unwrap();
         assert!(
-            rule.match_package_names.contains(&"my-custom-lib".to_owned()),
+            rule.match_package_names
+                .contains(&"my-custom-lib".to_owned()),
             "own matchPackageNames must be kept"
         );
         assert!(
@@ -10047,7 +10076,11 @@ mod rule_effects_tests {
             "ENV PNPM_VERSION=\"7.25.1\"\n"
         );
         let deps = cm.extract_deps(content);
-        assert_eq!(deps.len(), 1, "must extract one dep from ENV with double quotes");
+        assert_eq!(
+            deps.len(),
+            1,
+            "must extract one dep from ENV with double quotes"
+        );
         assert_eq!(deps[0].dep_name, "pnpm");
         assert_eq!(deps[0].datasource, "npm");
         assert_eq!(deps[0].current_value, "7.25.1");
@@ -10061,7 +10094,11 @@ mod rule_effects_tests {
             "ENV YARN_VERSION='3.3.1'\n"
         );
         let deps = cm.extract_deps(content);
-        assert_eq!(deps.len(), 1, "must extract one dep from ENV with single quotes");
+        assert_eq!(
+            deps.len(),
+            1,
+            "must extract one dep from ENV with single quotes"
+        );
         assert_eq!(deps[0].dep_name, "yarn");
         assert_eq!(deps[0].current_value, "3.3.1");
     }
@@ -10074,7 +10111,11 @@ mod rule_effects_tests {
             "ENV YARN_VERSION 3.3.1\n"
         );
         let deps = cm.extract_deps(content);
-        assert_eq!(deps.len(), 1, "must extract one dep from ENV without quotes");
+        assert_eq!(
+            deps.len(),
+            1,
+            "must extract one dep from ENV without quotes"
+        );
         assert_eq!(deps[0].current_value, "3.3.1");
     }
 
@@ -10107,7 +10148,10 @@ mod rule_effects_tests {
         assert_eq!(deps[0].dep_name, "kubernetes-sigs/kustomize");
         assert_eq!(deps[0].current_value, "v5.2.1");
         assert!(deps[0].versioning.is_some(), "versioning must be captured");
-        assert!(deps[0].extract_version.is_some(), "extractVersion must be captured");
+        assert!(
+            deps[0].extract_version.is_some(),
+            "extractVersion must be captured"
+        );
     }
 
     #[test]
@@ -10115,11 +10159,26 @@ mod rule_effects_tests {
         // Port of Renovate custom-managers.spec.ts: "matches regexes patterns"
         let cm = get_preset_custom_manager("custom-managers:dockerfileVersions");
         assert!(cm.matches_file("Dockerfile"), "Dockerfile must match");
-        assert!(cm.matches_file("foo/Dockerfile"), "foo/Dockerfile must match");
-        assert!(cm.matches_file("Dockerfile-foo"), "Dockerfile-foo must match");
-        assert!(cm.matches_file("something.dockerfile"), "lowercase .dockerfile must match");
-        assert!(cm.matches_file("something.containerfile"), ".containerfile must match");
-        assert!(!cm.matches_file("foo-Dockerfile"), "foo-Dockerfile must NOT match (prefix only)");
+        assert!(
+            cm.matches_file("foo/Dockerfile"),
+            "foo/Dockerfile must match"
+        );
+        assert!(
+            cm.matches_file("Dockerfile-foo"),
+            "Dockerfile-foo must match"
+        );
+        assert!(
+            cm.matches_file("something.dockerfile"),
+            "lowercase .dockerfile must match"
+        );
+        assert!(
+            cm.matches_file("something.containerfile"),
+            ".containerfile must match"
+        );
+        assert!(
+            !cm.matches_file("foo-Dockerfile"),
+            "foo-Dockerfile must NOT match (prefix only)"
+        );
     }
 
     #[test]
@@ -10144,7 +10203,11 @@ mod rule_effects_tests {
             "PNPM_VERSION = \"7.25.1\"\n"
         );
         let deps = cm.extract_deps(content);
-        assert_eq!(deps.len(), 1, "must extract from PNPM_VERSION = \"...\" (spaces around =)");
+        assert_eq!(
+            deps.len(),
+            1,
+            "must extract from PNPM_VERSION = \"...\" (spaces around =)"
+        );
         assert_eq!(deps[0].current_value, "7.25.1");
     }
 
@@ -10156,7 +10219,11 @@ mod rule_effects_tests {
             "YARN_VERSION := '3.3.1'\n"
         );
         let deps = cm.extract_deps(content);
-        assert_eq!(deps.len(), 1, "must extract from YARN_VERSION := '...' (:= assignment)");
+        assert_eq!(
+            deps.len(),
+            1,
+            "must extract from YARN_VERSION := '...' (:= assignment)"
+        );
         assert_eq!(deps[0].current_value, "3.3.1");
     }
 
@@ -10168,7 +10235,11 @@ mod rule_effects_tests {
             "CONSUL_VERSION ?= 1.3.1\n"
         );
         let deps = cm.extract_deps(content);
-        assert_eq!(deps.len(), 1, "must extract from CONSUL_VERSION ?= value (?= assignment)");
+        assert_eq!(
+            deps.len(),
+            1,
+            "must extract from CONSUL_VERSION ?= value (?= assignment)"
+        );
         assert_eq!(deps[0].current_value, "1.3.1");
         assert_eq!(deps[0].datasource, "custom.hashicorp");
     }
@@ -10197,7 +10268,10 @@ mod rule_effects_tests {
             "appVersion: 19.4.0\n"
         );
         let deps = cm.extract_deps(content);
-        assert!(!deps.is_empty(), "must extract dep from Chart.yaml appVersion");
+        assert!(
+            !deps.is_empty(),
+            "must extract dep from Chart.yaml appVersion"
+        );
         assert_eq!(deps[0].dep_name, "node");
         assert_eq!(deps[0].current_value, "19.4.0");
         assert_eq!(deps[0].datasource, "docker");
@@ -10234,7 +10308,10 @@ mod rule_effects_tests {
             "<asm.version>9.3</asm.version>\n"
         );
         let deps = cm.extract_deps(content);
-        assert!(!deps.is_empty(), "must extract from pom.xml property with renovate comment");
+        assert!(
+            !deps.is_empty(),
+            "must extract from pom.xml property with renovate comment"
+        );
         assert_eq!(deps[0].dep_name, "org.ow2.asm:asm");
         assert_eq!(deps[0].current_value, "9.3");
     }

@@ -151,10 +151,7 @@ pub(crate) struct DepReport {
     /// Replacement version constraint for the replacement package.
     ///
     /// Mirrors Renovate's `replacementVersion` field.
-    #[serde(
-        rename = "replacementVersion",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "replacementVersion", skip_serializing_if = "Option::is_none")]
     pub replacement_version: Option<String>,
     #[serde(flatten)]
     pub status: DepStatus,

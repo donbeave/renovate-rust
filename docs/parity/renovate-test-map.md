@@ -103,6 +103,19 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/string-match.ts` | — | `matchRegexOrGlobList` empty → false | `crates/renovate-core/src/string_match.rs` | `empty_list_returns_false` | ported |
 | `lib/util/string-match.ts` | — | `matchRegexOrGlobList` positive list | `crates/renovate-core/src/string_match.rs` | `positive_list_matches` | ported |
 | `lib/util/string-match.ts` | — | `matchRegexOrGlobList` negation `!pattern` | `crates/renovate-core/src/string_match.rs` | `negation_excludes_input`, `all_negative_patterns_allow_non_matching` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` case-insensitive glob `'TEST'` vs `'t*'` → true | `crates/renovate-core/src/string_match.rs` | `glob_is_case_insensitive_matching_renovate_nocase` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` two negative regex patterns that fail | `crates/renovate-core/src/string_match.rs` | `all_negative_patterns_both_must_not_match` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` two negative glob patterns that fail | `crates/renovate-core/src/string_match.rs` | `all_negative_patterns_both_must_not_match_glob` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` positive + negative regex → true | `crates/renovate-core/src/string_match.rs` | `negative_regex_positive_pattern_returns_true` | ported |
+| `lib/util/string-match.spec.ts` | — | `matchRegexOrGlobList` positive + two negative globs → true | `crates/renovate-core/src/string_match.rs` | `negative_glob_positive_pattern_returns_true` | ported |
+| `lib/util/string-match.spec.ts` | — | `anyMatchRegexOrGlobList` empty patterns → false | `crates/renovate-core/src/string_match.rs` | `any_match_empty_patterns_returns_false` | ported |
+| `lib/util/string-match.spec.ts` | — | `anyMatchRegexOrGlobList` empty inputs → false | `crates/renovate-core/src/string_match.rs` | `any_match_empty_inputs_returns_false` | ported |
+| `lib/util/string-match.spec.ts` | — | `anyMatchRegexOrGlobList` positive pattern matches any | `crates/renovate-core/src/string_match.rs` | `any_match_positive_list_matches` | ported |
+| `lib/util/string-match.spec.ts` | — | `anyMatchRegexOrGlobList` negative pattern matches any-non-excluded | `crates/renovate-core/src/string_match.rs` | `any_match_negative_list_matches_non_excluded` | ported |
+| `lib/util/package-rules/dep-names.spec.ts` | — | `matchDepNames` undefined depName → false | `crates/renovate-core/src/repo_config.rs` | `match_dep_names_exact_disables_dep` (implicitly via empty) | partial |
+| `lib/util/package-rules/dep-names.spec.ts` | — | `@opentelemetry**` without `/` does NOT match `@opentelemetry/http` | `crates/renovate-core/src/string_match.rs` | `dep_names_no_slash_double_star_does_not_cross_slash` | ported |
+| `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` undefined packageName → false | `crates/renovate-core/src/repo_config.rs` | (implicit in matcher logic) | pending |
+| `lib/util/package-rules/package-names.spec.ts` | — | `matchPackageNames` matches packageName not depName | `crates/renovate-core/src/repo_config.rs` | (implicit in matcher logic) | pending |
 | `lib/util/package-rules/index.spec.ts` | — | `matchDepTypes` | `crates/renovate-core/src/repo_config.rs` | `dep_type_rule_blocks_dependencies`, `dep_type_rule_does_not_block_dev_dep` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `allowedVersions` semver range | `crates/renovate-core/src/repo_config.rs` | `allowed_versions_blocks_out_of_range_update` | ported |
 | `lib/util/package-rules/index.spec.ts` | — | `ignoreVersions` in packageRules | `crates/renovate-core/src/repo_config.rs` | `package_rule_ignore_versions_scoped_to_matched_package` | ported |
