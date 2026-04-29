@@ -116,6 +116,17 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `reviewers`.
     pub reviewers: Vec<String>,
 
+    /// When `true`, Renovate PRs are created as draft PRs.  Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `draftPR`.
+    pub draft_pr: bool,
+
+    /// When `true`, assign reviewers/assignees even if the PR is auto-mergeable.
+    /// Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `assignAutomerge`.
+    pub assign_automerge: bool,
+
     // ── Branch behavior ──────────────���───────────────────────────────────────
     /// Branch name prefix for update branches.  Default: `"renovate/"`.
     ///
@@ -1096,6 +1107,10 @@ impl RepoConfig {
             assignees: Vec<String>,
             #[serde(default)]
             reviewers: Vec<String>,
+            #[serde(rename = "draftPR", default)]
+            draft_pr: bool,
+            #[serde(rename = "assignAutomerge", default)]
+            assign_automerge: bool,
             #[serde(rename = "branchPrefix", default = "default_branch_prefix")]
             branch_prefix: String,
             #[serde(rename = "additionalBranchPrefix", default)]
@@ -1423,6 +1438,8 @@ impl RepoConfig {
                 }
                 r
             },
+            draft_pr: raw.draft_pr,
+            assign_automerge: raw.assign_automerge,
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: raw.base_branches,
@@ -1854,6 +1871,8 @@ impl Default for RepoConfig {
             add_labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            draft_pr: false,
+            assign_automerge: false,
             branch_prefix: "renovate/".to_owned(),
             additional_branch_prefix: String::new(),
             base_branches: Vec::new(),
@@ -3358,6 +3377,30 @@ mod tests {
     fn pr_hourly_limit_default() {
         let c = RepoConfig::parse(r#"{}"#);
         assert_eq!(c.pr_hourly_limit, 2);
+    }
+
+    #[test]
+    fn draft_pr_default_false() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(!c.draft_pr);
+    }
+
+    #[test]
+    fn draft_pr_config() {
+        let c = RepoConfig::parse(r#"{"draftPR": true}"#);
+        assert!(c.draft_pr);
+    }
+
+    #[test]
+    fn assign_automerge_default_false() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(!c.assign_automerge);
+    }
+
+    #[test]
+    fn assign_automerge_config() {
+        let c = RepoConfig::parse(r#"{"assignAutomerge": true}"#);
+        assert!(c.assign_automerge);
     }
 
     #[test]

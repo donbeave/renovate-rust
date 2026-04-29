@@ -476,6 +476,8 @@ mod tests {
             .collect();
         RepoReport {
             repo_slug: "test/repo".to_owned(),
+            draft_pr: false,
+            assign_automerge: false,
             files: vec![FileReport {
                 path: "package.json".to_owned(),
                 manager: "npm".to_owned(),

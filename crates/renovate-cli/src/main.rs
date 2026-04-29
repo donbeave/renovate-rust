@@ -378,6 +378,8 @@ async fn process_repo(
         filtered_files: &filtered_files,
         report: output::RepoReport {
             repo_slug: repo_slug.to_owned(),
+            draft_pr: repo_cfg.draft_pr,
+            assign_automerge: repo_cfg.assign_automerge,
             files: Vec::new(),
         },
         had_error: false,

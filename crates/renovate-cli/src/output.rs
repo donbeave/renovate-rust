@@ -125,6 +125,12 @@ pub(crate) struct FileReport {
 pub(crate) struct RepoReport {
     #[serde(rename = "repoSlug")]
     pub repo_slug: String,
+    /// If `true`, PRs created by Renovate will be draft PRs.
+    #[serde(rename = "draftPR", skip_serializing_if = "std::ops::Not::not")]
+    pub draft_pr: bool,
+    /// If `true`, assignees/reviewers are added even to auto-merged PRs.
+    #[serde(rename = "assignAutomerge", skip_serializing_if = "std::ops::Not::not")]
+    pub assign_automerge: bool,
     pub files: Vec<FileReport>,
 }
 
@@ -625,6 +631,8 @@ mod tests {
     fn make_report() -> RepoReport {
         RepoReport {
             repo_slug: "owner/myrepo".into(),
+            draft_pr: false,
+            assign_automerge: false,
             files: vec![
                 FileReport {
                     path: "package.json".into(),
@@ -737,6 +745,8 @@ mod tests {
     fn print_report_empty_files() {
         let report = RepoReport {
             repo_slug: "owner/empty".into(),
+            draft_pr: false,
+            assign_automerge: false,
             files: vec![],
         };
         print_report(&report, false, false);
@@ -766,6 +776,8 @@ mod tests {
         stats.add_report(&make_report());
         stats.add_report(&RepoReport {
             repo_slug: "owner/clean".into(),
+            draft_pr: false,
+            assign_automerge: false,
             files: vec![FileReport {
                 path: "Cargo.toml".into(),
                 manager: "cargo".into(),
