@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0314  | 2026-04-29 | `group:drupal-core` preset; `rebaseWhen` config field; `:rebaseStalePrs` preset sets `rebaseWhen: "behind-base-branch"`; 3 tests | Complete | See below. |
 | 0313  | 2026-04-29 | `:automergeLinters`, `:automergeTesters`, `:automergeTypes`, `:automergeMajor` presets: inject packageRules with `automerge: true` for their respective package lists; 2 tests | Complete | See below. |
 | 0312  | 2026-04-29 | `helpers:pinGitHubActionDigests` preset: injects `{matchDepTypes: ["action"], pinDigests: true}` rule; 1 test | Complete | See below. |
 | 0311  | 2026-04-29 | `pinDigests` field in `packageRules` + `docker:pinDigests` preset (2 rules: docker datasource + undo for argocd/devcontainer/helmv3/pyenv); 2 tests | Complete | See below. |

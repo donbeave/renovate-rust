@@ -154,6 +154,11 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `baseBranches`.
     pub base_branches: Vec<String>,
+    /// When to rebase an existing PR branch.
+    /// Values: `"auto"` (default), `"never"`, `"conflicted"`, `"behind-base-branch"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `rebaseWhen`.
+    pub rebase_when: Option<String>,
 
     // ── Update grouping / limits ─────────────────────────────────────────────
     /// Maximum number of open Renovate PRs at any one time.  `0` = unlimited.
@@ -1933,6 +1938,16 @@ fn resolve_extends_group_presets(
                     ..Default::default()
                 });
             }
+            // group:drupal-core — group Drupal core packages.
+            "group:drupal-core" => {
+                rules.push(PackageRule {
+                    group_name: Some("Drupal core".to_owned()),
+                    group_slug: Some("drupal-core".to_owned()),
+                    match_package_names: vec!["drupal/core".to_owned(), "drupal/core-*".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
             // group:jwtFramework — group JWT Framework packages (packagist, web-token/**).
             "group:jwtFramework" => {
                 rules.push(PackageRule {
@@ -2455,6 +2470,8 @@ impl RepoConfig {
             additional_branch_prefix: String,
             #[serde(rename = "baseBranches", default)]
             base_branches: Vec<String>,
+            #[serde(rename = "rebaseWhen")]
+            rebase_when: Option<String>,
             #[serde(rename = "prConcurrentLimit", default)]
             pr_concurrent_limit: u32,
             #[serde(rename = "prHourlyLimit", default = "default_pr_hourly_limit")]
@@ -2841,6 +2858,17 @@ impl RepoConfig {
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: raw.base_branches,
+            rebase_when: raw.rebase_when.or_else(|| {
+                // :rebaseStalePrs preset sets rebaseWhen: "behind-base-branch".
+                if effective_extends
+                    .iter()
+                    .any(|p| p == ":rebaseStalePrs" || p == "rebaseStalePrs")
+                {
+                    Some("behind-base-branch".to_owned())
+                } else {
+                    None
+                }
+            }),
             pr_concurrent_limit: scalar_pr_concurrent.unwrap_or(raw.pr_concurrent_limit),
             pr_hourly_limit: scalar_pr_hourly.unwrap_or(raw.pr_hourly_limit),
             group_name: raw.group_name,
@@ -3305,6 +3333,7 @@ impl Default for RepoConfig {
             branch_prefix: "renovate/".to_owned(),
             additional_branch_prefix: String::new(),
             base_branches: Vec::new(),
+            rebase_when: None,
             pr_concurrent_limit: 0,
             pr_hourly_limit: 2,
             group_name: None,
@@ -4872,6 +4901,24 @@ mod tests {
     fn base_branches_parsed() {
         let c = RepoConfig::parse(r#"{"baseBranches": ["main", "develop"]}"#);
         assert_eq!(c.base_branches, vec!["main", "develop"]);
+    }
+
+    #[test]
+    fn rebase_when_parsed() {
+        let c = RepoConfig::parse(r#"{"rebaseWhen": "behind-base-branch"}"#);
+        assert_eq!(c.rebase_when.as_deref(), Some("behind-base-branch"));
+    }
+
+    #[test]
+    fn rebase_stale_prs_preset_sets_rebase_when() {
+        let c = RepoConfig::parse(r#"{"extends": [":rebaseStalePrs"]}"#);
+        assert_eq!(c.rebase_when.as_deref(), Some("behind-base-branch"));
+    }
+
+    #[test]
+    fn rebase_when_default_none() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(c.rebase_when.is_none());
     }
 
     #[test]
