@@ -227,6 +227,8 @@ pub fn hashed_branch_name(
 /// - `semantic_commits` — `"enabled"` adds `"chore(deps)"` prefix; other values skip it
 /// - `action` — action verb; `None` uses the default `"Update"`
 /// - `custom_prefix` — explicit prefix; when `Some`, overrides semantic prefix entirely
+/// - `commit_message_topic` — custom topic template; supports `{{depName}}` /
+///   `{{{depName}}}` substitution.  `None` uses the default `"dependency {dep_name}"`.
 ///
 /// Renovate reference:
 /// - `lib/config/options/index.ts` — `commitMessage`, `commitMessageAction`,
@@ -239,9 +241,16 @@ pub fn pr_title(
     semantic_commits: Option<&str>,
     action: Option<&str>,
     custom_prefix: Option<&str>,
+    commit_message_topic: Option<&str>,
 ) -> String {
     let action = action.unwrap_or("Update");
-    let topic = format!("dependency {dep_name}");
+    let topic = if let Some(t) = commit_message_topic {
+        // Basic Handlebars substitution: {{depName}} and {{{depName}}}.
+        t.replace("{{{depName}}}", dep_name)
+            .replace("{{depName}}", dep_name)
+    } else {
+        format!("dependency {dep_name}")
+    };
     let extra = format!("to {new_version}");
     let body = format!("{action} {topic} {extra}");
 
@@ -438,7 +447,7 @@ mod tests {
     #[test]
     fn pr_title_plain_minor() {
         assert_eq!(
-            pr_title("express", "4.18.2", false, None, None, None),
+            pr_title("express", "4.18.2", false, None, None, None, None),
             "Update dependency express to 4.18.2"
         );
     }
@@ -446,7 +455,7 @@ mod tests {
     #[test]
     fn pr_title_plain_major() {
         assert_eq!(
-            pr_title("lodash", "5.0.0", true, None, None, None),
+            pr_title("lodash", "5.0.0", true, None, None, None, None),
             "Update dependency lodash to 5.0.0"
         );
     }
@@ -454,7 +463,7 @@ mod tests {
     #[test]
     fn pr_title_semantic_minor() {
         assert_eq!(
-            pr_title("express", "4.18.2", false, Some("enabled"), None, None),
+            pr_title("express", "4.18.2", false, Some("enabled"), None, None, None),
             "chore(deps): Update dependency express to 4.18.2"
         );
     }
@@ -462,7 +471,7 @@ mod tests {
     #[test]
     fn pr_title_semantic_major_breaking() {
         assert_eq!(
-            pr_title("lodash", "5.0.0", true, Some("enabled"), None, None),
+            pr_title("lodash", "5.0.0", true, Some("enabled"), None, None, None),
             "chore(deps)!: Update dependency lodash to 5.0.0"
         );
     }
@@ -471,7 +480,7 @@ mod tests {
     fn pr_title_semantic_disabled() {
         // "disabled" semantic_commits → no prefix
         assert_eq!(
-            pr_title("react", "18.0.0", true, Some("disabled"), None, None),
+            pr_title("react", "18.0.0", true, Some("disabled"), None, None, None),
             "Update dependency react to 18.0.0"
         );
     }
@@ -485,6 +494,7 @@ mod tests {
                 false,
                 Some("enabled"),
                 None,
+                None,
                 None
             ),
             "chore(deps): Update dependency @angular/core to 17.1.0"
@@ -495,7 +505,7 @@ mod tests {
     fn pr_title_custom_action() {
         // commitMessageAction: "Bump" → custom action verb
         assert_eq!(
-            pr_title("lodash", "4.17.21", false, None, Some("Bump"), None),
+            pr_title("lodash", "4.17.21", false, None, Some("Bump"), None, None),
             "Bump dependency lodash to 4.17.21"
         );
     }
@@ -510,7 +520,8 @@ mod tests {
                 false,
                 Some("enabled"),
                 None,
-                Some("fix(deps):")
+                Some("fix(deps):"),
+                None
             ),
             "fix(deps): Update dependency express to 4.18.2"
         );
@@ -525,9 +536,77 @@ mod tests {
                 true,
                 Some("enabled"),
                 Some("Pin"),
-                Some("build(deps):")
+                Some("build(deps):"),
+                None
             ),
             "build(deps): Pin dependency react to 18.0.0"
+        );
+    }
+
+    // ── pr_title commitMessageTopic ──────────────────────────────────────────
+
+    #[test]
+    fn pr_title_custom_topic_literal() {
+        assert_eq!(
+            pr_title("nginx", "1.25", false, None, None, None, Some("Docker image nginx")),
+            "Update Docker image nginx to 1.25"
+        );
+    }
+
+    #[test]
+    fn pr_title_custom_topic_with_dep_name_template() {
+        assert_eq!(
+            pr_title(
+                "nginx",
+                "1.25",
+                false,
+                None,
+                None,
+                None,
+                Some("Docker image {{depName}}")
+            ),
+            "Update Docker image nginx to 1.25"
+        );
+    }
+
+    #[test]
+    fn pr_title_custom_topic_triple_brace() {
+        assert_eq!(
+            pr_title(
+                "nginx",
+                "1.25",
+                false,
+                None,
+                None,
+                None,
+                Some("Docker image {{{depName}}}")
+            ),
+            "Update Docker image nginx to 1.25"
+        );
+    }
+
+    #[test]
+    fn pr_title_default_topic_when_none() {
+        // None → uses default "dependency {dep_name}"
+        assert_eq!(
+            pr_title("nginx", "1.25", false, None, None, None, None),
+            "Update dependency nginx to 1.25"
+        );
+    }
+
+    #[test]
+    fn pr_title_semantic_with_custom_topic() {
+        assert_eq!(
+            pr_title(
+                "nginx",
+                "1.25",
+                true,
+                Some("enabled"),
+                None,
+                None,
+                Some("Helm chart {{depName}}")
+            ),
+            "chore(deps)!: Update Helm chart nginx to 1.25"
         );
     }
 

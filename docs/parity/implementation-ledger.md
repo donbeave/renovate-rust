@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0218  | 2026-04-29 | `commitMessageTopic` in `packageRules` — custom PR title topic with `{{depName}}` support | Complete | See below. |
 | 0217  | 2026-04-29 | `prPriority` in `packageRules` — PR priority in output | Complete | See below. |
 | 0216  | 2026-04-29 | `groupSlug` in `packageRules` — explicit group branch topic override | Complete | See below. |
 | 0215  | 2026-04-29 | `updateType` field in JSON output + DRY human output rendering | Complete | See below. |
@@ -4960,6 +4961,33 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0218 - `commitMessageTopic` in `packageRules` — custom PR title topic
+
+### Renovate reference
+- `lib/config/options/index.ts` — `commitMessageTopic` (default: `"dependency {{depName}}"`)
+- Template variables: `{{depName}}` / `{{{depName}}}` substituted with actual dep name
+
+### What landed
+- `PackageRule`: `commit_message_topic: Option<String>` (serde: `commitMessageTopic`)
+- `RuleEffects`: `commit_message_topic: Option<String>`; last matching rule wins
+- `branch::pr_title()`: new 7th parameter `commit_message_topic: Option<&str>`.
+  When set, replaces the default `"dependency {depName}"` topic string.
+  Supports `{{depName}}` and `{{{depName}}}` Handlebars-style substitution.
+- `pipeline_utils.rs`: passes `effects.commit_message_topic.as_deref()` to `pr_title()`
+- 5 new unit tests: literal topic, `{{depName}}` template, triple-brace, None falls back,
+  semantic commits with custom topic
+
+### Common use cases this enables
+- `"Docker image {{depName}}"` → `"Update Docker image nginx to 1.25"`
+- `"Helm chart {{depName}}"` → `"Update Helm chart nginx to 1.25"`
+- `"dependencies"` (grouped) → `"Update dependencies to ..."`
+
+### Verification
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` ✓
+- `cargo nextest run --workspace --all-features` → 1411 tests pass (5 new)
 
 ---
 

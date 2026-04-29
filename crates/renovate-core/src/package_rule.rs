@@ -182,6 +182,13 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `prPriority`.
     pub pr_priority: Option<i32>,
+
+    /// Custom commit message topic template.  Supports `{{depName}}` and
+    /// `{{{depName}}}` substitution.  `None` uses the default
+    /// `"dependency {depName}"` topic.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageTopic`.
+    pub commit_message_topic: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -668,6 +675,8 @@ pub struct RuleEffects {
     /// PR creation priority.  Higher numbers → created first.
     /// `None` = not configured (treat as 0).  The last matching rule wins.
     pub pr_priority: Option<i32>,
+    /// Per-rule commit message topic override.  The last matching rule wins.
+    pub commit_message_topic: Option<String>,
 }
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────

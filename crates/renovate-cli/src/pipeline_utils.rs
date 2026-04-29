@@ -139,6 +139,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     repo_cfg.semantic_commits.as_deref(),
                     Some(repo_cfg.commit_message_action.as_str()).filter(|s| *s != "Update"),
                     repo_cfg.commit_message_prefix.as_deref(),
+                    effects.commit_message_topic.as_deref(),
                 ));
                 dep.group_name = effects.group_name;
                 dep.automerge = effects.automerge;

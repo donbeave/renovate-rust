@@ -421,6 +421,8 @@ impl RepoConfig {
             minimum_release_age: Option<String>,
             #[serde(rename = "prPriority")]
             pr_priority: Option<i32>,
+            #[serde(rename = "commitMessageTopic")]
+            commit_message_topic: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -576,6 +578,7 @@ impl RepoConfig {
                     match_current_age: r.match_current_age,
                     minimum_release_age: r.minimum_release_age,
                     pr_priority: r.pr_priority,
+                    commit_message_topic: r.commit_message_topic,
                 }
             })
             .collect();
@@ -887,6 +890,9 @@ impl RepoConfig {
             }
             if rule.pr_priority.is_some() {
                 effects.pr_priority = rule.pr_priority;
+            }
+            if rule.commit_message_topic.is_some() {
+                effects.commit_message_topic.clone_from(&rule.commit_message_topic);
             }
             if !rule.assignees.is_empty() {
                 effects.assignees.clone_from(&rule.assignees);
