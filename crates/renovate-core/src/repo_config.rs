@@ -1558,11 +1558,13 @@ fn resolve_extends_group_presets(
                 ));
             }
             "group:monorepos" => {
-                // monorepos groups monorepo packages together via large matchPackageNames lists.
-                // Skip full expansion — those lists require network access to resolve.
-                tracing::debug!(
-                    "group:monorepos preset — partial support (grouped dep names not expanded)"
-                );
+                // Expand all individual monorepo group presets.
+                // patternGroups use matchPackageNames (resolved locally);
+                // orgGroups/repoGroups use matchSourceUrls (resolved when source URL is available).
+                for name in crate::monorepos::all_monorepo_group_names() {
+                    let key = name.strip_prefix("group:").unwrap_or(&name);
+                    rules.extend(crate::monorepos::rules_for_monorepo(key));
+                }
             }
             // config:recommended is expanded by expand_compound_presets() before this
             // function is called, so "group:recommended" is already in effective_extends
@@ -8315,6 +8317,39 @@ mod rule_effects_tests {
                 .as_deref()
                 .is_some_and(|v| v.starts_with("regex:")),
             "workarounds:k3sKubernetesVersioning must set a regex versioning scheme"
+        );
+    }
+
+    // ── group:monorepos integration tests ─────────────────────────────────────
+
+    #[test]
+    fn group_monorepos_angularmaterial_pattern_group() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:monorepos"]}"#);
+        // @angular/material should be grouped by the angularmaterial pattern group.
+        let ctx = DepContext::for_dep("@angular/material");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.group_name.is_some(),
+            "group:monorepos must group @angular/material into a monorepo group"
+        );
+        assert!(
+            effects
+                .group_name
+                .as_deref()
+                .map_or(false, |g| g.contains("angularmaterial")),
+            "group must be the angularmaterial monorepo, got: {:?}",
+            effects.group_name
+        );
+    }
+
+    #[test]
+    fn group_monorepos_injects_many_rules() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:monorepos"]}"#);
+        // 452+ monorepo presets → many rules.
+        assert!(
+            c.package_rules.len() >= 400,
+            "group:monorepos must inject at least 400 rules, got {}",
+            c.package_rules.len()
         );
     }
 }
