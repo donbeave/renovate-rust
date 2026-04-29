@@ -3593,7 +3593,12 @@ impl RepoConfig {
             #[serde(rename = "ignoreVersions", default)]
             ignore_versions: Vec<String>,
             enabled: Option<bool>,
-            #[serde(rename = "groupName")]
+            // groupName accepts string or ["string"] (deprecated array form).
+            #[serde(
+                rename = "groupName",
+                deserialize_with = "deserialize_string_or_first",
+                default
+            )]
             group_name: Option<String>,
             #[serde(rename = "groupSlug")]
             group_slug: Option<String>,
@@ -3675,6 +3680,10 @@ impl RepoConfig {
             include_paths: Vec<String>,
             #[serde(rename = "packageRules", default)]
             package_rules: Vec<RawPackageRule>,
+            /// Deprecated: `packages` was the old name for `packageRules`.
+            /// Renovate reference: lib/config/migrations/custom/packages-migration.ts
+            #[serde(default)]
+            packages: Vec<RawPackageRule>,
             #[serde(rename = "enabledManagers", default)]
             enabled_managers: Vec<String>,
             #[serde(rename = "disabledManagers", default)]
@@ -3870,6 +3879,27 @@ impl RepoConfig {
 
         /// Deserialize semanticCommits from bool or string.
         /// Renovate reference: lib/config/migrations/custom/semantic-commits-migration.ts
+        /// Deserialize a field that can be a string or `["string"]` (array with one element).
+        /// Used for `groupName` which Renovate historically accepted as an array.
+        fn deserialize_string_or_first<'de, D>(d: D) -> Result<Option<String>, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            use serde_json::Value;
+            let val = Value::deserialize(d)?;
+            Ok(match val {
+                Value::String(s) => Some(s),
+                Value::Array(arr) => arr.into_iter().next().and_then(|v| {
+                    if let Value::String(s) = v {
+                        Some(s)
+                    } else {
+                        None
+                    }
+                }),
+                _ => None,
+            })
+        }
+
         /// Deserialize a field that Renovate accepts as either a bare string or an array.
         /// `"every friday"` and `["every friday"]` both parse to `vec!["every friday"]`.
         fn deserialize_string_or_vec<'de, D>(d: D) -> Result<Vec<String>, D::Error>
@@ -4073,6 +4103,8 @@ impl RepoConfig {
         let package_rules: Vec<PackageRule> = raw
             .package_rules
             .into_iter()
+            // Deprecated: `packages` was the old name for `packageRules`.
+            .chain(raw.packages)
             .map(|r| {
                 // Resolve packages:* (and other recognized) presets from the
                 // rule's own `extends` list and merge their matchers in.
@@ -9187,6 +9219,45 @@ mod rule_effects_tests {
         assert!(
             url.unwrap().contains("{/,}**"),
             "sourceUrlPrefixes entry must end with glob"
+        );
+    }
+
+    // ── Ported from migration.spec.ts "migrates packages" ────────────────────
+
+    #[test]
+    fn deprecated_packages_field_merged_into_package_rules() {
+        // Ported: "migrates packages" from migration.spec.ts.
+        // Old `packages: [{...}]` → merged into `packageRules`.
+        let c = RepoConfig::parse(
+            r#"{
+                "packages": [{
+                    "matchPackageNames": ["@angular/core"],
+                    "groupName": "angular packages",
+                    "automerge": true
+                }]
+            }"#,
+        );
+        assert!(
+            !c.package_rules.is_empty(),
+            "deprecated `packages` field must be merged into package_rules"
+        );
+        // The rule should have the group name set.
+        assert_eq!(
+            c.package_rules[0].group_name.as_deref(),
+            Some("angular packages")
+        );
+    }
+
+    #[test]
+    fn group_name_array_first_element_used() {
+        // groupName: ["angular packages"] (array) → groupName: "angular packages" (string).
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"groupName": ["my group"], "automerge": true}]}"#,
+        );
+        assert_eq!(
+            c.package_rules[0].group_name.as_deref(),
+            Some("my group"),
+            "groupName array should use first element"
         );
     }
 

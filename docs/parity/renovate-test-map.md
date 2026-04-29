@@ -250,6 +250,8 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/config/migration.spec.ts` | 551 | `excludeRepositories` → `!repo` in `matchRepositories` | `crates/renovate-core/src/repo_config.rs` | `deprecated_exclude_repositories_negation` | ported |
 | `lib/config/migration.spec.ts` | 551 | `sourceUrlPrefixes` → `url{/,}**` in `matchSourceUrls` | `crates/renovate-core/src/repo_config.rs` | `deprecated_source_url_prefixes_become_glob` | ported |
 | `lib/config/migration.spec.ts` | 551 | `updateTypes` → `matchUpdateTypes` | `crates/renovate-core/src/repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | ported |
+| `lib/config/migration.spec.ts` | 257 | `packages: [{...}]` → `packageRules` (old field name) | `crates/renovate-core/src/repo_config.rs` | `deprecated_packages_field_merged_into_package_rules` | ported |
+| `lib/config/migration.spec.ts` | 257 | `groupName: ["name"]` array → `groupName: "name"` string | `crates/renovate-core/src/repo_config.rs` | `group_name_array_first_element_used` | ported |
 
 ---
 
