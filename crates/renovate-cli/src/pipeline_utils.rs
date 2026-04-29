@@ -35,6 +35,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     renovate_core::managers::manager_default_datasource(manager.as_str());
                 let ctx = renovate_core::repo_config::DepContext {
                     dep_name: &dep.name,
+                    package_name: dep.package_name.as_deref(),
                     manager: Some(manager.as_str()),
                     file_path: Some(file_path.as_str()),
                     current_value: Some(current.as_str()),
@@ -255,6 +256,7 @@ pub(crate) async fn docker_hub_reports(
                 current_version_timestamp: None,
 
                 dep_type: None,
+              package_name: None,
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -297,6 +299,7 @@ pub(crate) async fn docker_hub_reports(
                 current_version_timestamp: None,
 
                 dep_type: None,
+              package_name: None,
                 name: dep_name,
                 status,
             });

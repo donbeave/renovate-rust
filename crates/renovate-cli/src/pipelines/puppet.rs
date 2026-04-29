@@ -45,6 +45,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             current_version_timestamp: None,
 
                             dep_type: None,
+                           package_name: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -125,6 +126,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         current_version_timestamp: None,
 
                         dep_type: None,
+                       package_name: None,
                         name: dep.name.clone(),
                         status,
                     });

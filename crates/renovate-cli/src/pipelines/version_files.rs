@@ -188,6 +188,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         current_version_timestamp: None,
 
                         dep_type: None,
+                       package_name: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -309,6 +310,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         current_version_timestamp: None,
 
                         dep_type: None,
+                       package_name: None,
                         name: dep.tool_name.clone(),
                         status,
                     });
@@ -435,6 +437,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             current_version_timestamp: None,
 
                             dep_type: None,
+                           package_name: None,
                             name: dep.tool.to_owned(),
                             status,
                         }],
@@ -492,6 +495,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         current_version_timestamp: None,
 
                         dep_type: None,
+                       package_name: None,
                         name: dep.name.clone(),
                         status,
                     });

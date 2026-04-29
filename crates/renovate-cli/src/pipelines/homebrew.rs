@@ -133,6 +133,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         current_version_timestamp: None,
 
                         dep_type: None,
+                       package_name: None,
                         name: dep.formula_name.clone(),
                         status,
                     }],
