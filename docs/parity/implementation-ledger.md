@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0304  | 2026-04-29 | `group:linters` preset: inlines expanded `packages:linters` (emberTemplateLint + eslint + phpLinters + stylelint + tslint + prettier/oxlint) via `LINTER_PACKAGES` const; 1 test | Complete | See below. |
 | 0303  | 2026-04-29 | `helpers:disableTypesNodeMajor` preset: disables `@types/node` major updates via packageRule; 2 tests (major blocked, other packages unaffected) | Complete | See below. |
 | 0302  | 2026-04-29 | Remaining Spring presets (amqp/android/batch/hateoas/integration/kafka/ldap/mobile/osgi/restdocs/roo/scala/session/shell/social/statemachine/webflow/ws), `group:illuminate`, `group:rubyOmniauth`, `group:jestPlusTSJest`, `group:jestPlusTypes`, `group:recommended` compound expansion; 3 tests | Complete | See below. |
 | 0301  | 2026-04-29 | `group:react`, `group:puppeteer`, `group:remark`, `group:socketio`, `group:micrometer`, `group:resilience4j`, `group:hibernateValidator`, `group:hibernateOgm`, `group:springBoot` (2 rules), `group:springCore/Cloud/Data/Security`; 4 tests | Complete | See below. |
@@ -5700,6 +5701,23 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
 - Added `"helpers:disableTypesNodeMajor"` case to `resolve_extends_common_rules()`:
   - `PackageRule` with `match_package_names: ["@types/node"]`, `has_name_constraint: true`, `match_update_types: [Major]`, `has_update_type_constraint: true`, `enabled: Some(false)`
 - 2 tests: major @types/node update is blocked; minor @types/node and other packages unaffected
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0304 - `group:linters` preset
+
+### Renovate reference
+- `lib/config/presets/internal/group.preset.ts` — `linters`: uses `extends: ['packages:linters']`
+- `lib/config/presets/internal/packages.preset.ts` — `linters`: combines `emberTemplateLint`, `eslint`, `phpLinters`, `stylelint`, `tslint` + direct entries `["oxlint","prettier","remark-lint","standard"]`
+
+### Implementation
+- Added `LINTER_PACKAGES: &[&str]` file-level constant with the 28-entry expanded package list
+- Added `"group:linters"` case to `resolve_extends_group_presets()` using the constant
+- 1 test: matches eslint, @typescript-eslint/parser, prettier, stylelint; doesn't match lodash or jest
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

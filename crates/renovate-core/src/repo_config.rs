@@ -1605,6 +1605,18 @@ fn resolve_extends_group_presets(
                     rules.extend(sub_rules);
                 }
             }
+            // group:linters — group all lint-related packages together.
+            // Expands packages:linters which combines emberTemplateLint, eslint,
+            // phpLinters, stylelint, tslint, and direct entries.
+            "group:linters" => {
+                rules.push(PackageRule {
+                    group_name: Some("linters".to_owned()),
+                    group_slug: Some("linters".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: LINTER_PACKAGES.iter().map(|&s| s.to_owned()).collect(),
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -1650,6 +1662,39 @@ const JS_UNIT_TEST_PACKAGES: &[&str] = &[
     "qunit**",
     "should**",
     "sinon**",
+];
+
+/// Package list for `group:linters`. Expands `packages:linters` from packages.preset.ts:
+/// emberTemplateLint + eslint + phpLinters + stylelint + tslint + direct entries.
+const LINTER_PACKAGES: &[&str] = &[
+    // packages:emberTemplateLint
+    "ember-template-lint**",
+    // packages:eslint
+    "*/eslint-plugin",
+    "@babel/eslint-parser",
+    "@eslint/**",
+    "@eslint-community/**",
+    "@stylistic/eslint-plugin**",
+    "@types/eslint",
+    "@types/eslint__**",
+    "@typescript-eslint/**",
+    "babel-eslint",
+    "eslint**",
+    "typescript-eslint",
+    // packages:phpLinters
+    "friendsofphp/php-cs-fixer",
+    "squizlabs/php_codesniffer",
+    "symplify/easy-coding-standard",
+    // packages:stylelint
+    "stylelint**",
+    // packages:tslint
+    "codelyzer",
+    "/\\btslint\\b/",
+    // direct entries in packages:linters
+    "oxlint",
+    "prettier",
+    "remark-lint",
+    "standard",
 ];
 
 /// Parse a parameterized preset string into its name and arguments.
@@ -6401,6 +6446,20 @@ mod rule_effects_tests {
         assert_eq!(rule.group_name.as_deref(), Some("spring core"));
         assert!(rule.name_matches("org.springframework:spring-core"));
         assert!(!rule.name_matches("org.springframework.boot:spring-boot"));
+    }
+
+    #[test]
+    fn group_linters_matches_eslint_and_prettier() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:linters"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("linters"));
+        assert!(rule.name_matches("eslint"));
+        assert!(rule.name_matches("@typescript-eslint/parser"));
+        assert!(rule.name_matches("prettier"));
+        assert!(rule.name_matches("stylelint"));
+        assert!(!rule.name_matches("lodash"));
+        assert!(!rule.name_matches("jest"));
     }
 
     #[test]
