@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0358  | 2026-04-29 | `lockedVersion` in DepContext: `locked_version: Option<&str>` added to `DepContext`; `current_version_matches(current_value, locked_version)` now uses `lockedVersion ?? currentValue` for regex patterns (matching Renovate's `CurrentVersionMatcher`); 3 new tests from `current-version.spec.ts`; 1734 tests | Complete | See below. |
 | 0357  | 2026-04-29 | Port dep-names.spec.ts "undefined depName → false" test: explicit test that empty dep_name + matchDepNames set → rule doesn't fire; mark as ported in test map; 1731 tests | Complete | See below. |
 | 0356  | 2026-04-29 | Port 3 index.spec.ts tests: "needs baseBranch to match" (absent base_branch + matchBaseBranches → rule doesn't fire), "needs manager to match" (absent manager), "needs categories to match" (empty categories + matchCategories → doesn't fire); 1730 tests | Complete | See below. |
 | 0355  | 2026-04-29 | Test map expansion: add 14 entries for `index.spec.ts` behaviors (ported: matchSourceUrls glob/missing/case-insensitive, matchBaseBranches, matchCategories, only-negative patterns, matchCurrentVersion regex/negated; pending: lockFiles, force.enabled, overrideDepName/packageName, template engine) | Complete | See test-map. |

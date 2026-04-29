@@ -6052,9 +6052,9 @@ mod tests {
         );
         let rule = &c.package_rules[0];
         // "0.1.0" starts with "0" → matches /^0/
-        assert!(rule.current_version_matches("0.1.0"));
+        assert!(rule.current_version_matches("0.1.0", None));
         // "1.0.0" starts with "1", does NOT match /^0/
-        assert!(!rule.current_version_matches("1.0.0"));
+        assert!(!rule.current_version_matches("1.0.0", None));
     }
 
     #[test]
@@ -6066,11 +6066,11 @@ mod tests {
         );
         let rule = &c.package_rules[0];
         // "0.1.0" matches /^0/ → !/^0/ is FALSE for this version
-        assert!(!rule.current_version_matches("0.1.0"));
+        assert!(!rule.current_version_matches("0.1.0", None));
         // "1.0.0" does NOT match /^0/ → !/^0/ is TRUE
-        assert!(rule.current_version_matches("1.0.0"));
+        assert!(rule.current_version_matches("1.0.0", None));
         // "2.5.3" does NOT match /^0/ → !/^0/ is TRUE
-        assert!(rule.current_version_matches("2.5.3"));
+        assert!(rule.current_version_matches("2.5.3", None));
     }
 
     #[test]
@@ -6100,6 +6100,64 @@ mod tests {
         };
         let effects2 = c.collect_rule_effects(&ctx2);
         assert_eq!(effects2.automerge, Some(true));
+    }
+
+    // ── Ported from Renovate current-version.spec.ts (lockedVersion) ──────────
+
+    #[test]
+    fn match_current_version_regex_prefers_locked_version() {
+        // Ported: "return true for regex version match" test from current-version.spec.ts.
+        // When lockedVersion is set, regex matchCurrentVersion tests against it.
+        // ruby: currentValue='"~> 0.1.0"', lockedVersion='0.1.0'
+        // Pattern: /^v?[~ -]?0/ → tests against "0.1.0" → matches (starts with "0").
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "/^v?[~ -]?0/", "automerge": true}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        // With lockedVersion="0.1.0" — regex should match.
+        assert!(rule.current_version_matches(r#""~> 0.1.0""#, Some("0.1.0")));
+    }
+
+    #[test]
+    fn match_current_version_regex_false_without_locked_version() {
+        // Ported: "return false for regex value match" from current-version.spec.ts.
+        // When lockedVersion is absent, falls back to currentValue='"~> 0.1.0"'.
+        // Pattern: /^v?[~ -]?0/ against '"~> 0.1.0"' → doesn't match (starts with '"').
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "/^v?[~ -]?0/", "automerge": true}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.current_version_matches(r#""~> 0.1.0""#, None));
+    }
+
+    #[test]
+    fn match_current_version_via_dep_context_with_locked_version() {
+        // End-to-end: dep with locked_version should use it for matchCurrentVersion regex.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentVersion": "/^0/", "enabled": false}]}"#,
+        );
+        // Dep with range currentValue but locked_version starting with "0"
+        let ctx_locked = DepContext {
+            dep_name: "my-pkg",
+            current_value: Some("^0.5.0"),
+            locked_version: Some("0.5.3"),
+            ..Default::default()
+        };
+        assert!(
+            c.is_dep_ignored_ctx(&ctx_locked),
+            "rule should fire when lockedVersion matches the regex"
+        );
+        // Same range but locked at 1.x → rule should NOT fire.
+        let ctx_locked_1x = DepContext {
+            dep_name: "my-pkg",
+            current_value: Some("^1.0.0"),
+            locked_version: Some("1.2.3"),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_dep_ignored_ctx(&ctx_locked_1x),
+            "rule should not fire when lockedVersion does not match regex"
+        );
     }
 
     // ── matchFileNames tests ──────────────────────────────────────────────────

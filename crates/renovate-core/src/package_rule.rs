@@ -414,25 +414,46 @@ impl PackageRule {
     }
 
     /// Return `true` when `current_value` satisfies this rule's `matchCurrentVersion`.
-    pub fn current_version_matches(&self, current_value: &str) -> bool {
+    /// Match `matchCurrentVersion` against the dep's version context.
+    ///
+    /// Mirrors Renovate's `CurrentVersionMatcher`:
+    /// - Regex patterns: test against `locked_version ?? current_value`
+    /// - Semver range: extract lower-bound of `current_value` and check if in range
+    pub fn current_version_matches(
+        &self,
+        current_value: &str,
+        locked_version: Option<&str>,
+    ) -> bool {
         use crate::string_match::match_regex_or_glob;
         use crate::versioning::semver_generic::{lower_bound, parse_padded};
         let Some(ref mcv) = self.match_current_version else {
             return true;
         };
-        // Regex patterns and negated regex (!/pat/) are matched via match_regex_or_glob
-        // which now handles the ! prefix. Route anything that starts with / or !/ here.
+        // Regex patterns: use lockedVersion ?? currentValue as the string to test.
         if mcv.starts_with('/') || mcv.starts_with("!/") {
-            return match_regex_or_glob(current_value, mcv);
+            let compare = locked_version.unwrap_or(current_value);
+            if compare.is_empty() {
+                return false;
+            }
+            return match_regex_or_glob(compare, mcv);
         }
         // Semver range: extract the lower-bound version and compare.
         let lb = lower_bound(current_value);
         let Some(current_sv) = parse_padded(lb) else {
-            return true; // can't parse → don't restrict
+            // Can't parse currentValue as version — try lockedVersion.
+            if let Some(lv) = locked_version {
+                let Some(locked_sv) = parse_padded(lv) else {
+                    return false;
+                };
+                return semver::VersionReq::parse(mcv)
+                    .map(|req| req.matches(&locked_sv))
+                    .unwrap_or(false);
+            }
+            return false;
         };
         match semver::VersionReq::parse(mcv) {
             Ok(req) => req.matches(&current_sv),
-            Err(_) => true,
+            Err(_) => false,
         }
     }
 
@@ -561,7 +582,7 @@ impl PackageRule {
         if !self.current_value_matches(current_val) {
             return false;
         }
-        if !self.current_version_matches(current_val) {
+        if !self.current_version_matches(current_val, ctx.locked_version) {
             return false;
         }
 
@@ -658,8 +679,12 @@ pub struct DepContext<'a> {
     pub repository: Option<&'a str>,
     /// Current base branch (e.g. `"main"`, `"develop"`).
     pub base_branch: Option<&'a str>,
-    /// Raw current version string from the manifest.
+    /// Raw current version string from the manifest (may be a range like `"^1.0.0"`).
     pub current_value: Option<&'a str>,
+    /// Resolved exact version pinned in the lockfile (e.g. `"1.2.3"`).
+    /// When present, `matchCurrentVersion` regex patterns test against this
+    /// instead of `currentValue`, matching Renovate's `lockedVersion` field.
+    pub locked_version: Option<&'a str>,
     /// Proposed new version string (after datasource lookup).
     pub new_value: Option<&'a str>,
     /// Classified update type (available after version lookup).
