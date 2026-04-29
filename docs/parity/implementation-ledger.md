@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0373  | 2026-04-29 | `force.enabled` in packageRules: `force_enabled: Option<bool>` on PackageRule/RuleEffects; `is_update_blocked_ctx` respects force precedence; `baseBranchPatterns` as canonical alias for `baseBranches`; 4 force.enabled tests + 2 baseBranchPatterns tests; 1778 tests | Complete | See below. |
 | 0372  | 2026-04-29 | groupSlug auto-generation from groupName when prior slug exists; port index.spec.ts "creates groupSlug if necessary"; 1772 tests | Complete | See below. |
 | 0371  | 2026-04-29 | `depTypes` plural array support in DepContext + port 5 more index.spec.ts tests: depTypes any-match, naked depType, unrequested depType, comprehensive "applies" integration; 1771 tests | Complete | See below. |
 | 0370  | 2026-04-29 | `matchCategories` dep-provided categories + `matchCurrentVersion` 3-case dispatch + DepContext `categories`/`current_version` fields; 8 new tests from index.spec.ts; 1766 tests | Complete | See below. |

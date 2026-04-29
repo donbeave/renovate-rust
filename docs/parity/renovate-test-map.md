@@ -205,6 +205,10 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | 968 | `filters out unrequested depType` — non-matching dep type → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_out_of_requested_does_not_match` | ported |
 | `lib/util/package-rules/index.spec.ts` | 38 | `applies` — comprehensive integration: isBump+matchCurrentVersion+matchPackageNames negation | `crates/renovate-core/src/repo_config.rs` | `applies_comprehensive_integration` | ported |
 | `lib/util/package-rules/index.spec.ts` | 1242 | `creates groupSlug if necessary` — auto-generate groupSlug from groupName when prior slug exists | `crates/renovate-core/src/repo_config.rs` | `rule_effects_tests::group_slug_auto_generated_from_group_name_when_prior_slug_exists` | ported |
+| `lib/util/package-rules/index.spec.ts` | 202 | `force.enabled:true` overrides `enabled:false` (vulnerability alert) | `crates/renovate-core/src/repo_config.rs` | `force_enabled_true_overrides_enabled_false` | ported |
+| `lib/util/package-rules/index.spec.ts` | 223 | `force.enabled:true` overrides config-level `enabled:false` | `crates/renovate-core/src/repo_config.rs` | `force_enabled_true_also_overrides_config_level_disabled` | ported |
+| `lib/util/package-rules/index.spec.ts` | 292 | `force.enabled:false` overrides `enabled:true` | `crates/renovate-core/src/repo_config.rs` | `force_enabled_false_overrides_enabled_true` | ported |
+| `lib/config/migration.spec.ts` | 835 | `baseBranches: ['main', 'dev']` → `baseBranchPatterns` support | `crates/renovate-core/src/repo_config.rs` | `base_branch_patterns_parsed`, `base_branch_patterns_merged_with_base_branches` | ported |
 
 ---
 

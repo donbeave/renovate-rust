@@ -3663,6 +3663,15 @@ impl RepoConfig {
             extends: Vec<String>,
             #[serde(rename = "dependencyDashboardApproval")]
             dependency_dashboard_approval: Option<bool>,
+            /// `force: { enabled: bool }` — force-override for the enabled state.
+            /// Mirrors Renovate's `force` property in packageRules (used by vulnerability alerts).
+            force: Option<ForceConfig>,
+        }
+
+        /// Helper for `force: { enabled: bool }` in packageRules.
+        #[derive(Deserialize)]
+        struct ForceConfig {
+            enabled: Option<bool>,
         }
 
         #[derive(Deserialize)]
@@ -3721,6 +3730,9 @@ impl RepoConfig {
             additional_branch_prefix: String,
             #[serde(rename = "baseBranches", default)]
             base_branches: Vec<String>,
+            /// New canonical field name for baseBranches (Renovate migrates baseBranches → baseBranchPatterns).
+            #[serde(rename = "baseBranchPatterns", default)]
+            base_branch_patterns: Vec<String>,
             /// Deprecated: singular baseBranch → baseBranches[0].
             #[serde(rename = "baseBranch")]
             base_branch: Option<String>,
@@ -4290,6 +4302,7 @@ impl RepoConfig {
                     version_compatibility: r.version_compatibility,
                     changelog_url: r.changelog_url,
                     dependency_dashboard_approval: r.dependency_dashboard_approval,
+                    force_enabled: r.force.and_then(|f| f.enabled),
                 }
             })
             .collect();
@@ -4434,8 +4447,14 @@ impl RepoConfig {
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: {
-                // Deprecated singular baseBranch → prepend to baseBranches array.
+                // baseBranchPatterns is the new canonical name; merge with baseBranches.
                 let mut branches = raw.base_branches;
+                for b in raw.base_branch_patterns {
+                    if !branches.contains(&b) {
+                        branches.push(b);
+                    }
+                }
+                // Deprecated singular baseBranch → prepend to baseBranches array.
                 if let Some(b) = raw.base_branch
                     && !branches.contains(&b)
                 {
@@ -4756,18 +4775,32 @@ impl RepoConfig {
     /// (with `dep_type`, `repository`, `datasource`, etc.) to avoid re-constructing
     /// it and to ensure all matchers (`matchDepTypes`, `matchRepositories`, …) fire.
     pub fn is_update_blocked_ctx(&self, ctx: &DepContext<'_>) -> bool {
-        // Renovate uses "last matching rule wins" semantics for `enabled`.
-        // A later `enabled: true` rule overrides an earlier `enabled: false` rule
-        // (mirrors applyPackageRules in lib/util/package-rules/index.ts).
+        // Renovate uses "last matching rule wins" semantics for `enabled` and `force.enabled`.
+        // force.enabled: true  → clears blocked (overrides any enabled:false)
+        // force.enabled: false → sets blocked (overrides any enabled:true)
+        // enabled: false       → sets blocked (unless later rule re-enables)
+        // enabled: true        → clears blocked
+        // Mirrors applyPackageRules in lib/util/package-rules/index.ts.
         let mut blocked = false;
         for rule in &self.package_rules {
             if !rule.matches_context(ctx) {
                 continue;
             }
+            match rule.force_enabled {
+                Some(false) => {
+                    blocked = true;
+                    continue; // force overrides regular enabled for this rule
+                }
+                Some(true) => {
+                    blocked = false;
+                    continue;
+                }
+                None => {}
+            }
             match rule.enabled {
                 Some(false) => blocked = true,
-                Some(true) => blocked = false, // explicitly re-enabled
-                None => {}                     // no change
+                Some(true) => blocked = false,
+                None => {}
             }
         }
         blocked
@@ -5015,6 +5048,10 @@ impl RepoConfig {
             }
             if !rule.reviewers.is_empty() {
                 effects.reviewers.clone_from(&rule.reviewers);
+            }
+            // force.enabled: last matching rule that sets it wins.
+            if rule.force_enabled.is_some() {
+                effects.force_enabled = rule.force_enabled;
             }
         }
         // Apply repo-level group_name if no rule set one.
@@ -5503,6 +5540,96 @@ mod tests {
         assert!(c.is_dep_ignored("lodash"));
         assert!(!c.is_dep_ignored("lodash-fp"));
         assert!(!c.is_dep_ignored("react"));
+    }
+
+    #[test]
+    fn force_enabled_true_overrides_enabled_false() {
+        // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true"
+        // index.spec.ts line 202 — vulnerability alert scenario
+        // Rule 1: enabled:false → dep disabled
+        // Rule 2: force:{enabled:true} → force re-enables dep
+        let c = RepoConfig::parse(
+            r#"{
+            "packageRules": [
+                {"enabled": false},
+                {"force": {"enabled": true}}
+            ]
+        }"#,
+        );
+        let ctx = DepContext {
+            dep_name: "foo",
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "force.enabled:true must override enabled:false"
+        );
+    }
+
+    #[test]
+    fn force_enabled_false_overrides_enabled_true() {
+        // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false"
+        // index.spec.ts line 292
+        // Rule 1: enabled:true → dep enabled
+        // Rule 2: force:{enabled:false} → force disables dep
+        let c = RepoConfig::parse(
+            r#"{
+            "packageRules": [
+                {"enabled": true},
+                {"force": {"enabled": false}}
+            ]
+        }"#,
+        );
+        let ctx = DepContext {
+            dep_name: "foo",
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "force.enabled:false must override enabled:true"
+        );
+    }
+
+    #[test]
+    fn force_enabled_true_also_overrides_config_level_disabled() {
+        // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)"
+        // index.spec.ts line 223 — config-level enabled:false + force.enabled:true
+        let c = RepoConfig::parse(
+            r#"{
+            "packageRules": [
+                {"enabled": false},
+                {"force": {"enabled": true}}
+            ]
+        }"#,
+        );
+        let ctx = DepContext {
+            dep_name: "foo",
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "force.enabled:true must override even config-level enabled:false"
+        );
+    }
+
+    #[test]
+    fn force_enabled_true_on_ctx_clears_block() {
+        // Ported: "does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)"
+        // index.spec.ts line 245 — two rules: enabled:false, then force:enabled:true (via effects)
+        let c = RepoConfig::parse(
+            r#"{
+            "packageRules": [
+                {"enabled": false},
+                {"force": {"enabled": true}}
+            ]
+        }"#,
+        );
+        let ctx = DepContext {
+            dep_name: "foo",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.force_enabled, Some(true));
     }
 
     #[test]
@@ -7237,6 +7364,25 @@ mod tests {
     fn base_branches_parsed() {
         let c = RepoConfig::parse(r#"{"baseBranches": ["main", "develop"]}"#);
         assert_eq!(c.base_branches, vec!["main", "develop"]);
+    }
+
+    #[test]
+    fn base_branch_patterns_parsed() {
+        // Ported: "migrates baseBranches and baseBranch" — migration.spec.ts line 835
+        // baseBranchPatterns is the new canonical name; old baseBranches still supported.
+        let c = RepoConfig::parse(r#"{"baseBranchPatterns": ["main", "dev"]}"#);
+        assert_eq!(c.base_branches, vec!["main", "dev"]);
+    }
+
+    #[test]
+    fn base_branch_patterns_merged_with_base_branches() {
+        // Both fields provided: merge without duplicates.
+        let c = RepoConfig::parse(
+            r#"{"baseBranches": ["main"], "baseBranchPatterns": ["dev", "main"]}"#,
+        );
+        assert!(c.base_branches.contains(&"main".to_owned()));
+        assert!(c.base_branches.contains(&"dev".to_owned()));
+        assert_eq!(c.base_branches.len(), 2);
     }
 
     #[test]

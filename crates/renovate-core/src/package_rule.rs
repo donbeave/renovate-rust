@@ -71,6 +71,13 @@ pub struct PackageRule {
     pub match_dep_types: Vec<String>,
     /// If `Some(false)`, matching packages are disabled (skipped).
     pub enabled: Option<bool>,
+    /// Force-override for `enabled`.  From `force: { enabled: ... }` in the JSON config.
+    /// `Some(true)` overrides any `enabled: false` from config or prior rules (vulnerability
+    /// alert use case).  `Some(false)` sets skipReason regardless of `enabled: true`.
+    /// Takes precedence over regular `enabled` in the skip-reason evaluation.
+    ///
+    /// Renovate reference: `lib/util/package-rules/index.ts` — `toApply.force?.enabled`
+    pub force_enabled: Option<bool>,
     /// Version strings/ranges/regex patterns to ignore for packages matched
     /// by this rule.  Mirrors `ignoreVersions` in Renovate packageRules.
     pub ignore_versions: Vec<String>,
@@ -931,6 +938,11 @@ pub struct RuleEffects {
     pub changelog_url: Option<String>,
     /// Whether Dependency Dashboard approval is required before creating a PR.
     pub dependency_dashboard_approval: Option<bool>,
+    /// Whether this dep is force-disabled (skipReason should be set).
+    /// Computed from `force.enabled` in packageRules.
+    /// `true` = force-enabled (overrides any `enabled: false`).
+    /// `false` = force-disabled (skipReason regardless of `enabled: true`).
+    pub force_enabled: Option<bool>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────
