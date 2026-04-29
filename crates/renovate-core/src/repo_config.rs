@@ -484,6 +484,36 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
+            // security presets: wait N days before upgrading to limit supply-chain risk.
+            "security:minimumReleaseAgeNpm" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["npm".to_owned()],
+                    minimum_release_age: Some("3 days".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "security:minimumReleaseAgeCratesio" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["crate".to_owned()],
+                    minimum_release_age: Some("3 days".to_owned()),
+                    ..Default::default()
+                });
+            }
+            "security:minimumReleaseAgePyPI" | "security:minimumReleaseAgePip" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["pypi".to_owned()],
+                    minimum_release_age: Some("3 days".to_owned()),
+                    ..Default::default()
+                });
+            }
+            // :unpublishSafe is equivalent to minimumReleaseAge: "3 days" for npm
+            ":unpublishSafe" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["npm".to_owned()],
+                    minimum_release_age: Some("3 days".to_owned()),
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -3363,6 +3393,24 @@ mod schedule_preset_tests {
         assert!(c.is_update_blocked_ctx(&ctx));
         let ctx2 = DepContext { dep_name: "react", dep_type: Some("dependencies"), ..Default::default() };
         assert!(!c.is_update_blocked_ctx(&ctx2));
+    }
+
+    // ── security presets ─────────────────────────────────────────────────────
+
+    #[test]
+    fn security_minimum_release_age_npm_injects_rule() {
+        let c = RepoConfig::parse(r#"{"extends": ["security:minimumReleaseAgeNpm"]}"#);
+        let npm_rule = c.package_rules.iter().find(|r| r.match_datasources == vec!["npm"]);
+        assert!(npm_rule.is_some(), "should have a rule for npm datasource");
+        assert_eq!(npm_rule.unwrap().minimum_release_age.as_deref(), Some("3 days"));
+    }
+
+    #[test]
+    fn unpublish_safe_preset_injects_npm_minimum_release_age() {
+        let c = RepoConfig::parse(r#"{"extends": [":unpublishSafe"]}"#);
+        let npm_rule = c.package_rules.iter().find(|r| r.match_datasources == vec!["npm"]);
+        assert!(npm_rule.is_some());
+        assert_eq!(npm_rule.unwrap().minimum_release_age.as_deref(), Some("3 days"));
     }
 
     // ── scalar config presets ─────────────────────────────────────────────────
