@@ -121,7 +121,7 @@ find where a given TypeScript module is implemented in Rust.
 | `lib/modules/datasource/npm/index.ts` | `crates/renovate-core/src/datasources/npm.rs` | partial | Packument fetch, version sort, timestamps; dist-tags partial |
 | `lib/modules/datasource/pypi/index.ts` | `crates/renovate-core/src/datasources/pypi.rs` | partial | JSON API, yanked filtering, timestamps |
 | `lib/modules/datasource/docker/index.ts` | `crates/renovate-core/src/datasources/docker_hub.rs` | partial | Docker Hub tags; no digest pinning |
-| `lib/modules/datasource/github-releases/index.ts` | `crates/renovate-core/src/datasources/github_releases.rs` | partial | Latest release, version list |
+| `lib/modules/datasource/github-releases/index.ts` | `crates/renovate-core/src/datasources/github_releases.rs` | partial | Latest release, version list; `release_timestamp` via `published_at` |
 | `lib/modules/datasource/github-tags/index.ts` | `crates/renovate-core/src/datasources/github_tags.rs` | partial | Tag list, semantic sorting |
 | `lib/modules/datasource/maven/index.ts` | `crates/renovate-core/src/datasources/maven.rs` | partial | Maven Central metadata |
 | `lib/modules/datasource/gradle-version/index.ts` | `crates/renovate-core/src/datasources/gradle.rs` | partial | Gradle versions JSON |

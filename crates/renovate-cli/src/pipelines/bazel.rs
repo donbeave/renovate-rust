@@ -195,7 +195,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             )
                             .await
                             {
-                                Ok(Some(tag)) => {
+                                Ok(Some((tag, _))) => {
                                     let stripped = tag.trim_start_matches('v');
                                     let s = renovate_core::versioning::semver_generic::semver_update_summary(
                                         &dep.current_value, Some(stripped),

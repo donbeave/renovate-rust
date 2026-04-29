@@ -344,20 +344,25 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         repo = %repo_slug, file = %flux_path,
                         version = %dep.version, "extracted flux version"
                     );
-                    let status = match github_releases_datasource::fetch_latest_release(
+                    let release_result = github_releases_datasource::fetch_latest_release(
                         renovate_core::extractors::flux::FLUX2_REPO,
                         &gh_http,
                         gh_api_base,
                     )
-                    .await
-                    {
-                        Ok(Some(latest)) if latest != dep.version => {
+                    .await;
+                    let release_timestamp = release_result
+                        .as_ref()
+                        .ok()
+                        .and_then(|r| r.as_ref())
+                        .and_then(|(_, ts)| ts.clone());
+                    let status = match release_result {
+                        Ok(Some((latest, _))) if latest != dep.version => {
                             output::DepStatus::UpdateAvailable {
                                 current: dep.version.clone(),
                                 latest,
                             }
                         }
-                        Ok(Some(latest)) => output::DepStatus::UpToDate {
+                        Ok(Some((latest, _))) => output::DepStatus::UpToDate {
                             latest: Some(latest),
                         },
                         Ok(None) => output::DepStatus::UpToDate { latest: None },
@@ -378,7 +383,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             update_type: None,
                             pr_priority: None,
                             pr_title: None,
-                            release_timestamp: None,
+                            release_timestamp,
                             current_version_timestamp: None,
 
                             dep_type: None,

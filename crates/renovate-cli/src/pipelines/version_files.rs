@@ -117,7 +117,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         )
                         .await
                         {
-                            Ok(Some(tag)) => {
+                            Ok(Some((tag, _))) => {
                                 let version = tag.trim_start_matches(tag_strip).to_owned();
                                 lookup_map.insert(key.to_owned(), (false, Some(version), None));
                             }
@@ -387,6 +387,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 gh_api_base,
                             )
                             .await
+                            .map(|r| r.map(|(tag, _)| tag))
                             .map_err(|e| e.to_string())
                         }
                     };

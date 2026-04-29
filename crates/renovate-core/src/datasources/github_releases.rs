@@ -44,6 +44,9 @@ pub struct GithubReleasesUpdateSummary {
     pub current_value: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 publish timestamp of the latest stable release.
+    /// Populated from the `published_at` field of the GitHub Releases API.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result from `fetch_updates_concurrent`.
@@ -58,14 +61,19 @@ struct Release {
     tag_name: String,
     prerelease: bool,
     draft: bool,
+    /// ISO 8601 publish timestamp from the GitHub Releases API.
+    published_at: Option<String>,
 }
 
 /// Fetch the latest stable (non-prerelease, non-draft) release tag for `owner/repo`.
+///
+/// Returns `(tag_name, published_at)` for the latest stable release, or `None`
+/// when no stable release exists or the repo is not found.
 pub async fn fetch_latest_release(
     owner_repo: &str,
     http: &HttpClient,
     api_base: &str,
-) -> Result<Option<String>, GithubReleasesError> {
+) -> Result<Option<(String, Option<String>)>, GithubReleasesError> {
     let url = format!("{api_base}/repos/{owner_repo}/releases?per_page=100");
 
     let resp = http.get_retrying(&url).await?;
@@ -78,11 +86,11 @@ pub async fn fetch_latest_release(
 
     let releases: Vec<Release> = resp.json().await.map_err(GithubReleasesError::Json)?;
 
-    // Releases are newest-first; return the first stable one.
+    // Releases are newest-first; return the first stable one with its timestamp.
     let latest = releases
         .into_iter()
         .find(|r| !r.prerelease && !r.draft)
-        .map(|r| r.tag_name);
+        .map(|r| (r.tag_name, r.published_at));
 
     Ok(latest)
 }
@@ -132,7 +140,10 @@ async fn fetch_update_summary(
     http: &HttpClient,
     api_base: &str,
 ) -> Result<GithubReleasesUpdateSummary, GithubReleasesError> {
-    let latest_tag = fetch_latest_release(&dep.dep_name, http, api_base).await?;
+    let result = fetch_latest_release(&dep.dep_name, http, api_base).await?;
+    let (latest_tag, release_timestamp) = result
+        .map(|(tag, ts)| (Some(tag), ts))
+        .unwrap_or((None, None));
     let s = crate::versioning::semver_generic::semver_update_summary(
         &dep.current_value,
         latest_tag.as_deref(),
@@ -141,6 +152,7 @@ async fn fetch_update_summary(
         current_value: s.current_value,
         latest: s.latest,
         update_available: s.update_available,
+        release_timestamp,
     })
 }
 
@@ -183,7 +195,7 @@ mod tests {
         let result = fetch_latest_release("hashicorp/terraform", &http, &server.uri())
             .await
             .unwrap();
-        assert_eq!(result, Some("v1.6.6".to_owned()));
+        assert_eq!(result.map(|(v, _)| v), Some("v1.6.6".to_owned()));
     }
 
     #[tokio::test]
@@ -202,7 +214,7 @@ mod tests {
         let result = fetch_latest_release("owner/repo", &http, &server.uri())
             .await
             .unwrap();
-        assert_eq!(result, Some("v1.9.0".to_owned()));
+        assert_eq!(result.map(|(v, _)| v), Some("v1.9.0".to_owned()));
     }
 
     #[tokio::test]

@@ -60,6 +60,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                         gh_api_base,
                                     )
                                     .await
+                                    .map(|r| r.map(|(tag, _)| tag))
                                     .map_err(|e| e.to_string())
                                 }
                             };
