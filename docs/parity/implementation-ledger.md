@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0296  | 2026-04-29 | `docker:disableMajor`, `docker:enableMajor`, `docker:disable` presets: inject matchDatasources+matchUpdateTypes packageRules; last-rule-wins composes them correctly; 5 tests | Complete | See below. |
 | 0295  | 2026-04-29 | `:enablePreCommit` preset adds `"pre-commit"` to `enabled_managers` at parse time; 2 tests confirming pre-commit is gated by default and enabled when preset is active | Complete | See below. |
 | 0294  | 2026-04-29 | Bug fix: disabled-by-default managers (pre-commit, nix, html, travis, etc.) now correctly excluded even when `enabledManagers` is empty; always apply `is_manager_enabled()` filter | Complete | See below. |
 | 0293  | 2026-04-29 | `resolve_extends_parameterized_rules()`: `:doNotPinPackage(name)`, `:semanticCommitTypeAll(type)`, `:pathSemanticCommitType(path, type)` inject packageRules from preset arguments; 2 tests | Complete | See below. |
@@ -5519,3 +5520,26 @@ Previous implementation silently returned `false` (= not restricted) for
 - `crates/renovate-core/src/branch.rs`
 - `crates/renovate-core/src/repo_config.rs`
 - `crates/renovate-cli/src/pipeline_utils.rs`
+
+
+---
+
+## Slice 0296 - `docker:disableMajor`, `docker:enableMajor`, `docker:disable` presets
+
+### Renovate reference
+- `lib/config/presets/internal/docker.preset.ts` — three presets:
+  - `disableMajor`: `packageRules: [{matchDatasources: ["docker"], matchUpdateTypes: ["major"], enabled: false}]`
+  - `enableMajor`: `packageRules: [{matchDatasources: ["docker"], matchUpdateTypes: ["major"], enabled: true}]`
+  - `disable`: `packageRules: [{matchDatasources: ["docker"], enabled: false}]`
+
+### Implementation
+- Added three cases to `resolve_extends_common_rules()` in `repo_config.rs`:
+  - `docker:disableMajor`: injects `PackageRule` with `match_datasources: ["docker"]`, `match_update_types: [Major]`, `has_update_type_constraint: true`, `enabled: Some(false)`
+  - `docker:enableMajor`: same but `enabled: Some(true)` — counteracts `disableMajor` when listed later in `extends`
+  - `docker:disable`: injects `PackageRule` with `match_datasources: ["docker"]`, `enabled: Some(false)` — no `matchUpdateTypes`, blocks all update types
+- Last-rule-wins semantics (already implemented in `is_update_blocked_ctx`) ensure `docker:enableMajor` after `docker:disableMajor` correctly re-enables major updates
+- 5 tests: disableMajor blocks docker major, disableMajor allows docker minor, disableMajor doesn't affect npm, enableMajor counteracts disableMajor, docker:disable blocks all update types, docker:disable doesn't block npm
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`

@@ -630,6 +630,34 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
                     ..Default::default()
                 });
             }
+            // docker:disableMajor — disable major Docker updates
+            "docker:disableMajor" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_update_types: vec![UpdateType::Major],
+                    has_update_type_constraint: true,
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
+            // docker:enableMajor — re-enable major Docker updates (counteracts disableMajor)
+            "docker:enableMajor" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    match_update_types: vec![UpdateType::Major],
+                    has_update_type_constraint: true,
+                    enabled: Some(true),
+                    ..Default::default()
+                });
+            }
+            // docker:disable — disable all Docker updates across managers
+            "docker:disable" => {
+                rules.push(PackageRule {
+                    match_datasources: vec!["docker".to_owned()],
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -5728,6 +5756,103 @@ mod rule_effects_tests {
         assert!(
             c.is_update_blocked_ctx(&ctx),
             "minor update should be blocked when minor.enabled=false"
+        );
+    }
+
+    // ── docker:* presets ─────────────────────────────────────────────────────
+
+    #[test]
+    fn docker_disable_major_blocks_major_docker_updates() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["docker:disableMajor"]}"#);
+        let blocked = DepContext {
+            dep_name: "nginx",
+            datasource: Some("docker"),
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        let allowed = DepContext {
+            dep_name: "nginx",
+            datasource: Some("docker"),
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&blocked),
+            "docker:disableMajor must block major docker updates"
+        );
+        assert!(
+            !c.is_update_blocked_ctx(&allowed),
+            "docker:disableMajor must not block minor docker updates"
+        );
+    }
+
+    #[test]
+    fn docker_disable_major_does_not_affect_npm() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["docker:disableMajor"]}"#);
+        let ctx = DepContext {
+            dep_name: "express",
+            datasource: Some("npm"),
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "docker:disableMajor must only block docker datasource"
+        );
+    }
+
+    #[test]
+    fn docker_enable_major_counteracts_disable_major() {
+        use crate::versioning::semver_generic::UpdateType;
+        // Last-rule-wins: disableMajor then enableMajor → major is allowed.
+        let c = RepoConfig::parse(
+            r#"{"extends": ["docker:disableMajor", "docker:enableMajor"]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "nginx",
+            datasource: Some("docker"),
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "docker:enableMajor after docker:disableMajor must re-enable major updates"
+        );
+    }
+
+    #[test]
+    fn docker_disable_blocks_all_docker_update_types() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["docker:disable"]}"#);
+        for update_type in [UpdateType::Major, UpdateType::Minor, UpdateType::Patch] {
+            let ctx = DepContext {
+                dep_name: "alpine",
+                datasource: Some("docker"),
+                update_type: Some(update_type),
+                ..Default::default()
+            };
+            assert!(
+                c.is_update_blocked_ctx(&ctx),
+                "docker:disable must block {update_type:?} docker updates"
+            );
+        }
+    }
+
+    #[test]
+    fn docker_disable_does_not_block_non_docker() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["docker:disable"]}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            datasource: Some("npm"),
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "docker:disable must not affect non-docker datasources"
         );
     }
 }
