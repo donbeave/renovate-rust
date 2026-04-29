@@ -69,14 +69,12 @@ pub struct PackageRule {
     /// Version strings/ranges/regex patterns to ignore for packages matched
     /// by this rule.  Mirrors `ignoreVersions` in Renovate packageRules.
     pub ignore_versions: Vec<String>,
-    /// Source URL matchers from `matchSourceUrls`.
-    /// Supports the same exact/regex/glob syntax as `matchPackageNames`.
+    /// Source URL patterns from `matchSourceUrls`.
+    /// Supports exact strings, `/regex/`, glob, and `!negation` patterns.
     /// When non-empty, a dep's `sourceUrl` must match at least one entry.
     ///
     /// Renovate reference: `lib/util/package-rules/sourceurls.ts`
-    pub match_source_urls: Vec<PackageNameMatcher>,
-    /// `true` when the raw config specified at least one `matchSourceUrls` entry.
-    pub has_source_url_constraint: bool,
+    pub match_source_urls: Vec<String>,
     /// Single regex/glob pattern to match against the raw `currentValue` string.
     ///
     /// Renovate reference: `lib/util/package-rules/current-value.ts`
@@ -124,20 +122,18 @@ pub struct PackageRule {
     pub match_base_branches: Vec<String>,
 
     // ── Registry URL constraint ───────────────────────────────────────────────
-    /// Registry URL matchers from `matchRegistryUrls`.
+    /// Registry URL patterns from `matchRegistryUrls`.
+    /// Supports exact strings, `/regex/`, glob, and `!negation` patterns.
     ///
     /// Renovate reference: `lib/util/package-rules/registryurls.ts`
-    pub match_registry_urls: Vec<PackageNameMatcher>,
-    /// `true` when the raw config specified at least one `matchRegistryUrls` entry.
-    pub has_registry_url_constraint: bool,
+    pub match_registry_urls: Vec<String>,
 
     // ── Repository constraint ─────────────────────────────────────────────────
-    /// Repository name matchers from `matchRepositories`.
+    /// Repository name patterns from `matchRepositories`.
+    /// Supports exact strings, `/regex/`, glob, and `!negation` patterns.
     ///
     /// Renovate reference: `lib/util/package-rules/repositories.ts`
-    pub match_repositories: Vec<PackageNameMatcher>,
-    /// `true` when the raw config specified at least one `matchRepositories` entry.
-    pub has_repository_constraint: bool,
+    pub match_repositories: Vec<String>,
 
     // ── Age-based constraint ──────────────────────────────────────────────────
     /// Age range expression for the **currently installed** version.
@@ -209,15 +205,12 @@ impl PackageRule {
     }
 
     /// Return `true` when this rule's `matchSourceUrls` condition matches `source_url`.
+    ///
+    /// Supports exact, `/regex/`, glob, and `!negation` patterns.
     pub fn source_url_matches(&self, source_url: &str) -> bool {
-        if !self.has_source_url_constraint {
-            return true;
-        }
-        self.match_source_urls.iter().any(|m| match m {
-            PackageNameMatcher::Exact(s) => s == source_url,
-            PackageNameMatcher::Regex(re) => re.is_match(source_url),
-            PackageNameMatcher::Glob(gm) => gm.is_match(source_url),
-        })
+        use crate::string_match::match_regex_or_glob_list;
+        self.match_source_urls.is_empty()
+            || match_regex_or_glob_list(source_url, &self.match_source_urls)
     }
 
     /// Return `true` when this rule's `matchCurrentValue` pattern matches `current_value`.
@@ -310,30 +303,25 @@ impl PackageRule {
 
     /// Return `true` when this rule's `matchRegistryUrls` condition matches.
     ///
-    /// ANY dep registry URL matching ANY rule pattern → match.
+    /// Mirrors Renovate: any dep registry URL that satisfies the pattern list
+    /// (with positive/negative semantics) → match.
     pub fn registry_url_matches(&self, registry_urls: &[&str]) -> bool {
-        if !self.has_registry_url_constraint {
+        use crate::string_match::match_regex_or_glob_list;
+        if self.match_registry_urls.is_empty() {
             return true;
         }
-        registry_urls.iter().any(|url| {
-            self.match_registry_urls.iter().any(|m| match m {
-                PackageNameMatcher::Exact(s) => s == url,
-                PackageNameMatcher::Regex(re) => re.is_match(url),
-                PackageNameMatcher::Glob(gm) => gm.is_match(url),
-            })
-        })
+        registry_urls
+            .iter()
+            .any(|url| match_regex_or_glob_list(url, &self.match_registry_urls))
     }
 
     /// Return `true` when this rule's `matchRepositories` condition matches.
+    ///
+    /// Supports exact, `/regex/`, glob, and `!negation` patterns.
     pub fn repository_matches(&self, repository: &str) -> bool {
-        if !self.has_repository_constraint {
-            return true;
-        }
-        self.match_repositories.iter().any(|m| match m {
-            PackageNameMatcher::Exact(s) => s == repository,
-            PackageNameMatcher::Regex(re) => re.is_match(repository),
-            PackageNameMatcher::Glob(gm) => gm.is_match(repository),
-        })
+        use crate::string_match::match_regex_or_glob_list;
+        self.match_repositories.is_empty()
+            || match_regex_or_glob_list(repository, &self.match_repositories)
     }
 
     /// Return `true` when ALL matchers in this rule fire for `ctx`.
@@ -397,7 +385,7 @@ impl PackageRule {
                 }
             }
             None => {
-                if self.has_source_url_constraint {
+                if !self.match_source_urls.is_empty() {
                     return false;
                 }
             }
@@ -410,7 +398,7 @@ impl PackageRule {
                 }
             }
             None => {
-                if self.has_registry_url_constraint {
+                if !self.match_registry_urls.is_empty() {
                     return false;
                 }
             }
@@ -423,7 +411,7 @@ impl PackageRule {
                 }
             }
             None => {
-                if self.has_repository_constraint {
+                if !self.match_repositories.is_empty() {
                     return false;
                 }
             }

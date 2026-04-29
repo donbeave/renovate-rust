@@ -52,10 +52,25 @@ pub(crate) fn build_dep_reports_cargo(
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-        // Look up the release timestamp for the latest compatible version.
+        // Release timestamp for the latest compatible version.
         let release_timestamp = summary
             .and_then(|s| s.latest_compatible.as_deref())
             .and_then(|latest| timestamps.get(&dep.package_name)?.get(latest).cloned());
+        // Current-version timestamp for exact pins (`= 1.2.3` syntax).
+        // Cargo ranges (^, ~, bare version without =) don't reveal the
+        // installed version, so we can't look up a timestamp.
+        let current_version_timestamp = {
+            let v = dep.current_value.trim();
+            if let Some(pinned) = v.strip_prefix('=') {
+                let pinned = pinned.trim();
+                timestamps
+                    .get(&dep.package_name)
+                    .and_then(|ts| ts.get(pinned))
+                    .cloned()
+            } else {
+                None
+            }
+        };
         reports.push(output::DepReport {
             branch_name: None,
             group_name: None,
@@ -63,7 +78,7 @@ pub(crate) fn build_dep_reports_cargo(
             labels: Vec::new(),
             pr_title: None,
             release_timestamp,
-            current_version_timestamp: None,
+            current_version_timestamp,
             name: dep.dep_name.clone(),
             status,
         });

@@ -543,34 +543,14 @@ impl RepoConfig {
                     .map(|s| compile_name_matcher(s))
                     .collect();
 
-                let has_source_url_constraint = !r.match_source_urls.is_empty();
-                let match_source_urls: Vec<PackageNameMatcher> = r
-                    .match_source_urls
-                    .iter()
-                    .map(|s| compile_name_matcher(s))
-                    .collect();
-
-                let has_registry_url_constraint = !r.match_registry_urls.is_empty();
-                let match_registry_urls: Vec<PackageNameMatcher> = r
-                    .match_registry_urls
-                    .iter()
-                    .map(|s| compile_name_matcher(s))
-                    .collect();
-
-                let has_repository_constraint = !r.match_repositories.is_empty();
-                let match_repositories: Vec<PackageNameMatcher> = r
-                    .match_repositories
-                    .iter()
-                    .map(|s| compile_name_matcher(s))
-                    .collect();
-
+                // matchSourceUrls, matchRegistryUrls, matchRepositories store
+                // raw strings so match_regex_or_glob_list can apply negation.
                 PackageRule {
                     match_package_names,
                     match_package_patterns,
                     match_dep_names,
                     has_dep_name_constraint,
-                    match_source_urls,
-                    has_source_url_constraint,
+                    match_source_urls: r.match_source_urls,
                     match_current_value: r.match_current_value.map(|s| compile_name_matcher(&s)),
                     match_new_value: r.match_new_value.map(|s| compile_name_matcher(&s)),
                     match_datasources: r.match_datasources,
@@ -589,10 +569,8 @@ impl RepoConfig {
                     labels: r.labels,
                     match_categories: r.match_categories,
                     match_base_branches: r.match_base_branches,
-                    match_registry_urls,
-                    has_registry_url_constraint,
-                    match_repositories,
-                    has_repository_constraint,
+                    match_registry_urls: r.match_registry_urls,
+                    match_repositories: r.match_repositories,
                     match_current_age: r.match_current_age,
                 }
             })
@@ -2634,6 +2612,37 @@ mod registry_url_repository_tests {
         let rule = &c.package_rules[0];
         assert!(rule.repository_matches("owner/repo"));
         assert!(rule.repository_matches("anyone/anything"));
+    }
+
+    #[test]
+    fn match_repositories_negation() {
+        // ["!owner/**"] excludes owner/* repos, permits others.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["!owner/**"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.repository_matches("owner/repo"));
+        assert!(rule.repository_matches("other-org/repo"));
+    }
+
+    #[test]
+    fn match_source_urls_negation() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchSourceUrls": ["!https://github.com/bad/**"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.source_url_matches("https://github.com/bad/pkg"));
+        assert!(rule.source_url_matches("https://github.com/good/pkg"));
+    }
+
+    #[test]
+    fn match_registry_urls_negation() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRegistryUrls": ["!https://internal.registry/**"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(!rule.registry_url_matches(&["https://internal.registry/pkg"]));
+        assert!(rule.registry_url_matches(&["https://registry.npmjs.org/pkg"]));
     }
 }
 
