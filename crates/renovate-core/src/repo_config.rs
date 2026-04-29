@@ -221,6 +221,21 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `minimumReleaseAge`.
     pub minimum_release_age: Option<String>,
 
+    /// When `true`, only upgrade to stable versions if the current version is
+    /// stable.  If the current version is unstable, upgrades within the same
+    /// major are still allowed.  Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `ignoreUnstable`.
+    pub ignore_unstable: bool,
+
+    // ── Scheduling behavior ───────────────────────────────────────────────────
+    /// When `false`, Renovate will not update branches that are outside the
+    /// configured schedule window.  Default: `true` (updates happen even when
+    /// not scheduled, since the schedule gates PR *creation*, not branch updates).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `updateNotScheduled`.
+    pub update_not_scheduled: bool,
+
     // ── Commit message customization ─────────────────────────────────────────
     /// Action verb in PR titles and commit messages.  Default `"Update"`.
     ///
@@ -617,6 +632,13 @@ fn resolve_extends_range_strategy_rules(extends: &[String]) -> Vec<PackageRule> 
                     match_package_names: vec!["*".to_owned()],
                     has_name_constraint: true,
                     range_strategy: Some("pin".to_owned()),
+                    ..Default::default()
+                });
+            }
+            ":widenPeerDependencies" => {
+                rules.push(PackageRule {
+                    match_dep_types: vec!["peerDependencies".to_owned()],
+                    range_strategy: Some("widen".to_owned()),
                     ..Default::default()
                 });
             }
@@ -1106,6 +1128,10 @@ impl RepoConfig {
             ignore_presets: Vec<String>,
             #[serde(rename = "minimumReleaseAge")]
             minimum_release_age: Option<String>,
+            #[serde(rename = "ignoreUnstable", default)]
+            ignore_unstable: bool,
+            #[serde(rename = "updateNotScheduled", default = "default_true")]
+            update_not_scheduled: bool,
             #[serde(rename = "commitMessageAction", default = "default_commit_action")]
             commit_message_action: String,
             #[serde(rename = "commitMessagePrefix")]
@@ -1306,6 +1332,14 @@ impl RepoConfig {
         preset_rules.extend(package_rules);
         let package_rules = preset_rules;
 
+        // Resolve scalar presets that set ignoreUnstable / updateNotScheduled.
+        let preset_ignore_unstable =
+            effective_extends.iter().any(|p| p == ":ignoreUnstable");
+        let preset_update_not_scheduled = effective_extends
+            .iter()
+            .any(|p| p == ":noUnscheduledUpdates")
+            .then_some(false); // :noUnscheduledUpdates → updateNotScheduled: false
+
         Self {
             enabled: raw.enabled,
             ignore_deps: raw.ignore_deps,
@@ -1394,6 +1428,9 @@ impl RepoConfig {
             extends: raw.extends,
             ignore_presets: raw.ignore_presets,
             minimum_release_age: raw.minimum_release_age,
+            ignore_unstable: raw.ignore_unstable || preset_ignore_unstable,
+            update_not_scheduled: preset_update_not_scheduled
+                .unwrap_or(raw.update_not_scheduled),
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
             commit_message_extra: raw.commit_message_extra,
@@ -1796,6 +1833,8 @@ impl Default for RepoConfig {
             extends: Vec::new(),
             ignore_presets: Vec::new(),
             minimum_release_age: None,
+            ignore_unstable: false,
+            update_not_scheduled: true,
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
             commit_message_extra: None,
@@ -3805,6 +3844,51 @@ mod schedule_preset_tests {
     fn separate_multiple_minor_releases_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["separateMultipleMinorReleases"]}"#);
         assert!(c.separate_multiple_minor);
+    }
+
+    #[test]
+    fn widen_peer_dependencies_preset_injects_rule() {
+        let c = RepoConfig::parse(r#"{"extends": [":widenPeerDependencies"]}"#);
+        let rule = c
+            .package_rules
+            .iter()
+            .find(|r| r.range_strategy.as_deref() == Some("widen"));
+        assert!(rule.is_some(), "expected a widen rangeStrategy rule");
+        let rule = rule.unwrap();
+        assert!(
+            rule.match_dep_types.contains(&"peerDependencies".to_owned()),
+            "rule should match peerDependencies"
+        );
+    }
+
+    #[test]
+    fn ignore_unstable_preset_sets_field() {
+        let c = RepoConfig::parse(r#"{"extends": [":ignoreUnstable"]}"#);
+        assert!(c.ignore_unstable);
+    }
+
+    #[test]
+    fn ignore_unstable_direct_config() {
+        let c = RepoConfig::parse(r#"{"ignoreUnstable": true}"#);
+        assert!(c.ignore_unstable);
+    }
+
+    #[test]
+    fn update_not_scheduled_default_true() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert!(c.update_not_scheduled);
+    }
+
+    #[test]
+    fn no_unscheduled_updates_preset_sets_false() {
+        let c = RepoConfig::parse(r#"{"extends": [":noUnscheduledUpdates"]}"#);
+        assert!(!c.update_not_scheduled);
+    }
+
+    #[test]
+    fn update_not_scheduled_direct_config() {
+        let c = RepoConfig::parse(r#"{"updateNotScheduled": false}"#);
+        assert!(!c.update_not_scheduled);
     }
 
     #[test]
