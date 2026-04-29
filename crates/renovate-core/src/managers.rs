@@ -910,6 +910,47 @@ mod tests {
     }
 
     #[test]
+    fn circleci_file_patterns_match_spec() {
+        // Ported: "file names match managerFilePatterns" from circleci/index.spec.ts
+        let should_match = &[
+            ".circleci/config.yml",
+            ".circleci/config.yaml",
+            ".circleci/foo.yaml",
+            ".circleci/foo.yml",
+            ".circleci/foo/config.yaml",
+            ".circleci/foo/bar.yml",
+            "foo/.circleci/bar.yaml",
+        ];
+        let should_not_match = &[
+            "foo.yml",
+            "circleci/foo.yml",
+            ".circleci_foo/bar.yml",
+            ".circleci/foo.toml",
+        ];
+        let all_files: Vec<String> = should_match
+            .iter()
+            .chain(should_not_match.iter())
+            .map(|s| s.to_string())
+            .collect();
+        let file_refs: Vec<&str> = all_files.iter().map(|s| s.as_str()).collect();
+        let f = files(&file_refs);
+        let result = detect(&f);
+        let mgr = result.iter().find(|m| m.name == "circleci").unwrap();
+        for name in should_match {
+            assert!(
+                mgr.matched_files.contains(&name.to_string()),
+                "{name} should match circleci"
+            );
+        }
+        for name in should_not_match {
+            assert!(
+                !mgr.matched_files.contains(&name.to_string()),
+                "{name} should NOT match circleci"
+            );
+        }
+    }
+
+    #[test]
     fn mise_file_patterns_match_spec() {
         // Ported: "managerFilePatterns" from mise/index.spec.ts
         let should_match = &[
