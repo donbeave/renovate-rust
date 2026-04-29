@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0224  | 2026-04-29 | `matchRepositories` wired into `DepContext`; `apply_update_blocking_to_report` takes repo_slug | Complete | See below. |
 | 0223  | 2026-04-29 | Refactor: split `misc.rs` → `pre_commit.rs` + `git.rs` + `puppet.rs` (1522 lines, was 1888) | Complete | See below. |
 | 0222  | 2026-04-29 | Refactor: split `misc.rs` → `bazel.rs` + `ansible.rs` + `nix.rs` (1888 lines, was 2398) | Complete | See below. |
 | 0221  | 2026-04-29 | `allowedVersions` regex + exact-string support; fix silent pass-through for `/pattern/` values | Complete | See below. |

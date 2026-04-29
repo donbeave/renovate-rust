@@ -2798,6 +2798,47 @@ mod registry_url_repository_tests {
     }
 
     #[test]
+    fn match_repositories_fires_only_for_matching_repo() {
+        // packageRule with matchRepositories and automerge:true — verify rule fires
+        // only when repository matches the context.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchRepositories": ["owner/repo"], "automerge": true}]}"#,
+        );
+        // Matching repo → rule fires → automerge set
+        let ctx_match = DepContext {
+            dep_name: "lodash",
+            repository: Some("owner/repo"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx_match).automerge,
+            Some(true),
+            "rule should fire when repository matches"
+        );
+        // Non-matching repo → rule does NOT fire → automerge absent
+        let ctx_other = DepContext {
+            dep_name: "lodash",
+            repository: Some("other/repo"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx_other).automerge,
+            None,
+            "rule should not fire when repository doesn't match"
+        );
+        // No repository in context → rule does NOT fire (unknown context → conservative)
+        let ctx_none = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx_none).automerge,
+            None,
+            "rule should not fire when repository is unknown (None)"
+        );
+    }
+
+    #[test]
     fn match_source_urls_negation() {
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchSourceUrls": ["!https://github.com/bad/**"], "enabled": false}]}"#,

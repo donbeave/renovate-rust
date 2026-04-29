@@ -381,7 +381,7 @@ async fn process_repo(
     let (mut repo_report, had_error) = (ctx.report, ctx.had_error);
 
     // Apply matchUpdateTypes packageRules blocking across all collected file reports.
-    pipeline_utils::apply_update_blocking_to_report(&mut repo_report, &repo_cfg);
+    pipeline_utils::apply_update_blocking_to_report(&mut repo_report, &repo_cfg, repo_slug);
     // Apply ignoreVersions (global + per-rule) across all collected file reports.
     pipeline_utils::apply_version_ignore_to_report(&mut repo_report, &repo_cfg);
 

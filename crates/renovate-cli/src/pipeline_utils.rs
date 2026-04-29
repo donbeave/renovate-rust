@@ -9,9 +9,12 @@ use crate::output;
 /// Apply `packageRules` `matchUpdateTypes`+`enabled:false` blocking across all
 /// file reports.  For each `UpdateAvailable` dep, classifies the semver bump
 /// type and converts to `Skipped` when a matching rule blocks it.
+///
+/// `repo_slug` is passed as `"owner/repo"` so `matchRepositories` rules can fire.
 pub(crate) fn apply_update_blocking_to_report(
     report: &mut output::RepoReport,
     repo_cfg: &renovate_core::repo_config::RepoConfig,
+    repo_slug: &str,
 ) {
     use renovate_core::branch;
     use renovate_core::versioning::semver_generic::{classify_semver_update, parse_padded};
@@ -61,6 +64,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     update_type: classify_semver_update(current, latest),
                     current_version_timestamp: dep.current_version_timestamp.as_deref(),
                     dep_type: dep.dep_type.as_deref(),
+                    repository: Some(repo_slug),
                     ..Default::default()
                 };
                 let effects = repo_cfg.collect_rule_effects(&ctx);
