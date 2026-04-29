@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0253  | 2026-04-29 | `semanticCommitType`/`Scope` in packageRules + `RuleEffects` + `:semanticPrefixFixDepsChoreOthers` preset expansion injects production-dep `fix` / other-dep `chore` rules | Complete | See below. |
 | 0252  | 2026-04-29 | `semanticCommitType` + `semanticCommitScope` config options + `pr_title_full()` — configurable semantic commit type/scope, enabling `:semanticPrefixFixDepsChoreOthers` patterns | Complete | See below. |
 | 0251  | 2026-04-29 | Fix: `labels` in packageRules now REPLACES global labels (non-mergeable); `addLabels` still APPENDs (mergeable=true); `assignees`/`reviewers` seeded at start from repo config | Complete | See below. |
 | 0250  | 2026-04-29 | Fix: `groupName`/`groupSlug` now use Renovate's "last rule wins" semantics — was "first rule wins" which broke subsequent packageRules that re-assign groupName | Complete | See below. |

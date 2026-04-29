@@ -203,6 +203,18 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `commitMessagePrefix`.
     pub commit_message_prefix: Option<String>,
+
+    /// Per-rule semantic commit type (e.g. `"fix"`, `"feat"`, `"chore"`).
+    /// Overrides the repo-level `semanticCommitType` for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `semanticCommitType`.
+    pub semantic_commit_type: Option<String>,
+
+    /// Per-rule semantic commit scope (e.g. `"security"`, `"deps"`).
+    /// Overrides the repo-level `semanticCommitScope` for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `semanticCommitScope`.
+    pub semantic_commit_scope: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -695,6 +707,10 @@ pub struct RuleEffects {
     pub commit_message_action: Option<String>,
     /// Per-rule commit message prefix (e.g. `"fix(deps):"`).  Last rule wins.
     pub commit_message_prefix: Option<String>,
+    /// Per-rule semantic commit type (e.g. `"fix"`, `"chore"`).  Last rule wins.
+    pub semantic_commit_type: Option<String>,
+    /// Per-rule semantic commit scope (e.g. `"security"`, `"deps"`).  Last rule wins.
+    pub semantic_commit_scope: Option<String>,
 }
 
 // ── Free helpers (used by both PackageRule and RepoConfig) ────────────────────

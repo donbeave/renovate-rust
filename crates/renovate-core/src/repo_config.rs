@@ -365,6 +365,73 @@ fn resolve_extends_automerge(extends: &[String]) -> Option<bool> {
     result
 }
 
+/// Resolve semantic commit type/scope from built-in `semantic*` presets.
+///
+/// Returns `(type_override, scope_override)` from the last matching preset.
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts` —
+/// `:semanticPrefixFixDepsChoreOthers`, `:semanticCommitType`, etc.
+fn resolve_extends_semantic_type_scope(extends: &[String]) -> (Option<String>, Option<String>) {
+    let mut sem_type: Option<String> = None;
+    let mut _sem_scope: Option<String> = None;
+    for preset in extends {
+        match preset.as_str() {
+            ":semanticCommitTypeAll(fix)" => {
+                sem_type = Some("fix".to_owned());
+            }
+            ":semanticCommitTypeAll(chore)" => {
+                sem_type = Some("chore".to_owned());
+            }
+            _ => {}
+        }
+    }
+    (sem_type, None)
+}
+
+/// Resolve packageRules injected by semantic-prefix presets.
+///
+/// `:semanticPrefixFixDepsChoreOthers` is the most commonly used — it sets
+/// `semanticCommitType: "chore"` for all packages and then `"fix"` for
+/// production dependency dep types.
+///
+/// Renovate reference: `lib/config/presets/internal/default.preset.ts`
+fn resolve_extends_semantic_prefix_rules(
+    extends: &[String],
+) -> Vec<crate::package_rule::PackageRule> {
+    use crate::package_rule::PackageRule;
+
+    let mut rules: Vec<PackageRule> = Vec::new();
+
+    for preset in extends {
+        if preset == ":semanticPrefixFixDepsChoreOthers" {
+            // Rule 1: all packages → semanticCommitType: "chore"
+            rules.push(PackageRule {
+                match_package_names: vec!["*".to_owned()],
+                has_name_constraint: true,
+                semantic_commit_type: Some("chore".to_owned()),
+                ..Default::default()
+            });
+            // Rule 2: production dep types → semanticCommitType: "fix"
+            rules.push(PackageRule {
+                match_dep_types: vec![
+                    "dependencies".to_owned(),
+                    "require".to_owned(),
+                    "compile".to_owned(),
+                    "provided".to_owned(),
+                    "runtime".to_owned(),
+                    "system".to_owned(),
+                    "import".to_owned(),
+                    "parent".to_owned(),
+                ],
+                semantic_commit_type: Some("fix".to_owned()),
+                ..Default::default()
+            });
+        }
+    }
+
+    rules
+}
+
 /// Resolve built-in `group:*` presets from `extends`.
 ///
 /// Returns `(package_rules, separate_major_minor_override)` where:
@@ -515,6 +582,10 @@ impl RepoConfig {
             commit_message_action: Option<String>,
             #[serde(rename = "commitMessagePrefix")]
             commit_message_prefix: Option<String>,
+            #[serde(rename = "semanticCommitType")]
+            semantic_commit_type: Option<String>,
+            #[serde(rename = "semanticCommitScope")]
+            semantic_commit_scope: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -624,6 +695,10 @@ impl RepoConfig {
         // Preset rules are prepended so user-defined rules take precedence (later rules win).
         let (mut preset_rules, group_separate_major_minor) =
             resolve_extends_group_presets(&raw.extends);
+        // Inject semantic prefix packageRules from `:semanticPrefixFixDepsChoreOthers` etc.
+        let sem_prefix_rules = resolve_extends_semantic_prefix_rules(&raw.extends);
+        preset_rules.extend(sem_prefix_rules);
+        let _ = resolve_extends_semantic_type_scope(&raw.extends); // placeholder for future use
 
         let package_rules: Vec<PackageRule> = raw
             .package_rules
@@ -692,6 +767,8 @@ impl RepoConfig {
                     commit_message_topic: r.commit_message_topic,
                     commit_message_action: r.commit_message_action,
                     commit_message_prefix: r.commit_message_prefix,
+                    semantic_commit_type: r.semantic_commit_type,
+                    semantic_commit_scope: r.semantic_commit_scope,
                 }
             })
             .collect();
@@ -1051,6 +1128,12 @@ impl RepoConfig {
             }
             if rule.commit_message_prefix.is_some() {
                 effects.commit_message_prefix.clone_from(&rule.commit_message_prefix);
+            }
+            if rule.semantic_commit_type.is_some() {
+                effects.semantic_commit_type.clone_from(&rule.semantic_commit_type);
+            }
+            if rule.semantic_commit_scope.is_some() {
+                effects.semantic_commit_scope.clone_from(&rule.semantic_commit_scope);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
