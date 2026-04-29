@@ -284,7 +284,17 @@ numpy = ">=1.26"
 
     #[test]
     fn empty_file_returns_empty() {
+        // Ported: "returns null for empty pixi.toml" — pixi/extract.spec.ts line 151
         assert!(extract("").is_empty());
+        assert!(extract("nothing here").is_empty());
+    }
+
+    #[test]
+    fn file_without_pixi_section_returns_empty() {
+        // Ported: "returns null for parsed file without pixi section" — pixi/extract.spec.ts line 155
+        let content = "[project]\nname = \"myapp\"\n";
+        assert!(extract(content).is_empty());
+        assert!(extract_from_pyproject(content).is_empty());
     }
 
     #[test]
