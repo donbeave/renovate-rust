@@ -160,9 +160,6 @@ discovered but have not yet ported.**
 The following Markdown files track port coverage and must be kept current.
 They are the primary tool for understanding what is done and what remains.
 
-- `docs/parity/implementation-ledger.md` — one row per completed slice, newest
-  first.  Record what was implemented, what was deferred, and any blockers.
-
 - `docs/parity/renovate-test-map.md` — maps Renovate TypeScript **spec** test
   files to their Rust test coverage.  **CRITICAL: this file MUST contain ONLY
   `.spec.ts` file references — NEVER plain `.ts` source files.**
@@ -202,7 +199,6 @@ Parity workflow:
 3. Inspect Renovate reference docs/tests/source for one missing behavior slice.
 4. Choose the highest-value slice that can be completed in this loop without breaking existing work.
 5. Add or update parity tracking docs before or during implementation:
-   - `docs/parity/implementation-ledger.md` — add a row for the new slice.
    - `docs/parity/renovate-source-map.md` — update status for any TypeScript
      source files you read or implement from.
    - `docs/parity/renovate-test-map.md` — add rows for every new Rust test
@@ -281,7 +277,7 @@ Autonomy rules:
 - Do not push to remotes.
 - Do not rewrite unrelated user changes. If the worktree contains unrelated changes, leave them alone and commit only your own files.
 - If another agent or user changed files, inspect and integrate with those changes rather than reverting them.
-- If blocked, write a short note in `docs/parity/implementation-ledger.md` describing the blocker and choose another local slice.
+- If blocked, document the blocker in the commit message or a comment in the relevant parity file and choose another local slice.
 
 Commit rules:
 - Commit at the end of each successful loop when there are meaningful changes and checks pass.

@@ -41,6 +41,41 @@ Claude Code's resume/continue flow before the scheduled task expires. If you
 edit the prompt while a loop is running, cancel and recreate the loop for the
 most predictable behavior.
 
+---
+
+## Test Parity /loop Prompt
+
+Use [claude-loop-test-parity.md](claude-loop-test-parity.md) to rebuild and
+maintain `docs/parity/renovate-test-map.md` with **per-test-case granularity**.
+
+This prompt replaces the old file-level table format with a three-phase
+workflow:
+
+1. **Inventory** — parse each `.spec.ts` and write every `describe`/`it()` call
+   into the tracking file with `pending` status.
+2. **Mapping** — grep the Rust codebase to find existing coverage and link each
+   ported test.
+3. **Porting** — write any test that has no Rust equivalent yet, then mark it
+   `ported`.
+
+Start Claude Code in `~/Projects/renovate-rust-experiement`, then run:
+
+```text
+/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md
+```
+
+Or from inside `renovate-rust/`:
+
+```text
+/loop 15m Follow @prompts/claude-loop-test-parity.md
+```
+
+The loop prompt is operator-owned configuration. Agents must not edit
+[claude-loop-test-parity.md](claude-loop-test-parity.md). Record suggested
+improvements in project docs instead.
+
+---
+
 ## Expected Local Layout
 
 Run the loop from this parent directory:
