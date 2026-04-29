@@ -90,4 +90,16 @@ spec:
         assert_eq!(deps.len(), 1);
         assert!(deps[0].skip_reason.is_some());
     }
+
+    #[test]
+    fn ignores_file_without_deps() {
+        // Ported: "ignores file without any deps" — tekton/extract.spec.ts line 96
+        assert!(extract("foo: bar").is_empty());
+    }
+
+    #[test]
+    fn ignores_empty_file() {
+        // Ported: "ignores empty file" — tekton/extract.spec.ts line 112
+        assert!(extract("").is_empty());
+    }
 }

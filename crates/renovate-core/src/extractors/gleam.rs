@@ -114,4 +114,17 @@ gleeunit = "~> 1.0"
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
+
+    #[test]
+    fn no_deps_section_returns_empty() {
+        // Ported: "should return null when no dependencies are found" — gleam/extract.spec.ts line 65
+        let content = r#"name = "test"\nversion = "1.0.0"\n\n[unknown]\ngleam_http = "~> 3.6.0""#;
+        assert!(extract(content).is_empty());
+    }
+
+    #[test]
+    fn invalid_toml_returns_empty() {
+        // Ported: "should return null when gleam.toml is invalid" — gleam/extract.spec.ts line 82
+        assert!(extract("foo").is_empty());
+    }
 }
