@@ -57,13 +57,19 @@ pub(crate) fn apply_update_blocking_to_report(
                 }
                 // Check enabled:false rules with full context (matchDepTypes,
                 // matchRepositories, etc. now correctly included).
-                if update_type.is_some() && repo_cfg.is_update_blocked_ctx(&ctx) {
+                // Note: the guard is removed so non-semver deps (Docker, calendar
+                // versions) are also blocked when a matching rule has enabled:false.
+                if repo_cfg.is_update_blocked_ctx(&ctx) {
                     dep.status = output::DepStatus::Skipped {
-                        reason: format!(
-                            "blocked by packageRules (matchUpdateTypes: {:?})",
-                            update_type.unwrap()
-                        )
-                        .to_lowercase(),
+                        reason: if let Some(ut) = update_type {
+                            format!(
+                                "blocked by packageRules (matchUpdateTypes: {:?})",
+                                ut
+                            )
+                            .to_lowercase()
+                        } else {
+                            "blocked by packageRules (enabled: false)".into()
+                        },
                     };
                     continue;
                 }

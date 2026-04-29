@@ -1824,6 +1824,41 @@ mod tests {
         assert!(c.is_update_blocked("serde", "1.0.0", UpdateType::Major, "cargo"));
     }
 
+    #[test]
+    fn is_update_blocked_ctx_fires_without_update_type() {
+        // Regression: enabled:false should block even when update_type is None
+        // (non-semver deps like Docker image tags where semver classification fails).
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["dockerfile"], "enabled": false}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "nginx",
+            manager: Some("dockerfile"),
+            ..Default::default()
+            // update_type is None (Docker tag, not parseable as semver)
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "enabled:false should fire even when update_type is None"
+        );
+    }
+
+    #[test]
+    fn is_update_blocked_ctx_non_matching_manager_not_blocked() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["dockerfile"], "enabled": false}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            manager: Some("npm"),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "rule for dockerfile should not block npm deps"
+        );
+    }
+
     // ── allowedVersions tests ─────────────────────────────────────────────────
 
     #[test]
