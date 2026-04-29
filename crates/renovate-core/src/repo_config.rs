@@ -3777,6 +3777,10 @@ impl RepoConfig {
             /// Renovate reference: lib/config/migrations/custom/packages-migration.ts
             #[serde(default)]
             packages: Vec<RawPackageRule>,
+            /// Deprecated: `pathRules` was an alias for `packageRules` containing path-based rules.
+            /// Renovate reference: lib/config/migrations/custom/path-rules-migration.ts
+            #[serde(rename = "pathRules", default)]
+            path_rules: Vec<RawPackageRule>,
             #[serde(rename = "enabledManagers", default)]
             enabled_managers: Vec<String>,
             #[serde(rename = "disabledManagers", default)]
@@ -4210,6 +4214,8 @@ impl RepoConfig {
             .into_iter()
             // Deprecated: `packages` was the old name for `packageRules`.
             .chain(raw.packages)
+            // Deprecated: `pathRules` was an alias for `packageRules` containing path-based rules.
+            .chain(raw.path_rules)
             .map(|r| {
                 // Resolve packages:* (and other recognized) presets from the
                 // rule's own `extends` list and merge their matchers in.
@@ -9982,6 +9988,39 @@ mod rule_effects_tests {
             c.package_rules[0].group_name.as_deref(),
             Some("angular packages")
         );
+    }
+
+    #[test]
+    fn deprecated_path_rules_field_merged_into_package_rules() {
+        // Ported: "should migrate to packageRules" from path-rules-migration.spec.ts
+        // Old `pathRules: [{paths: ["examples/**"], extends: ["foo"]}]` → merged into `packageRules`
+        let c = RepoConfig::parse(
+            r#"{
+                "pathRules": [
+                    {"matchFileNames": ["examples/**"], "enabled": false}
+                ]
+            }"#,
+        );
+        assert!(
+            !c.package_rules.is_empty(),
+            "deprecated `pathRules` field must be merged into package_rules"
+        );
+        assert_eq!(
+            c.package_rules[0].match_file_names,
+            vec!["examples/**".to_owned()]
+        );
+    }
+
+    #[test]
+    fn path_rules_concat_with_existing_package_rules() {
+        // Ported: "should concat with existing package rules" from path-rules-migration.spec.ts
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [{"matchPackageNames": ["guava"], "enabled": false}],
+                "pathRules": [{"matchFileNames": ["examples/**"], "automerge": true}]
+            }"#,
+        );
+        assert_eq!(c.package_rules.len(), 2);
     }
 
     #[test]
