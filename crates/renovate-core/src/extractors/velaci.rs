@@ -77,4 +77,17 @@ mod tests {
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
+
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        // Ported: "should handle invalid YAML" — velaci/extract.spec.ts line 6
+        // invalid YAML ("foo: bar: invalid") has no pipeline steps
+        assert!(extract("foo: bar: invalid").is_empty());
+    }
+
+    #[test]
+    fn yaml_without_pipeline_returns_empty() {
+        // Ported: "should handle YAML without pipeline/images" — velaci/extract.spec.ts line 11
+        assert!(extract("no: pipeline").is_empty());
+    }
 }

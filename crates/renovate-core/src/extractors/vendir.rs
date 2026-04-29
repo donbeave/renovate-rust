@@ -156,7 +156,15 @@ directories:
 
     #[test]
     fn no_helm_charts_returns_empty() {
+        // Ported: "returns null for empty directories key" — vendir/extract.spec.ts line 20
         let content = "apiVersion: vendir.k14s.io/v1alpha1\nkind: Config\ndirectories: []\n";
         assert!(extract(content).is_empty());
+    }
+
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        // Ported: "returns null for invalid yaml file content" — vendir/extract.spec.ts line 10
+        // Unclosed bracket is treated as text, parser finds no helmChart entries
+        assert!(extract("nothing here: [").is_empty());
     }
 }
