@@ -114,7 +114,7 @@ pub(crate) fn apply_update_blocking_to_report(
                 // When groupName is set, use the group slug as the topic so all
                 // grouped deps share one branch (matching Renovate's behaviour).
                 // Explicit groupSlug overrides the auto-derived slug from groupName.
-                if let Some(new_ver) = parse_padded(latest) {
+                {
                     let this_is_major = update_type
                         == Some(renovate_core::versioning::semver_generic::UpdateType::Major);
                     let topic = if let Some(ref slug) = effects.group_slug {
@@ -122,14 +122,16 @@ pub(crate) fn apply_update_blocking_to_report(
                         slug.clone()
                     } else if let Some(ref gname) = effects.group_name {
                         let base = branch::group_branch_topic(gname);
+                        let new_major = parse_padded(latest).map(|v| v.major).unwrap_or(0);
                         branch::major_group_slug(
                             &base,
                             repo_cfg.separate_major_minor,
                             repo_cfg.separate_multiple_major,
                             this_is_major,
-                            new_ver.major,
+                            new_major,
                         )
-                    } else {
+                    } else if let Some(new_ver) = parse_padded(latest) {
+                        // Semver dep: use {sanitized_name}-{major}.x topic.
                         let is_patch = classify_semver_update(current, latest)
                             == Some(renovate_core::versioning::semver_generic::UpdateType::Patch);
                         branch::branch_topic(
@@ -139,6 +141,13 @@ pub(crate) fn apply_update_blocking_to_report(
                             is_patch,
                             repo_cfg.separate_minor_patch,
                         )
+                    } else {
+                        // Non-semver dep (Docker tags, calendar versions, etc.):
+                        // use {sanitized_name}-{sanitized_version} as the topic.
+                        // Mirrors Renovate's behaviour for non-semver branch names.
+                        let sanitized_name = branch::sanitize_dep_name(&dep.name);
+                        let sanitized_ver = branch::sanitize_dep_name(latest);
+                        format!("{sanitized_name}-{sanitized_ver}")
                     };
                     dep.branch_name = Some(if let Some(len) = repo_cfg.hashed_branch_length {
                         branch::hashed_branch_name(
