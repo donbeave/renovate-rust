@@ -3952,7 +3952,18 @@ impl RepoConfig {
 
                 // matchDepNames, matchSourceUrls, matchRegistryUrls, matchRepositories
                 // store raw strings so match_regex_or_glob_list can apply negation.
-                let mut match_datasources = r.match_datasources;
+                // Migrate deprecated datasource names in matchDatasources.
+                // Renovate reference: lib/config/migrations/custom/datasource-migration.ts
+                let mut match_datasources: Vec<String> = r
+                    .match_datasources
+                    .into_iter()
+                    .map(|ds| match ds.as_str() {
+                        "adoptium-java" => "java-version".to_owned(),
+                        "dotnet" => "dotnet-version".to_owned(),
+                        "node" => "node-version".to_owned(),
+                        _ => ds,
+                    })
+                    .collect();
                 match_datasources.extend(preset_matchers.match_datasources);
                 let mut match_source_urls = r.match_source_urls;
                 match_source_urls.extend(preset_matchers.match_source_urls);

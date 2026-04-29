@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0345  | 2026-04-29 | Datasource name migration in `matchDatasources`: deprecated `"adoptium-java"` → `"java-version"`, `"dotnet"` → `"dotnet-version"`, `"node"` → `"node-version"` (matching Renovate's datasource-migration.ts) | Complete | See below. |
 | 0344  | 2026-04-29 | `customManagers` without `customType`: when `customType` field is absent, defaults to `"regex"` (matching Renovate's customManagers migration which adds `customType: "regex"` to legacy custom managers) | Complete | See below. |
 | 0343  | 2026-04-29 | `matchManagers: ["regex"]` migration: deprecated `"regex"` manager name in packageRule `matchManagers` list now migrated to `"custom.regex"` (matching Renovate's match-managers-migration.ts) | Complete | See below. |
 | 0342  | 2026-04-29 | More deprecated field migrations: `ignoreNodeModules: true` → adds `"node_modules/"` to `ignorePaths`; `enabledManagers: ["yarn"]` → `"npm"`, `"regex"` → `"custom.regex"` (matching Renovate's enabledManagers migration); 2 tests | Complete | See below. |
