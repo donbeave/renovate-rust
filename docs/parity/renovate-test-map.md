@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 22 / 39 actionable tests ported (56%) — updated 2026-04-29
+**Overall progress:** 23 / 46 actionable tests ported (50%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -153,6 +153,42 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/deps-edn/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deps-edn/extract.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `extractPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid file | 6 | pending | — | — | — |
+| extractPackageFile | 10 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/droneci/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/droneci/extract.spec.ts
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 8 | ported | `droneci.rs` | `empty_returns_empty` | — |
+| extracts multiple image lines | 12 | pending | — | — | — |
+
+### `modules/manager/droneci/extract`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts image and replaces registry | 19 | pending | — | — | — |
+| extracts image but no replacement | 42 | pending | — | — | — |
+| extracts image and no double replacement | 65 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -176,12 +212,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
 | `lib/modules/manager/crossplane/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/crossplane.rs` | 7 | partial |
 | `lib/modules/manager/crow/extract.spec.ts` | 15 | `crates/renovate-core/src/extractors/crow.rs` | 10 | partial |
-| `lib/modules/manager/deps-edn/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/deps_edn.rs` | 5 | partial |
 | `lib/modules/manager/devbox/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/devbox.rs` | 9 | partial |
 | `lib/modules/manager/devcontainer/extract.spec.ts` | 15 | `crates/renovate-core/src/extractors/devcontainer.rs` | 10 | partial |
 | `lib/modules/manager/docker-compose/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/docker_compose.rs` | 10 | partial |
 | `lib/modules/manager/dockerfile/extract.spec.ts` | 75 | `crates/renovate-core/src/extractors/dockerfile.rs` | 16 | partial |
-| `lib/modules/manager/droneci/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/droneci.rs` | 6 | partial |
 | `lib/modules/manager/fleet/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/fleet.rs` | 10 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
 | `lib/modules/manager/fvm/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/fvm.rs` | 5 | partial |

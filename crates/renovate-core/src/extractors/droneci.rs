@@ -121,6 +121,7 @@ services:
         assert_eq!(deps[0].image, "gcr.io/myproject/myapp");
     }
 
+    // Ported: "returns null for empty" — droneci/extract.spec.ts line 8
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
