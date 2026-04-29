@@ -8462,6 +8462,43 @@ mod rule_effects_tests {
         assert!(c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
     }
 
+    // ── Ported from Renovate current-age.spec.ts ─────────────────────────────
+    // Renovate mock time is 2023-07-07. We use 2020 as "old" and 2099 as "future".
+
+    #[test]
+    fn current_age_returns_false_if_release_older_than_constraint_bound() {
+        // Renovate spec: "returns false if release is older"
+        // timestamp: '2020-01-01', matchCurrentAge: '< 1 year' (younger than 1 year)
+        // 2020 is NOT younger than 1 year from now → false
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "< 1 year", "enabled": false}]}"#,
+        );
+        assert!(!c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
+    }
+
+    #[test]
+    fn current_age_returns_false_if_release_younger_than_constraint_bound() {
+        // Renovate spec: "returns false if release is younger"
+        // timestamp: '2020-01-01', matchCurrentAge: '> 10 years' (older than 10 yrs)
+        // 2020 to 2025 is ~5 years, NOT > 10 years → false
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "> 10 years", "enabled": false}]}"#,
+        );
+        assert!(!c.package_rules[0].current_age_matches(Some("2020-01-01T00:00:00Z")));
+    }
+
+    #[test]
+    fn current_age_returns_false_for_invalid_timestamp() {
+        // Renovate spec: "returns null if release invalid" — Renovate returns null (pass-through).
+        // Our impl: invalid timestamp → parse fails → returns false (conservative).
+        // Compatibility note: diverges from Renovate for invalid/non-ISO timestamps.
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchCurrentAge": "> 2 days", "enabled": false}]}"#,
+        );
+        // "abc" is not a valid timestamp — our impl returns false (blocks rule from firing).
+        assert!(!c.package_rules[0].current_age_matches(Some("abc")));
+    }
+
     #[test]
     fn match_current_age_set_without_timestamp_returns_false() {
         let c = RepoConfig::parse(
