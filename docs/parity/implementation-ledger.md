@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0230  | 2026-04-29 | `as_renovate_str()` + `depType` propagation for Composer, Poetry, Bundler, pep621, NuGet, Terraform | Complete | See below. |
 | 0229  | 2026-04-29 | `depType` for Maven (`MavenDepType::as_renovate_str()`) and Pub/Dart (`PubspecDepType`) propagated to `DepReport` | Complete | See below. |
 | 0228  | 2026-04-29 | Refactor: split `misc.rs` → `typst.rs` + `cpanfile.rs` + `vendir.rs` + `cnb.rs` (557 lines, was 1016) | Complete | See below. |
 | 0227  | 2026-04-29 | `datasource` wired into `DepContext` via `manager_default_datasource()`; `matchDatasources` now fires in blocking path | Complete | See below. |

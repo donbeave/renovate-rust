@@ -33,6 +33,16 @@ pub enum ComposerDepType {
     Dev,
 }
 
+impl ComposerDepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            ComposerDepType::Regular => "require",
+            ComposerDepType::Dev => "require-dev",
+        }
+    }
+}
+
+
 /// Why a Composer dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ComposerSkipReason {

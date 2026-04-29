@@ -42,6 +42,18 @@ pub enum Pep621DepType {
     BuildSystem,
 }
 
+impl Pep621DepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            Pep621DepType::Regular => "dependencies",
+            Pep621DepType::Optional => "optional-dependencies",
+            Pep621DepType::Group => "dependency-groups",
+            Pep621DepType::BuildSystem => "build-system",
+        }
+    }
+}
+
+
 /// Why a pyproject.toml dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Pep621SkipReason {

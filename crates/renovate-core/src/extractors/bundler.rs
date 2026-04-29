@@ -38,6 +38,16 @@ pub enum BundlerDepType {
     Dev,
 }
 
+impl BundlerDepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            BundlerDepType::Regular => "dependencies",
+            BundlerDepType::Dev => "devDependencies",
+        }
+    }
+}
+
+
 /// Why a gem is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BundlerSkipReason {

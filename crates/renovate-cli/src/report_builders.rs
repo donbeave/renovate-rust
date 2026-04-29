@@ -449,7 +449,7 @@ pub(crate) fn build_dep_reports_nuget(
             release_timestamp: None,
             current_version_timestamp: None,
 
-            dep_type: None,
+            dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
             name: dep.package_id.clone(),
             status,
         });
@@ -517,7 +517,7 @@ pub(crate) fn build_dep_reports_composer(
             release_timestamp: None,
             current_version_timestamp: None,
 
-            dep_type: None,
+            dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
             name: dep.name.clone(),
             status,
         });
@@ -657,7 +657,7 @@ pub(crate) fn build_dep_reports_poetry(
             release_timestamp,
             current_version_timestamp: None,
 
-            dep_type: None,
+            dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
             name: dep.name.clone(),
             status,
         });
@@ -799,7 +799,7 @@ pub(crate) fn build_dep_reports_bundler(
             release_timestamp: None,
             current_version_timestamp: None,
 
-            dep_type: None,
+            dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
             name: dep.name.clone(),
             status,
         });
@@ -867,7 +867,7 @@ pub(crate) fn build_dep_reports_terraform(
             release_timestamp: None,
             current_version_timestamp: None,
 
-            dep_type: None,
+            dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
             name: dep.name.clone(),
             status,
         });

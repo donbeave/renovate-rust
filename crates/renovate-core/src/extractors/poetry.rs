@@ -42,6 +42,17 @@ pub enum PoetryDepType {
     Group,
 }
 
+impl PoetryDepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            PoetryDepType::Regular => "dependencies",
+            PoetryDepType::Dev => "dev-dependencies",
+            PoetryDepType::Group => "group",
+        }
+    }
+}
+
+
 /// Why a Poetry dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PoetrySkipReason {

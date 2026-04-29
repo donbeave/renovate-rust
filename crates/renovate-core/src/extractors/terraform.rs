@@ -37,6 +37,16 @@ pub enum TerraformDepType {
     Module,
 }
 
+impl TerraformDepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            TerraformDepType::Provider => "provider",
+            TerraformDepType::Module => "module",
+        }
+    }
+}
+
+
 /// Why a Terraform dep is skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TerraformSkipReason {

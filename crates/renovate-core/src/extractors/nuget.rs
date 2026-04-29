@@ -45,6 +45,18 @@ pub enum NuGetDepType {
     Global,
 }
 
+impl NuGetDepType {
+    pub fn as_renovate_str(&self) -> &'static str {
+        match self {
+            NuGetDepType::Package => "PackageReference",
+            NuGetDepType::PackageVersion => "PackageVersion",
+            NuGetDepType::CliTool => "DotNetCliToolReference",
+            NuGetDepType::Global => "GlobalPackageReference",
+        }
+    }
+}
+
+
 /// Why a NuGet package reference is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NuGetSkipReason {
