@@ -21,6 +21,10 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0264  | 2026-04-29 | Fix `:automergeMinor`/`:automergePatch` presets: inject per-update-type packageRules instead of global automerge; `:automergePatch` also sets `separateMinorPatch: true`; `resolve_extends_automerge_rules()` | Complete | See below. |
+| 0263  | 2026-04-29 | `prPriority`-based output sorting: ungrouped UpdateAvailable deps sorted by prPriority desc then update severity (major > minor > patch) to match Renovate PR creation order | Complete | See below. |
+| 0262  | 2026-04-29 | `includePaths` allowlist for file scanning; applied after `ignorePaths` exclusions; `is_path_included()` method on `RepoConfig`; 3 tests | Complete | See below. |
+| 0261  | 2026-04-29 | `ignoreDeps` enforcement: `apply_ignore_deps_to_report()` marks matching deps as `Skipped{reason:"ignoreDeps"}`; applied before all other blocking steps; 3 tests | Complete | See below. |
 | 0260  | 2026-04-29 | `commitMessageExtra` + `commitMessageSuffix` + `PrTitleConfig` refactor: configurable "to {{newVersion}}" segment with template substitution; free-form suffix; PR title builder uses config struct instead of 9 positional args | Complete | See below. |
 | 0259  | 2026-04-29 | Show proposed branch name in terminal output for `UpdateAvailable` deps — indented secondary line under each dep entry | Complete | See below. |
 | 0258  | 2026-04-29 | `enabled:false` in `major`/`minor`/`patch` config blocks converted to synthetic packageRules at parse time so `is_update_blocked_ctx` handles them correctly | Complete | See below. |
