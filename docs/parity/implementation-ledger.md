@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0300  | 2026-04-29 | `group:jsTestNonMajor`, `group:jsUnitTest`, `group:jsUnitTestNonMajor`, `group:gradle`, `group:hibernateCore`, `group:hibernateCommons`, `group:definitelyTyped`; refactor to shared `JS_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |
 | 0299  | 2026-04-29 | `group:allDigest`, `group:nodeJs`, `group:jsTest` presets; `group:nodeJs` uses regex+negation match_package_names with docker+node-version datasources; `group:jsTest` inlines jsUnitTest package list; 3 tests | Complete | See below. |
 | 0298  | 2026-04-29 | `automergeSchedule` config field + `schedule:automerge*` preset expansion (9 presets); parallel to `schedule` but gates automerge not branch creation; default `"at any time"`; 7 tests | Complete | See below. |
 | 0297  | 2026-04-29 | Fix `docker:disable`: disables `dockerfile`/`docker-compose`/`circleci` managers (not packageRules); add `disabledManagers` JSON config field (denylist overrides allowlist); 4 tests | Complete | See below. |
@@ -5610,6 +5611,31 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
   - `group:nodeJs`: `PackageRule` with `match_datasources: ["docker", "node-version"]`, `match_package_names` with `/(?:^|/)node$/` positive regex plus 4 `!`-negation exclusions; `has_name_constraint: true`; `commit_message_topic: "Node.js"`
   - `group:jsTest`: `PackageRule` with full 36-entry `match_package_names` list inlined from `packages:jsUnitTest` reference; `has_name_constraint: true`
 - 3 tests: allDigest rule structure; nodeJs matches "node" but not "calico/node"; jsTest matches jest/vitest/ts-jest but not lodash
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0300 - More group presets + JS_UNIT_TEST_PACKAGES refactor
+
+### Renovate reference
+- `lib/config/presets/internal/group.preset.ts`: `jsTestNonMajor`, `jsUnitTest`, `jsUnitTestNonMajor`, `gradle`, `hibernateCore`, `hibernateCommons`, `definitelyTyped`
+- `lib/config/presets/internal/packages.preset.ts`: `jsUnitTest` package list (36 entries)
+
+### Implementation
+- Extracted `JS_UNIT_TEST_PACKAGES: &[&str]` constant (file-level) shared across all four jsTest/jsUnitTest presets
+- Refactored `group:jsTest` to use the constant (removes 36-line inline list)
+- Added seven new preset cases to `resolve_extends_group_presets()`:
+  - `group:jsTestNonMajor`: jsTest packages + `matchUpdateTypes: [Minor, Patch]`
+  - `group:jsUnitTest`: same package list as jsTest but group name "JS unit test packages"
+  - `group:jsUnitTestNonMajor`: jsUnitTest + minor/patch constraint
+  - `group:gradle`: `matchDatasources: ["docker","gradle-version"]`, regex name pattern `/(?:^|/)gradle$/`
+  - `group:hibernateCore`: `matchPackageNames: ["org.hibernate:**"]`
+  - `group:hibernateCommons`: `matchPackageNames: ["org.hibernate.common:**"]`
+  - `group:definitelyTyped`: `matchPackageNames: ["@types/**"]`
+- 3 tests: jsTestNonMajor has update type constraint; gradle matches gradle; definitelyTyped matches @types/*
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

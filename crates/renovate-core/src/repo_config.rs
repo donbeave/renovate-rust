@@ -1099,43 +1099,95 @@ fn resolve_extends_group_presets(
                     group_name: Some("JS test packages".to_owned()),
                     group_slug: Some("js-test".to_owned()),
                     has_name_constraint: true,
-                    match_package_names: vec![
-                        "@types/chai".to_owned(),
-                        "@types/ember-mocha".to_owned(),
-                        "@types/ember-qunit".to_owned(),
-                        "@types/enzyme".to_owned(),
-                        "@types/istanbul".to_owned(),
-                        "@types/jest".to_owned(),
-                        "@types/mocha".to_owned(),
-                        "@types/mock-fs".to_owned(),
-                        "@types/proxyquire".to_owned(),
-                        "@types/sinon".to_owned(),
-                        "@types/supertest".to_owned(),
-                        "coveralls".to_owned(),
-                        "ember-exam".to_owned(),
-                        "ember-mocha".to_owned(),
-                        "ember-qunit".to_owned(),
-                        "enzyme".to_owned(),
-                        "istanbul".to_owned(),
-                        "mock-fs".to_owned(),
-                        "nock".to_owned(),
-                        "nyc".to_owned(),
-                        "proxyquire".to_owned(),
-                        "supertest".to_owned(),
-                        "ts-auto-mock".to_owned(),
-                        "ts-jest".to_owned(),
-                        "vitest".to_owned(),
-                        "@jest/**".to_owned(),
-                        "@testing-library/**".to_owned(),
-                        "@types/testing-library__**".to_owned(),
-                        "@vitest/**".to_owned(),
-                        "chai**".to_owned(),
-                        "jest**".to_owned(),
-                        "mocha**".to_owned(),
-                        "qunit**".to_owned(),
-                        "should**".to_owned(),
-                        "sinon**".to_owned(),
-                    ],
+                    match_package_names: JS_UNIT_TEST_PACKAGES
+                        .iter()
+                        .map(|&s| s.to_owned())
+                        .collect(),
+                    ..Default::default()
+                });
+            }
+            // group:jsTestNonMajor — same as jsTest but only minor+patch.
+            "group:jsTestNonMajor" => {
+                rules.push(PackageRule {
+                    group_name: Some("JS test packages".to_owned()),
+                    group_slug: Some("js-test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: JS_UNIT_TEST_PACKAGES
+                        .iter()
+                        .map(|&s| s.to_owned())
+                        .collect(),
+                    match_update_types: vec![UpdateType::Minor, UpdateType::Patch],
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:jsUnitTest — group JavaScript unit test packages.
+            "group:jsUnitTest" => {
+                rules.push(PackageRule {
+                    group_name: Some("JS unit test packages".to_owned()),
+                    group_slug: Some("js-unit-test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: JS_UNIT_TEST_PACKAGES
+                        .iter()
+                        .map(|&s| s.to_owned())
+                        .collect(),
+                    ..Default::default()
+                });
+            }
+            // group:jsUnitTestNonMajor — JS unit test packages, minor+patch only.
+            "group:jsUnitTestNonMajor" => {
+                rules.push(PackageRule {
+                    group_name: Some("JS unit test packages".to_owned()),
+                    group_slug: Some("js-unit-test".to_owned()),
+                    has_name_constraint: true,
+                    match_package_names: JS_UNIT_TEST_PACKAGES
+                        .iter()
+                        .map(|&s| s.to_owned())
+                        .collect(),
+                    match_update_types: vec![UpdateType::Minor, UpdateType::Patch],
+                    has_update_type_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:gradle — group Gradle-related updates together.
+            "group:gradle" => {
+                rules.push(PackageRule {
+                    group_name: Some("Gradle".to_owned()),
+                    group_slug: Some("gradle".to_owned()),
+                    match_datasources: vec!["docker".to_owned(), "gradle-version".to_owned()],
+                    match_package_names: vec!["/(?:^|/)gradle$/".to_owned()],
+                    has_name_constraint: true,
+                    commit_message_topic: Some("Gradle".to_owned()),
+                    ..Default::default()
+                });
+            }
+            // group:hibernateCore — group Hibernate Core (org.hibernate:**) packages.
+            "group:hibernateCore" => {
+                rules.push(PackageRule {
+                    group_name: Some("hibernate core".to_owned()),
+                    group_slug: Some("hibernate-core".to_owned()),
+                    match_package_names: vec!["org.hibernate:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:hibernateCommons — group Hibernate Commons (org.hibernate.common:**) packages.
+            "group:hibernateCommons" => {
+                rules.push(PackageRule {
+                    group_name: Some("hibernate commons".to_owned()),
+                    group_slug: Some("hibernate-commons".to_owned()),
+                    match_package_names: vec!["org.hibernate.common:**".to_owned()],
+                    has_name_constraint: true,
+                    ..Default::default()
+                });
+            }
+            // group:definitelyTyped — group all @types/* packages together.
+            "group:definitelyTyped" => {
+                rules.push(PackageRule {
+                    group_name: Some("definitelyTyped".to_owned()),
+                    group_slug: Some("definitely-typed".to_owned()),
+                    match_package_names: vec!["@types/**".to_owned()],
+                    has_name_constraint: true,
                     ..Default::default()
                 });
             }
@@ -1145,6 +1197,46 @@ fn resolve_extends_group_presets(
 
     (rules, separate_major_minor)
 }
+
+/// Shared package list for `group:jsTest`, `group:jsTestNonMajor`, `group:jsUnitTest`,
+/// and `group:jsUnitTestNonMajor`. Mirrors `packages:jsUnitTest` in packages.preset.ts.
+const JS_UNIT_TEST_PACKAGES: &[&str] = &[
+    "@types/chai",
+    "@types/ember-mocha",
+    "@types/ember-qunit",
+    "@types/enzyme",
+    "@types/istanbul",
+    "@types/jest",
+    "@types/mocha",
+    "@types/mock-fs",
+    "@types/proxyquire",
+    "@types/sinon",
+    "@types/supertest",
+    "coveralls",
+    "ember-exam",
+    "ember-mocha",
+    "ember-qunit",
+    "enzyme",
+    "istanbul",
+    "mock-fs",
+    "nock",
+    "nyc",
+    "proxyquire",
+    "supertest",
+    "ts-auto-mock",
+    "ts-jest",
+    "vitest",
+    "@jest/**",
+    "@testing-library/**",
+    "@types/testing-library__**",
+    "@vitest/**",
+    "chai**",
+    "jest**",
+    "mocha**",
+    "qunit**",
+    "should**",
+    "sinon**",
+];
 
 /// Parse a parameterized preset string into its name and arguments.
 ///
@@ -5825,6 +5917,43 @@ mod rule_effects_tests {
         assert!(rule.name_matches("@types/jest"));
         assert!(rule.name_matches("vitest"));
         assert!(rule.name_matches("ts-jest"));
+        assert!(!rule.name_matches("lodash"));
+    }
+
+    #[test]
+    fn group_js_test_non_major_does_not_group_major() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["group:jsTestNonMajor"]}"#);
+        let rule = &c.package_rules[0];
+        assert!(rule.name_matches("jest"));
+        // The rule has a minor+patch update type constraint
+        assert!(rule.update_type_matches(UpdateType::Minor));
+        assert!(rule.update_type_matches(UpdateType::Patch));
+        assert!(!rule.update_type_matches(UpdateType::Major));
+    }
+
+    #[test]
+    fn group_gradle_preset_injects_rule() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:gradle"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("Gradle"));
+        assert!(
+            rule.match_datasources
+                .contains(&"gradle-version".to_owned())
+        );
+        assert!(rule.name_matches("gradle"));
+        assert!(!rule.name_matches("maven"));
+    }
+
+    #[test]
+    fn group_definitely_typed_preset_matches_types_packages() {
+        let c = RepoConfig::parse(r#"{"extends": ["group:definitelyTyped"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let rule = &c.package_rules[0];
+        assert_eq!(rule.group_name.as_deref(), Some("definitelyTyped"));
+        assert!(rule.name_matches("@types/node"));
+        assert!(rule.name_matches("@types/jest"));
         assert!(!rule.name_matches("lodash"));
     }
 
