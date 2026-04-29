@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0216  | 2026-04-29 | `groupSlug` in `packageRules` — explicit group branch topic override | Complete | See below. |
 | 0215  | 2026-04-29 | `updateType` field in JSON output + DRY human output rendering | Complete | See below. |
 | 0214  | 2026-04-29 | `addLabels` + `assignees`/`reviewers` per-rule in `packageRules`; exposed in output | Complete | See below. |
 | 0213  | 2026-04-29 | Per-rule `schedule` + `minimumReleaseAge` in `packageRules` | Complete | See below. |
@@ -4958,6 +4959,29 @@ managers should only run when explicitly listed in `enabledManagers`.
 - `lib/util/string-match.ts`
 
 ---
+
+---
+
+## Slice 0216 - `groupSlug` in `packageRules` — explicit group branch topic override
+
+### Renovate reference
+- `lib/config/options/index.ts` — `groupSlug`
+- `lib/workers/repository/updates/branch-name.ts` — explicit groupSlug wins
+
+### What landed
+- `PackageRule`: `group_slug: Option<String>` (serde: `groupSlug`)
+- `RuleEffects`: `group_slug: Option<String>` — first matching rule wins
+- `repo_config.rs::collect_rule_effects`: collects `group_slug` from the first
+  matching rule that sets it
+- `pipeline_utils.rs` branch topic computation:
+  - If `effects.group_slug` is set → use it directly as the branch topic
+  - Else if `effects.group_name` is set → auto-derive via `group_branch_topic()`
+  - Else → normal per-dep branch topic
+- 4 new unit tests: parsing, collection, absent when not set, first-rule-wins
+
+### Verification
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings` ✓
+- `cargo nextest run --workspace --all-features` → 1406 tests pass (4 new)
 
 ---
 

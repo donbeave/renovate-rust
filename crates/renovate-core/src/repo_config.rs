@@ -394,6 +394,8 @@ impl RepoConfig {
             enabled: Option<bool>,
             #[serde(rename = "groupName")]
             group_name: Option<String>,
+            #[serde(rename = "groupSlug")]
+            group_slug: Option<String>,
             automerge: Option<bool>,
             #[serde(default)]
             schedule: Vec<String>,
@@ -558,6 +560,7 @@ impl RepoConfig {
                     enabled: r.enabled,
                     has_name_constraint,
                     group_name: r.group_name,
+                    group_slug: r.group_slug,
                     automerge: r.automerge,
                     schedule: r.schedule,
                     labels: r.labels,
@@ -855,6 +858,9 @@ impl RepoConfig {
             }
             if effects.group_name.is_none() {
                 effects.group_name = rule.group_name.clone();
+            }
+            if effects.group_slug.is_none() {
+                effects.group_slug = rule.group_slug.clone();
             }
             if let Some(am) = rule.automerge {
                 effects.automerge = Some(am);
@@ -3222,6 +3228,65 @@ mod rule_effects_tests {
         assert!(
             !effects.labels.contains(&"dep-update".to_owned()),
             "non-matching dep should not get addLabels"
+        );
+    }
+
+    // ── groupSlug ─────────────────────────────────────────────────────────────
+
+    #[test]
+    fn group_slug_parsed_from_package_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "groupName": "JS deps", "groupSlug": "js"}]}"#,
+        );
+        assert_eq!(c.package_rules[0].group_slug.as_deref(), Some("js"));
+    }
+
+    #[test]
+    fn group_slug_collected_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "groupName": "JS deps", "groupSlug": "js"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.group_name.as_deref(), Some("JS deps"));
+        assert_eq!(effects.group_slug.as_deref(), Some("js"));
+    }
+
+    #[test]
+    fn group_slug_absent_when_not_set() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["lodash"], "groupName": "JS deps"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.group_name.as_deref(), Some("JS deps"));
+        // No explicit groupSlug → auto-derive from groupName in branch computation
+        assert!(effects.group_slug.is_none());
+    }
+
+    #[test]
+    fn group_slug_first_matching_rule_wins() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["lodash"], "groupName": "A", "groupSlug": "first"},
+                {"matchPackageNames": ["lodash"], "groupName": "B", "groupSlug": "second"}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "lodash",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.group_slug.as_deref(),
+            Some("first"),
+            "first matching rule's groupSlug should win"
         );
     }
 }

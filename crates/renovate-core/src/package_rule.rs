@@ -100,6 +100,12 @@ pub struct PackageRule {
     /// Renovate reference: `lib/config/options/index.ts` — `groupName`.
     pub group_name: Option<String>,
 
+    /// Explicit slug for the group branch topic.  When set, overrides the
+    /// auto-computed `slugify(groupName)` used by `group_branch_topic()`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `groupSlug`.
+    pub group_slug: Option<String>,
+
     /// Per-rule auto-merge override.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `automerge`.
@@ -634,6 +640,9 @@ impl PathMatcher {
 pub struct RuleEffects {
     /// `groupName` from the first matching rule that sets it (or repo default).
     pub group_name: Option<String>,
+    /// Explicit `groupSlug` from the first matching rule that sets it.
+    /// When set, this is used as the branch topic instead of auto-slugifying `groupName`.
+    pub group_slug: Option<String>,
     /// `automerge` from the last matching rule that sets it (or repo default).
     pub automerge: Option<bool>,
     /// `schedule` from the last matching rule that sets it.  Empty = repo default.

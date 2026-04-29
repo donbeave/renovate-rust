@@ -96,8 +96,12 @@ pub(crate) fn apply_update_blocking_to_report(
                 // Compute the proposed branch name.
                 // When groupName is set, use the group slug as the topic so all
                 // grouped deps share one branch (matching Renovate's behaviour).
+                // Explicit groupSlug overrides the auto-derived slug from groupName.
                 if let Some(new_ver) = parse_padded(latest) {
-                    let topic = if let Some(ref gname) = effects.group_name {
+                    let topic = if let Some(ref slug) = effects.group_slug {
+                        // Explicit groupSlug — already the final topic string.
+                        slug.clone()
+                    } else if let Some(ref gname) = effects.group_name {
                         branch::group_branch_topic(gname)
                     } else {
                         let is_patch = classify_semver_update(current, latest)
