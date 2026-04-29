@@ -494,7 +494,7 @@ fn format_dep(dep: &DepReport, use_color: bool) -> String {
                 let label_str = dep.labels.join(",");
                 annotations.push_str(&format!("  {}", dim(&format!("[{label_str}]"), use_color)));
             }
-            format!(
+            let mut line = format!(
                 "{} {}  {}  {} → {}{}",
                 yellow("↑", use_color),
                 bold(&dep.name, use_color),
@@ -502,7 +502,15 @@ fn format_dep(dep: &DepReport, use_color: bool) -> String {
                 dim("→", use_color),
                 green(latest, use_color),
                 annotations,
-            )
+            );
+            if let Some(ref branch) = dep.branch_name {
+                line.push_str(&format!(
+                    "\n      {}  {}",
+                    dim("branch:", use_color),
+                    dim(branch, use_color),
+                ));
+            }
+            line
         }
         DepStatus::UpToDate { latest } => {
             let latest_str = latest
