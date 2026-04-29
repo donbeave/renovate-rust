@@ -1020,4 +1020,85 @@ mod tests {
         let sched = vec!["* * * * 1".to_owned()];
         assert!(!is_within_schedule_at(&sched, sunday_10am));
     }
+
+    #[test]
+    fn spec_supports_multiple_schedules() {
+        // "supports multiple schedules" — any one matching is sufficient
+        // At 10am: "after 4:00pm" → false, "before 11:00am" → true → overall true
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["after 4:00pm".to_owned(), "before 11:00am".to_owned()];
+        assert!(is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_supports_day_match_friday() {
+        // "supports day match" — on friday and saturday matches at Friday
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["on friday and saturday".to_owned()];
+        assert!(is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_supports_day_mismatch() {
+        // "supports day mismatch" — on monday and tuesday does NOT match Friday
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["on monday and tuesday".to_owned()];
+        assert!(!is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_every_weekday_matches_friday() {
+        // "supports every weekday" — Friday is a weekday → matches
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["every weekday".to_owned()];
+        assert!(is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_every_weekend_rejects_friday() {
+        // "supports every weekend" — Friday is not a weekend → false
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["every weekend".to_owned()];
+        assert!(!is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_before_11am_every_weekday_matches() {
+        // "supports every weekday with time" — before 11am on a weekday, at 10am → true
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["before 11:00am every weekday".to_owned()];
+        assert!(is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_cron_dom_mismatch_false() {
+        // "reject if day mismatch" — * 10 21 * * on dom=30 → false
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["* 10 21 * *".to_owned()];
+        assert!(!is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_cron_month_mismatch_false() {
+        // "reject if month mismatch" — * 10 30 1 * on month=6 → false
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["* 10 30 1 *".to_owned()];
+        assert!(!is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_first_day_of_month_rejects_non_first() {
+        // "rejects first day of the month" — June 30 is not the first day
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["before 11am on the first day of the month".to_owned()];
+        assert!(!is_within_schedule_at(&sched, friday_10am));
+    }
+
+    #[test]
+    fn spec_first_day_of_month_approves_first() {
+        // "approves first day of the month" — October 1, 2017 05:26am
+        let oct_1_5am = utc(2017, 10, 1, 5);
+        let sched = vec!["before 11am on the first day of the month".to_owned()];
+        assert!(is_within_schedule_at(&sched, oct_1_5am));
+    }
 }
