@@ -129,14 +129,19 @@ pub(crate) fn apply_update_blocking_to_report(
                         )
                     } else if let Some(new_ver) = parse_padded(latest) {
                         // Semver dep: use {sanitized_name}-{major}.x topic.
-                        let is_patch = classify_semver_update(current, latest)
+                        let update = classify_semver_update(current, latest);
+                        let is_patch = update
                             == Some(renovate_core::versioning::semver_generic::UpdateType::Patch);
+                        let is_minor = update
+                            == Some(renovate_core::versioning::semver_generic::UpdateType::Minor);
                         branch::branch_topic(
                             &dep.name,
                             new_ver.major,
                             new_ver.minor,
                             is_patch,
+                            is_minor,
                             repo_cfg.separate_minor_patch,
+                            repo_cfg.separate_multiple_minor,
                         )
                     } else {
                         // Non-semver dep (Docker tags, calendar versions, etc.):

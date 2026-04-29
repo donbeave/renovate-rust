@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0278  | 2026-04-29 | `separateMultipleMinor` config field + `:separateMultipleMinorReleases` preset; `branch_topic()` extended with `is_minor`/`separate_multiple_minor` params so minor updates get `dep-{major}.{minor}.x` topics; `ScalarOverrides` type extended to 6-tuple; 3 tests | Complete | See below. |
 | 0277  | 2026-04-29 | `rangeStrategy` in packageRules + `RuleEffects`; pin/preserve preset expansion: `:pinDependencies`, `:pinDevDependencies`, `:pinAllExceptPeerDependencies`, `:pinOnlyDevDependencies`, `:preserveSemverRanges`, `:pinVersions` inject rangeStrategy packageRules; 5 tests | Complete | See below. |
 | 0276  | 2026-04-29 | `ignorePresets`: filter extends list before all preset resolution; `effective_extends` replaces all `raw.extends` references in parse; `ignore_presets` field on `RepoConfig`; 4 tests | Complete | See below. |
 | 0275  | 2026-04-29 | Security presets: `security:minimumReleaseAgeNpm`, `:unpublishSafe`, `security:minimumReleaseAgeCratesio/PyPI` inject `minimumReleaseAge: "3 days"` packageRules; 2 tests | Complete | See below. |
@@ -5473,3 +5474,31 @@ Previous implementation silently returned `false` (= not restricted) for
 ### Files changed
 - `crates/renovate-core/src/package_rule.rs`
 - `crates/renovate-core/src/repo_config.rs`
+
+---
+
+## Slice 0278 - `separateMultipleMinor` config + branch topic extension
+
+### Renovate reference
+- `lib/config/options/index.ts` — `separateMultipleMinor`: when true, each distinct minor version gets its own branch
+- `lib/workers/repository/updates/branch-name.ts` — branch template includes `newMinor` component for minor updates when `separateMultipleMinor` is set
+- `lib/config/presets/internal/default.preset.ts` — `separateMultipleMinorReleases` preset sets `separateMultipleMinor: true`
+
+### Implementation
+- Added `separate_multiple_minor: bool` to `RepoConfig` struct (after `separate_minor_patch`)
+- Added `#[serde(rename = "separateMultipleMinor", default)]` to `Raw` struct
+- Extended `ScalarOverrides` type alias from 5-tuple to 6-tuple (added `sep_multi_minor`)
+- Added `"separateMultipleMinorReleases"` handler in `resolve_extends_scalar_overrides`
+- Extended `branch_topic()` signature with `is_minor: bool` and `separate_multiple_minor: bool` params:
+  - Condition: `(separate_minor_patch && is_patch) || (separate_multiple_minor && is_minor)` → include minor component
+  - Mirrors the Renovate handlebars template: `{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}`
+- Updated all `branch_topic()` call sites (pipeline_utils.rs + branch.rs tests)
+- `pipeline_utils.rs`: passes `is_minor` derived from `classify_semver_update` result alongside existing `is_patch`
+- Added `separate_multiple_minor: false` to `Default` impl
+- Added `separate_multiple_minor: scalar_sep_multi_minor.unwrap_or(raw.separate_multiple_minor)` in mapping block
+- 3 tests: preset sets field, direct JSON config, branch_topic produces correct topic for minor updates
+
+### Files changed
+- `crates/renovate-core/src/branch.rs`
+- `crates/renovate-core/src/repo_config.rs`
+- `crates/renovate-cli/src/pipeline_utils.rs`

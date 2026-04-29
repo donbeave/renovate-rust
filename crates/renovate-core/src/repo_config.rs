@@ -171,6 +171,14 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `separateMinorPatch`.
     pub separate_minor_patch: bool,
 
+    /// When `true`, each distinct minor version of a dependency gets its own
+    /// separate PR/branch.  Branch topics include the minor component:
+    /// `{dep}-{major}.{minor}.x` instead of `{dep}-{major}.x`.
+    /// Default: `false`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `separateMultipleMinor`.
+    pub separate_multiple_minor: bool,
+
     // ── Semantic commits ──────────────────────��─────────────────────��────────
     /// Enable semantic commits (`"enabled"` / `"disabled"` / `"auto"`).
     /// `None` → auto (detect from repository history).
@@ -620,8 +628,9 @@ fn resolve_extends_range_strategy_rules(extends: &[String]) -> Vec<PackageRule> 
 }
 
 /// Return type for `resolve_extends_scalar_overrides`:
-/// `(sep_minor_patch, sep_major_minor, sep_multi_major, pr_concurrent, pr_hourly)`.
+/// `(sep_minor_patch, sep_major_minor, sep_multi_major, sep_multi_minor, pr_concurrent, pr_hourly)`.
 type ScalarOverrides = (
+    Option<bool>,
     Option<bool>,
     Option<bool>,
     Option<bool>,
@@ -632,7 +641,7 @@ type ScalarOverrides = (
 /// Scalar config overrides contributed by named built-in presets.
 ///
 /// Returns overrides for: `separate_minor_patch`, `separate_major_minor`,
-/// `separate_multiple_major`, `pr_concurrent_limit`, `pr_hourly_limit`.
+/// `separate_multiple_major`, `separate_multiple_minor`, `pr_concurrent_limit`, `pr_hourly_limit`.
 /// `None` means the preset did not set that field.
 ///
 /// Renovate reference: `lib/config/presets/internal/default.preset.ts`
@@ -640,6 +649,7 @@ fn resolve_extends_scalar_overrides(extends: &[String]) -> ScalarOverrides {
     let mut sep_minor_patch: Option<bool> = None;
     let mut sep_major_minor: Option<bool> = None;
     let mut sep_multi_major: Option<bool> = None;
+    let mut sep_multi_minor: Option<bool> = None;
     let mut pr_concurrent: Option<u32> = None;
     let mut pr_hourly: Option<u32> = None;
 
@@ -655,6 +665,8 @@ fn resolve_extends_scalar_overrides(extends: &[String]) -> ScalarOverrides {
                 sep_major_minor = Some(true);
                 sep_multi_major = Some(true);
             }
+            // separateMultipleMinor
+            "separateMultipleMinorReleases" => sep_multi_minor = Some(true),
             // prConcurrentLimit
             "prConcurrentLimit10" => pr_concurrent = Some(10),
             "prConcurrentLimit20" => pr_concurrent = Some(20),
@@ -677,6 +689,7 @@ fn resolve_extends_scalar_overrides(extends: &[String]) -> ScalarOverrides {
         sep_minor_patch,
         sep_major_minor,
         sep_multi_major,
+        sep_multi_minor,
         pr_concurrent,
         pr_hourly,
     )
@@ -1073,6 +1086,8 @@ impl RepoConfig {
             separate_multiple_major: bool,
             #[serde(rename = "separateMinorPatch", default)]
             separate_minor_patch: bool,
+            #[serde(rename = "separateMultipleMinor", default)]
+            separate_multiple_minor: bool,
             #[serde(rename = "semanticCommits")]
             semantic_commits: Option<String>,
             #[serde(
@@ -1185,6 +1200,7 @@ impl RepoConfig {
             scalar_sep_minor_patch,
             scalar_sep_major_minor,
             scalar_sep_multi_major,
+            scalar_sep_multi_minor,
             scalar_pr_concurrent,
             scalar_pr_hourly,
         ) = resolve_extends_scalar_overrides(&effective_extends);
@@ -1353,6 +1369,8 @@ impl RepoConfig {
             separate_multiple_major: scalar_sep_multi_major.unwrap_or(raw.separate_multiple_major),
             separate_minor_patch: scalar_sep_minor_patch
                 .unwrap_or(raw.separate_minor_patch || preset_separate_minor_patch),
+            separate_multiple_minor: scalar_sep_multi_minor
+                .unwrap_or(raw.separate_multiple_minor),
             semantic_commit_type: param_sem_type.unwrap_or(raw.semantic_commit_type),
             semantic_commit_scope: param_sem_scope.unwrap_or(raw.semantic_commit_scope),
             semantic_commits: raw.semantic_commits.or_else(|| {
@@ -1771,6 +1789,7 @@ impl Default for RepoConfig {
             separate_major_minor: true,
             separate_multiple_major: false,
             separate_minor_patch: false,
+            separate_multiple_minor: false,
             semantic_commit_type: "chore".to_owned(),
             semantic_commit_scope: "deps".to_owned(),
             semantic_commits: None,
@@ -3780,6 +3799,33 @@ mod schedule_preset_tests {
         let c = RepoConfig::parse(r#"{"extends": ["separateMultipleMajorReleases"]}"#);
         assert!(c.separate_major_minor);
         assert!(c.separate_multiple_major);
+    }
+
+    #[test]
+    fn separate_multiple_minor_releases_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["separateMultipleMinorReleases"]}"#);
+        assert!(c.separate_multiple_minor);
+    }
+
+    #[test]
+    fn separate_multiple_minor_direct_config() {
+        let c = RepoConfig::parse(r#"{"separateMultipleMinor": true}"#);
+        assert!(c.separate_multiple_minor);
+    }
+
+    #[test]
+    fn separate_multiple_minor_branch_topic() {
+        use crate::branch::branch_topic;
+        // Without separateMultipleMinor: minor updates share {dep}-{major}.x
+        assert_eq!(
+            branch_topic("lodash", 4, 17, false, true, false, false),
+            "lodash-4.x"
+        );
+        // With separateMultipleMinor=true: minor gets {dep}-{major}.{minor}.x
+        assert_eq!(
+            branch_topic("lodash", 4, 17, false, true, false, true),
+            "lodash-4.17.x"
+        );
     }
 
     #[test]

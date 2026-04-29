@@ -59,37 +59,47 @@ pub fn sanitize_dep_name(name: &str) -> String {
 /// - When `separate_minor_patch = true` and the update is a patch: includes
 ///   the minor component → `{sanitized}-{major}.{minor}.x`.
 ///
+/// When `separate_multiple_minor` is `true` and this is a minor update, the
+/// minor component is included so that different minor versions get separate
+/// branches → `{sanitized}-{major}.{minor}.x`.
+///
 /// # Parameters
 ///
 /// - `dep_name` — raw dep name (will be sanitized)
 /// - `new_major` — major component of the proposed new version
-/// - `new_minor` — minor component (only used when `separate_minor_patch` and
-///   `is_patch` are both `true`)
+/// - `new_minor` — minor component (used when `separate_minor_patch` + `is_patch`,
+///   or when `separate_multiple_minor` + `is_minor`)
 /// - `is_patch` — whether this is a patch-level update
+/// - `is_minor` — whether this is a minor-level update
 /// - `separate_minor_patch` — value of the `separateMinorPatch` config option
+/// - `separate_multiple_minor` — value of the `separateMultipleMinor` config option
 ///
 /// # Examples
 ///
 /// ```
 /// # use renovate_core::branch::branch_topic;
 /// // Default: all 4.x lodash updates share one branch.
-/// assert_eq!(branch_topic("lodash", 4, 17, true, false), "lodash-4.x");
+/// assert_eq!(branch_topic("lodash", 4, 17, true, false, false, false), "lodash-4.x");
 /// // separateMinorPatch=true: patch gets its own branch.
-/// assert_eq!(branch_topic("lodash", 4, 17, true, true), "lodash-4.17.x");
+/// assert_eq!(branch_topic("lodash", 4, 17, true, false, true, false), "lodash-4.17.x");
+/// // separateMultipleMinor=true: minor update gets its own branch.
+/// assert_eq!(branch_topic("lodash", 4, 17, false, true, false, true), "lodash-4.17.x");
 /// // Major update.
-/// assert_eq!(branch_topic("react", 18, 0, false, false), "react-18.x");
+/// assert_eq!(branch_topic("react", 18, 0, false, false, false, false), "react-18.x");
 /// // Scoped npm package.
-/// assert_eq!(branch_topic("@angular/core", 17, 0, false, false), "angular-core-17.x");
+/// assert_eq!(branch_topic("@angular/core", 17, 0, false, false, false, false), "angular-core-17.x");
 /// ```
 pub fn branch_topic(
     dep_name: &str,
     new_major: u64,
     new_minor: u64,
     is_patch: bool,
+    is_minor: bool,
     separate_minor_patch: bool,
+    separate_multiple_minor: bool,
 ) -> String {
     let sanitized = sanitize_dep_name(dep_name);
-    if separate_minor_patch && is_patch {
+    if (separate_minor_patch && is_patch) || (separate_multiple_minor && is_minor) {
         format!("{sanitized}-{new_major}.{new_minor}.x")
     } else {
         format!("{sanitized}-{new_major}.x")
@@ -528,32 +538,65 @@ mod tests {
     #[test]
     fn branch_topic_default_no_minor_component() {
         // Default: patch/minor updates share {dep}-{major}.x branch.
-        assert_eq!(branch_topic("lodash", 4, 17, true, false), "lodash-4.x");
-        assert_eq!(branch_topic("lodash", 4, 17, false, false), "lodash-4.x");
+        assert_eq!(
+            branch_topic("lodash", 4, 17, true, false, false, false),
+            "lodash-4.x"
+        );
+        assert_eq!(
+            branch_topic("lodash", 4, 17, false, true, false, false),
+            "lodash-4.x"
+        );
     }
 
     #[test]
     fn branch_topic_separate_minor_patch_for_patch_update() {
-        assert_eq!(branch_topic("lodash", 4, 17, true, true), "lodash-4.17.x");
+        assert_eq!(
+            branch_topic("lodash", 4, 17, true, false, true, false),
+            "lodash-4.17.x"
+        );
     }
 
     #[test]
     fn branch_topic_separate_minor_patch_for_minor_not_applied() {
         // separateMinorPatch only adds minor component for patch updates.
-        assert_eq!(branch_topic("lodash", 4, 17, false, true), "lodash-4.x");
+        assert_eq!(
+            branch_topic("lodash", 4, 17, false, true, true, false),
+            "lodash-4.x"
+        );
+    }
+
+    #[test]
+    fn branch_topic_separate_multiple_minor_for_minor_update() {
+        // separateMultipleMinor adds minor component for minor updates.
+        assert_eq!(
+            branch_topic("lodash", 4, 17, false, true, false, true),
+            "lodash-4.17.x"
+        );
+    }
+
+    #[test]
+    fn branch_topic_separate_multiple_minor_not_applied_to_patch() {
+        // separateMultipleMinor does not affect patch updates.
+        assert_eq!(
+            branch_topic("lodash", 4, 17, true, false, false, true),
+            "lodash-4.x"
+        );
     }
 
     #[test]
     fn branch_topic_scoped_package() {
         assert_eq!(
-            branch_topic("@angular/core", 17, 0, false, false),
+            branch_topic("@angular/core", 17, 0, false, false, false, false),
             "angular-core-17.x"
         );
     }
 
     #[test]
     fn branch_topic_major_update() {
-        assert_eq!(branch_topic("react", 18, 0, false, false), "react-18.x");
+        assert_eq!(
+            branch_topic("react", 18, 0, false, false, false, false),
+            "react-18.x"
+        );
     }
 
     // ── group_branch_topic ────────────────────────────────────────────────────
@@ -603,7 +646,7 @@ mod tests {
 
     #[test]
     fn branch_name_roundtrip() {
-        let topic = branch_topic("@angular/core", 17, 0, false, false);
+        let topic = branch_topic("@angular/core", 17, 0, false, false, false, false);
         let name = branch_name("renovate/", "", &topic);
         assert_eq!(name, "renovate/angular-core-17.x");
     }
