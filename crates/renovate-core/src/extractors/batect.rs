@@ -105,11 +105,13 @@ tasks:
         assert!(!deps.iter().any(|d| d.image == "app"));
     }
 
+    // Ported: "returns empty array for empty configuration file" — batect/extract.spec.ts line 41
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns an a package file with no dependencies for configuration file without containers or includes" — batect/extract.spec.ts line 57
     #[test]
     fn no_containers_block_returns_empty() {
         let content = "tasks:\n  build:\n    run:\n      container: app\n";

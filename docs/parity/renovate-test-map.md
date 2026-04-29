@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 11 / 24 actionable tests ported (46%) — updated 2026-04-29
+**Overall progress:** 17 / 32 actionable tests ported (53%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -78,6 +78,38 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/batect-wrapper/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/batect-wrapper/extract.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty wrapper file | 9 | ported | `batect_wrapper.rs` | `empty_returns_none` | — |
+| returns null for file without version information | 13 | ported | `batect_wrapper.rs` | `no_version_line_returns_none` | — |
+| extracts the current version from a valid wrapper script | 17 | ported | `batect_wrapper.rs` | `extracts_version` | — |
+| returns the first version from a wrapper script with multiple versions | 31 | ported | `batect_wrapper.rs` | `multiple_version_lines_uses_first` | — |
+
+---
+
+## `lib/modules/manager/batect/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/batect/extract.spec.ts
+**Total tests:** 4 | **Ported:** 2 | **Actionable:** 4 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty array for empty configuration file | 41 | ported | `batect.rs` | `empty_returns_empty` | — |
+| returns empty array for non-object configuration file | 49 | pending | — | — | — |
+| returns an a package file with no dependencies for configuration file without containers or includes | 57 | ported | `batect.rs` | `no_containers_block_returns_empty` | — |
+| extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files | 70 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -87,8 +119,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/ant/extract.spec.ts` | 44 | `crates/renovate-core/src/extractors/ant.rs` | 6 | partial |
 | `lib/modules/manager/asdf/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/asdf.rs` | 28 | partial |
 | `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/azure_pipelines.rs` | 8 | partial |
-| `lib/modules/manager/batect-wrapper/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/batect_wrapper.rs` | 4 | partial |
-| `lib/modules/manager/batect/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/batect.rs` | 5 | partial |
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
 | `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 10 | partial |
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |

@@ -47,26 +47,28 @@ set -euo pipefail
 DOWNLOAD_URL="https://github.com/batect/batect/releases/download/${VERSION}/batect"
 "#;
 
+    // Ported: "extracts the current version from a valid wrapper script" — batect-wrapper/extract.spec.ts line 17
     #[test]
     fn extracts_version() {
         let dep = extract(SAMPLE).unwrap();
         assert_eq!(dep.version, "0.63.4");
     }
 
+    // Ported: "returns null for file without version information" — batect-wrapper/extract.spec.ts line 13
     #[test]
     fn no_version_line_returns_none() {
         assert!(extract("#!/bin/bash\necho hello\n").is_none());
     }
 
+    // Ported: "returns null for empty wrapper file" — batect-wrapper/extract.spec.ts line 9
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
     }
 
+    // Ported: "returns the first version from a wrapper script with multiple versions" — batect-wrapper/extract.spec.ts line 31
     #[test]
     fn multiple_version_lines_uses_first() {
-        // Ported: "returns the first version from a wrapper script with multiple versions"
-        // batect-wrapper/extract.spec.ts line 31
         let content = "#!/usr/bin/env bash\n{\n    VERSION=\"0.60.1\"\n    VERSION=\"0.63.0\"\n}";
         let dep = extract(content).unwrap();
         assert_eq!(dep.version, "0.60.1");
