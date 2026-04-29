@@ -48,6 +48,8 @@ pub struct GoModUpdateSummary {
     pub current_value: String,
     pub latest: Option<String>,
     pub update_available: bool,
+    /// ISO 8601 publication timestamp from the Go module proxy `@latest` response.
+    pub release_timestamp: Option<String>,
 }
 
 /// Per-dependency result from `fetch_updates_concurrent`.
@@ -61,14 +63,20 @@ pub struct GoModUpdateResult {
 struct ProxyLatest {
     #[serde(rename = "Version")]
     version: String,
+    /// RFC 3339 publication timestamp, e.g. `"2024-01-15T10:30:00Z"`.
+    #[serde(rename = "Time")]
+    time: Option<String>,
 }
 
 /// Fetch the latest version of a Go module from the proxy.
+///
+/// Returns `(version, published_at)` where `published_at` is an ISO 8601
+/// timestamp from the `Time` field of the Go module proxy `@latest` response.
 pub async fn fetch_latest(
     module_path: &str,
     http: &HttpClient,
     proxy_base: &str,
-) -> Result<Option<String>, GoModError> {
+) -> Result<Option<(String, Option<String>)>, GoModError> {
     let encoded = encode_module_path(module_path);
     let url = format!("{proxy_base}/{encoded}/@latest");
 
@@ -81,7 +89,7 @@ pub async fn fetch_latest(
     }
 
     let info: ProxyLatest = resp.json().await.map_err(GoModError::Json)?;
-    Ok(Some(info.version))
+    Ok(Some((info.version, info.time)))
 }
 
 /// Fetch update summaries for multiple Go module dependencies concurrently.
@@ -151,7 +159,12 @@ pub async fn fetch_latest_batch(
 
         set.spawn(async move {
             let _permit = sem.acquire_owned().await.expect("semaphore closed");
-            let latest = fetch_latest(&path, &http, &proxy_base).await.ok().flatten();
+            // Strip timestamp — batch cache only needs the version string.
+            let latest = fetch_latest(&path, &http, &proxy_base)
+                .await
+                .ok()
+                .flatten()
+                .map(|(v, _)| v);
             (path, latest)
         });
     }
@@ -177,6 +190,7 @@ pub fn summary_from_cache(current_value: &str, latest: GoModLatestEntry) -> GoMo
         current_value: current_value.to_owned(),
         latest,
         update_available,
+        release_timestamp: None, // not available from the batch cache
     }
 }
 
@@ -185,7 +199,10 @@ async fn fetch_update_summary(
     http: &HttpClient,
     proxy_base: &str,
 ) -> Result<GoModUpdateSummary, GoModError> {
-    let latest = fetch_latest(&dep.module_path, http, proxy_base).await?;
+    let result = fetch_latest(&dep.module_path, http, proxy_base).await?;
+    let (latest, release_timestamp) = result
+        .map(|(v, ts)| (Some(v), ts))
+        .unwrap_or((None, None));
     let update_available = latest
         .as_deref()
         .is_some_and(|l| l != dep.current_value && !dep.current_value.is_empty());
@@ -193,6 +210,7 @@ async fn fetch_update_summary(
         current_value: dep.current_value.clone(),
         latest,
         update_available,
+        release_timestamp,
     })
 }
 
@@ -252,7 +270,9 @@ mod tests {
         let result = fetch_latest("github.com/gorilla/mux", &http, &server.uri())
             .await
             .unwrap();
-        assert_eq!(result, Some("v1.8.1".to_owned()));
+        let (version, timestamp) = result.unwrap();
+        assert_eq!(version, "v1.8.1");
+        assert_eq!(timestamp.as_deref(), Some("2023-09-01T00:00:00Z"));
     }
 
     #[tokio::test]

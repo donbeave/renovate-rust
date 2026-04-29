@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0245  | 2026-04-29 | Go module proxy `release_timestamp`: `Time` field from `@latest` endpoint propagated through `fetch_latest` → `GoModUpdateSummary` → `build_dep_reports_gomod` | Complete | See below. |
 | 0244  | 2026-04-29 | GitHub Releases `release_timestamp`: `published_at` field propagated through `fetch_latest_release` return type → `GithubReleasesUpdateSummary` → batect/kubernetes/report builders; all 9 callers updated | Complete | See below. |
 | 0243  | 2026-04-29 | Timezone-aware schedule: `is_within_schedule_tz()` + `chrono-tz` crate; global and per-rule schedule gates now respect `timezone` config option | Complete | See below. |
 | 0242  | 2026-04-29 | Fix doctest code blocks in `cake.rs` and `conan.rs` — add `text` language tag to avoid compilation as Rust | Complete | See below. |
