@@ -249,6 +249,11 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `pinDigests`.
     pub pin_digests: Option<bool>,
+    /// Specific npm dist-tag to follow (e.g. `"next"`, `"beta"`).
+    /// When set, Renovate pins the package to the specified tag's latest version.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `followTag`.
+    pub follow_tag: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -765,6 +770,9 @@ pub struct RuleEffects {
     /// Per-rule digest pinning override.
     /// `None` = use manager default behavior.
     pub pin_digests: Option<bool>,
+    /// Per-rule dist-tag to follow (e.g. `"next"`, `"beta"`).
+    /// `None` = use the package's default release channel.
+    pub follow_tag: Option<String>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────

@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0316  | 2026-04-29 | `followTag` per-rule field (parsed, stored, collected in `RuleEffects`); 1 test | Complete | See below. |
 | 0315  | 2026-04-29 | `commitBody` top-level config field; `:gitSignOff` preset sets `commitBody: "Signed-off-by: {{{gitAuthor}}}"` — 1500 tests total; 2 tests | Complete | See below. |
 | 0314  | 2026-04-29 | `group:drupal-core` preset; `rebaseWhen` config field; `:rebaseStalePrs` preset sets `rebaseWhen: "behind-base-branch"`; 3 tests | Complete | See below. |
 | 0313  | 2026-04-29 | `:automergeLinters`, `:automergeTesters`, `:automergeTypes`, `:automergeMajor` presets: inject packageRules with `automerge: true` for their respective package lists; 2 tests | Complete | See below. |

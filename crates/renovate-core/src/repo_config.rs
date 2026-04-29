@@ -2428,6 +2428,8 @@ impl RepoConfig {
             versioning: Option<String>,
             #[serde(rename = "pinDigests")]
             pin_digests: Option<bool>,
+            #[serde(rename = "followTag")]
+            follow_tag: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -2734,6 +2736,7 @@ impl RepoConfig {
                     range_strategy: r.range_strategy,
                     versioning: r.versioning,
                     pin_digests: r.pin_digests,
+                    follow_tag: r.follow_tag,
                 }
             })
             .collect();
@@ -3288,6 +3291,9 @@ impl RepoConfig {
             }
             if rule.pin_digests.is_some() {
                 effects.pin_digests = rule.pin_digests;
+            }
+            if rule.follow_tag.is_some() {
+                effects.follow_tag.clone_from(&rule.follow_tag);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -5182,6 +5188,16 @@ mod tests {
         let ctx = DepContext::for_dep("react");
         let effects = c.collect_rule_effects(&ctx);
         assert_eq!(effects.range_strategy.as_deref(), Some("replace"));
+    }
+
+    #[test]
+    fn follow_tag_in_package_rule_collects_into_effects() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["typescript"], "followTag": "next"}]}"#,
+        );
+        let ctx = DepContext::for_dep("typescript");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.follow_tag.as_deref(), Some("next"));
     }
 
     #[test]
