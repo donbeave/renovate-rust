@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0303  | 2026-04-29 | `helpers:disableTypesNodeMajor` preset: disables `@types/node` major updates via packageRule; 2 tests (major blocked, other packages unaffected) | Complete | See below. |
 | 0302  | 2026-04-29 | Remaining Spring presets (amqp/android/batch/hateoas/integration/kafka/ldap/mobile/osgi/restdocs/roo/scala/session/shell/social/statemachine/webflow/ws), `group:illuminate`, `group:rubyOmniauth`, `group:jestPlusTSJest`, `group:jestPlusTypes`, `group:recommended` compound expansion; 3 tests | Complete | See below. |
 | 0301  | 2026-04-29 | `group:react`, `group:puppeteer`, `group:remark`, `group:socketio`, `group:micrometer`, `group:resilience4j`, `group:hibernateValidator`, `group:hibernateOgm`, `group:springBoot` (2 rules), `group:springCore/Cloud/Data/Security`; 4 tests | Complete | See below. |
 | 0300  | 2026-04-29 | `group:jsTestNonMajor`, `group:jsUnitTest`, `group:jsUnitTestNonMajor`, `group:gradle`, `group:hibernateCore`, `group:hibernateCommons`, `group:definitelyTyped`; refactor to shared `JS_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |
@@ -5683,6 +5684,22 @@ Slice 0296 implemented `docker:disable` as a `matchDatasources: ["docker"]` pack
 - Added `group:jestPlusTypes`: `@types/jest` + major/minor/patch (non-digest/pin) constraint
 - Added `group:recommended`: compound preset that expands all 39 sub-presets by recursively calling `resolve_extends_group_presets` for each member
 - 3 tests: group:recommended injects ≥30 rules with specific group names; jestPlusTSJest is major-only
+
+### Files changed
+- `crates/renovate-core/src/repo_config.rs`
+- `docs/parity/implementation-ledger.md`
+
+---
+
+## Slice 0303 - `helpers:disableTypesNodeMajor` preset
+
+### Renovate reference
+- `lib/config/presets/internal/helpers.preset.ts` — `disableTypesNodeMajor`: `{packageRules: [{enabled: false, matchPackageNames: ["@types/node"], matchUpdateTypes: ["major"]}]}`
+
+### Implementation
+- Added `"helpers:disableTypesNodeMajor"` case to `resolve_extends_common_rules()`:
+  - `PackageRule` with `match_package_names: ["@types/node"]`, `has_name_constraint: true`, `match_update_types: [Major]`, `has_update_type_constraint: true`, `enabled: Some(false)`
+- 2 tests: major @types/node update is blocked; minor @types/node and other packages unaffected
 
 ### Files changed
 - `crates/renovate-core/src/repo_config.rs`

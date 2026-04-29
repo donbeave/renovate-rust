@@ -706,6 +706,17 @@ fn resolve_extends_common_rules(extends: &[String]) -> Vec<PackageRule> {
             // managers at the manager level (not via packageRules). Handled in parse()
             // via disabled_managers. No packageRule needed here.
             "docker:disable" => {}
+            // helpers:disableTypesNodeMajor — disable @types/node major updates.
+            "helpers:disableTypesNodeMajor" => {
+                rules.push(PackageRule {
+                    match_package_names: vec!["@types/node".to_owned()],
+                    has_name_constraint: true,
+                    match_update_types: vec![UpdateType::Major],
+                    has_update_type_constraint: true,
+                    enabled: Some(false),
+                    ..Default::default()
+                });
+            }
             _ => {}
         }
     }
@@ -6722,6 +6733,48 @@ mod rule_effects_tests {
         assert!(
             c.is_manager_enabled("cargo", false),
             "cargo not in disabledManagers must remain enabled"
+        );
+    }
+
+    // ── helpers:* presets ────────────────────────────────────────────────────
+
+    #[test]
+    fn helpers_disable_types_node_major_blocks_major() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["helpers:disableTypesNodeMajor"]}"#);
+        assert_eq!(c.package_rules.len(), 1);
+        let ctx_major = DepContext {
+            dep_name: "@types/node",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        let ctx_minor = DepContext {
+            dep_name: "@types/node",
+            update_type: Some(UpdateType::Minor),
+            ..Default::default()
+        };
+        assert!(
+            c.is_update_blocked_ctx(&ctx_major),
+            "helpers:disableTypesNodeMajor must block @types/node major"
+        );
+        assert!(
+            !c.is_update_blocked_ctx(&ctx_minor),
+            "helpers:disableTypesNodeMajor must not block @types/node minor"
+        );
+    }
+
+    #[test]
+    fn helpers_disable_types_node_major_does_not_affect_other_packages() {
+        use crate::versioning::semver_generic::UpdateType;
+        let c = RepoConfig::parse(r#"{"extends": ["helpers:disableTypesNodeMajor"]}"#);
+        let ctx = DepContext {
+            dep_name: "lodash",
+            update_type: Some(UpdateType::Major),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx),
+            "helpers:disableTypesNodeMajor must not affect other packages"
         );
     }
 
