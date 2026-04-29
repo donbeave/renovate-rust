@@ -992,6 +992,13 @@ impl UpdateTypeConfig {
         }
         if let Some(gs) = &self.group_slug {
             effects.group_slug = Some(gs.clone());
+        } else if let Some(gn) = &self.group_name {
+            // Auto-generate groupSlug from groupName when the rule sets groupName but not
+            // groupSlug and a prior rule already set a groupSlug.  This matches Renovate's
+            // behaviour in applyPackageRules: the new groupName must override the stale slug.
+            if effects.group_slug.is_some() {
+                effects.group_slug = Some(crate::branch::group_branch_topic(gn));
+            }
         }
         if !self.schedule.is_empty() {
             effects.schedule.clone_from(&self.schedule);

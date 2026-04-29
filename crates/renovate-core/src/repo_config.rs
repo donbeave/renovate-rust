@@ -4910,6 +4910,14 @@ impl RepoConfig {
             }
             if rule.group_slug.is_some() {
                 effects.group_slug.clone_from(&rule.group_slug);
+            } else if let Some(gn) = &rule.group_name {
+                // Auto-generate groupSlug when rule sets groupName but not groupSlug
+                // and a prior rule already established a groupSlug — prevents a stale
+                // slug from the old rule being paired with the new groupName.
+                // Mirrors Renovate's applyPackageRules slugify logic.
+                if effects.group_slug.is_some() {
+                    effects.group_slug = Some(crate::branch::group_branch_topic(gn));
+                }
             }
             if let Some(am) = rule.automerge {
                 effects.automerge = Some(am);
@@ -9983,6 +9991,33 @@ mod rule_effects_tests {
             Some("second"),
             "last matching rule's groupSlug should win (Renovate mergeChildConfig semantics)"
         );
+    }
+
+    #[test]
+    fn group_slug_auto_generated_from_group_name_when_prior_slug_exists() {
+        // Ported: "creates groupSlug if necessary" — index.spec.ts line 1242
+        // Two rules both match '*':
+        //   Rule 1: groupName:'A', groupSlug:'a' → sets groupSlug='a'
+        //   Rule 2: groupName:'B' (no groupSlug) → since prior groupSlug exists, auto-generate
+        //           groupSlug = group_branch_topic('B') = 'b' (lowercase)
+        // Expected: groupSlug = 'b' (last rule wins, slug auto-generated)
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["*"], "groupName": "A", "groupSlug": "a"},
+                {"matchPackageNames": ["*"], "groupName": "B"}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "foo",
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.group_slug.as_deref(),
+            Some("b"),
+            "groupSlug must be auto-generated from groupName when prior slug existed"
+        );
+        assert_eq!(effects.group_name.as_deref(), Some("B"));
     }
 
     // ── per-rule commitMessageAction / commitMessagePrefix ────────────────────

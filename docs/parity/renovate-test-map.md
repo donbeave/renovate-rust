@@ -204,6 +204,7 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 | `lib/util/package-rules/index.spec.ts` | 950 | `filters naked depType` — singular depType matches | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_naked_dep_type_matches` | ported |
 | `lib/util/package-rules/index.spec.ts` | 968 | `filters out unrequested depType` — non-matching dep type → rule doesn't fire | `crates/renovate-core/src/repo_config.rs` | `match_dep_types_out_of_requested_does_not_match` | ported |
 | `lib/util/package-rules/index.spec.ts` | 38 | `applies` — comprehensive integration: isBump+matchCurrentVersion+matchPackageNames negation | `crates/renovate-core/src/repo_config.rs` | `applies_comprehensive_integration` | ported |
+| `lib/util/package-rules/index.spec.ts` | 1242 | `creates groupSlug if necessary` — auto-generate groupSlug from groupName when prior slug exists | `crates/renovate-core/src/repo_config.rs` | `rule_effects_tests::group_slug_auto_generated_from_group_name_when_prior_slug_exists` | ported |
 
 ---
 

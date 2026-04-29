@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0372  | 2026-04-29 | groupSlug auto-generation from groupName when prior slug exists; port index.spec.ts "creates groupSlug if necessary"; 1772 tests | Complete | See below. |
 | 0371  | 2026-04-29 | `depTypes` plural array support in DepContext + port 5 more index.spec.ts tests: depTypes any-match, naked depType, unrequested depType, comprehensive "applies" integration; 1771 tests | Complete | See below. |
 | 0370  | 2026-04-29 | `matchCategories` dep-provided categories + `matchCurrentVersion` 3-case dispatch + DepContext `categories`/`current_version` fields; 8 new tests from index.spec.ts; 1766 tests | Complete | See below. |
 | 0369  | 2026-04-29 | Port 2 matchDepTypes tests from index.spec.ts: multiple types in list, absent depType → rule doesn't fire; also fix missing #[test] for previously skipped test; 1758 tests | Complete | See below. |
