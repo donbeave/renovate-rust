@@ -879,4 +879,49 @@ mod tests {
             "automerge: false must not be flipped by automergeSchedule"
         );
     }
+
+    #[test]
+    fn replacement_name_sets_update_type_to_replacement() {
+        let cfg = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["old-pkg"], "replacementName": "new-pkg"}]}"#,
+        );
+        let mut report = make_report(vec![(
+            "old-pkg",
+            DepStatus::UpdateAvailable {
+                current: "1.0.0".into(),
+                latest: "2.0.0".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert_eq!(
+            report.files[0].deps[0].update_type.as_deref(),
+            Some("replacement"),
+            "replacementName must override updateType to 'replacement'"
+        );
+        assert_eq!(
+            report.files[0].deps[0].replacement_name.as_deref(),
+            Some("new-pkg"),
+            "replacementName must be forwarded to output"
+        );
+    }
+
+    #[test]
+    fn versioning_override_emitted_in_output() {
+        let cfg = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["npm"], "versioning": "docker"}]}"#,
+        );
+        let mut report = make_report(vec![(
+            "lodash",
+            DepStatus::UpdateAvailable {
+                current: "4.0.0".into(),
+                latest: "4.17.21".into(),
+            },
+        )]);
+        apply_update_blocking_to_report(&mut report, &cfg, "test/repo");
+        assert_eq!(
+            report.files[0].deps[0].versioning.as_deref(),
+            Some("docker"),
+            "versioning override from packageRule must appear in output"
+        );
+    }
 }
