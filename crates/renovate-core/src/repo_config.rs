@@ -715,26 +715,22 @@ fn parse_preset_args(preset: &str) -> (&str, Vec<&str>) {
 ///
 /// Returns `(labels, assignees, reviewers, automerge_type)`.
 ///
+/// Return type for `resolve_extends_parameterized`.
+type ParamOverrides = (Vec<String>, Vec<String>, Vec<String>, Option<String>, Option<String>, Option<String>);
+
 /// Renovate reference: `lib/config/presets/internal/default.preset.ts`
-fn resolve_extends_parameterized(
-    extends: &[String],
-) -> (Vec<String>, Vec<String>, Vec<String>, Option<String>) {
+fn resolve_extends_parameterized(extends: &[String]) -> ParamOverrides {
     let mut labels: Vec<String> = Vec::new();
     let mut assignees: Vec<String> = Vec::new();
     let mut reviewers: Vec<String> = Vec::new();
     let mut automerge_type: Option<String> = None;
+    let mut semantic_commit_type: Option<String> = None;
+    let mut semantic_commit_scope: Option<String> = None;
 
     for preset in extends {
         let (name, args) = parse_preset_args(preset.as_str());
         match name {
-            "label" => {
-                for arg in &args {
-                    if !arg.is_empty() && !labels.contains(&arg.to_string()) {
-                        labels.push(arg.to_string());
-                    }
-                }
-            }
-            "labels" => {
+            "label" | "labels" => {
                 for arg in &args {
                     if !arg.is_empty() && !labels.contains(&arg.to_string()) {
                         labels.push(arg.to_string());
@@ -760,11 +756,25 @@ fn resolve_extends_parameterized(
                     automerge_type = Some(ty.to_string());
                 }
             }
+            ":semanticCommitType" | "semanticCommitType" => {
+                if let Some(t) = args.first().filter(|s| !s.is_empty()) {
+                    semantic_commit_type = Some(t.to_string());
+                }
+            }
+            ":semanticCommitScope" | "semanticCommitScope" => {
+                if let Some(s) = args.first() {
+                    // Empty arg → no scope (disable parentheses).
+                    semantic_commit_scope = Some(s.to_string());
+                }
+            }
+            ":semanticCommitScopeDisabled" | "semanticCommitScopeDisabled" => {
+                semantic_commit_scope = Some(String::new());
+            }
             _ => {}
         }
     }
 
-    (labels, assignees, reviewers, automerge_type)
+    (labels, assignees, reviewers, automerge_type, semantic_commit_type, semantic_commit_scope)
 }
 
 /// Compile a single `matchPackageNames` entry into a [`PackageNameMatcher`].
@@ -986,8 +996,14 @@ impl RepoConfig {
         preset_rules.extend(common_rules);
         // :automergePatch sets separateMinorPatch: true.
         let preset_separate_minor_patch = raw.extends.iter().any(|p| p == ":automergePatch");
-        let (param_labels, param_assignees, param_reviewers, param_automerge_type) =
-            resolve_extends_parameterized(&raw.extends);
+        let (
+            param_labels,
+            param_assignees,
+            param_reviewers,
+            param_automerge_type,
+            param_sem_type,
+            param_sem_scope,
+        ) = resolve_extends_parameterized(&raw.extends);
         let (
             scalar_sep_minor_patch,
             scalar_sep_major_minor,
@@ -1159,8 +1175,8 @@ impl RepoConfig {
             separate_multiple_major: scalar_sep_multi_major.unwrap_or(raw.separate_multiple_major),
             separate_minor_patch: scalar_sep_minor_patch
                 .unwrap_or(raw.separate_minor_patch || preset_separate_minor_patch),
-            semantic_commit_type: raw.semantic_commit_type,
-            semantic_commit_scope: raw.semantic_commit_scope,
+            semantic_commit_type: param_sem_type.unwrap_or(raw.semantic_commit_type),
+            semantic_commit_scope: param_sem_scope.unwrap_or(raw.semantic_commit_scope),
             semantic_commits: raw.semantic_commits.or_else(|| {
                 // `:semanticCommits` preset implies semanticCommits = "enabled"
                 if raw.extends.iter().any(|e| e == ":semanticCommits") {
@@ -3442,6 +3458,24 @@ mod schedule_preset_tests {
         let (name, args) = super::parse_preset_args("labels(a, b, c)");
         assert_eq!(name, "labels");
         assert_eq!(args, vec!["a", "b", "c"]);
+    }
+
+    #[test]
+    fn semantic_commit_type_preset() {
+        let c = RepoConfig::parse(r#"{"extends": [":semanticCommitType(fix)"]}"#);
+        assert_eq!(c.semantic_commit_type, "fix");
+    }
+
+    #[test]
+    fn semantic_commit_scope_preset() {
+        let c = RepoConfig::parse(r#"{"extends": [":semanticCommitScope(security)"]}"#);
+        assert_eq!(c.semantic_commit_scope, "security");
+    }
+
+    #[test]
+    fn semantic_commit_scope_disabled_preset() {
+        let c = RepoConfig::parse(r#"{"extends": [":semanticCommitScopeDisabled"]}"#);
+        assert_eq!(c.semantic_commit_scope, "");
     }
 }
 
