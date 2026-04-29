@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 24 / 46 actionable tests ported (52%) — updated 2026-04-29
+**Overall progress:** 34 / 67 actionable tests ported (51%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -189,6 +189,68 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/fvm/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/fvm/extract.spec.ts
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid json | 7 | ported | `fvm.rs` | `invalid_json_returns_none` | — |
+| returns null for empty flutter sdk version | 13 | ported | `fvm.rs` | `missing_version_returns_none` | — |
+| returns null for non string flutter sdk version | 17 | ported | `fvm.rs` | `non_string_flutter_sdk_version_returns_none` | — |
+| returns a result for .fvm/fvm_config.json | 26 | ported | `fvm.rs` | `extracts_flutter_sdk_version_key` | — |
+| returns a result for .fvmrc | 41 | ported | `fvm.rs` | `extracts_flutter_key` | — |
+| supports non range for .fvm/fvm_config.json | 53 | ported | `fvm.rs` | `flutter_sdk_version_channel_extracted` | — |
+| supports non range for .fvmrc | 68 | ported | `fvm.rs` | `flutter_channel_extracted` | — |
+
+---
+
+## `lib/modules/manager/glasskube/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/glasskube/extract.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should extract version and registryUrl | 43 | pending | — | — | — |
+
+### `extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null for empty packageFiles | 62 | pending | — | — | — |
+| should skip package with non-existing repo | 67 | pending | — | — | — |
+| should extract registryUrl from repo in other file | 85 | pending | — | — | — |
+| should extract registryUrl from default repo in other file | 107 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gleam/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gleam/extract.spec.ts
+**Total tests:** 9 | **Ported:** 4 | **Actionable:** 9 | **Status:** partial
+
+### `modules/manager/gleam/extract`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should extract dev and prod dependencies | 8 | ported | `gleam.rs` | `both_sections` | — |
+| should extract dev only dependencies | 41 | ported | `gleam.rs` | `extracts_dev_dependencies` | — |
+| should return null when no dependencies are found | 65 | ported | `gleam.rs` | `no_deps_section_returns_empty` | — |
+| should return null when gleam.toml is invalid | 82 | ported | `gleam.rs` | `invalid_toml_returns_empty` | — |
+| should return locked versions | 91 | pending | — | — | — |
+| should fail to extract locked version | 119 | pending | — | — | — |
+| should fail to find locked version in range | 138 | pending | — | — | — |
+| should handle invalid versions in lock file | 166 | pending | — | — | — |
+| should handle lock file parsing and extracting errors | 193 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -218,12 +280,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/dockerfile/extract.spec.ts` | 75 | `crates/renovate-core/src/extractors/dockerfile.rs` | 16 | partial |
 | `lib/modules/manager/fleet/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/fleet.rs` | 10 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
-| `lib/modules/manager/fvm/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/fvm.rs` | 5 | partial |
 | `lib/modules/manager/git-submodules/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/git_submodules.rs` | 11 | partial |
 | `lib/modules/manager/github-actions/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/github_actions.rs` | 28 | partial |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/gitlabci.rs` | 8 | partial |
-| `lib/modules/manager/glasskube/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/glasskube.rs` | 3 | partial |
-| `lib/modules/manager/gleam/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/gleam.rs` | 6 | partial |
 | `lib/modules/manager/gomod/extract.spec.ts` | 21 | `crates/renovate-core/src/extractors/gomod.rs` | 9 | partial |
 | `lib/modules/manager/gradle-wrapper/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | 8 | partial |
 | `lib/modules/manager/gradle/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/gradle.rs` | 20 | partial |

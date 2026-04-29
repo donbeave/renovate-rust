@@ -85,6 +85,7 @@ lustre = ">= 4.0.0, < 5.0.0"
         assert!(deps.iter().any(|d| d.name == "lustre" && !d.dev));
     }
 
+    // Ported: "should extract dev only dependencies" — gleam/extract.spec.ts line 41
     #[test]
     fn extracts_dev_dependencies() {
         let content = r#"
@@ -97,6 +98,7 @@ gleeunit = "~> 1.0"
         assert_eq!(deps[0].name, "gleeunit");
     }
 
+    // Ported: "should extract dev and prod dependencies" — gleam/extract.spec.ts line 8
     #[test]
     fn both_sections() {
         let content = r#"
@@ -115,16 +117,16 @@ gleeunit = "~> 1.0"
         assert!(extract("").is_empty());
     }
 
+    // Ported: "should return null when no dependencies are found" — gleam/extract.spec.ts line 65
     #[test]
     fn no_deps_section_returns_empty() {
-        // Ported: "should return null when no dependencies are found" — gleam/extract.spec.ts line 65
         let content = r#"name = "test"\nversion = "1.0.0"\n\n[unknown]\ngleam_http = "~> 3.6.0""#;
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "should return null when gleam.toml is invalid" — gleam/extract.spec.ts line 82
     #[test]
     fn invalid_toml_returns_empty() {
-        // Ported: "should return null when gleam.toml is invalid" — gleam/extract.spec.ts line 82
         assert!(extract("foo").is_empty());
     }
 }

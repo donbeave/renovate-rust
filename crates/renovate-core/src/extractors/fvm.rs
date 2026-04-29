@@ -38,12 +38,14 @@ pub fn extract(content: &str) -> Option<FvmDep> {
 mod tests {
     use super::*;
 
+    // Ported: "returns a result for .fvmrc" — fvm/extract.spec.ts line 41
     #[test]
     fn extracts_flutter_key() {
         let dep = extract(r#"{"flutter": "3.16.5"}"#).unwrap();
         assert_eq!(dep.version, "3.16.5");
     }
 
+    // Ported: "returns a result for .fvm/fvm_config.json" — fvm/extract.spec.ts line 26
     #[test]
     fn extracts_flutter_sdk_version_key() {
         let dep = extract(r#"{"flutterSdkVersion": "3.19.0"}"#).unwrap();
@@ -56,13 +58,35 @@ mod tests {
         assert_eq!(dep.version, "3.16.5");
     }
 
+    // Ported: "returns null for empty flutter sdk version" — fvm/extract.spec.ts line 13
     #[test]
     fn missing_version_returns_none() {
         assert!(extract(r#"{"channel": "stable"}"#).is_none());
     }
 
+    // Ported: "returns null for invalid json" — fvm/extract.spec.ts line 7
     #[test]
     fn invalid_json_returns_none() {
         assert!(extract("not json").is_none());
+    }
+
+    // Ported: "returns null for non string flutter sdk version" — fvm/extract.spec.ts line 17
+    #[test]
+    fn non_string_flutter_sdk_version_returns_none() {
+        assert!(extract(r#"{"flutterSdkVersion": 2.1, "flavors": {}}"#).is_none());
+    }
+
+    // Ported: "supports non range for .fvm/fvm_config.json" — fvm/extract.spec.ts line 53
+    #[test]
+    fn flutter_sdk_version_channel_extracted() {
+        let dep = extract(r#"{"flutterSdkVersion": "stable", "flavors": {}}"#).unwrap();
+        assert_eq!(dep.version, "stable");
+    }
+
+    // Ported: "supports non range for .fvmrc" — fvm/extract.spec.ts line 68
+    #[test]
+    fn flutter_channel_extracted() {
+        let dep = extract(r#"{"flutter": "stable"}"#).unwrap();
+        assert_eq!(dep.version, "stable");
     }
 }
