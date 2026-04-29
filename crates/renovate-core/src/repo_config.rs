@@ -3959,7 +3959,13 @@ impl RepoConfig {
                     match_current_value: r.match_current_value,
                     match_new_value: r.match_new_value,
                     match_datasources,
-                    match_managers: r.match_managers,
+                    // Migrate deprecated "regex" manager name → "custom.regex".
+                    // Renovate reference: lib/config/migrations/custom/match-managers-migration.ts
+                    match_managers: r
+                        .match_managers
+                        .into_iter()
+                        .map(|m| if m == "regex" { "custom.regex".to_owned() } else { m })
+                        .collect(),
                     match_update_types,
                     allowed_versions: r.allowed_versions,
                     match_current_version: r.match_current_version,
