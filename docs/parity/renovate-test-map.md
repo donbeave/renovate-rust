@@ -275,6 +275,26 @@ This is **not** a one-to-one structural copy. Logical equivalence is the goal:
 
 ---
 
+## Cargo.toml extractor (`lib/modules/manager/cargo/extract.spec.ts`)
+
+| Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
+|--------------------|------|---------------|---------------|-----------|--------|
+| `lib/modules/manager/cargo/extract.spec.ts` | 46 | returns null for invalid toml | `crates/renovate-core/src/extractors/cargo.rs` | `empty_manifest_returns_empty_list` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 52 | returns null for empty dependencies | `crates/renovate-core/src/extractors/cargo.rs` | `empty_manifest_returns_empty_list` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 73 | extracts multiple dependencies simple | `crates/renovate-core/src/extractors/cargo.rs` | `extracts_simple_string_deps` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 79 | extracts multiple dependencies advanced | `crates/renovate-core/src/extractors/cargo.rs` | `extracts_table_deps_with_version` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 85 | handles inline tables | `crates/renovate-core/src/extractors/cargo.rs` | `extracts_table_deps_with_version` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 91 | handles standard tables | `crates/renovate-core/src/extractors/cargo.rs` | `version_constraint_forms_are_preserved` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | — | platform-specific deps extracted | `crates/renovate-core/src/extractors/cargo.rs` | `target_cfg_dependencies_extracted` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | — | workspace deps extracted | `crates/renovate-core/src/extractors/cargo.rs` | `workspace_dependencies_extracted`, `workspace_and_member_deps_both_extracted` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | — | path dep is skipped | `crates/renovate-core/src/extractors/cargo.rs` | `path_dep_is_skipped` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | — | git dep is skipped | `crates/renovate-core/src/extractors/cargo.rs` | `git_dep_is_skipped` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | — | dev/build deps have correct type | `crates/renovate-core/src/extractors/cargo.rs` | `dev_and_build_deps_have_correct_type` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | — | `package.name` field overrides crate name | `crates/renovate-core/src/extractors/cargo.rs` | `package_field_overrides_name` | ported |
+| `lib/modules/manager/cargo/extract.spec.ts` | 103 | extracts registry URLs from `.cargo/config.toml` | `crates/renovate-core/src/extractors/cargo.rs` | (not tested — no config.toml support yet) | pending |
+
+---
+
 ## `enabledManagers` filtering
 
 | Renovate test file | Line | Renovate test | Rust location | Rust test | Status |
@@ -382,7 +402,7 @@ relevant section above.
 |--------------------|-------|----------|
 | `lib/config/presets/index.spec.ts` | Remote preset resolution (`github>`) | high |
 | `lib/modules/manager/npm/extract.spec.ts` | npm dep extraction edge cases | high |
-| `lib/modules/manager/cargo/extract.spec.ts` | Cargo workspace dep extraction | high |
+| `lib/modules/manager/cargo/extract.spec.ts` | Cargo workspace dep extraction | `crates/renovate-core/src/extractors/cargo.rs` | `workspace_dependencies_extracted`, `workspace_and_member_deps_both_extracted` | ported |
 | `lib/workers/repository/updates/branch-name.spec.ts` | Group branch naming | medium |
 | `lib/modules/datasource/npm/index.spec.ts` | npm registry lookup | high |
 | `lib/modules/datasource/docker/index.spec.ts` | Docker Hub lookup | medium |

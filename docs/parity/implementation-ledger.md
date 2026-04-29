@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0365  | 2026-04-29 | Test map expansion: add cargo extractor section (12 entries from cargo/extract.spec.ts), fix future-planned table entries, update cargo/extract entry format | Complete | See test-map. |
 | 0364  | 2026-04-29 | Port `migration.spec.ts` packages + groupName migration: deprecated `packages` field merged into `packageRules`; `groupName: ["name"]` (array) deserialized as first element string; 2 new tests; 1753 tests | Complete | See below. |
 | 0363  | 2026-04-29 | `removedPresets` normalization + extends string-to-array: `normalize_preset()` applies full Renovate `removedPresets` map with chained resolution (`:unpublishSafe`→`npm:unpublishSafe`→`security:minimumReleaseAgeNpm`); `extends` + `schedule` accept bare strings via `deserialize_string_or_vec`; 5 new tests from migration.spec.ts; 1751 tests | Complete | See below. |
 | 0362  | 2026-04-29 | Schedule string migration + string-or-array deserialization: `"every friday"` → `"on friday"` (migrate_schedule_string); `schedule`/`automergeSchedule` now accept bare strings via `deserialize_string_or_vec`; 3 new tests from migration.spec.ts; 1746 tests | Complete | See below. |
