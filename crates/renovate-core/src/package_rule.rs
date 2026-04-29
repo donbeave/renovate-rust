@@ -269,6 +269,13 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `versionCompatibility`.
     pub version_compatibility: Option<String>,
+    /// Custom changelog URL template.  When set, Renovate puts this URL in the
+    /// PR body instead of auto-detecting the changelog.  Supports Handlebars
+    /// templates (e.g. `{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}`).
+    /// Stored and used during PR generation; not evaluated during dep scanning.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `changelogUrl`.
+    pub changelog_url: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -794,6 +801,8 @@ pub struct RuleEffects {
     pub replacement_version: Option<String>,
     /// Version-compatibility regex pattern (forwarded to updater; not evaluated here).
     pub version_compatibility: Option<String>,
+    /// Custom changelog URL template (forwarded to PR generator; not evaluated here).
+    pub changelog_url: Option<String>,
 }
 
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────

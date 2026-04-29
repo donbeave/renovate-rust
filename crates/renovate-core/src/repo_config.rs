@@ -416,6 +416,14 @@ fn expand_compound_presets(extends: &[String]) -> Vec<String> {
                     result.push("config:best-practices".to_owned());
                 }
             }
+            // helpers:followTypescriptNext/Rc expand to :followTag(typescript, next/rc).
+            // Renovate reference: lib/config/presets/internal/helpers.preset.ts
+            "helpers:followTypescriptNext" => {
+                result.push(":followTag(typescript, next)".to_owned());
+            }
+            "helpers:followTypescriptRc" => {
+                result.push(":followTag(typescript, rc)".to_owned());
+            }
             // workarounds:all expands to all known crowd-sourced workaround presets.
             // Renovate reference: lib/config/presets/internal/workarounds.preset.ts
             "workarounds:all" => {
@@ -1281,6 +1289,7 @@ fn resolve_extends_range_strategy_rules(extends: &[String]) -> Vec<PackageRule> 
 /// - `:doNotPinPackage(name)` — set rangeStrategy: replace for the named package
 /// - `:semanticCommitTypeAll(type)` — set semanticCommitType for all packages
 /// - `:pathSemanticCommitType(path, type)` — set semanticCommitType for path-matched packages
+/// - `:followTag(pkg, tag)` — follow a specific dist-tag for the named package
 ///
 /// Renovate reference: `lib/config/presets/internal/default.preset.ts`
 fn resolve_extends_parameterized_rules(extends: &[String]) -> Vec<PackageRule> {
@@ -1314,6 +1323,18 @@ fn resolve_extends_parameterized_rules(extends: &[String]) -> Vec<PackageRule> {
                 rules.push(PackageRule {
                     match_file_names: vec![args[0].to_owned()],
                     semantic_commit_type: Some(args[1].to_owned()),
+                    ..Default::default()
+                });
+            }
+            // :followTag(pkg, tag) → inject a packageRule that follows the given dist-tag.
+            // Used by helpers:followTypescriptNext, helpers:followTypescriptRc.
+            ":followTag" | "followTag"
+                if args.len() >= 2 && !args[0].is_empty() && !args[1].is_empty() =>
+            {
+                rules.push(PackageRule {
+                    match_package_names: vec![args[0].to_owned()],
+                    has_name_constraint: true,
+                    follow_tag: Some(args[1].to_owned()),
                     ..Default::default()
                 });
             }
@@ -2619,7 +2640,8 @@ fn resolve_extends_parameterized(extends: &[String]) -> ParamOverrides {
     for preset in extends {
         let (name, args) = parse_preset_args(preset.as_str());
         match name {
-            "label" | "labels" => {
+            // :label(foo) sets labels: ["foo"]; :labels(a, b) sets labels: ["a", "b"].
+            ":label" | "label" | ":labels" | "labels" => {
                 for arg in &args {
                     if !arg.is_empty() && !labels.contains(&arg.to_string()) {
                         labels.push(arg.to_string());
@@ -2781,6 +2803,8 @@ impl RepoConfig {
             replacement_version: Option<String>,
             #[serde(rename = "versionCompatibility")]
             version_compatibility: Option<String>,
+            #[serde(rename = "changelogUrl")]
+            changelog_url: Option<String>,
         }
 
         #[derive(Deserialize)]
@@ -3094,6 +3118,7 @@ impl RepoConfig {
                     replacement_name: r.replacement_name,
                     replacement_version: r.replacement_version,
                     version_compatibility: r.version_compatibility,
+                    changelog_url: r.changelog_url,
                 }
             })
             .collect();
@@ -3680,6 +3705,9 @@ impl RepoConfig {
                 effects
                     .version_compatibility
                     .clone_from(&rule.version_compatibility);
+            }
+            if rule.changelog_url.is_some() {
+                effects.changelog_url.clone_from(&rule.changelog_url);
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -8119,6 +8147,102 @@ mod rule_effects_tests {
             effects_ubuntu.versioning.as_deref(),
             Some("ubuntu"),
             "workarounds:all must include ubuntuDockerVersioning"
+        );
+    }
+
+    // ── :followTag / helpers:followTypescript* tests ──────────────────────────
+
+    #[test]
+    fn follow_tag_preset_injects_packagerule() {
+        let c = RepoConfig::parse(r#"{"extends": [":followTag(typescript, next)"]}"#);
+        let ctx = DepContext::for_dep("typescript")
+            .with_manager("npm")
+            .with_datasource("npm");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.follow_tag.as_deref(),
+            Some("next"),
+            ":followTag(typescript, next) must set followTag=next for typescript"
+        );
+    }
+
+    #[test]
+    fn helpers_follow_typescript_next_sets_follow_tag() {
+        let c = RepoConfig::parse(r#"{"extends": ["helpers:followTypescriptNext"]}"#);
+        let ctx = DepContext::for_dep("typescript")
+            .with_manager("npm")
+            .with_datasource("npm");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.follow_tag.as_deref(),
+            Some("next"),
+            "helpers:followTypescriptNext must set followTag=next for typescript"
+        );
+    }
+
+    #[test]
+    fn helpers_follow_typescript_rc_sets_follow_tag() {
+        let c = RepoConfig::parse(r#"{"extends": ["helpers:followTypescriptRc"]}"#);
+        let ctx = DepContext::for_dep("typescript").with_manager("npm");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.follow_tag.as_deref(),
+            Some("rc"),
+            "helpers:followTypescriptRc must set followTag=rc for typescript"
+        );
+    }
+
+    #[test]
+    fn follow_tag_preset_does_not_match_other_packages() {
+        let c = RepoConfig::parse(r#"{"extends": [":followTag(typescript, next)"]}"#);
+        let ctx = DepContext::for_dep("react").with_manager("npm");
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.follow_tag, None,
+            ":followTag(typescript, next) must not affect other packages"
+        );
+    }
+
+    // ── :label / :labels preset tests ────────────────────────────────────────
+
+    #[test]
+    fn label_preset_adds_label_to_repo() {
+        let c = RepoConfig::parse(r#"{"extends": [":label(security)"]}"#);
+        let ctx = DepContext::for_dep("lodash");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.labels.contains(&"security".to_owned()),
+            ":label(security) must add 'security' label"
+        );
+    }
+
+    #[test]
+    fn labels_preset_adds_multiple_labels() {
+        let c = RepoConfig::parse(r#"{"extends": [":labels(security, dependencies)"]}"#);
+        let ctx = DepContext::for_dep("lodash");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.labels.contains(&"security".to_owned()),
+            ":labels must add first label"
+        );
+        assert!(
+            effects.labels.contains(&"dependencies".to_owned()),
+            ":labels must add second label"
+        );
+    }
+
+    // ── changelogUrl per-rule field tests ─────────────────────────────────────
+
+    #[test]
+    fn changelog_url_parsed_from_package_rules() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["github-releases"], "changelogUrl": "{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}"}]}"#,
+        );
+        let ctx = DepContext::for_dep("actions/checkout").with_datasource("github-releases");
+        let effects = c.collect_rule_effects(&ctx);
+        assert!(
+            effects.changelog_url.is_some(),
+            "changelogUrl must be collected from packageRules"
         );
     }
 
