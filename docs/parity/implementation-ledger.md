@@ -21,6 +21,7 @@ should be able to plan the next slice from this file alone.
 
 | Slice | Date       | Theme                          | State    | Notes |
 |-------|------------|--------------------------------|----------|-------|
+| 0310  | 2026-04-29 | Bug fix: remove duplicate group:recommended expansion in `resolve_extends_group_presets` — the handler for `config:recommended` was running in both `expand_compound_presets` AND `resolve_extends_group_presets`, injecting rules twice | Complete | See below. |
 | 0309  | 2026-04-29 | `versioning` field in `packageRules`: parsed from JSON, stored in `PackageRule` and `RuleEffects`, collected with last-rule-wins; 2 tests | Complete | See below. |
 | 0308  | 2026-04-29 | Fix `config:recommended` to expand `:semanticPrefixFixDepsChoreOthers`, `:ignoreModulesAndTests`, `group:monorepos`, `group:recommended` in `expand_compound_presets`; `config:best-practices` also expanded; 2 tests | Complete | See below. |
 | 0307  | 2026-04-29 | 12 more group presets: `jwtFramework`, `atlaskit`, `dotNetCore`, `googleapis`, `jekyllEcosystem`, `postcss`, `vite`, `pulumi` (5 rules), `test`, `testNonMajor`, `unitTest`, `unitTestNonMajor`; `PHP_UNIT_TEST_PACKAGES` const; 3 tests | Complete | See below. |

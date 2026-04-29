@@ -1093,14 +1093,10 @@ fn resolve_extends_group_presets(
                     "group:monorepos preset — partial support (grouped dep names not expanded)"
                 );
             }
-            // config:recommended transitively includes group:monorepos and group:recommended.
-            // Expand group:recommended here so that `extends: ["config:recommended"]` users
-            // get the full group preset treatment.
-            "config:recommended" | "config:base" | "config:best-practices" => {
-                let sub_extends = vec!["group:recommended".to_string()];
-                let (sub_rules, _) = resolve_extends_group_presets(&sub_extends);
-                rules.extend(sub_rules);
-            }
+            // config:recommended is expanded by expand_compound_presets() before this
+            // function is called, so "group:recommended" is already in effective_extends
+            // when we get here. No separate handling needed — just skip the raw preset name.
+            "config:recommended" | "config:base" | "config:best-practices" => {}
             // group:allDigest — group all digest-pinned updates into one branch.
             // Digest updates are not yet implemented in the pipeline, so this rule
             // has no match_update_types constraint (digest is not an UpdateType variant).
