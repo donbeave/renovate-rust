@@ -173,6 +173,18 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `semanticCommits`.
     pub semantic_commits: Option<String>,
 
+    /// Conventional-commit type prefix to use when semantic commits are enabled.
+    /// Default: `"chore"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `semanticCommitType`.
+    pub semantic_commit_type: String,
+
+    /// Conventional-commit scope to use when semantic commits are enabled.
+    /// Default: `"deps"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `semanticCommitScope`.
+    pub semantic_commit_scope: String,
+
     // ── Preset inheritance ────────────────────────────────────────────────────
     /// Preset references to extend (e.g. `["config:recommended"]`).
     /// Built-in presets are resolved and their config effects merged at parse
@@ -554,6 +566,10 @@ impl RepoConfig {
             separate_minor_patch: bool,
             #[serde(rename = "semanticCommits")]
             semantic_commits: Option<String>,
+            #[serde(rename = "semanticCommitType", default = "default_semantic_commit_type")]
+            semantic_commit_type: String,
+            #[serde(rename = "semanticCommitScope", default = "default_semantic_commit_scope")]
+            semantic_commit_scope: String,
             #[serde(default)]
             extends: Vec<String>,
             #[serde(rename = "minimumReleaseAge")]
@@ -582,6 +598,14 @@ impl RepoConfig {
 
         fn default_range_strategy() -> String {
             "auto".to_owned()
+        }
+
+        fn default_semantic_commit_type() -> String {
+            "chore".to_owned()
+        }
+
+        fn default_semantic_commit_scope() -> String {
+            "deps".to_owned()
         }
 
         fn default_pr_hourly_limit() -> u32 {
@@ -712,6 +736,8 @@ impl RepoConfig {
             separate_major_minor: group_separate_major_minor.unwrap_or(raw.separate_major_minor),
             separate_multiple_major: raw.separate_multiple_major,
             separate_minor_patch: raw.separate_minor_patch,
+            semantic_commit_type: raw.semantic_commit_type,
+            semantic_commit_scope: raw.semantic_commit_scope,
             semantic_commits: raw.semantic_commits.or_else(|| {
                 // `:semanticCommits` preset implies semanticCommits = "enabled"
                 if raw.extends.iter().any(|e| e == ":semanticCommits") {
@@ -1072,6 +1098,8 @@ impl Default for RepoConfig {
             separate_major_minor: true,
             separate_multiple_major: false,
             separate_minor_patch: false,
+            semantic_commit_type: "chore".to_owned(),
+            semantic_commit_scope: "deps".to_owned(),
             semantic_commits: None,
             extends: Vec::new(),
             minimum_release_age: None,

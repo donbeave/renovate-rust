@@ -167,7 +167,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     .commit_message_prefix
                     .as_deref()
                     .or(repo_cfg.commit_message_prefix.as_deref());
-                dep.pr_title = Some(branch::pr_title(
+                dep.pr_title = Some(branch::pr_title_full(
                     &dep.name,
                     latest,
                     is_major,
@@ -175,6 +175,8 @@ pub(crate) fn apply_update_blocking_to_report(
                     Some(effective_action).filter(|s| *s != "Update"),
                     effective_prefix,
                     effects.commit_message_topic.as_deref(),
+                    &repo_cfg.semantic_commit_type,
+                    &repo_cfg.semantic_commit_scope,
                 ));
                 dep.group_name = effects.group_name;
                 dep.automerge = effects.automerge;

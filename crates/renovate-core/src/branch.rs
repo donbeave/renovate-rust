@@ -288,6 +288,35 @@ pub fn pr_title(
     custom_prefix: Option<&str>,
     commit_message_topic: Option<&str>,
 ) -> String {
+    pr_title_full(
+        dep_name,
+        new_version,
+        is_major,
+        semantic_commits,
+        action,
+        custom_prefix,
+        commit_message_topic,
+        "chore",
+        "deps",
+    )
+}
+
+/// Full `pr_title` with configurable semantic commit type and scope.
+///
+/// Used internally and by the CLI pipeline when `semanticCommitType` or
+/// `semanticCommitScope` are set in the config.
+#[allow(clippy::too_many_arguments)]
+pub fn pr_title_full(
+    dep_name: &str,
+    new_version: &str,
+    is_major: bool,
+    semantic_commits: Option<&str>,
+    action: Option<&str>,
+    custom_prefix: Option<&str>,
+    commit_message_topic: Option<&str>,
+    semantic_commit_type: &str,
+    semantic_commit_scope: &str,
+) -> String {
     let action = action.unwrap_or("Update");
     let topic = if let Some(t) = commit_message_topic {
         // Basic Handlebars substitution: {{depName}} and {{{depName}}}.
@@ -307,7 +336,12 @@ pub fn pr_title(
     match semantic_commits {
         Some("enabled") => {
             let breaking = if is_major { "!" } else { "" };
-            format!("chore(deps){breaking}: {body}")
+            let scope = if semantic_commit_scope.is_empty() {
+                String::new()
+            } else {
+                format!("({semantic_commit_scope})")
+            };
+            format!("{semantic_commit_type}{scope}{breaking}: {body}")
         }
         _ => body,
     }
@@ -552,6 +586,30 @@ mod tests {
         assert_eq!(
             pr_title("lodash", "4.17.21", false, None, Some("Bump"), None, None),
             "Bump dependency lodash to 4.17.21"
+        );
+    }
+
+    #[test]
+    fn pr_title_full_custom_type_and_scope() {
+        // semanticCommitType: "fix", semanticCommitScope: "security"
+        assert_eq!(
+            pr_title_full(
+                "express", "4.18.2", false, Some("enabled"), None, None, None,
+                "fix", "security"
+            ),
+            "fix(security): Update dependency express to 4.18.2"
+        );
+    }
+
+    #[test]
+    fn pr_title_full_empty_scope() {
+        // semanticCommitScope: "" → no parentheses
+        assert_eq!(
+            pr_title_full(
+                "lodash", "5.0.0", true, Some("enabled"), None, None, None,
+                "chore", ""
+            ),
+            "chore!: Update dependency lodash to 5.0.0"
         );
     }
 
