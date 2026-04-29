@@ -338,7 +338,166 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `patch`.
     pub patch_config: Option<crate::package_rule::UpdateTypeConfig>,
+
+    /// Custom managers defined in `customManagers` config.
+    /// Each entry can extract dependencies from arbitrary files using regex.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `customManagers`,
+    /// `lib/modules/manager/custom/regex/` — regex strategy implementation.
+    pub custom_managers: Vec<CustomManager>,
 }
+
+// ── CustomManager ─────────────────────────────────────────────────────────────
+
+/// A single entry from the `customManagers` array in `renovate.json`.
+///
+/// Only `customType: "regex"` is supported; JSONata is out of scope.
+///
+/// Renovate reference: `lib/config/options/index.ts` — `customManagers`,
+/// `lib/modules/manager/custom/regex/` — extraction logic.
+#[derive(Debug, Clone, Default)]
+pub struct CustomManager {
+    /// The custom manager type. Only `"regex"` is currently supported.
+    pub custom_type: String,
+    /// Glob/regex patterns for files this manager should scan.
+    /// Mirrors `managerFilePatterns` (Renovate 39+) or legacy `fileMatch`.
+    pub file_patterns: Vec<String>,
+    /// List of regex patterns applied to file content.
+    /// Named capture groups: `datasource`, `depName`, `packageName`,
+    /// `currentValue`, `versioning`, `registryUrl`, `extractVersion`.
+    pub match_strings: Vec<String>,
+    /// Matching strategy: `"any"` (default), `"combination"`, `"recursive"`.
+    pub match_strings_strategy: String,
+    /// Default datasource when not captured by regex.
+    pub datasource_template: Option<String>,
+    /// Default dep name when not captured by regex.
+    pub dep_name_template: Option<String>,
+    /// Default package name when not captured by regex.
+    pub package_name_template: Option<String>,
+    /// Default versioning when not captured by regex.
+    pub versioning_template: Option<String>,
+    /// Default registry URL when not captured by regex.
+    pub registry_url_template: Option<String>,
+    /// Default extract version when not captured by regex.
+    pub extract_version_template: Option<String>,
+    /// Auto-replace string template for updating matched content.
+    pub auto_replace_string_template: Option<String>,
+}
+
+/// A dependency extracted by a `CustomManager` regex match.
+#[derive(Debug, Clone)]
+pub struct CustomExtractedDep {
+    /// Dependency name (from `depName` capture group or `depNameTemplate`).
+    pub dep_name: String,
+    /// Package name (from `packageName` capture group or `packageNameTemplate`, defaults to `dep_name`).
+    pub package_name: Option<String>,
+    /// Current version string (from `currentValue` capture group).
+    pub current_value: String,
+    /// Datasource identifier (e.g., `"npm"`, `"docker"`).
+    pub datasource: String,
+    /// Optional versioning scheme override.
+    pub versioning: Option<String>,
+    /// Optional registry URL override.
+    pub registry_url: Option<String>,
+    /// Optional extract version pattern.
+    pub extract_version: Option<String>,
+}
+
+impl CustomManager {
+    /// Return `true` when this custom manager should process `file_path`.
+    ///
+    /// The `file_patterns` list contains glob/regex patterns (same semantics
+    /// as Renovate's `managerFilePatterns`).  An empty list matches all files.
+    pub fn matches_file(&self, file_path: &str) -> bool {
+        use crate::string_match::match_regex_or_glob_list;
+        if self.file_patterns.is_empty() {
+            return true;
+        }
+        match_regex_or_glob_list(file_path, &self.file_patterns)
+    }
+
+    /// Apply this custom manager's regex patterns to `content` and return
+    /// all extracted dependencies.  Implements the `"any"` strategy:
+    /// each pattern is applied globally and each match yields one dep.
+    ///
+    /// Named capture groups recognised:
+    /// `datasource`, `depName`, `packageName`, `currentValue`,
+    /// `versioning`, `registryUrl`, `extractVersion`.
+    /// Template fields fill in for missing capture groups.
+    ///
+    /// Renovate reference:
+    /// `lib/modules/manager/custom/regex/strategies.ts` — `handleAny`.
+    pub fn extract_deps(&self, content: &str) -> Vec<CustomExtractedDep> {
+        if self.custom_type != "regex" || self.match_strings.is_empty() {
+            return Vec::new();
+        }
+        let mut deps = Vec::new();
+        for pattern in &self.match_strings {
+            // Renovate patterns may use the JavaScript regex literal `/pattern/flags`
+            // form. Strip enclosing slashes and flags if present.
+            let bare = if pattern.starts_with('/') {
+                pattern
+                    .trim_start_matches('/')
+                    .rsplit_once('/')
+                    .map(|(p, _flags)| p)
+                    .unwrap_or(pattern.as_str())
+            } else {
+                pattern.as_str()
+            };
+            let Ok(re) = regex::Regex::new(bare) else {
+                tracing::debug!(pattern = %bare, "customManagers: invalid regex pattern; skipping");
+                continue;
+            };
+            for caps in re.captures_iter(content) {
+                let datasource = caps
+                    .name("datasource")
+                    .map(|m| m.as_str().to_owned())
+                    .or_else(|| self.datasource_template.clone())
+                    .unwrap_or_default();
+                let dep_name = caps
+                    .name("depName")
+                    .map(|m| m.as_str().to_owned())
+                    .or_else(|| self.dep_name_template.clone())
+                    .unwrap_or_default();
+                let current_value = caps
+                    .name("currentValue")
+                    .map(|m| m.as_str().to_owned())
+                    .unwrap_or_default();
+                // Skip incomplete matches.
+                if dep_name.is_empty() || current_value.is_empty() || datasource.is_empty() {
+                    continue;
+                }
+                let package_name = caps
+                    .name("packageName")
+                    .map(|m| m.as_str().to_owned())
+                    .or_else(|| self.package_name_template.clone());
+                let versioning = caps
+                    .name("versioning")
+                    .map(|m| m.as_str().to_owned())
+                    .or_else(|| self.versioning_template.clone());
+                let registry_url = caps
+                    .name("registryUrl")
+                    .map(|m| m.as_str().to_owned())
+                    .or_else(|| self.registry_url_template.clone());
+                let extract_version = caps
+                    .name("extractVersion")
+                    .map(|m| m.as_str().to_owned())
+                    .or_else(|| self.extract_version_template.clone());
+                deps.push(CustomExtractedDep {
+                    dep_name,
+                    package_name,
+                    current_value,
+                    datasource,
+                    versioning,
+                    registry_url,
+                    extract_version,
+                });
+            }
+        }
+        deps
+    }
+}
+
 // ── Free helpers ─────────────────────────────────────────────────────────────
 
 /// Expand compound presets (presets that themselves extend other presets)
@@ -2990,6 +3149,42 @@ impl RepoConfig {
             major: Option<crate::package_rule::UpdateTypeConfig>,
             minor: Option<crate::package_rule::UpdateTypeConfig>,
             patch: Option<crate::package_rule::UpdateTypeConfig>,
+            #[serde(rename = "customManagers", default)]
+            custom_managers: Vec<RawCustomManager>,
+        }
+
+        #[derive(Deserialize, Default)]
+        struct RawCustomManager {
+            #[serde(rename = "customType", default)]
+            custom_type: String,
+            /// managerFilePatterns (Renovate 39+) or legacy fileMatch.
+            #[serde(rename = "managerFilePatterns", default)]
+            manager_file_patterns: Vec<String>,
+            /// Legacy fileMatch field — merged with managerFilePatterns.
+            #[serde(rename = "fileMatch", default)]
+            file_match: Vec<String>,
+            #[serde(rename = "matchStrings", default)]
+            match_strings: Vec<String>,
+            #[serde(rename = "matchStringsStrategy", default = "default_any_strategy")]
+            match_strings_strategy: String,
+            #[serde(rename = "datasourceTemplate")]
+            datasource_template: Option<String>,
+            #[serde(rename = "depNameTemplate")]
+            dep_name_template: Option<String>,
+            #[serde(rename = "packageNameTemplate")]
+            package_name_template: Option<String>,
+            #[serde(rename = "versioningTemplate")]
+            versioning_template: Option<String>,
+            #[serde(rename = "registryUrlTemplate")]
+            registry_url_template: Option<String>,
+            #[serde(rename = "extractVersionTemplate")]
+            extract_version_template: Option<String>,
+            #[serde(rename = "autoReplaceStringTemplate")]
+            auto_replace_string_template: Option<String>,
+        }
+
+        fn default_any_strategy() -> String {
+            "any".to_owned()
         }
 
         fn default_true() -> bool {
@@ -3429,6 +3624,28 @@ impl RepoConfig {
             major_config: raw.major,
             minor_config: raw.minor,
             patch_config: raw.patch,
+            custom_managers: raw
+                .custom_managers
+                .into_iter()
+                .map(|cm| {
+                    // Merge managerFilePatterns and legacy fileMatch.
+                    let mut file_patterns = cm.manager_file_patterns;
+                    file_patterns.extend(cm.file_match);
+                    CustomManager {
+                        custom_type: cm.custom_type,
+                        file_patterns,
+                        match_strings: cm.match_strings,
+                        match_strings_strategy: cm.match_strings_strategy,
+                        datasource_template: cm.datasource_template,
+                        dep_name_template: cm.dep_name_template,
+                        package_name_template: cm.package_name_template,
+                        versioning_template: cm.versioning_template,
+                        registry_url_template: cm.registry_url_template,
+                        extract_version_template: cm.extract_version_template,
+                        auto_replace_string_template: cm.auto_replace_string_template,
+                    }
+                })
+                .collect(),
         }
     }
 
@@ -3888,6 +4105,7 @@ impl Default for RepoConfig {
             major_config: None,
             minor_config: None,
             patch_config: None,
+            custom_managers: Vec::new(),
         }
     }
 }
@@ -8468,6 +8686,112 @@ mod rule_effects_tests {
         assert!(
             partial_c.package_rules.len() < all_c.package_rules.len(),
             "ignorePresets: individual workaround must remove just that preset's rules"
+        );
+    }
+
+    // ── customManagers tests ──────────────────────────────────────────────────
+
+    #[test]
+    fn custom_manager_parsed_from_json() {
+        // Use r##"..."## to avoid "# in the JSON content terminating the raw string.
+        let c = RepoConfig::parse(
+            r##"{
+            "customManagers": [{
+                "customType": "regex",
+                "managerFilePatterns": ["Dockerfile"],
+                "matchStrings": [
+                    "(?P<datasource>[\\w-]+) depName=(?P<depName>[^\\s]+)\\nENV (?P<currentValue>.+)"
+                ],
+                "datasourceTemplate": "docker"
+            }]
+        }"##,
+        );
+        assert_eq!(
+            c.custom_managers.len(),
+            1,
+            "one customManager must be parsed"
+        );
+        let cm = &c.custom_managers[0];
+        assert_eq!(cm.custom_type, "regex");
+        assert_eq!(cm.file_patterns, vec!["Dockerfile"]);
+        assert_eq!(cm.match_strings.len(), 1);
+        assert_eq!(cm.datasource_template.as_deref(), Some("docker"));
+    }
+
+    #[test]
+    fn custom_manager_extracts_deps_from_content() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            file_patterns: vec!["**/.env".to_owned()],
+            match_strings: vec![
+                r"# renovate: datasource=(?P<datasource>[\w-]+) depName=(?P<depName>[^\s]+)\nNODE_VERSION=(?P<currentValue>[^\s]+)".to_owned(),
+            ],
+            match_strings_strategy: "any".to_owned(),
+            ..Default::default()
+        };
+        let content = "# renovate: datasource=node-version depName=node\nNODE_VERSION=20.0.0\n";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1, "must extract one dep");
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].datasource, "node-version");
+        assert_eq!(deps[0].current_value, "20.0.0");
+    }
+
+    #[test]
+    fn custom_manager_uses_datasource_template_when_group_missing() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            file_patterns: vec!["*.env".to_owned()],
+            match_strings: vec![r"NODE_VERSION=(?P<currentValue>[^\s]+)".to_owned()],
+            match_strings_strategy: "any".to_owned(),
+            datasource_template: Some("node-version".to_owned()),
+            dep_name_template: Some("node".to_owned()),
+            ..Default::default()
+        };
+        let content = "NODE_VERSION=18.0.0\n";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].datasource, "node-version");
+        assert_eq!(deps[0].current_value, "18.0.0");
+    }
+
+    #[test]
+    fn custom_manager_file_match_legacy_field_parsed() {
+        let c = RepoConfig::parse(
+            r##"{
+            "customManagers": [{
+                "customType": "regex",
+                "fileMatch": ["^Makefile$"],
+                "matchStrings": ["TOOL_VERSION=(?P<currentValue>[\\d.]+)"],
+                "datasourceTemplate": "github-releases",
+                "depNameTemplate": "my-tool"
+            }]
+        }"##,
+        );
+        assert_eq!(
+            c.custom_managers[0].file_patterns,
+            vec!["^Makefile$"],
+            "legacy fileMatch must be merged into file_patterns"
+        );
+    }
+
+    #[test]
+    fn custom_manager_matches_file_by_pattern() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            file_patterns: vec!["**.env".to_owned(), "Dockerfile".to_owned()],
+            match_strings: vec!["X=(?P<currentValue>\\d+)".to_owned()],
+            match_strings_strategy: "any".to_owned(),
+            datasource_template: Some("npm".to_owned()),
+            dep_name_template: Some("node".to_owned()),
+            ..Default::default()
+        };
+        assert!(cm.matches_file(".env"), ".env must match **.env glob");
+        assert!(cm.matches_file("Dockerfile"), "Dockerfile must match exact");
+        assert!(
+            !cm.matches_file("package.json"),
+            "package.json must not match"
         );
     }
 }
