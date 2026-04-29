@@ -62,4 +62,13 @@ DOWNLOAD_URL="https://github.com/batect/batect/releases/download/${VERSION}/bate
     fn empty_returns_none() {
         assert!(extract("").is_none());
     }
+
+    #[test]
+    fn multiple_version_lines_uses_first() {
+        // Ported: "returns the first version from a wrapper script with multiple versions"
+        // batect-wrapper/extract.spec.ts line 31
+        let content = "#!/usr/bin/env bash\n{\n    VERSION=\"0.60.1\"\n    VERSION=\"0.63.0\"\n}";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.version, "0.60.1");
+    }
 }

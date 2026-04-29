@@ -199,4 +199,32 @@ metadata:
             Some(CrossplaneSkipReason::MissingPackage)
         );
     }
+
+    #[test]
+    fn empty_content_returns_empty() {
+        // Ported: "returns null for empty" — crossplane/extract.spec.ts line 12
+        assert!(extract("nothing here").is_empty());
+    }
+
+    #[test]
+    fn double_quoted_api_version_extracted() {
+        // Ported: "return result for double quoted pkg.crossplane.io apiVersion reference" — spec line 37
+        let content = r#"apiVersion: "pkg.crossplane.io/v1"
+kind: Configuration
+spec:
+  package: "xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "v0.6.0");
+    }
+
+    #[test]
+    fn single_quoted_api_version_extracted() {
+        // Ported: "return result for single quoted pkg.crossplane.io apiVersion reference" — spec line 58
+        let content = "apiVersion: 'pkg.crossplane.io/v1'\nkind: Configuration\nspec:\n  package: 'xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0'\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "v0.6.0");
+    }
 }
