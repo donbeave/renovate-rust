@@ -158,6 +158,7 @@ steps:
       - cache#some-branch: ~
 "#;
 
+    // Ported: "extracts multiple plugins in same file" — buildkite/extract.spec.ts line 22
     #[test]
     fn one_part_plugin() {
         let deps = extract(SAMPLE);
@@ -175,6 +176,7 @@ steps:
         assert!(dcp.skip_reason.is_none());
     }
 
+    // Ported: "extracts simple single plugin" — buildkite/extract.spec.ts line 11
     #[test]
     fn two_part_plugin() {
         let deps = extract(SAMPLE);
@@ -191,6 +193,7 @@ steps:
         );
     }
 
+    // Ported: "extracts git-based plugins" — buildkite/extract.spec.ts line 92
     #[test]
     fn github_url_plugin() {
         let deps = extract(SAMPLE);
@@ -207,6 +210,7 @@ steps:
         );
     }
 
+    // Ported: "adds skipReason" — buildkite/extract.spec.ts line 47
     #[test]
     fn non_semver_version_skipped() {
         let deps = extract(SAMPLE);
@@ -214,25 +218,24 @@ steps:
         assert_eq!(cache.skip_reason, Some(BuildkiteSkipReason::InvalidVersion));
     }
 
+    // Ported: "returns null for empty" — buildkite/extract.spec.ts line 7
     #[test]
     fn empty_content_returns_no_deps() {
-        // Ported: "returns null for empty" — buildkite/extract.spec.ts line 7
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts multiple plugins in same file" — buildkite/extract.spec.ts line 22
     #[test]
     fn multiple_plugins_extracted() {
-        // Ported: "extracts multiple plugins in same file" — buildkite/extract.spec.ts line 22
         let content = "steps:\n  - plugins:\n      docker-compose#v1.3.2:\n        build: app\n  - plugins:\n      docker-compose#v1.3.2:\n        run: app\n";
         let deps = extract(content);
-        // Deduplication may apply; at least 1 dep found
         assert!(!deps.is_empty());
         assert!(deps.iter().any(|d| d.current_value == "v1.3.2"));
     }
 
+    // Ported: "extracts arrays of plugins" — buildkite/extract.spec.ts line 70
     #[test]
     fn array_plugins_extracted() {
-        // Ported: "extracts arrays of plugins" — buildkite/extract.spec.ts line 70
         let content = "steps:\n  - plugins:\n      - docker-login#v2.0.1:\n          username: xyz\n      - docker-compose#v2.5.1:\n          build: app\n";
         let deps = extract(content);
         assert!(!deps.is_empty());

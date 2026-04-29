@@ -226,6 +226,7 @@ jobs:
         assert!(!deps.iter().any(|d| d.dep.image.starts_with('$')));
     }
 
+    // Ported: "returns null for empty" — circleci/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
@@ -238,6 +239,7 @@ jobs:
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "extracts orbs too" — circleci/extract.spec.ts line 93
     #[test]
     fn extracts_orbs() {
         let orbs = extract_orbs(SAMPLE);

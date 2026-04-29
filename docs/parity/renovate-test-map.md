@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 63 / 126 actionable tests ported (50%) — updated 2026-04-29
+**Overall progress:** 71 / 146 actionable tests ported (49%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -411,6 +411,50 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/buildkite/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/buildkite/extract.spec.ts
+**Total tests:** 11 | **Ported:** 6 | **Actionable:** 11 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 7 | ported | `buildkite.rs` | `empty_content_returns_no_deps` | — |
+| extracts simple single plugin | 11 | ported | `buildkite.rs` | `two_part_plugin` | — |
+| extracts multiple plugins in same file | 22 | ported | `buildkite.rs` | `one_part_plugin` | — |
+| adds skipReason | 47 | ported | `buildkite.rs` | `non_semver_version_skipped` | — |
+| extracts arrays of plugins | 70 | ported | `buildkite.rs` | `array_plugins_extracted` | — |
+| extracts git-based plugins | 92 | ported | `buildkite.rs` | `github_url_plugin` | — |
+| extracts git-based plugin with .git at the end of its name | 105 | pending | — | — | — |
+| extracts plugins outside plugins sections | 121 | pending | — | — | — |
+| extracts plugin with preceding ? | 140 | pending | — | — | — |
+| extracts plugin tags from bitbucket | 155 | pending | — | — | — |
+| extracts plugin tags with quotes | 178 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/circleci/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/extract.spec.ts
+**Total tests:** 9 | **Ported:** 2 | **Actionable:** 9 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 12 | ported | `circleci.rs` | `empty_content_returns_no_deps` | — |
+| handles registry alias | 16 | pending | — | — | — |
+| extracts multiple image and resolves yaml anchors | 48 | pending | — | — | — |
+| extracts orbs too | 93 | ported | `circleci.rs` | `extracts_orbs` | — |
+| extracts image without leading dash | 200 | pending | — | — | — |
+| extracts and exclude android images | 226 | pending | — | — | — |
+| extracts orbs without jobs | 237 | pending | — | — | — |
+| extracts executors | 251 | pending | — | — | — |
+| extracts orb definitions | 273 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -423,9 +467,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
 | `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 10 | partial |
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
-| `lib/modules/manager/buildkite/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/buildkite.rs` | 7 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
-| `lib/modules/manager/circleci/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/circleci.rs` | 10 | partial |
 | `lib/modules/manager/composer/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/composer.rs` | 9 | partial |
 | `lib/modules/manager/conan/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/conan.rs` | 5 | partial |
 | `lib/modules/manager/copier/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/copier.rs` | 8 | partial |
