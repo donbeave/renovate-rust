@@ -278,4 +278,76 @@ resources:
         let deps = extract(content);
         assert!(containers(&deps).is_empty());
     }
+
+    // Ported: "should extract stages" — azure-pipelines/extract.spec.ts line 447
+    #[test]
+    fn extracts_task_from_nested_stages() {
+        let content = r#"stages:
+- stage: stage_one
+  jobs:
+    - job: job_one
+      steps:
+        - task: Bash@3
+          inputs:
+            script: 'echo Hello World'
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+        assert_eq!(t[0].version, "3");
+    }
+
+    // Ported: "should extract jobs" — azure-pipelines/extract.spec.ts line 470
+    #[test]
+    fn extracts_task_from_nested_jobs() {
+        let content = r#"jobs:
+- job: job_one
+  steps:
+    - task: Bash@3
+      inputs:
+        script: 'echo Hello World'
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+        assert_eq!(t[0].version, "3");
+    }
+
+    // Ported: "should extract steps" — azure-pipelines/extract.spec.ts line 491
+    #[test]
+    fn extracts_task_from_top_level_steps() {
+        let content = r#"steps:
+- task: Bash@3
+  inputs:
+    script: 'echo Hello World'
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+        assert_eq!(t[0].version, "3");
+    }
+
+    // Ported: "should return null when task alias used" — azure-pipelines/extract.spec.ts line 510
+    #[test]
+    fn task_alias_bash_not_extracted() {
+        let content = "steps:\n- bash: 'echo Hello World'\n";
+        let deps = extract(content);
+        assert!(tasks(&deps).is_empty());
+    }
+
+    // Ported: "return null on an invalid file" — azure-pipelines/extract.spec.ts line 30
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        assert!(extract("not valid yaml: [").is_empty());
+    }
+
+    // Ported: "should return null when there is no dependency found" — azure-pipelines/extract.spec.ts line 245
+    #[test]
+    fn no_tasks_or_containers_returns_empty() {
+        let content = "pool:\n  vmImage: ubuntu-latest\n";
+        assert!(extract(content).is_empty());
+    }
 }
