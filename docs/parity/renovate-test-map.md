@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 135 / 310 actionable tests ported (44%) — updated 2026-04-29
+**Overall progress:** 140 / 310 actionable tests ported (45%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -660,13 +660,13 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles custom hosts | 194 | ported | `dockerfile.rs` | `extracts_image_with_custom_host` | — |
 | handles custom hosts and suffix | 215 | pending | — | — | — |
 | handles custom hosts with port | 236 | ported | `dockerfile.rs` | `registry_port_not_confused_with_tag` | — |
-| handles custom hosts with port without tag | 257 | pending | — | — | — |
+| handles custom hosts with port without tag | 257 | ported | `dockerfile.rs` | `custom_host_with_port_no_tag` | — |
 | handles quay hosts with port | 278 | pending | — | — | — |
-| handles namespaced images | 295 | pending | — | — | — |
+| handles namespaced images | 295 | ported | `dockerfile.rs` | `extracts_namespaced_image` | — |
 | handles custom hosts with namespace | 312 | ported | `dockerfile.rs` | `extracts_scoped_image` | — |
-| handles abnormal spacing | 333 | pending | — | — | — |
+| handles abnormal spacing | 333 | ported | `dockerfile.rs` | `abnormal_spacing_after_from` | — |
 | extracts multiple FROM tags | 354 | ported | `dockerfile.rs` | `only_from_instructions_extracted` | — |
-| extracts tags from Dockerfile which begins with a BOM marker | 386 | pending | — | — | — |
+| extracts tags from Dockerfile which begins with a BOM marker | 386 | ported | `dockerfile.rs` | `bom_marker_stripped` | — |
 | skips scratches | 407 | ported | `dockerfile.rs` | `scratch_is_skipped` | — |
 | skips named multistage FROM tags | 412 | ported | `dockerfile.rs` | `stage_reference_is_skipped` | — |
 | handles COPY --from | 433 | pending | — | — | — |

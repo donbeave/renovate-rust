@@ -62,6 +62,7 @@ pub enum DockerfileExtractError {
 /// Returns a list of deps, one per `FROM` instruction (excluding comment-only
 /// `FROM` lines and other non-image uses).
 pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileExtractError> {
+    let content = content.trim_start_matches('\u{FEFF}');
     let logical_lines = join_continuations(content);
     let mut stage_names: Vec<String> = Vec::new();
     let mut out = Vec::new();
@@ -376,6 +377,22 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("8"));
     }
 
+    // Ported: "handles custom hosts with port without tag" — dockerfile/extract.spec.ts line 257
+    #[test]
+    fn custom_host_with_port_no_tag() {
+        let deps = extract_ok("FROM registry2.something.info:5005/node\n");
+        assert_eq!(deps[0].image, "registry2.something.info:5005/node");
+        assert!(deps[0].tag.is_none());
+    }
+
+    // Ported: "handles namespaced images" — dockerfile/extract.spec.ts line 295
+    #[test]
+    fn extracts_namespaced_image() {
+        let deps = extract_ok("FROM mynamespace/node:8\n");
+        assert_eq!(deps[0].image, "mynamespace/node");
+        assert_eq!(deps[0].tag.as_deref(), Some("8"));
+    }
+
     // Ported: "handles custom hosts with port" — dockerfile/extract.spec.ts line 236
     #[test]
     fn registry_port_not_confused_with_tag() {
@@ -383,6 +400,14 @@ mod tests {
         let deps = extract_ok("FROM registry.example.com:5000/myimage:1.2.3");
         assert_eq!(deps[0].image, "registry.example.com:5000/myimage");
         assert_eq!(deps[0].tag.as_deref(), Some("1.2.3"));
+    }
+
+    // Ported: "handles abnormal spacing" — dockerfile/extract.spec.ts line 333
+    #[test]
+    fn abnormal_spacing_after_from() {
+        let deps = extract_ok("FROM    registry.allmine.info:5005/node:8.7.0\n\n");
+        assert_eq!(deps[0].image, "registry.allmine.info:5005/node");
+        assert_eq!(deps[0].tag.as_deref(), Some("8.7.0"));
     }
 
     // ── AS alias and stage references ─────────────────────────────────────────
@@ -454,6 +479,18 @@ mod tests {
         assert_eq!(deps[0].image, "image2");
         assert_eq!(deps[0].tag.as_deref(), Some("1.0.0"));
         assert_eq!(deps[0].digest.as_deref(), Some("sha256:abcdef"));
+    }
+
+    // ── BOM marker ───────────────────────────────────────────────────────────
+
+    // Ported: "extracts tags from Dockerfile which begins with a BOM marker" — dockerfile/extract.spec.ts line 386
+    #[test]
+    fn bom_marker_stripped() {
+        let content = "\u{FEFF}FROM node:6.12.3 as frontend\n\n";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
+        assert_eq!(deps[0].tag.as_deref(), Some("6.12.3"));
     }
 
     // ── non-FROM instructions are ignored ─────────────────────────────────────
