@@ -86,7 +86,7 @@ pub fn extract(content: &str) -> Result<Vec<ComposeExtractedDep>, ComposeExtract
         // When we encounter a new key at the same or outer indent level as the
         // current service, flush the pending image (if any) before resetting.
         if let Some(si) = service_indent
-            && indent <= si
+            && indent < si
             && !stripped.starts_with('-')
         {
             // We've left the previous service block.
@@ -272,7 +272,7 @@ services:
 
     // ── comment lines ─────────────────────────────────────────────────────────
 
-    // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
+    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
     #[test]
     fn comment_lines_are_ignored() {
         let content =
@@ -302,7 +302,7 @@ db:
         assert!(deps.iter().any(|d| d.image == "postgres"));
     }
 
-    // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
+    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
     #[test]
     fn no_false_positives_for_non_image_keys() {
         let content = "services:\n  app:\n    imagePath: /tmp/image\n    image: nginx:1.25\n";
@@ -348,5 +348,42 @@ worker:
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].image, "node");
         assert_eq!(deps[0].tag.as_deref(), Some("20.0.0"));
+    }
+
+    // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
+    #[test]
+    fn no_version_key_extracts_eight_deps() {
+        // docker-compose.3-no-version.yml: services format without top-level `version:`.
+        // Rust extractor skips services with `build:` (debugapp) → 8 deps same as TypeScript.
+        let content = r#"services:
+  redis:
+    image: quay.io/something/redis:alpine
+  worker:
+    image: "node:10.0.0"
+  db:
+    image: "postgres:9.4.0"
+  vote:
+    image: dockersamples/examplevotingapp_vote:before
+  result:
+    image: 'dockersamples/examplevotingapp_result:before'
+  votingworker:
+    image: dockersamples/examplevotingapp_worker
+  visualizer:
+    image: dockersamples/visualizer:stable
+  edplugins:
+    image: ${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}
+  debugapp:
+    image: app-local-debug
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+"#;
+        let deps = extract_ok(content);
+        // debugapp has build: directive → skipped; edplugins → VariableRef skip (still a dep)
+        assert_eq!(deps.len(), 8);
+        assert!(deps.iter().any(|d| d.image == "quay.io/something/redis"));
+        assert!(deps.iter().any(|d| d.image == "node"));
+        assert!(deps.iter().any(|d| d.image == "postgres"));
+        assert!(deps.iter().any(|d| d.image == "dockersamples/visualizer"));
     }
 }
