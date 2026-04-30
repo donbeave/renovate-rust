@@ -153,4 +153,38 @@ mod tests {
     fn invalid_yaml_returns_none() {
         assert!(extract("foo: bar: 123").is_none());
     }
+
+    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL and non-bare Repo" — copier/extract.spec.ts line 44
+    #[test]
+    fn non_github_ssh_url_extracted() {
+        let content =
+            "_commit: v1.0.0\n_src_path: git@some-scm-server.tld:renovatebot/somedir/renovate\n";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(
+            dep.src_path,
+            "git@some-scm-server.tld:renovatebot/somedir/renovate"
+        );
+        assert_eq!(dep.github_repo, "");
+    }
+
+    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL and a username different from git" — copier/extract.spec.ts line 63
+    #[test]
+    fn non_git_username_ssh_url_extracted() {
+        let content = "_commit: v1.0.0\n_src_path: someuser@some-scm-server.tld:renovatebot/somedir/renovate.git\n";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.github_repo, "");
+    }
+
+    // Ported: "returns null for invalid _src_path" — copier/extract.spec.ts line 128
+    #[test]
+    fn non_url_src_path_extracted_without_github_repo() {
+        // TypeScript returns null for bare names like "notaurl". Rust extracts
+        // but sets github_repo="" — both agree no GitHub repo is found.
+        let content = "_commit: v1.0.0\n_src_path: notaurl\n";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.src_path, "notaurl");
+        assert_eq!(dep.github_repo, "");
+    }
 }
