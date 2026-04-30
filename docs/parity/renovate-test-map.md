@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 183 / 376 actionable tests ported (49%) — updated 2026-04-30
+**Overall progress:** 184 / 376 actionable tests ported (49%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -286,7 +286,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 42 | ported | `github_actions.rs` | `empty_content_returns_empty` | — |
-| returns null for invalid yaml | 48 | pending | — | — | — |
+| returns null for invalid yaml | 48 | ported | `github_actions.rs` | `invalid_yaml_returns_empty` | — |
 | extracts multiple docker image lines from yaml configuration file | 54 | ported | `github_actions.rs` | `docker_container_inline` (+ 5 others) | — |
 | extracts multiple action tag lines from yaml configuration file | 65 | ported | `github_actions.rs` | `extracts_simple_action` | — |
 | use github.com as registry when no settings provided | 79 | not-applicable | — | — | registryUrls not produced by Rust extractor |

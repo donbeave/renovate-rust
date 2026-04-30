@@ -715,6 +715,13 @@ jobs:
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns null for invalid yaml" — github-actions/extract.spec.ts line 48
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        // Our line-scanner doesn't parse YAML — malformed YAML with no `uses:` lines is empty.
+        assert!(extract("nothing here: [").is_empty());
+    }
+
     #[test]
     fn owner_repo_strips_subpath() {
         assert_eq!(
