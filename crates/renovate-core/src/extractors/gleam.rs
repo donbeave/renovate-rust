@@ -72,6 +72,7 @@ pub fn extract(content: &str) -> Vec<GleamDep> {
 mod tests {
     use super::*;
 
+    // Ported: "should extract dev and prod dependencies" — gleam/extract.spec.ts line 8
     #[test]
     fn extracts_dependencies() {
         let content = r#"
@@ -112,6 +113,7 @@ gleeunit = "~> 1.0"
         assert_eq!(deps.len(), 2);
     }
 
+    // Ported: "should return null when gleam.toml is invalid" — gleam/extract.spec.ts line 82
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

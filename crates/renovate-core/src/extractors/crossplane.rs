@@ -138,6 +138,7 @@ fn is_upbound_registry(image: &str) -> bool {
 mod tests {
     use super::*;
 
+    // Ported: "full test" — crossplane/extract.spec.ts line 94
     #[test]
     fn extracts_provider() {
         let content = r#"

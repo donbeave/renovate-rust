@@ -470,4 +470,46 @@ libc = "0.2"
         assert_eq!(deps[0].dep_name, "foobar");
         assert_eq!(deps[0].skip_reason, Some(SkipReason::WorkspaceInherited));
     }
+
+    // Ported: "handles inline tables" — cargo/extract.spec.ts line 85
+    #[test]
+    fn handles_inline_tables() {
+        let toml = r#"
+[package]
+name = "inline-tables-example"
+version = "0.1.2"
+
+[dependencies]
+pcap-sys = { version = "0.1", path = "pcap-sys" }
+pnet = { version = "0.21.0", optional = true, default-features = false}
+dep1 = {optional=true,path="./foo/bar",default-features   = true,        version="1.2"}
+dep2 ={  optional=false, path="./foo/bar",      default-features=    true, version    ="3.4"}
+dep3 ={ version=     "~12.3.1",      default-features=    true, path    ="./foo/bar"}
+dep4 = { version = "INVALID 3.3.1 VERSION" }
+dep5 = { version = "3.2.1" }
+dep6 = { vesion = "1.2.3" }
+"#;
+        let deps = extract(toml).unwrap();
+        assert_eq!(deps.len(), 8);
+
+        let pnet = deps.iter().find(|d| d.dep_name == "pnet").unwrap();
+        assert_eq!(pnet.current_value, "0.21.0");
+        assert!(pnet.skip_reason.is_none());
+
+        let dep4 = deps.iter().find(|d| d.dep_name == "dep4").unwrap();
+        assert_eq!(dep4.current_value, "INVALID 3.3.1 VERSION");
+        assert!(dep4.skip_reason.is_none());
+
+        let dep5 = deps.iter().find(|d| d.dep_name == "dep5").unwrap();
+        assert_eq!(dep5.current_value, "3.2.1");
+
+        let dep6 = deps.iter().find(|d| d.dep_name == "dep6").unwrap();
+        assert_eq!(dep6.skip_reason, Some(SkipReason::InvalidSpec));
+
+        let path_skipped: Vec<_> = deps
+            .iter()
+            .filter(|d| d.skip_reason == Some(SkipReason::PathDependency))
+            .collect();
+        assert_eq!(path_skipped.len(), 4); // pcap-sys, dep1, dep2, dep3
+    }
 }

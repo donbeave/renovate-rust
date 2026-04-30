@@ -71,6 +71,7 @@ mod tests {
   "requirements": ["requests==2.28.0", "aiohttp>=3.8.0", "no-version"]
 }"#;
 
+    // Ported: "extracts multiple requirements" — homeassistant-manifest/extract.spec.ts line 84
     #[test]
     fn extracts_requirements() {
         let deps = extract(SAMPLE);
@@ -78,6 +79,7 @@ mod tests {
         assert_eq!(req.current_value, "==2.28.0");
     }
 
+    // Ported: "supports requirements with other operators" — homeassistant-manifest/extract.spec.ts line 168
     #[test]
     fn extracts_range_version() {
         let deps = extract(SAMPLE);
@@ -85,51 +87,51 @@ mod tests {
         assert_eq!(aio.current_value, ">=3.8.0");
     }
 
+    // Ported: "returns null for invalid JSON" — homeassistant-manifest/extract.spec.ts line 9
     #[test]
     fn invalid_json_returns_empty() {
-        // Ported: "returns null for invalid JSON" — homeassistant-manifest/extract.spec.ts line 9
         assert!(extract("not valid json").is_empty());
     }
 
+    // Ported: "returns null for empty requirements" — homeassistant-manifest/extract.spec.ts line 45
     #[test]
     fn empty_requirements_returns_empty() {
-        // Ported: "returns null for empty requirements" — homeassistant-manifest/extract.spec.ts line 45
         let content = r#"{"domain": "test", "name": "Test Integration", "requirements": []}"#;
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns null when no requirements field" — homeassistant-manifest/extract.spec.ts line 55
     #[test]
     fn no_requirements_field_returns_empty() {
-        // Ported: "returns null when no requirements field" — homeassistant-manifest/extract.spec.ts line 55
         let content = r#"{"domain": "test", "name": "Test Integration"}"#;
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns null for non-Home Assistant manifest (missing domain)" — homeassistant-manifest/extract.spec.ts line 14
     #[test]
     fn missing_domain_returns_empty() {
-        // Ported: "returns null for non-Home Assistant manifest (missing domain)" — spec line 14
         let content = r#"{"name": "My Extension", "version": "1.0.0", "requirements": ["some-package==1.0.0"]}"#;
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns null for non-Home Assistant manifest (missing name)" — homeassistant-manifest/extract.spec.ts line 24
     #[test]
     fn missing_name_returns_empty() {
-        // Ported: "returns null for non-Home Assistant manifest (missing name)" — spec line 24
         let content =
             r#"{"domain": "test", "version": "1.0.0", "requirements": ["some-package==1.0.0"]}"#;
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns null for chrome extension manifest" — homeassistant-manifest/extract.spec.ts line 34
     #[test]
     fn chrome_extension_manifest_returns_empty() {
-        // Ported: "returns null for chrome extension manifest" — spec line 34
         let content = r#"{"manifest_version": 3, "name": "My Extension", "version": "1.0.0", "permissions": ["storage"]}"#;
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "extracts single requirement with exact version" — homeassistant-manifest/extract.spec.ts line 64
     #[test]
     fn extracts_single_requirement_exact_version() {
-        // Ported: "extracts single requirement with exact version" — spec line 64
         let content =
             r#"{"domain": "hue", "name": "Philips Hue", "requirements": ["aiohue==1.9.1"]}"#;
         let deps = extract(content);
@@ -138,9 +140,9 @@ mod tests {
         assert_eq!(deps[0].current_value, "==1.9.1");
     }
 
+    // Ported: "extracts multiple requirements" — homeassistant-manifest/extract.spec.ts line 84
     #[test]
     fn extracts_multiple_requirements() {
-        // Ported: "extracts multiple requirements" — spec line 84
         let content = r#"{"domain": "hue", "name": "Philips Hue", "requirements": ["aiohue==1.9.1", "aiohttp==3.8.1", "pyyaml==6.0"]}"#;
         let deps = extract(content);
         assert_eq!(deps.len(), 3);
@@ -149,9 +151,9 @@ mod tests {
         assert_eq!(deps[2].name, "pyyaml");
     }
 
+    // Ported: "handles requirements with extras" — homeassistant-manifest/extract.spec.ts line 118
     #[test]
     fn handles_requirements_with_extras() {
-        // Ported: "handles requirements with extras" — spec line 118
         let content = r#"{"domain": "test", "name": "Test", "requirements": ["package[extra1,extra2]==1.0.0"]}"#;
         let deps = extract(content);
         assert_eq!(deps.len(), 1);

@@ -183,6 +183,7 @@ class MyConan(ConanFile):
     build_requires = "cmake/3.25.3"
 "#;
 
+    // Ported: "extracts multiple image lines from conanfile.txt" — conan/extract.spec.ts line 14
     #[test]
     fn extracts_txt_requires() {
         let deps = extract_txt(SAMPLE_TXT);
@@ -192,6 +193,7 @@ class MyConan(ConanFile):
         assert!(zlib.skip_reason.is_none());
     }
 
+    // Ported: "extracts multiple image lines from conanfile.txt" — conan/extract.spec.ts line 14
     #[test]
     fn extracts_txt_build_requires() {
         let deps = extract_txt(SAMPLE_TXT);
@@ -200,6 +202,7 @@ class MyConan(ConanFile):
         assert_eq!(cmake.current_value, "3.25.3");
     }
 
+    // Ported: "extracts multiple image lines from conanfile.txt" — conan/extract.spec.ts line 14
     #[test]
     fn standard_channel_kept() {
         let deps = extract_txt(SAMPLE_TXT);

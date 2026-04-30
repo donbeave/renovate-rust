@@ -52,6 +52,7 @@ mod tests {
         assert_eq!(dep.version, "3.19.0");
     }
 
+    // Ported: "returns a result for .fvmrc" — fvm/extract.spec.ts line 41
     #[test]
     fn flutter_key_takes_precedence() {
         let dep = extract(r#"{"flutter": "3.16.5", "flutterSdkVersion": "3.19.0"}"#).unwrap();

@@ -244,4 +244,27 @@ scratch_job:
         let deps = extract(content);
         assert_eq!(deps.len(), 3);
     }
+
+    // Ported: "extracts multiple image lines with comments" — gitlabci/extract.spec.ts line 94
+    #[test]
+    fn extracts_images_with_comment_lines() {
+        let content = r#"image:
+  # comment
+  name: renovate/renovate:19.70.8-slim
+
+services:
+  # comment
+  - mariadb:10.4.11
+  # another comment
+  - other/image:1.0.0
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert!(
+            deps.iter().any(|d| d.dep.image == "renovate/renovate"
+                && d.dep.tag.as_deref() == Some("19.70.8-slim"))
+        );
+        assert!(deps.iter().any(|d| d.dep.image == "mariadb"));
+        assert!(deps.iter().any(|d| d.dep.image == "other/image"));
+    }
 }

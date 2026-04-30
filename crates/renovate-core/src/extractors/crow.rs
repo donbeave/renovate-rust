@@ -83,6 +83,7 @@ pipeline:
         assert!(deps.iter().any(|d| d.image == "golangci/golangci-lint"));
     }
 
+    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
     #[test]
     fn extracts_services_image() {
         let content = r#"
@@ -123,6 +124,7 @@ clone:
         assert_eq!(deps[0].image, "plugins/git");
     }
 
+    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
     #[test]
     fn top_level_image_ignored() {
         let content = r#"
@@ -142,6 +144,7 @@ pipeline:
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
     #[test]
     fn variable_ref_classified() {
         let content = r#"

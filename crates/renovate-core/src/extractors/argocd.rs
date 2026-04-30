@@ -236,6 +236,7 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "full test" — argocd/extract.spec.ts line 88
     #[test]
     fn extracts_helm_source() {
         let content = r#"
@@ -262,6 +263,7 @@ spec:
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "full test" — argocd/extract.spec.ts line 88
     #[test]
     fn extracts_git_source() {
         let content = r#"
@@ -284,6 +286,7 @@ spec:
         );
     }
 
+    // Ported: "return null if deps array would be empty" — argocd/extract.spec.ts line 26
     #[test]
     fn skips_missing_revision() {
         let content = r#"

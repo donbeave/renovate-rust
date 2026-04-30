@@ -96,6 +96,7 @@ mod tests {
         assert_eq!(dep.version, "8.4.1");
     }
 
+    // Ported: "extracts version for property file with distribution type \"bin\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 33
     #[test]
     fn full_properties_file() {
         let content = r#"
@@ -115,6 +116,7 @@ zipStorePath=wrapper/dists
         assert!(extract("distributionBase=GRADLE_USER_HOME\n").is_none());
     }
 
+    // Ported: "returns null for property file without distributionUrl" — gradle-wrapper/extract.spec.ts line 24
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());

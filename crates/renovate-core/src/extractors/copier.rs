@@ -106,6 +106,7 @@ mod tests {
         assert_eq!(dep.github_repo, "myorg/mytemplate");
     }
 
+    // Ported: "extracts repository and version from .copier-answers.yml" — copier/extract.spec.ts line 6
     #[test]
     fn non_github_url_has_empty_repo() {
         let content = "_commit: v1.0.0\n_src_path: https://gitlab.com/user/repo\n";
@@ -121,6 +122,7 @@ mod tests {
         assert!(extract(content).is_none());
     }
 
+    // Ported: "returns null for invalid .copier-answers.yml" — copier/extract.spec.ts line 119
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());

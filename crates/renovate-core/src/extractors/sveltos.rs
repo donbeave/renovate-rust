@@ -204,6 +204,7 @@ fn flush_chart(
 mod tests {
     use super::*;
 
+    // Ported: "supports clusterprofiles" — sveltos/extract.spec.ts line 400
     #[test]
     fn extracts_helm_chart() {
         let content = r#"
@@ -223,6 +224,7 @@ spec:
         assert_eq!(deps[0].registry_url, "https://charts.helm.sh/stable");
     }
 
+    // Ported: "supports clusterprofiles" — sveltos/extract.spec.ts line 400
     #[test]
     fn extracts_multiple_charts() {
         let content = r#"
@@ -243,22 +245,22 @@ spec:
         assert_eq!(deps.len(), 2);
     }
 
+    // Ported: "return null for Kubernetes manifest" — sveltos/extract.spec.ts line 264
     #[test]
     fn skips_non_sveltos_files() {
-        // Ported: "return null for Kubernetes manifest" — sveltos/extract.spec.ts line 264
         assert!(extract("apiVersion: v1\nkind: ConfigMap\n").is_empty());
     }
 
+    // Ported: "returns null for empty" — sveltos/extract.spec.ts line 254
     #[test]
     fn empty_content_returns_empty() {
-        // Ported: "returns null for empty" — sveltos/extract.spec.ts line 254
         assert!(extract("").is_empty());
         assert!(extract("nothing here").is_empty());
     }
 
+    // Ported: "return null if deps array would be empty" — sveltos/extract.spec.ts line 269
     #[test]
     fn malformed_no_charts_returns_empty() {
-        // Ported: "return null if deps array would be empty" — sveltos/extract.spec.ts line 269
         let content = r#"apiVersion: config.projectsveltos.io/v1beta1
 kind: ClusterProfile
 metadata:
@@ -271,9 +273,9 @@ spec:
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "return result for double quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 288
     #[test]
     fn double_quoted_api_version_extracted() {
-        // Ported: "return result for double quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 288
         let content = r#"apiVersion: "config.projectsveltos.io/v1beta1"
 kind: ClusterProfile
 metadata:
@@ -291,9 +293,9 @@ spec:
         assert_eq!(deps[0].current_value, "23.4.0");
     }
 
+    // Ported: "return result for single quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 320
     #[test]
     fn single_quoted_api_version_extracted() {
-        // Ported: "return result for single quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 320
         let content = r#"apiVersion: 'config.projectsveltos.io/v1beta1'
 kind: ClusterProfile
 metadata:

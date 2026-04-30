@@ -81,6 +81,7 @@ tasks:
       container: app
 "#;
 
+    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — batect/extract.spec.ts line 70
     #[test]
     fn extracts_images() {
         let deps = extract(SAMPLE);
@@ -92,12 +93,14 @@ tasks:
         assert_eq!(pg.tag.as_deref(), Some("15-alpine"));
     }
 
+    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — batect/extract.spec.ts line 70
     #[test]
     fn skips_build_directory_containers() {
         let deps = extract(SAMPLE);
         assert_eq!(deps.len(), 2); // only alpine and postgres
     }
 
+    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — batect/extract.spec.ts line 70
     #[test]
     fn stops_at_tasks_block() {
         // Tasks section should not contribute images.
