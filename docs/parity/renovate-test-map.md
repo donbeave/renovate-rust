@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 446 / 452 actionable tests ported (99%) — updated 2026-04-30
+**Overall progress:** 448 / 454 actionable tests ported (99%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -685,7 +685,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/composer/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/extract.spec.ts
-**Total tests:** 10 | **Ported:** 2 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 4 | **Actionable:** 10 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -693,13 +693,13 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for invalid json | 24 | ported | `composer.rs` | `invalid_json_returns_error` | — |
 | returns null for empty deps | 28 | ported | `composer.rs` | `empty_content_ok` | — |
-| extracts dependencies with no lock file | 32 | pending | — | — | — |
+| extracts dependencies with no lock file | 32 | ported | `composer.rs` | `composer1_fixture_has_33_deps` | — |
 | extracts registryUrls | 38 | pending | — | — | — |
 | extracts object registryUrls | 81 | pending | — | — | — |
 | extracts repositories and registryUrls | 186 | pending | — | — | — |
 | extracts bitbucket repositories and registryUrls | 219 | pending | — | — | — |
 | extracts object repositories and registryUrls with lock file | 248 | pending | — | — | — |
-| skips path dependencies | 284 | pending | — | — | — |
+| skips path dependencies | 284 | ported | `composer.rs` | `path_dependency_skipped` | — |
 | extracts dependencies with lock file | 313 | pending | — | — | — |
 
 ---

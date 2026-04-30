@@ -49,6 +49,8 @@ pub enum ComposerSkipReason {
     PlatformPackage,
     /// Version is a VCS branch reference (`dev-master`, `2.x-dev`).
     DevBranch,
+    /// Package source is a local `path` repository.
+    PathDependency,
 }
 
 /// A single extracted Composer dependency.
@@ -81,21 +83,73 @@ pub fn extract(content: &str) -> Result<Vec<ComposerExtractedDep>, ComposerExtra
         require: std::collections::HashMap<String, String>,
         #[serde(rename = "require-dev", default)]
         require_dev: std::collections::HashMap<String, String>,
+        #[serde(default)]
+        repositories: serde_json::Value,
     }
 
     let manifest: Manifest = serde_json::from_str(content)?;
+
+    // Collect path-type repo names → skip with PathDependency.
+    let path_repos = collect_path_repos(&manifest.repositories);
+
     let mut deps = Vec::new();
 
     for (name, version) in &manifest.require {
-        deps.push(make_dep(name, version, ComposerDepType::Regular));
+        let mut dep = make_dep(name, version, ComposerDepType::Regular);
+        if dep.skip_reason.is_none() && path_repos.contains(name.as_str()) {
+            dep.skip_reason = Some(ComposerSkipReason::PathDependency);
+        }
+        deps.push(dep);
     }
     for (name, version) in &manifest.require_dev {
-        deps.push(make_dep(name, version, ComposerDepType::Dev));
+        let mut dep = make_dep(name, version, ComposerDepType::Dev);
+        if dep.skip_reason.is_none() && path_repos.contains(name.as_str()) {
+            dep.skip_reason = Some(ComposerSkipReason::PathDependency);
+        }
+        deps.push(dep);
     }
 
     // Sort by name for deterministic output (HashMap is unordered).
     deps.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(deps)
+}
+
+/// Collect names of path-type repositories (both array and object forms).
+fn collect_path_repos(repos: &serde_json::Value) -> std::collections::HashSet<&str> {
+    let mut names = std::collections::HashSet::new();
+
+    fn check_entry<'a>(
+        entry: &'a serde_json::Value,
+        key: Option<&'a str>,
+        names: &mut std::collections::HashSet<&'a str>,
+    ) {
+        if entry.get("type").and_then(|v| v.as_str()) == Some("path") {
+            if let Some(k) = key {
+                names.insert(k);
+            }
+        }
+    }
+
+    match repos {
+        serde_json::Value::Array(arr) => {
+            // Array form: [{type, url}] — path repos have a name in the require section
+            for entry in arr {
+                // In array form, path repos match by name key if present
+                if let Some(name) = entry.get("name").and_then(|v| v.as_str()) {
+                    check_entry(entry, Some(name), &mut names);
+                }
+            }
+        }
+        serde_json::Value::Object(obj) => {
+            // Object form: {"pkg-name": {type: "path", url: "..."}}
+            for (key, entry) in obj {
+                check_entry(entry, Some(key.as_str()), &mut names);
+            }
+        }
+        _ => {}
+    }
+
+    names
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -289,6 +343,39 @@ mod tests {
         let symfony = deps.iter().find(|d| d.name == "symfony/symfony").unwrap();
         assert!(symfony.skip_reason.is_none());
         assert_eq!(symfony.current_value, "2.1.*");
+    }
+
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    #[test]
+    fn composer1_fixture_has_33_deps() {
+        // Full composer1.json fixture: 27 require + 6 require-dev = 33 total.
+        let content = include_str!("../../tests/fixtures/composer/composer1.json");
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 33);
+    }
+
+    // Ported: "skips path dependencies" — composer/extract.spec.ts line 284
+    #[test]
+    fn path_dependency_skipped() {
+        let content = r#"{
+            "name": "acme/path-sources",
+            "repositories": {
+                "acme/path1": {
+                    "type": "path",
+                    "url": "packages/acme/path1"
+                }
+            },
+            "require": {
+                "acme/path1": "*"
+            }
+        }"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "acme/path1");
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(ComposerSkipReason::PathDependency)
+        );
     }
 
     // Ported: "returns null for empty deps" — composer/extract.spec.ts line 28
