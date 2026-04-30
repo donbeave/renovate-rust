@@ -256,4 +256,21 @@ mod tests {
         // Local path is classified as a Docker dep (image: "./localfeature") but not a version dep.
         assert!(deps.version_deps.is_empty());
     }
+
+    // Ported: "returns null when the dev container JSON file is empty" — devcontainer/extract.spec.ts line 10
+    #[test]
+    fn empty_content_returns_empty() {
+        let deps = extract("");
+        assert!(deps.version_deps.is_empty());
+        assert!(deps.docker_deps.is_empty());
+    }
+
+    // Ported: "returns null when both the image and features properties are null" — devcontainer/extract.spec.ts line 314
+    #[test]
+    fn both_null_returns_empty() {
+        let content = r#"{"image": null, "features": null}"#;
+        let deps = extract(content);
+        assert!(deps.version_deps.is_empty());
+        assert!(deps.docker_deps.is_empty());
+    }
 }
