@@ -318,4 +318,19 @@ mod tests {
         let deps = extract(content);
         assert_eq!(deps[0].url, "https://gitlab.com/some/repo");
     }
+
+    // Ported: "when using SSH clone URL" — git-submodules/extract.spec.ts line 73
+    #[test]
+    fn ssh_clone_url_converted_to_https_for_source_url() {
+        // .gitmodules.3: git@github.com:PowerShell/PowerShell-Docs (no .git suffix)
+        let content = r#"[submodule "PowerShell-Docs"]
+	path = PowerShell-Docs
+	url = git@github.com:PowerShell/PowerShell-Docs
+	branch = staging
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].url, "https://github.com/PowerShell/PowerShell-Docs");
+        assert_eq!(deps[0].branch.as_deref(), Some("staging"));
+    }
 }

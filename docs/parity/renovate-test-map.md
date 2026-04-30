@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 252 / 450 actionable tests ported (56%) — updated 2026-04-30
+**Overall progress:** 256 / 450 actionable tests ported (57%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -43,18 +43,18 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ansible/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible/extract.spec.ts
-**Total tests:** 6 | **Ported:** 2 | **Actionable:** 6 | **Status:** partial
+**Total tests:** 6 | **Ported:** 3 | **Actionable:** 6 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 6 | ported | `ansible.rs` | `empty_returns_empty` | — |
-| extracts multiple image lines from docker_container | 10 | pending | — | — | — |
+| extracts multiple image lines from docker_container | 10 | ported | `ansible.rs` | `extracts_images` | — |
 | extracts multiple image lines from docker_service | 16 | ported | `ansible.rs` | `extracts_docker_service_images` | — |
-| extracts image and replaces registry | 22 | pending | — | — | — |
-| extracts image but no replacement | 52 | pending | — | — | — |
-| extracts image and no double replacement | 82 | pending | — | — | — |
+| extracts image and replaces registry | 22 | pending | — | — | registryAliases not yet implemented |
+| extracts image but no replacement | 52 | pending | — | — | registryAliases not yet implemented |
+| extracts image and no double replacement | 82 | pending | — | — | registryAliases not yet implemented |
 
 ---
 
@@ -333,7 +333,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/git-submodules/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/extract.spec.ts
-**Total tests:** 8 | **Ported:** 5 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -342,7 +342,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | empty submodule returns null | 48 | ported | `git_submodules.rs` | `empty_content_returns_no_deps` | — |
 | currentValue is unset when no branch is specified | 52 | ported | `git_submodules.rs` | `single_submodule_no_branch` | — |
 | given branch is used when branch is specified | 58 | ported | `git_submodules.rs` | `single_submodule_with_branch` | — |
-| submodule packageName is constructed from relative path | 64 | pending | — | — | — |
+| submodule packageName is constructed from relative path | 64 | ported | `git_submodules.rs` | `https_url_strips_git_suffix` (+ 4 others) | — |
 | fallback to current branch if special value is detected | 89 | ported | `git_submodules.rs` | `branch_dot_normalized_to_none` | — |
 | given semver version is extracted from branch and versioning is set to semver | 127 | ported | `git_submodules.rs` | `semver_and_non_semver_branches` | — |
 
@@ -350,8 +350,8 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| when using SSH clone URL | 73 | pending | — | — | — |
-| when using a relative path | 80 | pending | — | — | — |
+| when using SSH clone URL | 73 | ported | `git_submodules.rs` | `ssh_clone_url_converted_to_https_for_source_url` | — |
+| when using a relative path | 80 | not-applicable | — | — | Relative URL resolution requires knowledge of git origin remote; not available in static extractor |
 
 ---
 
