@@ -311,4 +311,107 @@ spec:
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].chart_name, "prometheus-community/prometheus");
     }
+
+    // Ported: "returns null if extractDefinition returns an empty array" — sveltos/extract.spec.ts line 240
+    #[test]
+    fn clusterprofile_with_no_helm_charts_returns_empty() {
+        let content = r#"apiVersion: "config.projectsveltos.io/v1beta1"
+kind: ClusterProfile
+metadata:
+  name: empty-profile
+"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "returns null for invalid" — sveltos/extract.spec.ts line 258
+    #[test]
+    fn malformed_profiles_all_empty_charts_returns_empty() {
+        let content = r#"---
+apiVersion: lib.projectsveltos.io/v1beta1
+kind: EventTrigger
+spec:
+  helmCharts: []
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+spec:
+  helmCharts: []
+"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "return null if YAML is invalid" — sveltos/extract.spec.ts line 274
+    #[test]
+    fn invalid_yaml_with_no_valid_helm_charts_returns_empty() {
+        let content = r#"----
+apiVersion: "config.projectsveltos.io/v1beta1"
+   kind ClusterProfile
+metadata:
+name: prometheus
+"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "supports profiles" — sveltos/extract.spec.ts line 352
+    #[test]
+    fn profile_kind_extracted() {
+        let content = r#"---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: Profile
+metadata:
+  name: baseline
+spec:
+  helmCharts:
+  - repositoryURL: https://prometheus-community.github.io/helm-charts
+    repositoryName: prometheus-community
+    chartName: prometheus-community/prometheus
+    chartVersion: "23.4.0"
+  - repositoryURL: https://kyverno.github.io/kyverno/
+    repositoryName: kyverno
+    chartName: kyverno/kyverno
+    chartVersion: "v3.2.5"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.chart_name == "prometheus-community/prometheus"
+                    && d.current_value == "23.4.0")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.chart_name == "kyverno/kyverno" && d.current_value == "v3.2.5")
+        );
+    }
+
+    // Ported: "supports eventtriggers" — sveltos/extract.spec.ts line 474
+    #[test]
+    fn eventtrigger_kind_extracted() {
+        let content = r#"---
+apiVersion: lib.projectsveltos.io/v1beta1
+kind: EventTrigger
+metadata:
+  name: baseline
+spec:
+  helmCharts:
+  - repositoryURL: https://prometheus-community.github.io/helm-charts
+    repositoryName: prometheus-community
+    chartName: prometheus-community/prometheus
+    chartVersion: "23.4.0"
+  - repositoryURL: https://kyverno.github.io/kyverno/
+    repositoryName: kyverno
+    chartName: kyverno/kyverno
+    chartVersion: "v3.2.5"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.chart_name == "prometheus-community/prometheus")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.chart_name == "kyverno/kyverno" && d.current_value == "v3.2.5")
+        );
+    }
 }
