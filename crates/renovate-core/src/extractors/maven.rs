@@ -600,6 +600,7 @@ mod tests {
         assert_eq!(exts[0].current_value, "1.0");
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn property_ref_skipped_when_not_defined() {
         // No <properties> section — ${spring.version} cannot be resolved.
@@ -617,6 +618,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(MavenSkipReason::PropertyRef));
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn property_resolved_from_properties_section() {
         let content = r#"<project>
@@ -666,6 +668,7 @@ mod tests {
         assert_eq!(unknown.skip_reason, Some(MavenSkipReason::PropertyRef));
     }
 
+    // Ported: "should apply props recursively" — maven/extract.spec.ts line 418
     #[test]
     fn recursive_property_resolution() {
         // ${alias} = ${actual}, ${actual} = 1.2.3 — two-level indirection.
@@ -688,6 +691,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn pdm_style_pom_with_properties() {
         // Based on the simple.pom.xml fixture from the Renovate test suite.
@@ -743,6 +747,7 @@ mod tests {
         assert_eq!(result, "${unclosed");
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn plugin_nested_dependencies_not_captured_as_regular() {
         // Dependencies nested inside a <plugin> block should not appear as
@@ -775,6 +780,7 @@ mod tests {
         );
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn profile_dependencies_extracted() {
         let content = r#"<project>
@@ -800,6 +806,7 @@ mod tests {
         assert_eq!(profile[0].dep_name, "org.example:profile-artifact");
     }
 
+    // Ported: "returns null for invalid XML" — maven/extract.spec.ts line 22
     #[test]
     fn empty_pom_returns_empty() {
         let content = r#"<project>
@@ -809,6 +816,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn multiline_element_values_trimmed() {
         let content = r#"<project>
@@ -872,5 +880,88 @@ mod tests {
             skip_reason: None,
         };
         assert_eq!(dep.renovate_dep_type(), "compile");
+    }
+
+    // Ported: "returns null for invalid XML" — maven/extract.spec.ts line 22
+    #[test]
+    fn invalid_xml_returns_empty() {
+        // Empty string, invalid XML, and documents with wrong root element all
+        // return no dependencies (mirrors extractPackage returning null).
+        assert!(extract_ok("").is_empty());
+        assert!(extract_ok("invalid xml content").is_empty());
+        assert!(extract_ok("<foobar></foobar>").is_empty());
+        assert!(extract_ok("<project></project>").is_empty());
+    }
+
+    // Ported: "tries minimum manifests" — maven/extract.spec.ts line 249
+    #[test]
+    fn minimum_manifest_returns_empty_deps() {
+        // A minimal valid POM with modelVersion and version but no dependencies.
+        let content = r#"<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>minimum</artifactId>
+  <version>1</version>
+</project>"#;
+        let deps = extract_ok(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "tries minimum snapshot manifests" — maven/extract.spec.ts line 264
+    #[test]
+    fn minimum_snapshot_manifest_returns_empty_deps() {
+        let content = r#"<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>minimum-snapshot</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+</project>"#;
+        let deps = extract_ok(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "should apply props multiple times" — maven/extract.spec.ts line 432
+    #[test]
+    fn props_applied_with_multiple_usages() {
+        // ${lucene.version} used in both groupId-like suffix and version.
+        let content = r#"<project>
+  <properties>
+    <lucene.version>1.2.3</lucene.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core-${lucene.version}.${lucene.version}</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        let deps = extract_ok(content);
+        // The version reference should be fully resolved.
+        assert_eq!(deps[0].current_value, "1.2.3");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "should detect props infinitely recursing props" — maven/extract.spec.ts line 448
+    #[test]
+    fn infinite_recursing_props_left_as_placeholder() {
+        // foo -> bar -> foo: circular reference — apply_props caps at 3 passes.
+        let content = r#"<project>
+  <properties>
+    <foo>${bar}</foo>
+    <bar>${foo}</bar>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${foo}</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        // After max iterations the property remains unresolved — skip_reason is set.
+        assert_eq!(deps[0].skip_reason, Some(MavenSkipReason::PropertyRef));
     }
 }

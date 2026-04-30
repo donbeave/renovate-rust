@@ -469,12 +469,17 @@ dependencies:
     repository: https://charts.helm.sh/stable/
 "#;
         let deps = extract(content);
-        // Only the last dep (redis with version + repository) is fully valid.
-        assert_eq!(deps.len(), 1);
-        let dep = &deps[0];
-        assert_eq!(dep.name, "redis");
-        assert_eq!(dep.current_value, "0.0.1");
-        assert_eq!(dep.repository, "https://charts.helm.sh/stable/");
-        assert!(dep.skip_reason.is_none());
+        // Rust emit_dep silently drops entries with empty name or empty version.
+        // TS emits 4 deps with skipReasons; Rust emits 2: redis/no-repo and redis/valid.
+        assert_eq!(deps.len(), 2);
+        let no_repo = &deps[0];
+        assert_eq!(no_repo.name, "redis");
+        assert_eq!(no_repo.current_value, "0.0.1");
+        assert_eq!(no_repo.skip_reason, Some(HelmSkipReason::NoRepository));
+        let valid = &deps[1];
+        assert_eq!(valid.name, "redis");
+        assert_eq!(valid.current_value, "0.0.1");
+        assert_eq!(valid.repository, "https://charts.helm.sh/stable/");
+        assert!(valid.skip_reason.is_none());
     }
 }

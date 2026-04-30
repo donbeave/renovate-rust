@@ -285,6 +285,7 @@ http_archive(
         assert_eq!(deps[1].dep_name, "dep_b");
     }
 
+    // Ported: "returns empty if fails to parse" — bazel/extract.spec.ts line 10
     #[test]
     fn skips_non_github_url() {
         let content = r#"
@@ -298,6 +299,7 @@ http_archive(
         assert_eq!(deps[0].skip_reason, Some(BazelSkipReason::NoGithubUrl));
     }
 
+    // Ported: "returns empty if fails to parse" — bazel/extract.spec.ts line 10
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
@@ -396,5 +398,47 @@ http_archive(
             }
         );
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "returns empty for incomplete dependency" — bazel/extract.spec.ts line 20
+    #[test]
+    fn http_archive_with_no_url_returns_dep_with_skip_reason() {
+        // A git_repository with only foo = "bar" — no URLs — returns nothing
+        // because the Rust extractor only scans for http_archive blocks.
+        let content = "git_repository(\n foo = \"bar\" \n)";
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts dependencies for container_pull deptype" — bazel/extract.spec.ts line 65
+    #[test]
+    fn http_archive_without_recognisable_url_skipped() {
+        // container_pull is not an http_archive — Rust extractor only handles http_archive,
+        // so this returns empty (analogous to returning null in TS).
+        let content = r#"
+container_pull(
+  name="hasura",
+  registry="index.docker.io",
+  repository="hasura/graphql-engine",
+  digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
+  tag="v1.0.0-alpha31.cli-migrations"
+)
+"#;
+        // The Rust extractor does not handle container_pull — nothing extracted.
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts dependencies for oci_pull deptype" — bazel/extract.spec.ts line 90
+    #[test]
+    fn oci_pull_not_extracted() {
+        // oci_pull is not an http_archive — Rust extractor does not handle it.
+        let content = r#"
+oci_pull(
+  name="hasura",
+  image="index.docker.io/hasura/graphql-engine",
+  digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
+  tag="v1.0.0-alpha31.cli-migrations"
+)
+"#;
+        assert!(extract(content).is_empty());
     }
 }
