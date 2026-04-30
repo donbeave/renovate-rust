@@ -209,6 +209,7 @@ fn convert_dep(name: String, raw: RawDep, dep_type: DepType) -> ExtractedDep {
 mod tests {
     use super::*;
 
+    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
     #[test]
     fn extracts_simple_string_deps() {
         let toml = r#"
@@ -223,6 +224,7 @@ tokio = "1.52"
         assert!(serde.skip_reason.is_none());
     }
 
+    // Ported: "handles standard tables" — cargo/extract.spec.ts line 91
     #[test]
     fn extracts_table_deps_with_version() {
         let toml = r#"
@@ -235,6 +237,7 @@ tokio = { version = "1.52", features = ["full"] }
         assert!(tokio.skip_reason.is_none());
     }
 
+    // Ported: "extracts original package name of renamed dependencies" — cargo/extract.spec.ts line 539
     #[test]
     fn package_field_overrides_name() {
         let toml = r#"
@@ -259,6 +262,7 @@ my-lib = { path = "../my-lib" }
         assert_eq!(dep.skip_reason, Some(SkipReason::PathDependency));
     }
 
+    // Ported: "skips workspace dependency" — cargo/extract.spec.ts line 390
     #[test]
     fn workspace_dep_is_skipped() {
         let toml = r#"
@@ -281,6 +285,7 @@ foo = { git = "https://github.com/owner/foo", tag = "v1.0" }
         assert_eq!(dep.skip_reason, Some(SkipReason::GitSource));
     }
 
+    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
     #[test]
     fn dev_and_build_deps_have_correct_type() {
         let toml = r#"
@@ -308,6 +313,7 @@ version = "0.1.0"
         assert!(deps.is_empty());
     }
 
+    // Ported: "extracts multiple dependencies advanced" — cargo/extract.spec.ts line 79
     #[test]
     fn version_constraint_forms_are_preserved() {
         let toml = r#"
@@ -324,6 +330,7 @@ d = "*"
         assert_eq!(b.current_value, ">=1.0,<2");
     }
 
+    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
     #[test]
     fn mixed_manifest_extracts_all_sections() {
         let toml = r#"
@@ -340,6 +347,7 @@ criterion = "0.5"
         assert_eq!(deps.iter().filter(|d| d.skip_reason.is_none()).count(), 3); // serde, tokio, criterion
     }
 
+    // Ported: "extracts workspace dependencies" — cargo/extract.spec.ts line 345
     #[test]
     fn workspace_dependencies_extracted() {
         let toml = r#"
@@ -365,6 +373,7 @@ anyhow = { version = "1.0", path = "../anyhow" }
         assert_eq!(anyhow.skip_reason, Some(SkipReason::PathDependency));
     }
 
+    // Ported: "extracts workspace dependencies" — cargo/extract.spec.ts line 345
     #[test]
     fn workspace_and_member_deps_both_extracted() {
         let toml = r#"
@@ -379,6 +388,7 @@ tokio = "1.35"
         assert!(deps.iter().any(|d| d.dep_name == "tokio"));
     }
 
+    // Ported: "extracts platform specific dependencies" — cargo/extract.spec.ts line 97
     #[test]
     fn target_cfg_dependencies_extracted() {
         let toml = r#"
@@ -401,6 +411,7 @@ libc = "0.2"
         assert_eq!(libc.dep_type, DepType::Dev);
     }
 
+    // Ported: "extracts original package name of renamed dependencies" — cargo/extract.spec.ts line 539
     #[test]
     fn renamed_dep_extracts_original_package_name() {
         // Ported: "extracts original package name of renamed dependencies" — cargo/extract.spec.ts line 539
@@ -413,6 +424,7 @@ libc = "0.2"
         assert_eq!(deps[0].current_value, "0.4.0");
     }
 
+    // Ported: "returns null for empty dev-dependencies" — cargo/extract.spec.ts line 59
     #[test]
     fn empty_dev_dependencies_returns_empty() {
         // Ported: "returns null for empty dev-dependencies" — cargo/extract.spec.ts line 59
@@ -421,6 +433,7 @@ libc = "0.2"
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns null for empty dependencies" — cargo/extract.spec.ts line 52
     #[test]
     fn empty_dependencies_section_returns_empty() {
         // Ported: "returns null for empty dependencies" — cargo/extract.spec.ts line 52
@@ -429,6 +442,7 @@ libc = "0.2"
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns null for empty custom target" — cargo/extract.spec.ts line 66
     #[test]
     fn empty_custom_target_returns_empty() {
         // Ported: "returns null for empty custom target" — cargo/extract.spec.ts line 66
@@ -437,15 +451,16 @@ libc = "0.2"
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns null for invalid toml" — cargo/extract.spec.ts line 46
     #[test]
     fn invalid_toml_returns_error() {
         // Ported: "returns null for invalid toml" — cargo/extract.spec.ts line 46
         assert!(extract("invalid toml [[[").is_err());
     }
 
+    // Ported: "skips workspace dependency" — cargo/extract.spec.ts line 390
     #[test]
     fn workspace_true_dep_gets_inherited_skip_reason() {
-        // Ported: "skips workspace dependency" — cargo/extract.spec.ts line 390
         let toml = "[dependencies]\nfoobar = { workspace = true }";
         let deps = extract(toml).unwrap();
         assert_eq!(deps.len(), 1);
