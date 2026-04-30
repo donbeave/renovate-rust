@@ -406,14 +406,68 @@ dependencies = ["requests>=2.28"]
         assert!(deps.iter().any(|d| d.name == "requests"));
     }
 
+    // Ported: "should return null for empty content" — pep621/extract.spec.ts line 16
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract_ok("");
         assert!(deps.is_empty());
     }
 
+    // Ported: "should return null for invalid toml" — pep621/extract.spec.ts line 21
+    #[test]
+    fn invalid_toml_returns_error() {
+        let content = "[project]\nname =\n";
+        assert!(extract(content).is_err());
+    }
+
+    // Ported: "should extract project version" — pep621/extract.spec.ts line 498
+    #[test]
+    fn project_version_field_is_parseable() {
+        // The spec checks res?.packageFileVersion === '0.0.2'.
+        // Rust extractor doesn't expose packageFileVersion separately — but the
+        // deps are still extractable from the same content.
+        let content = r#"[project]
+name = "test"
+version = "0.0.2"
+dependencies = [ "requests==2.30.0" ]
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "requests");
+        assert_eq!(deps[0].current_value, "==2.30.0");
+    }
+
+    // Ported: "should extract dependencies from build-system.requires" — pep621/extract.spec.ts line 510
+    #[test]
+    fn build_system_requires_extracted_with_project_deps() {
+        let content = r#"[build-system]
+requires = ["hatchling==1.18.0", "setuptools==69.0.3"]
+build-backend = "hatchling.build"
+
+[project]
+name = "test"
+version = "0.0.2"
+dependencies = [ "requests==2.30.0" ]
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 3);
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "requests" && d.current_value == "==2.30.0")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "hatchling" && d.current_value == "==1.18.0")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "setuptools" && d.current_value == "==69.0.3")
+        );
+    }
+
     // ── real-world fixture (from Renovate pep621 fixture) ─────────────────────
 
+    // Ported: "should resolve lockedVersions from pdm.lock" — pep621/extract.spec.ts line 551
     #[test]
     fn pdm_fixture() {
         let content = r#"
