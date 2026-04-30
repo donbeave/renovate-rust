@@ -179,6 +179,7 @@ scratch_job:
   image: scratch
 ";
 
+    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
     #[test]
     fn extracts_top_level_image() {
         let deps = extract(SAMPLE);
@@ -201,6 +202,7 @@ scratch_job:
         assert_eq!(py.dep.tag.as_deref(), Some("3.11-slim"));
     }
 
+    // Ported: "extracts named services" — gitlabci/extract.spec.ts line 57
     #[test]
     fn extracts_services() {
         let deps = extract(SAMPLE);
@@ -220,24 +222,24 @@ scratch_job:
         assert!(scratch.is_some());
     }
 
+    // Ported: "extracts from empty file" — gitlabci/extract.spec.ts line 22
     #[test]
     fn empty_content_returns_no_deps() {
-        // Ported: "extracts from empty file" — gitlabci/extract.spec.ts line 22
         assert!(extract("").is_empty());
     }
 
+    // Ported: "skips images with variables" — gitlabci/extract.spec.ts line 118
     #[test]
     fn variable_image_has_skip_reason() {
-        // Ported: "skips images with variables" (partial) — gitlabci/extract.spec.ts line 118
         let content = "image: $VARIABLE/renovate/renovate:31.65.1-slim\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert!(deps[0].dep.skip_reason.is_some());
     }
 
+    // Ported: "extracts from multidoc yaml" — gitlabci/extract.spec.ts line 36
     #[test]
     fn multidoc_yaml_extracts_from_all_docs() {
-        // Ported: "extracts from multidoc yaml" (basic coverage) — gitlabci/extract.spec.ts line 36
         let content = "image: node:18\n---\nimage: python:3.11\n---\nimage: golang:1.21\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 3);

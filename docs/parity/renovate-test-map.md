@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 165 / 310 actionable tests ported (53%) — updated 2026-04-29
+**Overall progress:** 170 / 310 actionable tests ported (55%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -273,6 +273,37 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | when using SSH clone URL | 73 | pending | — | — | — |
 | when using a relative path | 80 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gitlabci/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/extract.spec.ts
+**Total tests:** 14 | **Ported:** 5 | **Actionable:** 10 | **Status:** partial
+
+### `extractAllPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts from empty file | 22 | ported | `gitlabci.rs` | `empty_content_returns_no_deps` | — |
+
+### `extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 28 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| extracts from multidoc yaml | 36 | ported | `gitlabci.rs` | `multidoc_yaml_extracts_from_all_docs` | — |
+| extracts multiple included image lines | 46 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| extracts named services | 57 | ported | `gitlabci.rs` | `extracts_services` | — |
+| extracts multiple named services | 66 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| extracts multiple image lines | 75 | ported | `gitlabci.rs` | `extracts_top_level_image` | — |
+| extracts multiple image lines with comments | 94 | pending | — | — | — |
+| catches errors | 110 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| skips images with variables | 118 | ported | `gitlabci.rs` | `variable_image_has_skip_reason` | — |
+| extract images from dependency proxy | 172 | pending | — | — | — |
+| extract images via registry aliases | 229 | pending | — | — | registryAliases not yet implemented |
+| extracts component references via registry aliases | 299 | pending | — | — | registryAliases not yet implemented |
+| extracts component references | 377 | pending | — | — | — |
 
 ---
 
@@ -774,7 +805,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
 | `lib/modules/manager/github-actions/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/github_actions.rs` | 28 | partial |
-| `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/gitlabci.rs` | 8 | partial |
+<!-- gitlabci converted to per-test format above -->
 | `lib/modules/manager/gradle/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/gradle.rs` | 20 | partial |
 | `lib/modules/manager/helm-requirements/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/helm.rs` | 10 | partial |
 | `lib/modules/manager/helmfile/extract.spec.ts` | 19 | `crates/renovate-core/src/extractors/helmfile.rs` | 10 | partial |
