@@ -314,4 +314,106 @@ mylib = { git = "https://github.com/foo/mylib" }
             Some(PixiSkipReason::UnspecifiedVersion)
         );
     }
+
+    // Ported: "returns null for empty pyproject.toml" — pixi/extract.spec.ts line 145
+    #[test]
+    fn empty_pyproject_returns_empty() {
+        assert!(extract_from_pyproject("nothing here").is_empty());
+        assert!(extract_from_pyproject("").is_empty());
+    }
+
+    // Ported: "returns package of pyproject.toml tool.pixi section" — pixi/extract.spec.ts line 316
+    #[test]
+    fn extract_tool_pixi_section_without_lockfile() {
+        let content = r#"
+[tool.pixi.dependencies]
+numpy = ">=1.26"
+"#;
+        let deps = extract_from_pyproject(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "numpy");
+        assert_eq!(deps[0].current_value, ">=1.26");
+        assert_eq!(deps[0].source, PixiSource::Conda);
+    }
+
+    // Ported: "returns parse non-known config file as pyproject.toml" — pixi/extract.spec.ts line 481
+    #[test]
+    fn non_known_file_with_tool_pixi_section() {
+        let content = r#"
+[tool.pixi.project]
+channels = ['conda-forge']
+platforms = ["osx-arm64"]
+
+[tool.pixi.dependencies]
+requests = '*'
+"#;
+        let deps = extract_from_pyproject(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "requests");
+        assert_eq!(deps[0].current_value, "*");
+        assert_eq!(deps[0].source, PixiSource::Conda);
+    }
+
+    // Ported: "returns parse non-known config file as pixi.toml" — pixi/extract.spec.ts line 509
+    #[test]
+    fn non_known_file_with_project_section() {
+        let content = r#"
+[project]
+channels = ['conda-forge']
+platforms = ["osx-arm64"]
+
+[dependencies]
+requests = '*'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "requests");
+        assert_eq!(deps[0].current_value, "*");
+        assert_eq!(deps[0].source, PixiSource::Conda);
+    }
+
+    // Ported: "extract feature with channels" — pixi/extract.spec.ts line 538
+    #[test]
+    fn extract_feature_with_url_channel() {
+        let content = r#"
+[project]
+channels = ["https://prefix.dev/conda-forge"]
+name = "pixi"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[dependencies]
+scipy = { version = "==1.15.1" }
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "scipy");
+        assert_eq!(deps[0].current_value, "==1.15.1");
+        assert_eq!(deps[0].source, PixiSource::Conda);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extract package from with workspace" — pixi/extract.spec.ts line 601
+    #[test]
+    fn extract_from_workspace_section() {
+        let content = r#"
+[workspace]
+channels = ["conda-forge"]
+
+[dependencies]
+scipy = { version = "==1.15.1" }
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "scipy");
+        assert_eq!(deps[0].current_value, "==1.15.1");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "returns null for non-known config file" — pixi/extract.spec.ts line 681
+    #[test]
+    fn non_toml_content_returns_empty() {
+        assert!(extract("{}").is_empty());
+        assert!(extract_from_pyproject("{}").is_empty());
+    }
 }

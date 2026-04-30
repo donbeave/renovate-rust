@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 387 / 450 actionable tests ported (86%) — updated 2026-04-30
+**Overall progress:** 394 / 450 actionable tests ported (88%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -1030,7 +1030,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/pip_requirements/extract.spec.ts` | 22 | `crates/renovate-core/src/extractors/pip.rs` | 22 | ported |
 | `lib/modules/manager/pip_setup/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/pip_setup.rs` | 6 | partial |
 | `lib/modules/manager/pipenv/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pipfile.rs` | 16 | ported |
-| `lib/modules/manager/pixi/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pixi.rs` | 7 | partial |
+| `lib/modules/manager/pixi/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pixi.rs` | 14 | partial |
 | `lib/modules/manager/poetry/extract.spec.ts` | 34 | `crates/renovate-core/src/extractors/poetry.rs` | 12 | partial |
 | `lib/modules/manager/pre-commit/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/pre_commit.rs` | 16 | ported |
 | `lib/modules/manager/puppet/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/puppet.rs` | 9 | partial |
