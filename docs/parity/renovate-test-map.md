@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 320 / 450 actionable tests ported (71%) — updated 2026-04-30
+**Overall progress:** 322 / 450 actionable tests ported (72%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -227,7 +227,7 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts from simple file | 13 | pending | — | — | — |
+| extracts from simple file | 13 | ported | `cocoapods.rs` | `simple_podfile_fixture` | — |
 | extracts from complex file | 42 | pending | — | — | — |
 
 ---
