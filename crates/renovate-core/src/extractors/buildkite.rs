@@ -260,4 +260,84 @@ steps:
         let deps = extract(content);
         assert!(!deps.is_empty());
     }
+
+    // Ported: "extracts git-based plugin with .git at the end of its name" — buildkite/extract.spec.ts line 105
+    #[test]
+    fn github_enterprise_ssh_url_with_git_suffix() {
+        let content = "steps:\n  - ssh://git@github.company.com/some-org/some-plugin.git#v3.2.7:\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "v3.2.7");
+        assert_eq!(
+            deps[0].datasource,
+            Some(BuildkiteDatasource::GithubTags {
+                repo: "some-org/some-plugin".to_owned(),
+                registry_url: Some("https://github.company.com".to_owned()),
+            })
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts plugins outside plugins sections" — buildkite/extract.spec.ts line 121
+    #[test]
+    fn ssh_url_plugin_outside_plugins_section() {
+        let content = r#".python3-container: &python3-container
+  ssh://git@github.some-domain.com/some-org/some-plugin#v3.2.7:
+    some-config: some-value
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].datasource,
+            Some(BuildkiteDatasource::GithubTags {
+                repo: "some-org/some-plugin".to_owned(),
+                registry_url: Some("https://github.some-domain.com".to_owned()),
+            })
+        );
+    }
+
+    // Ported: "extracts plugin with preceding ?" — buildkite/extract.spec.ts line 140
+    #[test]
+    fn yaml_question_mark_prefix() {
+        let content =
+            "steps:\n  - ? ssh://git@github.company.com/some-org/some-plugin.git#v3.2.7\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "v3.2.7");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts plugin tags from bitbucket" — buildkite/extract.spec.ts line 155
+    #[test]
+    fn bitbucket_plugin_extracted() {
+        let content = r#"steps:
+  - plugins:
+      - ssh://git@bitbucket.org/some-org/some-plugin.git#v3.2.7:
+      - docker-compose#v1.3.2:
+"#;
+        let deps = extract(content);
+        let bitbucket = deps
+            .iter()
+            .find(|d| d.dep_name.contains("bitbucket.org"))
+            .unwrap();
+        assert_eq!(bitbucket.current_value, "v3.2.7");
+        assert_eq!(
+            bitbucket.datasource,
+            Some(BuildkiteDatasource::BitbucketTags {
+                repo: "some-org/some-plugin".to_owned(),
+                registry_url: "https://bitbucket.org".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "extracts plugin tags with quotes" — buildkite/extract.spec.ts line 178
+    #[test]
+    fn single_quoted_plugin() {
+        let content =
+            "steps:\n  - plugins:\n      - 'test-collector#v1.8.0':\n          files: junit.xml\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "test-collector");
+        assert_eq!(deps[0].current_value, "v1.8.0");
+    }
 }
