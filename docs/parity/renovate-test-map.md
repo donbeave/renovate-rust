@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 200 / 418 actionable tests ported (48%) — updated 2026-04-30
+**Overall progress:** 201 / 418 actionable tests ported (48%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -404,7 +404,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts tool directives of sub-modules | 323 | pending | — | — | — |
 | extracts tool directives with exact match | 370 | pending | — | — | — |
 | extracts tool directives with no matching dependencies | 389 | pending | — | — | — |
-| ignores directives unrelated to dependencies | 402 | pending | — | — | — |
+| ignores directives unrelated to dependencies | 402 | ported | `gomod.rs` | `unrelated_directives_ignored` | — |
 | marks placeholder pseudo versions with skipReason invalid-version | 426 | pending | — | — | — |
 | parses go $version directive | 528 | pending | — | — | — |
 | the extracted version can be used as a SemVer constraint | 582 | pending | — | — | — |

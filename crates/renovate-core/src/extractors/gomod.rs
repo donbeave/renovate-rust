@@ -336,6 +336,19 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         assert!(extract("").is_empty());
     }
 
+    // Ported: "ignores directives unrelated to dependencies" — gomod/extract.spec.ts line 402
+    #[test]
+    fn unrelated_directives_ignored() {
+        let content = "module github.com/renovate-tests/gomod\n\
+            godebug asynctimerchan=0\n\
+            godebug (\n  default=go1.21\n  panicnil=1\n)\n\
+            retract v3.0.0\n\
+            retract [v2.0.0,v2.0.5]\n\
+            retract (\n    v1.0.0\n    v1.0.1\n)\n";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
+
     // Ported: "ignores empty spaces in multi-line requires" — gomod/extract.spec.ts line 34
     // Note: TS test expects 3 deps (includes go directive as dep); Rust returns 2
     // (go directive extraction not yet implemented). Core behavior — empty lines
