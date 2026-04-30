@@ -183,4 +183,42 @@ pipeline:
     fn malformed_yaml_returns_empty() {
         assert!(extract("nothing here\n:::::::").is_empty());
     }
+
+    // Ported: "extracts the 1.0.0 version" — crow/extract.spec.ts line 255
+    #[test]
+    fn extracts_semver_version_from_steps() {
+        let content = "steps:\n  redis:\n    image: quay.io/something/redis:1.0.0\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "quay.io/something/redis");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.0.0"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "should parse multiple sources of dependencies together" — crow/extract.spec.ts line 281
+    #[test]
+    fn extracts_from_clone_and_steps_sections() {
+        let content = r#"
+clone:
+  git:
+    image: woodpeckerci/plugin-git:latest
+steps:
+  redis:
+    image: quay.io/something/redis:alpine
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(|d| d.image == "woodpeckerci/plugin-git"));
+        assert!(deps.iter().any(|d| d.image == "quay.io/something/redis"));
+    }
+
+    // Ported: "handles empty pipeline section gracefully" — crow/extract.spec.ts line 362
+    #[test]
+    fn empty_pipeline_object_is_skipped() {
+        // `pipeline: {}` does not match "pipeline:" → not entered; `steps:` still extracted
+        let content = "pipeline: {}\nsteps:\n  redis:\n    image: quay.io/something/redis:alpine\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "quay.io/something/redis");
+    }
 }
