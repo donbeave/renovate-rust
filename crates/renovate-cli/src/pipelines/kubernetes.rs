@@ -680,6 +680,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 },
                             }
                         }
+                        ArgocdSource::Docker { .. } => output::DepStatus::Skipped {
+                            reason: "docker-not-yet-supported".to_owned(),
+                        },
                         ArgocdSource::Unsupported => output::DepStatus::Skipped {
                             reason: "unsupported-datasource".to_owned(),
                         },

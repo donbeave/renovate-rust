@@ -172,12 +172,12 @@ fn strip_dependency_proxy_prefix(s: &str) -> Option<&str> {
         return None;
     }
     // $CI_DEPENDENCY_PROXY_*/image
-    if let Some(rest) = s.strip_prefix('$') {
-        if let Some(slash_pos) = rest.find('/') {
-            let var_name = &rest[..slash_pos];
-            if var_name.starts_with("CI_DEPENDENCY_PROXY") {
-                return Some(&rest[slash_pos + 1..]);
-            }
+    if let Some(rest) = s.strip_prefix('$')
+        && let Some(slash_pos) = rest.find('/')
+    {
+        let var_name = &rest[..slash_pos];
+        if var_name.starts_with("CI_DEPENDENCY_PROXY") {
+            return Some(&rest[slash_pos + 1..]);
         }
     }
     None

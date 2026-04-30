@@ -60,10 +60,10 @@ pub struct PixiDep {
 fn has_channels(table: &toml::Table) -> bool {
     // Check [project.channels] or [workspace.channels]
     for section in ["project", "workspace"] {
-        if let Some(Value::Table(t)) = table.get(section) {
-            if let Some(Value::Array(channels)) = t.get("channels") {
-                return !channels.is_empty();
-            }
+        if let Some(Value::Table(t)) = table.get(section)
+            && let Some(Value::Array(channels)) = t.get("channels")
+        {
+            return !channels.is_empty();
         }
     }
     true // no channel config found → don't apply unknown-registry skip

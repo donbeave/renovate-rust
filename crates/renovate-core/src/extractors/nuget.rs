@@ -177,13 +177,12 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
                             skip_reason: None,
                         });
                     }
-                } else if let Some(ref tag) = version_child_tag {
-                    if !text.is_empty()
-                        && let Some(ref mut pending) = current
-                        && (tag == "VersionOverride" || pending.version.is_empty())
-                    {
-                        pending.version = text;
-                    }
+                } else if let Some(ref tag) = version_child_tag
+                    && !text.is_empty()
+                    && let Some(ref mut pending) = current
+                    && (tag == "VersionOverride" || pending.version.is_empty())
+                {
+                    pending.version = text;
                 }
             }
 

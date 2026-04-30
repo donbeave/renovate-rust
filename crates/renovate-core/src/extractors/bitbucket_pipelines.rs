@@ -94,7 +94,7 @@ pub fn extract_docker(content: &str) -> Vec<DockerfileExtractedDep> {
         .into_iter()
         .filter_map(|d| match d {
             BitbucketPipelinesDep::Docker(dep) => Some(dep),
-            _ => None,
+            BitbucketPipelinesDep::BitbucketPipe { .. } => None,
         })
         .collect()
 }

@@ -162,7 +162,7 @@ fn parse_line(raw: &str) -> Option<PipExtractedDep> {
     // PEP 440 version specifiers start with an operator; if rest is non-empty
     // but doesn't start with an operator char, it's invalid pip syntax (e.g.
     // `nothing here` where "here" is not a version constraint → skip).
-    if !rest.is_empty() && !rest.starts_with(|c: char| matches!(c, '=' | '!' | '<' | '>' | '~')) {
+    if !rest.is_empty() && !rest.starts_with(['=', '!', '<', '>', '~']) {
         return None;
     }
 

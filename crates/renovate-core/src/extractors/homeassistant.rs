@@ -49,9 +49,8 @@ pub fn extract(content: &str) -> Vec<PipExtractedDep> {
         return Vec::new();
     }
 
-    let reqs_val = match manifest.requirements {
-        Some(serde_json::Value::Array(arr)) => arr,
-        _ => return Vec::new(),
+    let Some(serde_json::Value::Array(reqs_val)) = manifest.requirements else {
+        return Vec::new();
     };
 
     // Filter to string entries only (skip numbers, null, etc.).

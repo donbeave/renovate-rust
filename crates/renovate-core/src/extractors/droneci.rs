@@ -201,7 +201,6 @@ services:
         assert!(deps.iter().any(|d| d.image == "mysql"));
         assert!(deps.iter().any(|d| d.image == "redis"));
         // The multiline forms resolve to the same image as the plain form.
-        let node_deps: Vec<_> = deps.iter().filter(|d| d.image == "amd64/node").collect();
-        assert_eq!(node_deps.len(), 3);
+        assert_eq!(deps.iter().filter(|d| d.image == "amd64/node").count(), 3);
     }
 }

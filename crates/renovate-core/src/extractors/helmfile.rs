@@ -277,46 +277,46 @@ fn resolve_release(
     };
 
     // Check for OCI-backed repo
-    if let Some(entry) = repos.get(&repo_alias) {
-        if entry.oci {
-            // OCI-backed repo → Docker datasource
-            let pkg = format!("{}/{}", entry.url, dep_name);
-            if let Some(skip) = version_skip {
-                return Some(HelmExtractedDep {
-                    name: dep_name.clone(),
-                    current_value: version.to_owned(),
-                    repository: String::new(),
-                    skip_reason: Some(skip),
-                    datasource: Some("docker".into()),
-                    package_name: Some(pkg),
-                });
-            }
-            // Validate chart name
-            if !is_valid_chart_name(&dep_name) {
-                return Some(HelmExtractedDep {
-                    name: dep_name.clone(),
-                    current_value: version.to_owned(),
-                    repository: String::new(),
-                    skip_reason: Some(HelmSkipReason::UnsupportedChartType),
-                    datasource: Some("docker".into()),
-                    package_name: Some(pkg),
-                });
-            }
+    if let Some(entry) = repos.get(&repo_alias)
+        && entry.oci
+    {
+        // OCI-backed repo → Docker datasource
+        let pkg = format!("{}/{}", entry.url, dep_name);
+        if let Some(skip) = version_skip {
             return Some(HelmExtractedDep {
-                name: dep_name.clone(),
+                name: dep_name,
                 current_value: version.to_owned(),
                 repository: String::new(),
-                skip_reason: None,
+                skip_reason: Some(skip),
                 datasource: Some("docker".into()),
                 package_name: Some(pkg),
             });
         }
+        // Validate chart name
+        if !is_valid_chart_name(&dep_name) {
+            return Some(HelmExtractedDep {
+                name: dep_name,
+                current_value: version.to_owned(),
+                repository: String::new(),
+                skip_reason: Some(HelmSkipReason::UnsupportedChartType),
+                datasource: Some("docker".into()),
+                package_name: Some(pkg),
+            });
+        }
+        return Some(HelmExtractedDep {
+            name: dep_name,
+            current_value: version.to_owned(),
+            repository: String::new(),
+            skip_reason: None,
+            datasource: Some("docker".into()),
+            package_name: Some(pkg),
+        });
     }
 
     // Validate chart name (only for the dep_name part, not the alias)
     if !is_valid_chart_name(&dep_name) {
         return Some(HelmExtractedDep {
-            name: dep_name.clone(),
+            name: dep_name,
             current_value: version.to_owned(),
             repository: String::new(),
             skip_reason: Some(HelmSkipReason::UnsupportedChartType),
@@ -327,7 +327,7 @@ fn resolve_release(
 
     if let Some(skip) = version_skip {
         return Some(HelmExtractedDep {
-            name: dep_name.clone(),
+            name: dep_name,
             current_value: version.to_owned(),
             repository: String::new(),
             skip_reason: Some(skip),
@@ -344,7 +344,7 @@ fn resolve_release(
     } else {
         // Unknown alias — return dep with UnknownRegistry skip reason
         return Some(HelmExtractedDep {
-            name: dep_name.clone(),
+            name: dep_name,
             current_value: version.to_owned(),
             repository: String::new(),
             skip_reason: Some(HelmSkipReason::UnknownRegistry),
@@ -354,7 +354,7 @@ fn resolve_release(
     };
 
     Some(HelmExtractedDep {
-        name: dep_name.clone(),
+        name: dep_name,
         current_value: version.to_owned(),
         repository: repo_url,
         skip_reason: None,

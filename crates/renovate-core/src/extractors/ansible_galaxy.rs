@@ -477,12 +477,12 @@ roles:
         // The `include:` entry is silently skipped.
         assert!(!deps.iter().any(|d| d.dep_name.contains("webserver")));
         // The `test: yatesr.timezone` entry (unknown key) is skipped.
-        let test_entries: Vec<_> = deps
+        let test_entry_count = deps
             .iter()
             .filter(|d| d.dep_name == "yatesr.timezone")
-            .collect();
+            .count();
         // Only one timezone entry (from `src: yatesr.timezone`, not the `test:` one).
-        assert_eq!(test_entries.len(), 1);
+        assert_eq!(test_entry_count, 1);
     }
 
     // Ported: "check collection style requirements file" — ansible-galaxy/extract.spec.ts line 66

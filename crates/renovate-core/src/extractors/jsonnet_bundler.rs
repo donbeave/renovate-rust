@@ -72,21 +72,21 @@ fn build_dep_name(remote: &str, subdir: &str) -> String {
     let normalized = remote
         .strip_prefix("https://")
         .or_else(|| remote.strip_prefix("http://"))
-        .and_then(|s| {
+        .map(|s| {
             // For ssh://user@host/path
             if let Some(at) = s.find('@') {
-                Some(&s[at + 1..])
+                &s[at + 1..]
             } else {
-                Some(s)
+                s
             }
         })
         .or_else(|| {
             // ssh://git@host/path
-            remote.strip_prefix("ssh://").and_then(|s| {
+            remote.strip_prefix("ssh://").map(|s| {
                 if let Some(at) = s.find('@') {
-                    Some(&s[at + 1..])
+                    &s[at + 1..]
                 } else {
-                    Some(s)
+                    s
                 }
             })
         })

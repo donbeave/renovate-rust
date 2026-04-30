@@ -564,11 +564,11 @@ dep6 = { vesion = "1.2.3" }
         let dep6 = deps.iter().find(|d| d.dep_name == "dep6").unwrap();
         assert_eq!(dep6.skip_reason, Some(SkipReason::InvalidSpec));
 
-        let path_skipped: Vec<_> = deps
+        let path_skipped_count = deps
             .iter()
             .filter(|d| d.skip_reason == Some(SkipReason::PathDependency))
-            .collect();
-        assert_eq!(path_skipped.len(), 4); // pcap-sys, dep1, dep2, dep3
+            .count();
+        assert_eq!(path_skipped_count, 4); // pcap-sys, dep1, dep2, dep3
     }
 
     // Ported: "should extract project version" — cargo/extract.spec.ts line 650
