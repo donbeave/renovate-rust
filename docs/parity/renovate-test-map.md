@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 324 / 450 actionable tests ported (72%) — updated 2026-04-30
+**Overall progress:** 327 / 450 actionable tests ported (73%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -765,7 +765,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/crow/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/crow/extract.spec.ts
-**Total tests:** 15 | **Ported:** 8 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 11 | **Actionable:** 15 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -775,14 +775,14 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for non-object YAML | 10 | ported | `crow.rs` | `no_image_keys_returns_empty` | — |
 | returns null for malformed YAML | 15 | ported | `crow.rs` | `malformed_yaml_returns_empty` | — |
 | extracts multiple image lines | 19 | ported | `crow.rs` | `extracts_pipeline_images` | — |
-| extracts image and replaces registry | 164 | pending | — | — | — |
-| extracts image but no replacement | 194 | pending | — | — | — |
-| extracts image and no double replacement | 224 | pending | — | — | — |
-| extracts the 1.0.0 version | 255 | pending | — | — | — |
-| should parse multiple sources of dependencies together | 281 | pending | — | — | — |
+| extracts image and replaces registry | 164 | pending | — | — | registryAliases not yet implemented |
+| extracts image but no replacement | 194 | pending | — | — | registryAliases not yet implemented |
+| extracts image and no double replacement | 224 | pending | — | — | registryAliases not yet implemented |
+| extracts the 1.0.0 version | 255 | ported | `crow.rs` | `extracts_semver_version_from_steps` | — |
+| should parse multiple sources of dependencies together | 281 | ported | `crow.rs` | `extracts_from_clone_and_steps_sections` | — |
 | return dependency when a plugin-git is cloned | 321 | ported | `crow.rs` | `clone_section` | — |
 | return null when no dependencies are provided | 348 | ported | `crow.rs` | `no_dependencies_returns_empty` | — |
-| handles empty pipeline section gracefully | 362 | pending | — | — | — |
+| handles empty pipeline section gracefully | 362 | ported | `crow.rs` | `empty_pipeline_object_is_skipped` | — |
 | returns null when pipeline keys exist but contain no valid images | 390 | ported | `crow.rs` | `pipeline_without_valid_images_returns_empty` | — |
 | extracts images from array-based steps format | 408 | ported | `crow.rs` | `steps_as_array` | — |
 | extracts images from mixed array and object formats | 447 | pending | — | — | — |
