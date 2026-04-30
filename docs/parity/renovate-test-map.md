@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 71 / 146 actionable tests ported (49%) — updated 2026-04-29
+**Overall progress:** 80 / 169 actionable tests ported (47%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -455,6 +455,65 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/composer/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/extract.spec.ts
+**Total tests:** 10 | **Ported:** 1 | **Actionable:** 10 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid json | 24 | pending | — | — | — |
+| returns null for empty deps | 28 | ported | `composer.rs` | `empty_content_ok` | — |
+| extracts dependencies with no lock file | 32 | pending | — | — | — |
+| extracts registryUrls | 38 | pending | — | — | — |
+| extracts object registryUrls | 81 | pending | — | — | — |
+| extracts repositories and registryUrls | 186 | pending | — | — | — |
+| extracts bitbucket repositories and registryUrls | 219 | pending | — | — | — |
+| extracts object repositories and registryUrls with lock file | 248 | pending | — | — | — |
+| skips path dependencies | 284 | pending | — | — | — |
+| extracts dependencies with lock file | 313 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/conan/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/conan/extract.spec.ts
+**Total tests:** 4 | **Ported:** 2 | **Actionable:** 4 | **Status:** partial
+
+### `extractPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 10 | ported | `conan.rs` | `empty_returns_empty` | — |
+| extracts multiple image lines from conanfile.txt | 14 | pending | — | — | — |
+| extracts multiple 0 lines from conanfile.txt | 129 | pending | — | — | — |
+| extracts multiple image lines from conanfile.py | 134 | ported | `conan.rs` | `extracts_py_requires` | — |
+
+---
+
+## `lib/modules/manager/copier/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/copier/extract.spec.ts
+**Total tests:** 9 | **Ported:** 6 | **Actionable:** 9 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts repository and version from .copier-answers.yml | 6 | ported | `copier.rs` | `extracts_github_url` | — |
+| extracts repository and version from .copier-answers.yml with ssh URL | 25 | ported | `copier.rs` | `ssh_url_src_path_extracted` | — |
+| extracts repository and version from .copier-answers.yml with ssh URL and non-bare Repo | 44 | pending | — | — | — |
+| extracts repository and version from .copier-answers.yml with ssh URL and a username different from git | 63 | pending | — | — | — |
+| extracts and strips git+ prefix from $srcPath | 84 | ported | `copier.rs` | `strips_git_plus_prefix` | — |
+| returns null for invalid .copier-answers.yml | 119 | ported | `copier.rs` | `invalid_yaml_returns_none` | — |
+| returns null for invalid _src_path | 128 | pending | — | — | — |
+| returns null for missing _commit field | 137 | ported | `copier.rs` | `missing_commit_returns_none` | — |
+| returns null for missing _src_path field | 145 | ported | `copier.rs` | `missing_src_path_returns_none` | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -468,9 +527,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 10 | partial |
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
-| `lib/modules/manager/composer/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/composer.rs` | 9 | partial |
-| `lib/modules/manager/conan/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/conan.rs` | 5 | partial |
-| `lib/modules/manager/copier/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/copier.rs` | 8 | partial |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
 | `lib/modules/manager/crossplane/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/crossplane.rs` | 7 | partial |
 | `lib/modules/manager/crow/extract.spec.ts` | 15 | `crates/renovate-core/src/extractors/crow.rs` | 10 | partial |

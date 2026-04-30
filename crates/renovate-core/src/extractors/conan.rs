@@ -208,6 +208,7 @@ class MyConan(ConanFile):
         assert!(boost.skip_reason.is_none());
     }
 
+    // Ported: "extracts multiple image lines from conanfile.py" — conan/extract.spec.ts line 134
     #[test]
     fn extracts_py_requires() {
         let deps = extract_py(SAMPLE_PY);
@@ -221,6 +222,7 @@ class MyConan(ConanFile):
         );
     }
 
+    // Ported: "returns null for empty" — conan/extract.spec.ts line 10
     #[test]
     fn empty_returns_empty() {
         assert!(extract_txt("").is_empty());

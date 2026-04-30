@@ -283,6 +283,7 @@ mod tests {
         assert_eq!(symfony.current_value, "2.1.*");
     }
 
+    // Ported: "returns null for empty deps" — composer/extract.spec.ts line 28
     #[test]
     fn empty_content_ok() {
         let deps = extract_ok("{}");

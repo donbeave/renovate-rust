@@ -87,6 +87,7 @@ pub fn extract(content: &str) -> Option<CopierDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts repository and version from .copier-answers.yml" — copier/extract.spec.ts line 6
     #[test]
     fn extracts_github_url() {
         let content = "_commit: v1.2.3\n_src_path: https://github.com/owner/template-repo\n";
@@ -96,6 +97,7 @@ mod tests {
         assert_eq!(dep.src_path, "https://github.com/owner/template-repo");
     }
 
+    // Ported: "extracts and strips git+ prefix from $srcPath" — copier/extract.spec.ts line 84
     #[test]
     fn strips_git_plus_prefix() {
         let content = "_commit: v2.0.0\n_src_path: git+https://github.com/myorg/mytemplate\n";
@@ -112,6 +114,7 @@ mod tests {
         assert_eq!(dep.current_value, "v1.0.0");
     }
 
+    // Ported: "returns null for missing _commit field" — copier/extract.spec.ts line 137
     #[test]
     fn missing_commit_returns_none() {
         let content = "_src_path: https://github.com/owner/repo\n";
@@ -123,10 +126,9 @@ mod tests {
         assert!(extract("").is_none());
     }
 
+    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL" — copier/extract.spec.ts line 25
     #[test]
     fn ssh_url_src_path_extracted() {
-        // Ported: "extracts repository and version from .copier-answers.yml with ssh URL"
-        // copier/extract.spec.ts line 25
         let content =
             "_commit: v1.0.0\n_src_path: git@github.com:renovatebot/somedir/renovate.git\n";
         let dep = extract(content).unwrap();
@@ -137,16 +139,16 @@ mod tests {
         );
     }
 
+    // Ported: "returns null for missing _src_path field" — copier/extract.spec.ts line 145
     #[test]
     fn missing_src_path_returns_none() {
-        // Ported: "returns null for missing _src_path field" — copier/extract.spec.ts line 145
         let content = "_commit: v1.0.0\n";
         assert!(extract(content).is_none());
     }
 
+    // Ported: "returns null for invalid .copier-answers.yml" — copier/extract.spec.ts line 119
     #[test]
     fn invalid_yaml_returns_none() {
-        // Ported: "returns null for invalid .copier-answers.yml" — copier/extract.spec.ts line 119
         assert!(extract("foo: bar: 123").is_none());
     }
 }
