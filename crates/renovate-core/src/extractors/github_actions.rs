@@ -508,6 +508,28 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts non-semver ref automatically" — github-actions/extract.spec.ts line 484
+    #[test]
+    fn non_semver_ref_extracted() {
+        let content = "      - uses: taiki-e/install-action@cargo-llvm-cov\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].action, "taiki-e/install-action");
+        assert_eq!(deps[0].current_value, "cargo-llvm-cov");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts pinned non-semver ref with digest" — github-actions/extract.spec.ts line 504
+    #[test]
+    fn pinned_non_semver_ref_with_digest() {
+        let content = "      - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # cargo-llvm-cov\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].action, "taiki-e/install-action");
+        assert_eq!(deps[0].current_value, "cargo-llvm-cov");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "extracts multiple action tag lines with double quotes and comments" — github-actions/extract.spec.ts line 153
     #[test]
     fn quoted_action_is_parsed() {

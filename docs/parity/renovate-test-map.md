@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 179 / 376 actionable tests ported (48%) — updated 2026-04-30
+**Overall progress:** 181 / 376 actionable tests ported (48%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -299,8 +299,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | maintains quotes | 217 | pending | — | — | — |
 | maintains spaces between hash and comment | 299 | ported | `github_actions.rs` | `inline_comment_stripped` | — |
 | extracts tags in different formats | 352 | pending | — | — | — |
-| extracts non-semver ref automatically | 484 | pending | — | — | — |
-| extracts pinned non-semver ref with digest | 504 | pending | — | — | — |
+| extracts non-semver ref automatically | 484 | ported | `github_actions.rs` | `non_semver_ref_extracted` | — |
+| extracts pinned non-semver ref with digest | 504 | ported | `github_actions.rs` | `pinned_non_semver_ref_with_digest` | — |
 | disables naked SHA pins without version comment | 527 | ported | `github_actions.rs` | `full_sha_pin_skipped` | — |
 | disables naked short SHA pins without version comment | 546 | ported | `github_actions.rs` | `short_sha_pin_skipped` | — |
 | does not disable SHA pins with version comment | 565 | ported | `github_actions.rs` | `full_sha_with_version_comment_not_skipped` | — |
