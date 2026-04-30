@@ -215,5 +215,29 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
         assert!(extract_build_properties("").is_none());
+        assert!(extract("non-sense").is_empty());
+    }
+
+    // Ported: "extract sbt version" — sbt/extract.spec.ts line 469
+    #[test]
+    fn build_properties_extracts_sbt_version() {
+        let content = "sbt.version=1.6.0\n";
+        let dep = extract_build_properties(content).unwrap();
+        assert_eq!(dep.current_value, "1.6.0");
+    }
+
+    // Ported: "extract sbt version if the file contains other properties" — sbt/extract.spec.ts line 492
+    #[test]
+    fn build_properties_with_other_props_extracts_sbt_version() {
+        let content = "sbt.version=1.6.0\nanother.conf=1.4.0\n";
+        let dep = extract_build_properties(content).unwrap();
+        assert_eq!(dep.current_value, "1.6.0");
+    }
+
+    // Ported: "ignores build.properties file if does not contain sbt version" — sbt/extract.spec.ts line 516
+    #[test]
+    fn build_properties_without_sbt_version_returns_none() {
+        let content = "another.conf=1.4.0\n";
+        assert!(extract_build_properties(content).is_none());
     }
 }
