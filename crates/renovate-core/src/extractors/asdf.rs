@@ -1477,6 +1477,7 @@ rust 1.73.0
 unknowntool 9.9.9
 ";
 
+    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
     #[test]
     fn extracts_github_releases_tool() {
         let deps = extract(SAMPLE);
@@ -1495,6 +1496,7 @@ unknowntool 9.9.9
         assert!(tf.skip_reason.is_none());
     }
 
+    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
     #[test]
     fn extracts_github_tags_tool() {
         let deps = extract(SAMPLE);
@@ -1511,6 +1513,7 @@ unknowntool 9.9.9
         assert_eq!(py.extract_version, Some("^v(?<version>\\S+)"));
     }
 
+    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
     #[test]
     fn extracts_golang_go_prefix() {
         let deps = extract(SAMPLE);
@@ -1526,9 +1529,9 @@ unknowntool 9.9.9
         assert_eq!(go.extract_version, Some("^go(?<version>\\S+)"));
     }
 
+    // Ported: "returns a result" — asdf/extract.spec.ts line 6
     #[test]
     fn nodejs_maps_to_node_version_datasource() {
-        // Ported: asdf/extract.spec.ts line 6 — "returns a result"
         let deps = extract("nodejs 16.16.0\n");
         assert_eq!(deps.len(), 1);
         let d = &deps[0];
@@ -1540,6 +1543,7 @@ unknowntool 9.9.9
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "provides skipReason for lines with unsupported tooling" — asdf/extract.spec.ts line 19
     #[test]
     fn unknown_tool_gets_skip_reason() {
         let deps = extract(SAMPLE);
@@ -1548,6 +1552,7 @@ unknowntool 9.9.9
         assert!(unknown.datasource.is_none());
     }
 
+    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
     #[test]
     fn strips_inline_comments() {
         let deps = extract(SAMPLE);
@@ -1561,23 +1566,24 @@ unknowntool 9.9.9
         assert!(extract("").is_empty());
     }
 
+    // Ported: "ignores lines that are just comments" — asdf/extract.spec.ts line 1076
     #[test]
     fn comment_lines_skipped() {
         let deps = extract("# this is a comment\npython 3.11.5\n");
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "only captures the first version" — asdf/extract.spec.ts line 31
     #[test]
     fn only_captures_first_version() {
-        // Ported: "only captures the first version" — asdf/extract.spec.ts line 31
         let deps = extract("nodejs 16.16.0 16.15.1\n");
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].current_value, "16.16.0");
     }
 
+    // Ported: "provides skipReason for lines with unsupported tooling" — asdf/extract.spec.ts line 19
     #[test]
     fn provides_skip_reason_for_unsupported_tooling() {
-        // Ported: "provides skipReason for lines with unsupported tooling" — asdf/extract.spec.ts line 19
         let deps = extract("unsupported 1.22.5\n");
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].tool_name, "unsupported");
@@ -1586,9 +1592,9 @@ unknowntool 9.9.9
         assert!(deps[0].datasource.is_none());
     }
 
+    // Ported: "ignores supported tooling with a renovate:ignore comment" — asdf/extract.spec.ts line 1096
     #[test]
     fn renovate_ignore_comment_skips_dep() {
-        // Ported: asdf/extract.spec.ts line 1096 — "ignores supported tooling with a renovate:ignore comment"
         let deps = extract("nodejs 16.16.0 # renovate:ignore\npython 3.11.5\n");
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].tool_name, "python");
@@ -1601,9 +1607,9 @@ unknowntool 9.9.9
         assert_eq!(deps[0].tool_name, "nodejs");
     }
 
+    // Ported: "can handle multiple tools with indented versions in one file" — asdf/extract.spec.ts line 890
     #[test]
     fn indented_spacing_still_parses() {
-        // Ported: "can handle multiple tools with indented versions in one file" — asdf/extract.spec.ts line 890
         let content = "adr-tools 3.0.0\nargocd    2.5.4\nawscli    2.8.6\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 3);
@@ -1629,6 +1635,7 @@ unknowntool 9.9.9
         assert_eq!(awscli.package_name, Some("aws/aws-cli"));
     }
 
+    // Ported: "can handle flutter version channel" — asdf/extract.spec.ts line 923
     #[test]
     fn flutter_strips_channel_suffix() {
         // Ported: "can handle flutter version channel" — asdf/extract.spec.ts line 923
@@ -1645,6 +1652,7 @@ unknowntool 9.9.9
         assert_eq!(without_channel[0].datasource_id, Some("flutter-version"));
     }
 
+    // Ported: "can handle java jre / jdk" — asdf/extract.spec.ts line 946
     #[test]
     fn java_adoptopenjdk_jdk() {
         // Ported: "can handle java jre / jdk" — asdf/extract.spec.ts line 946
@@ -1658,6 +1666,7 @@ unknowntool 9.9.9
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "can handle java jre / jdk" — asdf/extract.spec.ts line 946
     #[test]
     fn java_adoptopenjdk_jre() {
         let deps = extract("java adoptopenjdk-jre-16.0.0+36\n");
@@ -1667,6 +1676,7 @@ unknowntool 9.9.9
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "can handle java jre / jdk" — asdf/extract.spec.ts line 946
     #[test]
     fn java_temurin_jdk() {
         let deps = extract("java temurin-16.0.0+36\n");
@@ -1676,6 +1686,7 @@ unknowntool 9.9.9
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "can handle java jre / jdk" — asdf/extract.spec.ts line 946
     #[test]
     fn java_temurin_jre() {
         let deps = extract("java temurin-jre-16.0.0+36\n");
@@ -1685,6 +1696,7 @@ unknowntool 9.9.9
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "can handle java jre / jdk" — asdf/extract.spec.ts line 946
     #[test]
     fn java_unknown_distribution_unsupported() {
         let deps = extract("java unknown-16.0.0+36\n");
@@ -1693,6 +1705,7 @@ unknowntool 9.9.9
         assert_eq!(d.skip_reason, Some(AsdfSkipReason::UnsupportedDatasource));
     }
 
+    // Ported: "can handle scala v 2 & 3" — asdf/extract.spec.ts line 1004
     #[test]
     fn scala_v2_uses_scala_scala() {
         // Ported: "can handle scala v 2 & 3" — asdf/extract.spec.ts line 1004
@@ -1706,6 +1719,7 @@ unknowntool 9.9.9
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "can handle scala v 2 & 3" — asdf/extract.spec.ts line 1004
     #[test]
     fn scala_v3_uses_lampepfl_dotty() {
         let deps = extract("scala 3.0.0\n");
@@ -1716,6 +1730,7 @@ unknowntool 9.9.9
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "can handle scala v 2 & 3" — asdf/extract.spec.ts line 1004
     #[test]
     fn scala_unknown_version_unsupported() {
         let deps = extract("scala 0.0.0\n");
@@ -1724,6 +1739,7 @@ unknowntool 9.9.9
         assert_eq!(d.skip_reason, Some(AsdfSkipReason::UnsupportedDatasource));
     }
 
+    // Ported: "ignores comments across multiple lines" — asdf/extract.spec.ts line 1081
     #[test]
     fn ignores_comments_across_multiple_lines() {
         // Ported: "ignores comments across multiple lines" — asdf/extract.spec.ts line 1081
@@ -1735,6 +1751,7 @@ unknowntool 9.9.9
         assert_eq!(deps[0].datasource_id, Some("node-version"));
     }
 
+    // Ported: "invalid comment placements fail to parse" — asdf/extract.spec.ts line 1069
     #[test]
     fn invalid_comment_no_space_fails_parse() {
         // Ported: "invalid comment placements fail to parse" — asdf/extract.spec.ts line 1069
@@ -1750,6 +1767,7 @@ unknowntool 9.9.9
         let _ = deps; // accepted as-is; no panic
     }
 
+    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
     #[test]
     fn hugo_strips_extended_prefix() {
         let deps = extract("gohugo extended_0.104.3\n");
@@ -1760,6 +1778,7 @@ unknowntool 9.9.9
         assert_eq!(d.package_name, Some("gohugoio/hugo"));
     }
 
+    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
     #[test]
     fn bun_extract_version_pattern() {
         let deps = extract("bun 0.2.2\n");
@@ -1774,6 +1793,7 @@ unknowntool 9.9.9
         );
     }
 
+    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
     #[test]
     fn erlang_extract_version_and_versioning() {
         let deps = extract("erlang 25.1.2\n");
