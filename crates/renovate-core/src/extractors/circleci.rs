@@ -198,6 +198,7 @@ jobs:
       - image: $CI_IMAGE
 ";
 
+    // Ported: "extracts multiple image and resolves yaml anchors" — circleci/extract.spec.ts line 48
     #[test]
     fn extracts_executor_images() {
         let deps = extract(SAMPLE);
@@ -209,6 +210,7 @@ jobs:
         assert_eq!(pg.dep.tag.as_deref(), Some("15"));
     }
 
+    // Ported: "extracts multiple image and resolves yaml anchors" — circleci/extract.spec.ts line 48
     #[test]
     fn extracts_job_images() {
         let deps = extract(SAMPLE);
@@ -219,6 +221,7 @@ jobs:
         assert_eq!(go.dep.tag.as_deref(), Some("1.21-alpine"));
     }
 
+    // Ported: "extracts and exclude android images" — circleci/extract.spec.ts line 226
     #[test]
     fn skips_variable_image() {
         let deps = extract(SAMPLE);
@@ -232,6 +235,7 @@ jobs:
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts orbs without jobs" — circleci/extract.spec.ts line 237
     #[test]
     fn no_docker_section_returns_no_deps() {
         let content =
@@ -258,6 +262,7 @@ jobs:
         assert!(extract_orbs(content).is_empty());
     }
 
+    // Ported: "extracts orb definitions" — circleci/extract.spec.ts line 273
     #[test]
     fn orbs_block_ends_at_next_top_level_key() {
         let content = "orbs:\n  node: circleci/node@5.0.0\njobs:\n  build:\n    docker:\n      - image: ubuntu:20.04\n";
@@ -265,11 +270,13 @@ jobs:
         assert_eq!(orbs.len(), 1);
     }
 
+    // Ported: "returns null for empty" — circleci/extract.spec.ts line 12
     #[test]
     fn empty_orbs_returns_empty() {
         assert!(extract_orbs("").is_empty());
     }
 
+    // Ported: "returns null for empty" — circleci/extract.spec.ts line 12
     #[test]
     fn no_orbs_block_returns_empty() {
         let content = "version: 2.1\njobs:\n  build:\n    docker:\n      - image: ubuntu:20.04\n";

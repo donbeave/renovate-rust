@@ -146,6 +146,7 @@ mod tests {
 
     // ── Platform packages ─────────────────────────────────────────────────────
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn php_constraint_skipped() {
         let content = r#"{"require": {"php": ">=8.1"}}"#;
@@ -157,6 +158,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn ext_skipped() {
         let content = r#"{"require": {"ext-intl": "*"}}"#;
@@ -167,6 +169,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn lib_skipped() {
         let content = r#"{"require": {"lib-curl": "*"}}"#;
@@ -179,6 +182,7 @@ mod tests {
 
     // ── Dev branch versions ───────────────────────────────────────────────────
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn dev_master_skipped() {
         let content = r#"{"require": {"vendor/pkg": "dev-master"}}"#;
@@ -186,6 +190,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(ComposerSkipReason::DevBranch));
     }
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn x_dev_skipped() {
         let content = r#"{"require": {"vendor/pkg": "2.x-dev"}}"#;
@@ -195,6 +200,7 @@ mod tests {
 
     // ── Normal deps ───────────────────────────────────────────────────────────
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn extracts_regular_deps() {
         let content = r#"{
@@ -221,6 +227,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn extracts_dev_deps() {
         let content = r#"{
@@ -240,6 +247,7 @@ mod tests {
 
     // ── Fixture composer1.json (Renovate reference fixture) ──────────────────
 
+    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
     #[test]
     fn composer1_fixture() {
         let content = r#"{
