@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 217 / 450 actionable tests ported (48%) — updated 2026-04-30
+**Overall progress:** 222 / 450 actionable tests ported (49%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -844,20 +844,20 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/docker-compose/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/docker-compose/extract.spec.ts
-**Total tests:** 13 | **Ported:** 4 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 7 | **Actionable:** 13 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 12 | ported | `docker_compose.rs` | `empty_content_returns_empty` | — |
-| returns null for non-object YAML | 16 | pending | — | — | — |
-| returns null for malformed YAML | 20 | pending | — | — | — |
+| returns null for non-object YAML | 16 | ported | `docker_compose.rs` | `non_object_yaml_returns_empty` | — |
+| returns null for malformed YAML | 20 | ported | `docker_compose.rs` | `malformed_yaml_returns_empty` | — |
 | extracts multiple image lines for version 1 | 24 | ported | `docker_compose.rs` | `renovate_fixture_1_v1_format` | — |
 | extracts multiple image lines for version 3 | 30 | ported | `docker_compose.rs` | `extracts_images_from_compose_v3` | — |
 | extracts multiple image lines for version 3 without set version key | 36 | pending | — | — | — |
 | extracts default variable values for version 3 | 42 | ported | `docker_compose.rs` | `variable_interpolation_is_skipped` | — |
-| extracts can parse yaml tags for version 3 | 59 | pending | — | — | — |
+| extracts can parse yaml tags for version 3 | 59 | ported | `docker_compose.rs` | `yaml_tags_do_not_break_extraction` | — |
 | extracts image and replaces registry | 87 | pending | — | — | registryAliases not yet implemented |
 | extracts image but no replacement | 115 | pending | — | — | registryAliases not yet implemented |
 | extracts image and no double replacement | 143 | pending | — | — | registryAliases not yet implemented |
@@ -869,7 +869,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 75 | **Ported:** 13 | **Actionable:** 66 | **Status:** partial
+**Total tests:** 75 | **Ported:** 14 | **Actionable:** 66 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -888,7 +888,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles custom hosts and suffix | 215 | ported | `dockerfile.rs` | `custom_host_with_suffix_in_tag` | — |
 | handles custom hosts with port | 236 | ported | `dockerfile.rs` | `registry_port_not_confused_with_tag` | — |
 | handles custom hosts with port without tag | 257 | ported | `dockerfile.rs` | `custom_host_with_port_no_tag` | — |
-| handles quay hosts with port | 278 | pending | — | — | — |
+| handles quay hosts with port | 278 | ported | `dockerfile.rs` | `quay_host_with_port_no_tag` | — |
 | handles namespaced images | 295 | ported | `dockerfile.rs` | `extracts_namespaced_image` | — |
 | handles custom hosts with namespace | 312 | ported | `dockerfile.rs` | `extracts_scoped_image` | — |
 | handles abnormal spacing | 333 | ported | `dockerfile.rs` | `abnormal_spacing_after_from` | — |

@@ -918,4 +918,14 @@ mod tests {
             Some(DockerfileSkipReason::BuildStageRef)
         );
     }
+
+    // Ported: "handles quay hosts with port" — dockerfile/extract.spec.ts line 278
+    #[test]
+    fn quay_host_with_port_no_tag() {
+        let deps = extract_ok("FROM quay.io:1234/node\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "quay.io:1234/node");
+        assert!(deps[0].tag.is_none());
+        assert!(deps[0].skip_reason.is_none());
+    }
 }

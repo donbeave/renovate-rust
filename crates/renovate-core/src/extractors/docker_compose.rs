@@ -317,4 +317,36 @@ db:
         let deps = extract_ok("");
         assert!(deps.is_empty());
     }
+
+    // Ported: "returns null for non-object YAML" — docker-compose/extract.spec.ts line 16
+    #[test]
+    fn non_object_yaml_returns_empty() {
+        let deps = extract_ok("nothing here");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "returns null for malformed YAML" — docker-compose/extract.spec.ts line 20
+    #[test]
+    fn malformed_yaml_returns_empty() {
+        let deps = extract_ok("nothing here\n:::::::");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "extracts can parse yaml tags for version 3" — docker-compose/extract.spec.ts line 59
+    #[test]
+    fn yaml_tags_do_not_break_extraction() {
+        let content = r#"web:
+  image: node:20.0.0
+  ports:
+    - "80:8000"
+worker:
+  extends:
+    service: web
+  ports: !reset null
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
+        assert_eq!(deps[0].tag.as_deref(), Some("20.0.0"));
+    }
 }
