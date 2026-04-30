@@ -303,6 +303,7 @@ mod tests {
 
     // ── basic FROM parsing ────────────────────────────────────────────────────
 
+    // Ported: "handles tag" — dockerfile/extract.spec.ts line 89
     #[test]
     fn extracts_image_and_tag() {
         let deps = extract_ok("FROM ubuntu:22.04");
@@ -312,6 +313,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "handles naked dep" — dockerfile/extract.spec.ts line 19
     #[test]
     fn extracts_image_without_tag() {
         let deps = extract_ok("FROM ubuntu");
@@ -319,6 +321,7 @@ mod tests {
         assert!(deps[0].tag.is_none());
     }
 
+    // Ported: "handles tag and digest" — dockerfile/extract.spec.ts line 129
     #[test]
     fn extracts_image_with_digest() {
         let deps = extract_ok("FROM ubuntu:22.04@sha256:abc123");
@@ -327,6 +330,7 @@ mod tests {
         assert_eq!(deps[0].digest.as_deref(), Some("sha256:abc123"));
     }
 
+    // Ported: "handles custom hosts with namespace" — dockerfile/extract.spec.ts line 312
     #[test]
     fn extracts_scoped_image() {
         let deps = extract_ok("FROM ghcr.io/owner/image:1.0");
@@ -334,6 +338,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("1.0"));
     }
 
+    // Ported: "handles custom hosts with port" — dockerfile/extract.spec.ts line 236
     #[test]
     fn registry_port_not_confused_with_tag() {
         // `host:5000/image:tag` — colon before `/` is the registry port
@@ -344,6 +349,7 @@ mod tests {
 
     // ── AS alias and stage references ─────────────────────────────────────────
 
+    // Ported: "handles from as" — dockerfile/extract.spec.ts line 152
     #[test]
     fn as_alias_does_not_become_dep() {
         let deps = extract_ok("FROM node:18-alpine AS builder");
@@ -353,6 +359,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "skips named multistage FROM tags" — dockerfile/extract.spec.ts line 412
     #[test]
     fn stage_reference_is_skipped() {
         let content = "FROM node:18 AS builder\nFROM builder AS final";
@@ -367,18 +374,21 @@ mod tests {
 
     // ── skip reasons ──────────────────────────────────────────────────────────
 
+    // Ported: "skips scratches" — dockerfile/extract.spec.ts line 407
     #[test]
     fn scratch_is_skipped() {
         let deps = extract_ok("FROM scratch");
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::Scratch));
     }
 
+    // Ported: "skips depName containing a non default variable at start" — dockerfile/extract.spec.ts line 1574
     #[test]
     fn arg_variable_is_skipped() {
         let deps = extract_ok("FROM $NODE_VERSION");
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
+    // Ported: "skips depName containing a non default variable with brackets at start" — dockerfile/extract.spec.ts line 1585
     #[test]
     fn arg_braces_variable_is_skipped() {
         let deps = extract_ok("FROM ${BASE_IMAGE}:latest");
@@ -410,6 +420,7 @@ mod tests {
 
     // ── non-FROM instructions are ignored ─────────────────────────────────────
 
+    // Ported: "extracts multiple FROM tags" — dockerfile/extract.spec.ts line 354
     #[test]
     fn only_from_instructions_extracted() {
         let content = "FROM node:18\nRUN apt-get install\nCOPY . /app\nFROM nginx:1.25";
@@ -419,6 +430,7 @@ mod tests {
         assert_eq!(deps[1].image, "nginx");
     }
 
+    // Ported: "handles comments" — dockerfile/extract.spec.ts line 173
     #[test]
     fn commented_from_ignored() {
         let deps = extract_ok("# FROM ubuntu:22.04\nFROM nginx:1.25");
@@ -437,6 +449,7 @@ mod tests {
 
     // ── real-world fixture from Renovate ─────────────────────────────────────
 
+    // Ported: "extracts images on adjacent lines" — dockerfile/extract.spec.ts line 598
     #[test]
     fn renovate_fixture_1() {
         let content = "FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node\nFROM buildkite/puppeteer:1.1.1 AS puppeteer\nFROM node AS production";
