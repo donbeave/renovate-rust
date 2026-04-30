@@ -47,6 +47,7 @@ pub fn extract(content: &str) -> Option<ScalafmtDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts version correctly" — scalafmt/extract.spec.ts line 6
     #[test]
     fn extracts_version() {
         let content = "version = \"3.7.14\"\nmaxColumn = 100\n";
@@ -54,6 +55,7 @@ mod tests {
         assert_eq!(dep.version, "3.7.14");
     }
 
+    // Ported: "extracts version correctly if enclosed in quotes" — scalafmt/extract.spec.ts line 25
     #[test]
     fn version_without_quotes() {
         let content = "version = 3.7.14\n";
@@ -61,11 +63,13 @@ mod tests {
         assert_eq!(dep.version, "3.7.14");
     }
 
+    // Ported: "ignore file if no version specified" — scalafmt/extract.spec.ts line 44
     #[test]
     fn no_version_returns_none() {
         assert!(extract("maxColumn = 100\n").is_none());
     }
 
+    // Ported: "should return empty packagefiles is no content is provided" — scalafmt/extract.spec.ts line 52
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());

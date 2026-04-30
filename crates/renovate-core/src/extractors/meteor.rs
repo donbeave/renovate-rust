@@ -70,6 +70,7 @@ Npm.depends({
 });
 "#;
 
+    // Ported: "returns results" — meteor/extract.spec.ts line 13
     #[test]
     fn extracts_deps() {
         let deps = extract(SAMPLE);
@@ -80,6 +81,7 @@ Npm.depends({
         assert_eq!(deps.len(), 3);
     }
 
+    // Ported: "returns empty if fails to parse" — meteor/extract.spec.ts line 8
     #[test]
     fn no_npm_depends_returns_empty() {
         assert!(extract("Package.describe({ name: 'foo' });").is_empty());

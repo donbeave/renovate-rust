@@ -49,6 +49,7 @@ pub fn extract(content: &str) -> Option<RuntimeVersionDep> {
 mod tests {
     use super::*;
 
+    // Ported: "returns a result - python" — runtime-version/extract.spec.ts line 5
     #[test]
     fn extracts_python_version() {
         let dep = extract("python-3.11.0\n").unwrap();
@@ -67,6 +68,7 @@ mod tests {
         assert!(extract("python-3.11\n").is_none());
     }
 
+    // Ported: "returns no result" — runtime-version/extract.spec.ts line 16
     #[test]
     fn returns_none_for_empty() {
         assert!(extract("").is_none());
