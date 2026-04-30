@@ -251,6 +251,7 @@ openssl = { package = "openssl-sys", version = "0.9" }
         assert_eq!(dep.current_value, "0.9");
     }
 
+    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
     #[test]
     fn path_dep_is_skipped() {
         let toml = r#"
@@ -274,6 +275,7 @@ serde = { workspace = true }
         assert_eq!(dep.skip_reason, Some(SkipReason::WorkspaceInherited));
     }
 
+    // Ported: "does not extract locked versions for git dependencies" — cargo/extract.spec.ts line 567
     #[test]
     fn git_dep_is_skipped() {
         let toml = r#"
@@ -302,6 +304,7 @@ cc = "1.0"
         assert_eq!(cc.dep_type, DepType::Build);
     }
 
+    // Ported: "returns null for empty dependencies" — cargo/extract.spec.ts line 52
     #[test]
     fn empty_manifest_returns_empty_list() {
         let toml = r#"
