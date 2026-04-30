@@ -94,6 +94,7 @@ struct RawDepTable {
 /// Minimal `Cargo.toml` representation — only the fields we need.
 #[derive(Debug, Deserialize)]
 struct RawManifest {
+    package: Option<RawPackage>,
     dependencies: Option<BTreeMap<String, RawDep>>,
     #[serde(rename = "dev-dependencies")]
     dev_dependencies: Option<BTreeMap<String, RawDep>>,
@@ -114,10 +115,49 @@ struct RawTargetDeps {
     build_dependencies: Option<BTreeMap<String, RawDep>>,
 }
 
+/// `[package]` section of Cargo.toml.
+#[derive(Debug, Deserialize)]
+struct RawPackage {
+    /// The `version` field — either a plain string or `{ workspace = true }`.
+    #[serde(default, deserialize_with = "version_or_workspace")]
+    version: VersionField,
+}
+
+#[derive(Debug, Default)]
+enum VersionField {
+    #[default]
+    Absent,
+    Value(String),
+    Workspace,
+}
+
+fn version_or_workspace<'de, D>(d: D) -> Result<VersionField, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    use serde::de::Error;
+    let v = serde_json::Value::deserialize(d).map_err(D::Error::custom)?;
+    match v {
+        serde_json::Value::String(s) => Ok(VersionField::Value(s)),
+        serde_json::Value::Object(ref m)
+            if m.get("workspace") == Some(&serde_json::Value::Bool(true)) =>
+        {
+            Ok(VersionField::Workspace)
+        }
+        _ => Ok(VersionField::Absent),
+    }
+}
+
 /// Workspace-level definitions (from workspace root `Cargo.toml`).
 #[derive(Debug, Deserialize)]
 struct RawWorkspace {
     dependencies: Option<BTreeMap<String, RawDep>>,
+    package: Option<RawWorkspacePackage>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RawWorkspacePackage {
+    version: Option<String>,
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -202,6 +242,24 @@ fn convert_dep(name: String, raw: RawDep, dep_type: DepType) -> ExtractedDep {
                 skip_reason,
             }
         }
+    }
+}
+
+/// Extract the project version from a `Cargo.toml` file.
+///
+/// Returns `Some(version)` from `[package].version`, or from
+/// `[workspace.package].version` if the package uses `version.workspace = true`.
+pub fn extract_project_version(content: &str) -> Option<String> {
+    let manifest: RawManifest = toml::from_str(content).ok()?;
+    let pkg = manifest.package.as_ref()?;
+    match &pkg.version {
+        VersionField::Value(v) => Some(v.clone()),
+        VersionField::Workspace => manifest
+            .workspace
+            .as_ref()
+            .and_then(|w| w.package.as_ref())
+            .and_then(|wp| wp.version.clone()),
+        VersionField::Absent => None,
     }
 }
 
@@ -511,5 +569,19 @@ dep6 = { vesion = "1.2.3" }
             .filter(|d| d.skip_reason == Some(SkipReason::PathDependency))
             .collect();
         assert_eq!(path_skipped.len(), 4); // pcap-sys, dep1, dep2, dep3
+    }
+
+    // Ported: "should extract project version" — cargo/extract.spec.ts line 650
+    #[test]
+    fn extracts_project_version() {
+        let toml = "[package]\nname = \"test\"\nversion = \"0.1.0\"\nedition = \"2021\"\n[dependencies]\nsyn = \"2.0\"\n";
+        assert_eq!(extract_project_version(toml).as_deref(), Some("0.1.0"));
+    }
+
+    // Ported: "should extract project version from workspace" — cargo/extract.spec.ts line 664
+    #[test]
+    fn extracts_project_version_from_workspace() {
+        let toml = "[package]\nname = \"test\"\nversion.workspace = true\nedition = \"2021\"\n[workspace.package]\nversion = \"0.1.0\"\n[dependencies]\nsyn = \"2.0\"\n";
+        assert_eq!(extract_project_version(toml).as_deref(), Some("0.1.0"));
     }
 }

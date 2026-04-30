@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 348 / 450 actionable tests ported (77%) — updated 2026-04-30
+**Overall progress:** 350 / 450 actionable tests ported (78%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -199,8 +199,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles missing locked versions | 601 | pending | — | — | — |
 | handles invalid versions in the toml file | 617 | pending | — | — | — |
 | handles invalid lock file | 635 | pending | — | — | — |
-| should extract project version | 650 | pending | — | — | — |
-| should extract project version from workspace | 664 | pending | — | — | — |
+| should extract project version | 650 | ported | `cargo.rs` | `extracts_project_version` | — |
+| should extract project version from workspace | 664 | ported | `cargo.rs` | `extracts_project_version_from_workspace` | — |
 
 ---
 
