@@ -350,4 +350,66 @@ resources:
         let content = "pool:\n  vmImage: ubuntu-latest\n";
         assert!(extract(content).is_empty());
     }
+
+    // Ported: "should extract deployment jobs runonce" — azure-pipelines/extract.spec.ts line 253
+    #[test]
+    fn extracts_task_from_deployment_job_runonce() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - task: Bash@3
+            inputs:
+              script: 'echo Hello World'
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+        assert_eq!(t[0].version, "3");
+    }
+
+    // Ported: "should extract deployment jobs on failure" — azure-pipelines/extract.spec.ts line 277
+    #[test]
+    fn extracts_task_from_deployment_job_on_failure() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    runOnce:
+      on:
+        failure:
+          steps:
+            - task: Bash@3
+              inputs:
+                script: 'echo Hello World'
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+        assert_eq!(t[0].version, "3");
+    }
+
+    // Ported: "should extract deployment jobs on success" — azure-pipelines/extract.spec.ts line 302
+    #[test]
+    fn extracts_task_from_deployment_job_on_success() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    runOnce:
+      on:
+        success:
+          steps:
+            - task: Bash@3
+              inputs:
+                script: 'echo Hello World'
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+        assert_eq!(t[0].version, "3");
+    }
 }
