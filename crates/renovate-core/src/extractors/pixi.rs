@@ -43,6 +43,8 @@ pub enum PixiSkipReason {
     InvalidVersion,
     /// No version specified (e.g. path or git dependency).
     UnspecifiedVersion,
+    /// No channels configured — cannot determine registry URL.
+    UnknownRegistry,
 }
 
 /// A single Pixi dependency.
@@ -54,6 +56,19 @@ pub struct PixiDep {
     pub skip_reason: Option<PixiSkipReason>,
 }
 
+/// Returns true if the TOML table has at least one channel configured.
+fn has_channels(table: &toml::Table) -> bool {
+    // Check [project.channels] or [workspace.channels]
+    for section in ["project", "workspace"] {
+        if let Some(Value::Table(t)) = table.get(section) {
+            if let Some(Value::Array(channels)) = t.get("channels") {
+                return !channels.is_empty();
+            }
+        }
+    }
+    true // no channel config found → don't apply unknown-registry skip
+}
+
 /// Extract all Pixi dependencies from a `pixi.toml` file.
 pub fn extract(content: &str) -> Vec<PixiDep> {
     let Ok(root) = toml::from_str::<Value>(content) else {
@@ -63,12 +78,17 @@ pub fn extract(content: &str) -> Vec<PixiDep> {
         return Vec::new();
     };
 
+    let channels_present = has_channels(table);
     let mut deps = Vec::new();
 
-    // `[dependencies]` → Conda (skipped)
+    // `[dependencies]` → Conda
     if let Some(Value::Table(conda_deps)) = table.get("dependencies") {
         for (name, spec) in conda_deps {
-            deps.push(parse_conda_dep(name, spec));
+            let mut dep = parse_conda_dep(name, spec);
+            if !channels_present && dep.skip_reason.is_none() {
+                dep.skip_reason = Some(PixiSkipReason::UnknownRegistry);
+            }
+            deps.push(dep);
         }
     }
 
@@ -415,5 +435,22 @@ scipy = { version = "==1.15.1" }
     fn non_toml_content_returns_empty() {
         assert!(extract("{}").is_empty());
         assert!(extract_from_pyproject("{}").is_empty());
+    }
+
+    // Ported: "skip package without channels" — pixi/extract.spec.ts line 571
+    #[test]
+    fn skip_package_without_channels() {
+        let content = r#"
+[project]
+name = "pixi"
+channels = []
+
+[dependencies]
+scipy = { version = "==1.15.1" }
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "scipy");
+        assert_eq!(deps[0].skip_reason, Some(PixiSkipReason::UnknownRegistry));
     }
 }

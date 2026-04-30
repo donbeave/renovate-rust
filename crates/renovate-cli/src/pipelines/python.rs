@@ -726,6 +726,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                         PixiSkipReason::UnspecifiedVersion => {
                                             "unspecified-version".to_owned()
                                         }
+                                        PixiSkipReason::UnknownRegistry => {
+                                            "unknown-registry".to_owned()
+                                        }
                                     },
                                 },
                             };
