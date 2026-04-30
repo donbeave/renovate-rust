@@ -127,6 +127,7 @@ fn strip_comments(content: &str) -> String {
 mod tests {
     use super::*;
 
+    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
     #[test]
     fn extracts_bazel_dep() {
         let content = r#"
@@ -140,6 +141,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
     #[test]
     fn extracts_dev_dependency() {
         let content = r#"bazel_dep(name = "gazelle", version = "0.32.0", dev_dependency = True)"#;
@@ -174,6 +176,7 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         assert_eq!(deps[1].name, "gazelle");
     }
 
+    // Ported: "returns bazel_dep with no version and git_override" — bazel-module/extract.spec.ts line 95
     #[test]
     fn dep_without_version_skipped() {
         let content = r#"bazel_dep(name = "rules_go")"#;
@@ -196,6 +199,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert_eq!(deps[0].name, "rules_go");
     }
 
+    // Ported: "returns null if file has unrecognized declarations" — bazel-module/extract.spec.ts line 46
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("module(name = \"mymodule\", version = \"1.0.0\")\n").is_empty());

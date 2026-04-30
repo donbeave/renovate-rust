@@ -235,6 +235,7 @@ fn parse_coords_dep(coords: &str, registry_urls: &[String]) -> Option<AntDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts inline version dependencies from build.xml" — ant/extract.spec.ts line 9
     #[test]
     fn extracts_inline_dependency() {
         let content = r#"
@@ -278,6 +279,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
     }
 
+    // Ported: "extracts multiple dependencies" — ant/extract.spec.ts line 33
     #[test]
     fn multiple_deps_extracted() {
         let content = r#"
@@ -307,6 +309,7 @@ mod tests {
         assert_eq!(deps[0].registry_urls, vec!["https://repo.example.com/"]);
     }
 
+    // Ported: "returns null for invalid XML" — ant/extract.spec.ts line 90
     #[test]
     fn empty_xml_returns_empty() {
         assert!(extract("<project />").is_empty());
