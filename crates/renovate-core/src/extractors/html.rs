@@ -128,4 +128,81 @@ mod tests {
         assert_eq!(deps[0].dep_name, "lodash.js");
         assert_eq!(deps[0].current_value, "4.17.21");
     }
+
+    // Ported: "extractPackageFile" — html/extract.spec.ts line 8
+    #[test]
+    fn extracts_from_sample_html_fixture() {
+        // Inlined from html/__fixtures__/sample.html — 10 cdnjs deps, unpkg URLs ignored.
+        let html = r#"
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.6.1/prop-types.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/react/16.3.2/umd/react.production.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.3.2/umd/react-dom.production.min.js"></script>
+<script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/react-transition-group/2.2.1/react-transition-group.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/react-popper/0.10.4/umd/react-popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-markdown/4.0.6/react-markdown.js"></script>
+<script src="https://unpkg.com/react-router-dom@4.3.1/umd/react-router-dom.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"
+        integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
+"#;
+        let deps = extract(html);
+        assert_eq!(deps.len(), 10);
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "prop-types" && d.current_value == "15.6.1")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "react" && d.current_value == "16.3.2")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "react-dom" && d.current_value == "16.3.2")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "react-transition-group" && d.current_value == "2.2.1")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "popper.js" && d.current_value == "1.14.3")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "react-popper" && d.current_value == "0.10.4")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "reactstrap" && d.current_value == "7.1.0")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "react-router" && d.current_value == "4.3.1")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "react-markdown" && d.current_value == "4.0.6")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "axios" && d.current_value == "0.18.0")
+        );
+    }
+
+    // Ported: "returns null" — html/extract.spec.ts line 21
+    #[test]
+    fn nothing_html_returns_empty() {
+        // No cdnjs URLs → returns null/empty
+        let html = "<html><head><title>Hello</title></head><body>Renovate</body></html>";
+        assert!(extract(html).is_empty());
+    }
 }
