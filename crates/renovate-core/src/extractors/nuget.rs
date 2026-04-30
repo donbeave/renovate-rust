@@ -129,7 +129,9 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
             Event::Start(ref e) => {
                 let elem = elem_name(e);
                 // MSBuild SDK: `<Project Sdk="Name/Version">` on the root element
-                if elem == "Project" && let Some(pending) = attrs_to_project_sdk(e) {
+                if elem == "Project"
+                    && let Some(pending) = attrs_to_project_sdk(e)
+                {
                     deps.push(build_dep(pending));
                 }
                 if let Some(dep_type) = dep_type_for(&elem) {

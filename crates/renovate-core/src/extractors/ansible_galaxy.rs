@@ -358,8 +358,9 @@ roles:
     fn collections_before_roles_extracts_all_four() {
         let deps = extract(COLLECTIONS2);
         assert_eq!(deps.len(), 4);
-        assert!(deps
-            .iter()
-            .all(|d| d.skip_reason == Some(AnsibleGalaxySkipReason::GalaxyHosted)));
+        assert!(
+            deps.iter()
+                .all(|d| d.skip_reason == Some(AnsibleGalaxySkipReason::GalaxyHosted))
+        );
     }
 }

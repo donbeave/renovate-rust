@@ -177,6 +177,7 @@ mod tests {
 
     // ── basic extraction ──────────────────────────────────────────────────────
 
+    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_images_from_compose_v3() {
         let content = r#"
@@ -241,6 +242,7 @@ services:
 
     // ── skip reasons ──────────────────────────────────────────────────────────
 
+    // Ported: "extracts default variable values for version 3" — docker-compose/extract.spec.ts line 42
     #[test]
     fn variable_interpolation_is_skipped() {
         let content = "services:\n  redis:\n    image: ${REDIS_IMAGE:-redis:5.0.0}\n";
@@ -277,6 +279,7 @@ services:
 
     // ── real fixture from Renovate ────────────────────────────────────────────
 
+    // Ported: "extracts multiple image lines for version 1" — docker-compose/extract.spec.ts line 24
     #[test]
     fn renovate_fixture_1_v1_format() {
         // v1 format: services at top level (no `services:` key)
@@ -302,6 +305,7 @@ db:
         assert_eq!(deps[0].image, "nginx");
     }
 
+    // Ported: "returns null for empty" — docker-compose/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract_ok("");

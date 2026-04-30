@@ -133,7 +133,9 @@ pub fn extract(content: &str) -> Result<Vec<PoetryExtractedDep>, PoetryExtractEr
         .and_then(|r| r.as_array())
     {
         for req in requires {
-            if let Some(s) = req.as_str() && let Some(dep) = parse_build_system_req(s) {
+            if let Some(s) = req.as_str()
+                && let Some(dep) = parse_build_system_req(s)
+            {
                 deps.push(dep);
             }
         }

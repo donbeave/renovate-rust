@@ -434,6 +434,7 @@ mod tests {
         assert!(!is_fleet_yaml_path("fleet-config.yaml"));
     }
 
+    // Ported: "should parse valid configuration" (fleet.yaml) — fleet/extract.spec.ts line 49
     #[test]
     fn extracts_helm_dep_from_fleet_yaml() {
         let content = r#"
@@ -451,6 +452,7 @@ helm:
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "should parse valid configuration with target customization" — fleet/extract.spec.ts line 132
     #[test]
     fn extracts_target_customizations() {
         let content = r#"
@@ -506,6 +508,7 @@ helm:
         );
     }
 
+    // Ported: "should parse valid configuration" (GitRepo) — fleet/extract.spec.ts line 254
     #[test]
     fn extracts_gitrepo_dep() {
         let content = r#"
@@ -551,6 +554,7 @@ spec:
         assert!(deps.git_deps.is_empty());
     }
 
+    // Ported: "should return null if empty content" — fleet/extract.spec.ts line 24
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract("", true);
@@ -559,10 +563,9 @@ spec:
         assert!(deps.git_deps.is_empty());
     }
 
+    // Ported: "should return null if a unknown manifest is supplied" — fleet/extract.spec.ts line 30
     #[test]
     fn unknown_manifest_returns_empty() {
-        // Ported: "should return null if a unknown manifest is supplied" — fleet/extract.spec.ts line 30
-        // A Kubernetes manifest without 'kind: GitRepo' → no deps extracted
         let content = "apiVersion: v1\nkind: Service\nspec:\n  selector: {}\n";
         let deps = extract(content, false);
         assert!(deps.git_deps.is_empty());

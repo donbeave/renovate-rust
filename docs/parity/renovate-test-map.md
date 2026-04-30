@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 202 / 418 actionable tests ported (48%) — updated 2026-04-30
+**Overall progress:** 213 / 450 actionable tests ported (47%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -157,6 +157,50 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for invalid files | 7 | ported | `buildpacks.rs` | `invalid_toml_returns_empty` | — |
 | returns null for empty package.toml | 11 | ported | `buildpacks.rs` | `no_io_buildpacks_returns_empty` | — |
 | extracts builder and buildpack images | 20 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cargo/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/extract.spec.ts
+**Total tests:** 32 | **Ported:** 11 | **Actionable:** 32 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid toml | 46 | ported | `cargo.rs` | `invalid_toml_returns_error` | — |
+| returns null for empty dependencies | 52 | ported | `cargo.rs` | `empty_dependencies_section_returns_empty` | — |
+| returns null for empty dev-dependencies | 59 | ported | `cargo.rs` | `empty_dev_dependencies_returns_empty` | — |
+| returns null for empty custom target | 66 | ported | `cargo.rs` | `empty_custom_target_returns_empty` | — |
+| extracts multiple dependencies simple | 73 | ported | `cargo.rs` | `extracts_simple_string_deps` | — |
+| extracts multiple dependencies advanced | 79 | ported | `cargo.rs` | `version_constraint_forms_are_preserved` | — |
+| handles inline tables | 85 | pending | — | — | — |
+| handles standard tables | 91 | ported | `cargo.rs` | `extracts_table_deps_with_version` | — |
+| extracts platform specific dependencies | 97 | ported | `cargo.rs` | `target_cfg_dependencies_extracted` | — |
+| extracts registry urls from .cargo/config.toml | 103 | pending | — | — | — |
+| extracts registry urls from .cargo/config (legacy path) | 112 | pending | — | — | — |
+| extracts overridden registry indexes from .cargo/config.toml | 121 | pending | — | — | — |
+| extracts overridden source registry indexes from .cargo/config.toml | 180 | pending | — | — | — |
+| extracts registries overridden to the default | 205 | pending | — | — | — |
+| extracts registries with an empty config.toml | 249 | pending | — | — | — |
+| extracts registry urls from environment | 299 | pending | — | — | — |
+| extracts workspace dependencies | 345 | ported | `cargo.rs` | `workspace_dependencies_extracted` | — |
+| skips workspace dependency | 390 | ported | `cargo.rs` | `workspace_dep_is_skipped` | — |
+| skips unknown registries | 407 | pending | — | — | — |
+| fails to parse cargo config with invalid TOML | 415 | pending | — | — | — |
+| ignore cargo config registries with missing index | 424 | pending | — | — | — |
+| ignore cargo config source replaced registries with missing index | 433 | pending | — | — | — |
+| ignore cargo config with circular registry source replacements | 481 | pending | — | — | — |
+| extracts original package name of renamed dependencies | 539 | ported | `cargo.rs` | `renamed_dep_extracts_original_package_name` | — |
+| extracts locked versions | 549 | pending | — | — | — |
+| does not extract locked versions for git dependencies | 567 | pending | — | — | — |
+| extracts locked versions for renamed packages | 585 | pending | — | — | — |
+| handles missing locked versions | 601 | pending | — | — | — |
+| handles invalid versions in the toml file | 617 | pending | — | — | — |
+| handles invalid lock file | 635 | pending | — | — | — |
+| should extract project version | 650 | pending | — | — | — |
+| should extract project version from workspace | 664 | pending | — | — | — |
 
 ---
 
@@ -953,7 +997,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
 | `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 10 | partial |
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
-| `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
+<!-- cargo/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
 <!-- github-actions/extract.spec.ts converted to per-test format above -->
