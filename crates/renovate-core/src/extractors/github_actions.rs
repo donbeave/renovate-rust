@@ -970,6 +970,27 @@ jobs:
         assert!(extract_runner_labels(content).is_empty());
     }
 
+    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 873
+    #[test]
+    fn setup_x_without_version_returns_only_action_dep() {
+        // When actions/setup-node is used without node-version in with:, only the action dep
+        // is extracted (no spurious runtime version dep).
+        let content = r#"
+jobs:
+  build:
+    steps:
+      - name: "Setup Node.js without version"
+        uses: actions/setup-node@v3
+        with:
+          registry-url: 'https://npm.pkg.github.com'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].action, "actions/setup-node");
+        assert_eq!(deps[0].current_value, "v3");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn parse_runner_label_splits_correctly() {

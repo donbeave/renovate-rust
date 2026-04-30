@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 451 / 457 actionable tests ported (99%) — updated 2026-04-30
+**Overall progress:** 452 / 458 actionable tests ported (99%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -387,7 +387,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts actions with fqdn | 614 | pending | — | — | — |
 | extracts multiple action runners from yaml configuration file | 673 | ported | `github_actions.rs` | `runner_simple_ubuntu` (+ 4 others) | — |
 | extracts x-version from actions/setup-x | 741 | pending | — | — | — |
-| handles actions/setup-x without x-version field | 873 | pending | — | — | — |
+| handles actions/setup-x without x-version field | 873 | ported | `github_actions.rs` | `setup_x_without_version_returns_only_action_dep` | — |
 | extracts x-version from actions/setup-x in composite action | 891 | pending | — | — | — |
 | logs unknown schema | 1023 | not-applicable | — | — | Tests log output; no Rust equivalent |
 | extract from $step.uses | 1033 | pending | — | — | — |
