@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 334 / 450 actionable tests ported (74%) — updated 2026-04-30
+**Overall progress:** 336 / 450 actionable tests ported (75%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -664,21 +664,21 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/circleci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/extract.spec.ts
-**Total tests:** 9 | **Ported:** 4 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 9 | **Ported:** 6 | **Actionable:** 9 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 12 | ported | `circleci.rs` | `empty_content_returns_no_deps` | — |
-| handles registry alias | 16 | pending | — | — | — |
-| extracts multiple image and resolves yaml anchors | 48 | pending | — | — | — |
+| handles registry alias | 16 | pending | — | — | registryAliases not yet implemented |
+| extracts multiple image and resolves yaml anchors | 48 | pending | — | — | YAML anchor resolution not implemented |
 | extracts orbs too | 93 | ported | `circleci.rs` | `extracts_orbs` | — |
-| extracts image without leading dash | 200 | pending | — | — | — |
+| extracts image without leading dash | 200 | pending | — | — | YAML anchor resolution not implemented |
 | extracts and exclude android images | 226 | ported | `circleci.rs` | `machine_image_not_extracted` | — |
-| extracts orbs without jobs | 237 | pending | — | — | — |
+| extracts orbs without jobs | 237 | ported | `circleci.rs` | `extracts_orbs_without_jobs` | — |
 | extracts executors | 251 | ported | `circleci.rs` | `executor_docker_image_extracted` | — |
-| extracts orb definitions | 273 | pending | — | — | — |
+| extracts orb definitions | 273 | ported | `circleci.rs` | `extracts_orb_definitions` | — |
 
 ---
 

@@ -300,4 +300,65 @@ jobs:
         assert_eq!(deps[0].dep.image, "cimg/ruby");
         assert_eq!(deps[0].dep.tag.as_deref(), Some("3.0.3-browsers"));
     }
+
+    // Ported: "extracts orbs without jobs" — circleci/extract.spec.ts line 237
+    #[test]
+    fn extracts_orbs_without_jobs() {
+        // config4.yml: only `orbs:` and `workflows:`, no jobs
+        let content = "version: 2.1\n\norbs:\n  nodejs: circleci/node@5.2.0\n\nworkflows:\n  Test:\n    jobs:\n      - nodejs/test\n";
+        let orbs = extract_orbs(content);
+        assert_eq!(orbs.len(), 1);
+        assert_eq!(orbs[0].alias, "nodejs");
+        assert_eq!(orbs[0].package_name, "circleci/node");
+        assert_eq!(orbs[0].version, "5.2.0");
+        // No docker images
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts orb definitions" — circleci/extract.spec.ts line 273
+    #[test]
+    fn extracts_orb_definitions() {
+        let content = r#"version: 2.1
+
+orbs:
+  myorb:
+    orbs:
+      python: circleci/python@2.1.1
+
+    executors:
+      python:
+        docker:
+          - image: cimg/python:3.9
+
+    jobs:
+      test_image:
+        docker:
+          - image: cimg/python:3.7
+        steps:
+          - checkout
+
+workflows:
+  Test:
+    jobs:
+      - myorb/test_image
+"#;
+        let orbs = extract_orbs(content);
+        assert_eq!(orbs.len(), 1);
+        assert_eq!(orbs[0].alias, "python");
+        assert_eq!(orbs[0].package_name, "circleci/python");
+        assert_eq!(orbs[0].version, "2.1.1");
+
+        let docker = extract(content);
+        assert_eq!(docker.len(), 2);
+        assert!(
+            docker
+                .iter()
+                .any(|d| d.dep.image == "cimg/python" && d.dep.tag.as_deref() == Some("3.9"))
+        );
+        assert!(
+            docker
+                .iter()
+                .any(|d| d.dep.image == "cimg/python" && d.dep.tag.as_deref() == Some("3.7"))
+        );
+    }
 }
