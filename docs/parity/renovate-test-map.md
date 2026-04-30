@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 261 / 450 actionable tests ported (58%) — updated 2026-04-30
+**Overall progress:** 285 / 450 actionable tests ported (63%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -641,7 +641,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/buildkite/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/buildkite/extract.spec.ts
-**Total tests:** 11 | **Ported:** 6 | **Actionable:** 11 | **Status:** partial
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -653,11 +653,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | adds skipReason | 47 | ported | `buildkite.rs` | `non_semver_version_skipped` | — |
 | extracts arrays of plugins | 70 | ported | `buildkite.rs` | `array_plugins_extracted` | — |
 | extracts git-based plugins | 92 | ported | `buildkite.rs` | `github_url_plugin` | — |
-| extracts git-based plugin with .git at the end of its name | 105 | pending | — | — | — |
-| extracts plugins outside plugins sections | 121 | pending | — | — | — |
-| extracts plugin with preceding ? | 140 | pending | — | — | — |
-| extracts plugin tags from bitbucket | 155 | pending | — | — | — |
-| extracts plugin tags with quotes | 178 | pending | — | — | — |
+| extracts git-based plugin with .git at the end of its name | 105 | ported | `buildkite.rs` | `github_enterprise_ssh_url_with_git_suffix` | — |
+| extracts plugins outside plugins sections | 121 | ported | `buildkite.rs` | `ssh_url_plugin_outside_plugins_section` | — |
+| extracts plugin with preceding ? | 140 | ported | `buildkite.rs` | `yaml_question_mark_prefix` | — |
+| extracts plugin tags from bitbucket | 155 | ported | `buildkite.rs` | `bitbucket_plugin_extracted` | — |
+| extracts plugin tags with quotes | 178 | ported | `buildkite.rs` | `single_quoted_plugin` | — |
 
 ---
 
