@@ -635,6 +635,23 @@ mod tests {
         assert_eq!(deps[0].image, "node");
     }
 
+    // Ported: "detects ["stage"] and ["final"] deps of docker multi-stage build." — dockerfile/extract.spec.ts line 549
+    #[test]
+    fn multistage_build_with_copy_from_stage() {
+        let content = "FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.23.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD [\"./app\"]\n";
+        let deps = extract_ok(content);
+        // 3 FROM-based deps: node, golang, alpine
+        // COPY --from=builder is a stage name ref → not added
+        assert_eq!(deps.len(), 3);
+        assert_eq!(deps[0].image, "node");
+        assert_eq!(deps[0].tag.as_deref(), Some("8.15.1-alpine"));
+        assert_eq!(deps[1].image, "golang");
+        assert_eq!(deps[1].tag.as_deref(), Some("1.23.3"));
+        assert_eq!(deps[2].image, "alpine");
+        assert_eq!(deps[2].tag.as_deref(), Some("latest"));
+        assert!(deps.iter().all(|d| d.skip_reason.is_none()));
+    }
+
     // ── real-world fixture from Renovate ─────────────────────────────────────
 
     // Ported: "extracts images on adjacent lines" — dockerfile/extract.spec.ts line 598

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 148 / 310 actionable tests ported (48%) — updated 2026-04-29
+**Overall progress:** 149 / 310 actionable tests ported (48%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -674,7 +674,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles COPY --link --from | 481 | ported | `dockerfile.rs` | `copy_link_from_extracts_image` | — |
 | skips named multistage COPY --from tags | 507 | ported | `dockerfile.rs` | `copy_from_stage_name_is_skipped` | — |
 | skips index reference COPY --from tags | 528 | ported | `dockerfile.rs` | `copy_from_index_is_skipped` | — |
-| detects ["stage"] and ["final"] deps of docker multi-stage build. | 549 | pending | — | — | — |
+| detects ["stage"] and ["final"] deps of docker multi-stage build. | 549 | ported | `dockerfile.rs` | `multistage_build_with_copy_from_stage` | — |
 | extracts images on adjacent lines | 598 | ported | `dockerfile.rs` | `renovate_fixture_1` | — |
 | extracts images from all sorts of (maybe multiline) FROM and COPY --from statements | 628 | pending | — | — | — |
 | handles calico/node | 733 | pending | — | — | — |
