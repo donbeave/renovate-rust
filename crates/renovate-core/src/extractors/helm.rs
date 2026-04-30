@@ -46,6 +46,14 @@ pub enum HelmSkipReason {
     OciRegistry,
     /// Repository is an unresolvable `@alias` reference.
     UnresolvableAlias,
+    /// Chart is a local path (`./`, `../`, `/`).
+    LocalChart,
+    /// Chart version is a template expression or missing.
+    InvalidVersion,
+    /// Chart name contains unsupported characters.
+    UnsupportedChartType,
+    /// Registry URL is unknown.
+    UnknownRegistry,
 }
 
 /// A single extracted Helm chart dependency.
@@ -60,6 +68,10 @@ pub struct HelmExtractedDep {
     pub repository: String,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<HelmSkipReason>,
+    /// Datasource override (e.g. `"docker"` for OCI repos).
+    pub datasource: Option<String>,
+    /// Package name for OCI deps (full image path).
+    pub package_name: Option<String>,
 }
 
 // ── Regexes ───────────────────────────────────────────────────────────────────
@@ -191,6 +203,8 @@ fn emit_dep(name: &str, version: &str, repository: &str, deps: &mut Vec<HelmExtr
         current_value: version.to_owned(),
         repository: resolved_repo,
         skip_reason,
+        datasource: None,
+        package_name: None,
     });
 }
 
