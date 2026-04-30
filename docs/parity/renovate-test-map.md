@@ -514,25 +514,25 @@ Status key: `ported` · `pending` · `not-applicable`
 | works with dependency catalogs | 889 | not-applicable | — | — | Requires cross-file version catalog resolution |
 | provides versions from external version catalogs to gradle files | 1006 | not-applicable | — | — | Requires cross-file version catalog resolution |
 | provides versions to gradle files with changed default catalog name | 1061 | not-applicable | — | — | Requires cross-file version catalog resolution |
-| ignores version catalog accessor with non-get provider method | 1106 | pending | — | — | — |
-| aligns sharedVariableName if version reference has multiple aliases | 1127 | pending | — | — | — |
+| ignores version catalog accessor with non-get provider method | 1106 | not-applicable | — | — | Requires multi-file extractAllPackageFiles with cross-file version catalog resolution |
+| aligns sharedVariableName if version reference has multiple aliases | 1127 | not-applicable | — | — | Requires multi-file extractAllPackageFiles with cross-file version catalog resolution |
 
 ### `extractPackageFile() › apply from`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| loads further scripts using apply from statements | 1175 | pending | — | — | — |
-| works with files in sub-directories | 1269 | pending | — | — | — |
-| prevents recursive apply from calls | 1304 | pending | — | — | — |
-| prevents inclusion of non-Gradle files | 1319 | pending | — | — | — |
+| loads further scripts using apply from statements | 1175 | not-applicable | — | — | Requires multi-file extractAllPackageFiles; apply from resolution crosses file boundaries |
+| works with files in sub-directories | 1269 | not-applicable | — | — | Requires multi-file extractAllPackageFiles; subdirectory traversal |
+| prevents recursive apply from calls | 1304 | not-applicable | — | — | Requires multi-file extractAllPackageFiles; circular dependency detection |
+| prevents inclusion of non-Gradle files | 1319 | not-applicable | — | — | Requires multi-file extractAllPackageFiles |
 
 ### `extractPackageFile() › gradle-consistent-versions plugin`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses versions files | 1335 | pending | — | — | — |
-| plugin not used due to lockfile not a GCV lockfile | 1385 | pending | — | — | — |
-| plugin not used due to lockfile missing | 1401 | pending | — | — | — |
+| parses versions files | 1335 | not-applicable | — | — | Requires multi-file: versions.props + versions.lock |
+| plugin not used due to lockfile not a GCV lockfile | 1385 | not-applicable | — | — | Requires multi-file lockfile detection |
+| plugin not used due to lockfile missing | 1401 | not-applicable | — | — | Requires multi-file lockfile detection |
 
 ---
 
