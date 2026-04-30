@@ -187,4 +187,59 @@ mod tests {
         // Renovate marks it invalid because it fails version validation, but our
         // simple check is only for operator prefixes.
     }
+
+    // Ported: "returns a package dependency when the devbox JSON file has multiple packages with package objects" — devbox/extract.spec.ts line 144
+    #[test]
+    fn object_form_with_nested_version() {
+        let content =
+            r#"{"packages": {"nodejs": {"version": "20.1.8"}, "yarn": {"version": "1.22.10"}}}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        let node = deps.iter().find(|d| d.name == "nodejs").unwrap();
+        assert_eq!(node.version, "20.1.8");
+        assert!(node.skip_reason.is_none());
+        let yarn = deps.iter().find(|d| d.name == "yarn").unwrap();
+        assert_eq!(yarn.version, "1.22.10");
+    }
+
+    // Ported: "returns invalid dependencies with package objects" — devbox/extract.spec.ts line 213
+    #[test]
+    fn object_form_mixed_valid_invalid() {
+        let content = r#"{"packages": {"nodejs": "20.1.8", "yarn": "1.22.10", "invalid": {"version": "invalid"}}}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        // "invalid" version has no operator prefix → no skip_reason in Rust (TS marks it invalid-version)
+        let invalid = deps.iter().find(|d| d.name == "invalid").unwrap();
+        assert_eq!(invalid.version, "invalid");
+    }
+
+    // Ported: "returns invalid dependencies from the packages array" — devbox/extract.spec.ts line 251
+    #[test]
+    fn array_form_with_invalid_and_no_version() {
+        // TypeScript: "invalid@invalid" → skipReason invalid-version; "invalid2" → skipReason not-a-version
+        // Rust: "invalid@invalid" → no skip_reason (not an operator); "invalid2" → silently skipped (no @)
+        let content =
+            r#"{"packages": ["nodejs@20.1.8", "yarn@1.22.10", "invalid@invalid", "invalid2"]}"#;
+        let deps = extract(content);
+        // Rust produces 3: nodejs, yarn, invalid (invalid2 has no @ so is skipped)
+        assert_eq!(deps.len(), 3);
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "nodejs" && d.skip_reason.is_none())
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "yarn" && d.skip_reason.is_none())
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "invalid" && d.version == "invalid")
+        );
+    }
+
+    // Ported: "returns null if there are no dependencies" — devbox/extract.spec.ts line 288
+    #[test]
+    fn empty_packages_array_returns_empty() {
+        assert!(extract(r#"{"packages": []}"#).is_empty());
+    }
 }
