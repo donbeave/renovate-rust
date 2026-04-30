@@ -316,6 +316,7 @@ pub fn extract(content: &str) -> Vec<TerraformExtractedDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
     #[test]
     fn required_providers_block_form() {
         let content = r#"
@@ -353,6 +354,7 @@ terraform {
         assert_eq!(k8s.current_value, ">= 2.0.0");
     }
 
+    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
     #[test]
     fn required_providers_inline_string_form() {
         let content = r#"
@@ -368,6 +370,7 @@ terraform {
         assert_eq!(deps[0].current_value, ">= 4.0.0");
     }
 
+    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
     #[test]
     fn module_with_version() {
         let content = r#"
@@ -387,6 +390,7 @@ module "vpc" {
         assert!(modules[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
     #[test]
     fn module_without_version_skipped() {
         let content = r#"
@@ -402,6 +406,7 @@ module "vpc" {
         );
     }
 
+    // Ported: "returns dep with skipReason local" — terraform/extract.spec.ts line 756
     #[test]
     fn module_with_local_path_skipped() {
         let content = r#"
@@ -417,6 +422,7 @@ module "local" {
         );
     }
 
+    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
     #[test]
     fn module_with_git_source_skipped() {
         let content = r#"
@@ -432,6 +438,7 @@ module "git_module" {
         );
     }
 
+    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
     #[test]
     fn mixed_providers_and_modules() {
         let content = r#"
@@ -480,6 +487,7 @@ module "local_mod" {
         assert_eq!(local.skip_reason, Some(TerraformSkipReason::ExternalSource));
     }
 
+    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
     #[test]
     fn comments_ignored() {
         let content = r#"
@@ -499,11 +507,13 @@ terraform {
         assert_eq!(deps[0].name, "hashicorp/aws");
     }
 
+    // Ported: "returns null for empty" — terraform/extract.spec.ts line 39
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
     #[test]
     fn provider_without_source_uses_name() {
         let content = r#"

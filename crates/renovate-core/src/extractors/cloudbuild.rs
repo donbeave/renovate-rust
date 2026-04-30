@@ -122,6 +122,7 @@ steps:
         );
     }
 
+    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
     #[test]
     fn variable_reference_classified() {
         let content = "steps:\n  - name: '$_BUILDER_IMAGE'\n";
@@ -131,6 +132,7 @@ steps:
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
     #[test]
     fn ignores_non_steps_sections() {
         let content = r#"
@@ -152,6 +154,7 @@ steps:
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
     #[test]
     fn inline_name_in_list_item() {
         let content = "steps:\n  - name: ubuntu:22.04\n";

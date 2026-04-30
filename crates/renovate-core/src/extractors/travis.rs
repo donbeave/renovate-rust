@@ -112,6 +112,7 @@ node_js:
         assert_eq!(deps[1].version, "20.9.0");
     }
 
+    // Ported: "returns results" — travis/extract.spec.ts line 18
     #[test]
     fn lts_alias_skipped() {
         let content = "node_js:\n  - lts/*\n  - \"18\"\n";
@@ -120,6 +121,7 @@ node_js:
         assert_eq!(deps[0].version, "18");
     }
 
+    // Ported: "returns results" — travis/extract.spec.ts line 18
     #[test]
     fn stable_skipped() {
         let content = "node_js:\n  - stable\n";
@@ -127,11 +129,13 @@ node_js:
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns empty if fails to parse" — travis/extract.spec.ts line 13
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns empty if fails to parse" — travis/extract.spec.ts line 13
     #[test]
     fn no_node_js_key_returns_empty() {
         let content = "language: python\npython:\n  - \"3.11\"\n";

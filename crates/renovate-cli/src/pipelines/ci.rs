@@ -549,6 +549,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         if let Some(
                             renovate_core::extractors::buildkite::BuildkiteDatasource::GithubTags {
                                 repo: gr,
+                                ..
                             },
                         ) = &d.datasource
                         {
@@ -592,11 +593,13 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             reason: format!("{reason:?}").to_lowercase(),
                         }
                     } else if !repo_cfg.is_dep_ignored_for_manager(&dep.dep_name, "buildkite") {
-                        let gh_repo = dep.datasource.as_ref().map(
-                            |renovate_core::extractors::buildkite::BuildkiteDatasource::GithubTags { repo: gr }| {
-                                gr.as_str()
-                            },
-                        );
+                        let gh_repo = dep.datasource.as_ref().and_then(|ds| {
+                            if let renovate_core::extractors::buildkite::BuildkiteDatasource::GithubTags { repo: gr, .. } = ds {
+                                Some(gr.as_str())
+                            } else {
+                                None
+                            }
+                        });
                         match gh_repo.and_then(|r| update_map.get(r)) {
                             Some((true, Some(latest), _)) => output::DepStatus::UpdateAvailable {
                                 current: dep.current_value.clone(),

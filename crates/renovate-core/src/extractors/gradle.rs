@@ -385,6 +385,7 @@ dependencies {
         );
     }
 
+    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
     #[test]
     fn skips_dynamic_versions() {
         let content = "implementation 'org.example:mylib:1.+'\n";
@@ -393,6 +394,7 @@ dependencies {
         assert_eq!(deps[0].skip_reason, Some(GradleSkipReason::DynamicVersion));
     }
 
+    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
     #[test]
     fn skips_snapshot_versions() {
         let content = "implementation 'com.example:mylib:1.0.0-SNAPSHOT'\n";
@@ -401,6 +403,7 @@ dependencies {
         assert_eq!(deps[0].skip_reason, Some(GradleSkipReason::DynamicVersion));
     }
 
+    // Ported: "extracts from cross-referenced files" — gradle/extract.spec.ts line 97
     #[test]
     fn strips_classifier() {
         let content = "implementation 'junit:junit:4.13.2@jar'\n";

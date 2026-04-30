@@ -32,10 +32,16 @@ pub enum BuildkiteSkipReason {
     InvalidName,
 }
 
-/// Datasource for a Buildkite plugin (only GitHub Tags supported for now).
+/// Datasource for a Buildkite plugin.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BuildkiteDatasource {
-    GithubTags { repo: String },
+    /// GitHub Tags; for GitHub Enterprise, `registry_url` is Some("https://host").
+    GithubTags {
+        repo: String,
+        registry_url: Option<String>,
+    },
+    /// Bitbucket Tags; `registry_url` is Some("https://bitbucket.org") or similar.
+    BitbucketTags { repo: String, registry_url: String },
 }
 
 /// A single extracted Buildkite plugin dependency.
@@ -83,22 +89,30 @@ pub fn extract(content: &str) -> Vec<BuildkiteDep> {
         if let Some(url_cap) = GIT_URL.captures(&dep_name) {
             let host = &url_cap["host"];
             let repo_path = url_cap["repo"].trim_start_matches('/').to_owned();
-            // Only GitHub is currently supported (Bitbucket Tags not yet implemented).
-            if host == "github.com" {
-                out.push(BuildkiteDep {
-                    dep_name,
-                    current_value,
-                    datasource: Some(BuildkiteDatasource::GithubTags { repo: repo_path }),
-                    skip_reason: None,
-                });
+            let datasource = if host.contains("bitbucket") {
+                // Bitbucket repositories use the Bitbucket Tags datasource.
+                Some(BuildkiteDatasource::BitbucketTags {
+                    repo: repo_path,
+                    registry_url: format!("https://{host}"),
+                })
+            } else if host == "github.com" {
+                Some(BuildkiteDatasource::GithubTags {
+                    repo: repo_path,
+                    registry_url: None,
+                })
             } else {
-                out.push(BuildkiteDep {
-                    dep_name,
-                    current_value,
-                    datasource: None,
-                    skip_reason: Some(BuildkiteSkipReason::InvalidName),
-                });
-            }
+                // GitHub Enterprise or any other GitHub-like host.
+                Some(BuildkiteDatasource::GithubTags {
+                    repo: repo_path,
+                    registry_url: Some(format!("https://{host}")),
+                })
+            };
+            out.push(BuildkiteDep {
+                dep_name,
+                current_value,
+                datasource,
+                skip_reason: None,
+            });
             continue;
         }
 
@@ -126,7 +140,10 @@ pub fn extract(content: &str) -> Vec<BuildkiteDep> {
         out.push(BuildkiteDep {
             dep_name,
             current_value,
-            datasource: repo.map(|r| BuildkiteDatasource::GithubTags { repo: r }),
+            datasource: repo.map(|r| BuildkiteDatasource::GithubTags {
+                repo: r,
+                registry_url: None,
+            }),
             skip_reason,
         });
     }
@@ -170,7 +187,8 @@ steps:
         assert_eq!(
             dcp.datasource,
             Some(BuildkiteDatasource::GithubTags {
-                repo: "buildkite-plugins/docker-compose-buildkite-plugin".to_owned()
+                repo: "buildkite-plugins/docker-compose-buildkite-plugin".to_owned(),
+                registry_url: None,
             })
         );
         assert!(dcp.skip_reason.is_none());
@@ -188,7 +206,8 @@ steps:
         assert_eq!(
             mj.datasource,
             Some(BuildkiteDatasource::GithubTags {
-                repo: "buildkite/matrix-joiner-buildkite-plugin".to_owned()
+                repo: "buildkite/matrix-joiner-buildkite-plugin".to_owned(),
+                registry_url: None,
             })
         );
     }
@@ -205,7 +224,8 @@ steps:
         assert_eq!(
             url.datasource,
             Some(BuildkiteDatasource::GithubTags {
-                repo: "my-org/my-plugin".to_owned()
+                repo: "my-org/my-plugin".to_owned(),
+                registry_url: None,
             })
         );
     }

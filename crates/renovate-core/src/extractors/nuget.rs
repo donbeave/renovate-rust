@@ -434,6 +434,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NuGetSkipReason::NoVersion));
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn exact_nuget_range_normalized() {
         let content = r#"<Project>
@@ -446,6 +447,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn minimum_only_range_normalized() {
         let content = r#"<Project>
@@ -461,6 +463,7 @@ mod tests {
         }
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn upper_bound_range_skipped() {
         let content = r#"<Project>
@@ -505,16 +508,19 @@ mod tests {
         assert!(deps.is_empty());
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn normalize_plain_version() {
         assert_eq!(normalize_version("1.2.3"), ("1.2.3".to_owned(), None));
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn normalize_exact_range() {
         assert_eq!(normalize_version("[1.2.3]"), ("1.2.3".to_owned(), None));
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn normalize_minimum_ranges() {
         assert_eq!(normalize_version("[1.2.3,]"), ("1.2.3".to_owned(), None));
