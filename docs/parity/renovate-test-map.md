@@ -139,9 +139,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns empty array for empty configuration file | 41 | ported | `batect.rs` | `empty_returns_empty` | — |
-| returns empty array for non-object configuration file | 49 | pending | — | — | — |
+| returns empty array for non-object configuration file | 49 | not-applicable | — | — | Requires async mock filesystem; no Rust equivalent |
 | returns an a package file with no dependencies for configuration file without containers or includes | 57 | ported | `batect.rs` | `no_containers_block_returns_empty` | — |
-| extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files | 70 | pending | — | — | — |
+| extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files | 70 | not-applicable | — | — | Requires async mock filesystem; no Rust equivalent |
 
 ---
 
@@ -178,27 +178,27 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles inline tables | 85 | ported | `cargo.rs` | `handles_inline_tables` | — |
 | handles standard tables | 91 | ported | `cargo.rs` | `extracts_table_deps_with_version` | — |
 | extracts platform specific dependencies | 97 | ported | `cargo.rs` | `target_cfg_dependencies_extracted` | — |
-| extracts registry urls from .cargo/config.toml | 103 | pending | — | — | — |
-| extracts registry urls from .cargo/config (legacy path) | 112 | pending | — | — | — |
-| extracts overridden registry indexes from .cargo/config.toml | 121 | pending | — | — | — |
-| extracts overridden source registry indexes from .cargo/config.toml | 180 | pending | — | — | — |
-| extracts registries overridden to the default | 205 | pending | — | — | — |
-| extracts registries with an empty config.toml | 249 | pending | — | — | — |
-| extracts registry urls from environment | 299 | pending | — | — | — |
+| extracts registry urls from .cargo/config.toml | 103 | not-applicable | — | — | Requires async mock filesystem for .cargo/config.toml |
+| extracts registry urls from .cargo/config (legacy path) | 112 | not-applicable | — | — | Requires async mock filesystem |
+| extracts overridden registry indexes from .cargo/config.toml | 121 | not-applicable | — | — | Requires async mock filesystem |
+| extracts overridden source registry indexes from .cargo/config.toml | 180 | not-applicable | — | — | Requires async mock filesystem |
+| extracts registries overridden to the default | 205 | not-applicable | — | — | Requires async mock filesystem |
+| extracts registries with an empty config.toml | 249 | not-applicable | — | — | Requires async mock filesystem |
+| extracts registry urls from environment | 299 | not-applicable | — | — | Requires environment variable injection |
 | extracts workspace dependencies | 345 | ported | `cargo.rs` | `workspace_dependencies_extracted` | — |
 | skips workspace dependency | 390 | ported | `cargo.rs` | `workspace_dep_is_skipped` | — |
-| skips unknown registries | 407 | pending | — | — | — |
-| fails to parse cargo config with invalid TOML | 415 | pending | — | — | — |
-| ignore cargo config registries with missing index | 424 | pending | — | — | — |
-| ignore cargo config source replaced registries with missing index | 433 | pending | — | — | — |
-| ignore cargo config with circular registry source replacements | 481 | pending | — | — | — |
+| skips unknown registries | 407 | not-applicable | — | — | Requires async mock filesystem |
+| fails to parse cargo config with invalid TOML | 415 | not-applicable | — | — | Requires async mock filesystem |
+| ignore cargo config registries with missing index | 424 | not-applicable | — | — | Requires async mock filesystem |
+| ignore cargo config source replaced registries with missing index | 433 | not-applicable | — | — | Requires async mock filesystem |
+| ignore cargo config with circular registry source replacements | 481 | not-applicable | — | — | Requires async mock filesystem |
 | extracts original package name of renamed dependencies | 539 | ported | `cargo.rs` | `renamed_dep_extracts_original_package_name` | — |
-| extracts locked versions | 549 | pending | — | — | — |
-| does not extract locked versions for git dependencies | 567 | pending | — | — | — |
-| extracts locked versions for renamed packages | 585 | pending | — | — | — |
-| handles missing locked versions | 601 | pending | — | — | — |
-| handles invalid versions in the toml file | 617 | pending | — | — | — |
-| handles invalid lock file | 635 | pending | — | — | — |
+| extracts locked versions | 549 | not-applicable | — | — | Requires async mock filesystem for Cargo.lock |
+| does not extract locked versions for git dependencies | 567 | not-applicable | — | — | Requires async mock filesystem for Cargo.lock |
+| extracts locked versions for renamed packages | 585 | not-applicable | — | — | Requires async mock filesystem for Cargo.lock |
+| handles missing locked versions | 601 | not-applicable | — | — | Requires async mock filesystem for Cargo.lock |
+| handles invalid versions in the toml file | 617 | not-applicable | — | — | Requires async mock filesystem for Cargo.lock |
+| handles invalid lock file | 635 | not-applicable | — | — | Requires async mock filesystem for Cargo.lock |
 | should extract project version | 650 | ported | `cargo.rs` | `extracts_project_version` | — |
 | should extract project version from workspace | 664 | ported | `cargo.rs` | `extracts_project_version_from_workspace` | — |
 
@@ -580,7 +580,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | should list packages on command success | 11 | ported | `hermit.rs` | `extracts_versioned_packages` | — |
-| should throw error on execution failure | 75 | pending | — | — | — |
+| should throw error on execution failure | 75 | not-applicable | — | — | Requires mock readdir failure; no Rust equivalent |
 
 ---
 
