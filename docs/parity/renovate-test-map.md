@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 437 / 450 actionable tests ported (97%) — updated 2026-04-30
+**Overall progress:** 444 / 450 actionable tests ported (99%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -1018,7 +1018,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/maven/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/maven.rs` | 19 | partial |
 | `lib/modules/manager/meteor/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/meteor.rs` | 2 | ported |
 | `lib/modules/manager/mint/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/mint.rs` | 6 | ported |
-| `lib/modules/manager/mise/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/mise.rs` | 9 | partial |
+| `lib/modules/manager/mise/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/mise.rs` | 16 | partial |
 | `lib/modules/manager/mix/extract.spec.ts` | 3 | `crates/renovate-core/src/extractors/mix.rs` | 9 | partial |
 | `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
 | `lib/modules/manager/nuget/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/nuget.rs` | 25 | partial |

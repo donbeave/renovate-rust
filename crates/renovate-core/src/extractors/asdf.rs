@@ -62,6 +62,8 @@ pub enum AsdfDatasource {
 pub enum AsdfSkipReason {
     UnsupportedTool,
     UnsupportedDatasource,
+    /// No version specified.
+    UnspecifiedVersion,
 }
 
 /// A single extracted asdf dependency.

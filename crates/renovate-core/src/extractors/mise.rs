@@ -197,15 +197,40 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
         let tool_name = tool_raw.trim().trim_matches('"').trim_matches('\'');
         let version_raw = val_raw.trim();
 
-        // Only handle simple quoted string versions (not arrays or tables).
-        if !version_raw.starts_with('"') && !version_raw.starts_with('\'') {
+        // Determine version string based on value type.
+        let version: Option<&str> = if version_raw.starts_with('"') || version_raw.starts_with('\'')
+        {
+            // Simple quoted string.
+            let v = version_raw.trim_matches('"').trim_matches('\'').trim();
+            if v.is_empty() { None } else { Some(v) }
+        } else if version_raw.starts_with('{') {
+            // Inline table: try to extract `version = "..."` or `version = '...'`.
+            let inner = version_raw.trim_start_matches('{').trim_end_matches('}');
+            inner.split(',').find_map(|kv| {
+                let kv = kv.trim();
+                let (k, v) = kv.split_once('=')?;
+                if k.trim() != "version" {
+                    return None;
+                }
+                let v = v.trim().trim_matches('"').trim_matches('\'').trim();
+                if v.is_empty() { None } else { Some(v) }
+            })
+        } else {
+            // Arrays, other formats — skip.
             continue;
-        }
+        };
 
-        let version = version_raw.trim_matches('"').trim_matches('\'').trim();
-        if version.is_empty() {
+        // No version → UnspecifiedVersion.
+        let Some(version) = version else {
+            out.push(AsdfDep {
+                tool_name: tool_name.to_owned(),
+                dep_name: tool_name.to_owned(),
+                current_value: String::new(),
+                skip_reason: Some(AsdfSkipReason::UnspecifiedVersion),
+                ..Default::default()
+            });
             continue;
-        }
+        };
 
         // Dynamic tools with version-dependent datasource.
         if tool_name == "java" {
@@ -348,5 +373,55 @@ mod tests {
         assert_eq!(d.package_name, Some("java-jdk"));
         assert_eq!(d.current_value, "16.0.0+36");
         assert!(d.skip_reason.is_none());
+    }
+
+    // Ported: "returns null for invalid TOML" — mise/extract.spec.ts line 17
+    #[test]
+    fn invalid_toml_returns_empty() {
+        assert!(extract("foo").is_empty());
+    }
+
+    // Ported: "returns null for empty tools section" — mise/extract.spec.ts line 21
+    #[test]
+    fn empty_tools_section_returns_empty() {
+        assert!(extract("[tools]\n").is_empty());
+    }
+
+    // Ported: "provides skipReason for missing version - empty string" — mise/extract.spec.ts line 802
+    #[test]
+    fn empty_version_string_skipped() {
+        let content = "[tools]\npython = ''\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert!(deps[0].skip_reason.is_some());
+    }
+
+    // Ported: "provides skipReason for missing version - missing version in object" — mise/extract.spec.ts line 818
+    #[test]
+    fn object_without_version_skipped() {
+        let content = "[tools]\npython = {virtualenv='.venv'}\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert!(deps[0].skip_reason.is_some());
+    }
+
+    // Ported: "provides skipReason for missing version - empty array" — mise/extract.spec.ts line 834
+    #[test]
+    fn empty_array_version_skipped() {
+        let content = "[tools]\njava = '21.0.2'\nerlang = []\n";
+        let deps = extract(content);
+        // erlang with empty array should be skipped
+        let erlang = deps.iter().find(|d| d.tool_name == "erlang");
+        assert!(erlang.map(|d| d.skip_reason.is_some()).unwrap_or(true));
+    }
+
+    // Ported: "extracts tools with plugin options" — mise/extract.spec.ts line 432
+    #[test]
+    fn tool_with_version_object() {
+        let content = "[tools]\npython = {version = \"3.12.3\"}\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "3.12.3");
+        assert!(deps[0].skip_reason.is_none());
     }
 }
