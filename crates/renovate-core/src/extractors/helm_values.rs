@@ -236,4 +236,39 @@ image:
         assert_eq!(deps[0].image, "nginx");
         assert_eq!(deps[0].tag.as_deref(), Some("1.16.1"));
     }
+
+    // Ported: "extract data from file with multiple documents" — helm-values/extract.spec.ts line 62
+    #[test]
+    fn multidoc_yaml_extracts_nested_images() {
+        // Simulates single_file_with_multiple_documents.yaml fixture:
+        // two image blocks nested under values: controller/speaker.
+        let content = r#"apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: metallb
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+spec:
+  values:
+    controller:
+      image:
+        repository: quay.io/metallb/controller
+        tag: v0.13.10
+    speaker:
+      image:
+        repository: quay.io/metallb/speaker
+        tag: v0.13.10
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(
+            |d| d.image == "quay.io/metallb/controller" && d.tag.as_deref() == Some("v0.13.10")
+        ));
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "quay.io/metallb/speaker"
+                    && d.tag.as_deref() == Some("v0.13.10"))
+        );
+    }
 }
