@@ -277,4 +277,99 @@ mod tests {
         let content = r#"{"feature-resource-version": "1.0"}"#;
         assert!(extract(content).is_empty());
     }
+
+    // Ported: "returns null for an invalid version of feature model definition" — osgi/extract.spec.ts line 157
+    #[test]
+    fn invalid_feature_version_returns_empty() {
+        let content = r#"{
+  "feature-resource-version": "unknown",
+  "bundles": [{"id": "commons-codec:commons-codec:1.15", "start-order": "5"}]
+}"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts the artifacts from an extension section" — osgi/extract.spec.ts line 228
+    #[test]
+    fn extracts_from_extension_section() {
+        let content = r#"{
+  "content-packages:ARTIFACTS|true": [
+    "com.day.cq:core.wcm.components.all:zip:2.21.0"
+  ]
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "com.day.cq:core.wcm.components.all");
+        assert_eq!(deps[0].current_value, "2.21.0");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts the artifacts a file with a double slash" — osgi/extract.spec.ts line 241
+    #[test]
+    fn double_slash_in_value_not_treated_as_comment() {
+        let content = r#"{
+  "bundles": [
+    {"id": "com.h2database:h2-mvstore:2.1.214", "start-order": "15"},
+    {"id": "org.mongodb:mongo-java-driver:3.12.11", "start-order": "15"}
+  ],
+  "configurations": {
+    "org.apache.jackrabbit.oak.plugins.document.DocumentNodeStoreService": {
+      "mongouri": "mongodb://localhost:27017"
+    }
+  }
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "com.h2database:h2-mvstore")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "org.mongodb:mongo-java-driver")
+        );
+    }
+
+    // Ported: "extracts the artifacts from the framework artifact section" — osgi/extract.spec.ts line 263
+    #[test]
+    fn extracts_from_framework_artifact_section() {
+        let content = r#"{
+  "execution-environment:JSON|false": {
+    "framework": {
+      "id": "org.apache.felix:org.apache.felix.framework:7.0.5"
+    }
+  }
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].dep_name,
+            "org.apache.felix:org.apache.felix.framework"
+        );
+        assert_eq!(deps[0].current_value, "7.0.5");
+    }
+
+    // Ported: "skips depedencies with with malformed definitions" — osgi/extract.spec.ts line 276
+    #[test]
+    fn malformed_definitions_skipped_with_valid_kept() {
+        let content = r##"{
+  "bundles": [
+    {"#": "missing id", "not-id": "commons-codec:commons-codec:1.15"},
+    {"id": "commons-codec:1.15"},
+    {"id": "commons-codec:commons-codec:1.15"}
+  ]
+}"##;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        let invalid = deps.iter().find(|d| d.dep_name == "commons-codec:1.15");
+        assert!(invalid.is_some());
+        assert_eq!(
+            invalid.unwrap().skip_reason,
+            Some(OsgiSkipReason::InvalidValue)
+        );
+        let valid = deps
+            .iter()
+            .find(|d| d.dep_name == "commons-codec:commons-codec");
+        assert!(valid.is_some());
+        assert!(valid.unwrap().skip_reason.is_none());
+    }
 }
