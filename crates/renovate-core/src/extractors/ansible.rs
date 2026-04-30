@@ -102,4 +102,32 @@ mod tests {
         let content = "- name: task\n  shell: echo hello\n";
         assert!(extract(content).is_empty());
     }
+
+    // Ported: "extracts multiple image lines from docker_service" — ansible/extract.spec.ts line 16
+    #[test]
+    fn extracts_docker_service_images() {
+        let content = r#"---
+- name: run containers
+  docker_service:
+    project_name: gitlab
+    definition:
+      services:
+        gitlab:
+          image: sameersbn/gitlab:11.5.1
+        db:
+          image: sameersbn/postgresql:10
+        redis:
+          image: sameersbn/redis:4.0.9-1
+        registry:
+          image: registry:2.6.2
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 4);
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "sameersbn/gitlab" && d.tag.as_deref() == Some("11.5.1"))
+        );
+        assert!(deps.iter().any(|d| d.image == "sameersbn/postgresql"));
+        assert!(deps.iter().any(|d| d.image == "registry"));
+    }
 }

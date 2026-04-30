@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 228 / 450 actionable tests ported (51%) — updated 2026-04-30
+**Overall progress:** 231 / 450 actionable tests ported (51%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -43,7 +43,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ansible/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible/extract.spec.ts
-**Total tests:** 6 | **Ported:** 1 | **Actionable:** 6 | **Status:** partial
+**Total tests:** 6 | **Ported:** 2 | **Actionable:** 6 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -51,7 +51,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for empty | 6 | ported | `ansible.rs` | `empty_returns_empty` | — |
 | extracts multiple image lines from docker_container | 10 | pending | — | — | — |
-| extracts multiple image lines from docker_service | 16 | pending | — | — | — |
+| extracts multiple image lines from docker_service | 16 | ported | `ansible.rs` | `extracts_docker_service_images` | — |
 | extracts image and replaces registry | 22 | pending | — | — | — |
 | extracts image but no replacement | 52 | pending | — | — | — |
 | extracts image and no double replacement | 82 | pending | — | — | — |
@@ -96,16 +96,16 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/argocd/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/argocd/extract.spec.ts
-**Total tests:** 8 | **Ported:** 4 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 11 | ported | `argocd.rs` | `empty_content_returns_empty` | — |
-| returns null for invalid | 15 | pending | — | — | — |
+| returns null for invalid | 15 | ported | `argocd.rs` | `invalid_yaml_with_trailing_content_returns_empty` | — |
 | return null for kubernetes manifest | 21 | ported | `argocd.rs` | `skips_non_argocd_file` | — |
-| return null if deps array would be empty | 26 | pending | — | — | — |
+| return null if deps array would be empty | 26 | ported | `argocd.rs` | `malformed_applications_return_empty` | — |
 | return result for double quoted argoproj.io apiVersion reference | 34 | ported | `argocd.rs` | `double_quoted_apiversion_accepted` | — |
 | return result for single quoted argoproj.io apiVersion reference | 61 | ported | `argocd.rs` | `single_quoted_apiversion_accepted` | — |
 | full test | 88 | pending | — | — | — |

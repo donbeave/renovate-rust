@@ -341,4 +341,22 @@ spec:
         assert_eq!(deps[0].current_value, "2.4.1");
         assert!(deps[0].skip_reason.is_none());
     }
+
+    // Ported: "return null if deps array would be empty" — argocd/extract.spec.ts line 26
+    #[test]
+    fn malformed_applications_return_empty() {
+        // Applications missing valid source/sources sections → no deps extracted.
+        let content = "---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  target:\n    namespace: testing\n---\napiVersion: argoproj.io/v1alpha1\nkind: Application\n---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  sources: []\n---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  source: null\n";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "returns null for invalid" — argocd/extract.spec.ts line 15
+    #[test]
+    fn invalid_yaml_with_trailing_content_returns_empty() {
+        // Malformed YAML (scalar after multi-doc YAML) → graceful empty.
+        let content = "---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  source: null\n---\n123\n";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
 }
