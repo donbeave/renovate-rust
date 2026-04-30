@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 333 / 450 actionable tests ported (74%) — updated 2026-04-30
+**Overall progress:** 334 / 450 actionable tests ported (74%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -249,14 +249,14 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/droneci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/droneci/extract.spec.ts
-**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 2 | **Actionable:** 5 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 8 | ported | `droneci.rs` | `empty_returns_empty` | — |
-| extracts multiple image lines | 12 | pending | — | — | — |
+| extracts multiple image lines | 12 | ported | `droneci.rs` | `extracts_drone_fixture_six_deps` | — |
 
 ### `modules/manager/droneci/extract`
 
