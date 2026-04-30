@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 285 / 450 actionable tests ported (63%) — updated 2026-04-30
+**Overall progress:** 287 / 450 actionable tests ported (64%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -621,7 +621,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gradle-wrapper/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/extract.spec.ts
-**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -633,8 +633,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts version for property file with distribution type "all" in distributionUrl | 47 | ported | `gradle_wrapper.rs` | `extracts_all_version` | — |
 | extracts version for property file with prerelease version in distributionUrl | 61 | ported | `gradle_wrapper.rs` | `prerelease_version_extracted` | — |
 | extracts version for property file with unnecessary whitespace in distributionUrl | 75 | ported | `gradle_wrapper.rs` | `whitespace_around_value_handled` | — |
-| extracts version for property file with custom distribution of type "bin" in distributionUrl | 89 | pending | — | — | — |
-| extracts version for property file with custom distribution of type "all" in distributionUrl | 103 | pending | — | — | — |
+| extracts version for property file with custom distribution of type "bin" in distributionUrl | 89 | ported | `gradle_wrapper.rs` | `custom_distribution_bin_extracted` | — |
+| extracts version for property file with custom distribution of type "all" in distributionUrl | 103 | ported | `gradle_wrapper.rs` | `custom_distribution_all_extracted` | — |
 
 ---
 
