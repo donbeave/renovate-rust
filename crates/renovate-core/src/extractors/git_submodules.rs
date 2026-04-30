@@ -206,6 +206,7 @@ mod tests {
         assert_eq!(deps[0].branch, None);
     }
 
+    // Ported: "currentValue is unset when no branch is specified" — git-submodules/extract.spec.ts line 52
     #[test]
     fn multiple_submodules() {
         let content = r#"
@@ -231,6 +232,7 @@ mod tests {
         );
     }
 
+    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 64
     #[test]
     fn https_url_strips_git_suffix() {
         let content = r#"
@@ -242,6 +244,7 @@ mod tests {
         assert_eq!(deps[0].url, "https://github.com/org/repo");
     }
 
+    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 64
     #[test]
     fn https_url_without_git_suffix_passthrough() {
         let content = r#"
@@ -253,6 +256,7 @@ mod tests {
         assert_eq!(deps[0].url, "https://github.com/org/repo");
     }
 
+    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 64
     #[test]
     fn azure_devops_user_prefix_stripped() {
         let content = r#"
@@ -267,6 +271,7 @@ mod tests {
         );
     }
 
+    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 64
     #[test]
     fn relative_url_passthrough() {
         let content = r#"
@@ -302,6 +307,7 @@ mod tests {
         assert_eq!(deps[2].branch.as_deref(), Some("not-a-semver"));
     }
 
+    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 64
     #[test]
     fn gitlab_url() {
         let content = r#"
