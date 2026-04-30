@@ -159,6 +159,13 @@ fn parse_line(raw: &str) -> Option<PipExtractedDep> {
     // Strip extras (the `[…]` portion) — we don't need them for registry lookup.
     let rest = strip_extras(rest).trim();
 
+    // PEP 440 version specifiers start with an operator; if rest is non-empty
+    // but doesn't start with an operator char, it's invalid pip syntax (e.g.
+    // `nothing here` where "here" is not a version constraint → skip).
+    if !rest.is_empty() && !rest.starts_with(|c: char| matches!(c, '=' | '!' | '<' | '>' | '~')) {
+        return None;
+    }
+
     let current_value = rest.to_owned();
     let normalized = normalize_name(&name);
 
@@ -368,6 +375,63 @@ mod tests {
     fn index_url_directive_ignored() {
         let deps = extract_ok("--index-url https://pypi.org/simple\nDjango==4.2.7");
         assert_eq!(deps.len(), 1);
+    }
+
+    // Ported: "returns null for empty" — pip_requirements/extract.spec.ts line 39
+    #[test]
+    fn invalid_line_returns_empty() {
+        // "nothing here" is not valid PEP 508 — "here" is not a version specifier.
+        assert!(extract_ok("nothing here").is_empty());
+    }
+
+    // Ported: "extracts dependencies with --index-url short code" — pip_requirements/extract.spec.ts line 50
+    #[test]
+    fn index_url_short_code_skipped_package_extracted() {
+        let content = "-i http://example.com/private-pypi/\nsome-package==0.3.1";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "some-package");
+        assert_eq!(deps[0].current_value, "==0.3.1");
+    }
+
+    // Ported: "handles extra spaces around pinned dependency equal signs" — pip_requirements/extract.spec.ts line 141
+    #[test]
+    fn extra_spaces_around_equal_signs() {
+        let content = "Django[argon2]==2.0.12\ncelery [redis]==4.1.1\nfoo [bar] == 3.2.1";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 3);
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "django" && d.current_value.starts_with("=="))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "celery" && d.current_value.starts_with("=="))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "foo" && d.current_value.starts_with("=="))
+        );
+    }
+
+    // Ported: "should handle hashes" — pip_requirements/extract.spec.ts line 178
+    #[test]
+    fn hash_continuation_lines_handled() {
+        let content = "Django==1.9.1 \\\n    --hash=sha256:9f7ca04\nbgg==0.22.1 \\\n    --hash=sha256:e5172c3\nhtml2text==2016.1.8";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 3);
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "django" && d.current_value == "==1.9.1")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "bgg" && d.current_value == "==0.22.1")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "html2text" && d.current_value == "==2016.1.8")
+        );
     }
 
     // ── real-world fixture (from Renovate __fixtures__/requirements1.txt) ─────

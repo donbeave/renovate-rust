@@ -555,4 +555,14 @@ terraform {
         let deps = extract(content);
         assert!(deps.is_empty());
     }
+
+    // Ported: "returns null for no deps" — terraform/extract.spec.ts line 43
+    #[test]
+    fn data_block_not_extracted() {
+        let content = r#"data "sops_file" "secrets" {
+  source_file = "${path.module}/secrets.enc.json"
+}
+"#;
+        assert!(extract(content).is_empty());
+    }
 }
