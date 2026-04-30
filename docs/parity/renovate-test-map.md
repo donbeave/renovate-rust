@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 131 / 310 actionable tests ported (42%) — updated 2026-04-29
+**Overall progress:** 135 / 310 actionable tests ported (44%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -648,16 +648,16 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles no FROM | 14 | pending | — | — | — |
+| handles no FROM | 14 | ported | `dockerfile.rs` | `no_from_returns_empty` | — |
 | handles naked dep | 19 | ported | `dockerfile.rs` | `extracts_image_without_tag` | — |
 | handles run --mount=from | 36 | pending | — | — | — |
-| is case insensitive | 72 | pending | — | — | — |
+| is case insensitive | 72 | ported | `dockerfile.rs` | `from_is_case_insensitive` | — |
 | handles tag | 89 | ported | `dockerfile.rs` | `extracts_image_and_tag` | — |
-| handles digest | 106 | pending | — | — | — |
+| handles digest | 106 | ported | `dockerfile.rs` | `extracts_image_with_digest_only` | — |
 | handles tag and digest | 129 | ported | `dockerfile.rs` | `extracts_image_with_digest` | — |
 | handles from as | 152 | ported | `dockerfile.rs` | `as_alias_does_not_become_dep` | — |
 | handles comments | 173 | ported | `dockerfile.rs` | `commented_from_ignored` | — |
-| handles custom hosts | 194 | pending | — | — | — |
+| handles custom hosts | 194 | ported | `dockerfile.rs` | `extracts_image_with_custom_host` | — |
 | handles custom hosts and suffix | 215 | pending | — | — | — |
 | handles custom hosts with port | 236 | ported | `dockerfile.rs` | `registry_port_not_confused_with_tag` | — |
 | handles custom hosts with port without tag | 257 | pending | — | — | — |

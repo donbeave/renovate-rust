@@ -303,6 +303,22 @@ mod tests {
 
     // ── basic FROM parsing ────────────────────────────────────────────────────
 
+    // Ported: "handles no FROM" — dockerfile/extract.spec.ts line 14
+    #[test]
+    fn no_from_returns_empty() {
+        let deps = extract_ok("no from!");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "is case insensitive" — dockerfile/extract.spec.ts line 72
+    #[test]
+    fn from_is_case_insensitive() {
+        let deps = extract_ok("From node\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
+        assert!(deps[0].tag.is_none());
+    }
+
     // Ported: "handles tag" — dockerfile/extract.spec.ts line 89
     #[test]
     fn extracts_image_and_tag() {
@@ -321,6 +337,20 @@ mod tests {
         assert!(deps[0].tag.is_none());
     }
 
+    // Ported: "handles digest" — dockerfile/extract.spec.ts line 106
+    #[test]
+    fn extracts_image_with_digest_only() {
+        let deps = extract_ok(
+            "FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
+        );
+        assert_eq!(deps[0].image, "node");
+        assert!(deps[0].tag.is_none());
+        assert_eq!(
+            deps[0].digest.as_deref(),
+            Some("sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063")
+        );
+    }
+
     // Ported: "handles tag and digest" — dockerfile/extract.spec.ts line 129
     #[test]
     fn extracts_image_with_digest() {
@@ -336,6 +366,14 @@ mod tests {
         let deps = extract_ok("FROM ghcr.io/owner/image:1.0");
         assert_eq!(deps[0].image, "ghcr.io/owner/image");
         assert_eq!(deps[0].tag.as_deref(), Some("1.0"));
+    }
+
+    // Ported: "handles custom hosts" — dockerfile/extract.spec.ts line 194
+    #[test]
+    fn extracts_image_with_custom_host() {
+        let deps = extract_ok("FROM registry2.something.info/node:8\n");
+        assert_eq!(deps[0].image, "registry2.something.info/node");
+        assert_eq!(deps[0].tag.as_deref(), Some("8"));
     }
 
     // Ported: "handles custom hosts with port" — dockerfile/extract.spec.ts line 236
