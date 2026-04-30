@@ -50,6 +50,8 @@ pub struct GoModExtractedDep {
     pub skip_reason: Option<GoModSkipReason>,
     /// Set for the `go X.Y` directive; `datasource` would be `golang-version`.
     pub is_go_directive: bool,
+    /// Set for the `toolchain goX.Y.Z` directive.
+    pub is_toolchain_directive: bool,
 }
 
 // ── Compiled regexes ───────────────────────────────────────────────────────
@@ -85,6 +87,10 @@ static EXCLUDE_BLOCK_START: LazyLock<Regex> =
 /// Matches `go <version>` directive (e.g. `go 1.21.3` or `go 1.21`).
 static GO_DIRECTIVE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*go\s+(\d+\.\d+(?:\.\d+)?)\s*$").unwrap());
+
+/// Matches `toolchain go<version>` directive (e.g. `toolchain go1.23.3`).
+static TOOLCHAIN_DIRECTIVE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*toolchain\s+go(\d+\.\d+(?:\.\d+)?)\s*$").unwrap());
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -144,6 +150,19 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 is_indirect: false,
                 skip_reason: None,
                 is_go_directive: true,
+                is_toolchain_directive: false,
+            });
+            continue;
+        }
+
+        if let Some(cap) = TOOLCHAIN_DIRECTIVE.captures(bare) {
+            deps.push(GoModExtractedDep {
+                module_path: "go".to_owned(),
+                current_value: cap[1].to_owned(),
+                is_indirect: false,
+                skip_reason: None,
+                is_go_directive: false,
+                is_toolchain_directive: true,
             });
             continue;
         }
@@ -195,6 +214,7 @@ fn make_dep(
         is_indirect,
         skip_reason,
         is_go_directive: false,
+        is_toolchain_directive: false,
     }
 }
 
@@ -401,5 +421,20 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
                 .any(|d| d.module_path == "github.com/Microsoft/go-winio"
                     && d.skip_reason == Some(GoModSkipReason::PseudoVersion))
         );
+    }
+
+    // Ported: "extracts the toolchain directive" — gomod/extract.spec.ts line 212
+    #[test]
+    fn toolchain_directive_extracted() {
+        let content =
+            "module github.com/renovate-tests/gomod\ngo 1.23\ntoolchain go1.23.3\n";
+        let deps = extract(content);
+        let go_dep = deps.iter().find(|d| d.is_go_directive).unwrap();
+        assert_eq!(go_dep.current_value, "1.23");
+
+        let toolchain_dep = deps.iter().find(|d| d.is_toolchain_directive).unwrap();
+        assert_eq!(toolchain_dep.module_path, "go");
+        assert_eq!(toolchain_dep.current_value, "1.23.3");
+        assert!(toolchain_dep.skip_reason.is_none());
     }
 }

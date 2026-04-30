@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 213 / 450 actionable tests ported (47%) — updated 2026-04-30
+**Overall progress:** 216 / 450 actionable tests ported (48%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -163,7 +163,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/cargo/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/extract.spec.ts
-**Total tests:** 32 | **Ported:** 11 | **Actionable:** 32 | **Status:** partial
+**Total tests:** 32 | **Ported:** 12 | **Actionable:** 32 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -175,7 +175,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for empty custom target | 66 | ported | `cargo.rs` | `empty_custom_target_returns_empty` | — |
 | extracts multiple dependencies simple | 73 | ported | `cargo.rs` | `extracts_simple_string_deps` | — |
 | extracts multiple dependencies advanced | 79 | ported | `cargo.rs` | `version_constraint_forms_are_preserved` | — |
-| handles inline tables | 85 | pending | — | — | — |
+| handles inline tables | 85 | ported | `cargo.rs` | `handles_inline_tables` | — |
 | handles standard tables | 91 | ported | `cargo.rs` | `extracts_table_deps_with_version` | — |
 | extracts platform specific dependencies | 97 | ported | `cargo.rs` | `target_cfg_dependencies_extracted` | — |
 | extracts registry urls from .cargo/config.toml | 103 | pending | — | — | — |
@@ -397,7 +397,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gitlabci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/extract.spec.ts
-**Total tests:** 14 | **Ported:** 5 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 14 | **Ported:** 6 | **Actionable:** 10 | **Status:** partial
 
 ### `extractAllPackageFile()`
 
@@ -415,7 +415,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts named services | 57 | ported | `gitlabci.rs` | `extracts_services` | — |
 | extracts multiple named services | 66 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
 | extracts multiple image lines | 75 | ported | `gitlabci.rs` | `extracts_top_level_image` | — |
-| extracts multiple image lines with comments | 94 | pending | — | — | — |
+| extracts multiple image lines with comments | 94 | ported | `gitlabci.rs` | `extracts_images_with_comment_lines` | — |
 | catches errors | 110 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
 | skips images with variables | 118 | ported | `gitlabci.rs` | `variable_image_has_skip_reason` | — |
 | extract images from dependency proxy | 172 | pending | — | — | — |
@@ -428,7 +428,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 21 | **Ported:** 5 | **Actionable:** 21 | **Status:** partial
+**Total tests:** 21 | **Ported:** 6 | **Actionable:** 21 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -441,7 +441,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts replace directives from multi-line and single line | 48 | pending | — | — | — |
 | extracts replace directives from non-public module path | 136 | pending | — | — | — |
 | ignores exclude directives from multi-line and single line | 193 | ported | `gomod.rs` | `exclude_block_ignored` | — |
-| extracts the toolchain directive | 212 | pending | — | — | — |
+| extracts the toolchain directive | 212 | ported | `gomod.rs` | `toolchain_directive_extracted` | — |
 | extracts single-line tool directives | 263 | pending | — | — | — |
 | extracts multi-line tool directives | 282 | pending | — | — | — |
 | extracts tool directives with required modules | 304 | pending | — | — | — |
