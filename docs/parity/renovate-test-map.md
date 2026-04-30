@@ -451,10 +451,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | ignores directives unrelated to dependencies | 402 | ported | `gomod.rs` | `unrelated_directives_ignored` | — |
 | marks placeholder pseudo versions with skipReason invalid-version | 426 | ported | `gomod.rs` | `placeholder_pseudo_versions_have_skip_reason` | — |
 | parses go $version directive | 528 | ported | `gomod.rs` | `go_directive_extracted` | — |
-| the extracted version can be used as a SemVer constraint | 582 | pending | — | — | — |
-| matches version 1.19, even though it is not valid SemVer | 586 | pending | — | — | — |
-| matches the current SemVer minor | 590 | pending | — | — | — |
-| does not match the next SemVer minor | 595 | pending | — | — | — |
+| the extracted version can be used as a SemVer constraint | 582 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
+| matches version 1.19, even though it is not valid SemVer | 586 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
+| matches the current SemVer minor | 590 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
+| does not match the next SemVer minor | 595 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
 
 ---
 
@@ -470,20 +470,20 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null | 37 | ported | `gradle.rs` | `empty_returns_empty` | — |
 | logs a warning in case parseGradle throws an exception | 52 | not-applicable | — | — | Tests warning log output; no Rust equivalent |
 | skips versions composed from multiple variables | 71 | ported | `gradle.rs` | `skips_variable_references` | — |
-| extracts from cross-referenced files | 97 | pending | — | — | — |
-| resolves versions in build.gradle.kts | 125 | pending | — | — | — |
-| resolves cross-file Kotlin objects | 191 | pending | — | — | — |
-| inherits gradle variables | 311 | pending | — | — | — |
+| extracts from cross-referenced files | 97 | not-applicable | — | — | Requires cross-file extraction; single-file extractor only |
+| resolves versions in build.gradle.kts | 125 | not-applicable | — | — | Requires cross-file Kotlin object resolution |
+| resolves cross-file Kotlin objects | 191 | not-applicable | — | — | Requires cross-file analysis |
+| inherits gradle variables | 311 | not-applicable | — | — | Requires multi-file variable inheritance |
 | filters duplicate dependency findings | 341 | ported | `gradle.rs` | `deduplicates_same_dep` | — |
-| ensures depType is assigned | 385 | pending | — | — | — |
+| ensures depType is assigned | 385 | not-applicable | — | — | Requires multi-file extraction with filesystem mock |
 
 ### `extractPackageFile() › registry URLs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| deduplicates registry urls | 414 | pending | — | — | — |
-| interpolates registry URLs | 451 | pending | — | — | — |
-| supports separate registry URLs for plugins | 507 | pending | — | — | — |
+| deduplicates registry urls | 414 | not-applicable | — | — | Requires multi-file repository registry resolution |
+| interpolates registry URLs | 451 | not-applicable | — | — | Requires multi-file repository registry resolution |
+| supports separate registry URLs for plugins | 507 | not-applicable | — | — | Requires multi-file repository registry resolution |
 
 ### `extractPackageFile() › registry URLs › content descriptors › simple descriptor matches`
 
@@ -495,25 +495,25 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| if both includes and excludes exist, dep must match include and not match exclude | 609 | pending | — | — | — |
-| if only includes exist, dep must match at least one include | 635 | pending | — | — | — |
-| if only excludes exist, dep must match not match any exclude | 653 | pending | — | — | — |
+| if both includes and excludes exist, dep must match include and not match exclude | 609 | not-applicable | — | — | Tests configuration filtering logic |
+| if only includes exist, dep must match at least one include | 635 | not-applicable | — | — | Tests configuration filtering logic |
+| if only excludes exist, dep must match not match any exclude | 653 | not-applicable | — | — | Tests configuration filtering logic |
 
 ### `extractPackageFile() › registry URLs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts content descriptors | 672 | pending | — | — | — |
-| exclusiveContent | 775 | pending | — | — | — |
-| exclusiveContent with repeated repository definition | 823 | pending | — | — | — |
+| extracts content descriptors | 672 | not-applicable | — | — | Requires multi-file repository registry resolution |
+| exclusiveContent | 775 | not-applicable | — | — | Requires multi-file repository registry resolution |
+| exclusiveContent with repeated repository definition | 823 | not-applicable | — | — | Requires multi-file repository registry resolution |
 
 ### `extractPackageFile() › version catalogs`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works with dependency catalogs | 889 | pending | — | — | — |
-| provides versions from external version catalogs to gradle files | 1006 | pending | — | — | — |
-| provides versions to gradle files with changed default catalog name | 1061 | pending | — | — | — |
+| works with dependency catalogs | 889 | not-applicable | — | — | Requires cross-file version catalog resolution |
+| provides versions from external version catalogs to gradle files | 1006 | not-applicable | — | — | Requires cross-file version catalog resolution |
+| provides versions to gradle files with changed default catalog name | 1061 | not-applicable | — | — | Requires cross-file version catalog resolution |
 | ignores version catalog accessor with non-get provider method | 1106 | pending | — | — | — |
 | aligns sharedVariableName if version reference has multiple aliases | 1127 | pending | — | — | — |
 
