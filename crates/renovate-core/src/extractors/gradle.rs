@@ -370,6 +370,7 @@ dependencies {
         );
     }
 
+    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
     #[test]
     fn skips_variable_references() {
         let content = r#"implementation "com.example:mylib:$version""#;
@@ -406,6 +407,7 @@ dependencies {
         assert_eq!(deps[0].current_value, "4.13.2");
     }
 
+    // Ported: "filters duplicate dependency findings" — gradle/extract.spec.ts line 341
     #[test]
     fn deduplicates_same_dep() {
         let content = r#"
@@ -593,6 +595,7 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         assert_eq!(deps[0].current_value, "1.1.4");
     }
 
+    // Ported: "returns null" — gradle/extract.spec.ts line 37
     #[test]
     fn empty_returns_empty() {
         assert!(extract_build_file("").is_empty());
