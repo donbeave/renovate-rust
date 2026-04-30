@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 170 / 310 actionable tests ported (55%) — updated 2026-04-29
+**Overall progress:** 177 / 376 actionable tests ported (47%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -273,6 +273,45 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | when using SSH clone URL | 73 | pending | — | — | — |
 | when using a relative path | 80 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/github-actions/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/extract.spec.ts
+**Total tests:** 27 | **Ported:** 8 | **Actionable:** 20 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 42 | ported | `github_actions.rs` | `empty_content_returns_empty` | — |
+| returns null for invalid yaml | 48 | pending | — | — | — |
+| extracts multiple docker image lines from yaml configuration file | 54 | ported | `github_actions.rs` | `docker_container_inline` (+ 5 others) | — |
+| extracts multiple action tag lines from yaml configuration file | 65 | ported | `github_actions.rs` | `extracts_simple_action` | — |
+| use github.com as registry when no settings provided | 79 | not-applicable | — | — | registryUrls not produced by Rust extractor |
+| use github.enterprise.com first and then github.com as registry running against github.enterprise.com | 87 | not-applicable | — | — | registryUrls not produced by Rust extractor |
+| use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3 | 102 | not-applicable | — | — | registryUrls not produced by Rust extractor |
+| use github.com only as registry when running against non-GitHub | 117 | not-applicable | — | — | registryUrls not produced by Rust extractor |
+| use github.com only as registry when running against github.com | 129 | not-applicable | — | — | registryUrls not produced by Rust extractor |
+| use github.com only as registry when running against api.github.com | 141 | not-applicable | — | — | registryUrls not produced by Rust extractor |
+| extracts multiple action tag lines with double quotes and comments | 153 | ported | `github_actions.rs` | `quoted_action_is_parsed` | — |
+| maintains quotes | 217 | pending | — | — | — |
+| maintains spaces between hash and comment | 299 | ported | `github_actions.rs` | `inline_comment_stripped` | — |
+| extracts tags in different formats | 352 | pending | — | — | — |
+| extracts non-semver ref automatically | 484 | pending | — | — | — |
+| extracts pinned non-semver ref with digest | 504 | pending | — | — | — |
+| disables naked SHA pins without version comment | 527 | ported | `github_actions.rs` | `full_sha_pin_skipped` | — |
+| disables naked short SHA pins without version comment | 546 | ported | `github_actions.rs` | `short_sha_pin_skipped` | — |
+| does not disable SHA pins with version comment | 565 | pending | — | — | — |
+| does not disable short SHA pins with version comment | 590 | pending | — | — | — |
+| extracts actions with fqdn | 614 | pending | — | — | — |
+| extracts multiple action runners from yaml configuration file | 673 | ported | `github_actions.rs` | `runner_simple_ubuntu` (+ 4 others) | — |
+| extracts x-version from actions/setup-x | 741 | pending | — | — | — |
+| handles actions/setup-x without x-version field | 873 | pending | — | — | — |
+| extracts x-version from actions/setup-x in composite action | 891 | pending | — | — | — |
+| logs unknown schema | 1023 | not-applicable | — | — | Tests log output; no Rust equivalent |
+| extract from $step.uses | 1033 | pending | — | — | — |
 
 ---
 
@@ -804,7 +843,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
-| `lib/modules/manager/github-actions/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/github_actions.rs` | 28 | partial |
+<!-- github-actions/extract.spec.ts converted to per-test format above -->
 <!-- gitlabci converted to per-test format above -->
 | `lib/modules/manager/gradle/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/gradle.rs` | 20 | partial |
 | `lib/modules/manager/helm-requirements/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/helm.rs` | 10 | partial |

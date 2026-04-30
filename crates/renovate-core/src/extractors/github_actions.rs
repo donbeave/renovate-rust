@@ -385,6 +385,7 @@ mod tests {
         }
     }
 
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
     #[test]
     fn extracts_simple_action() {
         let content = r#"
@@ -431,6 +432,7 @@ jobs:
         );
     }
 
+    // Ported: "disables naked SHA pins without version comment" — github-actions/extract.spec.ts line 527
     #[test]
     fn full_sha_pin_skipped() {
         let content = "      - uses: actions/checkout@a81bbbf8298c0fa03ea29cdc473d45769f953675\n";
@@ -439,6 +441,7 @@ jobs:
         assert_eq!(deps[0].skip_reason, Some(GithubActionsSkipReason::ShaPin));
     }
 
+    // Ported: "disables naked short SHA pins without version comment" — github-actions/extract.spec.ts line 546
     #[test]
     fn short_sha_pin_skipped() {
         let content = "      - uses: actions/checkout@abc1234\n";
@@ -450,6 +453,7 @@ jobs:
         );
     }
 
+    // Ported: "extracts multiple action tag lines with double quotes and comments" — github-actions/extract.spec.ts line 153
     #[test]
     fn quoted_action_is_parsed() {
         let content = r#"      - uses: "actions/checkout@v4""#;
@@ -459,6 +463,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v4");
     }
 
+    // Ported: "maintains spaces between hash and comment" — github-actions/extract.spec.ts line 299
     #[test]
     fn inline_comment_stripped() {
         let content = "      - uses: actions/checkout@v4 # pinned\n";
@@ -467,6 +472,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v4");
     }
 
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
     #[test]
     fn real_workflow_fixture() {
         let content = r#"
@@ -509,6 +515,7 @@ jobs:
         assert_eq!(pinned.skip_reason, Some(GithubActionsSkipReason::ShaPin));
     }
 
+    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 42
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
@@ -526,6 +533,7 @@ jobs:
 
     // ── extract_docker_images tests ───────────────────────────────────────────
 
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
     #[test]
     fn docker_container_inline() {
         let content = r#"
@@ -543,6 +551,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
     #[test]
     fn docker_container_block_form() {
         let content = r#"
@@ -559,6 +568,7 @@ jobs:
         assert_eq!(deps[0].tag.as_deref(), Some("16-bullseye"));
     }
 
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
     #[test]
     fn docker_services_block_image() {
         let content = r#"
@@ -583,6 +593,7 @@ jobs:
         );
     }
 
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
     #[test]
     fn docker_services_inline_string() {
         let content = r#"
@@ -598,6 +609,7 @@ jobs:
         assert_eq!(deps[0].tag.as_deref(), Some("10"));
     }
 
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
     #[test]
     fn docker_mixed_container_and_services() {
         let content = r#"
@@ -660,6 +672,7 @@ jobs:
         assert!(extract_docker_images(content).is_empty());
     }
 
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
     #[test]
     fn docker_workflow_fixture() {
         // Reflects upstream workflow_1.yml fixture from renovatebot/renovate.
@@ -684,6 +697,7 @@ jobs:
 
     // ── extract_runner_labels tests ───────────────────────────────────────────
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_simple_ubuntu() {
         let content = "    runs-on: ubuntu-22.04\n";
@@ -693,6 +707,7 @@ jobs:
         assert_eq!(runners[0].current_value, "22.04");
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_macos_xlarge() {
         let content = "    runs-on: macos-14-xlarge\n";
@@ -702,6 +717,7 @@ jobs:
         assert_eq!(runners[0].current_value, "14-xlarge");
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_windows() {
         let content = "    runs-on: windows-2022\n";
@@ -711,6 +727,7 @@ jobs:
         assert_eq!(runners[0].current_value, "2022");
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_latest_skipped() {
         let content = "    runs-on: ubuntu-latest\n";
@@ -729,6 +746,7 @@ jobs:
         assert!(extract_runner_labels(content).is_empty());
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_inline_array() {
         let content = "    runs-on: [ubuntu-22.04, self-hosted]\n";
