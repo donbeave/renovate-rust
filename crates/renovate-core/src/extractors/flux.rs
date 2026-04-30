@@ -53,6 +53,7 @@ pub fn extract(content: &str) -> Option<FluxSystemDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts version and components from system manifest at $filepath" — flux/extract.spec.ts line 72
     #[test]
     fn extracts_version_with_components() {
         let content = "# Flux Version: v2.2.3\n# Components: source-controller,kustomize-controller,helm-controller\napiVersion: v1\n";
@@ -64,6 +65,7 @@ mod tests {
         );
     }
 
+    // Ported: "considers components optional in system manifests" — flux/extract.spec.ts line 102
     #[test]
     fn extracts_version_without_components() {
         let content = "# Flux Version: v2.1.0\napiVersion: v1\n";
@@ -79,6 +81,7 @@ mod tests {
         assert_eq!(dep.version, "v2.0.1");
     }
 
+    // Ported: "ignores system manifests without a version" — flux/extract.spec.ts line 111
     #[test]
     fn no_header_returns_none() {
         let content = "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: flux-system\n";

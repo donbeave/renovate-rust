@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 450 / 456 actionable tests ported (99%) — updated 2026-04-30
+**Overall progress:** 451 / 457 actionable tests ported (99%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -929,7 +929,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles version in ARG and digest in FROM with CRLF linefeed | 1249 | pending | — | — | — |
 | handles updates of multiple ARG values | 1272 | pending | — | — | — |
 | handles same argument multiple times | 1308 | pending | — | — | — |
-| handles empty optional parameters | 1329 | pending | — | — | — |
+| handles empty optional parameters | 1329 | ported | `dockerfile.rs` | `handles_empty_optional_parameters` | — |
 | handles registry alias | 1352 | pending | — | — | registryAliases not yet implemented |
 | replaces registry alias from start only | 1380 | pending | — | — | registryAliases not yet implemented |
 | handles empty registry | 1407 | ported | `dockerfile.rs` | `namespaced_image_without_registry_extracted_normally` | — |

@@ -983,4 +983,14 @@ mod tests {
         assert!(deps[0].tag.is_none());
         assert!(deps[0].skip_reason.is_none());
     }
+
+    // Ported: "handles empty optional parameters" — dockerfile/extract.spec.ts line 1329
+    #[test]
+    fn handles_empty_optional_parameters() {
+        let deps = extract_ok("FROM quay.io/myName/myPackage:0.6.2\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "quay.io/myName/myPackage");
+        assert_eq!(deps[0].tag.as_deref(), Some("0.6.2"));
+        assert!(deps[0].skip_reason.is_none());
+    }
 }
