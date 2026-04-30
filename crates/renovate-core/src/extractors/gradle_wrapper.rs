@@ -17,6 +17,15 @@
 //! zipStorePath=wrapper/dists
 //! ```
 
+use std::sync::LazyLock;
+
+use regex::Regex;
+
+/// Matches the version at the end of a stem after stripping `-bin` or `-all`.
+/// Pattern mirrors the TypeScript: `\d+\.\d+(?:\.\d+)?(?:-\w+)*`
+static VERSION_SUFFIX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(\d+\.\d+(?:\.\d+)?(?:-\w+)*)$").unwrap());
+
 /// The extracted Gradle wrapper dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GradleWrapperDep {
@@ -44,34 +53,28 @@ pub fn extract(content: &str) -> Option<GradleWrapperDep> {
 
 /// Extract the Gradle version from a `distributionUrl` value.
 ///
-/// Handles:
-/// - `https\://...gradle-8.4-bin.zip` (escaped colon)
-/// - `https://...gradle-8.4.1-all.zip`
+/// Matches the TypeScript regex: `\S*-{version}-{type}.zip` where type is `bin` or `all`.
+/// Supports both standard (`gradle-8.4-bin.zip`) and custom (`custom-wrapper-1.3.7-bin.zip`)
+/// as well as prerelease versions (`gradle-7.0-milestone-1-bin.zip`).
 fn parse_distribution_url(url: &str) -> Option<String> {
     // Unescape `\:` → `:` (Gradle properties syntax).
     let url = url.replace("\\:", ":");
 
-    // Pattern: `gradle-{version}-{type}.zip` at end of URL.
-    // version = `\d+\.\d+(\.\d+)?(-\w+)?`
     let zip_name = url.split('/').next_back()?;
 
-    // `gradle-8.4-bin.zip` or `gradle-8.4.1-all.zip`
-    let stem = zip_name.strip_suffix(".zip")?;
-    // stem = `gradle-8.4-bin` or `gradle-8.4.1-all`
-    let without_prefix = stem.strip_prefix("gradle-")?;
-    // without_prefix = `8.4-bin` or `8.4.1-all`
-    // Split on last `-` to separate version from type (e.g. "bin", "all").
-    let last_dash = without_prefix.rfind('-')?;
-    let version_part = &without_prefix[..last_dash];
-    // version_part must start with a digit (semver or prerelease like "7.0-milestone-1").
-    if version_part.is_empty() || !version_part.starts_with(|c: char| c.is_ascii_digit()) {
-        return None;
+    // Must end in `-bin.zip` or `-all.zip`.
+    let stem = zip_name
+        .strip_suffix("-bin.zip")
+        .or_else(|| zip_name.strip_suffix("-all.zip"))?;
+    // Find the version at the end of the stem using the same pattern as TypeScript.
+    // The version is `\d+\.\d+(?:\.\d+)?(?:-\w+)*` at the tail of the stem.
+    let cap = VERSION_SUFFIX.captures(stem)?;
+    let version = cap[1].to_owned();
+    if version.contains('.') {
+        Some(version)
+    } else {
+        None
     }
-    // Must contain at least one dot (e.g. "8.4") to distinguish from garbage.
-    if !version_part.contains('.') {
-        return None;
-    }
-    Some(version_part.to_owned())
 }
 
 #[cfg(test)]
@@ -144,5 +147,23 @@ zipStorePath=wrapper/dists
     fn unsupported_url_format_returns_none() {
         let content = "distributionUrl=https://example.com/gradle/custom-gradle.zip\n";
         assert!(extract(content).is_none());
+    }
+
+    // Ported: "extracts version for property file with custom distribution of type \"bin\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 89
+    #[test]
+    fn custom_distribution_bin_extracted() {
+        let content = r"distributionUrl=https\://domain.tld/repository/maven-releases/tld/domain/gradle-wrapper/custom-gradle-wrapper/1.3.7/custom-gradle-wrapper-1.3.7-bin.zip
+";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.version, "1.3.7");
+    }
+
+    // Ported: "extracts version for property file with custom distribution of type \"all\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 103
+    #[test]
+    fn custom_distribution_all_extracted() {
+        let content = r"distributionUrl=https\://domain.tld/repository/maven-releases/tld/domain/gradle-wrapper/custom-gradle-wrapper/6.6.6/custom-gradle-wrapper-6.6.6-all.zip
+";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.version, "6.6.6");
     }
 }
