@@ -201,6 +201,7 @@ pub fn extract(content: &str) -> Option<HomebrewDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts \"archive\" github dependency" — homebrew/extract.spec.ts line 99
     #[test]
     fn extracts_github_archive_refs_tags() {
         let content = r#"
@@ -221,6 +222,7 @@ end"#;
         assert!(dep.skip_reason.is_none());
     }
 
+    // Ported: "handles old \"archive\" github url format" — homebrew/extract.spec.ts line 121
     #[test]
     fn extracts_github_archive_old_form() {
         let content = r#"class MyApp < Formula
@@ -238,6 +240,7 @@ end"#;
         );
     }
 
+    // Ported: "extracts \"releases\" github dependency" — homebrew/extract.spec.ts line 77
     #[test]
     fn extracts_github_release() {
         let content = r#"class Mytool < Formula
@@ -255,6 +258,7 @@ end"#;
         );
     }
 
+    // Ported: "skips if sha256 field is invalid" — homebrew/extract.spec.ts line 301
     #[test]
     fn invalid_sha256_skipped() {
         let content = r#"class Bad < Formula
@@ -265,6 +269,7 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::InvalidSha256));
     }
 
+    // Ported: "skips sourceforge dependency 1" — homebrew/extract.spec.ts line 10
     #[test]
     fn unsupported_url_skipped() {
         let content = r#"class Other < Formula
@@ -275,15 +280,16 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
     }
 
+    // Ported: "skips if there is no url field" — homebrew/extract.spec.ts line 213
     #[test]
     fn missing_url_skipped() {
         let dep = extract("class NoUrl < Formula\nend").unwrap();
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::MissingUrl));
     }
 
+    // Ported: "returns null for invalid class header 2" — homebrew/extract.spec.ts line 198
     #[test]
     fn invalid_class_header_not_formula_returns_none() {
-        // Ported: "returns null for invalid class header 2" — homebrew/extract.spec.ts line 198
         // "class X < NotFormula" is not a valid Formula class
         let content = "class Ibazel < NotFormula\n  url \"https://example.com/v1.0.tar.gz\"\n  sha256 \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\nend\n";
         assert!(extract(content).is_none());
@@ -294,9 +300,9 @@ end"#;
         assert!(extract("").is_none());
     }
 
+    // Ported: "returns null for invalid class header 1" — homebrew/extract.spec.ts line 183
     #[test]
     fn no_class_header_returns_none() {
-        // Ported: "returns null for invalid class header 1" — homebrew/extract.spec.ts line 183
         // Invalid class syntax (no " < Formula") → None
         let content = "class Ibazel !?# Formula\n  url \"https://example.com/v1.0.tar.gz\"\nend\n";
         assert!(extract(content).is_none());

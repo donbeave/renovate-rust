@@ -162,6 +162,7 @@ fn parse_gav(raw: &str) -> Option<OsgiDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts the bundles from a file with string bundles defintions" — osgi/extract.spec.ts line 193
     #[test]
     fn extracts_string_bundle() {
         let content = r#"{
@@ -180,6 +181,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts the bundles from a file with object bundles definitions" — osgi/extract.spec.ts line 171
     #[test]
     fn extracts_object_bundle() {
         let content = r#"{
@@ -194,6 +196,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "8.0.0");
     }
 
+    // Ported: "extracts the bundles from a file with string bundles defintions" — osgi/extract.spec.ts line 193
     #[test]
     fn slash_separator_normalized() {
         let content = r#"{
@@ -211,6 +214,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.1.4");
     }
 
+    // Ported: "skips artifacts with variables in version" — osgi/extract.spec.ts line 297
     #[test]
     fn variable_version_skipped() {
         let content = r#"{
@@ -224,6 +228,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(OsgiSkipReason::ContainsVariable));
     }
 
+    // Ported: "returns null for unsupported version of feature model definition" — osgi/extract.spec.ts line 151
     #[test]
     fn unsupported_version_skipped() {
         let content = r#"{
@@ -233,11 +238,13 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns null for invalid file" — osgi/extract.spec.ts line 147
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
     }
 
+    // Ported: "extracts the bundles from a file with comments" — osgi/extract.spec.ts line 215
     #[test]
     fn json_with_comments() {
         let content = r#"{
@@ -252,21 +259,21 @@ mod tests {
         assert_eq!(deps[0].current_value, "7.0.5");
     }
 
+    // Ported: "returns null for a null string passed in as a feature model definition" — osgi/extract.spec.ts line 163
     #[test]
     fn null_string_returns_empty() {
-        // Ported: "returns null for a null string passed in" — osgi/extract.spec.ts line 163
         assert!(extract("null").is_empty());
     }
 
+    // Ported: "returns null for empty file" — osgi/extract.spec.ts line 143
     #[test]
     fn empty_returns_empty() {
-        // Ported: "returns null for empty file" — osgi/extract.spec.ts line 143
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns null for a valid file with no artifact definitions" — osgi/extract.spec.ts line 167
     #[test]
     fn no_bundles_returns_empty() {
-        // Ported: "returns null for a valid file with no artifact definitions" — spec line 167
         let content = r#"{"feature-resource-version": "1.0"}"#;
         assert!(extract(content).is_empty());
     }

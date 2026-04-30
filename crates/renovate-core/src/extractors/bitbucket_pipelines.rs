@@ -117,6 +117,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn top_level_image() {
         let content = "image: atlassian/default-image:4\n";
@@ -126,6 +127,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("4"));
     }
 
+    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn step_image() {
         let content = r#"
@@ -142,6 +144,7 @@ pipelines:
         assert_eq!(deps[0].tag.as_deref(), Some("18-alpine"));
     }
 
+    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn image_object_with_name() {
         let content = r#"
@@ -157,6 +160,7 @@ pipelines:
         assert_eq!(deps[0].tag.as_deref(), Some("latest"));
     }
 
+    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn docker_pipe() {
         let content = "pipelines:\n  default:\n  - step:\n      script:\n      - pipe: docker://alpine/helm:3.12.0\n";
@@ -166,6 +170,7 @@ pipelines:
         assert_eq!(deps[0].tag.as_deref(), Some("3.12.0"));
     }
 
+    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn non_docker_pipe_skipped() {
         let content = "pipelines:\n  default:\n  - step:\n      script:\n      - pipe: atlassian/git-secrets-scan:0.5.1\n";
@@ -173,6 +178,7 @@ pipelines:
         assert!(deps.is_empty());
     }
 
+    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn multiple_images() {
         let content = r#"
@@ -192,6 +198,7 @@ pipelines:
         assert!(deps.iter().any(|d| d.image == "golang"));
     }
 
+    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn variable_ref_skipped() {
         let content = "image: $BB_IMAGE\n";

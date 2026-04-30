@@ -339,6 +339,7 @@ fn build_source(url: &Option<String>, github: &Option<String>) -> Option<XcodeGe
 mod tests {
     use super::*;
 
+    // Ported: "extracts remote package with url and from" — xcodegen/extract.spec.ts line 71
     #[test]
     fn extracts_github_url_with_from() {
         let content = r#"
@@ -359,6 +360,7 @@ packages:
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "extracts remote package with github shorthand" — xcodegen/extract.spec.ts line 92
     #[test]
     fn extracts_github_shorthand() {
         let content = r#"
@@ -376,6 +378,7 @@ packages:
         assert_eq!(deps[0].current_value, "4.1.0");
     }
 
+    // Ported: "skips local packages with path" — xcodegen/extract.spec.ts line 197
     #[test]
     fn local_path_skipped() {
         let content = r#"
@@ -388,6 +391,7 @@ packages:
         assert_eq!(deps[0].skip_reason, Some(XcodeGenSkipReason::LocalPath));
     }
 
+    // Ported: "skips packages with branch reference" — xcodegen/extract.spec.ts line 214
     #[test]
     fn branch_only_skipped() {
         let content = r#"
@@ -404,6 +408,7 @@ packages:
         );
     }
 
+    // Ported: "extracts packages from a realistic project.yml" — xcodegen/extract.spec.ts line 44
     #[test]
     fn multiple_packages() {
         let content = r#"
@@ -421,6 +426,7 @@ packages:
         assert_eq!(deps[1].name, "SnapKit");
     }
 
+    // Ported: "extracts remote package with url and from" — xcodegen/extract.spec.ts line 71
     #[test]
     fn gitlab_url_detected() {
         let content = r#"
@@ -437,28 +443,28 @@ packages:
         );
     }
 
+    // Ported: "returns null for YAML without packages" — xcodegen/extract.spec.ts line 22
     #[test]
     fn no_packages_returns_empty() {
-        // Ported: "returns null for YAML without packages" — xcodegen/extract.spec.ts line 22
         assert!(extract("name: MyApp\ntargets: {}").is_empty());
     }
 
+    // Ported: "returns null for empty content" — xcodegen/extract.spec.ts line 7
     #[test]
     fn empty_content_returns_empty() {
-        // Ported: "returns null for empty content" — xcodegen/extract.spec.ts line 7
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns null for empty packages" — xcodegen/extract.spec.ts line 36
     #[test]
     fn empty_packages_section_returns_empty() {
-        // Ported: "returns null for empty packages" — xcodegen/extract.spec.ts line 36
         let content = "name: MyProject\npackages: {}\n";
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "skips packages with revision reference" — xcodegen/extract.spec.ts line 233
     #[test]
     fn revision_reference_skipped() {
-        // Ported: "skips packages with revision reference" — xcodegen/extract.spec.ts line 233
         let content = "packages:\n  MyLib:\n    url: https://github.com/owner/repo.git\n    revision: abc123\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
@@ -468,9 +474,9 @@ packages:
         );
     }
 
+    // Ported: "skips packages without url or github" — xcodegen/extract.spec.ts line 356
     #[test]
     fn package_without_url_or_github_skipped() {
-        // Ported: "skips packages without url or github" — xcodegen/extract.spec.ts line 356
         let content = "packages:\n  MyLib:\n    from: \"1.0.0\"\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);

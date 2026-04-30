@@ -235,6 +235,7 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts multiple modules from Puppetfile without a forge" — puppet/extract.spec.ts line 14
     #[test]
     fn extracts_forge_module_with_version() {
         let content = "mod 'puppetlabs/apache', '5.5.0'\n";
@@ -249,6 +250,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts multiple modules from Puppetfile with multiple forges/registries" — puppet/extract.spec.ts line 47
     #[test]
     fn extracts_custom_forge() {
         let content = "forge 'https://forge.example.com'\nmod 'myorg/mymod', '1.0.0'\n";
@@ -262,6 +264,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts multiple git tag modules from Puppetfile" — puppet/extract.spec.ts line 100
     #[test]
     fn extracts_github_git_module() {
         let content = r#"
@@ -280,6 +283,7 @@ mod 'custom_mod',
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "Git module without a tag should result in a skip reason" — puppet/extract.spec.ts line 162
     #[test]
     fn git_no_tag_skipped() {
         let content = "mod 'mymod',\n  :git => 'https://github.com/owner/repo'\n";
@@ -288,6 +292,7 @@ mod 'custom_mod',
         assert_eq!(deps[0].skip_reason, Some(PuppetSkipReason::GitNoTag));
     }
 
+    // Ported: "extracts multiple modules from Puppetfile without a forge" — puppet/extract.spec.ts line 14
     #[test]
     fn multiple_modules() {
         let content = r#"
@@ -319,15 +324,15 @@ mod 'puppetlabs/concat', '7.1.1'
         assert_eq!(deps[0].name, "puppetlabs/apache");
     }
 
+    // Ported: "returns null for empty Puppetfile" — puppet/extract.spec.ts line 10
     #[test]
     fn empty_returns_empty() {
-        // Ported: "returns null for empty Puppetfile" — puppet/extract.spec.ts line 10
         assert!(extract("").is_empty());
     }
 
+    // Ported: "Use GithubTagsDatasource only if host is exactly github.com" — puppet/extract.spec.ts line 125
     #[test]
     fn non_github_host_uses_git_tags_datasource() {
-        // Ported: "Use GithubTagsDatasource only if host is exactly github.com" — spec line 125
         // github.com.example.com is NOT github.com → should use GitTags
         let content = "mod 'apache', :git => 'https://github.com.example.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'";
         let deps = extract(content);
