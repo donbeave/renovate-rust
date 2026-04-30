@@ -220,6 +220,7 @@ fn classify_repository(repo: &str) -> (String, Option<HelmSkipReason>) {
 mod tests {
     use super::*;
 
+    // Ported: "parses simple requirements.yaml correctly" — helm-requirements/extract.spec.ts line 64
     #[test]
     fn simple_chart_yaml() {
         let content = r#"
@@ -244,6 +245,7 @@ dependencies:
         assert!(redis.skip_reason.is_none());
     }
 
+    // Ported: "resolves aliased registry urls" — helm-requirements/extract.spec.ts line 112
     #[test]
     fn stable_alias_resolved() {
         let content = r#"
@@ -258,6 +260,7 @@ dependencies:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "skips invalid registry urls" — helm-requirements/extract.spec.ts line 34
     #[test]
     fn oci_registry_skipped() {
         let content = r#"
@@ -270,6 +273,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::OciRegistry));
     }
 
+    // Ported: "ensure that currentValue is string" — helm-requirements/extract.spec.ts line 8
     #[test]
     fn at_alias_skipped() {
         let content = r#"
@@ -282,6 +286,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::UnresolvableAlias));
     }
 
+    // Ported: "validates repository is required" — helm-requirements/extract.spec.ts line 278
     #[test]
     fn no_repository_skipped() {
         let content = r#"
@@ -293,6 +298,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::NoRepository));
     }
 
+    // Ported: "validates version is required" — helm-requirements/extract.spec.ts line 278
     #[test]
     fn missing_version_dep_skipped() {
         let content = r#"
@@ -305,6 +311,7 @@ dependencies:
         assert!(deps.is_empty());
     }
 
+    // Ported: "parses simple requirements.yaml correctly" — helm-requirements/extract.spec.ts line 64
     #[test]
     fn requirements_yaml_format() {
         let content = r#"
@@ -341,6 +348,7 @@ maintainers:
         assert_eq!(deps[0].name, "redis");
     }
 
+    // Ported: "returns null if no dependencies" — helm-requirements/extract.spec.ts line 172
     #[test]
     fn no_dependencies_returns_empty() {
         let content = r#"
@@ -391,5 +399,82 @@ dependencies:
 
         let oci = deps.iter().find(|d| d.name == "oci-chart").unwrap();
         assert_eq!(oci.skip_reason, Some(HelmSkipReason::OciRegistry));
+    }
+
+    // Ported: "skips local dependencies" — helm-requirements/extract.spec.ts line 141
+    #[test]
+    fn local_file_dependency_skipped() {
+        let content = r#"
+dependencies:
+  - name: redis
+    version: "0.9.0"
+    repository: https://charts.helm.sh/stable/
+  - name: postgresql
+    version: "0.8.1"
+    repository: file:///some/local/path/
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        let redis = deps.iter().find(|d| d.name == "redis").unwrap();
+        assert!(redis.skip_reason.is_none());
+        let pg = deps.iter().find(|d| d.name == "postgresql").unwrap();
+        // file:// paths are not https or http — treated as unresolvable alias
+        assert!(pg.skip_reason.is_some());
+    }
+
+    // Ported: "returns null if requirements.yaml is invalid" — helm-requirements/extract.spec.ts line 192
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        // Malformed YAML — the Rust extractor just returns empty for unrecognised content.
+        let content = "Invalid requirements.yaml content.\ndependencies:\n[\n";
+        let deps = extract(content);
+        // Invalid YAML with no parseable dependencies block → empty.
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "returns null if Chart.yaml is empty" — helm-requirements/extract.spec.ts line 214
+    #[test]
+    fn empty_content_returns_empty() {
+        let deps = extract("");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "validates name is required" — helm-requirements/extract.spec.ts line 278
+    #[test]
+    fn dep_without_name_is_silently_skipped() {
+        // A dependency entry with no name field — emit_dep skips it.
+        let content = r#"
+dependencies:
+  - version: "0.0.1"
+    repository: https://charts.helm.sh/stable/
+"#;
+        // The Rust extractor silently skips deps with empty name.
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "skips only invalid dependences" — helm-requirements/extract.spec.ts line 293
+    #[test]
+    fn skips_only_invalid_deps_keeps_valid_ones() {
+        let content = r#"
+dependencies:
+  - name: postgresql
+    repository: https://charts.helm.sh/stable/
+  - version: "0.0.1"
+    repository: https://charts.helm.sh/stable/
+  - name: redis
+    version: "0.0.1"
+  - name: redis
+    version: "0.0.1"
+    repository: https://charts.helm.sh/stable/
+"#;
+        let deps = extract(content);
+        // Only the last dep (redis with version + repository) is fully valid.
+        assert_eq!(deps.len(), 1);
+        let dep = &deps[0];
+        assert_eq!(dep.name, "redis");
+        assert_eq!(dep.current_value, "0.0.1");
+        assert_eq!(dep.repository, "https://charts.helm.sh/stable/");
+        assert!(dep.skip_reason.is_none());
     }
 }

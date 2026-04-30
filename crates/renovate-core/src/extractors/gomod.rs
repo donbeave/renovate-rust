@@ -426,8 +426,7 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
     // Ported: "extracts the toolchain directive" — gomod/extract.spec.ts line 212
     #[test]
     fn toolchain_directive_extracted() {
-        let content =
-            "module github.com/renovate-tests/gomod\ngo 1.23\ntoolchain go1.23.3\n";
+        let content = "module github.com/renovate-tests/gomod\ngo 1.23\ntoolchain go1.23.3\n";
         let deps = extract(content);
         let go_dep = deps.iter().find(|d| d.is_go_directive).unwrap();
         assert_eq!(go_dep.current_value, "1.23");

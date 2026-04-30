@@ -250,6 +250,7 @@ mod tests {
 
     // ── basic extraction ──────────────────────────────────────────────────────
 
+    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
     #[test]
     fn extracts_exact_pin() {
         let deps = extract_ok("Django==4.2.7");
@@ -259,6 +260,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
     #[test]
     fn extracts_range_constraint() {
         let deps = extract_ok("requests>=2.0.0,<3.0.0");
@@ -266,6 +268,7 @@ mod tests {
         assert_eq!(deps[0].current_value, ">=2.0.0,<3.0.0");
     }
 
+    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
     #[test]
     fn extracts_unconstrained_package() {
         let deps = extract_ok("sphinx");
@@ -274,12 +277,14 @@ mod tests {
         assert_eq!(deps[0].current_value, "");
     }
 
+    // Ported: "handles comments and commands" — pip_requirements/extract.spec.ts line 96
     #[test]
     fn strips_inline_comment() {
         let deps = extract_ok("Django==4.2.7 # some comment");
         assert_eq!(deps[0].current_value, "==4.2.7");
     }
 
+    // Ported: "should handle dependency and ignore env markers" — pip_requirements/extract.spec.ts line 198
     #[test]
     fn strips_environment_markers() {
         let deps = extract_ok("importlib-metadata==1.0.0; python_version < '3.8'");
@@ -287,6 +292,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "==1.0.0");
     }
 
+    // Ported: "should handle package with extras and no version specifiers" — pip_requirements/extract.spec.ts line 184
     #[test]
     fn strips_extras() {
         let deps = extract_ok("celery[redis]==4.1.1");
@@ -294,12 +300,14 @@ mod tests {
         assert_eq!(deps[0].current_value, "==4.1.1");
     }
 
+    // Ported: "handles extras and complex index url" — pip_requirements/extract.spec.ts line 102
     #[test]
     fn strips_extras_with_spaces() {
         let deps = extract_ok("celery [redis] == 4.1.1");
         assert_eq!(deps[0].current_value, "== 4.1.1");
     }
 
+    // Ported: "extracts multiple dependencies" — pip_requirements/extract.spec.ts line 90
     #[test]
     fn handles_multiple_packages() {
         let content = "Django==4.2.7\nrequests==2.28.0\nsphinx\n";
@@ -309,18 +317,21 @@ mod tests {
 
     // ── skip reasons ──────────────────────────────────────────────────────────
 
+    // Ported: "should handle git packages" — pip_requirements/extract.spec.ts line 213
     #[test]
     fn git_source_is_skipped() {
         let deps = extract_ok("git+https://github.com/owner/repo.git@v1.0");
         assert_eq!(deps[0].skip_reason, Some(PipSkipReason::GitSource));
     }
 
+    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
     #[test]
     fn url_install_is_skipped() {
         let deps = extract_ok("https://example.com/pkg-1.0.tar.gz");
         assert_eq!(deps[0].skip_reason, Some(PipSkipReason::UrlInstall));
     }
 
+    // Ported: "extracts --requirement short code option" — pip_requirements/extract.spec.ts line 68
     #[test]
     fn sub_requirement_is_skipped() {
         let deps = extract_ok("-r base.txt");
@@ -328,6 +339,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(PipSkipReason::SubRequirement));
     }
 
+    // Ported: "extracts --constraints short code option" — pip_requirements/extract.spec.ts line 79
     #[test]
     fn constraints_file_is_skipped() {
         let deps = extract_ok("-c constraints.txt");
@@ -337,18 +349,21 @@ mod tests {
 
     // ── ignored lines ─────────────────────────────────────────────────────────
 
+    // Ported: "handles comments and commands" — pip_requirements/extract.spec.ts line 96
     #[test]
     fn blank_lines_ignored() {
         let deps = extract_ok("\n\n  \nDjango==4.2.7\n\n");
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "handles comments and commands" — pip_requirements/extract.spec.ts line 96
     #[test]
     fn comment_only_lines_ignored() {
         let deps = extract_ok("# this is a comment\nDjango==4.2.7");
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "extracts a file with only --index-url flags" — pip_requirements/extract.spec.ts line 258
     #[test]
     fn index_url_directive_ignored() {
         let deps = extract_ok("--index-url https://pypi.org/simple\nDjango==4.2.7");
@@ -357,6 +372,7 @@ mod tests {
 
     // ── real-world fixture (from Renovate __fixtures__/requirements1.txt) ─────
 
+    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
     #[test]
     fn requirements1_fixture() {
         let content = "--index-url http://example.com/private-pypi/\n\
@@ -378,6 +394,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts multiple dependencies" — pip_requirements/extract.spec.ts line 90
     #[test]
     fn requirements2_fixture() {
         let content = "Django==1\ndistribute==0.6.27\ndj-database-url==0.2\npsycopg2==2.4.5\nwsgiref==0.1.2\n";

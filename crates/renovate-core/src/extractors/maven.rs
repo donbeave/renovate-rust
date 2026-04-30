@@ -455,6 +455,7 @@ mod tests {
   </dependencies>
 </project>"#;
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn extracts_regular_dependencies() {
         let deps = extract_ok(SIMPLE_POM);
@@ -473,6 +474,7 @@ mod tests {
         );
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn extracts_parent() {
         let content = r#"<project>
@@ -496,6 +498,7 @@ mod tests {
         assert_eq!(parents[0].current_value, "3.1.4");
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn extracts_dependency_management() {
         let content = r#"<project>
@@ -521,6 +524,7 @@ mod tests {
         assert_eq!(mgmt[0].current_value, "2.0.0");
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn extracts_build_plugins() {
         let content = r#"<project>
@@ -547,6 +551,7 @@ mod tests {
         assert_eq!(plugins[0].current_value, "3.11.0");
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn plugin_default_group_id() {
         let content = r#"<project>
@@ -571,6 +576,7 @@ mod tests {
         );
     }
 
+    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn extracts_build_extensions() {
         let content = r#"<project>

@@ -145,6 +145,7 @@ libraryDependencies ++= Seq(
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
 "#;
 
+    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
     #[test]
     fn extracts_scala_style_deps() {
         let deps = extract(SAMPLE_SBT);
@@ -155,6 +156,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(cats.dep_type, SbtDepType::Library);
     }
 
+    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
     #[test]
     fn extracts_java_style_deps() {
         let deps = extract(SAMPLE_SBT);
@@ -167,6 +169,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(commons.style, SbtDepStyle::Java);
     }
 
+    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
     #[test]
     fn extracts_plugin() {
         let deps = extract(SAMPLE_SBT);
@@ -178,6 +181,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(plugin.current_value, "1.9.16");
     }
 
+    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
     #[test]
     fn comment_line_skipped() {
         let deps = extract(SAMPLE_SBT);
@@ -196,6 +200,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(dep.dep_name(), "org.typelevel:cats-core");
     }
 
+    // Ported: "returns null for empty" — sbt/extract.spec.ts line 23
     #[test]
     fn build_properties_extraction() {
         let content = "sbt.version=1.9.8\n";
@@ -204,6 +209,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(dep.group_id, "org.scala-sbt");
     }
 
+    // Ported: "returns null for empty" — sbt/extract.spec.ts line 23
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

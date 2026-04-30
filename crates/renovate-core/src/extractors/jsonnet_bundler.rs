@@ -131,6 +131,7 @@ mod tests {
   ]
 }"#;
 
+    // Ported: "extracts dependency" — jsonnet-bundler/extract.spec.ts line 57
     #[test]
     fn extracts_github_deps() {
         let deps = extract(SAMPLE);
@@ -154,13 +155,22 @@ mod tests {
         assert_eq!(github_repo("https://gitlab.com/user/repo.git"), "");
     }
 
+    // Ported: "returns null for invalid jsonnetfile" — jsonnet-bundler/extract.spec.ts line 24
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
     }
 
+    // Ported: "returns null for jsonnetfile with no dependencies" — jsonnet-bundler/extract.spec.ts line 30
     #[test]
     fn empty_returns_empty() {
         assert!(extract("{}").is_empty());
+    }
+
+    // Ported: "returns null for dependencies with empty Git source" — jsonnet-bundler/extract.spec.ts line 48
+    #[test]
+    fn empty_git_source_returns_empty() {
+        let content = r#"{"version":1,"dependencies":[{"source":{"git":{}},"version":"v0.50.0"}]}"#;
+        assert!(extract(content).is_empty());
     }
 }
