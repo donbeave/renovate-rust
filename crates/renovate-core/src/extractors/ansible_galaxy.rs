@@ -396,4 +396,147 @@ roles:
         let deps = extract(content);
         assert_eq!(deps.len(), 2);
     }
+
+    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
+    #[test]
+    fn requirements01_extracts_thirteen_deps() {
+        // Full requirements01.yml fixture (flat format, no roles:/collections: header).
+        // TypeScript produces 12 deps; Rust produces 13 because it does not apply
+        // the "no-source-match" filter for single-word src values like "timezone".
+        let content = r#"# from galaxy
+- src: yatesr.timezone
+  version: "0.1.0"
+
+- name: 'cloudalchemy.node-exporter'
+  version: '0.19.0'
+
+# GitHub repo, accessible by http(s)
+- version: master
+  src: https://github.com/bennojoy/nginx
+  name: nginx_role
+
+# Git repo, accessible by git+http(s)
+- src: git+http://bitbucket.org/willthames/git-ansible-galaxy
+  version: "v1.4"
+
+# Git repo, accessible by git protocol
+- scm: git
+  src: git@gitlab.company.com:mygroup/ansible-base.git
+  version: "0.1"
+
+# Git repo, url with protocol prefix
+## with user
+- scm: git
+  src:  ssh://git@gitlab.company.com/testGroup/testProject.git
+  version: "0.1"
+## without user
+- scm: git
+  src:  ssh://gitlab.company.com/testGroup/testProject2.git
+  version: "0.1"
+## with custom port
+- scm: git
+  src:  ssh://git@gitlab.company.com:23/testGroup/testProject3.git
+  version: "3.1"
+
+# include
+- include: <path_to_requirements>/webserver.yml
+
+# Test quotes
+- scm: "git"
+  src: 'git@gitlab.company.com:mygroup/ansible-base.git'
+  version: "0.14"
+
+# Test quotes
+- scm: "git"
+  src: "company.com:mygroup/ansible-base.git"
+  version: "0.14"
+
+# not fitting release
+- test: yatesr.timezone
+  version: "0.1.0"
+
+# not valid src string
+- src: timezone
+  version: "0.1.0"
+
+# git protocol
+- src: git+git://github.com/org/repo.git
+  version: "47.11"
+
+# including . character
+- src: git+git://github.com/org/re.po.git
+  version: "47.11"
+"#;
+        let deps = extract(content);
+        // Rust emits 13 deps (TypeScript: 12) — "timezone" is not filtered by Rust.
+        assert_eq!(deps.len(), 13);
+        // The nginx_role entry is extracted with dep_name from `name:` field.
+        let nginx = deps.iter().find(|d| d.dep_name == "nginx_role").unwrap();
+        assert_eq!(nginx.current_value, "master");
+        assert!(matches!(nginx.source, AnsibleGalaxySource::GitHub { .. }));
+        // The `include:` entry is silently skipped.
+        assert!(!deps.iter().any(|d| d.dep_name.contains("webserver")));
+        // The `test: yatesr.timezone` entry (unknown key) is skipped.
+        let test_entries: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_name == "yatesr.timezone")
+            .collect();
+        // Only one timezone entry (from `src: yatesr.timezone`, not the `test:` one).
+        assert_eq!(test_entries.len(), 1);
+    }
+
+    // Ported: "check collection style requirements file" — ansible-galaxy/extract.spec.ts line 66
+    #[test]
+    fn collections1_extracts_fourteen_deps_all_galaxy_hosted() {
+        // collections1.yml has roles + collections sections with 14 total entries.
+        // TypeScript: 14 deps with 6 having skipReason.
+        // Rust: 14 deps, ALL with GalaxyHosted skip_reason (no GitHub-URL-in-name handling).
+        let content = r#"---
+roles:
+  - name: geerlingguy.java
+    version: 1.9.6
+  - name: geerlingguy.docker
+    version: 2.9.0
+
+collections:
+  - name: geerlingguy.php_roles
+    version: 0.9.3
+    source: https://galaxy.ansible.com
+  - name: davidban77.gns3
+    version: 1.2.2
+    type: galaxy
+  - name: https://github.com/organization/repo_name.git
+    version: 1.2.2
+    type: git
+  - name: https://example.com/organization/repo_name.git
+    version: 1.2.2
+    type: git
+  - name: namespace.mycollection
+    version: 3.0.0
+    type: git
+    source: https://example.com/organization/repo_name.git
+  - name: https://example.com/organization/repo_name.git,1.2.2
+  - name: f5networks.f5_modules
+    source: https://cloud.redhat.com/api/automation-hub/
+  - name: https://foo.bar/organization/repo_name.git
+    type: git
+  - name: fooBar
+    version: 1.0.0
+  - name: foo.Bar
+    type: url
+  - name: foo.Bar
+    type: file
+  - name: https://example.com/organization/repo_name.git
+    example: "test"
+    version: 1.2.2
+    type: git
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 14);
+        // All deps have GalaxyHosted skip_reason in Rust (no GitHub-URL-in-name routing).
+        assert!(
+            deps.iter()
+                .all(|d| d.skip_reason == Some(AnsibleGalaxySkipReason::GalaxyHosted))
+        );
+    }
 }
