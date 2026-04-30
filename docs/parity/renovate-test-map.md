@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 140 / 310 actionable tests ported (45%) — updated 2026-04-29
+**Overall progress:** 143 / 310 actionable tests ported (46%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -685,9 +685,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles debian with prefixes and registries | 821 | pending | — | — | — |
 | handles prefixes | 843 | pending | — | — | — |
 | handles prefixes with registries | 861 | pending | — | — | — |
-| handles implausible line continuation | 883 | pending | — | — | — |
-| handles multi-line FROM with space after escape character | 904 | pending | — | — | — |
-| handles FROM without ARG default value | 921 | pending | — | — | — |
+| handles implausible line continuation | 883 | ported | `dockerfile.rs` | `implausible_continuation_does_not_affect_from` | — |
+| handles multi-line FROM with space after escape character | 904 | ported | `dockerfile.rs` | `multiline_from_with_space_after_escape` | — |
+| handles FROM without ARG default value | 921 | ported | `dockerfile.rs` | `from_with_arg_variable_is_skipped` | — |
 | handles FROM with empty ARG default value | 939 | pending | — | — | — |
 | handles FROM with version in ARG value | 960 | pending | — | — | — |
 | handles FROM with version in ARG default value | 981 | pending | — | — | — |

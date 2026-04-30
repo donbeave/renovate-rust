@@ -461,6 +461,25 @@ mod tests {
 
     // ── multi-line continuation ───────────────────────────────────────────────
 
+    // Ported: "handles implausible line continuation" — dockerfile/extract.spec.ts line 883
+    #[test]
+    fn implausible_continuation_does_not_affect_from() {
+        // Trailing `\` on a RUN line should not affect the preceding FROM.
+        let content = "FROM alpine:3.5\n\nRUN something \\";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "alpine");
+        assert_eq!(deps[0].tag.as_deref(), Some("3.5"));
+    }
+
+    // Ported: "handles multi-line FROM with space after escape character" — dockerfile/extract.spec.ts line 904
+    #[test]
+    fn multiline_from_with_space_after_escape() {
+        let deps = extract_ok("FROM \\ \nnginx:1.20\n");
+        assert_eq!(deps[0].image, "nginx");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.20"));
+    }
+
     #[test]
     fn continuation_joined_correctly() {
         let content = "FROM node:18-alpine \\\n  AS builder";
@@ -479,6 +498,14 @@ mod tests {
         assert_eq!(deps[0].image, "image2");
         assert_eq!(deps[0].tag.as_deref(), Some("1.0.0"));
         assert_eq!(deps[0].digest.as_deref(), Some("sha256:abcdef"));
+    }
+
+    // Ported: "handles FROM without ARG default value" — dockerfile/extract.spec.ts line 921
+    #[test]
+    fn from_with_arg_variable_is_skipped() {
+        let deps = extract_ok("ARG img_base\nFROM $img_base\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
     // ── BOM marker ───────────────────────────────────────────────────────────
