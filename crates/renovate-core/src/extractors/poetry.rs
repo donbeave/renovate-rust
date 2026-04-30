@@ -179,10 +179,18 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
             })
         }
         Value::Table(tbl) => {
+            // Helper to extract version from table, defaulting to empty.
+            let table_version = |tbl: &toml::map::Map<String, Value>| -> String {
+                tbl.get("version")
+                    .and_then(|v| v.as_str())
+                    .filter(|v| *v != "*")
+                    .unwrap_or("")
+                    .to_owned()
+            };
             if tbl.contains_key("git") {
                 return Some(PoetryExtractedDep {
                     name: normalized,
-                    current_value: String::new(),
+                    current_value: table_version(tbl),
                     dep_type,
                     skip_reason: Some(PoetrySkipReason::GitSource),
                 });
@@ -190,7 +198,7 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
             if tbl.contains_key("path") {
                 return Some(PoetryExtractedDep {
                     name: normalized,
-                    current_value: String::new(),
+                    current_value: table_version(tbl),
                     dep_type,
                     skip_reason: Some(PoetrySkipReason::LocalPath),
                 });
@@ -198,7 +206,7 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
             if tbl.contains_key("url") {
                 return Some(PoetryExtractedDep {
                     name: normalized,
-                    current_value: String::new(),
+                    current_value: table_version(tbl),
                     dep_type,
                     skip_reason: Some(PoetrySkipReason::UrlInstall),
                 });
@@ -507,5 +515,48 @@ abc = "^5.5"
     fn empty_content_returns_empty() {
         let deps = extract_ok("");
         assert!(deps.is_empty());
+        // "nothing here" is invalid TOML → parse error or empty
+        let result = extract("nothing here");
+        assert!(result.is_err() || result.unwrap().is_empty());
+    }
+
+    // Ported: "handles case with no dependencies" — poetry/extract.spec.ts line 66
+    #[test]
+    fn poetry_section_with_no_deps_returns_empty() {
+        let content = r#"
+[tool.poetry]
+name = "myapp"
+version = "1.0.0"
+"#;
+        let deps = extract_ok(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "skips git dependencies with version" — poetry/extract.spec.ts line 375
+    #[test]
+    fn git_dep_with_version_shows_version() {
+        let content = r#"[tool.poetry.dependencies]
+flask = {git = "https://github.com/pallets/flask.git", version="1.2.3"}
+werkzeug = ">=0.14"
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 2);
+        let flask = deps.iter().find(|d| d.name == "flask").unwrap();
+        assert_eq!(flask.current_value, "1.2.3");
+        assert_eq!(flask.skip_reason, Some(PoetrySkipReason::GitSource));
+    }
+
+    // Ported: "skips path dependencies with version" — poetry/extract.spec.ts line 400
+    #[test]
+    fn path_dep_with_version_shows_version() {
+        let content = r#"[tool.poetry.dependencies]
+flask = {path = "/some/path/", version = "1.2.3"}
+werkzeug = ">=0.14"
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 2);
+        let flask = deps.iter().find(|d| d.name == "flask").unwrap();
+        assert_eq!(flask.current_value, "1.2.3");
+        assert_eq!(flask.skip_reason, Some(PoetrySkipReason::LocalPath));
     }
 }
