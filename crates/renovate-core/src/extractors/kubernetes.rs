@@ -29,8 +29,6 @@ use regex::Regex;
 pub enum KubernetesSkipReason {
     /// Image is pinned by digest (`@sha256:...`) — no version to update.
     DigestPinned,
-    /// Non-Docker-Hub registry — not supported by this extractor.
-    NonDockerHub,
     /// `latest` tag or no tag — skip to avoid noisy updates.
     NoVersion,
 }
@@ -100,15 +98,6 @@ fn parse_image_ref(image_ref: &str) -> Option<KubernetesDep> {
     // Split at the last `:` that isn't a port number.
     let (name_part, tag) = split_image_tag(image_ref);
 
-    // Skip non-Docker-Hub registries (contain a dot or port before first slash).
-    if is_non_docker_hub(name_part) {
-        return Some(KubernetesDep {
-            image_name: name_part.to_owned(),
-            current_value: tag.to_owned(),
-            skip_reason: Some(KubernetesSkipReason::NonDockerHub),
-        });
-    }
-
     // Skip `latest` or empty tags.
     if tag.is_empty() || tag == "latest" {
         return Some(KubernetesDep {
@@ -140,13 +129,6 @@ fn split_image_tag(s: &str) -> (&str, &str) {
     (s, "")
 }
 
-/// Returns true if the image appears to be from a non-Docker-Hub registry.
-fn is_non_docker_hub(name: &str) -> bool {
-    // If the first path segment contains a `.` or `:`, it's a hostname/registry.
-    let first_segment = name.split('/').next().unwrap_or(name);
-    first_segment.contains('.') || first_segment.contains(':')
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -174,7 +156,8 @@ spec:
     fn extracts_docker_hub_images() {
         let deps = extract(DEPLOYMENT);
         let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-        assert_eq!(actionable.len(), 2);
+        // nginx, redis, and gcr.io image all extracted (all registries supported)
+        assert_eq!(actionable.len(), 3);
         assert!(
             actionable
                 .iter()
@@ -188,14 +171,15 @@ spec:
     }
 
     #[test]
-    fn skips_non_docker_hub() {
+    fn extracts_non_docker_hub_registries() {
+        // TypeScript extractor extracts all images regardless of registry — no NonDockerHub skip.
         let deps = extract(DEPLOYMENT);
-        let non_hub: Vec<_> = deps
+        let gcr = deps
             .iter()
-            .filter(|d| d.skip_reason == Some(KubernetesSkipReason::NonDockerHub))
-            .collect();
-        assert!(!non_hub.is_empty());
-        assert!(non_hub.iter().any(|d| d.image_name.contains("gcr.io")));
+            .find(|d| d.image_name.contains("gcr.io"))
+            .unwrap();
+        assert!(gcr.skip_reason.is_none());
+        assert_eq!(gcr.current_value, "1.0");
     }
 
     #[test]
@@ -216,8 +200,63 @@ spec:
         assert!(has_no_ver);
     }
 
+    // Ported: "returns null for empty" — kubernetes/extract.spec.ts line 14
     #[test]
     fn returns_empty_for_non_k8s() {
         assert!(extract("key: value\nanother: field\n").is_empty());
+    }
+
+    // Ported: "returns null for empty" — kubernetes/extract.spec.ts line 14
+    #[test]
+    fn returns_empty_for_empty_input() {
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "handles invalid YAML files" — kubernetes/extract.spec.ts line 125
+    #[test]
+    fn handles_invalid_yaml_with_no_images() {
+        // apiVersion and kind present but malformed YAML — no image lines → empty
+        let content = "apiVersion: v1\nkind: ConfigMap\n<\n";
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "does not return unknown kind" — kubernetes/extract.spec.ts line 18
+    #[test]
+    fn configmap_with_no_images_returns_empty() {
+        let content =
+            "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: test\ndata:\n  key: value\n";
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts image tag when it contains underscores" — kubernetes/extract.spec.ts line 98
+    #[test]
+    fn extracts_image_with_underscore_in_tag() {
+        let content = r#"apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/berriai/litellm:litellm_stable_release_branch-v1.67.0-stable
+"#;
+        let deps = extract(content);
+        let dep = deps
+            .iter()
+            .find(|d| d.image_name == "ghcr.io/berriai/litellm")
+            .unwrap();
+        assert_eq!(
+            dep.current_value,
+            "litellm_stable_release_branch-v1.67.0-stable"
+        );
+        assert!(dep.skip_reason.is_none());
+    }
+
+    // Ported: "ignores non-Kubernetes YAML files" — kubernetes/extract.spec.ts line 121
+    #[test]
+    fn ignores_non_kubernetes_yaml() {
+        // GitLab CI YAML has no apiVersion or kind → empty
+        let content = "stages:\n  - build\nbuild:\n  image: node:18\n  script:\n    - npm ci\n";
+        assert!(extract(content).is_empty());
     }
 }

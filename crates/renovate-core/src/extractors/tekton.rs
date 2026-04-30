@@ -67,9 +67,16 @@ spec:
 "#;
         let deps = extract(content);
         let actionable: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
-        assert_eq!(actionable.len(), 1); // golang is Docker Hub, kaniko is GCR (skipped)
-        assert_eq!(actionable[0].image_name, "golang");
-        assert_eq!(actionable[0].current_value, "1.21.0");
+        // All images extracted regardless of registry (TypeScript behavior)
+        assert_eq!(actionable.len(), 2);
+        assert!(
+            actionable
+                .iter()
+                .any(|d| d.image_name == "golang" && d.current_value == "1.21.0")
+        );
+        assert!(actionable.iter().any(
+            |d| d.image_name == "gcr.io/kaniko-project/executor" && d.current_value == "v1.9.0"
+        ));
     }
 
     #[test]
@@ -79,7 +86,8 @@ spec:
     }
 
     #[test]
-    fn skips_gcr_images() {
+    fn extracts_gcr_images_without_skip() {
+        // TypeScript extractor does not skip non-Docker-Hub registries.
         let content = r#"
 apiVersion: tekton.dev/v1beta1
 kind: Task
@@ -89,7 +97,8 @@ spec:
 "#;
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
-        assert!(deps[0].skip_reason.is_some());
+        assert!(deps[0].skip_reason.is_none());
+        assert_eq!(deps[0].image_name, "gcr.io/google-containers/busybox");
     }
 
     // Ported: "ignores file without any deps" — tekton/extract.spec.ts line 96

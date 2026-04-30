@@ -301,9 +301,6 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                         KubernetesSkipReason::DigestPinned => {
                                             "digest-pinned".to_owned()
                                         }
-                                        KubernetesSkipReason::NonDockerHub => {
-                                            "non-docker-hub".to_owned()
-                                        }
                                         KubernetesSkipReason::NoVersion => "no-version".to_owned(),
                                     },
                                 },
@@ -514,9 +511,6 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                     reason: match reason {
                                         KubernetesSkipReason::DigestPinned => {
                                             "digest-pinned".to_owned()
-                                        }
-                                        KubernetesSkipReason::NonDockerHub => {
-                                            "non-docker-hub".to_owned()
                                         }
                                         KubernetesSkipReason::NoVersion => "no-version".to_owned(),
                                     },
