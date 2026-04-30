@@ -177,4 +177,10 @@ pipeline:
         let content = "pipeline:\n  test:\n    script: echo 'hello'\n";
         assert!(extract(content).is_empty());
     }
+
+    // Ported: "returns null for malformed YAML" — crow/extract.spec.ts line 15
+    #[test]
+    fn malformed_yaml_returns_empty() {
+        assert!(extract("nothing here\n:::::::").is_empty());
+    }
 }

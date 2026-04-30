@@ -282,4 +282,22 @@ jobs:
         let content = "version: 2.1\njobs:\n  build:\n    docker:\n      - image: ubuntu:20.04\n";
         assert!(extract_orbs(content).is_empty());
     }
+
+    // Ported: "extracts and exclude android images" — circleci/extract.spec.ts line 226
+    #[test]
+    fn machine_image_not_extracted() {
+        let content = "jobs:\n  build:\n    machine:\n      image: android:202102-01\n";
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts executors" — circleci/extract.spec.ts line 251
+    #[test]
+    fn executor_docker_image_extracted() {
+        let content =
+            "executors:\n  my-executor:\n    docker:\n      - image: cimg/ruby:3.0.3-browsers\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep.image, "cimg/ruby");
+        assert_eq!(deps[0].dep.tag.as_deref(), Some("3.0.3-browsers"));
+    }
 }

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 222 / 450 actionable tests ported (49%) — updated 2026-04-30
+**Overall progress:** 226 / 450 actionable tests ported (50%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -664,7 +664,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/circleci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/extract.spec.ts
-**Total tests:** 9 | **Ported:** 2 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 9 | **Ported:** 4 | **Actionable:** 9 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -675,9 +675,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts multiple image and resolves yaml anchors | 48 | pending | — | — | — |
 | extracts orbs too | 93 | ported | `circleci.rs` | `extracts_orbs` | — |
 | extracts image without leading dash | 200 | pending | — | — | — |
-| extracts and exclude android images | 226 | pending | — | — | — |
+| extracts and exclude android images | 226 | ported | `circleci.rs` | `machine_image_not_extracted` | — |
 | extracts orbs without jobs | 237 | pending | — | — | — |
-| extracts executors | 251 | pending | — | — | — |
+| extracts executors | 251 | ported | `circleci.rs` | `executor_docker_image_extracted` | — |
 | extracts orb definitions | 273 | pending | — | — | — |
 
 ---
@@ -765,7 +765,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/crow/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/crow/extract.spec.ts
-**Total tests:** 15 | **Ported:** 7 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 8 | **Actionable:** 15 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -773,7 +773,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for empty | 6 | ported | `crow.rs` | `empty_returns_empty` | — |
 | returns null for non-object YAML | 10 | ported | `crow.rs` | `no_image_keys_returns_empty` | — |
-| returns null for malformed YAML | 15 | pending | — | — | — |
+| returns null for malformed YAML | 15 | ported | `crow.rs` | `malformed_yaml_returns_empty` | — |
 | extracts multiple image lines | 19 | ported | `crow.rs` | `extracts_pipeline_images` | — |
 | extracts image and replaces registry | 164 | pending | — | — | — |
 | extracts image but no replacement | 194 | pending | — | — | — |
