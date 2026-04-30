@@ -45,6 +45,8 @@ pub enum NuGetDepType {
     Global,
     /// MSBuild SDK reference (`<Project Sdk="…/version">`, `<Sdk Name="…" Version="…">`, `<Import Sdk="…" Version="…">`)
     MsbuildSdk,
+    /// `<ContainerBaseImage>` property — Docker image for .NET container publishing.
+    ContainerImage,
 }
 
 impl NuGetDepType {
@@ -55,6 +57,7 @@ impl NuGetDepType {
             NuGetDepType::CliTool => "DotNetCliToolReference",
             NuGetDepType::Global => "GlobalPackageReference",
             NuGetDepType::MsbuildSdk => "msbuild-sdk",
+            NuGetDepType::ContainerImage => "docker",
         }
     }
 }
@@ -78,6 +81,8 @@ pub struct NuGetExtractedDep {
     pub package_id: String,
     /// Version string, normalized from range notation where possible.
     pub current_value: String,
+    /// Digest for digest-pinned container images.
+    pub current_digest: Option<String>,
     /// Which element type this came from.
     pub dep_type: NuGetDepType,
     /// Set when no registry lookup should be performed.
@@ -106,6 +111,8 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
     let mut current: Option<PendingDep> = None;
     // True while inside a <Version> or <VersionOverride> child element.
     let mut version_child_tag = Option::<String>::None;
+    // True while inside a <ContainerBaseImage> child element.
+    let mut in_container_image = false;
 
     loop {
         match reader.read_event_into(&mut buf)? {
@@ -134,7 +141,9 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
                 {
                     deps.push(build_dep(pending));
                 }
-                if let Some(dep_type) = dep_type_for(&elem) {
+                if elem == "ContainerBaseImage" {
+                    in_container_image = true;
+                } else if let Some(dep_type) = dep_type_for(&elem) {
                     current = attrs_to_pending(e, dep_type);
                 } else if current.is_some() && (elem == "Version" || elem == "VersionOverride") {
                     version_child_tag = Some(elem);
@@ -143,7 +152,9 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
 
             Event::End(e) => {
                 let elem = String::from_utf8_lossy(e.name().as_ref()).into_owned();
-                if version_child_tag.as_deref() == Some(elem.as_str()) {
+                if elem == "ContainerBaseImage" {
+                    in_container_image = false;
+                } else if version_child_tag.as_deref() == Some(elem.as_str()) {
                     version_child_tag = None;
                 } else if dep_type_for(&elem).is_some()
                     && let Some(pending) = current.take()
@@ -154,8 +165,19 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
             }
 
             Event::Text(e) => {
-                if let Some(ref tag) = version_child_tag {
-                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                if in_container_image && !text.is_empty() {
+                    let (image, tag, digest) = parse_container_image(&text);
+                    if !image.is_empty() && !tag.is_empty() {
+                        deps.push(NuGetExtractedDep {
+                            package_id: image,
+                            current_value: tag,
+                            current_digest: digest,
+                            dep_type: NuGetDepType::ContainerImage,
+                            skip_reason: None,
+                        });
+                    }
+                } else if let Some(ref tag) = version_child_tag {
                     if !text.is_empty()
                         && let Some(ref mut pending) = current
                         && (tag == "VersionOverride" || pending.version.is_empty())
@@ -286,6 +308,7 @@ fn build_dep(dep: PendingDep) -> NuGetExtractedDep {
         return NuGetExtractedDep {
             package_id: dep.package_id,
             current_value: String::new(),
+            current_digest: None,
             dep_type: dep.dep_type,
             skip_reason: Some(NuGetSkipReason::NoVersion),
         };
@@ -295,6 +318,7 @@ fn build_dep(dep: PendingDep) -> NuGetExtractedDep {
         return NuGetExtractedDep {
             package_id: dep.package_id,
             current_value: dep.version,
+            current_digest: None,
             dep_type: dep.dep_type,
             skip_reason: Some(NuGetSkipReason::PropertyRef),
         };
@@ -304,9 +328,28 @@ fn build_dep(dep: PendingDep) -> NuGetExtractedDep {
     NuGetExtractedDep {
         package_id: dep.package_id,
         current_value,
+        current_digest: None,
         dep_type: dep.dep_type,
         skip_reason,
     }
+}
+
+/// Parse a ContainerBaseImage value like `image:tag@digest` or `image:tag`.
+/// Returns `(image_name, tag, digest)`.
+fn parse_container_image(s: &str) -> (String, String, Option<String>) {
+    let (image_with_tag, digest) = if let Some(at_pos) = s.find('@') {
+        (&s[..at_pos], Some(s[at_pos + 1..].to_owned()))
+    } else {
+        (s, None)
+    };
+    if let Some(colon_pos) = image_with_tag.rfind(':') {
+        let tag = &image_with_tag[colon_pos + 1..];
+        if !tag.contains('/') {
+            let image = &image_with_tag[..colon_pos];
+            return (image.to_owned(), tag.to_owned(), digest);
+        }
+    }
+    (image_with_tag.to_owned(), String::new(), digest)
 }
 
 /// Normalize a NuGet version string.
@@ -644,5 +687,45 @@ mod tests {
 </Project>"#;
         let deps = extract_ok(content);
         assert!(deps.is_empty());
+    }
+
+    // Ported: "extracts ContainerBaseImage" — nuget/extract.spec.ts line 234
+    #[test]
+    fn extracts_container_base_image() {
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk.Worker">
+  <PropertyGroup>
+    <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10</ContainerBaseImage>
+  </PropertyGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "mcr.microsoft.com/dotnet/runtime");
+        assert_eq!(deps[0].current_value, "7.0.10");
+        assert_eq!(deps[0].current_digest, None);
+        assert_eq!(deps[0].dep_type, NuGetDepType::ContainerImage);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts ContainerBaseImage with pinned digest" — nuget/extract.spec.ts line 260
+    #[test]
+    fn extracts_container_base_image_with_digest() {
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk.Worker">
+  <PropertyGroup>
+    <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10@sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19</ContainerBaseImage>
+  </PropertyGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "mcr.microsoft.com/dotnet/runtime");
+        assert_eq!(deps[0].current_value, "7.0.10");
+        assert_eq!(
+            deps[0].current_digest,
+            Some(
+                "sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19"
+                    .to_owned()
+            )
+        );
+        assert_eq!(deps[0].dep_type, NuGetDepType::ContainerImage);
+        assert!(deps[0].skip_reason.is_none());
     }
 }
