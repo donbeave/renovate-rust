@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 163 / 310 actionable tests ported (53%) — updated 2026-04-29
+**Overall progress:** 165 / 310 actionable tests ported (53%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -658,7 +658,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles from as | 152 | ported | `dockerfile.rs` | `as_alias_does_not_become_dep` | — |
 | handles comments | 173 | ported | `dockerfile.rs` | `commented_from_ignored` | — |
 | handles custom hosts | 194 | ported | `dockerfile.rs` | `extracts_image_with_custom_host` | — |
-| handles custom hosts and suffix | 215 | pending | — | — | — |
+| handles custom hosts and suffix | 215 | ported | `dockerfile.rs` | `custom_host_with_suffix_in_tag` | — |
 | handles custom hosts with port | 236 | ported | `dockerfile.rs` | `registry_port_not_confused_with_tag` | — |
 | handles custom hosts with port without tag | 257 | ported | `dockerfile.rs` | `custom_host_with_port_no_tag` | — |
 | handles quay hosts with port | 278 | pending | — | — | — |
@@ -705,7 +705,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles empty optional parameters | 1329 | pending | — | — | — |
 | handles registry alias | 1352 | pending | — | — | registryAliases not yet implemented |
 | replaces registry alias from start only | 1380 | pending | — | — | registryAliases not yet implemented |
-| handles empty registry | 1407 | pending | — | — | — |
+| handles empty registry | 1407 | ported | `dockerfile.rs` | `namespaced_image_without_registry_extracted_normally` | — |
 | handles # syntax statements | 1435 | ported | `dockerfile.rs` | `syntax_directive_extracted` | — |
 | ignores # syntax statements after first line | 1469 | ported | `dockerfile.rs` | `syntax_directive_after_from_ignored` | — |
 

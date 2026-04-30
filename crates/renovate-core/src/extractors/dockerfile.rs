@@ -481,6 +481,14 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("8"));
     }
 
+    // Ported: "handles custom hosts and suffix" — dockerfile/extract.spec.ts line 215
+    #[test]
+    fn custom_host_with_suffix_in_tag() {
+        let deps = extract_ok("FROM registry2.something.info/node:8-alpine\n");
+        assert_eq!(deps[0].image, "registry2.something.info/node");
+        assert_eq!(deps[0].tag.as_deref(), Some("8-alpine"));
+    }
+
     // Ported: "handles custom hosts with port without tag" — dockerfile/extract.spec.ts line 257
     #[test]
     fn custom_host_with_port_no_tag() {
@@ -855,6 +863,16 @@ mod tests {
         assert_eq!(deps[2].image, "alpine");
         assert_eq!(deps[2].tag.as_deref(), Some("latest"));
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
+    }
+
+    // Ported: "handles empty registry" — dockerfile/extract.spec.ts line 1407
+    #[test]
+    fn namespaced_image_without_registry_extracted_normally() {
+        // When no registryAlias matches, a namespace/image ref is extracted as-is.
+        let deps = extract_ok("FROM myName/myPackage:0.6.2\n");
+        assert_eq!(deps[0].image, "myName/myPackage");
+        assert_eq!(deps[0].tag.as_deref(), Some("0.6.2"));
+        assert!(deps[0].skip_reason.is_none());
     }
 
     // ── # syntax directives ───────────────────────────────────────────────────
