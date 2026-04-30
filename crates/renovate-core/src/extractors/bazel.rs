@@ -221,6 +221,7 @@ fn parse_http_archive(block: &str) -> Option<BazelDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts github tags" — bazel/extract.spec.ts line 31
     #[test]
     fn extracts_github_archive_dep() {
         let content = r#"
@@ -244,6 +245,7 @@ http_archive(
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "extracts github tags" — bazel/extract.spec.ts line 31
     #[test]
     fn extracts_github_release_dep() {
         let content = r#"
@@ -263,6 +265,7 @@ http_archive(
         );
     }
 
+    // Ported: "sequential http_archive" — bazel/extract.spec.ts line 166
     #[test]
     fn extracts_multiple_archives() {
         let content = r#"
@@ -301,22 +304,22 @@ http_archive(
         assert!(extract("# just comments\n").is_empty());
     }
 
+    // Ported: "returns empty if fails to parse" — bazel/extract.spec.ts line 13
     #[test]
     fn invalid_content_returns_empty() {
-        // Ported: "returns empty if fails to parse" — bazel/extract.spec.ts line 13
         assert!(extract("blahhhhh:foo:@what\n").is_empty());
     }
 
+    // Ported: "returns empty if cannot parse dependency" — bazel/extract.spec.ts line 18
     #[test]
     fn git_repository_without_url_returns_empty() {
-        // Ported: "returns empty if cannot parse dependency" — bazel/extract.spec.ts line 18
         // We only handle http_archive; git_repository alone returns nothing.
         assert!(extract("git_repository(\n  nothing\n)\n").is_empty());
     }
 
+    // Ported: "sequential http_archive" (first archive uses `url =` singular) — bazel/extract.spec.ts line 126
     #[test]
     fn singular_url_form_extracted() {
-        // Ported: "sequential http_archive" (first archive uses `url =` singular) — bazel/extract.spec.ts line 126
         let content = r#"
 http_archive(
   name = "aspect_rules_js",
@@ -339,9 +342,9 @@ http_archive(
         assert_eq!(deps[1].current_value, "5.5.3");
     }
 
+    // Ported: "http_archive with GitLab url" (semver version) — bazel/extract.spec.ts line 160
     #[test]
     fn gitlab_archive_with_version_extracted() {
-        // Ported: "http_archive with GitLab url" (semver version) — bazel/extract.spec.ts line 160
         let content = r#"
 http_archive(
   name = "eigen3",
@@ -364,9 +367,9 @@ http_archive(
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "http_archive with GitLab url" (commit digest) — bazel/extract.spec.ts line 160
     #[test]
     fn gitlab_archive_with_commit_digest_extracted() {
-        // Ported: "http_archive with GitLab url" (commit digest) — bazel/extract.spec.ts line 160
         let digest = "90ee821c563fa20db4d64d6991ddca256d5c52f2";
         let content = format!(
             r#"

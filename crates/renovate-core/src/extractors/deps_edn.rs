@@ -166,6 +166,7 @@ mod tests {
  {:dev {:extra-deps {ring/ring-mock {:mvn/version "0.4.0"}}}}}
 "#;
 
+    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
     #[test]
     fn extracts_deps() {
         let deps = extract(SAMPLE);
@@ -189,18 +190,21 @@ mod tests {
         assert_eq!(compojure.current_value, "1.6.3");
     }
 
+    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
     #[test]
     fn skips_git_deps() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.dep_name == "nrepl:nrepl"));
     }
 
+    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
     #[test]
     fn skips_local_deps() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.dep_name == "local-lib:local-lib"));
     }
 
+    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
     #[test]
     fn extracts_alias_deps() {
         let deps = extract(SAMPLE);

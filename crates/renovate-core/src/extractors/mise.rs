@@ -246,9 +246,9 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
     #[test]
     fn extracts_node_version() {
-        // Ported: "extracts tools - mise core plugins" (node part) — mise/extract.spec.ts line 28
         let content = "[tools]\nnode = \"18\"\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
@@ -259,9 +259,9 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
     #[test]
     fn extracts_erlang_core_plugin() {
-        // Ported: "extracts tools - mise core plugins" (erlang part) — mise/extract.spec.ts line 28
         let content = "[tools]\nerlang = \"23.3\"\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
@@ -274,6 +274,7 @@ mod tests {
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
     #[test]
     fn extracts_multiple_tools() {
         let content = "[tools]\nnode = \"20.9.0\"\npython = \"3.11.5\"\ngo = \"1.21.0\"\n";
@@ -293,6 +294,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts tools - asdf plugins" — mise/extract.spec.ts line 393
     #[test]
     fn asdf_tools_fall_through_to_asdf_table() {
         // Tools not in mise core but in asdf table should still be resolved.
@@ -304,9 +306,9 @@ mod tests {
         assert_eq!(tf.package_name, Some("hashicorp/terraform"));
     }
 
+    // Ported: "provides skipReason for lines with unsupported tooling" — mise/extract.spec.ts line 781
     #[test]
     fn unknown_tool_skipped() {
-        // Ported: "provides skipReason for lines with unsupported tooling" — mise/extract.spec.ts line 781
         let content = "[tools]\nmyunknowntool = \"1.0\"\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
@@ -320,24 +322,24 @@ mod tests {
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "extracts tools with multiple versions" — mise/extract.spec.ts line 409
     #[test]
     fn ignores_array_versions() {
-        // Ported: "extracts tools with multiple versions" — mise/extract.spec.ts line 409
         // Array versions are skipped in this implementation (Renovate picks the first).
         let content = "[tools]\nnode = [\"18\", \"20\"]\n";
         let deps = extract(content);
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns null for empty" — mise/extract.spec.ts line 13
     #[test]
     fn empty_returns_empty() {
-        // Ported: "returns null for empty" — mise/extract.spec.ts line 13
         assert!(extract("").is_empty());
     }
 
+    // Ported: "core java plugin function" — mise/extract.spec.ts line 911
     #[test]
     fn java_core_plugin_jdk() {
-        // Ported: "core java plugin function" — mise/extract.spec.ts line 911 (partial)
         let content = "[tools]\njava = \"adoptopenjdk-16.0.0+36\"\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);

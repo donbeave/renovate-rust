@@ -198,6 +198,7 @@ fn extract_version(spec: &Value) -> Option<String> {
 mod tests {
     use super::*;
 
+    // Ported: "returns parse pixi.toml" — pixi/extract.spec.ts line 161
     #[test]
     fn extracts_pypi_deps() {
         let content = r#"
@@ -227,6 +228,7 @@ requests = { version = ">=2.31" }
         }
     }
 
+    // Ported: "returns parse pixi.toml" — pixi/extract.spec.ts line 161
     #[test]
     fn extracts_conda_deps_as_actionable() {
         let content = r#"
@@ -245,6 +247,7 @@ python = ">=3.9"
         }
     }
 
+    // Ported: "returns parse pixi.toml with features" — pixi/extract.spec.ts line 335
     #[test]
     fn extracts_feature_pypi_deps() {
         let content = r#"
@@ -263,6 +266,7 @@ torch = ">=2.0"
         assert!(pypi.iter().any(|d| d.dep_name == "torch"));
     }
 
+    // Ported: "returns parse pixi section from pyproject.toml" — pixi/extract.spec.ts line 297
     #[test]
     fn extract_from_pyproject_tool_pixi() {
         let content = r#"
@@ -282,16 +286,16 @@ numpy = ">=1.26"
         assert_eq!(pypi[0].dep_name, "requests");
     }
 
+    // Ported: "returns null for empty pixi.toml" — pixi/extract.spec.ts line 151
     #[test]
     fn empty_file_returns_empty() {
-        // Ported: "returns null for empty pixi.toml" — pixi/extract.spec.ts line 151
         assert!(extract("").is_empty());
         assert!(extract("nothing here").is_empty());
     }
 
+    // Ported: "returns null for parsed file without pixi section" — pixi/extract.spec.ts line 155
     #[test]
     fn file_without_pixi_section_returns_empty() {
-        // Ported: "returns null for parsed file without pixi section" — pixi/extract.spec.ts line 155
         let content = "[project]\nname = \"myapp\"\n";
         assert!(extract(content).is_empty());
         assert!(extract_from_pyproject(content).is_empty());

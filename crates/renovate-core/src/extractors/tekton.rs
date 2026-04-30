@@ -50,6 +50,7 @@ pub fn extract(content: &str) -> Vec<KubernetesDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts deps from a file" — tekton/extract.spec.ts line 6
     #[test]
     fn extracts_step_images() {
         let content = r#"
@@ -91,15 +92,15 @@ spec:
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "ignores file without any deps" — tekton/extract.spec.ts line 96
     #[test]
     fn ignores_file_without_deps() {
-        // Ported: "ignores file without any deps" — tekton/extract.spec.ts line 96
         assert!(extract("foo: bar").is_empty());
     }
 
+    // Ported: "ignores empty file" — tekton/extract.spec.ts line 112
     #[test]
     fn ignores_empty_file() {
-        // Ported: "ignores empty file" — tekton/extract.spec.ts line 112
         assert!(extract("").is_empty());
     }
 }

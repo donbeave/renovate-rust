@@ -59,6 +59,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
     #[test]
     fn extracts_step_image() {
         let content = r#"
@@ -72,6 +73,7 @@ steps:
         assert_eq!(deps[0].tag.as_deref(), Some("1.21"));
     }
 
+    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
     #[test]
     fn extracts_service_image() {
         let content = r#"
@@ -84,6 +86,7 @@ services:
         assert_eq!(deps[0].image, "redis");
     }
 
+    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
     #[test]
     fn multiple_steps_and_services() {
         let content = r#"
@@ -108,22 +111,22 @@ services:
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "returns null for empty" — woodpecker/extract.spec.ts line 8
     #[test]
     fn empty_returns_empty() {
-        // Ported: "returns null for empty" — woodpecker/extract.spec.ts line 8
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns null for non-object YAML" — woodpecker/extract.spec.ts line 12
     #[test]
     fn non_object_yaml_returns_empty() {
-        // Ported: "returns null for non-object YAML" — woodpecker/extract.spec.ts line 12
         assert!(extract("nothing here").is_empty());
         assert!(extract("clone: null").is_empty());
     }
 
+    // Ported: "return null when no dependencies are provided" — woodpecker/extract.spec.ts line 313
     #[test]
     fn no_steps_or_services_returns_empty() {
-        // Ported: "return null when no dependencies are provided" — woodpecker/extract.spec.ts line 313
         let content = "pipeline: {}\n";
         assert!(extract(content).is_empty());
     }

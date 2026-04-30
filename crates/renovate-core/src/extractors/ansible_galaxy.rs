@@ -237,6 +237,7 @@ collections:
     version: '1.5.4'
 ";
 
+    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn extracts_github_roles() {
         let deps = extract(SAMPLE);
@@ -251,6 +252,7 @@ collections:
         assert!(apache.skip_reason.is_none());
     }
 
+    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn strips_git_suffix() {
         let deps = extract(SAMPLE);
@@ -264,6 +266,7 @@ collections:
         assert_eq!(mysql.current_value, "v4.0.0");
     }
 
+    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn galaxy_roles_skipped() {
         let deps = extract(SAMPLE);
@@ -274,6 +277,7 @@ collections:
         );
     }
 
+    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn no_version_skipped() {
         let deps = extract(SAMPLE);
@@ -284,6 +288,7 @@ collections:
         assert_eq!(no_ver.skip_reason, Some(AnsibleGalaxySkipReason::NoVersion));
     }
 
+    // Ported: "check collection style requirements file" — ansible-galaxy/extract.spec.ts line 66
     #[test]
     fn collections_skipped_as_galaxy() {
         let deps = extract(SAMPLE);

@@ -49,6 +49,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts multiple step pipeline image lines" — velaci/extract.spec.ts line 16
     #[test]
     fn extracts_step_image() {
         let content = "steps:\n  - name: build\n    image: golang:1.21\n";
@@ -58,6 +59,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("1.21"));
     }
 
+    // Ported: "extracts multiple services pipeline image lines" — velaci/extract.spec.ts line 30
     #[test]
     fn extracts_service_image() {
         let content = "services:\n  - name: db\n    image: postgres:15\n";
@@ -78,16 +80,16 @@ mod tests {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "should handle invalid YAML" — velaci/extract.spec.ts line 6
     #[test]
     fn invalid_yaml_returns_empty() {
-        // Ported: "should handle invalid YAML" — velaci/extract.spec.ts line 6
         // invalid YAML ("foo: bar: invalid") has no pipeline steps
         assert!(extract("foo: bar: invalid").is_empty());
     }
 
+    // Ported: "should handle YAML without pipeline/images" — velaci/extract.spec.ts line 11
     #[test]
     fn yaml_without_pipeline_returns_empty() {
-        // Ported: "should handle YAML without pipeline/images" — velaci/extract.spec.ts line 11
         assert!(extract("no: pipeline").is_empty());
     }
 }

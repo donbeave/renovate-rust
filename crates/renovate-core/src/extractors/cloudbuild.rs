@@ -99,6 +99,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
     #[test]
     fn extracts_step_names() {
         let content = r#"

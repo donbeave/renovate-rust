@@ -335,6 +335,7 @@ mod tests {
         );
     }
 
+    // Ported: "extracts git and path prefixes" — bitrise/extract.spec.ts line 75
     #[test]
     fn path_step_is_skipped() {
         let content = "workflows:\n  test:\n    steps:\n    - path::./relative/path:\n";

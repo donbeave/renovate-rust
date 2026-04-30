@@ -190,6 +190,7 @@ mod tests {
         );
     }
 
+    // Ported: "parses known tool versions" — devcontainer/extract.spec.ts line 372
     #[test]
     fn extracts_go_feature_and_version() {
         let content = r#"{
@@ -203,6 +204,7 @@ mod tests {
         assert_eq!(deps.version_deps[0].current_value, "1.21");
     }
 
+    // Ported: "returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file" — devcontainer/extract.spec.ts line 333
     #[test]
     fn feature_without_version_skipped_from_version_deps() {
         let content = r#"{
@@ -245,6 +247,7 @@ mod tests {
         assert!(deps.docker_deps.is_empty());
     }
 
+    // Ported: "returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file" — devcontainer/extract.spec.ts line 333
     #[test]
     fn local_feature_path_excluded_from_version_deps() {
         // Local features (./localfeature) are Docker-classified but produce no version dep.

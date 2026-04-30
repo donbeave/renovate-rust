@@ -57,6 +57,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts multiple image lines" — droneci/extract.spec.ts line 12
     #[test]
     fn extracts_step_image() {
         let content = r#"
@@ -73,6 +74,7 @@ steps:
         assert_eq!(deps[0].tag.as_deref(), Some("1.21"));
     }
 
+    // Ported: "extracts multiple image lines" — droneci/extract.spec.ts line 12
     #[test]
     fn extracts_service_image() {
         let content = r#"
@@ -86,6 +88,7 @@ services:
         assert_eq!(deps[0].tag.as_deref(), Some("14"));
     }
 
+    // Ported: "extracts multiple image lines" — droneci/extract.spec.ts line 12
     #[test]
     fn multiple_images() {
         let content = r#"
@@ -113,6 +116,7 @@ services:
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "extracts image but no replacement" — droneci/extract.spec.ts line 42
     #[test]
     fn private_registry_not_docker_hub() {
         let content = "steps:\n- image: gcr.io/myproject/myapp:v1.0\n";

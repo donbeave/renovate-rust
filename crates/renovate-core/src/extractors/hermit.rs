@@ -110,6 +110,7 @@ mod tests {
         assert_eq!(deps[2].current_value, "21.0.5");
     }
 
+    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
     #[test]
     fn extracts_channel_pinned_packages() {
         let files = vec!["bin/.kubectl@stable.pkg".to_owned()];

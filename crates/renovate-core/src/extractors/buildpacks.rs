@@ -218,6 +218,7 @@ uri = "buildpacks/nodejs:3.3.3"
 id = "no/version"
 "#;
 
+    // Ported: "extracts builder and buildpack images" — buildpacks/extract.spec.ts line 20
     #[test]
     fn extracts_registry_deps() {
         let deps = extract(SAMPLE);
@@ -235,6 +236,7 @@ id = "no/version"
         );
     }
 
+    // Ported: "extracts builder and buildpack images" — buildpacks/extract.spec.ts line 20
     #[test]
     fn skips_docker_refs() {
         let deps = extract(SAMPLE);
@@ -249,6 +251,7 @@ id = "no/version"
         }
     }
 
+    // Ported: "extracts builder and buildpack images" — buildpacks/extract.spec.ts line 20
     #[test]
     fn no_version_skipped() {
         let deps = extract(SAMPLE);

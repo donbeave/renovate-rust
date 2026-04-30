@@ -478,6 +478,7 @@ targetCustomizations:
         assert_eq!(custom.customization_name.as_deref(), Some("prod"));
     }
 
+    // Ported: "should parse parse invalid configurations" — fleet/extract.spec.ts line 208
     #[test]
     fn missing_chart_sets_skip_reason() {
         let content = r#"
@@ -493,6 +494,7 @@ helm:
         );
     }
 
+    // Ported: "should parse parse invalid configurations" — fleet/extract.spec.ts line 208
     #[test]
     fn no_version_sets_skip_reason() {
         let content = r#"
@@ -527,6 +529,7 @@ spec:
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "should parse invalid configuration" — fleet/extract.spec.ts line 276
     #[test]
     fn gitrepo_missing_revision_sets_skip_reason() {
         let content = r#"
