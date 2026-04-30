@@ -750,11 +750,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         let status = if let Some(reason) = &dep.skip_reason {
                             output::DepStatus::Skipped {
                                 reason: match reason {
-                                    CrossplaneSkipReason::UnsupportedRegistry => {
-                                        "unsupported-registry".to_owned()
-                                    }
-                                    CrossplaneSkipReason::MissingPackage => {
-                                        "missing-package".to_owned()
+                                    CrossplaneSkipReason::InvalidValue => {
+                                        "invalid-value".to_owned()
                                     }
                                 },
                             }

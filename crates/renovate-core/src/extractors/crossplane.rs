@@ -26,10 +26,8 @@ use regex::Regex;
 /// Skip reason for a Crossplane dep.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CrossplaneSkipReason {
-    /// OCI image from `xpkg.upbound.io` — registry not yet supported.
-    UnsupportedRegistry,
-    /// `spec.package` field is missing or empty.
-    MissingPackage,
+    /// `spec.package` field is empty string.
+    InvalidValue,
 }
 
 /// A single Crossplane package dependency.
@@ -53,9 +51,9 @@ static CROSSPLANE_RE: LazyLock<Regex> =
 /// Extracts `kind: <value>` from a YAML document.
 static KIND_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^kind:\s*(\w+)\s*$").unwrap());
 
-/// Extracts `package: <image_ref>` from `spec:` block.
+/// Extracts `package: <value>` from `spec:` block. Captures the raw value including `null`.
 static PACKAGE_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"(?m)^\s+package:\s*['"]?([^\s'"]+)['"]?\s*$"#).unwrap());
+    LazyLock::new(|| Regex::new(r#"(?m)^\s+package:\s*(?:['"]([^'"]*?)['"]|(\S+))\s*$"#).unwrap());
 
 // ── Parsing ───────────────────────────────────────────────────────────────────
 
@@ -81,37 +79,34 @@ pub fn extract(content: &str) -> Vec<CrossplaneDep> {
             .unwrap_or_else(|| "Unknown".to_owned());
 
         let package_cap = PACKAGE_RE.captures(doc);
-        let package = package_cap.map(|c| c[1].to_owned());
+        // Group 1: quoted value, Group 2: unquoted value
+        let raw_pkg = package_cap
+            .as_ref()
+            .and_then(|c| c.get(1).or_else(|| c.get(2)).map(|m| m.as_str()));
 
-        match package {
+        match raw_pkg {
             None => {
-                deps.push(CrossplaneDep {
-                    kind,
-                    package: String::new(),
-                    current_value: String::new(),
-                    skip_reason: Some(CrossplaneSkipReason::MissingPackage),
-                });
+                // No `package:` field — skip this document entirely.
             }
-            Some(pkg) if pkg.is_empty() => {
+            Some("null") | Some("~") => {
+                // Explicit YAML null value — skip (no dep produced).
+            }
+            Some("") => {
+                // Empty string package — invalid-value dep.
                 deps.push(CrossplaneDep {
                     kind,
                     package: String::new(),
                     current_value: String::new(),
-                    skip_reason: Some(CrossplaneSkipReason::MissingPackage),
+                    skip_reason: Some(CrossplaneSkipReason::InvalidValue),
                 });
             }
             Some(pkg) => {
-                let (image_name, tag) = split_image_tag(&pkg);
-                let skip_reason = if is_upbound_registry(image_name) {
-                    Some(CrossplaneSkipReason::UnsupportedRegistry)
-                } else {
-                    None
-                };
+                let (_, tag) = split_image_tag(pkg);
                 deps.push(CrossplaneDep {
                     kind,
-                    package: pkg.clone(),
+                    package: pkg.to_owned(),
                     current_value: tag.to_owned(),
-                    skip_reason,
+                    skip_reason: None,
                 });
             }
         }
@@ -128,10 +123,6 @@ fn split_image_tag(s: &str) -> (&str, &str) {
         }
     }
     (s, "")
-}
-
-fn is_upbound_registry(image: &str) -> bool {
-    image.starts_with("xpkg.upbound.io/") || image.starts_with("index.docker.io/")
 }
 
 #[cfg(test)]
@@ -154,10 +145,7 @@ spec:
         let d = &deps[0];
         assert_eq!(d.kind, "Provider");
         assert_eq!(d.current_value, "v0.27.0");
-        assert_eq!(
-            d.skip_reason,
-            Some(CrossplaneSkipReason::UnsupportedRegistry)
-        );
+        assert!(d.skip_reason.is_none());
     }
 
     // Ported: "return null for kubernetes manifest" — crossplane/extract.spec.ts line 20
@@ -190,6 +178,7 @@ spec:
     // Ported: "return no results for invalid resource" — crossplane/extract.spec.ts line 79
     #[test]
     fn reports_missing_package() {
+        // No `spec.package` field → no dep produced
         let content = r#"
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
@@ -197,17 +186,94 @@ metadata:
   name: provider-aws
 "#;
         let deps = extract(content);
-        assert_eq!(deps.len(), 1);
-        assert_eq!(
-            deps[0].skip_reason,
-            Some(CrossplaneSkipReason::MissingPackage)
-        );
+        assert!(deps.is_empty());
     }
 
     // Ported: "returns null for empty" — crossplane/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("nothing here").is_empty());
+    }
+
+    // Ported: "strips invalid templates" — crossplane/extract.spec.ts line 16
+    #[test]
+    fn invalid_template_returns_empty() {
+        // No `pkg.crossplane.io` in content → empty
+        assert!(extract("test: test: 123").is_empty());
+    }
+
+    // Ported: "return invalid-value if deps are not valid images and ignore if missing" — crossplane/extract.spec.ts line 25
+    #[test]
+    fn malformed_packages_produce_invalid_value_dep() {
+        // package: null → skipped, package: "" → invalid-value, no spec.package → skipped
+        let content = r#"---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-nop
+spec:
+  package: null
+  ignoreCrossplaneConstraints: true
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-dummy
+spec:
+  package: ""
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Configuration
+metadata:
+  name: platform-ref-aws
+spec:
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].kind, "Function");
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(CrossplaneSkipReason::InvalidValue)
+        );
+    }
+
+    // Ported: "full test" — crossplane/extract.spec.ts line 94
+    #[test]
+    fn extracts_valid_packages_full_test() {
+        let content = r#"---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-nop
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-nop:v0.2.0
+  ignoreCrossplaneConstraints: true
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-dummy
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-dummy:v0.2.1
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Configuration
+metadata:
+  name: platform-ref-aws
+spec:
+  package: xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert!(deps.iter().any(|d| d.kind == "Provider"
+            && d.current_value == "v0.2.0"
+            && d.skip_reason.is_none()));
+        assert!(deps.iter().any(|d| d.kind == "Function"
+            && d.current_value == "v0.2.1"
+            && d.skip_reason.is_none()));
+        assert!(deps.iter().any(|d| d.kind == "Configuration"
+            && d.current_value == "v0.6.0"
+            && d.skip_reason.is_none()));
     }
 
     // Ported: "return result for double quoted pkg.crossplane.io apiVersion reference" — crossplane/extract.spec.ts line 37
