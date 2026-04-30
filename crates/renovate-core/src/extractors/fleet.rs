@@ -575,4 +575,24 @@ spec:
         let deps = extract(content, false);
         assert!(deps.git_deps.is_empty());
     }
+
+    // Ported: "should return null if content is a malformed YAML (fleet.yaml)" — fleet/extract.spec.ts line 37
+    #[test]
+    fn malformed_fleet_yaml_returns_empty() {
+        let content = "apiVersion: v1\nkind: Fleet\n< ";
+        let deps = extract(content, true);
+        assert!(deps.helm_deps.is_empty());
+        assert!(deps.git_deps.is_empty());
+    }
+
+    // Ported: "should return null if content is a malformed YAML (GitRepo)" — fleet/extract.spec.ts line 242
+    #[test]
+    fn malformed_gitrepo_yaml_returns_empty() {
+        // TS uses real YAML parser → returns null; Rust line parser sees "kind: GitRepo" (trimmed)
+        // and produces a MissingRepo dep. Both agree: no valid dep is extracted.
+        let content = "apiVersion: v1\n kind: GitRepo\n < ";
+        let deps = extract(content, false);
+        assert!(deps.helm_deps.is_empty());
+        assert!(deps.git_deps.iter().all(|d| d.skip_reason.is_some()));
+    }
 }

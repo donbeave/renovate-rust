@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 327 / 450 actionable tests ported (73%) — updated 2026-04-30
+**Overall progress:** 333 / 450 actionable tests ported (74%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -765,7 +765,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/crow/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/crow/extract.spec.ts
-**Total tests:** 15 | **Ported:** 11 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 12 | **Actionable:** 15 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -785,7 +785,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles empty pipeline section gracefully | 362 | ported | `crow.rs` | `empty_pipeline_object_is_skipped` | — |
 | returns null when pipeline keys exist but contain no valid images | 390 | ported | `crow.rs` | `pipeline_without_valid_images_returns_empty` | — |
 | extracts images from array-based steps format | 408 | ported | `crow.rs` | `steps_as_array` | — |
-| extracts images from mixed array and object formats | 447 | pending | — | — | — |
+| extracts images from mixed array and object formats | 447 | ported | `crow.rs` | `extracts_images_from_mixed_array_and_object_formats` | — |
 
 ---
 
@@ -966,7 +966,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/fleet/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/fleet/extract.spec.ts
-**Total tests:** 10 | **Ported:** 5 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 9 | **Actionable:** 10 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -974,14 +974,14 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | should return null if empty content | 24 | ported | `fleet.rs` | `empty_content_returns_empty` | — |
 | should return null if a unknown manifest is supplied | 30 | ported | `fleet.rs` | `unknown_manifest_returns_empty` | — |
-| should return null if content is a malformed YAML (fleet.yaml) | 37 | pending | — | — | — |
+| should return null if content is a malformed YAML (fleet.yaml) | 37 | ported | `fleet.rs` | `malformed_fleet_yaml_returns_empty` | — |
 | should parse valid configuration (fleet.yaml) | 49 | ported | `fleet.rs` | `extracts_helm_dep_from_fleet_yaml` | — |
 | should support registryAlias configuration | 88 | pending | — | — | registryAliases not yet implemented |
 | should parse valid configuration with target customization | 132 | ported | `fleet.rs` | `extracts_target_customizations` | — |
-| should parse parse invalid configurations | 208 | pending | — | — | — |
-| should return null if content is a malformed YAML (GitRepo) | 242 | pending | — | — | — |
+| should parse parse invalid configurations | 208 | ported | `fleet.rs` | `missing_chart_sets_skip_reason` / `no_version_sets_skip_reason` | — |
+| should return null if content is a malformed YAML (GitRepo) | 242 | ported | `fleet.rs` | `malformed_gitrepo_yaml_returns_empty` | — |
 | should parse valid configuration (GitRepo) | 254 | ported | `fleet.rs` | `extracts_gitrepo_dep` | — |
-| should parse invalid configuration (GitRepo) | 276 | pending | — | — | — |
+| should parse invalid configuration (GitRepo) | 276 | ported | `fleet.rs` | `gitrepo_missing_revision_sets_skip_reason` / `non_gitrepo_yaml_returns_empty` | — |
 
 ---
 

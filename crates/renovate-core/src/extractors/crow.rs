@@ -221,4 +221,42 @@ steps:
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].image, "quay.io/something/redis");
     }
+
+    // Ported: "extracts images from mixed array and object formats" — crow/extract.spec.ts line 447
+    #[test]
+    fn extracts_images_from_mixed_array_and_object_formats() {
+        let content = r#"
+clone:
+  git:
+    image: woodpeckerci/plugin-git:2.0.3
+
+steps:
+  - name: 'db'
+    image: postgres:9.4.0
+  - name: 'worker'
+    image: node:10.0.0
+
+pipeline:
+  nginx:
+    image: quay.io/nginx:0.0.1
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 4);
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "woodpeckerci/plugin-git" && d.tag.as_deref() == Some("2.0.3"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "postgres" && d.tag.as_deref() == Some("9.4.0"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "node" && d.tag.as_deref() == Some("10.0.0"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "quay.io/nginx" && d.tag.as_deref() == Some("0.0.1"))
+        );
+    }
 }
