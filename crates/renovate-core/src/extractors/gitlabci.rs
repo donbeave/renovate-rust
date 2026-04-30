@@ -157,6 +157,125 @@ fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
 }
 
+/// A GitLab CI component reference extracted from `include: - component:`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GitlabCiComponentDep {
+    /// The owner/repo path of the component (excludes host and component name).
+    pub dep_name: String,
+    /// The version/ref after `@`.
+    pub current_value: String,
+    /// Registry URL derived from the host part (`https://{host}`).
+    pub registry_url: String,
+    /// Skip reason (e.g. `unsupported-version` for `~latest`).
+    pub skip_reason: Option<&'static str>,
+}
+
+/// Extract GitLab CI component references from `include: - component:` entries.
+///
+/// Format: `{host}/{owner}/{repo}/{component}@{version}`
+/// - `dep_name` = `{owner}/{repo}` (all path segments except host and component)
+/// - `registry_url` = `https://{host}`
+/// - `current_value` = `{version}`
+pub fn extract_components(content: &str) -> Vec<GitlabCiComponentDep> {
+    let mut out = Vec::new();
+    let mut in_include = false;
+    let mut in_include_item = false;
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        if line.trim().is_empty() {
+            continue;
+        }
+        let trimmed = line.trim_start();
+        let indent = leading_spaces(line);
+
+        // Detect `include:` top-level block.
+        if indent == 0 && trimmed == "include:" {
+            in_include = true;
+            in_include_item = false;
+            continue;
+        }
+
+        // Exit include block when we return to indent 0.
+        if indent == 0 && !trimmed.starts_with('-') {
+            in_include = false;
+            in_include_item = false;
+        }
+
+        if !in_include {
+            continue;
+        }
+
+        // New include item.
+        if let Some(after_dash) = trimmed.strip_prefix("- ") {
+            in_include_item = true;
+            let rest = after_dash.trim();
+            if let Some(val) = rest.strip_prefix("component:") {
+                let val = val.trim().trim_matches('"').trim_matches('\'');
+                if let Some(dep) = parse_component_ref(val) {
+                    out.push(dep);
+                }
+            }
+            continue;
+        }
+
+        // Continuation key inside current list item.
+        if in_include_item && let Some(val) = trimmed.strip_prefix("component:") {
+            let val = val.trim().trim_matches('"').trim_matches('\'');
+            // Only parse if it's a scalar (not a nested object starting with `{`).
+            if !val.is_empty()
+                && !val.starts_with('{')
+                && let Some(dep) = parse_component_ref(val)
+            {
+                out.push(dep);
+            }
+        }
+    }
+
+    out
+}
+
+/// Parse a `host/owner/.../component@version` component reference.
+///
+/// Returns `None` for malformed references (missing `@`, too few path segments,
+/// or dep_name with no `/`).
+fn parse_component_ref(s: &str) -> Option<GitlabCiComponentDep> {
+    let (path_part, version) = s.split_once('@')?;
+    if version.is_empty() || path_part.is_empty() {
+        return None;
+    }
+
+    let segments: Vec<&str> = path_part.split('/').collect();
+    // Need: host + at least 2 path segments + component = 4 total.
+    if segments.len() < 4 {
+        return None;
+    }
+
+    let host = segments[0];
+    // component = last segment; dep_name = everything in between
+    let dep_name = segments[1..segments.len() - 1].join("/");
+
+    // dep_name must contain at least one `/` (owner/repo).
+    if !dep_name.contains('/') {
+        return None;
+    }
+
+    let registry_url = format!("https://{host}");
+
+    let skip_reason = if version.starts_with('~') {
+        Some("unsupported-version")
+    } else {
+        None
+    };
+
+    Some(GitlabCiComponentDep {
+        dep_name,
+        current_value: version.to_owned(),
+        registry_url,
+        skip_reason,
+    })
+}
+
 /// If the image reference uses a GitLab CI Dependency Proxy prefix variable,
 /// strip the prefix and return the actual image path.
 /// Handles: `${CI_DEPENDENCY_PROXY_*}/image:tag` and `$CI_DEPENDENCY_PROXY_*/image:tag`.
@@ -336,5 +455,62 @@ services:
             deps.iter()
                 .any(|d| d.dep.image == "mariadb" && d.dep.skip_reason.is_none())
         );
+    }
+
+    // Ported: "extracts component references" — gitlabci/extract.spec.ts line 377
+    #[test]
+    fn extracts_component_references() {
+        let content = r#"include:
+  - component: gitlab.example.com/an-org/a-project/a-component@1.0
+    inputs:
+      stage: build
+  - component: gitlab.example.com/an-org/a-subgroup/a-project/a-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8
+  - component: gitlab.example.com/an-org/a-subgroup/another-project/a-component@main
+  - component: gitlab.example.com/another-org/a-project/a-component@~latest
+    inputs:
+      stage: test
+  - component: gitlab.example.com/malformed-component-reference
+  - component:
+      malformed: true
+  - component: gitlab.example.com/an-org/a-component@1.0
+  - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
+"#;
+        let deps = extract_components(content);
+
+        assert_eq!(deps.len(), 5);
+
+        // First dep: an-org/a-project@1.0
+        assert_eq!(deps[0].dep_name, "an-org/a-project");
+        assert_eq!(deps[0].current_value, "1.0");
+        assert_eq!(deps[0].registry_url, "https://gitlab.example.com");
+        assert!(deps[0].skip_reason.is_none());
+
+        // Second dep: an-org/a-subgroup/a-project@sha
+        assert_eq!(deps[1].dep_name, "an-org/a-subgroup/a-project");
+        assert_eq!(
+            deps[1].current_value,
+            "e3262fdd0914fa823210cdb79a8c421e2cef79d8"
+        );
+        assert!(deps[1].skip_reason.is_none());
+
+        // Third dep: @main (no skip)
+        assert_eq!(deps[2].dep_name, "an-org/a-subgroup/another-project");
+        assert_eq!(deps[2].current_value, "main");
+        assert!(deps[2].skip_reason.is_none());
+
+        // Fourth dep: ~latest → unsupported-version
+        assert_eq!(deps[3].dep_name, "another-org/a-project");
+        assert_eq!(deps[3].current_value, "~latest");
+        assert_eq!(deps[3].skip_reason, Some("unsupported-version"));
+
+        // Fifth dep: other-gitlab.example.com
+        assert_eq!(deps[4].dep_name, "an-org/a-project");
+        assert_eq!(deps[4].registry_url, "https://other-gitlab.example.com");
+
+        // Malformed entries skipped:
+        // - malformed-component-reference (no @)
+        // - malformed: true (object, not string)
+        // - an-org/a-component@1.0 (dep_name has no /)
+        assert!(!deps.iter().any(|d| d.dep_name == "an-org"));
     }
 }

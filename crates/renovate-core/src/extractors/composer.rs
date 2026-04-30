@@ -123,10 +123,10 @@ fn collect_path_repos(repos: &serde_json::Value) -> std::collections::HashSet<&s
         key: Option<&'a str>,
         names: &mut std::collections::HashSet<&'a str>,
     ) {
-        if entry.get("type").and_then(|v| v.as_str()) == Some("path") {
-            if let Some(k) = key {
-                names.insert(k);
-            }
+        if entry.get("type").and_then(|v| v.as_str()) == Some("path")
+            && let Some(k) = key
+        {
+            names.insert(k);
         }
     }
 

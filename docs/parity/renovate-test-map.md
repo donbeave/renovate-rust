@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 448 / 454 actionable tests ported (99%) — updated 2026-04-30
+**Overall progress:** 449 / 455 actionable tests ported (99%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -421,7 +421,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extract images from dependency proxy | 172 | ported | `gitlabci.rs` | `dependency_proxy_prefix_stripped` | — |
 | extract images via registry aliases | 229 | pending | — | — | registryAliases not yet implemented |
 | extracts component references via registry aliases | 299 | pending | — | — | registryAliases not yet implemented |
-| extracts component references | 377 | pending | — | — | — |
+| extracts component references | 377 | ported | `gitlabci.rs` | `extracts_component_references` | — |
 
 ---
 
