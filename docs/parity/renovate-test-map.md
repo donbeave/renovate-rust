@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 394 / 450 actionable tests ported (88%) — updated 2026-04-30
+**Overall progress:** 396 / 450 actionable tests ported (88%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -995,7 +995,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- asdf/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/azure_pipelines.rs` | 8 | partial |
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
-| `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 10 | partial |
+| `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 20 | ported |
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 9 | ported |
 <!-- cargo/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |

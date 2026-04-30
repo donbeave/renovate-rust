@@ -1,35 +1,20 @@
-//! Bazel WORKSPACE `http_archive()` dependency extractor.
+//! Bazel WORKSPACE dependency extractor.
 //!
 //! Scans Bazel `WORKSPACE` / `WORKSPACE.bazel` / `.bzl` files for
-//! `http_archive()` calls and extracts the GitHub/GitLab URL and version for
-//! update tracking.
+//! `http_archive()`, `container_pull()`, and `oci_pull()` calls.
 //!
 //! Renovate reference:
 //! - `lib/modules/manager/bazel/extract.ts`
 //! - `lib/modules/manager/bazel/rules/git.ts`
 //! - Patterns: `(^|/)WORKSPACE(\.bazel|\.bzlmod)?$`, `\.bzl$`
-//! - Datasources: GitHub Tags, GitHub Releases, GitLab Tags, GitLab Releases
-//!
-//! ## Supported URL forms
-//!
-//! ```python
-//! http_archive(
-//!     name = "com_github_google_re2",
-//!     sha256 = "abcdef...",
-//!     urls = ["https://github.com/google/re2/archive/refs/tags/2023-03-01.tar.gz"],
-//! )
-//!
-//! http_archive(
-//!     name = "eigen3",
-//!     url = "https://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.zip",
-//! )
-//! ```
+//! - Datasources: GitHub Tags, GitHub Releases, GitLab Tags, GitLab Releases,
+//!   Docker (container_pull, oci_pull)
 
 use std::sync::LazyLock;
 
 use regex::Regex;
 
-/// Source datasource for a Bazel http_archive.
+/// Source datasource for a Bazel dep.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BazelSource {
     /// GitHub archive URL → GitHub Tags.
@@ -40,6 +25,13 @@ pub enum BazelSource {
     GitlabReleases { repo: String },
     /// GitLab archive URL with commit digest → GitLab Tags.
     GitlabTags { repo: String },
+    /// `container_pull()` → Docker datasource (registry + repository).
+    ContainerPull {
+        package_name: String,
+        registry_url: String,
+    },
+    /// `oci_pull()` → Docker datasource (full image URL).
+    OciPull { image: String },
     /// Non-GitHub/GitLab or unrecognised URL.
     Unsupported,
 }
@@ -53,14 +45,14 @@ pub enum BazelSkipReason {
     MissingSha256,
 }
 
-/// A single Bazel `http_archive` dependency.
+/// A single Bazel dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BazelDep {
-    /// Archive name (the Bazel workspace rule name).
+    /// Rule name (the Bazel workspace rule name).
     pub dep_name: String,
-    /// Extracted version (stripped of `v` prefix, or raw tag).
+    /// Extracted version tag.
     pub current_value: String,
-    /// Extracted commit digest (40-char hex, for GitLab/GitHub digest refs).
+    /// Extracted commit digest (40-char hex, or sha256:... for containers).
     pub current_digest: Option<String>,
     /// Source routing.
     pub source: BazelSource,
@@ -91,25 +83,32 @@ static GL_ARCHIVE_RE: LazyLock<Regex> =
 
 // ── Parsing ───────────────────────────────────────────────────────────────────
 
-/// Extract Bazel `http_archive` dependencies from a WORKSPACE or .bzl file.
+/// Extract Bazel dependencies from a WORKSPACE or .bzl file.
 pub fn extract(content: &str) -> Vec<BazelDep> {
     let mut deps = Vec::new();
+    extract_rule(content, "http_archive(", parse_http_archive, &mut deps);
+    extract_rule(content, "container_pull(", parse_container_pull, &mut deps);
+    extract_rule(content, "oci_pull(", parse_oci_pull, &mut deps);
+    deps
+}
 
-    // Find each `http_archive(` block by scanning for the opening and closing.
+fn extract_rule(
+    content: &str,
+    prefix: &str,
+    parser: fn(&str) -> Option<BazelDep>,
+    out: &mut Vec<BazelDep>,
+) {
     let mut search_pos = 0;
-    while let Some(start) = content[search_pos..].find("http_archive(") {
+    while let Some(start) = content[search_pos..].find(prefix) {
         let abs_start = search_pos + start;
-        // Find the matching closing `)` — simple brace counting.
         let Some(block) = extract_block(&content[abs_start..]) else {
             break;
         };
-        if let Some(dep) = parse_http_archive(block) {
-            deps.push(dep);
+        if let Some(dep) = parser(block) {
+            out.push(dep);
         }
         search_pos = abs_start + block.len().max(1);
     }
-
-    deps
 }
 
 /// Extract the content of a `http_archive(...)` block (including the outer parens).
@@ -129,6 +128,62 @@ fn extract_block(s: &str) -> Option<&str> {
         }
     }
     None
+}
+
+fn extract_field<'a>(block: &'a str, field: &str) -> Option<&'a str> {
+    let re = Regex::new(&format!(
+        r#"{}\s*=\s*["']([^"']+)["']"#,
+        regex::escape(field)
+    ))
+    .unwrap();
+    re.captures(block).map(|c| {
+        let m = c.get(1).unwrap();
+        &block[m.start()..m.end()]
+    })
+}
+
+fn parse_container_pull(block: &str) -> Option<BazelDep> {
+    let name_re = Regex::new(r#"name\s*=\s*["']([^"']+)["']"#).unwrap();
+    let dep_name = name_re
+        .captures(block)
+        .map(|c| c[1].to_owned())
+        .unwrap_or_else(|| "unknown".to_owned());
+
+    let registry = extract_field(block, "registry").unwrap_or("index.docker.io");
+    let repository = extract_field(block, "repository")?;
+    let tag = extract_field(block, "tag").unwrap_or("").to_owned();
+    let digest = extract_field(block, "digest").map(str::to_owned);
+
+    Some(BazelDep {
+        dep_name,
+        current_value: tag,
+        current_digest: digest,
+        source: BazelSource::ContainerPull {
+            package_name: repository.to_owned(),
+            registry_url: registry.to_owned(),
+        },
+        skip_reason: None,
+    })
+}
+
+fn parse_oci_pull(block: &str) -> Option<BazelDep> {
+    let name_re = Regex::new(r#"name\s*=\s*["']([^"']+)["']"#).unwrap();
+    let dep_name = name_re
+        .captures(block)
+        .map(|c| c[1].to_owned())
+        .unwrap_or_else(|| "unknown".to_owned());
+
+    let image = extract_field(block, "image")?.to_owned();
+    let tag = extract_field(block, "tag").unwrap_or("").to_owned();
+    let digest = extract_field(block, "digest").map(str::to_owned);
+
+    Some(BazelDep {
+        dep_name,
+        current_value: tag,
+        current_digest: digest,
+        source: BazelSource::OciPull { image },
+        skip_reason: None,
+    })
 }
 
 fn parse_http_archive(block: &str) -> Option<BazelDep> {
@@ -411,9 +466,7 @@ http_archive(
 
     // Ported: "extracts dependencies for container_pull deptype" — bazel/extract.spec.ts line 65
     #[test]
-    fn http_archive_without_recognisable_url_skipped() {
-        // container_pull is not an http_archive — Rust extractor only handles http_archive,
-        // so this returns empty (analogous to returning null in TS).
+    fn container_pull_extracted() {
         let content = r#"
 container_pull(
   name="hasura",
@@ -423,14 +476,31 @@ container_pull(
   tag="v1.0.0-alpha31.cli-migrations"
 )
 "#;
-        // The Rust extractor does not handle container_pull — nothing extracted.
-        assert!(extract(content).is_empty());
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        let d = &deps[0];
+        assert_eq!(d.dep_name, "hasura");
+        assert_eq!(d.current_value, "v1.0.0-alpha31.cli-migrations");
+        assert_eq!(
+            d.current_digest,
+            Some(
+                "sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548"
+                    .to_owned()
+            )
+        );
+        assert_eq!(
+            d.source,
+            BazelSource::ContainerPull {
+                package_name: "hasura/graphql-engine".to_owned(),
+                registry_url: "index.docker.io".to_owned(),
+            }
+        );
+        assert!(d.skip_reason.is_none());
     }
 
     // Ported: "extracts dependencies for oci_pull deptype" — bazel/extract.spec.ts line 90
     #[test]
-    fn oci_pull_not_extracted() {
-        // oci_pull is not an http_archive — Rust extractor does not handle it.
+    fn oci_pull_extracted() {
         let content = r#"
 oci_pull(
   name="hasura",
@@ -439,6 +509,24 @@ oci_pull(
   tag="v1.0.0-alpha31.cli-migrations"
 )
 "#;
-        assert!(extract(content).is_empty());
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        let d = &deps[0];
+        assert_eq!(d.dep_name, "hasura");
+        assert_eq!(d.current_value, "v1.0.0-alpha31.cli-migrations");
+        assert_eq!(
+            d.current_digest,
+            Some(
+                "sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548"
+                    .to_owned()
+            )
+        );
+        assert_eq!(
+            d.source,
+            BazelSource::OciPull {
+                image: "index.docker.io/hasura/graphql-engine".to_owned(),
+            }
+        );
+        assert!(d.skip_reason.is_none());
     }
 }

@@ -243,6 +243,11 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 reason: "gitlab-not-yet-supported".to_owned(),
                             }
                         }
+                        BazelSource::ContainerPull { .. } | BazelSource::OciPull { .. } => {
+                            output::DepStatus::Skipped {
+                                reason: "docker-not-yet-supported".to_owned(),
+                            }
+                        }
                         BazelSource::Unsupported => output::DepStatus::Skipped {
                             reason: "no-github-url".to_owned(),
                         },
