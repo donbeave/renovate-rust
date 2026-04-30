@@ -79,10 +79,15 @@ static KNOWN_FEATURES: &[KnownFeature] = &[
 ];
 
 /// Extract all deps from a `devcontainer.json` file.
+///
+/// Accepts both strict JSON and JSONC (comments + trailing commas) via json5.
 pub fn extract(content: &str) -> DevContainerDeps {
-    let file: DevContainerFile = match serde_json::from_str(content.trim()) {
-        Ok(f) => f,
-        Err(_) => return DevContainerDeps::default(),
+    let file: DevContainerFile = if let Ok(f) = serde_json::from_str(content.trim()) {
+        f
+    } else if let Ok(f) = json5::from_str(content.trim()) {
+        f
+    } else {
+        return DevContainerDeps::default();
     };
 
     let mut result = DevContainerDeps::default();
@@ -271,6 +276,52 @@ mod tests {
         let content = r#"{"image": null, "features": null}"#;
         let deps = extract(content);
         assert!(deps.version_deps.is_empty());
+        assert!(deps.docker_deps.is_empty());
+    }
+
+    // Ported: "tests if JSONC can be parsed" — devcontainer/extract.spec.ts line 34
+    #[test]
+    fn jsonc_with_comments_and_trailing_commas() {
+        let content = r#"{
+  // hello
+  "features": {
+    "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
+  }
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.docker_deps.len(), 1);
+        assert_eq!(
+            deps.docker_deps[0].image,
+            "devcontainer.registry.renovate.com/test/features/first"
+        );
+        assert_eq!(deps.docker_deps[0].tag.as_deref(), Some("1.2.3"));
+    }
+
+    // Ported: "returns null when the only feature property is malformed and no image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 207
+    #[test]
+    fn malformed_feature_key_returns_empty() {
+        // "malformedFeature" has no registry or version → classified as local dep → no docker dep
+        let content = r#"{"features": {"malformedFeature": {}}}"#;
+        let deps = extract(content);
+        // The feature is classified but has no valid registry path
+        assert!(deps.version_deps.is_empty());
+    }
+
+    // Ported: "returns null when the features property is malformed and no image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 227
+    #[test]
+    fn features_as_string_returns_empty() {
+        let content = r#"{"features": "devcontainer.registry.renovate.com/test:1.2.3"}"#;
+        let deps = extract(content);
+        assert!(deps.docker_deps.is_empty());
+        assert!(deps.version_deps.is_empty());
+    }
+
+    // Ported: "returns null when the image property is malformed and no features are defined in dev container JSON file" — devcontainer/extract.spec.ts line 245
+    #[test]
+    fn typo_in_image_key_returns_empty() {
+        // "image:" (with colon) is not the "image" key → no image dep
+        let content = r#"{"image:": "devcontainer.registry.renovate.com/test/image:1.2.3"}"#;
+        let deps = extract(content);
         assert!(deps.docker_deps.is_empty());
     }
 }
