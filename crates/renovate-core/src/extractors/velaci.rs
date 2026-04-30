@@ -68,6 +68,7 @@ mod tests {
         assert_eq!(deps[0].image, "postgres");
     }
 
+    // Ported: "extracts multiple step pipeline image lines" — velaci/extract.spec.ts line 16
     #[test]
     fn variable_skipped() {
         let content = "steps:\n  - name: ci\n    image: $VELA_IMAGE\n";
@@ -75,6 +76,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "should handle YAML without pipeline/images" — velaci/extract.spec.ts line 11
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

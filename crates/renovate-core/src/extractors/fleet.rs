@@ -426,6 +426,7 @@ fn extract_gitrepo(content: &str) -> FleetDeps {
 mod tests {
     use super::*;
 
+    // Ported: "should return null if a unknown manifest is supplied" — fleet/extract.spec.ts line 30
     #[test]
     fn is_fleet_yaml_detects_correctly() {
         assert!(is_fleet_yaml_path("fleet.yaml"));
@@ -545,6 +546,7 @@ spec:
         );
     }
 
+    // Ported: "should parse invalid configuration" — fleet/extract.spec.ts line 276
     #[test]
     fn non_gitrepo_yaml_returns_empty() {
         let content = r#"

@@ -188,6 +188,7 @@ scratch_job:
         assert!(node.dep.skip_reason.is_none());
     }
 
+    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
     #[test]
     fn extracts_job_image() {
         let deps = extract(SAMPLE);
@@ -195,6 +196,7 @@ scratch_job:
         assert_eq!(go.dep.tag.as_deref(), Some("1.21"));
     }
 
+    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
     #[test]
     fn extracts_block_form_image() {
         let deps = extract(SAMPLE);
@@ -213,6 +215,7 @@ scratch_job:
         assert_eq!(redis.dep.tag.as_deref(), Some("7-alpine"));
     }
 
+    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
     #[test]
     fn scratch_image_skipped() {
         let deps = extract(SAMPLE);

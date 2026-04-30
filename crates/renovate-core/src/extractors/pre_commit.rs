@@ -374,6 +374,7 @@ repos:
         assert!(extract("default_language_version:\n  python: python3\n").is_empty());
     }
 
+    // Ported: "extracts from values.yaml correctly with same structure as \"pre-commit sample-config\"" — pre-commit/extract.spec.ts line 83
     #[test]
     fn git_suffix_stripped() {
         let content = "repos:\n- repo: https://github.com/owner/myhook.git\n  rev: v1.0\n  hooks:\n  - id: hook\n";

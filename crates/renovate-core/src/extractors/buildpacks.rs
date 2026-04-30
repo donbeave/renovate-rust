@@ -263,6 +263,7 @@ id = "no/version"
         assert!(no_ver.iter().any(|d| d.dep_name == "no/version"));
     }
 
+    // Ported: "returns null for invalid files" — buildpacks/extract.spec.ts line 7
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());

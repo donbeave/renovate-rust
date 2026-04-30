@@ -78,6 +78,7 @@ mod tests {
         assert_eq!(pg.tag.as_deref(), Some("15-alpine"));
     }
 
+    // Ported: "extracts multiple image lines from docker_container" — ansible/extract.spec.ts line 10
     #[test]
     fn skips_variable_images() {
         let deps = extract(SAMPLE);
@@ -97,6 +98,7 @@ mod tests {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns null for empty" — ansible/extract.spec.ts line 6
     #[test]
     fn no_image_keys_returns_empty() {
         let content = "- name: task\n  shell: echo hello\n";

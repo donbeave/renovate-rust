@@ -57,12 +57,14 @@ mod tests {
         assert_eq!(dep.current_value, "3.11.0");
     }
 
+    // Ported: "returns a result - python" — runtime-version/extract.spec.ts line 5
     #[test]
     fn extracts_with_trailing_newline() {
         let dep = extract("python-3.12.1\r\n").unwrap();
         assert_eq!(dep.current_value, "3.12.1");
     }
 
+    // Ported: "returns no result" — runtime-version/extract.spec.ts line 16
     #[test]
     fn ignores_partial_version() {
         assert!(extract("python-3.11\n").is_none());

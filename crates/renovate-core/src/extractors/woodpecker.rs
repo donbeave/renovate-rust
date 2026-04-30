@@ -103,6 +103,7 @@ services:
         assert_eq!(deps.len(), 3);
     }
 
+    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
     #[test]
     fn variable_ref_skipped() {
         let content = "steps:\n  ci:\n    image: ${CI_IMAGE}\n";

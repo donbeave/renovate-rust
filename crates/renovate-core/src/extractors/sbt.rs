@@ -188,6 +188,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert!(!deps.iter().any(|d| d.artifact_id == "skip"));
     }
 
+    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
     #[test]
     fn dep_name_formats_correctly() {
         let dep = SbtDep {

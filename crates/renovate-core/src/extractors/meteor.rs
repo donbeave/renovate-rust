@@ -87,6 +87,7 @@ Npm.depends({
         assert!(extract("Package.describe({ name: 'foo' });").is_empty());
     }
 
+    // Ported: "returns empty if fails to parse" — meteor/extract.spec.ts line 8
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

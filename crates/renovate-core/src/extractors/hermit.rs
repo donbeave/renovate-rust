@@ -121,6 +121,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(HermitSkipReason::ChannelPin));
     }
 
+    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
     #[test]
     fn ignores_non_bin_directories() {
         let files = vec![
@@ -133,6 +134,7 @@ mod tests {
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
     #[test]
     fn ignores_hermit_hcl_and_non_pkg_files() {
         let files = vec![
@@ -144,6 +146,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
+    // Ported: "should throw error on execution failure" — hermit/extract.spec.ts line 75
     #[test]
     fn handles_empty_file_list() {
         assert!(extract_from_file_list(&[]).is_empty());
