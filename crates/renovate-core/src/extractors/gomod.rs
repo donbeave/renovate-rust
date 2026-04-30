@@ -546,6 +546,106 @@ replace (
         assert_eq!(cluster.current_value, "v0.17.3");
     }
 
+    // Ported: "extracts single-line tool directives" — gomod/extract.spec.ts line 263
+    #[test]
+    fn tool_directive_single_line_ignored() {
+        // `tool X` lines are not package deps; they just reference an already-required module.
+        // The extractor should produce the same output as without the tool line.
+        let content = "require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect\n\
+                       tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].module_path,
+            "github.com/oapi-codegen/oapi-codegen/v2"
+        );
+        assert_eq!(deps[0].current_value, "v2.4.1");
+        assert!(deps[0].is_indirect);
+    }
+
+    // Ported: "extracts multi-line tool directives" — gomod/extract.spec.ts line 282
+    #[test]
+    fn tool_directive_multi_line_ignored() {
+        let content = "require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect\n\
+                       tool (\n\
+                         github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen\n\
+                       )\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].module_path,
+            "github.com/oapi-codegen/oapi-codegen/v2"
+        );
+    }
+
+    // Ported: "extracts tool directives with required modules" — gomod/extract.spec.ts line 304
+    #[test]
+    fn tool_directive_with_required_module_not_indirect() {
+        let content = "require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1\n\
+                       tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert!(!deps[0].is_indirect);
+    }
+
+    // Ported: "extracts tool directives with no matching dependencies" — gomod/extract.spec.ts line 389
+    #[test]
+    fn tool_directive_alone_produces_no_deps() {
+        let content = "tool github.com/foo/bar/sub/cmd/hello\n";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "marks placeholder pseudo versions with skipReason invalid-version" — gomod/extract.spec.ts line 426
+    #[test]
+    fn placeholder_pseudo_versions_have_skip_reason() {
+        let content = r#"module github.com/renovate-tests/gomod
+go 1.19
+require (
+  github.com/foo/bar v1.2.3
+  github.com/baz/qux v0.0.0-00010101000000-000000000000
+  github.com/example/local v0.0.0-00010101000000-000000000000 // indirect
+  github.com/non/placeholder v1.2.4-0.20230101120000-abcdef123456
+  monorepo v0.0.0-00010101000000-000000000000
+)
+"#;
+        let deps = extract(content);
+        // go directive + 5 requires = 6 total
+        assert_eq!(deps.len(), 6);
+
+        let bar = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/foo/bar")
+            .unwrap();
+        assert!(bar.skip_reason.is_none());
+
+        let baz = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/baz/qux")
+            .unwrap();
+        assert_eq!(baz.skip_reason, Some(GoModSkipReason::PseudoVersion));
+
+        let local = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/example/local")
+            .unwrap();
+        assert_eq!(local.skip_reason, Some(GoModSkipReason::PseudoVersion));
+        assert!(local.is_indirect);
+
+        let non_placeholder = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/non/placeholder")
+            .unwrap();
+        // v1.2.4-0.20230101120000-abcdef123456 is a real pseudo-version (not placeholder)
+        assert_eq!(
+            non_placeholder.skip_reason,
+            Some(GoModSkipReason::PseudoVersion)
+        );
+
+        let monorepo = deps.iter().find(|d| d.module_path == "monorepo").unwrap();
+        assert_eq!(monorepo.skip_reason, Some(GoModSkipReason::PseudoVersion));
+    }
+
     // Ported: "extracts replace directives from non-public module path" — gomod/extract.spec.ts line 136
     #[test]
     fn replace_directive_non_public_module_path() {

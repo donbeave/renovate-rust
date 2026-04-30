@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 339 / 450 actionable tests ported (75%) — updated 2026-04-30
+**Overall progress:** 344 / 450 actionable tests ported (76%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -428,7 +428,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 21 | **Ported:** 8 | **Actionable:** 21 | **Status:** partial
+**Total tests:** 21 | **Ported:** 13 | **Actionable:** 21 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -442,14 +442,14 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts replace directives from non-public module path | 136 | ported | `gomod.rs` | `replace_directive_non_public_module_path` | — |
 | ignores exclude directives from multi-line and single line | 193 | ported | `gomod.rs` | `exclude_block_ignored` | — |
 | extracts the toolchain directive | 212 | ported | `gomod.rs` | `toolchain_directive_extracted` | — |
-| extracts single-line tool directives | 263 | pending | — | — | — |
-| extracts multi-line tool directives | 282 | pending | — | — | — |
-| extracts tool directives with required modules | 304 | pending | — | — | — |
-| extracts tool directives of sub-modules | 323 | pending | — | — | — |
-| extracts tool directives with exact match | 370 | pending | — | — | — |
-| extracts tool directives with no matching dependencies | 389 | pending | — | — | — |
+| extracts single-line tool directives | 263 | ported | `gomod.rs` | `tool_directive_single_line_ignored` | — |
+| extracts multi-line tool directives | 282 | ported | `gomod.rs` | `tool_directive_multi_line_ignored` | — |
+| extracts tool directives with required modules | 304 | ported | `gomod.rs` | `tool_directive_with_required_module_not_indirect` | — |
+| extracts tool directives of sub-modules | 323 | pending | — | — | Requires enabled/disabled logic for sub-module deps |
+| extracts tool directives with exact match | 370 | pending | — | — | Requires enabled/disabled logic |
+| extracts tool directives with no matching dependencies | 389 | ported | `gomod.rs` | `tool_directive_alone_produces_no_deps` | — |
 | ignores directives unrelated to dependencies | 402 | ported | `gomod.rs` | `unrelated_directives_ignored` | — |
-| marks placeholder pseudo versions with skipReason invalid-version | 426 | pending | — | — | — |
+| marks placeholder pseudo versions with skipReason invalid-version | 426 | ported | `gomod.rs` | `placeholder_pseudo_versions_have_skip_reason` | — |
 | parses go $version directive | 528 | ported | `gomod.rs` | `go_directive_extracted` | — |
 | the extracted version can be used as a SemVer constraint | 582 | pending | — | — | — |
 | matches version 1.19, even though it is not valid SemVer | 586 | pending | — | — | — |
