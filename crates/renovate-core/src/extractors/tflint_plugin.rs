@@ -142,6 +142,7 @@ fn build_dep(name: String, source: Option<String>, version: Option<String>) -> T
 mod tests {
     use super::*;
 
+    // Ported: "extracts plugins" — tflint-plugin/extract.spec.ts line 38
     #[test]
     fn extracts_github_plugin() {
         let content = r#"
@@ -160,6 +161,7 @@ plugin "aws" {
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "extracts plugins" — tflint-plugin/extract.spec.ts line 38
     #[test]
     fn extracts_multiple_plugins() {
         let content = r#"
@@ -181,6 +183,7 @@ plugin "google" {
         assert_eq!(deps[1].dep_name, "terraform-linters/tflint-ruleset-google");
     }
 
+    // Ported: "extracts nothing if not from github" — tflint-plugin/extract.spec.ts line 138
     #[test]
     fn non_github_source_skipped() {
         let content = r#"
@@ -197,6 +200,7 @@ plugin "custom" {
         );
     }
 
+    // Ported: "returns null when there are no version" — tflint-plugin/extract.spec.ts line 28
     #[test]
     fn missing_version_sets_skip_reason() {
         let content = r#"
@@ -213,6 +217,7 @@ plugin "aws" {
         );
     }
 
+    // Ported: "returns null for empty" — tflint-plugin/extract.spec.ts line 22
     #[test]
     fn no_plugins_returns_empty() {
         let content = r#"
@@ -221,5 +226,110 @@ config {
 }
 "#;
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "returns null when there are no version" — tflint-plugin/extract.spec.ts line 28
+    #[test]
+    fn plugin_without_source_or_version_gets_missing_source() {
+        let content = "plugin \"bundled\" {}\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(TflintSkipReason::MissingSource));
+    }
+
+    // Ported: "extracts from full configuration" — tflint-plugin/extract.spec.ts line 71
+    #[test]
+    fn extracts_plugin_from_full_config() {
+        let content = r#"
+config {
+  format = "compact"
+  plugin_dir = "~/.tflint.d/plugins"
+  module = true
+}
+
+plugin "aws" {
+  enabled = true
+  version = "0.4.0"
+  source  = "github.com/terraform-linters/tflint-ruleset-aws"
+}
+
+rule "aws_instance_invalid_type" {
+  enabled = false
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "terraform-linters/tflint-ruleset-aws");
+        assert_eq!(deps[0].current_value, "0.4.0");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts no source" — tflint-plugin/extract.spec.ts line 112
+    #[test]
+    fn plugins_without_source_get_missing_source_skip() {
+        let content = r#"
+plugin "aws" {
+  enabled = true
+  version = "0.4.0"
+}
+
+plugin "bundled" {
+  enabled = true
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .all(|d| d.skip_reason == Some(TflintSkipReason::MissingSource))
+        );
+    }
+
+    // Ported: "extracts plugins" — tflint-plugin/extract.spec.ts line 38
+    #[test]
+    fn extracts_plugins_with_org_paths() {
+        let content = r#"
+plugin "foo" {
+  enabled = true
+  version = "0.1.0"
+  source  = "github.com/org/tflint-ruleset-foo"
+}
+
+plugin "bar" {
+  enabled = true
+  version = "1.42.0"
+  source  = "github.com/org2/tflint-ruleset-bar"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(|d| d.dep_name == "org/tflint-ruleset-foo"
+            && d.current_value == "0.1.0"
+            && d.skip_reason.is_none()));
+        assert!(deps.iter().any(|d| d.dep_name == "org2/tflint-ruleset-bar"
+            && d.current_value == "1.42.0"
+            && d.skip_reason.is_none()));
+    }
+
+    // Ported: "extracts nothing if not from github" — tflint-plugin/extract.spec.ts line 138
+    #[test]
+    fn gitlab_source_gets_unsupported_datasource() {
+        let content = r#"
+plugin "aws" {
+  enabled = true
+  version = "0.4.0"
+  source  = "gitlab.com/terraform-linters/tflint-ruleset-aws"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(TflintSkipReason::UnsupportedDatasource)
+        );
+        assert_eq!(
+            deps[0].dep_name,
+            "gitlab.com/terraform-linters/tflint-ruleset-aws"
+        );
     }
 }

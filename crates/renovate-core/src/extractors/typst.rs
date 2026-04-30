@@ -174,4 +174,40 @@ mod tests {
         assert_eq!(deps[1].skip_reason, Some(TypstSkipReason::Local));
         assert_eq!(deps[2].skip_reason, Some(TypstSkipReason::Unsupported));
     }
+
+    // Ported: "returns empty deps for empty content" — typst/extract.spec.ts line 5
+    #[test]
+    fn empty_content_returns_empty() {
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "handles imports with different version formats" — typst/extract.spec.ts line 67
+    #[test]
+    fn prerelease_version_formats_extracted() {
+        let content = r#"
+        #import "@preview/pkg1:1.0.0": *
+        #import "@preview/pkg2:0.1.0-beta.1": *
+        #import "@preview/pkg3:2.1.0-alpha": *
+      "#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(deps[0].package_name, "pkg1");
+        assert_eq!(deps[0].current_value, "1.0.0");
+        assert_eq!(deps[1].package_name, "pkg2");
+        assert_eq!(deps[1].current_value, "0.1.0-beta.1");
+        assert_eq!(deps[2].package_name, "pkg3");
+        assert_eq!(deps[2].current_value, "2.1.0-alpha");
+    }
+
+    // Ported: "handles multiple imports on same line" — typst/extract.spec.ts line 125
+    #[test]
+    fn multiple_imports_on_same_line() {
+        let content = r#"#import "@preview/pkg1:1.0.0": * #import "@preview/pkg2:2.0.0": *"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].package_name, "pkg1");
+        assert_eq!(deps[0].current_value, "1.0.0");
+        assert_eq!(deps[1].package_name, "pkg2");
+        assert_eq!(deps[1].current_value, "2.0.0");
+    }
 }

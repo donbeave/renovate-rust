@@ -41,11 +41,21 @@ pub fn extract(content: &str) -> Vec<TravisDep> {
         // Detect `node_js:` key (at any indent level).
         if trimmed == "node_js:" || trimmed.starts_with("node_js:") {
             in_node_js = true;
-            // Handle inline single value: `node_js: "18"`
             if let Some(val) = trimmed.strip_prefix("node_js:") {
-                let v = val.trim().trim_matches('"').trim_matches('\'');
-                if !v.is_empty() {
-                    maybe_push(&mut out, v);
+                let v = val.trim();
+                if v.starts_with('[') {
+                    // Inline JSON array: `node_js: ['11.10.1', '11.10.2']`
+                    let inner = v.trim_start_matches('[').trim_end_matches(']');
+                    for item in inner.split(',') {
+                        let version = item.trim().trim_matches('"').trim_matches('\'');
+                        maybe_push(&mut out, version);
+                    }
+                } else {
+                    // Inline single value: `node_js: "18"`
+                    let version = v.trim_matches('"').trim_matches('\'');
+                    if !version.is_empty() {
+                        maybe_push(&mut out, version);
+                    }
                 }
             }
             continue;
@@ -181,5 +191,22 @@ node_js:
     fn matrix_without_node_js_returns_empty() {
         let content = "jobs:\n  include:\n    - invalid: '1.0'\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "should handle invalid YAML" — travis/extract.spec.ts line 24
+    #[test]
+    fn invalid_yaml_no_node_js_returns_empty() {
+        let content = "after_deploy:\n  - \"curl -H 'Content-Type: application/json' --data '{\\\"build\\\": true}' -X POST $DOCKER_HUB_URL;\"\n";
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "handles matrix node_js syntax with node_js array" — travis/extract.spec.ts line 42
+    #[test]
+    fn matrix_jobs_node_js_inline_array() {
+        let content = "jobs:\n  include:\n    - env: js-tests\n      language: node_js\n      node_js: ['11.10.1', '11.10.2']\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].version, "11.10.1");
+        assert_eq!(deps[1].version, "11.10.2");
     }
 }
