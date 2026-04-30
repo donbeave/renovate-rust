@@ -282,8 +282,29 @@ terraform {
         assert_eq!(deps[1].current_value, "v2.0.0");
     }
 
+    // Ported: "returns null for empty" — terragrunt/extract.spec.ts line 6
     #[test]
     fn no_terraform_block_returns_empty() {
         assert!(extract("# just a comment\n").is_empty());
+        assert!(extract("nothing here").is_empty());
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "returns null if only local terragrunt deps" — terragrunt/extract.spec.ts line 698
+    #[test]
+    fn local_only_deps_returns_empty() {
+        // `terragrunt {` block is not recognized (only `terraform {`) → empty.
+        // Local `terraform { source = "../fe" }` would be skipped with Local reason.
+        let content = "terraform {\n  source = \"../fe\"\n}\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(TerragruntSkipReason::Local));
+    }
+
+    // Ported: "returns empty deps if only local terragrunt includes" — terragrunt/extract.spec.ts line 707
+    #[test]
+    fn include_block_only_returns_empty() {
+        let content = "include \"root\" {\n  path = find_in_parent_folders(\"root.hcl\")\n}\n";
+        assert!(extract(content).is_empty());
     }
 }
