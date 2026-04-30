@@ -99,8 +99,9 @@ static GH_RELEASE_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"github\.com/([^/]+/[^/]+)/releases/download/([^/]+)/").unwrap());
 
 /// NPM registry: `https://registry.npmjs.org/{name}/-/{name}-{version}.tgz`
+/// Version always starts with a digit; use lazy repetition to skip hyphenated slug segments.
 static NPM_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"registry\.npmjs\.org/(@[^/]+/[^/]+|[^/@]+)/-/[^-]+-([^/]+)\.tgz$").unwrap()
+    Regex::new(r"registry\.npmjs\.org/(@[^/]+/[^/]+|[^/@]+)/-/(?:[^/]+-)+?(\d[^/]*)\.tgz$").unwrap()
 });
 
 /// Extract a Homebrew formula dependency from a `.rb` formula file.
@@ -306,5 +307,137 @@ end"#;
         // Invalid class syntax (no " < Formula") → None
         let content = "class Ibazel !?# Formula\n  url \"https://example.com/v1.0.tar.gz\"\nend\n";
         assert!(extract(content).is_none());
+    }
+
+    // Ported: "skips sourceforge dependency 2" — homebrew/extract.spec.ts line 32
+    #[test]
+    fn skips_sourceforge_dependency_2() {
+        let content = r#"class Aap < Formula
+  desc "Make-like tool to download, build, and install software"
+  homepage "http://www.a-a-p.org"
+  url "https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip"
+  sha256 "3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.formula_name, "Aap");
+        assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
+    }
+
+    // Ported: "skips github dependency with wrong format" — homebrew/extract.spec.ts line 54
+    #[test]
+    fn skips_github_dependency_wrong_format() {
+        // Git-style URL with :tag/:revision instead of archive/release — no sha256 field
+        let content = r#"class Acmetool < Formula
+  desc "Automatic certificate acquisition tool for ACME (Let's Encrypt)"
+  homepage "https://github.com/hlandau/acme"
+  url "https://github.com/hlandau/acme.git",
+    :tag      => "v0.0.67",
+    :revision => "221ea15246f0bbcf254b350bee272d43a1820285"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.formula_name, "Acmetool");
+        assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::InvalidSha256));
+    }
+
+    // Ported: "handles no space before class header" — homebrew/extract.spec.ts line 152
+    #[test]
+    fn handles_no_space_before_class_header() {
+        let content = r#"class Ibazel < Formula
+  desc "IBazel is a tool for building Bazel targets when source files change."
+  homepage "https://github.com/bazelbuild/bazel-watcher"
+  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+  sha256 "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.current_value, "0.8.2");
+        assert_eq!(
+            dep.source,
+            HomebrewSource::GitHub {
+                repo: "bazelbuild/bazel-watcher".to_owned(),
+                url_type: GitHubUrlType::Archive,
+            }
+        );
+        assert!(dep.skip_reason.is_none());
+    }
+
+    // Ported: "skips if invalid url protocol" — homebrew/extract.spec.ts line 235
+    #[test]
+    fn skips_invalid_url_protocol() {
+        // url ??https://... has no opening quote — URL_RE won't match → MissingUrl
+        let content = "class Ibazel < Formula\n  url ??https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz\"\n  sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'\nend";
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::MissingUrl));
+    }
+
+    // Ported: "skips if invalid url" — homebrew/extract.spec.ts line 257
+    #[test]
+    fn skips_invalid_url() {
+        let content = r#"class Ibazel < Formula
+  url "invalid_url"
+  sha256 "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
+    }
+
+    // Ported: "skips if there is no sha256 field" — homebrew/extract.spec.ts line 279
+    #[test]
+    fn skips_no_sha256_field() {
+        let content = r#"class Ibazel < Formula
+  url "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+  not_sha256 "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::InvalidSha256));
+    }
+
+    // Ported: "extracts npm scoped package dependency" — homebrew/extract.spec.ts line 323
+    #[test]
+    fn extracts_npm_scoped_package() {
+        let content = r#"class ClaudeCode < Formula
+  desc "Anthropic's official CLI for Claude"
+  url "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz"
+  sha256 "345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.formula_name, "ClaudeCode");
+        assert_eq!(dep.current_value, "0.1.0");
+        assert_eq!(
+            dep.source,
+            HomebrewSource::Npm {
+                package: "@anthropic-ai/claude-code".to_owned()
+            }
+        );
+        assert!(dep.skip_reason.is_none());
+    }
+
+    // Ported: "extracts npm unscoped package dependency" — homebrew/extract.spec.ts line 354
+    #[test]
+    fn extracts_npm_unscoped_package() {
+        let content = r#"class Express < Formula
+  desc "Fast, unopinionated, minimalist web framework"
+  url "https://registry.npmjs.org/express/-/express-4.18.2.tgz"
+  sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.current_value, "4.18.2");
+        assert_eq!(
+            dep.source,
+            HomebrewSource::Npm {
+                package: "express".to_owned()
+            }
+        );
+        assert!(dep.skip_reason.is_none());
+    }
+
+    // Ported: "skips npm package from custom registry" — homebrew/extract.spec.ts line 385
+    #[test]
+    fn skips_npm_custom_registry() {
+        let content = r#"class CustomPackage < Formula
+  url "https://registry.company.com/package/-/package-1.0.0.tgz"
+  sha256 "abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234"
+end"#;
+        let dep = extract(content).unwrap();
+        assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
     }
 }

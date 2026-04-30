@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 373 / 450 actionable tests ported (83%) — updated 2026-04-30
+**Overall progress:** 382 / 450 actionable tests ported (85%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -1006,7 +1006,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/helm-requirements/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/helm.rs` | 15 | ported |
 | `lib/modules/manager/helmfile/extract.spec.ts` | 19 | `crates/renovate-core/src/extractors/helmfile.rs` | 25 | ported |
 | `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/homeassistant.rs` | 4 | partial |
-| `lib/modules/manager/homebrew/extract.spec.ts` | 17 | `crates/renovate-core/src/extractors/homebrew.rs` | 9 | partial |
+| `lib/modules/manager/homebrew/extract.spec.ts` | 17 | `crates/renovate-core/src/extractors/homebrew.rs` | 18 | ported |
 | `lib/modules/manager/html/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/html.rs` | 8 | ported |
 | `lib/modules/manager/jenkins/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/jenkins.rs` | 14 | ported |
 | `lib/modules/manager/jsonnet-bundler/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | 8 | ported |
