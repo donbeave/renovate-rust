@@ -380,4 +380,56 @@ pod 'm', :git => 'git@example.com:baz/baz.git', :tag => '1.0.0'
             Some("https://example.com/baz/baz.git")
         );
     }
+
+    // Ported: "extracts from complex file" — cocoapods/extract.spec.ts line 42
+    #[test]
+    fn complex_podfile_fixture() {
+        // Mirrors Podfile.complex fixture with 29 versioned pods + 4 unversioned.
+        // Rust: unversioned pods have empty current_value (no TS-style unspecified-version skip).
+        let content = r#"platform :ios, '9.0'
+source "https://github.com/CocoaPods/Specs.git"
+
+target 'Sample' do
+  pod 'IQKeyboardManager', '~> 6.5.0'
+  pod 'CYLTabBarController', '~> 1.28.3'
+  pod 'PureLayout', '~> 3.1.4'
+  pod 'AFNetworking/Serialization', '~> 3.2.1'
+  pod 'AFNetworking/Security', '~> 3.2.1'
+  pod 'AFNetworking/Reachability', '~> 3.2.1'
+  pod 'AFNetworking/NSURLSession', '~> 3.2.1'
+  pod 'MBProgressHUD', '~> 1.1.0'
+  pod 'MJRefresh', '~> 3.1.16'
+  pod 'MJExtension', '~> 3.1.0'
+  pod 'TYPagerController', '~> 2.1.2'
+  pod 'YYImage', '~> 1.0.4'
+  pod 'SDWebImage', '~> 5.0'
+  pod 'SDCycleScrollView','~> 1.80'
+  pod 'NullSafe', '~> 2.0'
+  pod 'TZImagePickerController', '~> 3.2.1'
+  pod 'TOCropViewController', '~> 2.5.1'
+  pod 'FMDB', '~> 2.7.5'
+  pod 'FDStackView', '~> 1.0.1'
+  pod 'LYEmptyView'
+  pod 'MMKV', '~> 1.0.22'
+  pod 'fishhook'
+  pod 'CocoaLumberjack', '~> 3.5.3'
+  pod 'GZIP', '~> 1.2'
+  pod 'LBXScan/LBXNative','~> 2.3'
+  pod 'LBXScan/LBXZXing','~> 2.3'
+  pod 'LBXScan/UI','~> 2.3'
+  pod 'MLeaksFinder'
+  pod 'FBMemoryProfiler'
+end
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 29);
+
+        let iq = deps.iter().find(|d| d.name == "IQKeyboardManager").unwrap();
+        assert_eq!(iq.current_value, "~> 6.5.0");
+        assert!(iq.skip_reason.is_none());
+
+        let ly = deps.iter().find(|d| d.name == "LYEmptyView").unwrap();
+        assert!(ly.current_value.is_empty()); // no version
+        assert!(ly.skip_reason.is_none()); // Rust: no skip for unversioned (TS: unspecified-version)
+    }
 }
