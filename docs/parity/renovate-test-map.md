@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 161 / 310 actionable tests ported (52%) — updated 2026-04-29
+**Overall progress:** 163 / 310 actionable tests ported (53%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -706,8 +706,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles registry alias | 1352 | pending | — | — | registryAliases not yet implemented |
 | replaces registry alias from start only | 1380 | pending | — | — | registryAliases not yet implemented |
 | handles empty registry | 1407 | pending | — | — | — |
-| handles # syntax statements | 1435 | pending | — | — | — |
-| ignores # syntax statements after first line | 1469 | pending | — | — | — |
+| handles # syntax statements | 1435 | ported | `dockerfile.rs` | `syntax_directive_extracted` | — |
+| ignores # syntax statements after first line | 1469 | ported | `dockerfile.rs` | `syntax_directive_after_from_ignored` | — |
 
 ### `getDep()`
 

@@ -66,14 +66,30 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
     let logical_lines = join_continuations(content);
     let mut stage_names: Vec<String> = Vec::new();
     let mut out = Vec::new();
+    let mut seen_non_comment = false;
 
     for line in &logical_lines {
         let trimmed = line.trim();
 
         // Strip leading comments and blank lines.
-        if trimmed.is_empty() || trimmed.starts_with('#') {
+        if trimmed.is_empty() {
             continue;
         }
+        if trimmed.starts_with('#') {
+            // Check for `# syntax=<image>` parser directive (only valid before any
+            // instruction; we track whether we've seen any non-comment line).
+            if !seen_non_comment {
+                let comment = trimmed.strip_prefix('#').unwrap_or("").trim();
+                if let Some(image_ref) = comment.strip_prefix("syntax=") {
+                    let image_ref = image_ref.trim();
+                    if !image_ref.is_empty() {
+                        out.push(classify_from(image_ref, &stage_names));
+                    }
+                }
+            }
+            continue;
+        }
+        seen_non_comment = true;
 
         // Handle COPY --from=<image> instructions.
         if let Some(after_copy) = strip_instruction(trimmed, "COPY") {
@@ -839,6 +855,30 @@ mod tests {
         assert_eq!(deps[2].image, "alpine");
         assert_eq!(deps[2].tag.as_deref(), Some("latest"));
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
+    }
+
+    // ── # syntax directives ───────────────────────────────────────────────────
+
+    // Ported: "handles # syntax statements" — dockerfile/extract.spec.ts line 1435
+    #[test]
+    fn syntax_directive_extracted() {
+        let content = "# syntax=docker/dockerfile:1.1.7\nFROM alpine:3.13.5\n";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].image, "docker/dockerfile");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.1.7"));
+        assert_eq!(deps[1].image, "alpine");
+        assert_eq!(deps[1].tag.as_deref(), Some("3.13.5"));
+    }
+
+    // Ported: "ignores # syntax statements after first line" — dockerfile/extract.spec.ts line 1469
+    #[test]
+    fn syntax_directive_after_from_ignored() {
+        let content = "FROM alpine:3.13.5\n# syntax=docker/dockerfile:1.1.7\n";
+        let deps = extract_ok(content);
+        // The syntax comment appears after the FROM, so it is ignored.
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "alpine");
     }
 
     // ── real-world fixture from Renovate ─────────────────────────────────────
