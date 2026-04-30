@@ -323,6 +323,16 @@ fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtracted
         };
     }
 
+    // Any embedded variable in the full ref → skip.
+    if image_ref.contains('$') {
+        return DockerfileExtractedDep {
+            image: image_ref.to_owned(),
+            tag: None,
+            digest: None,
+            skip_reason: Some(DockerfileSkipReason::ArgVariable),
+        };
+    }
+
     // Split digest first, then tag.
     let (ref_no_digest, digest) = if let Some(at) = image_ref.find('@') {
         (&image_ref[..at], Some(image_ref[at + 1..].to_owned()))
@@ -527,6 +537,27 @@ mod tests {
     fn arg_braces_variable_is_skipped() {
         let deps = extract_ok("FROM ${BASE_IMAGE}:latest");
         // The whole reference starts with $ so it's an ARG.
+        assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
+    }
+
+    // Ported: "skips tag containing a variable" — dockerfile/extract.spec.ts line 1563
+    #[test]
+    fn tag_with_variable_is_skipped() {
+        let deps = extract_ok("FROM mcr.microsoft.com/dotnet/sdk:5.0${IMAGESUFFIX}");
+        assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
+    }
+
+    // Ported: "skips depName containing a non default variable" — dockerfile/extract.spec.ts line 1596
+    #[test]
+    fn variable_in_image_path_is_skipped() {
+        let deps = extract_ok("FROM docker.io/$PREFIX/alpine:3.15");
+        assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
+    }
+
+    // Ported: "skips depName containing a non default variable with brackets" — dockerfile/extract.spec.ts line 1607
+    #[test]
+    fn braced_variable_in_image_path_is_skipped() {
+        let deps = extract_ok("FROM docker.io/${PREFIX}/alpine:3.15");
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 

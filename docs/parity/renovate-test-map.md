@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 150 / 310 actionable tests ported (48%) — updated 2026-04-29
+**Overall progress:** 153 / 310 actionable tests ported (49%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -716,11 +716,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | rejects null | 1493 | not-applicable | — | — | TypeScript-only null guard; Rust Option handles this at type level |
 | rejects empty or whitespace | 1497 | not-applicable | — | — | TypeScript-only guard; no Rust equivalent needed |
 | handles default environment variable values | 1501 | pending | — | — | — |
-| skips tag containing a variable | 1563 | pending | — | — | — |
+| skips tag containing a variable | 1563 | ported | `dockerfile.rs` | `tag_with_variable_is_skipped` | — |
 | skips depName containing a non default variable at start | 1574 | ported | `dockerfile.rs` | `arg_variable_is_skipped` | — |
 | skips depName containing a non default variable with brackets at start | 1585 | ported | `dockerfile.rs` | `arg_braces_variable_is_skipped` | — |
-| skips depName containing a non default variable | 1596 | pending | — | — | — |
-| skips depName containing a non default variable with brackets | 1607 | pending | — | — | — |
+| skips depName containing a non default variable | 1596 | ported | `dockerfile.rs` | `variable_in_image_path_is_skipped` | — |
+| skips depName containing a non default variable with brackets | 1607 | ported | `dockerfile.rs` | `braced_variable_in_image_path_is_skipped` | — |
 
 ### `extractVariables()`
 
