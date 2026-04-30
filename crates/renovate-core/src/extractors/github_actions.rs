@@ -87,11 +87,13 @@ pub fn extract(content: &str) -> Vec<GithubActionsExtractedDep> {
 
     for cap in USES_LINE.captures_iter(content) {
         let remainder = cap[1].trim();
+        // Capture the version comment (e.g. "v4" from "# v4") before stripping.
+        let version_comment = comment_version(remainder);
         // Strip inline comment (# …) and trailing quotes.
         let raw = strip_comment(remainder);
         let raw = raw.trim_matches(|c| c == '\'' || c == '"');
 
-        if let Some(dep) = parse_uses(raw) {
+        if let Some(dep) = parse_uses(raw, version_comment) {
             deps.push(dep);
         }
     }
@@ -99,9 +101,16 @@ pub fn extract(content: &str) -> Vec<GithubActionsExtractedDep> {
     deps
 }
 
+/// Extract the version string from a trailing `# <version>` comment.
+fn comment_version(s: &str) -> Option<&str> {
+    let idx = s.find(" #")?;
+    let v = s[idx + 2..].trim();
+    if v.is_empty() { None } else { Some(v) }
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-fn parse_uses(raw: &str) -> Option<GithubActionsExtractedDep> {
+fn parse_uses(raw: &str, version_comment: Option<&str>) -> Option<GithubActionsExtractedDep> {
     // Local action reference.
     if raw.starts_with("./") {
         return Some(GithubActionsExtractedDep {
@@ -126,19 +135,42 @@ fn parse_uses(raw: &str) -> Option<GithubActionsExtractedDep> {
     // Strip optional sub-path to get `owner/repo`.
     let action = owner_repo(action_path)?;
 
-    // Classify the ref.
-    let skip_reason = if SHA_FULL.is_match(version) {
-        Some(GithubActionsSkipReason::ShaPin)
-    } else if SHA_SHORT.is_match(version) {
-        Some(GithubActionsSkipReason::ShortShaPin)
-    } else {
-        None
-    };
+    // A SHA pin with a version comment (e.g. `@sha # v4`) is treated as a
+    // versioned reference: the comment provides the version, the SHA is the
+    // digest.  Without a comment, naked SHAs are skipped.
+    if SHA_FULL.is_match(version) {
+        if let Some(vc) = version_comment {
+            return Some(GithubActionsExtractedDep {
+                action,
+                current_value: vc.to_owned(),
+                skip_reason: None,
+            });
+        }
+        return Some(GithubActionsExtractedDep {
+            action,
+            current_value: version.to_owned(),
+            skip_reason: Some(GithubActionsSkipReason::ShaPin),
+        });
+    }
+    if SHA_SHORT.is_match(version) {
+        if let Some(vc) = version_comment {
+            return Some(GithubActionsExtractedDep {
+                action,
+                current_value: vc.to_owned(),
+                skip_reason: None,
+            });
+        }
+        return Some(GithubActionsExtractedDep {
+            action,
+            current_value: version.to_owned(),
+            skip_reason: Some(GithubActionsSkipReason::ShortShaPin),
+        });
+    }
 
     Some(GithubActionsExtractedDep {
         action,
         current_value: version.to_owned(),
-        skip_reason,
+        skip_reason: None,
     })
 }
 
@@ -451,6 +483,29 @@ jobs:
             deps[0].skip_reason,
             Some(GithubActionsSkipReason::ShortShaPin)
         );
+    }
+
+    // Ported: "does not disable SHA pins with version comment" — github-actions/extract.spec.ts line 565
+    #[test]
+    fn full_sha_with_version_comment_not_skipped() {
+        let content =
+            "      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].action, "actions/checkout");
+        assert_eq!(deps[0].current_value, "v4");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "does not disable short SHA pins with version comment" — github-actions/extract.spec.ts line 590
+    #[test]
+    fn short_sha_with_version_comment_not_skipped() {
+        let content = "      - uses: actions/checkout@c85c95e # v4\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].action, "actions/checkout");
+        assert_eq!(deps[0].current_value, "v4");
+        assert!(deps[0].skip_reason.is_none());
     }
 
     // Ported: "extracts multiple action tag lines with double quotes and comments" — github-actions/extract.spec.ts line 153

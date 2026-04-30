@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 177 / 376 actionable tests ported (47%) — updated 2026-04-30
+**Overall progress:** 179 / 376 actionable tests ported (48%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -303,8 +303,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts pinned non-semver ref with digest | 504 | pending | — | — | — |
 | disables naked SHA pins without version comment | 527 | ported | `github_actions.rs` | `full_sha_pin_skipped` | — |
 | disables naked short SHA pins without version comment | 546 | ported | `github_actions.rs` | `short_sha_pin_skipped` | — |
-| does not disable SHA pins with version comment | 565 | pending | — | — | — |
-| does not disable short SHA pins with version comment | 590 | pending | — | — | — |
+| does not disable SHA pins with version comment | 565 | ported | `github_actions.rs` | `full_sha_with_version_comment_not_skipped` | — |
+| does not disable short SHA pins with version comment | 590 | ported | `github_actions.rs` | `short_sha_with_version_comment_not_skipped` | — |
 | extracts actions with fqdn | 614 | pending | — | — | — |
 | extracts multiple action runners from yaml configuration file | 673 | ported | `github_actions.rs` | `runner_simple_ubuntu` (+ 4 others) | — |
 | extracts x-version from actions/setup-x | 741 | pending | — | — | — |
