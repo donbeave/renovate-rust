@@ -1552,7 +1552,7 @@ unknowntool 9.9.9
         assert!(unknown.datasource.is_none());
     }
 
-    // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
+    // Ported: "entry: '${data.entry}'" (ignores proper comments at the end of lines) — asdf/extract.spec.ts line 1054
     #[test]
     fn strips_inline_comments() {
         let deps = extract(SAMPLE);

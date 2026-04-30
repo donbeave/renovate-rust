@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 187 / 405 actionable tests ported (46%) — updated 2026-04-30
+**Overall progress:** 200 / 418 actionable tests ported (48%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -55,6 +55,41 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts image and replaces registry | 22 | pending | — | — | — |
 | extracts image but no replacement | 52 | pending | — | — | — |
 | extracts image and no double replacement | 82 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/asdf/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/asdf/extract.spec.ts
+**Total tests:** 13 | **Ported:** 13 | **Actionable:** 13 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns a result | 6 | ported | `asdf.rs` | `nodejs_maps_to_node_version_datasource` | — |
+| provides skipReason for lines with unsupported tooling | 19 | ported | `asdf.rs` | `unknown_tool_gets_skip_reason` | — |
+| only captures the first version | 31 | ported | `asdf.rs` | `only_captures_first_version` | — |
+| can handle multiple tools in one file | 44 | ported | `asdf.rs` | `extracts_github_releases_tool` (+ 6 others) | — |
+| can handle multiple tools with indented versions in one file | 890 | ported | `asdf.rs` | `indented_spacing_still_parses` | — |
+| can handle flutter version channel | 923 | ported | `asdf.rs` | `flutter_strips_channel_suffix` | — |
+| can handle java jre / jdk | 946 | ported | `asdf.rs` | `java_adoptopenjdk_jdk` (+ 4 others) | — |
+| can handle scala v 2 & 3 | 1004 | ported | `asdf.rs` | `scala_v2_uses_scala_scala` (+ 2 others) | — |
+
+### `extractPackageFile() › comment handling › ignores proper comments at the end of lines`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| entry: '${data.entry}' | 1054 | ported | `asdf.rs` | `strips_inline_comments` | — |
+
+### `extractPackageFile() › comment handling`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| invalid comment placements fail to parse | 1069 | ported | `asdf.rs` | `invalid_comment_no_space_fails_parse` | — |
+| ignores lines that are just comments | 1076 | ported | `asdf.rs` | `comment_lines_skipped` | — |
+| ignores comments across multiple lines | 1081 | ported | `asdf.rs` | `ignores_comments_across_multiple_lines` | — |
+| ignores supported tooling with a renovate:ignore comment | 1096 | ported | `asdf.rs` | `renovate_ignore_comment_skips_dep` | — |
 
 ---
 
@@ -913,7 +948,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
 | `lib/modules/manager/ant/extract.spec.ts` | 44 | `crates/renovate-core/src/extractors/ant.rs` | 6 | partial |
-| `lib/modules/manager/asdf/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/asdf.rs` | 28 | partial |
+<!-- asdf/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/azure_pipelines.rs` | 8 | partial |
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
 | `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 10 | partial |
