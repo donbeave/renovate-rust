@@ -55,6 +55,15 @@ pub fn extract(content: &str) -> Vec<PipfileDep> {
     for (section_key, is_dev) in [("packages", false), ("dev-packages", true)] {
         if let Some(Value::Table(section)) = table.get(section_key) {
             for (raw_name, val) in section {
+                if !is_valid_package_name(raw_name) {
+                    out.push(PipfileDep {
+                        name: normalize_name(raw_name),
+                        current_value: String::new(),
+                        is_dev,
+                        skip_reason: Some(PipfileSkipReason::Wildcard),
+                    });
+                    continue;
+                }
                 let name = normalize_name(raw_name);
                 let dep = parse_entry(name, val, is_dev);
                 out.push(dep);
@@ -74,6 +83,13 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
                 PipfileDep {
                     name,
                     current_value: String::new(),
+                    is_dev,
+                    skip_reason: Some(PipfileSkipReason::Wildcard),
+                }
+            } else if !is_valid_version(s) {
+                PipfileDep {
+                    name,
+                    current_value: s.clone(),
                     is_dev,
                     skip_reason: Some(PipfileSkipReason::Wildcard),
                 }
@@ -132,6 +148,24 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
 /// Normalize PyPI package name: lowercase, replace `-`/`_`/`.` with `-`.
 fn normalize_name(name: &str) -> String {
     name.to_ascii_lowercase().replace(['.', '_'], "-")
+}
+
+/// Returns true if the package name is a valid PyPI package name.
+/// PEP 508: must start and end with alphanumeric; internal chars can be alphanumeric, `-`, `_`, `.`.
+fn is_valid_package_name(name: &str) -> bool {
+    let mut chars = name.chars();
+    let first = chars.next();
+    if !first.map(|c| c.is_ascii_alphanumeric()).unwrap_or(false) {
+        return false;
+    }
+    // All characters must be alphanumeric or separators
+    name.chars()
+        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+}
+
+/// Returns true if the version specifier is plausibly valid (no spaces within specifier).
+fn is_valid_version(spec: &str) -> bool {
+    !spec.contains(' ')
 }
 
 #[cfg(test)]
@@ -227,13 +261,85 @@ coverage = {version = ">=6.0"}
         assert_eq!(deps[0].name, "my-package");
     }
 
+    // Ported: "returns null for invalid toml file" — pipenv/extract.spec.ts line 41
     #[test]
     fn invalid_toml_returns_empty() {
         assert!(extract("not valid [toml").is_empty());
     }
 
+    // Ported: "returns null for empty" — pipenv/extract.spec.ts line 37
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
+    }
+
+    // Ported: "marks packages with \"extras\" as skipReason === unspecified-version" — pipenv/extract.spec.ts line 136
+    #[test]
+    fn packages_with_only_extras_are_skipped() {
+        let content = r#"[packages]
+raven = {extras = ['flask']}
+Flask = "*"
+Flask-Caching = '*'
+flask-mako = {}
+Flask-SQLAlchemy = {version = "*"}
+Flask-Login = {editable = true}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 6);
+        assert!(deps.iter().all(|d| d.skip_reason.is_some()));
+    }
+
+    // Ported: "ignores git dependencies" — pipenv/extract.spec.ts line 192
+    #[test]
+    fn git_dependency_in_mixed_list_skipped() {
+        let content = r#"[packages]
+flask = {git = "https://github.com/pallets/flask.git"}
+werkzeug = ">=0.14"
+"#;
+        let deps = extract(content);
+        let valid: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+        assert_eq!(valid.len(), 1);
+        assert_eq!(valid[0].name, "werkzeug");
+    }
+
+    // Ported: "ignores invalid package names" — pipenv/extract.spec.ts line 202
+    #[test]
+    fn invalid_package_name_starting_with_underscore_skipped() {
+        let content = r#"[packages]
+foo = "==1.0.0"
+_invalid = "==1.0.0"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        let valid: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+        assert_eq!(valid.len(), 1);
+        assert_eq!(valid[0].name, "foo");
+    }
+
+    // Ported: "ignores relative path dependencies" — pipenv/extract.spec.ts line 213
+    #[test]
+    fn relative_path_in_mixed_list_skipped() {
+        let content = r#"[packages]
+foo = "==1.0.0"
+test = {path = "."}
+"#;
+        let deps = extract(content);
+        let valid: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+        assert_eq!(valid.len(), 1);
+        assert_eq!(valid[0].name, "foo");
+    }
+
+    // Ported: "ignores invalid versions" — pipenv/extract.spec.ts line 223
+    #[test]
+    fn version_with_spaces_skipped() {
+        let content = r#"[packages]
+foo = "==1.0.0"
+some-package = "==0 0"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        let valid: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
+        assert_eq!(valid.len(), 1);
+        assert_eq!(valid[0].name, "foo");
     }
 }
