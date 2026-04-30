@@ -11,8 +11,9 @@
 //!
 //! - `require <module> <version>` — single-line require.
 //! - Multi-line `require (…)` blocks — each non-blank line inside is a dep.
-//! - `replace` directives are parsed to detect local replacements; deps
-//!   replaced with a local path (`=> ../path`) are skipped.
+//! - `replace X => Y version` — remote replacement; Y+version is extracted as a dep.
+//! - `replace X => ../path` — local replacement; deps replaced with a local path are skipped.
+//! - `replace (…)` blocks — multi-line replace directives.
 //! - `exclude (…)` blocks are ignored entirely.
 //! - `// indirect` comment is preserved in the dep record but does not skip.
 //!
@@ -52,6 +53,8 @@ pub struct GoModExtractedDep {
     pub is_go_directive: bool,
     /// Set for the `toolchain goX.Y.Z` directive.
     pub is_toolchain_directive: bool,
+    /// Set for a `replace X => Y version` directive (remote replacement).
+    pub is_replace_directive: bool,
 }
 
 // ── Compiled regexes ───────────────────────────────────────────────────────
@@ -75,6 +78,18 @@ static BLOCK_END: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*\)\s*$").u
 static REPLACE_LOCAL: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*replace\s+(\S+)(?:\s+\S+)?\s*=>\s*(\./|\.\./)").unwrap());
 
+/// Matches single-line `replace X [oldVer] => Y newVer` for remote replacements.
+static SINGLE_REPLACE_REMOTE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*replace\s+\S+(?:\s+\S+)?\s*=>\s*(\S+)\s+(\S+)").unwrap());
+
+/// Matches the start of a `replace (` block.
+static REPLACE_BLOCK_START: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*replace\s*\(\s*$").unwrap());
+
+/// Matches `X [oldVer] => Y newVer` inside a replace block (indented).
+static REPLACE_BLOCK_ITEM: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s+\S+(?:\s+\S+)?\s*=>\s*(\S+)\s+(\S+)").unwrap());
+
 /// Go pseudo-version pattern: `vX.Y.Z-[pre.]YYYYMMDDHHMMSS-abcdefabcdef`.
 /// The optional `pre.` prefix appears in pre-release pseudo-versions.
 static PSEUDO_VERSION: LazyLock<Regex> =
@@ -94,7 +109,7 @@ static TOOLCHAIN_DIRECTIVE: LazyLock<Regex> =
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
-/// Parse a `go.mod` file and extract all `require` directives.
+/// Parse a `go.mod` file and extract all `require` and `replace` directives.
 pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
     // First pass: collect locally-replaced module paths.
     let local_replaces: HashSet<String> = collect_local_replaces(content);
@@ -102,6 +117,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
     let mut deps = Vec::new();
     let mut in_require_block = false;
     let mut in_exclude_block = false;
+    let mut in_replace_block = false;
 
     for line in content.lines() {
         // Strip inline comments for matching purposes.
@@ -117,6 +133,26 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
 
         if EXCLUDE_BLOCK_START.is_match(bare) {
             in_exclude_block = true;
+            continue;
+        }
+
+        if in_replace_block {
+            if BLOCK_END.is_match(bare) {
+                in_replace_block = false;
+                continue;
+            }
+            if let Some(cap) = REPLACE_BLOCK_ITEM.captures(bare) {
+                let replacement = cap[1].to_owned();
+                let version = cap[2].to_owned();
+                if !replacement.starts_with("./") && !replacement.starts_with("../") {
+                    deps.push(make_replace_dep(replacement, version, is_indirect));
+                }
+            }
+            continue;
+        }
+
+        if REPLACE_BLOCK_START.is_match(bare) {
+            in_replace_block = true;
             continue;
         }
 
@@ -151,6 +187,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 skip_reason: None,
                 is_go_directive: true,
                 is_toolchain_directive: false,
+                is_replace_directive: false,
             });
             continue;
         }
@@ -163,8 +200,19 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 skip_reason: None,
                 is_go_directive: false,
                 is_toolchain_directive: true,
+                is_replace_directive: false,
             });
             continue;
+        }
+
+        // Single-line remote replace: `replace X [oldVer] => Y newVer`
+        if let Some(cap) = SINGLE_REPLACE_REMOTE.captures(bare) {
+            let replacement = cap[1].to_owned();
+            let version = cap[2].to_owned();
+            if !replacement.starts_with("./") && !replacement.starts_with("../") {
+                deps.push(make_replace_dep(replacement, version, is_indirect));
+                continue;
+            }
         }
 
         if let Some(cap) = SINGLE_REQUIRE.captures(bare) {
@@ -215,6 +263,23 @@ fn make_dep(
         skip_reason,
         is_go_directive: false,
         is_toolchain_directive: false,
+        is_replace_directive: false,
+    }
+}
+
+fn make_replace_dep(
+    module_path: String,
+    current_value: String,
+    is_indirect: bool,
+) -> GoModExtractedDep {
+    GoModExtractedDep {
+        module_path,
+        current_value,
+        is_indirect,
+        skip_reason: None,
+        is_go_directive: false,
+        is_toolchain_directive: false,
+        is_replace_directive: true,
     }
 }
 
@@ -435,5 +500,78 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         assert_eq!(toolchain_dep.module_path, "go");
         assert_eq!(toolchain_dep.current_value, "1.23.3");
         assert!(toolchain_dep.skip_reason.is_none());
+    }
+
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
+    #[test]
+    fn replace_directives_multi_line_and_single_line() {
+        let content = r#"module github.com/renovate-tests/gomod
+go 1.23
+replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
+replace (
+      k8s.io/client-go => k8s.io/client-go v0.21.9
+      )
+replace (
+  k8s.io/cloud-provider => k8s.io/cloud-provider v0.17.3
+  k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.17.3 // indirect
+  k8s.io/code-generator => k8s.io/code-generator v0.17.3
+)
+"#;
+        let deps = extract(content);
+
+        let go = deps.iter().find(|d| d.is_go_directive).unwrap();
+        assert_eq!(go.current_value, "1.23");
+
+        let replace_deps: Vec<_> = deps.iter().filter(|d| d.is_replace_directive).collect();
+        assert_eq!(replace_deps.len(), 5);
+
+        let gocql = replace_deps
+            .iter()
+            .find(|d| d.module_path == "github.com/pravesht/gocql")
+            .unwrap();
+        assert_eq!(gocql.current_value, "v0.0.0");
+        assert!(!gocql.is_indirect);
+
+        let client_go = replace_deps
+            .iter()
+            .find(|d| d.module_path == "k8s.io/client-go")
+            .unwrap();
+        assert_eq!(client_go.current_value, "v0.21.9");
+
+        let cluster = replace_deps
+            .iter()
+            .find(|d| d.module_path == "k8s.io/cluster-bootstrap")
+            .unwrap();
+        assert!(cluster.is_indirect);
+        assert_eq!(cluster.current_value, "v0.17.3");
+    }
+
+    // Ported: "extracts replace directives from non-public module path" — gomod/extract.spec.ts line 136
+    #[test]
+    fn replace_directive_non_public_module_path() {
+        let content = r#"module github.com/JamieTanna-Mend-testing/tka-9783-golang-pro-main
+go 1.25.5
+require pro-lib v0.0.0-00010101000000-000000000000
+replace pro-lib => github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns v0.0.0-20260219031232-e6910bd8fb97
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+
+        let go = deps.iter().find(|d| d.is_go_directive).unwrap();
+        assert_eq!(go.current_value, "1.25.5");
+
+        let pro_lib = deps.iter().find(|d| d.module_path == "pro-lib").unwrap();
+        assert_eq!(pro_lib.skip_reason, Some(GoModSkipReason::PseudoVersion));
+
+        let replacement = deps.iter().find(|d| d.is_replace_directive).unwrap();
+        assert_eq!(
+            replacement.module_path,
+            "github.com/ns-rpro-dev-tests/golang-pro-lib/libs/src/ns"
+        );
+        assert_eq!(
+            replacement.current_value,
+            "v0.0.0-20260219031232-e6910bd8fb97"
+        );
+        assert!(replacement.skip_reason.is_none());
     }
 }
