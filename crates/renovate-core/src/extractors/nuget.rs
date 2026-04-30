@@ -601,4 +601,48 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.2.3");
         assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
     }
+
+    // Ported: "returns null for invalid csproj" — nuget/extract.spec.ts line 28
+    #[test]
+    fn invalid_xml_returns_error_or_empty() {
+        // quick-xml may be lenient; check either error or no useful deps extracted
+        let result = extract("\u{FEFF}  <?xml version=\"1.0\" encoding=\"utf-8\" ?>invalid xml>");
+        assert!(result.is_err() || result.unwrap().is_empty());
+    }
+
+    // Ported: "returns null if not xml" — nuget/extract.spec.ts line 43
+    #[test]
+    fn non_xml_content_returns_empty_or_error() {
+        let content = "org.apache.curator:* =4.3.0\norg.apache.hadoop:*=3.1.4\n";
+        // Non-XML: quick-xml returns an error or empty deps
+        let result = extract(content);
+        // Either errors or produces no deps (non-xml has no PackageReference elements)
+        assert!(result.is_err() || result.unwrap().is_empty());
+    }
+
+    // Ported: "does not extract msbuild sdk from the Sdk element if version is missing" — nuget/extract.spec.ts line 156
+    #[test]
+    fn msbuild_sdk_element_without_version_is_skipped() {
+        let content = r#"<Project>
+  <Sdk Name="Microsoft.Build.NoTargets" />
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "does not extract msbuild sdk from the Import element if version is missing" — nuget/extract.spec.ts line 196
+    #[test]
+    fn msbuild_import_element_without_version_is_skipped() {
+        let content = r#"<Project>
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="My.Custom.Sdk" />
+</Project>"#;
+        let deps = extract_ok(content);
+        assert!(deps.is_empty());
+    }
 }
