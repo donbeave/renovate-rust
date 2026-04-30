@@ -101,10 +101,51 @@ pub fn extract(content: &str) -> Vec<GithubActionsExtractedDep> {
     deps
 }
 
-/// Extract the version string from a trailing `# <version>` comment.
+/// Extract and normalise the version string from a trailing `# <version>` comment.
+///
+/// Handles these forms (TypeScript parity):
+/// - `# v1.2`            → `v1.2`
+/// - `# @v1.2`           → `v1.2`  (leading `@` stripped)
+/// - `# pin @v1.2`       → `v1.2`
+/// - `# tag=v1.2`        → `v1.2`
+/// - `# ratchet:o/r@v1`  → `v1`   (rightmost `@…` component)
+/// - `# ratchet:exclude` → None
+/// - `#v2` (no space)    → `v2`
 fn comment_version(s: &str) -> Option<&str> {
-    let idx = s.find(" #")?;
-    let v = s[idx + 2..].trim();
+    // Accept both ` #` and `#` (no space before hash).
+    let comment_start = if let Some(i) = s.find(" #") {
+        i + 2
+    } else if let Some(i) = s.find('#') {
+        i + 1
+    } else {
+        return None;
+    };
+    let raw = s[comment_start..].trim();
+    if raw.is_empty() {
+        return None;
+    }
+
+    // ratchet:owner/repo@version  or  ratchet:exclude
+    if let Some(rest) = raw.strip_prefix("ratchet:") {
+        if rest == "exclude" {
+            return None;
+        }
+        return rest.rfind('@').map(|i| &rest[i + 1..]);
+    }
+
+    // tag=version
+    if let Some(v) = raw.strip_prefix("tag=") {
+        return if v.is_empty() { None } else { Some(v) };
+    }
+
+    // pin @version  or  pin@version
+    let without_pin = raw
+        .strip_prefix("pin ")
+        .or_else(|| raw.strip_prefix("pin@"))
+        .unwrap_or(raw);
+
+    // Strip leading `@`
+    let v = without_pin.trim_start_matches('@');
     if v.is_empty() { None } else { Some(v) }
 }
 
@@ -506,6 +547,63 @@ jobs:
         assert_eq!(deps[0].action, "actions/checkout");
         assert_eq!(deps[0].current_value, "v4");
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts tags in different formats" — github-actions/extract.spec.ts line 352
+    #[test]
+    fn comment_version_formats() {
+        let sha = "1e204e9a9253d643386038d443f96446fa156a97";
+        let cases: &[(&str, &str)] = &[
+            // bare version comment
+            (
+                &format!("      - uses: actions/checkout@{sha} # 1.2.3\n"),
+                "1.2.3",
+            ),
+            (
+                &format!("      - uses: actions/checkout@{sha} # v1.2.3\n"),
+                "v1.2.3",
+            ),
+            // leading @ stripped
+            (
+                &format!("      - uses: actions/checkout@{sha} # @v2.1.0\n"),
+                "v2.1.0",
+            ),
+            // pin @version
+            (
+                &format!("      - uses: actions/checkout@{sha} # pin @v2.1.0\n"),
+                "v2.1.0",
+            ),
+            // tag=version
+            (
+                &format!("      - uses: actions/checkout@{sha} # tag=v2.1.0\n"),
+                "v2.1.0",
+            ),
+            // extra whitespace
+            (
+                &format!("      - uses: actions/checkout@{sha}  #   v2.1.0\n"),
+                "v2.1.0",
+            ),
+            // no space before hash
+            (
+                &format!("      - uses: actions/checkout@{sha} #v2.1.0\n"),
+                "v2.1.0",
+            ),
+            // ratchet:owner/repo@version
+            (
+                &format!(
+                    "      - uses: actions/checkout@{sha} # ratchet:actions/checkout@v2.1.0\n"
+                ),
+                "v2.1.0",
+            ),
+        ];
+        for (content, expected) in cases {
+            let deps = extract(content);
+            assert_eq!(deps[0].current_value, *expected, "failed for: {content}");
+            assert!(
+                deps[0].skip_reason.is_none(),
+                "unexpected skip for: {content}"
+            );
+        }
     }
 
     // Ported: "extracts non-semver ref automatically" — github-actions/extract.spec.ts line 484
