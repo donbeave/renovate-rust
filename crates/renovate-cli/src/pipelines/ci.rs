@@ -768,12 +768,20 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
     for bb_path in manager_files(detected, "bitbucket-pipelines") {
         match client.get_raw_file(owner, repo, &bb_path).await {
             Ok(Some(raw)) => {
-                let deps = renovate_core::extractors::bitbucket_pipelines::extract(&raw.content);
-                tracing::debug!(repo = %repo_slug, file = %bb_path, total = deps.len(), "extracted bitbucket-pipelines images");
+                let all_deps =
+                    renovate_core::extractors::bitbucket_pipelines::extract(&raw.content);
+                let docker_deps: Vec<_> = all_deps.into_iter().filter_map(|d| {
+                    if let renovate_core::extractors::bitbucket_pipelines::BitbucketPipelinesDep::Docker(dep) = d {
+                        Some(dep)
+                    } else {
+                        None
+                    }
+                }).collect();
+                tracing::debug!(repo = %repo_slug, file = %bb_path, total = docker_deps.len(), "extracted bitbucket-pipelines images");
                 ctx.report.files.push(output::FileReport {
                     path: bb_path.clone(),
                     manager: "bitbucket-pipelines".into(),
-                    deps: docker_hub_reports(http, &deps).await,
+                    deps: docker_hub_reports(http, &docker_deps).await,
                 });
             }
             Ok(None) => {

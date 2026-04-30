@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 347 / 450 actionable tests ported (77%) — updated 2026-04-30
+**Overall progress:** 348 / 450 actionable tests ported (77%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -290,7 +290,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/glasskube/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/glasskube/extract.spec.ts
-**Total tests:** 5 | **Ported:** 2 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -302,17 +302,17 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null for empty packageFiles | 62 | pending | — | — | — |
+| should return null for empty packageFiles | 62 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
 | should skip package with non-existing repo | 67 | ported | `glasskube.rs` | `skips_non_glasskube_files` | — |
-| should extract registryUrl from repo in other file | 85 | pending | — | — | — |
-| should extract registryUrl from default repo in other file | 107 | pending | — | — | — |
+| should extract registryUrl from repo in other file | 85 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
+| should extract registryUrl from default repo in other file | 107 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
 
 ---
 
 ## `lib/modules/manager/gleam/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gleam/extract.spec.ts
-**Total tests:** 9 | **Ported:** 4 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 9 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `modules/manager/gleam/extract`
 
@@ -322,11 +322,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | should extract dev only dependencies | 41 | ported | `gleam.rs` | `extracts_dev_dependencies` | — |
 | should return null when no dependencies are found | 65 | ported | `gleam.rs` | `no_deps_section_returns_empty` | — |
 | should return null when gleam.toml is invalid | 82 | ported | `gleam.rs` | `invalid_toml_returns_empty` | — |
-| should return locked versions | 91 | pending | — | — | — |
-| should fail to extract locked version | 119 | pending | — | — | — |
-| should fail to find locked version in range | 138 | pending | — | — | — |
-| should handle invalid versions in lock file | 166 | pending | — | — | — |
-| should handle lock file parsing and extracting errors | 193 | pending | — | — | — |
+| should return locked versions | 91 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
+| should fail to extract locked version | 119 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
+| should fail to find locked version in range | 138 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
+| should handle invalid versions in lock file | 166 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
+| should handle lock file parsing and extracting errors | 193 | not-applicable | — | — | Requires async mock filesystem access; no Rust equivalent |
 
 ---
 
@@ -587,7 +587,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bitbucket-pipelines/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bitbucket-pipelines/extract.spec.ts
-**Total tests:** 4 | **Ported:** 2 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 3 | **Actionable:** 4 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -595,8 +595,8 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for empty | 6 | ported | `bitbucket_pipelines.rs` | `empty_returns_empty` | — |
 | returns null for malformed | 12 | ported | `bitbucket_pipelines.rs` | `malformed_image_object_without_name_returns_empty` | — |
-| extracts dependencies | 22 | pending | — | — | — |
-| extracts dependencies with registryAlias | 82 | pending | — | — | — |
+| extracts dependencies | 22 | ported | `bitbucket_pipelines.rs` | `extracts_full_fixture_seven_deps` | — |
+| extracts dependencies with registryAlias | 82 | pending | — | — | registryAliases not yet implemented |
 
 ---
 
