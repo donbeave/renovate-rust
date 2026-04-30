@@ -249,6 +249,7 @@ require (
         assert!(deps.iter().any(|d| d.module_path == "golang.org/x/net"));
     }
 
+    // Ported: "extracts multi-line requires" — gomod/extract.spec.ts line 26
     #[test]
     fn indirect_deps_included() {
         let content = "require github.com/davecgh/go-spew v1.0.0 // indirect\n";
@@ -258,6 +259,7 @@ require (
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "marks placeholder pseudo versions with skipReason invalid-version" — gomod/extract.spec.ts line 426
     #[test]
     fn pseudo_version_skipped() {
         let content = "require github.com/foo/bar v0.0.0-20230901123456-abcdef123456\n";
@@ -266,6 +268,7 @@ require (
         assert_eq!(deps[0].skip_reason, Some(GoModSkipReason::PseudoVersion));
     }
 
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
     #[test]
     fn local_replace_skipped() {
         let content = r#"
@@ -292,6 +295,7 @@ exclude (
         assert_eq!(deps[0].module_path, "github.com/good/dep");
     }
 
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
     #[test]
     fn incompatible_version_included() {
         let content = "require github.com/Azure/sdk v25.1.0+incompatible\n";
@@ -301,6 +305,7 @@ exclude (
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts replace directives from multi-line and single line" — gomod/extract.spec.ts line 48
     #[test]
     fn fixture_1() {
         let content = r#"module github.com/renovate-tests/gomod1

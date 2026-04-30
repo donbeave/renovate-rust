@@ -138,6 +138,7 @@ fn leading_spaces(s: &str) -> usize {
 mod tests {
     use super::*;
 
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
     #[test]
     fn object_form_repository_and_tag() {
         let content = r#"
@@ -151,6 +152,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("1.25"));
     }
 
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
     #[test]
     fn object_form_version_key() {
         let content = r#"
@@ -164,6 +166,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("7.0"));
     }
 
+    // Ported: "extracts from complex values file correctly" — helm-values/extract.spec.ts line 52
     #[test]
     fn inline_string_form() {
         let content = "busyboxImage: busybox:1.36\n";
@@ -173,6 +176,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("1.36"));
     }
 
+    // Ported: "extracts from complex values file correctly" — helm-values/extract.spec.ts line 52
     #[test]
     fn multiple_images() {
         let content = r#"
@@ -190,6 +194,7 @@ sidecar:
         assert!(deps.iter().any(|d| d.image == "redis"));
     }
 
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
     #[test]
     fn key_not_ending_in_image_ignored() {
         let content = "pullPolicy: IfNotPresent\nrepository: nginx\n";
@@ -197,6 +202,7 @@ sidecar:
         assert!(deps.is_empty());
     }
 
+    // Ported: "extract data from file with registry aliases" — helm-values/extract.spec.ts line 85
     #[test]
     fn registry_prefix_combined() {
         let content = r#"

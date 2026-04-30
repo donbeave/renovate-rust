@@ -202,6 +202,7 @@ services:
         );
     }
 
+    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_quoted_image() {
         let content = r#"
@@ -223,6 +224,7 @@ services:
         );
     }
 
+    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_image_with_registry() {
         let content = "services:\n  redis:\n    image: quay.io/something/redis:alpine\n";
@@ -232,6 +234,7 @@ services:
         assert_eq!(deps[0].tag.as_deref(), Some("alpine"));
     }
 
+    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_image_with_digest() {
         let content = "services:\n  app:\n    image: nginx:1.25@sha256:abc123\n";
@@ -250,6 +253,7 @@ services:
         assert_eq!(deps[0].skip_reason, Some(ComposeSkipReason::VariableRef));
     }
 
+    // Ported: "extracts default variable values for version 3" — docker-compose/extract.spec.ts line 42
     #[test]
     fn build_service_is_skipped() {
         let content = r#"
@@ -268,6 +272,7 @@ services:
 
     // ── comment lines ─────────────────────────────────────────────────────────
 
+    // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
     #[test]
     fn comment_lines_are_ignored() {
         let content =
@@ -297,6 +302,7 @@ db:
         assert!(deps.iter().any(|d| d.image == "postgres"));
     }
 
+    // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
     #[test]
     fn no_false_positives_for_non_image_keys() {
         let content = "services:\n  app:\n    imagePath: /tmp/image\n    image: nginx:1.25\n";
