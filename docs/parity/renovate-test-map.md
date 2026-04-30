@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 149 / 310 actionable tests ported (48%) — updated 2026-04-29
+**Overall progress:** 150 / 310 actionable tests ported (48%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -650,7 +650,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | handles no FROM | 14 | ported | `dockerfile.rs` | `no_from_returns_empty` | — |
 | handles naked dep | 19 | ported | `dockerfile.rs` | `extracts_image_without_tag` | — |
-| handles run --mount=from | 36 | pending | — | — | — |
+| handles run --mount=from | 36 | ported | `dockerfile.rs` | `run_mount_from_extracts_external_images` | — |
 | is case insensitive | 72 | ported | `dockerfile.rs` | `from_is_case_insensitive` | — |
 | handles tag | 89 | ported | `dockerfile.rs` | `extracts_image_and_tag` | — |
 | handles digest | 106 | ported | `dockerfile.rs` | `extracts_image_with_digest_only` | — |

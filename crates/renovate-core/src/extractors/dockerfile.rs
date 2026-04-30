@@ -83,6 +83,14 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
             continue;
         }
 
+        // Handle RUN --mount=from=<image> (and --mount=type=cache,from=<image>).
+        if let Some(after_run) = strip_instruction(trimmed, "RUN") {
+            for image_ref in extract_run_mount_from_images(after_run, &stage_names) {
+                out.push(classify_from(&image_ref, &stage_names));
+            }
+            continue;
+        }
+
         // Only care about FROM instructions.
         let Some(after_from) = strip_instruction(trimmed, "FROM") else {
             continue;
@@ -174,6 +182,39 @@ fn strip_instruction<'a>(line: &'a str, instruction: &str) -> Option<&'a str> {
         }
     }
     None
+}
+
+/// Extract image references from a RUN --mount=from=<image>[,...] line.
+///
+/// Each `--mount=` flag may contain a `from=<value>` parameter; if the value
+/// is not a stage name or numeric index, it is an external image reference.
+fn extract_run_mount_from_images(args: &str, stage_names: &[String]) -> Vec<String> {
+    let mut images = Vec::new();
+    let upper = args.to_ascii_uppercase();
+    let mut search = upper.as_str();
+    let mut pos_offset = 0usize;
+
+    while let Some(rel) = search.find("FROM=") {
+        let abs = pos_offset + rel;
+        let value_start = abs + "FROM=".len();
+        // Value ends at `,` or whitespace.
+        let value: &str = args[value_start..]
+            .split(|c: char| c == ',' || c.is_ascii_whitespace())
+            .next()
+            .unwrap_or("");
+
+        if !value.is_empty()
+            && value.parse::<u32>().is_err()
+            && !stage_names.contains(&value.to_lowercase())
+        {
+            images.push(value.to_owned());
+        }
+
+        pos_offset = value_start + value.len();
+        search = &upper[pos_offset..];
+    }
+
+    images
 }
 
 /// Extract the image reference from a COPY --from=<image> argument string.
@@ -577,6 +618,27 @@ mod tests {
         let deps = extract_ok("FROM --platform=linux/amd64 ubuntu:22.04");
         assert_eq!(deps[0].image, "ubuntu");
         assert_eq!(deps[0].tag.as_deref(), Some("22.04"));
+    }
+
+    // ── RUN --mount=from ──────────────────────────────────────────────────────
+
+    // Ported: "handles run --mount=from" — dockerfile/extract.spec.ts line 36
+    #[test]
+    fn run_mount_from_extracts_external_images() {
+        let content = "FROM scratch as build\n\
+            FROM scratch as final\n\
+            RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv uv pip install numpy\n\
+            RUN --mount=type=cache,from=example.com/cache/image,target=/root/.cache pip install numpy\n\
+            RUN --mount=type=bind,from=build,source=/project/dist/lib.whl,target=/dist/lib.whl pip install /dist/lib.whl\n";
+        let deps = extract_ok(content);
+        // scratch×2 + uv image + cache image; build is a stage name so skipped
+        assert_eq!(deps.len(), 4);
+        assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::Scratch));
+        assert_eq!(deps[1].skip_reason, Some(DockerfileSkipReason::Scratch));
+        assert_eq!(deps[2].image, "ghcr.io/astral-sh/uv");
+        assert!(deps[2].skip_reason.is_none());
+        assert_eq!(deps[3].image, "example.com/cache/image");
+        assert!(deps[3].skip_reason.is_none());
     }
 
     // ── COPY --from ───────────────────────────────────────────────────────────
