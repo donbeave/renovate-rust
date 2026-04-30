@@ -40,7 +40,7 @@ pub enum GoModSkipReason {
 /// A single extracted go.mod dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GoModExtractedDep {
-    /// Go module path (e.g. `github.com/gorilla/mux`).
+    /// Go module path (e.g. `github.com/gorilla/mux`), or `"go"` for the Go directive.
     pub module_path: String,
     /// Declared version (e.g. `v1.8.1`, `v25.1.0+incompatible`).
     pub current_value: String,
@@ -48,6 +48,8 @@ pub struct GoModExtractedDep {
     pub is_indirect: bool,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<GoModSkipReason>,
+    /// Set for the `go X.Y` directive; `datasource` would be `golang-version`.
+    pub is_go_directive: bool,
 }
 
 // ── Compiled regexes ───────────────────────────────────────────────────────
@@ -79,6 +81,10 @@ static PSEUDO_VERSION: LazyLock<Regex> =
 /// Matches exclude block start.
 static EXCLUDE_BLOCK_START: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*exclude\s*\(\s*$").unwrap());
+
+/// Matches `go <version>` directive (e.g. `go 1.21.3` or `go 1.21`).
+static GO_DIRECTIVE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*go\s+(\d+\.\d+(?:\.\d+)?)\s*$").unwrap());
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -131,6 +137,17 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
             continue;
         }
 
+        if let Some(cap) = GO_DIRECTIVE.captures(bare) {
+            deps.push(GoModExtractedDep {
+                module_path: "go".to_owned(),
+                current_value: cap[1].to_owned(),
+                is_indirect: false,
+                skip_reason: None,
+                is_go_directive: true,
+            });
+            continue;
+        }
+
         if let Some(cap) = SINGLE_REQUIRE.captures(bare) {
             let module_path = cap[1].to_owned();
             let current_value = cap[2].to_owned();
@@ -177,6 +194,7 @@ fn make_dep(
         current_value,
         is_indirect,
         skip_reason,
+        is_go_directive: false,
     }
 }
 
@@ -336,6 +354,19 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts `go` directive %s as a `%goMod` extracted constraint as a SemVer-minor compatible range" — gomod/extract.spec.ts line 528
+    #[test]
+    fn go_directive_extracted() {
+        for version in &["1.19", "1.19.0", "1.19.5"] {
+            let content = format!("module github.com/renovate-tests/gomod\ngo {version}\n");
+            let deps = extract(&content);
+            let go_dep = deps.iter().find(|d| d.module_path == "go").unwrap();
+            assert_eq!(go_dep.current_value, *version);
+            assert!(go_dep.is_go_directive);
+            assert!(go_dep.skip_reason.is_none());
+        }
+    }
+
     // Ported: "ignores directives unrelated to dependencies" — gomod/extract.spec.ts line 402
     #[test]
     fn unrelated_directives_ignored() {
@@ -350,9 +381,6 @@ require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
     }
 
     // Ported: "ignores empty spaces in multi-line requires" — gomod/extract.spec.ts line 34
-    // Note: TS test expects 3 deps (includes go directive as dep); Rust returns 2
-    // (go directive extraction not yet implemented). Core behavior — empty lines
-    // inside require blocks are handled correctly — is verified here.
     #[test]
     fn empty_lines_inside_require_block() {
         let content = "module github.com/renovate-tests/gomod\nrequire (\n\tcloud.google.com/go v0.45.1\n\n\tgithub.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect\n)\n";
