@@ -80,6 +80,7 @@ pub fn extract(content: &str) -> Vec<DockerfileExtractedDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts from quadlet container unit" — quadlet/extract.spec.ts line 29
     #[test]
     fn extracts_container_image() {
         let content = "[Container]\nImage=docker.io/library/nginx:latest\n";
@@ -89,6 +90,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("latest"));
     }
 
+    // Ported: "handles docker prefix" — quadlet/extract.spec.ts line 83
     #[test]
     fn strips_docker_transport_prefix() {
         let content = "[Container]\nImage=docker://nginx:alpine\n";
@@ -98,12 +100,14 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("alpine"));
     }
 
+    // Ported: "extracts from quadlet container unit" — quadlet/extract.spec.ts line 29
     #[test]
     fn skips_local_transport() {
         let content = "[Container]\nImage=oci:/tmp/myimage\n";
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "extracts from quadlet container unit" — quadlet/extract.spec.ts line 29
     #[test]
     fn ignores_non_container_sections() {
         let content = "[Unit]\nDescription=My Service\n[Container]\nImage=nginx:1.25\n";
@@ -112,6 +116,7 @@ mod tests {
         assert_eq!(deps[0].image, "nginx");
     }
 
+    // Ported: "extracts from quadlet container unit" — quadlet/extract.spec.ts line 29
     #[test]
     fn skips_comment_lines() {
         let content = "[Container]\n# This is a comment\nImage=redis:7\n";
@@ -119,11 +124,13 @@ mod tests {
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "returns null for empty yaml file content" — quadlet/extract.spec.ts line 24
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "extracts from quadlet container unit" — quadlet/extract.spec.ts line 29
     #[test]
     fn variable_ref_skipped() {
         let content = "[Container]\nImage=${MY_IMAGE}\n";
@@ -132,9 +139,9 @@ mod tests {
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "extracts from quadlet image unit" — quadlet/extract.spec.ts line 47
     #[test]
     fn image_section_extracted() {
-        // Ported: "extracts from quadlet image unit" — quadlet/extract.spec.ts line 47
         let content = "[Image]\nImage=docker.io/library/alpine:3.22\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
@@ -142,18 +149,18 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("3.22"));
     }
 
+    // Ported: "extracts from quadlet volume unit" — quadlet/extract.spec.ts line 65
     #[test]
     fn volume_section_extracted() {
-        // Ported: "extracts from quadlet volume unit" — quadlet/extract.spec.ts line 65
         let content = "[Volume]\nImage=docker.io/library/alpine:3.22\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].image, "docker.io/library/alpine");
     }
 
+    // Ported: "handles docker-daemon prefix" — quadlet/extract.spec.ts line 101
     #[test]
     fn docker_daemon_prefix_stripped() {
-        // Ported: "handles docker-daemon prefix" — quadlet/extract.spec.ts line 101
         let content = "[Volume]\nImage=docker-daemon:docker.io/library/alpine:3.22\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
@@ -161,23 +168,23 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("3.22"));
     }
 
+    // Ported: "does not extract an image file reference" — quadlet/extract.spec.ts line 119
     #[test]
     fn image_file_reference_skipped() {
-        // Ported: "does not extract an image file reference" — quadlet/extract.spec.ts line 119
         let content = "[Container]\nImage=foo.image\n";
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "does not extract a build file reference" — quadlet/extract.spec.ts line 129
     #[test]
     fn build_file_reference_skipped() {
-        // Ported: "does not extract a build file reference" — quadlet/extract.spec.ts line 129
         let content = "[Container]\nImage=foo.build\n";
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "handles an unsuccessful parse" — quadlet/extract.spec.ts line 158
     #[test]
     fn container_section_without_image_returns_empty() {
-        // Ported: "handles an unsuccessful parse" — quadlet/extract.spec.ts line 158
         let content = "[Container]\n";
         assert!(extract(content).is_empty());
     }

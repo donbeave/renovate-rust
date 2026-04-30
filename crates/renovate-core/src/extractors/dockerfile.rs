@@ -639,6 +639,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("1.20"));
     }
 
+    // Ported: "handles multi-line FROM with space after escape character" — dockerfile/extract.spec.ts line 904
     #[test]
     fn continuation_joined_correctly() {
         let content = "FROM node:18-alpine \\\n  AS builder";
@@ -647,6 +648,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("18-alpine"));
     }
 
+    // Ported: "handles multi-line FROM with space after escape character" — dockerfile/extract.spec.ts line 904
     #[test]
     fn continuation_with_comment() {
         // Fixture from Renovate 2.Dockerfile:
@@ -701,6 +703,7 @@ mod tests {
 
     // ── platform flag ──────────────────────────────────────────────────────────
 
+    // Ported: "extracts multiple FROM tags" — dockerfile/extract.spec.ts line 354
     #[test]
     fn platform_flag_stripped() {
         let deps = extract_ok("FROM --platform=linux/amd64 ubuntu:22.04");

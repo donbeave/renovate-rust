@@ -419,6 +419,7 @@ Typing_Extensions = "^4.0"
 
     // ── Fixture: pyproject.1.toml ─────────────────────────────────────────────
 
+    // Ported: "extracts multiple dependencies" — poetry/extract.spec.ts line 51
     #[test]
     fn poetry_fixture_1() {
         let content = r#"
