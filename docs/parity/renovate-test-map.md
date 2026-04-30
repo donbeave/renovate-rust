@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 370 / 450 actionable tests ported (82%) — updated 2026-04-30
+**Overall progress:** 373 / 450 actionable tests ported (83%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -1009,7 +1009,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/homebrew/extract.spec.ts` | 17 | `crates/renovate-core/src/extractors/homebrew.rs` | 9 | partial |
 | `lib/modules/manager/html/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/html.rs` | 8 | ported |
 | `lib/modules/manager/jenkins/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/jenkins.rs` | 14 | ported |
-| `lib/modules/manager/jsonnet-bundler/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | 5 | partial |
+| `lib/modules/manager/jsonnet-bundler/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | 8 | ported |
 | `lib/modules/manager/kotlin-script/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/kotlin_script.rs` | 7 | ported |
 | `lib/modules/manager/kubernetes/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/kubernetes.rs` | 5 | partial |
 | `lib/modules/manager/kustomize/extract.spec.ts` | 43 | `crates/renovate-core/src/extractors/kustomize.rs` | 6 | partial |
