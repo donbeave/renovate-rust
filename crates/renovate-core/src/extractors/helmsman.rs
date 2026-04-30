@@ -276,6 +276,7 @@ apps:
     version: "1.0.0"
 "#;
 
+    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
     #[test]
     fn extracts_helm_deps() {
         let deps = extract(SAMPLE);
@@ -291,6 +292,7 @@ apps:
             && d.registry_url == "https://charts.bitnami.com/bitnami"));
     }
 
+    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
     #[test]
     fn skips_missing_version() {
         let deps = extract(SAMPLE);
@@ -300,6 +302,7 @@ apps:
         );
     }
 
+    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
     #[test]
     fn skips_unknown_repo() {
         let deps = extract(SAMPLE);
@@ -315,5 +318,102 @@ apps:
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
+    }
+
+    // Ported: "returns null if apps not defined" — helmsman/extract.spec.ts line 23
+    #[test]
+    fn invalid_yaml_returns_empty() {
+        assert!(extract("incorrect").is_empty());
+    }
+
+    // Ported: "returns null if extracting non helmsman yaml file" — helmsman/extract.spec.ts line 16
+    #[test]
+    fn app_with_no_chart_or_version_has_skip_reason() {
+        // TS: parses empty.yaml via full YAML → app value is null → createDep returns null → null result.
+        // Rust: line parser treats `test:` as a new app entry with no chart → InvalidChart skip.
+        // Both return no actionable deps; Rust returns 1 dep with skip_reason.
+        let content = "namespaces:\n\nhelmRepos:\n  test:\napps:\n  test:\n";
+        let deps = extract(content);
+        assert!(
+            deps.is_empty()
+                || deps
+                    .iter()
+                    .all(|d| d.skip_reason == Some(HelmsmanSkipReason::InvalidChart))
+        );
+    }
+
+    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
+    #[test]
+    fn extract_deps_validhelmsfile() {
+        // Full validHelmsfile.yaml fixture: 11 apps, 5 with skip reasons.
+        // Rust behavioral note: OCI (`oci://`) apps are classified as NoRepository (not DockerDatasource).
+        let content = r#"namespaces:
+  redis-operator:
+  strimzi:
+  monitoring:
+  test-apps:
+
+helmRepos:
+  ot-helm: "https://ot-container-kit.github.io/helm-charts/"
+  strimzi: "https://strimzi.io/charts/"
+  open-telemetry: "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  grafana: "https://grafana.github.io/helm-charts"
+  prometheus-community: https://prometheus-community.github.io/helm-charts
+
+apps:
+  kube-prometheus:
+    enabled: true
+    namespace: monitoring
+    chart: prometheus-community/kube-prometheus-stack
+    version: 19.0.3
+  loki:
+    enabled: true
+    chart: grafana/loki
+    version: 2.6.0
+  tempo:
+    enabled: true
+    chart: grafana/tempo
+    version: 0.7.7
+  otlp-collector:
+    enabled: true
+    chart: open-telemetry/opentelemetry-collector
+    version: 0.6.0
+  strimzi-operator:
+    enabled: true
+    chart: strimzi/strimzi-kafka-operator
+    version: 0.25.0
+  podinfo:
+    enabled: true
+    chart: oci://ghcr.io/stefanprodan/charts/podinfo
+    version: 6.4.0
+  strimzi-operator-missing-version:
+    enabled: true
+    chart: strimzi/strimzi-kafka-operator
+  loki-no-registry-ref:
+    enabled: true
+    chart: /loki
+    version: 2.6.0
+  tempo-no-registry-ref:
+    enabled: true
+    chart: tempo
+    version: 0.7.7
+  kube-prometheus-no-lookup-name:
+    enabled: true
+    chart: prometheus-community/
+    version: 19.0.3
+  otlp-collector-no-chart:
+    enabled: true
+    version: 0.6.0
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 11);
+        // 5 apps with skip reasons (podinfo=NoRepository, missing-version=UnspecifiedVersion,
+        // loki-no-registry-ref=NoRepository, tempo-no-registry-ref=InvalidChart, no-chart=InvalidChart).
+        assert_eq!(deps.iter().filter(|d| d.skip_reason.is_some()).count(), 5);
+        // Verify a valid dep.
+        let loki = deps.iter().find(|d| d.chart_name == "loki").unwrap();
+        assert_eq!(loki.current_value, "2.6.0");
+        assert_eq!(loki.registry_url, "https://grafana.github.io/helm-charts");
+        assert!(loki.skip_reason.is_none());
     }
 }

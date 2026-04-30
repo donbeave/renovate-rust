@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 249 / 450 actionable tests ported (55%) — updated 2026-04-30
+**Overall progress:** 252 / 450 actionable tests ported (56%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -557,16 +557,16 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/helmsman/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmsman/extract.spec.ts
-**Total tests:** 4 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null if empty | 9 | ported | `helmsman.rs` | `empty_file_returns_empty` | — |
-| returns null if extracting non helmsman yaml file | 16 | pending | — | — | — |
-| returns null if apps not defined | 23 | pending | — | — | — |
-| extract deps | 29 | pending | — | — | — |
+| returns null if extracting non helmsman yaml file | 16 | ported | `helmsman.rs` | `app_with_no_chart_or_version_has_skip_reason` | — |
+| returns null if apps not defined | 23 | ported | `helmsman.rs` | `invalid_yaml_returns_empty` | — |
+| extract deps | 29 | ported | `helmsman.rs` | `extract_deps_validhelmsfile` (+ `extracts_helm_deps`, `skips_missing_version`, `skips_unknown_repo`) | — |
 
 ---
 
