@@ -24,13 +24,12 @@ use crate::extractors::pip::PipExtractedDep;
 
 #[derive(Debug, Deserialize)]
 struct HaManifest {
-    /// Required: HA domain key (absent in Chrome/browser extension manifests).
     domain: Option<String>,
-    /// Required: integration name.
     name: Option<String>,
-    /// Present in Chrome Extension Manifest V3 — signals this is NOT a HA file.
+    /// Chrome Extension Manifest V3 marker — signals this is NOT a HA file.
     manifest_version: Option<serde_json::Value>,
-    requirements: Option<Vec<String>>,
+    /// Flexible type to handle mixed arrays (strings, numbers, null).
+    requirements: Option<serde_json::Value>,
 }
 
 /// Extract PyPI deps from a Home Assistant `manifest.json` file.
@@ -43,16 +42,24 @@ pub fn extract(content: &str) -> Vec<PipExtractedDep> {
         Err(_) => return Vec::new(),
     };
 
-    // Must be a Home Assistant manifest: requires `domain` and `name`.
     if manifest.domain.is_none() || manifest.name.is_none() {
         return Vec::new();
     }
-    // Chrome extension manifests have `manifest_version` — skip them.
     if manifest.manifest_version.is_some() {
         return Vec::new();
     }
 
-    let reqs = manifest.requirements.unwrap_or_default();
+    let reqs_val = match manifest.requirements {
+        Some(serde_json::Value::Array(arr)) => arr,
+        _ => return Vec::new(),
+    };
+
+    // Filter to string entries only (skip numbers, null, etc.).
+    let reqs: Vec<String> = reqs_val
+        .into_iter()
+        .filter_map(|v| v.as_str().map(str::to_owned))
+        .collect();
+
     if reqs.is_empty() {
         return Vec::new();
     }
@@ -159,5 +166,53 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "package");
         assert_eq!(deps[0].current_value, "==1.0.0");
+    }
+
+    // Ported: "handles requirements without version" — homeassistant-manifest/extract.spec.ts line 211
+    #[test]
+    fn handles_requirements_without_version() {
+        let content =
+            r#"{"domain": "test", "name": "Test", "requirements": ["package", "aiohue==1.9.1"]}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        let aiohue = deps.iter().find(|d| d.name == "aiohue").unwrap();
+        assert_eq!(aiohue.current_value, "==1.9.1");
+        // bare package name with no version specifier — pip extractor returns it with empty value
+        let pkg = deps.iter().find(|d| d.name == "package").unwrap();
+        assert!(pkg.current_value.is_empty() || pkg.skip_reason.is_some());
+    }
+
+    // Ported: "extracts from real-world ASUSWRT manifest" — homeassistant-manifest/extract.spec.ts line 237
+    #[test]
+    fn extracts_asuswrt_manifest() {
+        let content = r#"{
+  "domain": "asuswrt",
+  "name": "ASUSWRT",
+  "requirements": ["aioasuswrt==1.5.1", "asusrouter==1.21.3"]
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        let a = deps.iter().find(|d| d.name == "aioasuswrt").unwrap();
+        assert_eq!(a.current_value, "==1.5.1");
+        let b = deps.iter().find(|d| d.name == "asusrouter").unwrap();
+        assert_eq!(b.current_value, "==1.21.3");
+    }
+
+    // Ported: "handles invalid requirement types in array" — homeassistant-manifest/extract.spec.ts line 272
+    #[test]
+    fn skips_non_string_entries_in_requirements_array() {
+        let content = r#"{"domain": "test", "name": "Test", "requirements": ["aiohue==1.9.1", 123, null, "valid==2.0.0"]}"#;
+        let deps = extract(content);
+        // Non-string entries (123, null) are filtered out
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(|d| d.name == "aiohue"));
+        assert!(deps.iter().any(|d| d.name == "valid"));
+    }
+
+    // Ported: "returns null when requirements is not an array" — homeassistant-manifest/extract.spec.ts line 299
+    #[test]
+    fn requirements_not_an_array_returns_empty() {
+        let content = r#"{"domain": "test", "name": "Test", "requirements": "not-an-array"}"#;
+        assert!(extract(content).is_empty());
     }
 }
