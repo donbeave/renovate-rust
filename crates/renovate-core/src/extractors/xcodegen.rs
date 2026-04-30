@@ -59,6 +59,8 @@ pub struct XcodeGenDep {
     pub current_value: String,
     /// Version field type used.
     pub dep_type: &'static str,
+    /// Registry base URL for self-hosted GHES or GitLab instances.
+    pub registry_url: Option<String>,
     /// Set when no lookup should be performed.
     pub skip_reason: Option<XcodeGenSkipReason>,
 }
@@ -107,6 +109,7 @@ pub fn extract(content: &str) -> Vec<XcodeGenDep> {
                 source: None,
                 current_value: String::new(),
                 dep_type,
+                registry_url: None,
                 skip_reason: Some(XcodeGenSkipReason::LocalPath),
             });
             return;
@@ -114,11 +117,13 @@ pub fn extract(content: &str) -> Vec<XcodeGenDep> {
 
         // minVersion + maxVersion = unsupported range
         if let (Some(min), Some(max)) = (min_version, max_version) {
+            let (source, registry_url) = build_source(url, github);
             deps.push(XcodeGenDep {
                 name: name.to_owned(),
-                source: build_source(url, github),
+                source,
                 current_value: format!("{min} - {max}"),
                 dep_type,
+                registry_url,
                 skip_reason: Some(XcodeGenSkipReason::UnsupportedVersionRange),
             });
             return;
@@ -126,11 +131,13 @@ pub fn extract(content: &str) -> Vec<XcodeGenDep> {
 
         if current_value.is_empty() {
             if has_branch_or_revision || url.is_some() || github.is_some() {
+                let (source, registry_url) = build_source(url, github);
                 deps.push(XcodeGenDep {
                     name: name.to_owned(),
-                    source: build_source(url, github),
+                    source,
                     current_value: String::new(),
                     dep_type,
+                    registry_url,
                     skip_reason: Some(XcodeGenSkipReason::NoSemverVersion),
                 });
             } else {
@@ -139,19 +146,21 @@ pub fn extract(content: &str) -> Vec<XcodeGenDep> {
                     source: None,
                     current_value: String::new(),
                     dep_type,
+                    registry_url: None,
                     skip_reason: Some(XcodeGenSkipReason::MissingSource),
                 });
             }
             return;
         }
 
-        let source = build_source(url, github);
+        let (source, registry_url) = build_source(url, github);
         if source.is_none() {
             deps.push(XcodeGenDep {
                 name: name.to_owned(),
                 source: None,
                 current_value: current_value.to_owned(),
                 dep_type,
+                registry_url: None,
                 skip_reason: Some(XcodeGenSkipReason::MissingSource),
             });
             return;
@@ -162,6 +171,7 @@ pub fn extract(content: &str) -> Vec<XcodeGenDep> {
             source,
             current_value: current_value.to_owned(),
             dep_type,
+            registry_url,
             skip_reason: None,
         });
     };
@@ -350,9 +360,13 @@ pub fn extract(content: &str) -> Vec<XcodeGenDep> {
     deps
 }
 
-fn build_source(url: &Option<String>, github: &Option<String>) -> Option<XcodeGenSource> {
+/// Returns `(source, registry_url)` where registry_url is set for self-hosted instances.
+fn build_source(
+    url: &Option<String>,
+    github: &Option<String>,
+) -> (Option<XcodeGenSource>, Option<String>) {
     if let Some(gh) = github {
-        return Some(XcodeGenSource::GitHub(gh.clone()));
+        return (Some(XcodeGenSource::GitHub(gh.clone())), None);
     }
     if let Some(u) = url {
         let cleaned = u.trim_end_matches(".git");
@@ -360,17 +374,42 @@ fn build_source(url: &Option<String>, github: &Option<String>) -> Option<XcodeGe
             let repo = cleaned
                 .trim_start_matches("https://github.com/")
                 .trim_start_matches("http://github.com/");
-            return Some(XcodeGenSource::GitHub(repo.to_owned()));
+            return (Some(XcodeGenSource::GitHub(repo.to_owned())), None);
         }
         if cleaned.starts_with("https://gitlab.com/") || cleaned.starts_with("http://gitlab.com/") {
             let repo = cleaned
                 .trim_start_matches("https://gitlab.com/")
                 .trim_start_matches("http://gitlab.com/");
-            return Some(XcodeGenSource::GitLab(repo.to_owned()));
+            return (Some(XcodeGenSource::GitLab(repo.to_owned())), None);
         }
-        return Some(XcodeGenSource::Git(u.clone()));
+        // Self-hosted GitHub Enterprise (github.* but not github.com)
+        if let Some(path_start) = cleaned.find("github.") {
+            let after = &cleaned[path_start + "github.".len()..];
+            if !after.starts_with("com/") {
+                // Self-hosted GHES: extract host and repo
+                let parts: Vec<&str> = cleaned.splitn(4, '/').collect();
+                if parts.len() >= 4 {
+                    let base = format!("{}//{}", parts[0], parts[2]);
+                    let repo = parts[3].trim_end_matches(".git").to_owned();
+                    return (Some(XcodeGenSource::GitHub(repo)), Some(base));
+                }
+            }
+        }
+        // Self-hosted GitLab
+        if let Some(path_start) = cleaned.find("gitlab.") {
+            let after = &cleaned[path_start + "gitlab.".len()..];
+            if !after.starts_with("com/") {
+                let parts: Vec<&str> = cleaned.splitn(5, '/').collect();
+                if parts.len() >= 5 {
+                    let base = format!("{}//{}", parts[0], parts[2]);
+                    let repo = format!("{}/{}", parts[3], parts[4].trim_end_matches(".git"));
+                    return (Some(XcodeGenSource::GitLab(repo)), Some(base));
+                }
+            }
+        }
+        return (Some(XcodeGenSource::Git(u.clone())), None);
     }
-    None
+    (None, None)
 }
 
 #[cfg(test)]
@@ -671,6 +710,41 @@ packages:
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].current_value, "5");
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "uses github-tags datasource with registryUrls for self-hosted GHES" — xcodegen/extract.spec.ts line 293
+    #[test]
+    fn self_hosted_ghes_registry_url() {
+        let content =
+            "packages:\n  Yams:\n    url: https://github.example.com/jpsim/Yams\n    from: 2.0.0\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].source,
+            Some(XcodeGenSource::GitHub("jpsim/Yams".to_owned()))
+        );
+        assert_eq!(
+            deps[0].registry_url,
+            Some("https://github.example.com".to_owned())
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "uses gitlab-tags datasource with registryUrls for self-hosted GitLab" — xcodegen/extract.spec.ts line 314
+    #[test]
+    fn self_hosted_gitlab_registry_url() {
+        let content = "packages:\n  GitLabPkg:\n    url: https://gitlab.example.com/some-group/some-project\n    from: 1.0.0\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].source,
+            Some(XcodeGenSource::GitLab("some-group/some-project".to_owned()))
+        );
+        assert_eq!(
+            deps[0].registry_url,
+            Some("https://gitlab.example.com".to_owned())
+        );
         assert!(deps[0].skip_reason.is_none());
     }
 }

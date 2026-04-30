@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 421 / 450 actionable tests ported (94%) — updated 2026-04-30
+**Overall progress:** 423 / 450 actionable tests ported (94%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -1050,7 +1050,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/velaci/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/velaci.rs` | 6 | partial |
 | `lib/modules/manager/vendir/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/vendir.rs` | 5 | partial |
 | `lib/modules/manager/woodpecker/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/woodpecker.rs` | 11 | ported |
-| `lib/modules/manager/xcodegen/extract.spec.ts` | 24 | `crates/renovate-core/src/extractors/xcodegen.rs` | 23 | partial |
+| `lib/modules/manager/xcodegen/extract.spec.ts` | 24 | `crates/renovate-core/src/extractors/xcodegen.rs` | 25 | ported |
 
 ### Other manager specs (non-extract)
 
