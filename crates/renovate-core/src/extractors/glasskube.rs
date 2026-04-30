@@ -108,6 +108,7 @@ pub fn extract(content: &str) -> Vec<GlasskubeDep> {
 mod tests {
     use super::*;
 
+    // Ported: "should extract version and registryUrl" — glasskube/extract.spec.ts line 43
     #[test]
     fn extracts_cluster_package() {
         let content = r#"
@@ -127,11 +128,13 @@ spec:
         assert_eq!(deps[0].kind, "ClusterPackage");
     }
 
+    // Ported: "should skip package with non-existing repo" — glasskube/extract.spec.ts line 67
     #[test]
     fn skips_non_glasskube_files() {
         assert!(extract("apiVersion: v1\nkind: ConfigMap\n").is_empty());
     }
 
+    // Ported: "should extract version and registryUrl" — glasskube/extract.spec.ts line 43
     #[test]
     fn extracts_multiple_packages() {
         let content = r#"

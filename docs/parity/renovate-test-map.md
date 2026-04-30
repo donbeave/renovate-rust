@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 231 / 450 actionable tests ported (51%) — updated 2026-04-30
+**Overall progress:** 235 / 450 actionable tests ported (52%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -148,7 +148,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/buildpacks/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/buildpacks/extract.spec.ts
-**Total tests:** 3 | **Ported:** 2 | **Actionable:** 3 | **Status:** partial
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -156,7 +156,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for invalid files | 7 | ported | `buildpacks.rs` | `invalid_toml_returns_empty` | — |
 | returns null for empty package.toml | 11 | ported | `buildpacks.rs` | `no_io_buildpacks_returns_empty` | — |
-| extracts builder and buildpack images | 20 | pending | — | — | — |
+| extracts builder and buildpack images | 20 | ported | `buildpacks.rs` | `extracts_registry_deps` (+ `skips_docker_refs`, `no_version_skipped`) | — |
 
 ---
 
@@ -290,20 +290,20 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/glasskube/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/glasskube/extract.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 2 | **Actionable:** 5 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should extract version and registryUrl | 43 | pending | — | — | — |
+| should extract version and registryUrl | 43 | ported | `glasskube.rs` | `extracts_cluster_package` (+ `extracts_multiple_packages`) | — |
 
 ### `extractAllPackageFiles()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | should return null for empty packageFiles | 62 | pending | — | — | — |
-| should skip package with non-existing repo | 67 | pending | — | — | — |
+| should skip package with non-existing repo | 67 | ported | `glasskube.rs` | `skips_non_glasskube_files` | — |
 | should extract registryUrl from repo in other file | 85 | pending | — | — | — |
 | should extract registryUrl from default repo in other file | 107 | pending | — | — | — |
 
@@ -685,13 +685,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/composer/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/extract.spec.ts
-**Total tests:** 10 | **Ported:** 1 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 2 | **Actionable:** 10 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for invalid json | 24 | pending | — | — | — |
+| returns null for invalid json | 24 | ported | `composer.rs` | `invalid_json_returns_error` | — |
 | returns null for empty deps | 28 | ported | `composer.rs` | `empty_content_ok` | — |
 | extracts dependencies with no lock file | 32 | pending | — | — | — |
 | extracts registryUrls | 38 | pending | — | — | — |

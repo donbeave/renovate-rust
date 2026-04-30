@@ -297,4 +297,10 @@ mod tests {
         let deps = extract_ok("{}");
         assert!(deps.is_empty());
     }
+
+    // Ported: "returns null for invalid json" — composer/extract.spec.ts line 24
+    #[test]
+    fn invalid_json_returns_error() {
+        assert!(extract("nothing here").is_err());
+    }
 }
