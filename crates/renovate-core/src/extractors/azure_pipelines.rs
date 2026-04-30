@@ -412,4 +412,89 @@ resources:
         assert_eq!(t[0].name, "Bash");
         assert_eq!(t[0].version, "3");
     }
+
+    // Ported: "should extract deployment jobs postroute" — azure-pipelines/extract.spec.ts line 327
+    #[test]
+    fn extracts_task_from_deployment_postroute() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    runOnce:
+      postRouteTraffic:
+        steps:
+          - task: Bash@3
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+    }
+
+    // Ported: "should extract deployment jobs predeploy" — azure-pipelines/extract.spec.ts line 351
+    #[test]
+    fn extracts_task_from_deployment_predeploy() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    runOnce:
+      preDeploy:
+        steps:
+          - task: Bash@3
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+    }
+
+    // Ported: "should extract deployment jobs route" — azure-pipelines/extract.spec.ts line 375
+    #[test]
+    fn extracts_task_from_deployment_route_traffic() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    runOnce:
+      routeTraffic:
+        steps:
+          - task: Bash@3
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+    }
+
+    // Ported: "should extract deployment jobs rolling" — azure-pipelines/extract.spec.ts line 399
+    #[test]
+    fn extracts_task_from_deployment_rolling() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    rolling:
+      deploy:
+        steps:
+          - task: Bash@3
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+    }
+
+    // Ported: "should extract deployment jobs canary" — azure-pipelines/extract.spec.ts line 423
+    #[test]
+    fn extracts_task_from_deployment_canary() {
+        let content = r#"jobs:
+- deployment: deployment_one
+  strategy:
+    canary:
+      deploy:
+        steps:
+          - task: Bash@3
+"#;
+        let deps = extract(content);
+        let t = tasks(&deps);
+        assert_eq!(t.len(), 1);
+        assert_eq!(t[0].name, "Bash");
+    }
 }
