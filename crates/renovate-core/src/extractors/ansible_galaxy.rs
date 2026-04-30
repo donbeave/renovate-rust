@@ -62,6 +62,8 @@ pub fn extract(content: &str) -> Vec<AnsibleGalaxyDep> {
     // Simple state machine: scan blocks starting with `- name:` or `- src:`.
     // Each block has `name:`, `src:`, and optionally `version:`.
     let mut in_list = false; // inside roles: or collections: list
+    // Set once a non-ansible top-level key is seen; disables flat mode.
+    let mut disallow_flat_mode = false;
     let mut current_name: Option<String> = None;
     let mut current_src: Option<String> = None;
     let mut current_ver: Option<String> = None;
@@ -73,6 +75,10 @@ pub fn extract(content: &str) -> Vec<AnsibleGalaxyDep> {
         }
 
         let trimmed = line.trim_start();
+        // Skip pure comment lines (start with `#` after whitespace).
+        if trimmed.starts_with('#') {
+            continue;
+        }
         let indent = leading_spaces(line);
 
         // Detect top-level section keys (`roles:`, `collections:`).
@@ -85,10 +91,22 @@ pub fn extract(content: &str) -> Vec<AnsibleGalaxyDep> {
                     &mut out,
                 );
                 in_list = true;
+                disallow_flat_mode = false;
                 continue;
             }
-            // Any other top-level key ends the current section.
-            if !trimmed.starts_with('-') {
+            // Flat format: top-level list items (`- src:`, `- name:`) without section header.
+            // Only if no non-ansible header was seen before.
+            if trimmed.starts_with("- ") && !disallow_flat_mode {
+                in_list = true;
+            } else if trimmed.starts_with("- ") && disallow_flat_mode {
+                // Discard — this is a non-ansible format.
+                continue;
+            } else if !in_list {
+                // Non-ansible top-level key before any list — disable flat mode.
+                disallow_flat_mode = true;
+                continue;
+            } else {
+                // Any other top-level key ends the current section.
                 flush(
                     &mut current_name,
                     &mut current_src,
@@ -367,5 +385,15 @@ roles:
             deps.iter()
                 .all(|d| d.skip_reason == Some(AnsibleGalaxySkipReason::GalaxyHosted))
         );
+    }
+
+    // Ported: "extracts dependencies from a not beautified requirements file" — ansible-galaxy/extract.spec.ts line 25
+    #[test]
+    fn non_beautified_requirements_extracts_two_deps() {
+        let content = "# from galaxy\n\
+- src: yatesr.timezone\n  version: \"0.1.0\"\n\
+- scm: git\n  src: git@gitlab.company.com:mygroup/ansible-base.git\n  version: \"0.1\"\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
     }
 }

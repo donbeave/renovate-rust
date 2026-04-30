@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 216 / 450 actionable tests ported (48%) — updated 2026-04-30
+**Overall progress:** 217 / 450 actionable tests ported (48%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -12,7 +12,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ansible-galaxy/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible-galaxy/extract.spec.ts
-**Total tests:** 14 | **Ported:** 6 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 14 | **Ported:** 7 | **Actionable:** 10 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -20,7 +20,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for empty | 15 | ported | `ansible_galaxy.rs` | `empty_content_returns_no_deps` | — |
 | extracts multiple dependencies from requirements.yml | 19 | pending | — | — | — |
-| extracts dependencies from a not beautified requirements file | 25 | pending | — | — | — |
+| extracts dependencies from a not beautified requirements file | 25 | ported | `ansible_galaxy.rs` | `non_beautified_requirements_extracts_two_deps` | — |
 | extracts dependencies from requirements.yml with a space at the end of line | 31 | ported | `ansible_galaxy.rs` | `collections_with_git_url_name_and_version` | — |
 | extracts git@ dependencies | 41 | ported | `ansible_galaxy.rs` | `collections_with_source_field_and_git_at_url` | — |
 | check if an empty file returns null | 56 | ported | `ansible_galaxy.rs` | `blank_file_returns_no_deps` | — |
