@@ -159,12 +159,14 @@ spec:
         );
     }
 
+    // Ported: "return null for kubernetes manifest" — crossplane/extract.spec.ts line 20
     #[test]
     fn skips_non_crossplane_files() {
         let content = "apiVersion: v1\nkind: ConfigMap\n";
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "should work even if there are other resources in the file" — crossplane/extract.spec.ts line 137
     #[test]
     fn handles_multi_document() {
         let content = r#"
@@ -184,6 +186,7 @@ spec:
         assert_eq!(deps[1].kind, "Configuration");
     }
 
+    // Ported: "return no results for invalid resource" — crossplane/extract.spec.ts line 79
     #[test]
     fn reports_missing_package() {
         let content = r#"
@@ -200,15 +203,15 @@ metadata:
         );
     }
 
+    // Ported: "returns null for empty" — crossplane/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_empty() {
-        // Ported: "returns null for empty" — crossplane/extract.spec.ts line 12
         assert!(extract("nothing here").is_empty());
     }
 
+    // Ported: "return result for double quoted pkg.crossplane.io apiVersion reference" — crossplane/extract.spec.ts line 37
     #[test]
     fn double_quoted_api_version_extracted() {
-        // Ported: "return result for double quoted pkg.crossplane.io apiVersion reference" — spec line 37
         let content = r#"apiVersion: "pkg.crossplane.io/v1"
 kind: Configuration
 spec:
@@ -219,9 +222,9 @@ spec:
         assert_eq!(deps[0].current_value, "v0.6.0");
     }
 
+    // Ported: "return result for single quoted pkg.crossplane.io apiVersion reference" — crossplane/extract.spec.ts line 58
     #[test]
     fn single_quoted_api_version_extracted() {
-        // Ported: "return result for single quoted pkg.crossplane.io apiVersion reference" — spec line 58
         let content = "apiVersion: 'pkg.crossplane.io/v1'\nkind: Configuration\nspec:\n  package: 'xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0'\n";
         let deps = extract(content);
         assert_eq!(deps.len(), 1);

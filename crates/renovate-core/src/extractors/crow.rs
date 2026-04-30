@@ -67,6 +67,7 @@ pub fn extract(content: &str) -> Vec<DockerfileExtractedDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
     #[test]
     fn extracts_pipeline_images() {
         let content = r#"
@@ -95,6 +96,7 @@ services:
         assert_eq!(deps[0].tag.as_deref(), Some("14"));
     }
 
+    // Ported: "extracts images from array-based steps format" — crow/extract.spec.ts line 408
     #[test]
     fn steps_as_array() {
         let content = r#"
@@ -108,6 +110,7 @@ steps:
         assert_eq!(deps.len(), 2);
     }
 
+    // Ported: "return dependency when a plugin-git is cloned" — crow/extract.spec.ts line 321
     #[test]
     fn clone_section() {
         let content = r#"
@@ -133,6 +136,7 @@ pipeline:
         assert_eq!(deps[0].image, "golang");
     }
 
+    // Ported: "returns null for empty" — crow/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
@@ -150,23 +154,23 @@ pipeline:
         assert!(deps[0].skip_reason.is_some());
     }
 
+    // Ported: "returns null for non-object YAML" — crow/extract.spec.ts line 10
     #[test]
     fn no_image_keys_returns_empty() {
-        // Ported: "returns null for non-object YAML" — crow/extract.spec.ts line 10
         assert!(extract("nothing here").is_empty());
         assert!(extract("clone: null").is_empty());
     }
 
+    // Ported: "return null when no dependencies are provided" — crow/extract.spec.ts line 348
     #[test]
     fn no_dependencies_returns_empty() {
-        // Ported: "return null when no dependencies are provided" — crow/extract.spec.ts line 348
         let content = "info:\n  version:\n    3.5\n";
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns null when pipeline keys exist but contain no valid images" — crow/extract.spec.ts line 390
     #[test]
     fn pipeline_without_valid_images_returns_empty() {
-        // Ported: "returns null when pipeline keys exist but contain no valid images" — crow/extract.spec.ts line 390
         let content = "pipeline:\n  test:\n    script: echo 'hello'\n";
         assert!(extract(content).is_empty());
     }

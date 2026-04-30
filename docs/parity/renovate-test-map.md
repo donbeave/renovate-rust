@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 80 / 169 actionable tests ported (47%) — updated 2026-04-30
+**Overall progress:** 92 / 193 actionable tests ported (48%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -514,6 +514,54 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/crossplane/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/crossplane/extract.spec.ts
+**Total tests:** 9 | **Ported:** 5 | **Actionable:** 9 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 12 | ported | `crossplane.rs` | `empty_content_returns_empty` | — |
+| strips invalid templates | 16 | pending | — | — | — |
+| return null for kubernetes manifest | 20 | ported | `crossplane.rs` | `skips_non_crossplane_files` | — |
+| return invalid-value if deps are not valid images and ignore if missing | 25 | pending | — | — | — |
+| return result for double quoted pkg.crossplane.io apiVersion reference | 37 | ported | `crossplane.rs` | `double_quoted_api_version_extracted` | — |
+| return result for single quoted pkg.crossplane.io apiVersion reference | 58 | ported | `crossplane.rs` | `single_quoted_api_version_extracted` | — |
+| return no results for invalid resource | 79 | ported | `crossplane.rs` | `reports_missing_package` | — |
+| full test | 94 | pending | — | — | — |
+| should work even if there are other resources in the file | 137 | ported | `crossplane.rs` | `handles_multi_document` | — |
+
+---
+
+## `lib/modules/manager/crow/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/crow/extract.spec.ts
+**Total tests:** 15 | **Ported:** 7 | **Actionable:** 15 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | ported | `crow.rs` | `empty_returns_empty` | — |
+| returns null for non-object YAML | 10 | ported | `crow.rs` | `no_image_keys_returns_empty` | — |
+| returns null for malformed YAML | 15 | pending | — | — | — |
+| extracts multiple image lines | 19 | ported | `crow.rs` | `extracts_pipeline_images` | — |
+| extracts image and replaces registry | 164 | pending | — | — | — |
+| extracts image but no replacement | 194 | pending | — | — | — |
+| extracts image and no double replacement | 224 | pending | — | — | — |
+| extracts the 1.0.0 version | 255 | pending | — | — | — |
+| should parse multiple sources of dependencies together | 281 | pending | — | — | — |
+| return dependency when a plugin-git is cloned | 321 | ported | `crow.rs` | `clone_section` | — |
+| return null when no dependencies are provided | 348 | ported | `crow.rs` | `no_dependencies_returns_empty` | — |
+| handles empty pipeline section gracefully | 362 | pending | — | — | — |
+| returns null when pipeline keys exist but contain no valid images | 390 | ported | `crow.rs` | `pipeline_without_valid_images_returns_empty` | — |
+| extracts images from array-based steps format | 408 | ported | `crow.rs` | `steps_as_array` | — |
+| extracts images from mixed array and object formats | 447 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -528,8 +576,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
-| `lib/modules/manager/crossplane/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/crossplane.rs` | 7 | partial |
-| `lib/modules/manager/crow/extract.spec.ts` | 15 | `crates/renovate-core/src/extractors/crow.rs` | 10 | partial |
 | `lib/modules/manager/devbox/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/devbox.rs` | 9 | partial |
 | `lib/modules/manager/devcontainer/extract.spec.ts` | 15 | `crates/renovate-core/src/extractors/devcontainer.rs` | 10 | partial |
 | `lib/modules/manager/docker-compose/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/docker_compose.rs` | 10 | partial |
