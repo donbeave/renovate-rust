@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 92 / 193 actionable tests ported (48%) — updated 2026-04-30
+**Overall progress:** 108 / 221 actionable tests ported (49%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -562,6 +562,58 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/devbox/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/devbox/extract.spec.ts
+**Total tests:** 13 | **Ported:** 9 | **Actionable:** 13 | **Status:** partial
+
+### `extractPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when the devbox JSON file is empty | 6 | ported | `devbox.rs` | `empty_returns_empty` | — |
+| returns null when the devbox JSON file is malformed | 11 | ported | `devbox.rs` | `invalid_json_returns_empty` | — |
+| returns null when the devbox JSON file has no packages | 16 | ported | `devbox.rs` | `no_packages_key_returns_empty` | — |
+| returns a package dependency when the devbox JSON file has a single package | 21 | ported | `devbox.rs` | `array_form` | — |
+| returns a package dependency when the devbox JSON file has a single package with a version object | 42 | ported | `devbox.rs` | `object_with_version_field` | — |
+| returns invalid-version when the devbox JSON file has a single package with an invalid version | 65 | ported | `devbox.rs` | `invalid_semver_range_flagged` | — |
+| returns a package dependency when the devbox JSON file has multiple packages | 89 | ported | `devbox.rs` | `valid_versions_have_no_skip_reason` | — |
+| returns a package dependency when the devbox JSON file has multiple packages with in a packages object | 115 | ported | `devbox.rs` | `object_form` | — |
+| returns a package dependency when the devbox JSON file has multiple packages with package objects | 144 | pending | — | — | — |
+| returns invalid dependencies | 177 | ported | `devbox.rs` | `mixed_valid_and_invalid_versions` | — |
+| returns invalid dependencies with package objects | 213 | pending | — | — | — |
+| returns invalid dependencies from the packages array | 251 | pending | — | — | — |
+| returns null if there are no dependencies | 288 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/devcontainer/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/devcontainer/extract.spec.ts
+**Total tests:** 15 | **Ported:** 7 | **Actionable:** 15 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when the dev container JSON file is empty | 10 | pending | — | — | — |
+| returns null when the dev container JSON file contents are malformed | 22 | ported | `devcontainer.rs` | `invalid_json_returns_empty` | — |
+| tests if JSONC can be parsed | 34 | pending | — | — | — |
+| returns feature image deps when only the features property is defined in dev container JSON file | 72 | ported | `devcontainer.rs` | `extracts_node_feature_and_version` | — |
+| returns image and feature image deps when both image and features properties are defined in dev container JSON file | 124 | ported | `devcontainer.rs` | `image_and_feature_combined` | — |
+| returns image dep when only the image property is defined in dev container JSON file | 174 | ported | `devcontainer.rs` | `extracts_image` | — |
+| returns null when the only feature property is malformed and no image property is defined in dev container JSON file | 207 | pending | — | — | — |
+| returns null when the features property is malformed and no image property is defined in dev container JSON file | 227 | pending | — | — | — |
+| returns null when the image property is malformed and no features are defined in dev container JSON file | 245 | pending | — | — | — |
+| returns null when no image or features properties are defined in dev container JSON file | 263 | ported | `devcontainer.rs` | `empty_object_returns_empty` | — |
+| returns null when the features property is null and no image property is defined in dev container JSON file | 278 | ported | `devcontainer.rs` | `null_features_value_returns_empty` | — |
+| returns null when the features property is not defined and the image property is null in dev container JSON file | 296 | ported | `devcontainer.rs` | `no_image_returns_empty` | — |
+| returns null when both the image and features properties are null | 314 | pending | — | — | — |
+| returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file | 333 | pending | — | — | — |
+| parses known tool versions | 372 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -576,8 +628,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
-| `lib/modules/manager/devbox/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/devbox.rs` | 9 | partial |
-| `lib/modules/manager/devcontainer/extract.spec.ts` | 15 | `crates/renovate-core/src/extractors/devcontainer.rs` | 10 | partial |
 | `lib/modules/manager/docker-compose/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/docker_compose.rs` | 10 | partial |
 | `lib/modules/manager/dockerfile/extract.spec.ts` | 75 | `crates/renovate-core/src/extractors/dockerfile.rs` | 16 | partial |
 | `lib/modules/manager/fleet/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/fleet.rs` | 10 | partial |

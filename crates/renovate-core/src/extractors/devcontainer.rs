@@ -133,6 +133,7 @@ pub fn extract(content: &str) -> DevContainerDeps {
 mod tests {
     use super::*;
 
+    // Ported: "returns image dep when only the image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 174
     #[test]
     fn extracts_image() {
         let content = r#"{"image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04"}"#;
@@ -145,6 +146,7 @@ mod tests {
         assert_eq!(deps.docker_deps[0].tag.as_deref(), Some("ubuntu-22.04"));
     }
 
+    // Ported: "returns null when the features property is not defined and the image property is null in dev container JSON file" — devcontainer/extract.spec.ts line 296
     #[test]
     fn no_image_returns_empty() {
         let content = r#"{"name": "Dev Container"}"#;
@@ -152,6 +154,7 @@ mod tests {
         assert!(deps.docker_deps.is_empty());
     }
 
+    // Ported: "returns null when the dev container JSON file contents are malformed" — devcontainer/extract.spec.ts line 22
     #[test]
     fn invalid_json_returns_empty() {
         let deps = extract("not json");
@@ -159,6 +162,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
+    // Ported: "returns feature image deps when only the features property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 72
     #[test]
     fn extracts_node_feature_and_version() {
         let content = r#"{
@@ -211,6 +215,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
+    // Ported: "returns image and feature image deps when both image and features properties are defined in dev container JSON file" — devcontainer/extract.spec.ts line 124
     #[test]
     fn image_and_feature_combined() {
         let content = r#"{
@@ -224,17 +229,17 @@ mod tests {
         assert_eq!(deps.version_deps.len(), 1);
     }
 
+    // Ported: "returns null when no image or features properties are defined in dev container JSON file" — devcontainer/extract.spec.ts line 263
     #[test]
     fn empty_object_returns_empty() {
-        // Ported: "returns null when no image or features properties are defined" — devcontainer/extract.spec.ts line 263
         let deps = extract("{}");
         assert!(deps.docker_deps.is_empty());
         assert!(deps.version_deps.is_empty());
     }
 
+    // Ported: "returns null when the features property is null and no image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 278
     #[test]
     fn null_features_value_returns_empty() {
-        // Ported: "returns null when the features property is null" — devcontainer/extract.spec.ts line 278
         let content = r#"{"features": null}"#;
         let deps = extract(content);
         assert!(deps.docker_deps.is_empty());
