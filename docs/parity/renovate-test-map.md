@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 235 / 450 actionable tests ported (52%) — updated 2026-04-30
+**Overall progress:** 238 / 450 actionable tests ported (53%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -1041,7 +1041,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/setup-cfg/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/setup_cfg.rs` | 9 | partial |
 | `lib/modules/manager/sveltos/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/sveltos.rs` | 7 | partial |
 | `lib/modules/manager/tekton/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/tekton.rs` | 5 | partial |
-| `lib/modules/manager/terraform/extract.spec.ts` | 18 | `crates/renovate-core/src/extractors/terraform.rs` | 10 | partial |
+| `lib/modules/manager/terraform/extract.spec.ts` | 18 | `crates/renovate-core/src/extractors/terraform.rs` | 13 | partial |
 | `lib/modules/manager/terragrunt/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/terragrunt.rs` | 5 | partial |
 | `lib/modules/manager/tflint-plugin/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/tflint_plugin.rs` | 5 | partial |
 | `lib/modules/manager/travis/extract.spec.ts` | 8 | `crates/renovate-core/src/extractors/travis.rs` | 5 | partial |

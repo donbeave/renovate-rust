@@ -520,4 +520,29 @@ terraform {
         assert_eq!(deps[0].name, "random");
         assert_eq!(deps[0].current_value, "~> 3.0");
     }
+
+    // Ported: "returns dep with skipReason local" — terraform/extract.spec.ts line 756
+    #[test]
+    fn local_module_has_skip_reason() {
+        let content = "module \"relative\" {\n  source = \"../fe\"\n}\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert!(deps[0].skip_reason.is_some());
+    }
+
+    // Ported: "returns null with only not added resources" — terraform/extract.spec.ts line 767
+    #[test]
+    fn resource_block_not_extracted() {
+        let content = "resource \"test_resource\" \"relative\" {\n  source = \"../fe\"\n}\n";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "return null if invalid HCL file" — terraform/extract.spec.ts line 933
+    #[test]
+    fn invalid_hcl_returns_empty() {
+        let content = "resource my provider\n";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
 }
