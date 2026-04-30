@@ -275,6 +275,7 @@ mod tests {
 
     // ── [tool.poetry.dependencies] ────────────────────────────────────────────
 
+    // Ported: "extracts multiple dependencies" — poetry/extract.spec.ts line 51
     #[test]
     fn extracts_string_deps() {
         let content = r#"
@@ -305,6 +306,7 @@ boto3 = "*"
         );
     }
 
+    // Ported: "extracts multiple dependencies (with dep = {version = \"1.2.3\"} case)" — poetry/extract.spec.ts line 60
     #[test]
     fn extracts_table_deps() {
         let content = r#"
@@ -321,6 +323,7 @@ mypackage = {version = "^1.0", extras = ["security"]}
         assert_eq!(mypackage.current_value, "^1.0");
     }
 
+    // Ported: "skips git dependencies" — poetry/extract.spec.ts line 363
     #[test]
     fn git_source_skipped() {
         let content = r#"
@@ -331,6 +334,7 @@ mylib = {git = "https://github.com/example/mylib.git", tag = "v1.0"}
         assert_eq!(deps[0].skip_reason, Some(PoetrySkipReason::GitSource));
     }
 
+    // Ported: "skips path dependencies" — poetry/extract.spec.ts line 388
     #[test]
     fn path_source_skipped() {
         let content = r#"
@@ -353,6 +357,7 @@ mypkg = {url = "https://example.com/mypkg-1.0.tar.gz"}
 
     // ── [tool.poetry.dev-dependencies] ───────────────────────────────────────
 
+    // Ported: "extracts mixed versioning types" — poetry/extract.spec.ts line 118
     #[test]
     fn extracts_dev_dependencies() {
         let content = r#"
@@ -374,6 +379,7 @@ black = "^23.0"
 
     // ── [tool.poetry.group.*.dependencies] ───────────────────────────────────
 
+    // Ported: "extracts dependencies from dependency groups" — poetry/extract.spec.ts line 160
     #[test]
     fn extracts_group_dependencies() {
         let content = r#"
@@ -449,9 +455,9 @@ dev_dep2 = "Invalid version."
 
     // ── [build-system].requires ──────────────────────────────────────────────
 
+    // Ported: "extracts build-system.requires dependencies" — poetry/extract.spec.ts line 77
     #[test]
     fn extracts_build_system_requires() {
-        // Ported: "extracts build-system.requires dependencies" — poetry/extract.spec.ts line 77
         let content = r#"
 [build-system]
 requires = ["poetry-core>=1.0.0", "setuptools>=40.0"]
@@ -487,6 +493,7 @@ abc = "^5.5"
 
     // ── Empty / no poetry section ─────────────────────────────────────────────
 
+    // Ported: "returns null for parsed file without poetry section" — poetry/extract.spec.ts line 47
     #[test]
     fn no_poetry_section_returns_empty() {
         let content = "[project]\nname = \"myapp\"\n";
@@ -494,6 +501,7 @@ abc = "^5.5"
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns null for empty" — poetry/extract.spec.ts line 43
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract_ok("");

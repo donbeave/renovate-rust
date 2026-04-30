@@ -328,6 +328,7 @@ mod tests {
 
     // ── build file tests ──────────────────────────────────────────────────────
 
+    // Ported: "extracts from cross-referenced files" — gradle/extract.spec.ts line 97
     #[test]
     fn extracts_implementation_single_quote() {
         let content = "implementation 'com.google.guava:guava:31.0-jre'\n";
@@ -338,6 +339,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "resolves versions in build.gradle.kts" — gradle/extract.spec.ts line 125
     #[test]
     fn extracts_implementation_double_quote_parens() {
         let content = r#"implementation("com.google.guava:guava:31.0-jre")"#;
@@ -346,6 +348,7 @@ mod tests {
         assert_eq!(deps[0].dep_name, "com.google.guava:guava");
     }
 
+    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
     #[test]
     fn extracts_multiple_configs() {
         let content = r#"
@@ -418,6 +421,7 @@ testImplementation 'junit:junit:4.13.2'
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
     #[test]
     fn classpath_dependency() {
         let content = "classpath 'com.android.tools.build:gradle:7.4.0'\n";
@@ -428,6 +432,7 @@ testImplementation 'junit:junit:4.13.2'
 
     // ── plugins {} block tests ────────────────────────────────────────────────
 
+    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
     #[test]
     fn plugins_block_single_quote() {
         let content = r#"
@@ -445,6 +450,7 @@ plugins {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "resolves versions in build.gradle.kts" — gradle/extract.spec.ts line 125
     #[test]
     fn plugins_block_double_quote_parens() {
         let content = r#"
@@ -462,6 +468,7 @@ plugins {
             && d.current_value == "1.9.20"));
     }
 
+    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
     #[test]
     fn plugins_and_deps_in_same_file() {
         let content = r#"
@@ -479,6 +486,7 @@ dependencies {
         assert!(deps.iter().any(|d| d.dep_name == "com.google.guava:guava"));
     }
 
+    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
     #[test]
     fn plugins_block_variable_version_skipped() {
         let content = r#"plugins { id 'org.example.plugin' version "$pluginVersion" }"#;
@@ -492,6 +500,7 @@ dependencies {
 
     // ── version catalog tests ─────────────────────────────────────────────────
 
+    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_inline_string_form() {
         let content = r#"
@@ -508,6 +517,7 @@ junit = "junit:junit:4.13.2"
         assert_eq!(guava.current_value, "31.0-jre");
     }
 
+    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_table_form_inline_version() {
         let content = r#"
@@ -520,6 +530,7 @@ commons-io = { module = "org.apache.commons:commons-io", version = "2.11.0" }
         assert_eq!(deps[0].current_value, "2.11.0");
     }
 
+    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_table_form_version_ref() {
         let content = r#"
@@ -535,6 +546,7 @@ guava = { module = "com.google.guava:guava", version.ref = "guava" }
         assert_eq!(deps[0].current_value, "31.0-jre");
     }
 
+    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_plugins_section_table_version_ref() {
         let content = r#"
@@ -565,6 +577,7 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
         );
     }
 
+    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_plugins_section_string_form() {
         let content = r#"
@@ -580,6 +593,7 @@ spring-boot = "org.springframework.boot:3.2.0"
         assert_eq!(deps[0].current_value, "3.2.0");
     }
 
+    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_plugins_section_table_inline_version() {
         let content = r#"
