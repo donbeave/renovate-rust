@@ -350,6 +350,23 @@ worker:
         assert_eq!(deps[0].tag.as_deref(), Some("20.0.0"));
     }
 
+    // Ported: "extracts image of templated compose file" — docker-compose/extract.spec.ts line 172
+    #[test]
+    fn extracts_image_from_templated_compose_file() {
+        // {{ }} template expressions are ignored since they don't contain `image:`
+        let content = r#"version: "3"
+services:
+  nginx:
+    image: quay.io/nginx:0.0.1
+    envrionment:
+      {{ services['nginx']['env'] }}
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "quay.io/nginx");
+        assert_eq!(deps[0].tag.as_deref(), Some("0.0.1"));
+    }
+
     // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
     #[test]
     fn no_version_key_extracts_eight_deps() {

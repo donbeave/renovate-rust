@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 336 / 450 actionable tests ported (75%) — updated 2026-04-30
+**Overall progress:** 337 / 450 actionable tests ported (75%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -714,8 +714,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 10 | ported | `conan.rs` | `empty_returns_empty` | — |
-| extracts multiple image lines from conanfile.txt | 14 | pending | — | — | — |
-| extracts multiple 0 lines from conanfile.txt | 129 | pending | — | — | — |
+| extracts multiple image lines from conanfile.txt | 14 | pending | — | — | Requires range version + digest support |
+| extracts multiple 0 lines from conanfile.txt | 129 | pending | — | — | Requires range version + digest support |
 | extracts multiple image lines from conanfile.py | 134 | ported | `conan.rs` | `extracts_py_requires` | — |
 
 ---
@@ -861,7 +861,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts image and replaces registry | 87 | pending | — | — | registryAliases not yet implemented |
 | extracts image but no replacement | 115 | pending | — | — | registryAliases not yet implemented |
 | extracts image and no double replacement | 143 | pending | — | — | registryAliases not yet implemented |
-| extracts image of templated compose file | 172 | pending | — | — | — |
+| extracts image of templated compose file | 172 | ported | `docker_compose.rs` | `extracts_image_from_templated_compose_file` | — |
 | extract images from fragments | 198 | pending | — | — | YAML anchors not resolved |
 
 ---
