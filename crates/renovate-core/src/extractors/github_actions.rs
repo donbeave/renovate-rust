@@ -474,6 +474,7 @@ jobs:
         assert!(deps.contains(&dep("actions/setup-node", "v3")));
     }
 
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
     #[test]
     fn action_with_sub_path_uses_owner_repo() {
         let content = "      - uses: org/repo/subpath@v2\n";
@@ -483,6 +484,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v2");
     }
 
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
     #[test]
     fn local_action_skipped() {
         let content = "      - uses: ./.github/actions/my-action\n";
@@ -494,6 +496,7 @@ jobs:
         );
     }
 
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 54
     #[test]
     fn docker_ref_skipped() {
         let content = "      - uses: docker://alpine:3.18\n";
@@ -722,6 +725,7 @@ jobs:
         assert!(extract("nothing here: [").is_empty());
     }
 
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
     #[test]
     fn owner_repo_strips_subpath() {
         assert_eq!(
@@ -861,6 +865,7 @@ jobs:
         assert!(deps.is_empty(), "variable references should be skipped");
     }
 
+    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 42
     #[test]
     fn docker_no_container_no_services_returns_empty() {
         let content = r#"
@@ -935,12 +940,14 @@ jobs:
         assert!(extract_runner_labels(content).is_empty());
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_self_hosted_skipped() {
         let content = "    runs-on: self-hosted\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_matrix_variable_skipped() {
         let content = "    runs-on: ${{ matrix.os }}\n";
@@ -956,12 +963,14 @@ jobs:
         assert_eq!(runners[0].current_value, "22.04");
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn runner_unknown_version_skipped() {
         let content = "    runs-on: ubuntu-99.99\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
+    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 673
     #[test]
     fn parse_runner_label_splits_correctly() {
         assert_eq!(

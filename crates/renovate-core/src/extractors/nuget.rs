@@ -350,6 +350,7 @@ mod tests {
         extract(content).expect("parse should succeed")
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn simple_package_reference() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk">
@@ -368,6 +369,7 @@ mod tests {
         assert!(json.skip_reason.is_none());
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn update_attribute_extracted() {
         let content = r#"<Project>
@@ -381,6 +383,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "4.5.0");
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn version_override_attribute_wins() {
         let content = r#"<Project>
@@ -392,6 +395,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "13.0.3");
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn version_child_element() {
         let content = r#"<Project>
@@ -406,6 +410,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "2.4.0");
     }
 
+    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn property_ref_skipped() {
         let content = r#"<Project>
@@ -417,6 +422,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NuGetSkipReason::PropertyRef));
     }
 
+    // Ported: "does not fail on package file without version" — nuget/extract.spec.ts line 79
     #[test]
     fn no_version_skipped() {
         let content = r#"<Project>
@@ -470,6 +476,7 @@ mod tests {
         }
     }
 
+    // Ported: "extracts all dependencies from global packages file" — nuget/extract.spec.ts line 226
     #[test]
     fn global_and_cli_tool_references() {
         let content = r#"<Project>
@@ -491,6 +498,7 @@ mod tests {
         );
     }
 
+    // Ported: "does not fail on package file without version" — nuget/extract.spec.ts line 79
     #[test]
     fn empty_project_returns_empty() {
         let deps = extract_ok(r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup/></Project>"#);
@@ -513,9 +521,9 @@ mod tests {
         assert_eq!(normalize_version("[1.2.3,)"), ("1.2.3".to_owned(), None));
     }
 
+    // Ported: "extracts dependency with lower-case Version attribute" — nuget/extract.spec.ts line 212
     #[test]
     fn lowercase_version_attribute_extracted() {
-        // Ported: "extracts dependency with lower-case Version attribute" — nuget/extract.spec.ts line 212
         let content = r#"<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Moq" version="4.18.4" />
@@ -528,9 +536,9 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts msbuild sdk from the Sdk attr of Project element" — nuget/extract.spec.ts line 94
     #[test]
     fn msbuild_sdk_from_project_attr() {
-        // Ported: "extracts msbuild sdk from the Sdk attr of Project element" — nuget/extract.spec.ts line 94
         let content = r#"<Project Sdk="Microsoft.Build.NoTargets/3.4.0">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -544,9 +552,9 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "does not extract msbuild sdk from the Sdk attr of Project element if version is missing" — nuget/extract.spec.ts line 117
     #[test]
     fn msbuild_sdk_missing_version_from_project_attr() {
-        // Ported: "does not extract msbuild sdk from the Sdk attr of Project element if version is missing" — line 117
         let content = r#"<Project Sdk="Microsoft.Build.NoTargets">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -556,9 +564,9 @@ mod tests {
         assert!(deps.is_empty());
     }
 
+    // Ported: "extracts msbuild sdk from the Sdk element" — nuget/extract.spec.ts line 132
     #[test]
     fn msbuild_sdk_from_sdk_element() {
-        // Ported: "extracts msbuild sdk from the Sdk element" — nuget/extract.spec.ts line 132
         let content = r#"<Project>
   <Sdk Name="Microsoft.Build.NoTargets" Version="3.4.0" />
   <PropertyGroup>
@@ -572,9 +580,9 @@ mod tests {
         assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
     }
 
+    // Ported: "extracts msbuild sdk from the Import element" — nuget/extract.spec.ts line 172
     #[test]
     fn msbuild_sdk_from_import_element() {
-        // Ported: "extracts msbuild sdk from the Import element" — nuget/extract.spec.ts line 172
         let content = r#"<Project>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
