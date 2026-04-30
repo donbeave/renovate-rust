@@ -727,6 +727,26 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("10"));
     }
 
+    // Ported: "handles prefixes with registries" — dockerfile/extract.spec.ts line 861
+    #[test]
+    fn registry_with_namespace_prefix() {
+        let deps = extract_ok("FROM public.ecr.aws/ubuntu/ubuntu:18.04\n");
+        assert_eq!(deps[0].image, "public.ecr.aws/ubuntu/ubuntu");
+        assert_eq!(deps[0].tag.as_deref(), Some("18.04"));
+    }
+
+    // Ported: "ignores parser directives in wrong order" — dockerfile/extract.spec.ts line 1131
+    #[test]
+    fn parser_directives_in_wrong_order_ignored() {
+        // `# escape = \`` must be the FIRST line to change the escape char;
+        // here it's the second line so it's treated as a regular comment.
+        let content = "# dummy\n# escape = `\n\nFROM\\\nnginx:1.20";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "nginx");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.20"));
+    }
+
     // ── RUN --mount=from ──────────────────────────────────────────────────────
 
     // Ported: "handles run --mount=from" — dockerfile/extract.spec.ts line 36

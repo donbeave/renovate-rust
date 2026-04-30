@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 159 / 310 actionable tests ported (51%) — updated 2026-04-29
+**Overall progress:** 161 / 310 actionable tests ported (52%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -683,8 +683,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles debian with regular tag | 786 | ported | `dockerfile.rs` | `debian_with_version_tag` | — |
 | handles debian with prefixes | 803 | pending | — | — | Requires depName/packageName distinction for platform prefix stripping |
 | handles debian with prefixes and registries | 821 | ported | `dockerfile.rs` | `debian_with_registry_prefix` | — |
-| handles prefixes | 843 | pending | — | — | — |
-| handles prefixes with registries | 861 | pending | — | — | — |
+| handles prefixes | 843 | pending | — | — | Requires depName/packageName distinction for platform prefix stripping |
+| handles prefixes with registries | 861 | ported | `dockerfile.rs` | `registry_with_namespace_prefix` | — |
 | handles implausible line continuation | 883 | ported | `dockerfile.rs` | `implausible_continuation_does_not_affect_from` | — |
 | handles multi-line FROM with space after escape character | 904 | ported | `dockerfile.rs` | `multiline_from_with_space_after_escape` | — |
 | handles FROM without ARG default value | 921 | ported | `dockerfile.rs` | `from_with_arg_variable_is_skipped` | — |
@@ -696,7 +696,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles FROM with multiple ARG values | 1058 | pending | — | — | — |
 | skips scratch if provided in ARG value | 1079 | pending | — | — | — |
 | extracts images from multi-line ARG statements | 1088 | pending | — | — | — |
-| ignores parser directives in wrong order | 1131 | pending | — | — | — |
+| ignores parser directives in wrong order | 1131 | ported | `dockerfile.rs` | `parser_directives_in_wrong_order_ignored` | — |
 | handles an alternative escape character | 1152 | pending | — | — | — |
 | handles FROM with version in ARG default value and quotes | 1227 | pending | — | — | — |
 | handles version in ARG and digest in FROM with CRLF linefeed | 1249 | pending | — | — | — |
