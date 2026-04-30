@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 154 / 310 actionable tests ported (50%) — updated 2026-04-29
+**Overall progress:** 159 / 310 actionable tests ported (51%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -677,12 +677,12 @@ Status key: `ported` · `pending` · `not-applicable`
 | detects ["stage"] and ["final"] deps of docker multi-stage build. | 549 | ported | `dockerfile.rs` | `multistage_build_with_copy_from_stage` | — |
 | extracts images on adjacent lines | 598 | ported | `dockerfile.rs` | `renovate_fixture_1` | — |
 | extracts images from all sorts of (maybe multiline) FROM and COPY --from statements | 628 | pending | — | — | — |
-| handles calico/node | 733 | pending | — | — | — |
-| handles ubuntu | 750 | pending | — | — | — |
-| handles debian with codename | 768 | pending | — | — | — |
-| handles debian with regular tag | 786 | pending | — | — | — |
-| handles debian with prefixes | 803 | pending | — | — | — |
-| handles debian with prefixes and registries | 821 | pending | — | — | — |
+| handles calico/node | 733 | ported | `dockerfile.rs` | `namespaced_image_without_tag` | — |
+| handles ubuntu | 750 | ported | `dockerfile.rs` | `ubuntu_with_version_tag` | — |
+| handles debian with codename | 768 | ported | `dockerfile.rs` | `debian_with_codename_tag` | — |
+| handles debian with regular tag | 786 | ported | `dockerfile.rs` | `debian_with_version_tag` | — |
+| handles debian with prefixes | 803 | pending | — | — | Requires depName/packageName distinction for platform prefix stripping |
+| handles debian with prefixes and registries | 821 | ported | `dockerfile.rs` | `debian_with_registry_prefix` | — |
 | handles prefixes | 843 | pending | — | — | — |
 | handles prefixes with registries | 861 | pending | — | — | — |
 | handles implausible line continuation | 883 | ported | `dockerfile.rs` | `implausible_continuation_does_not_affect_from` | — |

@@ -684,6 +684,49 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("22.04"));
     }
 
+    // ── image naming variants ─────────────────────────────────────────────────
+
+    // Ported: "handles calico/node" — dockerfile/extract.spec.ts line 733
+    #[test]
+    fn namespaced_image_without_tag() {
+        let deps = extract_ok("FROM calico/node\n");
+        assert_eq!(deps[0].image, "calico/node");
+        assert!(deps[0].tag.is_none());
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles ubuntu" — dockerfile/extract.spec.ts line 750
+    #[test]
+    fn ubuntu_with_version_tag() {
+        let deps = extract_ok("FROM ubuntu:18.04\n");
+        assert_eq!(deps[0].image, "ubuntu");
+        assert_eq!(deps[0].tag.as_deref(), Some("18.04"));
+    }
+
+    // Ported: "handles debian with codename" — dockerfile/extract.spec.ts line 768
+    #[test]
+    fn debian_with_codename_tag() {
+        let deps = extract_ok("FROM debian:buster\n");
+        assert_eq!(deps[0].image, "debian");
+        assert_eq!(deps[0].tag.as_deref(), Some("buster"));
+    }
+
+    // Ported: "handles debian with regular tag" — dockerfile/extract.spec.ts line 786
+    #[test]
+    fn debian_with_version_tag() {
+        let deps = extract_ok("FROM debian:11.4-slim\n");
+        assert_eq!(deps[0].image, "debian");
+        assert_eq!(deps[0].tag.as_deref(), Some("11.4-slim"));
+    }
+
+    // Ported: "handles debian with prefixes and registries" — dockerfile/extract.spec.ts line 821
+    #[test]
+    fn debian_with_registry_prefix() {
+        let deps = extract_ok("FROM docker.io/library/debian:10\n");
+        assert_eq!(deps[0].image, "docker.io/library/debian");
+        assert_eq!(deps[0].tag.as_deref(), Some("10"));
+    }
+
     // ── RUN --mount=from ──────────────────────────────────────────────────────
 
     // Ported: "handles run --mount=from" — dockerfile/extract.spec.ts line 36
