@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 108 / 221 actionable tests ported (49%) — updated 2026-04-30
+**Overall progress:** 118 / 244 actionable tests ported (48%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -614,6 +614,53 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/docker-compose/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/docker-compose/extract.spec.ts
+**Total tests:** 13 | **Ported:** 4 | **Actionable:** 13 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 12 | ported | `docker_compose.rs` | `empty_content_returns_empty` | — |
+| returns null for non-object YAML | 16 | pending | — | — | — |
+| returns null for malformed YAML | 20 | pending | — | — | — |
+| extracts multiple image lines for version 1 | 24 | ported | `docker_compose.rs` | `renovate_fixture_1_v1_format` | — |
+| extracts multiple image lines for version 3 | 30 | ported | `docker_compose.rs` | `extracts_images_from_compose_v3` | — |
+| extracts multiple image lines for version 3 without set version key | 36 | pending | — | — | — |
+| extracts default variable values for version 3 | 42 | ported | `docker_compose.rs` | `variable_interpolation_is_skipped` | — |
+| extracts can parse yaml tags for version 3 | 59 | pending | — | — | — |
+| extracts image and replaces registry | 87 | pending | — | — | registryAliases not yet implemented |
+| extracts image but no replacement | 115 | pending | — | — | registryAliases not yet implemented |
+| extracts image and no double replacement | 143 | pending | — | — | registryAliases not yet implemented |
+| extracts image of templated compose file | 172 | pending | — | — | — |
+| extract images from fragments | 198 | pending | — | — | YAML anchors not resolved |
+
+---
+
+## `lib/modules/manager/fleet/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/fleet/extract.spec.ts
+**Total tests:** 10 | **Ported:** 5 | **Actionable:** 10 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null if empty content | 24 | ported | `fleet.rs` | `empty_content_returns_empty` | — |
+| should return null if a unknown manifest is supplied | 30 | ported | `fleet.rs` | `unknown_manifest_returns_empty` | — |
+| should return null if content is a malformed YAML (fleet.yaml) | 37 | pending | — | — | — |
+| should parse valid configuration (fleet.yaml) | 49 | ported | `fleet.rs` | `extracts_helm_dep_from_fleet_yaml` | — |
+| should support registryAlias configuration | 88 | pending | — | — | registryAliases not yet implemented |
+| should parse valid configuration with target customization | 132 | ported | `fleet.rs` | `extracts_target_customizations` | — |
+| should parse parse invalid configurations | 208 | pending | — | — | — |
+| should return null if content is a malformed YAML (GitRepo) | 242 | pending | — | — | — |
+| should parse valid configuration (GitRepo) | 254 | ported | `fleet.rs` | `extracts_gitrepo_dep` | — |
+| should parse invalid configuration (GitRepo) | 276 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -628,9 +675,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
-| `lib/modules/manager/docker-compose/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/docker_compose.rs` | 10 | partial |
 | `lib/modules/manager/dockerfile/extract.spec.ts` | 75 | `crates/renovate-core/src/extractors/dockerfile.rs` | 16 | partial |
-| `lib/modules/manager/fleet/extract.spec.ts` | 10 | `crates/renovate-core/src/extractors/fleet.rs` | 10 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
 | `lib/modules/manager/github-actions/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/github_actions.rs` | 28 | partial |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/gitlabci.rs` | 8 | partial |
