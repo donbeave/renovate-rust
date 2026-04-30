@@ -919,6 +919,61 @@ mod tests {
         );
     }
 
+    // Ported: "extracts images from all sorts of (maybe multiline) FROM and COPY --from statements" — dockerfile/extract.spec.ts line 628
+    #[test]
+    fn renovate_fixture_2_multiline() {
+        let content = include_str!("../../tests/fixtures/dockerfile/2.Dockerfile");
+        let deps = extract_ok(content);
+        // Expected: image1, image2, image4, image5, image6, image7, image11, image12, image13
+        // image3 and image8 are in comments → skipped by the extractor.
+        let images: Vec<&str> = deps.iter().map(|d| d.image.as_str()).collect();
+        assert!(
+            images.contains(&"image1"),
+            "image1 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image2"),
+            "image2 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image4"),
+            "image4 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image5"),
+            "image5 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image6"),
+            "image6 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image7"),
+            "image7 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image11"),
+            "image11 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image12"),
+            "image12 expected, got: {images:?}"
+        );
+        assert!(
+            images.contains(&"image13"),
+            "image13 expected, got: {images:?}"
+        );
+        // image3 and image8 must NOT be extracted (they're in comments).
+        assert!(!images.contains(&"image3"), "image3 must not appear");
+        assert!(!images.contains(&"image8"), "image8 must not appear");
+        // Check digest on image2 and image7.
+        let img2 = deps.iter().find(|d| d.image == "image2").unwrap();
+        assert_eq!(img2.digest.as_deref(), Some("sha256:abcdef"));
+        assert_eq!(img2.tag.as_deref(), Some("1.0.0"));
+        let img7 = deps.iter().find(|d| d.image == "image7").unwrap();
+        assert_eq!(img7.digest.as_deref(), Some("sha256:abcdef"));
+    }
+
     // Ported: "handles quay hosts with port" — dockerfile/extract.spec.ts line 278
     #[test]
     fn quay_host_with_port_no_tag() {
