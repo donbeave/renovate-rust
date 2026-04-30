@@ -87,8 +87,15 @@ pub fn extract(content: &str) -> Vec<GitlabCiDep> {
         if in_services_block {
             if let Some(cap) = SERVICE_ITEM.captures(line) {
                 let image_str = cap[1].trim().trim_matches('"').trim_matches('\'');
-                if !image_str.is_empty() && !image_str.starts_with('$') {
-                    let dep = classify_image_ref(image_str);
+                let effective = if image_str.starts_with('$') {
+                    strip_dependency_proxy_prefix(image_str)
+                } else if image_str.is_empty() {
+                    None
+                } else {
+                    Some(image_str)
+                };
+                if let Some(eff) = effective {
+                    let dep = classify_image_ref(eff);
                     out.push(GitlabCiDep { dep });
                 }
             } else if indent == 0 {
@@ -102,7 +109,14 @@ pub fn extract(content: &str) -> Vec<GitlabCiDep> {
             let value = cap[1].trim().trim_matches('"').trim_matches('\'');
             if !value.is_empty() {
                 in_image_block = false;
-                let dep = classify_image_ref(value);
+                // Dependency proxy variables are stripped; other variables are
+                // passed as-is so classify_image_ref can assign a skip reason.
+                let effective = if value.starts_with('$') {
+                    strip_dependency_proxy_prefix(value).unwrap_or(value)
+                } else {
+                    value
+                };
+                let dep = classify_image_ref(effective);
                 out.push(GitlabCiDep { dep });
             }
             continue;
@@ -122,8 +136,13 @@ pub fn extract(content: &str) -> Vec<GitlabCiDep> {
                 in_image_block = false;
             } else if let Some(cap) = IMAGE_NAME.captures(line) {
                 let value = cap[1].trim().trim_matches('"').trim_matches('\'');
-                if !value.is_empty() && !value.starts_with('$') {
-                    let dep = classify_image_ref(value);
+                if !value.is_empty() {
+                    let effective = if value.starts_with('$') {
+                        strip_dependency_proxy_prefix(value).unwrap_or(value)
+                    } else {
+                        value
+                    };
+                    let dep = classify_image_ref(effective);
                     out.push(GitlabCiDep { dep });
                     in_image_block = false;
                 }
@@ -136,6 +155,32 @@ pub fn extract(content: &str) -> Vec<GitlabCiDep> {
 
 fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
+}
+
+/// If the image reference uses a GitLab CI Dependency Proxy prefix variable,
+/// strip the prefix and return the actual image path.
+/// Handles: `${CI_DEPENDENCY_PROXY_*}/image:tag` and `$CI_DEPENDENCY_PROXY_*/image:tag`.
+fn strip_dependency_proxy_prefix(s: &str) -> Option<&str> {
+    // ${CI_DEPENDENCY_PROXY_*}/image
+    if let Some(rest) = s.strip_prefix("${") {
+        if let Some(slash_pos) = rest.find("}/") {
+            let var_name = &rest[..slash_pos];
+            if var_name.starts_with("CI_DEPENDENCY_PROXY") {
+                return Some(&rest[slash_pos + 2..]);
+            }
+        }
+        return None;
+    }
+    // $CI_DEPENDENCY_PROXY_*/image
+    if let Some(rest) = s.strip_prefix('$') {
+        if let Some(slash_pos) = rest.find('/') {
+            let var_name = &rest[..slash_pos];
+            if var_name.starts_with("CI_DEPENDENCY_PROXY") {
+                return Some(&rest[slash_pos + 1..]);
+            }
+        }
+    }
+    None
 }
 
 #[cfg(test)]
@@ -269,5 +314,27 @@ services:
         );
         assert!(deps.iter().any(|d| d.dep.image == "mariadb"));
         assert!(deps.iter().any(|d| d.dep.image == "other/image"));
+    }
+
+    // Ported: "extract images from dependency proxy" — gitlabci/extract.spec.ts line 172
+    #[test]
+    fn dependency_proxy_prefix_stripped() {
+        // Inline image with ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX} prefix in block form
+        let content = r#"image:
+  name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim
+
+services:
+  - $CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.dep.image == "renovate/renovate" && d.dep.skip_reason.is_none())
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep.image == "mariadb" && d.dep.skip_reason.is_none())
+        );
     }
 }

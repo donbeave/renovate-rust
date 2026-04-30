@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 423 / 450 actionable tests ported (94%) — updated 2026-04-30
+**Overall progress:** 424 / 450 actionable tests ported (94%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -418,7 +418,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts multiple image lines with comments | 94 | ported | `gitlabci.rs` | `extracts_images_with_comment_lines` | — |
 | catches errors | 110 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
 | skips images with variables | 118 | ported | `gitlabci.rs` | `variable_image_has_skip_reason` | — |
-| extract images from dependency proxy | 172 | pending | — | — | — |
+| extract images from dependency proxy | 172 | ported | `gitlabci.rs` | `dependency_proxy_prefix_stripped` | — |
 | extract images via registry aliases | 229 | pending | — | — | registryAliases not yet implemented |
 | extracts component references via registry aliases | 299 | pending | — | — | registryAliases not yet implemented |
 | extracts component references | 377 | pending | — | — | — |
