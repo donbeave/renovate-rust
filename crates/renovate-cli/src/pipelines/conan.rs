@@ -29,10 +29,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 };
                 let actionable_count = deps
                     .iter()
-                    .filter(|d| {
-                        d.skip_reason.is_none()
-                            && !repo_cfg.is_dep_ignored_for_manager(&d.name, "conan")
-                    })
+                    .filter(|d| !repo_cfg.is_dep_ignored_for_manager(&d.name, "conan"))
                     .count();
                 tracing::debug!(
                     repo = %repo_slug, file = %conan_path,
@@ -41,36 +38,6 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 );
                 let mut file_deps: Vec<output::DepReport> = Vec::new();
                 for dep in &deps {
-                    if let Some(reason) = &dep.skip_reason {
-                        file_deps.push(output::DepReport {
-                            branch_name: None,
-                            group_name: None,
-                            automerge: None,
-                            labels: Vec::new(),
-                            assignees: Vec::new(),
-                            reviewers: Vec::new(),
-                            update_type: None,
-                            pr_priority: None,
-                            pr_title: None,
-                            release_timestamp: None,
-                            current_version_timestamp: None,
-
-                            dep_type: None,
-                            package_name: None,
-                            range_strategy: None,
-                            follow_tag: None,
-                            pin_digests: None,
-                            versioning: None,
-                            dependency_dashboard_approval: None,
-                            replacement_name: None,
-                            replacement_version: None,
-                            name: dep.name.clone(),
-                            status: output::DepStatus::Skipped {
-                                reason: format!("{reason:?}").to_lowercase(),
-                            },
-                        });
-                        continue;
-                    }
                     if repo_cfg.is_dep_ignored_for_manager(&dep.name, "conan") {
                         continue;
                     }

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 337 / 450 actionable tests ported (75%) — updated 2026-04-30
+**Overall progress:** 339 / 450 actionable tests ported (75%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -707,15 +707,15 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/conan/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/conan/extract.spec.ts
-**Total tests:** 4 | **Ported:** 2 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `extractPackageFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 10 | ported | `conan.rs` | `empty_returns_empty` | — |
-| extracts multiple image lines from conanfile.txt | 14 | pending | — | — | Requires range version + digest support |
-| extracts multiple 0 lines from conanfile.txt | 129 | pending | — | — | Requires range version + digest support |
+| extracts multiple image lines from conanfile.txt | 14 | ported | `conan.rs` | `extracts_full_conanfile_txt_fixture` | — |
+| extracts multiple 0 lines from conanfile.txt | 129 | ported | `conan.rs` | `conanfile_without_requires_section_returns_empty` | — |
 | extracts multiple image lines from conanfile.py | 134 | ported | `conan.rs` | `extracts_py_requires` | — |
 
 ---
