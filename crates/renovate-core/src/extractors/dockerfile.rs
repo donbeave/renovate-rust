@@ -75,6 +75,14 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
             continue;
         }
 
+        // Handle COPY --from=<image> instructions.
+        if let Some(after_copy) = strip_instruction(trimmed, "COPY") {
+            if let Some(image_ref) = extract_copy_from_image(after_copy, &stage_names) {
+                out.push(classify_from(&image_ref, &stage_names));
+            }
+            continue;
+        }
+
         // Only care about FROM instructions.
         let Some(after_from) = strip_instruction(trimmed, "FROM") else {
             continue;
@@ -166,6 +174,28 @@ fn strip_instruction<'a>(line: &'a str, instruction: &str) -> Option<&'a str> {
         }
     }
     None
+}
+
+/// Extract the image reference from a COPY --from=<image> argument string.
+///
+/// Returns `None` for stage name references (e.g. `--from=builder`) and
+/// numeric index references (e.g. `--from=0`).
+fn extract_copy_from_image(args: &str, stage_names: &[String]) -> Option<String> {
+    let upper = args.to_ascii_uppercase();
+    let from_pos = upper.find("--FROM=")?;
+    let value_start = from_pos + "--FROM=".len();
+    let value = args[value_start..].split_ascii_whitespace().next()?;
+
+    // Numeric index (e.g. `--from=0`) → skip.
+    if value.parse::<u32>().is_ok() {
+        return None;
+    }
+    // Named stage reference → skip.
+    if stage_names.contains(&value.to_lowercase()) {
+        return None;
+    }
+
+    Some(value.to_owned())
 }
 
 /// Strip an optional `--platform=...` prefix from a FROM argument string.
@@ -547,6 +577,62 @@ mod tests {
         let deps = extract_ok("FROM --platform=linux/amd64 ubuntu:22.04");
         assert_eq!(deps[0].image, "ubuntu");
         assert_eq!(deps[0].tag.as_deref(), Some("22.04"));
+    }
+
+    // ── COPY --from ───────────────────────────────────────────────────────────
+
+    // Ported: "handles COPY --from" — dockerfile/extract.spec.ts line 433
+    #[test]
+    fn copy_from_extracts_external_image() {
+        let content = "FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n";
+        let deps = extract_ok(content);
+        // scratch is skipped; the COPY --from external image is extracted
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::Scratch));
+        assert_eq!(deps[1].image, "gcr.io/k8s-skaffold/skaffold");
+        assert_eq!(deps[1].tag.as_deref(), Some("v0.11.0"));
+        assert!(deps[1].skip_reason.is_none());
+    }
+
+    // Ported: "handles COPY --from with digest" — dockerfile/extract.spec.ts line 454
+    #[test]
+    fn copy_from_with_digest() {
+        let content = "FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d /usr/bin/skaffold /usr/bin/skaffold\n";
+        let deps = extract_ok(content);
+        assert_eq!(deps[1].image, "gcr.io/k8s-skaffold/skaffold");
+        assert_eq!(deps[1].tag.as_deref(), Some("v0.11.0"));
+        assert_eq!(
+            deps[1].digest.as_deref(),
+            Some("sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d")
+        );
+    }
+
+    // Ported: "handles COPY --link --from" — dockerfile/extract.spec.ts line 481
+    #[test]
+    fn copy_link_from_extracts_image() {
+        let content = "FROM scratch\nCOPY --link --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n";
+        let deps = extract_ok(content);
+        assert_eq!(deps[1].image, "gcr.io/k8s-skaffold/skaffold");
+        assert_eq!(deps[1].tag.as_deref(), Some("v0.11.0"));
+    }
+
+    // Ported: "skips named multistage COPY --from tags" — dockerfile/extract.spec.ts line 507
+    #[test]
+    fn copy_from_stage_name_is_skipped() {
+        let content = "FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=frontend /usr/bin/node /usr/bin/node\n";
+        let deps = extract_ok(content);
+        // Only the FROM instruction produces a dep; the COPY --from refers to a stage name.
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
+    }
+
+    // Ported: "skips index reference COPY --from tags" — dockerfile/extract.spec.ts line 528
+    #[test]
+    fn copy_from_index_is_skipped() {
+        let content = "FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=0 /usr/bin/node /usr/bin/node\n";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "node");
     }
 
     // ── real-world fixture from Renovate ─────────────────────────────────────

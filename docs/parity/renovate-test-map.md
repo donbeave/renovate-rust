@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 143 / 310 actionable tests ported (46%) — updated 2026-04-29
+**Overall progress:** 148 / 310 actionable tests ported (48%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -669,11 +669,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts tags from Dockerfile which begins with a BOM marker | 386 | ported | `dockerfile.rs` | `bom_marker_stripped` | — |
 | skips scratches | 407 | ported | `dockerfile.rs` | `scratch_is_skipped` | — |
 | skips named multistage FROM tags | 412 | ported | `dockerfile.rs` | `stage_reference_is_skipped` | — |
-| handles COPY --from | 433 | pending | — | — | — |
-| handles COPY --from with digest | 454 | pending | — | — | — |
-| handles COPY --link --from | 481 | pending | — | — | — |
-| skips named multistage COPY --from tags | 507 | pending | — | — | — |
-| skips index reference COPY --from tags | 528 | pending | — | — | — |
+| handles COPY --from | 433 | ported | `dockerfile.rs` | `copy_from_extracts_external_image` | — |
+| handles COPY --from with digest | 454 | ported | `dockerfile.rs` | `copy_from_with_digest` | — |
+| handles COPY --link --from | 481 | ported | `dockerfile.rs` | `copy_link_from_extracts_image` | — |
+| skips named multistage COPY --from tags | 507 | ported | `dockerfile.rs` | `copy_from_stage_name_is_skipped` | — |
+| skips index reference COPY --from tags | 528 | ported | `dockerfile.rs` | `copy_from_index_is_skipped` | — |
 | detects ["stage"] and ["final"] deps of docker multi-stage build. | 549 | pending | — | — | — |
 | extracts images on adjacent lines | 598 | ported | `dockerfile.rs` | `renovate_fixture_1` | — |
 | extracts images from all sorts of (maybe multiline) FROM and COPY --from statements | 628 | pending | — | — | — |
