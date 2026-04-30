@@ -47,6 +47,8 @@ pub struct JenkinsPluginDep {
 pub enum JenkinsSkipReason {
     UnspecifiedVersion,
     UnsupportedVersion,
+    /// Plugin has a `# renovate:ignore` comment.
+    Ignored,
 }
 
 /// Parse a `plugins.txt` file (one `plugin-id:version` entry per line).
@@ -63,9 +65,7 @@ pub fn extract_txt(content: &str) -> Vec<JenkinsPluginDep> {
         if line.is_empty() {
             continue;
         }
-        if is_skip_comment(comment) {
-            continue;
-        }
+        let renovate_ignored = is_skip_comment(comment);
 
         if let Some((id, version)) = line.split_once(':') {
             let id = id.trim();
@@ -73,7 +73,9 @@ pub fn extract_txt(content: &str) -> Vec<JenkinsPluginDep> {
             if id.is_empty() {
                 continue;
             }
-            let skip_reason = if version.is_empty() {
+            let skip_reason = if renovate_ignored {
+                Some(JenkinsSkipReason::Ignored)
+            } else if version.is_empty() {
                 Some(JenkinsSkipReason::UnspecifiedVersion)
             } else if matches!(version, "latest" | "experimental") {
                 Some(JenkinsSkipReason::UnsupportedVersion)
@@ -278,5 +280,105 @@ plugins:
     #[test]
     fn yml_empty_returns_empty() {
         assert!(extract_yml("").is_empty());
+    }
+
+    // Ported: "returns empty list for an empty text file" — jenkins/extract.spec.ts line 15
+    #[test]
+    fn txt_empty_file_returns_empty() {
+        assert!(extract_txt("").is_empty());
+    }
+
+    // Ported: "returns empty list for an invalid yaml file" — jenkins/extract.spec.ts line 27
+    #[test]
+    fn yml_invalid_yaml_returns_empty() {
+        let content = "this: is: invalid: yaml: content\n";
+        let deps = extract_yml(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "extracts multiple image lines in text format" — jenkins/extract.spec.ts line 33
+    #[test]
+    fn txt_plugins_fixture_six_deps() {
+        // Mirrors jenkins/__fixtures__/plugins.txt; 4 valid + 2 renovate:ignore = 6 total
+        let content = "email-ext:1.2.3\n\
+                       apache-httpcomponents-client-4-api:4.4.10-2.0 # comment\n\
+                       authentication-tokens:1.2\n\
+                       blueocean:1.21.0 # another comment\n\
+                       #blueocean:1.22.0\n\
+                       \n\
+                       # these deps will be ignored:\n\
+                       git:4.2.0         # renovate:ignore\n\
+                       git-client:3.3.1  # renovate:ignore\n";
+        let deps = extract_txt(content);
+        assert_eq!(deps.len(), 6);
+        assert!(
+            deps.iter()
+                .any(|d| d.artifact_id == "email-ext" && d.version.as_deref() == Some("1.2.3"))
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.artifact_id == "authentication-tokens")
+        );
+        assert!(deps.iter().any(|d| d.artifact_id == "blueocean"));
+        let git = deps.iter().find(|d| d.artifact_id == "git").unwrap();
+        assert_eq!(git.skip_reason, Some(JenkinsSkipReason::Ignored));
+        let git_client = deps.iter().find(|d| d.artifact_id == "git-client").unwrap();
+        assert_eq!(git_client.skip_reason, Some(JenkinsSkipReason::Ignored));
+    }
+
+    // Ported: "extracts multiple image lines in yaml format" — jenkins/extract.spec.ts line 40
+    #[test]
+    fn yml_plugins_fixture_eight_deps() {
+        // Mirrors jenkins/__fixtures__/plugins.yaml; 8 total including skipped
+        let content = r#"plugins:
+  - artifactId: git
+    source:
+      version: latest
+  - artifactId: job-import-plugin
+    source:
+      version: '2.10'
+  - artifactId: invalid-version-plugin
+    source:
+      version: 2.10
+  - artifactId: ignore-plugin
+    source:
+      version: '2.10'
+    renovate:
+      ignore: true
+  - artifactId: docker
+  - artifactId: cloudbees-bitbucket-branch-source
+    source:
+      version: experimental
+  - artifactId: script-security
+    source:
+      url: http://ftp-chi.osuosl.org/pub/jenkins/plugins/script-security/1.56/script-security.hpi
+  - artifactId: workflow-step-api
+    groupId: org.jenkins-ci.plugins.workflow
+    source:
+      version: 2.19-rc289.d09828a05a74
+"#;
+        let deps = extract_yml(content);
+        assert_eq!(deps.len(), 8);
+        // git: version=latest → UnsupportedVersion
+        let git = deps.iter().find(|d| d.artifact_id == "git").unwrap();
+        assert_eq!(git.skip_reason, Some(JenkinsSkipReason::UnsupportedVersion));
+        // job-import-plugin: valid
+        let jip = deps
+            .iter()
+            .find(|d| d.artifact_id == "job-import-plugin")
+            .unwrap();
+        assert!(jip.skip_reason.is_none());
+        // docker: no version → UnspecifiedVersion
+        let docker = deps.iter().find(|d| d.artifact_id == "docker").unwrap();
+        assert_eq!(
+            docker.skip_reason,
+            Some(JenkinsSkipReason::UnspecifiedVersion)
+        );
+        // workflow-step-api: prerelease → valid
+        let wsa = deps
+            .iter()
+            .find(|d| d.artifact_id == "workflow-step-api")
+            .unwrap();
+        assert!(wsa.skip_reason.is_none());
     }
 }
