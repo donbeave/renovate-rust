@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 118 / 244 actionable tests ported (48%) — updated 2026-04-29
+**Overall progress:** 131 / 310 actionable tests ported (42%) — updated 2026-04-29
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -639,6 +639,103 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/dockerfile/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
+**Total tests:** 75 | **Ported:** 13 | **Actionable:** 66 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles no FROM | 14 | pending | — | — | — |
+| handles naked dep | 19 | ported | `dockerfile.rs` | `extracts_image_without_tag` | — |
+| handles run --mount=from | 36 | pending | — | — | — |
+| is case insensitive | 72 | pending | — | — | — |
+| handles tag | 89 | ported | `dockerfile.rs` | `extracts_image_and_tag` | — |
+| handles digest | 106 | pending | — | — | — |
+| handles tag and digest | 129 | ported | `dockerfile.rs` | `extracts_image_with_digest` | — |
+| handles from as | 152 | ported | `dockerfile.rs` | `as_alias_does_not_become_dep` | — |
+| handles comments | 173 | ported | `dockerfile.rs` | `commented_from_ignored` | — |
+| handles custom hosts | 194 | pending | — | — | — |
+| handles custom hosts and suffix | 215 | pending | — | — | — |
+| handles custom hosts with port | 236 | ported | `dockerfile.rs` | `registry_port_not_confused_with_tag` | — |
+| handles custom hosts with port without tag | 257 | pending | — | — | — |
+| handles quay hosts with port | 278 | pending | — | — | — |
+| handles namespaced images | 295 | pending | — | — | — |
+| handles custom hosts with namespace | 312 | ported | `dockerfile.rs` | `extracts_scoped_image` | — |
+| handles abnormal spacing | 333 | pending | — | — | — |
+| extracts multiple FROM tags | 354 | ported | `dockerfile.rs` | `only_from_instructions_extracted` | — |
+| extracts tags from Dockerfile which begins with a BOM marker | 386 | pending | — | — | — |
+| skips scratches | 407 | ported | `dockerfile.rs` | `scratch_is_skipped` | — |
+| skips named multistage FROM tags | 412 | ported | `dockerfile.rs` | `stage_reference_is_skipped` | — |
+| handles COPY --from | 433 | pending | — | — | — |
+| handles COPY --from with digest | 454 | pending | — | — | — |
+| handles COPY --link --from | 481 | pending | — | — | — |
+| skips named multistage COPY --from tags | 507 | pending | — | — | — |
+| skips index reference COPY --from tags | 528 | pending | — | — | — |
+| detects ["stage"] and ["final"] deps of docker multi-stage build. | 549 | pending | — | — | — |
+| extracts images on adjacent lines | 598 | ported | `dockerfile.rs` | `renovate_fixture_1` | — |
+| extracts images from all sorts of (maybe multiline) FROM and COPY --from statements | 628 | pending | — | — | — |
+| handles calico/node | 733 | pending | — | — | — |
+| handles ubuntu | 750 | pending | — | — | — |
+| handles debian with codename | 768 | pending | — | — | — |
+| handles debian with regular tag | 786 | pending | — | — | — |
+| handles debian with prefixes | 803 | pending | — | — | — |
+| handles debian with prefixes and registries | 821 | pending | — | — | — |
+| handles prefixes | 843 | pending | — | — | — |
+| handles prefixes with registries | 861 | pending | — | — | — |
+| handles implausible line continuation | 883 | pending | — | — | — |
+| handles multi-line FROM with space after escape character | 904 | pending | — | — | — |
+| handles FROM without ARG default value | 921 | pending | — | — | — |
+| handles FROM with empty ARG default value | 939 | pending | — | — | — |
+| handles FROM with version in ARG value | 960 | pending | — | — | — |
+| handles FROM with version in ARG default value | 981 | pending | — | — | — |
+| handles FROM with digest in ARG default value | 1002 | pending | — | — | — |
+| handles FROM with overwritten ARG value | 1026 | pending | — | — | — |
+| handles FROM with multiple ARG values | 1058 | pending | — | — | — |
+| skips scratch if provided in ARG value | 1079 | pending | — | — | — |
+| extracts images from multi-line ARG statements | 1088 | pending | — | — | — |
+| ignores parser directives in wrong order | 1131 | pending | — | — | — |
+| handles an alternative escape character | 1152 | pending | — | — | — |
+| handles FROM with version in ARG default value and quotes | 1227 | pending | — | — | — |
+| handles version in ARG and digest in FROM with CRLF linefeed | 1249 | pending | — | — | — |
+| handles updates of multiple ARG values | 1272 | pending | — | — | — |
+| handles same argument multiple times | 1308 | pending | — | — | — |
+| handles empty optional parameters | 1329 | pending | — | — | — |
+| handles registry alias | 1352 | pending | — | — | registryAliases not yet implemented |
+| replaces registry alias from start only | 1380 | pending | — | — | registryAliases not yet implemented |
+| handles empty registry | 1407 | pending | — | — | — |
+| handles # syntax statements | 1435 | pending | — | — | — |
+| ignores # syntax statements after first line | 1469 | pending | — | — | — |
+
+### `getDep()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| rejects null | 1493 | not-applicable | — | — | TypeScript-only null guard; Rust Option handles this at type level |
+| rejects empty or whitespace | 1497 | not-applicable | — | — | TypeScript-only guard; no Rust equivalent needed |
+| handles default environment variable values | 1501 | pending | — | — | — |
+| skips tag containing a variable | 1563 | pending | — | — | — |
+| skips depName containing a non default variable at start | 1574 | ported | `dockerfile.rs` | `arg_variable_is_skipped` | — |
+| skips depName containing a non default variable with brackets at start | 1585 | ported | `dockerfile.rs` | `arg_braces_variable_is_skipped` | — |
+| skips depName containing a non default variable | 1596 | pending | — | — | — |
+| skips depName containing a non default variable with brackets | 1607 | pending | — | — | — |
+
+### `extractVariables()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles no variable | 1651 | not-applicable | — | — | TypeScript utility with no Rust equivalent; variable expansion is done inline |
+| handles simple variable | 1655 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
+| handles escaped variable | 1661 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
+| handles complex variable | 1667 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
+| handles complex variable with static default value | 1673 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
+| handles complex variable with other variable as default value | 1679 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
+| handles multiple variables | 1685 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
+
+---
+
 ## `lib/modules/manager/fleet/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/fleet/extract.spec.ts
@@ -675,7 +772,6 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/bicep/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/bicep.rs` | 5 | partial |
 | `lib/modules/manager/cargo/extract.spec.ts` | 32 | `crates/renovate-core/src/extractors/cargo.rs` | 16 | partial |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
-| `lib/modules/manager/dockerfile/extract.spec.ts` | 75 | `crates/renovate-core/src/extractors/dockerfile.rs` | 16 | partial |
 | `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
 | `lib/modules/manager/github-actions/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/github_actions.rs` | 28 | partial |
 | `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/gitlabci.rs` | 8 | partial |
