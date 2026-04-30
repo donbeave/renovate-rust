@@ -105,6 +105,7 @@ mod tests {
         assert!(extract("// just a comment\nfun main() {}").is_empty());
     }
 
+    // Ported: "dep with classifier version" — kotlin-script/extract.spec.ts
     #[test]
     fn dep_with_classifier_version() {
         let content = r#"@file:DependsOn("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2")"#;
@@ -115,5 +116,58 @@ mod tests {
             "org.jetbrains.lets-plot:lets-plot-kotlin-jvm"
         );
         assert_eq!(deps[0].current_value, "3.0.2");
+    }
+
+    // Ported: "extracts dependencies in a generic case" — kotlin-script/extract.spec.ts line 12
+    #[test]
+    fn extracts_generic_case_fixture_three_deps() {
+        // Mirrors kotlin-script/__fixtures__/generic-case.main.kts
+        let content = r#"#!/usr/bin/env kotlin
+@file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.22.0")
+@file:DependsOn(
+  "org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r"
+)
+
+@file : DependsOn
+  (
+  "org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2"
+
+)
+
+println("Hello world")
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "it.krzeminski:github-actions-kotlin-dsl"
+                    && d.current_value == "0.22.0")
+        );
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "org.eclipse.jgit:org.eclipse.jgit"
+                    && d.current_value == "4.6.0.201612231935-r")
+        );
+        assert!(deps.iter().any(
+            |d| d.dep_name == "org.jetbrains.lets-plot:lets-plot-kotlin-jvm"
+                && d.current_value == "3.0.2"
+        ));
+    }
+
+    // Ported: "skips dependencies with missing parts" — kotlin-script/extract.spec.ts line 81
+    #[test]
+    fn skips_missing_parts() {
+        // Mirrors missing-parts.main.kts: :group:version, group::version, group:artifact: are invalid
+        let content = r#"#!/usr/bin/env kotlin
+@file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.22.0")
+@file:DependsOn(":org.eclipse.jgit:4.6.0.201612231935-r")
+@file:DependsOn("org.jetbrains.lets-plot::3.0.2")
+@file:DependsOn("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:")
+
+println("Hello world")
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "it.krzeminski:github-actions-kotlin-dsl");
     }
 }
