@@ -131,4 +131,56 @@ services:
         let content = "pipeline: {}\n";
         assert!(extract(content).is_empty());
     }
+
+    // Ported: "returns null for malformed YAML" — woodpecker/extract.spec.ts line 17
+    #[test]
+    fn malformed_yaml_returns_empty() {
+        let content = "nothing here\n:::::::\n";
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts the v.1.0.x version" — woodpecker/extract.spec.ts line 220
+    #[test]
+    fn steps_section_extracts_image() {
+        let content = r#"
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+        "#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "quay.io/something/redis");
+        assert_eq!(deps[0].tag.as_deref(), Some("alpine"));
+    }
+
+    // Ported: "should parse multiple sources of dependencies together" — woodpecker/extract.spec.ts line 246
+    #[test]
+    fn clone_and_steps_both_extracted() {
+        let content = r#"
+        clone:
+          git:
+            image: woodpeckerci/plugin-git:latest
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+        "#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(|d| d.image == "woodpeckerci/plugin-git"));
+        assert!(deps.iter().any(|d| d.image == "quay.io/something/redis"));
+    }
+
+    // Ported: "return dependency when an plugin-git is cloned" — woodpecker/extract.spec.ts line 286
+    #[test]
+    fn clone_section_extracted() {
+        let content = r#"
+        clone:
+          git:
+            image: woodpeckerci/plugin-git:latest
+        "#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "woodpeckerci/plugin-git");
+        assert_eq!(deps[0].tag.as_deref(), Some("latest"));
+    }
 }

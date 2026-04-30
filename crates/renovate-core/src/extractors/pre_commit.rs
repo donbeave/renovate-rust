@@ -53,8 +53,10 @@ pub enum PreCommitSkipReason {
 pub struct PreCommitDep {
     /// `owner/repo` path extracted from the repo URL.
     pub dep_name: String,
-    /// The `rev:` value (e.g. `"v4.5.0"`).
+    /// The `rev:` value (e.g. `"v4.5.0"`), or the frozen version for digest revs.
     pub current_value: String,
+    /// SHA digest when the rev line uses `sha # frozen: version` format.
+    pub current_digest: Option<String>,
     /// Hosting provider, used to select the right datasource.
     pub git_host: Option<GitHost>,
     /// Set when no tag lookup should be performed.
@@ -71,10 +73,20 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
     let mut entry_indent: Option<usize> = None;
     // Accumulate the current entry's fields.
     let mut current_repo: Option<String> = None;
-    let mut current_rev: Option<String> = None;
+    // (rev_value, digest): digest is Some only for `sha # frozen: version` revs.
+    let mut current_rev: Option<(String, Option<String>)> = None;
 
     for raw in content.lines() {
-        let line = strip_comment(raw);
+        // For rev: lines, we DON'T strip comments so we can detect `sha # frozen: version`.
+        // For all other lines, strip comments first.
+        let has_rev_key = raw.trim_start().starts_with("rev:")
+            || raw
+                .trim_start()
+                .strip_prefix("- ")
+                .unwrap_or("")
+                .starts_with("rev:");
+        let line = if has_rev_key { raw } else { strip_comment(raw) };
+
         if line.trim().is_empty() {
             continue;
         }
@@ -85,13 +97,11 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
         // Top-level (indent 0): look for `repos:` key or other top-level keys.
         if indent == 0 {
             if let Some(val) = strip_key(trimmed, "repos") {
-                // `repos:` starts the repos list.
                 flush(&mut current_repo, &mut current_rev, &mut out);
                 in_repos = val.trim().is_empty();
                 entry_indent = None;
                 continue;
             }
-            // Any other top-level key ends repos section.
             if !trimmed.starts_with('-') {
                 flush(&mut current_repo, &mut current_rev, &mut out);
                 in_repos = false;
@@ -106,34 +116,35 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
 
         // Detect list items: lines starting with `- `.
         if let Some(rest) = trimmed.strip_prefix("- ") {
-            // Determine if this is an entry-level item or a nested item.
             let this_indent = indent;
             match entry_indent {
                 None => {
-                    // First `-` we see → this is the entry indent.
                     entry_indent = Some(this_indent);
                 }
                 Some(ei) if this_indent > ei => {
-                    // Nested item (e.g. hooks list) — ignore.
                     continue;
                 }
                 Some(ei) if this_indent < ei => {
-                    // Less indented than entry level — end of repos section.
                     flush(&mut current_repo, &mut current_rev, &mut out);
                     in_repos = false;
                     continue;
                 }
                 _ => {
-                    // Same indent as entry level → new repo entry.
                     flush(&mut current_repo, &mut current_rev, &mut out);
                 }
             }
 
-            // Parse inline fields on the `- key: value` line.
             if let Some(url) = strip_key(rest, "repo") {
-                current_repo = Some(url.trim().trim_matches('\'').trim_matches('"').to_owned());
+                let stripped = strip_comment(url);
+                current_repo = Some(
+                    stripped
+                        .trim()
+                        .trim_matches('\'')
+                        .trim_matches('"')
+                        .to_owned(),
+                );
             } else if let Some(rev) = strip_key(rest, "rev") {
-                current_rev = Some(rev.trim().trim_matches('\'').trim_matches('"').to_owned());
+                current_rev = Some(parse_rev(rev));
             }
             continue;
         }
@@ -141,16 +152,21 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
         // Non-list continuation line at the current entry level or deeper.
         if let Some(ei) = entry_indent {
             if indent <= ei {
-                // At or shallower than entry indent but not a list item — end section.
                 flush(&mut current_repo, &mut current_rev, &mut out);
                 in_repos = false;
                 continue;
             }
-            // Deeper than entry indent → continuation line for current entry.
             if let Some(url) = strip_key(trimmed, "repo") {
-                current_repo = Some(url.trim().trim_matches('\'').trim_matches('"').to_owned());
+                let stripped = strip_comment(url);
+                current_repo = Some(
+                    stripped
+                        .trim()
+                        .trim_matches('\'')
+                        .trim_matches('"')
+                        .to_owned(),
+                );
             } else if let Some(rev) = strip_key(trimmed, "rev") {
-                current_rev = Some(rev.trim().trim_matches('\'').trim_matches('"').to_owned());
+                current_rev = Some(parse_rev(rev));
             }
         }
     }
@@ -161,25 +177,51 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-fn flush(repo: &mut Option<String>, rev: &mut Option<String>, out: &mut Vec<PreCommitDep>) {
+/// Parse a rev value, detecting the `sha # frozen: version` pattern.
+/// Returns `(value, digest)` where digest is Some for frozen-pinned revs.
+fn parse_rev(raw_rev: &str) -> (String, Option<String>) {
+    // Look for `sha # frozen: version` pattern
+    let trimmed = raw_rev.trim();
+    if let Some(idx) = trimmed.find(" # frozen:") {
+        let digest_part = trimmed[..idx].trim().trim_matches('"').trim_matches('\'');
+        let version_part = trimmed[idx + " # frozen:".len()..]
+            .trim()
+            .trim_matches('"')
+            .trim_matches('\'');
+        if !digest_part.is_empty() && !version_part.is_empty() {
+            return (version_part.to_owned(), Some(digest_part.to_owned()));
+        }
+    }
+    // Normal rev value
+    let v = trimmed.trim_matches('"').trim_matches('\'');
+    // Strip any trailing inline comment
+    let v = strip_comment(v).trim();
+    (v.to_owned(), None)
+}
+
+fn flush(
+    repo: &mut Option<String>,
+    rev: &mut Option<(String, Option<String>)>,
+    out: &mut Vec<PreCommitDep>,
+) {
     match (repo.take(), rev.take()) {
-        (Some(repo_url), Some(rev_tag)) => {
-            out.push(parse_dep(repo_url, rev_tag));
+        (Some(repo_url), Some((rev_tag, digest))) => {
+            out.push(parse_dep(repo_url, rev_tag, digest));
         }
         (Some(repo_url), None) => {
-            // `local` and `meta` repos have no rev — still emit them so they appear as skipped.
-            out.push(parse_dep(repo_url, String::new()));
+            out.push(parse_dep(repo_url, String::new(), None));
         }
         _ => {}
     }
 }
 
-fn parse_dep(repo_url: String, rev: String) -> PreCommitDep {
+fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommitDep {
     match repo_url.as_str() {
         "local" => {
             return PreCommitDep {
                 dep_name: repo_url,
                 current_value: rev,
+                current_digest: digest,
                 git_host: None,
                 skip_reason: Some(PreCommitSkipReason::LocalHook),
             };
@@ -188,6 +230,7 @@ fn parse_dep(repo_url: String, rev: String) -> PreCommitDep {
             return PreCommitDep {
                 dep_name: repo_url,
                 current_value: rev,
+                current_digest: digest,
                 git_host: None,
                 skip_reason: Some(PreCommitSkipReason::MetaHook),
             };
@@ -211,6 +254,7 @@ fn parse_dep(repo_url: String, rev: String) -> PreCommitDep {
         return PreCommitDep {
             dep_name: repo_url,
             current_value: rev,
+            current_digest: digest,
             git_host: None,
             skip_reason: Some(PreCommitSkipReason::InvalidUrl),
         };
@@ -220,6 +264,7 @@ fn parse_dep(repo_url: String, rev: String) -> PreCommitDep {
         return PreCommitDep {
             dep_name: repo_url,
             current_value: rev,
+            current_digest: digest,
             git_host: None,
             skip_reason: Some(PreCommitSkipReason::InvalidUrl),
         };
@@ -244,6 +289,7 @@ fn parse_dep(repo_url: String, rev: String) -> PreCommitDep {
     PreCommitDep {
         dep_name,
         current_value: rev,
+        current_digest: digest,
         git_host,
         skip_reason,
     }
@@ -411,5 +457,67 @@ repos:
     fn repo_entry_without_repo_key_returns_empty() {
         let content = "repos:\n- hooks:\n  - id: some-hook\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "returns null for no file content" — pre-commit/extract.spec.ts line 62
+    #[test]
+    fn null_content_returns_empty() {
+        // TypeScript passes null; Rust equivalent is empty string.
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "can handle pinned repo versions" — pre-commit/extract.spec.ts line 220
+    #[test]
+    fn frozen_digest_rev_extracts_version_and_digest() {
+        let content = r#"failfast: true
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: 6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode
+    hooks:
+      - id: prettier
+
+  - repo: https://github.com/crate-ci/typos
+    rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12
+    hooks:
+      - id: typos
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1
+    hooks:
+      - id: check-renovate
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 4);
+
+        // First dep: normal tag
+        assert_eq!(deps[0].dep_name, "pre-commit/pre-commit-hooks");
+        assert_eq!(deps[0].current_value, "v4.4.0");
+        assert!(deps[0].current_digest.is_none());
+
+        // Second dep: frozen digest
+        assert_eq!(deps[1].dep_name, "pre-commit/mirrors-prettier");
+        assert_eq!(deps[1].current_value, "v3.0.0-alpha.9-for-vscode");
+        assert_eq!(
+            deps[1].current_digest.as_deref(),
+            Some("6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e")
+        );
+
+        // Third dep: frozen with extra whitespace before comment
+        assert_eq!(deps[2].dep_name, "crate-ci/typos");
+        assert_eq!(deps[2].current_value, "v1.14.12");
+        assert_eq!(
+            deps[2].current_digest.as_deref(),
+            Some("20b36ca07fa1bfe124912287ac8502cf12f140e6")
+        );
+
+        // Fourth dep: frozen
+        assert_eq!(deps[3].dep_name, "python-jsonschema/check-jsonschema");
+        assert_eq!(deps[3].current_value, "0.23.1");
+        assert!(deps[3].current_digest.is_some());
     }
 }
