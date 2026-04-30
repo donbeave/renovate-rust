@@ -628,6 +628,25 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "maintains quotes" — github-actions/extract.spec.ts line 217
+    #[test]
+    fn single_and_double_quoted_uses_parsed() {
+        let sha = "56337c425554a6be30cdef71bf441f15be286854";
+        let content = [
+            format!("      - uses: actions/setup-node@{sha} # tag=v3.1.1"),
+            format!("      - uses: 'actions/setup-node@{sha}' # tag=v3.1.1"),
+            format!("      - uses: \"actions/setup-node@{sha}\" # tag=v2.5.1"),
+            "      - uses: \"actions/checkout@v2\" # comment after".to_owned(),
+        ]
+        .join("\n");
+        let deps = extract(&content);
+        assert_eq!(deps.len(), 4);
+        assert_eq!(deps[0].current_value, "v3.1.1");
+        assert_eq!(deps[1].current_value, "v3.1.1"); // single-quoted, tag= stripped
+        assert_eq!(deps[2].current_value, "v2.5.1"); // double-quoted
+        assert_eq!(deps[3].current_value, "v2"); // comment stripped, not used as version
+    }
+
     // Ported: "extracts multiple action tag lines with double quotes and comments" — github-actions/extract.spec.ts line 153
     #[test]
     fn quoted_action_is_parsed() {

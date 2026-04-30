@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 182 / 376 actionable tests ported (48%) — updated 2026-04-30
+**Overall progress:** 183 / 376 actionable tests ported (49%) — updated 2026-04-30
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -296,7 +296,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | use github.com only as registry when running against github.com | 129 | not-applicable | — | — | registryUrls not produced by Rust extractor |
 | use github.com only as registry when running against api.github.com | 141 | not-applicable | — | — | registryUrls not produced by Rust extractor |
 | extracts multiple action tag lines with double quotes and comments | 153 | ported | `github_actions.rs` | `quoted_action_is_parsed` | — |
-| maintains quotes | 217 | pending | — | — | — |
+| maintains quotes | 217 | ported | `github_actions.rs` | `single_and_double_quoted_uses_parsed` | — |
 | maintains spaces between hash and comment | 299 | ported | `github_actions.rs` | `inline_comment_stripped` | — |
 | extracts tags in different formats | 352 | ported | `github_actions.rs` | `comment_version_formats` | — |
 | extracts non-semver ref automatically | 484 | ported | `github_actions.rs` | `non_semver_ref_extracted` | — |
