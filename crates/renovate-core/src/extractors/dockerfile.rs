@@ -301,12 +301,19 @@ pub fn classify_image_ref(image_ref: &str) -> DockerfileExtractedDep {
 fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtractedDep {
     // ARG variable references.
     if image_ref.starts_with('$') {
-        let image = image_ref
-            .trim_start_matches('$')
-            .trim_start_matches('{')
-            .trim_end_matches('}');
+        // Handle ${VAR:-default} — extract and use the default value.
+        if let Some(inner) = image_ref
+            .strip_prefix("${")
+            .and_then(|s| s.strip_suffix('}'))
+            && let Some(pos) = inner.find(":-")
+        {
+            let default_val = inner[pos + 2..].trim_matches('"');
+            if !default_val.is_empty() && !default_val.contains('$') {
+                return classify_from(default_val, stage_names);
+            }
+        }
         return DockerfileExtractedDep {
-            image: image.to_owned(),
+            image: image_ref.to_owned(),
             tag: None,
             digest: None,
             skip_reason: Some(DockerfileSkipReason::ArgVariable),
@@ -538,6 +545,32 @@ mod tests {
         let deps = extract_ok("FROM ${BASE_IMAGE}:latest");
         // The whole reference starts with $ so it's an ARG.
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
+    }
+
+    // Ported: "handles default environment variable values" — dockerfile/extract.spec.ts line 1501
+    #[test]
+    fn default_variable_value_extracted() {
+        // ${VAR:-default} — use the default value as the image reference.
+        let dep = classify_image_ref("${REDIS_IMAGE:-redis:5.0.0@sha256:abcd}");
+        assert_eq!(dep.image, "redis");
+        assert_eq!(dep.tag.as_deref(), Some("5.0.0"));
+        assert_eq!(dep.digest.as_deref(), Some("sha256:abcd"));
+        assert!(dep.skip_reason.is_none());
+
+        let dep2 = classify_image_ref("${REDIS_IMAGE:-redis:5.0.0}");
+        assert_eq!(dep2.image, "redis");
+        assert_eq!(dep2.tag.as_deref(), Some("5.0.0"));
+
+        let dep3 = classify_image_ref("${REDIS_IMAGE:-redis@sha256:abcd}");
+        assert_eq!(dep3.image, "redis");
+        assert!(dep3.tag.is_none());
+        assert_eq!(dep3.digest.as_deref(), Some("sha256:abcd"));
+
+        // :+ form (use alternate when var IS set) → skip
+        let dep5 = classify_image_ref(
+            "${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}",
+        );
+        assert_eq!(dep5.skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
     // Ported: "skips tag containing a variable" — dockerfile/extract.spec.ts line 1563
