@@ -611,6 +611,608 @@ fn parse_runner_label(s: &str) -> Option<(&str, &str)> {
     Some((name, version))
 }
 
+// ── Uses-with extraction (setup-x and community actions) ─────────────────────
+
+/// A dependency extracted from the `with:` block of a GitHub Actions step.
+///
+/// Covers two classes of step:
+/// - Official `actions/setup-{go,node,python}` with `{lang}-version:` fields.
+/// - Community-contributed setup/install actions with a known version-input schema.
+///
+/// Renovate reference:
+/// - `lib/modules/manager/github-actions/extract.ts` — `extractVersionedAction`,
+///   `extractSteps`, `extractWithYAMLParser`
+/// - `lib/modules/manager/github-actions/community.ts` — `communityActions`
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UsesWithDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub datasource: &'static str,
+    pub versioning: Option<&'static str>,
+    pub extract_version: Option<&'static str>,
+    /// `"unspecified-version"` or `"invalid-version"` or `None`.
+    pub skip_reason: Option<&'static str>,
+    /// `"extract"` when the dep should not be looked up.
+    pub skip_stage: Option<&'static str>,
+}
+
+/// Internal config for a community action's `with:` field schema.
+struct CommActCfg {
+    /// `owner/repo` name (no FQDN prefix, no `@ref`).
+    action: &'static str,
+    /// Override `depName`; if `None`, falls back to `package_name`.
+    dep_name: Option<&'static str>,
+    package_name: &'static str,
+    datasource: &'static str,
+    versioning: Option<&'static str>,
+    extract_version: Option<&'static str>,
+    /// Key inside `with:` that holds the version string (typically `"version"`).
+    version_key: &'static str,
+    /// When `true` the version comes from `tag:` and the package name from `repo:`.
+    /// Used by `jaxxstorm/action-install-gh-release` and `sigoden/install-binary`.
+    use_repo_tag: bool,
+    /// Optional predicate that returns `true` when a value string is invalid.
+    is_invalid: Option<fn(&str) -> bool>,
+}
+
+/// Official `actions/setup-X` descriptors.
+/// Fields: (action_prefix, version_key, dep_name, package_name, versioning)
+const SETUP_X: &[(&str, &str, &str, &str, &str)] = &[
+    (
+        "actions/setup-go",
+        "go-version",
+        "go",
+        "actions/go-versions",
+        "npm",
+    ),
+    (
+        "actions/setup-node",
+        "node-version",
+        "node",
+        "actions/node-versions",
+        "node",
+    ),
+    (
+        "actions/setup-python",
+        "python-version",
+        "python",
+        "actions/python-versions",
+        "npm",
+    ),
+];
+
+const SETUP_X_EXTRACT_VERSION: &str = r"^(?<version>\d+\.\d+\.\d+)(-\d+)?$";
+
+const COMMUNITY_ACTIONS: &[CommActCfg] = &[
+    // https://github.com/aquasecurity/setup-trivy
+    CommActCfg {
+        action: "aquasecurity/setup-trivy",
+        dep_name: None,
+        package_name: "aquasecurity/trivy",
+        datasource: "github-releases",
+        versioning: None,
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    // https://github.com/aquasecurity/trivy-action
+    CommActCfg {
+        action: "aquasecurity/trivy-action",
+        dep_name: None,
+        package_name: "aquasecurity/trivy",
+        datasource: "github-releases",
+        versioning: None,
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    // https://github.com/astral-sh/setup-uv
+    CommActCfg {
+        action: "astral-sh/setup-uv",
+        dep_name: None,
+        package_name: "astral-sh/uv",
+        datasource: "github-releases",
+        versioning: Some("npm"),
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "denoland/setup-deno",
+        dep_name: None,
+        package_name: "deno",
+        datasource: "npm",
+        versioning: None,
+        extract_version: None,
+        version_key: "deno-version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    // https://github.com/docker/setup-docker-action
+    CommActCfg {
+        action: "docker/setup-docker-action",
+        dep_name: Some("docker/setup-docker-action"),
+        package_name: "moby/moby",
+        datasource: "github-releases",
+        versioning: None,
+        extract_version: Some("^docker-(?<version>.+)$"),
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "golangci/golangci-lint-action",
+        dep_name: None,
+        package_name: "golangci/golangci-lint",
+        datasource: "github-releases",
+        versioning: None,
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "jakebailey/pyright-action",
+        dep_name: None,
+        package_name: "pyright",
+        datasource: "npm",
+        versioning: None,
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: Some(|v| v == "PATH"),
+    },
+    // https://github.com/jaxxstorm/action-install-gh-release
+    CommActCfg {
+        action: "jaxxstorm/action-install-gh-release",
+        dep_name: None,
+        package_name: "",
+        datasource: "github-releases",
+        versioning: None,
+        extract_version: None,
+        version_key: "tag",
+        use_repo_tag: true,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "oven-sh/setup-bun",
+        dep_name: None,
+        package_name: "bun",
+        datasource: "npm",
+        versioning: None,
+        extract_version: None,
+        version_key: "bun-version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "pdm-project/setup-pdm",
+        dep_name: None,
+        package_name: "pdm",
+        datasource: "pypi",
+        versioning: None,
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "pnpm/action-setup",
+        dep_name: None,
+        package_name: "pnpm",
+        datasource: "npm",
+        versioning: None,
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    // https://github.com/prefix-dev/setup-pixi
+    CommActCfg {
+        action: "prefix-dev/setup-pixi",
+        dep_name: None,
+        package_name: "prefix-dev/pixi",
+        datasource: "github-releases",
+        versioning: Some("conda"),
+        extract_version: None,
+        version_key: "pixi-version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    // https://github.com/pypa/hatch
+    CommActCfg {
+        action: "pypa/hatch",
+        dep_name: None,
+        package_name: "pypa/hatch",
+        datasource: "github-releases",
+        versioning: None,
+        extract_version: Some("^hatch-(?<version>.+)$"),
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "ruby/setup-ruby",
+        dep_name: None,
+        package_name: "ruby",
+        datasource: "ruby-version",
+        versioning: None,
+        extract_version: None,
+        version_key: "ruby-version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "sigoden/install-binary",
+        dep_name: None,
+        package_name: "",
+        datasource: "github-releases",
+        versioning: None,
+        extract_version: None,
+        version_key: "tag",
+        use_repo_tag: true,
+        is_invalid: None,
+    },
+    CommActCfg {
+        action: "zizmorcore/zizmor-action",
+        dep_name: None,
+        package_name: "ghcr.io/zizmorcore/zizmor",
+        datasource: "docker",
+        versioning: None,
+        extract_version: None,
+        version_key: "version",
+        use_repo_tag: false,
+        is_invalid: None,
+    },
+];
+
+#[derive(Clone)]
+enum ActionMatch {
+    Official(usize),
+    Community(usize),
+}
+
+/// Scan a workflow or action YAML for `uses:` lines that match known setup or
+/// community actions, then look ahead for the accompanying `with:` block to
+/// extract the version field.
+///
+/// Returns one `UsesWithDep` per matched step.  Steps without a recognisable
+/// `uses:` are ignored; steps whose `with:` block lacks the expected version
+/// key emit an `unspecified-version` dep.
+pub fn extract_uses_with(content: &str) -> Vec<UsesWithDep> {
+    enum St {
+        Scanning,
+        /// Found a matching `uses:` line; waiting for `with:` or end of step.
+        MatchedUses {
+            m: ActionMatch,
+            /// Raw indent of the line that started the step (`- uses:` or `uses:`).
+            step_raw: usize,
+            /// Indent of the key character (step_raw + 2 for seq items).
+            key_ind: usize,
+        },
+        /// Inside a `with:` block; collecting version / repo / tag values.
+        InWith {
+            m: ActionMatch,
+            step_raw: usize,
+            with_key_ind: usize,
+            repo: Option<String>,
+            tag: Option<String>,
+            version: Option<String>,
+        },
+    }
+
+    let mut out = Vec::new();
+    let mut st = St::Scanning;
+    let lines: Vec<&str> = content.lines().collect();
+    let mut i = 0;
+
+    while i < lines.len() {
+        let raw = lines[i];
+        let trimmed = raw.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            i += 1;
+            continue;
+        }
+        let raw_ind = raw.len() - raw.trim_start().len();
+
+        // Helper: a line exits the current step when its raw indent is at or
+        // below the step-start indent (for sequence items), or strictly below
+        // the key indent (for plain mappings).
+        let exits_step = |step_raw: usize, key_ind: usize| -> bool {
+            if raw_ind < key_ind {
+                // Line is shallower than the step's keys → left the step.
+                return true;
+            }
+            if raw_ind == step_raw && (trimmed.starts_with("- ") || trimmed == "-") {
+                // New sequence item at the same level → new step.
+                return true;
+            }
+            false
+        };
+
+        match st {
+            St::Scanning => {
+                if let Some((m, key_ind)) = match_uses_line(trimmed, raw_ind) {
+                    st = St::MatchedUses {
+                        m,
+                        step_raw: raw_ind,
+                        key_ind,
+                    };
+                }
+                i += 1;
+            }
+            St::MatchedUses {
+                ref m,
+                step_raw,
+                key_ind,
+            } => {
+                if exits_step(step_raw, key_ind) {
+                    // Step ended without a `with:` block.
+                    out.push(build_unspecified(m));
+                    st = St::Scanning;
+                    // Re-process current line.
+                    continue;
+                }
+                // Look for `with:` at the same key indent.
+                if key_indent_of(raw) == key_ind
+                    && let Some(with_val) = strip_key(trimmed, "with")
+                {
+                    let with_val = with_val.trim();
+                    if with_val.is_empty() {
+                        // Block form: value follows on subsequent lines.
+                        st = St::InWith {
+                            m: m.clone(),
+                            step_raw,
+                            with_key_ind: key_ind,
+                            repo: None,
+                            tag: None,
+                            version: None,
+                        };
+                    } else {
+                        // Inline value (`with: {}`, `with: null`, etc.) — no version key.
+                        out.push(build_unspecified(m));
+                        st = St::Scanning;
+                    }
+                }
+                i += 1;
+            }
+            St::InWith {
+                ref m,
+                step_raw,
+                with_key_ind,
+                ref mut repo,
+                ref mut tag,
+                ref mut version,
+            } => {
+                // Exit condition: raw_ind has returned to step level.
+                if raw_ind <= with_key_ind
+                    || (raw_ind == step_raw && (trimmed.starts_with("- ") || trimmed == "-"))
+                {
+                    out.push(build_dep(m, version.take(), repo.take(), tag.take()));
+                    st = St::Scanning;
+                    continue;
+                }
+
+                let ver_key = version_key_of(m);
+                if let Some(val) = strip_key(trimmed, ver_key) {
+                    *version = Some(unquote(val.trim()));
+                }
+                // Collect `repo:` and `tag:` for use_repo_tag actions.
+                if is_repo_tag(m) {
+                    if let Some(val) = strip_key(trimmed, "repo") {
+                        *repo = Some(unquote(val.trim()));
+                    }
+                    if let Some(val) = strip_key(trimmed, "tag") {
+                        *tag = Some(unquote(val.trim()));
+                    }
+                }
+                i += 1;
+            }
+        }
+    }
+
+    // Flush any pending state at end of input.
+    match st {
+        St::MatchedUses { ref m, .. } => out.push(build_unspecified(m)),
+        St::InWith {
+            ref m,
+            version,
+            repo,
+            tag,
+            ..
+        } => out.push(build_dep(m, version, repo, tag)),
+        St::Scanning => {}
+    }
+
+    out
+}
+
+/// Return `(ActionMatch, key_indent)` if `trimmed` is a matching `uses:` line.
+fn match_uses_line(trimmed: &str, raw_ind: usize) -> Option<(ActionMatch, usize)> {
+    let (uses_raw, key_ind) = if let Some(rest) = trimmed.strip_prefix("uses:") {
+        (rest.trim(), raw_ind)
+    } else if let Some(rest) = trimmed.strip_prefix("- uses:") {
+        (rest.trim(), raw_ind + 2)
+    } else {
+        return None;
+    };
+
+    // Strip quotes then inline comment.
+    let uses_val = uses_raw
+        .trim_matches('\'')
+        .trim_matches('"')
+        .split(" #")
+        .next()
+        .unwrap_or(uses_raw)
+        .trim()
+        .trim_matches('\'')
+        .trim_matches('"');
+
+    // Normalise FQDN prefix: `https://github.com/owner/repo@ref` → `owner/repo@ref`
+    let path = if let Some(rest) = uses_val.strip_prefix("https://") {
+        // Drop the hostname segment.
+        rest.split_once('/')?.1
+    } else {
+        uses_val
+    };
+
+    // Strip `@ref` suffix.
+    let without_ref = path.split('@').next().unwrap_or(path);
+
+    // Extract `owner/repo` (drop any sub-path).
+    let owner_repo = {
+        let mut parts = without_ref.splitn(3, '/');
+        let owner = parts.next()?;
+        let repo = parts.next()?;
+        if owner.is_empty() || repo.is_empty() {
+            return None;
+        }
+        format!("{owner}/{repo}")
+    };
+
+    for (idx, &(action, ..)) in SETUP_X.iter().enumerate() {
+        if owner_repo == action {
+            return Some((ActionMatch::Official(idx), key_ind));
+        }
+    }
+    for (idx, cfg) in COMMUNITY_ACTIONS.iter().enumerate() {
+        if owner_repo == cfg.action {
+            return Some((ActionMatch::Community(idx), key_ind));
+        }
+    }
+
+    None
+}
+
+/// Return the indent of the first key character on `raw` (after stripping `- `).
+fn key_indent_of(raw: &str) -> usize {
+    let trimmed = raw.trim_start();
+    let leading = raw.len() - trimmed.len();
+    if trimmed.starts_with("- ") || trimmed == "-" {
+        leading + 2
+    } else {
+        leading
+    }
+}
+
+/// Remove surrounding single or double quotes from a YAML scalar.
+fn unquote(s: &str) -> String {
+    s.trim_matches('\'').trim_matches('"').to_owned()
+}
+
+fn version_key_of(m: &ActionMatch) -> &'static str {
+    match m {
+        ActionMatch::Official(idx) => SETUP_X[*idx].1,
+        ActionMatch::Community(idx) => COMMUNITY_ACTIONS[*idx].version_key,
+    }
+}
+
+fn is_repo_tag(m: &ActionMatch) -> bool {
+    match m {
+        ActionMatch::Official(_) => false,
+        ActionMatch::Community(idx) => COMMUNITY_ACTIONS[*idx].use_repo_tag,
+    }
+}
+
+fn build_unspecified(m: &ActionMatch) -> UsesWithDep {
+    build_dep(m, None, None, None)
+}
+
+fn build_dep(
+    m: &ActionMatch,
+    version: Option<String>,
+    repo: Option<String>,
+    tag: Option<String>,
+) -> UsesWithDep {
+    match m {
+        ActionMatch::Official(idx) => {
+            let (_, _, dep_name, pkg, versioning) = SETUP_X[*idx];
+            let (skip_reason, skip_stage) = if version.is_none() {
+                (Some("unspecified-version"), Some("extract"))
+            } else {
+                (None, None)
+            };
+            UsesWithDep {
+                dep_name: dep_name.to_owned(),
+                package_name: pkg.to_owned(),
+                current_value: version,
+                datasource: "github-releases",
+                versioning: Some(versioning),
+                extract_version: Some(SETUP_X_EXTRACT_VERSION),
+                skip_reason,
+                skip_stage,
+            }
+        }
+        ActionMatch::Community(idx) => {
+            let cfg = &COMMUNITY_ACTIONS[*idx];
+            build_community_dep(cfg, version, repo, tag)
+        }
+    }
+}
+
+fn build_community_dep(
+    cfg: &CommActCfg,
+    version: Option<String>,
+    repo: Option<String>,
+    tag: Option<String>,
+) -> UsesWithDep {
+    if cfg.use_repo_tag {
+        // Package name comes from `repo:`, version from `tag:`.
+        let pkg = repo.unwrap_or_default();
+        let dep_name = cfg
+            .dep_name
+            .map(str::to_owned)
+            .unwrap_or_else(|| pkg.clone());
+        let (current_value, skip_reason, skip_stage) = if tag.is_some() {
+            (tag, None, None)
+        } else {
+            (None, Some("unspecified-version"), Some("extract"))
+        };
+        return UsesWithDep {
+            dep_name,
+            package_name: pkg,
+            current_value,
+            datasource: cfg.datasource,
+            versioning: cfg.versioning,
+            extract_version: cfg.extract_version,
+            skip_reason,
+            skip_stage,
+        };
+    }
+
+    let pkg = cfg.package_name.to_owned();
+    let dep_name = cfg
+        .dep_name
+        .map(str::to_owned)
+        .unwrap_or_else(|| pkg.clone());
+
+    let (current_value, skip_reason, skip_stage) = match version {
+        None => (None, Some("unspecified-version"), Some("extract")),
+        Some(v) => {
+            if cfg.is_invalid.is_some_and(|f| f(&v)) {
+                (Some(v), Some("invalid-version"), Some("extract"))
+            } else {
+                (Some(v), None, None)
+            }
+        }
+    };
+
+    UsesWithDep {
+        dep_name,
+        package_name: pkg,
+        current_value,
+        datasource: cfg.datasource,
+        versioning: cfg.versioning,
+        extract_version: cfg.extract_version,
+        skip_reason,
+        skip_stage,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1244,5 +1846,268 @@ jobs:
         assert_eq!(deps[3].skip_reason, Some("unsupported-url"));
         assert!(deps[3].registry_url.is_none());
         assert!(deps[3].datasource.is_none());
+    }
+
+    // ── extract_uses_with tests ───────────────────────────────────────────────
+
+    // Ported: "extracts x-version from actions/setup-x" — github-actions/extract.spec.ts line 741
+    #[test]
+    fn setup_x_extracts_versioned_deps() {
+        let content = r#"
+jobs:
+  build:
+    steps:
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - name: "Setup Node.js exact"
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.0.0'
+      - name: "Setup Go"
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: "Setup Python with range"
+        uses: actions/setup-python@v3
+        with:
+          python-version: '>=3.8.0 <3.10.0'
+      - name: "Setup Node.js with latest"
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'latest'
+"#;
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 5);
+
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].package_name, "actions/node-versions");
+        assert_eq!(deps[0].current_value.as_deref(), Some("16.x"));
+        assert_eq!(deps[0].datasource, "github-releases");
+        assert_eq!(deps[0].versioning, Some("node"));
+        assert_eq!(
+            deps[0].extract_version,
+            Some(r"^(?<version>\d+\.\d+\.\d+)(-\d+)?$")
+        );
+        assert_eq!(deps[0].skip_reason, None);
+
+        assert_eq!(deps[1].dep_name, "node");
+        assert_eq!(deps[1].current_value.as_deref(), Some("20.0.0"));
+
+        assert_eq!(deps[2].dep_name, "go");
+        assert_eq!(deps[2].package_name, "actions/go-versions");
+        assert_eq!(deps[2].current_value.as_deref(), Some("1.23"));
+        assert_eq!(deps[2].versioning, Some("npm"));
+
+        assert_eq!(deps[3].dep_name, "python");
+        assert_eq!(deps[3].package_name, "actions/python-versions");
+        assert_eq!(deps[3].current_value.as_deref(), Some(">=3.8.0 <3.10.0"));
+        assert_eq!(deps[3].versioning, Some("npm"));
+
+        assert_eq!(deps[4].dep_name, "node");
+        assert_eq!(deps[4].current_value.as_deref(), Some("latest"));
+    }
+
+    // Ported: "extracts x-version from actions/setup-x in composite action" — github-actions/extract.spec.ts line 891
+    #[test]
+    fn setup_x_composite_action() {
+        let content = r#"
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+"#;
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].current_value.as_deref(), Some("16.x"));
+        assert_eq!(deps[1].dep_name, "go");
+        assert_eq!(deps[1].current_value.as_deref(), Some("1.23"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_trivy_unspecified_version() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: aquasecurity/setup-trivy@v0.2.6\n        with: {}\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "aquasecurity/trivy");
+        assert_eq!(deps[0].package_name, "aquasecurity/trivy");
+        assert_eq!(deps[0].datasource, "github-releases");
+        assert_eq!(deps[0].current_value, None);
+        assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
+        assert_eq!(deps[0].skip_stage, Some("extract"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_trivy_with_version() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: aquasecurity/setup-trivy@v0.2.6\n        with:\n          version: latest\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "aquasecurity/trivy");
+        assert_eq!(deps[0].current_value.as_deref(), Some("latest"));
+        assert_eq!(deps[0].datasource, "github-releases");
+        assert_eq!(deps[0].skip_reason, None);
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_pnpm_with_version() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: pnpm/action-setup@v4\n        with:\n          version: latest\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "pnpm");
+        assert_eq!(deps[0].package_name, "pnpm");
+        assert_eq!(deps[0].datasource, "npm");
+        assert_eq!(deps[0].current_value.as_deref(), Some("latest"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_pnpm_numeric_version() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: pnpm/action-setup@v4\n        with:\n          version: '10'\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("10"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_bun_with_bun_version_key() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: oven-sh/setup-bun@v2\n        with:\n          bun-version: '1.2.0'\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "bun");
+        assert_eq!(deps[0].datasource, "npm");
+        assert_eq!(deps[0].current_value.as_deref(), Some("1.2.0"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_bun_unspecified_version() {
+        let content =
+            "jobs:\n  build:\n    steps:\n      - uses: oven-sh/setup-bun@v2\n        with: {}\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_ruby_with_ruby_version_key() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: ruby/setup-ruby@v1\n        with:\n          ruby-version: '3.4'\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "ruby");
+        assert_eq!(deps[0].datasource, "ruby-version");
+        assert_eq!(deps[0].current_value.as_deref(), Some("3.4"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_pyright_invalid_version() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: jakebailey/pyright-action@v2\n        with:\n          version: PATH\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "pyright");
+        assert_eq!(deps[0].current_value.as_deref(), Some("PATH"));
+        assert_eq!(deps[0].skip_reason, Some("invalid-version"));
+        assert_eq!(deps[0].skip_stage, Some("extract"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_jaxxstorm_repo_tag() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: jaxxstorm/action-install-gh-release@v1.10.0\n        with:\n          repo: gotestyourself/gotestsum\n          tag: v1.12.1\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "gotestyourself/gotestsum");
+        assert_eq!(deps[0].package_name, "gotestyourself/gotestsum");
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.12.1"));
+        assert_eq!(deps[0].datasource, "github-releases");
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_pixi_with_pixi_version_key() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: prefix-dev/setup-pixi@v0.8.3\n        with:\n          pixi-version: v0.41.4\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "prefix-dev/pixi");
+        assert_eq!(deps[0].datasource, "github-releases");
+        assert_eq!(deps[0].versioning, Some("conda"));
+        assert_eq!(deps[0].current_value.as_deref(), Some("v0.41.4"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_zizmor_with_version() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: zizmorcore/zizmor-action@v0.5.2\n        with:\n          version: v1.23.1\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "ghcr.io/zizmorcore/zizmor");
+        assert_eq!(deps[0].datasource, "docker");
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.23.1"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_docker_setup_docker_action() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: docker/setup-docker-action@v4\n        with:\n          version: v27.1.0\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "docker/setup-docker-action");
+        assert_eq!(deps[0].package_name, "moby/moby");
+        assert_eq!(deps[0].extract_version, Some("^docker-(?<version>.+)$"));
+        assert_eq!(deps[0].current_value.as_deref(), Some("v27.1.0"));
+        assert_eq!(deps[0].datasource, "github-releases");
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_setup_uv_fqdn() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: https://github.com/astral-sh/setup-uv@v5\n        with:\n          version: 0.4.x\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "astral-sh/uv");
+        assert_eq!(deps[0].datasource, "github-releases");
+        assert_eq!(deps[0].versioning, Some("npm"));
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.4.x"));
+    }
+
+    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1033
+    #[test]
+    fn community_setup_uv_fqdn_empty_with() {
+        let content = "jobs:\n  build:\n    steps:\n      - uses: https://github.com/astral-sh/setup-uv@v5\n        with: {}\n";
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "astral-sh/uv");
+        assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
+    }
+
+    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 873
+    #[test]
+    fn setup_x_missing_version_key_emits_unspecified() {
+        // When the correct version key is absent, emit unspecified-version.
+        let content = r#"
+jobs:
+  build:
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: 'https://npm.pkg.github.com'
+"#;
+        let deps = extract_uses_with(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].current_value, None);
+        assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
     }
 }
