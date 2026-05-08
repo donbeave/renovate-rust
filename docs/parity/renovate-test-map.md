@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 587 / 685 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 608 / 715 actionable tests ported (85%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1672,6 +1672,60 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/kubernetes/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kubernetes/extract.spec.ts
+**Total tests:** 14 | **Ported:** 7 | **Actionable:** 14 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 14 | ported | `kubernetes.rs` | `returns_empty_for_empty_input` (+ returns_empty_for_non_k8s) | — |
+| does not return unknown kind | 18 | ported | `kubernetes.rs` | `configmap_with_no_images_returns_empty` | — |
+| extracts multiple Kubernetes configurations | 23 | ported | `kubernetes.rs` | `extracts_docker_hub_images` (+ extracts_non_docker_hub_registries) | — |
+| extracts image line in a YAML array | 71 | ported | `kubernetes.rs` | `extracts_docker_hub_images` | — |
+| extracts image tag when it contains underscores | 98 | ported | `kubernetes.rs` | `extracts_image_with_underscore_in_tag` | — |
+| ignores non-Kubernetes YAML files | 121 | ported | `kubernetes.rs` | `ignores_non_kubernetes_yaml` | — |
+| handles invalid YAML files | 125 | ported | `kubernetes.rs` | `handles_invalid_yaml_with_no_images` | — |
+| extracts images and replaces registries | 133 | pending | — | — | registryAliases not yet implemented |
+| extracts images but does no replacement | 155 | pending | — | — | registryAliases not yet implemented |
+| extracts images and does no double replacements | 177 | pending | — | — | registryAliases not yet implemented |
+| extracts from complex templates | 200 | pending | — | — | Requires complex YAML template path coverage |
+| extracts image volumes from Pod and CronJob | 265 | pending | — | — | Requires `volumes:` (Kubernetes 1.31+ image volumes) parsing |
+| does not extract image volumes for unsupported kind | 326 | pending | — | — | Requires `volumes:` parsing kind-gating |
+| skips malformed volume entries and extracts valid ones | 349 | pending | — | — | Requires `volumes:` parsing with skip-on-malformed handling |
+
+---
+
+## `lib/modules/manager/homeassistant-manifest/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homeassistant-manifest/extract.spec.ts
+**Total tests:** 16 | **Ported:** 14 | **Actionable:** 16 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid JSON | 9 | ported | `homeassistant.rs` | `invalid_json_returns_empty` | — |
+| returns null for non-Home Assistant manifest (missing domain) | 14 | ported | `homeassistant.rs` | `missing_domain_returns_empty` | — |
+| returns null for non-Home Assistant manifest (missing name) | 24 | ported | `homeassistant.rs` | `missing_name_returns_empty` | — |
+| returns null for chrome extension manifest | 34 | ported | `homeassistant.rs` | `chrome_extension_manifest_returns_empty` | — |
+| returns null for empty requirements | 45 | ported | `homeassistant.rs` | `empty_requirements_returns_empty` | — |
+| returns null when no requirements field | 55 | ported | `homeassistant.rs` | `no_requirements_field_returns_empty` | — |
+| extracts single requirement with exact version | 64 | ported | `homeassistant.rs` | `extracts_single_requirement_exact_version` | — |
+| extracts multiple requirements | 84 | ported | `homeassistant.rs` | `extracts_multiple_requirements` (+ extracts_requirements) | — |
+| handles requirements with extras | 118 | ported | `homeassistant.rs` | `handles_requirements_with_extras` | — |
+| extracts git+https requirements | 138 | pending | — | — | Requires git+https VCS source detection in homeassistant requirements |
+| supports requirements with other operators | 168 | ported | `homeassistant.rs` | `extracts_range_version` | — |
+| handles requirements without version | 211 | ported | `homeassistant.rs` | `handles_requirements_without_version` | — |
+| extracts from real-world ASUSWRT manifest | 237 | ported | `homeassistant.rs` | `extracts_asuswrt_manifest` | — |
+| handles invalid requirement types in array | 272 | ported | `homeassistant.rs` | `skips_non_string_entries_in_requirements_array` | — |
+| returns null when requirements is not an array | 299 | ported | `homeassistant.rs` | `requirements_not_an_array_returns_empty` | — |
+| handles unparseable requirement strings with skipReason | 313 | pending | — | — | Requires explicit skipReason path for unparseable PEP 508 strings |
+
+---
+
 ## `lib/modules/manager/setup-cfg/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/setup-cfg/extract.spec.ts
@@ -1864,13 +1918,13 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- gradle/extract.spec.ts converted to per-test format above -->
 <!-- helm-requirements/extract.spec.ts converted to per-test format above -->
 <!-- helmfile/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/homeassistant.rs` | 15 | partial |
+<!-- homeassistant-manifest/extract.spec.ts converted to per-test format above -->
 <!-- homebrew/extract.spec.ts converted to per-test format above -->
 <!-- html/extract.spec.ts converted to per-test format above -->
 <!-- jenkins/extract.spec.ts converted to per-test format above -->
 <!-- jsonnet-bundler/extract.spec.ts converted to per-test format above -->
 <!-- kotlin-script/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/kubernetes/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/kubernetes.rs` | 11 | partial |
+<!-- kubernetes/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/kustomize/extract.spec.ts` | 43 | `crates/renovate-core/src/extractors/kustomize.rs` | 6 | partial |
 <!-- leiningen/extract.spec.ts converted to per-test format above -->
 <!-- maven-wrapper/extract.spec.ts converted to per-test format above -->
