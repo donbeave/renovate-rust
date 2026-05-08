@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 324 / 376 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 329 / 381 actionable tests ported (86%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1052,6 +1052,23 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/mint/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mint/extract.spec.ts
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | ported | `mint.rs` | `empty_returns_empty` | — |
+| Mintfile With Version Description | 10 | ported | `mint.rs` | `extracts_deps_with_version` | — |
+| Mintfile Without Version Description | 41 | ported | `mint.rs` | `extracts_deps_without_version_as_skipped` | — |
+| Complex Mintfile | 61 | ported | `mint.rs` | `complex_mintfile_mixed` | — |
+| Mintfile Includes Commented Out | 86 | ported | `mint.rs` | `comment_lines_skipped` | — |
+
+---
+
 ## `lib/modules/manager/ocb/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ocb/extract.spec.ts
@@ -1126,7 +1143,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/maven-wrapper/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/maven_wrapper.rs` | 12 | ported |
 | `lib/modules/manager/maven/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/maven.rs` | 19 | partial |
 | `lib/modules/manager/meteor/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/meteor.rs` | 2 | ported |
-| `lib/modules/manager/mint/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/mint.rs` | 6 | ported |
+<!-- mint/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/mise/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/mise.rs` | 16 | partial |
 | `lib/modules/manager/mix/extract.spec.ts` | 3 | `crates/renovate-core/src/extractors/mix.rs` | 9 | partial |
 | `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
