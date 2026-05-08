@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 467 / 544 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 476 / 560 actionable tests ported (85%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1174,6 +1174,34 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/pipenv/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pipenv/extract.spec.ts
+**Total tests:** 16 | **Ported:** 9 | **Actionable:** 16 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 37 | ported | `pipfile.rs` | `empty_content_returns_no_deps` | — |
+| returns null for invalid toml file | 41 | ported | `pipfile.rs` | `invalid_toml_returns_empty` | — |
+| extracts dependencies | 45 | ported | `pipfile.rs` | `extracts_string_form` (+ extracts_multi_constraint, extracts_table_form, dev_packages_flagged) | — |
+| marks packages with "extras" as skipReason === unspecified-version | 136 | ported | `pipfile.rs` | `packages_with_only_extras_are_skipped` | — |
+| extracts multiple dependencies | 142 | ported | `pipfile.rs` | `dev_packages_flagged` (+ extracts_string_form combined coverage) | — |
+| ignores git dependencies | 192 | ported | `pipfile.rs` | `git_dependency_in_mixed_list_skipped` (+ git_dep_skipped) | — |
+| ignores invalid package names | 202 | ported | `pipfile.rs` | `invalid_package_name_starting_with_underscore_skipped` | — |
+| ignores relative path dependencies | 213 | ported | `pipfile.rs` | `relative_path_in_mixed_list_skipped` (+ local_dep_skipped) | — |
+| ignores invalid versions | 223 | ported | `pipfile.rs` | `version_with_spaces_skipped` (+ wildcard_skipped, dev_wildcard_skipped) | — |
+| extracts all sources | 234 | pending | — | — | Requires registryUrls plumbing for [[source]] entries |
+| extracts example pipfile | 247 | pending | — | — | Requires full Pipfile fixture round-trip with sources |
+| supports custom index | 313 | pending | — | — | Requires per-dep registryUrls / index name resolution |
+| gets python constraint from python_version | 338 | pending | — | — | Requires managerData.pythonVersion plumbing |
+| gets python constraint from python_full_version | 350 | pending | — | — | Requires managerData.pythonFullVersion plumbing |
+| gets pipenv constraint from packages | 362 | pending | — | — | Requires managerData.pipenvConstraint plumbing |
+| gets pipenv constraint from dev-packages | 372 | pending | — | — | Requires managerData.pipenvConstraint plumbing |
+
+---
+
 ## `lib/modules/manager/pip_requirements/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/extract.spec.ts
@@ -1522,7 +1550,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/pip-compile/extract.spec.ts` | 25 | — | 0 | pending |
 <!-- pip_requirements/extract.spec.ts converted to per-test format above -->
 <!-- pip_setup/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/pipenv/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pipfile.rs` | 16 | ported |
+<!-- pipenv/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/pixi/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pixi.rs` | 15 | partial |
 | `lib/modules/manager/poetry/extract.spec.ts` | 34 | `crates/renovate-core/src/extractors/poetry.rs` | 15 | partial |
 <!-- pre-commit/extract.spec.ts converted to per-test format above -->
