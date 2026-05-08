@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 321 / 373 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 324 / 376 actionable tests ported (86%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1052,6 +1052,21 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/ocb/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ocb/extract.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `extractPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| run successfully with full example | 6 | ported | `ocb.rs` | `extracts_full_example` | — |
+| return null for unknown content | 81 | ported | `ocb.rs` | `skips_unknown_content` | — |
+| return null for content which is not YAML | 85 | ported | `ocb.rs` | `skips_arbitrary_yaml` | — |
+
+---
+
 ## `lib/modules/manager/pip_setup/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_setup/extract.spec.ts
@@ -1116,7 +1131,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/mix/extract.spec.ts` | 3 | `crates/renovate-core/src/extractors/mix.rs` | 9 | partial |
 | `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
 | `lib/modules/manager/nuget/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/nuget.rs` | 25 | partial |
-| `lib/modules/manager/ocb/extract.spec.ts` | 3 | `crates/renovate-core/src/extractors/ocb.rs` | 4 | partial |
+<!-- ocb/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/osgi/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/osgi.rs` | 15 | ported |
 | `lib/modules/manager/pep621/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/pep621.rs` | 14 | ported |
 | `lib/modules/manager/pep723/extract.spec.ts` | 1 | `crates/renovate-core/src/extractors/pep723.rs` | 6 | partial |

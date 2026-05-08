@@ -157,6 +157,7 @@ providers:
   - gomod: go.opentelemetry.io/collector/confmap/provider/envprovider v1.0.0-rcv0015
 "#;
 
+    // Ported: "run successfully with full example" — ocb/extract.spec.ts line 6
     #[test]
     fn extracts_full_example() {
         let deps = extract(FULL_EXAMPLE);
@@ -190,9 +191,21 @@ providers:
         assert!(types.contains(&"providers"));
     }
 
+    // Ported: "return null for unknown content" — ocb/extract.spec.ts line 81
     #[test]
     fn skips_unknown_content() {
         assert!(extract("foo: bar\nbaz: qux\n").is_empty());
+    }
+
+    // Ported: "return null for content which is not YAML" — ocb/extract.spec.ts line 85
+    //
+    // The TS extractor parses the file as YAML; without an OCB-recognised
+    // top-level key (`dist:`, `exporters:`, etc.) it returns null. The
+    // Rust line-based extractor produces an empty list for the same input.
+    #[test]
+    fn skips_arbitrary_yaml() {
+        let content = "myObject:\n  aString: value\n---\nfoo: bar\n";
+        assert!(extract(content).is_empty());
     }
 
     #[test]
