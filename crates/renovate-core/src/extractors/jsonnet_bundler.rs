@@ -248,6 +248,39 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "extracts dependency with custom name" — jsonnet-bundler/extract.spec.ts line 79
+    //
+    // The TS extractor builds depName from the remote path + subdir
+    // regardless of the optional `name` field on the dependency, so a
+    // jsonnetfile that declares `name` produces the same depName as one
+    // that does not.
+    #[test]
+    fn extracts_dep_with_optional_name_field_uses_path_name() {
+        let content = r#"{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/prometheus-operator/prometheus-operator",
+          "subdir": "jsonnet/mixin"
+        }
+      },
+      "version": "v0.50.0",
+      "name": "prometheus-operator-mixin"
+    }
+  ],
+  "legacyImports": true
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].dep_name,
+            "github.com/prometheus-operator/prometheus-operator/jsonnet/mixin"
+        );
+        assert_eq!(deps[0].version, "v0.50.0");
+    }
+
     // Ported: "extracts dependency" — jsonnet-bundler/extract.spec.ts line 57
     #[test]
     fn extracts_main_fixture_two_deps() {
