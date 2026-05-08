@@ -288,6 +288,97 @@ on 'test' => sub {
         );
     }
 
+    // Ported: "parse modules with recommends" — cpanfile/extract.spec.ts line 113
+    #[test]
+    fn parse_modules_with_recommends() {
+        let content = "recommends 'Crypt::URandom';\nrecommends 'HTTP::XSCookies', '0.000015';\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "Crypt::URandom");
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(CpanSkipReason::UnspecifiedVersion)
+        );
+        assert_eq!(deps[1].dep_name, "HTTP::XSCookies");
+        assert_eq!(deps[1].current_value, "0.000015");
+        assert!(deps[1].skip_reason.is_none());
+    }
+
+    // Ported: "parse modules with suggests" — cpanfile/extract.spec.ts line 138
+    #[test]
+    fn parse_modules_with_suggests() {
+        let content =
+            "suggests 'Test::MockTime::HiRes', '0.06';\nsuggests 'Authen::Simple::Passwd';\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "Test::MockTime::HiRes");
+        assert_eq!(deps[0].current_value, "0.06");
+        assert!(deps[0].skip_reason.is_none());
+        assert_eq!(deps[1].dep_name, "Authen::Simple::Passwd");
+        assert_eq!(
+            deps[1].skip_reason,
+            Some(CpanSkipReason::UnspecifiedVersion)
+        );
+    }
+
+    // Ported: "returns null for empty" — cpanfile/extract.spec.ts line 6
+    #[test]
+    fn empty_input_returns_no_deps() {
+        // The TS extractor returns null for empty input; the Rust extractor
+        // returns an empty Vec — both indicate no actionable deps.
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "configure phase" — cpanfile/extract.spec.ts line 164 (parse modules with phases)
+    #[test]
+    fn parse_phase_configure() {
+        let content = "on 'configure' => sub {\n  requires \"ExtUtils::MakeMaker\" => \"0\";\n};\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "ExtUtils::MakeMaker");
+        assert_eq!(deps[0].current_value, "0");
+        assert_eq!(deps[0].phase, CpanDepPhase::Configure);
+    }
+
+    // Ported: "build phase" — cpanfile/extract.spec.ts line 186 (parse modules with phases)
+    #[test]
+    fn parse_phase_build_bareword() {
+        // Bareword form `on build => sub {` (no quotes around phase name).
+        let content = "on build => sub {\n  requires 'Test::More', '0.98';\n};\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "Test::More");
+        assert_eq!(deps[0].current_value, "0.98");
+        assert_eq!(deps[0].phase, CpanDepPhase::Build);
+    }
+
+    // Ported: "runtime phase" — cpanfile/extract.spec.ts line 237 (parse modules with phases)
+    #[test]
+    fn parse_phase_runtime_bareword_suggests() {
+        let content =
+            "on runtime => sub {\n  suggests 'FCGI';\n  suggests 'FCGI::ProcManager';\n};\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        for dep in &deps {
+            assert_eq!(dep.phase, CpanDepPhase::Runtime);
+            assert_eq!(dep.skip_reason, Some(CpanSkipReason::UnspecifiedVersion));
+        }
+    }
+
+    // Ported: "develop phase" — cpanfile/extract.spec.ts line 266 (parse modules with phases)
+    #[test]
+    fn parse_phase_develop() {
+        let content = "on 'develop' => sub {\n  requires \"IPC::Open3\" => \"0\";\n  requires \"Term::Table\" => \"0.013\";\n};\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "IPC::Open3");
+        assert_eq!(deps[0].current_value, "0");
+        assert_eq!(deps[0].phase, CpanDepPhase::Develop);
+        assert_eq!(deps[1].dep_name, "Term::Table");
+        assert_eq!(deps[1].current_value, "0.013");
+        assert_eq!(deps[1].phase, CpanDepPhase::Develop);
+    }
+
     #[test]
     fn perl_core_skipped() {
         let content = "requires 'perl', '5.036';\n";

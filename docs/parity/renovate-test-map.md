@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 718 / 1187 actionable tests ported (60%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 725 / 1187 actionable tests ported (61%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2199,26 +2199,26 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/cpanfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cpanfile/extract.spec.ts
-**Total tests:** 10 | **Ported:** 3 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `extractPackageFile() › parse perl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for empty | 6 | pending | — | — | Requires explicit empty-input null path; Rust currently returns Vec |
+| returns null for empty | 6 | ported | `cpanfile.rs` | `empty_input_returns_no_deps` | — |
 | parse modules with requires | 39 | ported | `cpanfile.rs` | `extracts_basic_requires` (+ extracts_fat_arrow_form) | — |
-| parse modules with recommends | 113 | pending | — | — | Requires `recommends` keyword extraction |
-| parse modules with suggests | 138 | pending | — | — | Requires `suggests` keyword extraction |
+| parse modules with recommends | 113 | ported | `cpanfile.rs` | `parse_modules_with_recommends` | — |
+| parse modules with suggests | 138 | ported | `cpanfile.rs` | `parse_modules_with_suggests` | — |
 
 ### `extractPackageFile() › parse modules with phases`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| configure phase | 164 | pending | — | — | Requires `on 'configure' => sub { … }` block parsing |
-| build phase | 186 | pending | — | — | Requires `on 'build' => sub { … }` block parsing |
+| configure phase | 164 | ported | `cpanfile.rs` | `parse_phase_configure` | — |
+| build phase | 186 | ported | `cpanfile.rs` | `parse_phase_build_bareword` | — |
 | phase | 208 | ported | `cpanfile.rs` | `extracts_test_phase_block` | — |
-| runtime phase | 237 | pending | — | — | Requires `on 'runtime' => sub { … }` block parsing |
-| develop phase | 266 | pending | — | — | Requires `on 'develop' => sub { … }` block parsing |
+| runtime phase | 237 | ported | `cpanfile.rs` | `parse_phase_runtime_bareword_suggests` | — |
+| develop phase | 266 | ported | `cpanfile.rs` | `parse_phase_develop` | — |
 
 ### `extractPackageFile() › parse modules with phase shortcuts`
 
