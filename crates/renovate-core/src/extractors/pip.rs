@@ -377,6 +377,41 @@ mod tests {
         assert_eq!(deps.len(), 1);
     }
 
+    // Ported: "extracts a file with only --extra-index-url flags" — pip_requirements/extract.spec.ts line 266
+    //
+    // The TS extractor still returns a (registry-only) PackageFile here, but
+    // the actionable dep list is empty. The Rust extractor doesn't track
+    // additional registry URLs separately, but the actionable-deps result
+    // matches: extract() returns no entries for an --extra-index-url-only
+    // file.
+    #[test]
+    fn extra_index_url_only_file_returns_no_deps() {
+        let deps = extract_ok("--extra-index-url https://example.com/pypi");
+        assert_eq!(deps.len(), 0);
+    }
+
+    // Ported: "extracts a file with only -r flags" — pip_requirements/extract.spec.ts line 276
+    //
+    // TS records the file as managerData.requirementsFiles. The Rust
+    // extractor produces one dep with skip_reason = SubRequirement, so
+    // actionable deps is empty — matching TS's empty deps array.
+    #[test]
+    fn r_flag_only_file_has_no_actionable_deps() {
+        let deps = extract_ok("-r requirements-other.txt");
+        assert!(deps.iter().all(|d| d.skip_reason.is_some()));
+    }
+
+    // Ported: "extracts a file with only -c flags" — pip_requirements/extract.spec.ts line 286
+    //
+    // TS records the file as managerData.constraintsFiles. The Rust
+    // extractor produces one dep with skip_reason = SubRequirement, so
+    // actionable deps is empty — matching TS's empty deps array.
+    #[test]
+    fn c_flag_only_file_has_no_actionable_deps() {
+        let deps = extract_ok("-c constraints.txt");
+        assert!(deps.iter().all(|d| d.skip_reason.is_some()));
+    }
+
     // Ported: "returns null for empty" — pip_requirements/extract.spec.ts line 39
     #[test]
     fn invalid_line_returns_empty() {

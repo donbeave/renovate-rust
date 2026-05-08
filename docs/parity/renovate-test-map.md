@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 464 / 544 actionable tests ported (85%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 467 / 544 actionable tests ported (86%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1177,7 +1177,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pip_requirements/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/extract.spec.ts
-**Total tests:** 22 | **Ported:** 14 | **Actionable:** 22 | **Status:** partial
+**Total tests:** 22 | **Ported:** 17 | **Actionable:** 22 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1202,9 +1202,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | should handle dependency and ignore env markers | 198 | ported | `pip.rs` | `extracts_range_constraint` | — |
 | should handle git packages | 213 | ported | `pip.rs` | `git_source_is_skipped` | — |
 | extracts a file with only --index-url flags | 258 | ported | `pip.rs` | `url_install_is_skipped` | — |
-| extracts a file with only --extra-index-url flags | 266 | pending | — | — | Requires extra-index-url-only file handling |
-| extracts a file with only -r flags | 276 | pending | — | — | Requires -r-only file null-result handling |
-| extracts a file with only -c flags | 286 | pending | — | — | Requires -c-only file null-result handling |
+| extracts a file with only --extra-index-url flags | 266 | ported | `pip.rs` | `extra_index_url_only_file_returns_no_deps` | — |
+| extracts a file with only -r flags | 276 | ported | `pip.rs` | `r_flag_only_file_has_no_actionable_deps` | — |
+| extracts a file with only -c flags | 286 | ported | `pip.rs` | `c_flag_only_file_has_no_actionable_deps` | — |
 
 ---
 
