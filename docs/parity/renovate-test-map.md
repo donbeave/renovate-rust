@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 639 / 788 actionable tests ported (81%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 664 / 834 actionable tests ported (80%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1744,6 +1744,76 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/pixi/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pixi/extract.spec.ts
+**Total tests:** 16 | **Ported:** 13 | **Actionable:** 16 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty pyproject.toml | 145 | ported | `pixi.rs` | `empty_pyproject_returns_empty` | — |
+| returns null for empty pixi.toml | 151 | ported | `pixi.rs` | `empty_file_returns_empty` | — |
+| returns null for parsed file without pixi section | 155 | ported | `pixi.rs` | `file_without_pixi_section_returns_empty` | — |
+| returns parse pixi.toml | 161 | ported | `pixi.rs` | `extracts_pypi_deps` (+ extracts_conda_deps_as_actionable) | — |
+| returns parse pixi section from pyproject.toml | 297 | ported | `pixi.rs` | `extract_from_pyproject_tool_pixi` | — |
+| returns package of pyproject.toml tool.pixi section | 316 | ported | `pixi.rs` | `extract_tool_pixi_section_without_lockfile` | — |
+| returns parse pixi.toml with features | 335 | ported | `pixi.rs` | `extracts_feature_pypi_deps` | — |
+| returns parse non-known config file as pyproject.toml | 481 | ported | `pixi.rs` | `non_known_file_with_project_section` | — |
+| returns parse non-known config file as pixi.toml | 509 | ported | `pixi.rs` | `non_known_file_with_tool_pixi_section` | — |
+| extract feature with channels | 538 | ported | `pixi.rs` | `extract_feature_with_url_channel` | — |
+| skip package without channels | 571 | ported | `pixi.rs` | `skip_package_without_channels` | — |
+| extract package from with workspace | 601 | ported | `pixi.rs` | `extract_from_workspace_section` | — |
+| extract package with channel priority | 630 | pending | — | — | Requires channel-priority resolution semantics |
+| returns null for non-known config file | 681 | ported | `pixi.rs` | `non_toml_content_returns_empty` | — |
+| set registryStrategy='merge' for channel-priority='disabled' | 685 | pending | — | — | Requires registryStrategy plumbing |
+| use default registryStrategy for channel-priority='strict' | 706 | pending | — | — | Requires registryStrategy plumbing |
+
+---
+
+## `lib/modules/manager/mise/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
+**Total tests:** 30 | **Ported:** 12 | **Actionable:** 30 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 13 | ported | `mise.rs` | `empty_returns_empty` | — |
+| returns null for invalid TOML | 17 | ported | `mise.rs` | `invalid_toml_returns_empty` | — |
+| returns null for empty tools section | 21 | ported | `mise.rs` | `empty_tools_section_returns_empty` | — |
+| extracts tools - mise core plugins | 28 | ported | `mise.rs` | `extracts_node_version` (+ extracts_erlang_core_plugin, extracts_multiple_tools) | — |
+| extracts tools - mise registry tools | 51 | pending | — | — | Requires mise registry resolution data file |
+| extracts tools - asdf plugins | 393 | ported | `mise.rs` | `asdf_tools_fall_through_to_asdf_table` | — |
+| extracts tools with multiple versions | 409 | ported | `mise.rs` | `unknown_tool_skipped` | — |
+| extracts tools with plugin options | 432 | ported | `mise.rs` | `tool_with_version_object` | — |
+| extracts tools in the default registry with backends | 448 | pending | — | — | Requires backend prefix syntax (e.g. `aqua:`, `cargo:`) parsing |
+| extracts aqua backend tool | 487 | pending | — | — | Requires aqua backend support |
+| extracts cargo backend tools | 514 | pending | — | — | Requires cargo backend support |
+| extracts dotnet backend tool | 553 | pending | — | — | Requires dotnet backend support |
+| extracts gem backend tool | 571 | pending | — | — | Requires gem backend support |
+| extracts go backend tool | 589 | pending | — | — | Requires go backend support |
+| extracts npm backend tool | 607 | pending | — | — | Requires npm backend support |
+| extracts pipx backend tools | 625 | pending | — | — | Requires pipx backend support |
+| extracts spm backend tools | 657 | pending | — | — | Requires spm backend support |
+| extracts ubi backend tools | 682 | pending | — | — | Requires ubi backend support |
+| extracts github backend tools | 740 | pending | — | — | Requires github backend support |
+| provides skipReason for lines with unsupported tooling | 781 | ported | `mise.rs` | `unknown_tool_skipped` | — |
+| provides skipReason for missing version - empty string | 802 | ported | `mise.rs` | `empty_version_string_skipped` | — |
+| provides skipReason for missing version - missing version in object | 818 | ported | `mise.rs` | `object_without_version_skipped` | — |
+| provides skipReason for missing version - empty array | 834 | ported | `mise.rs` | `empty_array_version_skipped` | — |
+| complete mise.toml example | 855 | pending | — | — | Requires fixture round-trip with full mise.toml |
+| complete example with skip | 878 | pending | — | — | Requires fixture round-trip with skip-reason mix |
+| core java plugin function | 911 | ported | `mise.rs` | `java_core_plugin_jdk` | — |
+| resolves tools from the mise registry data file via aqua backend | 1086 | pending | — | — | Requires mise registry data file resolver |
+| resolves tools from the mise registry data file via cargo backend | 1104 | pending | — | — | Requires mise registry data file resolver |
+| resolves tools from the mise registry data file via github backend | 1122 | pending | — | — | Requires mise registry data file resolver |
+| resolves a tool from the mise registry, prioritising the github backend over others | 1140 | pending | — | — | Requires mise registry data file resolver |
+
+---
+
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
@@ -2045,7 +2115,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/maven/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/maven.rs` | 19 | partial |
 <!-- meteor/extract.spec.ts converted to per-test format above -->
 <!-- mint/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/mise/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/mise.rs` | 16 | partial |
+<!-- mise/extract.spec.ts converted to per-test format above -->
 <!-- mix/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
 | `lib/modules/manager/nuget/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/nuget.rs` | 25 | partial |
@@ -2057,7 +2127,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- pip_requirements/extract.spec.ts converted to per-test format above -->
 <!-- pip_setup/extract.spec.ts converted to per-test format above -->
 <!-- pipenv/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/pixi/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pixi.rs` | 15 | partial |
+<!-- pixi/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/poetry/extract.spec.ts` | 34 | `crates/renovate-core/src/extractors/poetry.rs` | 15 | partial |
 <!-- pre-commit/extract.spec.ts converted to per-test format above -->
 <!-- puppet/extract.spec.ts converted to per-test format above -->
