@@ -403,4 +403,20 @@ services:
         assert!(deps.iter().any(|d| d.image == "postgres"));
         assert!(deps.iter().any(|d| d.image == "dockersamples/visualizer"));
     }
+
+    // Ported: "extract images from fragments" — docker-compose/extract.spec.ts line 198
+    //
+    // Docker compose files can declare a YAML anchor (`&shared_settings`)
+    // carrying an `image:` field and reuse it across services via merge keys
+    // (`<<: *shared_settings`). The Rust extractor scans every `image:` key
+    // regardless of nesting; the anchored declaration produces the dep once
+    // and the merge-key reuses do not duplicate it.
+    #[test]
+    fn extracts_image_from_yaml_anchor_fragment() {
+        let content = "---\nx-shared_setting: &shared_settings\n  image: debian:11\n  # Other shared properties here\n\nservices:\n  service-a:\n    <<: *shared_settings\n    environment:\n      - SERVICE=a\n  service-b:\n    <<: *shared_settings\n    environment:\n      - SERVICE=b\n";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "debian");
+        assert_eq!(deps[0].tag.as_deref(), Some("11"));
+    }
 }

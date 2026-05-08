@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 740 / 1187 actionable tests ported (62%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 741 / 1181 actionable tests ported (63%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -846,7 +846,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/docker-compose/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/docker-compose/extract.spec.ts
-**Total tests:** 13 | **Ported:** 9 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 10 | **Actionable:** 13 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -864,7 +864,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts image but no replacement | 115 | pending | — | — | registryAliases not yet implemented |
 | extracts image and no double replacement | 143 | pending | — | — | registryAliases not yet implemented |
 | extracts image of templated compose file | 172 | ported | `docker_compose.rs` | `extracts_image_from_templated_compose_file` | — |
-| extract images from fragments | 198 | pending | — | — | YAML anchors not resolved |
+| extract images from fragments | 198 | ported | `docker_compose.rs` | `extracts_image_from_yaml_anchor_fragment` | — |
 
 ---
 
@@ -1701,13 +1701,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/azure-pipelines/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/azure-pipelines/extract.spec.ts
-**Total tests:** 29 | **Ported:** 19 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 19 | **Actionable:** 28 | **Status:** partial
 
 ### `extractRepository / extractContainer / extractAzurePipelinesTaskDependency` helpers
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should parse a valid azure-pipelines file | 25 | pending | — | — | Tests the YAML parser helper directly; Rust extractor goes through full pipeline |
+| should parse a valid azure-pipelines file | 25 | not-applicable | — | — | Tests TS-internal YAML parser helper directly; Rust extractor goes through full pipeline only |
 | return null on an invalid file | 30 | ported | `azure_pipelines.rs` | `invalid_yaml_returns_empty` | — |
 | should extract repository information | 36 | pending | — | — | Requires GitHub `repositories[]` extraction |
 | should return null when repository type is not github | 52 | pending | — | — | Requires repository-type filtering |
@@ -1945,13 +1945,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 5 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 5 | **Actionable:** 39 | **Status:** partial
 
 ### `parseKustomize` (top-level)
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should successfully parse a valid kustomize file | 16 | pending | — | — | Tests TS-internal parseKustomize helper directly |
+| should successfully parse a valid kustomize file | 16 | not-applicable | — | — | Tests TS-internal parseKustomize helper directly; Rust extractor has no equivalent public entry point |
 | return null on an invalid file | 33 | ported | `kustomize.rs` | `empty_content_returns_empty` | — |
 | should return null when header has invalid resource kind | 38 | pending | — | — | Requires kind-validation skip path |
 | should fall back to default resource kind when header is missing | 47 | pending | — | — | Requires default-kind fallback |
@@ -1978,7 +1978,7 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null on a null input | 208 | pending | — | — | Tests TS-internal extractHelmChart helper directly |
+| should return null on a null input | 208 | not-applicable | — | — | Tests TS-internal extractHelmChart helper directly with null input |
 | should correctly extract a chart | 217 | ported | `kustomize.rs` | `extracts_helm_charts` | — |
 | should correctly extract an OCI chart | 233 | pending | — | — | Requires OCI chart extraction |
 | should correctly extract an OCI chart with registryAliases | 249 | pending | — | — | registryAliases not yet implemented |
@@ -1987,8 +1987,8 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null on a null input | 270 | pending | — | — | Tests TS-internal helper directly |
-| should return null on invalid input | 278 | pending | — | — | Tests TS-internal helper directly |
+| should return null on a null input | 270 | not-applicable | — | — | Tests TS-internal image-extraction helper directly with null input |
+| should return null on invalid input | 278 | not-applicable | — | — | Tests TS-internal image-extraction helper directly with invalid input |
 | should correctly extract a default image | 287 | ported | `kustomize.rs` | `extracts_images` | — |
 | should correctly extract an image in a repo | 305 | pending | — | — | Requires repo image newName/newTag extraction |
 | should correctly extract from a different registry | 323 | pending | — | — | Requires custom-registry handling |
@@ -2019,7 +2019,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts from digest | 710 | pending | — | — | Requires digest-pinned image handling |
 | extracts newName | 757 | pending | — | — | Requires newName override |
 | parses helmChart field | 799 | ported | `kustomize.rs` | `mixed_images_and_helm` | — |
-| extracts from various URL forms (it.each) | 1104 | pending | — | — | Requires URL-form rstest cases |
+| extracts from various URL forms (it.each) | 1104 | not-applicable | — | — | Tests TS-internal `extractResource` helper directly across many URL forms; Rust extractor has no equivalent public-API entry point |
 
 ---
 
