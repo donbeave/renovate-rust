@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 715 / 1151 actionable tests ported (62%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 717 / 1161 actionable tests ported (62%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -2196,6 +2196,38 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/cpanfile/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cpanfile/extract.spec.ts
+**Total tests:** 10 | **Ported:** 2 | **Actionable:** 10 | **Status:** partial
+
+### `extractPackageFile() › parse perl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | pending | — | — | Requires explicit empty-input null path; Rust currently returns Vec |
+| parse modules with requires | 39 | ported | `cpanfile.rs` | `extracts_basic_requires` (+ extracts_fat_arrow_form) | — |
+| parse modules with recommends | 113 | pending | — | — | Requires `recommends` keyword extraction |
+| parse modules with suggests | 138 | pending | — | — | Requires `suggests` keyword extraction |
+
+### `extractPackageFile() › parse modules with phases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| configure phase | 164 | pending | — | — | Requires `on 'configure' => sub { … }` block parsing |
+| build phase | 186 | pending | — | — | Requires `on 'build' => sub { … }` block parsing |
+| phase | 208 | ported | `cpanfile.rs` | `extracts_test_phase_block` | — |
+| runtime phase | 237 | pending | — | — | Requires `on 'runtime' => sub { … }` block parsing |
+| develop phase | 266 | pending | — | — | Requires `on 'develop' => sub { … }` block parsing |
+
+### `extractPackageFile() › parse modules with phase shortcuts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $shortcut (configure_requires/build_requires/test_requires/author_requires) | 296 | pending | — | — | Only `test_requires` covered (`extracts_test_requires_shorthand`); full it.each requires configure_requires / build_requires / author_requires cases too |
+
+---
+
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
@@ -2589,7 +2621,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- bazel/extract.spec.ts converted to per-test format above -->
 <!-- bicep/extract.spec.ts converted to per-test format above -->
 <!-- cargo/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
+<!-- cpanfile/extract.spec.ts converted to per-test format above -->
 <!-- flux/extract.spec.ts converted to per-test format above -->
 <!-- github-actions/extract.spec.ts converted to per-test format above -->
 <!-- gitlabci converted to per-test format above -->

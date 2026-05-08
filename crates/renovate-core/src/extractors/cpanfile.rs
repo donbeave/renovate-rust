@@ -187,6 +187,7 @@ fn parse_phase(name: &str) -> CpanDepPhase {
 mod tests {
     use super::*;
 
+    // Ported: "parse modules with requires" — cpanfile/extract.spec.ts line 39
     #[test]
     fn extracts_basic_requires() {
         let content = "requires 'Moose', '2.2006';\n";
@@ -198,6 +199,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "parse modules with requires" — cpanfile/extract.spec.ts line 39
     #[test]
     fn extracts_fat_arrow_form() {
         let content = "requires 'namespace::autoclean' => '0.28';\n";
@@ -207,6 +209,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "0.28");
     }
 
+    // Ported: "phase" — cpanfile/extract.spec.ts line 208 (parse modules with phases)
     #[test]
     fn extracts_test_phase_block() {
         let content = r#"
@@ -220,6 +223,7 @@ on 'test' => sub {
         assert_eq!(deps[0].phase, CpanDepPhase::Test);
     }
 
+    // Ported: "$shortcut" (test_requires case) — cpanfile/extract.spec.ts line 296 (test.each table)
     #[test]
     fn extracts_test_requires_shorthand() {
         let content = "test_requires 'Test::Exception', '0.43';\n";
