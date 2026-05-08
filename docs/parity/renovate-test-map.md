@@ -1,6 +1,8 @@
 # Renovate Test Map
 
-**Overall progress:** 453 / 458 actionable tests ported (99%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 304 / 353 actionable tests ported (86%) — updated 2026-05-08
+
+Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -12,7 +14,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ansible-galaxy/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible-galaxy/extract.spec.ts
-**Total tests:** 14 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+**Total tests:** 14 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -132,7 +134,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/batect/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/batect/extract.spec.ts
-**Total tests:** 4 | **Ported:** 2 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -163,7 +165,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/cargo/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/extract.spec.ts
-**Total tests:** 32 | **Ported:** 12 | **Actionable:** 32 | **Status:** partial
+**Total tests:** 32 | **Ported:** 14 | **Actionable:** 14 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -333,7 +335,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/git-submodules/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/extract.spec.ts
-**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -358,7 +360,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/github-actions/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/extract.spec.ts
-**Total tests:** 27 | **Ported:** 9 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 27 | **Ported:** 17 | **Actionable:** 20 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -397,7 +399,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gitlabci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/extract.spec.ts
-**Total tests:** 14 | **Ported:** 6 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 14 | **Ported:** 8 | **Actionable:** 10 | **Status:** partial
 
 ### `extractAllPackageFile()`
 
@@ -428,7 +430,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 21 | **Ported:** 13 | **Actionable:** 21 | **Status:** partial
+**Total tests:** 21 | **Ported:** 15 | **Actionable:** 17 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -461,7 +463,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gradle/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract.spec.ts
-**Total tests:** 31 | **Ported:** 3 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 30 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -573,7 +575,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/hermit/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/hermit/extract.spec.ts
-**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
+**Total tests:** 2 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `extractPackageFile`
 
@@ -844,7 +846,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/docker-compose/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/docker-compose/extract.spec.ts
-**Total tests:** 13 | **Ported:** 7 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 9 | **Actionable:** 13 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -869,7 +871,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 75 | **Ported:** 14 | **Actionable:** 66 | **Status:** partial
+**Total tests:** 75 | **Ported:** 49 | **Actionable:** 66 | **Status:** partial
 
 ### `extractPackageFile()`
 
