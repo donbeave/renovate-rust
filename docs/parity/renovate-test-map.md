@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 702 / 976 actionable tests ported (72%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 707 / 1020 actionable tests ported (69%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1942,6 +1942,87 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/kustomize/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
+**Total tests:** 44 | **Ported:** 5 | **Actionable:** 44 | **Status:** partial
+
+### `parseKustomize` (top-level)
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should successfully parse a valid kustomize file | 16 | pending | — | — | Tests TS-internal parseKustomize helper directly |
+| return null on an invalid file | 33 | ported | `kustomize.rs` | `empty_content_returns_empty` | — |
+| should return null when header has invalid resource kind | 38 | pending | — | — | Requires kind-validation skip path |
+| should fall back to default resource kind when header is missing | 47 | pending | — | — | Requires default-kind fallback |
+| should extract chartHome | 56 | pending | — | — | Requires chartHome top-level extraction |
+
+### `extractBase`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null for a local base | 66 | pending | — | — | Requires bases[] local-path detection |
+| should return null for an http base without ref/version | 71 | pending | — | — | Requires bases[] missing-ref handling |
+| should extract out the version of an http base | 77 | pending | — | — | Requires bases[] http URL parsing |
+| should extract the version of a non http base | 90 | pending | — | — | Requires bases[] non-http URL parsing |
+| should extract the depName if the URL includes a port number | 102 | pending | — | — | Requires bases[] URL with port handling |
+| should extract the version of a non http base with subdir | 114 | pending | — | — | Requires bases[] subdir handling |
+| should extract out the version of an github base | 126 | pending | — | — | Requires bases[] github source detection |
+| should extract out the version of a git base | 139 | pending | — | — | Requires bases[] git source detection |
+| should extract out the version of a git base with subdir | 152 | pending | — | — | Requires bases[] git source + subdir |
+| should extract out the version of an http base with additional params | 165 | pending | — | — | Requires bases[] http URL with query params |
+| should extract out the version of an http base from first version param | 180 | pending | — | — | Requires bases[] version-param extraction |
+| should extract out the version of an http base from first ref param | 193 | pending | — | — | Requires bases[] ref-param extraction |
+
+### `extractHelmChart`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null on a null input | 208 | pending | — | — | Tests TS-internal extractHelmChart helper directly |
+| should correctly extract a chart | 217 | ported | `kustomize.rs` | `extracts_helm_charts` | — |
+| should correctly extract an OCI chart | 233 | pending | — | — | Requires OCI chart extraction |
+| should correctly extract an OCI chart with registryAliases | 249 | pending | — | — | registryAliases not yet implemented |
+
+### `image extraction`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null on a null input | 270 | pending | — | — | Tests TS-internal helper directly |
+| should return null on invalid input | 278 | pending | — | — | Tests TS-internal helper directly |
+| should correctly extract a default image | 287 | ported | `kustomize.rs` | `extracts_images` | — |
+| should correctly extract an image in a repo | 305 | pending | — | — | Requires repo image newName/newTag extraction |
+| should correctly extract from a different registry | 323 | pending | — | — | Requires custom-registry handling |
+| should correctly extract from a different port | 341 | pending | — | — | Requires port-in-registry handling |
+| should correctly extract from a multi-depth registry | 359 | pending | — | — | Requires multi-depth registry handling |
+| should correctly extract with registryAliases | 377 | pending | — | — | registryAliases not yet implemented |
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for non kustomize kubernetes files | 400 | pending | — | — | Requires kind-filter |
+| extracts multiple image lines | 416 | pending | — | — | Requires multi-image fixture |
+| extracts ssh dependency | 444 | pending | — | — | Requires bases[] ssh URL parsing |
+| extracts ssh dependency with a subdir | 462 | pending | — | — | Requires bases[] ssh + subdir |
+| extracts http dependency | 481 | pending | — | — | Requires bases[] http URL parsing |
+| should extract out image versions | 506 | pending | — | — | Requires images[] full coverage |
+| ignores non-Kubernetes empty files | 586 | pending | — | — | Requires kind-filter |
+| does nothing with kustomize empty kustomize files | 590 | pending | — | — | Requires empty-content path |
+| should extract bases resources and components from their respective blocks | 598 | pending | — | — | Requires bases / resources / components block parsing |
+| should extract dependencies when kind is Component | 632 | pending | — | — | Requires Component kind handling |
+
+### `extractResource`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts from newTag | 675 | ported | `kustomize.rs` | `extracts_images` | — |
+| extracts from digest | 710 | pending | — | — | Requires digest-pinned image handling |
+| extracts newName | 757 | pending | — | — | Requires newName override |
+| parses helmChart field | 799 | ported | `kustomize.rs` | `mixed_images_and_helm` | — |
+| extracts from various URL forms (it.each) | 1104 | pending | — | — | Requires URL-form rstest cases |
+
+---
+
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
@@ -2349,7 +2430,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- jsonnet-bundler/extract.spec.ts converted to per-test format above -->
 <!-- kotlin-script/extract.spec.ts converted to per-test format above -->
 <!-- kubernetes/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/kustomize/extract.spec.ts` | 43 | `crates/renovate-core/src/extractors/kustomize.rs` | 6 | partial |
+<!-- kustomize/extract.spec.ts converted to per-test format above -->
 <!-- leiningen/extract.spec.ts converted to per-test format above -->
 <!-- maven-wrapper/extract.spec.ts converted to per-test format above -->
 <!-- maven/extract.spec.ts converted to per-test format above -->
