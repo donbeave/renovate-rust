@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 343 / 395 actionable tests ported (87%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 351 / 407 actionable tests ported (86%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1052,6 +1052,30 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/bazel/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/extract.spec.ts
+**Total tests:** 12 | **Ported:** 8 | **Actionable:** 12 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty if fails to parse | 10 | ported | `bazel.rs` | `empty_file_returns_empty` (+ invalid_content_returns_empty, git_repository_without_url_returns_empty) | — |
+| returns empty if cannot parse dependency | 15 | ported | `bazel.rs` | `invalid_content_returns_empty` | — |
+| returns empty for incomplete dependency | 20 | ported | `bazel.rs` | `http_archive_with_no_url_returns_dep_with_skip_reason` | — |
+| extracts multiple types of dependencies | 25 | pending | — | — | Requires WORKSPACE1 fixture (18-dep snapshot) |
+| extracts github tags | 31 | ported | `bazel.rs` | `extracts_github_archive_dep` (+ extracts_github_release_dep, extracts_multiple_archives) | — |
+| handle comments and strings | 42 | pending | — | — | Requires WORKSPACE3 fixture |
+| extracts dependencies from *.bzl files | 47 | pending | — | — | Requires *.bzl fixture support |
+| extracts dependencies for container_pull deptype | 65 | ported | `bazel.rs` | `container_pull_extracted` | — |
+| extracts dependencies for oci_pull deptype | 90 | ported | `bazel.rs` | `oci_pull_extracted` | — |
+| check remote option in go_repository | 113 | pending | — | — | go_repository remote option not yet implemented |
+| sequential http_archive | 166 | ported | `bazel.rs` | `singular_url_form_extracted` | — |
+| http_archive with GitLab url | 190 | ported | `bazel.rs` | `gitlab_archive_with_version_extracted` (+ gitlab_archive_with_commit_digest_extracted) | — |
+
+---
+
 ## `lib/modules/manager/bicep/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bicep/extract.spec.ts
@@ -1159,7 +1183,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- asdf/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/azure_pipelines.rs` | 22 | partial |
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
-| `lib/modules/manager/bazel/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/bazel.rs` | 20 | ported |
+<!-- bazel/extract.spec.ts converted to per-test format above -->
 <!-- bicep/extract.spec.ts converted to per-test format above -->
 <!-- cargo/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
