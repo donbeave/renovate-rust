@@ -61,9 +61,12 @@ pub struct CpanDep {
 /// `requires 'Foo::Bar', '1.23';` or `requires 'Foo::Bar' => '1.23';`
 /// Version is optional (but required for actionable deps).
 /// Also handles `test_requires`, `recommends`, `suggests`, `configure_requires`, etc.
+///
+/// Capture group 1: the keyword (e.g. `test_requires`); used to override the
+/// current phase for shortcut forms.
 static REQUIRES_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
-        r#"(?m)^\s*(?:requires|recommends|suggests|test_requires|configure_requires|build_requires|author_requires)\s+['"]([^'"]+)['"]\s*(?:(?:,|=>)\s*(?:['"]([^'"]+)['"]|([\d.v]+)))?\s*;"#,
+        r#"(?m)^\s*(requires|recommends|suggests|test_requires|configure_requires|build_requires|author_requires)\s+['"]([^'"]+)['"]\s*(?:(?:,|=>)\s*(?:['"]([^'"]+)['"]|([\d.v]+)))?\s*;"#,
     )
     .unwrap()
 });
@@ -126,23 +129,28 @@ pub fn extract(content: &str) -> Vec<CpanDep> {
 
         // Parse `requires` / `recommends` / etc. on this line.
         for cap in REQUIRES_RE.captures_iter(trimmed) {
-            let dep_name = cap[1].trim().to_owned();
+            let keyword = cap[1].to_owned();
+            let dep_name = cap[2].trim().to_owned();
+
+            // Shortcut keywords (`<phase>_requires`) imply their own phase
+            // independent of any surrounding `on 'phase' => sub {}` block.
+            let phase = phase_for_keyword(&keyword).unwrap_or_else(|| current_phase.clone());
 
             // Skip `perl` itself.
             if dep_name == "perl" {
                 deps.push(CpanDep {
                     dep_name,
                     current_value: String::new(),
-                    phase: current_phase.clone(),
+                    phase,
                     skip_reason: Some(CpanSkipReason::PerlCore),
                 });
                 continue;
             }
 
-            // Version: prefer quoted string (cap[2]), fall back to bare number (cap[3]).
+            // Version: prefer quoted string (cap[3]), fall back to bare number (cap[4]).
             let raw_version = cap
-                .get(2)
-                .or_else(|| cap.get(3))
+                .get(3)
+                .or_else(|| cap.get(4))
                 .map(|m| m.as_str().trim())
                 .unwrap_or("");
 
@@ -156,14 +164,14 @@ pub fn extract(content: &str) -> Vec<CpanDep> {
                 deps.push(CpanDep {
                     dep_name,
                     current_value: String::new(),
-                    phase: current_phase.clone(),
+                    phase,
                     skip_reason: Some(CpanSkipReason::UnspecifiedVersion),
                 });
             } else {
                 deps.push(CpanDep {
                     dep_name,
                     current_value: version,
-                    phase: current_phase.clone(),
+                    phase,
                     skip_reason: None,
                 });
             }
@@ -180,6 +188,21 @@ fn parse_phase(name: &str) -> CpanDepPhase {
         "configure" => CpanDepPhase::Configure,
         "develop" | "author" => CpanDepPhase::Develop,
         _ => CpanDepPhase::Runtime,
+    }
+}
+
+/// Map a `<phase>_requires` shortcut keyword to its phase.
+///
+/// Returns `None` for the plain `requires` / `recommends` / `suggests`
+/// forms — they inherit the phase from the surrounding `on 'phase'` block
+/// (defaulting to `Runtime`).
+fn phase_for_keyword(keyword: &str) -> Option<CpanDepPhase> {
+    match keyword {
+        "test_requires" => Some(CpanDepPhase::Test),
+        "build_requires" => Some(CpanDepPhase::Build),
+        "configure_requires" => Some(CpanDepPhase::Configure),
+        "author_requires" => Some(CpanDepPhase::Develop),
+        _ => None,
     }
 }
 
@@ -223,13 +246,35 @@ on 'test' => sub {
         assert_eq!(deps[0].phase, CpanDepPhase::Test);
     }
 
-    // Ported: "$shortcut" (test_requires case) — cpanfile/extract.spec.ts line 296 (test.each table)
+    // Ported: "$shortcut" — cpanfile/extract.spec.ts line 296 (test.each table covers
+    // configure_requires / build_requires / test_requires / author_requires)
     #[test]
-    fn extracts_test_requires_shorthand() {
-        let content = "test_requires 'Test::Exception', '0.43';\n";
-        let deps = extract(content);
-        assert_eq!(deps.len(), 1);
-        assert_eq!(deps[0].dep_name, "Test::Exception");
+    fn extracts_phase_shortcut_keywords() {
+        let cases = [
+            (
+                "configure_requires 'Capture::Tiny', '0.12';\n",
+                CpanDepPhase::Configure,
+            ),
+            (
+                "build_requires 'Capture::Tiny', '0.12';\n",
+                CpanDepPhase::Build,
+            ),
+            (
+                "test_requires 'Capture::Tiny', '0.12';\n",
+                CpanDepPhase::Test,
+            ),
+            (
+                "author_requires 'Capture::Tiny', '0.12';\n",
+                CpanDepPhase::Develop,
+            ),
+        ];
+        for (content, expected_phase) in cases {
+            let deps = extract(content);
+            assert_eq!(deps.len(), 1, "content: {content:?}");
+            assert_eq!(deps[0].dep_name, "Capture::Tiny");
+            assert_eq!(deps[0].current_value, "0.12");
+            assert_eq!(deps[0].phase, expected_phase);
+        }
     }
 
     #[test]

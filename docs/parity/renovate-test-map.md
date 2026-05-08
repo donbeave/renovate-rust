@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 717 / 1187 actionable tests ported (60%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 718 / 1187 actionable tests ported (60%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2199,7 +2199,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/cpanfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cpanfile/extract.spec.ts
-**Total tests:** 10 | **Ported:** 2 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 3 | **Actionable:** 10 | **Status:** partial
 
 ### `extractPackageFile() › parse perl`
 
@@ -2224,7 +2224,7 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $shortcut (configure_requires/build_requires/test_requires/author_requires) | 296 | pending | — | — | Only `test_requires` covered (`extracts_test_requires_shorthand`); full it.each requires configure_requires / build_requires / author_requires cases too |
+| $shortcut (configure_requires/build_requires/test_requires/author_requires) | 296 | ported | `cpanfile.rs` | `extracts_phase_shortcut_keywords` | — |
 
 ---
 
