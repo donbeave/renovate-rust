@@ -94,4 +94,32 @@ mod tests {
     fn yaml_without_pipeline_returns_empty() {
         assert!(extract("no: pipeline").is_empty());
     }
+
+    // Ported: "extracts multiple stages pipeline image lines" — velaci/extract.spec.ts line 48
+    #[test]
+    fn extracts_stages_pipeline_images() {
+        // Mirrors __fixtures__/.vela-stages.yaml
+        let content = "version: \"1\"\n\nstages:\n  go:\n    steps:\n      - name: go\n        image: golang:1.13\n  node:\n    steps:\n      - name: node\n        image: amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "golang" && d.tag.as_deref() == Some("1.13"))
+        );
+        assert!(deps.iter().any(|d| d.image == "amd64/node"));
+    }
+
+    // Ported: "extracts multiple secrets pipeline image lines" — velaci/extract.spec.ts line 62
+    #[test]
+    fn extracts_secrets_pipeline_images() {
+        // Mirrors __fixtures__/.vela-secrets.yml
+        let content = "version: \"1\"\n\nsteps:\n  - name: node\n    image: amd64/node:10.0.0@sha256:5082d4db78ee2d24f72b25eb75537f2e19c49f04a595378d1ae8814d6f2fbf28\n\nsecrets:\n  - name: vault_token\n  - origin:\n      name: private vault\n      image: target/secret-vault:v0.1.0\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().any(|d| d.image == "amd64/node"));
+        assert!(
+            deps.iter()
+                .any(|d| d.image == "target/secret-vault" && d.tag.as_deref() == Some("v0.1.0"))
+        );
+    }
 }

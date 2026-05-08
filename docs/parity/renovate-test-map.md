@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 736 / 1187 actionable tests ported (62%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 738 / 1187 actionable tests ported (62%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1627,7 +1627,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/velaci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/velaci/extract.spec.ts
-**Total tests:** 6 | **Ported:** 4 | **Actionable:** 6 | **Status:** partial
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1637,8 +1637,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | should handle YAML without pipeline/images | 11 | ported | `velaci.rs` | `yaml_without_pipeline_returns_empty` | — |
 | extracts multiple step pipeline image lines | 16 | ported | `velaci.rs` | `extracts_step_image` | — |
 | extracts multiple services pipeline image lines | 30 | ported | `velaci.rs` | `extracts_service_image` | — |
-| extracts multiple stages pipeline image lines | 48 | pending | — | — | Requires `stages:` section parsing |
-| extracts multiple secrets pipeline image lines | 62 | pending | — | — | Requires `secrets:` section parsing for image references |
+| extracts multiple stages pipeline image lines | 48 | ported | `velaci.rs` | `extracts_stages_pipeline_images` | — |
+| extracts multiple secrets pipeline image lines | 62 | ported | `velaci.rs` | `extracts_secrets_pipeline_images` | — |
 
 ---
 
