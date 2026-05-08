@@ -186,21 +186,36 @@ fn parse_dependency_attrs(
 }
 
 fn parse_coords_dep(coords: &str, registry_urls: &[String]) -> Option<AntDep> {
-    // coords: groupId:artifactId:version[:type[:classifier[:scope]]]
+    // coords: groupId:artifactId:[type:[classifier:]]version[:scope]
     let normalized = coords.replace('/', ":");
     let parts: Vec<&str> = normalized.split(':').collect();
     if parts.len() < 3 {
         return None;
     }
-    let dep_name = format!("{}:{}", parts[0], parts[1]);
-    let version = parts[2].to_owned();
+    if parts[0].is_empty() || parts[1].is_empty() {
+        // Reject malformed coords with empty groupId or artifactId.
+        return None;
+    }
 
-    // Scope is the last element if it's a known scope name.
-    let dep_type = parts
-        .last()
-        .filter(|&&s| SCOPE_NAMES.contains(&s))
-        .map(|&s| s.to_owned())
-        .unwrap_or_else(|| "compile".to_owned());
+    let dep_name = format!("{}:{}", parts[0], parts[1]);
+
+    // The optional trailing scope is recognised only when the last segment
+    // matches a known Maven scope name. Otherwise the last segment is the
+    // version (and any segments between artifactId and the version are
+    // type/classifier metadata that does not affect the dep name).
+    let last = *parts.last().unwrap();
+    let (dep_type, version) = if parts.len() >= 4 && SCOPE_NAMES.contains(&last) {
+        // grp:art:[type:[classifier:]]version:scope — pick the version slot.
+        // The version is the segment immediately before scope.
+        let version_segment = parts[parts.len() - 2];
+        (last.to_owned(), version_segment.to_owned())
+    } else if parts.len() == 3 {
+        // grp:art:version
+        ("compile".to_owned(), parts[2].to_owned())
+    } else {
+        // grp:art:[type:[classifier:]]version (no scope) — version is last.
+        ("compile".to_owned(), last.to_owned())
+    };
 
     if version.contains("${") {
         return Some(AntDep {
@@ -350,5 +365,64 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "junit:junit");
         assert_eq!(deps[0].current_value, "4.13.2");
+    }
+
+    // Ported: "extracts scope from 4-part coords attribute" — ant/extract.spec.ts line 791
+    #[test]
+    fn four_part_coords_with_scope_at_end() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency coords="junit:junit:4.13.2:test" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].current_value, "4.13.2");
+        assert_eq!(deps[0].dep_type, "test");
+    }
+
+    // Ported: "ignores coords with fewer than 3 parts" — ant/extract.spec.ts line 821
+    #[test]
+    fn coords_with_fewer_than_3_parts_skipped() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency coords="junit:junit" />
+  </artifact:dependencies>
+</project>"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "ignores coords with empty groupId" — ant/extract.spec.ts line 840
+    #[test]
+    fn coords_with_empty_groupid_skipped() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency coords=":junit:4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "treats last part as version when it is not a known scope" — ant/extract.spec.ts line 919
+    #[test]
+    fn four_part_coords_last_segment_is_version_when_not_a_scope() {
+        // groupId:artifactId:type:version — `jar` is not a Maven scope, so
+        // the last segment (`1.0.0`) is the version and depType defaults to
+        // `compile`.
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency coords="org.example:lib:jar:1.0.0" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "org.example:lib");
+        assert_eq!(deps[0].current_value, "1.0.0");
+        assert_eq!(deps[0].dep_type, "compile");
     }
 }

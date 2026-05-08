@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 729 / 1187 actionable tests ported (61%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 733 / 1187 actionable tests ported (62%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1879,7 +1879,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 8 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 12 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1925,12 +1925,12 @@ Status key: `ported` · `pending` · `not-applicable`
 | does not loop on self-importing files | 692 | pending | — | — | Requires self-import detection |
 | shares properties across imported files | 722 | pending | — | — | Requires multi-file property sharing |
 | extracts dependency from 3-part coords attribute | 760 | ported | `ant.rs` | `extracts_coords_form` | — |
-| extracts scope from 4-part coords attribute | 791 | pending | — | — | Requires 4-part coords scope extraction |
-| ignores coords with fewer than 3 parts | 821 | pending | — | — | Requires coords malformed-skip path |
-| ignores coords with empty groupId | 840 | pending | — | — | Requires coords empty-groupId skip |
+| extracts scope from 4-part coords attribute | 791 | ported | `ant.rs` | `four_part_coords_with_scope_at_end` | — |
+| ignores coords with fewer than 3 parts | 821 | ported | `ant.rs` | `coords_with_fewer_than_3_parts_skipped` | — |
+| ignores coords with empty groupId | 840 | ported | `ant.rs` | `coords_with_empty_groupid_skipped` | — |
 | resolves property references in coords version | 859 | pending | — | — | Requires coords + property resolution |
 | marks coords dependency with unresolvable property | 890 | pending | — | — | Requires coords + unresolved-property skip |
-| treats last part as version when it is not a known scope | 919 | pending | — | — | Requires coords scope/version disambiguation |
+| treats last part as version when it is not a known scope | 919 | ported | `ant.rs` | `four_part_coords_last_segment_is_version_when_not_a_scope` | — |
 | collects registry URLs from remoteRepository elements | 949 | ported | `ant.rs` | `remote_repository_collected` | — |
 | passes registry URLs to coords-style dependencies | 979 | pending | — | — | Requires registryUrls propagation to coords deps |
 | collects registry URLs from settingsFile attribute | 1009 | pending | — | — | Requires settingsFile attribute parsing |
