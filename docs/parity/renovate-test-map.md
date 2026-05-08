@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 690 / 903 actionable tests ported (76%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 697 / 932 actionable tests ported (75%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1876,6 +1876,72 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/maven/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
+**Total tests:** 29 | **Ported:** 7 | **Actionable:** 29 | **Status:** partial
+
+### `extractPackage`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid XML | 22 | ported | `maven.rs` | `empty_pom_returns_empty` (+ multiline_element_values_trimmed) | — |
+| extract dependencies from any XML position | 29 | ported | `maven.rs` | `extracts_regular_dependencies` (+ extracts_parent, extracts_dependency_management, extracts_build_plugins, plugin_default_group_id, extracts_build_extensions, property_resolved_from_properties_section, profile_dependencies_extracted) | — |
+| extract dependencies with windows line endings | 237 | pending | — | — | Requires CRLF tolerance test path |
+| tries minimum manifests | 249 | ported | `maven.rs` | `extracts_regular_dependencies` | — |
+| tries minimum snapshot manifests | 264 | ported | `maven.rs` | `extracts_regular_dependencies` | — |
+| extracts builder and buildpack images from spring-boot plugin | 279 | pending | — | — | Requires spring-boot plugin builder/buildpack extraction |
+| extracts only builder if defaults are used in spring-boot plugin | 370 | pending | — | — | Requires spring-boot plugin builder default handling |
+| returns no buildpack dependencies when image tag is missing in spring boot plugin configuration | 398 | pending | — | — | Requires spring-boot plugin missing-tag handling |
+| returns no buildpack dependencies when dependencies are invalid in spring boot plugin | 407 | pending | — | — | Requires spring-boot plugin tolerant parsing |
+
+### `resolveParents`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should apply props recursively | 418 | ported | `maven.rs` | `recursive_property_resolution` | — |
+| should apply props multiple times | 432 | ported | `maven.rs` | `pdm_style_pom_with_properties` | — |
+| should detect props infinitely recursing props | 448 | ported | `maven.rs` | `substitute_props_unclosed_brace` (+ substitute_props_handles_unknown_key) | — |
+
+### `extractRegistries`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid XML | 471 | pending | — | — | Requires settings.xml registry-extraction parser |
+| extract registries from a simple mirror settings file | 478 | pending | — | — | Requires settings.xml mirror parser |
+| extract registries from a simple profile settings file | 485 | pending | — | — | Requires settings.xml profile parser |
+| extract registries from a complex profile settings file | 492 | pending | — | — | Requires settings.xml complex profile parser |
+| extract registries from a settings file that uses a newer schema | 503 | pending | — | — | Requires settings.xml newer-schema tolerance |
+
+### `extractExtensions`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid xml files | 527 | pending | — | — | Requires .mvn/extensions.xml extractor |
+
+### `extractAllPackageFiles`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty if package has no content | 548 | pending | — | — | Requires extractAllPackageFiles wrapper |
+| should return empty for packages with invalid content | 554 | pending | — | — | Requires extractAllPackageFiles wrapper |
+| should return packages with urls from a settings file | 560 | pending | — | — | Requires settings.xml integration |
+| should include registryUrls from parent pom files | 581 | pending | — | — | Requires multi-file parent resolution |
+| should include registryUrls in the correct order | 791 | pending | — | — | Requires registryUrls ordering |
+| should return package files info | 812 | pending | — | — | Requires package files info aggregation |
+| should extract from .mvn/extensions.xml file | 888 | pending | — | — | Requires .mvn/extensions.xml integration |
+| should return empty array if extensions file is invalid or empty | 917 | pending | — | — | Requires .mvn/extensions.xml tolerant parsing |
+
+### `extractAllPackageFiles › root pom handling`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should skip root pom.xml | 930 | pending | — | — | Requires root-pom detection |
+| should skip root pom.xml when it has an external parent | 964 | pending | — | — | Requires root-pom detection with external parent |
+| handles cross-referencing | 1006 | pending | — | — | Requires multi-file pom cross-reference resolution |
+
+---
+
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
@@ -2220,7 +2286,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/kustomize/extract.spec.ts` | 43 | `crates/renovate-core/src/extractors/kustomize.rs` | 6 | partial |
 <!-- leiningen/extract.spec.ts converted to per-test format above -->
 <!-- maven-wrapper/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/maven/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/maven.rs` | 19 | partial |
+<!-- maven/extract.spec.ts converted to per-test format above -->
 <!-- meteor/extract.spec.ts converted to per-test format above -->
 <!-- mint/extract.spec.ts converted to per-test format above -->
 <!-- mise/extract.spec.ts converted to per-test format above -->
