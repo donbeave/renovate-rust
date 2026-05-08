@@ -170,4 +170,15 @@ directories:
         // Unclosed bracket is treated as text, parser finds no helmChart entries
         assert!(extract("nothing here: [").is_empty());
     }
+
+    // Ported: "returns null for nonHelmChart key" — vendir/extract.spec.ts line 30
+    //
+    // Mirrors the invalid-contents.yaml fixture: a `contents[]` entry that
+    // uses an `invalid:` key instead of `helmChart:`. The extractor only
+    // emits deps for `helmChart:` entries so the result is empty.
+    #[test]
+    fn non_helm_chart_contents_key_returns_empty() {
+        let content = "apiVersion: vendir.k14s.io/v1alpha1\nkind: Config\ndirectories:\n- path: vendor\n  contents:\n  - path: github.com/cloudfoundry/cf-k8s-networking\n    invalid:\n      url: https://github.com/cloudfoundry/cf-k8s-networking\n      ref: origin/master\n";
+        assert!(extract(content).is_empty());
+    }
 }

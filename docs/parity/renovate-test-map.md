@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 733 / 1187 actionable tests ported (62%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 736 / 1187 actionable tests ported (62%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1593,7 +1593,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/tekton/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/tekton/extract.spec.ts
-**Total tests:** 5 | **Ported:** 3 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 4 | **Actionable:** 5 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1602,7 +1602,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts deps from a file | 6 | ported | `tekton.rs` | `extracts_step_images` (+ extracts_gcr_images_without_skip) | — |
 | extracts deps from a file in annotations | 15 | pending | — | — | Requires Tekton bundle annotation parsing |
 | ignores file without any deps | 96 | ported | `tekton.rs` | `ignores_file_without_deps` | — |
-| ignores invalid YAML | 100 | pending | — | — | Requires explicit invalid-YAML test path distinct from non-tekton content |
+| ignores invalid YAML | 100 | ported | `tekton.rs` | `ignores_invalid_yaml_with_stray_bundle_key` | — |
 | ignores empty file | 112 | ported | `tekton.rs` | `ignores_empty_file` | — |
 
 ---
@@ -1610,7 +1610,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/vendir/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/vendir/extract.spec.ts
-**Total tests:** 5 | **Ported:** 4 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1619,7 +1619,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for invalid yaml file content | 10 | ported | `vendir.rs` | `invalid_yaml_returns_empty` | — |
 | returns null for empty yaml file content | 15 | ported | `vendir.rs` | `empty_returns_empty` | — |
 | returns null for empty directories key | 20 | ported | `vendir.rs` | `no_helm_charts_returns_empty` | — |
-| returns null for nonHelmChart key | 30 | pending | — | — | Requires explicit imgpkg/git/inline contents type detection |
+| returns null for nonHelmChart key | 30 | ported | `vendir.rs` | `non_helm_chart_contents_key_returns_empty` | — |
 | multiple charts - extracts helm-chart from vendir.yml correctly | 35 | ported | `vendir.rs` | `extracts_helm_charts` (+ extracts_second_chart) | — |
 
 ---
@@ -2559,7 +2559,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/quadlet/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/quadlet/extract.spec.ts
-**Total tests:** 11 | **Ported:** 9 | **Actionable:** 11 | **Status:** partial
+**Total tests:** 11 | **Ported:** 10 | **Actionable:** 11 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2575,7 +2575,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | does not extract an image file reference | 119 | ported | `quadlet.rs` | `image_file_reference_skipped` | — |
 | does not extract an build file reference | 129 | ported | `quadlet.rs` | `build_file_reference_skipped` | — |
 | extract data from file with registry aliases | 139 | pending | — | — | registryAliases not yet implemented |
-| handles an unsuccessful parse | 158 | pending | — | — | Requires malformed-systemd-unit handling distinct from empty content |
+| handles an unsuccessful parse | 158 | ported | `quadlet.rs` | `container_section_without_image_returns_empty` | — |
 
 ---
 

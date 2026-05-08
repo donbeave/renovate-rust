@@ -112,4 +112,15 @@ spec:
     fn ignores_empty_file() {
         assert!(extract("").is_empty());
     }
+
+    // Ported: "ignores invalid YAML" — tekton/extract.spec.ts line 100
+    //
+    // Content `bundle: registry.com/repo` looks like a stray bundle key
+    // outside any tekton resource. Rust extractor walks the YAML
+    // document — without a valid `kind:` it produces no deps.
+    #[test]
+    fn ignores_invalid_yaml_with_stray_bundle_key() {
+        let content = "\n---\nbundle: registry.com/repo\n";
+        assert!(extract(content).is_empty());
+    }
 }
