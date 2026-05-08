@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 579 / 675 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 587 / 685 actionable tests ported (86%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1672,6 +1672,79 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/setup-cfg/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/setup-cfg/extract.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | ported | `setup_cfg.rs` | `empty_content_returns_no_deps` | — |
+| extracts dependencies | 10 | ported | `setup_cfg.rs` | `extracts_install_requires` (+ extracts_setup_requires, extracts_tests_require, extracts_extras_require, skips_git_source, normalizes_package_name, strips_env_markers, ignores_unrelated_sections) | — |
+
+---
+
+## `lib/modules/manager/mix/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mix/extract.spec.ts
+**Total tests:** 3 | **Ported:** 2 | **Actionable:** 3 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty for invalid dependency file | 11 | ported | `mix.rs` | `no_deps_function_returns_empty` (+ deps_without_do_end_block) | — |
+| extracts all dependencies when no lockfile | 16 | ported | `mix.rs` | `simple_hex_dep` (+ real_world_mix_exs, dep_with_only_option, git_dep_skipped, github_dep_skipped, path_dep_skipped, dep_without_version_skipped) | — |
+| extracts all dependencies and adds the locked version if lockfile present | 139 | pending | — | — | Requires mix.lock parsing + lockedVersion plumbing |
+
+---
+
+## `lib/modules/manager/leiningen/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/leiningen/extract.spec.ts
+**Total tests:** 4 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/manager/leiningen/extract`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| trimAtKey | 10 | not-applicable | — | — | TypeScript-internal helper; Rust extractor uses different parser structure |
+| extractFromVectors | 22 | not-applicable | — | — | TypeScript-internal helper; Rust extractor uses different parser structure |
+| extractPackageFile | 74 | ported | `leiningen.rs` | `extracts_dependencies` (+ extracts_managed_dependencies, extracts_plugins, dev_profile_dependencies_also_extracted) | — |
+| extractVariables | 239 | not-applicable | — | — | TypeScript-internal helper; Rust handles variable expansion inline in extract() |
+
+---
+
+## `lib/modules/manager/pep723/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep723/extract.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should extract dependencies | 10 | ported | `pep723.rs` | `extracts_script_block_with_version` (+ extracts_pinned_version, handles_direct_reference, normalizes_package_name) | — |
+
+---
+
+## `lib/modules/manager/unity3d/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/unity3d/extract.spec.ts
+**Total tests:** 3 | **Ported:** 2 | **Actionable:** 3 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles no version | 5 | ported | `unity3d.rs` | `returns_none_for_empty` | — |
+| handles $packageName | 14 | ported | `unity3d.rs` | `extracts_plain_version` (+ prefers_with_revision_version) | — |
+| handles $type version | 39 | pending | — | — | Requires alpha/beta/stable channel-specific handling test cases |
+
+---
+
 ## `lib/modules/manager/quadlet/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/quadlet/extract.spec.ts
@@ -1799,19 +1872,19 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- kotlin-script/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/kubernetes/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/kubernetes.rs` | 11 | partial |
 | `lib/modules/manager/kustomize/extract.spec.ts` | 43 | `crates/renovate-core/src/extractors/kustomize.rs` | 6 | partial |
-| `lib/modules/manager/leiningen/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/leiningen.rs` | 8 | partial |
+<!-- leiningen/extract.spec.ts converted to per-test format above -->
 <!-- maven-wrapper/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/maven/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/maven.rs` | 19 | partial |
 <!-- meteor/extract.spec.ts converted to per-test format above -->
 <!-- mint/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/mise/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/mise.rs` | 16 | partial |
-| `lib/modules/manager/mix/extract.spec.ts` | 3 | `crates/renovate-core/src/extractors/mix.rs` | 9 | partial |
+<!-- mix/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
 | `lib/modules/manager/nuget/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/nuget.rs` | 25 | partial |
 <!-- ocb/extract.spec.ts converted to per-test format above -->
 <!-- osgi/extract.spec.ts converted to per-test format above -->
 <!-- pep621/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/pep723/extract.spec.ts` | 1 | `crates/renovate-core/src/extractors/pep723.rs` | 6 | partial |
+<!-- pep723/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/pip-compile/extract.spec.ts` | 25 | — | 0 | pending |
 <!-- pip_requirements/extract.spec.ts converted to per-test format above -->
 <!-- pip_setup/extract.spec.ts converted to per-test format above -->
@@ -1824,7 +1897,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- runtime-version/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/sbt/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/sbt.rs` | 10 | partial |
 <!-- scalafmt/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/setup-cfg/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/setup_cfg.rs` | 9 | partial |
+<!-- setup-cfg/extract.spec.ts converted to per-test format above -->
 <!-- sveltos/extract.spec.ts converted to per-test format above -->
 <!-- tekton/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/terraform/extract.spec.ts` | 18 | `crates/renovate-core/src/extractors/terraform.rs` | 14 | partial |
@@ -1832,7 +1905,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- tflint-plugin/extract.spec.ts converted to per-test format above -->
 <!-- travis/extract.spec.ts converted to per-test format above -->
 <!-- typst/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/unity3d/extract.spec.ts` | 0 | `crates/renovate-core/src/extractors/unity3d.rs` | 3 | partial |
+<!-- unity3d/extract.spec.ts converted to per-test format above -->
 <!-- velaci/extract.spec.ts converted to per-test format above -->
 <!-- vendir/extract.spec.ts converted to per-test format above -->
 <!-- woodpecker/extract.spec.ts converted to per-test format above -->
