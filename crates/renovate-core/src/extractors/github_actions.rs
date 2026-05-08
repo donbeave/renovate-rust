@@ -226,6 +226,171 @@ fn owner_repo(action_path: &str) -> Option<String> {
     Some(format!("{owner}/{repo}"))
 }
 
+/// A GitHub Actions FQDN dependency from `uses: https://host/owner/repo[/path]@ref`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GithubActionsFqdnDep {
+    /// Full URL dep_name: `https://host/owner/repo` (without sub-path).
+    pub dep_name: String,
+    /// Owner/repo portion: `owner/repo`.
+    pub package_name: String,
+    /// The ref after `@` (tag, branch, or digest).
+    pub current_value: Option<String>,
+    /// SHA digest when pinned.
+    pub current_digest: Option<String>,
+    /// Registry URL: `https://host/`.
+    pub registry_url: Option<String>,
+    /// Datasource identifier (e.g. `"github-tags"`, `"forgejo-tags"`, `"gitea-tags"`).
+    pub datasource: Option<&'static str>,
+    /// Skip reason when host is not supported.
+    pub skip_reason: Option<&'static str>,
+    /// Original `uses:` value verbatim (after quote stripping), used by writers
+    /// to do literal in-place substitution.
+    pub replace_string: String,
+}
+
+/// Detect the git platform based on the hostname.
+///
+/// Returns `"github"`, `"forgejo"`, `"gitea"`, or `None` (unsupported).
+fn detect_host_platform(hostname: &str) -> Option<&'static str> {
+    if hostname == "github.com" || hostname.contains("github") {
+        return Some("github");
+    }
+    if hostname.contains("forgejo") || hostname == "codeberg.org" || hostname == "codefloe.com" {
+        return Some("forgejo");
+    }
+    if hostname == "gitea.com" || hostname.contains("gitea") {
+        return Some("gitea");
+    }
+    None
+}
+
+/// Extract FQDN-style `uses: https://host/...` dependencies from a workflow.
+///
+/// These are full URL action references like:
+/// - `https://github.com/actions/cache/save@sha`
+/// - `https://code.forgejo.org/actions/setup-node@sha`
+/// - `https://gitea.com/actions/setup-node@sha`
+pub fn extract_fqdn(content: &str) -> Vec<GithubActionsFqdnDep> {
+    let mut out = Vec::new();
+
+    for raw in content.lines() {
+        if raw.trim().starts_with('#') {
+            continue;
+        }
+        // Look for `uses: https://...` patterns.
+        let trimmed = raw.trim();
+        let uses_val = if let Some(v) = trimmed.strip_prefix("uses:") {
+            v.trim()
+        } else if let Some(v) = trimmed.strip_prefix("- uses:") {
+            v.trim()
+        } else {
+            continue;
+        };
+
+        // Strip quotes.
+        let uses_val = uses_val.trim_matches('"').trim_matches('\'');
+
+        // Must start with https://.
+        if !uses_val.starts_with("https://") {
+            continue;
+        }
+
+        // Preserve the full `uses:` value as the replaceString.
+        let replace_string = uses_val.to_owned();
+
+        // Extract inline comment version (e.g. `# tag=v4.2.0` or `# v3.1.1`).
+        let (url_part, comment_version) = if let Some(idx) = uses_val.find(" #") {
+            let v = uses_val[idx + 2..].trim();
+            // Strip `tag=` prefix.
+            let v = v.strip_prefix("tag=").unwrap_or(v);
+            (&uses_val[..idx], Some(v.to_owned()))
+        } else {
+            (uses_val, None)
+        };
+
+        // Split into url@ref.
+        let Some((url_path, ref_str)) = url_part.split_once('@') else {
+            continue;
+        };
+
+        // Parse the URL path: `https://host/owner/repo[/subpath]`
+        let Some(without_scheme) = url_path.strip_prefix("https://") else {
+            continue;
+        };
+        let mut segs = without_scheme.splitn(4, '/');
+        let hostname = segs.next().unwrap_or("").trim();
+        let owner = segs.next().unwrap_or("").trim();
+        let repo = segs.next().unwrap_or("").trim();
+
+        if hostname.is_empty() || owner.is_empty() || repo.is_empty() {
+            continue;
+        }
+
+        let package_name = format!("{owner}/{repo}");
+        let dep_name = format!("https://{hostname}/{package_name}");
+        let registry_url_str = format!("https://{hostname}/");
+
+        let platform = detect_host_platform(hostname);
+
+        // Determine if ref is a full SHA.
+        let (current_digest, current_value) = if SHA_FULL.is_match(ref_str) {
+            (Some(ref_str.to_owned()), comment_version)
+        } else {
+            (
+                None,
+                Some(comment_version.unwrap_or_else(|| ref_str.to_owned())),
+            )
+        };
+
+        let dep = match platform {
+            Some("github") => GithubActionsFqdnDep {
+                dep_name,
+                package_name,
+                current_value,
+                current_digest,
+                registry_url: Some(registry_url_str),
+                datasource: Some("github-tags"),
+                skip_reason: None,
+                replace_string,
+            },
+            Some("forgejo") => GithubActionsFqdnDep {
+                dep_name,
+                package_name,
+                current_value,
+                current_digest,
+                registry_url: Some(registry_url_str),
+                datasource: Some("forgejo-tags"),
+                skip_reason: None,
+                replace_string,
+            },
+            Some("gitea") => GithubActionsFqdnDep {
+                dep_name,
+                package_name,
+                current_value,
+                current_digest,
+                registry_url: Some(registry_url_str),
+                datasource: Some("gitea-tags"),
+                skip_reason: None,
+                replace_string,
+            },
+            _ => GithubActionsFqdnDep {
+                dep_name,
+                package_name,
+                current_value: None,
+                current_digest: None,
+                registry_url: None,
+                datasource: None,
+                skip_reason: Some("unsupported-url"),
+                replace_string,
+            },
+        };
+
+        out.push(dep);
+    }
+
+    out
+}
+
 /// Strip a trailing `# comment` from a YAML value.
 fn strip_comment(s: &str) -> &str {
     if let Some(idx) = s.find(" #") {
@@ -1008,5 +1173,76 @@ jobs:
         );
         assert_eq!(parse_runner_label("self-hosted"), Some(("self", "hosted")));
         assert_eq!(parse_runner_label("nodash"), None);
+    }
+
+    // Ported: "extracts actions with fqdn" — github-actions/extract.spec.ts line 614
+    #[test]
+    fn extracts_actions_with_fqdn() {
+        let content = r#"
+jobs:
+  build:
+    steps:
+      - name: "test1"
+        uses: https://github.com/actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # tag=v4.2.0
+      - name: "test2"
+        uses: https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+      - name: "test3"
+        uses: https://gitea.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+      - name: "test4"
+        uses: https://code.domain.test/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+"#;
+
+        let deps = extract_fqdn(content);
+        assert_eq!(deps.len(), 4);
+
+        // [0] github.com
+        assert_eq!(deps[0].dep_name, "https://github.com/actions/cache");
+        assert_eq!(deps[0].package_name, "actions/cache");
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("1bd1e32a3bdc45362d1e726936510720a7c30a57")
+        );
+        assert_eq!(deps[0].current_value.as_deref(), Some("v4.2.0"));
+        assert_eq!(
+            deps[0].replace_string,
+            "https://github.com/actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # tag=v4.2.0"
+        );
+        assert_eq!(deps[0].datasource, Some("github-tags"));
+        assert_eq!(deps[0].registry_url.as_deref(), Some("https://github.com/"));
+        assert!(deps[0].skip_reason.is_none());
+
+        // [1] code.forgejo.org
+        assert_eq!(
+            deps[1].dep_name,
+            "https://code.forgejo.org/actions/setup-node"
+        );
+        assert_eq!(deps[1].package_name, "actions/setup-node");
+        assert_eq!(
+            deps[1].current_digest.as_deref(),
+            Some("56337c425554a6be30cdef71bf441f15be286854")
+        );
+        assert_eq!(deps[1].current_value.as_deref(), Some("v3.1.1"));
+        assert_eq!(
+            deps[1].replace_string,
+            "https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1"
+        );
+        assert_eq!(deps[1].datasource, Some("forgejo-tags"));
+        assert_eq!(
+            deps[1].registry_url.as_deref(),
+            Some("https://code.forgejo.org/")
+        );
+        assert!(deps[1].skip_reason.is_none());
+
+        // [2] gitea.com
+        assert_eq!(deps[2].dep_name, "https://gitea.com/actions/setup-node");
+        assert_eq!(deps[2].package_name, "actions/setup-node");
+        assert_eq!(deps[2].datasource, Some("gitea-tags"));
+        assert_eq!(deps[2].registry_url.as_deref(), Some("https://gitea.com/"));
+        assert!(deps[2].skip_reason.is_none());
+
+        // [3] code.domain.test — unsupported host: skip with no registry
+        assert_eq!(deps[3].skip_reason, Some("unsupported-url"));
+        assert!(deps[3].registry_url.is_none());
+        assert!(deps[3].datasource.is_none());
     }
 }

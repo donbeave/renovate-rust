@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 452 / 458 actionable tests ported (99%) — updated 2026-04-30
+**Overall progress:** 453 / 458 actionable tests ported (99%) — updated 2026-05-08
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -358,7 +358,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/github-actions/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/extract.spec.ts
-**Total tests:** 27 | **Ported:** 8 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 27 | **Ported:** 9 | **Actionable:** 20 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -384,7 +384,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | disables naked short SHA pins without version comment | 546 | ported | `github_actions.rs` | `short_sha_pin_skipped` | — |
 | does not disable SHA pins with version comment | 565 | ported | `github_actions.rs` | `full_sha_with_version_comment_not_skipped` | — |
 | does not disable short SHA pins with version comment | 590 | ported | `github_actions.rs` | `short_sha_with_version_comment_not_skipped` | — |
-| extracts actions with fqdn | 614 | pending | — | — | — |
+| extracts actions with fqdn | 614 | ported | `github_actions.rs` | `extracts_actions_with_fqdn` | — |
 | extracts multiple action runners from yaml configuration file | 673 | ported | `github_actions.rs` | `runner_simple_ubuntu` (+ 4 others) | — |
 | extracts x-version from actions/setup-x | 741 | pending | — | — | — |
 | handles actions/setup-x without x-version field | 873 | ported | `github_actions.rs` | `setup_x_without_version_returns_only_action_dep` | — |
