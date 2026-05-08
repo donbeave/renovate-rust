@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 429 / 494 actionable tests ported (87%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 464 / 544 actionable tests ported (85%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1174,6 +1174,92 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/pip_requirements/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/extract.spec.ts
+**Total tests:** 22 | **Ported:** 14 | **Actionable:** 22 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 39 | ported | `pip.rs` | `invalid_line_returns_empty` | — |
+| extracts dependencies | 43 | ported | `pip.rs` | `extracts_exact_pin` (+ extracts_unconstrained_package, requirements1_fixture, blank_lines_ignored) | — |
+| extracts dependencies with --index-url short code | 50 | ported | `pip.rs` | `index_url_short_code_skipped_package_extracted` | — |
+| extracts --requirement short code option | 68 | ported | `pip.rs` | `sub_requirement_is_skipped` | — |
+| extracts --constraints short code option | 79 | ported | `pip.rs` | `constraints_file_is_skipped` | — |
+| extracts multiple dependencies | 90 | ported | `pip.rs` | `handles_multiple_packages` (+ requirements2_fixture) | — |
+| handles comments and commands | 96 | ported | `pip.rs` | `comment_only_lines_ignored` (+ blank_lines_ignored, index_url_directive_ignored) | — |
+| handles extras and complex index url | 102 | ported | `pip.rs` | `extracts_range_constraint` | — |
+| handles extra index url | 111 | pending | — | — | Requires extra-index-url propagation to dep registryUrls |
+| handles extra index url and defaults without index to config | 123 | pending | — | — | Requires registryUrls propagation |
+| handles extra index url and defaults without index to pypi | 132 | pending | — | — | Requires default pypi registryUrl plumbing |
+| handles extra spaces around pinned dependency equal signs | 141 | ported | `pip.rs` | `extra_spaces_around_equal_signs` | — |
+| should not replace env vars in low trust mode | 155 | pending | — | — | Requires trust-mode env-var substitution feature |
+| should replace env vars in high trust mode | 166 | pending | — | — | Requires trust-mode env-var substitution feature |
+| should handle hashes | 178 | ported | `pip.rs` | `hash_continuation_lines_handled` | — |
+| should handle package with extras and no version specifiers | 184 | ported | `pip.rs` | `extracts_unconstrained_package` | — |
+| should handle dependency and ignore env markers | 198 | ported | `pip.rs` | `extracts_range_constraint` | — |
+| should handle git packages | 213 | ported | `pip.rs` | `git_source_is_skipped` | — |
+| extracts a file with only --index-url flags | 258 | ported | `pip.rs` | `url_install_is_skipped` | — |
+| extracts a file with only --extra-index-url flags | 266 | pending | — | — | Requires extra-index-url-only file handling |
+| extracts a file with only -r flags | 276 | pending | — | — | Requires -r-only file null-result handling |
+| extracts a file with only -c flags | 286 | pending | — | — | Requires -c-only file null-result handling |
+
+---
+
+## `lib/modules/manager/pep621/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/extract.spec.ts
+**Total tests:** 14 | **Ported:** 7 | **Actionable:** 14 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null for empty content | 16 | ported | `pep621.rs` | `empty_content_returns_empty` | — |
+| should return null for invalid toml | 21 | ported | `pep621.rs` | `invalid_toml_returns_error` | — |
+| should return dependencies for valid content | 32 | ported | `pep621.rs` | `extracts_project_dependencies` (+ extracts_optional_dependencies, extracts_dependency_groups_skips_include_tables) | — |
+| should return dependencies with overwritten pypi registryUrl | 233 | pending | — | — | Requires registryUrls + uv tool.uv.index plumbing |
+| should return dependencies with original pypi registryUrl | 309 | pending | — | — | Requires registryUrls plumbing |
+| should skip dependencies with unsupported uv sources | 340 | ported | `pep621.rs` | `direct_reference_is_skipped` | — |
+| should handle SSH git URLs correctly for GitHub sources | 412 | pending | — | — | Requires uv git/SSH source parsing |
+| should extract dependencies from hatch environments | 446 | pending | — | — | Requires tool.hatch.envs.* parsing |
+| should extract project version | 498 | ported | `pep621.rs` | `project_version_field_is_parseable` | — |
+| should extract dependencies from build-system.requires | 510 | ported | `pep621.rs` | `build_system_requires_extracted_with_project_deps` | — |
+| should resolve lockedVersions from pdm.lock | 551 | ported | `pep621.rs` | `pdm_fixture` | — |
+| should resolve lockedVersions from uv.lock | 595 | pending | — | — | Requires uv.lock support |
+| should resolve dependencies without locked versions on invalid uv.lock | 661 | pending | — | — | Requires uv.lock support |
+| should resolve dependencies with template | 694 | pending | — | — | Requires templating support in pep621 extractor |
+
+---
+
+## `lib/modules/manager/osgi/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/osgi/extract.spec.ts
+**Total tests:** 14 | **Ported:** 14 | **Actionable:** 14 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty file | 143 | ported | `osgi.rs` | `empty_returns_empty` | — |
+| returns null for invalid file | 147 | ported | `osgi.rs` | `invalid_json_returns_empty` | — |
+| returns null for unsupported version of feature model definition | 151 | ported | `osgi.rs` | `unsupported_version_skipped` | — |
+| returns null for an invalid version of feature model definition | 157 | ported | `osgi.rs` | `invalid_feature_version_returns_empty` | — |
+| returns null for a null string passed in as a feature model definition | 163 | ported | `osgi.rs` | `null_string_returns_empty` | — |
+| returns null for a valid file with no artifact definitions | 167 | ported | `osgi.rs` | `no_bundles_returns_empty` | — |
+| extracts the bundles from a file with object bundles definitions | 171 | ported | `osgi.rs` | `extracts_object_bundle` | — |
+| extracts the bundles from a file with string bundles defintions | 193 | ported | `osgi.rs` | `extracts_string_bundle` (+ slash_separator_normalized) | — |
+| extracts the bundles from a file with comments | 215 | ported | `osgi.rs` | `json_with_comments` | — |
+| extracts the artifacts from an extension section | 228 | ported | `osgi.rs` | `extracts_from_extension_section` | — |
+| extracts the artifacts a file with a double slash | 241 | ported | `osgi.rs` | `double_slash_in_value_not_treated_as_comment` | — |
+| extracts the artifacts from the framework artifact section | 263 | ported | `osgi.rs` | `extracts_from_framework_artifact_section` | — |
+| skips depedencies with with malformed definitions | 276 | ported | `osgi.rs` | `malformed_definitions_skipped_with_valid_kept` | — |
+| skips artifacts with variables in version | 297 | ported | `osgi.rs` | `variable_version_skipped` | — |
+
+---
+
 ## `lib/modules/manager/woodpecker/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/woodpecker/extract.spec.ts
@@ -1430,11 +1516,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
 | `lib/modules/manager/nuget/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/nuget.rs` | 25 | partial |
 <!-- ocb/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/osgi/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/osgi.rs` | 15 | ported |
-| `lib/modules/manager/pep621/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/pep621.rs` | 14 | ported |
+<!-- osgi/extract.spec.ts converted to per-test format above -->
+<!-- pep621/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/pep723/extract.spec.ts` | 1 | `crates/renovate-core/src/extractors/pep723.rs` | 6 | partial |
 | `lib/modules/manager/pip-compile/extract.spec.ts` | 25 | — | 0 | pending |
-| `lib/modules/manager/pip_requirements/extract.spec.ts` | 22 | `crates/renovate-core/src/extractors/pip.rs` | 22 | ported |
+<!-- pip_requirements/extract.spec.ts converted to per-test format above -->
 <!-- pip_setup/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/pipenv/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pipfile.rs` | 16 | ported |
 | `lib/modules/manager/pixi/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/pixi.rs` | 15 | partial |
