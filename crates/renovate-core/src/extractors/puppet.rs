@@ -44,6 +44,9 @@ pub enum PuppetSkipReason {
     UnspecifiedVersion,
     /// Module has `:git =>` but no `:tag =>`.
     GitNoTag,
+    /// Git URL points at github.com but does not use the `https://` scheme,
+    /// so the github-tags datasource cannot be used to look it up.
+    InvalidUrl,
 }
 
 /// A single extracted Puppet module dependency.
@@ -105,16 +108,29 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
                     });
                 }
                 Some(tag_val) => {
-                    // Only use GitHub datasource when the host is exactly "github.com"
-                    // (not subdomains like github.com.example.com).
+                    // A github.com URL using a non-https scheme (e.g. plain http://
+                    // or git@github.com:) cannot be looked up via the github-tags
+                    // datasource — flag it as InvalidUrl so the source URL is
+                    // preserved but no update lookup is attempted.
+                    if git_url.starts_with("http://github.com/") {
+                        deps.push(PuppetDep {
+                            name,
+                            current_value: tag_val,
+                            source: PuppetSource::Git(git_url),
+                            skip_reason: Some(PuppetSkipReason::InvalidUrl),
+                        });
+                        return;
+                    }
+
+                    // Only use the GitHub datasource when the host is exactly
+                    // "github.com" (not subdomains like github.com.example.com)
+                    // and the scheme is https or ssh.
                     let is_github = git_url.starts_with("https://github.com/")
-                        || git_url.starts_with("http://github.com/")
                         || git_url.starts_with("git@github.com:");
                     let source = if is_github {
                         let repo = git_url
                             .trim_end_matches(".git")
                             .trim_start_matches("https://github.com/")
-                            .trim_start_matches("http://github.com/")
                             .trim_start_matches("git@github.com:")
                             .to_owned();
                         PuppetSource::GitHub(repo)
@@ -341,5 +357,16 @@ mod 'puppetlabs/concat', '7.1.1'
         assert_eq!(deps[0].current_value, "0.9.0");
         // should NOT be GitHub datasource since host is not exactly github.com
         assert!(!matches!(deps[0].source, PuppetSource::GitHub { .. }));
+    }
+
+    // Ported: "Github url without https is skipped" — puppet/extract.spec.ts line 146
+    #[test]
+    fn http_github_url_marked_invalid_url() {
+        let content = "mod 'apache', :git => 'http://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "apache");
+        assert_eq!(deps[0].skip_reason, Some(PuppetSkipReason::InvalidUrl));
+        assert!(matches!(deps[0].source, PuppetSource::Git(_)));
     }
 }
