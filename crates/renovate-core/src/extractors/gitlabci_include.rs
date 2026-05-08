@@ -115,6 +115,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts single include block" — gitlabci-include/extract.spec.ts line 22
     #[test]
     fn extracts_include_with_ref() {
         let content = r#"
@@ -129,6 +130,7 @@ include:
         assert_eq!(deps[0].ref_value, "v2.1.0");
     }
 
+    // Ported: "extracts multiple include blocks" — gitlabci-include/extract.spec.ts line 28
     #[test]
     fn multiple_includes() {
         let content = r#"
@@ -162,6 +164,7 @@ build:
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns null for empty" — gitlabci-include/extract.spec.ts line 13
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

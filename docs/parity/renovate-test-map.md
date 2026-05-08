@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 312 / 363 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 315 / 371 actionable tests ported (85%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1029,6 +1029,26 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns a result | 5 | ported | `version_file.rs` | `terraform_version_plain` | — |
 | skips non ranges | 18 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gitlabci-include/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci-include/extract.spec.ts
+**Total tests:** 8 | **Ported:** 3 | **Actionable:** 8 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 13 | ported | `gitlabci_include.rs` | `empty_returns_empty` | — |
+| returns null for include block without any actual includes | 17 | pending | — | — | — |
+| extracts single include block | 22 | ported | `gitlabci_include.rs` | `extracts_include_with_ref` | — |
+| extracts multiple include blocks | 28 | ported | `gitlabci_include.rs` | `multiple_includes` | — |
+| extracts multiple embedded include blocks | 34 | pending | — | — | — |
+| ignores includes without project and file keys | 51 | pending | — | — | — |
+| normalizes configured endpoints | 60 | pending | — | — | — |
+| supports multi-document files | 73 | pending | — | — | — |
 
 ---
 
