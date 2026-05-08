@@ -695,14 +695,14 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for invalid json | 24 | ported | `composer.rs` | `invalid_json_returns_error` | — |
 | returns null for empty deps | 28 | ported | `composer.rs` | `empty_content_ok` | — |
-| extracts dependencies with no lock file | 32 | ported | `composer.rs` | `composer1_fixture_has_33_deps` | — |
-| extracts registryUrls | 38 | pending | — | — | — |
-| extracts object registryUrls | 81 | pending | — | — | — |
-| extracts repositories and registryUrls | 186 | pending | — | — | — |
-| extracts bitbucket repositories and registryUrls | 219 | pending | — | — | — |
-| extracts object repositories and registryUrls with lock file | 248 | pending | — | — | — |
+| extracts dependencies with no lock file | 32 | ported | `composer.rs` | `extracts_regular_deps` (+ extracts_dev_deps, composer1_fixture, composer1_fixture_has_33_deps, php_constraint_skipped, ext_skipped, lib_skipped, dev_master_skipped, x_dev_skipped) | — |
+| extracts registryUrls | 38 | pending | — | — | Requires composer registryUrls plumbing |
+| extracts object registryUrls | 81 | pending | — | — | Requires composer registryUrls plumbing |
+| extracts repositories and registryUrls | 186 | pending | — | — | Requires composer repositories[] / registryUrls plumbing |
+| extracts bitbucket repositories and registryUrls | 219 | pending | — | — | Requires Bitbucket repositories[] / registryUrls plumbing |
+| extracts object repositories and registryUrls with lock file | 248 | pending | — | — | Requires composer.lock parsing |
 | skips path dependencies | 284 | ported | `composer.rs` | `path_dependency_skipped` | — |
-| extracts dependencies with lock file | 313 | pending | — | — | — |
+| extracts dependencies with lock file | 313 | pending | — | — | Requires composer.lock parsing |
 
 ---
 
