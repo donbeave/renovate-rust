@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 307 / 363 actionable tests ported (85%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 312 / 363 actionable tests ported (86%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -990,31 +990,31 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nvm/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nvm/extract.spec.ts
-**Total tests:** 4 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 3 | **Actionable:** 4 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns a result | 5 | ported | `version_file.rs` | `nvmrc_plain_version` | — |
-| supports ranges | 16 | pending | — | — | — |
+| supports ranges | 16 | ported | `version_file.rs` | `nvmrc_partial_version_range` | — |
 | skips non ranges | 27 | pending | — | — | Rust `extract` returns None for the `latest` alias; TS keeps the literal value as the dep |
-| supports code comments | 38 | pending | — | — | — |
+| supports code comments | 38 | ported | `version_file.rs` | `nvmrc_skips_full_line_comments_and_inline_comment` | — |
 
 ---
 
 ## `lib/modules/manager/ruby-version/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ruby-version/extract.spec.ts
-**Total tests:** 3 | **Ported:** 1 | **Actionable:** 3 | **Status:** partial
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns a result | 5 | ported | `version_file.rs` | `ruby_version_file` | — |
-| supports ranges | 16 | pending | — | — | — |
-| skips non ranges | 27 | pending | — | — | — |
+| supports ranges | 16 | ported | `version_file.rs` | `ruby_version_partial_range` | — |
+| skips non ranges | 27 | ported | `version_file.rs` | `ruby_version_passes_through_non_alias_literal` | — |
 
 ---
 
@@ -1035,13 +1035,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/terragrunt-version/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt-version/extract.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns a result | 5 | pending | — | — | — |
+| returns a result | 5 | ported | `version_file.rs` | `terragrunt_version_file` | — |
 
 ---
 

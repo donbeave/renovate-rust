@@ -304,4 +304,58 @@ mod tests {
     fn manager_for_file_ruby_version() {
         assert_eq!(manager_for_file(".ruby-version"), Some("ruby-version"));
     }
+
+    // Ported: "returns a result" — terragrunt-version/extract.spec.ts line 5
+    #[test]
+    fn terragrunt_version_file() {
+        let dep = extract("12.0.0\n", "terragrunt-version").unwrap();
+        assert_eq!(dep.tool, "terragrunt");
+        assert_eq!(dep.current_value, "12.0.0");
+        assert_eq!(
+            dep.datasource,
+            AsdfDatasource::GithubReleases {
+                repo: "gruntwork-io/terragrunt",
+                tag_strip: "v",
+            }
+        );
+    }
+
+    // Ported: "supports ranges" — nvm/extract.spec.ts line 16
+    #[test]
+    fn nvmrc_partial_version_range() {
+        let dep = extract("8.4\n", "nvmrc").unwrap();
+        assert_eq!(dep.tool, "nodejs");
+        assert_eq!(dep.current_value, "8.4");
+    }
+
+    // Ported: "supports code comments" — nvm/extract.spec.ts line 38
+    #[test]
+    fn nvmrc_skips_full_line_comments_and_inline_comment() {
+        let content =
+            "# This is a comment\nv20.19.3 # This is an inline comment\n# This is another comment";
+        let dep = extract(content, "nvmrc").unwrap();
+        assert_eq!(dep.tool, "nodejs");
+        // Leading `v` is stripped by the extractor.
+        assert_eq!(dep.current_value, "20.19.3");
+    }
+
+    // Ported: "supports ranges" — ruby-version/extract.spec.ts line 16
+    #[test]
+    fn ruby_version_partial_range() {
+        let dep = extract("8.4\n", "ruby-version").unwrap();
+        assert_eq!(dep.tool, "ruby");
+        assert_eq!(dep.current_value, "8.4");
+    }
+
+    // Ported: "skips non ranges" — ruby-version/extract.spec.ts line 27
+    //
+    // The TS spec passes the literal `latestn` (a typo for `latest`) and
+    // expects the extractor to return it unchanged. Rust matches: `latestn`
+    // is not in the alias list, so the value is returned verbatim.
+    #[test]
+    fn ruby_version_passes_through_non_alias_literal() {
+        let dep = extract("latestn", "ruby-version").unwrap();
+        assert_eq!(dep.tool, "ruby");
+        assert_eq!(dep.current_value, "latestn");
+    }
 }
