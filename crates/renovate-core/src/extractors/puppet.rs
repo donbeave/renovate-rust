@@ -47,6 +47,9 @@ pub enum PuppetSkipReason {
     /// Git URL points at github.com but does not use the `https://` scheme,
     /// so the github-tags datasource cannot be used to look it up.
     InvalidUrl,
+    /// `mod` declaration has malformed positional arguments (more than two
+    /// quoted strings before the symbol-keyword section).
+    InvalidConfig,
 }
 
 /// A single extracted Puppet module dependency.
@@ -75,6 +78,12 @@ static MOD_START_RE: LazyLock<Regex> = LazyLock::new(|| {
 static SYMBOL_KV_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#":(\w+)\s*=>\s*['"]([^'"]+)['"]\s*"#).unwrap());
 
+// Matches `mod 'X', 'Y', 'Z'` — three or more quoted positional arguments.
+// Renovate flags such mod declarations as invalid-config.
+static MOD_INVALID_TRIPLE_ARG: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"^\s*mod\s+['"][^'"]+['"]\s*,\s*['"][^'"]+['"]\s*,\s*['"]"#).unwrap()
+});
+
 /// Extract Puppet module deps from a `Puppetfile`.
 pub fn extract(content: &str) -> Vec<PuppetDep> {
     let mut deps = Vec::new();
@@ -85,6 +94,7 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
     let mut pending_version: Option<String> = None;
     let mut pending_git: Option<String> = None;
     let mut pending_tag: Option<String> = None;
+    let mut pending_invalid_config = false;
     let mut continuation = false;
 
     let flush = |name: Option<String>,
@@ -92,10 +102,28 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
                  git: Option<String>,
                  tag: Option<String>,
                  forge_url: Option<String>,
+                 invalid_config: bool,
                  deps: &mut Vec<PuppetDep>| {
         let Some(name) = name else {
             return;
         };
+
+        // A malformed `mod` declaration short-circuits all other parsing —
+        // emit a single dep with InvalidConfig and the git URL (if any) as
+        // the source so callers can still report the offending line.
+        if invalid_config {
+            let source = match git {
+                Some(url) => PuppetSource::Git(url),
+                None => PuppetSource::PuppetForge { forge_url },
+            };
+            deps.push(PuppetDep {
+                name,
+                current_value: tag.or(version).unwrap_or_default(),
+                source,
+                skip_reason: Some(PuppetSkipReason::InvalidConfig),
+            });
+            return;
+        }
 
         if let Some(git_url) = git {
             match tag {
@@ -200,6 +228,7 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
                 pending_git.take(),
                 pending_tag.take(),
                 current_forge.clone(),
+                std::mem::take(&mut pending_invalid_config),
                 &mut deps,
             );
             continuation = false;
@@ -216,12 +245,15 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
                 pending_git.take(),
                 pending_tag.take(),
                 current_forge.clone(),
+                std::mem::take(&mut pending_invalid_config),
                 &mut deps,
             );
             pending_name = Some(cap[1].to_owned());
             pending_version = cap.get(2).map(|m| m.as_str().to_owned());
             pending_git = None;
             pending_tag = None;
+            // Three or more quoted positional arguments — invalid config.
+            pending_invalid_config = MOD_INVALID_TRIPLE_ARG.is_match(trimmed);
             // Also extract inline symbol key-value pairs on the same line (e.g. :git => '...' :tag => '...')
             for kv in SYMBOL_KV_RE.captures_iter(trimmed) {
                 match &kv[1] {
@@ -253,6 +285,7 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
         pending_git.take(),
         pending_tag.take(),
         current_forge,
+        pending_invalid_config,
         &mut deps,
     );
 
@@ -389,6 +422,17 @@ mod 'puppetlabs/concat', '7.1.1'
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "apache");
         assert_eq!(deps[0].skip_reason, Some(PuppetSkipReason::InvalidUrl));
+        assert!(matches!(deps[0].source, PuppetSource::Git(_)));
+    }
+
+    // Ported: "Skip reason should be overwritten by parser" — puppet/extract.spec.ts line 181
+    #[test]
+    fn malformed_mod_with_three_positional_args_is_invalid_config() {
+        let content = "mod 'stdlib', '0.1.0', 'i create a skip reason'\n  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "stdlib");
+        assert_eq!(deps[0].skip_reason, Some(PuppetSkipReason::InvalidConfig));
         assert!(matches!(deps[0].source, PuppetSource::Git(_)));
     }
 

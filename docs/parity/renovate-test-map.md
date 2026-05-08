@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 739 / 1187 actionable tests ported (62%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 740 / 1187 actionable tests ported (62%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1572,7 +1572,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/puppet/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/puppet/extract.spec.ts
-**Total tests:** 9 | **Ported:** 8 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1585,7 +1585,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | Use GithubTagsDatasource only if host is exactly github.com | 125 | ported | `puppet.rs` | `non_github_host_uses_git_tags_datasource` | — |
 | Github url without https is skipped | 146 | ported | `puppet.rs` | `http_github_url_marked_invalid_url` | — |
 | Git module without a tag should result in a skip reason | 162 | ported | `puppet.rs` | `git_no_tag_skipped` | — |
-| Skip reason should be overwritten by parser | 181 | pending | — | — | Requires invalid-config skip reason for malformed mod entries |
+| Skip reason should be overwritten by parser | 181 | ported | `puppet.rs` | `malformed_mod_with_three_positional_args_is_invalid_config` | — |
 | GitTagsDatasource | 200 | ported | `puppet.rs` | `git_tags_fixture_extracts_four_valid_and_one_invalid` | — |
 
 ---
