@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 329 / 381 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 334 / 386 actionable tests ported (87%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1052,6 +1052,23 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/jenkins/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/jenkins/extract.spec.ts
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty list for an empty text file | 15 | ported | `jenkins.rs` | `txt_empty_file_returns_empty` | — |
+| returns empty list for an empty yaml file | 21 | ported | `jenkins.rs` | `yml_empty_returns_empty` | — |
+| returns empty list for an invalid yaml file | 27 | ported | `jenkins.rs` | `yml_invalid_yaml_returns_empty` | — |
+| extracts multiple image lines in text format | 33 | ported | `jenkins.rs` | `txt_plugins_fixture_six_deps` | — |
+| extracts multiple image lines in yaml format | 40 | ported | `jenkins.rs` | `yml_plugins_fixture_eight_deps` | — |
+
+---
+
 ## `lib/modules/manager/mint/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mint/extract.spec.ts
@@ -1134,7 +1151,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/homeassistant.rs` | 15 | partial |
 | `lib/modules/manager/homebrew/extract.spec.ts` | 17 | `crates/renovate-core/src/extractors/homebrew.rs` | 18 | ported |
 | `lib/modules/manager/html/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/html.rs` | 8 | ported |
-| `lib/modules/manager/jenkins/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/jenkins.rs` | 14 | ported |
+<!-- jenkins/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/jsonnet-bundler/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | 8 | ported |
 | `lib/modules/manager/kotlin-script/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/kotlin_script.rs` | 7 | ported |
 | `lib/modules/manager/kubernetes/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/kubernetes.rs` | 11 | partial |

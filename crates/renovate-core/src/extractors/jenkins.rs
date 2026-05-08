@@ -277,6 +277,7 @@ plugins:
         );
     }
 
+    // Ported: "returns empty list for an empty yaml file" — jenkins/extract.spec.ts line 21
     #[test]
     fn yml_empty_returns_empty() {
         assert!(extract_yml("").is_empty());
