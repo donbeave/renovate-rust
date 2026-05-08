@@ -122,6 +122,18 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
                         return;
                     }
 
+                    // Reject git URLs that do not match any recognised
+                    // git URL scheme (https://, http://, ssh://, git@host:).
+                    if !is_recognised_git_url(&git_url) {
+                        deps.push(PuppetDep {
+                            name,
+                            current_value: tag_val,
+                            source: PuppetSource::Git(git_url),
+                            skip_reason: Some(PuppetSkipReason::InvalidUrl),
+                        });
+                        return;
+                    }
+
                     // Only use the GitHub datasource when the host is exactly
                     // "github.com" (not subdomains like github.com.example.com)
                     // and the scheme is https or ssh.
@@ -247,6 +259,16 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
     deps
 }
 
+/// Whether `url` looks like one of the git-URL schemes Puppet's r10k
+/// supports for `:git =>` references (https://, http://, ssh://, git@host:).
+fn is_recognised_git_url(url: &str) -> bool {
+    url.starts_with("https://")
+        || url.starts_with("http://")
+        || url.starts_with("ssh://")
+        // `git@host:owner/repo` SCP-like form
+        || url.starts_with("git@")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -368,5 +390,53 @@ mod 'puppetlabs/concat', '7.1.1'
         assert_eq!(deps[0].name, "apache");
         assert_eq!(deps[0].skip_reason, Some(PuppetSkipReason::InvalidUrl));
         assert!(matches!(deps[0].source, PuppetSource::Git(_)));
+    }
+
+    // Ported: "GitTagsDatasource" — puppet/extract.spec.ts line 200
+    //
+    // Mirrors the Puppetfile.git_tag fixture — non-github git URLs
+    // (gitlab.com, ssh, multi-dir paths) should produce GitTags-style
+    // deps; the malformed `'hello world'` entry is flagged InvalidUrl.
+    #[test]
+    fn git_tags_fixture_extracts_four_valid_and_one_invalid() {
+        let content = r#"
+mod 'apache',
+  :git => 'https://gitlab.com/example/project.git',
+  :tag => '0.9.0'
+
+mod 'stdlib',
+  :git => 'git@gitlab.com:example/project_stdlib.git',
+  :tag => '5.0.0'
+
+mod 'multiple_dirs_ssh',
+  :git => 'git@gitlab.com:dir1/dir2/project.git',
+  :tag => '1.0.0'
+
+mod 'multiple_dirs_https',
+  :git => 'https://gitlab.com/dir1/dir2/project.git',
+  :tag => '1.9.0'
+
+mod 'invalid_url',
+  :git => 'hello world',
+  :tag => '0.0.0'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 5);
+
+        // The four valid gitlab entries — all Git source (non-github), no skip.
+        for name in [
+            "apache",
+            "stdlib",
+            "multiple_dirs_ssh",
+            "multiple_dirs_https",
+        ] {
+            let dep = deps.iter().find(|d| d.name == name).unwrap();
+            assert!(matches!(dep.source, PuppetSource::Git(_)));
+            assert!(dep.skip_reason.is_none(), "{name} should not be skipped");
+        }
+
+        // `invalid_url` lacks a recognised URL scheme — InvalidUrl.
+        let invalid = deps.iter().find(|d| d.name == "invalid_url").unwrap();
+        assert_eq!(invalid.skip_reason, Some(PuppetSkipReason::InvalidUrl));
     }
 }
