@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 697 / 932 actionable tests ported (75%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 702 / 976 actionable tests ported (72%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1876,6 +1876,72 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/ant/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
+**Total tests:** 44 | **Ported:** 5 | **Actionable:** 44 | **Status:** partial
+
+### `extractPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts inline version dependencies from build.xml | 9 | ported | `ant.rs` | `extracts_inline_dependency` | — |
+| extracts multiple dependencies | 33 | ported | `ant.rs` | `multiple_deps_extracted` | — |
+| defaults depType to compile when no scope is set | 68 | pending | — | — | Requires depType plumbing |
+| returns null for invalid XML | 90 | ported | `ant.rs` | `empty_xml_returns_empty` | — |
+| returns null for build.xml with no dependencies | 94 | pending | — | — | Requires no-deps null-result handling |
+| ignores dependency nodes without version | 104 | pending | — | — | Requires version-missing skip path |
+| extracts dependencies with single-quoted attributes | 119 | pending | — | — | Requires single-quote attribute tolerance test |
+| returns null for unreadable build.xml | 135 | pending | — | — | Requires file-read failure path |
+| does not revisit the same file | 143 | pending | — | — | Requires multi-file deduplication |
+
+### `property resolution`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| resolves inline property references | 167 | pending | — | — | Requires `<property>` element resolution |
+| resolves properties from external .properties files | 193 | pending | — | — | Requires external .properties resolution |
+| implements first-definition-wins for inline properties | 228 | pending | — | — | Requires property precedence semantics |
+| inline properties take precedence over file properties | 254 | pending | — | — | Requires property precedence semantics |
+| skips dependencies with unresolvable property references | 288 | pending | — | — | Requires unresolved-property skip handling |
+| detects circular property references | 312 | pending | — | — | Requires circular-property detection |
+| resolves chained property references | 338 | pending | — | — | Requires chained property resolution |
+| groups multiple dependencies sharing the same property | 368 | pending | — | — | Requires shared-property dep grouping |
+| handles properties file in subdirectory | 400 | pending | — | — | Requires subdirectory .properties resolution |
+| handles unreadable properties file gracefully | 434 | pending | — | — | Requires .properties read-failure tolerance |
+| returns deps with mixed inline and property versions | 464 | pending | — | — | Requires mixed inline/property handling |
+| ignores dependency without version during property resolution | 495 | pending | — | — | Requires version-missing skip during resolution |
+| skips partial placeholder in version string | 522 | pending | — | — | Requires partial-placeholder skip handling |
+
+### `edge cases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles unparseable XML returned by readLocalFile | 549 | pending | — | — | Requires unparseable XML tolerance |
+| handles absolute path in property file reference | 557 | pending | — | — | Requires absolute path .properties handling |
+| skips duplicate property file references | 591 | pending | — | — | Requires duplicate-import skip |
+| follows import file references | 628 | pending | — | — | Requires `<import>` element resolution |
+| skips missing import files | 662 | pending | — | — | Requires missing-import tolerance |
+| does not loop on self-importing files | 692 | pending | — | — | Requires self-import detection |
+| shares properties across imported files | 722 | pending | — | — | Requires multi-file property sharing |
+| extracts dependency from 3-part coords attribute | 760 | ported | `ant.rs` | `extracts_coords_form` | — |
+| extracts scope from 4-part coords attribute | 791 | pending | — | — | Requires 4-part coords scope extraction |
+| ignores coords with fewer than 3 parts | 821 | pending | — | — | Requires coords malformed-skip path |
+| ignores coords with empty groupId | 840 | pending | — | — | Requires coords empty-groupId skip |
+| resolves property references in coords version | 859 | pending | — | — | Requires coords + property resolution |
+| marks coords dependency with unresolvable property | 890 | pending | — | — | Requires coords + unresolved-property skip |
+| treats last part as version when it is not a known scope | 919 | pending | — | — | Requires coords scope/version disambiguation |
+| collects registry URLs from remoteRepository elements | 949 | ported | `ant.rs` | `remote_repository_collected` | — |
+| passes registry URLs to coords-style dependencies | 979 | pending | — | — | Requires registryUrls propagation to coords deps |
+| collects registry URLs from settingsFile attribute | 1009 | pending | — | — | Requires settingsFile attribute parsing |
+| merges registries from settingsFile and remoteRepository | 1047 | pending | — | — | Requires registries merging |
+| handles absolute settingsFile path | 1089 | pending | — | — | Requires absolute settingsFile path |
+| logs debug when settingsFile cannot be read | 1127 | pending | — | — | Requires settingsFile read-failure tolerance |
+| does not pass registries to dependencies outside the block | 1155 | pending | — | — | Requires registry-block scoping |
+| handles chain referencing undefined property | 1191 | pending | — | — | Requires chained-undefined-property tolerance |
+
+---
+
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
@@ -2262,7 +2328,7 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
-| `lib/modules/manager/ant/extract.spec.ts` | 44 | `crates/renovate-core/src/extractors/ant.rs` | 6 | partial |
+<!-- ant/extract.spec.ts converted to per-test format above -->
 <!-- asdf/extract.spec.ts converted to per-test format above -->
 <!-- azure-pipelines/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |

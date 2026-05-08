@@ -252,6 +252,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts dependency from 3-part coords attribute" — ant/extract.spec.ts line 760
     #[test]
     fn extracts_coords_form() {
         let content = r#"
@@ -295,6 +296,7 @@ mod tests {
         assert_eq!(deps[1].dep_name, "org.slf4j:slf4j-api");
     }
 
+    // Ported: "collects registry URLs from remoteRepository elements" — ant/extract.spec.ts line 949
     #[test]
     fn remote_repository_collected() {
         let content = r#"
