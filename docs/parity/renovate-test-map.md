@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 608 / 715 actionable tests ported (85%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 620 / 759 actionable tests ported (82%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1698,6 +1698,74 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/sbt/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
+**Total tests:** 26 | **Ported:** 5 | **Actionable:** 26 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 23 | ported | `sbt.rs` | `empty_returns_empty` (+ build_properties_extraction) | — |
+| extracts deps for generic use-cases | 47 | ported | `sbt.rs` | `extracts_scala_style_deps` (+ extracts_java_style_deps, extracts_plugin, comment_line_skipped, dep_name_formats_correctly) | — |
+| extracts deps when scala version is defined in a variable | 74 | pending | — | — | Requires scalaVersion := Var resolution |
+| extracts deps when scala version is defined in an object | 99 | pending | — | — | Requires scalaVersion := Obj.field resolution |
+| skips deps when dotted symbolds do not resolve to anything | 136 | pending | — | — | Requires unresolved-symbol skip path |
+| extracts packageFileVersion when scala version is defined in a variable | 159 | pending | — | — | Requires packageFileVersion plumbing |
+| extracts typed variables | 170 | pending | — | — | Requires typed `val x: T = "..."` parsing |
+| skips deps when scala version is missing | 185 | pending | — | — | Requires scala-version-missing skip path |
+| extract deps from native scala file with variables | 213 | pending | — | — | Requires .scala build file variable resolution |
+| extracts deps when scala version is defined with a trailing comma | 232 | pending | — | — | Requires trailing-comma tolerance |
+| extracts deps when scala version is defined in a variable with a trailing comma | 253 | pending | — | — | Requires trailing-comma tolerance |
+| extracts deps when scala version is defined with ThisBuild scope | 275 | pending | — | — | Requires ThisBuild scope handling |
+| extracts correct scala library when dealing with scala 3 | 294 | pending | — | — | Requires Scala 3 library naming |
+| extracts deps correctly when dealing with scala 3 | 309 | pending | — | — | Requires Scala 3 dep resolution |
+| extracts deps when scala version is defined in a variable with ThisBuild scope | 329 | pending | — | — | Requires ThisBuild + variable resolution |
+| extract deps from native scala file with private variables | 349 | pending | — | — | Requires private variable resolution in .scala files |
+| extract deps when they are defined in a new line | 371 | pending | — | — | Requires multi-line dep continuation parsing |
+| extract deps with comment | 412 | pending | — | — | Requires inline-comment-stripping in dep position |
+| extract addCompilerPlugin | 452 | pending | — | — | Requires addCompilerPlugin extraction |
+| extract sbt version | 469 | ported | `sbt.rs` | `build_properties_extracts_sbt_version` | — |
+| extract sbt version if the file contains other properties | 492 | ported | `sbt.rs` | `build_properties_with_other_props_extracts_sbt_version` | — |
+| ignores build.properties file if does not contain sbt version | 516 | ported | `sbt.rs` | `build_properties_without_sbt_version_returns_none` | — |
+| extracts proxy repositories | 529 | pending | — | — | Requires repositories file parsing |
+| should include default registryUrls if no repositories file is provided | 607 | pending | — | — | Requires registryUrls default plumbing |
+| should return empty packagefiles is no content is provided | 637 | pending | — | — | Already partly covered by empty_returns_empty; TS uses extractAllPackageFiles wrapper not ported |
+| extracts build properties correctly | 643 | pending | — | — | Requires extractAllPackageFiles wrapper port |
+
+---
+
+## `lib/modules/manager/terraform/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extract.spec.ts
+**Total tests:** 18 | **Ported:** 7 | **Actionable:** 18 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 39 | ported | `terraform.rs` | `empty_file_returns_empty` | — |
+| returns null for no deps | 43 | ported | `terraform.rs` | `data_block_not_extracted` | — |
+| extracts  modules | 54 | ported | `terraform.rs` | `module_with_version` (+ module_without_version_skipped, module_with_git_source_skipped, mixed_providers_and_modules) | — |
+| extracts bitbucket modules | 221 | pending | — | — | Requires Bitbucket source URL detection |
+| extracts azureDevOps modules | 306 | pending | — | — | Requires Azure DevOps source URL detection |
+| resolves OCI registry aliases | 338 | pending | — | — | registryAliases not yet implemented |
+| handles invalid OCI source URL | 358 | pending | — | — | Requires OCI source validation |
+| extracts OCI modules and providers | 374 | pending | — | — | Requires OCI module / provider source parsing |
+| extracts providers | 463 | ported | `terraform.rs` | `required_providers_block_form` (+ required_providers_inline_string_form, comments_ignored, provider_without_source_uses_name) | — |
+| extracts docker resources | 579 | pending | — | — | Requires docker_image / docker_registry_image resource extraction |
+| extracts kubernetes resources | 655 | pending | — | — | Requires kubernetes_manifest / kubernetes_pod resource extraction |
+| returns dep with skipReason local | 756 | ported | `terraform.rs` | `module_with_local_path_skipped` (+ local_module_has_skip_reason) | — |
+| returns null with only not added resources | 767 | ported | `terraform.rs` | `resource_block_not_extracted` | — |
+| extract helm releases | 776 | pending | — | — | Requires helm_release resource extraction |
+| update lockfile constraints with range strategy update-lockfile | 845 | pending | — | — | Requires .terraform.lock.hcl parsing |
+| test terraform block with only requirement_terraform_version | 884 | pending | — | — | Requires required_version-only path test |
+| extracts terraform_version for tfe_workspace and ignores missing terraform_version keys | 904 | pending | — | — | Requires tfe_workspace resource extraction |
+| return null if invalid HCL file | 933 | ported | `terraform.rs` | `invalid_hcl_returns_empty` | — |
+
+---
+
 ## `lib/modules/manager/homeassistant-manifest/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homeassistant-manifest/extract.spec.ts
@@ -1949,12 +2017,12 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- puppet/extract.spec.ts converted to per-test format above -->
 <!-- quadlet/extract.spec.ts converted to per-test format above -->
 <!-- runtime-version/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/sbt/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/sbt.rs` | 10 | partial |
+<!-- sbt/extract.spec.ts converted to per-test format above -->
 <!-- scalafmt/extract.spec.ts converted to per-test format above -->
 <!-- setup-cfg/extract.spec.ts converted to per-test format above -->
 <!-- sveltos/extract.spec.ts converted to per-test format above -->
 <!-- tekton/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/terraform/extract.spec.ts` | 18 | `crates/renovate-core/src/extractors/terraform.rs` | 14 | partial |
+<!-- terraform/extract.spec.ts converted to per-test format above -->
 <!-- terragrunt/extract.spec.ts converted to per-test format above -->
 <!-- tflint-plugin/extract.spec.ts converted to per-test format above -->
 <!-- travis/extract.spec.ts converted to per-test format above -->
