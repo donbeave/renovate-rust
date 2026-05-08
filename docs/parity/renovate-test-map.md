@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 351 / 407 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 361 / 417 actionable tests ported (87%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1097,6 +1097,64 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/html/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/html/extract.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `modules/manager/html/extract`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extractPackageFile | 8 | ported | `html.rs` | `extracts_from_sample_html_fixture` | — |
+| returns null | 21 | ported | `html.rs` | `nothing_html_returns_empty` | — |
+
+---
+
+## `lib/modules/manager/meteor/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/meteor/extract.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty if fails to parse | 8 | ported | `meteor.rs` | `no_npm_depends_returns_empty` (+ empty_returns_empty) | — |
+| returns results | 13 | ported | `meteor.rs` | `extracts_deps` | — |
+
+---
+
+## `lib/modules/manager/scalafmt/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/scalafmt/extract.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts version correctly | 6 | ported | `scalafmt.rs` | `extracts_version` | — |
+| extracts version correctly if enclosed in quotes | 25 | ported | `scalafmt.rs` | `version_without_quotes` | — |
+| ignore file if no version specified | 44 | ported | `scalafmt.rs` | `no_version_returns_none` | — |
+| should return empty packagefiles is no content is provided | 52 | ported | `scalafmt.rs` | `empty_returns_none` | — |
+
+---
+
+## `lib/modules/manager/runtime-version/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/runtime-version/extract.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns a result - python | 5 | ported | `runtime_version.rs` | `extracts_python_version` (+ extracts_with_trailing_newline) | — |
+| returns no result | 16 | ported | `runtime_version.rs` | `ignores_partial_version` (+ returns_none_for_empty) | — |
+
+---
+
 ## `lib/modules/manager/jenkins/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/jenkins/extract.spec.ts
@@ -1195,7 +1253,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/helmfile/extract.spec.ts` | 19 | `crates/renovate-core/src/extractors/helmfile.rs` | 25 | ported |
 | `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | 16 | `crates/renovate-core/src/extractors/homeassistant.rs` | 15 | partial |
 | `lib/modules/manager/homebrew/extract.spec.ts` | 17 | `crates/renovate-core/src/extractors/homebrew.rs` | 18 | ported |
-| `lib/modules/manager/html/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/html.rs` | 8 | ported |
+<!-- html/extract.spec.ts converted to per-test format above -->
 <!-- jenkins/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/jsonnet-bundler/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | 8 | ported |
 | `lib/modules/manager/kotlin-script/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/kotlin_script.rs` | 7 | ported |
@@ -1204,7 +1262,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/leiningen/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/leiningen.rs` | 8 | partial |
 | `lib/modules/manager/maven-wrapper/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/maven_wrapper.rs` | 12 | ported |
 | `lib/modules/manager/maven/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/maven.rs` | 19 | partial |
-| `lib/modules/manager/meteor/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/meteor.rs` | 2 | ported |
+<!-- meteor/extract.spec.ts converted to per-test format above -->
 <!-- mint/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/mise/extract.spec.ts` | 30 | `crates/renovate-core/src/extractors/mise.rs` | 16 | partial |
 | `lib/modules/manager/mix/extract.spec.ts` | 3 | `crates/renovate-core/src/extractors/mix.rs` | 9 | partial |
@@ -1223,9 +1281,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/pre-commit/extract.spec.ts` | 12 | `crates/renovate-core/src/extractors/pre_commit.rs` | 16 | ported |
 | `lib/modules/manager/puppet/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/puppet.rs` | 9 | partial |
 | `lib/modules/manager/quadlet/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/quadlet.rs` | 13 | partial |
-| `lib/modules/manager/runtime-version/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/runtime_version.rs` | 2 | ported |
+<!-- runtime-version/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/sbt/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/sbt.rs` | 10 | partial |
-| `lib/modules/manager/scalafmt/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/scalafmt.rs` | 4 | ported |
+<!-- scalafmt/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/setup-cfg/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/setup_cfg.rs` | 9 | partial |
 | `lib/modules/manager/sveltos/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/sveltos.rs` | 12 | ported |
 | `lib/modules/manager/tekton/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/tekton.rs` | 5 | partial |
