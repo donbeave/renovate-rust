@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 548 / 636 actionable tests ported (86%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 579 / 675 actionable tests ported (86%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1590,6 +1590,111 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/tekton/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/tekton/extract.spec.ts
+**Total tests:** 5 | **Ported:** 3 | **Actionable:** 5 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts deps from a file | 6 | ported | `tekton.rs` | `extracts_step_images` (+ extracts_gcr_images_without_skip) | — |
+| extracts deps from a file in annotations | 15 | pending | — | — | Requires Tekton bundle annotation parsing |
+| ignores file without any deps | 96 | ported | `tekton.rs` | `ignores_file_without_deps` | — |
+| ignores invalid YAML | 100 | pending | — | — | Requires explicit invalid-YAML test path distinct from non-tekton content |
+| ignores empty file | 112 | ported | `tekton.rs` | `ignores_empty_file` | — |
+
+---
+
+## `lib/modules/manager/vendir/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/vendir/extract.spec.ts
+**Total tests:** 5 | **Ported:** 4 | **Actionable:** 5 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid yaml file content | 10 | ported | `vendir.rs` | `invalid_yaml_returns_empty` | — |
+| returns null for empty yaml file content | 15 | ported | `vendir.rs` | `empty_returns_empty` | — |
+| returns null for empty directories key | 20 | ported | `vendir.rs` | `no_helm_charts_returns_empty` | — |
+| returns null for nonHelmChart key | 30 | pending | — | — | Requires explicit imgpkg/git/inline contents type detection |
+| multiple charts - extracts helm-chart from vendir.yml correctly | 35 | ported | `vendir.rs` | `extracts_helm_charts` (+ extracts_second_chart) | — |
+
+---
+
+## `lib/modules/manager/velaci/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/velaci/extract.spec.ts
+**Total tests:** 6 | **Ported:** 4 | **Actionable:** 6 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should handle invalid YAML | 6 | ported | `velaci.rs` | `invalid_yaml_returns_empty` (+ empty_returns_empty) | — |
+| should handle YAML without pipeline/images | 11 | ported | `velaci.rs` | `yaml_without_pipeline_returns_empty` | — |
+| extracts multiple step pipeline image lines | 16 | ported | `velaci.rs` | `extracts_step_image` | — |
+| extracts multiple services pipeline image lines | 30 | ported | `velaci.rs` | `extracts_service_image` | — |
+| extracts multiple stages pipeline image lines | 48 | pending | — | — | Requires `stages:` section parsing |
+| extracts multiple secrets pipeline image lines | 62 | pending | — | — | Requires `secrets:` section parsing for image references |
+
+---
+
+## `lib/modules/manager/sveltos/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sveltos/extract.spec.ts
+**Total tests:** 13 | **Ported:** 11 | **Actionable:** 12 | **Status:** partial
+
+### `extractDefinition()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns an empty array when parsing fails | 234 | not-applicable | — | — | Tests TypeScript-internal `extractDefinition` helper directly; no Rust equivalent (Rust extracts via the public `extract()` only) |
+| returns null if extractDefinition returns an empty array | 240 | ported | `sveltos.rs` | `clusterprofile_with_no_helm_charts_returns_empty` | — |
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 254 | ported | `sveltos.rs` | `empty_content_returns_empty` | — |
+| returns null for invalid | 258 | ported | `sveltos.rs` | `malformed_profiles_all_empty_charts_returns_empty` | — |
+| return null for Kubernetes manifest | 264 | ported | `sveltos.rs` | `skips_non_sveltos_files` | — |
+| return null if deps array would be empty | 269 | ported | `sveltos.rs` | `malformed_no_charts_returns_empty` | — |
+| return null if YAML is invalid | 274 | ported | `sveltos.rs` | `invalid_yaml_with_no_valid_helm_charts_returns_empty` | — |
+| return result for double quoted projectsveltos.io apiVersion reference | 288 | ported | `sveltos.rs` | `double_quoted_api_version_extracted` | — |
+| return result for single quoted projectsveltos.io apiVersion reference | 320 | ported | `sveltos.rs` | `single_quoted_api_version_extracted` | — |
+| supports profiles | 352 | ported | `sveltos.rs` | `profile_kind_extracted` | — |
+| supports clusterprofiles | 400 | ported | `sveltos.rs` | `extracts_helm_chart` (+ extracts_multiple_charts) | — |
+| considers registryAliases | 451 | pending | — | — | registryAliases not yet implemented |
+| supports eventtriggers | 474 | ported | `sveltos.rs` | `eventtrigger_kind_extracted` | — |
+
+---
+
+## `lib/modules/manager/quadlet/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/quadlet/extract.spec.ts
+**Total tests:** 11 | **Ported:** 9 | **Actionable:** 11 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid quadlet file content | 19 | ported | `quadlet.rs` | `ignores_non_container_sections` | — |
+| returns null for empty yaml file content | 24 | ported | `quadlet.rs` | `empty_returns_empty` | — |
+| extracts from quadlet container unit | 29 | ported | `quadlet.rs` | `extracts_container_image` (+ skips_local_transport, skips_comment_lines, variable_ref_skipped) | — |
+| extracts from quadlet image unit | 47 | ported | `quadlet.rs` | `image_section_extracted` | — |
+| extracts from quadlet volume unit | 65 | ported | `quadlet.rs` | `volume_section_extracted` | — |
+| handles docker prefix | 83 | ported | `quadlet.rs` | `strips_docker_transport_prefix` | — |
+| handles docker-daemon prefix | 101 | ported | `quadlet.rs` | `docker_daemon_prefix_stripped` | — |
+| does not extract an image file reference | 119 | ported | `quadlet.rs` | `image_file_reference_skipped` | — |
+| does not extract an build file reference | 129 | ported | `quadlet.rs` | `build_file_reference_skipped` | — |
+| extract data from file with registry aliases | 139 | pending | — | — | registryAliases not yet implemented |
+| handles an unsuccessful parse | 158 | pending | — | — | Requires malformed-systemd-unit handling distinct from empty content |
+
+---
+
 ## `lib/modules/manager/jenkins/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/jenkins/extract.spec.ts
@@ -1715,21 +1820,21 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/poetry/extract.spec.ts` | 34 | `crates/renovate-core/src/extractors/poetry.rs` | 15 | partial |
 <!-- pre-commit/extract.spec.ts converted to per-test format above -->
 <!-- puppet/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/quadlet/extract.spec.ts` | 11 | `crates/renovate-core/src/extractors/quadlet.rs` | 13 | partial |
+<!-- quadlet/extract.spec.ts converted to per-test format above -->
 <!-- runtime-version/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/sbt/extract.spec.ts` | 26 | `crates/renovate-core/src/extractors/sbt.rs` | 10 | partial |
 <!-- scalafmt/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/setup-cfg/extract.spec.ts` | 2 | `crates/renovate-core/src/extractors/setup_cfg.rs` | 9 | partial |
-| `lib/modules/manager/sveltos/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/sveltos.rs` | 12 | ported |
-| `lib/modules/manager/tekton/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/tekton.rs` | 5 | partial |
+<!-- sveltos/extract.spec.ts converted to per-test format above -->
+<!-- tekton/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/terraform/extract.spec.ts` | 18 | `crates/renovate-core/src/extractors/terraform.rs` | 14 | partial |
 <!-- terragrunt/extract.spec.ts converted to per-test format above -->
 <!-- tflint-plugin/extract.spec.ts converted to per-test format above -->
 <!-- travis/extract.spec.ts converted to per-test format above -->
 <!-- typst/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/unity3d/extract.spec.ts` | 0 | `crates/renovate-core/src/extractors/unity3d.rs` | 3 | partial |
-| `lib/modules/manager/velaci/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/velaci.rs` | 6 | partial |
-| `lib/modules/manager/vendir/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/vendir.rs` | 5 | partial |
+<!-- velaci/extract.spec.ts converted to per-test format above -->
+<!-- vendir/extract.spec.ts converted to per-test format above -->
 <!-- woodpecker/extract.spec.ts converted to per-test format above -->
 <!-- xcodegen/extract.spec.ts converted to per-test format above -->
 
