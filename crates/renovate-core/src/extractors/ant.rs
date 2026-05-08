@@ -316,4 +316,39 @@ mod tests {
     fn empty_xml_returns_empty() {
         assert!(extract("<project />").is_empty());
     }
+
+    // Ported: "returns null for build.xml with no dependencies" — ant/extract.spec.ts line 94
+    #[test]
+    fn project_without_artifact_dependencies_returns_empty() {
+        let content = r#"<project><target name="build" /></project>"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "ignores dependency nodes without version" — ant/extract.spec.ts line 104
+    //
+    // The TS extractor returns null when no actionable deps are present.
+    // Rust returns an empty Vec for the same input — there is no dep
+    // to surface because the only dependency lacks a `version` attribute.
+    #[test]
+    fn dependency_without_version_returns_empty() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency groupId="org.example" artifactId="lib" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        let actionable: usize = deps.iter().filter(|d| d.skip_reason.is_none()).count();
+        assert_eq!(actionable, 0);
+    }
+
+    // Ported: "extracts dependencies with single-quoted attributes" — ant/extract.spec.ts line 119
+    #[test]
+    fn single_quoted_attributes_extracted() {
+        let content = "<project><artifact:dependencies><dependency groupId='junit' artifactId='junit' version='4.13.2' /></artifact:dependencies></project>";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].current_value, "4.13.2");
+    }
 }

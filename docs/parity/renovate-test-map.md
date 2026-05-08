@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 726 / 1187 actionable tests ported (61%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 729 / 1187 actionable tests ported (61%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1879,7 +1879,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 5 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 8 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1889,9 +1889,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts multiple dependencies | 33 | ported | `ant.rs` | `multiple_deps_extracted` | — |
 | defaults depType to compile when no scope is set | 68 | pending | — | — | Requires depType plumbing |
 | returns null for invalid XML | 90 | ported | `ant.rs` | `empty_xml_returns_empty` | — |
-| returns null for build.xml with no dependencies | 94 | pending | — | — | Requires no-deps null-result handling |
-| ignores dependency nodes without version | 104 | pending | — | — | Requires version-missing skip path |
-| extracts dependencies with single-quoted attributes | 119 | pending | — | — | Requires single-quote attribute tolerance test |
+| returns null for build.xml with no dependencies | 94 | ported | `ant.rs` | `project_without_artifact_dependencies_returns_empty` | — |
+| ignores dependency nodes without version | 104 | ported | `ant.rs` | `dependency_without_version_returns_empty` | — |
+| extracts dependencies with single-quoted attributes | 119 | ported | `ant.rs` | `single_quoted_attributes_extracted` | — |
 | returns null for unreadable build.xml | 135 | pending | — | — | Requires file-read failure path |
 | does not revisit the same file | 143 | pending | — | — | Requires multi-file deduplication |
 
