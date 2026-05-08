@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 664 / 834 actionable tests ported (80%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 690 / 903 actionable tests ported (76%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1814,6 +1814,114 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/nuget/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/extract.spec.ts
+**Total tests:** 35 | **Ported:** 14 | **Actionable:** 35 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid csproj | 28 | ported | `nuget.rs` | `invalid_xml_returns_error_or_empty` | — |
+| returns null if not xml | 43 | ported | `nuget.rs` | `non_xml_content_returns_empty_or_error` | — |
+| extracts package version dependency | 61 | pending | — | — | Requires `<PackageVersion>` (Central Package Management) extraction |
+| extracts package file version | 70 | pending | — | — | Requires packageFileVersion plumbing |
+| does not fail on package file without version | 79 | ported | `nuget.rs` | `no_version_skipped` | — |
+| extracts all dependencies | 86 | ported | `nuget.rs` | `simple_package_reference` (+ update_attribute_extracted, version_override_attribute_wins, version_child_element, exact_nuget_range_normalized, minimum_only_range_normalized) | — |
+| extracts msbuild sdk from the Sdk attr of Project element | 94 | ported | `nuget.rs` | `msbuild_sdk_from_project_attr` | — |
+| does not extract msbuild sdk from the Sdk attr of Project element if version is missing | 117 | ported | `nuget.rs` | `msbuild_sdk_missing_version_from_project_attr` | — |
+| extracts msbuild sdk from the Sdk element | 132 | ported | `nuget.rs` | `msbuild_sdk_from_sdk_element` | — |
+| does not extract msbuild sdk from the Sdk element if version is missing | 156 | ported | `nuget.rs` | `msbuild_sdk_element_without_version_is_skipped` | — |
+| extracts msbuild sdk from the Import element | 172 | ported | `nuget.rs` | `msbuild_sdk_from_import_element` | — |
+| does not extract msbuild sdk from the Import element if version is missing | 196 | ported | `nuget.rs` | `msbuild_import_element_without_version_is_skipped` | — |
+| extracts dependency with lower-case Version attribute | 212 | ported | `nuget.rs` | `lowercase_version_attribute_extracted` | — |
+| extracts all dependencies from global packages file | 226 | ported | `nuget.rs` | `global_and_cli_tool_references` | — |
+| extracts ContainerBaseImage | 234 | ported | `nuget.rs` | `extracts_container_base_image` | — |
+| extracts ContainerBaseImage with pinned digest | 260 | ported | `nuget.rs` | `extracts_container_base_image_with_digest` | — |
+| considers NuGet.config | 289 | pending | — | — | Requires NuGet.config sibling-file resolution |
+| considers lower-case nuget.config | 309 | pending | — | — | Requires NuGet.config sibling-file resolution |
+| considers pascal-case NuGet.Config | 330 | pending | — | — | Requires NuGet.config sibling-file resolution |
+| handles malformed NuGet.config | 351 | pending | — | — | Requires NuGet.config tolerant parsing |
+| handles NuGet.config without package sources | 368 | pending | — | — | Requires NuGet.config tolerant parsing |
+| handles NuGet.config with whitespaces in package source keys | 385 | pending | — | — | Requires NuGet.config key normalization |
+| ignores local feed in NuGet.config | 404 | pending | — | — | Requires NuGet.config local-feed filtering |
+| extracts registry URLs independently | 422 | pending | — | — | Requires registryUrls plumbing |
+| extracts msbuild-sdks from global.json | 461 | pending | — | — | Requires global.json msbuild-sdks parsing |
+| extracts dotnet-sdk from global.json | 483 | pending | — | — | Requires global.json sdk version parsing |
+| handles malformed global.json | 501 | pending | — | — | Requires global.json tolerant parsing |
+| handles not-a-nuget global.json | 509 | pending | — | — | Requires global.json type-detection |
+
+### `extractPackageFile() › .config/dotnet-tools.json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 521 | pending | — | — | Requires .config/dotnet-tools.json parsing |
+| with-config | 537 | pending | — | — | Requires .config/dotnet-tools.json + NuGet.config |
+| wrong version | 561 | pending | — | — | Requires .config/dotnet-tools.json version validation |
+| returns null for no deps | 571 | pending | — | — | Requires .config/dotnet-tools.json empty-tools handling |
+| does not throw | 577 | pending | — | — | Requires .config/dotnet-tools.json malformed tolerance |
+
+### `extractPackageFile() › single-csharp-file`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads sdk and package directives | 583 | pending | — | — | Requires .NET 10 single-file `#:sdk` / `#:package` directive parsing |
+
+### `extractPackageFile() › single-csharp-file-nuget`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calls applyRegistries to honor nuget.config files if present | 615 | pending | — | — | Requires single-csharp-file + NuGet.config integration |
+
+---
+
+## `lib/modules/manager/poetry/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
+**Total tests:** 34 | **Ported:** 12 | **Actionable:** 34 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 43 | ported | `poetry.rs` | `empty_content_returns_empty` | — |
+| returns null for parsed file without poetry section | 47 | ported | `poetry.rs` | `no_poetry_section_returns_empty` | — |
+| extracts multiple dependencies | 51 | ported | `poetry.rs` | `extracts_string_deps` (+ poetry_fixture_1) | — |
+| extracts multiple dependencies (with dep = {version = "1.2.3"} case) | 60 | ported | `poetry.rs` | `extracts_table_deps` | — |
+| handles case with no dependencies | 66 | ported | `poetry.rs` | `poetry_section_with_no_deps_returns_empty` | — |
+| handles multiple constraint dependencies | 71 | pending | — | — | Requires multi-constraint dep table-of-tables parsing |
+| extracts build-system.requires dependencies | 77 | ported | `poetry.rs` | `extracts_build_system_requires` | — |
+| can parse TOML v1 heterogeneous arrays | 112 | pending | — | — | Requires TOML v1 heterogeneous-array tolerance |
+| extracts mixed versioning types | 118 | ported | `poetry.rs` | `name_normalized_per_pep503` | — |
+| extracts dependencies from dependency groups | 160 | ported | `poetry.rs` | `extracts_group_dependencies` (+ extracts_dev_dependencies) | — |
+| resolves lockedVersions from the lockfile | 197 | pending | — | — | Requires poetry.lock parsing |
+| parses git dependencies long commit hashes on http urls | 209 | pending | — | — | Requires git dep + commit hash extraction |
+| parses git dependencies short commit hashes on http urls | 234 | pending | — | — | Requires git dep + short commit hash extraction |
+| parses git dependencies long commit hashes on ssh urls | 259 | pending | — | — | Requires git dep + ssh URL extraction |
+| parses git dependencies long commit hashes on http urls with branch marker | 284 | pending | — | — | Requires git dep + branch marker handling |
+| parses github dependencies tags on ssh urls | 310 | pending | — | — | Requires git dep + GitHub-tags datasource selection on ssh |
+| parses github dependencies tags on http urls | 325 | pending | — | — | Requires git dep + GitHub-tags datasource selection |
+| parses git dependencies with tags that are not on GitHub | 340 | pending | — | — | Requires generic git-tags datasource selection |
+| skips git dependencies | 363 | ported | `poetry.rs` | `git_source_skipped` | — |
+| skips git dependencies with version | 375 | ported | `poetry.rs` | `git_dep_with_version_shows_version` | — |
+| skips path dependencies | 388 | ported | `poetry.rs` | `path_source_skipped` | — |
+| skips path dependencies with version | 400 | ported | `poetry.rs` | `path_dep_with_version_shows_version` | — |
+| does not include registry url for dependency python | 413 | pending | — | — | Requires registryUrls plumbing for python core dep |
+| can parse empty registries | 436 | pending | — | — | Requires `[[tool.poetry.source]]` registries plumbing |
+| can parse missing registries | 441 | pending | — | — | Requires registries plumbing |
+| extracts registries | 446 | pending | — | — | Requires registries plumbing |
+| dedupes registries | 455 | pending | — | — | Requires registries plumbing + dedup |
+| source with priority="default" and implicit PyPI priority="primary" | 463 | pending | — | — | Requires source priority semantics |
+| source with implicit priority and PyPI with priority="explicit" | 483 | pending | — | — | Requires source priority semantics |
+| supports dependencies with explicit source | 500 | pending | — | — | Requires per-dep source-binding plumbing |
+| parses package file with template | 535 | pending | — | — | Requires Jinja-template tolerance |
+| extract dependencies from the project section | 555 | pending | — | — | Requires `[project]` PEP 621 fallback parse |
+| extracts dependencies from pep735 dependency-groups | 616 | pending | — | — | Requires PEP 735 `[dependency-groups]` parse |
+| enriches pep621/pep735 dependencies with poetry managerData | 663 | pending | — | — | Requires PEP 621/735 enrichment with poetry managerData |
+
+---
+
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
@@ -2118,7 +2226,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- mise/extract.spec.ts converted to per-test format above -->
 <!-- mix/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
-| `lib/modules/manager/nuget/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/nuget.rs` | 25 | partial |
+<!-- nuget/extract.spec.ts converted to per-test format above -->
 <!-- ocb/extract.spec.ts converted to per-test format above -->
 <!-- osgi/extract.spec.ts converted to per-test format above -->
 <!-- pep621/extract.spec.ts converted to per-test format above -->
@@ -2128,7 +2236,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- pip_setup/extract.spec.ts converted to per-test format above -->
 <!-- pipenv/extract.spec.ts converted to per-test format above -->
 <!-- pixi/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/poetry/extract.spec.ts` | 34 | `crates/renovate-core/src/extractors/poetry.rs` | 15 | partial |
+<!-- poetry/extract.spec.ts converted to per-test format above -->
 <!-- pre-commit/extract.spec.ts converted to per-test format above -->
 <!-- puppet/extract.spec.ts converted to per-test format above -->
 <!-- quadlet/extract.spec.ts converted to per-test format above -->
