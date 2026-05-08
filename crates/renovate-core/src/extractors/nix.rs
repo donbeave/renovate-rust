@@ -323,6 +323,7 @@ mod tests {
         assert!(!deps.iter().any(|d| d.input_name == "nixpkgs_2"));
     }
 
+    // Ported: "returns nixpkgs input" — nix/extract.spec.ts line 217
     #[test]
     fn extracts_nixpkgs_correctly() {
         let deps = extract(SAMPLE_LOCK);
@@ -336,6 +337,7 @@ mod tests {
         assert!(np.skip_reason.is_none());
     }
 
+    // Ported: "returns null when flake.lock has invalid JSON" — nix/extract.spec.ts line 1046
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
