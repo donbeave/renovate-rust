@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 707 / 1020 actionable tests ported (69%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 709 / 1058 actionable tests ported (67%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -2023,6 +2023,56 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/nix/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
+**Total tests:** 38 | **Ported:** 2 | **Actionable:** 38 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when no nixpkgs input exists | 10 | pending | — | — | Requires `extractPackageFile(flake.nix, ...)` integration with flake.lock read |
+| does not include nixpkgs input with no explicit ref | 25 | pending | — | — | Requires flake.nix + flake.lock integration |
+| includes nixpkgs input with only ref | 42 | pending | — | — | Requires flake.nix + flake.lock integration |
+| returns null when no inputs | 59 | pending | — | — | Requires flake.nix + flake.lock integration |
+| returns null when inputs are missing locked | 71 | pending | — | — | Requires flake.lock locked-section validation |
+| returns null when inputs are missing original | 95 | pending | — | — | Requires flake.lock original-section validation |
+| returns null when original inputs are from local path | 121 | pending | — | — | Requires path-input filtering |
+| returns null when locked inputs are indirect | 153 | pending | — | — | Requires indirect-input filtering |
+| returns null when locked inputs are from local path | 185 | pending | — | — | Requires path-input filtering |
+| returns nixpkgs input | 217 | ported | `nix.rs` | `extracts_nixpkgs_correctly` | — |
+| includes nixpkgs with no explicit ref | 260 | pending | — | — | Requires explicit-ref handling |
+| includes patchelf from HEAD | 300 | pending | — | — | Requires HEAD ref handling |
+| includes ijq from sourcehut without a flake | 358 | pending | — | — | Requires sourcehut detection |
+| includes home-manager from gitlab | 399 | pending | — | — | Requires gitlab detection |
+| test other version | 440 | pending | — | — | Requires older flake.lock version handling |
+| includes nixpkgs with ref and shallow arguments | 452 | pending | — | — | Requires shallow-arg handling |
+| includes nixpkgs but using indirect type that cannot be updated | 494 | pending | — | — | Requires indirect-type skip-reason |
+| includes nixpkgs but using indirect type and path locked type that cannot be updated | 524 | pending | — | — | Requires indirect+path-type skip-reason |
+| includes flake from GitHub Enterprise | 553 | pending | — | — | Requires GitHub Enterprise detection |
+| includes flake with tarball type | 649 | pending | — | — | Requires tarball-type handling |
+| uri decode gitlab subgroup | 750 | pending | — | — | Requires URI-decode for gitlab subgroup |
+| includes flake with only tarball type | 790 | pending | — | — | Requires tarball-only handling |
+| includes flake with nixpkgs-lib as tarball type | 818 | pending | — | — | Requires nixpkgs-lib tarball detection |
+| includes flake with nixpkgs channel as tarball type | 897 | pending | — | — | Requires nixpkgs-channel tarball detection |
+| finds currentDigest correctly when input sha is pinned | 937 | pending | — | — | Requires currentDigest extraction |
+| does not duplicate nixpkgs dependency | 983 | pending | — | — | Requires dedup logic |
+| returns null when flake.lock file cannot be read | 1028 | pending | — | — | Requires flake.lock read-failure path |
+| returns null when flake.nix file cannot be read | 1033 | pending | — | — | Requires flake.nix read-failure path |
+| returns null when flake.lock has invalid JSON | 1046 | ported | `nix.rs` | `invalid_json_returns_empty` | — |
+| returns deps when no root inputs but deps exist | 1051 | pending | — | — | Requires non-root deps fallback |
+| handles currentDigest replacement when config provided | 1065 | pending | — | — | Requires currentDigest replacement plumbing |
+| includes nixpkgs with ref when original has rev | 1112 | pending | — | — | Requires ref+rev priority handling |
+| includes github flake with ref when original has rev | 1154 | pending | — | — | Requires github flake ref+rev handling |
+| includes gitlab flake with custom host | 1196 | pending | — | — | Requires gitlab custom-host handling |
+| includes sourcehut flake with custom host | 1238 | pending | — | — | Requires sourcehut custom-host handling |
+| includes tarball flake with ref when original has rev | 1280 | pending | — | — | Requires tarball ref+rev handling |
+| handles unknown flake lock type | 1321 | pending | — | — | Requires unknown-type tolerance |
+| ignores unsupported file type and still extracts other inputs | 1348 | pending | — | — | Requires unsupported-type filtering with fallthrough |
+
+---
+
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
@@ -2438,7 +2488,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- mint/extract.spec.ts converted to per-test format above -->
 <!-- mise/extract.spec.ts converted to per-test format above -->
 <!-- mix/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/nix/extract.spec.ts` | 38 | `crates/renovate-core/src/extractors/nix.rs` | 5 | partial |
+<!-- nix/extract.spec.ts converted to per-test format above -->
 <!-- nuget/extract.spec.ts converted to per-test format above -->
 <!-- ocb/extract.spec.ts converted to per-test format above -->
 <!-- osgi/extract.spec.ts converted to per-test format above -->
