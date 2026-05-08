@@ -145,6 +145,18 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert_eq!(deps[0].current_value, "2022-09-01");
     }
 
+    // Ported: "should extract a conditional loop resource" — bicep/extract.spec.ts line 117
+    #[test]
+    fn extracts_conditional_loop_resource() {
+        // `[for x in [...]: if(...) {}]` should still expose the resource on
+        // the same `resource <name> '<type>@<version>' = ...` line.
+        let content = "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = [for name in ['test', 'test2']: if(42 == 'the answer') {}]";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "Microsoft.Storage/storageAccounts");
+        assert_eq!(deps[0].current_value, "2022-09-01");
+    }
+
     // Ported: "should not extract a nested unversioned resource" — bicep/extract.spec.ts line 185
     #[test]
     fn nested_unversioned_resource_skipped() {
