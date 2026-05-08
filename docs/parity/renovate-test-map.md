@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 725 / 1187 actionable tests ported (61%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 726 / 1187 actionable tests ported (61%) — updated 2026-05-08
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2428,7 +2428,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/terraform/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extract.spec.ts
-**Total tests:** 18 | **Ported:** 7 | **Actionable:** 18 | **Status:** partial
+**Total tests:** 18 | **Ported:** 8 | **Actionable:** 18 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2449,7 +2449,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns null with only not added resources | 767 | ported | `terraform.rs` | `resource_block_not_extracted` | — |
 | extract helm releases | 776 | pending | — | — | Requires helm_release resource extraction |
 | update lockfile constraints with range strategy update-lockfile | 845 | pending | — | — | Requires .terraform.lock.hcl parsing |
-| test terraform block with only requirement_terraform_version | 884 | pending | — | — | Requires required_version-only path test |
+| test terraform block with only requirement_terraform_version | 884 | ported | `terraform.rs` | `required_version_extracted_as_hashicorp_terraform` | — |
 | extracts terraform_version for tfe_workspace and ignores missing terraform_version keys | 904 | pending | — | — | Requires tfe_workspace resource extraction |
 | return null if invalid HCL file | 933 | ported | `terraform.rs` | `invalid_hcl_returns_empty` | — |
 

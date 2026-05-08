@@ -35,6 +35,9 @@ pub enum TerraformDepType {
     Provider,
     /// Declared in `module "name" { … }`.
     Module,
+    /// Declared as `terraform { required_version = "…" }` — pins the
+    /// terraform CLI itself (looked up via hashicorp/terraform releases).
+    RequiredVersion,
 }
 
 impl TerraformDepType {
@@ -42,6 +45,7 @@ impl TerraformDepType {
         match self {
             TerraformDepType::Provider => "provider",
             TerraformDepType::Module => "module",
+            TerraformDepType::RequiredVersion => "required_version",
         }
     }
 }
@@ -167,9 +171,28 @@ impl Parser {
     fn handle_terraform_block(&mut self, trimmed: &str) {
         if REQUIRED_PROVIDERS.is_match(trimmed) {
             self.state = State::InRequiredProviders;
-        } else if trimmed == "}" {
+            return;
+        }
+        if trimmed == "}" {
             self.state = State::TopLevel;
-        } else if trimmed.ends_with('{') {
+            return;
+        }
+        // `required_version = "…"` pins the terraform CLI itself.
+        if let Some(cap) = KV_LINE.captures(trimmed)
+            && &cap[1] == "required_version"
+        {
+            let version = cap[2].trim().to_owned();
+            if !version.is_empty() {
+                self.deps.push(TerraformExtractedDep {
+                    name: "hashicorp/terraform".to_owned(),
+                    current_value: version,
+                    dep_type: TerraformDepType::RequiredVersion,
+                    skip_reason: None,
+                });
+            }
+            return;
+        }
+        if trimmed.ends_with('{') {
             // Other nested block inside terraform {}.
             self.state = State::Skip(1);
         }
@@ -564,5 +587,17 @@ terraform {
 }
 "#;
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "test terraform block with only requirement_terraform_version" — terraform/extract.spec.ts line 884
+    #[test]
+    fn required_version_extracted_as_hashicorp_terraform() {
+        let content = "terraform {\n  required_version = \"1.0.0\"\n}\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "hashicorp/terraform");
+        assert_eq!(deps[0].current_value, "1.0.0");
+        assert_eq!(deps[0].dep_type, TerraformDepType::RequiredVersion);
+        assert!(deps[0].skip_reason.is_none());
     }
 }

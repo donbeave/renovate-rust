@@ -31,17 +31,25 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 );
                 let dep_inputs: Vec<terraform_datasource::TerraformDepInput> = actionable
                     .iter()
-                    .map(|d| terraform_datasource::TerraformDepInput {
-                        name: d.name.clone(),
-                        current_value: d.current_value.clone(),
-                        kind: match d.dep_type {
+                    .filter_map(|d| {
+                        let kind = match d.dep_type {
                             terraform_extractor::TerraformDepType::Provider => {
                                 terraform_datasource::TerraformLookupKind::Provider
                             }
                             terraform_extractor::TerraformDepType::Module => {
                                 terraform_datasource::TerraformLookupKind::Module
                             }
-                        },
+                            // `required_version` is the terraform CLI itself —
+                            // looked up via hashicorp/terraform GitHub Releases,
+                            // not the Terraform Registry. Skip it here; a
+                            // dedicated lookup path is a separate feature.
+                            terraform_extractor::TerraformDepType::RequiredVersion => return None,
+                        };
+                        Some(terraform_datasource::TerraformDepInput {
+                            name: d.name.clone(),
+                            current_value: d.current_value.clone(),
+                            kind,
+                        })
                     })
                     .collect();
                 let updates = terraform_datasource::fetch_updates_concurrent(
