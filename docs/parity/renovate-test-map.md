@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 709 / 1058 actionable tests ported (67%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 712 / 1116 actionable tests ported (64%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -2073,6 +2073,82 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/flux/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
+**Total tests:** 58 | **Ported:** 3 | **Actionable:** 58 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts multiple resources | 27 | pending | — | — | Requires full multi-resource fixture round-trip |
+| extracts version and components from system manifest at $filepath | 72 | ported | `flux.rs` | `extracts_version_with_components` | — |
+| considers components optional in system manifests | 102 | ported | `flux.rs` | `extracts_version_without_components` | — |
+| ignores system manifests without a version | 111 | ported | `flux.rs` | `no_header_returns_none` | — |
+| extracts releases without repositories | 119 | pending | — | — | Requires HelmRelease without HelmRepository pairing |
+| falls back to unknown-registry when registryAliases has no matching HelmRelease sourceRef name | 136 | pending | — | — | registryAliases not yet implemented |
+| uses registryAliases to resolve HelmRelease sourceRef name when repository is missing | 158 | pending | — | — | registryAliases not yet implemented |
+| uses registryAliases with an OCI URL for HelmRelease sourceRef name | 180 | pending | — | — | registryAliases not yet implemented |
+| ignores HelmRelease resources without an apiVersion | 202 | pending | — | — | Requires apiVersion validation |
+| ignores HelmRepository resources without an apiVersion | 207 | pending | — | — | Requires apiVersion validation |
+| ignores HelmRepository resources without metadata | 212 | pending | — | — | Requires metadata validation |
+| ignores HelmRelease resources without any chart reference | 234 | pending | — | — | Requires HelmRelease chart-ref validation |
+| ignores HelmRelease resources without a chart name | 250 | pending | — | — | Requires HelmRelease chart-name validation |
+| skip HelmRelease with local chart | 271 | pending | — | — | Requires local-chart skip-reason |
+| does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace | 299 | pending | — | — | Requires namespace pairing |
+| does not match HelmRelease resources without a sourceRef | 325 | pending | — | — | Requires sourceRef pairing |
+| does not match HelmRelease resources without a namespace | 355 | pending | — | — | Requires namespace pairing |
+| ignores HelmRepository resources without a namespace | 376 | pending | — | — | Requires namespace pairing |
+| ignores HelmRepository resources without a URL | 400 | pending | — | — | Requires url validation |
+| ignores HelmRelease resources using an invalid chartRef | 425 | pending | — | — | Requires chartRef validation |
+| ignores HelmRelease resources using a chartRef targetting a HelmChart | 433 | pending | — | — | Requires HelmChart chartRef detection |
+| ignores HelmRelease resources using a chartRef targetting an OCIRepository | 457 | pending | — | — | Requires OCIRepository chartRef detection |
+| extracts HelmChart version | 492 | pending | — | — | Requires HelmChart resource extraction |
+| does not match HelmChart resources without a namespace | 513 | pending | — | — | Requires HelmChart namespace pairing |
+| falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name | 544 | pending | — | — | registryAliases not yet implemented |
+| uses registryAliases to resolve HelmChart sourceRef name when repository is missing | 566 | pending | — | — | registryAliases not yet implemented |
+| ignores HelmChart resources using git sources | 588 | pending | — | — | Requires git source filter on HelmChart |
+| ignores HelmChart resources using bucket sources | 608 | pending | — | — | Requires bucket source filter on HelmChart |
+| ignores GitRepository without a tag nor a commit | 645 | pending | — | — | Requires GitRepository ref validation |
+| extracts GitRepository with a commit | 665 | pending | — | — | Requires GitRepository commit extraction |
+| extracts GitRepository with a tag from github with ssh | 694 | pending | — | — | Requires GitRepository ssh URL handling |
+| extracts GitRepository with a tag from github | 722 | pending | — | — | Requires GitRepository github tag extraction |
+| extracts GitRepository with a tag from gitlab | 750 | pending | — | — | Requires GitRepository gitlab tag extraction |
+| extracts GitRepository with a tag from bitbucket | 778 | pending | — | — | Requires GitRepository bitbucket tag extraction |
+| extracts GitRepository with a tag from an unkown domain | 806 | pending | — | — | Requires GitRepository generic-host handling |
+| ignores OCIRepository with no tag and no digest | 834 | pending | — | — | Requires OCIRepository ref validation |
+| extracts OCIRepository with a tag | 861 | pending | — | — | Requires OCIRepository tag extraction |
+| extracts OCIRepository with a digest | 897 | pending | — | — | Requires OCIRepository digest extraction |
+| extracts OCIRepository with a tag that contains a digest | 925 | pending | — | — | Requires OCIRepository tag+inline-digest |
+| extracts OCIRepository with a digest and tag | 958 | pending | — | — | Requires OCIRepository tag+digest extraction |
+| extracts OCIRepository with quoted digest and tag | 994 | pending | — | — | Requires OCIRepository quoted-value tolerance |
+| extracts OCIRepository with quoted keys | 1030 | pending | — | — | Requires OCIRepository quoted-key tolerance |
+| extracts OCIRepository when ref key is quoted | 1063 | pending | — | — | Requires OCIRepository quoted ref-key tolerance |
+| skips OCIRepository when tag value is a YAML alias | 1098 | pending | — | — | Requires YAML-alias filtering |
+| extracts OCIRepository with tag and digest preceded by other document types | 1129 | pending | — | — | Requires multi-document YAML preceded-by-others handling |
+| extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref | 1195 | pending | — | — | Requires multi-document same-name resource handling |
+| extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec | 1241 | pending | — | — | Requires multi-document same-name resource handling |
+| extracts OCIRepository with tag and digest when ref contains a non-scalar key | 1285 | pending | — | — | Requires non-scalar ref-key tolerance |
+| extracts Kustomization | 1323 | pending | — | — | Requires Kustomization resource extraction |
+| ignores resources of an unknown kind | 1389 | pending | — | — | Requires kind-filter |
+| ignores resources without a kind | 1400 | pending | — | — | Requires kind-validation |
+| ignores bad manifests | 1408 | pending | — | — | Requires malformed-manifest tolerance |
+| ignores null resources | 1413 | pending | — | — | Requires null-resource tolerance |
+
+### `extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts multiple files | 1420 | pending | — | — | Requires extractAllPackageFiles wrapper |
+| should handle HelmRepository with type OCI | 1486 | pending | — | — | Requires HelmRepository type=OCI handling |
+| should handle HelmRepository w/o type oci and url starts with oci | 1514 | pending | — | — | Requires HelmRepository url-based OCI inference |
+| ignores files that do not exist | 1535 | pending | — | — | Requires file-not-found tolerance |
+| ignores system manifest files without valid Flux version header | 1542 | pending | — | — | Requires Flux version-header validation |
+| should pick correct package file when using HelmRepository with chartRef | 1549 | pending | — | — | Requires multi-file chartRef pairing |
+
+---
+
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
@@ -2467,7 +2543,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- bicep/extract.spec.ts converted to per-test format above -->
 <!-- cargo/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/cpanfile/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/cpanfile.rs` | 8 | partial |
-| `lib/modules/manager/flux/extract.spec.ts` | 58 | `crates/renovate-core/src/extractors/flux.rs` | 5 | partial |
+<!-- flux/extract.spec.ts converted to per-test format above -->
 <!-- github-actions/extract.spec.ts converted to per-test format above -->
 <!-- gitlabci converted to per-test format above -->
 <!-- gradle/extract.spec.ts converted to per-test format above -->
