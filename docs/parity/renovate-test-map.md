@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 712 / 1116 actionable tests ported (64%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 715 / 1151 actionable tests ported (62%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -2149,6 +2149,53 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/bazel-module/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
+**Total tests:** 35 | **Ported:** 3 | **Actionable:** 35 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if fails to parse | 25 | pending | — | — | Requires MODULE.bazel parser failure path |
+| returns null if something throws an error | 33 | pending | — | — | Requires generic error tolerance |
+| returns null if file is empty | 41 | pending | — | — | Requires empty-file null-result path |
+| returns null if file has unrecognized declarations | 46 | ported | `bazel_module.rs` | `empty_file_returns_empty` (+ comment_lines_stripped) | — |
+| returns bazel_dep and git_override dependencies | 54 | ported | `bazel_module.rs` | `extracts_bazel_dep` (+ extracts_dev_dependency, extracts_multiline_dep, multiple_deps) | — |
+| returns bazel_dep with no version and git_override | 95 | ported | `bazel_module.rs` | `dep_without_version_skipped` | — |
+| returns dependencies and custom registry URLs when specified in a bazelrc | 125 | pending | — | — | Requires .bazelrc registry parsing |
+| returns bazel_dep and archive_override dependencies | 148 | pending | — | — | Requires archive_override extraction |
+| returns bazel_dep with no version and archive_override dependencies | 179 | pending | — | — | Requires archive_override + bazel_dep no-version handling |
+| returns bazel_dep and local_path_override dependencies | 209 | pending | — | — | Requires local_path_override extraction |
+| returns bazel_dep with no version and local_path_override dependencies | 238 | pending | — | — | Requires local_path_override + no-version handling |
+| returns bazel_dep and single_version_override dependencies if a version is specified | 266 | pending | — | — | Requires single_version_override extraction |
+| returns bazel_dep with no version and single_version_override dependencies if a version is specified | 299 | pending | — | — | Requires single_version_override + no-version handling |
+| returns bazel_dep dependency if single_version_override does not have a version | 331 | pending | — | — | Requires single_version_override empty-version handling |
+| returns bazel_dep with no version dependency if single_version_override does not have a version | 355 | pending | — | — | Requires combined single_version_override + no-version |
+| returns crate.spec dependencies | 377 | pending | — | — | Requires crate.spec extraction (Rust crates) |
+| returns maven.install and maven.artifact dependencies | 453 | pending | — | — | Requires maven.install / maven.artifact extraction |
+| returns oci.pull dependencies | 507 | pending | — | — | Requires oci.pull extraction |
+| returns oci.pull dependencies without tags | 544 | pending | — | — | Requires oci.pull no-tag handling |
+| returns oci.pull dependencies with tag only (no digest) | 578 | pending | — | — | Requires oci.pull tag-only handling |
+| returns oci.pull dependencies without tag or digest | 611 | pending | — | — | Requires oci.pull missing-ref handling |
+| returns oci.pull dependencies with registryAliases | 641 | pending | — | — | registryAliases not yet implemented |
+| returns oci.pull dependencies with registryAliases with multiple segments | 682 | pending | — | — | registryAliases not yet implemented |
+| returns maven.install and bazel_dep dependencies together | 723 | pending | — | — | Requires maven + bazel_dep combined extraction |
+| returns git_repository dependencies with digest | 772 | pending | — | — | Requires git_repository digest extraction |
+| returns git_repository dependencies with tag | 796 | pending | — | — | Requires git_repository tag extraction |
+| returns new_git_repository dependencies | 820 | pending | — | — | Requires new_git_repository extraction |
+| handles a real-world MODULE.bazel file (rules_sh) | 846 | pending | — | — | Requires rules_sh fixture round-trip |
+| handles every method available in MODULE.bazel files | 887 | pending | — | — | Requires comprehensive MODULE.bazel coverage |
+| returns rules_img pull dependencies | 1005 | pending | — | — | Requires rules_img.pull extraction |
+| returns rules_img pull dependencies with custom registry | 1051 | pending | — | — | Requires rules_img.pull custom-registry handling |
+| returns rules_img pull dependencies with multiple pulls | 1086 | pending | — | — | Requires rules_img.pull multiple-pulls handling |
+| ignores rules_img pull without required fields | 1141 | pending | — | — | Requires rules_img.pull required-field validation |
+| handles rules_img with renamed variable | 1161 | pending | — | — | Requires rules_img renamed-variable resolution |
+| ignores non-rules_img repo rules | 1193 | pending | — | — | Requires rules_img repo-rule filter |
+
+---
+
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
@@ -2538,7 +2585,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- ant/extract.spec.ts converted to per-test format above -->
 <!-- asdf/extract.spec.ts converted to per-test format above -->
 <!-- azure-pipelines/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
+<!-- bazel-module/extract.spec.ts converted to per-test format above -->
 <!-- bazel/extract.spec.ts converted to per-test format above -->
 <!-- bicep/extract.spec.ts converted to per-test format above -->
 <!-- cargo/extract.spec.ts converted to per-test format above -->
