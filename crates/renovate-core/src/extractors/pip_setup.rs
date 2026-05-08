@@ -121,6 +121,7 @@ fn extract_balanced(s: &str) -> Option<&str> {
 mod tests {
     use super::*;
 
+    // Ported: "returns found deps" — pip_setup/extract.spec.ts line 12
     #[test]
     fn extracts_install_requires() {
         let content = r#"
@@ -165,6 +166,11 @@ setup(
         assert!(deps.iter().any(|d| d.name == "black"));
     }
 
+    // Ported: "returns nothing" — pip_setup/extract.spec.ts line 41
+    //
+    // The TS spec passes empty content; Rust covers the equivalent
+    // no-install_requires-key behaviour, which the TS extractor would
+    // also collapse to null on empty input.
     #[test]
     fn no_requires_returns_empty() {
         assert!(extract("setup(name='foo')").is_empty());
