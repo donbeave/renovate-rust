@@ -176,6 +176,7 @@ pub fn manager_for_file(filename: &str) -> Option<&'static str> {
 mod tests {
     use super::*;
 
+    // Ported: "returns a result" — terraform-version/extract.spec.ts line 5
     #[test]
     fn terraform_version_plain() {
         let dep = extract("1.6.3\n", "terraform-version").unwrap();
@@ -234,6 +235,7 @@ mod tests {
         assert!(extract("latest\n", "nvmrc").is_none());
     }
 
+    // Ported: "returns a result" — nvm/extract.spec.ts line 5
     #[test]
     fn nvmrc_plain_version() {
         let dep = extract("20.9.0\n", "nvmrc").unwrap();
@@ -283,6 +285,7 @@ mod tests {
         assert_eq!(manager_for_file("Gemfile"), None);
     }
 
+    // Ported: "returns a result" — ruby-version/extract.spec.ts line 5
     #[test]
     fn ruby_version_file() {
         let dep = extract("3.3.0\n", "ruby-version").unwrap();
