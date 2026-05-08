@@ -262,9 +262,9 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts image and replaces registry | 19 | pending | — | — | — |
-| extracts image but no replacement | 42 | pending | — | — | — |
-| extracts image and no double replacement | 65 | pending | — | — | — |
+| extracts image and replaces registry | 19 | pending | — | — | registryAliases not yet implemented |
+| extracts image but no replacement | 42 | pending | — | — | registryAliases not yet implemented |
+| extracts image and no double replacement | 65 | pending | — | — | registryAliases not yet implemented |
 
 ---
 
