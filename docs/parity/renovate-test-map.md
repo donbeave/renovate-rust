@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 620 / 759 actionable tests ported (82%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 639 / 788 actionable tests ported (81%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1698,6 +1698,52 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/azure-pipelines/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/azure-pipelines/extract.spec.ts
+**Total tests:** 29 | **Ported:** 19 | **Actionable:** 29 | **Status:** partial
+
+### `extractRepository / extractContainer / extractAzurePipelinesTaskDependency` helpers
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should parse a valid azure-pipelines file | 25 | pending | — | — | Tests the YAML parser helper directly; Rust extractor goes through full pipeline |
+| return null on an invalid file | 30 | ported | `azure_pipelines.rs` | `invalid_yaml_returns_empty` | — |
+| should extract repository information | 36 | pending | — | — | Requires GitHub `repositories[]` extraction |
+| should return null when repository type is not github | 52 | pending | — | — | Requires repository-type filtering |
+| should return null when reference is not defined specified | 65 | pending | — | — | Requires repository ref validation |
+| should return null when reference is invalid tag format | 77 | pending | — | — | Requires repository ref tag-format validation |
+| should extract Azure repository information if project in name | 90 | pending | — | — | Requires Azure DevOps `repositories[]` extraction |
+| should extract Azure repository information if project is not in name but is in the config repository | 111 | pending | — | — | Requires Azure DevOps repo + currentRepository config |
+| should return null if repository type is git and project not in name nor in config repository name | 132 | pending | — | — | Requires Azure DevOps repo project resolution |
+| should return null if repository type is git and currentRepository is undefined | 150 | pending | — | — | Requires currentRepository config plumbing |
+| should return null for git repo type if platform not Azure | 168 | pending | — | — | Requires platform-specific repo filtering |
+| should extract container information | 187 | ported | `azure_pipelines.rs` | `extracts_container_image` (+ extracts_multiple_containers) | — |
+| should extract azure-pipelines task information | 201 | ported | `azure_pipelines.rs` | `extracts_tasks` (+ tasks_in_nested_jobs_stages) | — |
+| should return null for invalid task format | 209 | ported | `azure_pipelines.rs` | `task_without_at_ignored` | — |
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid azure pipelines files | 215 | ported | `azure_pipelines.rs` | `invalid_yaml_returns_empty` | — |
+| extracts dependencies | 221 | ported | `azure_pipelines.rs` | `extracts_container_image` (+ extracts_tasks, extracts_multiple_containers) | — |
+| should return null when there is no dependency found | 245 | ported | `azure_pipelines.rs` | `no_tasks_or_containers_returns_empty` (+ empty_returns_empty, non_containers_resources_not_extracted) | — |
+| should extract deployment jobs runonce | 253 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_job_runonce` | — |
+| should extract deployment jobs on failure | 277 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_job_on_failure` | — |
+| should extract deployment jobs on success | 302 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_job_on_success` | — |
+| should extract deployment jobs postroute | 327 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_postroute` | — |
+| should extract deployment jobs predeploy | 351 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_predeploy` | — |
+| should extract deployment jobs route | 375 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_route_traffic` | — |
+| should extract deployment jobs rolling | 399 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_rolling` | — |
+| should extract deployment jobs canary | 423 | ported | `azure_pipelines.rs` | `extracts_task_from_deployment_canary` | — |
+| should extract stages | 447 | ported | `azure_pipelines.rs` | `extracts_task_from_nested_stages` | — |
+| should extract jobs | 470 | ported | `azure_pipelines.rs` | `extracts_task_from_nested_jobs` | — |
+| should extract steps | 491 | ported | `azure_pipelines.rs` | `extracts_task_from_top_level_steps` | — |
+| should return null when task alias used | 510 | ported | `azure_pipelines.rs` | `task_alias_bash_not_extracted` | — |
+
+---
+
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
@@ -1974,7 +2020,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |--------------------|---------------|-----------|------------|--------|
 | `lib/modules/manager/ant/extract.spec.ts` | 44 | `crates/renovate-core/src/extractors/ant.rs` | 6 | partial |
 <!-- asdf/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | `crates/renovate-core/src/extractors/azure_pipelines.rs` | 22 | partial |
+<!-- azure-pipelines/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | `crates/renovate-core/src/extractors/bazel_module.rs` | 7 | partial |
 <!-- bazel/extract.spec.ts converted to per-test format above -->
 <!-- bicep/extract.spec.ts converted to per-test format above -->
