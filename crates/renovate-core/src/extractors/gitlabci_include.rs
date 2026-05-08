@@ -169,4 +169,93 @@ build:
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
+
+    // Ported: "extracts multiple embedded include blocks" — gitlabci-include/extract.spec.ts line 34
+    //
+    // The fixture has a top-level `include:` plus a nested `trigger.include:`
+    // block inside a job. Both should produce a dep.
+    #[test]
+    fn extracts_multiple_embedded_include_blocks() {
+        let content = "\
+---
+include:
+- project: mikebryant/include-source-example
+  file: /template.yaml
+  ref: 1.0.0
+
+trigger-my-job:
+  extends: .extend-trigger-job
+  trigger:
+    include:
+      - project: mikebryant/include-source-example
+        file: /template.yaml
+        ref: master
+";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].project, "mikebryant/include-source-example");
+        assert_eq!(deps[0].ref_value, "1.0.0");
+        assert_eq!(deps[1].project, "mikebryant/include-source-example");
+        assert_eq!(deps[1].ref_value, "master");
+    }
+
+    // Ported: "supports multi-document files" — gitlabci-include/extract.spec.ts line 73
+    //
+    // A single YAML file may contain multiple documents separated by `---`.
+    // Each document's `include:` block should be parsed independently.
+    #[test]
+    fn supports_multi_document_files() {
+        let content = "\
+other:
+  content: to be ignored
+---
+include:
+  - project: mikebryant/include-source-example
+    ref: 1.0.0
+---
+include:
+  - project: mikebryant/include-source-example2
+    ref: 2.0.0
+---
+more:
+  content: to be ignored
+";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].project, "mikebryant/include-source-example");
+        assert_eq!(deps[0].ref_value, "1.0.0");
+        assert_eq!(deps[1].project, "mikebryant/include-source-example2");
+        assert_eq!(deps[1].ref_value, "2.0.0");
+    }
+
+    // Ported: "returns null for include block without any actual includes" — gitlabci-include/extract.spec.ts line 17
+    //
+    // A bare `include:` key with no list under it produces no deps.
+    #[test]
+    fn empty_include_block_returns_no_deps() {
+        let content = "\
+include:
+
+script:
+- !reference [.setup, script]
+";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "ignores includes without project and file keys" — gitlabci-include/extract.spec.ts line 51
+    //
+    // String form, `remote:` form, and `local:` form includes have no
+    // project+ref pair so the extractor produces nothing.
+    #[test]
+    fn ignores_includes_without_project_and_file_keys() {
+        let content = "\
+include:
+  - 'https://gitlab.com/mikebryant/include-source-example.yml'
+  - remote: 'https://gitlab.com/mikebryant/include-source-example.yml'
+  - local: mikebryant/include-source-example
+";
+        let deps = extract(content);
+        assert!(deps.is_empty());
+    }
 }
