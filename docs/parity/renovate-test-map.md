@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 476 / 560 actionable tests ported (85%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 500 / 586 actionable tests ported (85%) — updated 2026-05-08
 
 Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
 
@@ -1331,6 +1331,80 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/typst/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/typst/extract.spec.ts
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty deps for empty content | 5 | ported | `typst.rs` | `empty_content_returns_empty` | — |
+| returns empty deps when no imports found | 10 | ported | `typst.rs` | `no_imports_returns_empty` | — |
+| extracts single import | 21 | ported | `typst.rs` | `extracts_preview_import` (+ extracts_import_with_trailing_colon_import) | — |
+| extracts multiple imports | 36 | ported | `typst.rs` | `multiple_imports` | — |
+| handles imports with different version formats | 67 | ported | `typst.rs` | `prerelease_version_formats_extracted` | — |
+| strips JSON comments before parsing | 98 | ported | `typst.rs` | `comment_line_skipped` | — |
+| handles multiple imports on same line | 125 | ported | `typst.rs` | `multiple_imports_on_same_line` | — |
+| ignores invalid import formats | 147 | ported | `typst.rs` | `ignores_invalid_import_formats` | — |
+| adds skipReason for non-preview namespaces | 167 | ported | `typst.rs` | `local_namespace_skipped` (+ unknown_namespace_skipped, non_preview_namespaces_get_skip_reasons) | — |
+
+---
+
+## `lib/modules/manager/terragrunt/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/extract.spec.ts
+**Total tests:** 7 | **Ported:** 5 | **Actionable:** 7 | **Status:** partial
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | ported | `terragrunt.rs` | `no_terraform_block_returns_empty` | — |
+| extracts terragrunt sources using tfr protocol | 10 | pending | — | — | tfr:// protocol not yet supported |
+| extracts terragrunt sources | 51 | ported | `terragrunt.rs` | `extracts_github_ref_source` (+ extracts_git_prefix_github, multiple_terraform_blocks, local_path_skipped) | — |
+| extracts terragrunt sources with depth specified after the branch | 269 | pending | — | — | Requires depth=N parameter parsing |
+| extracts terragrunt sources with depth specified before the branch | 487 | pending | — | — | Requires depth=N parameter parsing |
+| returns null if only local terragrunt deps | 698 | ported | `terragrunt.rs` | `local_only_deps_returns_empty` | — |
+| returns empty deps if only local terragrunt includes | 707 | ported | `terragrunt.rs` | `include_block_only_returns_empty` | — |
+
+---
+
+## `lib/modules/manager/tflint-plugin/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/tflint-plugin/extract.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 22 | ported | `tflint_plugin.rs` | `no_plugins_returns_empty` | — |
+| returns null when there are no version | 28 | ported | `tflint_plugin.rs` | `missing_version_sets_skip_reason` (+ plugin_without_source_or_version_gets_missing_source) | — |
+| extracts plugins | 38 | ported | `tflint_plugin.rs` | `extracts_github_plugin` (+ extracts_multiple_plugins, extracts_plugins_with_org_paths) | — |
+| extracts from full configuration | 71 | ported | `tflint_plugin.rs` | `extracts_plugin_from_full_config` | — |
+| extracts no source | 112 | ported | `tflint_plugin.rs` | `plugins_without_source_get_missing_source_skip` | — |
+| extracts nothing if not from github | 138 | ported | `tflint_plugin.rs` | `non_github_source_skipped` (+ gitlab_source_gets_unsupported_datasource) | — |
+
+---
+
+## `lib/modules/manager/kotlin-script/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kotlin-script/extract.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts dependencies in a generic case | 12 | ported | `kotlin_script.rs` | `extracts_generic_case_fixture_three_deps` (+ extracts_single_dep, extracts_multiple_deps) | — |
+| detects custom repository definitions | 43 | ported | `kotlin_script.rs` | `extracts_custom_repositories` | — |
+| no dependencies | 71 | ported | `kotlin_script.rs` | `no_annotations_returns_empty` | — |
+| skips dependencies with missing parts | 81 | ported | `kotlin_script.rs` | `skips_missing_parts` | — |
+
+---
+
 ## `lib/modules/manager/maven-wrapper/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven-wrapper/extract.spec.ts
@@ -1531,7 +1605,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- html/extract.spec.ts converted to per-test format above -->
 <!-- jenkins/extract.spec.ts converted to per-test format above -->
 <!-- jsonnet-bundler/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/kotlin-script/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/kotlin_script.rs` | 7 | ported |
+<!-- kotlin-script/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/kubernetes/extract.spec.ts` | 14 | `crates/renovate-core/src/extractors/kubernetes.rs` | 11 | partial |
 | `lib/modules/manager/kustomize/extract.spec.ts` | 43 | `crates/renovate-core/src/extractors/kustomize.rs` | 6 | partial |
 | `lib/modules/manager/leiningen/extract.spec.ts` | 4 | `crates/renovate-core/src/extractors/leiningen.rs` | 8 | partial |
@@ -1563,10 +1637,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | `lib/modules/manager/sveltos/extract.spec.ts` | 13 | `crates/renovate-core/src/extractors/sveltos.rs` | 12 | ported |
 | `lib/modules/manager/tekton/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/tekton.rs` | 5 | partial |
 | `lib/modules/manager/terraform/extract.spec.ts` | 18 | `crates/renovate-core/src/extractors/terraform.rs` | 14 | partial |
-| `lib/modules/manager/terragrunt/extract.spec.ts` | 7 | `crates/renovate-core/src/extractors/terragrunt.rs` | 7 | ported |
-| `lib/modules/manager/tflint-plugin/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/tflint_plugin.rs` | 12 | ported |
+<!-- terragrunt/extract.spec.ts converted to per-test format above -->
+<!-- tflint-plugin/extract.spec.ts converted to per-test format above -->
 <!-- travis/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/typst/extract.spec.ts` | 9 | `crates/renovate-core/src/extractors/typst.rs` | 10 | ported |
+<!-- typst/extract.spec.ts converted to per-test format above -->
 | `lib/modules/manager/unity3d/extract.spec.ts` | 0 | `crates/renovate-core/src/extractors/unity3d.rs` | 3 | partial |
 | `lib/modules/manager/velaci/extract.spec.ts` | 6 | `crates/renovate-core/src/extractors/velaci.rs` | 6 | partial |
 | `lib/modules/manager/vendir/extract.spec.ts` | 5 | `crates/renovate-core/src/extractors/vendir.rs` | 5 | partial |

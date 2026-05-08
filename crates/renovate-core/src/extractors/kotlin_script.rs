@@ -89,6 +89,7 @@ mod tests {
         assert_eq!(deps[1].current_value, "4.6.0.201612231935-r");
     }
 
+    // Ported: "detects custom repository definitions" — kotlin-script/extract.spec.ts line 43
     #[test]
     fn extracts_custom_repositories() {
         let content = r#"
@@ -100,6 +101,7 @@ mod tests {
         assert_eq!(deps[0].registry_urls, vec!["https://jitpack.io"]);
     }
 
+    // Ported: "no dependencies" — kotlin-script/extract.spec.ts line 71
     #[test]
     fn no_annotations_returns_empty() {
         assert!(extract("// just a comment\nfun main() {}").is_empty());
