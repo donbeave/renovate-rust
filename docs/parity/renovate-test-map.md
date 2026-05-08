@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 717 / 1161 actionable tests ported (62%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 717 / 1187 actionable tests ported (60%) — updated 2026-05-08
 
-Legacy summary tables below cover ~1187 additional renovate tests (26 files fully ported, 40 partial, 36 pending). Those files will be converted to per-test format incrementally; until they are, the per-test fraction above is the precise tracked subset.
+Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2228,6 +2228,53 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/pip-compile/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/extract.spec.ts
+**Total tests:** 26 | **Ported:** 0 | **Actionable:** 26 | **Status:** pending
+
+The pip-compile manager has no Rust extractor yet — all rows pending
+the implementation of `extractAllPackageFiles()` (multi-file path
+resolver) and the inner `extractPackageFile()` adapter.
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns object for requirements.in | 40 | pending | — | — | pip-compile manager not implemented |
+| returns object for setup.py | 50 | pending | — | — | pip-compile manager not implemented |
+| returns object for pyproject.toml | 60 | pending | — | — | pip-compile manager not implemented |
+| handles different file extensions (it.each) | 93 | pending | — | — | pip-compile manager not implemented |
+
+### `extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| support package file with multiple lock files | 105 | pending | — | — | pip-compile manager not implemented |
+| no lock files in returned package files | 137 | pending | — | — | pip-compile manager not implemented |
+| no constraint files in returned package files | 162 | pending | — | — | pip-compile manager not implemented |
+| return null for malformed files | 183 | pending | — | — | pip-compile manager not implemented |
+| return null for bad paths | 221 | pending | — | — | pip-compile manager not implemented |
+| return for valid paths | 246 | pending | — | — | pip-compile manager not implemented |
+| return sorted package files | 281 | pending | — | — | pip-compile manager not implemented |
+| return sorted package files with constraint in file | 311 | pending | — | — | pip-compile manager not implemented |
+| return sorted package files with constraint in command | 335 | pending | — | — | pip-compile manager not implemented |
+| adds lockedVersion to deps in package file | 360 | pending | — | — | pip-compile manager not implemented |
+| warns if dependency has no locked version | 382 | pending | — | — | pip-compile manager not implemented |
+| adds transitive dependency to deps in package file | 403 | pending | — | — | pip-compile manager not implemented |
+| handles -r reference to another input file | 427 | pending | — | — | pip-compile manager not implemented |
+| handles transitive -r references | 455 | pending | — | — | pip-compile manager not implemented |
+| warns on -r reference to failed file | 491 | pending | — | — | pip-compile manager not implemented |
+| warns on -r reference to requirements file not managed by pip-compile | 516 | pending | — | — | pip-compile manager not implemented |
+| handles duplicate -r dependencies | 539 | pending | — | — | pip-compile manager not implemented |
+| handles -r dependency on lock file with multiple input files | 583 | pending | — | — | pip-compile manager not implemented |
+| handles -r dependency on input file that is also used to generate lock file with multiple inputs | 614 | pending | — | — | pip-compile manager not implemented |
+| handles -r dependency on file with relative path same dir | 645 | pending | — | — | pip-compile manager not implemented |
+| handles -r dependency on file with relative path above | 673 | pending | — | — | pip-compile manager not implemented |
+| handles -r dependency on file with relative path above with path | 701 | pending | — | — | pip-compile manager not implemented |
+
+---
+
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
@@ -2649,7 +2696,7 @@ Status key: `ported` · `pending` · `not-applicable`
 <!-- osgi/extract.spec.ts converted to per-test format above -->
 <!-- pep621/extract.spec.ts converted to per-test format above -->
 <!-- pep723/extract.spec.ts converted to per-test format above -->
-| `lib/modules/manager/pip-compile/extract.spec.ts` | 25 | — | 0 | pending |
+<!-- pip-compile/extract.spec.ts converted to per-test format above -->
 <!-- pip_requirements/extract.spec.ts converted to per-test format above -->
 <!-- pip_setup/extract.spec.ts converted to per-test format above -->
 <!-- pipenv/extract.spec.ts converted to per-test format above -->
