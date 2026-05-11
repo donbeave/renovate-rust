@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1423 / 1650 actionable tests ported (86%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1425 / 1650 actionable tests ported (86%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 8 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 10 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2210,8 +2210,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes patchelf from HEAD | 300 | ported | `nix.rs` | `includes_git_input_from_head` | — |
 | includes ijq from sourcehut without a flake | 358 | ported | `nix.rs` | `includes_sourcehut_input_without_flake` | — |
 | includes home-manager from gitlab | 399 | ported | `nix.rs` | `includes_gitlab_input` | — |
-| test other version | 440 | pending | — | — | Requires older flake.lock version handling |
-| includes nixpkgs with ref and shallow arguments | 452 | pending | — | — | Requires shallow-arg handling |
+| test other version | 440 | ported | `nix.rs` | `other_lockfile_version_returns_empty` | — |
+| includes nixpkgs with ref and shallow arguments | 452 | ported | `nix.rs` | `includes_git_input_with_ref_and_shallow_arguments` | — |
 | includes nixpkgs but using indirect type that cannot be updated | 494 | pending | — | — | Requires indirect-type skip-reason |
 | includes nixpkgs but using indirect type and path locked type that cannot be updated | 524 | pending | — | — | Requires indirect+path-type skip-reason |
 | includes flake from GitHub Enterprise | 553 | pending | — | — | Requires GitHub Enterprise detection |

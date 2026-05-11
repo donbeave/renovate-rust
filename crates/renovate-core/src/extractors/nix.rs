@@ -528,6 +528,66 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "test other version" — nix/extract.spec.ts line 440
+    #[test]
+    fn other_lockfile_version_returns_empty() {
+        let content = r#"{
+  "nodes": {
+    "root": {}
+  },
+  "root": "root",
+  "version": 6
+}"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "includes nixpkgs with ref and shallow arguments" — nix/extract.spec.ts line 452
+    #[test]
+    fn includes_git_input_with_ref_and_shallow_arguments() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1728492678,
+        "narHash": "sha256-9UTxR8eukdg+XZeHgxW5hQA9fIKHsKCdOIUycTryeVw=",
+        "ref": "nixos-unstable",
+        "rev": "5633bcff0c6162b9e4b5f1264264611e950c8ec7",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
+      },
+      "original": {
+        "ref": "nixos-unstable",
+        "shallow": true,
+        "type": "git",
+        "url": "https://github.com/NixOS/nixpkgs"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(
+            deps[0].locked_rev,
+            "5633bcff0c6162b9e4b5f1264264611e950c8ec7"
+        );
+        assert_eq!(deps[0].current_ref.as_deref(), Some("nixos-unstable"));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/NixOS/nixpkgs")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Git);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "returns null when flake.lock has invalid JSON" — nix/extract.spec.ts line 1046
     #[test]
     fn invalid_json_returns_empty() {
@@ -610,11 +670,5 @@ mod tests {
             deps[0].package_name.as_deref(),
             Some("https://github.com/NixOS/nixpkgs")
         );
-    }
-
-    #[test]
-    fn wrong_version_returns_empty() {
-        let content = r#"{"nodes": {"root": {}}, "version": 6}"#;
-        assert!(extract(content).is_empty());
     }
 }
