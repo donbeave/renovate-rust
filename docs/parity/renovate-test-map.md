@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 994 / 1217 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 996 / 1217 actionable tests ported (82%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 56 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 58 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2142,8 +2142,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | extracts multiple files | 1420 | ported | `flux.rs` | `extract_all_package_files_extracts_multiple_files` | — |
-| should handle HelmRepository with type OCI | 1486 | pending | — | — | Requires HelmRepository type=OCI handling |
-| should handle HelmRepository w/o type oci and url starts with oci | 1514 | pending | — | — | Requires HelmRepository url-based OCI inference |
+| should handle HelmRepository with type OCI | 1486 | ported | `flux.rs` | `extract_all_package_files_handles_helm_repository_type_oci` | — |
+| should handle HelmRepository w/o type oci and url starts with oci | 1514 | ported | `flux.rs` | `extract_all_package_files_handles_helm_repository_oci_url_without_type` | — |
 | ignores files that do not exist | 1535 | ported | `flux.rs` | `extract_all_package_files_ignores_missing_files` | — |
 | ignores system manifest files without valid Flux version header | 1542 | ported | `flux.rs` | `extract_all_package_files_ignores_invalid_system_manifest` | — |
 | should pick correct package file when using HelmRepository with chartRef | 1549 | ported | `flux.rs` | `extract_all_package_files_picks_helm_chart_package_file_for_chart_ref` | — |

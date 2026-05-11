@@ -575,8 +575,7 @@ fn extract_helm_release_doc(
                 .iter()
                 .find(|repo| repo.name == source_name && repo.namespace == source_namespace)
         {
-            dep.skip_reason = None;
-            dep.registry_urls.push(repository.url.clone());
+            apply_helm_repository(&mut dep, repository, chart, registry_aliases);
             return Some(dep);
         }
 
@@ -649,8 +648,7 @@ fn extract_helm_chart_doc(
                 .iter()
                 .find(|repo| repo.name == source_name && repo.namespace == source_namespace)
         {
-            dep.skip_reason = None;
-            dep.registry_urls.push(repository.url.clone());
+            apply_helm_repository(&mut dep, repository, chart, registry_aliases);
             return Some(dep);
         }
 
@@ -664,6 +662,24 @@ fn extract_helm_chart_doc(
     }
 
     Some(dep)
+}
+
+fn apply_helm_repository(
+    dep: &mut FluxHelmReleaseDep,
+    repository: &HelmRepository,
+    chart: &str,
+    registry_aliases: &[(&str, &str)],
+) {
+    dep.skip_reason = None;
+    if let Some(oci_url) = repository.url.strip_prefix("oci://") {
+        dep.datasource = Some(DOCKER_DATASOURCE);
+        dep.package_name = Some(apply_registry_alias(
+            &format!("{}/{}", oci_url.trim_end_matches('/'), chart),
+            registry_aliases,
+        ));
+    } else {
+        dep.registry_urls.push(repository.url.clone());
+    }
 }
 
 fn yaml_scalars(doc: &str) -> Vec<(Vec<String>, String)> {
@@ -1596,6 +1612,61 @@ spec:
         assert!(extract_all_package_files(&files).is_empty());
     }
 
+    // Ported: "should handle HelmRepository with type OCI" — flux/extract.spec.ts line 1486
+    #[test]
+    fn extract_all_package_files_handles_helm_repository_type_oci() {
+        let files = [
+            (
+                "lib/modules/manager/flux/__fixtures__/helmOCISource.yaml",
+                Some(HELM_OCI_REPOSITORY),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml",
+                Some(HELM_OCI_RELEASE),
+            ),
+        ];
+        let result = extract_all_package_files_with_registry_aliases(
+            &files,
+            &[("ghcr.io", "ghcr.proxy.test/some/path")],
+        );
+        assert_eq!(result.len(), 1);
+        assert_eq!(
+            result[0].package_file,
+            "lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml"
+        );
+        assert!(matches!(&result[0].deps[0], FluxDep::Helm(dep)
+                if dep.datasource == Some(DOCKER_DATASOURCE)
+                    && dep.dep_name == "actions-runner-controller-charts/gha-runner-scale-set"
+                    && dep.current_value.as_deref() == Some("0.4.0")
+                    && dep.package_name.as_deref() == Some("ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set")));
+    }
+
+    // Ported: "should handle HelmRepository w/o type oci and url starts with oci" — flux/extract.spec.ts line 1514
+    #[test]
+    fn extract_all_package_files_handles_helm_repository_oci_url_without_type() {
+        let files = [
+            (
+                "lib/modules/manager/flux/__fixtures__/helmOCISource2.yaml",
+                Some(HELM_OCI_REPOSITORY_WITHOUT_TYPE),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml",
+                Some(HELM_OCI_RELEASE_WITHOUT_TYPE),
+            ),
+        ];
+        let result = extract_all_package_files(&files);
+        assert_eq!(result.len(), 1);
+        assert_eq!(
+            result[0].package_file,
+            "lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml"
+        );
+        assert!(matches!(&result[0].deps[0], FluxDep::Helm(dep)
+                if dep.datasource == Some(DOCKER_DATASOURCE)
+                    && dep.dep_name == "kyverno"
+                    && dep.current_value.as_deref() == Some("2.6.0")
+                    && dep.package_name.as_deref() == Some("ghcr.io/kyverno/charts/kyverno")));
+    }
+
     // Ported: "should pick correct package file when using HelmRepository with chartRef" — flux/extract.spec.ts line 1549
     #[test]
     fn extract_all_package_files_picks_helm_chart_package_file_for_chart_ref() {
@@ -1666,6 +1737,71 @@ metadata:
 spec:
   interval: 1h0m0s
   url: https://bitnami-labs.github.io/sealed-secrets
+"#;
+
+    const HELM_OCI_REPOSITORY: &str = r#"
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: actions-runner-controller
+  namespace: flux-system
+spec:
+  type: oci
+  interval: 30m
+  url: oci://ghcr.io/actions
+  timeout: 3m
+"#;
+
+    const HELM_OCI_RELEASE: &str = r#"
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: arc-assets
+  namespace: dev
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: actions-runner-controller-charts/gha-runner-scale-set
+      version: 0.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: actions-runner-controller
+        namespace: flux-system
+      interval: 30m
+"#;
+
+    const HELM_OCI_REPOSITORY_WITHOUT_TYPE: &str = r#"
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: kyverno
+  namespace: flux-system
+spec:
+  interval: 6h
+  url: oci://ghcr.io/kyverno/charts
+"#;
+
+    const HELM_OCI_RELEASE_WITHOUT_TYPE: &str = r#"
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kyverno
+  namespace: flux-system
+spec:
+  interval: 6h
+  releaseName: kyverno
+  targetNamespace: kyverno
+  install:
+    createNamespace: true
+  chart:
+    spec:
+      chart: kyverno
+      version: 2.6.0
+      interval: 6h
+      sourceRef:
+        kind: HelmRepository
+        name: kyverno
 "#;
 
     const HELM_CHART: &str = r#"
