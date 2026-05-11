@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 885 / 1216 actionable tests ported (73%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 888 / 1216 actionable tests ported (73%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -251,7 +251,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/droneci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/droneci/extract.spec.ts
-**Total tests:** 5 | **Ported:** 2 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -264,9 +264,9 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts image and replaces registry | 19 | pending | — | — | registryAliases not yet implemented |
-| extracts image but no replacement | 42 | pending | — | — | registryAliases not yet implemented |
-| extracts image and no double replacement | 65 | pending | — | — | registryAliases not yet implemented |
+| extracts image and replaces registry | 19 | ported | `droneci.rs` | `extracts_image_and_replaces_registry` | — |
+| extracts image but no replacement | 42 | ported | `droneci.rs` | `extracts_image_without_registry_replacement` | — |
+| extracts image and no double replacement | 65 | ported | `droneci.rs` | `extracts_image_without_double_registry_replacement` | — |
 
 ---
 
