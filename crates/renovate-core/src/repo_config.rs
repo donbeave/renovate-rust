@@ -3663,7 +3663,7 @@ impl RepoConfig {
     /// Returns a default `RepoConfig` (all defaults) when the content is
     /// empty or unparseable.
     pub fn parse(content: &str) -> Self {
-        #[derive(Deserialize)]
+        #[derive(Clone, Deserialize)]
         struct RawPackageRule {
             #[serde(rename = "matchPackageNames", default)]
             match_package_names: Vec<String>,
@@ -3817,10 +3817,13 @@ impl RepoConfig {
             /// `force: { enabled: bool }` — force-override for the enabled state.
             /// Mirrors Renovate's `force` property in packageRules (used by vulnerability alerts).
             force: Option<ForceConfig>,
+            /// Deprecated nested packageRules; flattened with inherited parent matchers/options.
+            #[serde(rename = "packageRules", default)]
+            package_rules: Vec<RawPackageRule>,
         }
 
         /// Helper for `force: { enabled: bool }` in packageRules.
-        #[derive(Deserialize)]
+        #[derive(Clone, Deserialize)]
         struct ForceConfig {
             enabled: Option<bool>,
         }
@@ -4289,6 +4292,35 @@ impl RepoConfig {
             }
         }
 
+        fn flatten_raw_package_rule(rule: RawPackageRule) -> Vec<RawPackageRule> {
+            if rule.package_rules.is_empty() {
+                return vec![rule];
+            }
+
+            let parent = rule;
+            parent
+                .package_rules
+                .into_iter()
+                .map(|mut child| {
+                    let mut inherited_names = parent
+                        .exclude_package_names
+                        .iter()
+                        .map(|name| format!("!{name}"))
+                        .collect::<Vec<_>>();
+                    inherited_names.extend(child.match_package_names);
+                    child.match_package_names = inherited_names;
+
+                    if child.automerge.is_none() {
+                        child.automerge = parent.automerge;
+                    }
+                    if child.enabled.is_none() {
+                        child.enabled = parent.enabled;
+                    }
+                    child
+                })
+                .collect()
+        }
+
         let package_rules: Vec<PackageRule> = raw
             .package_rules
             .into_iter()
@@ -4296,6 +4328,7 @@ impl RepoConfig {
             .chain(raw.packages)
             // Deprecated: `pathRules` was an alias for `packageRules` containing path-based rules.
             .chain(raw.path_rules)
+            .flat_map(flatten_raw_package_rule)
             .map(|r| {
                 // Resolve packages:* (and other recognized) presets from the
                 // rule's own `extends` list and merge their matchers in.
@@ -10617,6 +10650,56 @@ mod rule_effects_tests {
         assert_eq!(c.package_rules.len(), 2);
         assert_eq!(c.package_rules[0].match_file_names, vec!["matchPaths"]);
         assert_eq!(c.package_rules[1].match_file_names, vec!["matchPaths"]);
+    }
+
+    // Ported: "migrates nested packageRules" — config/migration.spec.ts line 624
+    #[test]
+    fn nested_package_rules_are_flattened_with_parent_fields() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [
+                    {
+                        "matchDepTypes": ["devDependencies"],
+                        "enabled": false
+                    },
+                    {
+                        "automerge": true,
+                        "excludePackageNames": ["@types/react-table"],
+                        "packageRules": [
+                            {
+                                "groupName": "definitelyTyped",
+                                "matchPackageNames": ["@types/**"]
+                            },
+                            {
+                                "matchDepTypes": ["dependencies"],
+                                "automerge": false
+                            }
+                        ]
+                    }
+                ]
+            }"#,
+        );
+
+        assert_eq!(c.package_rules.len(), 3);
+        assert_eq!(c.package_rules[0].match_dep_types, vec!["devDependencies"]);
+        assert_eq!(c.package_rules[0].enabled, Some(false));
+
+        assert_eq!(
+            c.package_rules[1].match_package_names,
+            vec!["!@types/react-table", "@types/**"]
+        );
+        assert_eq!(
+            c.package_rules[1].group_name.as_deref(),
+            Some("definitelyTyped")
+        );
+        assert_eq!(c.package_rules[1].automerge, Some(true));
+
+        assert_eq!(
+            c.package_rules[2].match_package_names,
+            vec!["!@types/react-table"]
+        );
+        assert_eq!(c.package_rules[2].match_dep_types, vec!["dependencies"]);
+        assert_eq!(c.package_rules[2].automerge, Some(false));
     }
 
     #[test]
