@@ -4022,6 +4022,9 @@ impl RepoConfig {
             dep_name_template: Option<String>,
             #[serde(rename = "packageNameTemplate")]
             package_name_template: Option<String>,
+            /// Deprecated: lookupNameTemplate -> packageNameTemplate.
+            #[serde(rename = "lookupNameTemplate")]
+            lookup_name_template: Option<String>,
             #[serde(rename = "versioningTemplate")]
             versioning_template: Option<String>,
             #[serde(rename = "registryUrlTemplate")]
@@ -4831,11 +4834,15 @@ impl RepoConfig {
                     CustomManager {
                         custom_type: cm.custom_type,
                         file_patterns,
-                        match_strings: cm.match_strings,
+                        match_strings: cm
+                            .match_strings
+                            .into_iter()
+                            .map(|s| s.replace("(?<lookupName>", "(?<packageName>"))
+                            .collect(),
                         match_strings_strategy: cm.match_strings_strategy,
                         datasource_template: cm.datasource_template,
                         dep_name_template: cm.dep_name_template,
-                        package_name_template: cm.package_name_template,
+                        package_name_template: cm.package_name_template.or(cm.lookup_name_template),
                         versioning_template: cm.versioning_template,
                         registry_url_template: cm.registry_url_template,
                         extract_version_template: cm.extract_version_template,
@@ -12253,6 +12260,47 @@ mod rule_effects_tests {
             c.custom_managers[0].file_patterns,
             vec!["^Makefile$"],
             "legacy fileMatch must be merged into file_patterns"
+        );
+    }
+
+    // Ported: "migrates customManagers" — config/migration.spec.ts line 671
+    #[test]
+    fn custom_manager_deprecated_lookup_name_fields_migrate() {
+        let c = RepoConfig::parse(
+            r##"{
+            "customManagers": [
+                {
+                    "customType": "regex",
+                    "fileMatch": ["(^|/|\\.)Dockerfile$", "(^|/)Dockerfile[^/]*$"],
+                    "matchStrings": [
+                        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION=\"?(?<currentValue>.+?)\"?\\s"
+                    ]
+                },
+                {
+                    "fileMatch": ["(^|/|\\.)Dockerfile$", "(^|/)Dockerfile[^/]*$"],
+                    "matchStrings": [
+                        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION=\"?(?<currentValue>.+?)\"?\\s"
+                    ],
+                    "lookupNameTemplate": "{{{holder}}}"
+                }
+            ]
+        }"##,
+        );
+
+        assert_eq!(c.custom_managers.len(), 2);
+        assert_eq!(c.custom_managers[0].custom_type, "regex");
+        assert_eq!(
+            c.custom_managers[0].file_patterns,
+            vec!["(^|/|\\.)Dockerfile$", "(^|/)Dockerfile[^/]*$"]
+        );
+        assert!(
+            c.custom_managers[0].match_strings[0].contains("(?<packageName>"),
+            "lookupName capture must migrate to packageName"
+        );
+        assert_eq!(c.custom_managers[1].custom_type, "regex");
+        assert_eq!(
+            c.custom_managers[1].package_name_template.as_deref(),
+            Some("{{{holder}}}")
         );
     }
 
