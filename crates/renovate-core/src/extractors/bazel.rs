@@ -93,14 +93,38 @@ static GL_ARCHIVE_RE: LazyLock<Regex> =
 /// Extract Bazel dependencies from a WORKSPACE or .bzl file.
 pub fn extract(content: &str) -> Vec<BazelDep> {
     let content = strip_comment_lines(content);
-    let mut deps = Vec::new();
-    extract_rule(&content, "http_archive(", parse_http_archive, &mut deps);
-    extract_maybe_rule(&content, "http_archive", parse_http_archive, &mut deps);
-    extract_rule(&content, "container_pull(", parse_container_pull, &mut deps);
-    extract_rule(&content, "oci_pull(", parse_oci_pull, &mut deps);
-    extract_rule(&content, "go_repository(", parse_go_repository, &mut deps);
-    extract_maybe_rule(&content, "go_repository", parse_go_repository, &mut deps);
-    deps
+    let mut blocks = Vec::new();
+
+    collect_rule_blocks(&content, "http_archive(", parse_http_archive, &mut blocks);
+    collect_rule_blocks(&content, "http_file(", parse_http_archive, &mut blocks);
+    collect_rule_blocks(
+        &content,
+        "container_pull(",
+        parse_container_pull,
+        &mut blocks,
+    );
+    collect_rule_blocks(&content, "oci_pull(", parse_oci_pull, &mut blocks);
+    collect_rule_blocks(&content, "go_repository(", parse_go_repository, &mut blocks);
+    collect_rule_blocks(
+        &content,
+        "git_repository(",
+        parse_git_repository,
+        &mut blocks,
+    );
+    collect_rule_blocks(
+        &content,
+        "new_git_repository(",
+        parse_git_repository,
+        &mut blocks,
+    );
+    collect_maybe_rule_blocks(&content, "http_archive", parse_http_archive, &mut blocks);
+    collect_maybe_rule_blocks(&content, "go_repository", parse_go_repository, &mut blocks);
+
+    blocks.sort_by_key(|(pos, _, _)| *pos);
+    blocks
+        .into_iter()
+        .filter_map(|(_, block, parser)| parser(block))
+        .collect()
 }
 
 fn strip_comment_lines(content: &str) -> String {
@@ -111,30 +135,39 @@ fn strip_comment_lines(content: &str) -> String {
         .join("\n")
 }
 
-fn extract_rule(
-    content: &str,
+type RuleParser = fn(&str) -> Option<BazelDep>;
+type RuleBlock<'a> = (usize, &'a str, RuleParser);
+
+fn collect_rule_blocks<'a>(
+    content: &'a str,
     prefix: &str,
-    parser: fn(&str) -> Option<BazelDep>,
-    out: &mut Vec<BazelDep>,
+    parser: RuleParser,
+    out: &mut Vec<RuleBlock<'a>>,
 ) {
     let mut search_pos = 0;
     while let Some(start) = content[search_pos..].find(prefix) {
         let abs_start = search_pos + start;
+        if content[..abs_start]
+            .chars()
+            .next_back()
+            .is_some_and(|ch| ch.is_ascii_alphanumeric() || ch == '_')
+        {
+            search_pos = abs_start + prefix.len();
+            continue;
+        }
         let Some(block) = extract_block(&content[abs_start..]) else {
             break;
         };
-        if let Some(dep) = parser(block) {
-            out.push(dep);
-        }
+        out.push((abs_start, block, parser));
         search_pos = abs_start + block.len().max(1);
     }
 }
 
-fn extract_maybe_rule(
-    content: &str,
+fn collect_maybe_rule_blocks<'a>(
+    content: &'a str,
     rule_name: &str,
-    parser: fn(&str) -> Option<BazelDep>,
-    out: &mut Vec<BazelDep>,
+    parser: RuleParser,
+    out: &mut Vec<RuleBlock<'a>>,
 ) {
     let mut search_pos = 0;
     while let Some(start) = content[search_pos..].find("maybe(") {
@@ -142,10 +175,8 @@ fn extract_maybe_rule(
         let Some(block) = extract_block(&content[abs_start..]) else {
             break;
         };
-        if maybe_wraps_rule(block, rule_name)
-            && let Some(dep) = parser(block)
-        {
-            out.push(dep);
+        if maybe_wraps_rule(block, rule_name) {
+            out.push((abs_start, block, parser));
         }
         search_pos = abs_start + block.len().max(1);
     }
@@ -240,7 +271,8 @@ fn parse_go_repository(block: &str) -> Option<BazelDep> {
     let dep_name = extract_field(block, "name").unwrap_or("unknown").to_owned();
     let importpath = extract_field(block, "importpath")?.to_owned();
     let remote = extract_field(block, "remote");
-    let commit = extract_field(block, "commit").unwrap_or("").to_owned();
+    let commit = extract_field(block, "commit").map(str::to_owned);
+    let tag = extract_field(block, "tag").unwrap_or("").to_owned();
 
     let package_name = match remote {
         Some(remote) => normalize_go_remote(remote),
@@ -251,7 +283,7 @@ fn parse_go_repository(block: &str) -> Option<BazelDep> {
         return Some(BazelDep {
             dep_name,
             current_value: String::new(),
-            current_digest: Some(commit),
+            current_digest: commit,
             source: BazelSource::GoRepository {
                 importpath,
                 package_name: String::new(),
@@ -262,8 +294,8 @@ fn parse_go_repository(block: &str) -> Option<BazelDep> {
 
     Some(BazelDep {
         dep_name,
-        current_value: String::new(),
-        current_digest: Some(commit),
+        current_value: tag,
+        current_digest: commit,
         source: BazelSource::GoRepository {
             importpath,
             package_name,
@@ -278,6 +310,34 @@ fn normalize_go_remote(remote: &str) -> Option<String> {
         return None;
     }
     Some(format!("github.com/{}", path.trim_end_matches(".git")))
+}
+
+fn parse_git_repository(block: &str) -> Option<BazelDep> {
+    let dep_name = extract_field(block, "name").unwrap_or("unknown").to_owned();
+    let remote = extract_field(block, "remote")?;
+    let repo = normalize_github_remote(remote)?;
+    let commit = extract_field(block, "commit").map(str::to_owned);
+    let tag = extract_field(block, "tag").unwrap_or("").to_owned();
+
+    let source = if commit.is_some() {
+        BazelSource::GithubTags { repo }
+    } else {
+        BazelSource::GithubReleases { repo }
+    };
+
+    Some(BazelDep {
+        dep_name,
+        current_value: tag,
+        current_digest: commit,
+        source,
+        skip_reason: None,
+    })
+}
+
+fn normalize_github_remote(remote: &str) -> Option<String> {
+    remote
+        .strip_prefix("https://github.com/")
+        .map(|path| path.trim_end_matches(".git").to_owned())
 }
 
 fn parse_http_archive(block: &str) -> Option<BazelDep> {
@@ -716,6 +776,76 @@ go_repository(
                 Some(BazelSkipReason::UnsupportedRemote)
             );
         }
+    }
+
+    // Ported: "extracts multiple types of dependencies" — bazel/extract.spec.ts line 25
+    #[test]
+    fn workspace1_multiple_dependency_types() {
+        let content = r#"
+go_repository(name = "com_github_bitly_go-nsq", importpath = "github.com/bitly/go-nsq", tag = "v1.0.5")
+go_repository(name = "com_github_google_uuid", importpath = "github.com/google/uuid", commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e")
+go_repository(name = "com_gopkgin_mgo_v2", importpath = "gopkg.in/mgo.v2", tag = "v2")
+git_repository(name = "build_bazel_rules_nodejs", remote = "https://github.com/bazelbuild/rules_nodejs.git", tag = "0.3.1")
+new_git_repository(name = "build_bazel_rules_typescript", remote = "https://github.com/bazelbuild/rules_typescript.git", tag = "0.6.1")
+http_archive(name="distroless", urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"])
+http_archive(name = "bazel_toolchains", urls = ["https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz", "https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz"])
+http_archive(name = "rules_nodejs", urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"])
+git_repository(name = "io_bazel_rules_sass", remote = "https://github.com/bazelbuild/rules_sass.git", tag = "0.0.3")
+git_repository(name = "com_github_bazelbuild_buildtools", remote = "https://github.com/bazelbuild/buildtools.git", commit = "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71")
+http_archive(name = "io_bazel_rules_go", url = "https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz")
+http_archive(name = "bazel_skylib", urls = ["https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz", "https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz"])
+http_archive(name="distroless", urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"])
+maybe(http_archive, name = "io_bazel_rules_go", url = "https://github.com/bazelbuild/rules_go/releases/download/v0.29.0/rules_go-v0.29.0.zip")
+maybe(http_archive, name = "bazel_gazelle", urls = ["https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz", "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.24.0/bazel-gazelle-v0.24.0.tar.gz"])
+maybe(go_repository, name = "com_github_pkg_errors", commit = "816c9085562cd7ee03e7f8188a1cfd942858cded", importpath = "github.com/pkg/errors")
+container_pull(name = "py3_image_base", digest = "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7", registry = "gcr.io", repository = "distroless/python3-debian10", tag = "latest")
+http_file(name="distroless", urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"])
+"#;
+
+        let deps = extract(content);
+        assert_eq!(deps.len(), 18);
+        assert_eq!(deps[0].dep_name, "com_github_bitly_go-nsq");
+        assert_eq!(deps[0].current_value, "v1.0.5");
+        assert_eq!(
+            deps[0].source,
+            BazelSource::GoRepository {
+                importpath: "github.com/bitly/go-nsq".to_owned(),
+                package_name: "github.com/bitly/go-nsq".to_owned(),
+            }
+        );
+        assert_eq!(deps[3].dep_name, "build_bazel_rules_nodejs");
+        assert_eq!(deps[3].current_value, "0.3.1");
+        assert_eq!(
+            deps[3].source,
+            BazelSource::GithubReleases {
+                repo: "bazelbuild/rules_nodejs".to_owned(),
+            }
+        );
+        assert_eq!(deps[9].dep_name, "com_github_bazelbuild_buildtools");
+        assert_eq!(
+            deps[9].current_digest.as_deref(),
+            Some("b3b620e8bcff18ed3378cd3f35ebeb7016d71f71")
+        );
+        assert_eq!(
+            deps[15].source,
+            BazelSource::GoRepository {
+                importpath: "github.com/pkg/errors".to_owned(),
+                package_name: "github.com/pkg/errors".to_owned(),
+            }
+        );
+        assert_eq!(deps[16].dep_name, "py3_image_base");
+        assert_eq!(
+            deps[16].source,
+            BazelSource::ContainerPull {
+                package_name: "distroless/python3-debian10".to_owned(),
+                registry_url: "gcr.io".to_owned(),
+            }
+        );
+        assert_eq!(deps[17].dep_name, "distroless");
+        assert_eq!(
+            deps[17].current_digest.as_deref(),
+            Some("446923c3756ceeaa75888f52fcbdd48bb314fbf8")
+        );
     }
 
     // Ported: "extracts dependencies from *.bzl files" — bazel/extract.spec.ts line 47
