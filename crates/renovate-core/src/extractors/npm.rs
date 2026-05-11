@@ -205,9 +205,9 @@ struct PackageJson {
     /// yarn `resolutions` block — flat `{ "pkg": "version" }`.
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
     resolutions: BTreeMap<String, DependencySpec>,
-    /// npm 8+ `overrides` block — flat `{ "pkg": "version" }`.
-    #[serde(default, deserialize_with = "deserialize_dependency_section")]
-    overrides: BTreeMap<String, DependencySpec>,
+    /// npm 8+ `overrides` block.
+    #[serde(default)]
+    overrides: serde_json::Value,
     /// package runtime/tool constraints.
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
     engines: BTreeMap<String, DependencySpec>,
@@ -266,7 +266,6 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
         (&pkg.peer_dependencies, NpmDepType::Peer),
         (&pkg.optional_dependencies, NpmDepType::Optional),
         (&pkg.resolutions, NpmDepType::Resolutions),
-        (&pkg.overrides, NpmDepType::Overrides),
         (&pkg.engines, NpmDepType::Engines),
         (&pkg.volta, NpmDepType::Volta),
     ] {
@@ -278,6 +277,7 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
             ));
         }
     }
+    collect_overrides(&pkg.overrides, &mut out);
     if let Some((name, version)) = parse_package_manager(pkg.package_manager.as_deref()) {
         out.push(classify(
             name,
@@ -287,6 +287,35 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
     }
 
     Ok(out)
+}
+
+fn collect_overrides(value: &serde_json::Value, out: &mut Vec<NpmExtractedDep>) {
+    let Some(overrides) = value.as_object() else {
+        return;
+    };
+
+    for (name, value) in overrides {
+        collect_override_entry(name, value, out);
+    }
+}
+
+fn collect_override_entry(name: &str, value: &serde_json::Value, out: &mut Vec<NpmExtractedDep>) {
+    if let Some(version) = value.as_str() {
+        out.push(classify(
+            name.to_owned(),
+            &DependencySpec::Version(version.to_owned()),
+            NpmDepType::Overrides,
+        ));
+        return;
+    }
+
+    let Some(children) = value.as_object() else {
+        return;
+    };
+    for (child_name, child_value) in children {
+        let dep_name = if child_name == "." { name } else { child_name };
+        collect_override_entry(dep_name, child_value, out);
+    }
 }
 
 fn parse_package_manager(package_manager: Option<&str>) -> Option<(String, String)> {
@@ -1907,19 +1936,56 @@ chalk@^2.4.1:
         assert!(resolutions.iter().any(|d| d.name == "lodash"));
     }
 
+    // Ported: "extracts dependencies from overrides" — npm/extract/index.spec.ts line 957
     #[test]
     fn extracts_npm_overrides() {
         let json = r#"{
-          "overrides": { "semver": "^7.5.2", "tough-cookie": ">=4.1.3" }
+          "devDependencies": {
+            "@types/react": "18.0.5"
+          },
+          "overrides": {
+            "node": "8.9.2",
+            "@types/react": "18.0.5",
+            "baz": {
+              "node": "8.9.2",
+              "bar": {
+                "foo": "1.0.0"
+              }
+            },
+            "foo2": {
+              ".": "1.0.0",
+              "bar2": "1.0.0"
+            },
+            "emptyObject": {}
+          }
         }"#;
         let deps = extract_ok(json);
+        assert!(deps.iter().any(|d| {
+            d.name == "@types/react" && d.current_value == "18.0.5" && d.dep_type == NpmDepType::Dev
+        }));
+
         let overrides: Vec<_> = deps
             .iter()
             .filter(|d| d.dep_type == NpmDepType::Overrides)
             .collect();
-        assert_eq!(overrides.len(), 2);
-        let semver = overrides.iter().find(|d| d.name == "semver").unwrap();
-        assert_eq!(semver.current_value, "^7.5.2");
-        assert!(semver.skip_reason.is_none());
+        assert_eq!(overrides.len(), 6);
+        for (name, current_value) in [
+            ("node", "8.9.2"),
+            ("@types/react", "18.0.5"),
+            ("foo", "1.0.0"),
+            ("foo2", "1.0.0"),
+            ("bar2", "1.0.0"),
+        ] {
+            assert!(overrides.iter().any(|dep| {
+                dep.name == name && dep.current_value == current_value && dep.skip_reason.is_none()
+            }));
+        }
+        assert_eq!(
+            overrides
+                .iter()
+                .filter(|dep| dep.name == "node" && dep.current_value == "8.9.2")
+                .count(),
+            2
+        );
     }
 }
