@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1483 / 1657 actionable tests ported (89%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1485 / 1657 actionable tests ported (90%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2554,7 +2554,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
-**Total tests:** 26 | **Ported:** 24 | **Actionable:** 26 | **Status:** partial
+**Total tests:** 26 | **Ported:** 26 | **Actionable:** 26 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2582,8 +2582,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extract sbt version | 469 | ported | `sbt.rs` | `build_properties_extracts_sbt_version` | — |
 | extract sbt version if the file contains other properties | 492 | ported | `sbt.rs` | `build_properties_with_other_props_extracts_sbt_version` | — |
 | ignores build.properties file if does not contain sbt version | 516 | ported | `sbt.rs` | `build_properties_without_sbt_version_returns_none` | — |
-| extracts proxy repositories | 529 | pending | — | — | Requires repositories file parsing |
-| should include default registryUrls if no repositories file is provided | 607 | pending | — | — | Requires registryUrls default plumbing |
+| extracts proxy repositories | 529 | ported | `sbt.rs` | `extract_all_package_files_extracts_proxy_repositories` | — |
+| should include default registryUrls if no repositories file is provided | 607 | ported | `sbt.rs` | `extract_all_package_files_uses_default_registry_urls_without_repositories_file` | — |
 | should return empty packagefiles is no content is provided | 637 | ported | `sbt.rs` | `extract_all_package_files_empty_content_returns_empty` | — |
 | extracts build properties correctly | 643 | ported | `sbt.rs` | `extract_all_package_files_extracts_build_properties` | — |
 

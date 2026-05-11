@@ -69,6 +69,7 @@ pub struct SbtResolvedDep {
     pub current_value: Option<String>,
     pub dep_type: SbtDepType,
     pub shared_variable_name: Option<String>,
+    pub registry_urls: Vec<String>,
 }
 
 /// Extracted `build.sbt`/Scala package-file data.
@@ -135,6 +136,13 @@ static SETTING_ASSIGN: LazyLock<Regex> = LazyLock::new(|| {
 static SBT_VERSION: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"sbt\.version\s*=\s*(?P<ver>\d+\.\d+\.\d+)").unwrap());
 
+/// Matches SBT resolver declarations such as `"Repo" at "https://repo/"`.
+static RESOLVER_URL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#""[^"]+"\s+at\s+"(?P<url>[^"]+)""#).unwrap());
+
+const DEFAULT_MAVEN_REGISTRY: &str = "https://repo.maven.apache.org/maven2";
+const DEFAULT_SBT_PLUGIN_REGISTRY: &str = "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases";
+
 /// Extract SBT dependencies from a `.sbt` or `project/*.scala` file.
 pub fn extract(content: &str) -> Vec<SbtDep> {
     let mut out = Vec::new();
@@ -194,6 +202,7 @@ pub fn extract_package_file(content: &str) -> Option<SbtPackageFile> {
             current_value: Some(version.clone()),
             dep_type: SbtDepType::Library,
             shared_variable_name: None,
+            registry_urls: Vec::new(),
         });
     }
 
@@ -231,6 +240,7 @@ pub fn extract_package_file(content: &str) -> Option<SbtPackageFile> {
                     SbtDepType::Library
                 },
                 shared_variable_name,
+                registry_urls: Vec::new(),
             });
         }
     }
@@ -249,7 +259,18 @@ pub fn extract_package_file(content: &str) -> Option<SbtPackageFile> {
 /// Extract all SBT package files from already-read path/content pairs.
 pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<SbtPackageFile> {
     let mut out = Vec::new();
+    let repository_registries = files
+        .iter()
+        .find(|(path, _)| *path == "repositories")
+        .map(|(_, content)| extract_repositories(content));
+    let has_repositories_file = repository_registries.is_some();
+    let repository_registries = repository_registries.unwrap_or_default();
+
     for (path, content) in files {
+        if *path == "repositories" {
+            continue;
+        }
+
         if path.ends_with("build.properties") {
             if let Some(dep) = extract_build_properties(content) {
                 out.push(SbtPackageFile {
@@ -259,13 +280,19 @@ pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<SbtPackageFile> 
                         current_value: Some(dep.current_value),
                         dep_type: SbtDepType::SbtVersion,
                         shared_variable_name: None,
+                        registry_urls: Vec::new(),
                     }],
                     package_file_version: None,
                     scala_version: None,
                 });
             }
         } else if let Some(package_file) = extract_package_file(content) {
-            out.push(package_file);
+            out.push(apply_registry_urls(
+                package_file,
+                content,
+                has_repositories_file,
+                &repository_registries,
+            ));
         }
     }
     out
@@ -317,6 +344,79 @@ fn collect_string_variables(content: &str) -> std::collections::HashMap<String, 
     }
 
     variables
+}
+
+fn extract_repositories(content: &str) -> Vec<String> {
+    let mut urls = Vec::new();
+    let mut in_repositories = false;
+
+    for raw in content.lines() {
+        let line = raw.trim();
+        if line.is_empty() {
+            continue;
+        }
+        if line.starts_with('[') {
+            in_repositories = line == "[repositories]";
+            continue;
+        }
+        if !in_repositories {
+            continue;
+        }
+        if line == "maven-central" {
+            push_unique(&mut urls, DEFAULT_MAVEN_REGISTRY);
+        } else if let Some((_, value)) = line.split_once(':') {
+            let url = value.split(',').next().unwrap_or(value).trim();
+            if !url.is_empty() {
+                push_unique(&mut urls, url);
+            }
+        }
+    }
+
+    urls
+}
+
+fn extract_resolver_urls(content: &str) -> Vec<String> {
+    let mut urls = Vec::new();
+    for cap in RESOLVER_URL.captures_iter(content) {
+        push_unique(&mut urls, &cap["url"]);
+    }
+    urls
+}
+
+fn apply_registry_urls(
+    mut package_file: SbtPackageFile,
+    content: &str,
+    has_repositories_file: bool,
+    repository_registries: &[String],
+) -> SbtPackageFile {
+    let resolver_urls = extract_resolver_urls(content);
+    for dep in &mut package_file.deps {
+        if dep.dep_type == SbtDepType::SbtVersion {
+            continue;
+        }
+
+        if has_repositories_file {
+            dep.registry_urls = repository_registries.to_vec();
+            continue;
+        }
+
+        let mut urls = Vec::new();
+        if dep.dep_type == SbtDepType::Plugin {
+            push_unique(&mut urls, DEFAULT_SBT_PLUGIN_REGISTRY);
+        }
+        push_unique(&mut urls, DEFAULT_MAVEN_REGISTRY);
+        for url in &resolver_urls {
+            push_unique(&mut urls, url);
+        }
+        dep.registry_urls = urls;
+    }
+    package_file
+}
+
+fn push_unique(urls: &mut Vec<String>, value: &str) {
+    if !urls.iter().any(|url| url == value) {
+        urls.push(value.to_owned());
+    }
 }
 
 fn resolve_token(
@@ -937,5 +1037,80 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         assert_eq!(dep.dep_name, "sbt/sbt");
         assert_eq!(dep.package_name, "sbt/sbt");
         assert_eq!(dep.current_value.as_deref(), Some("1.6.0"));
+    }
+
+    // Ported: "extracts proxy repositories" — sbt/extract.spec.ts line 529
+    #[test]
+    fn extract_all_package_files_extracts_proxy_repositories() {
+        let repositories = r#"
+[repositories]
+local
+my-maven-repo: http://example.org/repo
+my-ivy-repo: https://example.org/ivy-repo/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
+maven-central
+"#;
+        let build = r#"
+scalaVersion := "2.13.0-RC5"
+libraryDependencies += "com.example" %% "foo" % "0.7.1"
+"#;
+        let packages =
+            extract_all_package_files(&[("repositories", repositories), ("build.sbt", build)]);
+        assert_eq!(packages.len(), 1);
+        let expected = vec![
+            "http://example.org/repo".to_owned(),
+            "https://example.org/ivy-repo/".to_owned(),
+            DEFAULT_MAVEN_REGISTRY.to_owned(),
+        ];
+        for dep in &packages[0].deps {
+            assert_eq!(dep.registry_urls, expected, "{}", dep.package_name);
+        }
+    }
+
+    // Ported: "should include default registryUrls if no repositories file is provided" — sbt/extract.spec.ts line 607
+    #[test]
+    fn extract_all_package_files_uses_default_registry_urls_without_repositories_file() {
+        let build = r#"
+scalaVersion := "2.12.10"
+libraryDependencies += "org.example" %% "bar" % "0.0.2"
+resolvers += "Repo #1" at "https://example.com/repos/1/"
+resolvers ++= Seq(
+  "Repo #2" at "https://example.com/repos/2/",
+  "Repo #3" at "https://example.com/repos/3/"
+)
+addSbtPlugin("org.example" % "waldo" % "0.0.9")
+"#;
+        let packages = extract_all_package_files(&[("build.sbt", build)]);
+        assert_eq!(packages.len(), 1);
+
+        let plugin = packages[0]
+            .deps
+            .iter()
+            .find(|dep| dep.dep_type == SbtDepType::Plugin)
+            .unwrap();
+        assert_eq!(
+            plugin.registry_urls,
+            vec![
+                DEFAULT_SBT_PLUGIN_REGISTRY.to_owned(),
+                DEFAULT_MAVEN_REGISTRY.to_owned(),
+                "https://example.com/repos/1/".to_owned(),
+                "https://example.com/repos/2/".to_owned(),
+                "https://example.com/repos/3/".to_owned(),
+            ]
+        );
+
+        let library = packages[0]
+            .deps
+            .iter()
+            .find(|dep| dep.package_name == "org.example:bar_2.12")
+            .unwrap();
+        assert_eq!(
+            library.registry_urls,
+            vec![
+                DEFAULT_MAVEN_REGISTRY.to_owned(),
+                "https://example.com/repos/1/".to_owned(),
+                "https://example.com/repos/2/".to_owned(),
+                "https://example.com/repos/3/".to_owned(),
+            ]
+        );
     }
 }
