@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1282 / 1402 actionable tests ported (91%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 8 spec files not yet converted to per-test format (8 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 6 spec files not yet converted to per-test format (6 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3821,6 +3821,43 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/workers/repository/init/apis.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/apis.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `workers/repository/init/apis › initApis`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs | 24 | not-applicable | — | — | Rust worker layer does not implement Renovate repository initApis/platform bootstrap flow |
+| throws for disabled | 34 | not-applicable | — | — | Rust worker layer does not implement optimizeForDisabled repository bootstrap checks |
+| throws for forked | 49 | not-applicable | — | — | Rust worker layer does not implement fork-processing repository bootstrap checks |
+| does not throw for includeForks=true | 66 | not-applicable | — | — | Rust worker layer does not implement fork-processing repository bootstrap checks |
+| does not throw for forkProcessing=enabled | 79 | not-applicable | — | — | Rust worker layer does not implement fork-processing repository bootstrap checks |
+| ignores platform.getJsonFile() failures | 92 | not-applicable | — | — | Rust worker layer does not implement platform getJsonFile probing during repository bootstrap |
+| throws for fork with platform.getJsonFile() failures | 109 | not-applicable | — | — | Rust worker layer does not implement platform getJsonFile probing during repository bootstrap |
+| uses the onboardingConfigFileName if set | 124 | not-applicable | — | — | Rust worker layer does not implement onboarding config file probing during repository bootstrap |
+| falls back to "renovate.json" if onboardingConfigFileName is not set | 151 | not-applicable | — | — | Rust worker layer does not implement onboarding config file probing during repository bootstrap |
+| falls back to "renovate.json" if onboardingConfigFileName is not valid | 172 | not-applicable | — | — | Rust worker layer does not implement onboarding config file probing during repository bootstrap |
+| checks for re-enablement and continues | 191 | not-applicable | — | — | Rust worker layer does not implement disabled-repository re-enablement probing |
+| checks for re-enablement and skips | 211 | not-applicable | — | — | Rust worker layer does not implement disabled-repository re-enablement probing |
+
+---
+
+## `lib/workers/repository/init/cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/cache.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `workers/repository/init/cache › initializeCaches()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| initializes | 23 | not-applicable | — | — | Rust worker layer does not implement Renovate repository cache initialization |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3829,8 +3866,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/workers/global/config/parse/env.spec.ts` | — | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
 | `lib/workers/global/config/parse/file.spec.ts` | — | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
 | `lib/workers/repository/init/merge.spec.ts` | 37 | `crates/renovate-core/src/repo_config.rs` | 0 | pending |
-| `lib/workers/repository/init/apis.spec.ts` | — | — | 0 | pending |
-| `lib/workers/repository/init/cache.spec.ts` | — | — | 0 | pending |
+<!-- workers/repository/init/apis.spec.ts converted to per-test format above -->
+<!-- workers/repository/init/cache.spec.ts converted to per-test format above -->
 
 ---
 
