@@ -92,12 +92,21 @@ static GL_ARCHIVE_RE: LazyLock<Regex> =
 
 /// Extract Bazel dependencies from a WORKSPACE or .bzl file.
 pub fn extract(content: &str) -> Vec<BazelDep> {
+    let content = strip_comment_lines(content);
     let mut deps = Vec::new();
-    extract_rule(content, "http_archive(", parse_http_archive, &mut deps);
-    extract_rule(content, "container_pull(", parse_container_pull, &mut deps);
-    extract_rule(content, "oci_pull(", parse_oci_pull, &mut deps);
-    extract_rule(content, "go_repository(", parse_go_repository, &mut deps);
+    extract_rule(&content, "http_archive(", parse_http_archive, &mut deps);
+    extract_rule(&content, "container_pull(", parse_container_pull, &mut deps);
+    extract_rule(&content, "oci_pull(", parse_oci_pull, &mut deps);
+    extract_rule(&content, "go_repository(", parse_go_repository, &mut deps);
     deps
+}
+
+fn strip_comment_lines(content: &str) -> String {
+    content
+        .lines()
+        .filter(|line| !line.trim_start().starts_with('#'))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn extract_rule(
@@ -505,6 +514,39 @@ http_archive(
             }
         );
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handle comments and strings" — bazel/extract.spec.ts line 42
+    #[test]
+    fn workspace3_comments_and_strings() {
+        let content = r#"
+# http_archive(
+#     name = "rules_foreign_cc",
+#     url = "https://github.com/bazelbuild/rules_foreign_cc/archive/dfccdce2c9d1063c59ddd331b94eb7cb528a96ee.tar.gz",
+#     sha256 = "5469ef8b4e2c475de443c13290cf91ba7d1255899442b1e42fcb7fcdee8ceed8",
+# )
+# FOREIGN_CC_EXPOSE_ALL_FILES = """filegroup(name = "all", srcs = glob(["**"]), visibility = ["//visibility:public"])"""
+
+http_archive(
+    name = "com_github_nelhage_rules_boost",
+    url = "https://github.com/nelhage/rules_boost/archive/98495a618246683c9058dd87c2c78a2c06087999.tar.gz",
+    sha256 = "f92cb7ed66a5b24f97a7fc3917407f808c70d2689273bdd68f93d70a379d22d3",
+    strip_prefix = "rules_boost-98495a618246683c9058dd87c2c78a2c06087999",
+)
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "com_github_nelhage_rules_boost");
+        assert_eq!(
+            deps[0].current_value,
+            "98495a618246683c9058dd87c2c78a2c06087999"
+        );
+        assert_eq!(
+            deps[0].source,
+            BazelSource::GithubTags {
+                repo: "nelhage/rules_boost".to_owned(),
+            }
+        );
     }
 
     // Ported: "returns empty for incomplete dependency" — bazel/extract.spec.ts line 20

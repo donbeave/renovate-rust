@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 914 / 1216 actionable tests ported (75%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 915 / 1216 actionable tests ported (75%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1055,7 +1055,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/extract.spec.ts
-**Total tests:** 12 | **Ported:** 9 | **Actionable:** 12 | **Status:** partial
+**Total tests:** 12 | **Ported:** 10 | **Actionable:** 12 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1066,7 +1066,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns empty for incomplete dependency | 20 | ported | `bazel.rs` | `http_archive_with_no_url_returns_dep_with_skip_reason` | — |
 | extracts multiple types of dependencies | 25 | pending | — | — | Requires WORKSPACE1 fixture (18-dep snapshot) |
 | extracts github tags | 31 | ported | `bazel.rs` | `extracts_github_archive_dep` (+ extracts_github_release_dep, extracts_multiple_archives) | — |
-| handle comments and strings | 42 | pending | — | — | Requires WORKSPACE3 fixture |
+| handle comments and strings | 42 | ported | `bazel.rs` | `workspace3_comments_and_strings` | — |
 | extracts dependencies from *.bzl files | 47 | pending | — | — | Requires *.bzl fixture support |
 | extracts dependencies for container_pull deptype | 65 | ported | `bazel.rs` | `container_pull_extracted` | — |
 | extracts dependencies for oci_pull deptype | 90 | ported | `bazel.rs` | `oci_pull_extracted` | — |
