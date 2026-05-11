@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 984 / 1217 actionable tests ported (81%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 990 / 1217 actionable tests ported (81%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 46 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 52 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2104,7 +2104,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | ignores HelmRepository resources without a URL | 400 | ported | `flux.rs` | `ignores_helm_repository_without_url` | — |
 | ignores HelmRelease resources using an invalid chartRef | 425 | ported | `flux.rs` | `ignores_helm_release_with_invalid_chart_ref` | — |
 | ignores HelmRelease resources using a chartRef targetting a HelmChart | 433 | ported | `flux.rs` | `ignores_release_chart_ref_and_extracts_helm_chart` | — |
-| ignores HelmRelease resources using a chartRef targetting an OCIRepository | 457 | pending | — | — | Requires OCIRepository chartRef detection |
+| ignores HelmRelease resources using a chartRef targetting an OCIRepository | 457 | ported | `flux.rs` | `ignores_release_chart_ref_and_extracts_oci_repository` | — |
 | extracts HelmChart version | 492 | ported | `flux.rs` | `extracts_helm_chart_version` | — |
 | does not match HelmChart resources without a namespace | 513 | ported | `flux.rs` | `helm_chart_without_namespace_is_unknown_registry` | — |
 | falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name | 544 | ported | `flux.rs` | `helm_chart_registry_alias_without_source_match_is_unknown` | — |
@@ -2131,11 +2131,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref | 1195 | ported | `flux.rs` | `extracts_oci_repository_after_same_name_scalar_ref` | — |
 | extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec | 1241 | ported | `flux.rs` | `extracts_oci_repository_after_same_name_scalar_spec` | — |
 | extracts OCIRepository with tag and digest when ref contains a non-scalar key | 1285 | ported | `flux.rs` | `extracts_oci_repository_when_ref_contains_non_scalar_key` | — |
-| extracts Kustomization | 1323 | pending | — | — | Requires Kustomization resource extraction |
-| ignores resources of an unknown kind | 1389 | pending | — | — | Requires kind-filter |
-| ignores resources without a kind | 1400 | pending | — | — | Requires kind-validation |
-| ignores bad manifests | 1408 | pending | — | — | Requires malformed-manifest tolerance |
-| ignores null resources | 1413 | pending | — | — | Requires null-resource tolerance |
+| extracts Kustomization | 1323 | ported | `flux.rs` | `extracts_kustomization_images` | — |
+| ignores resources of an unknown kind | 1389 | ported | `flux.rs` | `ignores_resources_of_unknown_kind` | — |
+| ignores resources without a kind | 1400 | ported | `flux.rs` | `ignores_resources_without_kind` | — |
+| ignores bad manifests | 1408 | ported | `flux.rs` | `ignores_bad_manifests` | — |
+| ignores null resources | 1413 | ported | `flux.rs` | `ignores_null_resources` | — |
 
 ### `extractAllPackageFiles()`
 

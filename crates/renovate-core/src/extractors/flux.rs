@@ -83,6 +83,16 @@ pub struct FluxOciRepositoryDep {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FluxKustomizationImageDep {
+    pub dep_name: String,
+    pub datasource: &'static str,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub package_name: String,
+    pub replace_string: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct HelmRepository {
     name: String,
     namespace: String,
@@ -153,8 +163,112 @@ pub fn extract_oci_repositories_with_registry_aliases(
         .collect()
 }
 
+pub fn extract_kustomizations(content: &str) -> Vec<FluxKustomizationImageDep> {
+    content
+        .split("\n---")
+        .flat_map(extract_kustomization_doc)
+        .collect()
+}
+
 fn yaml_documents(content: &str) -> Vec<Vec<(Vec<String>, String)>> {
     content.split("\n---").map(yaml_scalars).collect()
+}
+
+fn extract_kustomization_doc(doc: &str) -> Vec<FluxKustomizationImageDep> {
+    let scalars = yaml_scalars(doc);
+    if value_at(&scalars, &["apiVersion"]).is_none()
+        || value_at(&scalars, &["kind"]) != Some("Kustomization")
+    {
+        return Vec::new();
+    }
+
+    let mut images = Vec::new();
+    let mut current = KustomizationImageFields::default();
+    let mut in_images = false;
+    let mut images_indent = 0;
+
+    for raw_line in doc.lines() {
+        let line = raw_line
+            .split_once('#')
+            .map_or(raw_line, |(before, _)| before);
+        if line.trim().is_empty() {
+            continue;
+        }
+
+        let indent = line.len() - line.trim_start().len();
+        let trimmed = line.trim();
+        if trimmed == "images:" {
+            in_images = true;
+            images_indent = indent;
+            continue;
+        }
+        if !in_images {
+            continue;
+        }
+        if indent <= images_indent && !trimmed.starts_with('-') {
+            break;
+        }
+
+        if let Some(rest) = trimmed.strip_prefix("- ") {
+            if current.name.is_some() {
+                if let Some(dep) = current.to_dep() {
+                    images.push(dep);
+                }
+                current = KustomizationImageFields::default();
+            }
+            set_kustomization_image_field(&mut current, rest);
+        } else {
+            set_kustomization_image_field(&mut current, trimmed);
+        }
+    }
+
+    if let Some(dep) = current.to_dep() {
+        images.push(dep);
+    }
+
+    images
+}
+
+#[derive(Default)]
+struct KustomizationImageFields {
+    name: Option<String>,
+    new_name: Option<String>,
+    new_tag: Option<String>,
+    digest: Option<String>,
+}
+
+impl KustomizationImageFields {
+    fn to_dep(&self) -> Option<FluxKustomizationImageDep> {
+        let name = self.name.as_ref()?;
+        let dep_name = self.new_name.as_ref().unwrap_or(name).to_owned();
+        let replace_string = self
+            .new_tag
+            .clone()
+            .or_else(|| self.digest.clone())
+            .or_else(|| self.new_name.clone());
+        Some(FluxKustomizationImageDep {
+            dep_name: dep_name.clone(),
+            datasource: DOCKER_DATASOURCE,
+            current_value: self.new_tag.clone(),
+            current_digest: self.digest.clone(),
+            package_name: dep_name,
+            replace_string,
+        })
+    }
+}
+
+fn set_kustomization_image_field(fields: &mut KustomizationImageFields, entry: &str) {
+    let Some((key, value)) = entry.split_once(':') else {
+        return;
+    };
+    let value = trim_yaml_scalar(value);
+    match trim_yaml_scalar(key).as_str() {
+        "name" => fields.name = Some(value),
+        "newName" => fields.new_name = Some(value),
+        "newTag" => fields.new_tag = Some(value),
+        "digest" => fields.digest = Some(value),
+        _ => {}
+    }
 }
 
 fn extract_helm_repo(scalars: &[(Vec<String>, String)]) -> Option<HelmRepository> {
@@ -818,6 +932,18 @@ spec:
         );
     }
 
+    // Ported: "ignores HelmRelease resources using a chartRef targetting an OCIRepository" — flux/extract.spec.ts line 457
+    #[test]
+    fn ignores_release_chart_ref_and_extracts_oci_repository() {
+        let content = format!(
+            "{OCI_REPOSITORY}\n---\napiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name: kyverno-controller\n  namespace: kube-system\nspec:\n  chartRef:\n    kind: OCIRepository\n    name: kyverno-controller\n    namespace: kube-system\n"
+        );
+        let deps = extract_oci_repositories(&content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "ghcr.io/kyverno/manifests/kyverno");
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+    }
+
     // Ported: "extracts HelmChart version" — flux/extract.spec.ts line 492
     #[test]
     fn extracts_helm_chart_version() {
@@ -1239,6 +1365,97 @@ spec:
             deps[0].current_digest.as_deref(),
             Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
         );
+    }
+
+    // Ported: "extracts Kustomization" — flux/extract.spec.ts line 1323
+    #[test]
+    fn extracts_kustomization_images() {
+        let deps = extract_kustomizations(
+            "apiVersion: kustomize.toolkit.fluxcd.io/v1\nkind: Kustomization\nmetadata:\n  name: podinfo\n  namespace: flux-system\nspec:\n  images:\n  - name: podinfo\n    newName: my-registry/podinfo\n    newTag: v1\n  - name: podinfo\n    newTag: 1.8.0\n  - name: podinfo\n    newName: my-podinfo\n  - name: podinfo\n    digest: sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3\n",
+        );
+        assert_eq!(
+            deps,
+            vec![
+                FluxKustomizationImageDep {
+                    dep_name: "my-registry/podinfo".to_owned(),
+                    datasource: DOCKER_DATASOURCE,
+                    current_value: Some("v1".to_owned()),
+                    current_digest: None,
+                    package_name: "my-registry/podinfo".to_owned(),
+                    replace_string: Some("v1".to_owned()),
+                },
+                FluxKustomizationImageDep {
+                    dep_name: "podinfo".to_owned(),
+                    datasource: DOCKER_DATASOURCE,
+                    current_value: Some("1.8.0".to_owned()),
+                    current_digest: None,
+                    package_name: "podinfo".to_owned(),
+                    replace_string: Some("1.8.0".to_owned()),
+                },
+                FluxKustomizationImageDep {
+                    dep_name: "my-podinfo".to_owned(),
+                    datasource: DOCKER_DATASOURCE,
+                    current_value: None,
+                    current_digest: None,
+                    package_name: "my-podinfo".to_owned(),
+                    replace_string: Some("my-podinfo".to_owned()),
+                },
+                FluxKustomizationImageDep {
+                    dep_name: "podinfo".to_owned(),
+                    datasource: DOCKER_DATASOURCE,
+                    current_value: None,
+                    current_digest: Some(
+                        "sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3"
+                            .to_owned()
+                    ),
+                    package_name: "podinfo".to_owned(),
+                    replace_string: Some(
+                        "sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3"
+                            .to_owned()
+                    ),
+                },
+            ]
+        );
+    }
+
+    // Ported: "ignores resources of an unknown kind" — flux/extract.spec.ts line 1389
+    #[test]
+    fn ignores_resources_of_unknown_kind() {
+        let content = "kind: SomethingElse\napiVersion: helm.toolkit.fluxcd.io/v2beta1\n";
+        assert!(extract_helm_releases(content).is_empty());
+        assert!(extract_git_repositories(content).is_empty());
+        assert!(extract_oci_repositories(content).is_empty());
+        assert!(extract_kustomizations(content).is_empty());
+    }
+
+    // Ported: "ignores resources without a kind" — flux/extract.spec.ts line 1400
+    #[test]
+    fn ignores_resources_without_kind() {
+        let content = "apiVersion: helm.toolkit.fluxcd.io/v2beta1";
+        assert!(extract_helm_releases(content).is_empty());
+        assert!(extract_git_repositories(content).is_empty());
+        assert!(extract_oci_repositories(content).is_empty());
+        assert!(extract_kustomizations(content).is_empty());
+    }
+
+    // Ported: "ignores bad manifests" — flux/extract.spec.ts line 1408
+    #[test]
+    fn ignores_bad_manifests() {
+        let content = "\"bad YAML";
+        assert!(extract_helm_releases(content).is_empty());
+        assert!(extract_git_repositories(content).is_empty());
+        assert!(extract_oci_repositories(content).is_empty());
+        assert!(extract_kustomizations(content).is_empty());
+    }
+
+    // Ported: "ignores null resources" — flux/extract.spec.ts line 1413
+    #[test]
+    fn ignores_null_resources() {
+        let content = "null";
+        assert!(extract_helm_releases(content).is_empty());
+        assert!(extract_git_repositories(content).is_empty());
+        assert!(extract_oci_repositories(content).is_empty());
+        assert!(extract_kustomizations(content).is_empty());
     }
 
     #[test]
