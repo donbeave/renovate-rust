@@ -7925,6 +7925,13 @@ mod tests {
         assert_eq!(c.schedule, vec!["every weekday"]);
     }
 
+    // Ported: "does not migrate multi days" — config/migration.spec.ts line 236
+    #[test]
+    fn schedule_multi_day_expression_not_migrated() {
+        let c = RepoConfig::parse(r#"{"schedule": "after 5:00pm on wednesday and thursday"}"#);
+        assert_eq!(c.schedule, vec!["after 5:00pm on wednesday and thursday"]);
+    }
+
     #[test]
     fn timezone_parsed() {
         let c = RepoConfig::parse(r#"{"timezone": "America/New_York"}"#);
