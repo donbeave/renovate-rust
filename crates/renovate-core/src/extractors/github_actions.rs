@@ -104,6 +104,19 @@ pub struct GithubActionsQuotedValue {
     pub quote: Option<char>,
 }
 
+/// Parsed GitHub Actions `uses:` line components.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GithubActionsParsedUsesLine {
+    pub indentation: String,
+    pub uses_prefix: String,
+    pub replace_string: String,
+    pub comment_preceding_whitespace: String,
+    pub comment_string: String,
+    pub action_ref: Option<GithubActionReference>,
+    pub comment_data: GithubActionsCommentData,
+    pub quote: Option<char>,
+}
+
 // ── Compiled regexes ───────────────────────────────────────────────────────
 
 /// Matches a `uses:` line inside a workflow YAML file.
@@ -127,6 +140,9 @@ static COMMENT_PIN_TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
 
 static COMMENT_BARE_TOKEN_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*(?<token>\S+)\s*$").unwrap());
+
+static PARSE_USES_LINE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?<prefix>\s+(?:-\s+)?uses\s*:\s*)(?<remainder>.+)$").unwrap());
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -230,6 +246,58 @@ pub fn parse_quote(input: &str) -> GithubActionsQuotedValue {
         value: trimmed.to_owned(),
         quote: None,
     }
+}
+
+/// Parse a single GitHub Actions `uses:` line into replaceable components.
+///
+/// Renovate reference: `lib/modules/manager/github-actions/parse.ts`
+/// `parseUsesLine`.
+pub fn parse_uses_line(line: &str) -> Option<GithubActionsParsedUsesLine> {
+    let caps = PARSE_USES_LINE_RE.captures(line)?;
+    let prefix = caps.name("prefix")?.as_str();
+    let remainder = caps.name("remainder")?.as_str();
+
+    if remainder.starts_with('#') {
+        return None;
+    }
+
+    let indentation = prefix
+        .find("uses")
+        .map(|idx| &prefix[..idx])
+        .unwrap_or_default();
+
+    if let Some(comment_index) = remainder.find(" #") {
+        let raw_value_part = &remainder[..comment_index];
+        let comment_part = &remainder[comment_index + 1..];
+        let part_before_hash = &remainder[..comment_index + 1];
+        let trimmed_len = part_before_hash.trim_end().len();
+        let comment_preceding_whitespace = &part_before_hash[trimmed_len..];
+        let quoted = parse_quote(raw_value_part);
+        let clean_comment_body = comment_part.strip_prefix('#').unwrap_or(comment_part);
+
+        return Some(GithubActionsParsedUsesLine {
+            indentation: indentation.to_owned(),
+            uses_prefix: prefix.to_owned(),
+            replace_string: raw_value_part.trim().to_owned(),
+            comment_preceding_whitespace: comment_preceding_whitespace.to_owned(),
+            comment_string: comment_part.to_owned(),
+            action_ref: parse_action_reference(&quoted.value),
+            comment_data: parse_comment(clean_comment_body),
+            quote: quoted.quote,
+        });
+    }
+
+    let quoted = parse_quote(remainder);
+    Some(GithubActionsParsedUsesLine {
+        indentation: indentation.to_owned(),
+        uses_prefix: prefix.to_owned(),
+        replace_string: remainder.trim().to_owned(),
+        comment_preceding_whitespace: String::new(),
+        comment_string: String::new(),
+        action_ref: parse_action_reference(&quoted.value),
+        comment_data: GithubActionsCommentData::default(),
+        quote: quoted.quote,
+    })
 }
 
 /// Extract and normalise the version string from a trailing `# <version>` comment.
@@ -1452,6 +1520,41 @@ mod tests {
         }
     }
 
+    fn repo_ref(owner: &str, repo: &str, reference: &str) -> GithubActionReference {
+        GithubActionReference::Repository {
+            hostname: "github.com".to_owned(),
+            is_explicit_hostname: false,
+            owner: owner.to_owned(),
+            repo: repo.to_owned(),
+            path: None,
+            reference: reference.to_owned(),
+        }
+    }
+
+    struct UsesLineExpected<'a> {
+        indentation: &'a str,
+        uses_prefix: &'a str,
+        replace_string: &'a str,
+        comment_preceding_whitespace: &'a str,
+        comment_string: &'a str,
+        action_ref: Option<GithubActionReference>,
+        comment_data: GithubActionsCommentData,
+        quote: Option<char>,
+    }
+
+    fn parsed_uses_line(expected: UsesLineExpected<'_>) -> GithubActionsParsedUsesLine {
+        GithubActionsParsedUsesLine {
+            indentation: expected.indentation.to_owned(),
+            uses_prefix: expected.uses_prefix.to_owned(),
+            replace_string: expected.replace_string.to_owned(),
+            comment_preceding_whitespace: expected.comment_preceding_whitespace.to_owned(),
+            comment_string: expected.comment_string.to_owned(),
+            action_ref: expected.action_ref,
+            comment_data: expected.comment_data,
+            quote: expected.quote,
+        }
+    }
+
     // Ported: "returns null for empty string" — github-actions/parse.spec.ts line 11
     #[test]
     fn parse_action_reference_returns_none_for_empty_string() {
@@ -1865,6 +1968,244 @@ mod tests {
     #[test]
     fn parse_quote_returns_empty_quote_for_only_opening_quote() {
         assert_eq!(parse_quote("\"value"), quoted_value("\"value", None));
+    }
+
+    // Ported: "returns null for non-uses lines" — github-actions/parse.spec.ts line 326
+    #[test]
+    fn parse_uses_line_returns_none_for_non_uses_lines() {
+        assert!(parse_uses_line("name: test").is_none());
+        assert!(parse_uses_line("run: echo hello").is_none());
+        assert!(parse_uses_line("").is_none());
+        assert!(parse_uses_line("uses: value").is_none());
+    }
+
+    // Ported: "returns null when value is only a comment" — github-actions/parse.spec.ts line 333
+    #[test]
+    fn parse_uses_line_returns_none_when_value_is_only_a_comment() {
+        assert!(parse_uses_line("      uses: # only comment").is_none());
+    }
+
+    // Ported: "parses simple uses line without comment" — github-actions/parse.spec.ts line 337
+    #[test]
+    fn parse_uses_line_parses_simple_uses_line_without_comment() {
+        assert_eq!(
+            parse_uses_line("      uses: actions/checkout@v4"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "actions/checkout@v4",
+                comment_preceding_whitespace: "",
+                comment_string: "",
+                action_ref: Some(repo_ref("actions", "checkout", "v4")),
+                comment_data: GithubActionsCommentData::default(),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "parses uses line with - prefix" — github-actions/parse.spec.ts line 359
+    #[test]
+    fn parse_uses_line_parses_uses_line_with_dash_prefix() {
+        assert_eq!(
+            parse_uses_line("      - uses: actions/checkout@v4"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      - ",
+                uses_prefix: "      - uses: ",
+                replace_string: "actions/checkout@v4",
+                comment_preceding_whitespace: "",
+                comment_string: "",
+                action_ref: Some(repo_ref("actions", "checkout", "v4")),
+                comment_data: GithubActionsCommentData::default(),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "parses uses line with comment" — github-actions/parse.spec.ts line 381
+    #[test]
+    fn parse_uses_line_parses_uses_line_with_comment() {
+        assert_eq!(
+            parse_uses_line("      uses: actions/checkout@abc123 # v4"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "actions/checkout@abc123",
+                comment_preceding_whitespace: " ",
+                comment_string: "# v4",
+                action_ref: Some(repo_ref("actions", "checkout", "abc123")),
+                comment_data: comment_data(Some("v4"), None, false, Some(" v4"), Some(0)),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "parses uses line with multiple spaces before comment" — github-actions/parse.spec.ts line 407
+    #[test]
+    fn parse_uses_line_parses_uses_line_with_multiple_spaces_before_comment() {
+        assert_eq!(
+            parse_uses_line("      uses: actions/checkout@abc123   # v4"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "actions/checkout@abc123",
+                comment_preceding_whitespace: "   ",
+                comment_string: "# v4",
+                action_ref: Some(repo_ref("actions", "checkout", "abc123")),
+                comment_data: comment_data(Some("v4"), None, false, Some(" v4"), Some(0)),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "parses double quoted value" — github-actions/parse.spec.ts line 435
+    #[test]
+    fn parse_uses_line_parses_double_quoted_value() {
+        assert_eq!(
+            parse_uses_line("      uses: \"actions/checkout@v4\""),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "\"actions/checkout@v4\"",
+                comment_preceding_whitespace: "",
+                comment_string: "",
+                action_ref: Some(repo_ref("actions", "checkout", "v4")),
+                comment_data: GithubActionsCommentData::default(),
+                quote: Some('"'),
+            }))
+        );
+    }
+
+    // Ported: "parses single quoted value" — github-actions/parse.spec.ts line 457
+    #[test]
+    fn parse_uses_line_parses_single_quoted_value() {
+        assert_eq!(
+            parse_uses_line("      uses: 'actions/checkout@v4'"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "'actions/checkout@v4'",
+                comment_preceding_whitespace: "",
+                comment_string: "",
+                action_ref: Some(repo_ref("actions", "checkout", "v4")),
+                comment_data: GithubActionsCommentData::default(),
+                quote: Some('\''),
+            }))
+        );
+    }
+
+    // Ported: "parses quoted value with comment" — github-actions/parse.spec.ts line 479
+    #[test]
+    fn parse_uses_line_parses_quoted_value_with_comment() {
+        assert_eq!(
+            parse_uses_line("      uses: \"owner/repo@abc123\" # v1.0.0"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "\"owner/repo@abc123\"",
+                comment_preceding_whitespace: " ",
+                comment_string: "# v1.0.0",
+                action_ref: Some(repo_ref("owner", "repo", "abc123")),
+                comment_data: comment_data(Some("v1.0.0"), None, false, Some(" v1.0.0"), Some(0)),
+                quote: Some('"'),
+            }))
+        );
+    }
+
+    // Ported: "parses docker action" — github-actions/parse.spec.ts line 505
+    #[test]
+    fn parse_uses_line_parses_docker_action() {
+        assert_eq!(
+            parse_uses_line("      uses: docker://alpine:3.18"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "docker://alpine:3.18",
+                comment_preceding_whitespace: "",
+                comment_string: "",
+                action_ref: Some(GithubActionReference::Docker {
+                    image: "alpine".to_owned(),
+                    tag: Some("3.18".to_owned()),
+                    digest: None,
+                    original_ref: "alpine:3.18".to_owned(),
+                }),
+                comment_data: GithubActionsCommentData::default(),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "parses local action" — github-actions/parse.spec.ts line 524
+    #[test]
+    fn parse_uses_line_parses_local_action() {
+        assert_eq!(
+            parse_uses_line("      uses: ./local/action"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "./local/action",
+                comment_preceding_whitespace: "",
+                comment_string: "",
+                action_ref: Some(GithubActionReference::Local {
+                    path: "./local/action".to_owned(),
+                }),
+                comment_data: GithubActionsCommentData::default(),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "handles ratchet:exclude comment" — github-actions/parse.spec.ts line 541
+    #[test]
+    fn parse_uses_line_handles_ratchet_exclude_comment() {
+        assert_eq!(
+            parse_uses_line("      uses: actions/checkout@v4 # ratchet:exclude"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "actions/checkout@v4",
+                comment_preceding_whitespace: " ",
+                comment_string: "# ratchet:exclude",
+                action_ref: Some(repo_ref("actions", "checkout", "v4")),
+                comment_data: comment_data(None, None, true, None, None),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "handles unrecognized comment" — github-actions/parse.spec.ts line 567
+    #[test]
+    fn parse_uses_line_handles_unrecognized_comment() {
+        assert_eq!(
+            parse_uses_line("      uses: actions/checkout@v4 # unrelated comment"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "actions/checkout@v4",
+                comment_preceding_whitespace: " ",
+                comment_string: "# unrelated comment",
+                action_ref: Some(repo_ref("actions", "checkout", "v4")),
+                comment_data: GithubActionsCommentData::default(),
+                quote: None,
+            }))
+        );
+    }
+
+    // Ported: "returns null actionRef for invalid action" — github-actions/parse.spec.ts line 591
+    #[test]
+    fn parse_uses_line_returns_none_action_ref_for_invalid_action() {
+        assert_eq!(
+            parse_uses_line("      uses: invalid-no-at-symbol"),
+            Some(parsed_uses_line(UsesLineExpected {
+                indentation: "      ",
+                uses_prefix: "      uses: ",
+                replace_string: "invalid-no-at-symbol",
+                comment_preceding_whitespace: "",
+                comment_string: "",
+                action_ref: None,
+                comment_data: GithubActionsCommentData::default(),
+                quote: None,
+            }))
+        );
     }
 
     // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65

@@ -433,7 +433,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/github-actions/extract.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | partial | Core extraction + uses-with extraction ported; registryAliases not yet implemented |
-| `lib/modules/manager/github-actions/parse.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | partial | `parseActionReference`, `parseComment`, and `parseQuote` ported; line helper partially inlined |
+| `lib/modules/manager/github-actions/parse.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | full | Action reference, comment, quote, and uses-line helpers ported |
 | `lib/modules/manager/github-actions/index.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | partial | Manager metadata |
 | `lib/modules/manager/github-actions/schema.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | partial | Schema inlined |
 | `lib/modules/manager/github-actions/community.ts` | `crates/renovate-core/src/extractors/github_actions.rs` | full | `COMMUNITY_ACTIONS` table + `build_community_dep` in `extract_uses_with` |

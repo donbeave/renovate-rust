@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1162 / 1368 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1176 / 1368 actionable tests ported (86%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 29 spec files not yet converted to per-test format (24 pending, 4 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -412,7 +412,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/github-actions/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/parse.spec.ts
-**Total tests:** 53 | **Ported:** 39 | **Actionable:** 53 | **Status:** partial
+**Total tests:** 53 | **Ported:** 53 | **Actionable:** 53 | **Status:** ported
 
 ### `modules/manager/github-actions/parse › parseActionReference`
 
@@ -472,20 +472,20 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for non-uses lines | 326 | pending | — | — | — |
-| returns null when value is only a comment | 333 | pending | — | — | — |
-| parses simple uses line without comment | 337 | pending | — | — | — |
-| parses uses line with - prefix | 359 | pending | — | — | — |
-| parses uses line with comment | 381 | pending | — | — | — |
-| parses uses line with multiple spaces before comment | 407 | pending | — | — | — |
-| parses double quoted value | 435 | pending | — | — | — |
-| parses single quoted value | 457 | pending | — | — | — |
-| parses quoted value with comment | 479 | pending | — | — | — |
-| parses docker action | 505 | pending | — | — | — |
-| parses local action | 524 | pending | — | — | — |
-| handles ratchet:exclude comment | 541 | pending | — | — | — |
-| handles unrecognized comment | 567 | pending | — | — | — |
-| returns null actionRef for invalid action | 591 | pending | — | — | — |
+| returns null for non-uses lines | 326 | ported | `github_actions.rs` | `parse_uses_line_returns_none_for_non_uses_lines` | — |
+| returns null when value is only a comment | 333 | ported | `github_actions.rs` | `parse_uses_line_returns_none_when_value_is_only_a_comment` | — |
+| parses simple uses line without comment | 337 | ported | `github_actions.rs` | `parse_uses_line_parses_simple_uses_line_without_comment` | — |
+| parses uses line with - prefix | 359 | ported | `github_actions.rs` | `parse_uses_line_parses_uses_line_with_dash_prefix` | — |
+| parses uses line with comment | 381 | ported | `github_actions.rs` | `parse_uses_line_parses_uses_line_with_comment` | — |
+| parses uses line with multiple spaces before comment | 407 | ported | `github_actions.rs` | `parse_uses_line_parses_uses_line_with_multiple_spaces_before_comment` | — |
+| parses double quoted value | 435 | ported | `github_actions.rs` | `parse_uses_line_parses_double_quoted_value` | — |
+| parses single quoted value | 457 | ported | `github_actions.rs` | `parse_uses_line_parses_single_quoted_value` | — |
+| parses quoted value with comment | 479 | ported | `github_actions.rs` | `parse_uses_line_parses_quoted_value_with_comment` | — |
+| parses docker action | 505 | ported | `github_actions.rs` | `parse_uses_line_parses_docker_action` | — |
+| parses local action | 524 | ported | `github_actions.rs` | `parse_uses_line_parses_local_action` | — |
+| handles ratchet:exclude comment | 541 | ported | `github_actions.rs` | `parse_uses_line_handles_ratchet_exclude_comment` | — |
+| handles unrecognized comment | 567 | ported | `github_actions.rs` | `parse_uses_line_handles_unrecognized_comment` | — |
+| returns null actionRef for invalid action | 591 | ported | `github_actions.rs` | `parse_uses_line_returns_none_action_ref_for_invalid_action` | — |
 
 ---
 
