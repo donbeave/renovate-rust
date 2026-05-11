@@ -497,6 +497,64 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::LocalPath));
     }
 
+    // Ported: "returns null when inputs are missing locked" — nix/extract.spec.ts line 71
+    #[test]
+    fn missing_locked_section_is_skipped_as_no_rev() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::NoRev));
+    }
+
+    // Ported: "returns null when inputs are missing original" — nix/extract.spec.ts line 95
+    #[test]
+    fn missing_original_section_is_skipped_as_no_rev() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1720031269,
+        "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::NoRev));
+    }
+
     // Ported: "includes nixpkgs with no explicit ref" — nix/extract.spec.ts line 260
     #[test]
     fn includes_nixpkgs_with_no_explicit_ref() {
@@ -953,6 +1011,38 @@ mod tests {
         );
         assert_eq!(deps[0].input_type, FlakeInputType::Tarball);
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes flake with only tarball type" — nix/extract.spec.ts line 790
+    #[test]
+    fn tarball_without_locked_rev_is_skipped_as_no_rev() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs-lib": {
+      "locked": {
+        "lastModified": 1738452942,
+        "narHash": "sha256-vJzFZGaCpnmo7I6i416HaBLpC+hvcURh/BQwROcGIp8=",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs-lib");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::NoRev));
     }
 
     // Ported: "includes flake with nixpkgs-lib as tarball type" — nix/extract.spec.ts line 818

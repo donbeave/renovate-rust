@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1442 / 1650 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1445 / 1650 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 27 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 30 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2200,8 +2200,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | does not include nixpkgs input with no explicit ref | 25 | pending | — | — | Requires flake.nix + flake.lock integration |
 | includes nixpkgs input with only ref | 42 | pending | — | — | Requires flake.nix + flake.lock integration |
 | returns null when no inputs | 59 | pending | — | — | Requires flake.nix + flake.lock integration |
-| returns null when inputs are missing locked | 71 | pending | — | — | Requires flake.lock locked-section validation |
-| returns null when inputs are missing original | 95 | pending | — | — | Requires flake.lock original-section validation |
+| returns null when inputs are missing locked | 71 | ported | `nix.rs` | `missing_locked_section_is_skipped_as_no_rev` | — |
+| returns null when inputs are missing original | 95 | ported | `nix.rs` | `missing_original_section_is_skipped_as_no_rev` | — |
 | returns null when original inputs are from local path | 121 | ported | `nix.rs` | `original_path_input_is_skipped_as_local_path` | — |
 | returns null when locked inputs are indirect | 153 | ported | `nix.rs` | `locked_indirect_input_is_skipped` | — |
 | returns null when locked inputs are from local path | 185 | ported | `nix.rs` | `locked_path_input_is_skipped_as_local_path` | — |
@@ -2217,7 +2217,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes flake from GitHub Enterprise | 553 | ported | `nix.rs` | `includes_github_enterprise_input` | — |
 | includes flake with tarball type | 649 | ported | `nix.rs` | `includes_tarball_input_with_archive_url` | — |
 | uri decode gitlab subgroup | 750 | ported | `nix.rs` | `decodes_gitlab_subgroup_owner` | — |
-| includes flake with only tarball type | 790 | pending | — | — | Requires tarball-only handling |
+| includes flake with only tarball type | 790 | ported | `nix.rs` | `tarball_without_locked_rev_is_skipped_as_no_rev` | — |
 | includes flake with nixpkgs-lib as tarball type | 818 | ported | `nix.rs` | `ignores_transitive_nixpkgs_lib_tarball_while_extracting_root_inputs` | — |
 | includes flake with nixpkgs channel as tarball type | 897 | ported | `nix.rs` | `includes_nixpkgs_channel_tarball_input` | — |
 | finds currentDigest correctly when input sha is pinned | 937 | ported | `nix.rs` | `extracts_current_digest_from_original_rev` | — |
