@@ -246,6 +246,31 @@ pub fn extract_package_file(content: &str) -> Option<SbtPackageFile> {
     })
 }
 
+/// Extract all SBT package files from already-read path/content pairs.
+pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<SbtPackageFile> {
+    let mut out = Vec::new();
+    for (path, content) in files {
+        if path.ends_with("build.properties") {
+            if let Some(dep) = extract_build_properties(content) {
+                out.push(SbtPackageFile {
+                    deps: vec![SbtResolvedDep {
+                        dep_name: "sbt/sbt".to_owned(),
+                        package_name: "sbt/sbt".to_owned(),
+                        current_value: Some(dep.current_value),
+                        dep_type: SbtDepType::SbtVersion,
+                        shared_variable_name: None,
+                    }],
+                    package_file_version: None,
+                    scala_version: None,
+                });
+            }
+        } else if let Some(package_file) = extract_package_file(content) {
+            out.push(package_file);
+        }
+    }
+    out
+}
+
 /// Extract `sbt.version` from a `project/build.properties` file.
 pub fn extract_build_properties(content: &str) -> Option<SbtDep> {
     let cap = SBT_VERSION.captures(content)?;
@@ -892,5 +917,25 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
     fn build_properties_without_sbt_version_returns_none() {
         let content = "another.conf=1.4.0\n";
         assert!(extract_build_properties(content).is_none());
+    }
+
+    // Ported: "should return empty packagefiles is no content is provided" — sbt/extract.spec.ts line 637
+    #[test]
+    fn extract_all_package_files_empty_content_returns_empty() {
+        assert!(extract_all_package_files(&[("build.sbt", "")]).is_empty());
+    }
+
+    // Ported: "extracts build properties correctly" — sbt/extract.spec.ts line 643
+    #[test]
+    fn extract_all_package_files_extracts_build_properties() {
+        let packages =
+            extract_all_package_files(&[("project/build.properties", "sbt.version=1.6.0\n")]);
+        assert_eq!(packages.len(), 1);
+        assert_eq!(packages[0].deps.len(), 1);
+        let dep = &packages[0].deps[0];
+        assert_eq!(dep.dep_type, SbtDepType::SbtVersion);
+        assert_eq!(dep.dep_name, "sbt/sbt");
+        assert_eq!(dep.package_name, "sbt/sbt");
+        assert_eq!(dep.current_value.as_deref(), Some("1.6.0"));
     }
 }

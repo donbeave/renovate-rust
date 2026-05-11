@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1481 / 1657 actionable tests ported (89%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1483 / 1657 actionable tests ported (89%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2554,7 +2554,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
-**Total tests:** 26 | **Ported:** 22 | **Actionable:** 26 | **Status:** partial
+**Total tests:** 26 | **Ported:** 24 | **Actionable:** 26 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2584,8 +2584,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 | ignores build.properties file if does not contain sbt version | 516 | ported | `sbt.rs` | `build_properties_without_sbt_version_returns_none` | — |
 | extracts proxy repositories | 529 | pending | — | — | Requires repositories file parsing |
 | should include default registryUrls if no repositories file is provided | 607 | pending | — | — | Requires registryUrls default plumbing |
-| should return empty packagefiles is no content is provided | 637 | pending | — | — | Already partly covered by empty_returns_empty; TS uses extractAllPackageFiles wrapper not ported |
-| extracts build properties correctly | 643 | pending | — | — | Requires extractAllPackageFiles wrapper port |
+| should return empty packagefiles is no content is provided | 637 | ported | `sbt.rs` | `extract_all_package_files_empty_content_returns_empty` | — |
+| extracts build properties correctly | 643 | ported | `sbt.rs` | `extract_all_package_files_extracts_build_properties` | — |
 
 ---
 
