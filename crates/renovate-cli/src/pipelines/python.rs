@@ -436,6 +436,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         .iter()
                         .filter(|d| {
                             d.skip_reason.is_none()
+                                && d.dep_type != pep621_extractor::Pep621DepType::RequiresPython
                                 && !repo_cfg.is_dep_ignored_for_manager(&d.name, "pep621")
                         })
                         .collect();

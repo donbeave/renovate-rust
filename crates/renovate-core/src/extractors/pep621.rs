@@ -29,13 +29,15 @@
 //! the registry lookup.  Entries that cannot be parsed as PEP 508 strings
 //! (e.g., PEP 735 `{include-group = "…"}` tables) are silently skipped.
 
-use std::collections::BTreeMap;
+use std::{borrow::Cow, collections::BTreeMap};
 use thiserror::Error;
 use toml::Value;
 
 /// Which `pyproject.toml` section the dep came from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Pep621DepType {
+    /// `[project].requires-python`
+    RequiresPython,
     /// `[project].dependencies`
     Regular,
     /// `[project.optional-dependencies].*`
@@ -55,6 +57,7 @@ pub enum Pep621DepType {
 impl Pep621DepType {
     pub fn as_renovate_str(&self) -> &'static str {
         match self {
+            Pep621DepType::RequiresPython => "requires-python",
             Pep621DepType::Regular => "dependencies",
             Pep621DepType::Optional => "optional-dependencies",
             Pep621DepType::Group => "dependency-groups",
@@ -138,10 +141,29 @@ pub fn extract_package_file_with_uv_lock(
     content: &str,
     uv_lock: Option<&str>,
 ) -> Result<Pep621Extract, Pep621ExtractError> {
-    let doc: Value = toml::from_str(content)?;
+    let content = remove_template_lines(content);
+    let doc: Value = toml::from_str(&content)?;
     let mut deps = Vec::new();
     let registry_urls = extract_pdm_sources(&doc);
     let uv_sources = extract_uv_sources(&doc);
+
+    if let Some(requires_python) = doc
+        .get("project")
+        .and_then(|p| p.get("requires-python"))
+        .and_then(Value::as_str)
+    {
+        deps.push(Pep621ExtractedDep {
+            name: "python".to_owned(),
+            current_value: requires_python.to_owned(),
+            dep_type: Pep621DepType::RequiresPython,
+            dep_group: None,
+            datasource: None,
+            package_name: Some("python".to_owned()),
+            registry_urls: Vec::new(),
+            locked_version: None,
+            skip_reason: None,
+        });
+    }
 
     // [project].dependencies
     if let Some(project_deps) = doc
@@ -270,6 +292,27 @@ pub fn extract_package_file_with_uv_lock(
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+fn remove_template_lines(content: &str) -> Cow<'_, str> {
+    // Fast path keeps TOML parse error spans unchanged for normal files.
+    if !content
+        .lines()
+        .any(|line| line.trim_start().starts_with("{%") || line.trim_start().starts_with("{#"))
+    {
+        return Cow::Borrowed(content);
+    }
+
+    Cow::Owned(
+        content
+            .lines()
+            .filter(|line| {
+                let trimmed = line.trim_start();
+                !trimmed.starts_with("{%") && !trimmed.starts_with("{#")
+            })
+            .collect::<Vec<_>>()
+            .join("\n"),
+    )
+}
 
 /// Parse a TOML value that should be a PEP 508 specifier string.
 ///
@@ -869,7 +912,7 @@ name = "pypi"
         let actionable: Vec<_> = package_file
             .deps
             .iter()
-            .filter(|d| d.skip_reason.is_none())
+            .filter(|d| d.skip_reason.is_none() && d.dep_type != Pep621DepType::RequiresPython)
             .collect();
         assert_eq!(actionable.len(), 5);
 
@@ -1096,5 +1139,39 @@ requires-python = ">=3.11"
         let attrs = extract.deps.iter().find(|d| d.name == "attrs").unwrap();
         assert_eq!(attrs.current_value, ">=24.1.0");
         assert_eq!(attrs.locked_version, None);
+    }
+
+    // Ported: "should resolve dependencies with template" — pep621/extract.spec.ts line 694
+    #[test]
+    fn resolves_dependencies_with_template_lines() {
+        let content = r#"
+[project]
+name = "{{ name }}"
+dynamic = ["version"]
+requires-python = ">=3.7"
+license = {text = "MIT"}
+{# comment #}
+dependencies = [
+  "blinker",
+  {% if foo %}
+  "packaging>=20.9,!=22.0",
+  {% endif %}
+]
+readme = "README.md"
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 3);
+
+        let python = deps.iter().find(|d| d.name == "python").unwrap();
+        assert_eq!(python.dep_type, Pep621DepType::RequiresPython);
+        assert_eq!(python.current_value, ">=3.7");
+
+        let blinker = deps.iter().find(|d| d.name == "blinker").unwrap();
+        assert_eq!(blinker.dep_type, Pep621DepType::Regular);
+        assert!(blinker.current_value.is_empty());
+
+        let packaging = deps.iter().find(|d| d.name == "packaging").unwrap();
+        assert_eq!(packaging.dep_type, Pep621DepType::Regular);
+        assert_eq!(packaging.current_value, ">=20.9,!=22.0");
     }
 }
