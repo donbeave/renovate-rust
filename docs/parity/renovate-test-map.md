@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1176 / 1368 actionable tests ported (86%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 28 spec files not yet converted to per-test format (24 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 27 spec files not yet converted to per-test format (23 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -367,6 +367,20 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | when using SSH clone URL | 73 | ported | `git_submodules.rs` | `ssh_clone_url_converted_to_https_for_source_url` | — |
 | when using a relative path | 80 | not-applicable | — | — | Relative URL resolution requires knowledge of git origin remote; not available in static extractor |
+
+---
+
+## `lib/modules/manager/git-submodules/artifact.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/artifact.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/git-submodules/artifact › updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty content | 5 | not-applicable | — | — | Exercises Renovate `updateArtifacts()` file-addition generation; Rust git-submodules support is extractor-only and has no artifact update API |
+| returns two modules | 16 | not-applicable | — | — | Exercises Renovate `updateArtifacts()` file-addition generation; Rust git-submodules support is extractor-only and has no artifact update API |
 
 ---
 
@@ -3036,7 +3050,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- bazel-module/parser/context.spec.ts converted to per-test format above -->
 <!-- bazel-module/parser/fragments.spec.ts converted to per-test format above -->
 | `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | — | — | — | pending |
-| `lib/modules/manager/git-submodules/artifact.spec.ts` | — | — | — | pending |
+<!-- git-submodules/artifact.spec.ts converted to per-test format above -->
 <!-- github-actions/integration.spec.ts converted to per-test format above -->
 <!-- github-actions/parse.spec.ts converted to per-test format above -->
 <!-- helmv3/common.spec.ts converted to per-test format above -->
