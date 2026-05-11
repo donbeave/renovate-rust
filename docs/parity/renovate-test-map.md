@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 996 / 1217 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 997 / 1217 actionable tests ported (82%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,13 +2077,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 58 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 59 | **Actionable:** 59 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts multiple resources | 27 | pending | — | — | Requires full multi-resource fixture round-trip |
+| extracts multiple resources | 27 | ported | `flux.rs` | `extracts_multiple_resources` | — |
 | extracts version and components from system manifest at $filepath | 72 | ported | `flux.rs` | `extracts_version_with_components` | — |
 | considers components optional in system manifests | 102 | ported | `flux.rs` | `extracts_version_without_components` | — |
 | ignores system manifests without a version | 111 | ported | `flux.rs` | `no_header_returns_none` | — |

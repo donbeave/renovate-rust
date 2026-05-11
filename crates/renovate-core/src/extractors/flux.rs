@@ -248,6 +248,47 @@ pub fn extract_all_package_files_with_registry_aliases(
         .collect()
 }
 
+pub fn extract_package_file(content: &str) -> Vec<FluxDep> {
+    extract_package_file_with_registry_aliases(content, &[])
+}
+
+pub fn extract_package_file_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<FluxDep> {
+    let docs = yaml_documents(content);
+    let repositories: Vec<_> = docs
+        .iter()
+        .filter_map(|doc| extract_helm_repo(doc))
+        .collect();
+    let mut deps = Vec::new();
+
+    for doc in &docs {
+        if let Some(dep) = extract_helm_release_doc(doc, registry_aliases, &repositories) {
+            deps.push(FluxDep::Helm(dep));
+        }
+        if let Some(dep) = extract_helm_release_image_doc(doc, registry_aliases) {
+            deps.push(FluxDep::Oci(dep));
+        }
+        if let Some(dep) = extract_helm_chart_doc(doc, registry_aliases, &repositories) {
+            deps.push(FluxDep::Helm(dep));
+        }
+        if let Some(dep) = extract_git_repository_doc(doc) {
+            deps.push(FluxDep::Git(dep));
+        }
+        if let Some(dep) = extract_oci_repository_doc(doc, registry_aliases) {
+            deps.push(FluxDep::Oci(dep));
+        }
+    }
+
+    deps.extend(
+        extract_kustomization_doc(content)
+            .into_iter()
+            .map(FluxDep::KustomizationImage),
+    );
+    deps
+}
+
 fn yaml_documents(content: &str) -> Vec<Vec<(Vec<String>, String)>> {
     content.split("\n---").map(yaml_scalars).collect()
 }
@@ -473,6 +514,29 @@ fn extract_oci_repository_doc(
         package_name,
         replace_string,
         skip_reason,
+    })
+}
+
+fn extract_helm_release_image_doc(
+    scalars: &[(Vec<String>, String)],
+    registry_aliases: &[(&str, &str)],
+) -> Option<FluxOciRepositoryDep> {
+    if value_at(scalars, &["apiVersion"]).is_none()
+        || value_at(scalars, &["kind"]) != Some("HelmRelease")
+    {
+        return None;
+    }
+
+    let image = value_at(scalars, &["spec", "values", "image", "repository"])?;
+    let tag = value_at(scalars, &["spec", "values", "image", "tag"])?;
+    Some(FluxOciRepositoryDep {
+        dep_name: image.to_owned(),
+        datasource: DOCKER_DATASOURCE,
+        current_value: Some(tag.to_owned()),
+        current_digest: None,
+        package_name: apply_registry_alias(image, registry_aliases),
+        replace_string: Some(tag.to_owned()),
+        skip_reason: None,
     })
 }
 
@@ -752,6 +816,31 @@ mod tests {
             dep.components.as_deref(),
             Some("source-controller,kustomize-controller,helm-controller")
         );
+    }
+
+    // Ported: "extracts multiple resources" — flux/extract.spec.ts line 27
+    #[test]
+    fn extracts_multiple_resources() {
+        let deps = extract_package_file(MULTIDOC);
+        assert_eq!(deps.len(), 4);
+        assert!(matches!(&deps[0], FluxDep::Helm(dep)
+                if dep.dep_name == "external-dns"
+                    && dep.current_value.as_deref() == Some("1.7.0")
+                    && dep.registry_urls == vec!["https://kubernetes-sigs.github.io/external-dns/"]));
+        assert!(matches!(&deps[1], FluxDep::Oci(dep)
+                if dep.dep_name == "k8s.gcr.io/external-dns/external-dns"
+                    && dep.current_value.as_deref() == Some("v0.13.4")
+                    && dep.package_name == "k8s.gcr.io/external-dns/external-dns"
+                    && dep.replace_string.as_deref() == Some("v0.13.4")));
+        assert!(matches!(&deps[2], FluxDep::Git(dep)
+                if dep.dep_name == "renovate-repo"
+                    && dep.datasource == Some(GITHUB_TAGS_DATASOURCE)
+                    && dep.current_value.as_deref() == Some("v11.35.4")
+                    && dep.package_name.as_deref() == Some("renovatebot/renovate")));
+        assert!(matches!(&deps[3], FluxDep::Oci(dep)
+                if dep.dep_name == "ghcr.io/kyverno/manifests/kyverno"
+                    && dep.current_value.as_deref() == Some("v1.8.2")
+                    && dep.package_name == "ghcr.io/kyverno/manifests/kyverno"));
     }
 
     // Ported: "considers components optional in system manifests" — flux/extract.spec.ts line 102
@@ -1726,6 +1815,60 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: flux-system
+"#;
+
+    const MULTIDOC: &str = r#"
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: kube-system
+spec:
+  releaseName: external-dns
+  chart:
+    spec:
+      chart: external-dns
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+      version: "1.7.0"
+  interval: 1h0m0s
+  values:
+    image:
+      repository: k8s.gcr.io/external-dns/external-dns
+      tag: v0.13.4
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: external-dns
+  namespace: kube-system
+spec:
+  interval: 1h0m0s
+  url: https://kubernetes-sigs.github.io/external-dns/
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  interval: 1h0m0s
+  url: https://github.com/renovatebot/renovate
+  ref:
+    tag: v11.35.4
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: kyverno-controller
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  provider: generic
+  url: oci://ghcr.io/kyverno/manifests/kyverno
+  ref:
+    tag: v1.8.2
 "#;
 
     const HELM_REPOSITORY: &str = r#"
