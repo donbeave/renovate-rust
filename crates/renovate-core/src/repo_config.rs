@@ -6969,6 +6969,7 @@ mod tests {
         assert!(!c.is_update_blocked("pkg", "0.9.0", UpdateType::Major, "cargo"));
     }
 
+    // Ported: "checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap" — util/package-rules/index.spec.ts line 987
     #[test]
     fn match_current_version_range_uses_current_version_field() {
         // Mirrors: "satisfies the condition on range overlap" — when currentVersion is set,
@@ -6997,6 +6998,15 @@ mod tests {
         assert!(
             !c.is_update_blocked_ctx(&ctx_no_cv),
             "without currentVersion, range currentValue can't match a range pattern"
+        );
+        let ctx_locked_range = DepContext {
+            dep_name: "test",
+            locked_version: Some("^1.0.0"),
+            ..Default::default()
+        };
+        assert!(
+            !c.is_update_blocked_ctx(&ctx_locked_range),
+            "range lockedVersion can't match a range pattern"
         );
     }
 
@@ -7130,10 +7140,9 @@ mod tests {
 
     // ── Ported from Renovate index.spec.ts (matchCurrentVersion) ─────────────
 
+    // Ported: "checks if matchCurrentVersion selector works with regular expressions" — util/package-rules/index.spec.ts line 1101
     #[test]
     fn match_current_version_index_spec_regex_matches() {
-        // Ported: "checks if matchCurrentVersion selector works with regular expressions"
-        // index.spec.ts line ~1101
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "/^4/", "automerge": true}]}"#,
         );
@@ -7155,10 +7164,9 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx2).automerge, None);
     }
 
+    // Ported: "checks if matchCurrentVersion selector works with negated regular expressions" — util/package-rules/index.spec.ts line 1132
     #[test]
     fn match_current_version_index_spec_negated_regex() {
-        // Ported: "checks if matchCurrentVersion selector works with negated regular expressions"
-        // index.spec.ts line ~1132
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "!/^4/", "automerge": true}]}"#,
         );
@@ -7180,10 +7188,9 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx2).automerge, Some(true));
     }
 
+    // Ported: "checks if matchCurrentVersion selector works with static values" — util/package-rules/index.spec.ts line 1079
     #[test]
     fn match_current_version_index_spec_static_value() {
-        // Ported: "checks if matchCurrentVersion selector works with static values"
-        // index.spec.ts line ~1079
         // matchCurrentVersion is a plain version → checks if it satisfies currentValue range.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "4.6.0", "automerge": true}]}"#,
@@ -7198,10 +7205,9 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
+    // Ported: "checks if matchCurrentVersion selector is a version and matches if currentValue is a range" — util/package-rules/index.spec.ts line 1049
     #[test]
     fn match_current_version_index_spec_version_matches_range() {
-        // Ported: "checks if matchCurrentVersion selector is a version and matches if currentValue is a range"
-        // index.spec.ts line ~1049
         // matchCurrentVersion='2.1.0' is a version → is it within currentValue range?
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": "2.1.0", "automerge": true}]}"#,
@@ -7228,6 +7234,21 @@ mod tests {
             None,
             "2.1.0 should NOT be in ~2.0.0"
         );
+    }
+
+    // Ported: "checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap" — util/package-rules/index.spec.ts line 1026
+    #[test]
+    fn match_current_version_index_spec_pinned_satisfies_range() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["test"], "matchCurrentVersion": ">= 2.0.0", "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "test",
+            current_value: Some("2.4.6"),
+            current_version: Some("2.4.6"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
     // ── matchFileNames tests ──────────────────────────────────────────────────
@@ -7261,6 +7282,7 @@ mod tests {
         ));
     }
 
+    // Ported: "matches packageFiles" — util/package-rules/index.spec.ts line 1163
     #[test]
     fn match_file_names_exact_match() {
         let c = RepoConfig::parse(
@@ -9327,9 +9349,9 @@ mod source_url_tests {
 
     // ── Ported from Renovate index.spec.ts "matches lock files" ──────────────
 
+    // Ported: "matches lock files" — util/package-rules/index.spec.ts line 1187
     #[test]
     fn match_file_names_matches_lock_files() {
-        // Ported: "matches lock files" test from index.spec.ts.
         // Rule matchFileNames: ['yarn.lock'] should fire when lockFiles contains 'yarn.lock'.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchFileNames": ["yarn.lock"], "automerge": true}]}"#,
@@ -9345,6 +9367,34 @@ mod source_url_tests {
             Some(true),
             "rule must fire when lockFiles contains matched pattern"
         );
+    }
+
+    // Ported: "matches paths" — util/package-rules/index.spec.ts line 1203
+    #[test]
+    fn match_file_names_matches_paths() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchFileNames": ["examples/**", "lib/"], "automerge": true}]}"#,
+        );
+        let examples_ctx = DepContext {
+            dep_name: "test",
+            file_path: Some("examples/foo/package.json"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&examples_ctx).automerge, Some(true));
+
+        let root_ctx = DepContext {
+            dep_name: "test",
+            file_path: Some("package.json"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&root_ctx).automerge, None);
+
+        let lib_ctx = DepContext {
+            dep_name: "test",
+            file_path: Some("lib/a/package.json"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&lib_ctx).automerge, Some(true));
     }
 
     #[test]

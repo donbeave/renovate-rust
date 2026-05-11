@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1329 / 1672 actionable tests ported (79%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1338 / 1672 actionable tests ported (80%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,7 +4295,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 38 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 47 | **Actionable:** 73 | **Status:** partial
 
 ### `util/package-rules/index`
 
@@ -4360,15 +4360,15 @@ resolver) and the inner `extractPackageFile()` adapter.
 |---|---|---|---|---|---|
 | filters naked depType | 950 | ported | `repo_config.rs` | `match_dep_types_naked_dep_type_matches` | — |
 | filters out unrequested depType | 968 | ported | `repo_config.rs` | `match_dep_types_out_of_requested_does_not_match` | — |
-| checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap | 987 | pending | — | — | — |
-| checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap | 1026 | pending | — | — | — |
-| checks if matchCurrentVersion selector is a version and matches if currentValue is a range | 1049 | pending | — | — | — |
-| checks if matchCurrentVersion selector works with static values | 1079 | pending | — | — | — |
-| checks if matchCurrentVersion selector works with regular expressions | 1101 | pending | — | — | — |
-| checks if matchCurrentVersion selector works with negated regular expressions | 1132 | pending | — | — | — |
-| matches packageFiles | 1163 | pending | — | — | — |
-| matches lock files | 1187 | pending | — | — | — |
-| matches paths | 1203 | pending | — | — | — |
+| checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap | 987 | ported | `repo_config.rs` | `match_current_version_range_uses_current_version_field` | — |
+| checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap | 1026 | ported | `repo_config.rs` | `match_current_version_index_spec_pinned_satisfies_range` | — |
+| checks if matchCurrentVersion selector is a version and matches if currentValue is a range | 1049 | ported | `repo_config.rs` | `match_current_version_index_spec_version_matches_range` | — |
+| checks if matchCurrentVersion selector works with static values | 1079 | ported | `repo_config.rs` | `match_current_version_index_spec_static_value` | — |
+| checks if matchCurrentVersion selector works with regular expressions | 1101 | ported | `repo_config.rs` | `match_current_version_index_spec_regex_matches` | — |
+| checks if matchCurrentVersion selector works with negated regular expressions | 1132 | ported | `repo_config.rs` | `match_current_version_index_spec_negated_regex` | — |
+| matches packageFiles | 1163 | ported | `repo_config.rs` | `match_file_names_exact_match` | — |
+| matches lock files | 1187 | ported | `repo_config.rs` | `match_file_names_matches_lock_files` | — |
+| matches paths | 1203 | ported | `repo_config.rs` | `match_file_names_matches_paths` | — |
 | empty rules | 1233 | pending | — | — | — |
 | creates groupSlug if necessary | 1242 | ported | `repo_config.rs` | `group_slug_auto_generated_from_group_name_when_prior_slug_exists` | — |
 | matches matchSourceUrls with patterns (case-insensitive) | 1261 | ported | `repo_config.rs` | `match_source_urls_case_insensitive` | — |
