@@ -17,6 +17,19 @@
 use globset::GlobBuilder;
 use regex::Regex;
 
+#[derive(Debug)]
+pub struct RegexPredicate {
+    regex: Regex,
+    is_positive: bool,
+}
+
+impl RegexPredicate {
+    pub fn is_match(&self, input: &str) -> bool {
+        let matched = self.regex.is_match(input);
+        if self.is_positive { matched } else { !matched }
+    }
+}
+
 /// Match `input` against a single pattern.
 ///
 /// Pattern forms:
@@ -35,10 +48,8 @@ pub fn match_regex_or_glob(input: &str, pattern: &str) -> bool {
     }
 
     // Inline regex: /pattern/ or /pattern/flags
-    if let Some(regex_body) = extract_regex_pattern(pattern) {
-        return Regex::new(&regex_body)
-            .map(|re| re.is_match(input))
-            .unwrap_or(false);
+    if let Some(predicate) = get_regex_predicate(pattern) {
+        return predicate.is_match(input);
     }
 
     // Glob: contains special characters.
@@ -131,35 +142,34 @@ pub fn is_skip_comment(comment: &str) -> bool {
     cmd == "ignore"
 }
 
-/// Extract a Rust-compatible regex string from a `/pattern/` or `/pattern/flags` literal.
+/// Return a predicate for Renovate `/pattern/` or `!/pattern/i` config regex literals.
 ///
-/// Supported flags: `i` (case-insensitive), `m` (multi-line), `s` (dot-all).
-/// Unknown flags are ignored.  Returns `None` if `s` is not a regex literal.
-fn extract_regex_pattern(s: &str) -> Option<String> {
+/// Renovate only accepts an optional trailing `i` flag here; unsupported flags
+/// like `/pattern/m` are treated as non-regex patterns.
+pub fn get_regex_predicate(input: &str) -> Option<RegexPredicate> {
+    let (is_positive, s) = if let Some(inner) = input.strip_prefix('!') {
+        (false, inner)
+    } else {
+        (true, input)
+    };
+
     let inner = s.strip_prefix('/')?;
     let close = inner.rfind('/')?;
     let body = &inner[..close];
     let flags = &inner[close + 1..];
 
-    if body.is_empty() {
+    if body.is_empty() || (!flags.is_empty() && flags != "i") {
         return None;
     }
 
-    // Build a prefix of embedded flags recognised by the `regex` crate.
-    let mut prefix = String::new();
-    for ch in flags.chars() {
-        match ch {
-            'i' | 'm' | 's' | 'x' => {
-                prefix.push('(');
-                prefix.push('?');
-                prefix.push(ch);
-                prefix.push(')');
-            }
-            _ => {}
-        }
-    }
-
-    Some(format!("{prefix}{body}"))
+    let regex_body = if flags == "i" {
+        format!("(?i){body}")
+    } else {
+        body.to_owned()
+    };
+    Regex::new(&regex_body)
+        .ok()
+        .map(|regex| RegexPredicate { regex, is_positive })
 }
 
 /// Return `true` if `pattern` contains any glob metacharacters.
@@ -228,6 +238,30 @@ mod tests {
     }
 
     #[test]
+    fn string_match_spec_empty_patterns_returns_false() {
+        // Ported from string-match.spec.ts: returns false if empty patterns
+        assert!(!match_regex_or_glob_list("test", &[]));
+    }
+
+    #[test]
+    fn string_match_spec_no_match_returns_false() {
+        let pats: Vec<String> = vec!["/test2/".into()];
+        assert!(!match_regex_or_glob_list("test", &pats));
+    }
+
+    #[test]
+    fn string_match_spec_star_returns_true() {
+        let pats: Vec<String> = vec!["*".into()];
+        assert!(match_regex_or_glob_list("&&&", &pats));
+    }
+
+    #[test]
+    fn string_match_spec_any_positive_match_returns_true() {
+        let pats: Vec<String> = vec!["test".into(), "/test2/".into()];
+        assert!(match_regex_or_glob_list("test", &pats));
+    }
+
+    #[test]
     fn positive_list_matches() {
         let pats: Vec<String> = vec!["npm".into(), "cargo".into()];
         assert!(match_regex_or_glob_list("npm", &pats));
@@ -248,6 +282,18 @@ mod tests {
         let pats: Vec<String> = vec!["!cargo".into()];
         assert!(match_regex_or_glob_list("npm", &pats));
         assert!(!match_regex_or_glob_list("cargo", &pats));
+    }
+
+    #[test]
+    fn string_match_spec_one_negative_pattern_returns_true() {
+        let pats: Vec<String> = vec!["!/test2/".into()];
+        assert!(match_regex_or_glob_list("test", &pats));
+    }
+
+    #[test]
+    fn string_match_spec_every_negative_regex_returns_true() {
+        let pats: Vec<String> = vec!["!/test2/".into(), "!/test3/".into()];
+        assert!(match_regex_or_glob_list("test", &pats));
     }
 
     #[test]
@@ -386,6 +432,13 @@ mod tests {
         assert!(match_regex_or_glob_list("test", &pats));
     }
 
+    #[test]
+    fn negative_regex_positive_pattern_allows_all_non_matches() {
+        // returns true if matching every negative pattern (regex)
+        let pats: Vec<String> = vec!["test".into(), "!/test3/".into(), "!/test4/".into()];
+        assert!(match_regex_or_glob_list("test", &pats));
+    }
+
     // ── any_match_regex_or_glob_list ──────────────────────────────────────────
 
     #[test]
@@ -400,6 +453,11 @@ mod tests {
     }
 
     #[test]
+    fn any_match_both_empty_returns_false() {
+        assert!(!any_match_regex_or_glob_list(&[], &[]));
+    }
+
+    #[test]
     fn any_match_positive_list_matches() {
         let pats: Vec<String> = vec!["b".into()];
         assert!(any_match_regex_or_glob_list(&["a", "b"], &pats));
@@ -410,6 +468,50 @@ mod tests {
         // any_match with negative pattern: if any input passes the negative filter, returns true
         let pats: Vec<String> = vec!["!b".into()];
         assert!(any_match_regex_or_glob_list(&["a", "b"], &pats));
+    }
+
+    // ── get_regex_predicate ──────────────────────────────────────────────────
+
+    #[test]
+    fn get_regex_predicate_allows_valid_regex_pattern() {
+        assert!(get_regex_predicate("/hello/").is_some());
+    }
+
+    #[test]
+    fn get_regex_predicate_invalidates_invalid_regex_pattern() {
+        assert!(get_regex_predicate(r"/^test\d+$/m").is_none());
+    }
+
+    #[test]
+    fn get_regex_predicate_allows_i_flag() {
+        assert!(get_regex_predicate(r"/^test\d+$/i").is_some());
+    }
+
+    #[test]
+    fn get_regex_predicate_allows_negative_regex_pattern() {
+        let predicate = get_regex_predicate(r"!/^test\d+$/i").expect("valid regex");
+        assert!(!predicate.is_match("test123"));
+        assert!(predicate.is_match("other"));
+    }
+
+    #[test]
+    fn get_regex_predicate_rejects_non_regex_input() {
+        assert!(get_regex_predicate("hello").is_none());
+    }
+
+    #[test]
+    fn match_regex_or_glob_positive_regex_pattern_matched() {
+        assert!(match_regex_or_glob("test", "/test/"));
+    }
+
+    #[test]
+    fn match_regex_or_glob_negative_regex_not_matched_returns_true() {
+        assert!(match_regex_or_glob("test", "!/test3/"));
+    }
+
+    #[test]
+    fn match_regex_or_glob_negative_pattern_matched_returns_false() {
+        assert!(!match_regex_or_glob("test", "!/te/"));
     }
 
     // ── Ported from Renovate dep-names.spec.ts (additional) ──────────────────
