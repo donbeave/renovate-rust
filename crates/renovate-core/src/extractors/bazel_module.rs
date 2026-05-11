@@ -143,6 +143,282 @@ pub enum BazelFragment {
     },
 }
 
+impl BazelFragment {
+    fn type_name(&self) -> &'static str {
+        match self {
+            BazelFragment::String { .. } => "string",
+            BazelFragment::Boolean { .. } => "boolean",
+            BazelFragment::Array { .. } => "array",
+            BazelFragment::Rule { .. } => "rule",
+            BazelFragment::PreparedExtensionTag { .. } => "preparedExtensionTag",
+            BazelFragment::ExtensionTag { .. } => "extensionTag",
+            BazelFragment::Attribute { .. } => "attribute",
+        }
+    }
+
+    fn is_complete(&self) -> bool {
+        match self {
+            BazelFragment::String { is_complete, .. }
+            | BazelFragment::Boolean { is_complete, .. }
+            | BazelFragment::Array { is_complete, .. }
+            | BazelFragment::Rule { is_complete, .. }
+            | BazelFragment::PreparedExtensionTag { is_complete, .. }
+            | BazelFragment::ExtensionTag { is_complete, .. }
+            | BazelFragment::Attribute { is_complete, .. } => *is_complete,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazelCtxProcessingError {
+    pub message: String,
+    pub current: BazelFragment,
+    pub parent: Option<BazelFragment>,
+}
+
+impl BazelCtxProcessingError {
+    pub fn new(current: BazelFragment, parent: Option<BazelFragment>) -> Self {
+        let parent_type = parent
+            .as_ref()
+            .map(BazelFragment::type_name)
+            .unwrap_or("none");
+        Self {
+            message: format!(
+                "Invalid context state. current: {}, parent: {}",
+                current.type_name(),
+                parent_type
+            ),
+            current,
+            parent,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BazelCtxError {
+    Message(&'static str),
+    Processing(Box<BazelCtxProcessingError>),
+}
+
+/// Stack context for Bazel module parser fragments.
+///
+/// This mirrors the checked state transitions from
+/// `lib/modules/manager/bazel-module/parser/context.ts`.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct BazelCtx {
+    source: String,
+    stack: Vec<BazelFragment>,
+    results: Vec<BazelFragment>,
+}
+
+impl BazelCtx {
+    pub fn new(source: &str) -> Self {
+        Self {
+            source: source.to_owned(),
+            stack: Vec::new(),
+            results: Vec::new(),
+        }
+    }
+
+    pub fn start_rule(&mut self, name: &str) {
+        self.stack.push(fragment_rule(name, BTreeMap::new(), false));
+    }
+
+    pub fn end_rule(&mut self) -> Result<(), BazelCtxError> {
+        let Some(current) = self.stack.last_mut() else {
+            return Err(BazelCtxError::Message("Requested current, but no value."));
+        };
+        match current {
+            BazelFragment::Rule { is_complete, .. } => {
+                *is_complete = true;
+                self.process_stack()
+            }
+            _ => Err(BazelCtxError::Message(
+                "Requested current rule, but does not exist.",
+            )),
+        }
+    }
+
+    pub fn start_array(&mut self) {
+        self.stack.push(fragment_array(Vec::new(), false));
+    }
+
+    pub fn end_array(&mut self) -> Result<(), BazelCtxError> {
+        let Some(current) = self.stack.last_mut() else {
+            return Err(BazelCtxError::Message("Requested current, but no value."));
+        };
+        match current {
+            BazelFragment::Array { is_complete, .. } => {
+                *is_complete = true;
+                self.process_stack()
+            }
+            _ => Err(BazelCtxError::Message(
+                "Requested current array, but does not exist.",
+            )),
+        }
+    }
+
+    pub fn start_attribute(&mut self, name: &str) -> Result<(), BazelCtxError> {
+        self.stack.push(fragment_attribute(name, None, false));
+        self.process_stack()
+    }
+
+    pub fn add_string(&mut self, value: &str) -> Result<(), BazelCtxError> {
+        self.stack.push(fragment_string(value));
+        self.process_stack()
+    }
+
+    pub fn prepare_extension_tag(&mut self, extension: &str, raw_extension: &str, offset: usize) {
+        self.stack.push(fragment_prepared_extension_tag(
+            extension,
+            raw_extension,
+            offset,
+        ));
+    }
+
+    pub fn start_extension_tag(&mut self, tag: &str) -> Result<(), BazelCtxError> {
+        let Some(current) = self.stack.pop() else {
+            return Err(BazelCtxError::Message("Requested current, but no value."));
+        };
+        match current {
+            BazelFragment::PreparedExtensionTag {
+                extension,
+                raw_extension,
+                offset,
+                ..
+            } => {
+                self.stack.push(fragment_extension_tag(
+                    &extension,
+                    &raw_extension,
+                    tag,
+                    offset,
+                    BTreeMap::new(),
+                    None,
+                    false,
+                ));
+                Ok(())
+            }
+            other => {
+                self.stack.push(other);
+                Err(BazelCtxError::Message(
+                    "Requested current prepared extension tag, but does not exist.",
+                ))
+            }
+        }
+    }
+
+    pub fn end_extension_tag(&mut self, offset: usize) -> Result<(), BazelCtxError> {
+        let Some(current) = self.stack.last_mut() else {
+            return Err(BazelCtxError::Message("Requested current, but no value."));
+        };
+        match current {
+            BazelFragment::ExtensionTag {
+                is_complete,
+                raw_string,
+                ..
+            } => {
+                *is_complete = true;
+                *raw_string = Some(self.source.chars().take(offset).collect());
+                self.process_stack()
+            }
+            _ => Err(BazelCtxError::Message(
+                "Requested current extension tag, but does not exist.",
+            )),
+        }
+    }
+
+    pub fn end_use_repo_rule(&mut self) -> Result<(), BazelCtxError> {
+        let Some(current) = self.stack.last() else {
+            return Err(BazelCtxError::Message("Requested current, but no value."));
+        };
+        if current.type_name() == "useRepoRule" {
+            self.process_stack()
+        } else {
+            Err(BazelCtxError::Message(
+                "Requested current use repo rule, but does not exist.",
+            ))
+        }
+    }
+
+    pub fn end_repo_rule_call(&mut self, _offset: usize) -> Result<(), BazelCtxError> {
+        let Some(current) = self.stack.last() else {
+            return Err(BazelCtxError::Message("Requested current, but no value."));
+        };
+        if current.type_name() == "repoRuleCall" {
+            self.process_stack()
+        } else {
+            Err(BazelCtxError::Message(
+                "Requested current repo rule call, but does not exist.",
+            ))
+        }
+    }
+
+    fn process_stack(&mut self) -> Result<(), BazelCtxError> {
+        while self.pop_stack()? {}
+        Ok(())
+    }
+
+    fn pop_stack(&mut self) -> Result<bool, BazelCtxError> {
+        let Some(current) = self.stack.pop() else {
+            return Ok(false);
+        };
+        if !current.is_complete() {
+            self.stack.push(current);
+            return Ok(false);
+        }
+
+        let parent = self.stack.last_mut();
+        if let Some(parent) = parent {
+            match parent {
+                BazelFragment::Attribute {
+                    value, is_complete, ..
+                } if fragment_is_value(&current) => {
+                    *value = Some(Box::new(current));
+                    *is_complete = true;
+                    return Ok(true);
+                }
+                BazelFragment::Array { items, .. } if fragment_is_primitive(&current) => {
+                    items.push(current);
+                    return Ok(true);
+                }
+                BazelFragment::Rule { children, .. } => {
+                    if let BazelFragment::Attribute {
+                        name,
+                        value: Some(value),
+                        ..
+                    } = current
+                    {
+                        children.insert(name, *value);
+                        return Ok(true);
+                    }
+                }
+                BazelFragment::ExtensionTag { children, .. } => {
+                    if let BazelFragment::Attribute {
+                        name,
+                        value: Some(value),
+                        ..
+                    } = current
+                    {
+                        children.insert(name, *value);
+                        return Ok(true);
+                    }
+                }
+                _ => {}
+            }
+        } else if matches!(
+            current,
+            BazelFragment::Rule { .. } | BazelFragment::ExtensionTag { .. }
+        ) {
+            self.results.push(current);
+            return Ok(true);
+        }
+
+        Err(BazelCtxError::Processing(Box::new(
+            BazelCtxProcessingError::new(current, self.stack.last().cloned()),
+        )))
+    }
+}
+
 pub fn fragment_string(value: &str) -> BazelFragment {
     BazelFragment::String {
         value: value.to_owned(),
@@ -1058,6 +1334,135 @@ mod tests {
         for (fragment, expected) in cases {
             assert_eq!(fragment_is_primitive(&fragment), expected);
         }
+    }
+
+    // Ported: "throws if there is no current" — bazel-module/parser/context.spec.ts line 7
+    #[test]
+    fn bazel_ctx_start_extension_tag_errors_without_current() {
+        let mut ctx = BazelCtx::new("");
+        assert_eq!(
+            ctx.start_extension_tag("install"),
+            Err(BazelCtxError::Message("Requested current, but no value."))
+        );
+    }
+
+    // Ported: "throws if the current is not a prepared extension tag" — bazel-module/parser/context.spec.ts line 13
+    #[test]
+    fn bazel_ctx_start_extension_tag_errors_for_wrong_current() {
+        let mut ctx = BazelCtx::new("");
+        ctx.start_rule("foo");
+        assert_eq!(
+            ctx.start_extension_tag("install"),
+            Err(BazelCtxError::Message(
+                "Requested current prepared extension tag, but does not exist."
+            ))
+        );
+    }
+
+    // Ported: "throws if the current is not an extension tag" — bazel-module/parser/context.spec.ts line 23
+    #[test]
+    fn bazel_ctx_end_extension_tag_errors_for_wrong_current() {
+        let mut ctx = BazelCtx::new("");
+        ctx.start_rule("foo");
+        assert_eq!(
+            ctx.end_extension_tag(0),
+            Err(BazelCtxError::Message(
+                "Requested current extension tag, but does not exist."
+            ))
+        );
+    }
+
+    // Ported: "throws on missing current" — bazel-module/parser/context.spec.ts line 30
+    #[test]
+    fn bazel_ctx_end_rule_errors_without_current() {
+        let mut ctx = BazelCtx::new("");
+        assert_eq!(
+            ctx.end_rule(),
+            Err(BazelCtxError::Message("Requested current, but no value."))
+        );
+    }
+
+    // Ported: "throws on unbalanced endRule" — bazel-module/parser/context.spec.ts line 37
+    #[test]
+    fn bazel_ctx_end_rule_errors_when_current_is_array() {
+        let mut ctx = BazelCtx::new("");
+        ctx.start_rule("foo");
+        ctx.start_array();
+        assert_eq!(
+            ctx.end_rule(),
+            Err(BazelCtxError::Message(
+                "Requested current rule, but does not exist."
+            ))
+        );
+    }
+
+    // Ported: "throws on unbalanced endArray" — bazel-module/parser/context.spec.ts line 44
+    #[test]
+    fn bazel_ctx_end_array_errors_when_current_is_rule() {
+        let mut ctx = BazelCtx::new("");
+        ctx.start_array();
+        ctx.start_rule("dummy");
+        assert_eq!(
+            ctx.end_array(),
+            Err(BazelCtxError::Message(
+                "Requested current array, but does not exist."
+            ))
+        );
+    }
+
+    // Ported: "throws if add an attribute without a parent" — bazel-module/parser/context.spec.ts line 51
+    #[test]
+    fn bazel_ctx_add_string_to_parentless_attribute_errors() {
+        let mut ctx = BazelCtx::new("");
+        ctx.start_attribute("name").unwrap();
+        let expected_current = fragment_attribute("name", Some(fragment_string("chicken")), true);
+        assert_eq!(
+            ctx.add_string("chicken"),
+            Err(BazelCtxError::Processing(Box::new(
+                BazelCtxProcessingError::new(expected_current, None)
+            )))
+        );
+    }
+
+    // Ported: "throws if current use repo rule does not exist" — bazel-module/parser/context.spec.ts line 60
+    #[test]
+    fn bazel_ctx_end_use_repo_rule_errors_for_wrong_current() {
+        let mut ctx = BazelCtx::new("");
+        ctx.start_rule("foo");
+        assert_eq!(
+            ctx.end_use_repo_rule(),
+            Err(BazelCtxError::Message(
+                "Requested current use repo rule, but does not exist."
+            ))
+        );
+    }
+
+    // Ported: "throws if current repo rule call does not exist" — bazel-module/parser/context.spec.ts line 67
+    #[test]
+    fn bazel_ctx_end_repo_rule_call_errors_for_wrong_current() {
+        let mut ctx = BazelCtx::new("");
+        ctx.start_rule("foo");
+        assert_eq!(
+            ctx.end_repo_rule_call(0),
+            Err(BazelCtxError::Message(
+                "Requested current repo rule call, but does not exist."
+            ))
+        );
+    }
+
+    // Ported: "creates CtxProcessingError with parent type" — bazel-module/parser/context.spec.ts line 74
+    #[test]
+    fn bazel_ctx_processing_error_records_current_and_parent_type() {
+        let current = fragment_attribute("name", None, false);
+        let parent = fragment_rule("parent", BTreeMap::new(), false);
+        let error = BazelCtxProcessingError::new(current.clone(), Some(parent.clone()));
+
+        assert_eq!(
+            error.message,
+            "Invalid context state. current: attribute, parent: rule"
+        );
+        assert_eq!(error.current, current);
+        assert_eq!(error.parent, Some(parent));
     }
 
     // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54

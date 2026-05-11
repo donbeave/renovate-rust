@@ -108,7 +108,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/bazel-module/extract.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Core extraction ported |
 | `lib/modules/manager/bazel-module/parser/index.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Parser inlined |
 | `lib/modules/manager/bazel-module/parser/common.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/context.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
+| `lib/modules/manager/bazel-module/parser/context.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Context error semantics ported |
 | `lib/modules/manager/bazel-module/parser/crate.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/parser/extension-tags.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/parser/fragments.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Fragment constructors/classifiers ported |

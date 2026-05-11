@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1113 / 1305 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1123 / 1315 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 31 spec files not yet converted to per-test format (24 pending, 6 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 30 spec files not yet converted to per-test format (24 pending, 5 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2821,6 +2821,33 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/bazel-module/parser/context.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/parser/context.spec.ts
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+
+### `modules/manager/bazel-module/parser/context › Ctx (failures cases) › extension tag`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws if there is no current | 7 | ported | `bazel_module.rs` | `bazel_ctx_start_extension_tag_errors_without_current` | — |
+| throws if the current is not a prepared extension tag | 13 | ported | `bazel_module.rs` | `bazel_ctx_start_extension_tag_errors_for_wrong_current` | — |
+| throws if the current is not an extension tag | 23 | ported | `bazel_module.rs` | `bazel_ctx_end_extension_tag_errors_for_wrong_current` | — |
+
+### `modules/manager/bazel-module/parser/context › Ctx (failures cases)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws on missing current | 30 | ported | `bazel_module.rs` | `bazel_ctx_end_rule_errors_without_current` | — |
+| throws on unbalanced endRule | 37 | ported | `bazel_module.rs` | `bazel_ctx_end_rule_errors_when_current_is_array` | — |
+| throws on unbalanced endArray | 44 | ported | `bazel_module.rs` | `bazel_ctx_end_array_errors_when_current_is_rule` | — |
+| throws if add an attribute without a parent | 51 | ported | `bazel_module.rs` | `bazel_ctx_add_string_to_parentless_attribute_errors` | — |
+| throws if current use repo rule does not exist | 60 | ported | `bazel_module.rs` | `bazel_ctx_end_use_repo_rule_errors_for_wrong_current` | — |
+| throws if current repo rule call does not exist | 67 | ported | `bazel_module.rs` | `bazel_ctx_end_repo_rule_call_errors_for_wrong_current` | — |
+| creates CtxProcessingError with parent type | 74 | ported | `bazel_module.rs` | `bazel_ctx_processing_error_records_current_and_parent_type` | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -2897,7 +2924,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- ant/update.spec.ts converted to per-test format above -->
 | `lib/modules/manager/bazel-module/bazelrc.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/bazel-module/lockfile.spec.ts` | — | — | — | pending |
-| `lib/modules/manager/bazel-module/parser/context.spec.ts` | — | `crates/renovate-core/src/extractors/bazel_module.rs` | — | partial |
+<!-- bazel-module/parser/context.spec.ts converted to per-test format above -->
 <!-- bazel-module/parser/fragments.spec.ts converted to per-test format above -->
 | `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | — | — | — | pending |
