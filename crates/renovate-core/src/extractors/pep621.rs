@@ -16,6 +16,7 @@
 //! | `[project.optional-dependencies].*` | `Optional` |
 //! | `[dependency-groups].*` (PEP 735) | `Group` |
 //! | `[tool.pdm.dev-dependencies].*` | `PdmDev` |
+//! | `[tool.uv.sources].*` | `UvSources` |
 //! | `[build-system].requires` | `BuildSystem` |
 //!
 //! ## PEP 508 string format
@@ -27,6 +28,7 @@
 //! the registry lookup.  Entries that cannot be parsed as PEP 508 strings
 //! (e.g., PEP 735 `{include-group = "…"}` tables) are silently skipped.
 
+use std::collections::BTreeMap;
 use thiserror::Error;
 use toml::Value;
 
@@ -41,6 +43,8 @@ pub enum Pep621DepType {
     Group,
     /// `[tool.pdm.dev-dependencies].*`
     PdmDev,
+    /// `[tool.uv.sources].*`
+    UvSources,
     /// `[build-system].requires`
     BuildSystem,
 }
@@ -52,6 +56,7 @@ impl Pep621DepType {
             Pep621DepType::Optional => "optional-dependencies",
             Pep621DepType::Group => "dependency-groups",
             Pep621DepType::PdmDev => "tool.pdm.dev-dependencies",
+            Pep621DepType::UvSources => "tool.uv.sources",
             Pep621DepType::BuildSystem => "build-system",
         }
     }
@@ -64,6 +69,21 @@ pub enum Pep621SkipReason {
     GroupInclude,
     /// Entry is a direct URL or VCS reference.
     DirectReference,
+    /// Entry is a local path or wheel.
+    PathDependency,
+    /// Entry uses a source URL shape unsupported by Renovate's pep621 manager.
+    UnsupportedUrl,
+    /// Entry is inherited from the workspace.
+    InheritedDependency,
+    /// Entry has no source version to look up.
+    UnspecifiedVersion,
+}
+
+/// Datasource associated with a PEP 621 dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Pep621Datasource {
+    GitRefs,
+    GithubTags,
 }
 
 /// A single extracted pyproject.toml dependency.
@@ -75,6 +95,8 @@ pub struct Pep621ExtractedDep {
     pub current_value: String,
     /// Which section this dep came from.
     pub dep_type: Pep621DepType,
+    pub datasource: Option<Pep621Datasource>,
+    pub package_name: Option<String>,
     pub registry_urls: Vec<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<Pep621SkipReason>,
@@ -106,6 +128,7 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
     let doc: Value = toml::from_str(content)?;
     let mut deps = Vec::new();
     let registry_urls = extract_pdm_sources(&doc);
+    let uv_sources = extract_uv_sources(&doc);
 
     // [project].dependencies
     if let Some(project_deps) = doc
@@ -115,7 +138,11 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
     {
         for entry in project_deps {
             if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::Regular) {
-                deps.push(with_registry_urls(dep, &registry_urls));
+                if let Some(uv_source) = uv_sources.get(&dep.name) {
+                    deps.push(uv_source.clone());
+                } else {
+                    deps.push(with_registry_urls(dep, &registry_urls));
+                }
             }
         }
     }
@@ -149,6 +176,8 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
                             name: String::new(),
                             current_value: String::new(),
                             dep_type: Pep621DepType::Group,
+                            datasource: None,
+                            package_name: None,
                             registry_urls: Vec::new(),
                             skip_reason: Some(Pep621SkipReason::GroupInclude),
                         });
@@ -220,6 +249,8 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             name,
             current_value: raw.to_owned(),
             dep_type,
+            datasource: None,
+            package_name: None,
             registry_urls: Vec::new(),
             skip_reason: Some(Pep621SkipReason::DirectReference),
         };
@@ -242,6 +273,8 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             name: String::new(),
             current_value: raw.to_owned(),
             dep_type,
+            datasource: None,
+            package_name: None,
             registry_urls: Vec::new(),
             skip_reason: Some(Pep621SkipReason::GroupInclude),
         };
@@ -261,6 +294,8 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
         name,
         current_value: specifier.to_owned(),
         dep_type,
+        datasource: None,
+        package_name: None,
         registry_urls: Vec::new(),
         skip_reason: None,
     }
@@ -285,6 +320,70 @@ fn extract_pdm_sources(doc: &Value) -> Vec<String> {
                 .collect()
         })
         .unwrap_or_default()
+}
+
+fn extract_uv_sources(doc: &Value) -> BTreeMap<String, Pep621ExtractedDep> {
+    let Some(sources) = doc
+        .get("tool")
+        .and_then(|tool| tool.get("uv"))
+        .and_then(|uv| uv.get("sources"))
+        .and_then(Value::as_table)
+    else {
+        return BTreeMap::new();
+    };
+
+    sources
+        .iter()
+        .filter_map(|(name, source)| {
+            let name = normalize_name(name);
+            let table = source.as_table()?;
+            let mut dep = Pep621ExtractedDep {
+                name: name.clone(),
+                current_value: String::new(),
+                dep_type: Pep621DepType::UvSources,
+                datasource: None,
+                package_name: None,
+                registry_urls: Vec::new(),
+                skip_reason: None,
+            };
+
+            if table.get("workspace").and_then(Value::as_bool) == Some(true) {
+                dep.skip_reason = Some(Pep621SkipReason::InheritedDependency);
+            } else if table.get("path").is_some() {
+                dep.skip_reason = Some(Pep621SkipReason::PathDependency);
+            } else if table.get("url").is_some() {
+                dep.skip_reason = Some(Pep621SkipReason::UnsupportedUrl);
+            } else if let Some(git) = table.get("git").and_then(Value::as_str) {
+                dep.datasource = Some(Pep621Datasource::GitRefs);
+                dep.package_name = Some(git.to_owned());
+
+                if let Some(tag) = table.get("tag").and_then(Value::as_str) {
+                    dep.current_value = tag.to_owned();
+                    if let Some(repo) = github_repo_from_git_url(git) {
+                        dep.datasource = Some(Pep621Datasource::GithubTags);
+                        dep.package_name = Some(repo);
+                        dep.registry_urls = vec!["https://github.com".to_owned()];
+                    }
+                } else if let Some(rev) = table.get("rev").and_then(Value::as_str) {
+                    dep.current_value = rev.to_owned();
+                } else {
+                    dep.skip_reason = Some(Pep621SkipReason::UnspecifiedVersion);
+                }
+            } else {
+                return None;
+            }
+
+            Some((name, dep))
+        })
+        .collect()
+}
+
+fn github_repo_from_git_url(url: &str) -> Option<String> {
+    let path = url
+        .strip_prefix("ssh://git@github.com/")
+        .or_else(|| url.strip_prefix("git@github.com:"))
+        .or_else(|| url.strip_prefix("https://github.com/"))?;
+    Some(path.trim_end_matches(".git").to_owned())
 }
 
 /// Normalize a Python package name per PEP 503.
@@ -434,6 +533,115 @@ dependencies = ["mypkg @ https://example.com/mypkg.tar.gz"]
 "#;
         let deps = extract_ok(content);
         assert_eq!(deps[0].skip_reason, Some(Pep621SkipReason::DirectReference));
+    }
+
+    #[test]
+    fn uv_sources_classify_git_path_url_and_workspace_sources() {
+        let content = r#"
+[project]
+dependencies = [
+  "dep1",
+  "dep2",
+  "dep3",
+  "dep4",
+  "dep5",
+  "dep6",
+  "dep7",
+  "dep-with_NORMALIZATION",
+]
+
+[tool.uv.sources]
+dep2 = { git = "https://github.com/foo/bar" }
+dep3 = { path = "/local-dep.whl" }
+dep4 = { url = "https://example.com" }
+dep5 = { workspace = true }
+dep7 = { git = "ssh://git@github.com/foo/baz", tag = "1.0.1" }
+dep_WITH-normalization = { workspace = true }
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 8);
+
+        let dep1 = deps.iter().find(|d| d.name == "dep1").unwrap();
+        assert_eq!(dep1.dep_type, Pep621DepType::Regular);
+        assert!(dep1.skip_reason.is_none());
+
+        let dep2 = deps.iter().find(|d| d.name == "dep2").unwrap();
+        assert_eq!(dep2.dep_type, Pep621DepType::UvSources);
+        assert_eq!(dep2.datasource, Some(Pep621Datasource::GitRefs));
+        assert_eq!(
+            dep2.package_name.as_deref(),
+            Some("https://github.com/foo/bar")
+        );
+        assert_eq!(dep2.skip_reason, Some(Pep621SkipReason::UnspecifiedVersion));
+
+        let dep3 = deps.iter().find(|d| d.name == "dep3").unwrap();
+        assert_eq!(dep3.skip_reason, Some(Pep621SkipReason::PathDependency));
+
+        let dep4 = deps.iter().find(|d| d.name == "dep4").unwrap();
+        assert_eq!(dep4.skip_reason, Some(Pep621SkipReason::UnsupportedUrl));
+
+        let dep5 = deps.iter().find(|d| d.name == "dep5").unwrap();
+        assert_eq!(
+            dep5.skip_reason,
+            Some(Pep621SkipReason::InheritedDependency)
+        );
+
+        let dep6 = deps.iter().find(|d| d.name == "dep6").unwrap();
+        assert_eq!(dep6.dep_type, Pep621DepType::Regular);
+        assert!(dep6.skip_reason.is_none());
+
+        let dep7 = deps.iter().find(|d| d.name == "dep7").unwrap();
+        assert_eq!(dep7.dep_type, Pep621DepType::UvSources);
+        assert_eq!(dep7.datasource, Some(Pep621Datasource::GithubTags));
+        assert_eq!(dep7.package_name.as_deref(), Some("foo/baz"));
+        assert_eq!(dep7.current_value, "1.0.1");
+        assert_eq!(dep7.registry_urls, vec!["https://github.com".to_owned()]);
+
+        let normalized = deps
+            .iter()
+            .find(|d| d.name == "dep-with-normalization")
+            .unwrap();
+        assert_eq!(
+            normalized.skip_reason,
+            Some(Pep621SkipReason::InheritedDependency)
+        );
+    }
+
+    // Ported: "should handle SSH git URLs correctly for GitHub sources" — pep621/extract.spec.ts line 412
+    #[test]
+    fn uv_sources_handle_ssh_github_tag_and_rev() {
+        let content = r#"
+[project]
+dependencies = [
+  "dep1",
+  "dep2",
+]
+
+[tool.uv.sources]
+dep1 = { git = "ssh://git@github.com/foo/dep1", tag = "v1.2.3" }
+dep2 = { git = "ssh://git@github.com/foo/dep2", rev = "abcd1234" }
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 2);
+
+        let dep1 = deps.iter().find(|d| d.name == "dep1").unwrap();
+        assert_eq!(dep1.dep_type, Pep621DepType::UvSources);
+        assert_eq!(dep1.datasource, Some(Pep621Datasource::GithubTags));
+        assert_eq!(dep1.package_name.as_deref(), Some("foo/dep1"));
+        assert_eq!(dep1.current_value, "v1.2.3");
+        assert_eq!(dep1.registry_urls, vec!["https://github.com".to_owned()]);
+        assert!(dep1.skip_reason.is_none());
+
+        let dep2 = deps.iter().find(|d| d.name == "dep2").unwrap();
+        assert_eq!(dep2.dep_type, Pep621DepType::UvSources);
+        assert_eq!(dep2.datasource, Some(Pep621Datasource::GitRefs));
+        assert_eq!(
+            dep2.package_name.as_deref(),
+            Some("ssh://git@github.com/foo/dep2")
+        );
+        assert_eq!(dep2.current_value, "abcd1234");
+        assert!(dep2.registry_urls.is_empty());
+        assert!(dep2.skip_reason.is_none());
     }
 
     // Ported: "should return dependencies with original pypi registryUrl" — pep621/extract.spec.ts line 309

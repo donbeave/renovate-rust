@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 999 / 1217 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1000 / 1217 actionable tests ported (82%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1239,7 +1239,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pep621/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/extract.spec.ts
-**Total tests:** 14 | **Ported:** 9 | **Actionable:** 14 | **Status:** partial
+**Total tests:** 14 | **Ported:** 10 | **Actionable:** 14 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1250,8 +1250,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | should return dependencies for valid content | 32 | ported | `pep621.rs` | `extracts_project_dependencies` (+ extracts_optional_dependencies, extracts_dependency_groups_skips_include_tables) | — |
 | should return dependencies with overwritten pypi registryUrl | 233 | ported | `pep621.rs` | `pdm_sources_apply_registry_urls_to_project_optional_and_dev_dependencies` | — |
 | should return dependencies with original pypi registryUrl | 309 | ported | `pep621.rs` | `pdm_sources_apply_registry_urls_to_project_dependencies` | — |
-| should skip dependencies with unsupported uv sources | 340 | ported | `pep621.rs` | `direct_reference_is_skipped` | — |
-| should handle SSH git URLs correctly for GitHub sources | 412 | pending | — | — | Requires uv git/SSH source parsing |
+| should skip dependencies with unsupported uv sources | 340 | ported | `pep621.rs` | `uv_sources_classify_git_path_url_and_workspace_sources` | — |
+| should handle SSH git URLs correctly for GitHub sources | 412 | ported | `pep621.rs` | `uv_sources_handle_ssh_github_tag_and_rev` | — |
 | should extract dependencies from hatch environments | 446 | pending | — | — | Requires tool.hatch.envs.* parsing |
 | should extract project version | 498 | ported | `pep621.rs` | `project_version_field_is_parseable` | — |
 | should extract dependencies from build-system.requires | 510 | ported | `pep621.rs` | `build_system_requires_extracted_with_project_deps` | — |
