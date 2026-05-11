@@ -12,6 +12,7 @@
 
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use regex::Regex;
+use serde::Deserialize;
 
 use crate::managers::manager_categories;
 use crate::versioning::semver_generic::UpdateType;
@@ -945,6 +946,21 @@ pub struct RuleEffects {
     pub force_enabled: Option<bool>,
 }
 
+fn deserialize_string_or_vec<'de, D>(d: D) -> Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let val = serde_json::Value::deserialize(d)?;
+    Ok(match val {
+        serde_json::Value::String(s) => vec![s],
+        serde_json::Value::Array(arr) => arr
+            .into_iter()
+            .filter_map(|v| v.as_str().map(str::to_owned))
+            .collect(),
+        _ => vec![],
+    })
+}
+
 // ── UpdateTypeConfig ──────────────────────────────────────────────────────────
 
 /// Per-update-type configuration block.
@@ -970,7 +986,7 @@ pub struct UpdateTypeConfig {
     pub group_name: Option<String>,
     #[serde(rename = "groupSlug")]
     pub group_slug: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_string_or_vec")]
     pub schedule: Vec<String>,
     #[serde(rename = "prPriority")]
     pub pr_priority: Option<i32>,

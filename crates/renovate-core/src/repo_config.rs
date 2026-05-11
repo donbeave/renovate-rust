@@ -7489,16 +7489,16 @@ mod tests {
 
     // ── Ported from migration.spec.ts schedule migration ─────────────────────
 
+    // Ported: "migrates every friday" — config/migration.spec.ts line 205
     #[test]
     fn schedule_every_friday_migrated_to_on_friday() {
-        // Ported: "migrates every friday" from migration.spec.ts
         let c = RepoConfig::parse(r#"{"schedule": "every friday"}"#);
         assert_eq!(c.schedule, vec!["on friday"]);
     }
 
+    // Ported: "does not migrate every weekday" — config/migration.spec.ts line 226
     #[test]
     fn schedule_every_weekday_not_migrated() {
-        // Ported: "does not migrate every weekday" — "every weekday" stays unchanged.
         let c = RepoConfig::parse(r#"{"schedule": "every weekday"}"#);
         assert_eq!(c.schedule, vec!["every weekday"]);
     }
@@ -7515,9 +7515,30 @@ mod tests {
         assert!(c.schedule.is_empty());
     }
 
+    // Ported: "migrates before and after schedules" — config/migration.spec.ts line 184
+    #[test]
+    fn schedule_before_after_migration_matches_renovate_cases() {
+        let c = RepoConfig::parse(
+            r#"{
+                "major": {"schedule": "after 10pm and before 7am"},
+                "minor": {"schedule": "after 10pm and before 7am on every weekday"}
+            }"#,
+        );
+        assert_eq!(
+            c.major_config.as_ref().map(|m| &m.schedule),
+            Some(&vec!["after 10pm".to_owned(), "before 7am".to_owned()])
+        );
+        assert_eq!(
+            c.minor_config.as_ref().map(|m| &m.schedule),
+            Some(&vec![
+                "after 10pm every weekday".to_owned(),
+                "before 7am every weekday".to_owned()
+            ])
+        );
+    }
+
     #[test]
     fn schedule_compound_after_before_splits_at_midnight_boundary() {
-        // Ported: "migrates before and after schedules" — migration.spec.ts line 184
         // "after 10pm and before 7am" — 10pm (22) > 7am (7) → straddling midnight → split
         let c = RepoConfig::parse(r#"{"major": {"schedule": ["after 10pm and before 7am"]}}"#);
         // The major.schedule should be split into ["after 10pm", "before 7am"]
@@ -7541,9 +7562,9 @@ mod tests {
         );
     }
 
+    // Ported: "does not migrate hour range" — config/migration.spec.ts line 247
     #[test]
     fn schedule_compound_non_straddling_not_split() {
-        // Ported: "does not migrate hour range" — migration.spec.ts line 247
         // "after 1:00pm and before 5:00pm" — 13:00 < 17:00 → not straddling → no split
         let c = RepoConfig::parse(r#"{"schedule": "after 1:00pm and before 5:00pm"}"#);
         assert_eq!(c.schedule, vec!["after 1:00pm and before 5:00pm"]);
@@ -7683,9 +7704,18 @@ mod tests {
         assert_eq!(c.base_branches, vec!["main", "develop"]);
     }
 
+    // Ported: "migrates baseBranches and baseBranch" — config/migration.spec.ts line 835
+    #[test]
+    fn base_branches_and_base_branch_migrated_to_patterns() {
+        let c = RepoConfig::parse(r#"{"baseBranches": ["main", "dev"]}"#);
+        assert_eq!(c.base_branches, vec!["main", "dev"]);
+
+        let c = RepoConfig::parse(r#"{"baseBranch": "next"}"#);
+        assert_eq!(c.base_branches, vec!["next"]);
+    }
+
     #[test]
     fn base_branch_patterns_parsed() {
-        // Ported: "migrates baseBranches and baseBranch" — migration.spec.ts line 835
         // baseBranchPatterns is the new canonical name; old baseBranches still supported.
         let c = RepoConfig::parse(r#"{"baseBranchPatterns": ["main", "dev"]}"#);
         assert_eq!(c.base_branches, vec!["main", "dev"]);
@@ -7814,18 +7844,18 @@ mod tests {
         assert!(!c.platform_automerge);
     }
 
+    // Ported: "migrates azureAutoComplete" — config/migration.spec.ts line 762
     #[test]
     fn azure_auto_complete_migrated_to_platform_automerge() {
-        // Ported: "migrates azureAutoComplete" — migration.spec.ts line 762
         let c = RepoConfig::parse(r#"{"azureAutoComplete": true}"#);
         assert!(c.platform_automerge);
         let c2 = RepoConfig::parse(r#"{"azureAutoComplete": false}"#);
         assert!(!c2.platform_automerge);
     }
 
+    // Ported: "migrates gitLabAutomerge" — config/migration.spec.ts line 791
     #[test]
     fn git_lab_automerge_migrated_to_platform_automerge() {
-        // Ported: "migrates gitLabAutomerge" — migration.spec.ts line 791
         let c = RepoConfig::parse(r#"{"gitLabAutomerge": true}"#);
         assert!(c.platform_automerge);
         let c2 = RepoConfig::parse(r#"{"gitLabAutomerge": false}"#);
@@ -10017,9 +10047,9 @@ mod rule_effects_tests {
 
     // ── Ported from Renovate migration.spec.ts "migrates packageRules" ────────
 
+    // Ported: "migrates packageRules" — config/migration.spec.ts line 551
     #[test]
     fn migrates_package_rules_all_deprecated_fields() {
-        // Ported from migration.spec.ts "migrates packageRules" test.
         // Verifies that all deprecated packageRule fields are migrated correctly.
         let c = RepoConfig::parse(
             r#"{
@@ -10129,9 +10159,9 @@ mod rule_effects_tests {
 
     // ── Ported from migration.spec.ts "migrates packages" ────────────────────
 
+    // Ported: "migrates packages" — config/migration.spec.ts line 257
     #[test]
     fn deprecated_packages_field_merged_into_package_rules() {
-        // Ported: "migrates packages" from migration.spec.ts.
         // Old `packages: [{...}]` → merged into `packageRules`.
         let c = RepoConfig::parse(
             r#"{

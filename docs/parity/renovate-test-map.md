@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1282 / 1442 actionable tests ported (89%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1291 / 1472 actionable tests ported (88%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 3 spec files not yet converted to per-test format (3 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, and migration — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 2 spec files not yet converted to per-test format (2 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, and validation — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3498,6 +3498,53 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
+**Total tests:** 30 | **Ported:** 9 | **Actionable:** 30 | **Status:** partial
+
+### `config/migration › migrateConfig(config, parentConfig)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates config | 17 | pending | — | — | — |
+| migrates before and after schedules | 184 | ported | `repo_config.rs` | `schedule_before_after_migration_matches_renovate_cases` | — |
+| migrates every friday | 205 | ported | `repo_config.rs` | `schedule_every_friday_migrated_to_on_friday` | — |
+| migrates semantic prefix with no scope | 215 | pending | — | — | — |
+| does not migrate every weekday | 226 | ported | `repo_config.rs` | `schedule_every_weekday_not_migrated` | — |
+| does not migrate multi days | 236 | pending | — | — | — |
+| does not migrate hour range | 247 | ported | `repo_config.rs` | `schedule_compound_non_straddling_not_split` | — |
+| migrates packages | 257 | ported | `repo_config.rs` | `deprecated_packages_field_merged_into_package_rules` | — |
+| overrides existing automerge setting | 279 | pending | — | — | — |
+| does not migrate config | 297 | pending | — | — | — |
+| migrates subconfig | 308 | pending | — | — | — |
+| migrates packageFiles | 334 | pending | — | — | — |
+| migrates more packageFiles | 360 | pending | — | — | — |
+| removes invalid configs | 389 | pending | — | — | — |
+| migrates preset strings to array | 419 | pending | — | — | — |
+| migrates unpublishSafe | 441 | pending | — | — | — |
+| migrates npm:unpublishSafe | 532 | pending | — | — | — |
+| migrates packageRules | 551 | ported | `repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | — |
+| migrates in order of precedence | 593 | pending | — | — | — |
+
+### `config/migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates nested packageRules | 624 | pending | — | — | — |
+| migrates presets | 655 | pending | — | — | — |
+| migrates customManagers | 671 | pending | — | — | — |
+| migrates pip-compile | 696 | pending | — | — | — |
+| migrates gradle-lite | 731 | pending | — | — | — |
+| migrates empty requiredStatusChecks | 751 | pending | — | — | — |
+| migrates azureAutoComplete | 762 | ported | `repo_config.rs` | `azure_auto_complete_migrated_to_platform_automerge` | — |
+| migrates gitLabAutomerge | 791 | ported | `repo_config.rs` | `git_lab_automerge_migrated_to_platform_automerge` | — |
+| migrates dryRun | 820 | pending | — | — | — |
+| migrates baseBranches and baseBranch | 835 | ported | `repo_config.rs` | `base_branches_and_base_branch_migrated_to_patterns` | — |
+| logs errors | 844 | pending | — | — | — |
+
+---
+
 ## Config specs (`lib/config/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3507,7 +3554,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- config/parse.spec.ts converted to per-test format above -->
 <!-- config/global.spec.ts converted to per-test format above -->
 | `lib/config/validation.spec.ts` | 124 | — | 0 | pending |
-| `lib/config/migration.spec.ts` | 30 | — | 0 | pending |
+<!-- config/migration.spec.ts converted to per-test format above -->
 <!-- config/migrate-validate.spec.ts converted to per-test format above -->
 <!-- config/massage.spec.ts converted to per-test format above -->
 <!-- config/secrets.spec.ts converted to per-test format above -->
