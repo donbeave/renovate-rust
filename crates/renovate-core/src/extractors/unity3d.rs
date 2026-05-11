@@ -28,7 +28,7 @@ pub enum Unity3dVersionKind {
     WithRevision,
 }
 
-/// A single Unity3D Editor version dep.
+/// A Unity3D Editor version dep.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Unity3dDep {
     pub current_value: String,
@@ -38,58 +38,115 @@ pub struct Unity3dDep {
 /// Matches `m_EditorVersion: 2022.3.10f1` or
 /// `m_EditorVersionWithRevision: 2022.3.10f1 (ff3792e53c62)`.
 static VERSION_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?m)^m_EditorVersion(?:WithRevision)?:\s*(.+?)\s*$").unwrap());
+    LazyLock::new(|| Regex::new(r"(?m)^m_EditorVersion:\s*(.*?)\s*$").unwrap());
 
 /// Matches `m_EditorVersionWithRevision:` specifically.
 static WITH_REV_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?m)^m_EditorVersionWithRevision:\s*(.+?)\s*$").unwrap());
 
-/// Extract the Unity3D Editor version from a `ProjectVersion.txt` file.
+/// Extract the Unity3D Editor versions from a `ProjectVersion.txt` file.
 ///
-/// Returns `None` if no version field is found.
-pub fn extract(content: &str) -> Option<Unity3dDep> {
-    // Prefer `m_EditorVersionWithRevision` if present.
-    if let Some(cap) = WITH_REV_RE.captures(content) {
-        return Some(Unity3dDep {
-            current_value: cap[1].to_owned(),
-            kind: Unity3dVersionKind::WithRevision,
-        });
-    }
+/// Returns an empty vector if no version field is found.
+pub fn extract(content: &str) -> Vec<Unity3dDep> {
+    let mut deps = Vec::new();
 
-    // Fall back to plain `m_EditorVersion`.
     if let Some(cap) = VERSION_RE.captures(content) {
-        return Some(Unity3dDep {
-            current_value: cap[1].to_owned(),
-            kind: Unity3dVersionKind::Plain,
-        });
+        let current_value = cap[1].trim();
+        if !current_value.is_empty() {
+            deps.push(Unity3dDep {
+                current_value: current_value.to_owned(),
+                kind: Unity3dVersionKind::Plain,
+            });
+        }
     }
 
-    None
+    if let Some(cap) = WITH_REV_RE.captures(content) {
+        let current_value = cap[1].trim();
+        if !current_value.is_empty() {
+            deps.push(Unity3dDep {
+                current_value: current_value.to_owned(),
+                kind: Unity3dVersionKind::WithRevision,
+            });
+        }
+    }
+
+    deps
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    // Ported: "handles $packageName" — unity3d/extract.spec.ts line 14
     #[test]
     fn extracts_plain_version() {
-        let content = "m_EditorVersion: 2022.3.10f1\n";
-        let dep = extract(content).unwrap();
-        assert_eq!(dep.current_value, "2022.3.10f1");
-        assert_eq!(dep.kind, Unity3dVersionKind::Plain);
+        let deps = extract("m_EditorVersion: 2022.3.19f1\n");
+        assert_eq!(
+            deps,
+            vec![Unity3dDep {
+                current_value: "2022.3.19f1".to_owned(),
+                kind: Unity3dVersionKind::Plain,
+            }]
+        );
     }
 
+    // Ported: "handles $packageName" — unity3d/extract.spec.ts line 14
     #[test]
-    fn prefers_with_revision_version() {
-        let content = "m_EditorVersion: 2022.3.10f1\nm_EditorVersionWithRevision: 2022.3.10f1 (ff3792e53c62)\n";
-        let dep = extract(content).unwrap();
-        assert_eq!(dep.current_value, "2022.3.10f1 (ff3792e53c62)");
-        assert_eq!(dep.kind, Unity3dVersionKind::WithRevision);
+    fn extracts_with_revision_version() {
+        let deps = extract("m_EditorVersionWithRevision: 2022.3.19f1 (30acc77e9b6b)\n");
+        assert_eq!(
+            deps,
+            vec![Unity3dDep {
+                current_value: "2022.3.19f1 (30acc77e9b6b)".to_owned(),
+                kind: Unity3dVersionKind::WithRevision,
+            }]
+        );
     }
 
+    // Ported: "handles no version" — unity3d/extract.spec.ts line 5
     #[test]
     fn returns_none_for_empty() {
-        assert!(extract("").is_none());
-        assert!(extract("something: else\n").is_none());
+        assert!(extract("").is_empty());
+        assert!(extract("m_EditorVersion: ").is_empty());
+        assert!(extract("m_EditorVersionWithRevision: ").is_empty());
+        assert!(extract("something: else\n").is_empty());
+    }
+
+    // Ported: "handles $type versions" — unity3d/extract.spec.ts line 39
+    #[test]
+    fn extracts_alpha_beta_and_stable_versions_with_revisions() {
+        let cases = [
+            (
+                "m_EditorVersion: 2022.3.0a1\nm_EditorVersionWithRevision: 2022.3.0a1 (244b723c30a6)\n",
+                "2022.3.0a1",
+                "2022.3.0a1 (244b723c30a6)",
+            ),
+            (
+                "m_EditorVersion: 2023.3.0b5\nm_EditorVersionWithRevision: 2023.3.0b5 (30acc77e9b6b)\n",
+                "2023.3.0b5",
+                "2023.3.0b5 (30acc77e9b6b)",
+            ),
+            (
+                "m_EditorVersion: 2021.3.35f1\nm_EditorVersionWithRevision: 2021.3.35f1 (122a674b12f3)\n",
+                "2021.3.35f1",
+                "2021.3.35f1 (122a674b12f3)",
+            ),
+        ];
+
+        for (content, version, version_with_revision) in cases {
+            assert_eq!(
+                extract(content),
+                vec![
+                    Unity3dDep {
+                        current_value: version.to_owned(),
+                        kind: Unity3dVersionKind::Plain,
+                    },
+                    Unity3dDep {
+                        current_value: version_with_revision.to_owned(),
+                        kind: Unity3dVersionKind::WithRevision,
+                    },
+                ]
+            );
+        }
     }
 }

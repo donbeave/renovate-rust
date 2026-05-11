@@ -125,43 +125,44 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
         match client.get_raw_file(owner, repo, &unity_path).await {
             Ok(Some(raw)) => {
                 use renovate_core::extractors::unity3d::Unity3dVersionKind;
-                let Some(dep) = renovate_core::extractors::unity3d::extract(&raw.content) else {
+                let deps = renovate_core::extractors::unity3d::extract(&raw.content);
+                if deps.is_empty() {
                     continue;
-                };
-                let with_revision = dep.kind == Unity3dVersionKind::WithRevision;
-                let status = match renovate_core::datasources::unity3d::fetch_latest_lts(
-                    http,
-                    with_revision,
-                )
-                .await
-                {
-                    Ok(s) => {
-                        let latest_str = if with_revision {
-                            s.latest_with_revision.clone()
-                        } else {
-                            s.latest.clone()
-                        };
-                        match latest_str {
-                            Some(latest) if latest != dep.current_value => {
-                                output::DepStatus::UpdateAvailable {
-                                    current: dep.current_value.clone(),
-                                    latest,
+                }
+
+                let mut reports = Vec::new();
+                for dep in deps {
+                    let with_revision = dep.kind == Unity3dVersionKind::WithRevision;
+                    let status = match renovate_core::datasources::unity3d::fetch_latest_lts(
+                        http,
+                        with_revision,
+                    )
+                    .await
+                    {
+                        Ok(s) => {
+                            let latest_str = if with_revision {
+                                s.latest_with_revision.clone()
+                            } else {
+                                s.latest.clone()
+                            };
+                            match latest_str {
+                                Some(latest) if latest != dep.current_value => {
+                                    output::DepStatus::UpdateAvailable {
+                                        current: dep.current_value.clone(),
+                                        latest,
+                                    }
                                 }
+                                Some(latest) => output::DepStatus::UpToDate {
+                                    latest: Some(latest),
+                                },
+                                None => output::DepStatus::UpToDate { latest: None },
                             }
-                            Some(latest) => output::DepStatus::UpToDate {
-                                latest: Some(latest),
-                            },
-                            None => output::DepStatus::UpToDate { latest: None },
                         }
-                    }
-                    Err(e) => output::DepStatus::LookupError {
-                        message: e.to_string(),
-                    },
-                };
-                ctx.report.files.push(output::FileReport {
-                    path: unity_path.clone(),
-                    manager: "unity3d".into(),
-                    deps: vec![output::DepReport {
+                        Err(e) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                    };
+                    reports.push(output::DepReport {
                         branch_name: None,
                         group_name: None,
                         automerge: None,
@@ -185,7 +186,12 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         replacement_version: None,
                         name: "Unity Editor".to_owned(),
                         status,
-                    }],
+                    });
+                }
+                ctx.report.files.push(output::FileReport {
+                    path: unity_path.clone(),
+                    manager: "unity3d".into(),
+                    deps: reports,
                 });
             }
             Ok(None) => {
