@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 980 / 1217 actionable tests ported (81%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 984 / 1217 actionable tests ported (81%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 42 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 46 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2127,10 +2127,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts OCIRepository with quoted keys | 1030 | ported | `flux.rs` | `extracts_oci_repository_with_quoted_keys` | — |
 | extracts OCIRepository when ref key is quoted | 1063 | ported | `flux.rs` | `extracts_oci_repository_with_quoted_ref_key` | — |
 | skips OCIRepository when tag value is a YAML alias | 1098 | ported | `flux.rs` | `skips_oci_repository_when_tag_value_is_yaml_alias` | — |
-| extracts OCIRepository with tag and digest preceded by other document types | 1129 | pending | — | — | Requires multi-document YAML preceded-by-others handling |
-| extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref | 1195 | pending | — | — | Requires multi-document same-name resource handling |
-| extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec | 1241 | pending | — | — | Requires multi-document same-name resource handling |
-| extracts OCIRepository with tag and digest when ref contains a non-scalar key | 1285 | pending | — | — | Requires non-scalar ref-key tolerance |
+| extracts OCIRepository with tag and digest preceded by other document types | 1129 | ported | `flux.rs` | `extracts_oci_repository_after_other_document_types` | — |
+| extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref | 1195 | ported | `flux.rs` | `extracts_oci_repository_after_same_name_scalar_ref` | — |
+| extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec | 1241 | ported | `flux.rs` | `extracts_oci_repository_after_same_name_scalar_spec` | — |
+| extracts OCIRepository with tag and digest when ref contains a non-scalar key | 1285 | ported | `flux.rs` | `extracts_oci_repository_when_ref_contains_non_scalar_key` | — |
 | extracts Kustomization | 1323 | pending | — | — | Requires Kustomization resource extraction |
 | ignores resources of an unknown kind | 1389 | pending | — | — | Requires kind-filter |
 | ignores resources without a kind | 1400 | pending | — | — | Requires kind-validation |

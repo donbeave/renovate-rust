@@ -234,6 +234,9 @@ fn extract_oci_repository_doc(
     let package_name = apply_registry_alias(image, registry_aliases);
     let tag = value_at(scalars, &["spec", "ref", "tag"]);
     let digest = value_at(scalars, &["spec", "ref", "digest"]);
+    if tag.is_none() && digest.is_none() && value_at(scalars, &["spec", "ref"]).is_some() {
+        return None;
+    }
     let tag_is_yaml_alias = tag.is_some_and(|tag| tag.starts_with('*'));
     let tag = if tag_is_yaml_alias {
         tag.and_then(|tag| resolve_yaml_alias(scalars, tag))
@@ -1176,6 +1179,68 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::InvalidValue));
     }
 
+    // Ported: "extracts OCIRepository with tag and digest preceded by other document types" — flux/extract.spec.ts line 1129
+    #[test]
+    fn extracts_oci_repository_after_other_document_types() {
+        let content = format!(
+            "---\n---\napiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: HelmRepository\nmetadata:\n  name: bitnami\n  namespace: flux-system\nspec:\n  url: https://charts.bitnami.com/bitnami\n---\napiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: other-oci\n  namespace: flux-system\nspec:\n  url: oci://ghcr.io/other/repo\n  ref:\n    tag: v1.0.0\n---\n{OCI_REPOSITORY_WITH_DIGEST_AND_TAG}"
+        );
+        let deps = extract_oci_repositories(&content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "ghcr.io/other/repo");
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.0.0"));
+        assert_eq!(deps[1].dep_name, "ghcr.io/kyverno/manifests/kyverno");
+        assert_eq!(deps[1].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[1].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
+    // Ported: "extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref" — flux/extract.spec.ts line 1195
+    #[test]
+    fn extracts_oci_repository_after_same_name_scalar_ref() {
+        let content = format!(
+            "---\napiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec:\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n  ref: \"not-a-map\"\n---\n{OCI_REPOSITORY_WITH_DIGEST_AND_TAG}"
+        );
+        let deps = extract_oci_repositories(&content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
+    // Ported: "extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec" — flux/extract.spec.ts line 1241
+    #[test]
+    fn extracts_oci_repository_after_same_name_scalar_spec() {
+        let content = format!(
+            "---\napiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec: \"not-a-map\"\n---\n{OCI_REPOSITORY_WITH_DIGEST_AND_TAG}"
+        );
+        let deps = extract_oci_repositories(&content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
+    // Ported: "extracts OCIRepository with tag and digest when ref contains a non-scalar key" — flux/extract.spec.ts line 1285
+    #[test]
+    fn extracts_oci_repository_when_ref_contains_non_scalar_key() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec:\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n  ref:\n    ? [seq-key]\n    : ignored\n    tag: v1.8.2\n    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
@@ -1269,5 +1334,18 @@ spec:
   url: oci://ghcr.io/kyverno/manifests/kyverno
   ref:
     tag: v1.8.2
+"#;
+
+    const OCI_REPOSITORY_WITH_DIGEST_AND_TAG: &str = r#"
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: kyverno-controller
+  namespace: flux-system
+spec:
+  url: oci://ghcr.io/kyverno/manifests/kyverno
+  ref:
+    tag: v1.8.2
+    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
 "#;
 }
