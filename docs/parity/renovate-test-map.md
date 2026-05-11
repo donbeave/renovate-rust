@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 816 / 1217 actionable tests ported (67%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 820 / 1217 actionable tests ported (67%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1817,7 +1817,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nuget/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/extract.spec.ts
-**Total tests:** 35 | **Ported:** 15 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 19 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1856,11 +1856,11 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 521 | pending | — | — | Requires .config/dotnet-tools.json parsing |
+| works | 521 | ported | `nuget.rs` | `dotnet_tools_manifest_extracts_tools` | — |
 | with-config | 537 | pending | — | — | Requires .config/dotnet-tools.json + NuGet.config |
-| wrong version | 561 | pending | — | — | Requires .config/dotnet-tools.json version validation |
-| returns null for no deps | 571 | pending | — | — | Requires .config/dotnet-tools.json empty-tools handling |
-| does not throw | 577 | pending | — | — | Requires .config/dotnet-tools.json malformed tolerance |
+| wrong version | 561 | ported | `nuget.rs` | `dotnet_tools_manifest_wrong_version_returns_empty` | — |
+| returns null for no deps | 571 | ported | `nuget.rs` | `dotnet_tools_manifest_without_tools_returns_empty` | — |
+| does not throw | 577 | ported | `nuget.rs` | `dotnet_tools_manifest_malformed_returns_empty` | — |
 
 ### `extractPackageFile() › single-csharp-file`
 

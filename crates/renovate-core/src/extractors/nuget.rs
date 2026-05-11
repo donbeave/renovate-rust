@@ -30,6 +30,7 @@ use std::io::BufReader;
 
 use quick_xml::Reader;
 use quick_xml::events::{BytesStart, Event};
+use serde_json::Value;
 use thiserror::Error;
 
 /// Which MSBuild element the dep came from.
@@ -45,6 +46,8 @@ pub enum NuGetDepType {
     Global,
     /// MSBuild SDK reference (`<Project Sdk="…/version">`, `<Sdk Name="…" Version="…">`, `<Import Sdk="…" Version="…">`)
     MsbuildSdk,
+    /// Local .NET tool manifest entry from `.config/dotnet-tools.json`.
+    DotnetTool,
     /// `<ContainerBaseImage>` property — Docker image for .NET container publishing.
     ContainerImage,
 }
@@ -57,6 +60,7 @@ impl NuGetDepType {
             NuGetDepType::CliTool => "DotNetCliToolReference",
             NuGetDepType::Global => "GlobalPackageReference",
             NuGetDepType::MsbuildSdk => "msbuild-sdk",
+            NuGetDepType::DotnetTool => "nuget",
             NuGetDepType::ContainerImage => "docker",
         }
     }
@@ -193,6 +197,42 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
     }
 
     Ok(deps)
+}
+
+/// Parse a `.config/dotnet-tools.json` local tool manifest.
+///
+/// Renovate treats unsupported manifest versions, missing `tools`, and invalid
+/// JSON as null extraction results; this tolerant API mirrors that behavior by
+/// returning an empty dependency list for those cases.
+pub fn extract_dotnet_tools(content: &str) -> Vec<NuGetExtractedDep> {
+    let Ok(manifest) = serde_json::from_str::<Value>(content) else {
+        return Vec::new();
+    };
+
+    if manifest.get("version").and_then(Value::as_u64) != Some(1) {
+        return Vec::new();
+    }
+
+    let Some(tools) = manifest.get("tools").and_then(Value::as_object) else {
+        return Vec::new();
+    };
+
+    tools
+        .iter()
+        .filter_map(|(name, tool)| {
+            let version = tool.get("version").and_then(Value::as_str)?;
+            if version.is_empty() {
+                return None;
+            }
+            Some(NuGetExtractedDep {
+                package_id: name.clone(),
+                current_value: version.to_owned(),
+                current_digest: None,
+                dep_type: NuGetDepType::DotnetTool,
+                skip_reason: None,
+            })
+        })
+        .collect()
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -742,5 +782,49 @@ mod tests {
         );
         assert_eq!(deps[0].dep_type, NuGetDepType::ContainerImage);
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "works" — nuget/extract.spec.ts line 521
+    #[test]
+    fn dotnet_tools_manifest_extracts_tools() {
+        let content = r#"{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "minver-cli": {
+      "version": "2.0.0",
+      "commands": ["minver"]
+    }
+  }
+}"#;
+        let deps = extract_dotnet_tools(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "minver-cli");
+        assert_eq!(deps[0].current_value, "2.0.0");
+        assert_eq!(deps[0].dep_type, NuGetDepType::DotnetTool);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "wrong version" — nuget/extract.spec.ts line 561
+    #[test]
+    fn dotnet_tools_manifest_wrong_version_returns_empty() {
+        let deps = extract_dotnet_tools(
+            r#"{"version": 2, "tools": {"minver-cli": {"version": "2.0.0"}}}"#,
+        );
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "returns null for no deps" — nuget/extract.spec.ts line 571
+    #[test]
+    fn dotnet_tools_manifest_without_tools_returns_empty() {
+        let deps = extract_dotnet_tools(r#"{"version": 1}"#);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "does not throw" — nuget/extract.spec.ts line 577
+    #[test]
+    fn dotnet_tools_manifest_malformed_returns_empty() {
+        let deps = extract_dotnet_tools("{{");
+        assert!(deps.is_empty());
     }
 }
