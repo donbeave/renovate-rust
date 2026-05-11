@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1137 / 1368 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1154 / 1368 actionable tests ported (84%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 29 spec files not yet converted to per-test format (24 pending, 4 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -412,7 +412,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/github-actions/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/parse.spec.ts
-**Total tests:** 53 | **Ported:** 14 | **Actionable:** 53 | **Status:** partial
+**Total tests:** 53 | **Ported:** 31 | **Actionable:** 53 | **Status:** partial
 
 ### `modules/manager/github-actions/parse › parseActionReference`
 
@@ -437,23 +437,23 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns ratchetExclude for ratchet:exclude | 147 | pending | — | — | — |
-| returns empty object for no match | 154 | pending | — | — | — |
-| parses pinned version with tag= prefix | 159 | pending | — | — | — |
-| parses pinned version with pin prefix | 168 | pending | — | — | — |
-| parses pinned version with renovate: prefix | 177 | pending | — | — | — |
-| parses pinned version with renovate:pin prefix | 186 | pending | — | — | — |
-| parses bare version | 195 | pending | — | — | — |
-| parses version with @ prefix | 204 | pending | — | — | — |
-| parses ratchet pinned version | 213 | pending | — | — | — |
-| parses version without v prefix | 222 | pending | — | — | — |
-| parses version with leading whitespace | 231 | pending | — | — | — |
-| parses prefixed version like node/v20 | 240 | pending | — | — | — |
-| parses prerelease version like v2.2-rc.1 | 249 | pending | — | — | — |
-| parses full semver prerelease version like v2.2.0-rc.1 | 258 | pending | — | — | — |
-| parses bare non-semver ref | 267 | pending | — | — | — |
-| parses bare branch name | 276 | pending | — | — | — |
-| ignores multi-word comments | 285 | pending | — | — | — |
+| returns ratchetExclude for ratchet:exclude | 147 | ported | `github_actions.rs` | `parse_comment_returns_ratchet_exclude_for_ratchet_exclude` | — |
+| returns empty object for no match | 154 | ported | `github_actions.rs` | `parse_comment_returns_empty_object_for_no_match` | — |
+| parses pinned version with tag= prefix | 159 | ported | `github_actions.rs` | `parse_comment_parses_pinned_version_with_tag_prefix` | — |
+| parses pinned version with pin prefix | 168 | ported | `github_actions.rs` | `parse_comment_parses_pinned_version_with_pin_prefix` | — |
+| parses pinned version with renovate: prefix | 177 | ported | `github_actions.rs` | `parse_comment_parses_pinned_version_with_renovate_prefix` | — |
+| parses pinned version with renovate:pin prefix | 186 | ported | `github_actions.rs` | `parse_comment_parses_pinned_version_with_renovate_pin_prefix` | — |
+| parses bare version | 195 | ported | `github_actions.rs` | `parse_comment_parses_bare_version` | — |
+| parses version with @ prefix | 204 | ported | `github_actions.rs` | `parse_comment_parses_version_with_at_prefix` | — |
+| parses ratchet pinned version | 213 | ported | `github_actions.rs` | `parse_comment_parses_ratchet_pinned_version` | — |
+| parses version without v prefix | 222 | ported | `github_actions.rs` | `parse_comment_parses_version_without_v_prefix` | — |
+| parses version with leading whitespace | 231 | ported | `github_actions.rs` | `parse_comment_parses_version_with_leading_whitespace` | — |
+| parses prefixed version like node/v20 | 240 | ported | `github_actions.rs` | `parse_comment_parses_prefixed_version_like_node_v20` | — |
+| parses prerelease version like v2.2-rc.1 | 249 | ported | `github_actions.rs` | `parse_comment_parses_prerelease_version_like_v2_2_rc_1` | — |
+| parses full semver prerelease version like v2.2.0-rc.1 | 258 | ported | `github_actions.rs` | `parse_comment_parses_full_semver_prerelease_version_like_v2_2_0_rc_1` | — |
+| parses bare non-semver ref | 267 | ported | `github_actions.rs` | `parse_comment_parses_bare_non_semver_ref` | — |
+| parses bare branch name | 276 | ported | `github_actions.rs` | `parse_comment_parses_bare_branch_name` | — |
+| ignores multi-word comments | 285 | ported | `github_actions.rs` | `parse_comment_ignores_multi_word_comments` | — |
 
 ### `modules/manager/github-actions/parse › parseQuote`
 

@@ -87,6 +87,16 @@ pub enum GithubActionReference {
     },
 }
 
+/// Parsed trailing GitHub Actions comment metadata.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct GithubActionsCommentData {
+    pub pinned_version: Option<String>,
+    pub reference: Option<String>,
+    pub ratchet_exclude: bool,
+    pub matched_string: Option<String>,
+    pub index: Option<usize>,
+}
+
 // ── Compiled regexes ───────────────────────────────────────────────────────
 
 /// Matches a `uses:` line inside a workflow YAML file.
@@ -100,6 +110,16 @@ static SHA_FULL: LazyLock<Regex> =
 
 /// 6–7 character lowercase hex short SHA.
 static SHA_SHORT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-f0-9]{6,7}$").unwrap());
+
+static COMMENT_PIN_TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+/[.\w-]+))?@?(?<version>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?(?:-[a-zA-Z0-9.]+)?)",
+    )
+    .unwrap()
+});
+
+static COMMENT_BARE_TOKEN_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*(?<token>\S+)\s*$").unwrap());
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -143,6 +163,43 @@ pub fn parse_action_reference(raw: &str) -> Option<GithubActionReference> {
     }
 
     parse_repository_action_reference(raw)
+}
+
+/// Parse Renovate metadata from a GitHub Actions trailing comment.
+///
+/// Renovate reference: `lib/modules/manager/github-actions/parse.ts`
+/// `parseComment`.
+pub fn parse_comment(comment_body: &str) -> GithubActionsCommentData {
+    if comment_body.trim() == "ratchet:exclude" {
+        return GithubActionsCommentData {
+            ratchet_exclude: true,
+            ..GithubActionsCommentData::default()
+        };
+    }
+
+    if let Some(caps) = COMMENT_PIN_TOKEN_RE.captures(comment_body)
+        && let (Some(matched), Some(version)) = (caps.get(0), caps.name("version"))
+    {
+        return GithubActionsCommentData {
+            pinned_version: Some(version.as_str().to_owned()),
+            matched_string: Some(matched.as_str().to_owned()),
+            index: Some(matched.start()),
+            ..GithubActionsCommentData::default()
+        };
+    }
+
+    if let Some(caps) = COMMENT_BARE_TOKEN_RE.captures(comment_body)
+        && let (Some(matched), Some(token)) = (caps.get(0), caps.name("token"))
+    {
+        return GithubActionsCommentData {
+            reference: Some(token.as_str().to_owned()),
+            matched_string: Some(matched.as_str().to_owned()),
+            index: Some(matched.start()),
+            ..GithubActionsCommentData::default()
+        };
+    }
+
+    GithubActionsCommentData::default()
 }
 
 /// Extract and normalise the version string from a trailing `# <version>` comment.
@@ -1342,6 +1399,22 @@ mod tests {
         }
     }
 
+    fn comment_data(
+        pinned_version: Option<&str>,
+        reference: Option<&str>,
+        ratchet_exclude: bool,
+        matched_string: Option<&str>,
+        index: Option<usize>,
+    ) -> GithubActionsCommentData {
+        GithubActionsCommentData {
+            pinned_version: pinned_version.map(str::to_owned),
+            reference: reference.map(str::to_owned),
+            ratchet_exclude,
+            matched_string: matched_string.map(str::to_owned),
+            index,
+        }
+    }
+
     // Ported: "returns null for empty string" — github-actions/parse.spec.ts line 11
     #[test]
     fn parse_action_reference_returns_none_for_empty_string() {
@@ -1514,6 +1587,194 @@ mod tests {
                 path: Some("workflow.yml".to_owned()),
                 reference: "main".to_owned(),
             })
+        );
+    }
+
+    // Ported: "returns ratchetExclude for ratchet:exclude" — github-actions/parse.spec.ts line 147
+    #[test]
+    fn parse_comment_returns_ratchet_exclude_for_ratchet_exclude() {
+        assert_eq!(
+            parse_comment("ratchet:exclude"),
+            comment_data(None, None, true, None, None)
+        );
+        assert_eq!(
+            parse_comment("  ratchet:exclude  "),
+            comment_data(None, None, true, None, None)
+        );
+    }
+
+    // Ported: "returns empty object for no match" — github-actions/parse.spec.ts line 154
+    #[test]
+    fn parse_comment_returns_empty_object_for_no_match() {
+        assert_eq!(parse_comment(""), GithubActionsCommentData::default());
+        assert_eq!(
+            parse_comment("some random comment"),
+            GithubActionsCommentData::default()
+        );
+    }
+
+    // Ported: "parses pinned version with tag= prefix" — github-actions/parse.spec.ts line 159
+    #[test]
+    fn parse_comment_parses_pinned_version_with_tag_prefix() {
+        assert_eq!(
+            parse_comment(" tag=v1.2.3"),
+            comment_data(Some("v1.2.3"), None, false, Some(" tag=v1.2.3"), Some(0))
+        );
+    }
+
+    // Ported: "parses pinned version with pin prefix" — github-actions/parse.spec.ts line 168
+    #[test]
+    fn parse_comment_parses_pinned_version_with_pin_prefix() {
+        assert_eq!(
+            parse_comment("pin v2"),
+            comment_data(Some("v2"), None, false, Some("pin v2"), Some(0))
+        );
+    }
+
+    // Ported: "parses pinned version with renovate: prefix" — github-actions/parse.spec.ts line 177
+    #[test]
+    fn parse_comment_parses_pinned_version_with_renovate_prefix() {
+        assert_eq!(
+            parse_comment("renovate: pin v3.0.0"),
+            comment_data(
+                Some("v3.0.0"),
+                None,
+                false,
+                Some("renovate: pin v3.0.0"),
+                Some(0),
+            )
+        );
+    }
+
+    // Ported: "parses pinned version with renovate:pin prefix" — github-actions/parse.spec.ts line 186
+    #[test]
+    fn parse_comment_parses_pinned_version_with_renovate_pin_prefix() {
+        assert_eq!(
+            parse_comment("renovate:pin v3.0.0"),
+            comment_data(
+                Some("v3.0.0"),
+                None,
+                false,
+                Some("renovate:pin v3.0.0"),
+                Some(0),
+            )
+        );
+    }
+
+    // Ported: "parses bare version" — github-actions/parse.spec.ts line 195
+    #[test]
+    fn parse_comment_parses_bare_version() {
+        assert_eq!(
+            parse_comment("v1"),
+            comment_data(Some("v1"), None, false, Some("v1"), Some(0))
+        );
+    }
+
+    // Ported: "parses version with @ prefix" — github-actions/parse.spec.ts line 204
+    #[test]
+    fn parse_comment_parses_version_with_at_prefix() {
+        assert_eq!(
+            parse_comment("@v4.1.0"),
+            comment_data(Some("v4.1.0"), None, false, Some("@v4.1.0"), Some(0))
+        );
+    }
+
+    // Ported: "parses ratchet pinned version" — github-actions/parse.spec.ts line 213
+    #[test]
+    fn parse_comment_parses_ratchet_pinned_version() {
+        assert_eq!(
+            parse_comment("ratchet:actions/checkout@v4"),
+            comment_data(
+                Some("v4"),
+                None,
+                false,
+                Some("ratchet:actions/checkout@v4"),
+                Some(0),
+            )
+        );
+    }
+
+    // Ported: "parses version without v prefix" — github-actions/parse.spec.ts line 222
+    #[test]
+    fn parse_comment_parses_version_without_v_prefix() {
+        assert_eq!(
+            parse_comment("1.2.3"),
+            comment_data(Some("1.2.3"), None, false, Some("1.2.3"), Some(0))
+        );
+    }
+
+    // Ported: "parses version with leading whitespace" — github-actions/parse.spec.ts line 231
+    #[test]
+    fn parse_comment_parses_version_with_leading_whitespace() {
+        assert_eq!(
+            parse_comment("   v1.0"),
+            comment_data(Some("v1.0"), None, false, Some("   v1.0"), Some(0))
+        );
+    }
+
+    // Ported: "parses prefixed version like node/v20" — github-actions/parse.spec.ts line 240
+    #[test]
+    fn parse_comment_parses_prefixed_version_like_node_v20() {
+        assert_eq!(
+            parse_comment("node/v20"),
+            comment_data(Some("node/v20"), None, false, Some("node/v20"), Some(0))
+        );
+    }
+
+    // Ported: "parses prerelease version like v2.2-rc.1" — github-actions/parse.spec.ts line 249
+    #[test]
+    fn parse_comment_parses_prerelease_version_like_v2_2_rc_1() {
+        assert_eq!(
+            parse_comment("v2.2-rc.1"),
+            comment_data(Some("v2.2-rc.1"), None, false, Some("v2.2-rc.1"), Some(0))
+        );
+    }
+
+    // Ported: "parses full semver prerelease version like v2.2.0-rc.1" — github-actions/parse.spec.ts line 258
+    #[test]
+    fn parse_comment_parses_full_semver_prerelease_version_like_v2_2_0_rc_1() {
+        assert_eq!(
+            parse_comment("v2.2.0-rc.1"),
+            comment_data(
+                Some("v2.2.0-rc.1"),
+                None,
+                false,
+                Some("v2.2.0-rc.1"),
+                Some(0),
+            )
+        );
+    }
+
+    // Ported: "parses bare non-semver ref" — github-actions/parse.spec.ts line 267
+    #[test]
+    fn parse_comment_parses_bare_non_semver_ref() {
+        assert_eq!(
+            parse_comment(" cargo-llvm-cov"),
+            comment_data(
+                None,
+                Some("cargo-llvm-cov"),
+                false,
+                Some(" cargo-llvm-cov"),
+                Some(0)
+            )
+        );
+    }
+
+    // Ported: "parses bare branch name" — github-actions/parse.spec.ts line 276
+    #[test]
+    fn parse_comment_parses_bare_branch_name() {
+        assert_eq!(
+            parse_comment(" main"),
+            comment_data(None, Some("main"), false, Some(" main"), Some(0))
+        );
+    }
+
+    // Ported: "ignores multi-word comments" — github-actions/parse.spec.ts line 285
+    #[test]
+    fn parse_comment_ignores_multi_word_comments() {
+        assert_eq!(
+            parse_comment("do not update"),
+            GithubActionsCommentData::default()
         );
     }
 
