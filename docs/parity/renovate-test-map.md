@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 957 / 1217 actionable tests ported (79%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 964 / 1217 actionable tests ported (79%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 19 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 26 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2103,14 +2103,14 @@ Status key: `ported` · `pending` · `not-applicable`
 | ignores HelmRepository resources without a namespace | 376 | ported | `flux.rs` | `ignores_helm_repository_without_namespace` | — |
 | ignores HelmRepository resources without a URL | 400 | ported | `flux.rs` | `ignores_helm_repository_without_url` | — |
 | ignores HelmRelease resources using an invalid chartRef | 425 | ported | `flux.rs` | `ignores_helm_release_with_invalid_chart_ref` | — |
-| ignores HelmRelease resources using a chartRef targetting a HelmChart | 433 | pending | — | — | Requires HelmChart chartRef detection |
+| ignores HelmRelease resources using a chartRef targetting a HelmChart | 433 | ported | `flux.rs` | `ignores_release_chart_ref_and_extracts_helm_chart` | — |
 | ignores HelmRelease resources using a chartRef targetting an OCIRepository | 457 | pending | — | — | Requires OCIRepository chartRef detection |
-| extracts HelmChart version | 492 | pending | — | — | Requires HelmChart resource extraction |
-| does not match HelmChart resources without a namespace | 513 | pending | — | — | Requires HelmChart namespace pairing |
-| falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name | 544 | pending | — | — | registryAliases not yet implemented |
-| uses registryAliases to resolve HelmChart sourceRef name when repository is missing | 566 | pending | — | — | registryAliases not yet implemented |
-| ignores HelmChart resources using git sources | 588 | pending | — | — | Requires git source filter on HelmChart |
-| ignores HelmChart resources using bucket sources | 608 | pending | — | — | Requires bucket source filter on HelmChart |
+| extracts HelmChart version | 492 | ported | `flux.rs` | `extracts_helm_chart_version` | — |
+| does not match HelmChart resources without a namespace | 513 | ported | `flux.rs` | `helm_chart_without_namespace_is_unknown_registry` | — |
+| falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name | 544 | ported | `flux.rs` | `helm_chart_registry_alias_without_source_match_is_unknown` | — |
+| uses registryAliases to resolve HelmChart sourceRef name when repository is missing | 566 | ported | `flux.rs` | `helm_chart_registry_alias_resolves_source_name` | — |
+| ignores HelmChart resources using git sources | 588 | ported | `flux.rs` | `ignores_helm_chart_using_git_source` | — |
+| ignores HelmChart resources using bucket sources | 608 | ported | `flux.rs` | `helm_chart_using_bucket_source_is_unsupported` | — |
 | ignores GitRepository without a tag nor a commit | 645 | pending | — | — | Requires GitRepository ref validation |
 | extracts GitRepository with a commit | 665 | pending | — | — | Requires GitRepository commit extraction |
 | extracts GitRepository with a tag from github with ssh | 694 | pending | — | — | Requires GitRepository ssh URL handling |

@@ -39,6 +39,7 @@ pub struct FluxSystemDep {
 pub enum FluxSkipReason {
     UnknownRegistry,
     LocalChart,
+    UnsupportedDatasource,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -89,9 +90,16 @@ pub fn extract_helm_releases_with_registry_aliases(
         .filter_map(|doc| extract_helm_repo(doc))
         .collect();
 
-    docs.iter()
-        .filter_map(|doc| extract_helm_release_doc(doc, registry_aliases, &repositories))
-        .collect()
+    let mut deps = Vec::new();
+    for doc in &docs {
+        if let Some(dep) = extract_helm_release_doc(doc, registry_aliases, &repositories) {
+            deps.push(dep);
+        }
+        if let Some(dep) = extract_helm_chart_doc(doc, registry_aliases, &repositories) {
+            deps.push(dep);
+        }
+    }
+    deps
 }
 
 fn yaml_documents(content: &str) -> Vec<Vec<(Vec<String>, String)>> {
@@ -179,6 +187,75 @@ fn extract_helm_release_doc(
             } else {
                 dep.registry_urls.push((*alias).to_owned());
             }
+        }
+    }
+
+    Some(dep)
+}
+
+fn extract_helm_chart_doc(
+    scalars: &[(Vec<String>, String)],
+    registry_aliases: &[(&str, &str)],
+    repositories: &[HelmRepository],
+) -> Option<FluxHelmReleaseDep> {
+    if value_at(scalars, &["apiVersion"]).is_none()
+        || value_at(scalars, &["kind"]) != Some("HelmChart")
+    {
+        return None;
+    }
+
+    let chart = value_at(scalars, &["spec", "chart"])?;
+    let source_kind = value_at(scalars, &["spec", "sourceRef", "kind"]);
+    if chart.starts_with("./") || chart.starts_with("../") {
+        if source_kind == Some("Bucket") {
+            return Some(FluxHelmReleaseDep {
+                dep_name: chart.to_owned(),
+                current_value: None,
+                datasource: None,
+                registry_urls: Vec::new(),
+                package_name: None,
+                skip_reason: Some(FluxSkipReason::UnsupportedDatasource),
+            });
+        }
+        return None;
+    }
+
+    if source_kind.is_some_and(|kind| kind != "HelmRepository") {
+        return None;
+    }
+
+    let current_value = value_at(scalars, &["spec", "version"])?;
+    let source_name = value_at(scalars, &["spec", "sourceRef", "name"]);
+    let chart_namespace = value_at(scalars, &["metadata", "namespace"]);
+    let source_namespace =
+        value_at(scalars, &["spec", "sourceRef", "namespace"]).or(chart_namespace);
+
+    let mut dep = FluxHelmReleaseDep {
+        dep_name: chart.to_owned(),
+        current_value: Some(current_value.to_owned()),
+        datasource: Some(HELM_DATASOURCE),
+        registry_urls: Vec::new(),
+        package_name: None,
+        skip_reason: Some(FluxSkipReason::UnknownRegistry),
+    };
+
+    if let Some(source_name) = source_name {
+        if let Some(source_namespace) = source_namespace
+            && let Some(repository) = repositories
+                .iter()
+                .find(|repo| repo.name == source_name && repo.namespace == source_namespace)
+        {
+            dep.skip_reason = None;
+            dep.registry_urls.push(repository.url.clone());
+            return Some(dep);
+        }
+
+        if let Some((_, alias)) = registry_aliases
+            .iter()
+            .find(|(source, _)| *source == source_name)
+        {
+            dep.skip_reason = None;
+            dep.registry_urls.push((*alias).to_owned());
         }
     }
 
@@ -510,6 +587,132 @@ spec:
         assert!(extract_helm_releases(content).is_empty());
     }
 
+    // Ported: "ignores HelmRelease resources using a chartRef targetting a HelmChart" — flux/extract.spec.ts line 433
+    #[test]
+    fn ignores_release_chart_ref_and_extracts_helm_chart() {
+        let content =
+            format!("{HELM_CHART_REF_RELEASE}\n---\n{HELM_CHART}\n---\n{HELM_REPOSITORY}");
+        let deps = extract_helm_releases(&content);
+        assert_eq!(
+            deps,
+            vec![FluxHelmReleaseDep {
+                dep_name: "sealed-secrets".to_owned(),
+                current_value: Some("2.0.2".to_owned()),
+                datasource: Some(HELM_DATASOURCE),
+                registry_urls: vec!["https://bitnami-labs.github.io/sealed-secrets".to_owned()],
+                package_name: None,
+                skip_reason: None,
+            }]
+        );
+    }
+
+    // Ported: "extracts HelmChart version" — flux/extract.spec.ts line 492
+    #[test]
+    fn extracts_helm_chart_version() {
+        let content = format!("{HELM_REPOSITORY}\n---\n{HELM_CHART}");
+        let deps = extract_helm_releases(&content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "sealed-secrets");
+        assert_eq!(deps[0].current_value.as_deref(), Some("2.0.2"));
+        assert_eq!(
+            deps[0].registry_urls,
+            vec!["https://bitnami-labs.github.io/sealed-secrets"]
+        );
+    }
+
+    // Ported: "does not match HelmChart resources without a namespace" — flux/extract.spec.ts line 513
+    #[test]
+    fn helm_chart_without_namespace_is_unknown_registry() {
+        let content = format!(
+            "{HELM_REPOSITORY}\n---\napiVersion: source.toolkit.fluxcd.io/v1\nkind: HelmChart\nmetadata:\n  name: sealed-secrets\nspec:\n  interval: 10m\n  chart: sealed-secrets\n  sourceRef:\n    kind: HelmRepository\n    name: sealed-secrets\n  version: \"2.0.2\"\n"
+        );
+        let deps = extract_helm_releases(&content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::UnknownRegistry));
+    }
+
+    // Ported: "falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name" — flux/extract.spec.ts line 544
+    #[test]
+    fn helm_chart_registry_alias_without_source_match_is_unknown() {
+        let deps = extract_helm_releases_with_registry_aliases(
+            HELM_CHART,
+            &[("other-repo", "https://example.com/charts")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::UnknownRegistry));
+    }
+
+    // Ported: "uses registryAliases to resolve HelmChart sourceRef name when repository is missing" — flux/extract.spec.ts line 566
+    #[test]
+    fn helm_chart_registry_alias_resolves_source_name() {
+        let deps = extract_helm_releases_with_registry_aliases(
+            HELM_CHART,
+            &[("sealed-secrets", "https://example.com/charts")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, None);
+        assert_eq!(deps[0].registry_urls, vec!["https://example.com/charts"]);
+    }
+
+    // Ported: "ignores HelmChart resources using git sources" — flux/extract.spec.ts line 588
+    #[test]
+    fn ignores_helm_chart_using_git_source() {
+        let content = r#"
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: sealed-secrets
+  namespace: kube-system
+spec:
+  interval: 10m
+  chart: ./helm/sealed-secrets
+  sourceRef:
+    kind: GitRepository
+    name: sealed-secrets
+"#;
+        assert!(extract_helm_releases(content).is_empty());
+    }
+
+    // Ported: "ignores HelmChart resources using bucket sources" — flux/extract.spec.ts line 608
+    #[test]
+    fn helm_chart_using_bucket_source_is_unsupported() {
+        let content = r#"
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: Bucket
+metadata:
+  name: sealed-secrets
+  namespace: kube-system
+spec:
+  interval: 5m0s
+  endpoint: sealed-secrets.example.com
+  bucketName: example
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: sealed-secrets
+  namespace: kube-system
+spec:
+  interval: 10m
+  chart: ./helm/sealed-secrets
+  sourceRef:
+    kind: Bucket
+    name: sealed-secrets
+"#;
+        let deps = extract_helm_releases(content);
+        assert_eq!(
+            deps,
+            vec![FluxHelmReleaseDep {
+                dep_name: "./helm/sealed-secrets".to_owned(),
+                current_value: None,
+                datasource: None,
+                registry_urls: Vec::new(),
+                package_name: None,
+                skip_reason: Some(FluxSkipReason::UnsupportedDatasource),
+            }]
+        );
+    }
+
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
@@ -543,5 +746,38 @@ metadata:
 spec:
   interval: 1h0m0s
   url: https://bitnami-labs.github.io/sealed-secrets
+"#;
+
+    const HELM_CHART: &str = r#"
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: sealed-secrets
+  namespace: kube-system
+spec:
+  interval: 10m
+  chart: sealed-secrets
+  sourceRef:
+    kind: HelmRepository
+    name: sealed-secrets
+  version: "2.0.2"
+  valuesFiles:
+    - values-prod.yaml
+"#;
+
+    const HELM_CHART_REF_RELEASE: &str = r#"
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sealed-secrets
+  namespace: kube-system
+spec:
+  interval: 10m
+  chartRef:
+    kind: HelmChart
+    name: sealed-secrets
+    namespace: kube-system
+  values:
+    replicaCount: 2
 "#;
 }
