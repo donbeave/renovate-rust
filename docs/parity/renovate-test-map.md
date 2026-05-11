@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 800 / 1217 actionable tests ported (66%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 802 / 1217 actionable tests ported (66%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1205,7 +1205,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pip_requirements/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/extract.spec.ts
-**Total tests:** 22 | **Ported:** 20 | **Actionable:** 22 | **Status:** partial
+**Total tests:** 22 | **Ported:** 22 | **Actionable:** 22 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1223,8 +1223,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles extra index url and defaults without index to config | 123 | ported | `pip.rs` | `handles_extra_index_url_without_index_for_config_default` | — |
 | handles extra index url and defaults without index to pypi | 132 | ported | `pip.rs` | `handles_extra_index_url_without_index_for_pypi_default` | — |
 | handles extra spaces around pinned dependency equal signs | 141 | ported | `pip.rs` | `extra_spaces_around_equal_signs` | — |
-| should not replace env vars in low trust mode | 155 | pending | — | — | Requires trust-mode env-var substitution feature |
-| should replace env vars in high trust mode | 166 | pending | — | — | Requires trust-mode env-var substitution feature |
+| should not replace env vars in low trust mode | 155 | ported | `pip.rs` | `does_not_replace_env_vars_in_low_trust_mode` | — |
+| should replace env vars in high trust mode | 166 | ported | `pip.rs` | `replaces_env_vars_in_high_trust_mode` | — |
 | should handle hashes | 178 | ported | `pip.rs` | `hash_continuation_lines_handled` | — |
 | should handle package with extras and no version specifiers | 184 | ported | `pip.rs` | `extracts_unconstrained_package` | — |
 | should handle dependency and ignore env markers | 198 | ported | `pip.rs` | `extracts_range_constraint` | — |

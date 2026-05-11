@@ -22,6 +22,8 @@
 //! - `https://…` / `http://…` — direct URL install
 //! - `SubRequirement` — `-r other.txt` sub-requirement file reference
 
+use std::collections::BTreeMap;
+
 use thiserror::Error;
 
 /// Why a pip dependency is being skipped.
@@ -74,6 +76,15 @@ pub fn extract(content: &str) -> Result<Vec<PipExtractedDep>, PipExtractError> {
 
 /// Parse a `requirements.txt` string and extract deps plus package-file metadata.
 pub fn extract_package_file(content: &str) -> PipExtract {
+    extract_package_file_with_env(content, false, &BTreeMap::new())
+}
+
+/// Parse a `requirements.txt` string, optionally interpolating env vars in registry URLs.
+pub fn extract_package_file_with_env(
+    content: &str,
+    expose_all_env: bool,
+    env: &BTreeMap<String, String>,
+) -> PipExtract {
     let mut out = Vec::new();
     let mut registry_urls = Vec::new();
     let mut additional_registry_urls = Vec::new();
@@ -81,9 +92,9 @@ pub fn extract_package_file(content: &str) -> PipExtract {
     for raw_line in content.lines() {
         let line = raw_line.split('#').next().unwrap_or("").trim();
         if let Some(url) = directive_value(line, &["-i", "--index-url"]) {
-            registry_urls.push(url.to_owned());
+            registry_urls.push(interpolate_env(url, expose_all_env, env));
         } else if let Some(url) = directive_value(line, &["--extra-index-url"]) {
-            additional_registry_urls.push(url.to_owned());
+            additional_registry_urls.push(interpolate_env(url, expose_all_env, env));
         }
         if let Some(dep) = parse_line(raw_line) {
             out.push(dep);
@@ -205,10 +216,86 @@ fn directive_value<'a>(line: &'a str, flags: &[&str]) -> Option<&'a str> {
     let mut parts = line.split_whitespace();
     let flag = parts.next()?;
     if flags.contains(&flag) {
-        parts.next()
+        parts.next().map(strip_matching_quotes)
     } else {
         None
     }
+}
+
+fn strip_matching_quotes(value: &str) -> &str {
+    if value.len() >= 2
+        && ((value.starts_with('"') && value.ends_with('"'))
+            || (value.starts_with('\'') && value.ends_with('\'')))
+    {
+        &value[1..value.len() - 1]
+    } else {
+        value
+    }
+}
+
+fn interpolate_env(value: &str, expose_all_env: bool, env: &BTreeMap<String, String>) -> String {
+    if !expose_all_env {
+        return value.to_owned();
+    }
+
+    let mut out = String::with_capacity(value.len());
+    let chars: Vec<_> = value.char_indices().collect();
+    let mut pos = 0;
+    while pos < chars.len() {
+        let (byte_idx, ch) = chars[pos];
+        if ch != '$' {
+            out.push(ch);
+            pos += 1;
+            continue;
+        }
+
+        let next = chars.get(pos + 1).copied();
+        if let Some((_, '{')) = next
+            && let Some(end_pos) = chars[pos + 2..]
+                .iter()
+                .position(|(_, c)| *c == '}')
+                .map(|offset| pos + 2 + offset)
+        {
+            let start = chars[pos + 2].0;
+            let end = chars[end_pos].0;
+            let name = &value[start..end];
+            if let Some(replacement) = env.get(name) {
+                out.push_str(replacement);
+            } else {
+                out.push_str(&value[byte_idx..chars[end_pos].0 + 1]);
+            }
+            pos = end_pos + 1;
+            continue;
+        }
+
+        let name_start_pos = pos + 1;
+        let mut end_pos = name_start_pos;
+        while let Some((_, c)) = chars.get(end_pos) {
+            if c.is_ascii_alphanumeric() || *c == '_' {
+                end_pos += 1;
+            } else {
+                break;
+            }
+        }
+        if end_pos > name_start_pos {
+            let start = chars[name_start_pos].0;
+            let end = chars
+                .get(end_pos)
+                .map(|(idx, _)| *idx)
+                .unwrap_or(value.len());
+            let name = &value[start..end];
+            if let Some(replacement) = env.get(name) {
+                out.push_str(replacement);
+            } else {
+                out.push_str(&value[byte_idx..end]);
+            }
+            pos = end_pos;
+        } else {
+            out.push('$');
+            pos += 1;
+        }
+    }
+    out
 }
 
 /// Split a line into the package name and the remainder (extras + specifier).
@@ -538,6 +625,46 @@ mod tests {
             vec!["http://example.com/private-pypi/".to_owned()]
         );
         assert_eq!(package_file.deps.len(), 6);
+    }
+
+    // Ported: "should not replace env vars in low trust mode" — pip_requirements/extract.spec.ts line 155
+    #[test]
+    fn does_not_replace_env_vars_in_low_trust_mode() {
+        let content = "--extra-index-url http://$PIP_TEST_TOKEN:example.com/private-pypi/\n\
+                       --extra-index-url http://${PIP_TEST_TOKEN}:example.com/private-pypi/\n\
+                       --extra-index-url \"http://$PIP_TEST_TOKEN:example.com/private-pypi/\"\n\
+                       --extra-index-url \"http://${PIP_TEST_TOKEN1}:example.com/private-pypi/\"";
+        let env = BTreeMap::from([("PIP_TEST_TOKEN".to_owned(), "its-a-secret".to_owned())]);
+        let package_file = extract_package_file_with_env(content, false, &env);
+        assert_eq!(
+            package_file.additional_registry_urls,
+            vec![
+                "http://$PIP_TEST_TOKEN:example.com/private-pypi/".to_owned(),
+                "http://${PIP_TEST_TOKEN}:example.com/private-pypi/".to_owned(),
+                "http://$PIP_TEST_TOKEN:example.com/private-pypi/".to_owned(),
+                "http://${PIP_TEST_TOKEN1}:example.com/private-pypi/".to_owned(),
+            ]
+        );
+    }
+
+    // Ported: "should replace env vars in high trust mode" — pip_requirements/extract.spec.ts line 166
+    #[test]
+    fn replaces_env_vars_in_high_trust_mode() {
+        let content = "--extra-index-url http://$PIP_TEST_TOKEN:example.com/private-pypi/\n\
+                       --extra-index-url http://${PIP_TEST_TOKEN}:example.com/private-pypi/\n\
+                       --extra-index-url \"http://$PIP_TEST_TOKEN:example.com/private-pypi/\"\n\
+                       --extra-index-url \"http://${PIP_TEST_TOKEN1}:example.com/private-pypi/\"";
+        let env = BTreeMap::from([("PIP_TEST_TOKEN".to_owned(), "its-a-secret".to_owned())]);
+        let package_file = extract_package_file_with_env(content, true, &env);
+        assert_eq!(
+            package_file.additional_registry_urls,
+            vec![
+                "http://its-a-secret:example.com/private-pypi/".to_owned(),
+                "http://its-a-secret:example.com/private-pypi/".to_owned(),
+                "http://its-a-secret:example.com/private-pypi/".to_owned(),
+                "http://${PIP_TEST_TOKEN1}:example.com/private-pypi/".to_owned(),
+            ]
+        );
     }
 
     // Ported: "handles extra spaces around pinned dependency equal signs" — pip_requirements/extract.spec.ts line 141
