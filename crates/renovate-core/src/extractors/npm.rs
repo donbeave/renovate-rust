@@ -71,6 +71,8 @@ pub enum NpmDepType {
     Engines,
     /// `volta` tool constraints.
     Volta,
+    /// `packageManager` tool constraint.
+    PackageManager,
 }
 
 impl NpmDepType {
@@ -85,6 +87,7 @@ impl NpmDepType {
             NpmDepType::Overrides => "overrides",
             NpmDepType::Engines => "engines",
             NpmDepType::Volta => "volta",
+            NpmDepType::PackageManager => "packageManager",
         }
     }
 }
@@ -211,6 +214,8 @@ struct PackageJson {
     /// Volta-pinned runtime/tool versions.
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
     volta: BTreeMap<String, DependencySpec>,
+    #[serde(rename = "packageManager")]
+    package_manager: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -273,8 +278,24 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
             ));
         }
     }
+    if let Some((name, version)) = parse_package_manager(pkg.package_manager.as_deref()) {
+        out.push(classify(
+            name,
+            &DependencySpec::Version(version),
+            NpmDepType::PackageManager,
+        ));
+    }
 
     Ok(out)
+}
+
+fn parse_package_manager(package_manager: Option<&str>) -> Option<(String, String)> {
+    let package_manager = package_manager?;
+    let (name, version) = package_manager.rsplit_once('@')?;
+    if name.is_empty() || version.is_empty() {
+        return None;
+    }
+    Some((name.to_owned(), version.to_owned()))
 }
 
 impl PackageJson {
@@ -1845,6 +1866,22 @@ chalk@^2.4.1:
                 && dep.dep_type == NpmDepType::Volta
                 && dep.skip_reason.is_none()
         }));
+    }
+
+    // Ported: "extracts packageManager" — npm/extract/index.spec.ts line 894
+    #[test]
+    fn package_json_extracts_package_manager() {
+        let json = r#"{
+          "packageManager": "yarn@3.0.0"
+        }"#;
+        let deps = extract_ok(json);
+
+        assert_eq!(deps.len(), 1);
+        let yarn = &deps[0];
+        assert_eq!(yarn.name, "yarn");
+        assert_eq!(yarn.current_value, "3.0.0");
+        assert_eq!(yarn.dep_type, NpmDepType::PackageManager);
+        assert_eq!(yarn.skip_reason, None);
     }
 
     #[test]
