@@ -44,6 +44,8 @@ pub enum NpmSkipReason {
     NpmAlias,
     /// Dependency name is not valid for the npm registry.
     InvalidName,
+    /// Dependency value is not a string version specifier.
+    InvalidValue,
 }
 
 /// Which `package.json` section the dep came from.
@@ -164,36 +166,42 @@ struct PackageJson {
     #[serde(rename = "_resolved")]
     resolved: Option<serde_json::Value>,
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
-    dependencies: BTreeMap<String, String>,
+    dependencies: BTreeMap<String, DependencySpec>,
     #[serde(
         rename = "devDependencies",
         default,
         deserialize_with = "deserialize_dependency_section"
     )]
-    dev_dependencies: BTreeMap<String, String>,
+    dev_dependencies: BTreeMap<String, DependencySpec>,
     #[serde(
         rename = "peerDependencies",
         default,
         deserialize_with = "deserialize_dependency_section"
     )]
-    peer_dependencies: BTreeMap<String, String>,
+    peer_dependencies: BTreeMap<String, DependencySpec>,
     #[serde(
         rename = "optionalDependencies",
         default,
         deserialize_with = "deserialize_dependency_section"
     )]
-    optional_dependencies: BTreeMap<String, String>,
+    optional_dependencies: BTreeMap<String, DependencySpec>,
     /// yarn `resolutions` block — flat `{ "pkg": "version" }`.
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
-    resolutions: BTreeMap<String, String>,
+    resolutions: BTreeMap<String, DependencySpec>,
     /// npm 8+ `overrides` block — flat `{ "pkg": "version" }`.
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
-    overrides: BTreeMap<String, String>,
+    overrides: BTreeMap<String, DependencySpec>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum DependencySpec {
+    Version(String),
+    InvalidValue,
 }
 
 fn deserialize_dependency_section<'de, D>(
     deserializer: D,
-) -> Result<BTreeMap<String, String>, D::Error>
+) -> Result<BTreeMap<String, DependencySpec>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -204,10 +212,12 @@ where
 
     Ok(object
         .iter()
-        .filter_map(|(name, value)| {
-            value
+        .map(|(name, value)| {
+            let spec = value
                 .as_str()
-                .map(|version| (name.clone(), version.to_owned()))
+                .map(|version| DependencySpec::Version(version.to_owned()))
+                .unwrap_or(DependencySpec::InvalidValue);
+            (name.clone(), spec)
         })
         .collect())
 }
@@ -234,7 +244,11 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
         (&pkg.overrides, NpmDepType::Overrides),
     ] {
         for (name, value) in section {
-            out.push(classify(name.clone(), value, dep_type));
+            out.push(classify(
+                normalize_package_key(name, dep_type),
+                value,
+                dep_type,
+            ));
         }
     }
 
@@ -245,6 +259,18 @@ impl PackageJson {
     fn is_vendorised(&self) -> bool {
         self.id.is_some() && (self.from.is_some() || self.resolved.is_some())
     }
+}
+
+fn normalize_package_key(name: &str, dep_type: NpmDepType) -> String {
+    if dep_type != NpmDepType::Resolutions {
+        return name.to_owned();
+    }
+
+    if let Some(scoped_start) = name.rfind("/@") {
+        return name[scoped_start + 1..].to_owned();
+    }
+
+    name.rsplit('/').next().unwrap_or(name).to_owned()
 }
 
 /// Resolve the registry URL for a package name from Yarn config.
@@ -640,15 +666,21 @@ fn unquote_yarnrc_token(token: &str) -> String {
     token.trim().trim_matches('"').trim_matches('\'').to_owned()
 }
 
-fn classify(name: String, value: &str, dep_type: NpmDepType) -> NpmExtractedDep {
-    let skip_reason = if invalid_package_name(&name) {
+fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmExtractedDep {
+    let current_value = match value {
+        DependencySpec::Version(value) => value.clone(),
+        DependencySpec::InvalidValue => String::new(),
+    };
+    let skip_reason = if matches!(value, DependencySpec::InvalidValue) {
+        Some(NpmSkipReason::InvalidValue)
+    } else if invalid_package_name(&name) {
         Some(NpmSkipReason::InvalidName)
     } else {
-        skip_reason_for(value)
+        skip_reason_for(&current_value)
     };
     NpmExtractedDep {
         name,
-        current_value: value.to_owned(),
+        current_value,
         dep_type,
         skip_reason,
     }
@@ -1469,6 +1501,59 @@ chalk@^2.4.1:
         let json = r#"{"dependencies": true, "devDependencies": []}"#;
         let deps = extract_ok(json);
         assert!(deps.is_empty());
+    }
+
+    // Ported: "returns an array of dependencies" — npm/extract/index.spec.ts line 95
+    #[test]
+    fn package_json_fixture_extracts_dependency_array() {
+        let json = r#"{
+          "dependencies": {
+            "autoprefixer": "6.5.0",
+            "bower": "~1.6.0",
+            "browserify": "13.1.0",
+            "browserify-css": "0.9.2",
+            "cheerio": "=0.22.0",
+            "config": "1.21.0"
+          },
+          "devDependencies": {
+            "enabled": false,
+            "angular": "^1.5.8",
+            "angular-touch": "1.5.8",
+            "angular-sanitize": "1.5.8",
+            "@angular/core": "4.0.0-beta.1"
+          },
+          "resolutions": {
+            "config": "1.21.0",
+            "**/@angular/cli": "8.0.0",
+            "**/angular": "1.33.0",
+            "config/glob": "1.0.0"
+          }
+        }"#;
+        let deps = extract_ok(json);
+
+        assert_eq!(deps.len(), 15);
+        for (name, current_value) in [
+            ("autoprefixer", "6.5.0"),
+            ("bower", "~1.6.0"),
+            ("browserify", "13.1.0"),
+            ("browserify-css", "0.9.2"),
+            ("cheerio", "=0.22.0"),
+            ("config", "1.21.0"),
+            ("angular", "^1.5.8"),
+            ("angular-touch", "1.5.8"),
+            ("angular-sanitize", "1.5.8"),
+            ("@angular/core", "4.0.0-beta.1"),
+            ("@angular/cli", "8.0.0"),
+            ("angular", "1.33.0"),
+            ("glob", "1.0.0"),
+        ] {
+            assert!(deps.iter().any(|dep| {
+                dep.name == name && dep.current_value == current_value && dep.skip_reason.is_none()
+            }));
+        }
+
+        let enabled = deps.iter().find(|dep| dep.name == "enabled").unwrap();
+        assert_eq!(enabled.skip_reason, Some(NpmSkipReason::InvalidValue));
     }
 
     #[test]
