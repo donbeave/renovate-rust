@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1461 / 1657 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1465 / 1657 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,16 +2190,16 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 33 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 37 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null when no nixpkgs input exists | 10 | pending | — | — | Requires `extractPackageFile(flake.nix, ...)` integration with flake.lock read |
-| does not include nixpkgs input with no explicit ref | 25 | pending | — | — | Requires flake.nix + flake.lock integration |
-| includes nixpkgs input with only ref | 42 | pending | — | — | Requires flake.nix + flake.lock integration |
-| returns null when no inputs | 59 | pending | — | — | Requires flake.nix + flake.lock integration |
+| returns null when no nixpkgs input exists | 10 | ported | `nix.rs` | `package_file_returns_none_when_no_nixpkgs_input_exists` | — |
+| does not include nixpkgs input with no explicit ref | 25 | ported | `nix.rs` | `package_file_returns_none_for_nixpkgs_without_explicit_ref_when_lock_has_no_input` | — |
+| includes nixpkgs input with only ref | 42 | ported | `nix.rs` | `package_file_returns_none_for_ref_only_flake_when_lock_has_no_input` | — |
+| returns null when no inputs | 59 | ported | `nix.rs` | `package_file_returns_none_when_flake_nix_has_no_inputs` | — |
 | returns null when inputs are missing locked | 71 | ported | `nix.rs` | `missing_locked_section_is_skipped_as_no_rev` | — |
 | returns null when inputs are missing original | 95 | ported | `nix.rs` | `missing_original_section_is_skipped_as_no_rev` | — |
 | returns null when original inputs are from local path | 121 | ported | `nix.rs` | `original_path_input_is_skipped_as_local_path` | — |

@@ -435,6 +435,51 @@ mod tests {
         assert_eq!(deps.iter().filter(|d| d.skip_reason.is_none()).count(), 2);
     }
 
+    const EMPTY_ROOT_LOCK: &str = r#"{
+  "nodes": {
+    "root": {}
+  },
+  "root": "root",
+  "version": 7
+}"#;
+
+    // Ported: "returns null when no nixpkgs input exists" — nix/extract.spec.ts line 10
+    #[test]
+    fn package_file_returns_none_when_no_nixpkgs_input_exists() {
+        let flake_nix = r#"{
+  inputs = {};
+}"#;
+        assert!(extract_package_file(Some(flake_nix), Some(EMPTY_ROOT_LOCK)).is_none());
+    }
+
+    // Ported: "does not include nixpkgs input with no explicit ref" — nix/extract.spec.ts line 25
+    #[test]
+    fn package_file_returns_none_for_nixpkgs_without_explicit_ref_when_lock_has_no_input() {
+        let flake_nix = r#"{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs";
+  };
+}"#;
+        assert!(extract_package_file(Some(flake_nix), Some(EMPTY_ROOT_LOCK)).is_none());
+    }
+
+    // Ported: "includes nixpkgs input with only ref" — nix/extract.spec.ts line 42
+    #[test]
+    fn package_file_returns_none_for_ref_only_flake_when_lock_has_no_input() {
+        let flake_nix = r#"{
+  inputs = {
+    nixpkgs-lib.url = "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz";
+  };
+}"#;
+        assert!(extract_package_file(Some(flake_nix), Some(EMPTY_ROOT_LOCK)).is_none());
+    }
+
+    // Ported: "returns null when no inputs" — nix/extract.spec.ts line 59
+    #[test]
+    fn package_file_returns_none_when_flake_nix_has_no_inputs() {
+        assert!(extract_package_file(Some(""), Some(EMPTY_ROOT_LOCK)).is_none());
+    }
+
     #[test]
     fn skips_transitive() {
         let deps = extract(SAMPLE_LOCK);
