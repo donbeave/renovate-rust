@@ -166,6 +166,7 @@ mod tests {
         cli
     }
 
+    // Ported: "returns empty argv" — workers/global/config/parse/cli.spec.ts line 32
     #[test]
     fn default_cli_produces_default_config() {
         let cli = cli_with(|_| {});
@@ -193,6 +194,7 @@ mod tests {
         );
     }
 
+    // Ported: "supports string" — workers/global/config/parse/cli.spec.ts line 84
     #[test]
     fn token_is_set() {
         let cli = cli_with(|c| c.token = Some("mytoken".to_owned()));
@@ -223,7 +225,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates dryRun" — config/migration.spec.ts line 820
+    // Ported: "dryRun boolean true" — workers/global/config/parse/cli.spec.ts line 175
     #[test]
     fn dry_run_legacy_true_maps_to_full() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyTrue));
@@ -233,19 +235,21 @@ mod tests {
         );
     }
 
-    // Ported: "migrates dryRun" — config/migration.spec.ts line 820
+    // Ported: "dryRun boolean false" — workers/global/config/parse/cli.spec.ts line 185
     #[test]
     fn dry_run_legacy_false_disables_dry_run() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyFalse));
         assert_eq!(build(&cli, GlobalConfig::default()).dry_run, None);
     }
 
+    // Ported: "dryRun  null" — workers/global/config/parse/cli.spec.ts line 190
     #[test]
     fn dry_run_legacy_null_disables_dry_run() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyNull));
         assert_eq!(build(&cli, GlobalConfig::default()).dry_run, None);
     }
 
+    // Ported: "requireConfig boolean true" — workers/global/config/parse/cli.spec.ts line 195
     #[test]
     fn require_config_legacy_true_maps_to_required() {
         let cli = cli_with(|c| c.require_config = Some(RequireConfigArg::LegacyTrue));
@@ -255,6 +259,7 @@ mod tests {
         );
     }
 
+    // Ported: "requireConfig boolean false" — workers/global/config/parse/cli.spec.ts line 205
     #[test]
     fn require_config_legacy_false_maps_to_optional() {
         let cli = cli_with(|c| c.require_config = Some(RequireConfigArg::LegacyFalse));
