@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 756 / 1217 actionable tests ported (62%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 762 / 1217 actionable tests ported (63%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -871,7 +871,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 75 | **Ported:** 49 | **Actionable:** 66 | **Status:** partial
+**Total tests:** 75 | **Ported:** 55 | **Actionable:** 66 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -917,12 +917,12 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles implausible line continuation | 883 | ported | `dockerfile.rs` | `implausible_continuation_does_not_affect_from` | — |
 | handles multi-line FROM with space after escape character | 904 | ported | `dockerfile.rs` | `multiline_from_with_space_after_escape` | — |
 | handles FROM without ARG default value | 921 | ported | `dockerfile.rs` | `from_with_arg_variable_is_skipped` | — |
-| handles FROM with empty ARG default value | 939 | pending | — | — | — |
-| handles FROM with version in ARG value | 960 | pending | — | — | — |
-| handles FROM with version in ARG default value | 981 | pending | — | — | — |
-| handles FROM with digest in ARG default value | 1002 | pending | — | — | — |
-| handles FROM with overwritten ARG value | 1026 | pending | — | — | — |
-| handles FROM with multiple ARG values | 1058 | pending | — | — | — |
+| handles FROM with empty ARG default value | 939 | ported | `dockerfile.rs` | `from_with_empty_arg_defaults_extracts_literal_image` | — |
+| handles FROM with version in ARG value | 960 | ported | `dockerfile.rs` | `from_with_version_in_arg_value` | — |
+| handles FROM with version in ARG default value | 981 | ported | `dockerfile.rs` | `from_with_version_in_arg_default_value` | — |
+| handles FROM with digest in ARG default value | 1002 | ported | `dockerfile.rs` | `from_with_digest_in_arg_value` | — |
+| handles FROM with overwritten ARG value | 1026 | ported | `dockerfile.rs` | `from_with_overwritten_arg_value` | — |
+| handles FROM with multiple ARG values | 1058 | ported | `dockerfile.rs` | `from_with_multiple_arg_values` | — |
 | skips scratch if provided in ARG value | 1079 | pending | — | — | — |
 | extracts images from multi-line ARG statements | 1088 | pending | — | — | — |
 | ignores parser directives in wrong order | 1131 | ported | `dockerfile.rs` | `parser_directives_in_wrong_order_ignored` | — |

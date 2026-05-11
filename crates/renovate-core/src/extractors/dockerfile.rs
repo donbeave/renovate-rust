@@ -19,8 +19,10 @@
 //! | Condition | Reason |
 //! |---|---|
 //! | `FROM scratch` | `Scratch` |
-//! | Image starts with `$` (ARG variable) | `ArgVariable` |
+//! | Unresolved ARG variable | `ArgVariable` |
 //! | Image is a prior stage alias (via `AS name`) | `BuildStageRef` |
+
+use std::collections::HashMap;
 
 use thiserror::Error;
 
@@ -65,6 +67,7 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
     let content = content.trim_start_matches('\u{FEFF}');
     let logical_lines = join_continuations(content);
     let mut stage_names: Vec<String> = Vec::new();
+    let mut args: HashMap<String, String> = HashMap::new();
     let mut out = Vec::new();
     let mut seen_non_comment = false;
 
@@ -90,6 +93,13 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
             continue;
         }
         seen_non_comment = true;
+
+        if let Some(after_arg) = strip_instruction(trimmed, "ARG") {
+            if let Some((name, value)) = parse_arg_assignment(after_arg) {
+                args.insert(name, value);
+            }
+            continue;
+        }
 
         // Handle COPY --from=<image> instructions.
         if let Some(after_copy) = strip_instruction(trimmed, "COPY") {
@@ -118,6 +128,8 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
         // Parse image reference: `image[:tag][@digest]`.
         let (image_ref, alias) = split_as_alias(after_platform);
         let image_ref = image_ref.trim();
+        let resolved_image_ref = resolve_arg_refs(image_ref, &args);
+        let image_ref = resolved_image_ref.as_deref().unwrap_or(image_ref);
 
         // Classify against the stage names seen so far (before adding this
         // FROM's own alias — a FROM can't reference itself as a stage).
@@ -198,6 +210,96 @@ fn strip_instruction<'a>(line: &'a str, instruction: &str) -> Option<&'a str> {
         }
     }
     None
+}
+
+fn parse_arg_assignment(arg: &str) -> Option<(String, String)> {
+    let arg = arg.trim();
+    if arg.is_empty() {
+        return None;
+    }
+
+    let (name, value) = if let Some((name, value)) = arg.split_once('=') {
+        (name.trim(), value.trim())
+    } else {
+        let mut parts = arg.splitn(2, char::is_whitespace);
+        let name = parts.next()?.trim();
+        let value = parts.next()?.trim();
+        (name, value)
+    };
+
+    if name.is_empty() {
+        return None;
+    }
+
+    Some((name.to_owned(), trim_arg_value(value).to_owned()))
+}
+
+fn trim_arg_value(value: &str) -> &str {
+    value
+        .strip_prefix('"')
+        .and_then(|v| v.strip_suffix('"'))
+        .or_else(|| value.strip_prefix('\'').and_then(|v| v.strip_suffix('\'')))
+        .unwrap_or(value)
+}
+
+fn resolve_arg_refs(image_ref: &str, args: &HashMap<String, String>) -> Option<String> {
+    let mut out = String::with_capacity(image_ref.len());
+    let mut chars = image_ref.chars().peekable();
+    let mut changed = false;
+
+    while let Some(ch) = chars.next() {
+        if ch != '$' {
+            out.push(ch);
+            continue;
+        }
+
+        if chars.peek() == Some(&'{') {
+            chars.next();
+            let mut name = String::new();
+            let mut closed = false;
+            for next in chars.by_ref() {
+                if next == '}' {
+                    closed = true;
+                    break;
+                }
+                name.push(next);
+            }
+
+            if closed && let Some(value) = args.get(&name) {
+                out.push_str(value);
+                changed = true;
+            } else {
+                out.push_str("${");
+                out.push_str(&name);
+                if closed {
+                    out.push('}');
+                }
+            }
+            continue;
+        }
+
+        let mut name = String::new();
+        while let Some(next) = chars.peek().copied() {
+            if next == '_' || next.is_ascii_alphanumeric() {
+                name.push(next);
+                chars.next();
+            } else {
+                break;
+            }
+        }
+
+        if !name.is_empty()
+            && let Some(value) = args.get(&name)
+        {
+            out.push_str(value);
+            changed = true;
+        } else {
+            out.push('$');
+            out.push_str(&name);
+        }
+    }
+
+    changed.then_some(out)
 }
 
 /// Extract image references from a RUN --mount=from=<image>[,...] line.
@@ -667,6 +769,76 @@ mod tests {
         let deps = extract_ok("ARG img_base\nFROM $img_base\n");
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
+    }
+
+    // Ported: "handles FROM with empty ARG default value" — dockerfile/extract.spec.ts line 939
+    #[test]
+    fn from_with_empty_arg_defaults_extracts_literal_image() {
+        let deps = extract_ok("ARG patch1=\"\"\nARG patch2=\nFROM nginx:1.20${patch1}$patch2\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "nginx");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.20"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles FROM with version in ARG value" — dockerfile/extract.spec.ts line 960
+    #[test]
+    fn from_with_version_in_arg_value() {
+        let deps = extract_ok("ARG\tVARIANT=\"1.60.0-bullseye\" \nFROM\trust:${VARIANT}\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "rust");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.60.0-bullseye"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles FROM with version in ARG default value" — dockerfile/extract.spec.ts line 981
+    #[test]
+    fn from_with_version_in_arg_default_value() {
+        let deps = extract_ok(
+            "ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:xenial}\nfrom ${IMAGE_VERSION} as base\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "ubuntu");
+        assert_eq!(deps[0].tag.as_deref(), Some("xenial"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles FROM with digest in ARG default value" — dockerfile/extract.spec.ts line 1002
+    #[test]
+    fn from_with_digest_in_arg_value() {
+        let digest = "sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f";
+        let deps = extract_ok(&format!(
+            "ARG sha_digest={digest}\n      FROM gcr.io/distroless/java17@$sha_digest"
+        ));
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "gcr.io/distroless/java17");
+        assert_eq!(deps[0].digest.as_deref(), Some(digest));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles FROM with overwritten ARG value" — dockerfile/extract.spec.ts line 1026
+    #[test]
+    fn from_with_overwritten_arg_value() {
+        let deps = extract_ok(
+            "ARG base=nginx:1.19\nFROM $base as stage1\nARG base=nginx:1.20\nFROM --platform=amd64 $base as stage2\n",
+        );
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].image, "nginx");
+        assert_eq!(deps[0].tag.as_deref(), Some("1.19"));
+        assert_eq!(deps[1].image, "nginx");
+        assert_eq!(deps[1].tag.as_deref(), Some("1.20"));
+    }
+
+    // Ported: "handles FROM with multiple ARG values" — dockerfile/extract.spec.ts line 1058
+    #[test]
+    fn from_with_multiple_arg_values() {
+        let deps = extract_ok(
+            "ARG CUDA=9.2\nARG LINUX_VERSION ubuntu16.04\nFROM nvidia/cuda:${CUDA}-devel-${LINUX_VERSION}\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "nvidia/cuda");
+        assert_eq!(deps[0].tag.as_deref(), Some("9.2-devel-ubuntu16.04"));
+        assert!(deps[0].skip_reason.is_none());
     }
 
     // ── BOM marker ───────────────────────────────────────────────────────────
