@@ -173,6 +173,7 @@ mod tests {
             .collect()
     }
 
+    // Ported: "should extract container information" — azure-pipelines/extract.spec.ts line 187
     #[test]
     fn extracts_container_image() {
         let content = r#"
@@ -188,6 +189,7 @@ resources:
         assert_eq!(c[0].tag.as_deref(), Some("22.04"));
     }
 
+    // Ported: "should extract container information" — azure-pipelines/extract.spec.ts line 187
     #[test]
     fn extracts_multiple_containers() {
         let content = r#"
@@ -205,6 +207,7 @@ resources:
         assert!(c.iter().any(|d| d.image == "postgres"));
     }
 
+    // Ported: "should extract azure-pipelines task information" — azure-pipelines/extract.spec.ts line 201
     #[test]
     fn extracts_tasks() {
         let content = r#"
@@ -221,6 +224,7 @@ steps:
         assert!(t.iter().any(|d| d.name == "Docker" && d.version == "2"));
     }
 
+    // Ported: "should extract azure-pipelines task information" — azure-pipelines/extract.spec.ts line 201
     #[test]
     fn tasks_in_nested_jobs_stages() {
         let content = r#"
@@ -254,6 +258,7 @@ resources:
         assert!(c[0].skip_reason.is_some());
     }
 
+    // Ported: "should return null for invalid task format" — azure-pipelines/extract.spec.ts line 209
     #[test]
     fn task_without_at_ignored() {
         let content = "steps:\n- task: JustAName\n";
@@ -261,11 +266,13 @@ resources:
         assert!(tasks(&deps).is_empty());
     }
 
+    // Ported: "should return null when there is no dependency found" — azure-pipelines/extract.spec.ts line 245
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
+    // Ported: "should return null when there is no dependency found" — azure-pipelines/extract.spec.ts line 245
     #[test]
     fn non_containers_resources_not_extracted() {
         let content = r#"
