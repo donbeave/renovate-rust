@@ -1049,7 +1049,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/config/validation.ts` | — | not-started | Not ported |
 | `lib/config/migration.ts` | — | not-started | Not ported |
 | `lib/config/migrate-validate.ts` | — | not-started | Not ported |
-| `lib/config/massage.ts` | — | not-started | Not ported |
+| `lib/config/massage.ts` | `crates/renovate-core/src/config/massage.rs` | partial | Config massage helpers for scalar, packageRules, and update-type expansion ported |
 | `lib/config/secrets.ts` | `crates/renovate-core/src/config/secrets.rs` | partial | Secret/variable validation and interpolation ported |
 | `lib/config/inherit.ts` | `crates/renovate-core/src/config.rs` | partial | Inheritable option list and configFileNames lookup ported |
 | `lib/config/decrypt.ts` | — | out-of-scope | Platform encryption feature |

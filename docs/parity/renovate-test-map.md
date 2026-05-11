@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1068 / 1255 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1075 / 1262 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 40 spec files not yet converted to per-test format (28 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 39 spec files not yet converted to per-test format (27 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,25 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/massage.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/massage.spec.ts
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+
+### `config/massage › massageConfig`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty | 6 | ported | `massage.rs` | `massage_config_returns_empty` | — |
+| massages strings to array | 12 | ported | `massage.rs` | `massage_config_converts_allowed_string_to_array` | — |
+| normalizes zero minimumReleaseAge to null | 20 | ported | `massage.rs` | `massage_config_normalizes_zero_minimum_release_age` | — |
+| normalizes zero minimumReleaseAge in packageRules | 30 | ported | `massage.rs` | `massage_config_normalizes_zero_minimum_release_age_in_package_rules` | — |
+| massages packageRules matchUpdateTypes | 58 | ported | `massage.rs` | `massage_config_expands_package_rule_update_types` | — |
+| filters packageRules with only match/exclude | 95 | ported | `massage.rs` | `massage_config_filters_package_rules_with_only_match_or_exclude` | — |
+| does not massage lockFileMaintenance | 110 | ported | `massage.rs` | `massage_config_does_not_expand_lock_file_maintenance` | — |
+
+---
+
 ## `lib/config/secrets.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/secrets.spec.ts
@@ -2897,7 +2916,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/config/validation.spec.ts` | 124 | — | 0 | pending |
 | `lib/config/migration.spec.ts` | 30 | — | 0 | pending |
 | `lib/config/migrate-validate.spec.ts` | 5 | — | 0 | pending |
-| `lib/config/massage.spec.ts` | 7 | — | 0 | pending |
+<!-- config/massage.spec.ts converted to per-test format above -->
 <!-- config/secrets.spec.ts converted to per-test format above -->
 <!-- config/inherit.spec.ts converted to per-test format above -->
 | `lib/config/index.spec.ts` | 12 | — | 0 | pending |

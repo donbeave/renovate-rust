@@ -9,9 +9,10 @@
 
 mod platform;
 mod run;
-pub mod secrets;
 
 pub mod file;
+pub mod massage;
+pub mod secrets;
 
 pub use platform::Platform;
 pub use run::{DryRun, ForkProcessing, RecreateWhen, RequireConfig};
