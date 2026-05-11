@@ -24,8 +24,6 @@
 //!     version: 6.5.0
 //! ```
 
-use crate::extractors::dockerfile::{DockerfileExtractedDep, classify_image_ref};
-
 /// A remote Kustomize base/resource/component reference.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KustomizeResourceDep {
@@ -86,11 +84,28 @@ pub struct KustomizeResolvedImageDep {
     pub datasource: &'static str,
 }
 
+/// Why a Kustomize image entry is skipped.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum KustomizeImageSkipReason {
+    InvalidValue,
+    InvalidDependencySpecification,
+}
+
+/// Docker image from a kustomize `images:` entry.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KustomizeImageDep {
+    pub image: String,
+    pub tag: Option<String>,
+    pub digest: Option<String>,
+    pub skip_reason: Option<KustomizeImageSkipReason>,
+    pub replace_string: String,
+}
+
 /// A single dependency extracted from a `kustomization.yaml`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KustomizeDep {
     /// Docker image from `images:` section.
-    Image(DockerfileExtractedDep),
+    Image(KustomizeImageDep),
     /// Helm chart from `helmCharts:` section.
     Helm(KustomizeHelmDep),
     /// OCI Helm chart from `helmCharts:` section.
@@ -116,6 +131,8 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
     let mut img_name: Option<String> = None;
     let mut img_new_name: Option<String> = None;
     let mut img_new_tag: Option<String> = None;
+    let mut img_new_tag_quoted = false;
+    let mut img_digest: Option<String> = None;
     // Current helm entry being assembled.
     let mut helm_name: Option<String> = None;
     let mut helm_repo: Option<String> = None;
@@ -142,7 +159,14 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
             State::InImages => {
                 if indent == 0 && !trimmed.starts_with('-') {
                     // Exited images section — flush last entry
-                    flush_image(&mut img_name, &mut img_new_name, &mut img_new_tag, &mut out);
+                    flush_image(
+                        &mut img_name,
+                        &mut img_new_name,
+                        &mut img_new_tag,
+                        &mut img_new_tag_quoted,
+                        &mut img_digest,
+                        &mut out,
+                    );
                     state = State::Default;
                     if trimmed == "helmCharts:" {
                         state = State::InHelmCharts;
@@ -153,16 +177,35 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
                 }
                 // New list item
                 if let Some(rest) = trimmed.strip_prefix("- ") {
-                    flush_image(&mut img_name, &mut img_new_name, &mut img_new_tag, &mut out);
+                    flush_image(
+                        &mut img_name,
+                        &mut img_new_name,
+                        &mut img_new_tag,
+                        &mut img_new_tag_quoted,
+                        &mut img_digest,
+                        &mut out,
+                    );
                     if let Some(val) = strip_key(rest, "name") {
-                        img_name = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+                        img_name = Some(trim_yaml_scalar(val).0);
+                    } else if let Some(val) = strip_key(rest, "newName") {
+                        img_new_name = Some(trim_yaml_scalar(val).0);
+                    } else if let Some(val) = strip_key(rest, "newTag") {
+                        let (tag, quoted) = trim_yaml_scalar(val);
+                        img_new_tag = Some(tag);
+                        img_new_tag_quoted = quoted;
+                    } else if let Some(val) = strip_key(rest, "digest") {
+                        img_digest = Some(trim_yaml_scalar(val).0);
                     }
                 } else if let Some(val) = strip_key(trimmed, "name") {
-                    img_name = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+                    img_name = Some(trim_yaml_scalar(val).0);
                 } else if let Some(val) = strip_key(trimmed, "newName") {
-                    img_new_name = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+                    img_new_name = Some(trim_yaml_scalar(val).0);
                 } else if let Some(val) = strip_key(trimmed, "newTag") {
-                    img_new_tag = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+                    let (tag, quoted) = trim_yaml_scalar(val);
+                    img_new_tag = Some(tag);
+                    img_new_tag_quoted = quoted;
+                } else if let Some(val) = strip_key(trimmed, "digest") {
+                    img_digest = Some(trim_yaml_scalar(val).0);
                 }
             }
             State::InHelmCharts => {
@@ -213,7 +256,14 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
     }
 
     // Flush trailing entries.
-    flush_image(&mut img_name, &mut img_new_name, &mut img_new_tag, &mut out);
+    flush_image(
+        &mut img_name,
+        &mut img_new_name,
+        &mut img_new_tag,
+        &mut img_new_tag_quoted,
+        &mut img_digest,
+        &mut out,
+    );
     flush_helm(&mut helm_name, &mut helm_repo, &mut helm_version, &mut out);
 
     out
@@ -233,16 +283,15 @@ pub fn resolve_oci_helm_dep(
 }
 
 pub fn resolve_image_dep(
-    dep: DockerfileExtractedDep,
+    dep: KustomizeImageDep,
     registry_aliases: &[(&str, &str)],
 ) -> KustomizeResolvedImageDep {
-    let replace_string = dep.tag.clone().unwrap_or_default();
     KustomizeResolvedImageDep {
         package_name: apply_registry_alias(&dep.image, registry_aliases),
         dep_name: dep.image,
         current_value: dep.tag,
         current_digest: dep.digest,
-        replace_string,
+        replace_string: dep.replace_string,
         auto_replace_string_template: "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"
             .to_owned(),
         datasource: "docker",
@@ -428,25 +477,152 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
     line.strip_prefix(prefix.as_str())
 }
 
+fn trim_yaml_scalar(value: &str) -> (String, bool) {
+    let value = value.trim();
+    let quoted = (value.starts_with('"') && value.ends_with('"'))
+        || (value.starts_with('\'') && value.ends_with('\''));
+    (
+        value.trim_matches('"').trim_matches('\'').to_owned(),
+        quoted,
+    )
+}
+
 fn flush_image(
     name: &mut Option<String>,
     new_name: &mut Option<String>,
     new_tag: &mut Option<String>,
+    new_tag_quoted: &mut bool,
+    digest: &mut Option<String>,
     out: &mut Vec<KustomizeDep>,
 ) {
     let Some(n) = name.take() else {
         new_name.take();
         new_tag.take();
+        *new_tag_quoted = false;
+        digest.take();
         return;
     };
     let lookup_name = new_name.take().unwrap_or(n);
-    let tag = new_tag.take().unwrap_or_default();
-    if tag.is_empty() || lookup_name.is_empty() {
+    let tag = new_tag.take();
+    let digest_value = digest.take();
+    let was_quoted = *new_tag_quoted;
+    *new_tag_quoted = false;
+    if lookup_name.is_empty() {
         return;
     }
-    let image_ref = format!("{lookup_name}:{tag}");
-    let dep = classify_image_ref(&image_ref);
-    out.push(KustomizeDep::Image(dep));
+    if let Some(dep) = kustomize_image_dep(lookup_name, tag, was_quoted, digest_value) {
+        out.push(KustomizeDep::Image(dep));
+    }
+}
+
+fn kustomize_image_dep(
+    image: String,
+    tag: Option<String>,
+    tag_quoted: bool,
+    digest: Option<String>,
+) -> Option<KustomizeImageDep> {
+    if tag.is_some() && digest.is_some() {
+        return Some(KustomizeImageDep {
+            image,
+            tag: None,
+            digest,
+            skip_reason: Some(KustomizeImageSkipReason::InvalidDependencySpecification),
+            replace_string: String::new(),
+        });
+    }
+
+    if let Some(digest) = digest {
+        if !is_valid_digest(&digest) {
+            return Some(KustomizeImageDep {
+                image,
+                tag: None,
+                digest: None,
+                skip_reason: Some(KustomizeImageSkipReason::InvalidValue),
+                replace_string: digest,
+            });
+        }
+        let (image, current_value) = split_image_tag(&image);
+        return Some(KustomizeImageDep {
+            image: image.to_owned(),
+            tag: (!current_value.is_empty()).then(|| current_value.to_owned()),
+            digest: Some(digest.clone()),
+            skip_reason: None,
+            replace_string: digest,
+        });
+    }
+
+    let tag = tag?;
+
+    if !tag_quoted && looks_like_yaml_number(&tag) {
+        return Some(KustomizeImageDep {
+            image,
+            tag: Some(tag.clone()),
+            digest: None,
+            skip_reason: Some(KustomizeImageSkipReason::InvalidValue),
+            replace_string: tag,
+        });
+    }
+
+    if let Some((tag, digest)) = tag.split_once('@')
+        && is_valid_digest(digest)
+    {
+        return Some(KustomizeImageDep {
+            image,
+            tag: Some(tag.to_owned()),
+            digest: Some(digest.to_owned()),
+            skip_reason: None,
+            replace_string: format!("{tag}@{digest}"),
+        });
+    }
+
+    if tag.starts_with("sha256:") || tag.starts_with("sha512:") {
+        return Some(KustomizeImageDep {
+            image,
+            tag: Some(tag.clone()),
+            digest: None,
+            skip_reason: Some(KustomizeImageSkipReason::InvalidValue),
+            replace_string: tag,
+        });
+    }
+
+    Some(KustomizeImageDep {
+        image,
+        tag: Some(tag.clone()),
+        digest: None,
+        skip_reason: None,
+        replace_string: tag,
+    })
+}
+
+fn is_valid_digest(value: &str) -> bool {
+    value.starts_with("sha256:") || value.starts_with("sha512:")
+}
+
+fn looks_like_yaml_number(value: &str) -> bool {
+    let value = value.trim_start_matches(['-', '+']);
+    let mut dot_count = 0;
+    !value.is_empty()
+        && value.chars().all(|ch| {
+            if ch == '.' {
+                dot_count += 1;
+                true
+            } else {
+                ch.is_ascii_digit()
+            }
+        })
+        && dot_count == 1
+        && value.chars().any(|ch| ch.is_ascii_digit())
+}
+
+fn split_image_tag(s: &str) -> (&str, &str) {
+    if let Some(pos) = s.rfind(':') {
+        let tag = &s[pos + 1..];
+        let name = &s[..pos];
+        if !tag.contains('/') {
+            return (name, tag);
+        }
+    }
+    (s, "")
 }
 
 fn flush_helm(
@@ -685,6 +861,52 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
+    // Ported: "should extract out image versions" — kustomize/extract.spec.ts line 506
+    #[test]
+    fn package_file_extracts_image_versions() {
+        let content = r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: node
+  newTag: v0.1.0
+- newTag: v0.0.1
+  name: group/instance
+- name: quay.io/test/repo
+  newTag: v0.0.2
+- name: gitlab.com/org/suborg/image
+  newTag: v0.0.3
+- name: this-lives/on-docker-hub
+  newName: but.this.lives.on.local/private-registry
+  newTag: v0.0.4
+- name: nginx
+  newTag: 2.5
+"#;
+        let images: Vec<_> = extract(content)
+            .into_iter()
+            .filter_map(|dep| match dep {
+                KustomizeDep::Image(image) => Some(image),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(images.len(), 6);
+        assert_eq!(images[0].image, "node");
+        assert_eq!(images[0].tag.as_deref(), Some("v0.1.0"));
+        assert_eq!(images[1].image, "group/instance");
+        assert_eq!(images[1].tag.as_deref(), Some("v0.0.1"));
+        assert_eq!(images[2].image, "quay.io/test/repo");
+        assert_eq!(images[2].tag.as_deref(), Some("v0.0.2"));
+        assert_eq!(images[3].image, "gitlab.com/org/suborg/image");
+        assert_eq!(images[3].tag.as_deref(), Some("v0.0.3"));
+        assert_eq!(images[4].image, "but.this.lives.on.local/private-registry");
+        assert_eq!(images[4].tag.as_deref(), Some("v0.0.4"));
+        assert_eq!(images[5].image, "nginx");
+        assert_eq!(
+            images[5].skip_reason,
+            Some(KustomizeImageSkipReason::InvalidValue)
+        );
+    }
+
     // Ported: "should correctly extract a chart" — kustomize/extract.spec.ts line 217
     #[test]
     fn extracts_helm_charts() {
@@ -767,6 +989,58 @@ helmCharts:
         assert_eq!(resolved.current_value, "18.12.1");
         assert_eq!(resolved.datasource, "docker");
         assert!(!resolved.pin_digests);
+    }
+
+    // Ported: "extracts from digest" — kustomize/extract.spec.ts line 710
+    #[test]
+    fn extracts_images_from_digest() {
+        let digest = "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c";
+        let content = format!(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+  - name: postgres
+    digest: {digest}
+  - name: postgres:11
+    digest: {digest}
+  - name: postgres
+    newTag: 11
+    digest: {digest}
+  - name: postgres
+    digest: 02641143766
+  - name: postgres
+    digest: b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+"#
+        );
+        let images: Vec<_> = extract(&content)
+            .into_iter()
+            .filter_map(|dep| match dep {
+                KustomizeDep::Image(image) => Some(image),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(images.len(), 5);
+        assert_eq!(images[0].image, "postgres");
+        assert_eq!(images[0].digest.as_deref(), Some(digest));
+        assert_eq!(images[0].tag, None);
+        assert_eq!(images[0].replace_string, digest);
+        assert_eq!(images[1].image, "postgres");
+        assert_eq!(images[1].tag.as_deref(), Some("11"));
+        assert_eq!(images[1].digest.as_deref(), Some(digest));
+        assert_eq!(images[1].replace_string, digest);
+        assert_eq!(
+            images[2].skip_reason,
+            Some(KustomizeImageSkipReason::InvalidDependencySpecification)
+        );
+        assert_eq!(
+            images[3].skip_reason,
+            Some(KustomizeImageSkipReason::InvalidValue)
+        );
+        assert_eq!(
+            images[4].skip_reason,
+            Some(KustomizeImageSkipReason::InvalidValue)
+        );
     }
 
     // Ported: "should return null for a local base" — kustomize/extract.spec.ts line 66

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 939 / 1217 actionable tests ported (77%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 941 / 1217 actionable tests ported (77%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1946,7 +1946,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 37 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 44 | **Ported:** 39 | **Actionable:** 39 | **Status:** ported
 
 ### `parseKustomize` (top-level)
 
@@ -2006,7 +2006,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts ssh dependency | 444 | ported | `kustomize.rs` | `package_file_extracts_ssh_dependency` | — |
 | extracts ssh dependency with a subdir | 462 | ported | `kustomize.rs` | `package_file_extracts_ssh_dependency_with_subdir` | — |
 | extracts http dependency | 481 | ported | `kustomize.rs` | `package_file_extracts_http_dependencies` | — |
-| should extract out image versions | 506 | pending | — | — | Requires images[] full coverage |
+| should extract out image versions | 506 | ported | `kustomize.rs` | `package_file_extracts_image_versions` | — |
 | ignores non-Kubernetes empty files | 586 | ported | `kustomize.rs` | `ignores_non_kubernetes_empty_files` | — |
 | does nothing with kustomize empty kustomize files | 590 | ported | `kustomize.rs` | `empty_kustomization_returns_empty` | — |
 | should extract bases resources and components from their respective blocks | 598 | ported | `kustomize.rs` | `extracts_bases_resources_and_components_blocks` | — |
@@ -2017,7 +2017,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | extracts from newTag | 675 | ported | `kustomize.rs` | `extracts_images` | — |
-| extracts from digest | 710 | pending | — | — | Requires digest-pinned image handling |
+| extracts from digest | 710 | ported | `kustomize.rs` | `extracts_images_from_digest` | — |
 | extracts newName | 757 | ported | `kustomize.rs` | `extracts_new_name_override` | — |
 | parses helmChart field | 799 | ported | `kustomize.rs` | `mixed_images_and_helm` | — |
 | extracts from various URL forms (it.each) | 1104 | not-applicable | — | — | Tests TS-internal `extractResource` helper directly across many URL forms; Rust extractor has no equivalent public-API entry point |
