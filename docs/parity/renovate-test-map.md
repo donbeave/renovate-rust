@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1415 / 1651 actionable tests ported (86%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1417 / 1651 actionable tests ported (86%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2891,7 +2891,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/npm/extract/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/index.spec.ts
-**Total tests:** 41 | **Ported:** 13 | **Actionable:** 18 | **Status:** partial
+**Total tests:** 41 | **Ported:** 15 | **Actionable:** 18 | **Status:** partial
 
 ### `modules/manager/npm/extract/index › .extractPackageFile()`
 
@@ -2928,8 +2928,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extracts packageManager | 894 | ported | `npm.rs` | `package_json_extracts_package_manager` | — |
 | sets hasPackageManager to true when devEngines detected in package file | 923 | not-applicable | — | — | Requires package-file managerData; Rust package.json extractor returns dependencies only |
 | extracts dependencies from overrides | 957 | ported | `npm.rs` | `extracts_npm_overrides` | — |
-| extracts dependencies from pnpm.overrides | 1036 | pending | — | — | — |
-| extracts dependencies from pnpm.overrides, with version ranges in flat syntax | 1117 | pending | — | — | — |
+| extracts dependencies from pnpm.overrides | 1036 | ported | `npm.rs` | `extracts_pnpm_overrides` | — |
+| extracts dependencies from pnpm.overrides, with version ranges in flat syntax | 1117 | ported | `npm.rs` | `extracts_pnpm_override_range_keys` | — |
 
 ### `modules/manager/npm/extract/index › .extractAllPackageFiles()`
 

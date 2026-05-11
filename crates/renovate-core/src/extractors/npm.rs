@@ -67,6 +67,8 @@ pub enum NpmDepType {
     Resolutions,
     /// npm 8+ `overrides` override.
     Overrides,
+    /// pnpm `overrides` override.
+    PnpmOverrides,
     /// `engines` constraints.
     Engines,
     /// `volta` tool constraints.
@@ -85,6 +87,7 @@ impl NpmDepType {
             NpmDepType::Optional => "optionalDependencies",
             NpmDepType::Resolutions => "resolutions",
             NpmDepType::Overrides => "overrides",
+            NpmDepType::PnpmOverrides => "pnpm.overrides",
             NpmDepType::Engines => "engines",
             NpmDepType::Volta => "volta",
             NpmDepType::PackageManager => "packageManager",
@@ -216,6 +219,14 @@ struct PackageJson {
     volta: BTreeMap<String, DependencySpec>,
     #[serde(rename = "packageManager")]
     package_manager: Option<String>,
+    #[serde(default)]
+    pnpm: PnpmPackageJson,
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct PnpmPackageJson {
+    #[serde(default)]
+    overrides: serde_json::Value,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -277,7 +288,8 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
             ));
         }
     }
-    collect_overrides(&pkg.overrides, &mut out);
+    collect_overrides(&pkg.overrides, NpmDepType::Overrides, &mut out);
+    collect_overrides(&pkg.pnpm.overrides, NpmDepType::PnpmOverrides, &mut out);
     if let Some((name, version)) = parse_package_manager(pkg.package_manager.as_deref()) {
         out.push(classify(
             name,
@@ -289,22 +301,31 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
     Ok(out)
 }
 
-fn collect_overrides(value: &serde_json::Value, out: &mut Vec<NpmExtractedDep>) {
+fn collect_overrides(
+    value: &serde_json::Value,
+    dep_type: NpmDepType,
+    out: &mut Vec<NpmExtractedDep>,
+) {
     let Some(overrides) = value.as_object() else {
         return;
     };
 
     for (name, value) in overrides {
-        collect_override_entry(name, value, out);
+        collect_override_entry(name, value, dep_type, out);
     }
 }
 
-fn collect_override_entry(name: &str, value: &serde_json::Value, out: &mut Vec<NpmExtractedDep>) {
+fn collect_override_entry(
+    name: &str,
+    value: &serde_json::Value,
+    dep_type: NpmDepType,
+    out: &mut Vec<NpmExtractedDep>,
+) {
     if let Some(version) = value.as_str() {
         out.push(classify(
             name.to_owned(),
             &DependencySpec::Version(version.to_owned()),
-            NpmDepType::Overrides,
+            dep_type,
         ));
         return;
     }
@@ -314,7 +335,7 @@ fn collect_override_entry(name: &str, value: &serde_json::Value, out: &mut Vec<N
     };
     for (child_name, child_value) in children {
         let dep_name = if child_name == "." { name } else { child_name };
-        collect_override_entry(dep_name, child_value, out);
+        collect_override_entry(dep_name, child_value, dep_type, out);
     }
 }
 
@@ -1987,5 +2008,98 @@ chalk@^2.4.1:
                 .count(),
             2
         );
+    }
+
+    // Ported: "extracts dependencies from pnpm.overrides" — npm/extract/index.spec.ts line 1036
+    #[test]
+    fn extracts_pnpm_overrides() {
+        let json = r#"{
+          "devDependencies": {
+            "@types/react": "18.0.5"
+          },
+          "pnpm": {
+            "overrides": {
+              "node": "8.9.2",
+              "@types/react": "18.0.5",
+              "baz": {
+                "node": "8.9.2",
+                "bar": {
+                  "foo": "1.0.0"
+                }
+              },
+              "foo2": {
+                ".": "1.0.0",
+                "bar2": "1.0.0"
+              },
+              "emptyObject": {}
+            }
+          }
+        }"#;
+        let deps = extract_ok(json);
+        assert!(deps.iter().any(|d| {
+            d.name == "@types/react" && d.current_value == "18.0.5" && d.dep_type == NpmDepType::Dev
+        }));
+
+        let overrides: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_type == NpmDepType::PnpmOverrides)
+            .collect();
+        assert_eq!(overrides.len(), 6);
+        for (name, current_value) in [
+            ("node", "8.9.2"),
+            ("@types/react", "18.0.5"),
+            ("foo", "1.0.0"),
+            ("foo2", "1.0.0"),
+            ("bar2", "1.0.0"),
+        ] {
+            assert!(overrides.iter().any(|dep| {
+                dep.name == name && dep.current_value == current_value && dep.skip_reason.is_none()
+            }));
+        }
+        assert_eq!(
+            overrides
+                .iter()
+                .filter(|dep| dep.name == "node" && dep.current_value == "8.9.2")
+                .count(),
+            2
+        );
+    }
+
+    // Ported: "extracts dependencies from pnpm.overrides, with version ranges in flat syntax" — npm/extract/index.spec.ts line 1117
+    #[test]
+    fn extracts_pnpm_override_range_keys() {
+        let json = r#"{
+          "pnpm": {
+            "overrides": {
+              "foo>bar": "2.0.0",
+              "foo@1.0.0": "2.0.0",
+              "foo@>1.0.0": "2.0.0",
+              "foo@>=1.0.0": "2.0.0",
+              "foo@1.0.0>bar": "2.0.0",
+              "foo@>1.0.0>bar": "2.0.0",
+              "foo@>=1.0.0 <2.0.0": ">=2.0.0"
+            }
+          }
+        }"#;
+        let deps = extract_ok(json);
+        let overrides: Vec<_> = deps
+            .iter()
+            .filter(|d| d.dep_type == NpmDepType::PnpmOverrides)
+            .collect();
+
+        assert_eq!(overrides.len(), 7);
+        for (name, current_value) in [
+            ("foo>bar", "2.0.0"),
+            ("foo@1.0.0", "2.0.0"),
+            ("foo@>1.0.0", "2.0.0"),
+            ("foo@>=1.0.0", "2.0.0"),
+            ("foo@1.0.0>bar", "2.0.0"),
+            ("foo@>1.0.0>bar", "2.0.0"),
+            ("foo@>=1.0.0 <2.0.0", ">=2.0.0"),
+        ] {
+            assert!(overrides.iter().any(|dep| {
+                dep.name == name && dep.current_value == current_value && dep.skip_reason.is_none()
+            }));
+        }
     }
 }
