@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 893 / 1216 actionable tests ported (73%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 896 / 1216 actionable tests ported (74%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -846,7 +846,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/docker-compose/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/docker-compose/extract.spec.ts
-**Total tests:** 13 | **Ported:** 10 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 13 | **Actionable:** 13 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -860,9 +860,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts multiple image lines for version 3 without set version key | 36 | ported | `docker_compose.rs` | `no_version_key_extracts_eight_deps` | — |
 | extracts default variable values for version 3 | 42 | ported | `docker_compose.rs` | `variable_interpolation_is_skipped` | — |
 | extracts can parse yaml tags for version 3 | 59 | ported | `docker_compose.rs` | `yaml_tags_do_not_break_extraction` | — |
-| extracts image and replaces registry | 87 | pending | — | — | registryAliases not yet implemented |
-| extracts image but no replacement | 115 | pending | — | — | registryAliases not yet implemented |
-| extracts image and no double replacement | 143 | pending | — | — | registryAliases not yet implemented |
+| extracts image and replaces registry | 87 | ported | `docker_compose.rs` | `extracts_image_and_replaces_registry` | — |
+| extracts image but no replacement | 115 | ported | `docker_compose.rs` | `extracts_image_without_registry_replacement` | — |
+| extracts image and no double replacement | 143 | ported | `docker_compose.rs` | `extracts_image_without_double_registry_replacement` | — |
 | extracts image of templated compose file | 172 | ported | `docker_compose.rs` | `extracts_image_from_templated_compose_file` | — |
 | extract images from fragments | 198 | ported | `docker_compose.rs` | `extracts_image_from_yaml_anchor_fragment` | — |
 

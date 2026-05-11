@@ -52,6 +52,17 @@ pub struct ComposeExtractedDep {
     pub skip_reason: Option<ComposeSkipReason>,
 }
 
+/// Docker dep metadata after applying Compose registry alias config.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ComposeDockerDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub replace_string: String,
+    pub auto_replace_string_template: String,
+}
+
 /// Errors from parsing a docker-compose file.
 #[derive(Debug, Error)]
 pub enum ComposeExtractError {
@@ -124,6 +135,17 @@ pub fn extract(content: &str) -> Result<Vec<ComposeExtractedDep>, ComposeExtract
     Ok(deps)
 }
 
+/// Extract Docker deps and apply Renovate-style registry aliases.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Result<Vec<ComposeDockerDep>, ComposeExtractError> {
+    Ok(extract(content)?
+        .into_iter()
+        .map(|dep| compose_docker_dep(dep, registry_aliases))
+        .collect())
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /// If `line` starts with `key:` (YAML key), return the value part.
@@ -165,6 +187,62 @@ fn classify_image(image_ref: &str) -> ComposeExtractedDep {
         digest: df_dep.digest,
         skip_reason: df_dep.skip_reason.map(ComposeSkipReason::Dockerfile),
     }
+}
+
+fn compose_docker_dep(
+    dep: ComposeExtractedDep,
+    registry_aliases: &[(&str, &str)],
+) -> ComposeDockerDep {
+    let dep_name = dep.image;
+    let package_name = apply_registry_alias(&dep_name, registry_aliases);
+    let alias_applied = package_name != dep_name;
+    let replace_string = image_ref(&dep_name, dep.tag.as_deref(), dep.digest.as_deref());
+    let auto_replace_string_template = if alias_applied {
+        format!(
+            "{dep_name}:{{{{#if newValue}}}}{{{{newValue}}}}{{{{/if}}}}{{{{#if newDigest}}}}@{{{{newDigest}}}}{{{{/if}}}}"
+        )
+    } else {
+        "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+            .to_owned()
+    };
+
+    ComposeDockerDep {
+        dep_name,
+        package_name,
+        current_value: dep.tag,
+        current_digest: dep.digest,
+        replace_string,
+        auto_replace_string_template,
+    }
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
+}
+
+fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
+    let mut value = image.to_owned();
+    if let Some(tag) = tag {
+        value.push(':');
+        value.push_str(tag);
+    }
+    if let Some(digest) = digest {
+        value.push('@');
+        value.push_str(digest);
+    }
+    value
 }
 
 #[cfg(test)]
@@ -365,6 +443,82 @@ services:
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].image, "quay.io/nginx");
         assert_eq!(deps[0].tag.as_deref(), Some("0.0.1"));
+    }
+
+    // Ported: "extracts image and replaces registry" — docker-compose/extract.spec.ts line 87
+    #[test]
+    fn extracts_image_and_replaces_registry() {
+        let content = r#"
+version: "3"
+services:
+  nginx:
+    image: quay.io/nginx:0.0.1
+"#;
+        let deps =
+            extract_with_registry_aliases(content, &[("quay.io", "my-quay-mirror.registry.com")])
+                .unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/nginx");
+        assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.0.1"));
+        assert_eq!(deps[0].current_digest, None);
+        assert_eq!(deps[0].replace_string, "quay.io/nginx:0.0.1");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+    }
+
+    // Ported: "extracts image but no replacement" — docker-compose/extract.spec.ts line 115
+    #[test]
+    fn extracts_image_without_registry_replacement() {
+        let content = r#"
+version: "3"
+services:
+  nginx:
+    image: quay.io/nginx:0.0.1
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[("index.docker.io", "my-docker-mirror.registry.com")],
+        )
+        .unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/nginx");
+        assert_eq!(deps[0].package_name, "quay.io/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.0.1"));
+        assert_eq!(deps[0].replace_string, "quay.io/nginx:0.0.1");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+    }
+
+    // Ported: "extracts image and no double replacement" — docker-compose/extract.spec.ts line 143
+    #[test]
+    fn extracts_image_without_double_registry_replacement() {
+        let content = r#"
+version: "3"
+services:
+  nginx:
+    image: quay.io/nginx:0.0.1
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[
+                ("quay.io", "my-quay-mirror.registry.com"),
+                ("my-quay-mirror.registry.com", "quay.io"),
+            ],
+        )
+        .unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/nginx");
+        assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.0.1"));
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
     }
 
     // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
