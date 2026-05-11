@@ -59,12 +59,20 @@ pub struct PreCommitDep {
     pub current_digest: Option<String>,
     /// Hosting provider, used to select the right datasource.
     pub git_host: Option<GitHost>,
+    pub registry_urls: Vec<String>,
     /// Set when no tag lookup should be performed.
     pub skip_reason: Option<PreCommitSkipReason>,
 }
 
 /// Extract pre-commit hook dependencies from a `.pre-commit-config.yaml`.
 pub fn extract(content: &str) -> Vec<PreCommitDep> {
+    extract_with_private_hosts(content, &[])
+}
+
+pub fn extract_with_private_hosts(
+    content: &str,
+    private_hosts: &[(&str, GitHost)],
+) -> Vec<PreCommitDep> {
     let mut out = Vec::new();
 
     // Whether we're inside the `repos:` list.
@@ -97,13 +105,13 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
         // Top-level (indent 0): look for `repos:` key or other top-level keys.
         if indent == 0 {
             if let Some(val) = strip_key(trimmed, "repos") {
-                flush(&mut current_repo, &mut current_rev, &mut out);
+                flush(&mut current_repo, &mut current_rev, &mut out, private_hosts);
                 in_repos = val.trim().is_empty();
                 entry_indent = None;
                 continue;
             }
             if !trimmed.starts_with('-') {
-                flush(&mut current_repo, &mut current_rev, &mut out);
+                flush(&mut current_repo, &mut current_rev, &mut out, private_hosts);
                 in_repos = false;
                 entry_indent = None;
                 continue;
@@ -125,12 +133,12 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
                     continue;
                 }
                 Some(ei) if this_indent < ei => {
-                    flush(&mut current_repo, &mut current_rev, &mut out);
+                    flush(&mut current_repo, &mut current_rev, &mut out, private_hosts);
                     in_repos = false;
                     continue;
                 }
                 _ => {
-                    flush(&mut current_repo, &mut current_rev, &mut out);
+                    flush(&mut current_repo, &mut current_rev, &mut out, private_hosts);
                 }
             }
 
@@ -152,7 +160,7 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
         // Non-list continuation line at the current entry level or deeper.
         if let Some(ei) = entry_indent {
             if indent <= ei {
-                flush(&mut current_repo, &mut current_rev, &mut out);
+                flush(&mut current_repo, &mut current_rev, &mut out, private_hosts);
                 in_repos = false;
                 continue;
             }
@@ -171,7 +179,7 @@ pub fn extract(content: &str) -> Vec<PreCommitDep> {
         }
     }
 
-    flush(&mut current_repo, &mut current_rev, &mut out);
+    flush(&mut current_repo, &mut current_rev, &mut out, private_hosts);
     out
 }
 
@@ -203,19 +211,25 @@ fn flush(
     repo: &mut Option<String>,
     rev: &mut Option<(String, Option<String>)>,
     out: &mut Vec<PreCommitDep>,
+    private_hosts: &[(&str, GitHost)],
 ) {
     match (repo.take(), rev.take()) {
         (Some(repo_url), Some((rev_tag, digest))) => {
-            out.push(parse_dep(repo_url, rev_tag, digest));
+            out.push(parse_dep(repo_url, rev_tag, digest, private_hosts));
         }
         (Some(repo_url), None) => {
-            out.push(parse_dep(repo_url, String::new(), None));
+            out.push(parse_dep(repo_url, String::new(), None, private_hosts));
         }
         _ => {}
     }
 }
 
-fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommitDep {
+fn parse_dep(
+    repo_url: String,
+    rev: String,
+    digest: Option<String>,
+    private_hosts: &[(&str, GitHost)],
+) -> PreCommitDep {
     match repo_url.as_str() {
         "local" => {
             return PreCommitDep {
@@ -223,6 +237,7 @@ fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommit
                 current_value: rev,
                 current_digest: digest,
                 git_host: None,
+                registry_urls: Vec::new(),
                 skip_reason: Some(PreCommitSkipReason::LocalHook),
             };
         }
@@ -232,6 +247,7 @@ fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommit
                 current_value: rev,
                 current_digest: digest,
                 git_host: None,
+                registry_urls: Vec::new(),
                 skip_reason: Some(PreCommitSkipReason::MetaHook),
             };
         }
@@ -256,6 +272,7 @@ fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommit
             current_value: rev,
             current_digest: digest,
             git_host: None,
+            registry_urls: Vec::new(),
             skip_reason: Some(PreCommitSkipReason::InvalidUrl),
         };
     };
@@ -266,6 +283,7 @@ fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommit
             current_value: rev,
             current_digest: digest,
             git_host: None,
+            registry_urls: Vec::new(),
             skip_reason: Some(PreCommitSkipReason::InvalidUrl),
         };
     }
@@ -276,6 +294,8 @@ fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommit
         Some(GitHost::GitHub)
     } else if hostname.contains("gitlab") {
         Some(GitHost::GitLab)
+    } else if let Some((_, host)) = private_hosts.iter().find(|(host, _)| *host == hostname) {
+        Some(host.clone())
     } else {
         None
     };
@@ -291,6 +311,14 @@ fn parse_dep(repo_url: String, rev: String, digest: Option<String>) -> PreCommit
         current_value: rev,
         current_digest: digest,
         git_host,
+        registry_urls: if hostname != "github.com"
+            && hostname != "gitlab.com"
+            && skip_reason.is_none()
+        {
+            vec![hostname.to_owned()]
+        } else {
+            Vec::new()
+        },
         skip_reason,
     }
 }
@@ -434,6 +462,34 @@ repos:
         let content =
             "repos:\n- repo: https://bitbucket.org/owner/repo\n  rev: v1.0\n  hooks:\n  - id: x\n";
         let deps = extract(content);
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(PreCommitSkipReason::UnknownRegistry)
+        );
+    }
+
+    // Ported: "can handle private git repos" — pre-commit/extract.spec.ts line 161
+    #[test]
+    fn private_gitlab_host_uses_gitlab_tags_and_registry_url() {
+        let content = "fail_fast: true\nrepos:\n  - repo: https://enterprise.com/pre-commit/pre-commit-hooks\n    rev: v1.0.0\n";
+        let deps = extract_with_private_hosts(content, &[("enterprise.com", GitHost::GitLab)]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "pre-commit/pre-commit-hooks");
+        assert_eq!(deps[0].current_value, "v1.0.0");
+        assert_eq!(deps[0].git_host, Some(GitHost::GitLab));
+        assert_eq!(deps[0].registry_urls, vec!["enterprise.com"]);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "can handle unknown private git repos" — pre-commit/extract.spec.ts line 200
+    #[test]
+    fn private_git_host_without_provider_is_unknown_registry() {
+        let content = "fail_fast: true\nrepos:\n  - repo: https://enterprise.com/pre-commit/pre-commit-hooks\n    rev: v1.0.0\n";
+        let deps = extract_with_private_hosts(content, &[]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "pre-commit/pre-commit-hooks");
+        assert_eq!(deps[0].current_value, "v1.0.0");
+        assert_eq!(deps[0].registry_urls, Vec::<String>::new());
         assert_eq!(
             deps[0].skip_reason,
             Some(PreCommitSkipReason::UnknownRegistry)

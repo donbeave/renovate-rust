@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1028 / 1217 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1030 / 1217 actionable tests ported (85%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1429,7 +1429,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pre-commit/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pre-commit/extract.spec.ts
-**Total tests:** 12 | **Ported:** 10 | **Actionable:** 12 | **Status:** partial
+**Total tests:** 12 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1443,9 +1443,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for invalid repo | 78 | ported | `pre_commit.rs` | `repo_entry_without_repo_key_returns_empty` | — |
 | extracts from values.yaml correctly with same structure as "pre-commit sample-config" | 83 | ported | `pre_commit.rs` | `git_suffix_stripped` | — |
 | extracts from complex config file correctly | 105 | ported | `pre_commit.rs` | `extracts_github_hooks` (+ extracts_gitlab_hooks, skips_local_hooks, skips_meta_hooks, total_dep_count) | — |
-| can handle private git repos | 161 | pending | — | — | Requires hostRules / token-based platform detection |
+| can handle private git repos | 161 | ported | `pre_commit.rs` | `private_gitlab_host_uses_gitlab_tags_and_registry_url` | — |
 | can handle invalid private git repos | 183 | ported | `pre_commit.rs` | `unknown_registry_gets_skip_reason` | — |
-| can handle unknown private git repos | 200 | pending | — | — | Requires hostRules / token-based platform detection |
+| can handle unknown private git repos | 200 | ported | `pre_commit.rs` | `private_git_host_without_provider_is_unknown_registry` | — |
 | can handle pinned repo versions | 220 | ported | `pre_commit.rs` | `frozen_digest_rev_extracts_version_and_digest` | — |
 
 ---
