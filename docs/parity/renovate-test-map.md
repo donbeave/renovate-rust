@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1309 / 1672 actionable tests ported (78%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1317 / 1672 actionable tests ported (79%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,13 +4295,13 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 18 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 26 | **Actionable:** 73 | **Status:** partial
 
 ### `util/package-rules/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| applies | 38 | pending | — | — | — |
+| applies | 38 | ported | `repo_config.rs` | `applies_comprehensive_integration` | — |
 | applies both rules for a | 71 | pending | — | — | — |
 | applies both rules for b | 81 | pending | — | — | — |
 | applies the second rule | 91 | pending | — | — | — |
@@ -4311,16 +4311,16 @@ resolver) and the inner `extractPackageFile()` adapter.
 | excludes package pattern | 127 | pending | — | — | — |
 | ignores patterns if lock file maintenance | 136 | pending | — | — | — |
 | do apply rule with matchPackageName | 152 | pending | — | — | — |
-| sets skipReason=package-rules if enabled=false | 169 | pending | — | — | — |
-| unsets skipReason=package-rules if enabled=true | 184 | pending | — | — | — |
-| does not set skipReason=package-rules if the last packageRule has force.enabled=true | 202 | pending | — | — | — |
+| sets skipReason=package-rules if enabled=false | 169 | ported | `repo_config.rs` | `enabled_false_rule_blocks_dependency` | Rust tracks the equivalent blocked state, not the worker-layer skipReason fields |
+| unsets skipReason=package-rules if enabled=true | 184 | ported | `repo_config.rs` | `enabled_true_later_rule_overrides_earlier_enabled_false` | Rust tracks the equivalent unblocked state, not the worker-layer skipReason fields |
+| does not set skipReason=package-rules if the last packageRule has force.enabled=true | 202 | ported | `repo_config.rs` | `force_enabled_true_overrides_enabled_false` | Rust tracks the equivalent unblocked state, not the worker-layer skipReason fields |
 | does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false) | 223 | pending | — | — | — |
-| does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false) | 245 | pending | — | — | — |
+| does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false) | 245 | ported | `repo_config.rs` | `force_enabled_true_on_ctx_clears_block` | Rust verifies the equivalent merged force.enabled effect |
 | sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false) | 267 | pending | — | — | — |
-| sets skipReason=package-rules if the last packageRule has force.enabled=false | 292 | pending | — | — | — |
+| sets skipReason=package-rules if the last packageRule has force.enabled=false | 292 | ported | `repo_config.rs` | `force_enabled_false_overrides_enabled_true` | Rust tracks the equivalent blocked state, not the worker-layer skipReason fields |
 | skips skipReason=package-rules if enabled=true | 312 | pending | — | — | — |
-| matches anything if missing inclusive rules | 326 | pending | — | — | — |
-| supports inclusive or | 348 | pending | — | — | — |
+| matches anything if missing inclusive rules | 326 | ported | `repo_config.rs` | `match_package_names_negation` | — |
+| supports inclusive or | 348 | ported | `repo_config.rs` | `match_package_names_supports_inclusive_or` | — |
 | filters requested depType | 370 | ported | `repo_config.rs` | `match_dep_types_multiple_types_in_list` | — |
 | filters from list of requested depTypes | 389 | ported | `repo_config.rs` | `match_dep_types_plural_array_any_matches` | — |
 | returns false if no depTypes | 408 | ported | `repo_config.rs` | `match_dep_types_no_dep_type_rule_does_not_fire` | — |

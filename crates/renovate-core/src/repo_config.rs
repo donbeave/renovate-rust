@@ -5791,9 +5791,20 @@ mod tests {
         assert!(!c.is_dep_ignored("react"));
     }
 
+    // Ported: "sets skipReason=package-rules if enabled=false" — util/package-rules/index.spec.ts line 169
+    #[test]
+    fn enabled_false_rule_blocks_dependency() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
+        let ctx = DepContext::for_dep("foo");
+        assert!(
+            c.is_update_blocked_ctx(&ctx),
+            "enabled:false with no matchers must block the dependency"
+        );
+    }
+
+    // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true" — util/package-rules/index.spec.ts line 202
     #[test]
     fn force_enabled_true_overrides_enabled_false() {
-        // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true"
         // index.spec.ts line 202 — vulnerability alert scenario
         // Rule 1: enabled:false → dep disabled
         // Rule 2: force:{enabled:true} → force re-enables dep
@@ -5815,9 +5826,9 @@ mod tests {
         );
     }
 
+    // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false" — util/package-rules/index.spec.ts line 292
     #[test]
     fn force_enabled_false_overrides_enabled_true() {
-        // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false"
         // index.spec.ts line 292
         // Rule 1: enabled:true → dep enabled
         // Rule 2: force:{enabled:false} → force disables dep
@@ -5861,9 +5872,9 @@ mod tests {
         );
     }
 
+    // Ported: "does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)" — util/package-rules/index.spec.ts line 245
     #[test]
     fn force_enabled_true_on_ctx_clears_block() {
-        // Ported: "does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)"
         // index.spec.ts line 245 — two rules: enabled:false, then force:enabled:true (via effects)
         let c = RepoConfig::parse(
             r#"{
@@ -6014,6 +6025,7 @@ mod tests {
         assert!(!c.is_dep_ignored("babel-loader"));
     }
 
+    // Ported: "matches anything if missing inclusive rules" — util/package-rules/index.spec.ts line 326
     #[test]
     fn match_package_names_negation() {
         // "!lodash" in matchPackageNames excludes lodash, allows others
@@ -6022,6 +6034,18 @@ mod tests {
         );
         assert!(!c.is_dep_ignored("lodash"));
         assert!(c.is_dep_ignored("express"));
+    }
+
+    // Ported: "supports inclusive or" — util/package-rules/index.spec.ts line 348
+    #[test]
+    fn match_package_names_supports_inclusive_or() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchPackageNames": ["neutrino", "/^@neutrino\\//"], "automerge": true}]}"#,
+        );
+        let exact = DepContext::for_dep("neutrino");
+        let scoped = DepContext::for_dep("@neutrino/something");
+        assert_eq!(c.collect_rule_effects(&exact).automerge, Some(true));
+        assert_eq!(c.collect_rule_effects(&scoped).automerge, Some(true));
     }
 
     #[test]
@@ -6458,9 +6482,9 @@ mod tests {
         );
     }
 
+    // Ported: "applies" — util/package-rules/index.spec.ts line 38
     #[test]
     fn applies_comprehensive_integration() {
-        // Ported: "applies" — index.spec.ts line 38
         // packageName='a', updateType='minor', isBump=true, currentValue='1.0.0'
         // - Rule 1: matchPackageNames:['*'] + matchCurrentVersion:'<= 2.0.0' → fires (no effect fields)
         // - Rule 2: matchPackageNames:['b'] → doesn't match 'a' → skipped
@@ -6692,6 +6716,7 @@ mod tests {
         );
     }
 
+    // Ported: "unsets skipReason=package-rules if enabled=true" — util/package-rules/index.spec.ts line 184
     #[test]
     fn enabled_true_later_rule_overrides_earlier_enabled_false() {
         // Renovate: last matching rule wins for enabled field.
