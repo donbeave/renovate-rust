@@ -1044,6 +1044,39 @@ new_git_repository(
         );
     }
 
+    // Ported: "handles a real-world MODULE.bazel file (rules_sh)" — bazel-module/extract.spec.ts line 846
+    #[test]
+    fn extracts_rules_sh_real_world_module_bazel() {
+        let input = r#"
+module(
+    name = "rules_sh",
+    version = "0.5.0",
+    compatibility_level = 0,
+)
+bazel_dep(name = "bazel_skylib", version = "1.2.1")
+bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
+sh_configure = use_extension("//bzlmod:extensions.bzl", "sh_configure")
+use_repo(sh_configure, "local_posix_config", "rules_sh_shim_exe")
+register_toolchains("@local_posix_config//...")
+"#;
+        let deps = extract(input);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(deps[0].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(deps[0].name, "bazel_skylib");
+        assert_eq!(deps[0].current_value, "1.2.1");
+        assert!(!deps[0].dev_dependency);
+        assert_eq!(deps[1].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(deps[1].name, "platforms");
+        assert_eq!(deps[1].current_value, "0.0.8");
+        assert!(!deps[1].dev_dependency);
+        assert_eq!(deps[2].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(deps[2].name, "stardoc");
+        assert_eq!(deps[2].current_value, "0.6.2");
+        assert!(deps[2].dev_dependency);
+        assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
+    }
+
     // Ported: "returns bazel_dep and archive_override dependencies" — bazel-module/extract.spec.ts line 148
     #[test]
     fn extracts_archive_override_with_bazel_dep_version() {

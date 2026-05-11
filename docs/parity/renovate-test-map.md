@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 873 / 1217 actionable tests ported (72%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 874 / 1217 actionable tests ported (72%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2152,7 +2152,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 25 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 26 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2185,7 +2185,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns git_repository dependencies with digest | 772 | ported | `bazel_module.rs` | `extracts_git_repository_dependency_with_digest` | — |
 | returns git_repository dependencies with tag | 796 | ported | `bazel_module.rs` | `extracts_git_repository_dependency_with_tag` | — |
 | returns new_git_repository dependencies | 820 | ported | `bazel_module.rs` | `extracts_new_git_repository_dependency` | — |
-| handles a real-world MODULE.bazel file (rules_sh) | 846 | pending | — | — | Requires rules_sh fixture round-trip |
+| handles a real-world MODULE.bazel file (rules_sh) | 846 | ported | `bazel_module.rs` | `extracts_rules_sh_real_world_module_bazel` | — |
 | handles every method available in MODULE.bazel files | 887 | pending | — | — | Requires comprehensive MODULE.bazel coverage |
 | returns rules_img pull dependencies | 1005 | pending | — | — | Requires rules_img.pull extraction |
 | returns rules_img pull dependencies with custom registry | 1051 | pending | — | — | Requires rules_img.pull custom-registry handling |
