@@ -73,6 +73,7 @@ pub struct ComposerExtractedDep {
 pub struct ComposerResolvedDep {
     pub dep_name: String,
     pub current_value: String,
+    pub locked_version: Option<String>,
     pub dep_type: ComposerDepType,
     pub datasource: Option<&'static str>,
     pub package_name: Option<String>,
@@ -130,6 +131,14 @@ pub fn extract(content: &str) -> Result<Vec<ComposerExtractedDep>, ComposerExtra
 
 /// Parse a `composer.json` string and extract Renovate-style dependency metadata.
 pub fn extract_resolved(content: &str) -> Result<Vec<ComposerResolvedDep>, ComposerExtractError> {
+    extract_resolved_with_lock(content, None)
+}
+
+/// Parse a `composer.json` string and overlay versions from optional `composer.lock`.
+pub fn extract_resolved_with_lock(
+    content: &str,
+    lock_content: Option<&str>,
+) -> Result<Vec<ComposerResolvedDep>, ComposerExtractError> {
     #[derive(Deserialize)]
     struct Manifest {
         #[serde(default)]
@@ -142,6 +151,9 @@ pub fn extract_resolved(content: &str) -> Result<Vec<ComposerResolvedDep>, Compo
 
     let manifest: Manifest = serde_json::from_str(content)?;
     let repo_config = collect_repository_config(&manifest.repositories);
+    let locked_versions = lock_content
+        .and_then(|content| collect_locked_versions(content).ok())
+        .unwrap_or_default();
     let mut deps = Vec::new();
 
     for (name, version) in &manifest.require {
@@ -150,6 +162,7 @@ pub fn extract_resolved(content: &str) -> Result<Vec<ComposerResolvedDep>, Compo
             version,
             ComposerDepType::Regular,
             &repo_config,
+            &locked_versions,
         ));
     }
     for (name, version) in &manifest.require_dev {
@@ -158,6 +171,7 @@ pub fn extract_resolved(content: &str) -> Result<Vec<ComposerResolvedDep>, Compo
             version,
             ComposerDepType::Dev,
             &repo_config,
+            &locked_versions,
         ));
     }
 
@@ -296,11 +310,13 @@ fn make_resolved_dep(
     version: &str,
     dep_type: ComposerDepType,
     repo_config: &RepositoryConfig,
+    locked_versions: &HashMap<String, String>,
 ) -> ComposerResolvedDep {
     if name == "php" {
         return ComposerResolvedDep {
             dep_name: name.to_owned(),
             current_value: version.to_owned(),
+            locked_version: locked_versions.get(name).cloned(),
             dep_type,
             datasource: Some("github-tags"),
             package_name: Some("containerbase/php-prebuild".to_owned()),
@@ -312,6 +328,7 @@ fn make_resolved_dep(
     let mut dep = ComposerResolvedDep {
         dep_name: name.to_owned(),
         current_value: version.to_owned(),
+        locked_version: locked_versions.get(name).cloned(),
         dep_type,
         datasource: Some("packagist"),
         package_name: None,
@@ -350,6 +367,31 @@ fn make_resolved_dep(
     }
 
     dep
+}
+
+fn collect_locked_versions(
+    lock_content: &str,
+) -> Result<HashMap<String, String>, serde_json::Error> {
+    #[derive(Deserialize)]
+    struct LockFile {
+        #[serde(default)]
+        packages: Vec<LockedPackage>,
+        #[serde(rename = "packages-dev", default)]
+        packages_dev: Vec<LockedPackage>,
+    }
+
+    #[derive(Deserialize)]
+    struct LockedPackage {
+        name: String,
+        version: String,
+    }
+
+    let lock: LockFile = serde_json::from_str(lock_content)?;
+    let mut versions = HashMap::new();
+    for package in lock.packages.into_iter().chain(lock.packages_dev) {
+        versions.insert(package.name, package.version);
+    }
+    Ok(versions)
 }
 
 fn normalize_composer_repo_url(url: &str) -> String {
@@ -752,6 +794,72 @@ mod tests {
             assert!(dep.registry_urls.is_empty());
             assert!(dep.skip_reason.is_none());
         }
+    }
+
+    // Ported: "extracts object repositories and registryUrls with lock file" — composer/extract.spec.ts line 248
+    #[test]
+    fn extracts_object_repositories_and_registry_urls_with_lock_file() {
+        let content = r#"{
+            "repositories": {
+                "awesome/vcs": {"type": "vcs", "url": "https://my-vcs.example/my-vcs-repo"},
+                "awesome/git": {"type": "git", "url": "git@my-git.example:my-git-repo"},
+                "wpackagist": {"type": "composer", "url": "https://wpackagist.org"}
+            },
+            "require": {
+                "aws/aws-sdk-php": "*",
+                "awesome/vcs": "dev-trunk",
+                "awesome/git": ">=7.0.2"
+            }
+        }"#;
+        let lock = r#"{
+            "packages": [
+                {"name": "awesome/vcs", "version": "1.1.0"},
+                {"name": "awesome/git", "version": "1.2.0"}
+            ]
+        }"#;
+        let deps = extract_resolved_with_lock(content, Some(lock)).unwrap();
+        assert_eq!(deps.len(), 3);
+
+        let aws = deps
+            .iter()
+            .find(|dep| dep.dep_name == "aws/aws-sdk-php")
+            .unwrap();
+        assert_eq!(
+            aws.registry_urls,
+            ["https://wpackagist.org", "https://repo.packagist.org"]
+        );
+        assert_eq!(aws.locked_version, None);
+
+        let vcs = deps
+            .iter()
+            .find(|dep| dep.dep_name == "awesome/vcs")
+            .unwrap();
+        assert_eq!(vcs.datasource, Some("git-tags"));
+        assert_eq!(vcs.locked_version.as_deref(), Some("1.1.0"));
+        assert_eq!(
+            vcs.package_name.as_deref(),
+            Some("https://my-vcs.example/my-vcs-repo")
+        );
+
+        let git = deps
+            .iter()
+            .find(|dep| dep.dep_name == "awesome/git")
+            .unwrap();
+        assert_eq!(git.datasource, Some("git-tags"));
+        assert_eq!(git.locked_version.as_deref(), Some("1.2.0"));
+        assert_eq!(
+            git.package_name.as_deref(),
+            Some("git@my-git.example:my-git-repo")
+        );
+    }
+
+    // Ported: "extracts dependencies with lock file" — composer/extract.spec.ts line 313
+    #[test]
+    fn extracts_dependencies_with_empty_lock_file() {
+        let content = include_str!("../../tests/fixtures/composer/composer1.json");
+        let deps = extract_resolved_with_lock(content, Some("{}")).unwrap();
+        assert_eq!(deps.len(), 33);
+        assert!(deps.iter().all(|dep| dep.locked_version.is_none()));
     }
 
     // Ported: "returns null for empty deps" — composer/extract.spec.ts line 28

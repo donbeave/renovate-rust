@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 911 / 1216 actionable tests ported (75%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 913 / 1216 actionable tests ported (75%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -687,7 +687,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/composer/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/extract.spec.ts
-**Total tests:** 10 | **Ported:** 8 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -700,9 +700,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts object registryUrls | 81 | ported | `composer.rs` | `extracts_object_registry_urls` | — |
 | extracts repositories and registryUrls | 186 | ported | `composer.rs` | `extracts_repositories_and_registry_urls` | — |
 | extracts bitbucket repositories and registryUrls | 219 | ported | `composer.rs` | `extracts_bitbucket_repositories` | — |
-| extracts object repositories and registryUrls with lock file | 248 | pending | — | — | Requires composer.lock parsing |
+| extracts object repositories and registryUrls with lock file | 248 | ported | `composer.rs` | `extracts_object_repositories_and_registry_urls_with_lock_file` | — |
 | skips path dependencies | 284 | ported | `composer.rs` | `path_dependency_skipped` | — |
-| extracts dependencies with lock file | 313 | pending | — | — | Requires composer.lock parsing |
+| extracts dependencies with lock file | 313 | ported | `composer.rs` | `extracts_dependencies_with_empty_lock_file` | — |
 
 ---
 
