@@ -535,6 +535,28 @@ Typing_Extensions = "^4.0"
         assert!(deps.iter().any(|d| d.name == "typing-extensions"));
     }
 
+    // Ported: "does not include registry url for dependency python" — poetry/extract.spec.ts line 413
+    #[test]
+    fn python_dependency_has_no_registry_urls() {
+        let content = r#"
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[[tool.poetry.source]]
+name = "custom-source"
+url = "https://example.com"
+priority = "explicit"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert_eq!(package_file.deps.len(), 1);
+        let python = &package_file.deps[0];
+        assert_eq!(python.name, "python");
+        assert_eq!(python.current_value, "^3.11");
+        assert_eq!(python.skip_reason, Some(PoetrySkipReason::PythonVersion));
+        assert!(python.registry_urls.is_empty());
+        assert_eq!(python.source_name, None);
+    }
+
     // Ported: "can parse empty registries" — poetry/extract.spec.ts line 436
     #[test]
     fn empty_registry_list_returns_no_registry_urls() {

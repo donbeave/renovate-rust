@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 811 / 1217 actionable tests ported (67%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 812 / 1217 actionable tests ported (67%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2344,7 +2344,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 19 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 20 | **Actionable:** 34 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2372,7 +2372,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | skips git dependencies with version | 375 | ported | `poetry.rs` | `git_dep_with_version_shows_version` | — |
 | skips path dependencies | 388 | ported | `poetry.rs` | `path_source_skipped` | — |
 | skips path dependencies with version | 400 | ported | `poetry.rs` | `path_dep_with_version_shows_version` | — |
-| does not include registry url for dependency python | 413 | pending | — | — | Requires registryUrls plumbing for python core dep |
+| does not include registry url for dependency python | 413 | ported | `poetry.rs` | `python_dependency_has_no_registry_urls` | — |
 | can parse empty registries | 436 | ported | `poetry.rs` | `empty_registry_list_returns_no_registry_urls` | — |
 | can parse missing registries | 441 | ported | `poetry.rs` | `missing_registry_list_returns_no_registry_urls` | — |
 | extracts registries | 446 | ported | `poetry.rs` | `extracts_registry_urls` | — |
