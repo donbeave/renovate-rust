@@ -8995,12 +8995,40 @@ mod schedule_preset_tests {
 
     // ── Ported from migration.spec.ts extends migration ───────────────────────
 
+    // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
     #[test]
     fn extends_string_coerced_to_array() {
-        // Ported: "migrates preset strings to array" — extends: 'foo' → extends: ['foo']
         let c = RepoConfig::parse(r#"{"extends": "foo"}"#);
         // 'foo' is unknown so should be in extends but not break parsing
         assert!(c.minimum_release_age.is_none()); // sanity check: no minimumReleaseAge
+    }
+
+    // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+    #[test]
+    fn extends_string_js_app_shorthand_normalized() {
+        let c = RepoConfig::parse(r#"{"extends": ":js-app"}"#);
+        let has_pin_rule = c
+            .package_rules
+            .iter()
+            .any(|r| r.range_strategy.as_deref() == Some("pin"));
+        assert!(
+            has_pin_rule,
+            "string :js-app should normalize to config:js-app and inject pin rules"
+        );
+    }
+
+    // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+    #[test]
+    fn extends_mixed_array_js_app_shorthand_normalized() {
+        let c = RepoConfig::parse(r#"{"extends": ["foo", ":js-app", "bar"]}"#);
+        let has_pin_rule = c
+            .package_rules
+            .iter()
+            .any(|r| r.range_strategy.as_deref() == Some("pin"));
+        assert!(
+            has_pin_rule,
+            "array :js-app should normalize among unrelated presets"
+        );
     }
 
     #[test]
