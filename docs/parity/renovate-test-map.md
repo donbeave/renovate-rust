@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 917 / 1216 actionable tests ported (75%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 920 / 1216 actionable tests ported (76%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1291,7 +1291,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/woodpecker/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/woodpecker/extract.spec.ts
-**Total tests:** 11 | **Ported:** 8 | **Actionable:** 11 | **Status:** partial
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1301,9 +1301,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for non-object YAML | 12 | ported | `woodpecker.rs` | `non_object_yaml_returns_empty` | — |
 | returns null for malformed YAML | 17 | ported | `woodpecker.rs` | `malformed_yaml_returns_empty` | — |
 | extracts multiple image lines | 21 | ported | `woodpecker.rs` | `extracts_step_image` (+ extracts_service_image, multiple_steps_and_services, steps_section_extracts_image) | — |
-| extracts image and replaces registry | 129 | pending | — | — | registryAliases not yet implemented |
-| extracts image but no replacement | 159 | pending | — | — | registryAliases not yet implemented |
-| extracts image and no double replacement | 189 | pending | — | — | registryAliases not yet implemented |
+| extracts image and replaces registry | 129 | ported | `woodpecker.rs` | `extracts_image_and_replaces_registry` | — |
+| extracts image but no replacement | 159 | ported | `woodpecker.rs` | `extracts_image_without_registry_replacement` | — |
+| extracts image and no double replacement | 189 | ported | `woodpecker.rs` | `extracts_image_without_double_registry_replacement` | — |
 | extracts the v.1.0.x version | 220 | ported | `woodpecker.rs` | `steps_section_extracts_image` | — |
 | should parse multiple sources of dependencies together | 246 | ported | `woodpecker.rs` | `clone_and_steps_both_extracted` | — |
 | return dependency when an plugin-git is cloned | 286 | ported | `woodpecker.rs` | `clone_section_extracted` | — |
