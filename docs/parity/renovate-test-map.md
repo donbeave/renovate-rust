@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1480 / 1657 actionable tests ported (89%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1481 / 1657 actionable tests ported (89%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2554,7 +2554,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
-**Total tests:** 26 | **Ported:** 21 | **Actionable:** 26 | **Status:** partial
+**Total tests:** 26 | **Ported:** 22 | **Actionable:** 26 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2562,7 +2562,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 |---|---|---|---|---|---|
 | returns null for empty | 23 | ported | `sbt.rs` | `empty_returns_empty` (+ build_properties_extraction) | — |
 | extracts deps for generic use-cases | 47 | ported | `sbt.rs` | `extracts_scala_style_deps` (+ extracts_java_style_deps, extracts_plugin, comment_line_skipped, dep_name_formats_correctly) | — |
-| extracts deps when scala version is defined in a variable | 74 | pending | — | — | Requires scalaVersion := Var resolution |
+| extracts deps when scala version is defined in a variable | 74 | ported | `sbt.rs` | `package_file_resolves_scala_version_variable_fixture` | — |
 | extracts deps when scala version is defined in an object | 99 | ported | `sbt.rs` | `package_file_resolves_object_variables` | — |
 | skips deps when dotted symbolds do not resolve to anything | 136 | ported | `sbt.rs` | `package_file_keeps_unresolved_dotted_symbols_without_current_value` | — |
 | extracts packageFileVersion when scala version is defined in a variable | 159 | ported | `sbt.rs` | `package_file_resolves_package_file_version_variable` | — |

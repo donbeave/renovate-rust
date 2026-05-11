@@ -99,7 +99,7 @@ static DEP_EXPR: LazyLock<Regex> = LazyLock::new(|| {
 /// Matches `"group" %%? "artifact" % versionToken` in a dependency expression.
 static DEP_EXPR_TOKEN: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
-        r#""(?P<group>[^"]+)"\s+(?P<op>%%?)\s+"(?P<artifact>[^"]+)"\s+%\s+(?P<version>"[^"]+"|[A-Za-z_][A-Za-z0-9_\.]*)"#,
+        r#"(?P<group>"[^"]+"|[A-Za-z_][A-Za-z0-9_\.]*)\s+(?P<op>%%?)\s+(?P<artifact>"[^"]+"|[A-Za-z_][A-Za-z0-9_\.]*)\s+%\s+(?P<version>"[^"]+"|[A-Za-z_][A-Za-z0-9_\.]*)"#,
     )
     .unwrap()
 });
@@ -201,8 +201,12 @@ pub fn extract_package_file(content: &str) -> Option<SbtPackageFile> {
         let line = strip_line_comment(raw).trim_end();
         let is_plugin = line.contains("addSbtPlugin") || line.contains("addCompilerPlugin");
         for cap in DEP_EXPR_TOKEN.captures_iter(line) {
-            let group = cap["group"].to_owned();
-            let artifact = cap["artifact"].to_owned();
+            let Some(group) = resolve_token(&cap["group"], &variables) else {
+                continue;
+            };
+            let Some(artifact) = resolve_token(&cap["artifact"], &variables) else {
+                continue;
+            };
             let version_token = cap["version"].trim_end_matches(',');
             let current_value = resolve_token(version_token, &variables);
             let shared_variable_name = unquoted_identifier(version_token)
@@ -481,6 +485,70 @@ libraryDependencies += "org.example" % "foo" % versions.example
             .unwrap();
         assert_eq!(foo.current_value, None);
         assert_eq!(foo.package_name, "org.example:foo");
+    }
+
+    // Ported: "extracts deps when scala version is defined in a variable" — sbt/extract.spec.ts line 74
+    #[test]
+    fn package_file_resolves_scala_version_variable_fixture() {
+        let content = r#"
+val ScalaVersion = "2.12.10"
+val versionExample = "0.0.8"
+
+version := "3.2.1"
+
+scalaVersion := ScalaVersion
+
+libraryDependencies += "org.example" % "foo" % "0.0.1"
+libraryDependencies += "org.example" %% "bar" % "0.0.2"
+libraryDependencies ++= Seq(
+  "org.example" %% "baz" % "0.0.3",
+  "org.example" % "qux" % "0.0.4"
+)
+
+dependencyOverrides += "org.example" % "quux" % "0.0.5"
+dependencyOverrides ++= {
+  val groupIdExample = "org.example"
+  val artifactIdExample = "corge"
+
+  Seq(
+    groupIdExample %% "quuz" % "0.0.6" % "test",
+    "org.example" % artifactIdExample % "0.0.7" % Provided,
+    "org.example" % "grault" % versionExample % Test
+  )
+}
+
+addSbtPlugin("org.example" % "waldo" % "0.0.9")
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.package_file_version.as_deref(), Some("3.2.1"));
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.12"));
+        for (package_name, current_value) in [
+            ("org.scala-lang:scala-library", "2.12.10"),
+            ("org.example:foo", "0.0.1"),
+            ("org.example:bar_2.12", "0.0.2"),
+            ("org.example:baz_2.12", "0.0.3"),
+            ("org.example:qux", "0.0.4"),
+            ("org.example:quux", "0.0.5"),
+            ("org.example:quuz_2.12", "0.0.6"),
+            ("org.example:corge", "0.0.7"),
+            ("org.example:grault", "0.0.8"),
+            ("org.example:waldo", "0.0.9"),
+        ] {
+            assert!(
+                package_file
+                    .deps
+                    .iter()
+                    .any(|dep| dep.package_name == package_name
+                        && dep.current_value.as_deref() == Some(current_value)),
+                "missing {package_name}@{current_value}"
+            );
+        }
+        let plugin = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.package_name == "org.example:waldo")
+            .unwrap();
+        assert_eq!(plugin.dep_type, SbtDepType::Plugin);
     }
 
     // Ported: "skips deps when scala version is missing" — sbt/extract.spec.ts line 185
