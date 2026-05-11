@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1176 / 1368 actionable tests ported (86%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 29 spec files not yet converted to per-test format (24 pending, 4 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 28 spec files not yet converted to per-test format (24 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -406,6 +406,35 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts x-version from actions/setup-x in composite action | 891 | ported | `github_actions.rs` | `setup_x_composite_action` | — |
 | logs unknown schema | 1023 | not-applicable | — | — | Tests log output; no Rust equivalent |
 | extract from $step.uses | 1033 | ported | `github_actions.rs` | `community_trivy_*`, `community_pnpm_*`, `community_bun_*`, `community_ruby_*`, `community_pyright_*`, `community_jaxxstorm_*`, `community_pixi_*`, `community_zizmor_*`, `community_docker_*`, `community_setup_uv_*` (14 tests) | — |
+
+---
+
+## `lib/modules/manager/github-actions/integration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/integration.spec.ts
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/github-actions/integration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| proposes major update when using tagged major, if a major is available | 33 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| switches major-only version to major.minor if no major is available | 87 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes major and minor updates for tagged major.minor | 138 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes minor update for full semver | 203 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes updates for SHA-pinned action with major-only comment | 252 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases/digests; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes updates for SHA-pinned action with major.minor comment | 312 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases/digests; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes updates for SHA-pinned action with full semver comment | 386 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases/digests; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes minor and major updates for floating minor tag | 458 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes no update for major, when only newer patch/minor releases exist | 522 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes minor+major+digest updates for SHA-pinned with floating major comment | 557 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases/digests; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes no update for SHA-pinned when only patch version available and digest unchanged | 617 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases/digests; Rust has no equivalent GitHub Actions lookup-update engine |
+| preserves floating major tag when newer patch/minor versions exist with full semver | 652 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| preserves floating major tag when only floating minor tags exist | 702 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| migrates floating major tag to major.minor when only floating minor tags exist | 733 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes minor update for floating minor tag without returning less-specific floating major | 780 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| handles multiple deps in one workflow | 828 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
+| proposes minor and major updates for semver tag | 904 | not-applicable | — | — | Exercises Renovate `lookup.lookupUpdates()` update selection with mocked GitHub releases; Rust has no equivalent GitHub Actions lookup-update engine |
 
 ---
 
@@ -3008,7 +3037,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- bazel-module/parser/fragments.spec.ts converted to per-test format above -->
 | `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | — | — | — | pending |
-| `lib/modules/manager/github-actions/integration.spec.ts` | — | `crates/renovate-core/src/extractors/github_actions.rs` | — | partial |
+<!-- github-actions/integration.spec.ts converted to per-test format above -->
 <!-- github-actions/parse.spec.ts converted to per-test format above -->
 <!-- helmv3/common.spec.ts converted to per-test format above -->
 | `lib/modules/manager/npm/extract/index.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
