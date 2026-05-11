@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1185 / 1377 actionable tests ported (86%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 25 spec files not yet converted to per-test format (21 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 24 spec files not yet converted to per-test format (20 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2994,6 +2994,26 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/bazel-module/lockfile.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/lockfile.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/bazel-module/lockfile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns updated lockfile when modified | 22 | not-applicable | — | — | Exercises Renovate `updateBazelLockfile()` artifact workflow with `bazel mod deps`, git status, and filesystem writes; Rust has no Bazel lockfile updater |
+| returns updated lockfile when in not_added | 54 | not-applicable | — | — | Exercises Renovate `updateBazelLockfile()` artifact workflow with `bazel mod deps`, git status, and filesystem writes; Rust has no Bazel lockfile updater |
+| returns null when lockfile is not modified | 83 | not-applicable | — | — | Exercises Renovate `updateBazelLockfile()` artifact workflow with `bazel mod deps` and git status; Rust has no Bazel lockfile updater |
+| deletes lockfile during maintenance | 105 | not-applicable | — | — | Exercises Renovate lockfile maintenance deletion before `bazel mod deps`; Rust has no Bazel lockfile updater |
+| does not delete lockfile when not in maintenance | 137 | not-applicable | — | — | Exercises Renovate lockfile maintenance deletion control; Rust has no Bazel lockfile updater |
+| re-throws TEMPORARY_ERROR | 154 | not-applicable | — | — | Exercises Renovate artifact execution error handling; Rust has no Bazel lockfile updater |
+| returns artifactError on exec failure | 168 | not-applicable | — | — | Exercises Renovate artifact execution error reporting; Rust has no Bazel lockfile updater |
+| returns null when bazelModDeps is not allowed | 190 | not-applicable | — | — | Exercises Renovate unsafe execution policy for `bazel mod deps`; Rust has no Bazel lockfile updater |
+
+---
+
 ## `lib/modules/manager/bazel-module/parser/fragments.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/parser/fragments.spec.ts
@@ -3117,7 +3137,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- ant/properties.spec.ts converted to per-test format above -->
 <!-- ant/update.spec.ts converted to per-test format above -->
 <!-- bazel-module/bazelrc.spec.ts converted to per-test format above -->
-| `lib/modules/manager/bazel-module/lockfile.spec.ts` | — | — | — | pending |
+<!-- bazel-module/lockfile.spec.ts converted to per-test format above -->
 <!-- bazel-module/parser/context.spec.ts converted to per-test format above -->
 <!-- bazel-module/parser/fragments.spec.ts converted to per-test format above -->
 <!-- batect-wrapper/artifacts.spec.ts converted to per-test format above -->
