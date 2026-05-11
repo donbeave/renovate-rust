@@ -50,6 +50,8 @@ pub enum NpmSkipReason {
     Empty,
     /// Dependency has no comparable version.
     UnspecifiedVersion,
+    /// Dependency is pinned to a moving or malformed source reference.
+    UnversionedReference,
     /// Engine name is not handled by Renovate.
     UnknownEngines,
     /// Volta tool name is not handled by Renovate.
@@ -102,6 +104,14 @@ pub struct NpmExtractedDep {
     pub name: String,
     /// Registry package name when it differs from the package.json key.
     pub package_name: Option<String>,
+    /// Datasource used to look up available versions.
+    pub datasource: &'static str,
+    /// Source repository URL for non-npm dependencies.
+    pub source_url: Option<String>,
+    /// Digest for commit-pinned non-npm dependencies.
+    pub current_digest: Option<String>,
+    /// Original value when current value/digest is normalized.
+    pub current_raw_value: Option<String>,
     /// The version constraint string (e.g. `"^18.0.0"`).
     pub current_value: String,
     /// Which dep section this came from.
@@ -763,6 +773,10 @@ fn unquote_yarnrc_token(token: &str) -> String {
 
 fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmExtractedDep {
     let mut package_name = None;
+    let mut datasource = "npm";
+    let mut source_url = None;
+    let mut current_digest = None;
+    let mut current_raw_value = None;
     let mut current_value = match value {
         DependencySpec::Version(value) => value.clone(),
         DependencySpec::InvalidValue => String::new(),
@@ -774,6 +788,15 @@ fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmEx
         package_name = alias.package_name;
         current_value = alias.current_value;
         alias.skip_reason
+    } else if matches!(value, DependencySpec::Version(_))
+        && let Some(github_dep) = parse_github_dependency(&current_value)
+    {
+        datasource = github_dep.datasource;
+        source_url = github_dep.source_url;
+        current_digest = github_dep.current_digest;
+        current_raw_value = github_dep.current_raw_value;
+        current_value = github_dep.current_value;
+        github_dep.skip_reason
     } else {
         match dep_type {
             NpmDepType::Engines => engine_skip_reason_for(&name, value, &current_value),
@@ -786,10 +809,133 @@ fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmEx
     NpmExtractedDep {
         name,
         package_name,
+        datasource,
+        source_url,
+        current_digest,
+        current_raw_value,
         current_value,
         dep_type,
         skip_reason,
     }
+}
+
+struct ParsedGithubDep {
+    datasource: &'static str,
+    source_url: Option<String>,
+    current_value: String,
+    current_digest: Option<String>,
+    current_raw_value: Option<String>,
+    skip_reason: Option<NpmSkipReason>,
+}
+
+fn parse_github_dependency(raw_value: &str) -> Option<ParsedGithubDep> {
+    let (repo, reference, raw_for_normalized) = github_repo_and_ref(raw_value)?;
+    let Some((owner, name)) = repo.split_once('/') else {
+        return Some(skipped_github_dep(
+            raw_value,
+            NpmSkipReason::UnspecifiedVersion,
+        ));
+    };
+    if owner.is_empty()
+        || name.is_empty()
+        || owner.starts_with('-')
+        || owner.starts_with('@')
+        || name.starts_with('@')
+    {
+        return Some(skipped_github_dep(
+            raw_value,
+            NpmSkipReason::UnspecifiedVersion,
+        ));
+    }
+
+    let source_url = format!(
+        "https://github.com/{}/{}",
+        owner,
+        name.trim_end_matches(".git")
+    );
+
+    let Some(reference) = reference else {
+        return Some(skipped_github_dep(
+            raw_value,
+            NpmSkipReason::UnspecifiedVersion,
+        ));
+    };
+    if let Some(version) = reference.strip_prefix("semver:") {
+        return Some(ParsedGithubDep {
+            datasource: "github-tags",
+            source_url: Some(source_url),
+            current_value: version.to_owned(),
+            current_digest: None,
+            current_raw_value: None,
+            skip_reason: None,
+        });
+    }
+    if reference.starts_with('v') {
+        return Some(ParsedGithubDep {
+            datasource: "github-tags",
+            source_url: Some(source_url),
+            current_value: reference.to_owned(),
+            current_digest: None,
+            current_raw_value: raw_for_normalized.then(|| raw_value.to_owned()),
+            skip_reason: None,
+        });
+    }
+    if reference.chars().all(|ch| ch.is_ascii_hexdigit()) && reference.len() >= 7 {
+        return Some(ParsedGithubDep {
+            datasource: "github-tags",
+            source_url: Some(source_url),
+            current_value: String::new(),
+            current_digest: Some(reference.to_owned()),
+            current_raw_value: (raw_for_normalized && reference.len() < 40)
+                .then(|| raw_value.to_owned()),
+            skip_reason: None,
+        });
+    }
+
+    Some(skipped_github_dep(
+        raw_value,
+        NpmSkipReason::UnversionedReference,
+    ))
+}
+
+fn skipped_github_dep(raw_value: &str, skip_reason: NpmSkipReason) -> ParsedGithubDep {
+    ParsedGithubDep {
+        datasource: "npm",
+        source_url: None,
+        current_value: raw_value.to_owned(),
+        current_digest: None,
+        current_raw_value: None,
+        skip_reason: Some(skip_reason),
+    }
+}
+
+fn github_repo_and_ref(raw_value: &str) -> Option<(String, Option<&str>, bool)> {
+    let value = raw_value.strip_prefix("git+").unwrap_or(raw_value);
+    let repo_with_ref = value
+        .strip_prefix("github:")
+        .or_else(|| value.strip_prefix("https://github.com/"))
+        .or_else(|| value.strip_prefix("http://github.com/"))
+        .or_else(|| value.strip_prefix("git@github.com:"))
+        .map(|repo| (repo, true))
+        .or_else(|| {
+            (value.contains('/')
+                && !value.starts_with('@')
+                && !value.starts_with("http")
+                && !value.starts_with("file:")
+                && !value.starts_with("link:")
+                && !value.starts_with("portal:")
+                && !value.starts_with("patch:")
+                && !value.starts_with("gitlab:")
+                && !value.starts_with("bitbucket:"))
+            .then_some((value, false))
+        })?;
+    let (repo, ref_part) = repo_with_ref
+        .0
+        .split_once('#')
+        .unwrap_or((repo_with_ref.0, ""));
+    let repo = repo.trim_end_matches(".git").to_owned();
+    let reference = (!ref_part.is_empty()).then_some(ref_part);
+    Some((repo, reference, repo_with_ref.1))
 }
 
 struct ParsedNpmAlias {
@@ -931,10 +1077,16 @@ fn skip_reason_for(value: &str) -> Option<NpmSkipReason> {
     if v == "latest" {
         return Some(NpmSkipReason::UnspecifiedVersion);
     }
+    if v.contains('#') {
+        return Some(NpmSkipReason::UnspecifiedVersion);
+    }
 
     // workspace protocol (pnpm / yarn)
     if v.starts_with("workspace:") {
         return Some(NpmSkipReason::WorkspaceProtocol);
+    }
+    if v.starts_with("gitlab:") {
+        return Some(NpmSkipReason::UnspecifiedVersion);
     }
 
     // local path references
@@ -950,7 +1102,6 @@ fn skip_reason_for(value: &str) -> Option<NpmSkipReason> {
     if v.starts_with("git+")
         || v.starts_with("git://")
         || v.starts_with("github:")
-        || v.starts_with("gitlab:")
         || v.starts_with("bitbucket:")
         || v.starts_with("gist:")
         // GitHub shorthand: "owner/repo" (contains exactly one slash, no sigil)
@@ -1676,15 +1827,32 @@ chalk@^2.4.1:
     #[test]
     fn git_source_forms_are_skipped() {
         let json = r#"{ "dependencies": {
-          "a": "git+https://github.com/owner/repo.git",
-          "b": "github:owner/repo",
+          "a": "github:owner/repo",
+          "b": "github:owner/repo#master",
           "c": "gitlab:owner/repo",
-          "d": "owner/repo"
+          "d": "owner/repo",
+          "e": "git+https://github.com/owner/repo.git"
         }}"#;
         let deps = extract_ok(json);
-        assert!(
-            deps.iter()
-                .all(|d| d.skip_reason == Some(NpmSkipReason::GitSource))
+        assert_eq!(
+            deps.iter().find(|d| d.name == "a").unwrap().skip_reason,
+            Some(NpmSkipReason::UnspecifiedVersion)
+        );
+        assert_eq!(
+            deps.iter().find(|d| d.name == "b").unwrap().skip_reason,
+            Some(NpmSkipReason::UnversionedReference)
+        );
+        assert_eq!(
+            deps.iter().find(|d| d.name == "c").unwrap().skip_reason,
+            Some(NpmSkipReason::UnspecifiedVersion)
+        );
+        assert_eq!(
+            deps.iter().find(|d| d.name == "d").unwrap().skip_reason,
+            Some(NpmSkipReason::UnspecifiedVersion)
+        );
+        assert_eq!(
+            deps.iter().find(|d| d.name == "e").unwrap().skip_reason,
+            Some(NpmSkipReason::UnspecifiedVersion)
         );
     }
 
@@ -2047,6 +2215,89 @@ chalk@^2.4.1:
                 && dep.dep_type == NpmDepType::Volta
                 && dep.skip_reason.is_none()
         }));
+    }
+
+    // Ported: "extracts non-npmjs" — npm/extract/index.spec.ts line 626
+    #[test]
+    fn package_json_extracts_non_npmjs_github_dependencies() {
+        let json = r#"{
+          "dependencies": {
+            "a": "github:owner/a",
+            "b": "github:owner/b#master",
+            "c": "github:owner/c#v1.1.0",
+            "d": "github:owner/d#a7g3eaf",
+            "e": "github:owner/e#49b5aca613b33c5b626ae68c03a385f25c142f55",
+            "f": "owner/f#v2.0.0",
+            "g": "gitlab:owner/g#v1.0.0",
+            "h": "github:-hello/world#v1.0.0",
+            "i": "@foo/bar#v2.0.0",
+            "j": "github:frank#v0.0.1",
+            "k": "github:owner/k#49b5aca",
+            "l": "github:owner/l.git#abcdef0",
+            "m": "https://github.com/owner/m.git#v1.0.0",
+            "n": "git+https://github.com/owner/n#v2.0.0",
+            "o": "git@github.com:owner/o.git#v2.0.0",
+            "p": "Owner/P.git#v2.0.0",
+            "q": "github:owner/q#semver:1.1.0",
+            "r": "github:owner/r#semver:^1.0.0"
+          }
+        }"#;
+        let deps = extract_ok(json);
+
+        assert_eq!(deps.len(), 18);
+        assert_eq!(
+            deps.iter().find(|dep| dep.name == "a").unwrap().skip_reason,
+            Some(NpmSkipReason::UnspecifiedVersion)
+        );
+        assert_eq!(
+            deps.iter().find(|dep| dep.name == "b").unwrap().skip_reason,
+            Some(NpmSkipReason::UnversionedReference)
+        );
+        assert_eq!(
+            deps.iter().find(|dep| dep.name == "d").unwrap().skip_reason,
+            Some(NpmSkipReason::UnversionedReference)
+        );
+        for (name, current_value, source_url) in [
+            ("c", "v1.1.0", "https://github.com/owner/c"),
+            ("f", "v2.0.0", "https://github.com/owner/f"),
+            ("m", "v1.0.0", "https://github.com/owner/m"),
+            ("n", "v2.0.0", "https://github.com/owner/n"),
+            ("o", "v2.0.0", "https://github.com/owner/o"),
+            ("p", "v2.0.0", "https://github.com/Owner/P"),
+            ("q", "1.1.0", "https://github.com/owner/q"),
+            ("r", "^1.0.0", "https://github.com/owner/r"),
+        ] {
+            assert!(deps.iter().any(|dep| {
+                dep.name == name
+                    && dep.datasource == "github-tags"
+                    && dep.current_value == current_value
+                    && dep.source_url.as_deref() == Some(source_url)
+                    && dep.skip_reason.is_none()
+            }));
+        }
+        for (name, digest, raw) in [
+            ("e", "49b5aca613b33c5b626ae68c03a385f25c142f55", None),
+            ("k", "49b5aca", Some("github:owner/k#49b5aca")),
+            ("l", "abcdef0", Some("github:owner/l.git#abcdef0")),
+        ] {
+            assert!(deps.iter().any(|dep| {
+                dep.name == name
+                    && dep.datasource == "github-tags"
+                    && dep.current_value.is_empty()
+                    && dep.current_digest.as_deref() == Some(digest)
+                    && dep.current_raw_value.as_deref() == raw
+                    && dep.skip_reason.is_none()
+            }));
+        }
+        for name in ["g", "h", "i", "j"] {
+            assert_eq!(
+                deps.iter()
+                    .find(|dep| dep.name == name)
+                    .unwrap()
+                    .skip_reason,
+                Some(NpmSkipReason::UnspecifiedVersion)
+            );
+        }
     }
 
     // Ported: "extracts packageManager" — npm/extract/index.spec.ts line 894

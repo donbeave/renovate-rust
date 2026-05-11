@@ -50,6 +50,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 .flat_map(|(_, deps)| deps.iter())
                 .filter(|d| {
                     d.skip_reason.is_none()
+                        && d.datasource == "npm"
                         && !repo_cfg.is_dep_ignored_with_dep_type(
                             &d.name,
                             "npm",
@@ -85,6 +86,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                 .iter()
                 .filter(|d| {
                     d.skip_reason.is_none()
+                        && d.datasource == "npm"
                         && !repo_cfg.is_dep_ignored_with_dep_type(
                             &d.name,
                             "npm",
