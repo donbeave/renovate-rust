@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1403 / 1653 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1404 / 1653 actionable tests ported (85%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2508,7 +2508,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 33 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 34 | **Actionable:** 34 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2547,7 +2547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | parses package file with template | 535 | ported | `poetry.rs` | `parses_package_file_with_template_lines` | — |
 | extract dependencies from the project section | 555 | ported | `poetry.rs` | `extracts_poetry_v2_project_section_dependencies` | — |
 | extracts dependencies from pep735 dependency-groups | 616 | ported | `poetry.rs` | `extracts_pep735_dependency_groups` | — |
-| enriches pep621/pep735 dependencies with poetry managerData | 663 | pending | — | — | Requires PEP 621/735 enrichment with poetry managerData |
+| enriches pep621/pep735 dependencies with poetry managerData | 663 | ported | `poetry.rs` | `pep621_and_pep735_deps_are_enriched_from_poetry_metadata` | — |
 
 ---
 

@@ -79,6 +79,8 @@ pub enum PoetrySkipReason {
     UrlInstall,
     /// Entry contains multiple Python-specific constraints.
     MultipleConstraint,
+    /// Entry is specified in both Poetry and PEP 621/735 sections with versions.
+    InvalidDependencySpecification,
 }
 
 /// A single extracted Poetry dependency.
@@ -200,7 +202,7 @@ pub fn extract_package_file_with_lockfile(
         for (name, value) in tbl {
             if let Some(dep) = parse_dep(name, value, PoetryDepType::Regular, &source_urls_by_name)
             {
-                deps.push(dep);
+                push_or_merge_poetry_dep(&mut deps, dep);
             }
         }
     }
@@ -209,20 +211,21 @@ pub fn extract_package_file_with_lockfile(
     if let Some(tbl) = nested_table(&doc, &["tool", "poetry", "dev-dependencies"]) {
         for (name, value) in tbl {
             if let Some(dep) = parse_dep(name, value, PoetryDepType::Dev, &source_urls_by_name) {
-                deps.push(dep);
+                push_or_merge_poetry_dep(&mut deps, dep);
             }
         }
     }
 
     // [tool.poetry.group.*.dependencies]
     if let Some(groups) = nested_table(&doc, &["tool", "poetry", "group"]) {
-        for (_group_name, group_val) in groups {
+        for (group_name, group_val) in groups {
             if let Some(group_deps) = group_val.get("dependencies").and_then(|d| d.as_table()) {
                 for (name, value) in group_deps {
-                    if let Some(dep) =
+                    if let Some(mut dep) =
                         parse_dep(name, value, PoetryDepType::Group, &source_urls_by_name)
                     {
-                        deps.push(dep);
+                        dep.group_name = Some(group_name.clone());
+                        push_or_merge_poetry_dep(&mut deps, dep);
                     }
                 }
             }
@@ -381,11 +384,11 @@ fn parse_dep(
                 });
             }
             // `{version = "…", optional = true, extras = […]}` — standard dep.
-            let v = tbl.get("version")?.as_str()?;
-            let current_value = if v == "*" {
-                String::new()
-            } else {
-                v.to_owned()
+            let current_value = match tbl.get("version").and_then(Value::as_str) {
+                Some("*") => String::new(),
+                Some(v) => v.to_owned(),
+                None if tbl.contains_key("source") => String::new(),
+                None => return None,
             };
             let source_name = tbl.get("source").and_then(Value::as_str).map(str::to_owned);
             let registry_urls = source_name
@@ -585,6 +588,49 @@ fn extract_source_urls_by_name(doc: &Value) -> std::collections::BTreeMap<String
         }
     }
     urls
+}
+
+fn push_or_merge_poetry_dep(deps: &mut Vec<PoetryExtractedDep>, poetry_dep: PoetryExtractedDep) {
+    if let Some(project_dep) = deps.iter_mut().find(|dep| {
+        dep.name == poetry_dep.name
+            && matches!(
+                dep.dep_type,
+                PoetryDepType::Project
+                    | PoetryDepType::ProjectOptional
+                    | PoetryDepType::DependencyGroups
+            )
+    }) {
+        merge_poetry_metadata(project_dep, &poetry_dep);
+    } else {
+        deps.push(poetry_dep);
+    }
+}
+
+fn merge_poetry_metadata(project_dep: &mut PoetryExtractedDep, poetry_dep: &PoetryExtractedDep) {
+    if project_dep.current_value.is_empty() {
+        project_dep.current_value = poetry_dep.current_value.clone();
+    } else if !poetry_dep.current_value.is_empty() {
+        project_dep.skip_reason = Some(PoetrySkipReason::InvalidDependencySpecification);
+    }
+
+    if project_dep.package_name.is_none() {
+        project_dep.package_name = poetry_dep.package_name.clone();
+    }
+    if project_dep.current_digest.is_none() {
+        project_dep.current_digest = poetry_dep.current_digest.clone();
+    }
+    if project_dep.locked_version.is_none() {
+        project_dep.locked_version = poetry_dep.locked_version.clone();
+    }
+    if project_dep.replace_string.is_none() {
+        project_dep.replace_string = poetry_dep.replace_string.clone();
+    }
+    if project_dep.registry_urls.is_empty() {
+        project_dep.registry_urls = poetry_dep.registry_urls.clone();
+    }
+    if project_dep.source_name.is_none() {
+        project_dep.source_name = poetry_dep.source_name.clone();
+    }
 }
 
 fn apply_locked_versions(deps: &mut [PoetryExtractedDep], lockfile: &str) {
@@ -1118,6 +1164,94 @@ all = [{include-group = "typing"}, {include-group = "coverage"}, "click==8.1.7"]
         assert!(groups.iter().any(|dep| dep.name == "click"
             && dep.current_value == "==8.1.7"
             && dep.group_name.as_deref() == Some("all")));
+    }
+
+    // Ported: "enriches pep621/pep735 dependencies with poetry managerData" — poetry/extract.spec.ts line 663
+    #[test]
+    fn pep621_and_pep735_deps_are_enriched_from_poetry_metadata() {
+        let content = r#"
+[project]
+dependencies = ["click", "pytest-cov==5.0.0"]
+
+[project.optional-dependencies]
+other = ["zoom==1.0.0"]
+
+[dependency-groups]
+typing = ["mypy==1.13.0", "types-requests"]
+
+[tool.poetry.dependencies]
+click = { version="==1.0.0", source = "artifactory" }
+pytest-cov = { version = "==5.0.0" }
+zoom = { source = "artifactory" }
+
+[tool.poetry.group.typing.dependencies]
+types-requests = { source = "artifactory" }
+
+[tool.poetry.group.typing.dependencies.mypy]
+source = "artifactory"
+
+[[tool.poetry.source]]
+name = "artifactory"
+url = "https://example.com/artifactory/api/pypi/pypi/simple"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+
+        assert_eq!(package_file.deps.len(), 5);
+
+        let click = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "click")
+            .unwrap();
+        assert_eq!(click.dep_type, PoetryDepType::Project);
+        assert_eq!(click.current_value, "==1.0.0");
+        assert_eq!(click.source_name.as_deref(), Some("artifactory"));
+        assert_eq!(
+            click.registry_urls,
+            vec!["https://example.com/artifactory/api/pypi/pypi/simple".to_owned()]
+        );
+
+        let pytest_cov = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "pytest-cov")
+            .unwrap();
+        assert_eq!(pytest_cov.dep_type, PoetryDepType::Project);
+        assert_eq!(pytest_cov.current_value, "==5.0.0");
+        assert_eq!(
+            pytest_cov.skip_reason,
+            Some(PoetrySkipReason::InvalidDependencySpecification)
+        );
+
+        let mypy = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "mypy")
+            .unwrap();
+        assert_eq!(mypy.dep_type, PoetryDepType::DependencyGroups);
+        assert_eq!(mypy.current_value, "==1.13.0");
+        assert_eq!(mypy.group_name.as_deref(), Some("typing"));
+        assert_eq!(mypy.source_name.as_deref(), Some("artifactory"));
+
+        let types_requests = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "types-requests")
+            .unwrap();
+        assert_eq!(types_requests.dep_type, PoetryDepType::DependencyGroups);
+        assert_eq!(types_requests.current_value, "");
+        assert_eq!(types_requests.group_name.as_deref(), Some("typing"));
+        assert_eq!(types_requests.source_name.as_deref(), Some("artifactory"));
+
+        let zoom = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "zoom")
+            .unwrap();
+        assert_eq!(zoom.dep_type, PoetryDepType::ProjectOptional);
+        assert_eq!(zoom.current_value, "==1.0.0");
+        assert_eq!(zoom.group_name.as_deref(), Some("other"));
+        assert_eq!(zoom.source_name.as_deref(), Some("artifactory"));
     }
 
     // ── Fixture: pyproject.1.toml ─────────────────────────────────────────────
