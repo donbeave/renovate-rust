@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1001 / 1217 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1003 / 1217 actionable tests ported (82%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1880,7 +1880,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 27 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 29 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1893,8 +1893,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for build.xml with no dependencies | 94 | ported | `ant.rs` | `project_without_artifact_dependencies_returns_empty` | — |
 | ignores dependency nodes without version | 104 | ported | `ant.rs` | `dependency_without_version_returns_empty` | — |
 | extracts dependencies with single-quoted attributes | 119 | ported | `ant.rs` | `single_quoted_attributes_extracted` | — |
-| returns null for unreadable build.xml | 135 | pending | — | — | Requires file-read failure path |
-| does not revisit the same file | 143 | pending | — | — | Requires multi-file deduplication |
+| returns null for unreadable build.xml | 135 | ported | `ant.rs` | `extract_all_package_files_ignores_unreadable_build_xml` | — |
+| does not revisit the same file | 143 | ported | `ant.rs` | `extract_all_package_files_deduplicates_paths` | — |
 
 ### `property resolution`
 

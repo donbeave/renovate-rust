@@ -55,6 +55,12 @@ pub struct AntDep {
     pub shared_variable_name: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AntPackageFile {
+    pub package_file: String,
+    pub deps: Vec<AntDep>,
+}
+
 const SCOPE_NAMES: &[&str] = &["compile", "runtime", "test", "provided", "system"];
 
 /// Extract Maven deps from an Apache Ant `build.xml` file.
@@ -115,6 +121,29 @@ pub fn extract(content: &str) -> Vec<AntDep> {
     }
 
     deps
+}
+
+pub fn extract_all_package_files(files: &[(&str, Option<&str>)]) -> Vec<AntPackageFile> {
+    let mut seen = HashSet::new();
+    let mut package_files = Vec::new();
+
+    for (path, content) in files {
+        if !seen.insert((*path).to_owned()) {
+            continue;
+        }
+        let Some(content) = content else {
+            continue;
+        };
+        let deps = extract(content);
+        if !deps.is_empty() {
+            package_files.push(AntPackageFile {
+                package_file: (*path).to_owned(),
+                deps,
+            });
+        }
+    }
+
+    package_files
 }
 
 /// Strip XML namespace prefix: `artifact:dependency` → `dependency`.
@@ -696,6 +725,31 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "junit:junit");
         assert_eq!(deps[0].current_value, "4.13.2");
+    }
+
+    // Ported: "returns null for unreadable build.xml" — ant/extract.spec.ts line 135
+    #[test]
+    fn extract_all_package_files_ignores_unreadable_build_xml() {
+        let files = [("build.xml", None)];
+        assert!(extract_all_package_files(&files).is_empty());
+    }
+
+    // Ported: "does not revisit the same file" — ant/extract.spec.ts line 143
+    #[test]
+    fn extract_all_package_files_deduplicates_paths() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let files = [("build.xml", Some(content)), ("build.xml", Some("invalid"))];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(package_files.len(), 1);
+        assert_eq!(package_files[0].package_file, "build.xml");
+        assert_eq!(package_files[0].deps.len(), 1);
+        assert_eq!(package_files[0].deps[0].dep_name, "junit:junit");
+        assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
     }
 
     // Ported: "extracts scope from 4-part coords attribute" — ant/extract.spec.ts line 791
