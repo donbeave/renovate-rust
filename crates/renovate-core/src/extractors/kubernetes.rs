@@ -43,6 +43,17 @@ pub struct KubernetesDep {
     pub skip_reason: Option<KubernetesSkipReason>,
 }
 
+/// Docker dep metadata after applying Kubernetes registry alias config.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KubernetesDockerDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: String,
+    pub replace_string: String,
+    pub auto_replace_string_template: String,
+    pub skip_reason: Option<KubernetesSkipReason>,
+}
+
 // ── Regexes ───────────────────────────────────────────────────────────────────
 
 /// K8s manifest signature: both `apiVersion:` and `kind:` present.
@@ -100,6 +111,68 @@ pub fn extract(content: &str) -> Vec<KubernetesDep> {
     }
 
     deps
+}
+
+/// Extract Docker deps and apply Renovate-style registry aliases.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<KubernetesDockerDep> {
+    extract(content)
+        .into_iter()
+        .map(|dep| kubernetes_docker_dep(dep, registry_aliases))
+        .collect()
+}
+
+fn kubernetes_docker_dep(
+    dep: KubernetesDep,
+    registry_aliases: &[(&str, &str)],
+) -> KubernetesDockerDep {
+    let dep_name = dep.image_name;
+    let package_name = apply_registry_alias(&dep_name, registry_aliases);
+    let alias_applied = package_name != dep_name;
+    let replace_string = image_ref(&dep_name, &dep.current_value);
+    let auto_replace_string_template = if alias_applied {
+        format!(
+            "{dep_name}:{{{{#if newValue}}}}{{{{newValue}}}}{{{{/if}}}}{{{{#if newDigest}}}}@{{{{newDigest}}}}{{{{/if}}}}"
+        )
+    } else {
+        "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+            .to_owned()
+    };
+
+    KubernetesDockerDep {
+        dep_name,
+        package_name,
+        current_value: dep.current_value,
+        replace_string,
+        auto_replace_string_template,
+        skip_reason: dep.skip_reason,
+    }
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
+}
+
+fn image_ref(image: &str, tag: &str) -> String {
+    if tag.is_empty() {
+        image.to_owned()
+    } else {
+        format!("{image}:{tag}")
+    }
 }
 
 /// Parse a Docker image reference into a [`KubernetesDep`].
@@ -269,6 +342,78 @@ spec:
             "litellm_stable_release_branch-v1.67.0-stable"
         );
         assert!(dep.skip_reason.is_none());
+    }
+
+    // Ported: "extracts images and replaces registries" — kubernetes/extract.spec.ts line 133
+    #[test]
+    fn extracts_images_and_replaces_registries() {
+        let content = r#"
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: node
+      image: quay.io/node:0.0.1
+"#;
+        let deps =
+            extract_with_registry_aliases(content, &[("quay.io", "my-quay-mirror.registry.com")]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/node");
+        assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/node");
+        assert_eq!(deps[0].current_value, "0.0.1");
+        assert_eq!(deps[0].replace_string, "quay.io/node:0.0.1");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "quay.io/node:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts images but does no replacement" — kubernetes/extract.spec.ts line 155
+    #[test]
+    fn extracts_images_without_registry_replacement() {
+        let content = r#"
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: node
+      image: quay.io/node:0.0.1
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[("index.docker.io", "my-docker-mirror.registry.com")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/node");
+        assert_eq!(deps[0].package_name, "quay.io/node");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+    }
+
+    // Ported: "extracts images and does no double replacements" — kubernetes/extract.spec.ts line 177
+    #[test]
+    fn extracts_images_without_double_registry_replacement() {
+        let content = r#"
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: node
+      image: quay.io/node:0.0.1
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[
+                ("quay.io", "my-quay-mirror.registry.com"),
+                ("my-quay-mirror.registry.com", "quay.io"),
+            ],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/node");
+        assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/node");
     }
 
     // Ported: "ignores non-Kubernetes YAML files" — kubernetes/extract.spec.ts line 121
