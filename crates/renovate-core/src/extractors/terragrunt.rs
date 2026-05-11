@@ -77,7 +77,7 @@ static GIT_REF_RE: LazyLock<Regex> = LazyLock::new(|| {
 
 /// `[registry/]org/name/cloud[//subpath]?version=x.y.z`  (Terraform registry)
 static TFR_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"tfr://(?P<registry>[^/]+)/(?P<org>[^/]+)/(?P<name>[^/]+)/(?P<cloud>[^/?]+).*\?(?:ref|version)=(?P<version>[^\s&]+)").unwrap()
+    Regex::new(r"tfr://(?P<registry>.*?)/(?P<org>[^/]+)/(?P<name>[^/]+)/(?P<cloud>[^/?]+).*\?(?:ref|version)=(?P<version>[^\s&]+)").unwrap()
 });
 
 /// `key = "value"` inside an HCL block
@@ -176,13 +176,15 @@ fn analyse_source(source: &str) -> TerragruntDep {
     if let Some(cap) = TFR_RE.captures(source) {
         let registry = cap["registry"].to_owned();
         let module = format!("{}/{}/{}", &cap["org"], &cap["name"], &cap["cloud"]);
+        let hostname = if registry.is_empty() {
+            "registry.terraform.io".to_owned()
+        } else {
+            registry
+        };
         return TerragruntDep {
-            dep_name: format!("{registry}/{module}"),
+            dep_name: module.clone(),
             current_value: cap["version"].to_owned(),
-            source: Some(TerragruntSource::TerraformRegistry {
-                hostname: registry,
-                module,
-            }),
+            source: Some(TerragruntSource::TerraformRegistry { hostname, module }),
             skip_reason: None,
         };
     }
@@ -218,6 +220,7 @@ fn analyse_source(source: &str) -> TerragruntDep {
 mod tests {
     use super::*;
 
+    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
     #[test]
     fn extracts_github_ref_source() {
         let content = r#"
@@ -237,6 +240,68 @@ terraform {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts terragrunt sources using tfr protocol" — terragrunt/extract.spec.ts line 10
+    #[test]
+    fn extracts_tfr_protocol_sources() {
+        let content = r#"
+terraform {
+  source = "tfr:///myuser/myrepo/cloud//folder/modules/moduleone?ref=v0.0.9"
+}
+
+terraform {
+  source = "tfr:///terraform-google-modules/kubernetes-engine/google//modules/private-cluster?version=1.2.3"
+}
+
+terraform {
+  source = "tfr:///terraform-aws-modules/vpc/aws?version=3.3.0"
+}
+
+terraform {
+  source = "tfr://terraform-aws-modules/vpc/aws?version=3.3.0"
+}
+
+terraform {
+  source = "tfr://registry.domain.com/abc/helloworld/aws?version=1.0.0"
+}
+
+terraform {
+  source = "tfr://registry.domain.com/abc/helloworld/aws?version=1.0.0"
+}
+"#;
+
+        let deps = extract(content);
+        assert_eq!(deps.len(), 6);
+        assert_eq!(deps[0].dep_name, "myuser/myrepo/cloud");
+        assert_eq!(deps[0].current_value, "v0.0.9");
+        assert_eq!(
+            deps[0].source,
+            Some(TerragruntSource::TerraformRegistry {
+                hostname: "registry.terraform.io".to_owned(),
+                module: "myuser/myrepo/cloud".to_owned(),
+            })
+        );
+        assert_eq!(
+            deps[1].dep_name,
+            "terraform-google-modules/kubernetes-engine/google"
+        );
+        assert_eq!(deps[1].current_value, "1.2.3");
+        assert_eq!(deps[2].dep_name, "terraform-aws-modules/vpc/aws");
+        assert_eq!(deps[2].current_value, "3.3.0");
+        assert_eq!(deps[3].skip_reason, Some(TerragruntSkipReason::Unknown));
+        assert_eq!(deps[4].dep_name, "abc/helloworld/aws");
+        assert_eq!(deps[4].current_value, "1.0.0");
+        assert_eq!(
+            deps[4].source,
+            Some(TerragruntSource::TerraformRegistry {
+                hostname: "registry.domain.com".to_owned(),
+                module: "abc/helloworld/aws".to_owned(),
+            })
+        );
+        assert_eq!(deps[5].dep_name, "abc/helloworld/aws");
+        assert_eq!(deps[5].current_value, "1.0.0");
+    }
+
+    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
     #[test]
     fn extracts_git_prefix_github() {
         let content = r#"
@@ -253,6 +318,7 @@ terraform {
         assert_eq!(deps[0].current_value, "v1.0.0");
     }
 
+    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
     #[test]
     fn local_path_skipped() {
         let content = r#"
@@ -265,6 +331,7 @@ terraform {
         assert_eq!(deps[0].skip_reason, Some(TerragruntSkipReason::Local));
     }
 
+    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
     #[test]
     fn multiple_terraform_blocks() {
         let content = r#"

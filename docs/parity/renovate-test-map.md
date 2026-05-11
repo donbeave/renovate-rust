@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 755 / 1217 actionable tests ported (62%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 756 / 1217 actionable tests ported (62%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1362,7 +1362,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 6 | ported | `terragrunt.rs` | `no_terraform_block_returns_empty` | — |
-| extracts terragrunt sources using tfr protocol | 10 | pending | — | — | tfr:// protocol not yet supported |
+| extracts terragrunt sources using tfr protocol | 10 | ported | `terragrunt.rs` | `extracts_tfr_protocol_sources` | — |
 | extracts terragrunt sources | 51 | ported | `terragrunt.rs` | `extracts_github_ref_source` (+ extracts_git_prefix_github, multiple_terraform_blocks, local_path_skipped) | — |
 | extracts terragrunt sources with depth specified after the branch | 269 | pending | — | — | Requires depth=N parameter parsing |
 | extracts terragrunt sources with depth specified before the branch | 487 | pending | — | — | Requires depth=N parameter parsing |
