@@ -42,6 +42,8 @@ pub enum NpmSkipReason {
     UrlInstall,
     /// Dependency uses an npm alias (`npm:other-pkg`).
     NpmAlias,
+    /// Dependency name is not valid for the npm registry.
+    InvalidName,
 }
 
 /// Which `package.json` section the dep came from.
@@ -591,13 +593,32 @@ fn unquote_yarnrc_token(token: &str) -> String {
 }
 
 fn classify(name: String, value: &str, dep_type: NpmDepType) -> NpmExtractedDep {
-    let skip_reason = skip_reason_for(value);
+    let skip_reason = if invalid_package_name(&name) {
+        Some(NpmSkipReason::InvalidName)
+    } else {
+        skip_reason_for(value)
+    };
     NpmExtractedDep {
         name,
         current_value: value.to_owned(),
         dep_type,
         skip_reason,
     }
+}
+
+fn invalid_package_name(name: &str) -> bool {
+    if name.is_empty() {
+        return true;
+    }
+
+    if let Some(rest) = name.strip_prefix('@') {
+        let Some((scope, package)) = rest.split_once('/') else {
+            return true;
+        };
+        return scope.is_empty() || package.is_empty() || package.contains('/');
+    }
+
+    name.contains('/')
 }
 
 /// Classify an npm version string and return the skip reason, if any.
@@ -1250,6 +1271,25 @@ chalk@^2.4.1:
     #[test]
     fn package_json_extract_returns_error_if_cannot_parse() {
         assert!(extract("not json").is_err());
+    }
+
+    // Ported: "catches invalid names" — npm/extract/index.spec.ts line 47
+    #[test]
+    fn package_json_invalid_dependency_names_are_skipped() {
+        let json = r#"{
+          "dependencies": {
+            "kgabis/parson": "0.0.0"
+          },
+          "development": {
+            "silentbicycle/greatest": "v1.2.1"
+          }
+        }"#;
+        let deps = extract_ok(json);
+
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "kgabis/parson");
+        assert_eq!(deps[0].current_value, "0.0.0");
+        assert_eq!(deps[0].skip_reason, Some(NpmSkipReason::InvalidName));
     }
 
     #[test]
