@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1003 / 1217 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1009 / 1217 actionable tests ported (83%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1880,7 +1880,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 29 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 35 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1901,15 +1901,15 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | resolves inline property references | 167 | ported | `ant.rs` | `resolves_inline_property_references` | — |
-| resolves properties from external .properties files | 193 | pending | — | — | Requires external .properties resolution |
+| resolves properties from external .properties files | 193 | ported | `ant.rs` | `extract_all_package_files_resolves_external_properties_file` | — |
 | implements first-definition-wins for inline properties | 228 | ported | `ant.rs` | `first_inline_property_definition_wins` | — |
-| inline properties take precedence over file properties | 254 | pending | — | — | Requires property precedence semantics |
+| inline properties take precedence over file properties | 254 | ported | `ant.rs` | `extract_all_package_files_inline_properties_override_file_properties` | — |
 | skips dependencies with unresolvable property references | 288 | ported | `ant.rs` | `property_ref_skipped` | — |
 | detects circular property references | 312 | ported | `ant.rs` | `circular_property_reference_is_skipped` | — |
 | resolves chained property references | 338 | ported | `ant.rs` | `resolves_chained_property_references` | — |
 | groups multiple dependencies sharing the same property | 368 | ported | `ant.rs` | `resolves_shared_property_for_multiple_dependencies` | — |
-| handles properties file in subdirectory | 400 | pending | — | — | Requires subdirectory .properties resolution |
-| handles unreadable properties file gracefully | 434 | pending | — | — | Requires .properties read-failure tolerance |
+| handles properties file in subdirectory | 400 | ported | `ant.rs` | `extract_all_package_files_resolves_subdirectory_properties_file` | — |
+| handles unreadable properties file gracefully | 434 | ported | `ant.rs` | `extract_all_package_files_handles_unreadable_properties_file` | — |
 | returns deps with mixed inline and property versions | 464 | ported | `ant.rs` | `returns_mixed_inline_and_property_versions` | — |
 | ignores dependency without version during property resolution | 495 | ported | `ant.rs` | `ignores_dependency_without_version_during_property_resolution` | — |
 | skips partial placeholder in version string | 522 | ported | `ant.rs` | `partial_placeholder_version_is_skipped` | — |
@@ -1919,8 +1919,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | handles unparseable XML returned by readLocalFile | 549 | ported | `ant.rs` | `unparseable_xml_returns_empty` | — |
-| handles absolute path in property file reference | 557 | pending | — | — | Requires absolute path .properties handling |
-| skips duplicate property file references | 591 | pending | — | — | Requires duplicate-import skip |
+| handles absolute path in property file reference | 557 | ported | `ant.rs` | `extract_all_package_files_resolves_absolute_properties_file` | — |
+| skips duplicate property file references | 591 | ported | `ant.rs` | `extract_all_package_files_deduplicates_properties_file_refs` | — |
 | follows import file references | 628 | pending | — | — | Requires `<import>` element resolution |
 | skips missing import files | 662 | pending | — | — | Requires missing-import tolerance |
 | does not loop on self-importing files | 692 | pending | — | — | Requires self-import detection |
