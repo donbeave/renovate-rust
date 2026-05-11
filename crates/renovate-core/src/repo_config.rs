@@ -9040,9 +9040,9 @@ mod schedule_preset_tests {
         );
     }
 
+    // Ported: "migrates npm:unpublishSafe" — config/migration.spec.ts line 532
     #[test]
     fn extends_npm_unpublish_safe_normalized() {
-        // Ported: extends: ['npm:unpublishSafe'] → 'security:minimumReleaseAgeNpm'
         let c = RepoConfig::parse(r#"{"extends": ["npm:unpublishSafe"]}"#);
         let has_npm_age = c.package_rules.iter().any(|r| {
             r.match_datasources.contains(&"npm".to_owned())
@@ -9051,6 +9051,20 @@ mod schedule_preset_tests {
         assert!(
             has_npm_age,
             "npm:unpublishSafe must normalize to security:minimumReleaseAgeNpm"
+        );
+    }
+
+    // Ported: "migrates npm:unpublishSafe" — config/migration.spec.ts line 532
+    #[test]
+    fn extends_npm_unpublish_safe_normalized_after_existing_preset() {
+        let c = RepoConfig::parse(r#"{"extends": ["foo", "npm:unpublishSafe"]}"#);
+        let has_npm_age = c.package_rules.iter().any(|r| {
+            r.match_datasources.contains(&"npm".to_owned())
+                && r.minimum_release_age.as_deref() == Some("3 days")
+        });
+        assert!(
+            has_npm_age,
+            "npm:unpublishSafe must normalize even after unrelated presets"
         );
     }
 

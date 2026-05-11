@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1379 / 1661 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1380 / 1661 actionable tests ported (83%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1939,7 +1939,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 30 | **Ported:** 12 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 13 | **Actionable:** 30 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -3522,7 +3522,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | removes invalid configs | 389 | pending | — | — | — |
 | migrates preset strings to array | 419 | pending | — | — | — |
 | migrates unpublishSafe | 441 | pending | — | — | — |
-| migrates npm:unpublishSafe | 532 | pending | — | — | — |
+| migrates npm:unpublishSafe | 532 | ported | `repo_config.rs` | `extends_npm_unpublish_safe_normalized` (+ extends_npm_unpublish_safe_normalized_after_existing_preset) | — |
 | migrates packageRules | 551 | ported | `repo_config.rs` | `migrates_package_rules_all_deprecated_fields` | — |
 | migrates in order of precedence | 593 | pending | — | — | — |
 
