@@ -75,6 +75,8 @@ pub enum PoetrySkipReason {
     LocalPath,
     /// Entry is a direct URL source.
     UrlInstall,
+    /// Entry contains multiple Python-specific constraints.
+    MultipleConstraint,
 }
 
 /// A single extracted Poetry dependency.
@@ -348,7 +350,15 @@ fn parse_dep(
                 skip_reason: None,
             })
         }
-        // Array form (platform-conditional) — skip for now.
+        Value::Array(entries) if entries.iter().any(Value::is_table) => Some(PoetryExtractedDep {
+            name: normalized,
+            current_value: String::new(),
+            dep_type,
+            registry_urls: Vec::new(),
+            source_name: None,
+            group_name: None,
+            skip_reason: Some(PoetrySkipReason::MultipleConstraint),
+        }),
         _ => None,
     }
 }
@@ -1017,6 +1027,47 @@ abc = "^5.5"
             .collect();
         assert_eq!(regular.len(), 1);
         assert_eq!(regular[0].name, "abc");
+    }
+
+    // Ported: "handles multiple constraint dependencies" — poetry/extract.spec.ts line 71
+    #[test]
+    fn multiple_constraint_dependency_is_skipped() {
+        let content = r#"
+[tool.poetry]
+name = "example 3"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+foo = [
+    {version = "<=1.9", python = "^2.7"},
+    {version = "^2.0", python = "^3.4"}
+]
+
+[build-system]
+requires = ["poetry>=1.1.2", "setuptools", "poetry-dynamic-versioning"]
+"#;
+        let deps = extract_ok(content);
+
+        assert_eq!(deps.len(), 4);
+        let foo = deps.iter().find(|dep| dep.name == "foo").unwrap();
+        assert_eq!(foo.dep_type, PoetryDepType::Regular);
+        assert_eq!(foo.current_value, "");
+        assert_eq!(foo.skip_reason, Some(PoetrySkipReason::MultipleConstraint));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "poetry"
+                && dep.current_value == ">=1.1.2"
+                && dep.dep_type == PoetryDepType::BuildSystem
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "setuptools"
+                && dep.current_value.is_empty()
+                && dep.dep_type == PoetryDepType::BuildSystem
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "poetry-dynamic-versioning"
+                && dep.current_value.is_empty()
+                && dep.dep_type == PoetryDepType::BuildSystem
+        }));
     }
 
     // ── Empty / no poetry section ─────────────────────────────────────────────

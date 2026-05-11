@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1393 / 1653 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1394 / 1653 actionable tests ported (84%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2508,7 +2508,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 23 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 24 | **Actionable:** 34 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2519,7 +2519,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extracts multiple dependencies | 51 | ported | `poetry.rs` | `extracts_string_deps` (+ poetry_fixture_1) | — |
 | extracts multiple dependencies (with dep = {version = "1.2.3"} case) | 60 | ported | `poetry.rs` | `extracts_table_deps` | — |
 | handles case with no dependencies | 66 | ported | `poetry.rs` | `poetry_section_with_no_deps_returns_empty` | — |
-| handles multiple constraint dependencies | 71 | pending | — | — | Requires multi-constraint dep table-of-tables parsing |
+| handles multiple constraint dependencies | 71 | ported | `poetry.rs` | `multiple_constraint_dependency_is_skipped` | — |
 | extracts build-system.requires dependencies | 77 | ported | `poetry.rs` | `extracts_build_system_requires` | — |
 | can parse TOML v1 heterogeneous arrays | 112 | pending | — | — | Requires TOML v1 heterogeneous-array tolerance |
 | extracts mixed versioning types | 118 | ported | `poetry.rs` | `name_normalized_per_pep503` | — |
