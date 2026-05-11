@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1245 / 1402 actionable tests ported (89%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1265 / 1402 actionable tests ported (90%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 14 spec files not yet converted to per-test format (14 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 12 spec files not yet converted to per-test format (12 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3640,6 +3640,55 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/util/package-rules/current-age.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/current-age.spec.ts
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `util/package-rules/current-age › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if release is older | 18 | ported | `package_rule.rs` | `current_age_matcher_returns_false_if_release_is_older` | — |
+| returns false if release is younger | 30 | ported | `package_rule.rs` | `current_age_matcher_returns_false_if_release_is_younger` | — |
+| returns null if release invalid | 42 | ported | `package_rule.rs` | `current_age_matcher_returns_false_if_release_invalid` | Rust matcher is boolean-only, so invalid dates are treated as a non-match |
+| returns false if release undefined | 54 | ported | `package_rule.rs` | `current_age_matcher_returns_false_if_release_undefined` | — |
+| returns true if age matches | 66 | ported | `package_rule.rs` | `current_age_matcher_returns_true_if_age_matches` | — |
+
+---
+
+## `lib/util/package-rules/repositories.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/repositories.spec.ts
+**Total tests:** 15 | **Ported:** 15 | **Actionable:** 15 | **Status:** ported
+
+### `util/package-rules/repositories › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null if match repositories is not defined | 7 | ported | `package_rule.rs` | `repositories_matcher_without_patterns_is_not_a_constraint` | Rust matcher uses `true` to represent "no constraint"; the TypeScript matcher returns `null` before the package-rule combiner skips it |
+| should return false if repository is not defined | 19 | ported | `package_rule.rs` | `repositories_matcher_returns_false_if_repository_is_missing` | — |
+| should return true if repository matches regex pattern | 31 | ported | `package_rule.rs` | `repositories_matcher_returns_true_for_regex_pattern` | — |
+| should return false if repository has invalid regex pattern | 43 | ported | `package_rule.rs` | `repositories_matcher_returns_false_for_invalid_regex_pattern` | — |
+| should return false if repository does not match regex pattern | 55 | ported | `package_rule.rs` | `repositories_matcher_returns_false_for_non_matching_regex_pattern` | — |
+| should return true if repository matches minimatch pattern | 67 | ported | `package_rule.rs` | `repositories_matcher_returns_true_for_minimatch_pattern` | — |
+| should return false if repository does not match minimatch pattern | 79 | ported | `package_rule.rs` | `repositories_matcher_returns_false_for_non_matching_minimatch_pattern` | — |
+| should return true if repository matches at least one pattern | 91 | ported | `package_rule.rs` | `repositories_matcher_returns_true_if_any_pattern_matches` | — |
+
+### `util/package-rules/repositories › excludes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false if exclude repository is not defined | 105 | ported | `package_rule.rs` | `repositories_matcher_returns_false_if_exclude_repository_is_missing` | — |
+| should return false if exclude repository matches regex pattern | 117 | ported | `package_rule.rs` | `repositories_matcher_returns_false_if_exclude_regex_matches` | — |
+| should return true if exclude repository has invalid regex pattern | 129 | ported | `package_rule.rs` | `repositories_matcher_returns_true_if_exclude_regex_is_invalid` | — |
+| should return true if exclude repository does not match regex pattern | 141 | ported | `package_rule.rs` | `repositories_matcher_returns_true_if_exclude_regex_does_not_match` | — |
+| should return false if exclude repository matches minimatch pattern | 153 | ported | `package_rule.rs` | `repositories_matcher_returns_false_if_exclude_minimatch_matches` | — |
+| should return true if exclude repository does not match minimatch pattern | 165 | ported | `package_rule.rs` | `repositories_matcher_returns_true_if_exclude_minimatch_does_not_match` | — |
+| should return false if exclude repository matches at least one pattern | 177 | ported | `package_rule.rs` | `repositories_matcher_returns_false_if_any_exclude_pattern_matches` | — |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3662,10 +3711,10 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- util/package-rules/managers.spec.ts converted to per-test format above -->
 <!-- util/package-rules/dep-names.spec.ts converted to per-test format above -->
 <!-- util/package-rules/current-value.spec.ts converted to per-test format above -->
-| `lib/util/package-rules/current-age.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
+<!-- util/package-rules/current-age.spec.ts converted to per-test format above -->
 | `lib/util/package-rules/current-version.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
 <!-- util/package-rules/files.spec.ts converted to per-test format above -->
 <!-- util/package-rules/new-value.spec.ts converted to per-test format above -->
 <!-- util/package-rules/package-names.spec.ts converted to per-test format above -->
-| `lib/util/package-rules/repositories.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
+<!-- util/package-rules/repositories.spec.ts converted to per-test format above -->
 | `lib/util/package-rules/jsonata.spec.ts` | — | — | 0 | pending |

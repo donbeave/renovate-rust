@@ -1213,6 +1213,23 @@ mod tests {
         }
     }
 
+    fn rule_with_repositories(patterns: &[&str]) -> PackageRule {
+        PackageRule {
+            match_repositories: patterns
+                .iter()
+                .map(|pattern| (*pattern).to_owned())
+                .collect(),
+            ..Default::default()
+        }
+    }
+
+    fn rule_with_current_age(range: &str) -> PackageRule {
+        PackageRule {
+            match_current_age: Some(range.to_owned()),
+            ..Default::default()
+        }
+    }
+
     #[test]
     fn managers_matcher_returns_true_for_matching_manager() {
         let rule = rule_with_managers(&["npm", "regex"]);
@@ -1415,5 +1432,147 @@ mod tests {
         let ctx = DepContext::for_dep("dep");
 
         assert!(!rule.matches_context(&ctx));
+    }
+
+    #[test]
+    fn current_age_matcher_returns_false_if_release_is_older() {
+        let rule = rule_with_current_age("< 1 year");
+
+        assert!(!rule.current_age_matches(Some("2020-01-01")));
+    }
+
+    #[test]
+    fn current_age_matcher_returns_false_if_release_is_younger() {
+        let rule = rule_with_current_age("> 10 years");
+
+        assert!(!rule.current_age_matches(Some("2020-01-01")));
+    }
+
+    #[test]
+    fn current_age_matcher_returns_false_if_release_invalid() {
+        let rule = rule_with_current_age("> 2 days");
+
+        assert!(!rule.current_age_matches(Some("abc")));
+    }
+
+    #[test]
+    fn current_age_matcher_returns_false_if_release_undefined() {
+        let rule = rule_with_current_age("> 2 days");
+
+        assert!(!rule.current_age_matches(None));
+    }
+
+    #[test]
+    fn current_age_matcher_returns_true_if_age_matches() {
+        let rule = rule_with_current_age("> 3 years");
+
+        assert!(rule.current_age_matches(Some("2020-01-01")));
+    }
+
+    #[test]
+    fn repositories_matcher_without_patterns_is_not_a_constraint() {
+        let rule = PackageRule::default();
+
+        assert!(rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_if_repository_is_missing() {
+        let rule = rule_with_repositories(&["org/repo"]);
+        let ctx = DepContext::for_dep("dep");
+
+        assert!(!rule.matches_context(&ctx));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_true_for_regex_pattern() {
+        let rule = rule_with_repositories(&["/^org/repo$/"]);
+
+        assert!(rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_for_invalid_regex_pattern() {
+        let rule = rule_with_repositories(&["/[/"]);
+
+        assert!(!rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_for_non_matching_regex_pattern() {
+        let rule = rule_with_repositories(&["/^org/other-repo$/"]);
+
+        assert!(!rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_true_for_minimatch_pattern() {
+        let rule = rule_with_repositories(&["org/**"]);
+
+        assert!(rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_for_non_matching_minimatch_pattern() {
+        let rule = rule_with_repositories(&["other-org/**"]);
+
+        assert!(!rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_true_if_any_pattern_matches() {
+        let rule = rule_with_repositories(&["/^org/repo$/", "**/*-archived"]);
+
+        assert!(rule.repository_matches("org/repo-archived"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_if_exclude_repository_is_missing() {
+        let rule = rule_with_repositories(&["!org/repo"]);
+        let ctx = DepContext::for_dep("dep");
+
+        assert!(!rule.matches_context(&ctx));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_if_exclude_regex_matches() {
+        let rule = rule_with_repositories(&["!/^org/repo$/"]);
+
+        assert!(!rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_true_if_exclude_regex_is_invalid() {
+        let rule = rule_with_repositories(&["!/[/"]);
+
+        assert!(rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_true_if_exclude_regex_does_not_match() {
+        let rule = rule_with_repositories(&["!/^org/other-repo$/"]);
+
+        assert!(rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_if_exclude_minimatch_matches() {
+        let rule = rule_with_repositories(&["!org/**"]);
+
+        assert!(!rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_true_if_exclude_minimatch_does_not_match() {
+        let rule = rule_with_repositories(&["!other-org/**"]);
+
+        assert!(rule.repository_matches("org/repo"));
+    }
+
+    #[test]
+    fn repositories_matcher_returns_false_if_any_exclude_pattern_matches() {
+        let rule = rule_with_repositories(&["!/^org/repo$/", "!**/*-archived"]);
+
+        assert!(!rule.repository_matches("org/repo-archived"));
     }
 }

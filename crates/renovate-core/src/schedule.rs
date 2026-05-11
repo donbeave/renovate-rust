@@ -23,15 +23,17 @@
 //! Both `0` and `7` map to Sunday (ISO week: Monday = 1, Sunday = 7) is
 //! normalised to 0.
 
-use chrono::{DateTime, Datelike, Duration, TimeZone, Timelike, Utc, Weekday};
+use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Timelike, Utc, Weekday};
 use chrono_tz::Tz;
 
 /// Parse a Renovate `minimumReleaseAge` string into a [`Duration`].
 ///
 /// Supported units: `second`/`seconds`/`sec`/`secs`, `minute`/`minutes`/`min`/`mins`,
-/// `hour`/`hours`/`hr`/`hrs`, `day`/`days`, `week`/`weeks`, `month`/`months`.
+/// `hour`/`hours`/`hr`/`hrs`, `day`/`days`, `week`/`weeks`, `month`/`months`,
+/// `year`/`years`.
 ///
-/// A "month" is approximated as 30 days.  Returns `None` for unrecognised strings.
+/// A "month" is approximated as 30 days and a "year" as 365 days. Returns
+/// `None` for unrecognised strings.
 ///
 /// # Examples
 /// ```
@@ -53,6 +55,7 @@ pub fn parse_age_duration(age: &str) -> Option<Duration> {
         "day" | "days" => Duration::try_days(n),
         "week" | "weeks" => Duration::try_weeks(n),
         "month" | "months" => Duration::try_days(n * 30),
+        "year" | "years" => Duration::try_days(n * 365),
         _ => None,
     }
 }
@@ -114,12 +117,18 @@ pub fn satisfies_date_range(timestamp: &str, range: &str) -> bool {
     };
 
     // Parse the timestamp — append Z if needed so chrono recognises it as UTC.
-    let ts_str = if timestamp.ends_with('Z') || timestamp.contains('+') {
-        timestamp.to_owned()
+    let ts = if let Ok(date) = NaiveDate::parse_from_str(timestamp, "%Y-%m-%d") {
+        date.and_hms_opt(0, 0, 0)
+            .map(|naive| DateTime::<Utc>::from_naive_utc_and_offset(naive, Utc))
     } else {
-        format!("{timestamp}Z")
+        let ts_str = if timestamp.ends_with('Z') || timestamp.contains('+') {
+            timestamp.to_owned()
+        } else {
+            format!("{timestamp}Z")
+        };
+        ts_str.parse::<DateTime<Utc>>().ok()
     };
-    let Ok(ts) = ts_str.parse::<DateTime<Utc>>() else {
+    let Some(ts) = ts else {
         return false;
     };
 
