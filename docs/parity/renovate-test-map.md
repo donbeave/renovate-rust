@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 848 / 1217 actionable tests ported (70%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 851 / 1217 actionable tests ported (70%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1945,7 +1945,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 31 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 44 | **Ported:** 34 | **Actionable:** 39 | **Status:** partial
 
 ### `parseKustomize` (top-level)
 
@@ -1953,9 +1953,9 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | should successfully parse a valid kustomize file | 16 | not-applicable | — | — | Tests TS-internal parseKustomize helper directly; Rust extractor has no equivalent public entry point |
 | return null on an invalid file | 33 | ported | `kustomize.rs` | `empty_content_returns_empty` | — |
-| should return null when header has invalid resource kind | 38 | pending | — | — | Requires kind-validation skip path |
-| should fall back to default resource kind when header is missing | 47 | pending | — | — | Requires default-kind fallback |
-| should extract chartHome | 56 | pending | — | — | Requires chartHome top-level extraction |
+| should return null when header has invalid resource kind | 38 | ported | `kustomize.rs` | `invalid_resource_kind_returns_none` | — |
+| should fall back to default resource kind when header is missing | 47 | ported | `kustomize.rs` | `missing_kind_defaults_to_kustomization` | — |
+| should extract chartHome | 56 | ported | `kustomize.rs` | `extracts_chart_home` | — |
 
 ### `extractBase`
 

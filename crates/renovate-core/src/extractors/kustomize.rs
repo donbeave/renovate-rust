@@ -35,6 +35,13 @@ pub struct KustomizeResourceDep {
     pub datasource: &'static str,
 }
 
+/// Minimal parsed Kustomize file metadata.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParsedKustomize {
+    pub kind: String,
+    pub chart_home: Option<String>,
+}
+
 /// A Helm chart reference from a kustomize `helmCharts:` entry.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KustomizeHelmDep {
@@ -188,6 +195,43 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
     flush_helm(&mut helm_name, &mut helm_repo, &mut helm_version, &mut out);
 
     out
+}
+
+/// Parse Kustomize metadata needed by the extractor.
+pub fn parse_kustomize(content: &str) -> Option<ParsedKustomize> {
+    if content.trim().is_empty() {
+        return None;
+    }
+
+    let mut kind = None;
+    let mut chart_home = None;
+    let mut in_helm_globals = false;
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        if line.trim().is_empty() {
+            continue;
+        }
+        let trimmed = line.trim_start();
+        let indent = leading_spaces(line);
+
+        if indent == 0 {
+            in_helm_globals = trimmed == "helmGlobals:";
+        }
+
+        if let Some(val) = strip_key(trimmed, "kind") {
+            kind = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+        } else if in_helm_globals && let Some(val) = strip_key(trimmed, "chartHome") {
+            chart_home = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+        }
+    }
+
+    let kind = kind.unwrap_or_else(|| "Kustomization".to_owned());
+    if !matches!(kind.as_str(), "Kustomization" | "Component") {
+        return None;
+    }
+
+    Some(ParsedKustomize { kind, chart_home })
 }
 
 /// Extract a remote Kustomize base/resource/component reference.
@@ -411,6 +455,45 @@ images:
                 .any(|i| i.image == "registry.example.com/myapp"
                     && i.tag.as_deref() == Some("v2.1.0"))
         );
+    }
+
+    // Ported: "should return null when header has invalid resource kind" — kustomize/extract.spec.ts line 38
+    #[test]
+    fn invalid_resource_kind_returns_none() {
+        let parsed = parse_kustomize(
+            r#"
+kind: NoKustomization
+bases:
+- github.com/fluxcd/flux/deploy?ref=1.19.0
+"#,
+        );
+        assert!(parsed.is_none());
+    }
+
+    // Ported: "should fall back to default resource kind when header is missing" — kustomize/extract.spec.ts line 47
+    #[test]
+    fn missing_kind_defaults_to_kustomization() {
+        let parsed = parse_kustomize(
+            r#"
+bases:
+- github.com/fluxcd/flux/deploy?ref=1.19.0
+"#,
+        )
+        .expect("kustomization should parse");
+        assert_eq!(parsed.kind, "Kustomization");
+    }
+
+    // Ported: "should extract chartHome" — kustomize/extract.spec.ts line 56
+    #[test]
+    fn extracts_chart_home() {
+        let parsed = parse_kustomize(
+            r#"
+helmGlobals:
+  chartHome: customPathToCharts
+"#,
+        )
+        .expect("kustomization should parse");
+        assert_eq!(parsed.chart_home.as_deref(), Some("customPathToCharts"));
     }
 
     // Ported: "should correctly extract an image in a repo" — kustomize/extract.spec.ts line 305
