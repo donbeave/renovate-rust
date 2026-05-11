@@ -25,6 +25,11 @@ pub const FLUX2_REPO: &str = "fluxcd/flux2";
 
 pub const HELM_DATASOURCE: &str = "helm";
 pub const DOCKER_DATASOURCE: &str = "docker";
+pub const BITBUCKET_TAGS_DATASOURCE: &str = "bitbucket-tags";
+pub const GIT_REFS_DATASOURCE: &str = "git-refs";
+pub const GIT_TAGS_DATASOURCE: &str = "git-tags";
+pub const GITHUB_TAGS_DATASOURCE: &str = "github-tags";
+pub const GITLAB_TAGS_DATASOURCE: &str = "gitlab-tags";
 
 /// A single extracted FluxCD system-manifest dep.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -40,6 +45,7 @@ pub enum FluxSkipReason {
     UnknownRegistry,
     LocalChart,
     UnsupportedDatasource,
+    UnversionedReference,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,6 +55,18 @@ pub struct FluxHelmReleaseDep {
     pub datasource: Option<&'static str>,
     pub registry_urls: Vec<String>,
     pub package_name: Option<String>,
+    pub skip_reason: Option<FluxSkipReason>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FluxGitRepositoryDep {
+    pub dep_name: String,
+    pub datasource: Option<&'static str>,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub package_name: Option<String>,
+    pub replace_string: Option<String>,
+    pub source_url: Option<String>,
     pub skip_reason: Option<FluxSkipReason>,
 }
 
@@ -102,6 +120,13 @@ pub fn extract_helm_releases_with_registry_aliases(
     deps
 }
 
+pub fn extract_git_repositories(content: &str) -> Vec<FluxGitRepositoryDep> {
+    yaml_documents(content)
+        .iter()
+        .filter_map(|doc| extract_git_repository_doc(doc))
+        .collect()
+}
+
 fn yaml_documents(content: &str) -> Vec<Vec<(Vec<String>, String)>> {
     content.split("\n---").map(yaml_scalars).collect()
 }
@@ -118,6 +143,78 @@ fn extract_helm_repo(scalars: &[(Vec<String>, String)]) -> Option<HelmRepository
         namespace: value_at(scalars, &["metadata", "namespace"])?.to_owned(),
         url: value_at(scalars, &["spec", "url"])?.to_owned(),
     })
+}
+
+fn extract_git_repository_doc(scalars: &[(Vec<String>, String)]) -> Option<FluxGitRepositoryDep> {
+    if value_at(scalars, &["apiVersion"]).is_none()
+        || value_at(scalars, &["kind"]) != Some("GitRepository")
+    {
+        return None;
+    }
+
+    let dep_name = value_at(scalars, &["metadata", "name"])?;
+    let url = value_at(scalars, &["spec", "url"])?;
+    if let Some(commit) = value_at(scalars, &["spec", "ref", "commit"]) {
+        return Some(FluxGitRepositoryDep {
+            dep_name: dep_name.to_owned(),
+            datasource: Some(GIT_REFS_DATASOURCE),
+            current_value: None,
+            current_digest: Some(commit.to_owned()),
+            package_name: Some(url.to_owned()),
+            replace_string: Some(commit.to_owned()),
+            source_url: Some(normalize_git_source_url(url)),
+            skip_reason: None,
+        });
+    }
+
+    if let Some(tag) = value_at(scalars, &["spec", "ref", "tag"]) {
+        let normalized_url = normalize_git_source_url(url);
+        let (datasource, package_name) = git_tag_source(&normalized_url);
+        return Some(FluxGitRepositoryDep {
+            dep_name: dep_name.to_owned(),
+            datasource: Some(datasource),
+            current_value: Some(tag.to_owned()),
+            current_digest: None,
+            package_name: Some(package_name),
+            replace_string: None,
+            source_url: Some(normalized_url),
+            skip_reason: None,
+        });
+    }
+
+    Some(FluxGitRepositoryDep {
+        dep_name: dep_name.to_owned(),
+        datasource: None,
+        current_value: None,
+        current_digest: None,
+        package_name: None,
+        replace_string: None,
+        source_url: None,
+        skip_reason: Some(FluxSkipReason::UnversionedReference),
+    })
+}
+
+fn normalize_git_source_url(url: &str) -> String {
+    if let Some(path) = url.strip_prefix("git@github.com:") {
+        return format!(
+            "https://github.com/{}",
+            path.strip_suffix(".git").unwrap_or(path)
+        );
+    }
+    url.strip_suffix(".git").unwrap_or(url).to_owned()
+}
+
+fn git_tag_source(url: &str) -> (&'static str, String) {
+    if let Some(path) = url.strip_prefix("https://github.com/") {
+        return (GITHUB_TAGS_DATASOURCE, path.to_owned());
+    }
+    if let Some(path) = url.strip_prefix("https://gitlab.com/") {
+        return (GITLAB_TAGS_DATASOURCE, path.to_owned());
+    }
+    if let Some(path) = url.strip_prefix("https://bitbucket.org/") {
+        return (BITBUCKET_TAGS_DATASOURCE, path.to_owned());
+    }
+    (GIT_TAGS_DATASOURCE, url.to_owned())
 }
 
 fn extract_helm_release_doc(
@@ -713,6 +810,116 @@ spec:
         );
     }
 
+    // Ported: "ignores GitRepository without a tag nor a commit" — flux/extract.spec.ts line 645
+    #[test]
+    fn ignores_git_repository_without_tag_or_commit() {
+        let deps = extract_git_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta1\nkind: GitRepository\nmetadata:\n  name: renovate-repo\n  namespace: renovate-system\nspec:\n  url: https://github.com/renovatebot/renovate\n",
+        );
+        assert_eq!(
+            deps,
+            vec![FluxGitRepositoryDep {
+                dep_name: "renovate-repo".to_owned(),
+                datasource: None,
+                current_value: None,
+                current_digest: None,
+                package_name: None,
+                replace_string: None,
+                source_url: None,
+                skip_reason: Some(FluxSkipReason::UnversionedReference),
+            }]
+        );
+    }
+
+    // Ported: "extracts GitRepository with a commit" — flux/extract.spec.ts line 665
+    #[test]
+    fn extracts_git_repository_with_commit() {
+        let deps = extract_git_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta1\nkind: GitRepository\nmetadata:\n  name: renovate-repo\n  namespace: renovate-system\nspec:\n  ref:\n    commit: c93154b\n  url: https://github.com/renovatebot/renovate\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, Some(GIT_REFS_DATASOURCE));
+        assert_eq!(deps[0].current_digest.as_deref(), Some("c93154b"));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/renovatebot/renovate")
+        );
+        assert_eq!(deps[0].replace_string.as_deref(), Some("c93154b"));
+    }
+
+    // Ported: "extracts GitRepository with a tag from github with ssh" — flux/extract.spec.ts line 694
+    #[test]
+    fn extracts_git_repository_tag_from_github_ssh() {
+        let deps = extract_git_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta1\nkind: GitRepository\nmetadata:\n  name: renovate-repo\n  namespace: renovate-system\nspec:\n  ref:\n    tag: v11.35.9\n  url: git@github.com:renovatebot/renovate.git\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, Some(GITHUB_TAGS_DATASOURCE));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("renovatebot/renovate")
+        );
+        assert_eq!(
+            deps[0].source_url.as_deref(),
+            Some("https://github.com/renovatebot/renovate")
+        );
+    }
+
+    // Ported: "extracts GitRepository with a tag from github" — flux/extract.spec.ts line 722
+    #[test]
+    fn extracts_git_repository_tag_from_github() {
+        let deps = extract_git_repositories(GIT_REPOSITORY);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, Some(GITHUB_TAGS_DATASOURCE));
+        assert_eq!(deps[0].current_value.as_deref(), Some("v11.35.4"));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("renovatebot/renovate")
+        );
+    }
+
+    // Ported: "extracts GitRepository with a tag from gitlab" — flux/extract.spec.ts line 750
+    #[test]
+    fn extracts_git_repository_tag_from_gitlab() {
+        let deps = extract_git_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta1\nkind: GitRepository\nmetadata:\n  name: renovate-repo\n  namespace: renovate-system\nspec:\n  ref:\n    tag: 1.2.3\n  url: https://gitlab.com/renovatebot/renovate\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, Some(GITLAB_TAGS_DATASOURCE));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("renovatebot/renovate")
+        );
+    }
+
+    // Ported: "extracts GitRepository with a tag from bitbucket" — flux/extract.spec.ts line 778
+    #[test]
+    fn extracts_git_repository_tag_from_bitbucket() {
+        let deps = extract_git_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta1\nkind: GitRepository\nmetadata:\n  name: renovate-repo\n  namespace: renovate-system\nspec:\n  ref:\n    tag: 2020.5.6+staging.ze\n  url: https://bitbucket.org/renovatebot/renovate\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, Some(BITBUCKET_TAGS_DATASOURCE));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("renovatebot/renovate")
+        );
+    }
+
+    // Ported: "extracts GitRepository with a tag from an unkown domain" — flux/extract.spec.ts line 806
+    #[test]
+    fn extracts_git_repository_tag_from_unknown_domain() {
+        let deps = extract_git_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta1\nkind: GitRepository\nmetadata:\n  name: renovate-repo\n  namespace: renovate-system\nspec:\n  ref:\n    tag: \"7.56.4_p1\"\n  url: https://example.com/renovatebot/renovate\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, Some(GIT_TAGS_DATASOURCE));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://example.com/renovatebot/renovate")
+        );
+    }
+
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
@@ -779,5 +986,18 @@ spec:
     namespace: kube-system
   values:
     replicaCount: 2
+"#;
+
+    const GIT_REPOSITORY: &str = r#"
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  interval: 1h0m0s
+  url: https://github.com/renovatebot/renovate
+  ref:
+    tag: v11.35.4
 "#;
 }

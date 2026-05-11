@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 964 / 1217 actionable tests ported (79%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 971 / 1217 actionable tests ported (80%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 26 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 33 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2111,13 +2111,13 @@ Status key: `ported` · `pending` · `not-applicable`
 | uses registryAliases to resolve HelmChart sourceRef name when repository is missing | 566 | ported | `flux.rs` | `helm_chart_registry_alias_resolves_source_name` | — |
 | ignores HelmChart resources using git sources | 588 | ported | `flux.rs` | `ignores_helm_chart_using_git_source` | — |
 | ignores HelmChart resources using bucket sources | 608 | ported | `flux.rs` | `helm_chart_using_bucket_source_is_unsupported` | — |
-| ignores GitRepository without a tag nor a commit | 645 | pending | — | — | Requires GitRepository ref validation |
-| extracts GitRepository with a commit | 665 | pending | — | — | Requires GitRepository commit extraction |
-| extracts GitRepository with a tag from github with ssh | 694 | pending | — | — | Requires GitRepository ssh URL handling |
-| extracts GitRepository with a tag from github | 722 | pending | — | — | Requires GitRepository github tag extraction |
-| extracts GitRepository with a tag from gitlab | 750 | pending | — | — | Requires GitRepository gitlab tag extraction |
-| extracts GitRepository with a tag from bitbucket | 778 | pending | — | — | Requires GitRepository bitbucket tag extraction |
-| extracts GitRepository with a tag from an unkown domain | 806 | pending | — | — | Requires GitRepository generic-host handling |
+| ignores GitRepository without a tag nor a commit | 645 | ported | `flux.rs` | `ignores_git_repository_without_tag_or_commit` | — |
+| extracts GitRepository with a commit | 665 | ported | `flux.rs` | `extracts_git_repository_with_commit` | — |
+| extracts GitRepository with a tag from github with ssh | 694 | ported | `flux.rs` | `extracts_git_repository_tag_from_github_ssh` | — |
+| extracts GitRepository with a tag from github | 722 | ported | `flux.rs` | `extracts_git_repository_tag_from_github` | — |
+| extracts GitRepository with a tag from gitlab | 750 | ported | `flux.rs` | `extracts_git_repository_tag_from_gitlab` | — |
+| extracts GitRepository with a tag from bitbucket | 778 | ported | `flux.rs` | `extracts_git_repository_tag_from_bitbucket` | — |
+| extracts GitRepository with a tag from an unkown domain | 806 | ported | `flux.rs` | `extracts_git_repository_tag_from_unknown_domain` | — |
 | ignores OCIRepository with no tag and no digest | 834 | pending | — | — | Requires OCIRepository ref validation |
 | extracts OCIRepository with a tag | 861 | pending | — | — | Requires OCIRepository tag extraction |
 | extracts OCIRepository with a digest | 897 | pending | — | — | Requires OCIRepository digest extraction |
