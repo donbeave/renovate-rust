@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1338 / 1672 actionable tests ported (80%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1342 / 1672 actionable tests ported (80%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,7 +4295,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 47 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 51 | **Actionable:** 73 | **Status:** partial
 
 ### `util/package-rules/index`
 
@@ -4369,15 +4369,15 @@ resolver) and the inner `extractPackageFile()` adapter.
 | matches packageFiles | 1163 | ported | `repo_config.rs` | `match_file_names_exact_match` | — |
 | matches lock files | 1187 | ported | `repo_config.rs` | `match_file_names_matches_lock_files` | — |
 | matches paths | 1203 | ported | `repo_config.rs` | `match_file_names_matches_paths` | — |
-| empty rules | 1233 | pending | — | — | — |
+| empty rules | 1233 | ported | `repo_config.rs` | `package_rules_null_is_treated_as_empty_rules` | — |
 | creates groupSlug if necessary | 1242 | ported | `repo_config.rs` | `group_slug_auto_generated_from_group_name_when_prior_slug_exists` | — |
 | matches matchSourceUrls with patterns (case-insensitive) | 1261 | ported | `repo_config.rs` | `match_source_urls_case_insensitive` | — |
 | matches matchSourceUrls(case-insensitive) | 1284 | ported | `repo_config.rs` | `match_source_urls_case_insensitive` | — |
-| needs language to match | 1307 | pending | — | — | — |
+| needs language to match | 1307 | ported | `repo_config.rs` | `needs_categories_to_match_rule_does_not_fire_without_it` | — |
 | needs baseBranch to match | 1325 | ported | `repo_config.rs` | `needs_base_branch_to_match_rule_does_not_fire_without_it` | — |
 | needs manager to match | 1343 | ported | `repo_config.rs` | `needs_manager_to_match_rule_does_not_fire_without_it` | — |
-| matches matchDepNames(depName) | 1361 | pending | — | — | — |
-| matches if there are no matchers | 1386 | pending | — | — | — |
+| matches matchDepNames(depName) | 1361 | ported | `repo_config.rs` | `match_dep_names_exact_disables_dep` | — |
+| matches if there are no matchers | 1386 | ported | `repo_config.rs` | `package_rule_without_matchers_applies_to_any_dep` | — |
 | overrides | 1404 | pending | — | — | — |
 | overrides with templates | 1447 | pending | — | — | — |
 | propagates fetchChangeLogs from matching packageRule | 1464 | pending | — | — | — |

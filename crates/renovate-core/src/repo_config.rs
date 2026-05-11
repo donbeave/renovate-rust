@@ -5776,6 +5776,17 @@ mod tests {
         assert_eq!(c.ignore_deps, vec!["jest"]);
     }
 
+    // Ported: "empty rules" — util/package-rules/index.spec.ts line 1233
+    #[test]
+    fn package_rules_null_is_treated_as_empty_rules() {
+        let c = RepoConfig::parse(r#"{"packageRules": null}"#);
+        assert!(c.package_rules.is_empty());
+        assert_eq!(
+            c.collect_rule_effects(&DepContext::for_dep("dep")),
+            RuleEffects::default()
+        );
+    }
+
     #[test]
     fn malformed_json_returns_defaults() {
         let c = RepoConfig::parse("not valid json at all");
@@ -7420,6 +7431,7 @@ mod tests {
 
     // ── matchDepNames ────────────────────────────────────────────────────────
 
+    // Ported: "matches matchDepNames(depName)" — util/package-rules/index.spec.ts line 1361
     #[test]
     fn match_dep_names_exact_disables_dep() {
         let c = RepoConfig::parse(
@@ -7432,6 +7444,14 @@ mod tests {
         );
         assert!(c.is_dep_ignored("lodash"));
         assert!(!c.is_dep_ignored("express"));
+    }
+
+    // Ported: "matches if there are no matchers" — util/package-rules/index.spec.ts line 1386
+    #[test]
+    fn package_rule_without_matchers_applies_to_any_dep() {
+        let c = RepoConfig::parse(r#"{"packageRules": [{"automerge": true}]}"#);
+        let ctx = DepContext::for_dep("test2");
+        assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
     // ── Ported from Renovate dep-names.spec.ts ────────────────────────────────
@@ -9566,6 +9586,7 @@ mod categories_base_branch_tests {
     }
 
     // Ported: "filters categories with undefined category" — util/package-rules/index.spec.ts line 510
+    // Ported: "needs language to match" — util/package-rules/index.spec.ts line 1307
     #[test]
     fn needs_categories_to_match_rule_does_not_fire_without_it() {
         // but matchCategories is set, rule must not fire.
