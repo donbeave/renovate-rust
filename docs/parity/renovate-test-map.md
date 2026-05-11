@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1044 / 1231 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1048 / 1235 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 44 spec files not yet converted to per-test format (32 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 43 spec files not yet converted to per-test format (31 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,22 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/app-strings.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/app-strings.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `config/app-strings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds user configured filenames to list | 8 | ported | `repo_config.rs` | `config_file_names_include_user_configured_names` | — |
+| expands brace patterns for json and json5 filenames | 20 | ported | `repo_config.rs` | `config_file_names_expand_json_and_json5_patterns` | — |
+| filters based on platform | 33 | ported | `repo_config.rs` | `config_file_names_filter_platform_specific_names` | — |
+| does not allow the local platform to have an associated filename | 42 | ported | `repo_config.rs` | `config_file_names_do_not_add_local_platform_names` | — |
+
+---
+
 ## `lib/config/defaults.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/defaults.spec.ts
@@ -2804,7 +2820,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
 <!-- config/defaults.spec.ts converted to per-test format above -->
-| `lib/config/app-strings.spec.ts` | 3 | `crates/renovate-core/src/config.rs` | 0 | pending |
+<!-- config/app-strings.spec.ts converted to per-test format above -->
 | `lib/config/parse.spec.ts` | 4 | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
 <!-- config/global.spec.ts converted to per-test format above -->
 | `lib/config/validation.spec.ts` | 124 | — | 0 | pending |

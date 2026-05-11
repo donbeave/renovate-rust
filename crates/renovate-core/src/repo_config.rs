@@ -44,6 +44,52 @@ pub const CONFIG_FILE_CANDIDATES: &[&str] = &[
     ".renovaterc.json5",
 ];
 
+const CONFIG_FILE_NAMES: &[&str] = &[
+    "renovate.json",
+    "renovate.json5",
+    ".github/renovate.json",
+    ".github/renovate.json5",
+    ".gitlab/renovate.json",
+    ".gitlab/renovate.json5",
+    ".renovaterc",
+    ".renovaterc.json",
+    ".renovaterc.json5",
+    "package.json",
+];
+
+/// Return Renovate config file names, optionally filtered for a platform.
+///
+/// Mirrors `getConfigFileNames()` in `lib/config/app-strings.ts`.
+pub fn config_file_names(platform: Option<&str>, user_config_file_names: &[String]) -> Vec<String> {
+    let mut names: Vec<String> = user_config_file_names.to_vec();
+
+    match platform.filter(|platform| !platform.is_empty()) {
+        Some(platform) => {
+            for filename in CONFIG_FILE_NAMES {
+                if let Some(config_platform) = platform_from_config_filename(filename)
+                    && config_platform != platform
+                {
+                    continue;
+                }
+                names.push((*filename).to_owned());
+            }
+
+            if !matches!(platform, "github" | "gitlab" | "local") {
+                names.push(format!(".{platform}/renovate.json"));
+                names.push(format!(".{platform}/renovate.json5"));
+            }
+        }
+        None => names.extend(CONFIG_FILE_NAMES.iter().map(|name| (*name).to_owned())),
+    }
+
+    names
+}
+
+fn platform_from_config_filename(filename: &str) -> Option<&str> {
+    let (platform, suffix) = filename.strip_prefix('.')?.split_once('/')?;
+    matches!(suffix, "renovate.json" | "renovate.json5").then_some(platform)
+}
+
 /// Parsed per-repository Renovate configuration.
 ///
 /// Defaults match Renovate's option defaults.
@@ -5372,6 +5418,94 @@ mod tests {
 
     fn make_client(server_uri: &str) -> AnyPlatformClient {
         AnyPlatformClient::Github(GithubClient::with_endpoint("token", server_uri).unwrap())
+    }
+
+    // Ported: "adds user configured filenames to list" — config/app-strings.spec.ts line 8
+    #[test]
+    fn config_file_names_include_user_configured_names() {
+        let filenames = config_file_names(None, &[]);
+        assert!(!filenames.iter().any(|filename| filename == "abc"));
+        assert!(!filenames.iter().any(|filename| filename == "def"));
+
+        let user_names = vec!["abc".to_owned(), "def".to_owned()];
+        let filenames = config_file_names(None, &user_names);
+        assert!(filenames.iter().any(|filename| filename == "abc"));
+        assert!(filenames.iter().any(|filename| filename == "def"));
+    }
+
+    // Ported: "expands brace patterns for json and json5 filenames" — config/app-strings.spec.ts line 20
+    #[test]
+    fn config_file_names_expand_json_and_json5_patterns() {
+        let filenames = config_file_names(None, &[]);
+
+        assert!(filenames.iter().any(|filename| filename == "renovate.json"));
+        assert!(
+            filenames
+                .iter()
+                .any(|filename| filename == "renovate.json5")
+        );
+        assert!(
+            filenames
+                .iter()
+                .any(|filename| filename == ".renovaterc.json")
+        );
+        assert!(
+            filenames
+                .iter()
+                .any(|filename| filename == ".renovaterc.json5")
+        );
+        assert!(
+            !filenames
+                .iter()
+                .any(|filename| filename == "renovate.json{,5}")
+        );
+        assert!(!filenames.iter().any(|filename| filename == "package.json5"));
+    }
+
+    // Ported: "filters based on platform" — config/app-strings.spec.ts line 33
+    #[test]
+    fn config_file_names_filter_platform_specific_names() {
+        let gitea = config_file_names(Some("gitea"), &[]);
+        assert!(
+            !gitea
+                .iter()
+                .any(|filename| filename == ".github/renovate.json")
+        );
+        assert!(
+            gitea
+                .iter()
+                .any(|filename| filename == ".gitea/renovate.json")
+        );
+
+        let github = config_file_names(Some("github"), &[]);
+        assert!(
+            github
+                .iter()
+                .any(|filename| filename == ".github/renovate.json")
+        );
+    }
+
+    // Ported: "does not allow the local platform to have an associated filename" — config/app-strings.spec.ts line 42
+    #[test]
+    fn config_file_names_do_not_add_local_platform_names() {
+        let filenames = config_file_names(Some("local"), &[]);
+
+        assert!(
+            !filenames
+                .iter()
+                .any(|filename| filename == ".local/renovate.json")
+        );
+        assert_eq!(
+            filenames,
+            vec![
+                "renovate.json",
+                "renovate.json5",
+                ".renovaterc",
+                ".renovaterc.json",
+                ".renovaterc.json5",
+                "package.json",
+            ]
+        );
     }
 
     #[tokio::test]
