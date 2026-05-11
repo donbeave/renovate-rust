@@ -8225,6 +8225,16 @@ mod tests {
         assert!(!c2.platform_automerge);
     }
 
+    // Ported: "migrates empty requiredStatusChecks" — config/migration.spec.ts line 751
+    #[test]
+    fn empty_required_status_checks_is_removed() {
+        let c = RepoConfig::parse(r#"{"requiredStatusChecks": []}"#);
+        assert!(c.package_rules.is_empty());
+        assert!(c.schedule.is_empty());
+        assert!(!c.automerge);
+        assert!(c.platform_automerge);
+    }
+
     #[test]
     fn platform_automerge_takes_precedence_over_deprecated_aliases() {
         // Explicit platformAutomerge overrides azureAutoComplete.
