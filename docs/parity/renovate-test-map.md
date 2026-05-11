@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 896 / 1216 actionable tests ported (74%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 900 / 1216 actionable tests ported (74%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -871,7 +871,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 75 | **Ported:** 62 | **Actionable:** 66 | **Status:** partial
+**Total tests:** 75 | **Ported:** 66 | **Actionable:** 66 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -910,9 +910,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles ubuntu | 750 | ported | `dockerfile.rs` | `ubuntu_with_version_tag` | — |
 | handles debian with codename | 768 | ported | `dockerfile.rs` | `debian_with_codename_tag` | — |
 | handles debian with regular tag | 786 | ported | `dockerfile.rs` | `debian_with_version_tag` | — |
-| handles debian with prefixes | 803 | pending | — | — | Requires depName/packageName distinction for platform prefix stripping |
+| handles debian with prefixes | 803 | ported | `dockerfile.rs` | `debian_with_platform_prefix` | — |
 | handles debian with prefixes and registries | 821 | ported | `dockerfile.rs` | `debian_with_registry_prefix` | — |
-| handles prefixes | 843 | pending | — | — | Requires depName/packageName distinction for platform prefix stripping |
+| handles prefixes | 843 | ported | `dockerfile.rs` | `ubuntu_with_platform_prefix` | — |
 | handles prefixes with registries | 861 | ported | `dockerfile.rs` | `registry_with_namespace_prefix` | — |
 | handles implausible line continuation | 883 | ported | `dockerfile.rs` | `implausible_continuation_does_not_affect_from` | — |
 | handles multi-line FROM with space after escape character | 904 | ported | `dockerfile.rs` | `multiline_from_with_space_after_escape` | — |
@@ -932,8 +932,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles updates of multiple ARG values | 1272 | ported | `dockerfile.rs` | `from_with_multiple_arg_components` | — |
 | handles same argument multiple times | 1308 | ported | `dockerfile.rs` | `same_arg_used_multiple_times` | — |
 | handles empty optional parameters | 1329 | ported | `dockerfile.rs` | `handles_empty_optional_parameters` | — |
-| handles registry alias | 1352 | pending | — | — | registryAliases not yet implemented |
-| replaces registry alias from start only | 1380 | pending | — | — | registryAliases not yet implemented |
+| handles registry alias | 1352 | ported | `dockerfile.rs` | `handles_registry_alias` | — |
+| replaces registry alias from start only | 1380 | ported | `dockerfile.rs` | `registry_alias_matches_start_only` | — |
 | handles empty registry | 1407 | ported | `dockerfile.rs` | `namespaced_image_without_registry_extracted_normally` | — |
 | handles # syntax statements | 1435 | ported | `dockerfile.rs` | `syntax_directive_extracted` | — |
 | ignores # syntax statements after first line | 1469 | ported | `dockerfile.rs` | `syntax_directive_after_from_ignored` | — |

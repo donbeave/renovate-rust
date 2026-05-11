@@ -51,6 +51,18 @@ pub struct DockerfileExtractedDep {
     pub skip_reason: Option<DockerfileSkipReason>,
 }
 
+/// Docker dep metadata after applying Renovate-style package name normalization.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DockerfileResolvedDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub replace_string: String,
+    pub auto_replace_string_template: String,
+    pub versioning: Option<&'static str>,
+}
+
 /// Errors from parsing a `Dockerfile`.
 #[derive(Debug, Error)]
 pub enum DockerfileExtractError {
@@ -145,6 +157,18 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
     }
 
     Ok(out)
+}
+
+/// Extract Docker deps and apply Renovate-style registry aliases and dep metadata.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Result<Vec<DockerfileResolvedDep>, DockerfileExtractError> {
+    Ok(extract(content)?
+        .into_iter()
+        .filter(|dep| dep.skip_reason.is_none())
+        .map(|dep| dockerfile_resolved_dep(dep, registry_aliases))
+        .collect())
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -548,6 +572,98 @@ fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtracted
         digest,
         skip_reason: None,
     }
+}
+
+fn dockerfile_resolved_dep(
+    dep: DockerfileExtractedDep,
+    registry_aliases: &[(&str, &str)],
+) -> DockerfileResolvedDep {
+    let mut dep_name = dep.image;
+    let original_image = dep_name.clone();
+    let mut package_name = apply_registry_alias(&dep_name, registry_aliases);
+    let alias_applied = package_name != dep_name;
+
+    let mut auto_replace_string_template = if alias_applied {
+        format!(
+            "{dep_name}:{{{{#if newValue}}}}{{{{newValue}}}}{{{{/if}}}}{{{{#if newDigest}}}}@{{{{newDigest}}}}{{{{/if}}}}"
+        )
+    } else {
+        "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+            .to_owned()
+    };
+
+    for prefix in ["amd64", "arm64", "library"] {
+        if let Some(stripped) = dep_name
+            .strip_prefix(prefix)
+            .and_then(|rest| rest.strip_prefix('/'))
+        {
+            dep_name = stripped.to_owned();
+            package_name = image_ref(&format!("{prefix}/{dep_name}"), None, None);
+            auto_replace_string_template =
+                "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+                    .to_owned();
+            break;
+        }
+    }
+
+    let versioning = docker_versioning(&dep_name, dep.tag.as_deref());
+    let replace_string = image_ref(&original_image, dep.tag.as_deref(), dep.digest.as_deref());
+
+    DockerfileResolvedDep {
+        dep_name,
+        package_name,
+        current_value: dep.tag,
+        current_digest: dep.digest,
+        replace_string,
+        auto_replace_string_template,
+        versioning,
+    }
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
+}
+
+fn docker_versioning(dep_name: &str, current_value: Option<&str>) -> Option<&'static str> {
+    if dep_name == "ubuntu" || dep_name.ends_with("/ubuntu") {
+        return Some("ubuntu");
+    }
+    if (dep_name == "debian" || dep_name.ends_with("/debian"))
+        && current_value.is_some_and(|value| {
+            value
+                .as_bytes()
+                .first()
+                .is_some_and(|byte| byte.is_ascii_digit())
+        })
+    {
+        return Some("debian");
+    }
+    None
+}
+
+fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
+    let mut out = image.to_owned();
+    if let Some(tag) = tag {
+        out.push(':');
+        out.push_str(tag);
+    }
+    if let Some(digest) = digest {
+        out.push('@');
+        out.push_str(digest);
+    }
+    out
 }
 
 #[cfg(test)]
@@ -1059,12 +1175,44 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].tag.as_deref(), Some("11.4-slim"));
     }
 
+    // Ported: "handles debian with prefixes" — dockerfile/extract.spec.ts line 803
+    #[test]
+    fn debian_with_platform_prefix() {
+        let deps = extract_with_registry_aliases("FROM amd64/debian:10\n", &[]).unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "debian");
+        assert_eq!(deps[0].package_name, "amd64/debian");
+        assert_eq!(deps[0].current_value.as_deref(), Some("10"));
+        assert_eq!(deps[0].replace_string, "amd64/debian:10");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+        assert_eq!(deps[0].versioning, Some("debian"));
+    }
+
     // Ported: "handles debian with prefixes and registries" — dockerfile/extract.spec.ts line 821
     #[test]
     fn debian_with_registry_prefix() {
         let deps = extract_ok("FROM docker.io/library/debian:10\n");
         assert_eq!(deps[0].image, "docker.io/library/debian");
         assert_eq!(deps[0].tag.as_deref(), Some("10"));
+    }
+
+    // Ported: "handles prefixes" — dockerfile/extract.spec.ts line 843
+    #[test]
+    fn ubuntu_with_platform_prefix() {
+        let deps = extract_with_registry_aliases("FROM amd64/ubuntu:18.04\n", &[]).unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "ubuntu");
+        assert_eq!(deps[0].package_name, "amd64/ubuntu");
+        assert_eq!(deps[0].current_value.as_deref(), Some("18.04"));
+        assert_eq!(deps[0].replace_string, "amd64/ubuntu:18.04");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+        assert_eq!(deps[0].versioning, Some("ubuntu"));
     }
 
     // Ported: "handles prefixes with registries" — dockerfile/extract.spec.ts line 861
@@ -1227,6 +1375,56 @@ FROM $nginx_version as stage2
         assert_eq!(deps[2].image, "alpine");
         assert_eq!(deps[2].tag.as_deref(), Some("latest"));
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
+    }
+
+    // Ported: "handles registry alias" — dockerfile/extract.spec.ts line 1352
+    #[test]
+    fn handles_registry_alias() {
+        let deps = extract_with_registry_aliases(
+            "FROM quay.io/myName/myPackage:0.6.2\n",
+            &[
+                ("quay.io", "my-quay-mirror.registry.com"),
+                ("index.docker.io", "my-docker-mirror.registry.com"),
+            ],
+        )
+        .unwrap();
+
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/myName/myPackage");
+        assert_eq!(
+            deps[0].package_name,
+            "my-quay-mirror.registry.com/myName/myPackage"
+        );
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.6.2"));
+        assert!(deps[0].current_digest.is_none());
+        assert_eq!(deps[0].replace_string, "quay.io/myName/myPackage:0.6.2");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+    }
+
+    // Ported: "replaces registry alias from start only" — dockerfile/extract.spec.ts line 1380
+    #[test]
+    fn registry_alias_matches_start_only() {
+        let deps = extract_with_registry_aliases(
+            "FROM index.docker.io/myName/myPackage:0.6.2\n",
+            &[("docker.io", "my-docker-mirror.registry.com")],
+        )
+        .unwrap();
+
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "index.docker.io/myName/myPackage");
+        assert_eq!(deps[0].package_name, "index.docker.io/myName/myPackage");
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.6.2"));
+        assert_eq!(
+            deps[0].replace_string,
+            "index.docker.io/myName/myPackage:0.6.2"
+        );
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
     }
 
     // Ported: "handles empty registry" — dockerfile/extract.spec.ts line 1407
