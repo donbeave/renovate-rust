@@ -910,6 +910,100 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "includes nixpkgs with ref when original has rev" — nix/extract.spec.ts line 1112
+    #[test]
+    fn includes_nixpkgs_ref_and_original_rev() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1720031269,
+        "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "rev": "specific-commit-hash",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].current_ref.as_deref(), Some("nixos-unstable"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("specific-commit-hash")
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/NixOS/nixpkgs")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Github);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes github flake with ref when original has rev" — nix/extract.spec.ts line 1154
+    #[test]
+    fn includes_github_ref_and_original_rev() {
+        let content = r#"{
+  "nodes": {
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1726560853,
+        "narHash": "sha256-X6rJYSESBVr3hBoH0WbKE5KvhPU5bloyZ2L4K60/fPQ=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "ref": "main",
+        "rev": "specific-commit-hash",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "flake-utils");
+        assert_eq!(deps[0].current_ref.as_deref(), Some("main"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("specific-commit-hash")
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/numtide/flake-utils")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Github);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "includes gitlab flake with custom host" — nix/extract.spec.ts line 1196
     #[test]
     fn includes_gitlab_input_with_custom_host() {

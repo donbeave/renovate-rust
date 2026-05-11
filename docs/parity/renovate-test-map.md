@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1433 / 1650 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1435 / 1650 actionable tests ported (87%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 18 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 20 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2227,8 +2227,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null when flake.lock has invalid JSON | 1046 | ported | `nix.rs` | `invalid_json_returns_empty` | — |
 | returns deps when no root inputs but deps exist | 1051 | pending | — | — | Requires non-root deps fallback |
 | handles currentDigest replacement when config provided | 1065 | pending | — | — | Requires currentDigest replacement plumbing |
-| includes nixpkgs with ref when original has rev | 1112 | pending | — | — | Requires ref+rev priority handling |
-| includes github flake with ref when original has rev | 1154 | pending | — | — | Requires github flake ref+rev handling |
+| includes nixpkgs with ref when original has rev | 1112 | ported | `nix.rs` | `includes_nixpkgs_ref_and_original_rev` | — |
+| includes github flake with ref when original has rev | 1154 | ported | `nix.rs` | `includes_github_ref_and_original_rev` | — |
 | includes gitlab flake with custom host | 1196 | ported | `nix.rs` | `includes_gitlab_input_with_custom_host` | — |
 | includes sourcehut flake with custom host | 1238 | ported | `nix.rs` | `includes_sourcehut_input_with_custom_host` | — |
 | includes tarball flake with ref when original has rev | 1280 | ported | `nix.rs` | `includes_tarball_input_ref_and_current_digest` | — |
