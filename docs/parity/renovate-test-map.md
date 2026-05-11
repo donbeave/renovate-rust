@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1282 / 1402 actionable tests ported (91%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 6 spec files not yet converted to per-test format (6 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 5 spec files not yet converted to per-test format (5 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3858,13 +3858,45 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/workers/global/config/parse/file.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `workers/global/config/parse/file › .getConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses %s > %s | 27 | pending | — | — | — |
+| migrates | 56 | pending | — | — | — |
+| warns if config is invalid | 68 | pending | — | — | — |
+| parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env | 80 | pending | — | — | — |
+| fatal error and exit if error in parsing %s | 84 | pending | — | — | — |
+| fatal error and exit if custom config file does not exist | 112 | pending | — | — | — |
+| fatal error and exit if config.js contains unresolved env var | 126 | pending | — | — | — |
+| fatal error and exit if %s | 147 | pending | — | — | — |
+| exports env variables to environment from processEnv object | 161 | pending | — | — | — |
+| does not export env variables to environment from processEnv object if key/value is invalid | 184 | pending | — | — | — |
+
+### `workers/global/config/parse/file › deleteConfigFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skip when RENOVATE_CONFIG_FILE is not set ("%s") | 214 | pending | — | — | — |
+| skip when config file does not exist | 226 | pending | — | — | — |
+| skip if deleteConfigFile is not set ("%s") | 239 | pending | — | — | — |
+| removes the specified config file | 255 | pending | — | — | — |
+| fails silently when attempting to delete the config file | 278 | pending | — | — | — |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
 <!-- workers/global/config/parse/cli.spec.ts converted to per-test format above -->
 | `lib/workers/global/config/parse/env.spec.ts` | — | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
-| `lib/workers/global/config/parse/file.spec.ts` | — | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
+<!-- workers/global/config/parse/file.spec.ts converted to per-test format above -->
 | `lib/workers/repository/init/merge.spec.ts` | 37 | `crates/renovate-core/src/repo_config.rs` | 0 | pending |
 <!-- workers/repository/init/apis.spec.ts converted to per-test format above -->
 <!-- workers/repository/init/cache.spec.ts converted to per-test format above -->
