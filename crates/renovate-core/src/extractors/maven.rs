@@ -197,6 +197,92 @@ pub fn extract_registries(content: &str) -> Vec<String> {
     if saw_settings { urls } else { Vec::new() }
 }
 
+/// Parse a Maven `.mvn/extensions.xml` file.
+pub fn extract_extensions(content: &str) -> Option<Vec<MavenExtractedDep>> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut stack: Vec<String> = Vec::new();
+    let mut current: Option<CurrentDep> = None;
+    let mut deps = Vec::new();
+    let mut saw_extensions = false;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if stack.is_empty() && name != "extensions" {
+                    return None;
+                }
+                if stack.is_empty() {
+                    saw_extensions = true;
+                }
+                if stack.len() == 1 && stack[0] == "extensions" && name == "extension" {
+                    current = Some(CurrentDep::new(MavenDepType::Extension));
+                }
+                stack.push(name);
+            }
+            Ok(Event::End(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if name == "extension"
+                    && let Some(dep) = current.take()
+                    && let Some(extracted) = build_dep(&dep)
+                {
+                    deps.push(extracted);
+                }
+                stack.pop();
+            }
+            Ok(Event::Text(e)) => {
+                if let Some(ref mut dep) = current
+                    && stack.len() == 3
+                {
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                    if text.is_empty() {
+                        continue;
+                    }
+                    match stack.last().map(String::as_str) {
+                        Some("groupId") => dep.group_id = text,
+                        Some("artifactId") => dep.artifact_id = text,
+                        Some("version") => dep.version = text,
+                        _ => {}
+                    }
+                }
+            }
+            Ok(Event::Eof) => break,
+            Ok(_) => {}
+            Err(_) => return None,
+        }
+        buf.clear();
+    }
+
+    (saw_extensions && !deps.is_empty()).then_some(deps)
+}
+
+/// Extract Maven package files from already-read path/content pairs.
+pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtractedDep>> {
+    let mut package_files = Vec::new();
+    for (path, content) in files {
+        if path.ends_with(".mvn/extensions.xml") || *path == ".mvn/extensions.xml" {
+            if let Some(deps) = extract_extensions(content)
+                && !deps.is_empty()
+            {
+                package_files.push(deps);
+            }
+            continue;
+        }
+
+        if path.ends_with(".xml")
+            && let Ok(deps) = extract(content)
+            && !deps.is_empty()
+        {
+            package_files.push(deps);
+        }
+    }
+    package_files
+}
+
 /// SAX parse a POM and return (deps, properties).
 fn parse_pom(
     content: &str,
@@ -762,6 +848,66 @@ mod tests {
         assert_eq!(
             extract_registries(content),
             vec!["https://proxy-repo.com/artifactory/apache-maven"]
+        );
+    }
+
+    // Ported: "returns null for invalid xml files" — maven/extract.spec.ts line 527
+    #[test]
+    fn extensions_invalid_xml_returns_none() {
+        assert!(extract_extensions("").is_none());
+        assert!(extract_extensions("invalid xml content").is_none());
+        assert!(extract_extensions("<foobar></foobar>").is_none());
+        assert!(extract_extensions("<extensions></extensions>").is_none());
+        assert!(
+            extract_extensions(
+                r#"<extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0"></extensions>"#
+            )
+            .is_none()
+        );
+    }
+
+    // Ported: "should return empty if package has no content" — maven/extract.spec.ts line 548
+    #[test]
+    fn extract_all_package_files_empty_content_returns_empty() {
+        assert!(extract_all_package_files(&[("random.pom.xml", "")]).is_empty());
+    }
+
+    // Ported: "should return empty for packages with invalid content" — maven/extract.spec.ts line 554
+    #[test]
+    fn extract_all_package_files_invalid_content_returns_empty() {
+        assert!(extract_all_package_files(&[("random.pom.xml", "invalid content")]).is_empty());
+    }
+
+    // Ported: "should extract from .mvn/extensions.xml file" — maven/extract.spec.ts line 888
+    #[test]
+    fn extract_all_package_files_extracts_extensions_xml() {
+        let content = r#"<extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <extension>
+    <groupId>io.jenkins.tools.incrementals</groupId>
+    <artifactId>git-changelist-maven-extension</artifactId>
+    <version>1.6</version>
+  </extension>
+</extensions>"#;
+        let packages = extract_all_package_files(&[(".mvn/extensions.xml", content)]);
+        assert_eq!(packages.len(), 1);
+        assert_eq!(packages[0].len(), 1);
+        assert_eq!(
+            packages[0][0].dep_name,
+            "io.jenkins.tools.incrementals:git-changelist-maven-extension"
+        );
+        assert_eq!(packages[0][0].current_value, "1.6");
+        assert_eq!(packages[0][0].dep_type, MavenDepType::Extension);
+    }
+
+    // Ported: "should return empty array if extensions file is invalid or empty" — maven/extract.spec.ts line 917
+    #[test]
+    fn extract_all_package_files_invalid_extensions_return_empty() {
+        assert!(
+            extract_all_package_files(&[
+                (".mvn/extensions.xml", ""),
+                ("grp/.mvn/extensions.xml", "invalid xml content"),
+            ])
+            .is_empty()
         );
     }
 
