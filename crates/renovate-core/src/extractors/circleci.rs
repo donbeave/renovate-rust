@@ -31,7 +31,7 @@
 //! - `machine:` executor (uses CircleCI VM images, not Docker Hub)
 //! - Inline orbs (`orb:` blocks with `commands:`, `jobs:` etc.)
 
-use std::sync::LazyLock;
+use std::{collections::HashMap, sync::LazyLock};
 
 use regex::Regex;
 
@@ -75,11 +75,25 @@ static DOCKER_KEY: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*docker:\s
 static IMAGE_ITEM: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*-\s+image:\s+(\S+.*)").unwrap());
 
+/// Matches `image: ref` mapping entries, including entries inside anchored objects.
+static IMAGE_ENTRY: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*image:\s+(\S+.*)").unwrap());
+
+/// Matches YAML anchor list items like `- &nodejs`.
+static ANCHOR_ITEM: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*-\s+&([A-Za-z0-9_-]+)\s*$").unwrap());
+
+/// Matches YAML alias list items like `- *nodejs`.
+static ALIAS_ITEM: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*-\s+\*([A-Za-z0-9_-]+)\s*$").unwrap());
+
 /// Extract Docker image deps from a CircleCI config YAML.
 pub fn extract(content: &str) -> Vec<CircleCiDep> {
     let mut out = Vec::new();
     let mut in_docker_block = false;
     let mut docker_indent: usize = 0;
+    let mut pending_anchor: Option<String> = None;
+    let mut image_anchors: HashMap<String, String> = HashMap::new();
 
     for raw in content.lines() {
         // Strip inline comments.
@@ -90,6 +104,23 @@ pub fn extract(content: &str) -> Vec<CircleCiDep> {
         }
 
         let indent = leading_spaces(line);
+
+        if let Some(cap) = ANCHOR_ITEM.captures(line) {
+            pending_anchor = Some(cap[1].to_owned());
+            continue;
+        }
+
+        if let Some(anchor) = pending_anchor.take()
+            && let Some(cap) = IMAGE_ENTRY.captures(line)
+        {
+            let value = cap[1].trim().trim_matches('"').trim_matches('\'');
+            if !value.is_empty() && !value.starts_with('$') {
+                image_anchors.insert(anchor, value.to_owned());
+                let dep = classify_image_ref(value);
+                out.push(CircleCiDep { dep });
+            }
+            continue;
+        }
 
         // Detect `docker:` key.
         if DOCKER_KEY.is_match(line) {
@@ -108,6 +139,11 @@ pub fn extract(content: &str) -> Vec<CircleCiDep> {
                     let dep = classify_image_ref(value);
                     out.push(CircleCiDep { dep });
                 }
+            } else if let Some(cap) = ALIAS_ITEM.captures(line)
+                && let Some(value) = image_anchors.get(&cap[1])
+            {
+                let dep = classify_image_ref(value);
+                out.push(CircleCiDep { dep });
             }
         }
     }
@@ -299,6 +335,72 @@ jobs:
 
         let go = deps.iter().find(|d| d.dep.image == "golang").unwrap();
         assert_eq!(go.dep.tag.as_deref(), Some("1.21-alpine"));
+    }
+
+    // Ported: "extracts multiple image and resolves yaml anchors" — circleci/extract.spec.ts line 48
+    #[test]
+    fn fixture_config_resolves_yaml_anchor_images() {
+        let content = r#"workflows:
+  version: 2
+  node-multi-build:
+    jobs:
+      - node-v4
+      - node-v6
+      - node-v8
+
+version: 2
+jobs:
+  node-base: &node-base
+    docker:
+      - image: node
+
+  node-v4:
+    <<: *node-base
+    docker:
+      - image: 'node:4'
+  node-v6:
+    <<: *node-base
+    docker:
+      - image: node:6
+  node-v8:
+    <<: *node-base
+    docker:
+      - image: "node:8.9.0"
+"#;
+        let deps = extract_with_registry_aliases(content, &[]);
+        assert_eq!(deps.len(), 4);
+        assert_eq!(deps[0].dep_name, "node");
+        assert_eq!(deps[0].current_value, None);
+        assert_eq!(deps[0].replace_string, "node");
+        assert_eq!(deps[1].current_value.as_deref(), Some("4"));
+        assert_eq!(deps[1].replace_string, "node:4");
+        assert_eq!(deps[2].current_value.as_deref(), Some("6"));
+        assert_eq!(deps[2].replace_string, "node:6");
+        assert_eq!(deps[3].current_value.as_deref(), Some("8.9.0"));
+        assert_eq!(deps[3].replace_string, "node:8.9.0");
+    }
+
+    // Ported: "extracts image without leading dash" — circleci/extract.spec.ts line 200
+    #[test]
+    fn anchor_image_without_leading_dash_is_resolved() {
+        let content = r#"aliases:
+  - &nodejs
+    image: cimg/node:14.8.0
+
+version: 2
+jobs:
+  checkout:
+    docker:
+      - *nodejs
+"#;
+        let deps = extract_with_registry_aliases(content, &[]);
+        assert_eq!(deps.len(), 2);
+        for dep in deps {
+            assert_eq!(dep.dep_name, "cimg/node");
+            assert_eq!(dep.package_name, "cimg/node");
+            assert_eq!(dep.current_value.as_deref(), Some("14.8.0"));
+            assert_eq!(dep.replace_string, "cimg/node:14.8.0");
+        }
     }
 
     // Ported: "extracts and exclude android images" — circleci/extract.spec.ts line 226
