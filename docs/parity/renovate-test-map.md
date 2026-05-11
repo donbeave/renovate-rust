@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 830 / 1217 actionable tests ported (68%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 842 / 1217 actionable tests ported (69%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1945,7 +1945,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 13 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 44 | **Ported:** 25 | **Actionable:** 39 | **Status:** partial
 
 ### `parseKustomize` (top-level)
 
@@ -1961,18 +1961,18 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null for a local base | 66 | pending | — | — | Requires bases[] local-path detection |
-| should return null for an http base without ref/version | 71 | pending | — | — | Requires bases[] missing-ref handling |
-| should extract out the version of an http base | 77 | pending | — | — | Requires bases[] http URL parsing |
-| should extract the version of a non http base | 90 | pending | — | — | Requires bases[] non-http URL parsing |
-| should extract the depName if the URL includes a port number | 102 | pending | — | — | Requires bases[] URL with port handling |
-| should extract the version of a non http base with subdir | 114 | pending | — | — | Requires bases[] subdir handling |
-| should extract out the version of an github base | 126 | pending | — | — | Requires bases[] github source detection |
-| should extract out the version of a git base | 139 | pending | — | — | Requires bases[] git source detection |
-| should extract out the version of a git base with subdir | 152 | pending | — | — | Requires bases[] git source + subdir |
-| should extract out the version of an http base with additional params | 165 | pending | — | — | Requires bases[] http URL with query params |
-| should extract out the version of an http base from first version param | 180 | pending | — | — | Requires bases[] version-param extraction |
-| should extract out the version of an http base from first ref param | 193 | pending | — | — | Requires bases[] ref-param extraction |
+| should return null for a local base | 66 | ported | `kustomize.rs` | `local_base_returns_none` | — |
+| should return null for an http base without ref/version | 71 | ported | `kustomize.rs` | `http_base_without_ref_returns_none` | — |
+| should extract out the version of an http base | 77 | ported | `kustomize.rs` | `extracts_http_base_ref` | — |
+| should extract the version of a non http base | 90 | ported | `kustomize.rs` | `extracts_non_http_ssh_base_ref` | — |
+| should extract the depName if the URL includes a port number | 102 | ported | `kustomize.rs` | `extracts_ssh_base_with_port` | — |
+| should extract the version of a non http base with subdir | 114 | ported | `kustomize.rs` | `extracts_ssh_base_with_subdir` | — |
+| should extract out the version of an github base | 126 | ported | `kustomize.rs` | `extracts_github_shorthand_base_ref` | — |
+| should extract out the version of a git base | 139 | ported | `kustomize.rs` | `extracts_git_at_github_base_ref` | — |
+| should extract out the version of a git base with subdir | 152 | ported | `kustomize.rs` | `extracts_git_at_github_base_with_subdir` | — |
+| should extract out the version of an http base with additional params | 165 | ported | `kustomize.rs` | `extracts_http_base_ref_with_additional_params` | — |
+| should extract out the version of an http base from first version param | 180 | ported | `kustomize.rs` | `extracts_http_base_first_version_param` | — |
+| should extract out the version of an http base from first ref param | 193 | ported | `kustomize.rs` | `extracts_http_base_first_ref_param` | — |
 
 ### `extractHelmChart`
 

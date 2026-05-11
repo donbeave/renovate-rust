@@ -26,6 +26,15 @@
 
 use crate::extractors::dockerfile::{DockerfileExtractedDep, classify_image_ref};
 
+/// A remote Kustomize base/resource/component reference.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KustomizeResourceDep {
+    pub dep_name: String,
+    pub package_name: Option<String>,
+    pub current_value: String,
+    pub datasource: &'static str,
+}
+
 /// A Helm chart reference from a kustomize `helmCharts:` entry.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KustomizeHelmDep {
@@ -57,6 +66,8 @@ pub enum KustomizeDep {
     Helm(KustomizeHelmDep),
     /// OCI Helm chart from `helmCharts:` section.
     OciHelm(KustomizeOciHelmDep),
+    /// Remote base/resource/component Git reference.
+    Resource(KustomizeResourceDep),
 }
 
 /// Extract dependencies from a `kustomization.yaml` file.
@@ -153,7 +164,124 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
     out
 }
 
+/// Extract a remote Kustomize base/resource/component reference.
+pub fn extract_resource(raw: &str) -> Option<KustomizeResourceDep> {
+    let raw = raw.trim();
+    if raw.is_empty() || raw.starts_with("./") || raw.starts_with("../") || !raw.contains('?') {
+        return None;
+    }
+
+    let (base, query) = raw.split_once('?')?;
+    let current_value =
+        first_query_value(query, "ref").or_else(|| first_query_value(query, "version"))?;
+    if current_value.is_empty() {
+        return None;
+    }
+
+    if let Some(rest) = base.strip_prefix("https://github.com/") {
+        let dep_name = github_dep_name(rest)?;
+        return Some(KustomizeResourceDep {
+            dep_name,
+            package_name: Some(format!(
+                "https://{}",
+                repo_base(&format!("github.com/{rest}"))?
+            )),
+            current_value,
+            datasource: "github-tags",
+        });
+    }
+
+    if let Some(rest) = base.strip_prefix("github.com/") {
+        let dep_name = github_dep_name(rest)?;
+        return Some(KustomizeResourceDep {
+            dep_name,
+            package_name: None,
+            current_value,
+            datasource: "github-tags",
+        });
+    }
+
+    if let Some(rest) = base.strip_prefix("git@github.com:") {
+        let dep_name = github_dep_name(rest)?;
+        return Some(KustomizeResourceDep {
+            dep_name,
+            package_name: None,
+            current_value,
+            datasource: "github-tags",
+        });
+    }
+
+    if let Some(rest) = base.strip_prefix("ssh://git@") {
+        let package_name = format!("ssh://git@{}", repo_base(rest)?);
+        let dep_name = dep_name_from_remote_path(rest)?;
+        return Some(KustomizeResourceDep {
+            dep_name,
+            package_name: Some(package_name),
+            current_value,
+            datasource: "git-tags",
+        });
+    }
+
+    if let Some(rest) = base.strip_prefix("https://") {
+        let package_name = format!("https://{}", repo_base(rest)?);
+        let dep_name = dep_name_from_remote_path(rest)?;
+        return Some(KustomizeResourceDep {
+            dep_name,
+            package_name: Some(package_name),
+            current_value,
+            datasource: "git-tags",
+        });
+    }
+
+    None
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+fn first_query_value(query: &str, key: &str) -> Option<String> {
+    query.split('&').find_map(|part| {
+        let (candidate, value) = part.split_once('=')?;
+        (candidate == key).then(|| value.to_owned())
+    })
+}
+
+fn github_dep_name(path: &str) -> Option<String> {
+    let clean = repo_base(&format!("github.com/{path}"))?;
+    let clean = clean.strip_prefix("github.com/").unwrap_or(clean.as_str());
+    let clean = clean.strip_suffix(".git").unwrap_or(clean);
+    let mut parts = clean.split('/');
+    let owner = parts.next()?;
+    let repo = parts.next()?;
+    if owner.is_empty() || repo.is_empty() {
+        return None;
+    }
+    Some(format!("{owner}/{repo}"))
+}
+
+fn dep_name_from_remote_path(path: &str) -> Option<String> {
+    let clean = repo_base(path)?;
+    let clean = clean.strip_suffix(".git").unwrap_or(clean.as_str());
+    let mut parts = clean.split('/');
+    let host = parts.next()?;
+    let owner = parts.next()?;
+    let repo = parts.next()?;
+    if host.is_empty() || owner.is_empty() || repo.is_empty() {
+        return None;
+    }
+    Some(format!("{host}/{owner}/{repo}"))
+}
+
+fn repo_base(path: &str) -> Option<String> {
+    let without_subdir = path.split("//").next().unwrap_or(path);
+    if let Some((before_git, _)) = without_subdir.split_once(".git") {
+        return Some(format!("{before_git}.git"));
+    }
+    let parts = without_subdir.split('/').take(3).collect::<Vec<_>>();
+    if parts.len() < 3 {
+        return None;
+    }
+    Some(parts.join("/"))
+}
 
 fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
@@ -411,6 +539,121 @@ helmCharts:
             "registry-1.docker.io/bitnamicharts/redis"
         );
         assert_eq!(chart.current_value, "18.12.1");
+    }
+
+    // Ported: "should return null for a local base" — kustomize/extract.spec.ts line 66
+    #[test]
+    fn local_base_returns_none() {
+        assert!(extract_resource("./service-1").is_none());
+    }
+
+    // Ported: "should return null for an http base without ref/version" — kustomize/extract.spec.ts line 71
+    #[test]
+    fn http_base_without_ref_returns_none() {
+        assert!(extract_resource("https://github.com/user/test-repo.git?timeout=10s").is_none());
+    }
+
+    // Ported: "should extract out the version of an http base" — kustomize/extract.spec.ts line 77
+    #[test]
+    fn extracts_http_base_ref() {
+        let dep = extract_resource("https://github.com/user/test-repo.git?ref=v1.0.0").unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.datasource, "github-tags");
+        assert_eq!(dep.dep_name, "user/test-repo");
+    }
+
+    // Ported: "should extract the version of a non http base" — kustomize/extract.spec.ts line 90
+    #[test]
+    fn extracts_non_http_ssh_base_ref() {
+        let dep = extract_resource("ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3").unwrap();
+        assert_eq!(dep.current_value, "v1.2.3");
+        assert_eq!(dep.datasource, "git-tags");
+        assert_eq!(dep.dep_name, "bitbucket.com/user/test-repo");
+        assert_eq!(
+            dep.package_name.as_deref(),
+            Some("ssh://git@bitbucket.com/user/test-repo")
+        );
+    }
+
+    // Ported: "should extract the depName if the URL includes a port number" — kustomize/extract.spec.ts line 102
+    #[test]
+    fn extracts_ssh_base_with_port() {
+        let dep =
+            extract_resource("ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3").unwrap();
+        assert_eq!(dep.dep_name, "bitbucket.com:7999/user/test-repo");
+        assert_eq!(
+            dep.package_name.as_deref(),
+            Some("ssh://git@bitbucket.com:7999/user/test-repo")
+        );
+    }
+
+    // Ported: "should extract the version of a non http base with subdir" — kustomize/extract.spec.ts line 114
+    #[test]
+    fn extracts_ssh_base_with_subdir() {
+        let dep =
+            extract_resource("ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3").unwrap();
+        assert_eq!(dep.current_value, "v1.2.3");
+        assert_eq!(dep.dep_name, "bitbucket.com/user/test-repo");
+        assert_eq!(
+            dep.package_name.as_deref(),
+            Some("ssh://git@bitbucket.com/user/test-repo")
+        );
+    }
+
+    // Ported: "should extract out the version of an github base" — kustomize/extract.spec.ts line 126
+    #[test]
+    fn extracts_github_shorthand_base_ref() {
+        let dep = extract_resource("github.com/fluxcd/flux/deploy?ref=v1.0.0").unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.datasource, "github-tags");
+        assert_eq!(dep.dep_name, "fluxcd/flux");
+    }
+
+    // Ported: "should extract out the version of a git base" — kustomize/extract.spec.ts line 139
+    #[test]
+    fn extracts_git_at_github_base_ref() {
+        let dep = extract_resource("git@github.com:user/repo.git?ref=v1.0.0").unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.datasource, "github-tags");
+        assert_eq!(dep.dep_name, "user/repo");
+    }
+
+    // Ported: "should extract out the version of a git base with subdir" — kustomize/extract.spec.ts line 152
+    #[test]
+    fn extracts_git_at_github_base_with_subdir() {
+        let dep = extract_resource("git@github.com:user/repo.git/subdir?ref=v1.0.0").unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.dep_name, "user/repo");
+    }
+
+    // Ported: "should extract out the version of an http base with additional params" — kustomize/extract.spec.ts line 165
+    #[test]
+    fn extracts_http_base_ref_with_additional_params() {
+        let dep = extract_resource(
+            "https://github.com/user/test-repo.git?timeout=120&ref=v1.0.0&submodules=false&version=v1",
+        )
+        .unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.dep_name, "user/test-repo");
+    }
+
+    // Ported: "should extract out the version of an http base from first version param" — kustomize/extract.spec.ts line 180
+    #[test]
+    fn extracts_http_base_first_version_param() {
+        let dep =
+            extract_resource("https://github.com/user/test-repo.git?version=v1.0.0&version=v0")
+                .unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.dep_name, "user/test-repo");
+    }
+
+    // Ported: "should extract out the version of an http base from first ref param" — kustomize/extract.spec.ts line 193
+    #[test]
+    fn extracts_http_base_first_ref_param() {
+        let dep =
+            extract_resource("https://github.com/user/test-repo.git?ref=v1.0.0&ref=v0").unwrap();
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.dep_name, "user/test-repo");
     }
 
     // Ported: "parses helmChart field" — kustomize/extract.spec.ts line 799
