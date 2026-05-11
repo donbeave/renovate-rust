@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1378 / 1661 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1379 / 1661 actionable tests ported (83%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3500,7 +3500,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 11 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 12 | **Actionable:** 30 | **Status:** partial
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
@@ -3538,7 +3538,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | migrates empty requiredStatusChecks | 751 | pending | — | — | — |
 | migrates azureAutoComplete | 762 | ported | `repo_config.rs` | `azure_auto_complete_migrated_to_platform_automerge` | — |
 | migrates gitLabAutomerge | 791 | ported | `repo_config.rs` | `git_lab_automerge_migrated_to_platform_automerge` | — |
-| migrates dryRun | 820 | pending | — | — | — |
+| migrates dryRun | 820 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` (+ dry_run_legacy_false_disables_dry_run) | — |
 | migrates baseBranches and baseBranch | 835 | ported | `repo_config.rs` | `base_branches_and_base_branch_migrated_to_patterns` | — |
 | logs errors | 844 | pending | — | — | — |
 

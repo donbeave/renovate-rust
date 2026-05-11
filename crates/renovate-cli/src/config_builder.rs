@@ -211,9 +211,9 @@ mod tests {
         );
     }
 
+    // Ported: "migrates dryRun" — config/migration.spec.ts line 820
     #[test]
     fn dry_run_legacy_true_maps_to_full() {
-        // --dry-run (bare) → --dry-run=true via migrateArgs → Full.
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyTrue));
         assert_eq!(
             build(&cli, GlobalConfig::default()).dry_run,
@@ -221,6 +221,7 @@ mod tests {
         );
     }
 
+    // Ported: "migrates dryRun" — config/migration.spec.ts line 820
     #[test]
     fn dry_run_legacy_false_disables_dry_run() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyFalse));
