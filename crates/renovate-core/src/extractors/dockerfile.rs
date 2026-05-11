@@ -849,6 +849,37 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::Scratch));
     }
 
+    // Ported: "extracts images from multi-line ARG statements" — dockerfile/extract.spec.ts line 1088
+    #[test]
+    fn extracts_images_from_multiline_arg_statements() {
+        let content = r#" ARG \
+	# multi-line arg
+   ALPINE_VERSION=alpine:3.15.4
+
+FROM \
+${ALPINE_VERSION} as stage1
+
+ARG   \
+  \
+ # multi-line arg
+ # and multi-line comment
+   nginx_version="nginx:1.18.0-alpine@sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd"
+
+FROM $nginx_version as stage2
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].image, "alpine");
+        assert_eq!(deps[0].tag.as_deref(), Some("3.15.4"));
+        assert_eq!(deps[1].image, "nginx");
+        assert_eq!(deps[1].tag.as_deref(), Some("1.18.0-alpine"));
+        assert_eq!(
+            deps[1].digest.as_deref(),
+            Some("sha256:ca9fac83c6c89a09424279de522214e865e322187b22a1a29b12747a4287b7bd")
+        );
+        assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
+    }
+
     // Ported: "handles FROM with version in ARG default value and quotes" — dockerfile/extract.spec.ts line 1227
     #[test]
     fn from_with_quoted_arg_default_value() {

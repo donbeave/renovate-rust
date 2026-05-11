@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 769 / 1217 actionable tests ported (63%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 770 / 1217 actionable tests ported (63%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -871,7 +871,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 75 | **Ported:** 60 | **Actionable:** 66 | **Status:** partial
+**Total tests:** 75 | **Ported:** 61 | **Actionable:** 66 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -924,7 +924,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles FROM with overwritten ARG value | 1026 | ported | `dockerfile.rs` | `from_with_overwritten_arg_value` | — |
 | handles FROM with multiple ARG values | 1058 | ported | `dockerfile.rs` | `from_with_multiple_arg_values` | — |
 | skips scratch if provided in ARG value | 1079 | ported | `dockerfile.rs` | `scratch_from_arg_value_is_skipped` | — |
-| extracts images from multi-line ARG statements | 1088 | pending | — | — | — |
+| extracts images from multi-line ARG statements | 1088 | ported | `dockerfile.rs` | `extracts_images_from_multiline_arg_statements` | — |
 | ignores parser directives in wrong order | 1131 | ported | `dockerfile.rs` | `parser_directives_in_wrong_order_ignored` | — |
 | handles an alternative escape character | 1152 | pending | — | — | — |
 | handles FROM with version in ARG default value and quotes | 1227 | ported | `dockerfile.rs` | `from_with_quoted_arg_default_value` | — |
