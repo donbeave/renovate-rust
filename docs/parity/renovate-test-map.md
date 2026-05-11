@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 767 / 1217 actionable tests ported (63%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 768 / 1217 actionable tests ported (63%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1128,7 +1128,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/jsonnet-bundler/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/jsonnet-bundler/extract.spec.ts
-**Total tests:** 7 | **Ported:** 6 | **Actionable:** 7 | **Status:** partial
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1137,7 +1137,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for invalid jsonnetfile | 24 | ported | `jsonnet_bundler.rs` | `invalid_json_returns_empty` | — |
 | returns null for jsonnetfile with no dependencies | 30 | ported | `jsonnet_bundler.rs` | `empty_returns_empty` | — |
 | returns null for local dependencies | 36 | ported | `jsonnet_bundler.rs` | `local_deps_returns_empty` | — |
-| returns null for vendored dependencies | 42 | pending | — | — | Requires file-path-based filtering (`vendor/` prefix); Rust extractor has no file path argument |
+| returns null for vendored dependencies | 42 | ported | `jsonnet_bundler.rs` | `vendored_dependencies_return_empty` | — |
 | returns null for dependencies with empty Git source | 48 | ported | `jsonnet_bundler.rs` | `empty_git_source_returns_empty` | — |
 | extracts dependency | 57 | ported | `jsonnet_bundler.rs` | `extracts_github_deps` (+ extracts_main_fixture_two_deps) | — |
 | extracts dependency with custom name | 79 | ported | `jsonnet_bundler.rs` | `extracts_dep_with_optional_name_field_uses_path_name` | — |

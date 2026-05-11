@@ -139,6 +139,15 @@ fn github_repo(remote: &str) -> String {
 
 /// Extract git deps from a `jsonnetfile.json` file.
 pub fn extract(content: &str) -> Vec<JsonnetDep> {
+    extract_with_path(content, "jsonnetfile.json")
+}
+
+/// Extract git deps from a `jsonnetfile.json` file at `path`.
+pub fn extract_with_path(content: &str, path: &str) -> Vec<JsonnetDep> {
+    if path.starts_with("vendor/") || path.contains("/vendor/") {
+        return Vec::new();
+    }
+
     let file: JsonnetFile = match serde_json::from_str(content) {
         Ok(f) => f,
         Err(_) => return Vec::new(),
@@ -239,6 +248,13 @@ mod tests {
     fn local_deps_returns_empty() {
         let content = r#"{"version":1,"dependencies":[{"source":{"local":{"directory":"jsonnet"}},"version":""}]}"#;
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "returns null for vendored dependencies" — jsonnet-bundler/extract.spec.ts line 42
+    #[test]
+    fn vendored_dependencies_return_empty() {
+        assert!(extract_with_path(SAMPLE, "vendor/jsonnetfile.json").is_empty());
+        assert!(extract_with_path(SAMPLE, "components/vendor/jsonnetfile.json").is_empty());
     }
 
     // Ported: "returns null for dependencies with empty Git source" — jsonnet-bundler/extract.spec.ts line 48
