@@ -93,6 +93,21 @@ pub struct FluxKustomizationImageDep {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum FluxDep {
+    Helm(FluxHelmReleaseDep),
+    Git(FluxGitRepositoryDep),
+    Oci(FluxOciRepositoryDep),
+    KustomizationImage(FluxKustomizationImageDep),
+    System(FluxSystemDep),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FluxPackageFile {
+    pub package_file: String,
+    pub deps: Vec<FluxDep>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct HelmRepository {
     name: String,
     namespace: String,
@@ -167,6 +182,69 @@ pub fn extract_kustomizations(content: &str) -> Vec<FluxKustomizationImageDep> {
     content
         .split("\n---")
         .flat_map(extract_kustomization_doc)
+        .collect()
+}
+
+pub fn extract_all_package_files(files: &[(&str, Option<&str>)]) -> Vec<FluxPackageFile> {
+    extract_all_package_files_with_registry_aliases(files, &[])
+}
+
+pub fn extract_all_package_files_with_registry_aliases(
+    files: &[(&str, Option<&str>)],
+    registry_aliases: &[(&str, &str)],
+) -> Vec<FluxPackageFile> {
+    let parsed_files: Vec<_> = files
+        .iter()
+        .filter_map(|(path, content)| {
+            content.map(|content| (*path, content, yaml_documents(content)))
+        })
+        .collect();
+    let repositories: Vec<_> = parsed_files
+        .iter()
+        .flat_map(|(_, _, docs)| docs.iter().filter_map(|doc| extract_helm_repo(doc)))
+        .collect();
+
+    parsed_files
+        .iter()
+        .filter_map(|(path, content, docs)| {
+            let mut deps = Vec::new();
+
+            for doc in docs {
+                if let Some(dep) = extract_helm_release_doc(doc, registry_aliases, &repositories) {
+                    deps.push(FluxDep::Helm(dep));
+                }
+                if let Some(dep) = extract_helm_chart_doc(doc, registry_aliases, &repositories) {
+                    deps.push(FluxDep::Helm(dep));
+                }
+                if let Some(dep) = extract_git_repository_doc(doc) {
+                    deps.push(FluxDep::Git(dep));
+                }
+                if let Some(dep) = extract_oci_repository_doc(doc, registry_aliases) {
+                    deps.push(FluxDep::Oci(dep));
+                }
+            }
+
+            deps.extend(
+                extract_kustomization_doc(content)
+                    .into_iter()
+                    .map(FluxDep::KustomizationImage),
+            );
+
+            if (path.ends_with("gotk-components.yaml") || path.ends_with("gotk-components.yml"))
+                && let Some(dep) = extract(content)
+            {
+                deps.push(FluxDep::System(dep));
+            }
+
+            if deps.is_empty() {
+                None
+            } else {
+                Some(FluxPackageFile {
+                    package_file: (*path).to_owned(),
+                    deps,
+                })
+            }
+        })
         .collect()
 }
 
@@ -1458,6 +1536,94 @@ spec:
         assert!(extract_kustomizations(content).is_empty());
     }
 
+    // Ported: "extracts multiple files" — flux/extract.spec.ts line 1420
+    #[test]
+    fn extract_all_package_files_extracts_multiple_files() {
+        let files = [
+            (
+                "lib/modules/manager/flux/__fixtures__/helmRelease.yaml",
+                Some(HELM_RELEASE),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/helmSource.yaml",
+                Some(HELM_REPOSITORY),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/gitSource.yaml",
+                Some(GIT_REPOSITORY),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/ociSource.yaml",
+                Some(OCI_REPOSITORY),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml",
+                Some(FLUX_SYSTEM_MANIFEST),
+            ),
+        ];
+        let result = extract_all_package_files(&files);
+        assert_eq!(result.len(), 4);
+        assert_eq!(
+            result[0].package_file,
+            "lib/modules/manager/flux/__fixtures__/helmRelease.yaml"
+        );
+        assert!(
+            matches!(&result[0].deps[0], FluxDep::Helm(dep) if dep.registry_urls == vec!["https://bitnami-labs.github.io/sealed-secrets"])
+        );
+        assert!(
+            matches!(&result[1].deps[0], FluxDep::Git(dep) if dep.current_value.as_deref() == Some("v11.35.4"))
+        );
+        assert!(
+            matches!(&result[2].deps[0], FluxDep::Oci(dep) if dep.current_value.as_deref() == Some("v1.8.2"))
+        );
+        assert!(matches!(&result[3].deps[0], FluxDep::System(dep) if dep.version == "v0.24.1"));
+    }
+
+    // Ported: "ignores files that do not exist" — flux/extract.spec.ts line 1535
+    #[test]
+    fn extract_all_package_files_ignores_missing_files() {
+        let files = [("lib/modules/manager/flux/__fixtures__/bogus.yaml", None)];
+        assert!(extract_all_package_files(&files).is_empty());
+    }
+
+    // Ported: "ignores system manifest files without valid Flux version header" — flux/extract.spec.ts line 1542
+    #[test]
+    fn extract_all_package_files_ignores_invalid_system_manifest() {
+        let files = [(
+            "lib/modules/manager/flux/__fixtures__/flux-system-invalid/gotk-components.yaml",
+            Some("not actually a system manifest!"),
+        )];
+        assert!(extract_all_package_files(&files).is_empty());
+    }
+
+    // Ported: "should pick correct package file when using HelmRepository with chartRef" — flux/extract.spec.ts line 1549
+    #[test]
+    fn extract_all_package_files_picks_helm_chart_package_file_for_chart_ref() {
+        let files = [
+            (
+                "lib/modules/manager/flux/__fixtures__/helmChartRefRelease.yaml",
+                Some(HELM_CHART_REF_RELEASE),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/helmChart.yaml",
+                Some(HELM_CHART),
+            ),
+            (
+                "lib/modules/manager/flux/__fixtures__/helmSource.yaml",
+                Some(HELM_REPOSITORY),
+            ),
+        ];
+        let result = extract_all_package_files(&files);
+        assert_eq!(result.len(), 1);
+        assert_eq!(
+            result[0].package_file,
+            "lib/modules/manager/flux/__fixtures__/helmChart.yaml"
+        );
+        assert!(
+            matches!(&result[0].deps[0], FluxDep::Helm(dep) if dep.dep_name == "sealed-secrets" && dep.skip_reason.is_none())
+        );
+    }
+
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
@@ -1480,6 +1646,15 @@ spec:
         namespace: kube-system
       version: "2.0.2"
   interval: 1h0m0s
+"#;
+
+    const FLUX_SYSTEM_MANIFEST: &str = r#"
+# Flux Version: v0.24.1
+# Components: source-controller,kustomize-controller,helm-controller,notification-controller
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system
 "#;
 
     const HELM_REPOSITORY: &str = r#"
