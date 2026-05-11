@@ -404,4 +404,20 @@ helmCharts:
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
     }
+
+    // Ported: "ignores non-Kubernetes empty files" — kustomize/extract.spec.ts line 586
+    #[test]
+    fn ignores_non_kubernetes_empty_files() {
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "does nothing with kustomize empty kustomize files" — kustomize/extract.spec.ts line 590
+    #[test]
+    fn empty_kustomization_returns_empty() {
+        let content = r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+"#;
+        assert!(extract(content).is_empty());
+    }
 }

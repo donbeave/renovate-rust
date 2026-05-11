@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 779 / 1217 actionable tests ported (64%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 781 / 1217 actionable tests ported (64%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1945,7 +1945,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 10 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 44 | **Ported:** 12 | **Actionable:** 39 | **Status:** partial
 
 ### `parseKustomize` (top-level)
 
@@ -2006,8 +2006,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts ssh dependency with a subdir | 462 | pending | — | — | Requires bases[] ssh + subdir |
 | extracts http dependency | 481 | pending | — | — | Requires bases[] http URL parsing |
 | should extract out image versions | 506 | pending | — | — | Requires images[] full coverage |
-| ignores non-Kubernetes empty files | 586 | pending | — | — | Requires kind-filter |
-| does nothing with kustomize empty kustomize files | 590 | pending | — | — | Requires empty-content path |
+| ignores non-Kubernetes empty files | 586 | ported | `kustomize.rs` | `ignores_non_kubernetes_empty_files` | — |
+| does nothing with kustomize empty kustomize files | 590 | ported | `kustomize.rs` | `empty_kustomization_returns_empty` | — |
 | should extract bases resources and components from their respective blocks | 598 | pending | — | — | Requires bases / resources / components block parsing |
 | should extract dependencies when kind is Component | 632 | pending | — | — | Requires Component kind handling |
 
