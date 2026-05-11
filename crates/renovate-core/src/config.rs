@@ -9,6 +9,7 @@
 
 mod platform;
 mod run;
+pub mod secrets;
 
 pub mod file;
 

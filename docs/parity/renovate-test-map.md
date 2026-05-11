@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1055 / 1242 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1068 / 1255 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 41 spec files not yet converted to per-test format (29 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 40 spec files not yet converted to per-test format (28 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,36 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/secrets.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/secrets.spec.ts
+**Total tests:** 13 | **Ported:** 13 | **Actionable:** 13 | **Status:** ported
+
+### `config/secrets › validateConfigSecretsAndVariables(config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works with default config | 14 | ported | `secrets.rs` | `validate_config_secrets_and_variables_works_with_default_config` | — |
+| returns if no secrets/variables | 20 | ported | `secrets.rs` | `validate_config_secrets_and_variables_returns_without_entries` | — |
+| throws for invalid secret name | 24 | ported | `secrets.rs` | `validate_config_secrets_and_variables_rejects_invalid_secret_name` | — |
+| throws for invalid variable name | 32 | ported | `secrets.rs` | `validate_config_secrets_and_variables_rejects_invalid_variable_name` | — |
+| throws for secrets in repositories | 40 | ported | `secrets.rs` | `validate_config_secrets_and_variables_rejects_repository_secrets` | — |
+| throws for variables in repositories | 48 | ported | `secrets.rs` | `validate_config_secrets_and_variables_rejects_repository_variables` | — |
+
+### `config/secrets › applySecretsAndVariablesToConfig(config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces both secrets and variables | 58 | ported | `secrets.rs` | `apply_secrets_and_variables_replaces_both` | — |
+| replaces all secrets and variables | 75 | ported | `secrets.rs` | `apply_secrets_and_variables_replaces_all` | — |
+| handles a mix of space characters around the curly braces | 94 | ported | `secrets.rs` | `apply_secrets_and_variables_handles_spaces_around_braces` | — |
+| does not handle non-space characters around the curly braces | 111 | ported | `secrets.rs` | `apply_secrets_and_variables_does_not_handle_non_space_characters` | — |
+| preserves secrets and variables if delete flags are false | 128 | ported | `secrets.rs` | `apply_secrets_and_variables_preserves_sources_when_delete_flags_are_false` | — |
+| throws if secret is missing | 151 | ported | `secrets.rs` | `apply_secrets_and_variables_errors_if_secret_missing` | — |
+| throws if variable is missing | 160 | ported | `secrets.rs` | `apply_secrets_and_variables_errors_if_variable_missing` | — |
+
+---
+
 ## `lib/config/inherit.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/inherit.spec.ts
@@ -2868,7 +2898,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/config/migration.spec.ts` | 30 | — | 0 | pending |
 | `lib/config/migrate-validate.spec.ts` | 5 | — | 0 | pending |
 | `lib/config/massage.spec.ts` | 7 | — | 0 | pending |
-| `lib/config/secrets.spec.ts` | 11 | — | 0 | pending |
+<!-- config/secrets.spec.ts converted to per-test format above -->
 <!-- config/inherit.spec.ts converted to per-test format above -->
 | `lib/config/index.spec.ts` | 12 | — | 0 | pending |
 | `lib/config/decrypt.spec.ts` | 12 | — | 0 | not-applicable |
