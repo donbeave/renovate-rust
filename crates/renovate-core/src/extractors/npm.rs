@@ -104,6 +104,29 @@ pub struct NpmLock {
     pub lockfile_version: Option<u64>,
 }
 
+/// Parsed Yarn lock metadata used to choose the expected Yarn version range.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct YarnLock {
+    pub is_yarn1: bool,
+    pub lockfile_version: Option<u64>,
+}
+
+/// Yarn catalog dependency extracted from `.yarnrc.yml`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct YarnCatalogDep {
+    pub name: String,
+    pub current_value: String,
+    pub dep_type: String,
+}
+
+/// Yarn catalog extraction result.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct YarnCatalogExtraction {
+    pub deps: Vec<YarnCatalogDep>,
+    pub yarn_lock: Option<String>,
+    pub has_package_manager: bool,
+}
+
 /// Errors from parsing a `package.json`.
 #[derive(Debug, Error)]
 pub enum NpmExtractError {
@@ -303,6 +326,61 @@ pub fn parse_npm_lock(content: Option<&str>) -> NpmLock {
     NpmLock {
         locked_versions,
         lockfile_version,
+    }
+}
+
+/// Return the Yarn version range Renovate infers from lockfile metadata.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/yarn.ts`
+/// `getYarnVersionFromLock`.
+pub fn get_yarn_version_from_lock(lock: &YarnLock) -> &'static str {
+    if lock.is_yarn1 {
+        return "^1.22.18";
+    }
+
+    match lock.lockfile_version {
+        Some(version) if version >= 12 => ">=4.0.0",
+        Some(version) if version >= 10 => "^4.0.0",
+        Some(version) if version >= 8 => "^3.0.0",
+        Some(version) if version >= 6 => "^2.2.0",
+        _ => "^2.0.0",
+    }
+}
+
+/// Extract Yarn catalog dependencies from parsed `.yarnrc.yml` catalog blocks.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/yarn.ts`
+/// `extractYarnCatalogs`.
+pub fn extract_yarn_catalogs(
+    default_catalog: &BTreeMap<String, String>,
+    named_catalogs: &BTreeMap<String, BTreeMap<String, String>>,
+    yarn_lock: Option<&str>,
+    has_package_manager: bool,
+) -> YarnCatalogExtraction {
+    let mut deps = Vec::new();
+
+    for (name, version) in default_catalog {
+        deps.push(YarnCatalogDep {
+            name: name.clone(),
+            current_value: version.clone(),
+            dep_type: "yarn.catalog.default".to_owned(),
+        });
+    }
+
+    for (catalog_name, catalog) in named_catalogs {
+        for (name, version) in catalog {
+            deps.push(YarnCatalogDep {
+                name: name.clone(),
+                current_value: version.clone(),
+                dep_type: format!("yarn.catalog.{catalog_name}"),
+            });
+        }
+    }
+
+    YarnCatalogExtraction {
+        deps,
+        yarn_lock: yarn_lock.map(str::to_owned),
+        has_package_manager,
     }
 }
 
@@ -629,6 +707,102 @@ mod tests {
     fn npm_lock_returns_empty_on_read_error() {
         let lock = parse_npm_lock(None);
         assert!(lock.locked_versions.is_empty());
+    }
+
+    // Ported: "getYarnVersionFromLock" — npm/extract/yarn.spec.ts line 58
+    #[test]
+    fn yarn_version_from_lock_matches_lockfile_version() {
+        assert_eq!(
+            get_yarn_version_from_lock(&YarnLock {
+                is_yarn1: true,
+                lockfile_version: None,
+            }),
+            "^1.22.18"
+        );
+        assert_eq!(
+            get_yarn_version_from_lock(&YarnLock {
+                is_yarn1: false,
+                lockfile_version: Some(12),
+            }),
+            ">=4.0.0"
+        );
+        assert_eq!(
+            get_yarn_version_from_lock(&YarnLock {
+                is_yarn1: false,
+                lockfile_version: Some(10),
+            }),
+            "^4.0.0"
+        );
+        assert_eq!(
+            get_yarn_version_from_lock(&YarnLock {
+                is_yarn1: false,
+                lockfile_version: Some(8),
+            }),
+            "^3.0.0"
+        );
+        assert_eq!(
+            get_yarn_version_from_lock(&YarnLock {
+                is_yarn1: false,
+                lockfile_version: Some(6),
+            }),
+            "^2.2.0"
+        );
+        assert_eq!(
+            get_yarn_version_from_lock(&YarnLock {
+                is_yarn1: false,
+                lockfile_version: Some(3),
+            }),
+            "^2.0.0"
+        );
+    }
+
+    // Ported: "handles empty catalog entries" — npm/extract/yarn.spec.ts line 78
+    #[test]
+    fn yarn_catalogs_handles_empty_catalog_entries() {
+        let extraction = extract_yarn_catalogs(&BTreeMap::new(), &BTreeMap::new(), None, false);
+        assert!(extraction.deps.is_empty());
+    }
+
+    // Ported: "parses valid .yarnrc.yml file" — npm/extract/yarn.spec.ts line 86
+    #[test]
+    fn yarn_catalogs_parses_valid_yarnrc_yml() {
+        let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.0".to_owned())]);
+        let named_catalogs = BTreeMap::from([(
+            "react17".to_owned(),
+            BTreeMap::from([("react".to_owned(), "17.0.2".to_owned())]),
+        )]);
+
+        let extraction =
+            extract_yarn_catalogs(&default_catalog, &named_catalogs, Some("yarn.lock"), true);
+
+        assert_eq!(
+            extraction.deps,
+            vec![
+                YarnCatalogDep {
+                    name: "react".to_owned(),
+                    current_value: "18.3.0".to_owned(),
+                    dep_type: "yarn.catalog.default".to_owned(),
+                },
+                YarnCatalogDep {
+                    name: "react".to_owned(),
+                    current_value: "17.0.2".to_owned(),
+                    dep_type: "yarn.catalog.react17".to_owned(),
+                },
+            ]
+        );
+        assert_eq!(extraction.yarn_lock.as_deref(), Some("yarn.lock"));
+        assert!(extraction.has_package_manager);
+    }
+
+    // Ported: "finds relevant lockfile" — npm/extract/yarn.spec.ts line 130
+    #[test]
+    fn yarn_catalogs_finds_relevant_lockfile() {
+        let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.1".to_owned())]);
+        let extraction =
+            extract_yarn_catalogs(&default_catalog, &BTreeMap::new(), Some("yarn.lock"), false);
+
+        assert_eq!(extraction.yarn_lock.as_deref(), Some("yarn.lock"));
+        assert!(!extraction.has_package_manager);
     }
 
     #[test]

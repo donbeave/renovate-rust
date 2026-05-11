@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1100 / 1287 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1104 / 1296 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 33 spec files not yet converted to per-test format (24 pending, 8 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 32 spec files not yet converted to per-test format (24 pending, 7 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2769,6 +2769,37 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/npm/extract/yarn.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/yarn.spec.ts
+**Total tests:** 9 | **Ported:** 4 | **Actionable:** 9 | **Status:** partial
+
+### `modules/manager/npm/extract/yarn › .getYarnLock()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty if exception parsing | 10 | pending | — | — | Requires Yarn lock parser |
+| extracts yarn 1 | 17 | pending | — | — | Requires Yarn v1 lock parser fixtures |
+| extracts yarn 2 | 27 | pending | — | — | Requires Yarn v2 lock parser fixtures |
+| extracts yarn 2 cache version | 37 | pending | — | — | Requires Yarn v2 cache-version parser fixtures |
+| ignores individual invalid entries | 47 | pending | — | — | Requires Yarn lock parser invalid-entry filtering |
+
+### `modules/manager/npm/extract/yarn`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getYarnVersionFromLock | 58 | ported | `npm.rs` | `yarn_version_from_lock_matches_lockfile_version` | — |
+
+### `modules/manager/npm/extract/yarn › .extractYarnCatalogs()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty catalog entries | 78 | ported | `npm.rs` | `yarn_catalogs_handles_empty_catalog_entries` | — |
+| parses valid .yarnrc.yml file | 86 | ported | `npm.rs` | `yarn_catalogs_parses_valid_yarnrc_yml` | — |
+| finds relevant lockfile | 130 | ported | `npm.rs` | `yarn_catalogs_finds_relevant_lockfile` | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -2855,7 +2886,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/modules/manager/npm/extract/index.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 <!-- npm/extract/npm.spec.ts converted to per-test format above -->
 | `lib/modules/manager/npm/extract/pnpm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
-| `lib/modules/manager/npm/extract/yarn.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
+<!-- npm/extract/yarn.spec.ts converted to per-test format above -->
 <!-- npm/extract/yarnrc.spec.ts converted to per-test format above -->
 <!-- ruby-version/extract.spec.ts converted to per-test format above -->
 <!-- nvm/extract.spec.ts, terraform-version/extract.spec.ts, terragrunt-version/extract.spec.ts also covered in per-test sections above (all use version_file.rs) -->
