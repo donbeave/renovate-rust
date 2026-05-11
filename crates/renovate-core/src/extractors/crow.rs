@@ -23,6 +23,17 @@
 
 use crate::extractors::dockerfile::{DockerfileExtractedDep, classify_image_ref};
 
+/// Docker dep metadata after applying Crow registry alias config.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CrowDockerDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub replace_string: String,
+    pub auto_replace_string_template: String,
+}
+
 /// Extract Docker image deps from a Crow CI YAML file.
 ///
 /// Returns one dep for every `image:` key found in pipeline/steps/clone/services.
@@ -61,6 +72,73 @@ pub fn extract(content: &str) -> Vec<DockerfileExtractedDep> {
     }
 
     out
+}
+
+/// Extract Docker deps and apply Renovate-style registry aliases.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<CrowDockerDep> {
+    extract(content)
+        .into_iter()
+        .map(|dep| crow_docker_dep(dep, registry_aliases))
+        .collect()
+}
+
+fn crow_docker_dep(
+    dep: DockerfileExtractedDep,
+    registry_aliases: &[(&str, &str)],
+) -> CrowDockerDep {
+    let dep_name = dep.image;
+    let package_name = apply_registry_alias(&dep_name, registry_aliases);
+    let alias_applied = package_name != dep_name;
+    let replace_string = image_ref(&dep_name, dep.tag.as_deref(), dep.digest.as_deref());
+    let auto_replace_string_template = if alias_applied {
+        format!(
+            "{dep_name}:{{{{#if newValue}}}}{{{{newValue}}}}{{{{/if}}}}{{{{#if newDigest}}}}@{{{{newDigest}}}}{{{{/if}}}}"
+        )
+    } else {
+        "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+            .to_owned()
+    };
+
+    CrowDockerDep {
+        dep_name,
+        package_name,
+        current_value: dep.tag,
+        current_digest: dep.digest,
+        replace_string,
+        auto_replace_string_template,
+    }
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
+}
+
+fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
+    let mut value = image.to_owned();
+    if let Some(tag) = tag {
+        value.push(':');
+        value.push_str(tag);
+    }
+    if let Some(digest) = digest {
+        value.push('@');
+        value.push_str(digest);
+    }
+    value
 }
 
 #[cfg(test)]
@@ -193,6 +271,76 @@ pipeline:
         assert_eq!(deps[0].image, "quay.io/something/redis");
         assert_eq!(deps[0].tag.as_deref(), Some("1.0.0"));
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts image and replaces registry" — crow/extract.spec.ts line 164
+    #[test]
+    fn extracts_image_and_replaces_registry() {
+        let content = r#"
+pipeline:
+  nginx:
+    image: quay.io/nginx:0.0.1
+"#;
+        let deps =
+            extract_with_registry_aliases(content, &[("quay.io", "my-quay-mirror.registry.com")]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/nginx");
+        assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.0.1"));
+        assert_eq!(deps[0].current_digest, None);
+        assert_eq!(deps[0].replace_string, "quay.io/nginx:0.0.1");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+    }
+
+    // Ported: "extracts image but no replacement" — crow/extract.spec.ts line 194
+    #[test]
+    fn extracts_image_without_registry_replacement() {
+        let content = r#"
+pipeline:
+  nginx:
+    image: quay.io/nginx:0.0.1
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[("index.docker.io", "my-docker-mirror.registry.com")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/nginx");
+        assert_eq!(deps[0].package_name, "quay.io/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.0.1"));
+        assert_eq!(deps[0].replace_string, "quay.io/nginx:0.0.1");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+    }
+
+    // Ported: "extracts image and no double replacement" — crow/extract.spec.ts line 224
+    #[test]
+    fn extracts_image_without_double_registry_replacement() {
+        let content = r#"
+pipeline:
+  nginx:
+    image: quay.io/nginx:0.0.1
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[
+                ("quay.io", "my-quay-mirror.registry.com"),
+                ("my-quay-mirror.registry.com", "quay.io"),
+            ],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "quay.io/nginx");
+        assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.0.1"));
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "quay.io/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
     }
 
     // Ported: "should parse multiple sources of dependencies together" — crow/extract.spec.ts line 281
