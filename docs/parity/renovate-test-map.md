@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1431 / 1650 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1433 / 1650 actionable tests ported (87%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 16 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 18 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2216,11 +2216,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes nixpkgs but using indirect type and path locked type that cannot be updated | 524 | pending | — | — | Requires indirect+path-type skip-reason |
 | includes flake from GitHub Enterprise | 553 | ported | `nix.rs` | `includes_github_enterprise_input` | — |
 | includes flake with tarball type | 649 | ported | `nix.rs` | `includes_tarball_input_with_archive_url` | — |
-| uri decode gitlab subgroup | 750 | pending | — | — | Requires URI-decode for gitlab subgroup |
+| uri decode gitlab subgroup | 750 | ported | `nix.rs` | `decodes_gitlab_subgroup_owner` | — |
 | includes flake with only tarball type | 790 | pending | — | — | Requires tarball-only handling |
 | includes flake with nixpkgs-lib as tarball type | 818 | pending | — | — | Requires nixpkgs-lib tarball detection |
 | includes flake with nixpkgs channel as tarball type | 897 | ported | `nix.rs` | `includes_nixpkgs_channel_tarball_input` | — |
-| finds currentDigest correctly when input sha is pinned | 937 | pending | — | — | Requires currentDigest extraction |
+| finds currentDigest correctly when input sha is pinned | 937 | ported | `nix.rs` | `extracts_current_digest_from_original_rev` | — |
 | does not duplicate nixpkgs dependency | 983 | pending | — | — | Requires dedup logic |
 | returns null when flake.lock file cannot be read | 1028 | pending | — | — | Requires flake.lock read-failure path |
 | returns null when flake.nix file cannot be read | 1033 | pending | — | — | Requires flake.nix read-failure path |

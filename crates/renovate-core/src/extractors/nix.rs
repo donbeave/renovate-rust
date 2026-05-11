@@ -257,7 +257,7 @@ fn build_package_name(locked: &FlakeLocked, original: &FlakeOriginal) -> Option<
         }
         FlakeInputType::Gitlab => {
             let host = original.host.as_deref().unwrap_or("gitlab.com");
-            let owner = original.owner.as_deref()?;
+            let owner = decode_percent_slashes(original.owner.as_deref()?);
             let repo = original.repo.as_deref()?;
             Some(format!("https://{host}/{owner}/{repo}"))
         }
@@ -293,6 +293,10 @@ fn tarball_channel_ref(original: &FlakeOriginal) -> Option<String> {
     } else {
         None
     }
+}
+
+fn decode_percent_slashes(value: &str) -> String {
+    value.replace("%2F", "/").replace("%2f", "/")
 }
 
 #[cfg(test)]
@@ -814,6 +818,95 @@ mod tests {
             Some("https://git.clan.lol/clan/data-mesher")
         );
         assert_eq!(deps[0].input_type, FlakeInputType::Tarball);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "uri decode gitlab subgroup" — nix/extract.spec.ts line 750
+    #[test]
+    fn decodes_gitlab_subgroup_owner() {
+        let content = r#"{
+  "nodes": {
+    "subgroup-project": {
+      "locked": {
+        "lastModified": 1739792862,
+        "narHash": "sha256-n0MrSIZZknq2OqOYgNS0iMp2yVRekpBFGhrhsT7aXGg=",
+        "owner": "group%2Fsub-group",
+        "repo": "subgroup-project",
+        "rev": "24b560624f154c9e962d146217b2a964faaf2055",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "group%2Fsub-group",
+        "repo": "subgroup-project",
+        "type": "gitlab"
+      }
+    },
+    "root": {
+      "inputs": {
+        "subgroup-project": "subgroup-project"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "subgroup-project");
+        assert_eq!(
+            deps[0].locked_rev,
+            "24b560624f154c9e962d146217b2a964faaf2055"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://gitlab.com/group/sub-group/subgroup-project")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Gitlab);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "finds currentDigest correctly when input sha is pinned" — nix/extract.spec.ts line 937
+    #[test]
+    fn extracts_current_digest_from_original_rev() {
+        let content = r#"{
+  "nodes": {
+    "disko": {
+      "locked": {
+        "lastModified": 1744145203,
+        "narHash": "sha256-I2oILRiJ6G+BOSjY+0dGrTPe080L3pbKpc+gCV3Nmyk=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "disko": "disko"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "disko");
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("76c0a6dba345490508f36c1aa3c7ba5b6b460989")
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/nix-community/disko")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Github);
         assert!(deps[0].skip_reason.is_none());
     }
 
