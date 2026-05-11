@@ -296,6 +296,22 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
     }
 
+    // Ported: "skips partial placeholder in version string" — ant/extract.spec.ts line 522
+    #[test]
+    fn partial_placeholder_version_is_skipped() {
+        let content = r#"
+<project>
+  <property name="base.version" value="1.7"/>
+  <artifact:dependencies>
+    <dependency groupId="org.slf4j" artifactId="slf4j-api" version="${base.version}.36" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "org.slf4j:slf4j-api");
+        assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
+    }
+
     // Ported: "defaults depType to compile when no scope is set" — ant/extract.spec.ts line 68
     #[test]
     fn defaults_dep_type_to_compile_without_scope() {
