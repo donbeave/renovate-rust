@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1394 / 1653 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1395 / 1653 actionable tests ported (84%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2508,7 +2508,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 24 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 25 | **Actionable:** 34 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2521,7 +2521,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | handles case with no dependencies | 66 | ported | `poetry.rs` | `poetry_section_with_no_deps_returns_empty` | — |
 | handles multiple constraint dependencies | 71 | ported | `poetry.rs` | `multiple_constraint_dependency_is_skipped` | — |
 | extracts build-system.requires dependencies | 77 | ported | `poetry.rs` | `extracts_build_system_requires` | — |
-| can parse TOML v1 heterogeneous arrays | 112 | pending | — | — | Requires TOML v1 heterogeneous-array tolerance |
+| can parse TOML v1 heterogeneous arrays | 112 | ported | `poetry.rs` | `toml_v1_heterogeneous_arrays_are_tolerated` | — |
 | extracts mixed versioning types | 118 | ported | `poetry.rs` | `name_normalized_per_pep503` | — |
 | extracts dependencies from dependency groups | 160 | ported | `poetry.rs` | `extracts_group_dependencies` (+ extracts_dev_dependencies) | — |
 | resolves lockedVersions from the lockfile | 197 | pending | — | — | Requires poetry.lock parsing |

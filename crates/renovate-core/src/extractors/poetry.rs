@@ -1070,6 +1070,42 @@ requires = ["poetry>=1.1.2", "setuptools", "poetry-dynamic-versioning"]
         }));
     }
 
+    // Ported: "can parse TOML v1 heterogeneous arrays" — poetry/extract.spec.ts line 112
+    #[test]
+    fn toml_v1_heterogeneous_arrays_are_tolerated() {
+        let content = r#"
+[tool.poetry]
+name = "example 12"
+include = [
+  "README.md",
+  { path = "tests", format = "sdist" }
+]
+exclude = [
+  "afile",
+  { path = "adir", format = ["wheel"] }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+dep1 = "0.0.0"
+dep2 = "^0.6.0"
+"#;
+        let deps = extract_ok(content);
+
+        assert_eq!(deps.len(), 3);
+        assert!(deps.iter().any(|dep| {
+            dep.name == "python" && dep.skip_reason == Some(PoetrySkipReason::PythonVersion)
+        }));
+        assert!(
+            deps.iter()
+                .any(|dep| dep.name == "dep1" && dep.current_value == "0.0.0")
+        );
+        assert!(
+            deps.iter()
+                .any(|dep| dep.name == "dep2" && dep.current_value == "^0.6.0")
+        );
+    }
+
     // ── Empty / no poetry section ─────────────────────────────────────────────
 
     // Ported: "returns null for parsed file without poetry section" — poetry/extract.spec.ts line 47
