@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 935 / 1217 actionable tests ported (77%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 937 / 1217 actionable tests ported (77%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1880,7 +1880,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 25 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 27 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1929,7 +1929,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts scope from 4-part coords attribute | 791 | ported | `ant.rs` | `four_part_coords_with_scope_at_end` | — |
 | ignores coords with fewer than 3 parts | 821 | ported | `ant.rs` | `coords_with_fewer_than_3_parts_skipped` | — |
 | ignores coords with empty groupId | 840 | ported | `ant.rs` | `coords_with_empty_groupid_skipped` | — |
-| resolves property references in coords version | 859 | pending | — | — | Requires coords + property resolution |
+| resolves property references in coords version | 859 | ported | `ant.rs` | `resolves_property_references_in_coords_version` | — |
 | marks coords dependency with unresolvable property | 890 | ported | `ant.rs` | `coords_with_unresolvable_property_is_skipped` | — |
 | treats last part as version when it is not a known scope | 919 | ported | `ant.rs` | `four_part_coords_last_segment_is_version_when_not_a_scope` | — |
 | collects registry URLs from remoteRepository elements | 949 | ported | `ant.rs` | `remote_repository_collected` | — |
@@ -1939,7 +1939,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles absolute settingsFile path | 1089 | pending | — | — | Requires absolute settingsFile path |
 | logs debug when settingsFile cannot be read | 1127 | pending | — | — | Requires settingsFile read-failure tolerance |
 | does not pass registries to dependencies outside the block | 1155 | pending | — | — | Requires registry-block scoping |
-| handles chain referencing undefined property | 1191 | pending | — | — | Requires chained-undefined-property tolerance |
+| handles chain referencing undefined property | 1191 | ported | `ant.rs` | `chain_referencing_undefined_property_is_skipped` | — |
 
 ---
 

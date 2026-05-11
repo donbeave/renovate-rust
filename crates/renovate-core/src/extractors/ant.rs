@@ -358,7 +358,11 @@ fn resolve_property_placeholders(
             return Ok(out);
         };
         let property_name = &after_start[..end];
-        out.push_str(&resolve_property(property_name, properties, seen)?);
+        match resolve_property(property_name, properties, seen) {
+            Ok(resolved) => out.push_str(&resolved),
+            Err(AntSkipReason::PropertyRef) => return Err(AntSkipReason::RecursivePropertyRef),
+            Err(skip_reason) => return Err(skip_reason),
+        }
         rest = &after_start[end + 1..];
     }
     out.push_str(rest);
@@ -710,6 +714,27 @@ mod tests {
         assert_eq!(deps[0].dep_type, "test");
     }
 
+    // Ported: "resolves property references in coords version" — ant/extract.spec.ts line 859
+    #[test]
+    fn resolves_property_references_in_coords_version() {
+        let content = r#"
+<project>
+  <property name="junit.version" value="4.13.2" />
+  <artifact:dependencies>
+    <dependency coords="junit:junit:${junit.version}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].current_value, "4.13.2");
+        assert_eq!(
+            deps[0].shared_variable_name.as_deref(),
+            Some("junit.version")
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "ignores coords with fewer than 3 parts" — ant/extract.spec.ts line 821
     #[test]
     fn coords_with_fewer_than_3_parts_skipped() {
@@ -766,5 +791,24 @@ mod tests {
         assert_eq!(deps[0].dep_name, "org.example:lib");
         assert_eq!(deps[0].current_value, "1.0.0");
         assert_eq!(deps[0].dep_type, "compile");
+    }
+
+    // Ported: "handles chain referencing undefined property" — ant/extract.spec.ts line 1191
+    #[test]
+    fn chain_referencing_undefined_property_is_skipped() {
+        let content = r#"
+<project>
+  <property name="a" value="${nonexistent}"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="${a}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(AntSkipReason::RecursivePropertyRef)
+        );
     }
 }
