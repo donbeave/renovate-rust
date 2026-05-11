@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1291 / 1472 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1291 / 1545 actionable tests ported (84%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 2 spec files not yet converted to per-test format (2 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, and validation — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 1 spec file not yet converted to per-test format (1 pending, 0 partial, 0 not-applicable). It is a non-extract validation spec that needs a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -4119,12 +4119,107 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/util/package-rules/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
+**Total tests:** 73 | **Ported:** 0 | **Actionable:** 73 | **Status:** pending
+
+### `util/package-rules/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| applies | 38 | pending | — | — | — |
+| applies both rules for a | 71 | pending | — | — | — |
+| applies both rules for b | 81 | pending | — | — | — |
+| applies the second rule | 91 | pending | — | — | — |
+| applies matchPackageNames | 101 | pending | — | — | — |
+| applies the second second rule | 109 | pending | — | — | — |
+| excludes package name | 118 | pending | — | — | — |
+| excludes package pattern | 127 | pending | — | — | — |
+| ignores patterns if lock file maintenance | 136 | pending | — | — | — |
+| do apply rule with matchPackageName | 152 | pending | — | — | — |
+| sets skipReason=package-rules if enabled=false | 169 | pending | — | — | — |
+| unsets skipReason=package-rules if enabled=true | 184 | pending | — | — | — |
+| does not set skipReason=package-rules if the last packageRule has force.enabled=true | 202 | pending | — | — | — |
+| does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false) | 223 | pending | — | — | — |
+| does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false) | 245 | pending | — | — | — |
+| sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false) | 267 | pending | — | — | — |
+| sets skipReason=package-rules if the last packageRule has force.enabled=false | 292 | pending | — | — | — |
+| skips skipReason=package-rules if enabled=true | 312 | pending | — | — | — |
+| matches anything if missing inclusive rules | 326 | pending | — | — | — |
+| supports inclusive or | 348 | pending | — | — | — |
+| filters requested depType | 370 | pending | — | — | — |
+| filters from list of requested depTypes | 389 | pending | — | — | — |
+| returns false if no depTypes | 408 | pending | — | — | — |
+| filters managers with matching manager | 426 | pending | — | — | — |
+| filters managers with non-matching manager | 446 | pending | — | — | — |
+| filters categories with matching category | 468 | pending | — | — | — |
+| filters categories with non-matching category | 489 | pending | — | — | — |
+| filters categories with undefined category | 510 | pending | — | — | — |
+| filters datasources with matching datasource | 529 | pending | — | — | — |
+| filters branches with matching branch | 554 | pending | — | — | — |
+| filters datasources with non-matching datasource | 573 | pending | — | — | — |
+| filters branches with non-matching branch | 591 | pending | — | — | — |
+| filters branches with matching branch regex | 609 | pending | — | — | — |
+| filters branches with non-matching branch regex | 628 | pending | — | — | — |
+| filters updateType | 647 | pending | — | — | — |
+| matches matchSourceUrls with glob | 672 | pending | — | — | — |
+| non-matches matchSourceUrls with globs | 695 | pending | — | — | — |
+| handles matchSourceUrls when missing sourceUrl | 718 | pending | — | — | — |
+| matches matchSourceUrls | 740 | pending | — | — | — |
+| non-matches matchSourceUrls | 763 | pending | — | — | — |
+| handles matchRegistryUrls when missing registryUrls | 786 | pending | — | — | — |
+| matches matchRegistryUrls | 808 | pending | — | — | — |
+| non-matches matchRegistryUrls | 831 | pending | — | — | — |
+
+### `util/package-rules/index › matchConfidence`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches matchConfidence | 865 | pending | — | — | — |
+| non-matches matchConfidence | 884 | pending | — | — | — |
+| does not match matchConfidence when there is no mergeConfidenceLevel | 903 | pending | — | — | — |
+| throws when unauthenticated | 922 | pending | — | — | — |
+
+### `util/package-rules/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| filters naked depType | 950 | pending | — | — | — |
+| filters out unrequested depType | 968 | pending | — | — | — |
+| checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap | 987 | pending | — | — | — |
+| checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap | 1026 | pending | — | — | — |
+| checks if matchCurrentVersion selector is a version and matches if currentValue is a range | 1049 | pending | — | — | — |
+| checks if matchCurrentVersion selector works with static values | 1079 | pending | — | — | — |
+| checks if matchCurrentVersion selector works with regular expressions | 1101 | pending | — | — | — |
+| checks if matchCurrentVersion selector works with negated regular expressions | 1132 | pending | — | — | — |
+| matches packageFiles | 1163 | pending | — | — | — |
+| matches lock files | 1187 | pending | — | — | — |
+| matches paths | 1203 | pending | — | — | — |
+| empty rules | 1233 | pending | — | — | — |
+| creates groupSlug if necessary | 1242 | pending | — | — | — |
+| matches matchSourceUrls with patterns (case-insensitive) | 1261 | pending | — | — | — |
+| matches matchSourceUrls(case-insensitive) | 1284 | pending | — | — | — |
+| needs language to match | 1307 | pending | — | — | — |
+| needs baseBranch to match | 1325 | pending | — | — | — |
+| needs manager to match | 1343 | pending | — | — | — |
+| matches matchDepNames(depName) | 1361 | pending | — | — | — |
+| matches if there are no matchers | 1386 | pending | — | — | — |
+| overrides | 1404 | pending | — | — | — |
+| overrides with templates | 1447 | pending | — | — | — |
+| propagates fetchChangeLogs from matching packageRule | 1464 | pending | — | — | — |
+| does not set fetchChangeLogs when packageRule does not match | 1479 | pending | — | — | — |
+| compiles sourceUrl with template helper functions | 1494 | pending | — | — | — |
+| compiles sourceUrl with template variables | 1513 | pending | — | — | — |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
 <!-- util/string-match.spec.ts converted to per-test format above -->
-| `lib/util/package-rules/index.spec.ts` | 73 | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
+<!-- util/package-rules/index.spec.ts converted to per-test format above -->
 <!-- util/package-rules/managers.spec.ts converted to per-test format above -->
 <!-- util/package-rules/dep-names.spec.ts converted to per-test format above -->
 <!-- util/package-rules/current-value.spec.ts converted to per-test format above -->
