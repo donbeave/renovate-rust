@@ -24,14 +24,25 @@ pub struct GitlabIncludeDep {
     pub project: String,
     /// Git ref (tag or branch) used as version (e.g. `"v2.1.0"`).
     pub ref_value: String,
+    /// Optional GitLab registry URL for self-hosted endpoints.
+    pub registry_urls: Vec<String>,
 }
 
 /// Extract include project references from a GitLab CI YAML file.
 pub fn extract(content: &str) -> Vec<GitlabIncludeDep> {
+    extract_with_endpoint(content, None)
+}
+
+/// Extract include project references using an optional configured GitLab API endpoint.
+pub fn extract_with_endpoint(content: &str, endpoint: Option<&str>) -> Vec<GitlabIncludeDep> {
     let mut out = Vec::new();
     let mut in_include = false;
     let mut cur_project: Option<String> = None;
     let mut cur_ref: Option<String> = None;
+    let registry_urls = endpoint
+        .and_then(normalize_gitlab_endpoint)
+        .map(|url| vec![url])
+        .unwrap_or_default();
 
     for raw in content.lines() {
         let line = raw.split(" #").next().unwrap_or(raw).trim_end();
@@ -44,14 +55,14 @@ pub fn extract(content: &str) -> Vec<GitlabIncludeDep> {
 
         // `include:` at any top-level indent.
         if trimmed == "include:" {
-            flush(&mut out, &mut cur_project, &mut cur_ref);
+            flush(&mut out, &mut cur_project, &mut cur_ref, &registry_urls);
             in_include = true;
             continue;
         }
 
         // Leaving the include block when we see a top-level key.
         if indent == 0 && !trimmed.starts_with('-') && in_include {
-            flush(&mut out, &mut cur_project, &mut cur_ref);
+            flush(&mut out, &mut cur_project, &mut cur_ref, &registry_urls);
             in_include = false;
             continue;
         }
@@ -62,7 +73,7 @@ pub fn extract(content: &str) -> Vec<GitlabIncludeDep> {
 
         // New list item: `- project: X` or `- ref: Y`
         if trimmed.starts_with("- ") {
-            flush(&mut out, &mut cur_project, &mut cur_ref);
+            flush(&mut out, &mut cur_project, &mut cur_ref, &registry_urls);
             let rest = trimmed.strip_prefix("- ").unwrap_or("");
             if let Some(val) = strip_key(rest, "project") {
                 cur_project = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
@@ -80,7 +91,7 @@ pub fn extract(content: &str) -> Vec<GitlabIncludeDep> {
         }
     }
 
-    flush(&mut out, &mut cur_project, &mut cur_ref);
+    flush(&mut out, &mut cur_project, &mut cur_ref, &registry_urls);
     out
 }
 
@@ -88,6 +99,7 @@ fn flush(
     out: &mut Vec<GitlabIncludeDep>,
     project: &mut Option<String>,
     ref_val: &mut Option<String>,
+    registry_urls: &[String],
 ) {
     if let (Some(p), Some(r)) = (project.take(), ref_val.take())
         && !p.is_empty()
@@ -96,6 +108,7 @@ fn flush(
         out.push(GitlabIncludeDep {
             project: p,
             ref_value: r,
+            registry_urls: registry_urls.to_vec(),
         });
     }
     project.take();
@@ -109,6 +122,17 @@ fn leading_spaces(s: &str) -> usize {
 fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
     let prefix = format!("{key}:");
     line.strip_prefix(prefix.as_str())
+}
+
+fn normalize_gitlab_endpoint(endpoint: &str) -> Option<String> {
+    let mut endpoint = endpoint.trim().trim_end_matches('/').to_owned();
+    if endpoint.is_empty() {
+        return None;
+    }
+    if let Some(stripped) = endpoint.strip_suffix("/api/v4") {
+        endpoint = stripped.to_owned();
+    }
+    Some(endpoint)
 }
 
 #[cfg(test)]
@@ -257,5 +281,22 @@ include:
 ";
         let deps = extract(content);
         assert!(deps.is_empty());
+    }
+
+    // Ported: "normalizes configured endpoints" — gitlabci-include/extract.spec.ts line 60
+    #[test]
+    fn normalizes_configured_endpoints() {
+        let content = "\
+include:
+  - project: mikebryant/include-source-example
+    file: /template.yaml
+    ref: 1.0.0
+";
+
+        for endpoint in ["http://gitlab.test/api/v4", "http://gitlab.test/api/v4/"] {
+            let deps = extract_with_endpoint(content, Some(endpoint));
+            assert_eq!(deps.len(), 1);
+            assert_eq!(deps[0].registry_urls, vec!["http://gitlab.test"]);
+        }
     }
 }

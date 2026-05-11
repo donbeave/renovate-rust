@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 751 / 1217 actionable tests ported (62%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 752 / 1217 actionable tests ported (62%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1035,7 +1035,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gitlabci-include/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci-include/extract.spec.ts
-**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1047,7 +1047,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts multiple include blocks | 28 | ported | `gitlabci_include.rs` | `multiple_includes` | — |
 | extracts multiple embedded include blocks | 34 | ported | `gitlabci_include.rs` | `extracts_multiple_embedded_include_blocks` | — |
 | ignores includes without project and file keys | 51 | ported | `gitlabci_include.rs` | `ignores_includes_without_project_and_file_keys` | — |
-| normalizes configured endpoints | 60 | pending | — | — | Requires GlobalConfig endpoint plumbing — registryUrls not yet emitted by Rust extractor |
+| normalizes configured endpoints | 60 | ported | `gitlabci_include.rs` | `normalizes_configured_endpoints` | — |
 | supports multi-document files | 73 | ported | `gitlabci_include.rs` | `supports_multi_document_files` | — |
 
 ---
