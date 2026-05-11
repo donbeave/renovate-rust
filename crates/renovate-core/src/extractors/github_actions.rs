@@ -65,6 +65,28 @@ pub struct GithubActionsExtractedDep {
     pub skip_reason: Option<GithubActionsSkipReason>,
 }
 
+/// Parsed GitHub Actions `uses:` reference.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GithubActionReference {
+    Docker {
+        image: String,
+        tag: Option<String>,
+        digest: Option<String>,
+        original_ref: String,
+    },
+    Local {
+        path: String,
+    },
+    Repository {
+        hostname: String,
+        is_explicit_hostname: bool,
+        owner: String,
+        repo: String,
+        path: Option<String>,
+        reference: String,
+    },
+}
+
 // ── Compiled regexes ───────────────────────────────────────────────────────
 
 /// Matches a `uses:` line inside a workflow YAML file.
@@ -99,6 +121,28 @@ pub fn extract(content: &str) -> Vec<GithubActionsExtractedDep> {
     }
 
     deps
+}
+
+/// Parse a single GitHub Actions action reference.
+///
+/// Renovate reference: `lib/modules/manager/github-actions/parse.ts`
+/// `parseActionReference`.
+pub fn parse_action_reference(raw: &str) -> Option<GithubActionReference> {
+    if raw.is_empty() {
+        return None;
+    }
+
+    if let Some(docker_ref) = raw.strip_prefix("docker://") {
+        return parse_docker_action_reference(docker_ref);
+    }
+
+    if raw.starts_with("./") || raw.starts_with("../") {
+        return Some(GithubActionReference::Local {
+            path: raw.to_owned(),
+        });
+    }
+
+    parse_repository_action_reference(raw)
 }
 
 /// Extract and normalise the version string from a trailing `# <version>` comment.
@@ -212,6 +256,79 @@ fn parse_uses(raw: &str, version_comment: Option<&str>) -> Option<GithubActionsE
         action,
         current_value: version.to_owned(),
         skip_reason: None,
+    })
+}
+
+fn parse_docker_action_reference(raw: &str) -> Option<GithubActionReference> {
+    if raw.is_empty() {
+        return None;
+    }
+
+    if let Some((image, digest)) = raw.split_once('@') {
+        if image.is_empty() || digest.is_empty() {
+            return None;
+        }
+        return Some(GithubActionReference::Docker {
+            image: image.to_owned(),
+            tag: None,
+            digest: Some(digest.to_owned()),
+            original_ref: raw.to_owned(),
+        });
+    }
+
+    let last_slash = raw.rfind('/');
+    let tag_sep = raw
+        .rfind(':')
+        .filter(|colon| last_slash.is_none_or(|slash| *colon > slash));
+
+    let (image, tag) = match tag_sep {
+        Some(idx) => (&raw[..idx], Some(raw[idx + 1..].to_owned())),
+        None => (raw, None),
+    };
+    if image.is_empty() || tag.as_deref() == Some("") {
+        return None;
+    }
+
+    Some(GithubActionReference::Docker {
+        image: image.to_owned(),
+        tag,
+        digest: None,
+        original_ref: raw.to_owned(),
+    })
+}
+
+fn parse_repository_action_reference(raw: &str) -> Option<GithubActionReference> {
+    let (action_path, reference) = raw.rsplit_once('@')?;
+    if action_path.is_empty() || reference.is_empty() {
+        return None;
+    }
+
+    let (hostname, is_explicit_hostname, path_without_host) =
+        if let Some(without_scheme) = action_path.strip_prefix("https://") {
+            let (hostname, rest) = without_scheme.split_once('/')?;
+            (hostname, true, rest)
+        } else {
+            ("github.com", false, action_path)
+        };
+
+    let mut parts = path_without_host.splitn(3, '/');
+    let owner = parts.next()?.trim();
+    let repo = parts.next()?.trim();
+    let path = parts
+        .next()
+        .filter(|path| !path.is_empty())
+        .map(str::to_owned);
+    if hostname.is_empty() || owner.is_empty() || repo.is_empty() {
+        return None;
+    }
+
+    Some(GithubActionReference::Repository {
+        hostname: hostname.to_owned(),
+        is_explicit_hostname,
+        owner: owner.to_owned(),
+        repo: repo.to_owned(),
+        path,
+        reference: reference.to_owned(),
     })
 }
 
@@ -1223,6 +1340,181 @@ mod tests {
             current_value: current_value.to_owned(),
             skip_reason: None,
         }
+    }
+
+    // Ported: "returns null for empty string" — github-actions/parse.spec.ts line 11
+    #[test]
+    fn parse_action_reference_returns_none_for_empty_string() {
+        assert!(parse_action_reference("").is_none());
+    }
+
+    // Ported: "returns null for empty docker reference" — github-actions/parse.spec.ts line 16
+    #[test]
+    fn parse_action_reference_returns_none_for_empty_docker_reference() {
+        assert!(parse_action_reference("docker://").is_none());
+    }
+
+    // Ported: "parses docker image with digest" — github-actions/parse.spec.ts line 20
+    #[test]
+    fn parse_action_reference_parses_docker_image_with_digest() {
+        assert_eq!(
+            parse_action_reference("docker://alpine@sha256:abc123"),
+            Some(GithubActionReference::Docker {
+                image: "alpine".to_owned(),
+                tag: None,
+                digest: Some("sha256:abc123".to_owned()),
+                original_ref: "alpine@sha256:abc123".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses docker image with tag" — github-actions/parse.spec.ts line 29
+    #[test]
+    fn parse_action_reference_parses_docker_image_with_tag() {
+        assert_eq!(
+            parse_action_reference("docker://alpine:3.18"),
+            Some(GithubActionReference::Docker {
+                image: "alpine".to_owned(),
+                tag: Some("3.18".to_owned()),
+                digest: None,
+                original_ref: "alpine:3.18".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses docker image with registry port and tag" — github-actions/parse.spec.ts line 38
+    #[test]
+    fn parse_action_reference_parses_docker_image_with_registry_port_and_tag() {
+        assert_eq!(
+            parse_action_reference("docker://registry.example.com:5000/alpine:3.18"),
+            Some(GithubActionReference::Docker {
+                image: "registry.example.com:5000/alpine".to_owned(),
+                tag: Some("3.18".to_owned()),
+                digest: None,
+                original_ref: "registry.example.com:5000/alpine:3.18".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses docker image without tag or digest" — github-actions/parse.spec.ts line 51
+    #[test]
+    fn parse_action_reference_parses_docker_image_without_tag_or_digest() {
+        assert_eq!(
+            parse_action_reference("docker://alpine"),
+            Some(GithubActionReference::Docker {
+                image: "alpine".to_owned(),
+                tag: None,
+                digest: None,
+                original_ref: "alpine".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses docker image with registry but no tag" — github-actions/parse.spec.ts line 59
+    #[test]
+    fn parse_action_reference_parses_docker_image_with_registry_but_no_tag() {
+        assert_eq!(
+            parse_action_reference("docker://ghcr.io/owner/image"),
+            Some(GithubActionReference::Docker {
+                image: "ghcr.io/owner/image".to_owned(),
+                tag: None,
+                digest: None,
+                original_ref: "ghcr.io/owner/image".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses ./ local reference" — github-actions/parse.spec.ts line 69
+    #[test]
+    fn parse_action_reference_parses_dot_slash_local_reference() {
+        assert_eq!(
+            parse_action_reference("./path/to/action"),
+            Some(GithubActionReference::Local {
+                path: "./path/to/action".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses ../ local reference" — github-actions/parse.spec.ts line 76
+    #[test]
+    fn parse_action_reference_parses_dot_dot_slash_local_reference() {
+        assert_eq!(
+            parse_action_reference("../other/action"),
+            Some(GithubActionReference::Local {
+                path: "../other/action".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "returns null for invalid format" — github-actions/parse.spec.ts line 85
+    #[test]
+    fn parse_action_reference_returns_none_for_invalid_repository_format() {
+        assert!(parse_action_reference("invalid").is_none());
+        assert!(parse_action_reference("owner/repo").is_none());
+    }
+
+    // Ported: "parses owner/repo@ref with default hostname" — github-actions/parse.spec.ts line 90
+    #[test]
+    fn parse_action_reference_parses_owner_repo_ref_with_default_hostname() {
+        assert_eq!(
+            parse_action_reference("actions/checkout@v4"),
+            Some(GithubActionReference::Repository {
+                hostname: "github.com".to_owned(),
+                is_explicit_hostname: false,
+                owner: "actions".to_owned(),
+                repo: "checkout".to_owned(),
+                path: None,
+                reference: "v4".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses owner/repo/path@ref" — github-actions/parse.spec.ts line 102
+    #[test]
+    fn parse_action_reference_parses_owner_repo_path_ref() {
+        assert_eq!(
+            parse_action_reference("owner/repo/sub/path@main"),
+            Some(GithubActionReference::Repository {
+                hostname: "github.com".to_owned(),
+                is_explicit_hostname: false,
+                owner: "owner".to_owned(),
+                repo: "repo".to_owned(),
+                path: Some("sub/path".to_owned()),
+                reference: "main".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses https://host/owner/repo@ref with explicit hostname" — github-actions/parse.spec.ts line 114
+    #[test]
+    fn parse_action_reference_parses_https_owner_repo_ref_with_explicit_hostname() {
+        assert_eq!(
+            parse_action_reference("https://gitea.example.com/owner/repo@v1"),
+            Some(GithubActionReference::Repository {
+                hostname: "gitea.example.com".to_owned(),
+                is_explicit_hostname: true,
+                owner: "owner".to_owned(),
+                repo: "repo".to_owned(),
+                path: None,
+                reference: "v1".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "parses https://host/owner/repo/path@ref" — github-actions/parse.spec.ts line 128
+    #[test]
+    fn parse_action_reference_parses_https_owner_repo_path_ref() {
+        assert_eq!(
+            parse_action_reference("https://github.enterprise.com/org/repo/workflow.yml@main"),
+            Some(GithubActionReference::Repository {
+                hostname: "github.enterprise.com".to_owned(),
+                is_explicit_hostname: true,
+                owner: "org".to_owned(),
+                repo: "repo".to_owned(),
+                path: Some("workflow.yml".to_owned()),
+                reference: "main".to_owned(),
+            })
+        );
     }
 
     // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65
