@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1364 / 1661 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1369 / 1661 actionable tests ported (82%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3020,17 +3020,17 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/npm/extract/yarn.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/yarn.spec.ts
-**Total tests:** 9 | **Ported:** 4 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `modules/manager/npm/extract/yarn › .getYarnLock()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty if exception parsing | 10 | pending | — | — | Requires Yarn lock parser |
-| extracts yarn 1 | 17 | pending | — | — | Requires Yarn v1 lock parser fixtures |
-| extracts yarn 2 | 27 | pending | — | — | Requires Yarn v2 lock parser fixtures |
-| extracts yarn 2 cache version | 37 | pending | — | — | Requires Yarn v2 cache-version parser fixtures |
-| ignores individual invalid entries | 47 | pending | — | — | Requires Yarn lock parser invalid-entry filtering |
+| returns empty if exception parsing | 10 | ported | `npm.rs` | `yarn_lock_returns_empty_if_exception_parsing` | — |
+| extracts yarn 1 | 17 | ported | `npm.rs` | `yarn_lock_extracts_yarn1_dependencies` | — |
+| extracts yarn 2 | 27 | ported | `npm.rs` | `yarn_lock_extracts_yarn2_dependencies` | — |
+| extracts yarn 2 cache version | 37 | ported | `npm.rs` | `yarn_lock_extracts_yarn2_cache_version` | — |
+| ignores individual invalid entries | 47 | ported | `npm.rs` | `yarn_lock_ignores_individual_invalid_entries` | — |
 
 ### `modules/manager/npm/extract/yarn`
 

@@ -109,6 +109,7 @@ pub struct NpmLock {
 pub struct YarnLock {
     pub is_yarn1: bool,
     pub lockfile_version: Option<u64>,
+    pub locked_versions: BTreeMap<String, String>,
 }
 
 /// Yarn catalog dependency extracted from `.yarnrc.yml`.
@@ -361,6 +362,95 @@ pub fn get_yarn_version_from_lock(lock: &YarnLock) -> &'static str {
         Some(version) if version >= 6 => "^2.2.0",
         _ => "^2.0.0",
     }
+}
+
+/// Parse Yarn v1 and Berry lockfiles into locked package versions.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/yarn.ts` `getYarnLock`.
+pub fn parse_yarn_lock(content: Option<&str>) -> YarnLock {
+    let Some(content) = content else {
+        return YarnLock {
+            is_yarn1: true,
+            lockfile_version: None,
+            locked_versions: BTreeMap::new(),
+        };
+    };
+
+    let is_yarn1 = !content.lines().any(|line| line.trim() == "__metadata:");
+    let lockfile_version = parse_yarn_lockfile_version(content);
+    let mut locked_versions = BTreeMap::new();
+    let mut current_name: Option<String> = None;
+
+    for raw_line in content.lines() {
+        let line = raw_line.trim_end();
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+
+        if !line.starts_with(' ') && !line.starts_with('\t') && trimmed.ends_with(':') {
+            current_name = yarn_lock_entry_name(trimmed.trim_end_matches(':'));
+            continue;
+        }
+
+        let version = trimmed
+            .strip_prefix("version ")
+            .or_else(|| trimmed.strip_prefix("version:"))
+            .and_then(parse_yarn_string_value);
+
+        if let (Some(name), Some(version)) = (current_name.take(), version) {
+            locked_versions.insert(name, version);
+        }
+    }
+
+    YarnLock {
+        is_yarn1,
+        lockfile_version,
+        locked_versions,
+    }
+}
+
+fn parse_yarn_lockfile_version(content: &str) -> Option<u64> {
+    let mut in_metadata = false;
+    for raw_line in content.lines() {
+        let trimmed = raw_line.trim();
+        if trimmed == "__metadata:" {
+            in_metadata = true;
+            continue;
+        }
+        if in_metadata && trimmed.starts_with("version:") {
+            return trimmed
+                .strip_prefix("version:")
+                .map(|version| version.trim().trim_matches('"').trim_matches('\''))
+                .and_then(|version| version.parse().ok());
+        }
+        if in_metadata && !raw_line.starts_with(' ') && !trimmed.is_empty() {
+            in_metadata = false;
+        }
+    }
+    None
+}
+
+fn yarn_lock_entry_name(entry: &str) -> Option<String> {
+    let first = entry
+        .trim()
+        .trim_matches('"')
+        .split(',')
+        .next()?
+        .trim()
+        .trim_matches('"');
+    let descriptor = first.strip_prefix("patch:").unwrap_or(first);
+    let descriptor = descriptor.strip_prefix("virtual:").unwrap_or(descriptor);
+    let descriptor = descriptor.split('#').next().unwrap_or(descriptor);
+    descriptor
+        .rsplit_once('@')
+        .map(|(name, _)| name)
+        .filter(|name| is_valid_yarn_package_name(name))
+        .map(str::to_owned)
+}
+
+fn is_valid_yarn_package_name(name: &str) -> bool {
+    !name.is_empty() && name.chars().any(|ch| ch.is_ascii_alphabetic() || ch == '@')
 }
 
 /// Extract Yarn catalog dependencies from parsed `.yarnrc.yml` catalog blocks.
@@ -801,6 +891,160 @@ mod tests {
         assert!(lock.locked_versions.is_empty());
     }
 
+    // Ported: "returns empty if exception parsing" — npm/extract/yarn.spec.ts line 10
+    #[test]
+    fn yarn_lock_returns_empty_if_exception_parsing() {
+        let lock = parse_yarn_lock(Some("abcd"));
+        assert!(lock.is_yarn1);
+        assert_eq!(lock.lockfile_version, None);
+        assert!(lock.locked_versions.is_empty());
+    }
+
+    // Ported: "extracts yarn 1" — npm/extract/yarn.spec.ts line 17
+    #[test]
+    fn yarn_lock_extracts_yarn1_dependencies() {
+        let lock = parse_yarn_lock(Some(
+            r#"
+# yarn lockfile v1
+
+ansi-styles@^3.2.1:
+  version "3.2.1"
+chalk@^2.4.1:
+  version "2.4.1"
+color-convert@^1.9.0:
+  version "1.9.1"
+color-name@1.1.3:
+  version "1.1.3"
+escape-string-regexp@^1.0.5:
+  version "1.0.5"
+has-flag@^3.0.0:
+  version "3.0.0"
+supports-color@^5.3.0:
+  version "5.4.0"
+"#,
+        ));
+        assert!(lock.is_yarn1);
+        assert_eq!(lock.lockfile_version, None);
+        assert_eq!(lock.locked_versions.len(), 7);
+        assert_eq!(
+            lock.locked_versions.get("ansi-styles").map(String::as_str),
+            Some("3.2.1")
+        );
+        assert_eq!(
+            lock.locked_versions
+                .get("supports-color")
+                .map(String::as_str),
+            Some("5.4.0")
+        );
+    }
+
+    // Ported: "extracts yarn 2" — npm/extract/yarn.spec.ts line 27
+    #[test]
+    fn yarn_lock_extracts_yarn2_dependencies() {
+        let lock = parse_yarn_lock(Some(
+            r#"
+__metadata:
+  cacheKey: 8
+
+"@babel/code-frame@npm:^7.0.0":
+  version: 7.12.11
+"@babel/helper-validator-identifier@npm:^7.10.4":
+  version: 7.12.11
+"@types/node@npm:^14.14.6":
+  version: 14.14.6
+"ansi-styles@npm:^4.3.0":
+  version: 4.3.0
+"chalk@npm:^4.1.0":
+  version: 4.1.0
+"color-convert@npm:^2.0.1":
+  version: 2.0.1
+"color-name@npm:~1.1.4":
+  version: 1.1.4
+"has-flag@npm:^4.0.0":
+  version: 4.0.0
+"#,
+        ));
+        assert!(!lock.is_yarn1);
+        assert_eq!(lock.lockfile_version, None);
+        assert_eq!(lock.locked_versions.len(), 8);
+        assert_eq!(
+            lock.locked_versions
+                .get("@babel/code-frame")
+                .map(String::as_str),
+            Some("7.12.11")
+        );
+        assert_eq!(
+            lock.locked_versions.get("chalk").map(String::as_str),
+            Some("4.1.0")
+        );
+    }
+
+    // Ported: "extracts yarn 2 cache version" — npm/extract/yarn.spec.ts line 37
+    #[test]
+    fn yarn_lock_extracts_yarn2_cache_version() {
+        let lock = parse_yarn_lock(Some(
+            r#"
+__metadata:
+  version: 6
+  cacheKey: 8
+
+"@babel/code-frame@npm:^7.0.0":
+  version: 7.12.11
+"@babel/helper-validator-identifier@npm:^7.10.4":
+  version: 7.12.11
+"@types/node@npm:^14.14.6":
+  version: 14.14.6
+"ansi-styles@npm:^4.3.0":
+  version: 4.3.0
+"chalk@npm:^4.1.0":
+  version: 4.1.0
+"color-convert@npm:^2.0.1":
+  version: 2.0.1
+"color-name@npm:~1.1.4":
+  version: 1.1.4
+"escape-string-regexp@npm:^1.0.5":
+  version: 1.0.5
+"has-flag@npm:^4.0.0":
+  version: 4.0.0
+"supports-color@npm:^7.1.0":
+  version: 7.1.0
+"#,
+        ));
+        assert!(!lock.is_yarn1);
+        assert_eq!(lock.lockfile_version, Some(6));
+        assert_eq!(lock.locked_versions.len(), 10);
+        assert_eq!(
+            lock.locked_versions
+                .get("supports-color")
+                .map(String::as_str),
+            Some("7.1.0")
+        );
+    }
+
+    // Ported: "ignores individual invalid entries" — npm/extract/yarn.spec.ts line 47
+    #[test]
+    fn yarn_lock_ignores_individual_invalid_entries() {
+        let lock = parse_yarn_lock(Some(
+            r#"
+# yarn lockfile v1
+
+1@^1.0.0:
+  version "1.0.0"
+ansi-styles@^3.2.1:
+  version "3.2.1"
+chalk@^2.4.1:
+  version "2.4.1"
+"#,
+        ));
+        assert!(lock.is_yarn1);
+        assert_eq!(lock.locked_versions.len(), 2);
+        assert!(!lock.locked_versions.contains_key("1"));
+        assert_eq!(
+            lock.locked_versions.get("chalk").map(String::as_str),
+            Some("2.4.1")
+        );
+    }
+
     // Ported: "getYarnVersionFromLock" — npm/extract/yarn.spec.ts line 58
     #[test]
     fn yarn_version_from_lock_matches_lockfile_version() {
@@ -808,6 +1052,7 @@ mod tests {
             get_yarn_version_from_lock(&YarnLock {
                 is_yarn1: true,
                 lockfile_version: None,
+                locked_versions: BTreeMap::new(),
             }),
             "^1.22.18"
         );
@@ -815,6 +1060,7 @@ mod tests {
             get_yarn_version_from_lock(&YarnLock {
                 is_yarn1: false,
                 lockfile_version: Some(12),
+                locked_versions: BTreeMap::new(),
             }),
             ">=4.0.0"
         );
@@ -822,6 +1068,7 @@ mod tests {
             get_yarn_version_from_lock(&YarnLock {
                 is_yarn1: false,
                 lockfile_version: Some(10),
+                locked_versions: BTreeMap::new(),
             }),
             "^4.0.0"
         );
@@ -829,6 +1076,7 @@ mod tests {
             get_yarn_version_from_lock(&YarnLock {
                 is_yarn1: false,
                 lockfile_version: Some(8),
+                locked_versions: BTreeMap::new(),
             }),
             "^3.0.0"
         );
@@ -836,6 +1084,7 @@ mod tests {
             get_yarn_version_from_lock(&YarnLock {
                 is_yarn1: false,
                 lockfile_version: Some(6),
+                locked_versions: BTreeMap::new(),
             }),
             "^2.2.0"
         );
@@ -843,6 +1092,7 @@ mod tests {
             get_yarn_version_from_lock(&YarnLock {
                 is_yarn1: false,
                 lockfile_version: Some(3),
+                locked_versions: BTreeMap::new(),
             }),
             "^2.0.0"
         );
