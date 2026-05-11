@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1282 / 1402 actionable tests ported (91%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 5 spec files not yet converted to per-test format (5 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 4 spec files not yet converted to per-test format (4 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3890,12 +3890,89 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/workers/global/config/parse/env.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
+**Total tests:** 45 | **Ported:** 0 | **Actionable:** 45 | **Status:** pending
+
+### `workers/global/config/parse/env › .getConfig(env)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty env | 11 | pending | — | — | — |
+| supports boolean true | 15 | pending | — | — | — |
+| supports boolean false | 20 | pending | — | — | — |
+| throws exception for invalid boolean value | 27 | pending | — | — | — |
+| supports list single | 40 | pending | — | — | — |
+| supports list multiple | 45 | pending | — | — | — |
+| supports list multiple without blank items | 50 | pending | — | — | — |
+| supports string | 55 | pending | — | — | — |
+| coerces string newlines | 60 | pending | — | — | — |
+| supports custom prefixes | 67 | pending | — | — | — |
+| supports json | 76 | pending | — | — | — |
+| supports arrays of objects | 83 | pending | — | — | — |
+| "$envArg" -> $config | 91 | pending | — | — | — |
+| skips misconfigured arrays | 103 | pending | — | — | — |
+| skips garbage array values | 117 | pending | — | — | — |
+| supports GitHub token | 131 | pending | — | — | — |
+| supports GitHub custom endpoint | 140 | pending | — | — | — |
+| supports GitHub custom endpoint and github.com | 149 | pending | — | — | — |
+| supports GitHub fine-grained PATs | 168 | pending | — | — | — |
+| supports RENOVATE_ prefixed github com token | 185 | pending | — | — | — |
+| GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN | 202 | pending | — | — | — |
+| supports GitHub custom endpoint and gitlab.com | 220 | pending | — | — | — |
+| supports GitLab token | 231 | pending | — | — | — |
+| supports GitLab custom endpoint | 242 | pending | — | — | — |
+| supports Azure DevOps | 255 | pending | — | — | — |
+| supports Bitbucket token | 268 | pending | — | — | — |
+| supports Bitbucket username/password | 283 | pending | — | — | — |
+| merges full config from env | 299 | pending | — | — | — |
+| massages converted experimental env vars | 309 | pending | — | — | — |
+| does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL | 336 | pending | — | — | — |
+
+### `workers/global/config/parse/env › .getConfig(env) › RENOVATE_CONFIG tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| crashes | 357 | pending | — | — | — |
+| migrates RENOVATE_CONFIG | 367 | pending | — | — | — |
+| warns if config in RENOVATE_CONFIG is invalid | 376 | pending | — | — | — |
+
+### `workers/global/config/parse/env › .getConfig(env) › migrations`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| renames migrated variables | 386 | pending | — | — | — |
+
+### `workers/global/config/parse/env`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has no duplicate env names across options | 396 | pending | — | — | — |
+
+### `workers/global/config/parse/env › .getEnvName(definition)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty | 418 | pending | — | — | — |
+| returns existing env | 426 | pending | — | — | — |
+| generates RENOVATE_ env | 434 | pending | — | — | — |
+| dryRun boolean true | 441 | pending | — | — | — |
+| dryRun boolean false | 449 | pending | — | — | — |
+| dryRun null | 457 | pending | — | — | — |
+| requireConfig boolean true | 465 | pending | — | — | — |
+| requireConfig boolean false | 473 | pending | — | — | — |
+| platformCommit boolean true | 481 | pending | — | — | — |
+| platformCommit boolean false | 489 | pending | — | — | — |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
 <!-- workers/global/config/parse/cli.spec.ts converted to per-test format above -->
-| `lib/workers/global/config/parse/env.spec.ts` | — | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
+<!-- workers/global/config/parse/env.spec.ts converted to per-test format above -->
 <!-- workers/global/config/parse/file.spec.ts converted to per-test format above -->
 | `lib/workers/repository/init/merge.spec.ts` | 37 | `crates/renovate-core/src/repo_config.rs` | 0 | pending |
 <!-- workers/repository/init/apis.spec.ts converted to per-test format above -->
