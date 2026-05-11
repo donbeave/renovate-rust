@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1176 / 1368 actionable tests ported (86%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 27 spec files not yet converted to per-test format (23 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 26 spec files not yet converted to per-test format (22 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -141,6 +141,21 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for file without version information | 13 | ported | `batect_wrapper.rs` | `no_version_line_returns_none` | — |
 | extracts the current version from a valid wrapper script | 17 | ported | `batect_wrapper.rs` | `extracts_version` | — |
 | returns the first version from a wrapper script with multiple versions | 31 | ported | `batect_wrapper.rs` | `multiple_version_lines_uses_first` | — |
+
+---
+
+## `lib/modules/manager/batect-wrapper/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/batect-wrapper/artifacts.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/batect-wrapper/artifacts › updateArtifacts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns updated files if the wrapper script is in the root directory | 54 | not-applicable | — | — | Exercises Renovate `updateArtifacts()` HTTP download/file-addition workflow; Rust batect-wrapper support is extractor-only and has no artifact update API |
+| returns updated files if the wrapper script is in a subdirectory | 76 | not-applicable | — | — | Exercises Renovate `updateArtifacts()` HTTP download/file-addition workflow; Rust batect-wrapper support is extractor-only and has no artifact update API |
+| returns an error if the updated wrapper script cannot be downloaded | 98 | not-applicable | — | — | Exercises Renovate `updateArtifacts()` HTTP download error reporting; Rust batect-wrapper support is extractor-only and has no artifact update API |
 
 ---
 
@@ -3049,7 +3064,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/modules/manager/bazel-module/lockfile.spec.ts` | — | — | — | pending |
 <!-- bazel-module/parser/context.spec.ts converted to per-test format above -->
 <!-- bazel-module/parser/fragments.spec.ts converted to per-test format above -->
-| `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | — | — | — | pending |
+<!-- batect-wrapper/artifacts.spec.ts converted to per-test format above -->
 <!-- git-submodules/artifact.spec.ts converted to per-test format above -->
 <!-- github-actions/integration.spec.ts converted to per-test format above -->
 <!-- github-actions/parse.spec.ts converted to per-test format above -->
