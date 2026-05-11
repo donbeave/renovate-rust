@@ -55,6 +55,15 @@ pub struct BazelCrateSpecDep {
     pub skip_reason: Option<BazelSkipReason>,
 }
 
+/// A dependency extracted from `maven.install(...)` or `maven.artifact(...)`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazelMavenDep {
+    pub dep_name: String,
+    pub current_value: String,
+    pub dep_type: &'static str,
+    pub registry_urls: Vec<String>,
+}
+
 /// Which Bazel module declaration produced the dep.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BazelModuleDepType {
@@ -110,9 +119,20 @@ static LOCAL_PATH_OVERRIDE_BLOCK_RE: LazyLock<Regex> =
 static CRATE_SPEC_BLOCK_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)crate\.spec\s*\(([^)]+)\)").unwrap());
 
+/// Matches a `maven.install(...)` call.
+static MAVEN_INSTALL_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)maven\.install\s*\(([^)]+)\)").unwrap());
+
+/// Matches a `maven.artifact(...)` call.
+static MAVEN_ARTIFACT_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)maven\.artifact\s*\(([^)]+)\)").unwrap());
+
 /// Extracts `name = "value"` or `name = 'value'` from a call argument list.
 static ATTR_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"(\w+)\s*=\s*['"]([^'"]+)['"]"#).unwrap());
+
+/// Extracts quoted strings from a Starlark list body.
+static STRING_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r#"['"]([^'"]+)['"]"#).unwrap());
 
 /// Extracts `dev_dependency = True` flag.
 static DEV_DEP_RE: LazyLock<Regex> =
@@ -285,6 +305,61 @@ pub fn extract_crate_specs(content: &str) -> Vec<BazelCrateSpecDep> {
         .collect()
 }
 
+/// Extract Maven dependencies from `maven.install(...)` and `maven.artifact(...)`.
+pub fn extract_maven_deps(content: &str) -> Vec<BazelMavenDep> {
+    let stripped = strip_comments(content);
+    let mut deps = Vec::new();
+
+    for cap in MAVEN_INSTALL_BLOCK_RE.captures_iter(&stripped) {
+        let args = &cap[1];
+        let registries = list_attr(args, "repositories");
+        for artifact in list_attr(args, "artifacts") {
+            if let Some((dep_name, current_value)) = parse_maven_coordinate(&artifact) {
+                deps.push(BazelMavenDep {
+                    dep_name,
+                    current_value,
+                    dep_type: "maven_install",
+                    registry_urls: registries.clone(),
+                });
+            }
+        }
+    }
+
+    for cap in MAVEN_ARTIFACT_BLOCK_RE.captures_iter(&stripped) {
+        let args = &cap[1];
+        let attrs = attrs_from_args(args);
+        let Some(group) = attrs.get("group") else {
+            continue;
+        };
+        let Some(artifact) = attrs.get("artifact") else {
+            continue;
+        };
+        let Some(version) = attrs.get("version") else {
+            continue;
+        };
+        deps.push(BazelMavenDep {
+            dep_name: format!("{group}:{artifact}"),
+            current_value: version.clone(),
+            dep_type: "maven_install",
+            registry_urls: Vec::new(),
+        });
+    }
+
+    let install_registries = deps
+        .iter()
+        .find(|dep| !dep.registry_urls.is_empty())
+        .map(|dep| dep.registry_urls.clone());
+    if let Some(registries) = install_registries {
+        for dep in &mut deps {
+            if dep.registry_urls.is_empty() {
+                dep.registry_urls = registries.clone();
+            }
+        }
+    }
+
+    deps
+}
+
 fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
     let mut deps = Vec::new();
     deps.extend(parse_named_overrides(
@@ -373,6 +448,35 @@ fn attrs_from_args(args: &str) -> std::collections::BTreeMap<String, String> {
         .captures_iter(args)
         .map(|cap| (cap[1].to_owned(), cap[2].to_owned()))
         .collect()
+}
+
+fn list_attr(args: &str, attr: &str) -> Vec<String> {
+    let pattern = format!(r#"(?s){attr}\s*=\s*\[([^\]]*)\]"#);
+    let Ok(regex) = Regex::new(&pattern) else {
+        return Vec::new();
+    };
+    let Some(cap) = regex.captures(args) else {
+        return Vec::new();
+    };
+    STRING_RE
+        .captures_iter(&cap[1])
+        .map(|item| item[1].to_owned())
+        .collect()
+}
+
+fn parse_maven_coordinate(raw: &str) -> Option<(String, String)> {
+    let parts = raw.split(':').collect::<Vec<_>>();
+    if parts.len() < 3 {
+        return None;
+    }
+    let group = parts[0];
+    let artifact = parts[1];
+    let version = parts.last()?;
+    if group.is_empty() || artifact.is_empty() || version.is_empty() {
+        None
+    } else {
+        Some((format!("{group}:{artifact}"), (*version).to_owned()))
+    }
 }
 
 fn github_package_name(url: &str) -> Option<String> {
@@ -524,6 +628,54 @@ crate.spec(
         assert_eq!(
             deps[4].skip_reason,
             Some(BazelSkipReason::InvalidDependencySpecification)
+        );
+    }
+
+    // Ported: "returns maven.install and maven.artifact dependencies" — bazel-module/extract.spec.ts line 453
+    #[test]
+    fn extracts_maven_install_and_artifact_dependencies() {
+        let input = r#"
+maven.artifact(
+    artifact = "core.specs.alpha",
+    exclusions = ["org.clojure:clojure"],
+    group = "org.clojure",
+    version = "0.2.56",
+)
+
+maven.install(
+    artifacts = [
+        "junit:junit:4.13.2",
+        "com.google.guava:guava:31.1-jre",
+    ],
+    lock_file = "//:maven_install.json",
+    repositories = [
+        "https://repo1.maven.org/maven2/",
+    ],
+    version_conflict_policy = "pinned",
+)
+"#;
+        let deps = extract_maven_deps(input);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].current_value, "4.13.2");
+        assert_eq!(deps[0].dep_type, "maven_install");
+        assert_eq!(
+            deps[0].registry_urls,
+            vec!["https://repo1.maven.org/maven2/"]
+        );
+        assert_eq!(deps[1].dep_name, "com.google.guava:guava");
+        assert_eq!(deps[1].current_value, "31.1-jre");
+        assert_eq!(deps[1].dep_type, "maven_install");
+        assert_eq!(
+            deps[1].registry_urls,
+            vec!["https://repo1.maven.org/maven2/"]
+        );
+        assert_eq!(deps[2].dep_name, "org.clojure:core.specs.alpha");
+        assert_eq!(deps[2].current_value, "0.2.56");
+        assert_eq!(deps[2].dep_type, "maven_install");
+        assert_eq!(
+            deps[2].registry_urls,
+            vec!["https://repo1.maven.org/maven2/"]
         );
     }
 
