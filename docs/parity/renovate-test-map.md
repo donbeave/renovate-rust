@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1495 / 1657 actionable tests ported (90%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1497 / 1657 actionable tests ported (90%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2442,7 +2442,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 29 | **Ported:** 18 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 20 | **Actionable:** 29 | **Status:** partial
 
 ### `extractPackage`
 
@@ -2488,9 +2488,9 @@ resolver) and the inner `extractPackageFile()` adapter.
 |---|---|---|---|---|---|
 | should return empty if package has no content | 548 | ported | `maven.rs` | `extract_all_package_files_empty_content_returns_empty` | — |
 | should return empty for packages with invalid content | 554 | ported | `maven.rs` | `extract_all_package_files_invalid_content_returns_empty` | — |
-| should return packages with urls from a settings file | 560 | pending | — | — | Requires settings.xml integration |
+| should return packages with urls from a settings file | 560 | ported | `maven.rs` | `extract_all_package_files_applies_settings_registry_urls` | — |
 | should include registryUrls from parent pom files | 581 | pending | — | — | Requires multi-file parent resolution |
-| should include registryUrls in the correct order | 791 | pending | — | — | Requires registryUrls ordering |
+| should include registryUrls in the correct order | 791 | ported | `maven.rs` | `extract_all_package_files_preserves_settings_registry_url_order` | — |
 | should return package files info | 812 | pending | — | — | Requires package files info aggregation |
 | should extract from .mvn/extensions.xml file | 888 | ported | `maven.rs` | `extract_all_package_files_extracts_extensions_xml` | — |
 | should return empty array if extensions file is invalid or empty | 917 | ported | `maven.rs` | `extract_all_package_files_invalid_extensions_return_empty` | — |

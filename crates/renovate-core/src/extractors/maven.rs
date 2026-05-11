@@ -96,6 +96,8 @@ pub struct MavenExtractedDep {
     pub scope: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<MavenSkipReason>,
+    /// Registry URLs extracted from Maven settings files or related metadata.
+    pub registry_urls: Vec<String>,
 }
 
 impl MavenExtractedDep {
@@ -263,24 +265,62 @@ pub fn extract_extensions(content: &str) -> Option<Vec<MavenExtractedDep>> {
 /// Extract Maven package files from already-read path/content pairs.
 pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtractedDep>> {
     let mut package_files = Vec::new();
+    let registry_urls = extract_package_registry_urls(files);
     for (path, content) in files {
         if path.ends_with(".mvn/extensions.xml") || *path == ".mvn/extensions.xml" {
-            if let Some(deps) = extract_extensions(content)
+            if let Some(mut deps) = extract_extensions(content)
                 && !deps.is_empty()
             {
+                apply_registry_urls(&mut deps, &registry_urls);
                 package_files.push(deps);
             }
             continue;
         }
 
         if path.ends_with(".xml")
-            && let Ok(deps) = extract(content)
+            && !is_settings_xml_path(path)
+            && let Ok(mut deps) = extract(content)
             && !deps.is_empty()
         {
+            apply_registry_urls(&mut deps, &registry_urls);
             package_files.push(deps);
         }
     }
     package_files
+}
+
+fn extract_package_registry_urls(files: &[(&str, &str)]) -> Vec<String> {
+    let mut urls = Vec::new();
+    for (path, content) in files {
+        if is_settings_xml_path(path) {
+            for url in extract_registries(content) {
+                if !urls.iter().any(|existing| existing == &url) {
+                    urls.push(url);
+                }
+            }
+        }
+    }
+    if !urls.is_empty()
+        && !urls
+            .iter()
+            .any(|url| url == "https://repo.maven.apache.org/maven2")
+    {
+        urls.push("https://repo.maven.apache.org/maven2".to_owned());
+    }
+    urls
+}
+
+fn is_settings_xml_path(path: &str) -> bool {
+    path.ends_with("settings.xml")
+}
+
+fn apply_registry_urls(deps: &mut [MavenExtractedDep], registry_urls: &[String]) {
+    if registry_urls.is_empty() {
+        return;
+    }
+    for dep in deps {
+        dep.registry_urls = registry_urls.to_vec();
+    }
 }
 
 /// SAX parse a POM and return (deps, properties).
@@ -504,6 +544,7 @@ fn build_dep(dep: &CurrentDep) -> Option<MavenExtractedDep> {
         dep_type: dep.dep_type,
         scope: dep.scope.clone(),
         skip_reason,
+        registry_urls: Vec::new(),
     })
 }
 
@@ -878,6 +919,82 @@ mod tests {
         assert!(extract_all_package_files(&[("random.pom.xml", "invalid content")]).is_empty());
     }
 
+    // Ported: "should return packages with urls from a settings file" — maven/extract.spec.ts line 560
+    #[test]
+    fn extract_all_package_files_applies_settings_registry_urls() {
+        let settings = r#"<settings>
+  <mirrors>
+    <mirror>
+      <url>https://artifactory.company.com/artifactory/my-maven-repo</url>
+    </mirror>
+    <mirror>
+      <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+    </mirror>
+  </mirrors>
+</settings>"#;
+        let pom = r#"<project>
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>demo</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+
+        let packages = extract_all_package_files(&[
+            ("mirror.settings.xml", settings),
+            ("simple.pom.xml", pom),
+        ]);
+        let expected = vec![
+            "https://artifactory.company.com/artifactory/my-maven-repo".to_owned(),
+            "https://maven.atlassian.com/content/repositories/atlassian-public/".to_owned(),
+            "https://repo.maven.apache.org/maven2".to_owned(),
+        ];
+        assert_eq!(packages.len(), 1);
+        assert_eq!(packages[0][0].registry_urls, expected);
+    }
+
+    // Ported: "should include registryUrls in the correct order" — maven/extract.spec.ts line 791
+    #[test]
+    fn extract_all_package_files_preserves_settings_registry_url_order() {
+        let pom = r#"<project>
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>demo</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        let settings = r#"<settings>
+  <profiles>
+    <profile>
+      <repositories>
+        <repository>
+          <url>https://repo.adobe.com/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+          <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>"#;
+
+        let packages = extract_all_package_files(&[
+            ("simple.pom.xml", pom),
+            ("profile.settings.xml", settings),
+        ]);
+        let expected = vec![
+            "https://repo.adobe.com/nexus/content/groups/public".to_owned(),
+            "https://maven.atlassian.com/content/repositories/atlassian-public/".to_owned(),
+            "https://repo.maven.apache.org/maven2".to_owned(),
+        ];
+        assert_eq!(packages.len(), 1);
+        assert_eq!(packages[0][0].registry_urls, expected);
+    }
+
     // Ported: "should extract from .mvn/extensions.xml file" — maven/extract.spec.ts line 888
     #[test]
     fn extract_all_package_files_extracts_extensions_xml() {
@@ -1211,6 +1328,7 @@ mod tests {
             dep_type: MavenDepType::Regular,
             scope: Some("test".to_owned()),
             skip_reason: None,
+            registry_urls: Vec::new(),
         };
         assert_eq!(dep.renovate_dep_type(), "test");
     }
@@ -1223,6 +1341,7 @@ mod tests {
             dep_type: MavenDepType::Regular,
             scope: None,
             skip_reason: None,
+            registry_urls: Vec::new(),
         };
         assert_eq!(dep.renovate_dep_type(), "compile");
     }
