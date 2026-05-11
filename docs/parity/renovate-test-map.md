@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 750 / 1217 actionable tests ported (62%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 751 / 1217 actionable tests ported (62%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1021,14 +1021,14 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/terraform-version/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform-version/extract.spec.ts
-**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns a result | 5 | ported | `version_file.rs` | `terraform_version_plain` | — |
-| skips non ranges | 18 | pending | — | — | — |
+| skips non ranges | 18 | ported | `version_file.rs` | `terraform_version_passes_through_non_alias_literal` | — |
 
 ---
 

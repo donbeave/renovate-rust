@@ -138,7 +138,9 @@ pub fn extract(content: &str, manager_name: &str) -> Option<VersionFileDep> {
         .find(|l| !l.is_empty())?;
 
     // Skip NVM aliases like `lts/*`, `latest`, `stable`, `node`.
-    if version.contains('/') || matches!(version, "lts" | "latest" | "stable" | "node") {
+    if manager_name == "nvmrc"
+        && (version.contains('/') || matches!(version, "lts" | "latest" | "stable" | "node"))
+    {
         return None;
     }
 
@@ -182,6 +184,21 @@ mod tests {
         let dep = extract("1.6.3\n", "terraform-version").unwrap();
         assert_eq!(dep.tool, "terraform");
         assert_eq!(dep.current_value, "1.6.3");
+        assert_eq!(
+            dep.datasource,
+            AsdfDatasource::GithubReleases {
+                repo: "hashicorp/terraform",
+                tag_strip: "v",
+            }
+        );
+    }
+
+    // Ported: "skips non ranges" — terraform-version/extract.spec.ts line 18
+    #[test]
+    fn terraform_version_passes_through_non_alias_literal() {
+        let dep = extract("latest", "terraform-version").unwrap();
+        assert_eq!(dep.tool, "terraform");
+        assert_eq!(dep.current_value, "latest");
         assert_eq!(
             dep.datasource,
             AsdfDatasource::GithubReleases {
