@@ -202,11 +202,15 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
                 current_digest: None,
                 package_name: None,
                 input_type: locked.input_type.clone(),
-                skip_reason: Some(if locked.input_type == FlakeInputType::Path {
-                    NixSkipReason::LocalPath
-                } else {
-                    NixSkipReason::Indirect
-                }),
+                skip_reason: Some(
+                    if locked.input_type == FlakeInputType::Path
+                        || original.input_type == FlakeInputType::Path
+                    {
+                        NixSkipReason::LocalPath
+                    } else {
+                        NixSkipReason::Indirect
+                    },
+                ),
             });
             continue;
         }
@@ -383,6 +387,114 @@ mod tests {
             Some("https://github.com/NixOS/nixpkgs")
         );
         assert!(np.skip_reason.is_none());
+    }
+
+    // Ported: "returns null when original inputs are from local path" — nix/extract.spec.ts line 121
+    #[test]
+    fn original_path_input_is_skipped_as_local_path() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1720031269,
+        "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "path"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::LocalPath));
+    }
+
+    // Ported: "returns null when locked inputs are indirect" — nix/extract.spec.ts line 153
+    #[test]
+    fn locked_indirect_input_is_skipped() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1720031269,
+        "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+        "type": "indirect"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::Indirect));
+    }
+
+    // Ported: "returns null when locked inputs are from local path" — nix/extract.spec.ts line 185
+    #[test]
+    fn locked_path_input_is_skipped_as_local_path() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1720031269,
+        "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+        "type": "path"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::LocalPath));
     }
 
     // Ported: "includes nixpkgs with no explicit ref" — nix/extract.spec.ts line 260
@@ -624,6 +736,73 @@ mod tests {
         );
         assert_eq!(deps[0].input_type, FlakeInputType::Git);
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes nixpkgs but using indirect type that cannot be updated" — nix/extract.spec.ts line 494
+    #[test]
+    fn original_indirect_input_is_skipped() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1728538411,
+        "narHash": "sha256-f0SBJz1eZ2yOuKUr5CA9BHULGXVSn6miBuUWdTyhUhU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b69de56fac8c2b6f8fd27f2eca01dcda8e0a4221",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::Indirect));
+    }
+
+    // Ported: "includes nixpkgs but using indirect type and path locked type that cannot be updated" — nix/extract.spec.ts line 524
+    #[test]
+    fn original_indirect_locked_path_input_is_skipped_as_local_path() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1687274257,
+        "narHash": "sha256-TutzPriQcZ8FghDhEolnHcYU2oHIG5XWF+/SUBNnAOE=",
+        "path": "/nix/store/22qgs3skscd9bmrxv9xv4q5d4wwm5ppx-source",
+        "rev": "2c9ecd1f0400076a4d6b2193ad468ff0a7e7fdc5",
+        "type": "path"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].skip_reason, Some(NixSkipReason::LocalPath));
     }
 
     // Ported: "includes flake from GitHub Enterprise" — nix/extract.spec.ts line 553

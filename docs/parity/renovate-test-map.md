@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1437 / 1650 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1442 / 1650 actionable tests ported (87%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 22 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 27 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2202,9 +2202,9 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null when no inputs | 59 | pending | — | — | Requires flake.nix + flake.lock integration |
 | returns null when inputs are missing locked | 71 | pending | — | — | Requires flake.lock locked-section validation |
 | returns null when inputs are missing original | 95 | pending | — | — | Requires flake.lock original-section validation |
-| returns null when original inputs are from local path | 121 | pending | — | — | Requires path-input filtering |
-| returns null when locked inputs are indirect | 153 | pending | — | — | Requires indirect-input filtering |
-| returns null when locked inputs are from local path | 185 | pending | — | — | Requires path-input filtering |
+| returns null when original inputs are from local path | 121 | ported | `nix.rs` | `original_path_input_is_skipped_as_local_path` | — |
+| returns null when locked inputs are indirect | 153 | ported | `nix.rs` | `locked_indirect_input_is_skipped` | — |
+| returns null when locked inputs are from local path | 185 | ported | `nix.rs` | `locked_path_input_is_skipped_as_local_path` | — |
 | returns nixpkgs input | 217 | ported | `nix.rs` | `extracts_nixpkgs_correctly` | — |
 | includes nixpkgs with no explicit ref | 260 | ported | `nix.rs` | `includes_nixpkgs_with_no_explicit_ref` | — |
 | includes patchelf from HEAD | 300 | ported | `nix.rs` | `includes_git_input_from_head` | — |
@@ -2212,8 +2212,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes home-manager from gitlab | 399 | ported | `nix.rs` | `includes_gitlab_input` | — |
 | test other version | 440 | ported | `nix.rs` | `other_lockfile_version_returns_empty` | — |
 | includes nixpkgs with ref and shallow arguments | 452 | ported | `nix.rs` | `includes_git_input_with_ref_and_shallow_arguments` | — |
-| includes nixpkgs but using indirect type that cannot be updated | 494 | pending | — | — | Requires indirect-type skip-reason |
-| includes nixpkgs but using indirect type and path locked type that cannot be updated | 524 | pending | — | — | Requires indirect+path-type skip-reason |
+| includes nixpkgs but using indirect type that cannot be updated | 494 | ported | `nix.rs` | `original_indirect_input_is_skipped` | — |
+| includes nixpkgs but using indirect type and path locked type that cannot be updated | 524 | ported | `nix.rs` | `original_indirect_locked_path_input_is_skipped_as_local_path` | — |
 | includes flake from GitHub Enterprise | 553 | ported | `nix.rs` | `includes_github_enterprise_input` | — |
 | includes flake with tarball type | 649 | ported | `nix.rs` | `includes_tarball_input_with_archive_url` | — |
 | uri decode gitlab subgroup | 750 | ported | `nix.rs` | `decodes_gitlab_subgroup_owner` | — |
