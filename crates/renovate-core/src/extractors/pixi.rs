@@ -53,6 +53,8 @@ pub struct PixiDep {
     pub dep_name: String,
     pub current_value: String,
     pub source: PixiSource,
+    pub channels: Vec<String>,
+    pub registry_strategy: Option<&'static str>,
     pub skip_reason: Option<PixiSkipReason>,
 }
 
@@ -79,12 +81,14 @@ pub fn extract(content: &str) -> Vec<PixiDep> {
     };
 
     let channels_present = has_channels(table);
+    let base_channels = collect_base_channels(table);
+    let registry_strategy = registry_strategy(table);
     let mut deps = Vec::new();
 
     // `[dependencies]` → Conda
     if let Some(Value::Table(conda_deps)) = table.get("dependencies") {
         for (name, spec) in conda_deps {
-            let mut dep = parse_conda_dep(name, spec);
+            let mut dep = parse_conda_dep(name, spec, &base_channels, registry_strategy);
             if !channels_present && dep.skip_reason.is_none() {
                 dep.skip_reason = Some(PixiSkipReason::UnknownRegistry);
             }
@@ -104,8 +108,9 @@ pub fn extract(content: &str) -> Vec<PixiDep> {
         for (_feat_name, feat_val) in features {
             if let Some(Value::Table(feat_table)) = Some(feat_val) {
                 if let Some(Value::Table(conda_deps)) = feat_table.get("dependencies") {
+                    let channels = collect_feature_channels(feat_table, &base_channels);
                     for (name, spec) in conda_deps {
-                        deps.push(parse_conda_dep(name, spec));
+                        deps.push(parse_conda_dep(name, spec, &channels, registry_strategy));
                     }
                 }
                 if let Some(Value::Table(pypi_deps)) = feat_table.get("pypi-dependencies") {
@@ -135,11 +140,18 @@ pub fn extract_from_pyproject(content: &str) -> Vec<PixiDep> {
         return Vec::new();
     };
 
+    let base_channels = collect_base_channels(pixi_table);
+    let registry_strategy = registry_strategy(pixi_table);
     let mut deps = Vec::new();
 
     if let Some(Value::Table(conda_deps)) = pixi_table.get("dependencies") {
         for (name, spec) in conda_deps {
-            deps.push(parse_conda_dep(name, spec));
+            deps.push(parse_conda_dep(
+                name,
+                spec,
+                &base_channels,
+                registry_strategy,
+            ));
         }
     }
 
@@ -153,8 +165,9 @@ pub fn extract_from_pyproject(content: &str) -> Vec<PixiDep> {
         for (_feat_name, feat_val) in features {
             if let Some(Value::Table(feat_table)) = Some(feat_val) {
                 if let Some(Value::Table(conda_deps)) = feat_table.get("dependencies") {
+                    let channels = collect_feature_channels(feat_table, &base_channels);
                     for (name, spec) in conda_deps {
-                        deps.push(parse_conda_dep(name, spec));
+                        deps.push(parse_conda_dep(name, spec, &channels, registry_strategy));
                     }
                 }
                 if let Some(Value::Table(pypi_deps)) = feat_table.get("pypi-dependencies") {
@@ -176,29 +189,103 @@ fn parse_pypi_dep(name: &str, spec: &Value) -> PixiDep {
             dep_name: name.to_owned(),
             current_value: v,
             source: PixiSource::Pypi,
+            channels: Vec::new(),
+            registry_strategy: None,
             skip_reason: None,
         },
         None => PixiDep {
             dep_name: name.to_owned(),
             current_value: String::new(),
             source: PixiSource::Pypi,
+            channels: Vec::new(),
+            registry_strategy: None,
             skip_reason: Some(PixiSkipReason::UnspecifiedVersion),
         },
     }
 }
 
-fn parse_conda_dep(name: &str, spec: &Value) -> PixiDep {
+fn parse_conda_dep(
+    name: &str,
+    spec: &Value,
+    channels: &[String],
+    registry_strategy: Option<&'static str>,
+) -> PixiDep {
     let version = extract_version(spec);
     PixiDep {
         dep_name: name.to_owned(),
         current_value: version.clone().unwrap_or_default(),
         source: PixiSource::Conda,
+        channels: channels.to_vec(),
+        registry_strategy,
         skip_reason: if version.is_none() || version.as_deref() == Some("") {
             Some(PixiSkipReason::UnspecifiedVersion)
         } else {
             None
         },
     }
+}
+
+fn registry_strategy(table: &toml::Table) -> Option<&'static str> {
+    table
+        .get("project")
+        .or_else(|| table.get("workspace"))
+        .and_then(Value::as_table)
+        .and_then(|t| t.get("channel-priority"))
+        .and_then(Value::as_str)
+        .filter(|priority| *priority == "disabled")
+        .map(|_| "merge")
+}
+
+fn collect_base_channels(table: &toml::Table) -> Vec<String> {
+    ["project", "workspace"]
+        .iter()
+        .find_map(|section| {
+            table
+                .get(*section)
+                .and_then(Value::as_table)
+                .and_then(|t| t.get("channels"))
+                .and_then(channels_from_value)
+        })
+        .unwrap_or_default()
+}
+
+fn collect_feature_channels(feat_table: &toml::Table, base_channels: &[String]) -> Vec<String> {
+    let mut channels = feat_table
+        .get("channels")
+        .and_then(channels_from_value)
+        .unwrap_or_default();
+    channels.extend_from_slice(base_channels);
+    channels
+}
+
+fn channels_from_value(value: &Value) -> Option<Vec<String>> {
+    let Value::Array(values) = value else {
+        return None;
+    };
+
+    let mut channels: Vec<(usize, usize, String)> = values
+        .iter()
+        .enumerate()
+        .filter_map(|(index, value)| match value {
+            Value::String(channel) => Some((usize::MAX, index, channel.clone())),
+            Value::Table(table) => table.get("channel").and_then(Value::as_str).map(|channel| {
+                let priority = table
+                    .get("priority")
+                    .and_then(Value::as_integer)
+                    .and_then(|priority| usize::try_from(priority).ok())
+                    .unwrap_or(usize::MAX);
+                (priority, index, channel.to_owned())
+            }),
+            _ => None,
+        })
+        .collect();
+    channels.sort_by_key(|(priority, index, _)| (*priority, *index));
+    Some(
+        channels
+            .into_iter()
+            .map(|(_, _, channel)| channel)
+            .collect(),
+    )
 }
 
 /// Extract a version string from a Pixi dep spec.
@@ -428,6 +515,75 @@ scipy = { version = "==1.15.1" }
         assert_eq!(deps[0].dep_name, "scipy");
         assert_eq!(deps[0].current_value, "==1.15.1");
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extract package with channel priority" — pixi/extract.spec.ts line 630
+    #[test]
+    fn feature_channel_priority_prepends_prioritized_channels() {
+        let content = r#"
+[project]
+channels = ["conda-forge", "conda-not-forge"]
+name = "pixi"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[feature.scipy]
+channels = ["anaconda", { channel = "cuda", priority = 1 }, { channel = "cuda2", priority = 1 }]
+dependencies = { scipy = "==1.15.1" }
+
+[feature.numpy]
+dependencies = { numpy = "==1.15.1" }
+"#;
+        let deps = extract(content);
+        let scipy = deps.iter().find(|d| d.dep_name == "scipy").unwrap();
+        assert_eq!(
+            scipy.channels,
+            vec![
+                "cuda",
+                "cuda2",
+                "anaconda",
+                "conda-forge",
+                "conda-not-forge"
+            ]
+        );
+
+        let numpy = deps.iter().find(|d| d.dep_name == "numpy").unwrap();
+        assert_eq!(numpy.channels, vec!["conda-forge", "conda-not-forge"]);
+    }
+
+    // Ported: "set registryStrategy='merge' for channel-priority='disabled'" — pixi/extract.spec.ts line 685
+    #[test]
+    fn disabled_channel_priority_sets_merge_registry_strategy() {
+        let content = r#"
+[project]
+channels = ["anaconda", "conda-forge"]
+platforms = ["win-64"]
+channel-priority = "disabled"
+
+[dependencies]
+python = "3.12.*"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].channels, vec!["anaconda", "conda-forge"]);
+        assert_eq!(deps[0].registry_strategy, Some("merge"));
+    }
+
+    // Ported: "use default registryStrategy for channel-priority='strict'" — pixi/extract.spec.ts line 706
+    #[test]
+    fn strict_channel_priority_uses_default_registry_strategy() {
+        let content = r#"
+[project]
+channels = ["anaconda", "conda-forge"]
+platforms = ["win-64"]
+
+[dependencies]
+python = "3.12.*"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].channels, vec!["anaconda", "conda-forge"]);
+        assert_eq!(deps[0].registry_strategy, None);
     }
 
     // Ported: "returns null for non-known config file" — pixi/extract.spec.ts line 681

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1357 / 1661 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1360 / 1661 actionable tests ported (82%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1911,7 +1911,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pixi/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pixi/extract.spec.ts
-**Total tests:** 16 | **Ported:** 13 | **Actionable:** 16 | **Status:** partial
+**Total tests:** 16 | **Ported:** 16 | **Actionable:** 16 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1929,10 +1929,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | extract feature with channels | 538 | ported | `pixi.rs` | `extract_feature_with_url_channel` | — |
 | skip package without channels | 571 | ported | `pixi.rs` | `skip_package_without_channels` | — |
 | extract package from with workspace | 601 | ported | `pixi.rs` | `extract_from_workspace_section` | — |
-| extract package with channel priority | 630 | pending | — | — | Requires channel-priority resolution semantics |
+| extract package with channel priority | 630 | ported | `pixi.rs` | `feature_channel_priority_prepends_prioritized_channels` | — |
 | returns null for non-known config file | 681 | ported | `pixi.rs` | `non_toml_content_returns_empty` | — |
-| set registryStrategy='merge' for channel-priority='disabled' | 685 | pending | — | — | Requires registryStrategy plumbing |
-| use default registryStrategy for channel-priority='strict' | 706 | pending | — | — | Requires registryStrategy plumbing |
+| set registryStrategy='merge' for channel-priority='disabled' | 685 | ported | `pixi.rs` | `disabled_channel_priority_sets_merge_registry_strategy` | — |
+| use default registryStrategy for channel-priority='strict' | 706 | ported | `pixi.rs` | `strict_channel_priority_uses_default_registry_strategy` | — |
 
 ---
 
