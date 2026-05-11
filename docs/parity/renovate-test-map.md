@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1342 / 1672 actionable tests ported (80%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1349 / 1672 actionable tests ported (81%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,20 +4295,20 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 51 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 58 | **Actionable:** 73 | **Status:** partial
 
 ### `util/package-rules/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | applies | 38 | ported | `repo_config.rs` | `applies_comprehensive_integration` | — |
-| applies both rules for a | 71 | pending | — | — | — |
-| applies both rules for b | 81 | pending | — | — | — |
-| applies the second rule | 91 | pending | — | — | — |
-| applies matchPackageNames | 101 | pending | — | — | — |
-| applies the second second rule | 109 | pending | — | — | — |
-| excludes package name | 118 | pending | — | — | — |
-| excludes package pattern | 127 | pending | — | — | — |
+| applies both rules for a | 71 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
+| applies both rules for b | 81 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
+| applies the second rule | 91 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
+| applies matchPackageNames | 101 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
+| applies the second second rule | 109 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
+| excludes package name | 118 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
+| excludes package pattern | 127 | ported | `repo_config.rs` | `package_rules_index_fixture_name_matching_cases` | — |
 | ignores patterns if lock file maintenance | 136 | pending | — | — | — |
 | do apply rule with matchPackageName | 152 | pending | — | — | — |
 | sets skipReason=package-rules if enabled=false | 169 | ported | `repo_config.rs` | `enabled_false_rule_blocks_dependency` | Rust tracks the equivalent blocked state, not the worker-layer skipReason fields |

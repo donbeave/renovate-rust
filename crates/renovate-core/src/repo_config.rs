@@ -6560,6 +6560,55 @@ mod tests {
         );
     }
 
+    // Ported: "applies both rules for a" — util/package-rules/index.spec.ts line 71
+    // Ported: "applies both rules for b" — util/package-rules/index.spec.ts line 81
+    // Ported: "applies the second rule" — util/package-rules/index.spec.ts line 91
+    // Ported: "applies matchPackageNames" — util/package-rules/index.spec.ts line 101
+    // Ported: "applies the second second rule" — util/package-rules/index.spec.ts line 109
+    // Ported: "excludes package name" — util/package-rules/index.spec.ts line 118
+    // Ported: "excludes package pattern" — util/package-rules/index.spec.ts line 127
+    #[test]
+    fn package_rules_index_fixture_name_matching_cases() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchPackageNames": ["a", "b", "xyz/**", "!xyz/foo**"], "automerge": true},
+                {"matchPackageNames": ["/a/", "/b/", "!aa", "!/d/"], "labels": ["regex-rule"]},
+                {"matchPackageNames": ["xyz/**", "!xyz/foo"], "groupName": "xyz"}
+            ]}"#,
+        );
+
+        for dep in ["a", "b"] {
+            let effects = c.collect_rule_effects(&DepContext::for_dep(dep));
+            assert_eq!(effects.automerge, Some(true), "{dep} matches first rule");
+            assert_eq!(
+                effects.labels,
+                vec!["regex-rule"],
+                "{dep} matches second rule"
+            );
+            assert_eq!(effects.group_name, None, "{dep} must not match xyz group");
+        }
+
+        for dep in ["abc", "bc"] {
+            let effects = c.collect_rule_effects(&DepContext::for_dep(dep));
+            assert_eq!(effects.automerge, None, "{dep} must not match first rule");
+            assert_eq!(
+                effects.labels,
+                vec!["regex-rule"],
+                "{dep} matches second rule"
+            );
+            assert_eq!(effects.group_name, None, "{dep} must not match xyz group");
+        }
+
+        for dep in ["xyz/foo", "aa", "bcd"] {
+            let effects = c.collect_rule_effects(&DepContext::for_dep(dep));
+            assert_eq!(
+                effects,
+                RuleEffects::default(),
+                "{dep} must be excluded by the fixture's negated pattern"
+            );
+        }
+    }
+
     #[test]
     fn match_datasources_glob_pattern() {
         let c = RepoConfig::parse(
