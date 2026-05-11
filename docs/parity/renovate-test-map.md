@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 874 / 1217 actionable tests ported (72%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 880 / 1217 actionable tests ported (72%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2152,7 +2152,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 26 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 32 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2187,12 +2187,12 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns new_git_repository dependencies | 820 | ported | `bazel_module.rs` | `extracts_new_git_repository_dependency` | — |
 | handles a real-world MODULE.bazel file (rules_sh) | 846 | ported | `bazel_module.rs` | `extracts_rules_sh_real_world_module_bazel` | — |
 | handles every method available in MODULE.bazel files | 887 | pending | — | — | Requires comprehensive MODULE.bazel coverage |
-| returns rules_img pull dependencies | 1005 | pending | — | — | Requires rules_img.pull extraction |
-| returns rules_img pull dependencies with custom registry | 1051 | pending | — | — | Requires rules_img.pull custom-registry handling |
-| returns rules_img pull dependencies with multiple pulls | 1086 | pending | — | — | Requires rules_img.pull multiple-pulls handling |
-| ignores rules_img pull without required fields | 1141 | pending | — | — | Requires rules_img.pull required-field validation |
-| handles rules_img with renamed variable | 1161 | pending | — | — | Requires rules_img renamed-variable resolution |
-| ignores non-rules_img repo rules | 1193 | pending | — | — | Requires rules_img repo-rule filter |
+| returns rules_img pull dependencies | 1005 | ported | `bazel_module.rs` | `extracts_rules_img_pull_dependency` | — |
+| returns rules_img pull dependencies with custom registry | 1051 | ported | `bazel_module.rs` | `extracts_rules_img_pull_dependency_with_custom_registry` | — |
+| returns rules_img pull dependencies with multiple pulls | 1086 | ported | `bazel_module.rs` | `extracts_multiple_rules_img_pull_dependencies` | — |
+| ignores rules_img pull without required fields | 1141 | ported | `bazel_module.rs` | `ignores_rules_img_pull_without_required_fields` | — |
+| handles rules_img with renamed variable | 1161 | ported | `bazel_module.rs` | `extracts_rules_img_pull_dependency_with_renamed_variable` | — |
+| ignores non-rules_img repo rules | 1193 | ported | `bazel_module.rs` | `ignores_non_rules_img_repo_rules` | — |
 
 ---
 

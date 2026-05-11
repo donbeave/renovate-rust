@@ -86,6 +86,18 @@ pub struct BazelGitRepositoryDep {
     pub dep_type: &'static str,
 }
 
+/// A dependency extracted from `rules_img` pull repository rules.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazelRulesImgPullDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub registry_urls: Vec<String>,
+    pub datasource: &'static str,
+    pub dep_type: &'static str,
+}
+
 /// Which Bazel module declaration produced the dep.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BazelModuleDepType {
@@ -160,6 +172,14 @@ static GIT_REPOSITORY_BLOCK_RE: LazyLock<Regex> =
 /// Matches a `new_git_repository(...)` call.
 static NEW_GIT_REPOSITORY_BLOCK_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)new_git_repository\s*\(([^)]+)\)").unwrap());
+
+/// Captures aliases assigned from the rules_img pull repo rule.
+static RULES_IMG_PULL_ALIAS_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r#"(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*use_repo_rule\(\s*['"]@rules_img//img:pull\.bzl['"]\s*,\s*['"]pull['"]\s*\)"#,
+    )
+    .unwrap()
+});
 
 /// Extracts `name = "value"` or `name = 'value'` from a call argument list.
 static ATTR_RE: LazyLock<Regex> =
@@ -436,6 +456,15 @@ pub fn extract_git_repository_deps(content: &str) -> Vec<BazelGitRepositoryDep> 
     deps
 }
 
+/// Extract Docker image dependencies from `rules_img` pull repo rule aliases.
+pub fn extract_rules_img_pull_deps(content: &str) -> Vec<BazelRulesImgPullDep> {
+    let stripped = strip_comments(content);
+    rules_img_pull_aliases(&stripped)
+        .into_iter()
+        .flat_map(|alias| parse_rules_img_pull_alias(&stripped, &alias))
+        .collect()
+}
+
 fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
     let mut deps = Vec::new();
     deps.extend(parse_named_overrides(
@@ -572,6 +601,47 @@ fn parse_git_repository_deps(
                 current_digest: attrs.get("commit").cloned(),
                 datasource: "github-tags",
                 dep_type,
+            })
+        })
+        .collect()
+}
+
+fn rules_img_pull_aliases(content: &str) -> Vec<String> {
+    RULES_IMG_PULL_ALIAS_RE
+        .captures_iter(content)
+        .map(|cap| cap[1].to_owned())
+        .collect()
+}
+
+fn parse_rules_img_pull_alias(content: &str, alias: &str) -> Vec<BazelRulesImgPullDep> {
+    let pattern = format!(r"(?s)(?:^|[^\w.]){}\s*\(([^)]+)\)", regex::escape(alias));
+    let Ok(regex) = Regex::new(&pattern) else {
+        return Vec::new();
+    };
+
+    regex
+        .captures_iter(content)
+        .filter_map(|cap| {
+            let attrs = attrs_from_args(&cap[1]);
+            let dep_name = attrs.get("name")?.clone();
+            let repository = attrs.get("repository")?.clone();
+            let registry = attrs.get("registry").cloned();
+            let package_name = registry
+                .as_ref()
+                .map(|registry| format!("{registry}/{repository}"))
+                .unwrap_or(repository);
+            let registry_urls = registry
+                .map(|registry| vec![format!("https://{registry}")])
+                .unwrap_or_default();
+
+            Some(BazelRulesImgPullDep {
+                dep_name,
+                package_name,
+                current_value: attrs.get("tag").cloned(),
+                current_digest: attrs.get("digest").cloned(),
+                registry_urls,
+                datasource: "docker",
+                dep_type: "rules_img_pull",
             })
         })
         .collect()
@@ -1075,6 +1145,150 @@ register_toolchains("@local_posix_config//...")
         assert_eq!(deps[2].current_value, "0.6.2");
         assert!(deps[2].dev_dependency);
         assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
+    }
+
+    // Ported: "returns rules_img pull dependencies" — bazel-module/extract.spec.ts line 1005
+    #[test]
+    fn extracts_rules_img_pull_dependency() {
+        let input = r#"
+bazel_dep(name = "rules_img", version = "0.1.0")
+pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+pull(
+    name = "ubuntu",
+    digest = "sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9",
+    registry = "index.docker.io",
+    repository = "library/ubuntu",
+    tag = "24.04",
+)
+"#;
+        let bazel_deps = extract(input);
+        assert_eq!(bazel_deps.len(), 1);
+        assert_eq!(bazel_deps[0].name, "rules_img");
+        assert_eq!(bazel_deps[0].current_value, "0.1.0");
+
+        let image_deps = extract_rules_img_pull_deps(input);
+        assert_eq!(image_deps.len(), 1);
+        assert_eq!(image_deps[0].datasource, "docker");
+        assert_eq!(image_deps[0].dep_type, "rules_img_pull");
+        assert_eq!(image_deps[0].dep_name, "ubuntu");
+        assert_eq!(image_deps[0].package_name, "index.docker.io/library/ubuntu");
+        assert_eq!(image_deps[0].current_value.as_deref(), Some("24.04"));
+        assert_eq!(
+            image_deps[0].current_digest.as_deref(),
+            Some("sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9")
+        );
+        assert_eq!(image_deps[0].registry_urls, vec!["https://index.docker.io"]);
+    }
+
+    // Ported: "returns rules_img pull dependencies with custom registry" — bazel-module/extract.spec.ts line 1051
+    #[test]
+    fn extracts_rules_img_pull_dependency_with_custom_registry() {
+        let input = r#"
+pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+pull(
+    name = "my_image",
+    registry = "my.registry.com",
+    repository = "myorg/myimage",
+    tag = "v1.2.3",
+)
+"#;
+        let deps = extract_rules_img_pull_deps(input);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "my_image");
+        assert_eq!(deps[0].package_name, "my.registry.com/myorg/myimage");
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.2.3"));
+        assert_eq!(deps[0].current_digest, None);
+        assert_eq!(deps[0].registry_urls, vec!["https://my.registry.com"]);
+    }
+
+    // Ported: "returns rules_img pull dependencies with multiple pulls" — bazel-module/extract.spec.ts line 1086
+    #[test]
+    fn extracts_multiple_rules_img_pull_dependencies() {
+        let input = r#"
+pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+pull(
+    name = "ubuntu",
+    repository = "library/ubuntu",
+    tag = "24.04",
+)
+pull(
+    name = "nginx",
+    repository = "library/nginx",
+    tag = "1.27.1",
+    digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+)
+"#;
+        let deps = extract_rules_img_pull_deps(input);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "ubuntu");
+        assert_eq!(deps[0].package_name, "library/ubuntu");
+        assert_eq!(deps[0].current_value.as_deref(), Some("24.04"));
+        assert_eq!(deps[0].current_digest, None);
+        assert!(deps[0].registry_urls.is_empty());
+        assert_eq!(deps[1].dep_name, "nginx");
+        assert_eq!(deps[1].package_name, "library/nginx");
+        assert_eq!(deps[1].current_value.as_deref(), Some("1.27.1"));
+        assert_eq!(
+            deps[1].current_digest.as_deref(),
+            Some("sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720")
+        );
+    }
+
+    // Ported: "ignores rules_img pull without required fields" — bazel-module/extract.spec.ts line 1141
+    #[test]
+    fn ignores_rules_img_pull_without_required_fields() {
+        let input = r#"
+pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+# Missing repository
+pull(
+    name = "missing_repo",
+    tag = "1.0.0",
+)
+# Missing name
+pull(
+    repository = "library/ubuntu",
+    tag = "24.04",
+)
+"#;
+        assert!(extract_rules_img_pull_deps(input).is_empty());
+    }
+
+    // Ported: "handles rules_img with renamed variable" — bazel-module/extract.spec.ts line 1161
+    #[test]
+    fn extracts_rules_img_pull_dependency_with_renamed_variable() {
+        let input = r#"
+my_pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+my_pull(
+    name = "ubuntu",
+    repository = "library/ubuntu",
+    tag = "24.04",
+)
+"#;
+        let deps = extract_rules_img_pull_deps(input);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "ubuntu");
+        assert_eq!(deps[0].package_name, "library/ubuntu");
+        assert_eq!(deps[0].current_value.as_deref(), Some("24.04"));
+    }
+
+    // Ported: "ignores non-rules_img repo rules" — bazel-module/extract.spec.ts line 1193
+    #[test]
+    fn ignores_non_rules_img_repo_rules() {
+        let input = r#"
+bazel_dep(name = "some_rules", version = "0.1.0")
+
+other_rule = use_repo_rule("@some_rules//some:rule.bzl", "other")
+
+other_rule(
+    name = "test",
+    value = "something",
+)
+"#;
+        let bazel_deps = extract(input);
+        assert_eq!(bazel_deps.len(), 1);
+        assert_eq!(bazel_deps[0].name, "some_rules");
+        assert_eq!(bazel_deps[0].current_value, "0.1.0");
+        assert!(extract_rules_img_pull_deps(input).is_empty());
     }
 
     // Ported: "returns bazel_dep and archive_override dependencies" — bazel-module/extract.spec.ts line 148
