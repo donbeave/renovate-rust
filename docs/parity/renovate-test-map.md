@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 815 / 1217 actionable tests ported (67%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 816 / 1217 actionable tests ported (67%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2278,7 +2278,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 29 | **Ported:** 7 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 8 | **Actionable:** 29 | **Status:** partial
 
 ### `extractPackage`
 
@@ -2286,7 +2286,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 |---|---|---|---|---|---|
 | returns null for invalid XML | 22 | ported | `maven.rs` | `empty_pom_returns_empty` (+ multiline_element_values_trimmed) | — |
 | extract dependencies from any XML position | 29 | ported | `maven.rs` | `extracts_regular_dependencies` (+ extracts_parent, extracts_dependency_management, extracts_build_plugins, plugin_default_group_id, extracts_build_extensions, property_resolved_from_properties_section, profile_dependencies_extracted) | — |
-| extract dependencies with windows line endings | 237 | pending | — | — | Requires CRLF tolerance test path |
+| extract dependencies with windows line endings | 237 | ported | `maven.rs` | `windows_line_endings_are_tolerated` | — |
 | tries minimum manifests | 249 | ported | `maven.rs` | `extracts_regular_dependencies` | — |
 | tries minimum snapshot manifests | 264 | ported | `maven.rs` | `extracts_regular_dependencies` | — |
 | extracts builder and buildpack images from spring-boot plugin | 279 | pending | — | — | Requires spring-boot plugin builder/buildpack extraction |

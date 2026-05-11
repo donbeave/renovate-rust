@@ -842,6 +842,16 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.0.0");
     }
 
+    // Ported: "extract dependencies with windows line endings" — maven/extract.spec.ts line 237
+    #[test]
+    fn windows_line_endings_are_tolerated() {
+        let content = "<project>\r\n  <dependencies>\r\n    <dependency>\r\n      <groupId>org.example</groupId>\r\n      <artifactId>demo</artifactId>\r\n      <version>1.2.3</version>\r\n    </dependency>\r\n  </dependencies>\r\n</project>\r\n";
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "org.example:demo");
+        assert_eq!(deps[0].current_value, "1.2.3");
+    }
+
     #[test]
     fn dep_type_as_renovate_str() {
         // Renovate uses scope-based dep types for Maven (compile, test, etc.)
