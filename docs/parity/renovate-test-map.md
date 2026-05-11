@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1408 / 1653 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1409 / 1653 actionable tests ported (85%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2891,7 +2891,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/npm/extract/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/index.spec.ts
-**Total tests:** 41 | **Ported:** 6 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 41 | **Ported:** 7 | **Actionable:** 20 | **Status:** partial
 
 ### `modules/manager/npm/extract/index › .extractPackageFile()`
 
@@ -2904,7 +2904,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns null if no deps | 77 | ported | `npm.rs` | `empty_package_json_returns_empty_list` | — |
 | handles invalid | 86 | ported | `npm.rs` | `package_json_invalid_dependency_sections_return_empty` | — |
 | returns an array of dependencies | 95 | ported | `npm.rs` | `package_json_fixture_extracts_dependency_array` | — |
-| returns an array of dependencies with resolution comments | 122 | pending | — | — | — |
+| returns an array of dependencies with resolution comments | 122 | ported | `npm.rs` | `package_json_resolution_comments_are_invalid_names` | — |
 | finds a lock file | 151 | not-applicable | — | — | Requires async sibling file reads and managerData lockfile wrapper; Rust package.json extractor is content-only |
 | warns when multiple lock files found | 170 | not-applicable | — | — | Requires async sibling file reads, logging, and managerData lockfile wrapper; Rust package.json extractor is content-only |
 | finds and filters .npmrc | 197 | not-applicable | — | — | Requires async .npmrc discovery/filtering wrapper; Rust package.json extractor is content-only |

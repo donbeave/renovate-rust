@@ -671,10 +671,10 @@ fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmEx
         DependencySpec::Version(value) => value.clone(),
         DependencySpec::InvalidValue => String::new(),
     };
-    let skip_reason = if matches!(value, DependencySpec::InvalidValue) {
-        Some(NpmSkipReason::InvalidValue)
-    } else if invalid_package_name(&name) {
+    let skip_reason = if invalid_package_name(&name) {
         Some(NpmSkipReason::InvalidName)
+    } else if matches!(value, DependencySpec::InvalidValue) {
+        Some(NpmSkipReason::InvalidValue)
     } else {
         skip_reason_for(&current_value)
     };
@@ -1554,6 +1554,46 @@ chalk@^2.4.1:
 
         let enabled = deps.iter().find(|dep| dep.name == "enabled").unwrap();
         assert_eq!(enabled.skip_reason, Some(NpmSkipReason::InvalidValue));
+    }
+
+    // Ported: "returns an array of dependencies with resolution comments" — npm/extract/index.spec.ts line 122
+    #[test]
+    fn package_json_resolution_comments_are_invalid_names() {
+        let json = r#"{
+          "dependencies": {
+            "autoprefixer": "6.5.0",
+            "bower": "~1.6.0",
+            "browserify": "13.1.0",
+            "browserify-css": "0.9.2",
+            "cheerio": "=0.22.0",
+            "config": "1.21.0"
+          },
+          "devDependencies": {
+            "enabled": false,
+            "angular": "^1.5.8",
+            "angular-touch": "1.5.8",
+            "angular-sanitize": "1.5.8",
+            "@angular/core": "4.0.0-beta.1"
+          },
+          "resolutions": {
+            "//": ["This is a comment"],
+            "**/config": "1.21.0"
+          }
+        }"#;
+        let deps = extract_ok(json);
+
+        assert_eq!(deps.len(), 13);
+        assert!(deps.iter().any(|dep| {
+            dep.name == "config"
+                && dep.current_value == "1.21.0"
+                && dep.dep_type == NpmDepType::Resolutions
+                && dep.skip_reason.is_none()
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name.is_empty()
+                && dep.dep_type == NpmDepType::Resolutions
+                && dep.skip_reason == Some(NpmSkipReason::InvalidName)
+        }));
     }
 
     #[test]
