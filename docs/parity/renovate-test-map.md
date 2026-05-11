@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1466 / 1657 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1475 / 1657 actionable tests ported (89%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2554,7 +2554,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
-**Total tests:** 26 | **Ported:** 7 | **Actionable:** 26 | **Status:** partial
+**Total tests:** 26 | **Ported:** 16 | **Actionable:** 26 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2563,18 +2563,18 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns null for empty | 23 | ported | `sbt.rs` | `empty_returns_empty` (+ build_properties_extraction) | — |
 | extracts deps for generic use-cases | 47 | ported | `sbt.rs` | `extracts_scala_style_deps` (+ extracts_java_style_deps, extracts_plugin, comment_line_skipped, dep_name_formats_correctly) | — |
 | extracts deps when scala version is defined in a variable | 74 | pending | — | — | Requires scalaVersion := Var resolution |
-| extracts deps when scala version is defined in an object | 99 | pending | — | — | Requires scalaVersion := Obj.field resolution |
+| extracts deps when scala version is defined in an object | 99 | ported | `sbt.rs` | `package_file_resolves_object_variables` | — |
 | skips deps when dotted symbolds do not resolve to anything | 136 | pending | — | — | Requires unresolved-symbol skip path |
-| extracts packageFileVersion when scala version is defined in a variable | 159 | pending | — | — | Requires packageFileVersion plumbing |
-| extracts typed variables | 170 | pending | — | — | Requires typed `val x: T = "..."` parsing |
+| extracts packageFileVersion when scala version is defined in a variable | 159 | ported | `sbt.rs` | `package_file_resolves_package_file_version_variable` | — |
+| extracts typed variables | 170 | ported | `sbt.rs` | `package_file_resolves_typed_variables` | — |
 | skips deps when scala version is missing | 185 | pending | — | — | Requires scala-version-missing skip path |
 | extract deps from native scala file with variables | 213 | pending | — | — | Requires .scala build file variable resolution |
-| extracts deps when scala version is defined with a trailing comma | 232 | pending | — | — | Requires trailing-comma tolerance |
-| extracts deps when scala version is defined in a variable with a trailing comma | 253 | pending | — | — | Requires trailing-comma tolerance |
-| extracts deps when scala version is defined with ThisBuild scope | 275 | pending | — | — | Requires ThisBuild scope handling |
-| extracts correct scala library when dealing with scala 3 | 294 | pending | — | — | Requires Scala 3 library naming |
-| extracts deps correctly when dealing with scala 3 | 309 | pending | — | — | Requires Scala 3 dep resolution |
-| extracts deps when scala version is defined in a variable with ThisBuild scope | 329 | pending | — | — | Requires ThisBuild + variable resolution |
+| extracts deps when scala version is defined with a trailing comma | 232 | ported | `sbt.rs` | `package_file_resolves_scala_version_with_trailing_comma` | — |
+| extracts deps when scala version is defined in a variable with a trailing comma | 253 | ported | `sbt.rs` | `package_file_resolves_variable_scala_version_with_trailing_comma` | — |
+| extracts deps when scala version is defined with ThisBuild scope | 275 | ported | `sbt.rs` | `package_file_resolves_thisbuild_scala_version` | — |
+| extracts correct scala library when dealing with scala 3 | 294 | ported | `sbt.rs` | `package_file_extracts_scala3_library` | — |
+| extracts deps correctly when dealing with scala 3 | 309 | ported | `sbt.rs` | `package_file_resolves_scala3_cross_dependencies` | — |
+| extracts deps when scala version is defined in a variable with ThisBuild scope | 329 | ported | `sbt.rs` | `package_file_resolves_thisbuild_variable_scala_version` | — |
 | extract deps from native scala file with private variables | 349 | pending | — | — | Requires private variable resolution in .scala files |
 | extract deps when they are defined in a new line | 371 | pending | — | — | Requires multi-line dep continuation parsing |
 | extract deps with comment | 412 | ported | `sbt.rs` | `extracts_dependencies_with_trailing_comments` | — |

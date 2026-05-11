@@ -61,6 +61,24 @@ pub struct SbtDep {
     pub dep_type: SbtDepType,
 }
 
+/// Resolved package-file dependency with SBT/Scala cross-version context applied.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SbtResolvedDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub dep_type: SbtDepType,
+    pub shared_variable_name: Option<String>,
+}
+
+/// Extracted `build.sbt`/Scala package-file data.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SbtPackageFile {
+    pub deps: Vec<SbtResolvedDep>,
+    pub package_file_version: Option<String>,
+    pub scala_version: Option<String>,
+}
+
 impl SbtDep {
     /// Maven `group:artifact` coordinates.
     pub fn dep_name(&self) -> String {
@@ -74,6 +92,41 @@ impl SbtDep {
 static DEP_EXPR: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
         r#""(?P<group>[^"]+)"\s+(?P<op>%%?)\s+"(?P<artifact>[^"]+)"\s+%\s+"(?P<version>[^"]+)""#,
+    )
+    .unwrap()
+});
+
+/// Matches `"group" %%? "artifact" % versionToken` in a dependency expression.
+static DEP_EXPR_TOKEN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r#""(?P<group>[^"]+)"\s+(?P<op>%%?)\s+"(?P<artifact>[^"]+)"\s+%\s+(?P<version>"[^"]+"|[A-Za-z_][A-Za-z0-9_\.]*)"#,
+    )
+    .unwrap()
+});
+
+/// Matches string variables such as `val Version: String = "1.2.3"`.
+static STRING_VAR: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r#"(?:(?:private|lazy)\s+)?val\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*(?::\s*String)?\s*=\s*"(?P<value>[^"]+)""#,
+    )
+    .unwrap()
+});
+
+/// Matches object fields such as `scala = "2.12.10"` inside `val versions = new { ... }`.
+static OBJECT_FIELD: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*"(?P<value>[^"]+)""#).unwrap()
+});
+
+/// Matches object declarations such as `val versions = new {`.
+static OBJECT_DECL: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(?:(?:private|lazy)\s+)?val\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*new\s*\{"#)
+        .unwrap()
+});
+
+/// Matches setting assignments such as `ThisBuild / scalaVersion := ScalaVersion,`.
+static SETTING_ASSIGN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r#"(?:(?:ThisBuild|Global|LocalRootProject)\s*/\s*)?(?P<key>scalaVersion|version)\s*:=\s*(?P<value>"[^"]+"|[A-Za-z_][A-Za-z0-9_\.]*)"#,
     )
     .unwrap()
 });
@@ -114,6 +167,81 @@ pub fn extract(content: &str) -> Vec<SbtDep> {
     out
 }
 
+/// Extract SBT package-file metadata with variables and Scala cross-version package names resolved.
+pub fn extract_package_file(content: &str) -> Option<SbtPackageFile> {
+    let variables = collect_string_variables(content);
+    let mut scala_version = None;
+    let mut package_file_version = None;
+    let mut deps = Vec::new();
+
+    for raw in content.lines() {
+        let line = strip_line_comment(raw).trim_end();
+        for cap in SETTING_ASSIGN.captures_iter(line) {
+            let value = resolve_token(&cap["value"], &variables);
+            match &cap["key"] {
+                "scalaVersion" => scala_version = value,
+                "version" => package_file_version = value,
+                _ => {}
+            }
+        }
+    }
+
+    if let Some(version) = &scala_version {
+        let artifact = scala_library_artifact(version);
+        deps.push(SbtResolvedDep {
+            dep_name: "scala".to_owned(),
+            package_name: format!("org.scala-lang:{artifact}"),
+            current_value: Some(version.clone()),
+            dep_type: SbtDepType::Library,
+            shared_variable_name: None,
+        });
+    }
+
+    for raw in content.lines() {
+        let line = strip_line_comment(raw).trim_end();
+        let is_plugin = line.contains("addSbtPlugin") || line.contains("addCompilerPlugin");
+        for cap in DEP_EXPR_TOKEN.captures_iter(line) {
+            let group = cap["group"].to_owned();
+            let artifact = cap["artifact"].to_owned();
+            let version_token = cap["version"].trim_end_matches(',');
+            let current_value = resolve_token(version_token, &variables);
+            let shared_variable_name = unquoted_identifier(version_token)
+                .filter(|name| variables.contains_key(*name))
+                .map(str::to_owned);
+            let dep_name = format!("{group}:{artifact}");
+            let package_artifact = if &cap["op"] == "%%" {
+                scala_version
+                    .as_deref()
+                    .map(|version| format!("{artifact}_{}", scala_binary_version(version)))
+                    .unwrap_or_else(|| artifact.clone())
+            } else {
+                artifact.clone()
+            };
+            deps.push(SbtResolvedDep {
+                dep_name,
+                package_name: format!("{group}:{package_artifact}"),
+                current_value,
+                dep_type: if is_plugin {
+                    SbtDepType::Plugin
+                } else {
+                    SbtDepType::Library
+                },
+                shared_variable_name,
+            });
+        }
+    }
+
+    if deps.is_empty() && package_file_version.is_none() {
+        return None;
+    }
+
+    Some(SbtPackageFile {
+        deps,
+        package_file_version,
+        scala_version: scala_version.as_deref().map(scala_binary_version),
+    })
+}
+
 /// Extract `sbt.version` from a `project/build.properties` file.
 pub fn extract_build_properties(content: &str) -> Option<SbtDep> {
     let cap = SBT_VERSION.captures(content)?;
@@ -124,6 +252,77 @@ pub fn extract_build_properties(content: &str) -> Option<SbtDep> {
         style: SbtDepStyle::Java,
         dep_type: SbtDepType::SbtVersion,
     })
+}
+
+fn strip_line_comment(line: &str) -> &str {
+    line.split("//").next().unwrap_or(line)
+}
+
+fn collect_string_variables(content: &str) -> std::collections::HashMap<String, String> {
+    let mut variables = std::collections::HashMap::new();
+    let mut current_object: Option<String> = None;
+
+    for raw in content.lines() {
+        let line = strip_line_comment(raw).trim();
+        if let Some(object_name) = current_object.clone() {
+            if line.contains('}') {
+                current_object = None;
+                continue;
+            }
+            if let Some(cap) = OBJECT_FIELD.captures(line) {
+                variables.insert(
+                    format!("{object_name}.{}", &cap["name"]),
+                    cap["value"].to_owned(),
+                );
+            }
+            continue;
+        }
+
+        if let Some(cap) = STRING_VAR.captures(line) {
+            variables.insert(cap["name"].to_owned(), cap["value"].to_owned());
+        }
+
+        if let Some(cap) = OBJECT_DECL.captures(line) {
+            current_object = Some(cap["name"].to_owned());
+        }
+    }
+
+    variables
+}
+
+fn resolve_token(
+    token: &str,
+    variables: &std::collections::HashMap<String, String>,
+) -> Option<String> {
+    let token = token.trim().trim_end_matches(',');
+    if token.starts_with('"') {
+        return Some(token.trim_matches('"').to_owned());
+    }
+    variables.get(token).cloned()
+}
+
+fn unquoted_identifier(token: &str) -> Option<&str> {
+    let token = token.trim().trim_end_matches(',');
+    (!token.starts_with('"')).then_some(token)
+}
+
+fn scala_binary_version(version: &str) -> String {
+    if version.starts_with('3') {
+        return "3".to_owned();
+    }
+    let mut parts = version.split('.');
+    match (parts.next(), parts.next()) {
+        (Some(major), Some(minor)) => format!("{major}.{minor}"),
+        _ => version.to_owned(),
+    }
+}
+
+fn scala_library_artifact(version: &str) -> String {
+    if version.starts_with('3') {
+        "scala3-library_3".to_owned()
+    } else {
+        "scala-library".to_owned()
+    }
 }
 
 #[cfg(test)]
@@ -227,6 +426,175 @@ libraryDependencies ++= Seq(
         assert_eq!(logback.group_id, "ch.qos.logback");
         assert_eq!(logback.current_value, "1.2.10");
         assert_eq!(logback.style, SbtDepStyle::Java);
+    }
+
+    // Ported: "extracts deps when scala version is defined in an object" — sbt/extract.spec.ts line 99
+    #[test]
+    fn package_file_resolves_object_variables() {
+        let content = r#"
+val versions = new {
+  scala = "2.12.10"
+  example = "0.0.8"
+}
+scalaVersion := versions.scala
+version := "3.2.1"
+libraryDependencies += "org.example" % "foo" % versions.example
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.package_file_version.as_deref(), Some("3.2.1"));
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.12"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.scala-lang:scala-library"
+                    && dep.current_value.as_deref() == Some("2.12.10"))
+        );
+        let foo = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.dep_name == "org.example:foo")
+            .unwrap();
+        assert_eq!(foo.package_name, "org.example:foo");
+        assert_eq!(foo.current_value.as_deref(), Some("0.0.8"));
+        assert_eq!(
+            foo.shared_variable_name.as_deref(),
+            Some("versions.example")
+        );
+    }
+
+    // Ported: "extracts typed variables" — sbt/extract.spec.ts line 170
+    #[test]
+    fn package_file_resolves_typed_variables() {
+        let content = r#"
+val version: String = "1.2.3"
+libraryDependencies += "foo" % "bar" % version
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        let dep = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.dep_name == "foo:bar")
+            .unwrap();
+        assert_eq!(dep.current_value.as_deref(), Some("1.2.3"));
+        assert_eq!(dep.shared_variable_name.as_deref(), Some("version"));
+    }
+
+    // Ported: "extracts packageFileVersion when scala version is defined in a variable" — sbt/extract.spec.ts line 159
+    #[test]
+    fn package_file_resolves_package_file_version_variable() {
+        let content = r#"
+val fileVersion = "1.2.3"
+version := fileVersion
+libraryDependencies += "foo" % "bar" % "0.0.1"
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.package_file_version.as_deref(), Some("1.2.3"));
+    }
+
+    // Ported: "extracts deps when scala version is defined with a trailing comma" — sbt/extract.spec.ts line 232
+    #[test]
+    fn package_file_resolves_scala_version_with_trailing_comma() {
+        let content = r#"
+lazy val commonSettings = Seq(
+  scalaVersion := "2.12.10",
+)
+libraryDependencies += "org.example" %% "bar" % "0.0.2"
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.12"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.example:bar_2.12"
+                    && dep.current_value.as_deref() == Some("0.0.2"))
+        );
+    }
+
+    // Ported: "extracts deps when scala version is defined in a variable with a trailing comma" — sbt/extract.spec.ts line 253
+    #[test]
+    fn package_file_resolves_variable_scala_version_with_trailing_comma() {
+        let content = r#"
+val ScalaVersion = "2.12.10"
+lazy val commonSettings = Seq(
+  scalaVersion := ScalaVersion,
+)
+libraryDependencies += "org.example" %% "bar" % "0.0.2"
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.12"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.example:bar_2.12")
+        );
+    }
+
+    // Ported: "extracts deps when scala version is defined with ThisBuild scope" — sbt/extract.spec.ts line 275
+    #[test]
+    fn package_file_resolves_thisbuild_scala_version() {
+        let content = r#"
+ThisBuild / scalaVersion := "2.12.10"
+libraryDependencies += "org.example" %% "bar" % "0.0.2"
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.12"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.example:bar_2.12")
+        );
+    }
+
+    // Ported: "extracts correct scala library when dealing with scala 3" — sbt/extract.spec.ts line 294
+    #[test]
+    fn package_file_extracts_scala3_library() {
+        let package_file = extract_package_file(r#"scalaVersion := "3.1.1""#).unwrap();
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.scala-lang:scala3-library_3"
+                    && dep.current_value.as_deref() == Some("3.1.1"))
+        );
+    }
+
+    // Ported: "extracts deps correctly when dealing with scala 3" — sbt/extract.spec.ts line 309
+    #[test]
+    fn package_file_resolves_scala3_cross_dependencies() {
+        let content = r#"
+scalaVersion := "3.3.4"
+libraryDependencies += "org.example" %% "bar" % "0.0.5"
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.example:bar_3"
+                    && dep.current_value.as_deref() == Some("0.0.5"))
+        );
+    }
+
+    // Ported: "extracts deps when scala version is defined in a variable with ThisBuild scope" — sbt/extract.spec.ts line 329
+    #[test]
+    fn package_file_resolves_thisbuild_variable_scala_version() {
+        let content = r#"
+val ScalaVersion = "2.12.10"
+ThisBuild / scalaVersion := ScalaVersion
+libraryDependencies += "org.example" %% "bar" % "0.0.2"
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.12"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.example:bar_2.12")
+        );
     }
 
     // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
