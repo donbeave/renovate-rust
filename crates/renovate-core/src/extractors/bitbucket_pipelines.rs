@@ -25,6 +25,23 @@ pub enum BitbucketPipelinesDep {
     },
 }
 
+/// A Bitbucket Pipelines dependency after registry alias handling.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BitbucketPipelinesResolvedDep {
+    Docker {
+        dep_name: String,
+        package_name: String,
+        current_value: Option<String>,
+        current_digest: Option<String>,
+        dep_type: &'static str,
+    },
+    BitbucketPipe {
+        dep_name: String,
+        current_value: String,
+        dep_type: &'static str,
+    },
+}
+
 /// Extract all deps from a Bitbucket Pipelines YAML file.
 pub fn extract(content: &str) -> Vec<BitbucketPipelinesDep> {
     let mut out: Vec<BitbucketPipelinesDep> = Vec::new();
@@ -99,6 +116,37 @@ pub fn extract_docker(content: &str) -> Vec<DockerfileExtractedDep> {
         .collect()
 }
 
+/// Extract deps and apply Renovate-style Docker registry aliases.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<BitbucketPipelinesResolvedDep> {
+    extract(content)
+        .into_iter()
+        .map(|dep| match dep {
+            BitbucketPipelinesDep::Docker(dep) => {
+                let dep_name = dep.image;
+                let package_name = apply_registry_alias(&dep_name, registry_aliases);
+                BitbucketPipelinesResolvedDep::Docker {
+                    dep_name,
+                    package_name,
+                    current_value: dep.tag,
+                    current_digest: dep.digest,
+                    dep_type: "docker",
+                }
+            }
+            BitbucketPipelinesDep::BitbucketPipe {
+                dep_name,
+                current_value,
+            } => BitbucketPipelinesResolvedDep::BitbucketPipe {
+                dep_name,
+                current_value,
+                dep_type: "bitbucket-tags",
+            },
+        })
+        .collect()
+}
+
 /// Parse a non-docker Bitbucket pipe reference `owner/repo:version`.
 fn parse_bitbucket_pipe(pipe: &str) -> Option<(String, String)> {
     // Must have exactly one `/` before the `:` (owner/repo:version)
@@ -111,6 +159,22 @@ fn parse_bitbucket_pipe(pipe: &str) -> Option<(String, String)> {
         return None;
     }
     Some((owner_repo.to_owned(), version.to_owned()))
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
 }
 
 /// Look ahead from `start` for a `name:` key inside an image object block.
@@ -366,5 +430,78 @@ pipelines:
         assert_eq!(docker_count, 6);
         assert_eq!(pipe_count, 1);
         assert_eq!(deps.len(), 7);
+    }
+
+    // Ported: "extracts dependencies with registryAlias" — bitbucket-pipelines/extract.spec.ts line 82
+    #[test]
+    fn extracts_dependencies_with_registry_alias() {
+        let content = r#"image: node:10.15.1
+
+definitions:
+  steps:
+    - step: &build-test
+        name: Build and test
+        image:
+          # comment
+          name: node:18.15.0
+        script:
+          - mvn package
+
+    - step: &build-test1
+        image:
+          username: xxxx
+          name: node:18.15.1
+
+    - step: &build-test2
+        image:
+          username: xxx
+          password: xxx
+
+          name: node:18.15.2
+
+pipelines:
+  default:
+    - step:
+        name: Build and Test
+        image: node:10.15.2
+        script:
+          - step: *build-test
+          - pipe: docker://jfrogecosystem/jfrog-setup-cli:2.0.2
+          - npm install
+    - step:
+        name: Deploy
+        script:
+          - pipe: atlassian/aws-s3-deploy:0.2.1
+"#;
+        let deps =
+            extract_with_registry_aliases(content, &[("jfrogecosystem", "some.jfrog.mirror")]);
+        assert_eq!(deps.len(), 7);
+        assert!(deps.iter().any(|dep| {
+            matches!(
+                dep,
+                BitbucketPipelinesResolvedDep::Docker {
+                    dep_name,
+                    package_name,
+                    current_value,
+                    dep_type,
+                    ..
+                } if dep_name == "jfrogecosystem/jfrog-setup-cli"
+                    && package_name == "some.jfrog.mirror/jfrog-setup-cli"
+                    && current_value.as_deref() == Some("2.0.2")
+                    && *dep_type == "docker"
+            )
+        }));
+        assert!(deps.iter().any(|dep| {
+            matches!(
+                dep,
+                BitbucketPipelinesResolvedDep::BitbucketPipe {
+                    dep_name,
+                    current_value,
+                    dep_type,
+                } if dep_name == "atlassian/aws-s3-deploy"
+                    && current_value == "0.2.1"
+                    && *dep_type == "bitbucket-tags"
+            )
+        }));
     }
 }
