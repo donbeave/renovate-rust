@@ -996,6 +996,12 @@ mod tests {
         );
     }
 
+    // Ported: "returns null if cannot parse" — npm/extract/index.spec.ts line 38
+    #[test]
+    fn package_json_extract_returns_error_if_cannot_parse() {
+        assert!(extract("not json").is_err());
+    }
+
     #[test]
     fn extracts_all_four_sections() {
         let json = r#"{
@@ -1091,6 +1097,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "returns null if no deps" — npm/extract/index.spec.ts line 77
     #[test]
     fn empty_package_json_returns_empty_list() {
         let json = r#"{}"#;

@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1190 / 1382 actionable tests ported (86%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1192 / 1402 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 23 spec files not yet converted to per-test format (20 pending, 2 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 22 spec files not yet converted to per-test format (20 pending, 1 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2889,6 +2889,69 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/npm/extract/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/index.spec.ts
+**Total tests:** 41 | **Ported:** 2 | **Actionable:** 20 | **Status:** partial
+
+### `modules/manager/npm/extract/index › .extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if cannot parse | 38 | ported | `npm.rs` | `package_json_extract_returns_error_if_cannot_parse` | — |
+| catches invalid names | 47 | pending | — | — | — |
+| ignores vendorised package.json | 58 | pending | — | — | — |
+| throws error if non-root renovate config | 67 | pending | — | — | — |
+| returns null if no deps | 77 | ported | `npm.rs` | `empty_package_json_returns_empty_list` | — |
+| handles invalid | 86 | pending | — | — | — |
+| returns an array of dependencies | 95 | pending | — | — | — |
+| returns an array of dependencies with resolution comments | 122 | pending | — | — | — |
+| finds a lock file | 151 | not-applicable | — | — | Requires async sibling file reads and managerData lockfile wrapper; Rust package.json extractor is content-only |
+| warns when multiple lock files found | 170 | not-applicable | — | — | Requires async sibling file reads, logging, and managerData lockfile wrapper; Rust package.json extractor is content-only |
+| finds and filters .npmrc | 197 | not-applicable | — | — | Requires async .npmrc discovery/filtering wrapper; Rust package.json extractor is content-only |
+| uses config.npmrc if no .npmrc is returned from search | 220 | not-applicable | — | — | Requires ExtractConfig npmrc merge wrapper; Rust package.json extractor has no config/npmrc API |
+| uses config.npmrc if no .npmrc exists | 229 | not-applicable | — | — | Requires ExtractConfig npmrc merge wrapper; Rust package.json extractor has no config/npmrc API |
+| uses config.npmrc if .npmrc does exist but npmrcMerge=false | 239 | not-applicable | — | — | Requires ExtractConfig npmrc merge wrapper and async file reads; Rust package.json extractor has no config/npmrc API |
+| merges config.npmrc and repo .npmrc when npmrcMerge=true | 262 | not-applicable | — | — | Requires ExtractConfig npmrc merge wrapper and async file reads; Rust package.json extractor has no config/npmrc API |
+| finds and filters .npmrc with variables | 285 | not-applicable | — | — | Requires async .npmrc discovery/filtering wrapper; Rust package.json extractor is content-only |
+| reads registryUrls from .yarnrc.yml | 310 | not-applicable | — | — | Requires async .yarnrc.yml discovery integrated into package extraction; static Yarn registry parser is covered in yarnrc.spec.ts |
+| reads registryUrls from .yarnrc | 338 | not-applicable | — | — | Requires async .yarnrc discovery integrated into package extraction; static Yarn registry parser is covered in yarnrc.spec.ts |
+| resolves registry URLs using the package name if set | 365 | not-applicable | — | — | Requires async .yarnrc.yml discovery plus packageManager dependency integration; static registry resolution is covered in yarnrc.spec.ts |
+| finds complex yarn workspaces | 398 | not-applicable | — | — | Requires workspace glob discovery and async filesystem reads; Rust package.json extractor is content-only |
+| extracts engines | 412 | pending | — | — | — |
+| extracts volta | 503 | pending | — | — | — |
+| extracts volta yarn unspecified-version | 543 | pending | — | — | — |
+| extracts volta yarn higher than 1 | 584 | pending | — | — | — |
+| extracts non-npmjs | 626 | pending | — | — | — |
+| does not set registryUrls for non-npmjs | 760 | pending | — | — | — |
+| extracts npm package alias | 815 | pending | — | — | — |
+| sets skipInstalls false if Yarn zero-install is used | 866 | not-applicable | — | — | Requires async lockfile/.yarnrc.yml discovery and install-strategy managerData wrapper; Rust package.json extractor is content-only |
+| extracts packageManager | 894 | pending | — | — | — |
+| sets hasPackageManager to true when devEngines detected in package file | 923 | pending | — | — | — |
+| extracts dependencies from overrides | 957 | pending | — | — | — |
+| extracts dependencies from pnpm.overrides | 1036 | pending | — | — | — |
+| extracts dependencies from pnpm.overrides, with version ranges in flat syntax | 1117 | pending | — | — | — |
+
+### `modules/manager/npm/extract/index › .extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs | 1200 | not-applicable | — | — | Requires Renovate `extractAllPackageFiles()` async multi-file manager wrapper; Rust npm extraction is content-level |
+| warns for invalid pnpm workspace yaml files | 1250 | not-applicable | — | — | Requires Renovate `extractAllPackageFiles()` async multi-file manager wrapper and logging |
+| parses empty pnpm workspace yaml files | 1267 | not-applicable | — | — | Requires Renovate `extractAllPackageFiles()` async multi-file manager wrapper |
+| extracts pnpm workspace yaml files | 1276 | not-applicable | — | — | Requires Renovate `extractAllPackageFiles()` async multi-file manager wrapper; static pnpm workspace helper is covered in pnpm.spec.ts |
+| extracts yarnrc.yml and adds it as packageFile | 1306 | not-applicable | — | — | Requires Renovate `extractAllPackageFiles()` async multi-file manager wrapper; static Yarn catalog helper is covered in yarn.spec.ts |
+| extracts yarnrc.yml and adds it as packageFile and packageManager to true | 1340 | not-applicable | — | — | Requires Renovate `extractAllPackageFiles()` async multi-file manager wrapper and packageManager cross-file detection |
+| extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps | 1372 | not-applicable | — | — | Requires Renovate `extractAllPackageFiles()` async multi-file manager wrapper and packageManager cross-file detection |
+
+### `modules/manager/npm/extract/index › .postExtract()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs | 1409 | not-applicable | — | — | Renovate postExtract hook is a no-op async manager hook; no Rust equivalent hook exists |
+
+---
+
 ## `lib/modules/manager/npm/extract/npm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/npm.spec.ts
@@ -3193,7 +3256,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- github-actions/integration.spec.ts converted to per-test format above -->
 <!-- github-actions/parse.spec.ts converted to per-test format above -->
 <!-- helmv3/common.spec.ts converted to per-test format above -->
-| `lib/modules/manager/npm/extract/index.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
+<!-- npm/extract/index.spec.ts converted to per-test format above -->
 <!-- npm/extract/npm.spec.ts converted to per-test format above -->
 <!-- npm/extract/pnpm.spec.ts converted to per-test format above -->
 <!-- npm/extract/yarn.spec.ts converted to per-test format above -->
