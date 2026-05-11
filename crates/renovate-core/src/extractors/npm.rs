@@ -127,6 +127,22 @@ pub struct YarnCatalogExtraction {
     pub has_package_manager: bool,
 }
 
+/// pnpm workspace dependency extracted from `pnpm-workspace.yaml`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PnpmWorkspaceDep {
+    pub name: String,
+    pub current_value: String,
+    pub dep_type: String,
+    pub package_name: Option<String>,
+}
+
+/// pnpm workspace extraction result.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PnpmWorkspaceExtraction {
+    pub deps: Vec<PnpmWorkspaceDep>,
+    pub pnpm_shrinkwrap: Option<String>,
+}
+
 /// Errors from parsing a `package.json`.
 #[derive(Debug, Error)]
 pub enum NpmExtractError {
@@ -384,12 +400,88 @@ pub fn extract_yarn_catalogs(
     }
 }
 
+/// Extract pnpm catalog and workspace override dependencies from parsed
+/// `pnpm-workspace.yaml` data.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/pnpm.ts`
+/// `extractPnpmWorkspaceFile`.
+pub fn extract_pnpm_workspace_file(
+    default_catalog: &BTreeMap<String, String>,
+    named_catalogs: &BTreeMap<String, BTreeMap<String, String>>,
+    overrides: &BTreeMap<String, String>,
+    pnpm_lock: Option<&str>,
+) -> PnpmWorkspaceExtraction {
+    let mut deps = Vec::new();
+
+    for (name, version) in default_catalog {
+        deps.push(PnpmWorkspaceDep {
+            name: name.clone(),
+            current_value: version.clone(),
+            dep_type: "pnpm.catalog.default".to_owned(),
+            package_name: None,
+        });
+    }
+
+    for (catalog_name, catalog) in named_catalogs {
+        for (name, version) in catalog {
+            deps.push(PnpmWorkspaceDep {
+                name: name.clone(),
+                current_value: version.clone(),
+                dep_type: format!("pnpm.catalog.{catalog_name}"),
+                package_name: None,
+            });
+        }
+    }
+
+    for (name, version) in overrides {
+        deps.push(PnpmWorkspaceDep {
+            name: name.clone(),
+            current_value: version.clone(),
+            dep_type: "pnpm-workspace.overrides".to_owned(),
+            package_name: Some(pnpm_override_package_name(name)),
+        });
+    }
+
+    PnpmWorkspaceExtraction {
+        deps,
+        pnpm_shrinkwrap: pnpm_lock.map(str::to_owned),
+    }
+}
+
 fn parse_yarn_string_value(value: &str) -> Option<String> {
     let value = value.trim().trim_matches('"').trim_matches('\'');
     if value.is_empty() || value.parse::<i64>().is_ok() {
         return None;
     }
     Some(value.to_owned())
+}
+
+fn pnpm_override_package_name(dep_name: &str) -> String {
+    if let Some((_, package)) = dep_name.rsplit_once('>')
+        && package
+            .chars()
+            .any(|ch| ch.is_ascii_alphabetic() || ch == '@')
+    {
+        return package.to_owned();
+    }
+
+    let scoped_version_separator = dep_name
+        .starts_with('@')
+        .then(|| {
+            dep_name
+                .find('/')
+                .and_then(|slash| dep_name[slash + 1..].find('@').map(|idx| slash + 1 + idx))
+        })
+        .flatten();
+    let unscoped_version_separator = (!dep_name.starts_with('@'))
+        .then(|| dep_name.find('@'))
+        .flatten();
+    let base = scoped_version_separator
+        .or(unscoped_version_separator)
+        .map(|idx| &dep_name[..idx])
+        .unwrap_or(dep_name);
+
+    base.rsplit('>').next().unwrap_or(base).to_owned()
 }
 
 fn split_legacy_yarnrc_line(line: &str) -> Option<(&str, &str)> {
@@ -803,6 +895,105 @@ mod tests {
 
         assert_eq!(extraction.yarn_lock.as_deref(), Some("yarn.lock"));
         assert!(!extraction.has_package_manager);
+    }
+
+    // Ported: "returns empty if no deps" — npm/extract/pnpm.spec.ts line 341
+    #[test]
+    fn pnpm_workspace_returns_empty_if_no_deps() {
+        let extraction =
+            extract_pnpm_workspace_file(&BTreeMap::new(), &BTreeMap::new(), &BTreeMap::new(), None);
+        assert!(extraction.deps.is_empty());
+    }
+
+    // Ported: "handles empty catalog entries" — npm/extract/pnpm.spec.ts line 349
+    #[test]
+    fn pnpm_workspace_handles_empty_catalog_entries() {
+        let extraction =
+            extract_pnpm_workspace_file(&BTreeMap::new(), &BTreeMap::new(), &BTreeMap::new(), None);
+        assert!(extraction.deps.is_empty());
+    }
+
+    // Ported: "parses valid pnpm-workspace.yaml file" — npm/extract/pnpm.spec.ts line 360
+    #[test]
+    fn pnpm_workspace_parses_valid_workspace_file() {
+        let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.0".to_owned())]);
+        let named_catalogs = BTreeMap::from([(
+            "react17".to_owned(),
+            BTreeMap::from([("react".to_owned(), "17.0.2".to_owned())]),
+        )]);
+        let extraction =
+            extract_pnpm_workspace_file(&default_catalog, &named_catalogs, &BTreeMap::new(), None);
+
+        assert_eq!(
+            extraction.deps,
+            vec![
+                PnpmWorkspaceDep {
+                    name: "react".to_owned(),
+                    current_value: "18.3.0".to_owned(),
+                    dep_type: "pnpm.catalog.default".to_owned(),
+                    package_name: None,
+                },
+                PnpmWorkspaceDep {
+                    name: "react".to_owned(),
+                    current_value: "17.0.2".to_owned(),
+                    dep_type: "pnpm.catalog.react17".to_owned(),
+                    package_name: None,
+                },
+            ]
+        );
+    }
+
+    // Ported: "parses overrides in pnpm-workspace.yaml file" — npm/extract/pnpm.spec.ts line 395
+    #[test]
+    fn pnpm_workspace_parses_overrides() {
+        let overrides = BTreeMap::from([
+            ("foo>bar".to_owned(), "2.0.0".to_owned()),
+            ("foo@1.0.0".to_owned(), "2.0.0".to_owned()),
+            ("foo@>1.0.0".to_owned(), "2.0.0".to_owned()),
+            ("foo@>=1.0.0".to_owned(), "2.0.0".to_owned()),
+            ("foo@1.0.0>bar".to_owned(), "2.0.0".to_owned()),
+            ("foo@>1.0.0>bar".to_owned(), "2.0.0".to_owned()),
+            ("foo@>=1.0.0 <2.0.0".to_owned(), ">=2.0.0".to_owned()),
+        ]);
+        let extraction =
+            extract_pnpm_workspace_file(&BTreeMap::new(), &BTreeMap::new(), &overrides, None);
+
+        assert_eq!(extraction.deps.len(), 7);
+        assert!(extraction.deps.iter().any(|dep| {
+            dep.name == "foo>bar"
+                && dep.package_name.as_deref() == Some("bar")
+                && dep.dep_type == "pnpm-workspace.overrides"
+        }));
+        assert!(
+            extraction.deps.iter().any(|dep| {
+                dep.name == "foo@1.0.0" && dep.package_name.as_deref() == Some("foo")
+            })
+        );
+        assert!(extraction.deps.iter().any(|dep| {
+            dep.name == "foo@>=1.0.0 <2.0.0"
+                && dep.current_value == ">=2.0.0"
+                && dep.package_name.as_deref() == Some("foo")
+        }));
+        assert!(extraction.deps.iter().any(|dep| {
+            dep.name == "foo@>1.0.0>bar" && dep.package_name.as_deref() == Some("bar")
+        }));
+    }
+
+    // Ported: "finds relevant lockfile" — npm/extract/pnpm.spec.ts line 466
+    #[test]
+    fn pnpm_workspace_finds_relevant_lockfile() {
+        let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.1".to_owned())]);
+        let extraction = extract_pnpm_workspace_file(
+            &default_catalog,
+            &BTreeMap::new(),
+            &BTreeMap::new(),
+            Some("pnpm-lock.yaml"),
+        );
+
+        assert_eq!(
+            extraction.pnpm_shrinkwrap.as_deref(),
+            Some("pnpm-lock.yaml")
+        );
     }
 
     #[test]

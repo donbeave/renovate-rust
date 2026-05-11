@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1185 / 1377 actionable tests ported (86%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1190 / 1382 actionable tests ported (86%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 24 spec files not yet converted to per-test format (20 pending, 3 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 23 spec files not yet converted to per-test format (20 pending, 2 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2907,6 +2907,54 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/npm/extract/pnpm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/pnpm.spec.ts
+**Total tests:** 16 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `modules/manager/npm/extract/pnpm › .extractPnpmFilters()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects errors in pnpm-workspace.yml file structure | 28 | not-applicable | — | — | Requires async filesystem/YAML parse logging around pnpm workspace discovery; Rust exposes static workspace extraction helpers only |
+| detects errors when opening pnpm-workspace.yml file | 46 | not-applicable | — | — | Requires async filesystem/YAML parse logging around pnpm workspace discovery; Rust exposes static workspace extraction helpers only |
+
+### `modules/manager/npm/extract/pnpm › .findPnpmWorkspace()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects missing pnpm-workspace.yaml | 65 | not-applicable | — | — | Requires async sibling/parent filesystem lookup; Rust exposes static workspace extraction helpers only |
+| detects missing pnpm-lock.yaml when pnpm-workspace.yaml was already found | 78 | not-applicable | — | — | Requires async sibling/parent filesystem lookup; Rust exposes static workspace extraction helpers only |
+
+### `modules/manager/npm/extract/pnpm › .detectPnpmWorkspaces()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses pnpm workspaces | 114 | not-applicable | — | — | Requires fixture-backed async filesystem traversal and workspace glob matching; Rust exposes static workspace extraction helpers only |
+| skips when pnpm shrinkwrap file has already been provided | 203 | not-applicable | — | — | Requires async workspace detection over package file sets; Rust exposes static workspace extraction helpers only |
+| filters none matching packages | 220 | not-applicable | — | — | Requires async workspace detection over package file sets; Rust exposes static workspace extraction helpers only |
+
+### `modules/manager/npm/extract/pnpm › .getPnpmLock()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty if failed to parse | 266 | not-applicable | — | — | Requires pnpm-lock.yaml parser and async file reads; not ported |
+| extracts version from monorepo | 272 | not-applicable | — | — | Requires pnpm-lock.yaml parser and fixture-backed async file reads; not ported |
+| extracts version from normal repo | 279 | not-applicable | — | — | Requires pnpm-lock.yaml parser and fixture-backed async file reads; not ported |
+| extracts version from catalogs | 289 | not-applicable | — | — | Requires pnpm-lock.yaml parser and async file reads; not ported |
+| returns empty if no deps | 341 | ported | `npm.rs` | `pnpm_workspace_returns_empty_if_no_deps` | — |
+
+### `modules/manager/npm/extract/pnpm › .extractPnpmWorkspaceFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty catalog entries | 349 | ported | `npm.rs` | `pnpm_workspace_handles_empty_catalog_entries` | — |
+| parses valid pnpm-workspace.yaml file | 360 | ported | `npm.rs` | `pnpm_workspace_parses_valid_workspace_file` | — |
+| parses overrides in pnpm-workspace.yaml file | 395 | ported | `npm.rs` | `pnpm_workspace_parses_overrides` | — |
+| finds relevant lockfile | 466 | ported | `npm.rs` | `pnpm_workspace_finds_relevant_lockfile` | — |
+
+---
+
 ## `lib/modules/manager/npm/extract/yarn.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/yarn.spec.ts
@@ -3147,7 +3195,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- helmv3/common.spec.ts converted to per-test format above -->
 | `lib/modules/manager/npm/extract/index.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 <!-- npm/extract/npm.spec.ts converted to per-test format above -->
-| `lib/modules/manager/npm/extract/pnpm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
+<!-- npm/extract/pnpm.spec.ts converted to per-test format above -->
 <!-- npm/extract/yarn.spec.ts converted to per-test format above -->
 <!-- npm/extract/yarnrc.spec.ts converted to per-test format above -->
 <!-- ruby-version/extract.spec.ts converted to per-test format above -->
