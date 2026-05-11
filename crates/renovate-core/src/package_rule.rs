@@ -1178,6 +1178,41 @@ mod tests {
         }
     }
 
+    fn rule_with_package_names(patterns: &[&str]) -> PackageRule {
+        PackageRule {
+            match_package_names: patterns
+                .iter()
+                .map(|pattern| (*pattern).to_owned())
+                .collect(),
+            has_name_constraint: true,
+            ..Default::default()
+        }
+    }
+
+    fn rule_with_current_value(pattern: &str) -> PackageRule {
+        PackageRule {
+            match_current_value: Some(pattern.to_owned()),
+            ..Default::default()
+        }
+    }
+
+    fn rule_with_new_value(pattern: &str) -> PackageRule {
+        PackageRule {
+            match_new_value: Some(pattern.to_owned()),
+            ..Default::default()
+        }
+    }
+
+    fn rule_with_file_names(patterns: &[&str]) -> PackageRule {
+        PackageRule {
+            match_file_names: patterns
+                .iter()
+                .map(|pattern| (*pattern).to_owned())
+                .collect(),
+            ..Default::default()
+        }
+    }
+
     #[test]
     fn managers_matcher_returns_true_for_matching_manager() {
         let rule = rule_with_managers(&["npm", "regex"]);
@@ -1244,5 +1279,141 @@ mod tests {
         let rule = rule_with_dep_names(&["@opentelemetry**"]);
 
         assert!(!rule.dep_name_matches("@opentelemetry/http"));
+    }
+
+    #[test]
+    fn current_value_matcher_returns_true_for_exact_match() {
+        let rule = rule_with_current_value("1.1.0");
+
+        assert!(rule.current_value_matches("1.1.0"));
+    }
+
+    #[test]
+    fn current_value_matcher_returns_true_for_glob_match() {
+        let rule = rule_with_current_value("1.2.*");
+
+        assert!(rule.current_value_matches("1.2.3"));
+    }
+
+    #[test]
+    fn current_value_matcher_returns_false_for_glob_non_match() {
+        let rule = rule_with_current_value("1.3.*");
+
+        assert!(!rule.current_value_matches("1.2.3"));
+    }
+
+    #[test]
+    fn current_value_matcher_returns_false_for_regex_version_non_match() {
+        let rule = rule_with_current_value("/^v/");
+
+        assert!(!rule.current_value_matches("\"~> 1.1.0\""));
+    }
+
+    #[test]
+    fn current_value_matcher_is_case_insensitive_for_i_regex_flag() {
+        let rule = rule_with_current_value("/^\"v/i");
+
+        assert!(rule.current_value_matches("\"V1.1.0\""));
+    }
+
+    #[test]
+    fn current_value_matcher_returns_true_for_regex_version_match() {
+        let rule = rule_with_current_value("/^\"/");
+
+        assert!(rule.current_value_matches("\"~> 0.1.0\""));
+    }
+
+    #[test]
+    fn current_value_matcher_returns_false_for_missing_value() {
+        let rule = rule_with_current_value("/^v?[~ -]?0/");
+        let ctx = DepContext::for_dep("dep");
+
+        assert!(!rule.matches_context(&ctx));
+    }
+
+    #[test]
+    fn new_value_matcher_returns_true_for_exact_match() {
+        let rule = rule_with_new_value("1.1.0");
+
+        assert!(rule.new_value_matches("1.1.0"));
+    }
+
+    #[test]
+    fn new_value_matcher_returns_true_for_glob_match() {
+        let rule = rule_with_new_value("1.2.*");
+
+        assert!(rule.new_value_matches("1.2.3"));
+    }
+
+    #[test]
+    fn new_value_matcher_returns_false_for_glob_non_match() {
+        let rule = rule_with_new_value("1.3.*");
+
+        assert!(!rule.new_value_matches("1.2.3"));
+    }
+
+    #[test]
+    fn new_value_matcher_returns_false_for_regex_version_non_match() {
+        let rule = rule_with_new_value("/^v/");
+
+        assert!(!rule.new_value_matches("\"~> 1.1.0\""));
+    }
+
+    #[test]
+    fn new_value_matcher_is_case_insensitive_for_i_regex_flag() {
+        let rule = rule_with_new_value("/^\"v/i");
+
+        assert!(rule.new_value_matches("\"V1.1.0\""));
+    }
+
+    #[test]
+    fn new_value_matcher_returns_true_for_regex_version_match() {
+        let rule = rule_with_new_value("/^\"/");
+
+        assert!(rule.new_value_matches("\"~> 0.1.0\""));
+    }
+
+    #[test]
+    fn new_value_matcher_returns_false_for_missing_value() {
+        let rule = rule_with_new_value("/^v?[~ -]?0/");
+        let ctx = DepContext::for_dep("dep");
+
+        assert!(!rule.matches_context(&ctx));
+    }
+
+    #[test]
+    fn package_name_matcher_returns_false_if_package_name_is_empty() {
+        let rule = rule_with_package_names(&["@opentelemetry/http"]);
+
+        assert!(!rule.name_matches(""));
+    }
+
+    #[test]
+    fn package_name_matcher_returns_false_if_not_matching() {
+        let rule = rule_with_package_names(&["ghi"]);
+
+        assert!(!rule.name_matches("def"));
+    }
+
+    #[test]
+    fn package_name_matcher_matches_package_name() {
+        let rule = rule_with_package_names(&["def", "ghi"]);
+
+        assert!(rule.name_matches("def"));
+    }
+
+    #[test]
+    fn package_name_matcher_matches_regex_pattern() {
+        let rule = rule_with_package_names(&["/b/"]);
+
+        assert!(rule.name_matches("b"));
+    }
+
+    #[test]
+    fn file_names_matcher_returns_false_if_package_file_is_missing() {
+        let rule = rule_with_file_names(&["frontend/package.json"]);
+        let ctx = DepContext::for_dep("dep");
+
+        assert!(!rule.matches_context(&ctx));
     }
 }

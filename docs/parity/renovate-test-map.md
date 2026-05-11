@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1226 / 1402 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1245 / 1402 actionable tests ported (89%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 18 spec files not yet converted to per-test format (18 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 14 spec files not yet converted to per-test format (14 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3573,6 +3573,73 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/util/package-rules/current-value.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/current-value.spec.ts
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+
+### `util/package-rules/current-value › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return true for exact match | 7 | ported | `package_rule.rs` | `current_value_matcher_returns_true_for_exact_match` | — |
+| return true for glob match | 19 | ported | `package_rule.rs` | `current_value_matcher_returns_true_for_glob_match` | — |
+| return false for glob non match | 31 | ported | `package_rule.rs` | `current_value_matcher_returns_false_for_glob_non_match` | — |
+| return false for regex version non match | 43 | ported | `package_rule.rs` | `current_value_matcher_returns_false_for_regex_version_non_match` | — |
+| case insensitive match | 55 | ported | `package_rule.rs` | `current_value_matcher_is_case_insensitive_for_i_regex_flag` | — |
+| return true for regex version match | 67 | ported | `package_rule.rs` | `current_value_matcher_returns_true_for_regex_version_match` | — |
+| return false for now value | 79 | ported | `package_rule.rs` | `current_value_matcher_returns_false_for_missing_value` | — |
+
+---
+
+## `lib/util/package-rules/new-value.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/new-value.spec.ts
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+
+### `util/package-rules/new-value › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return true for exact match | 7 | ported | `package_rule.rs` | `new_value_matcher_returns_true_for_exact_match` | — |
+| return true for glob match | 19 | ported | `package_rule.rs` | `new_value_matcher_returns_true_for_glob_match` | — |
+| return false for glob non match | 31 | ported | `package_rule.rs` | `new_value_matcher_returns_false_for_glob_non_match` | — |
+| return false for regex version non match | 43 | ported | `package_rule.rs` | `new_value_matcher_returns_false_for_regex_version_non_match` | — |
+| case insensitive match | 55 | ported | `package_rule.rs` | `new_value_matcher_is_case_insensitive_for_i_regex_flag` | — |
+| return true for regex version match | 67 | ported | `package_rule.rs` | `new_value_matcher_returns_true_for_regex_version_match` | — |
+| return false for now value | 79 | ported | `package_rule.rs` | `new_value_matcher_returns_false_for_missing_value` | — |
+
+---
+
+## `lib/util/package-rules/package-names.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/package-names.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `util/package-rules/package-names › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false if packageName is not defined | 7 | ported | `package_rule.rs` | `package_name_matcher_returns_false_if_package_name_is_empty` | Rust `PackageRule::name_matches` carries a string package name; empty string covers the missing packageName case |
+| should return false if not matching | 19 | ported | `package_rule.rs` | `package_name_matcher_returns_false_if_not_matching` | — |
+| should matchPackageName | 32 | ported | `package_rule.rs` | `package_name_matcher_matches_package_name` | — |
+| should match pattern | 44 | ported | `package_rule.rs` | `package_name_matcher_matches_regex_pattern` | — |
+
+---
+
+## `lib/util/package-rules/files.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/files.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `util/package-rules/files › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false if packageFile is not defined | 7 | ported | `package_rule.rs` | `file_names_matcher_returns_false_if_package_file_is_missing` | — |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3594,11 +3661,11 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/util/package-rules/index.spec.ts` | 73 | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
 <!-- util/package-rules/managers.spec.ts converted to per-test format above -->
 <!-- util/package-rules/dep-names.spec.ts converted to per-test format above -->
+<!-- util/package-rules/current-value.spec.ts converted to per-test format above -->
 | `lib/util/package-rules/current-age.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
-| `lib/util/package-rules/current-value.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
 | `lib/util/package-rules/current-version.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
-| `lib/util/package-rules/files.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
-| `lib/util/package-rules/new-value.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
-| `lib/util/package-rules/package-names.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
+<!-- util/package-rules/files.spec.ts converted to per-test format above -->
+<!-- util/package-rules/new-value.spec.ts converted to per-test format above -->
+<!-- util/package-rules/package-names.spec.ts converted to per-test format above -->
 | `lib/util/package-rules/repositories.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
 | `lib/util/package-rules/jsonata.spec.ts` | — | — | 0 | pending |
