@@ -270,9 +270,15 @@ pub fn extract(content: &str) -> Vec<BazelModuleDep> {
         }
     }
 
+    let bazel_dep_names = deps
+        .iter()
+        .map(|dep| dep.name.clone())
+        .collect::<std::collections::BTreeSet<_>>();
+
     deps.extend(
         unsupported_overrides
             .into_iter()
+            .filter(|override_dep| bazel_dep_names.contains(&override_dep.name))
             .map(|override_dep| BazelModuleDep {
                 name: override_dep.name,
                 current_value: String::new(),
@@ -286,6 +292,7 @@ pub fn extract(content: &str) -> Vec<BazelModuleDep> {
         overrides
             .into_iter()
             .filter(|override_dep| !override_dep.version.is_empty())
+            .filter(|override_dep| bazel_dep_names.contains(&override_dep.name))
             .map(|override_dep| BazelModuleDep {
                 name: override_dep.name,
                 current_value: override_dep.version,
@@ -1289,6 +1296,99 @@ other_rule(
         assert_eq!(bazel_deps[0].name, "some_rules");
         assert_eq!(bazel_deps[0].current_value, "0.1.0");
         assert!(extract_rules_img_pull_deps(input).is_empty());
+    }
+
+    // Ported: "handles every method available in MODULE.bazel files" — bazel-module/extract.spec.ts line 887
+    #[test]
+    fn extracts_every_supported_module_bazel_method() {
+        let input = r#"
+module(
+    name = "module_name",
+    version = "1.2.3",
+    compatibility_level = 0,
+    repo_name = "io_bazel_module_name",
+    bazel_compatibility = ["<=6.0.0", ">=8.2.0"],
+)
+bazel_dep(name = "bazel_skylib", version = "1.2.1")
+bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "rules_img", version = "0.1.5")
+bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
+pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
+pull(
+    name = "ubuntu",
+    digest = "sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9",
+    registry = "index.docker.io",
+    repository = "library/ubuntu",
+    tag = "24.04",
+)
+multiple_version_override(
+    module_name = "overriden_module_a",
+    versions = ["1.2.3", "1.2.4"],
+    registry = "https://example.com/custom_registry",
+)
+git_override(
+    module_name = "overriden_module_c",
+    commit = "850cb49c8649e463b80ef7984e7c744279746170",
+    remote = "https://github.com/example/overriden_module_b.git",
+)
+archive_override(
+    module_name = "overriden_module_d",
+    urls = [
+        "https://example.com/archive.tar.gz",
+    ],
+)
+include("//:extra.MODULE.bazel")
+sh_configure = use_extension("//bzlmod:extensions.bzl", "sh_configure")
+use_repo(sh_configure, "local_posix_config", "rules_sh_shim_exe")
+override_repo(
+    sh_configure,
+    com_github_foo_bar = "overriden_module_a",
+)
+register_execution_platforms(
+    "@overriden_module_a//:some_execution_platform",
+    dev_dependency = True,
+)
+register_toolchains(
+    "@overriden_module_a//:some_toolchain",
+    dev_dependency = True,
+)
+single_version_override(
+    module_name = "overriden_module_c",
+    version = "1.2.5",
+    registry = "https://example.com/custom_registry",
+    patch_cmds = [],
+    patch_strip = 8,
+)
+my_repo_rule = use_repo_rule("@my_repo//:my_repo.bzl", "my_repo_rule")
+my_repo_rule(
+    name = "my_custom_repo",
+    url = "https://example.com/my_custom_repo.tar.gz",
+    sha256 = "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+)
+"#;
+        let bazel_deps = extract(input);
+        assert_eq!(bazel_deps.len(), 4);
+        assert_eq!(bazel_deps[0].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(bazel_deps[0].name, "bazel_skylib");
+        assert_eq!(bazel_deps[0].current_value, "1.2.1");
+        assert_eq!(bazel_deps[1].name, "platforms");
+        assert_eq!(bazel_deps[1].current_value, "0.0.8");
+        assert_eq!(bazel_deps[2].name, "rules_img");
+        assert_eq!(bazel_deps[2].current_value, "0.1.5");
+        assert_eq!(bazel_deps[3].name, "stardoc");
+        assert_eq!(bazel_deps[3].current_value, "0.6.2");
+        assert!(bazel_deps[3].dev_dependency);
+
+        let image_deps = extract_rules_img_pull_deps(input);
+        assert_eq!(image_deps.len(), 1);
+        assert_eq!(image_deps[0].dep_name, "ubuntu");
+        assert_eq!(image_deps[0].package_name, "index.docker.io/library/ubuntu");
+        assert_eq!(image_deps[0].current_value.as_deref(), Some("24.04"));
+        assert_eq!(
+            image_deps[0].current_digest.as_deref(),
+            Some("sha256:1e622c5f9ac0c0144d577702ba5f2cce79fc8e3cf89ec88291739cd4eee3b7b9")
+        );
+        assert_eq!(image_deps[0].registry_urls, vec!["https://index.docker.io"]);
     }
 
     // Ported: "returns bazel_dep and archive_override dependencies" — bazel-module/extract.spec.ts line 148
