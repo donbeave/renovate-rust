@@ -46,6 +46,12 @@ pub enum NpmSkipReason {
     InvalidName,
     /// Dependency value is not a string version specifier.
     InvalidValue,
+    /// Dependency has an empty version specifier.
+    Empty,
+    /// Dependency has no comparable version.
+    UnspecifiedVersion,
+    /// Engine name is not handled by Renovate.
+    UnknownEngines,
 }
 
 /// Which `package.json` section the dep came from.
@@ -59,6 +65,8 @@ pub enum NpmDepType {
     Resolutions,
     /// npm 8+ `overrides` override.
     Overrides,
+    /// `engines` constraints.
+    Engines,
 }
 
 impl NpmDepType {
@@ -71,6 +79,7 @@ impl NpmDepType {
             NpmDepType::Optional => "optionalDependencies",
             NpmDepType::Resolutions => "resolutions",
             NpmDepType::Overrides => "overrides",
+            NpmDepType::Engines => "engines",
         }
     }
 }
@@ -191,6 +200,9 @@ struct PackageJson {
     /// npm 8+ `overrides` block — flat `{ "pkg": "version" }`.
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
     overrides: BTreeMap<String, DependencySpec>,
+    /// package runtime/tool constraints.
+    #[serde(default, deserialize_with = "deserialize_dependency_section")]
+    engines: BTreeMap<String, DependencySpec>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -242,6 +254,7 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
         (&pkg.optional_dependencies, NpmDepType::Optional),
         (&pkg.resolutions, NpmDepType::Resolutions),
         (&pkg.overrides, NpmDepType::Overrides),
+        (&pkg.engines, NpmDepType::Engines),
     ] {
         for (name, value) in section {
             out.push(classify(
@@ -671,7 +684,9 @@ fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmEx
         DependencySpec::Version(value) => value.clone(),
         DependencySpec::InvalidValue => String::new(),
     };
-    let skip_reason = if invalid_package_name(&name) {
+    let skip_reason = if dep_type == NpmDepType::Engines {
+        engine_skip_reason_for(&name, value, &current_value)
+    } else if invalid_package_name(&name) {
         Some(NpmSkipReason::InvalidName)
     } else if matches!(value, DependencySpec::InvalidValue) {
         Some(NpmSkipReason::InvalidValue)
@@ -683,6 +698,24 @@ fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmEx
         current_value,
         dep_type,
         skip_reason,
+    }
+}
+
+fn engine_skip_reason_for(
+    name: &str,
+    value: &DependencySpec,
+    current_value: &str,
+) -> Option<NpmSkipReason> {
+    if matches!(value, DependencySpec::InvalidValue) {
+        return Some(NpmSkipReason::InvalidValue);
+    }
+    if current_value.is_empty() {
+        return Some(NpmSkipReason::Empty);
+    }
+    match name {
+        "node" | "npm" | "pnpm" | "vscode" => None,
+        "yarn" => (current_value == "disabled").then_some(NpmSkipReason::UnspecifiedVersion),
+        _ => Some(NpmSkipReason::UnknownEngines),
     }
 }
 
@@ -707,6 +740,13 @@ fn invalid_package_name(name: &str) -> bool {
 /// in the npm registry.
 fn skip_reason_for(value: &str) -> Option<NpmSkipReason> {
     let v = value.trim();
+
+    if v.is_empty() {
+        return Some(NpmSkipReason::Empty);
+    }
+    if v == "latest" {
+        return Some(NpmSkipReason::UnspecifiedVersion);
+    }
 
     // workspace protocol (pnpm / yarn)
     if v.starts_with("workspace:") {
@@ -1593,6 +1633,88 @@ chalk@^2.4.1:
             dep.name.is_empty()
                 && dep.dep_type == NpmDepType::Resolutions
                 && dep.skip_reason == Some(NpmSkipReason::InvalidName)
+        }));
+    }
+
+    // Ported: "extracts engines" — npm/extract/index.spec.ts line 412
+    #[test]
+    fn package_json_extracts_engines() {
+        let json = r#"{
+          "dependencies": {
+            "angular": "1.6.0"
+          },
+          "devDependencies": {
+            "@angular/cli": "1.6.0",
+            "foo": "*",
+            "bar": "file:../foo/bar",
+            "baz": "",
+            "other": "latest"
+          },
+          "engines": {
+            "atom": ">=1.7.0 <2.0.0",
+            "node": ">= 8.9.2",
+            "npm": "^8.0.0",
+            "pnpm": "^1.2.0",
+            "yarn": "disabled",
+            "vscode": ">=1.49.3"
+          },
+          "main": "index.js"
+        }"#;
+        let deps = extract_ok(json);
+
+        assert_eq!(deps.len(), 12);
+        assert!(deps.iter().any(|dep| {
+            dep.name == "angular"
+                && dep.current_value == "1.6.0"
+                && dep.dep_type == NpmDepType::Regular
+                && dep.skip_reason.is_none()
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "@angular/cli"
+                && dep.current_value == "1.6.0"
+                && dep.dep_type == NpmDepType::Dev
+                && dep.skip_reason.is_none()
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "bar"
+                && dep.current_value == "file:../foo/bar"
+                && dep.skip_reason == Some(NpmSkipReason::LocalPath)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "baz"
+                && dep.current_value.is_empty()
+                && dep.skip_reason == Some(NpmSkipReason::Empty)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "other"
+                && dep.current_value == "latest"
+                && dep.skip_reason == Some(NpmSkipReason::UnspecifiedVersion)
+        }));
+
+        for (name, current_value) in [
+            ("node", ">= 8.9.2"),
+            ("npm", "^8.0.0"),
+            ("pnpm", "^1.2.0"),
+            ("vscode", ">=1.49.3"),
+        ] {
+            assert!(deps.iter().any(|dep| {
+                dep.name == name
+                    && dep.current_value == current_value
+                    && dep.dep_type == NpmDepType::Engines
+                    && dep.skip_reason.is_none()
+            }));
+        }
+        assert!(deps.iter().any(|dep| {
+            dep.name == "atom"
+                && dep.current_value == ">=1.7.0 <2.0.0"
+                && dep.dep_type == NpmDepType::Engines
+                && dep.skip_reason == Some(NpmSkipReason::UnknownEngines)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "yarn"
+                && dep.current_value == "disabled"
+                && dep.dep_type == NpmDepType::Engines
+                && dep.skip_reason == Some(NpmSkipReason::UnspecifiedVersion)
         }));
     }
 
