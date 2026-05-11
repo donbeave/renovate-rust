@@ -200,6 +200,35 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert!(!deps.iter().any(|d| d.artifact_id == "skip"));
     }
 
+    // Ported: "extract deps with comment" — sbt/extract.spec.ts line 412
+    #[test]
+    fn extracts_dependencies_with_trailing_comments() {
+        let content = r#"
+libraryDependencies ++= Seq(
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4", /** critical lib */
+  "ch.qos.logback" % "logback-classic" % "1.2.10" // common lib
+)
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+
+        let scala_logging = deps
+            .iter()
+            .find(|dep| dep.artifact_id == "scala-logging")
+            .unwrap();
+        assert_eq!(scala_logging.group_id, "com.typesafe.scala-logging");
+        assert_eq!(scala_logging.current_value, "3.9.4");
+        assert_eq!(scala_logging.style, SbtDepStyle::Scala);
+
+        let logback = deps
+            .iter()
+            .find(|dep| dep.artifact_id == "logback-classic")
+            .unwrap();
+        assert_eq!(logback.group_id, "ch.qos.logback");
+        assert_eq!(logback.current_value, "1.2.10");
+        assert_eq!(logback.style, SbtDepStyle::Java);
+    }
+
     // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
     #[test]
     fn dep_name_formats_correctly() {

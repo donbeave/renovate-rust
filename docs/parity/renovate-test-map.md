@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1445 / 1650 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1446 / 1650 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2554,7 +2554,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
-**Total tests:** 26 | **Ported:** 6 | **Actionable:** 26 | **Status:** partial
+**Total tests:** 26 | **Ported:** 7 | **Actionable:** 26 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2577,7 +2577,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extracts deps when scala version is defined in a variable with ThisBuild scope | 329 | pending | — | — | Requires ThisBuild + variable resolution |
 | extract deps from native scala file with private variables | 349 | pending | — | — | Requires private variable resolution in .scala files |
 | extract deps when they are defined in a new line | 371 | pending | — | — | Requires multi-line dep continuation parsing |
-| extract deps with comment | 412 | pending | — | — | Requires inline-comment-stripping in dep position |
+| extract deps with comment | 412 | ported | `sbt.rs` | `extracts_dependencies_with_trailing_comments` | — |
 | extract addCompilerPlugin | 452 | ported | `sbt.rs` | `extracts_add_compiler_plugin` | — |
 | extract sbt version | 469 | ported | `sbt.rs` | `build_properties_extracts_sbt_version` | — |
 | extract sbt version if the file contains other properties | 492 | ported | `sbt.rs` | `build_properties_with_other_props_extracts_sbt_version` | — |
