@@ -157,6 +157,12 @@ pub enum NpmExtractError {
 
 #[derive(Debug, Deserialize, Default)]
 struct PackageJson {
+    #[serde(rename = "_from")]
+    from: Option<serde_json::Value>,
+    #[serde(rename = "_id")]
+    id: Option<serde_json::Value>,
+    #[serde(rename = "_resolved")]
+    resolved: Option<serde_json::Value>,
     #[serde(default)]
     dependencies: BTreeMap<String, String>,
     #[serde(rename = "devDependencies", default)]
@@ -181,6 +187,9 @@ struct PackageJson {
 /// its section type and any applicable skip reason.
 pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
     let pkg: PackageJson = serde_json::from_str(content)?;
+    if pkg.is_vendorised() {
+        return Ok(Vec::new());
+    }
     let mut out = Vec::new();
 
     for (section, dep_type) in [
@@ -197,6 +206,12 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
     }
 
     Ok(out)
+}
+
+impl PackageJson {
+    fn is_vendorised(&self) -> bool {
+        self.id.is_some() && (self.from.is_some() || self.resolved.is_some())
+    }
 }
 
 /// Resolve the registry URL for a package name from Yarn config.
@@ -1290,6 +1305,26 @@ chalk@^2.4.1:
         assert_eq!(deps[0].name, "kgabis/parson");
         assert_eq!(deps[0].current_value, "0.0.0");
         assert_eq!(deps[0].skip_reason, Some(NpmSkipReason::InvalidName));
+    }
+
+    // Ported: "ignores vendorised package.json" — npm/extract/index.spec.ts line 58
+    #[test]
+    fn package_json_vendorised_installed_package_is_ignored() {
+        let json = r#"{
+          "_from": "is-object@1.0.1",
+          "_id": "is-object@1.0.1",
+          "_resolved": "https://registry.npmjs.org/is-object/-/is-object-1.0.1.tgz",
+          "devDependencies": {
+            "covert": "~1.0.0",
+            "jscs": "~1.6.0",
+            "tape": "~2.14.0"
+          },
+          "name": "is-object",
+          "version": "1.0.1"
+        }"#;
+        let deps = extract_ok(json);
+
+        assert!(deps.is_empty());
     }
 
     #[test]
