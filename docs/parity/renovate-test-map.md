@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1271 / 1402 actionable tests ported (91%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 11 spec files not yet converted to per-test format (11 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 10 spec files not yet converted to per-test format (10 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3711,6 +3711,35 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/util/package-rules/jsonata.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/jsonata.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/package-rules/jsonata`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true for a matching JSONata expression | 6 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return false for a non-matching JSONata expression | 14 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return false for an invalid JSONata expression | 22 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return null if matchJsonata is not defined | 30 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return true for a complex JSONata expression | 35 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return false for a complex JSONata expression with non-matching version | 44 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return true for a JSONata expression with nested properties | 53 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return false for a JSONata expression with nested properties and non-matching version | 62 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should return true if any JSONata expression matches | 71 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+| should catch evaluate errors | 79 | not-applicable | — | — | JSONata expression evaluation is not implemented in Rust package-rule matching |
+
+### `util/package-rules/jsonata › $detectPlatform`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true when sourceUrl matches platform | 88 | not-applicable | — | — | JSONata custom function evaluation is not implemented in Rust package-rule matching |
+| should return false when sourceUrl does not match platform | 96 | not-applicable | — | — | JSONata custom function evaluation is not implemented in Rust package-rule matching |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3739,4 +3768,4 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- util/package-rules/new-value.spec.ts converted to per-test format above -->
 <!-- util/package-rules/package-names.spec.ts converted to per-test format above -->
 <!-- util/package-rules/repositories.spec.ts converted to per-test format above -->
-| `lib/util/package-rules/jsonata.spec.ts` | — | — | 0 | pending |
+<!-- util/package-rules/jsonata.spec.ts converted to per-test format above -->
