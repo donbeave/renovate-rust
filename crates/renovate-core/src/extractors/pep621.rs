@@ -17,6 +17,7 @@
 //! | `[dependency-groups].*` (PEP 735) | `Group` |
 //! | `[tool.pdm.dev-dependencies].*` | `PdmDev` |
 //! | `[tool.uv.sources].*` | `UvSources` |
+//! | `[tool.hatch.envs.*]` | `HatchEnv` |
 //! | `[build-system].requires` | `BuildSystem` |
 //!
 //! ## PEP 508 string format
@@ -45,6 +46,8 @@ pub enum Pep621DepType {
     PdmDev,
     /// `[tool.uv.sources].*`
     UvSources,
+    /// `[tool.hatch.envs.*]`
+    HatchEnv,
     /// `[build-system].requires`
     BuildSystem,
 }
@@ -57,6 +60,7 @@ impl Pep621DepType {
             Pep621DepType::Group => "dependency-groups",
             Pep621DepType::PdmDev => "tool.pdm.dev-dependencies",
             Pep621DepType::UvSources => "tool.uv.sources",
+            Pep621DepType::HatchEnv => "tool.hatch.envs",
             Pep621DepType::BuildSystem => "build-system",
         }
     }
@@ -95,6 +99,7 @@ pub struct Pep621ExtractedDep {
     pub current_value: String,
     /// Which section this dep came from.
     pub dep_type: Pep621DepType,
+    pub dep_group: Option<String>,
     pub datasource: Option<Pep621Datasource>,
     pub package_name: Option<String>,
     pub registry_urls: Vec<String>,
@@ -176,6 +181,7 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
                             name: String::new(),
                             current_value: String::new(),
                             dep_type: Pep621DepType::Group,
+                            dep_group: None,
                             datasource: None,
                             package_name: None,
                             registry_urls: Vec::new(),
@@ -220,6 +226,30 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
         }
     }
 
+    // [tool.hatch.envs.*].dependencies and extra-dependencies
+    if let Some(hatch_envs) = doc
+        .get("tool")
+        .and_then(|tool| tool.get("hatch"))
+        .and_then(|hatch| hatch.get("envs"))
+        .and_then(Value::as_table)
+    {
+        for (env_name, env) in hatch_envs {
+            let Some(env_table) = env.as_table() else {
+                continue;
+            };
+            for key in ["dependencies", "extra-dependencies"] {
+                if let Some(entries) = env_table.get(key).and_then(Value::as_array) {
+                    for entry in entries {
+                        if let Some(mut dep) = parse_pep508_entry(entry, Pep621DepType::HatchEnv) {
+                            dep.dep_group = Some(env_name.to_owned());
+                            deps.push(dep);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Ok(Pep621Extract {
         deps,
         registry_urls,
@@ -249,6 +279,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             name,
             current_value: raw.to_owned(),
             dep_type,
+            dep_group: None,
             datasource: None,
             package_name: None,
             registry_urls: Vec::new(),
@@ -273,6 +304,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             name: String::new(),
             current_value: raw.to_owned(),
             dep_type,
+            dep_group: None,
             datasource: None,
             package_name: None,
             registry_urls: Vec::new(),
@@ -294,6 +326,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
         name,
         current_value: specifier.to_owned(),
         dep_type,
+        dep_group: None,
         datasource: None,
         package_name: None,
         registry_urls: Vec::new(),
@@ -341,6 +374,7 @@ fn extract_uv_sources(doc: &Value) -> BTreeMap<String, Pep621ExtractedDep> {
                 name: name.clone(),
                 current_value: String::new(),
                 dep_type: Pep621DepType::UvSources,
+                dep_group: None,
                 datasource: None,
                 package_name: None,
                 registry_urls: Vec::new(),
@@ -642,6 +676,72 @@ dep2 = { git = "ssh://git@github.com/foo/dep2", rev = "abcd1234" }
         assert_eq!(dep2.current_value, "abcd1234");
         assert!(dep2.registry_urls.is_empty());
         assert!(dep2.skip_reason.is_none());
+    }
+
+    // Ported: "should extract dependencies from hatch environments" — pep621/extract.spec.ts line 446
+    #[test]
+    fn hatch_env_dependencies_and_extra_dependencies_are_extracted() {
+        let content = r#"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hatch"
+dependencies = [
+  "requests==2.30.0"
+]
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]==6.5",
+  "pytest",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+  "black>=23.1.0",
+]
+
+[tool.hatch.envs.experimental]
+extra-dependencies = [
+  "baz",
+]
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 6);
+
+        let requests = deps.iter().find(|d| d.name == "requests").unwrap();
+        assert_eq!(requests.dep_type, Pep621DepType::Regular);
+        assert_eq!(requests.current_value, "==2.30.0");
+
+        let hatchling = deps.iter().find(|d| d.name == "hatchling").unwrap();
+        assert_eq!(hatchling.dep_type, Pep621DepType::BuildSystem);
+        assert!(hatchling.current_value.is_empty());
+
+        let coverage = deps.iter().find(|d| d.name == "coverage").unwrap();
+        assert_eq!(coverage.dep_type, Pep621DepType::HatchEnv);
+        assert_eq!(coverage.dep_group.as_deref(), Some("default"));
+        assert_eq!(coverage.current_value, "==6.5");
+
+        let pytest = deps.iter().find(|d| d.name == "pytest").unwrap();
+        assert_eq!(pytest.dep_type, Pep621DepType::HatchEnv);
+        assert_eq!(pytest.dep_group.as_deref(), Some("default"));
+        assert!(pytest.current_value.is_empty());
+
+        let black = deps.iter().find(|d| d.name == "black").unwrap();
+        assert_eq!(black.dep_type, Pep621DepType::HatchEnv);
+        assert_eq!(black.dep_group.as_deref(), Some("lint"));
+        assert_eq!(black.current_value, ">=23.1.0");
+
+        let baz = deps.iter().find(|d| d.name == "baz").unwrap();
+        assert_eq!(baz.dep_type, Pep621DepType::HatchEnv);
+        assert_eq!(baz.dep_group.as_deref(), Some("experimental"));
+        assert!(baz.current_value.is_empty());
     }
 
     // Ported: "should return dependencies with original pypi registryUrl" — pep621/extract.spec.ts line 309
