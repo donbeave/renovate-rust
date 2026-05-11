@@ -52,6 +52,8 @@ pub enum NpmSkipReason {
     UnspecifiedVersion,
     /// Engine name is not handled by Renovate.
     UnknownEngines,
+    /// Volta tool name is not handled by Renovate.
+    UnknownVolta,
 }
 
 /// Which `package.json` section the dep came from.
@@ -67,6 +69,8 @@ pub enum NpmDepType {
     Overrides,
     /// `engines` constraints.
     Engines,
+    /// `volta` tool constraints.
+    Volta,
 }
 
 impl NpmDepType {
@@ -80,6 +84,7 @@ impl NpmDepType {
             NpmDepType::Resolutions => "resolutions",
             NpmDepType::Overrides => "overrides",
             NpmDepType::Engines => "engines",
+            NpmDepType::Volta => "volta",
         }
     }
 }
@@ -203,6 +208,9 @@ struct PackageJson {
     /// package runtime/tool constraints.
     #[serde(default, deserialize_with = "deserialize_dependency_section")]
     engines: BTreeMap<String, DependencySpec>,
+    /// Volta-pinned runtime/tool versions.
+    #[serde(default, deserialize_with = "deserialize_dependency_section")]
+    volta: BTreeMap<String, DependencySpec>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -255,6 +263,7 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
         (&pkg.resolutions, NpmDepType::Resolutions),
         (&pkg.overrides, NpmDepType::Overrides),
         (&pkg.engines, NpmDepType::Engines),
+        (&pkg.volta, NpmDepType::Volta),
     ] {
         for (name, value) in section {
             out.push(classify(
@@ -684,20 +693,36 @@ fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmEx
         DependencySpec::Version(value) => value.clone(),
         DependencySpec::InvalidValue => String::new(),
     };
-    let skip_reason = if dep_type == NpmDepType::Engines {
-        engine_skip_reason_for(&name, value, &current_value)
-    } else if invalid_package_name(&name) {
-        Some(NpmSkipReason::InvalidName)
-    } else if matches!(value, DependencySpec::InvalidValue) {
-        Some(NpmSkipReason::InvalidValue)
-    } else {
-        skip_reason_for(&current_value)
+    let skip_reason = match dep_type {
+        NpmDepType::Engines => engine_skip_reason_for(&name, value, &current_value),
+        NpmDepType::Volta => volta_skip_reason_for(&name, value, &current_value),
+        _ if invalid_package_name(&name) => Some(NpmSkipReason::InvalidName),
+        _ if matches!(value, DependencySpec::InvalidValue) => Some(NpmSkipReason::InvalidValue),
+        _ => skip_reason_for(&current_value),
     };
     NpmExtractedDep {
         name,
         current_value,
         dep_type,
         skip_reason,
+    }
+}
+
+fn volta_skip_reason_for(
+    name: &str,
+    value: &DependencySpec,
+    current_value: &str,
+) -> Option<NpmSkipReason> {
+    if matches!(value, DependencySpec::InvalidValue) {
+        return Some(NpmSkipReason::InvalidValue);
+    }
+    if current_value.is_empty() {
+        return Some(NpmSkipReason::Empty);
+    }
+    match name {
+        "node" | "npm" | "pnpm" => None,
+        "yarn" => (current_value == "unknown").then_some(NpmSkipReason::UnspecifiedVersion),
+        _ => Some(NpmSkipReason::UnknownVolta),
     }
 }
 
@@ -1715,6 +1740,110 @@ chalk@^2.4.1:
                 && dep.current_value == "disabled"
                 && dep.dep_type == NpmDepType::Engines
                 && dep.skip_reason == Some(NpmSkipReason::UnspecifiedVersion)
+        }));
+    }
+
+    // Ported: "extracts volta" — npm/extract/index.spec.ts line 503
+    #[test]
+    fn package_json_extracts_volta() {
+        let json = r#"{
+          "main": "index.js",
+          "engines": {
+            "node": "8.9.2"
+          },
+          "volta": {
+            "node": "8.9.2",
+            "yarn": "1.12.3",
+            "npm": "5.9.0",
+            "pnpm": "6.11.2",
+            "invalid": "1.0.0"
+          }
+        }"#;
+        let deps = extract_ok(json);
+
+        assert_eq!(deps.len(), 6);
+        assert!(deps.iter().any(|dep| {
+            dep.name == "node"
+                && dep.current_value == "8.9.2"
+                && dep.dep_type == NpmDepType::Engines
+                && dep.skip_reason.is_none()
+        }));
+        for (name, current_value) in [
+            ("node", "8.9.2"),
+            ("yarn", "1.12.3"),
+            ("npm", "5.9.0"),
+            ("pnpm", "6.11.2"),
+        ] {
+            assert!(deps.iter().any(|dep| {
+                dep.name == name
+                    && dep.current_value == current_value
+                    && dep.dep_type == NpmDepType::Volta
+                    && dep.skip_reason.is_none()
+            }));
+        }
+        assert!(deps.iter().any(|dep| {
+            dep.name == "invalid"
+                && dep.current_value == "1.0.0"
+                && dep.dep_type == NpmDepType::Volta
+                && dep.skip_reason == Some(NpmSkipReason::UnknownVolta)
+        }));
+    }
+
+    // Ported: "extracts volta yarn unspecified-version" — npm/extract/index.spec.ts line 543
+    #[test]
+    fn package_json_extracts_volta_yarn_unspecified() {
+        let json = r#"{
+          "main": "index.js",
+          "engines": {
+            "node": "8.9.2"
+          },
+          "volta": {
+            "node": "8.9.2",
+            "yarn": "unknown"
+          }
+        }"#;
+        let deps = extract_ok(json);
+
+        assert!(deps.iter().any(|dep| {
+            dep.name == "node"
+                && dep.current_value == "8.9.2"
+                && dep.dep_type == NpmDepType::Volta
+                && dep.skip_reason.is_none()
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "yarn"
+                && dep.current_value == "unknown"
+                && dep.dep_type == NpmDepType::Volta
+                && dep.skip_reason == Some(NpmSkipReason::UnspecifiedVersion)
+        }));
+    }
+
+    // Ported: "extracts volta yarn higher than 1" — npm/extract/index.spec.ts line 584
+    #[test]
+    fn package_json_extracts_volta_yarn_higher_than_one() {
+        let json = r#"{
+          "main": "index.js",
+          "engines": {
+            "node": "16.0.0"
+          },
+          "volta": {
+            "node": "16.0.0",
+            "yarn": "3.2.4"
+          }
+        }"#;
+        let deps = extract_ok(json);
+
+        assert!(deps.iter().any(|dep| {
+            dep.name == "node"
+                && dep.current_value == "16.0.0"
+                && dep.dep_type == NpmDepType::Volta
+                && dep.skip_reason.is_none()
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "yarn"
+                && dep.current_value == "3.2.4"
+                && dep.dep_type == NpmDepType::Volta
+                && dep.skip_reason.is_none()
         }));
     }
 

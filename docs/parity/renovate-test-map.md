@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1410 / 1652 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1413 / 1652 actionable tests ported (86%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2891,7 +2891,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/npm/extract/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/index.spec.ts
-**Total tests:** 41 | **Ported:** 8 | **Actionable:** 19 | **Status:** partial
+**Total tests:** 41 | **Ported:** 11 | **Actionable:** 19 | **Status:** partial
 
 ### `modules/manager/npm/extract/index › .extractPackageFile()`
 
@@ -2918,9 +2918,9 @@ resolver) and the inner `extractPackageFile()` adapter.
 | resolves registry URLs using the package name if set | 365 | not-applicable | — | — | Requires async .yarnrc.yml discovery plus packageManager dependency integration; static registry resolution is covered in yarnrc.spec.ts |
 | finds complex yarn workspaces | 398 | not-applicable | — | — | Requires workspace glob discovery and async filesystem reads; Rust package.json extractor is content-only |
 | extracts engines | 412 | ported | `npm.rs` | `package_json_extracts_engines` | — |
-| extracts volta | 503 | pending | — | — | — |
-| extracts volta yarn unspecified-version | 543 | pending | — | — | — |
-| extracts volta yarn higher than 1 | 584 | pending | — | — | — |
+| extracts volta | 503 | ported | `npm.rs` | `package_json_extracts_volta` | — |
+| extracts volta yarn unspecified-version | 543 | ported | `npm.rs` | `package_json_extracts_volta_yarn_unspecified` | — |
+| extracts volta yarn higher than 1 | 584 | ported | `npm.rs` | `package_json_extracts_volta_yarn_higher_than_one` | — |
 | extracts non-npmjs | 626 | pending | — | — | — |
 | does not set registryUrls for non-npmjs | 760 | pending | — | — | — |
 | extracts npm package alias | 815 | pending | — | — | — |
