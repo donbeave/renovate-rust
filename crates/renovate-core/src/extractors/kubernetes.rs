@@ -52,6 +52,8 @@ static KIND_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^\s*kind\s*:
 /// `image: <value>` YAML line (with optional list prefix `-`).
 static IMAGE_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r##"^\s*-?\s*image:\s*['"]?([^'"#\s]+)['"]?\s*$"##).unwrap());
+static IMAGE_VOLUME_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r##"^\s*reference:\s*['"]?([^'"#\s]+)['"]?\s*$"##).unwrap());
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
@@ -64,18 +66,35 @@ pub fn extract(content: &str) -> Vec<KubernetesDep> {
     }
 
     let mut deps = Vec::new();
+    let mut in_image_volume = false;
 
     for line in content.lines() {
         let stripped = match line.find(" #") {
             Some(pos) => &line[..pos],
             None => line,
         };
-        let Some(cap) = IMAGE_RE.captures(stripped) else {
+        let trimmed = stripped.trim_start();
+
+        let image_ref = if trimmed == "image:" {
+            in_image_volume = true;
+            continue;
+        } else if in_image_volume {
+            if let Some(cap) = IMAGE_VOLUME_RE.captures(stripped) {
+                in_image_volume = false;
+                cap[1].to_owned()
+            } else if trimmed.starts_with('-') || !trimmed.starts_with("reference:") {
+                in_image_volume = false;
+                continue;
+            } else {
+                continue;
+            }
+        } else if let Some(cap) = IMAGE_RE.captures(stripped) {
+            cap[1].to_owned()
+        } else {
             continue;
         };
-        let image_ref = &cap[1];
 
-        if let Some(dep) = parse_image_ref(image_ref) {
+        if let Some(dep) = parse_image_ref(&image_ref) {
             deps.push(dep);
         }
     }
@@ -258,5 +277,29 @@ spec:
         // GitLab CI YAML has no apiVersion or kind → empty
         let content = "stages:\n  - build\nbuild:\n  image: node:18\n  script:\n    - npm ci\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "skips malformed volume entries and extracts valid ones" — kubernetes/extract.spec.ts line 349
+    #[test]
+    fn skips_malformed_image_volume_entries_and_extracts_valid_ones() {
+        let content = r#"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-test
+spec:
+  volumes:
+    - name: bad-vol
+      image:
+        notReference: invalid
+    - name: good-vol
+      image:
+        reference: quay.io/test/image:v1.0.0
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image_name, "quay.io/test/image");
+        assert_eq!(deps[0].current_value, "v1.0.0");
+        assert!(deps[0].skip_reason.is_none());
     }
 }

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 768 / 1217 actionable tests ported (63%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 769 / 1217 actionable tests ported (63%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1675,7 +1675,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kubernetes/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kubernetes/extract.spec.ts
-**Total tests:** 14 | **Ported:** 7 | **Actionable:** 14 | **Status:** partial
+**Total tests:** 14 | **Ported:** 8 | **Actionable:** 14 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1694,7 +1694,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts from complex templates | 200 | pending | — | — | Requires complex YAML template path coverage |
 | extracts image volumes from Pod and CronJob | 265 | pending | — | — | Requires `volumes:` (Kubernetes 1.31+ image volumes) parsing |
 | does not extract image volumes for unsupported kind | 326 | pending | — | — | Requires `volumes:` parsing kind-gating |
-| skips malformed volume entries and extracts valid ones | 349 | pending | — | — | Requires `volumes:` parsing with skip-on-malformed handling |
+| skips malformed volume entries and extracts valid ones | 349 | ported | `kubernetes.rs` | `skips_malformed_image_volume_entries_and_extracts_valid_ones` | — |
 
 ---
 
