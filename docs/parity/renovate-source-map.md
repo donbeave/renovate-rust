@@ -1045,7 +1045,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/config/defaults.ts` | `crates/renovate-core/src/config.rs` | partial | Core defaults ported |
 | `lib/config/app-strings.ts` | `crates/renovate-core/src/config.rs` | partial | App strings partially ported |
 | `lib/config/parse.ts` | `crates/renovate-cli/src/config_builder.rs` | partial | Config parsing in CLI |
-| `lib/config/global.ts` | `crates/renovate-core/src/config/run.rs` | partial | Global config partially ported |
+| `lib/config/global.ts` | `crates/renovate-core/src/config.rs` | partial | Global option list and config types partially ported |
 | `lib/config/validation.ts` | — | not-started | Not ported |
 | `lib/config/migration.ts` | — | not-started | Not ported |
 | `lib/config/migrate-validate.ts` | — | not-started | Not ported |

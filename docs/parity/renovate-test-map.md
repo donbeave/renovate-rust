@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1040 / 1227 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1041 / 1228 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 46 spec files not yet converted to per-test format (34 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 45 spec files not yet converted to per-test format (33 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,19 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/global.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/global.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/global`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| all values in OPTIONS are sorted | 4 | ported | `config.rs` | `global_config_options_are_sorted` | — |
+
+---
+
 ## Config specs (`lib/config/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -2778,7 +2791,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/config/defaults.spec.ts` | 2 | `crates/renovate-core/src/config.rs` | 0 | pending |
 | `lib/config/app-strings.spec.ts` | 3 | `crates/renovate-core/src/config.rs` | 0 | pending |
 | `lib/config/parse.spec.ts` | 4 | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
-| `lib/config/global.spec.ts` | 1 | `crates/renovate-core/src/config/run.rs` | 0 | pending |
+<!-- config/global.spec.ts converted to per-test format above -->
 | `lib/config/validation.spec.ts` | 124 | — | 0 | pending |
 | `lib/config/migration.spec.ts` | 30 | — | 0 | pending |
 | `lib/config/migrate-validate.spec.ts` | 5 | — | 0 | pending |

@@ -15,6 +15,66 @@ pub mod file;
 pub use platform::Platform;
 pub use run::{DryRun, ForkProcessing, RecreateWhen, RequireConfig};
 
+/// Renovate global-only option names.
+///
+/// Mirrors `GlobalConfig.OPTIONS` in `lib/config/global.ts`. The list is kept
+/// sorted to preserve Renovate's predictable option processing order.
+pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
+    "allowCustomCrateRegistries",
+    "allowPlugins",
+    "allowScripts",
+    "allowShellExecutorForPostUpgradeCommands",
+    "allowedCommands",
+    "allowedEnv",
+    "allowedHeaders",
+    "allowedUnsafeExecutions",
+    "autodiscoverRepoOrder",
+    "autodiscoverRepoSort",
+    "bbUseDevelopmentBranch",
+    "binarySource",
+    "cacheDir",
+    "cacheHardTtlMinutes",
+    "cachePrivatePackages",
+    "cacheTtlOverride",
+    "configFileNames",
+    "containerbaseDir",
+    "customEnvVariables",
+    "dockerChildPrefix",
+    "dockerCliOptions",
+    "dockerMaxPages",
+    "dockerSidecarImage",
+    "dockerUser",
+    "dryRun",
+    "encryptedWarning",
+    "endpoint",
+    "executionTimeout",
+    "exposeAllEnv",
+    "gitTimeout",
+    "githubTokenWarn",
+    "httpCacheTtlDays",
+    "ignorePrAuthor",
+    "includeMirrors",
+    "localDir",
+    "migratePresets",
+    "onboarding",
+    "onboardingAutoCloseAge",
+    "onboardingBranch",
+    "onboardingCommitMessage",
+    "onboardingConfig",
+    "onboardingConfigFileName",
+    "onboardingNoDeps",
+    "onboardingPrTitle",
+    "platform",
+    "prCacheSyncMaxPages",
+    "presetCachePersistence",
+    "repositoryCacheForceLocal",
+    "requireConfig",
+    "s3Endpoint",
+    "s3PathStyle",
+    "toolSettings",
+    "userAgent",
+];
+
 /// Canonical global Renovate configuration.
 ///
 /// Fields correspond to Renovate's `globalOnly` options. All have the same
@@ -82,5 +142,18 @@ impl Default for GlobalConfig {
             allow_command_templating: false,
             repositories: Vec::new(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::GLOBAL_CONFIG_OPTIONS;
+
+    // Ported: "all values in OPTIONS are sorted" — config/global.spec.ts line 4
+    #[test]
+    fn global_config_options_are_sorted() {
+        let mut sorted = GLOBAL_CONFIG_OPTIONS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(GLOBAL_CONFIG_OPTIONS, sorted.as_slice());
     }
 }
