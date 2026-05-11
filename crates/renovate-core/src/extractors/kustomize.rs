@@ -982,4 +982,22 @@ kind: Kustomization
 "#;
         assert!(extract(content).is_empty());
     }
+
+    // Ported: "returns null for non kustomize kubernetes files" — kustomize/extract.spec.ts line 400
+    #[test]
+    fn non_kustomize_kubernetes_file_returns_empty() {
+        let content = r#"
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-service
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: http
+    name: http
+"#;
+        assert!(extract(content).is_empty());
+    }
 }
