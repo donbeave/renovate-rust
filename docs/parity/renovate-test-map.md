@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 923 / 1216 actionable tests ported (76%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 924 / 1216 actionable tests ported (76%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1645,7 +1645,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/sveltos/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sveltos/extract.spec.ts
-**Total tests:** 13 | **Ported:** 11 | **Actionable:** 12 | **Status:** partial
+**Total tests:** 13 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
 
 ### `extractDefinition()`
 
@@ -1667,7 +1667,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | return result for single quoted projectsveltos.io apiVersion reference | 320 | ported | `sveltos.rs` | `single_quoted_api_version_extracted` | — |
 | supports profiles | 352 | ported | `sveltos.rs` | `profile_kind_extracted` | — |
 | supports clusterprofiles | 400 | ported | `sveltos.rs` | `extracts_helm_chart` (+ extracts_multiple_charts) | — |
-| considers registryAliases | 451 | pending | — | — | registryAliases not yet implemented |
+| considers registryAliases | 451 | ported | `sveltos.rs` | `considers_registry_aliases_for_oci_charts` | — |
 | supports eventtriggers | 474 | ported | `sveltos.rs` | `eventtrigger_kind_extracted` | — |
 
 ---

@@ -30,6 +30,18 @@ pub struct SveltosDep {
     pub chart_name: String,
     pub current_value: String,
     pub registry_url: String,
+    pub dep_type: String,
+}
+
+/// Sveltos dependency metadata after resolving datasource-specific fields.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SveltosResolvedDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub dep_type: String,
+    pub registry_urls: Vec<String>,
 }
 
 // ── Regexes ───────────────────────────────────────────────────────────────────
@@ -40,6 +52,9 @@ static SVELTOS_RE: LazyLock<Regex> = LazyLock::new(|| {
 
 static HELM_CHARTS_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s+helmCharts:\s*$").unwrap());
+
+static KIND_VALUE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^\s*kind:\s*["']?([^"'\s]+)"#).unwrap());
 
 static KV_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\s+(\w+):\s+(?:"([^"]+)"|'([^']+)'|(\S+))"#).unwrap());
@@ -76,12 +91,71 @@ pub fn extract(content: &str) -> Vec<SveltosDep> {
     deps
 }
 
+/// Extract Sveltos deps and apply Renovate-style registry aliases.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<SveltosResolvedDep> {
+    extract(content)
+        .into_iter()
+        .map(|dep| sveltos_resolved_dep(dep, registry_aliases))
+        .collect()
+}
+
+fn sveltos_resolved_dep(dep: SveltosDep, registry_aliases: &[(&str, &str)]) -> SveltosResolvedDep {
+    if let Some(package_name) = dep.chart_name.strip_prefix("oci://") {
+        let package_name = apply_registry_alias(package_name, registry_aliases);
+        return SveltosResolvedDep {
+            dep_name: dep.chart_name,
+            package_name,
+            current_value: dep.current_value,
+            datasource: "docker",
+            dep_type: dep.dep_type,
+            registry_urls: Vec::new(),
+        };
+    }
+
+    SveltosResolvedDep {
+        package_name: dep
+            .chart_name
+            .rsplit('/')
+            .next()
+            .unwrap_or(&dep.chart_name)
+            .to_owned(),
+        dep_name: dep.chart_name,
+        current_value: dep.current_value,
+        datasource: "helm",
+        dep_type: dep.dep_type,
+        registry_urls: vec![dep.registry_url],
+    }
+}
+
+fn apply_registry_alias(package_name: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = package_name.split_once('/') else {
+        return package_name.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| package_name.to_owned())
+}
+
 fn extract_from_doc(doc: &str) -> Vec<SveltosDep> {
     let mut deps = Vec::new();
     let mut in_helm_charts = false;
     let mut repo_url: Option<String> = None;
     let mut chart_name: Option<String> = None;
     let mut chart_version: Option<String> = None;
+    let dep_type = doc
+        .lines()
+        .find_map(|line| KIND_VALUE_RE.captures(line).map(|cap| cap[1].to_owned()))
+        .unwrap_or_default();
 
     for line in doc.lines() {
         let stripped = match line.find(" #") {
@@ -99,6 +173,7 @@ fn extract_from_doc(doc: &str) -> Vec<SveltosDep> {
                 &mut repo_url,
                 &mut chart_name,
                 &mut chart_version,
+                &dep_type,
                 &mut deps,
             );
             in_helm_charts = true;
@@ -112,6 +187,7 @@ fn extract_from_doc(doc: &str) -> Vec<SveltosDep> {
                     &mut repo_url,
                     &mut chart_name,
                     &mut chart_version,
+                    &dep_type,
                     &mut deps,
                 );
                 in_helm_charts = false;
@@ -126,6 +202,7 @@ fn extract_from_doc(doc: &str) -> Vec<SveltosDep> {
                     &mut repo_url,
                     &mut chart_name,
                     &mut chart_version,
+                    &dep_type,
                     &mut deps,
                 );
                 // Parse inline KV if present.
@@ -157,6 +234,7 @@ fn extract_from_doc(doc: &str) -> Vec<SveltosDep> {
         &mut repo_url,
         &mut chart_name,
         &mut chart_version,
+        &dep_type,
         &mut deps,
     );
     deps
@@ -181,6 +259,7 @@ fn flush_chart(
     repo_url: &mut Option<String>,
     chart_name: &mut Option<String>,
     chart_version: &mut Option<String>,
+    dep_type: &str,
     deps: &mut Vec<SveltosDep>,
 ) {
     if let (Some(url), Some(name), Some(ver)) =
@@ -191,6 +270,7 @@ fn flush_chart(
                 chart_name: name,
                 current_value: ver,
                 registry_url: url,
+                dep_type: dep_type.to_owned(),
             });
         }
     } else {
@@ -243,6 +323,41 @@ spec:
 "#;
         let deps = extract(content);
         assert_eq!(deps.len(), 2);
+    }
+
+    // Ported: "considers registryAliases" — sveltos/extract.spec.ts line 451
+    #[test]
+    fn considers_registry_aliases_for_oci_charts() {
+        let content = r#"---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterProfile
+metadata:
+  name: vault
+spec:
+  syncMode: Continuous
+  helmCharts:
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+    repositoryName:   oci-vault
+    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartVersion:     0.7.2
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[("registry-1.docker.io", "docker.proxy.test/some/path")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "0.7.2");
+        assert_eq!(
+            deps[0].dep_name,
+            "oci://registry-1.docker.io/bitnamicharts/vault"
+        );
+        assert_eq!(
+            deps[0].package_name,
+            "docker.proxy.test/some/path/bitnamicharts/vault"
+        );
+        assert_eq!(deps[0].datasource, "docker");
+        assert_eq!(deps[0].dep_type, "ClusterProfile");
+        assert!(deps[0].registry_urls.is_empty());
     }
 
     // Ported: "return null for Kubernetes manifest" — sveltos/extract.spec.ts line 264
