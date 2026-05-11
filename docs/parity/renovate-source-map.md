@@ -111,7 +111,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/bazel-module/parser/context.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/parser/crate.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/parser/extension-tags.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
-| `lib/modules/manager/bazel-module/parser/fragments.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
+| `lib/modules/manager/bazel-module/parser/fragments.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Fragment constructors/classifiers ported |
 | `lib/modules/manager/bazel-module/parser/maven.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/parser/oci.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/parser/repo-rules.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |

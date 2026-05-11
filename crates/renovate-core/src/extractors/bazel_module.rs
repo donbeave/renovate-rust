@@ -22,6 +22,7 @@
 //! )
 //! ```
 
+use std::collections::BTreeMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -96,6 +97,139 @@ pub struct BazelRulesImgPullDep {
     pub registry_urls: Vec<String>,
     pub datasource: &'static str,
     pub dep_type: &'static str,
+}
+
+/// Parser fragment produced while reading `MODULE.bazel` Starlark calls.
+///
+/// Renovate reference: `lib/modules/manager/bazel-module/parser/fragments.ts`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BazelFragment {
+    String {
+        value: String,
+        is_complete: bool,
+    },
+    Boolean {
+        value: bool,
+        is_complete: bool,
+    },
+    Array {
+        items: Vec<BazelFragment>,
+        is_complete: bool,
+    },
+    Rule {
+        rule: String,
+        children: BTreeMap<String, BazelFragment>,
+        is_complete: bool,
+    },
+    PreparedExtensionTag {
+        extension: String,
+        raw_extension: String,
+        offset: usize,
+        is_complete: bool,
+    },
+    ExtensionTag {
+        extension: String,
+        raw_extension: String,
+        tag: String,
+        offset: usize,
+        children: BTreeMap<String, BazelFragment>,
+        raw_string: Option<String>,
+        is_complete: bool,
+    },
+    Attribute {
+        name: String,
+        value: Option<Box<BazelFragment>>,
+        is_complete: bool,
+    },
+}
+
+pub fn fragment_string(value: &str) -> BazelFragment {
+    BazelFragment::String {
+        value: value.to_owned(),
+        is_complete: true,
+    }
+}
+
+pub fn fragment_boolean(value: bool) -> BazelFragment {
+    BazelFragment::Boolean {
+        value,
+        is_complete: true,
+    }
+}
+
+pub fn fragment_rule(
+    rule: &str,
+    children: BTreeMap<String, BazelFragment>,
+    is_complete: bool,
+) -> BazelFragment {
+    BazelFragment::Rule {
+        rule: rule.to_owned(),
+        children,
+        is_complete,
+    }
+}
+
+pub fn fragment_prepared_extension_tag(
+    extension: &str,
+    raw_extension: &str,
+    offset: usize,
+) -> BazelFragment {
+    BazelFragment::PreparedExtensionTag {
+        extension: extension.to_owned(),
+        raw_extension: raw_extension.to_owned(),
+        offset,
+        is_complete: false,
+    }
+}
+
+pub fn fragment_extension_tag(
+    extension: &str,
+    raw_extension: &str,
+    tag: &str,
+    offset: usize,
+    children: BTreeMap<String, BazelFragment>,
+    raw_string: Option<String>,
+    is_complete: bool,
+) -> BazelFragment {
+    BazelFragment::ExtensionTag {
+        extension: extension.to_owned(),
+        raw_extension: raw_extension.to_owned(),
+        tag: tag.to_owned(),
+        offset,
+        children,
+        raw_string,
+        is_complete,
+    }
+}
+
+pub fn fragment_attribute(
+    name: &str,
+    value: Option<BazelFragment>,
+    is_complete: bool,
+) -> BazelFragment {
+    BazelFragment::Attribute {
+        name: name.to_owned(),
+        value: value.map(Box::new),
+        is_complete,
+    }
+}
+
+pub fn fragment_array(items: Vec<BazelFragment>, is_complete: bool) -> BazelFragment {
+    BazelFragment::Array { items, is_complete }
+}
+
+pub fn fragment_is_primitive(fragment: &BazelFragment) -> bool {
+    matches!(
+        fragment,
+        BazelFragment::String { .. } | BazelFragment::Boolean { .. }
+    )
+}
+
+pub fn fragment_is_value(fragment: &BazelFragment) -> bool {
+    matches!(
+        fragment,
+        BazelFragment::String { .. } | BazelFragment::Boolean { .. } | BazelFragment::Array { .. }
+    )
 }
 
 /// Which Bazel module declaration produced the dep.
@@ -790,6 +924,141 @@ fn strip_comments(content: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Ported: ".string()" — bazel-module/parser/fragments.spec.ts line 13
+    #[test]
+    fn fragment_string_constructor() {
+        assert_eq!(
+            fragment_string("hello"),
+            BazelFragment::String {
+                value: "hello".to_owned(),
+                is_complete: true,
+            }
+        );
+    }
+
+    // Ported: ".boolean()" — bazel-module/parser/fragments.spec.ts line 19
+    #[test]
+    fn fragment_boolean_constructor() {
+        assert_eq!(
+            fragment_boolean(true),
+            BazelFragment::Boolean {
+                value: true,
+                is_complete: true,
+            }
+        );
+    }
+
+    // Ported: ".rule()" — bazel-module/parser/fragments.spec.ts line 25
+    #[test]
+    fn fragment_rule_constructor() {
+        let children = BTreeMap::from([("name".to_owned(), fragment_string("bar"))]);
+        assert_eq!(
+            fragment_rule("foo", children.clone(), true),
+            BazelFragment::Rule {
+                rule: "foo".to_owned(),
+                children,
+                is_complete: true,
+            }
+        );
+    }
+
+    // Ported: ".extensionTag()" — bazel-module/parser/fragments.spec.ts line 37
+    #[test]
+    fn fragment_extension_tag_constructor() {
+        let children = BTreeMap::from([("name".to_owned(), fragment_string("bar"))]);
+        assert_eq!(
+            fragment_extension_tag("ext", "ext_01", "tag", 0, children.clone(), None, true),
+            BazelFragment::ExtensionTag {
+                extension: "ext".to_owned(),
+                raw_extension: "ext_01".to_owned(),
+                tag: "tag".to_owned(),
+                offset: 0,
+                children,
+                raw_string: None,
+                is_complete: true,
+            }
+        );
+    }
+
+    // Ported: ".preparedExtensionTag()" — bazel-module/parser/fragments.spec.ts line 56
+    #[test]
+    fn fragment_prepared_extension_tag_constructor() {
+        assert_eq!(
+            fragment_prepared_extension_tag("ext", "ext_01", 0),
+            BazelFragment::PreparedExtensionTag {
+                extension: "ext".to_owned(),
+                raw_extension: "ext_01".to_owned(),
+                offset: 0,
+                is_complete: false,
+            }
+        );
+    }
+
+    // Ported: ".attribute()" — bazel-module/parser/fragments.spec.ts line 65
+    #[test]
+    fn fragment_attribute_constructor() {
+        assert_eq!(
+            fragment_attribute("name", Some(fragment_string("foo")), true),
+            BazelFragment::Attribute {
+                name: "name".to_owned(),
+                value: Some(Box::new(fragment_string("foo"))),
+                is_complete: true,
+            }
+        );
+    }
+
+    // Ported: ".array()" — bazel-module/parser/fragments.spec.ts line 73
+    #[test]
+    fn fragment_array_constructor() {
+        assert_eq!(
+            fragment_array(vec![fragment_string("foo")], true),
+            BazelFragment::Array {
+                items: vec![fragment_string("foo")],
+                is_complete: true,
+            }
+        );
+    }
+
+    // Ported: ".isValue($a)" — bazel-module/parser/fragments.spec.ts line 80
+    #[test]
+    fn fragment_is_value_matches_renovate_value_fragments() {
+        let cases = [
+            (fragment_string("hello"), true),
+            (fragment_boolean(true), true),
+            (fragment_array(Vec::new(), false), true),
+            (fragment_rule("dummy", BTreeMap::new(), false), false),
+            (
+                fragment_extension_tag("ext", "ext_01", "tag", 0, BTreeMap::new(), None, false),
+                false,
+            ),
+            (fragment_prepared_extension_tag("ext", "ext_01", 0), false),
+        ];
+
+        for (fragment, expected) in cases {
+            assert_eq!(fragment_is_value(&fragment), expected);
+        }
+    }
+
+    // Ported: ".isPrimitive($a)" — bazel-module/parser/fragments.spec.ts line 92
+    #[test]
+    fn fragment_is_primitive_matches_renovate_primitive_fragments() {
+        let cases = [
+            (fragment_string("hello"), true),
+            (fragment_boolean(true), true),
+            (fragment_array(Vec::new(), false), false),
+            (fragment_rule("dummy", BTreeMap::new(), false), false),
+            (
+                fragment_extension_tag("ext", "ext_01", "tag", 0, BTreeMap::new(), None, false),
+                false,
+            ),
+            (fragment_prepared_extension_tag("ext", "ext_01", 0), false),
+        ];
+
+        for (fragment, expected) in cases {
+            assert_eq!(fragment_is_primitive(&fragment), expected);
+        }
+    }
 
     // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
     #[test]

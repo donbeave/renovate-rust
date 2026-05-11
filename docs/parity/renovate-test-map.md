@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1104 / 1296 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1113 / 1305 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 32 spec files not yet converted to per-test format (24 pending, 7 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 31 spec files not yet converted to per-test format (24 pending, 6 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2800,6 +2800,27 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/bazel-module/parser/fragments.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/parser/fragments.spec.ts
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+
+### `modules/manager/bazel-module/parser/fragments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| .string() | 13 | ported | `bazel_module.rs` | `fragment_string_constructor` | — |
+| .boolean() | 19 | ported | `bazel_module.rs` | `fragment_boolean_constructor` | — |
+| .rule() | 25 | ported | `bazel_module.rs` | `fragment_rule_constructor` | — |
+| .extensionTag() | 37 | ported | `bazel_module.rs` | `fragment_extension_tag_constructor` | — |
+| .preparedExtensionTag() | 56 | ported | `bazel_module.rs` | `fragment_prepared_extension_tag_constructor` | — |
+| .attribute() | 65 | ported | `bazel_module.rs` | `fragment_attribute_constructor` | — |
+| .array() | 73 | ported | `bazel_module.rs` | `fragment_array_constructor` | — |
+| .isValue($a) | 80 | ported | `bazel_module.rs` | `fragment_is_value_matches_renovate_value_fragments` | — |
+| .isPrimitive($a) | 92 | ported | `bazel_module.rs` | `fragment_is_primitive_matches_renovate_primitive_fragments` | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -2877,7 +2898,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/modules/manager/bazel-module/bazelrc.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/bazel-module/lockfile.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/bazel-module/parser/context.spec.ts` | — | `crates/renovate-core/src/extractors/bazel_module.rs` | — | partial |
-| `lib/modules/manager/bazel-module/parser/fragments.spec.ts` | — | `crates/renovate-core/src/extractors/bazel_module.rs` | — | partial |
+<!-- bazel-module/parser/fragments.spec.ts converted to per-test format above -->
 | `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/github-actions/integration.spec.ts` | — | `crates/renovate-core/src/extractors/github_actions.rs` | — | partial |
