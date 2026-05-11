@@ -39,6 +39,10 @@ pub enum TerraformDepType {
     /// terraform CLI itself (looked up via hashicorp/terraform releases).
     RequiredVersion,
     TfeWorkspace,
+    DockerImage,
+    DockerContainer,
+    DockerService,
+    DockerRegistryImage,
 }
 
 impl TerraformDepType {
@@ -48,6 +52,10 @@ impl TerraformDepType {
             TerraformDepType::Module => "module",
             TerraformDepType::RequiredVersion => "required_version",
             TerraformDepType::TfeWorkspace => "tfe_workspace",
+            TerraformDepType::DockerImage => "docker_image",
+            TerraformDepType::DockerContainer => "docker_container",
+            TerraformDepType::DockerService => "docker_service",
+            TerraformDepType::DockerRegistryImage => "docker_registry_image",
         }
     }
 }
@@ -61,6 +69,8 @@ pub enum TerraformSkipReason {
     ExternalSource,
     InvalidUrl,
     UnspecifiedVersion,
+    ContainsVariable,
+    InvalidDependencySpecification,
 }
 
 /// A single extracted Terraform dependency.
@@ -107,6 +117,11 @@ static TERRAFORM_BLOCK: LazyLock<Regex> =
 static TFE_WORKSPACE_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\s*resource\s+"tfe_workspace"\s+"[^"]+"\s*\{"#).unwrap());
 
+static DOCKER_RESOURCE_BLOCK: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"^\s*(resource|data)\s+"(docker_(?:image|container|service|registry_image))"\s+"[^"]+"\s*\{"#)
+        .unwrap()
+});
+
 /// `required_providers {` inside a terraform block.
 static REQUIRED_PROVIDERS: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*required_providers\s*\{").unwrap());
@@ -128,6 +143,10 @@ enum State {
     InProviderEntry,
     InModuleBlock,
     InTfeWorkspaceBlock(usize),
+    InDockerResourceBlock {
+        dep_type: TerraformDepType,
+        depth: usize,
+    },
     Skip(usize), // skip other blocks, depth counter
 }
 
@@ -144,6 +163,7 @@ struct Parser {
     mod_version: String,
     registry_aliases: BTreeMap<String, String>,
     resource_version: String,
+    resource_image: String,
 }
 
 impl Parser {
@@ -159,6 +179,7 @@ impl Parser {
             mod_version: String::new(),
             registry_aliases: registry_aliases.clone(),
             resource_version: String::new(),
+            resource_image: String::new(),
         }
     }
 
@@ -175,6 +196,9 @@ impl Parser {
             State::InProviderEntry => self.handle_provider_entry(trimmed),
             State::InModuleBlock => self.handle_module_block(trimmed),
             State::InTfeWorkspaceBlock(depth) => self.handle_tfe_workspace_block(*depth, trimmed),
+            State::InDockerResourceBlock { dep_type, depth } => {
+                self.handle_docker_resource_block(*dep_type, *depth, trimmed);
+            }
             State::Skip(depth) => self.handle_skip(*depth, trimmed),
         }
     }
@@ -185,6 +209,16 @@ impl Parser {
         } else if TFE_WORKSPACE_BLOCK.is_match(trimmed) {
             self.resource_version.clear();
             self.state = State::InTfeWorkspaceBlock(1);
+        } else if let Some(cap) = DOCKER_RESOURCE_BLOCK.captures(trimmed) {
+            self.resource_image.clear();
+            let dep_type = match &cap[2] {
+                "docker_image" => TerraformDepType::DockerImage,
+                "docker_container" => TerraformDepType::DockerContainer,
+                "docker_service" => TerraformDepType::DockerService,
+                "docker_registry_image" => TerraformDepType::DockerRegistryImage,
+                _ => unreachable!("regex only matches supported docker resources"),
+            };
+            self.state = State::InDockerResourceBlock { dep_type, depth: 1 };
         } else if let Some(cap) = MODULE_BLOCK.captures(trimmed) {
             self.mod_name = cap[1].to_owned();
             self.mod_source.clear();
@@ -391,6 +425,42 @@ impl Parser {
             self.state = State::InTfeWorkspaceBlock(new_depth);
         }
     }
+
+    fn handle_docker_resource_block(
+        &mut self,
+        dep_type: TerraformDepType,
+        depth: usize,
+        trimmed: &str,
+    ) {
+        if let Some(cap) = KV_LINE.captures(trimmed) {
+            let image_key = match dep_type {
+                TerraformDepType::DockerImage | TerraformDepType::DockerRegistryImage => "name",
+                TerraformDepType::DockerContainer | TerraformDepType::DockerService => "image",
+                _ => "",
+            };
+            if &cap[1] == image_key {
+                self.resource_image = cap[2].trim().to_owned();
+            }
+        }
+
+        let opens = trimmed.chars().filter(|&c| c == '{').count();
+        let closes = trimmed.chars().filter(|&c| c == '}').count();
+        let new_depth = depth.saturating_add(opens).saturating_sub(closes);
+        if new_depth == 0 {
+            self.deps.push(resolve_docker_image(
+                dep_type,
+                &self.resource_image,
+                &self.registry_aliases,
+            ));
+            self.resource_image.clear();
+            self.state = State::TopLevel;
+        } else {
+            self.state = State::InDockerResourceBlock {
+                dep_type,
+                depth: new_depth,
+            };
+        }
+    }
 }
 
 /// Classify a module source string.
@@ -587,6 +657,77 @@ fn query_param(query: &str, key: &str) -> Option<String> {
         let (name, value) = part.split_once('=')?;
         (name == key && !value.is_empty()).then(|| value.to_owned())
     })
+}
+
+fn resolve_docker_image(
+    dep_type: TerraformDepType,
+    image: &str,
+    registry_aliases: &BTreeMap<String, String>,
+) -> TerraformExtractedDep {
+    if image.is_empty() {
+        return docker_skip(
+            dep_type,
+            TerraformSkipReason::InvalidDependencySpecification,
+        );
+    }
+    if image.contains("${") || image.contains("data.") {
+        return docker_skip(dep_type, TerraformSkipReason::ContainsVariable);
+    }
+
+    let (without_digest, current_digest) = image
+        .split_once('@')
+        .map_or((image, None), |(name, digest)| {
+            (name, Some(digest.to_owned()))
+        });
+    let last_slash = without_digest.rfind('/').unwrap_or(0);
+    let tag_sep = without_digest[last_slash..]
+        .rfind(':')
+        .map(|idx| last_slash + idx);
+    let Some(tag_sep) = tag_sep else {
+        return docker_skip(
+            dep_type,
+            TerraformSkipReason::InvalidDependencySpecification,
+        );
+    };
+    let dep_name = &without_digest[..tag_sep];
+    let current_value = &without_digest[tag_sep + 1..];
+    if dep_name.is_empty() || current_value.is_empty() {
+        return docker_skip(
+            dep_type,
+            TerraformSkipReason::InvalidDependencySpecification,
+        );
+    }
+
+    let package_name = dep_name.split_once('/').and_then(|(host, path)| {
+        registry_aliases
+            .get(host)
+            .map(|registry| format!("{registry}/{path}"))
+    });
+
+    TerraformExtractedDep {
+        name: dep_name.to_owned(),
+        current_value: current_value.to_owned(),
+        dep_type,
+        datasource: Some("docker"),
+        package_name,
+        current_digest,
+        skip_reason: None,
+    }
+}
+
+fn docker_skip(
+    dep_type: TerraformDepType,
+    skip_reason: TerraformSkipReason,
+) -> TerraformExtractedDep {
+    TerraformExtractedDep {
+        name: String::new(),
+        current_value: String::new(),
+        dep_type,
+        datasource: Some("docker"),
+        package_name: None,
+        current_digest: None,
+        skip_reason: Some(skip_reason),
+    }
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -943,6 +1084,102 @@ terraform {
             no_version_provider.skip_reason,
             Some(TerraformSkipReason::UnspecifiedVersion)
         );
+    }
+
+    // Ported: "extracts docker resources" — terraform/extract.spec.ts line 579
+    #[test]
+    fn docker_resources_are_extracted() {
+        let content = r#"
+data "docker_registry_image" "ubuntu" {
+  name = "ubuntu:precise"
+}
+
+resource "docker_image" "nginx" {
+  name = "nginx:1.7.8"
+}
+
+resource "docker_image" "invalid" {
+}
+
+resource "docker_image" "ignore_variable" {
+  name = data.docker_registry_image.ubuntu.name
+}
+
+resource "docker_image" "proxy" {
+  name = "hub.proxy.test/bitnami/nginx:1.24.0"
+}
+
+resource "docker_container" "foo" {
+  image = "nginx:1.7.8"
+}
+
+resource "docker_container" "invalid" {
+  name = "foo"
+}
+
+resource "docker_service" "foo" {
+  task_spec {
+    container_spec {
+      image = "repo.mycompany.com:8080/foo-service:v1"
+    }
+  }
+}
+
+resource "not_supported_resource" "foo" {
+  image = "nginx:9.9.9"
+}
+"#;
+        let aliases = BTreeMap::from([("hub.proxy.test".to_owned(), "index.docker.io".to_owned())]);
+        let deps = extract_with_registry_aliases(content, &aliases);
+
+        assert_eq!(deps.len(), 8);
+        assert_eq!(
+            deps.iter().filter(|dep| dep.skip_reason.is_some()).count(),
+            3
+        );
+
+        let registry = deps
+            .iter()
+            .find(|dep| dep.dep_type == TerraformDepType::DockerRegistryImage)
+            .unwrap();
+        assert_eq!(registry.name, "ubuntu");
+        assert_eq!(registry.current_value, "precise");
+        assert_eq!(registry.datasource, Some("docker"));
+
+        let nginx = deps
+            .iter()
+            .find(|dep| dep.dep_type == TerraformDepType::DockerImage && dep.name == "nginx")
+            .unwrap();
+        assert_eq!(nginx.current_value, "1.7.8");
+
+        let proxy = deps
+            .iter()
+            .find(|dep| dep.name == "hub.proxy.test/bitnami/nginx")
+            .unwrap();
+        assert_eq!(proxy.current_value, "1.24.0");
+        assert_eq!(
+            proxy.package_name.as_deref(),
+            Some("index.docker.io/bitnami/nginx")
+        );
+
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::DockerContainer
+                && dep.name == "nginx"
+                && dep.current_value == "1.7.8"
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::DockerService
+                && dep.name == "repo.mycompany.com:8080/foo-service"
+                && dep.current_value == "v1"
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::DockerImage
+                && dep.skip_reason == Some(TerraformSkipReason::ContainsVariable)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::DockerContainer
+                && dep.skip_reason == Some(TerraformSkipReason::InvalidDependencySpecification)
+        }));
     }
 
     // Ported: "extracts  modules" — terraform/extract.spec.ts line 54

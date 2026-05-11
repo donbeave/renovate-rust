@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1389 / 1653 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1390 / 1653 actionable tests ported (84%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2592,7 +2592,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/terraform/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extract.spec.ts
-**Total tests:** 18 | **Ported:** 14 | **Actionable:** 18 | **Status:** partial
+**Total tests:** 18 | **Ported:** 15 | **Actionable:** 18 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2607,7 +2607,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | handles invalid OCI source URL | 358 | ported | `terraform.rs` | `invalid_oci_module_source_has_skip_reason` | — |
 | extracts OCI modules and providers | 374 | ported | `terraform.rs` | `oci_modules_and_required_providers_are_extracted` | — |
 | extracts providers | 463 | ported | `terraform.rs` | `required_providers_block_form` (+ required_providers_inline_string_form, comments_ignored, provider_without_source_uses_name) | — |
-| extracts docker resources | 579 | pending | — | — | Requires docker_image / docker_registry_image resource extraction |
+| extracts docker resources | 579 | ported | `terraform.rs` | `docker_resources_are_extracted` | — |
 | extracts kubernetes resources | 655 | pending | — | — | Requires kubernetes_manifest / kubernetes_pod resource extraction |
 | returns dep with skipReason local | 756 | ported | `terraform.rs` | `module_with_local_path_skipped` (+ local_module_has_skip_reason) | — |
 | returns null with only not added resources | 767 | ported | `terraform.rs` | `resource_block_not_extracted` | — |

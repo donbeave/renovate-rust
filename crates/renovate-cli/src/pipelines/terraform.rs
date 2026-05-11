@@ -44,7 +44,15 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             // Terraform Registry. Skip them here; a dedicated
                             // lookup path is a separate feature.
                             terraform_extractor::TerraformDepType::RequiredVersion
-                            | terraform_extractor::TerraformDepType::TfeWorkspace => return None,
+                            | terraform_extractor::TerraformDepType::TfeWorkspace
+                            // Docker resources use the Docker datasource, not
+                            // the Terraform Registry lookup path.
+                            | terraform_extractor::TerraformDepType::DockerImage
+                            | terraform_extractor::TerraformDepType::DockerContainer
+                            | terraform_extractor::TerraformDepType::DockerService
+                            | terraform_extractor::TerraformDepType::DockerRegistryImage => {
+                                return None;
+                            }
                         };
                         Some(terraform_datasource::TerraformDepInput {
                             name: d.name.clone(),
