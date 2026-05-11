@@ -71,8 +71,16 @@ pub struct Pep621ExtractedDep {
     pub current_value: String,
     /// Which section this dep came from.
     pub dep_type: Pep621DepType,
+    pub registry_urls: Vec<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<Pep621SkipReason>,
+}
+
+/// Package-file level PEP 621 extraction data.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct Pep621Extract {
+    pub deps: Vec<Pep621ExtractedDep>,
+    pub registry_urls: Vec<String>,
 }
 
 /// Errors from parsing a `pyproject.toml`.
@@ -86,8 +94,14 @@ pub enum Pep621ExtractError {
 
 /// Parse a `pyproject.toml` string and extract all Python dependencies.
 pub fn extract(content: &str) -> Result<Vec<Pep621ExtractedDep>, Pep621ExtractError> {
+    Ok(extract_package_file(content)?.deps)
+}
+
+/// Parse a `pyproject.toml` string and extract deps plus package-file metadata.
+pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621ExtractError> {
     let doc: Value = toml::from_str(content)?;
     let mut deps = Vec::new();
+    let registry_urls = extract_pdm_sources(&doc);
 
     // [project].dependencies
     if let Some(project_deps) = doc
@@ -97,7 +111,7 @@ pub fn extract(content: &str) -> Result<Vec<Pep621ExtractedDep>, Pep621ExtractEr
     {
         for entry in project_deps {
             if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::Regular) {
-                deps.push(dep);
+                deps.push(with_registry_urls(dep, &registry_urls));
             }
         }
     }
@@ -112,7 +126,7 @@ pub fn extract(content: &str) -> Result<Vec<Pep621ExtractedDep>, Pep621ExtractEr
             if let Some(arr) = entries.as_array() {
                 for entry in arr {
                     if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::Optional) {
-                        deps.push(dep);
+                        deps.push(with_registry_urls(dep, &registry_urls));
                     }
                 }
             }
@@ -131,10 +145,11 @@ pub fn extract(content: &str) -> Result<Vec<Pep621ExtractedDep>, Pep621ExtractEr
                             name: String::new(),
                             current_value: String::new(),
                             dep_type: Pep621DepType::Group,
+                            registry_urls: Vec::new(),
                             skip_reason: Some(Pep621SkipReason::GroupInclude),
                         });
                     } else if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::Group) {
-                        deps.push(dep);
+                        deps.push(with_registry_urls(dep, &registry_urls));
                     }
                 }
             }
@@ -154,7 +169,10 @@ pub fn extract(content: &str) -> Result<Vec<Pep621ExtractedDep>, Pep621ExtractEr
         }
     }
 
-    Ok(deps)
+    Ok(Pep621Extract {
+        deps,
+        registry_urls,
+    })
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -180,6 +198,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             name,
             current_value: raw.to_owned(),
             dep_type,
+            registry_urls: Vec::new(),
             skip_reason: Some(Pep621SkipReason::DirectReference),
         };
     }
@@ -201,6 +220,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             name: String::new(),
             current_value: raw.to_owned(),
             dep_type,
+            registry_urls: Vec::new(),
             skip_reason: Some(Pep621SkipReason::GroupInclude),
         };
     }
@@ -219,8 +239,30 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
         name,
         current_value: specifier.to_owned(),
         dep_type,
+        registry_urls: Vec::new(),
         skip_reason: None,
     }
+}
+
+fn with_registry_urls(mut dep: Pep621ExtractedDep, registry_urls: &[String]) -> Pep621ExtractedDep {
+    if dep.skip_reason.is_none() && dep.name != "python" && !registry_urls.is_empty() {
+        dep.registry_urls = registry_urls.to_vec();
+    }
+    dep
+}
+
+fn extract_pdm_sources(doc: &Value) -> Vec<String> {
+    doc.get("tool")
+        .and_then(|tool| tool.get("pdm"))
+        .and_then(|pdm| pdm.get("source"))
+        .and_then(Value::as_array)
+        .map(|sources| {
+            sources
+                .iter()
+                .filter_map(|source| source.get("url").and_then(Value::as_str).map(str::to_owned))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 /// Normalize a Python package name per PEP 503.
@@ -370,6 +412,34 @@ dependencies = ["mypkg @ https://example.com/mypkg.tar.gz"]
 "#;
         let deps = extract_ok(content);
         assert_eq!(deps[0].skip_reason, Some(Pep621SkipReason::DirectReference));
+    }
+
+    // Ported: "should return dependencies with original pypi registryUrl" — pep621/extract.spec.ts line 309
+    #[test]
+    fn pdm_sources_apply_registry_urls_to_project_dependencies() {
+        let content = r#"
+[project]
+dependencies = [
+  "packaging>=20.9,!=22.0",
+]
+
+[[tool.pdm.source]]
+url = "https://private-site.org/pypi/simple"
+verify_ssl = true
+name = "internal"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert_eq!(
+            package_file.registry_urls,
+            vec!["https://private-site.org/pypi/simple".to_owned()]
+        );
+        assert_eq!(package_file.deps.len(), 1);
+        assert_eq!(package_file.deps[0].name, "packaging");
+        assert_eq!(package_file.deps[0].current_value, ">=20.9,!=22.0");
+        assert_eq!(
+            package_file.deps[0].registry_urls,
+            vec!["https://private-site.org/pypi/simple".to_owned()]
+        );
     }
 
     // ── empty / no deps ───────────────────────────────────────────────────────
