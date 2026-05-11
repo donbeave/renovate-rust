@@ -243,22 +243,7 @@ pub fn extract_project_file_with_config(
         return Ok(None);
     }
 
-    let registry_urls = nuget_config_registry_urls(package_file, files);
-    if !registry_urls.is_empty() {
-        for dep in &mut deps {
-            if matches!(
-                dep.dep_type,
-                NuGetDepType::Package
-                    | NuGetDepType::PackageVersion
-                    | NuGetDepType::CliTool
-                    | NuGetDepType::Global
-                    | NuGetDepType::DotnetTool
-                    | NuGetDepType::SingleFilePackage
-            ) {
-                dep.registry_urls.clone_from(&registry_urls);
-            }
-        }
-    }
+    apply_config_registry_urls(&mut deps, package_file, files);
 
     let package_file_version = extract_package_file_version(content)?;
     let lock_files = if lock_file_exists {
@@ -280,6 +265,14 @@ pub fn extract_project_file_with_config(
 /// JSON as null extraction results; this tolerant API mirrors that behavior by
 /// returning an empty dependency list for those cases.
 pub fn extract_dotnet_tools(content: &str) -> Vec<NuGetExtractedDep> {
+    extract_dotnet_tools_with_config(content, "", &[])
+}
+
+pub fn extract_dotnet_tools_with_config(
+    content: &str,
+    package_file: &str,
+    files: &[(&str, Option<&str>)],
+) -> Vec<NuGetExtractedDep> {
     let Ok(manifest) = serde_json::from_str::<Value>(content) else {
         return Vec::new();
     };
@@ -292,7 +285,7 @@ pub fn extract_dotnet_tools(content: &str) -> Vec<NuGetExtractedDep> {
         return Vec::new();
     };
 
-    tools
+    let mut deps: Vec<_> = tools
         .iter()
         .filter_map(|(name, tool)| {
             let version = tool.get("version").and_then(Value::as_str)?;
@@ -308,7 +301,9 @@ pub fn extract_dotnet_tools(content: &str) -> Vec<NuGetExtractedDep> {
                 skip_reason: None,
             })
         })
-        .collect()
+        .collect();
+    apply_config_registry_urls(&mut deps, package_file, files);
+    deps
 }
 
 /// Parse NuGet directives from a .NET 10 single C# file.
@@ -316,7 +311,15 @@ pub fn extract_dotnet_tools(content: &str) -> Vec<NuGetExtractedDep> {
 /// Supports Renovate's current directive forms:
 /// `#:sdk Name@Version` and `#:package Name@Version`.
 pub fn extract_single_csharp_file(content: &str) -> Vec<NuGetExtractedDep> {
-    content
+    extract_single_csharp_file_with_config(content, "", &[])
+}
+
+pub fn extract_single_csharp_file_with_config(
+    content: &str,
+    package_file: &str,
+    files: &[(&str, Option<&str>)],
+) -> Vec<NuGetExtractedDep> {
+    let mut deps: Vec<_> = content
         .lines()
         .filter_map(|line| {
             let line = line.trim_start();
@@ -353,7 +356,9 @@ pub fn extract_single_csharp_file(content: &str) -> Vec<NuGetExtractedDep> {
                 skip_reason: None,
             })
         })
-        .collect()
+        .collect();
+    apply_config_registry_urls(&mut deps, package_file, files);
+    deps
 }
 
 /// Parse a NuGet-relevant `global.json` manifest.
@@ -422,14 +427,66 @@ fn nuget_config_registry_urls(package_file: &str, files: &[(&str, Option<&str>)]
         .filter_map(|(path, content)| content.map(|content| (*path, content)))
         .collect();
 
-    for config_name in ["NuGet.config", "nuget.config", "NuGet.Config"] {
-        let path = sibling_file_name(package_file, config_name);
-        if let Some(content) = file_contents.get(path.as_str()) {
-            return parse_nuget_config_registry_urls(content);
+    for dir in package_file_dirs(package_file) {
+        for config_name in ["nuget.config", "NuGet.config", "NuGet.Config"] {
+            let path = join_path(&dir, config_name);
+            if let Some(content) = file_contents.get(path.as_str()) {
+                return parse_nuget_config_registry_urls(content);
+            }
         }
     }
 
     Vec::new()
+}
+
+fn apply_config_registry_urls(
+    deps: &mut [NuGetExtractedDep],
+    package_file: &str,
+    files: &[(&str, Option<&str>)],
+) {
+    let registry_urls = nuget_config_registry_urls(package_file, files);
+    if registry_urls.is_empty() {
+        return;
+    }
+
+    for dep in deps {
+        if matches!(
+            dep.dep_type,
+            NuGetDepType::Package
+                | NuGetDepType::PackageVersion
+                | NuGetDepType::CliTool
+                | NuGetDepType::Global
+                | NuGetDepType::DotnetTool
+                | NuGetDepType::SingleFilePackage
+                | NuGetDepType::MsbuildSdk
+        ) {
+            dep.registry_urls.clone_from(&registry_urls);
+        }
+    }
+}
+
+fn package_file_dirs(package_file: &str) -> Vec<String> {
+    let Some((mut dir, _)) = package_file.rsplit_once('/') else {
+        return vec![String::new()];
+    };
+    let mut dirs = Vec::new();
+    loop {
+        dirs.push(dir.to_owned());
+        let Some((parent, _)) = dir.rsplit_once('/') else {
+            dirs.push(String::new());
+            break;
+        };
+        dir = parent;
+    }
+    dirs
+}
+
+fn join_path(dir: &str, file: &str) -> String {
+    if dir.is_empty() {
+        file.to_owned()
+    } else {
+        format!("{dir}/{file}")
+    }
 }
 
 fn parse_nuget_config_registry_urls(content: &str) -> Vec<String> {
@@ -1399,6 +1456,42 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "with-config" — nuget/extract.spec.ts line 537
+    #[test]
+    fn dotnet_tools_manifest_applies_parent_nuget_config() {
+        let content = r#"{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "minver-cli": {
+      "version": "2.0.0",
+      "commands": ["minver"]
+    }
+  }
+}"#;
+        let config = nuget_config_with_sources(&[
+            "https://api.nuget.org/v3/index.json#protocolVersion=3",
+            "https://contoso.com/packages/",
+        ]);
+        let files = [
+            ("with-config-file/.config/dotnet-tools.json", Some(content)),
+            ("with-config-file/NuGet.config", Some(config.as_str())),
+        ];
+        let deps = extract_dotnet_tools_with_config(
+            content,
+            "with-config-file/.config/dotnet-tools.json",
+            &files,
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].registry_urls,
+            vec![
+                "https://api.nuget.org/v3/index.json#protocolVersion=3",
+                "https://contoso.com/packages/"
+            ]
+        );
+    }
+
     // Ported: "wrong version" — nuget/extract.spec.ts line 561
     #[test]
     fn dotnet_tools_manifest_wrong_version_returns_empty() {
@@ -1441,6 +1534,33 @@ mod tests {
         assert_eq!(deps[1].current_value, "3.0.1");
         assert_eq!(deps[1].dep_type, NuGetDepType::SingleFilePackage);
         assert_eq!(deps[1].dep_type.as_renovate_str(), "nuget");
+    }
+
+    // Ported: "calls applyRegistries to honor nuget.config files if present" — nuget/extract.spec.ts line 615
+    #[test]
+    fn single_csharp_file_applies_nuget_config_registries() {
+        let content = r#"
+#:sdk Some.Sdk@6.0.0
+#:package Some.NuGet.Package@3.0.1
+
+Console.WriteLine("Hello World!");
+"#;
+        let config = nuget_config_with_sources(&["https://contoso.com/packages/"]);
+        let files = [
+            ("single-csharp-file-nuget/singlefile.cs", Some(content)),
+            (
+                "single-csharp-file-nuget/NuGet.config",
+                Some(config.as_str()),
+            ),
+        ];
+        let deps = extract_single_csharp_file_with_config(
+            content,
+            "single-csharp-file-nuget/singlefile.cs",
+            &files,
+        );
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].registry_urls, vec!["https://contoso.com/packages/"]);
+        assert_eq!(deps[1].registry_urls, vec!["https://contoso.com/packages/"]);
     }
 
     // Ported: "extracts msbuild-sdks from global.json" — nuget/extract.spec.ts line 461
