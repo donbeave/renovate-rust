@@ -20,7 +20,23 @@
 
 use serde::Deserialize;
 
-use crate::extractors::pip::PipExtractedDep;
+use crate::extractors::pip;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HomeAssistantSkipReason {
+    UnspecifiedVersion,
+    InvalidDependencySpecification,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HomeAssistantExtractedDep {
+    pub name: String,
+    pub package_name: Option<String>,
+    pub datasource: &'static str,
+    pub current_value: String,
+    pub current_version: Option<String>,
+    pub skip_reason: Option<HomeAssistantSkipReason>,
+}
 
 #[derive(Debug, Deserialize)]
 struct HaManifest {
@@ -36,7 +52,7 @@ struct HaManifest {
 ///
 /// Returns empty if the file is not a valid HA manifest (missing `domain`
 /// or `name`, or has `manifest_version` which marks a Chrome extension).
-pub fn extract(content: &str) -> Vec<PipExtractedDep> {
+pub fn extract(content: &str) -> Vec<HomeAssistantExtractedDep> {
     let manifest: HaManifest = match serde_json::from_str(content.trim()) {
         Ok(m) => m,
         Err(_) => return Vec::new(),
@@ -63,8 +79,62 @@ pub fn extract(content: &str) -> Vec<PipExtractedDep> {
         return Vec::new();
     }
 
-    let joined = reqs.join("\n");
-    crate::extractors::pip::extract(&joined).unwrap_or_default()
+    reqs.iter().map(|req| parse_requirement(req)).collect()
+}
+
+fn parse_requirement(req: &str) -> HomeAssistantExtractedDep {
+    if let Some(dep) = parse_git_requirement(req) {
+        return dep;
+    }
+
+    match pip::extract(req).unwrap_or_default().into_iter().next() {
+        Some(dep) => {
+            let current_version = dep
+                .current_value
+                .strip_prefix("==")
+                .filter(|v| !v.is_empty())
+                .map(str::to_owned);
+            let skip_reason = if dep.current_value.is_empty() {
+                Some(HomeAssistantSkipReason::UnspecifiedVersion)
+            } else {
+                None
+            };
+            let name = dep.name;
+            HomeAssistantExtractedDep {
+                package_name: Some(name.clone()),
+                datasource: "pypi",
+                name,
+                current_value: dep.current_value,
+                current_version,
+                skip_reason,
+            }
+        }
+        None => HomeAssistantExtractedDep {
+            name: req.to_owned(),
+            package_name: None,
+            datasource: "pypi",
+            current_value: String::new(),
+            current_version: None,
+            skip_reason: Some(HomeAssistantSkipReason::InvalidDependencySpecification),
+        },
+    }
+}
+
+fn parse_git_requirement(req: &str) -> Option<HomeAssistantExtractedDep> {
+    let (name, rest) = req.split_once("@git+")?;
+    let (url, version) = rest.rsplit_once('@')?;
+    if name.is_empty() || url.is_empty() || version.is_empty() {
+        return None;
+    }
+
+    Some(HomeAssistantExtractedDep {
+        name: name.to_owned(),
+        package_name: Some(url.to_owned()),
+        datasource: "git-tags",
+        current_value: version.to_owned(),
+        current_version: Some(version.to_owned()),
+        skip_reason: None,
+    })
 }
 
 #[cfg(test)]
@@ -167,6 +237,28 @@ mod tests {
         assert_eq!(deps[0].current_value, "==1.0.0");
     }
 
+    // Ported: "extracts git+https requirements" — homeassistant-manifest/extract.spec.ts line 138
+    #[test]
+    fn extracts_git_https_requirements() {
+        let content = r#"{"domain": "test", "name": "Test", "requirements": ["pycoolmaster@git+https://github.com/issacg/pycoolmaster.git@v1.0.0", "aiohue==1.9.1"]}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+
+        let git = deps.iter().find(|d| d.name == "pycoolmaster").unwrap();
+        assert_eq!(git.datasource, "git-tags");
+        assert_eq!(
+            git.package_name.as_deref(),
+            Some("https://github.com/issacg/pycoolmaster.git")
+        );
+        assert_eq!(git.current_value, "v1.0.0");
+        assert_eq!(git.current_version.as_deref(), Some("v1.0.0"));
+
+        let aiohue = deps.iter().find(|d| d.name == "aiohue").unwrap();
+        assert_eq!(aiohue.datasource, "pypi");
+        assert_eq!(aiohue.package_name.as_deref(), Some("aiohue"));
+        assert_eq!(aiohue.current_version.as_deref(), Some("1.9.1"));
+    }
+
     // Ported: "handles requirements without version" — homeassistant-manifest/extract.spec.ts line 211
     #[test]
     fn handles_requirements_without_version() {
@@ -178,7 +270,10 @@ mod tests {
         assert_eq!(aiohue.current_value, "==1.9.1");
         // bare package name with no version specifier — pip extractor returns it with empty value
         let pkg = deps.iter().find(|d| d.name == "package").unwrap();
-        assert!(pkg.current_value.is_empty() || pkg.skip_reason.is_some());
+        assert_eq!(
+            pkg.skip_reason,
+            Some(HomeAssistantSkipReason::UnspecifiedVersion)
+        );
     }
 
     // Ported: "extracts from real-world ASUSWRT manifest" — homeassistant-manifest/extract.spec.ts line 237
@@ -213,5 +308,23 @@ mod tests {
     fn requirements_not_an_array_returns_empty() {
         let content = r#"{"domain": "test", "name": "Test", "requirements": "not-an-array"}"#;
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "handles unparseable requirement strings with skipReason" — homeassistant-manifest/extract.spec.ts line 313
+    #[test]
+    fn unparseable_requirement_has_skip_reason() {
+        let content = r#"{"domain": "test", "name": "Test", "requirements": ["!!!invalid!!!", "aiohue==1.9.1"]}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+
+        let invalid = deps.iter().find(|d| d.name == "!!!invalid!!!").unwrap();
+        assert_eq!(
+            invalid.skip_reason,
+            Some(HomeAssistantSkipReason::InvalidDependencySpecification)
+        );
+
+        let aiohue = deps.iter().find(|d| d.name == "aiohue").unwrap();
+        assert_eq!(aiohue.package_name.as_deref(), Some("aiohue"));
+        assert_eq!(aiohue.current_version.as_deref(), Some("1.9.1"));
     }
 }

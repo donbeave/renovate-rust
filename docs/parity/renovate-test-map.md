@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1355 / 1661 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1357 / 1661 actionable tests ported (82%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2622,7 +2622,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/homeassistant-manifest/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homeassistant-manifest/extract.spec.ts
-**Total tests:** 16 | **Ported:** 14 | **Actionable:** 16 | **Status:** partial
+**Total tests:** 16 | **Ported:** 16 | **Actionable:** 16 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2637,13 +2637,13 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extracts single requirement with exact version | 64 | ported | `homeassistant.rs` | `extracts_single_requirement_exact_version` | — |
 | extracts multiple requirements | 84 | ported | `homeassistant.rs` | `extracts_multiple_requirements` (+ extracts_requirements) | — |
 | handles requirements with extras | 118 | ported | `homeassistant.rs` | `handles_requirements_with_extras` | — |
-| extracts git+https requirements | 138 | pending | — | — | Requires git+https VCS source detection in homeassistant requirements |
+| extracts git+https requirements | 138 | ported | `homeassistant.rs` | `extracts_git_https_requirements` | — |
 | supports requirements with other operators | 168 | ported | `homeassistant.rs` | `extracts_range_version` | — |
 | handles requirements without version | 211 | ported | `homeassistant.rs` | `handles_requirements_without_version` | — |
 | extracts from real-world ASUSWRT manifest | 237 | ported | `homeassistant.rs` | `extracts_asuswrt_manifest` | — |
 | handles invalid requirement types in array | 272 | ported | `homeassistant.rs` | `skips_non_string_entries_in_requirements_array` | — |
 | returns null when requirements is not an array | 299 | ported | `homeassistant.rs` | `requirements_not_an_array_returns_empty` | — |
-| handles unparseable requirement strings with skipReason | 313 | pending | — | — | Requires explicit skipReason path for unparseable PEP 508 strings |
+| handles unparseable requirement strings with skipReason | 313 | ported | `homeassistant.rs` | `unparseable_requirement_has_skip_reason` | — |
 
 ---
 

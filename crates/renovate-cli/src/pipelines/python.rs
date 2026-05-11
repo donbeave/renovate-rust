@@ -215,6 +215,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     .iter()
                     .filter(|d| {
                         d.skip_reason.is_none()
+                            && d.datasource == "pypi"
                             && !repo_cfg
                                 .is_dep_ignored_for_manager(&d.name, "homeassistant-manifest")
                     })
@@ -242,10 +243,127 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                     .into_iter()
                     .map(|r| (r.dep_name, r.summary))
                     .collect();
+                let mut reports = Vec::new();
+                for dep in deps.iter().filter(|d| d.skip_reason.is_some()) {
+                    let reason = match dep.skip_reason.as_ref().unwrap() {
+                        renovate_core::extractors::homeassistant::HomeAssistantSkipReason::UnspecifiedVersion => {
+                            "unspecified-version"
+                        }
+                        renovate_core::extractors::homeassistant::HomeAssistantSkipReason::InvalidDependencySpecification => {
+                            "invalid-dependency-specification"
+                        }
+                    };
+                    reports.push(output::DepReport {
+                        branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
+                        assignees: Vec::new(),
+                        reviewers: Vec::new(),
+                        update_type: None,
+                        pr_priority: None,
+                        pr_title: None,
+                        release_timestamp: None,
+                        current_version_timestamp: None,
+                        dep_type: None,
+                        package_name: dep.package_name.clone(),
+                        range_strategy: None,
+                        follow_tag: None,
+                        pin_digests: None,
+                        versioning: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
+                        name: dep.name.clone(),
+                        status: output::DepStatus::Skipped {
+                            reason: reason.into(),
+                        },
+                    });
+                }
+                for dep in &actionable {
+                    let summary = update_map.get(&dep.name);
+                    let release_timestamp = summary
+                        .and_then(|r| r.as_ref().ok())
+                        .and_then(|s| s.latest_timestamp.clone());
+                    let current_version_timestamp = summary
+                        .and_then(|r| r.as_ref().ok())
+                        .and_then(|s| s.current_version_timestamp.clone());
+                    let status = match summary {
+                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_specifier.clone(),
+                            latest: s.latest.clone().unwrap_or_default(),
+                        },
+                        Some(Ok(s)) => output::DepStatus::UpToDate {
+                            latest: s.latest.clone(),
+                        },
+                        Some(Err(e)) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                        None => output::DepStatus::LookupError {
+                            message: "no lookup result".into(),
+                        },
+                    };
+                    reports.push(output::DepReport {
+                        branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
+                        assignees: Vec::new(),
+                        reviewers: Vec::new(),
+                        update_type: None,
+                        pr_priority: None,
+                        pr_title: None,
+                        release_timestamp,
+                        current_version_timestamp,
+                        dep_type: None,
+                        package_name: dep.package_name.clone(),
+                        range_strategy: None,
+                        follow_tag: None,
+                        pin_digests: None,
+                        versioning: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
+                        name: dep.name.clone(),
+                        status,
+                    });
+                }
+                for dep in deps
+                    .iter()
+                    .filter(|d| d.skip_reason.is_none() && d.datasource != "pypi")
+                {
+                    reports.push(output::DepReport {
+                        branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
+                        assignees: Vec::new(),
+                        reviewers: Vec::new(),
+                        update_type: None,
+                        pr_priority: None,
+                        pr_title: None,
+                        release_timestamp: None,
+                        current_version_timestamp: None,
+                        dep_type: None,
+                        package_name: dep.package_name.clone(),
+                        range_strategy: None,
+                        follow_tag: None,
+                        pin_digests: None,
+                        versioning: Some(dep.datasource.into()),
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
+                        name: dep.name.clone(),
+                        status: output::DepStatus::Skipped {
+                            reason: "unsupported-datasource".into(),
+                        },
+                    });
+                }
+
                 ctx.report.files.push(output::FileReport {
                     path: ha_path.clone(),
                     manager: "homeassistant-manifest".into(),
-                    deps: build_dep_reports_pip(&deps, &actionable, &update_map),
+                    deps: reports,
                 });
             }
             Ok(None) => {
