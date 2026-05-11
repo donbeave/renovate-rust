@@ -54,7 +54,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/asdf/extract.ts` | `crates/renovate-core/src/extractors/asdf.rs` | partial | Core extraction ported; large tooling map |
 | `lib/modules/manager/asdf/upgradeable-tooling.ts` | `crates/renovate-core/src/extractors/asdf.rs` | partial | Tooling map partially inlined |
-| `lib/modules/manager/asdf/index.ts` | `crates/renovate-core/src/extractors/asdf.rs` | partial | Manager metadata |
+| `lib/modules/manager/asdf/index.ts` | `crates/renovate-core/src/extractors/asdf.rs` | partial | Manager metadata; supported datasources parity |
 
 ### azure-pipelines
 

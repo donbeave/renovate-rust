@@ -41,6 +41,24 @@ pub mod datasource_id {
     pub const PYPI: &str = "pypi";
 }
 
+/// Datasources supported by the asdf manager.
+///
+/// Renovate reference: `lib/modules/manager/asdf/index.ts` `supportedDatasources`.
+pub const SUPPORTED_DATASOURCES: &[&str] = &[
+    datasource_id::DART_VERSION,
+    datasource_id::DOCKER,
+    datasource_id::DOTNET_VERSION,
+    datasource_id::FLUTTER_VERSION,
+    datasource_id::GITHUB_RELEASES,
+    datasource_id::GITHUB_TAGS,
+    datasource_id::HEXPM_BOB,
+    datasource_id::JAVA_VERSION,
+    datasource_id::NODE_VERSION,
+    datasource_id::NPM,
+    datasource_id::PYPI,
+    datasource_id::RUBY_VERSION,
+];
+
 /// Legacy enum kept for pipeline compatibility (`devcontainer.rs`, `version_files.rs`).
 ///
 /// GitHub-backed tools populate both this enum and the string-based fields on
@@ -1812,6 +1830,29 @@ unknowntool 9.9.9
                 tag_strip: "OTP-",
             })
         );
+    }
+
+    // Ported: "contains ${datasource}" — asdf/index.spec.ts line 22
+    #[test]
+    fn supported_datasources_contains_all_used_datasources() {
+        for (_, definition) in TOOL_TABLE {
+            assert!(
+                SUPPORTED_DATASOURCES.contains(&definition.datasource),
+                "missing supported datasource {}",
+                definition.datasource
+            );
+        }
+
+        let dynamic_deps = extract(
+            "java adoptopenjdk-16.0.0+36\njava adoptopenjdk-jre-16.0.0+36\nscala 2.0.0\nscala 3.0.0",
+        );
+        for dep in dynamic_deps {
+            let datasource = dep.datasource_id.expect("dynamic dep datasource");
+            assert!(
+                SUPPORTED_DATASOURCES.contains(&datasource),
+                "missing supported datasource {datasource}"
+            );
+        }
     }
 
     #[test]

@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1079 / 1266 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1080 / 1267 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 38 spec files not yet converted to per-test format (26 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 37 spec files not yet converted to per-test format (26 pending, 10 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -92,6 +92,19 @@ Status key: `ported` · `pending` · `not-applicable`
 | ignores lines that are just comments | 1076 | ported | `asdf.rs` | `comment_lines_skipped` | — |
 | ignores comments across multiple lines | 1081 | ported | `asdf.rs` | `ignores_comments_across_multiple_lines` | — |
 | ignores supported tooling with a renovate:ignore comment | 1096 | ported | `asdf.rs` | `renovate_ignore_comment_skips_dep` | — |
+
+---
+
+## `lib/modules/manager/asdf/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/asdf/index.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/manager/asdf/index › supportedDatasources`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| contains ${datasource} | 22 | ported | `asdf.rs` | `supported_datasources_contains_all_used_datasources` | — |
 
 ---
 
@@ -2749,7 +2762,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
-| `lib/modules/manager/asdf/index.spec.ts` | — | `crates/renovate-core/src/extractors/asdf.rs` | — | partial |
+<!-- asdf/index.spec.ts converted to per-test format above -->
 | `lib/modules/manager/ant/properties.spec.ts` | — | `crates/renovate-core/src/extractors/ant.rs` | — | partial |
 <!-- ant/update.spec.ts converted to per-test format above -->
 | `lib/modules/manager/bazel-module/bazelrc.spec.ts` | — | — | — | pending |
