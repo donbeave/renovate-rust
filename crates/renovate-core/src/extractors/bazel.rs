@@ -95,9 +95,11 @@ pub fn extract(content: &str) -> Vec<BazelDep> {
     let content = strip_comment_lines(content);
     let mut deps = Vec::new();
     extract_rule(&content, "http_archive(", parse_http_archive, &mut deps);
+    extract_maybe_rule(&content, "http_archive", parse_http_archive, &mut deps);
     extract_rule(&content, "container_pull(", parse_container_pull, &mut deps);
     extract_rule(&content, "oci_pull(", parse_oci_pull, &mut deps);
     extract_rule(&content, "go_repository(", parse_go_repository, &mut deps);
+    extract_maybe_rule(&content, "go_repository", parse_go_repository, &mut deps);
     deps
 }
 
@@ -126,6 +128,37 @@ fn extract_rule(
         }
         search_pos = abs_start + block.len().max(1);
     }
+}
+
+fn extract_maybe_rule(
+    content: &str,
+    rule_name: &str,
+    parser: fn(&str) -> Option<BazelDep>,
+    out: &mut Vec<BazelDep>,
+) {
+    let mut search_pos = 0;
+    while let Some(start) = content[search_pos..].find("maybe(") {
+        let abs_start = search_pos + start;
+        let Some(block) = extract_block(&content[abs_start..]) else {
+            break;
+        };
+        if maybe_wraps_rule(block, rule_name)
+            && let Some(dep) = parser(block)
+        {
+            out.push(dep);
+        }
+        search_pos = abs_start + block.len().max(1);
+    }
+}
+
+fn maybe_wraps_rule(block: &str, rule_name: &str) -> bool {
+    let Some(open) = block.find('(') else {
+        return false;
+    };
+    let inner = block[open + 1..].trim_start();
+    inner
+        .strip_prefix(rule_name)
+        .is_some_and(|rest| rest.trim_start().starts_with(','))
 }
 
 /// Extract the content of a `http_archive(...)` block (including the outer parens).
@@ -300,7 +333,17 @@ fn parse_http_archive(block: &str) -> Option<BazelDep> {
         // GitHub archive.
         if let Some(cap) = GH_ARCHIVE_RE.captures(url) {
             let repo = cap[1].to_owned();
-            let version = cap[2].trim_start_matches('v').to_owned();
+            let ref_str = &cap[2];
+            if ref_str.len() == 40 && ref_str.chars().all(|c| c.is_ascii_hexdigit()) {
+                return Some(BazelDep {
+                    dep_name,
+                    current_value: String::new(),
+                    current_digest: Some(ref_str.to_owned()),
+                    source: BazelSource::GithubTags { repo },
+                    skip_reason: None,
+                });
+            }
+            let version = ref_str.trim_start_matches('v').to_owned();
             return Some(BazelDep {
                 dep_name,
                 current_value: version,
@@ -538,8 +581,8 @@ http_archive(
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "com_github_nelhage_rules_boost");
         assert_eq!(
-            deps[0].current_value,
-            "98495a618246683c9058dd87c2c78a2c06087999"
+            deps[0].current_digest.as_deref(),
+            Some("98495a618246683c9058dd87c2c78a2c06087999")
         );
         assert_eq!(
             deps[0].source,
@@ -673,5 +716,67 @@ go_repository(
                 Some(BazelSkipReason::UnsupportedRemote)
             );
         }
+    }
+
+    // Ported: "extracts dependencies from *.bzl files" — bazel/extract.spec.ts line 47
+    #[test]
+    fn extracts_dependencies_from_bzl_files() {
+        let content = r#"
+def repositories():
+    if "subpar" not in native.existing_rules().keys():
+        http_archive(
+            name = "subpar",
+            sha256 = "7ab6ab37ede82255e00c0456846a1428b20e8813f77d83bcf54ddd59ba34377a",
+            strip_prefix = "subpar-0356bef3fbbabec5f0e196ecfacdeb6db62d48c0",
+            urls = ["https://github.com/google/subpar/archive/0356bef3fbbabec5f0e196ecfacdeb6db62d48c0.tar.gz"],
+        )
+
+    if "bazel_skylib" not in native.existing_rules().keys():
+        http_archive(
+            name = "bazel_skylib",
+            sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
+            strip_prefix = "bazel-skylib-0.6.0",
+            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
+        )
+
+    maybe(
+        http_archive,
+        name = "io_bazel_stardoc",
+        sha256 = "c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
+            "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
+        ],
+    )
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(deps[0].dep_name, "subpar");
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("0356bef3fbbabec5f0e196ecfacdeb6db62d48c0")
+        );
+        assert_eq!(
+            deps[0].source,
+            BazelSource::GithubTags {
+                repo: "google/subpar".to_owned(),
+            }
+        );
+        assert_eq!(deps[1].dep_name, "bazel_skylib");
+        assert_eq!(deps[1].current_value, "0.6.0");
+        assert_eq!(
+            deps[1].source,
+            BazelSource::GithubTags {
+                repo: "bazelbuild/bazel-skylib".to_owned(),
+            }
+        );
+        assert_eq!(deps[2].dep_name, "io_bazel_stardoc");
+        assert_eq!(deps[2].current_value, "0.5.0");
+        assert_eq!(
+            deps[2].source,
+            BazelSource::GithubReleases {
+                repo: "bazelbuild/stardoc".to_owned(),
+            }
+        );
     }
 }
