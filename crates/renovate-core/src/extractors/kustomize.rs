@@ -199,6 +199,7 @@ fn flush_helm(
 mod tests {
     use super::*;
 
+    // Ported: "should correctly extract a default image" — kustomize/extract.spec.ts line 287
     #[test]
     fn extracts_images() {
         let content = r#"
@@ -333,6 +334,7 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
+    // Ported: "should correctly extract a chart" — kustomize/extract.spec.ts line 217
     #[test]
     fn extracts_helm_charts() {
         let content = r#"
@@ -368,6 +370,7 @@ helmCharts:
         );
     }
 
+    // Ported: "parses helmChart field" — kustomize/extract.spec.ts line 799
     #[test]
     fn mixed_images_and_helm() {
         let content = r#"
@@ -400,6 +403,7 @@ helmCharts:
         assert!(deps.is_empty());
     }
 
+    // Ported: "return null on an invalid file" — kustomize/extract.spec.ts line 33
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
