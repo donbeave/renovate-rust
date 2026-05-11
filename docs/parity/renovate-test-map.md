@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 741 / 1181 actionable tests ported (63%) — updated 2026-05-08
+**Overall progress (per-test sections only):** 744 / 1217 actionable tests ported (61%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1903,7 +1903,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | resolves properties from external .properties files | 193 | pending | — | — | Requires external .properties resolution |
 | implements first-definition-wins for inline properties | 228 | pending | — | — | Requires property precedence semantics |
 | inline properties take precedence over file properties | 254 | pending | — | — | Requires property precedence semantics |
-| skips dependencies with unresolvable property references | 288 | pending | — | — | Requires unresolved-property skip handling |
+| skips dependencies with unresolvable property references | 288 | ported | `ant.rs` | `property_ref_skipped` | — |
 | detects circular property references | 312 | pending | — | — | Requires circular-property detection |
 | resolves chained property references | 338 | pending | — | — | Requires chained property resolution |
 | groups multiple dependencies sharing the same property | 368 | pending | — | — | Requires shared-property dep grouping |

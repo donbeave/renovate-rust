@@ -282,6 +282,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.7.36");
     }
 
+    // Ported: "skips dependencies with unresolvable property references" — ant/extract.spec.ts line 288
     #[test]
     fn property_ref_skipped() {
         let content = r#"
