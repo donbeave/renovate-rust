@@ -40,6 +40,12 @@ pub enum PoetryDepType {
     Dev,
     /// `[tool.poetry.group.*.dependencies]`
     Group,
+    /// `[project].dependencies`
+    Project,
+    /// `[project.optional-dependencies].*`
+    ProjectOptional,
+    /// `[dependency-groups].*` (PEP 735)
+    DependencyGroups,
     /// `[build-system].requires`
     BuildSystem,
 }
@@ -50,6 +56,9 @@ impl PoetryDepType {
             PoetryDepType::Regular => "dependencies",
             PoetryDepType::Dev => "dev-dependencies",
             PoetryDepType::Group => "group",
+            PoetryDepType::Project => "project.dependencies",
+            PoetryDepType::ProjectOptional => "project.optional-dependencies",
+            PoetryDepType::DependencyGroups => "dependency-groups",
             PoetryDepType::BuildSystem => "build-system.requires",
         }
     }
@@ -79,6 +88,7 @@ pub struct PoetryExtractedDep {
     pub dep_type: PoetryDepType,
     pub registry_urls: Vec<String>,
     pub source_name: Option<String>,
+    pub group_name: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<PoetrySkipReason>,
 }
@@ -110,6 +120,56 @@ pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtrac
     let mut deps = Vec::new();
     let registry_urls = extract_registry_urls(&doc);
     let source_urls_by_name = extract_source_urls_by_name(&doc);
+
+    // [project].dependencies (Poetry v2 / PEP 621)
+    if let Some(project_deps) = doc
+        .get("project")
+        .and_then(|project| project.get("dependencies"))
+        .and_then(Value::as_array)
+    {
+        for entry in project_deps {
+            if let Some(dep) = parse_pep508_entry(entry, PoetryDepType::Project, None) {
+                deps.push(dep);
+            }
+        }
+    }
+
+    // [project.optional-dependencies].*
+    if let Some(optional_deps) = doc
+        .get("project")
+        .and_then(|project| project.get("optional-dependencies"))
+        .and_then(Value::as_table)
+    {
+        for (group, entries) in optional_deps {
+            if let Some(entries) = entries.as_array() {
+                for entry in entries {
+                    if let Some(dep) =
+                        parse_pep508_entry(entry, PoetryDepType::ProjectOptional, Some(group))
+                    {
+                        deps.push(dep);
+                    }
+                }
+            }
+        }
+    }
+
+    // [dependency-groups].* (PEP 735)
+    if let Some(dep_groups) = doc.get("dependency-groups").and_then(Value::as_table) {
+        for (group, entries) in dep_groups {
+            if let Some(entries) = entries.as_array() {
+                for entry in entries {
+                    if entry.is_table() {
+                        continue;
+                    }
+                    if let Some(dep) =
+                        parse_pep508_entry(entry, PoetryDepType::DependencyGroups, Some(group))
+                    {
+                        deps.push(dep);
+                    }
+                }
+            }
+        }
+    }
 
     // [tool.poetry.dependencies]
     if let Some(tbl) = nested_table(&doc, &["tool", "poetry", "dependencies"]) {
@@ -191,6 +251,7 @@ fn parse_dep(
             dep_type,
             registry_urls: Vec::new(),
             source_name: None,
+            group_name: None,
             skip_reason: Some(PoetrySkipReason::PythonVersion),
         });
     }
@@ -206,6 +267,7 @@ fn parse_dep(
                 dep_type,
                 registry_urls: Vec::new(),
                 source_name: None,
+                group_name: None,
                 skip_reason: None,
             })
         }
@@ -225,6 +287,7 @@ fn parse_dep(
                     dep_type,
                     registry_urls: Vec::new(),
                     source_name: None,
+                    group_name: None,
                     skip_reason: Some(PoetrySkipReason::GitSource),
                 });
             }
@@ -235,6 +298,7 @@ fn parse_dep(
                     dep_type,
                     registry_urls: Vec::new(),
                     source_name: None,
+                    group_name: None,
                     skip_reason: Some(PoetrySkipReason::LocalPath),
                 });
             }
@@ -245,6 +309,7 @@ fn parse_dep(
                     dep_type,
                     registry_urls: Vec::new(),
                     source_name: None,
+                    group_name: None,
                     skip_reason: Some(PoetrySkipReason::UrlInstall),
                 });
             }
@@ -267,12 +332,44 @@ fn parse_dep(
                 dep_type,
                 registry_urls,
                 source_name,
+                group_name: None,
                 skip_reason: None,
             })
         }
         // Array form (platform-conditional) — skip for now.
         _ => None,
     }
+}
+
+fn parse_pep508_entry(
+    entry: &Value,
+    dep_type: PoetryDepType,
+    group_name: Option<&str>,
+) -> Option<PoetryExtractedDep> {
+    let raw = entry.as_str()?;
+    let without_markers = raw.split(';').next().unwrap_or("").trim();
+    let name_end = without_markers
+        .find(|c: char| !c.is_ascii_alphanumeric() && c != '.' && c != '-' && c != '_')
+        .unwrap_or(without_markers.len());
+    let name_raw = without_markers[..name_end].trim();
+    if name_raw.is_empty() {
+        return None;
+    }
+    let rest = without_markers[name_end..].trim_start();
+    let specifier = if rest.starts_with('[') {
+        rest.find(']').map(|i| rest[i + 1..].trim()).unwrap_or(rest)
+    } else {
+        rest
+    };
+    Some(PoetryExtractedDep {
+        name: normalize_name(name_raw),
+        current_value: specifier.to_owned(),
+        dep_type,
+        registry_urls: Vec::new(),
+        source_name: None,
+        group_name: group_name.map(str::to_owned),
+        skip_reason: None,
+    })
 }
 
 fn extract_registry_urls(doc: &Value) -> Vec<String> {
@@ -361,6 +458,7 @@ fn parse_build_system_req(req: &str) -> Option<PoetryExtractedDep> {
         dep_type: PoetryDepType::BuildSystem,
         registry_urls: Vec::new(),
         source_name: None,
+        group_name: None,
         skip_reason: None,
     })
 }
@@ -736,6 +834,77 @@ priority = "explicit"
             requests_cache.registry_urls,
             vec!["https://example.com".to_owned()]
         );
+    }
+
+    // Ported: "extract dependencies from the project section" — poetry/extract.spec.ts line 555
+    #[test]
+    fn extracts_poetry_v2_project_section_dependencies() {
+        let content = r#"
+[project]
+name = "poetry-v2-support-reproduction"
+version = "1.0.0"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "algoliasearch==4.11.2",
+]
+
+[project.optional-dependencies]
+decouple = ["python-decouple==3.6"]
+
+[build-system]
+requires = ["poetry-core==2.0.0"]
+build-backend = "poetry.core.masonry.api"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert!(package_file.deps.iter().any(|dep| dep.name == "poetry-core"
+            && dep.current_value == "==2.0.0"
+            && dep.dep_type == PoetryDepType::BuildSystem));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.name == "algoliasearch"
+                    && dep.current_value == "==4.11.2"
+                    && dep.dep_type == PoetryDepType::Project)
+        );
+        let python_decouple = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "python-decouple")
+            .unwrap();
+        assert_eq!(python_decouple.current_value, "==3.6");
+        assert_eq!(python_decouple.dep_type, PoetryDepType::ProjectOptional);
+        assert_eq!(python_decouple.group_name.as_deref(), Some("decouple"));
+    }
+
+    // Ported: "extracts dependencies from pep735 dependency-groups" — poetry/extract.spec.ts line 616
+    #[test]
+    fn extracts_pep735_dependency_groups() {
+        let content = r#"
+[dependency-groups]
+typing = ["mypy==1.13.0", "types-requests"]
+coverage = ["pytest-cov==5.0.0"]
+all = [{include-group = "typing"}, {include-group = "coverage"}, "click==8.1.7"]
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        let groups: Vec<_> = package_file
+            .deps
+            .iter()
+            .filter(|dep| dep.dep_type == PoetryDepType::DependencyGroups)
+            .collect();
+        assert_eq!(groups.len(), 4);
+        assert!(groups.iter().any(|dep| dep.name == "mypy"
+            && dep.current_value == "==1.13.0"
+            && dep.group_name.as_deref() == Some("typing")));
+        assert!(groups.iter().any(|dep| dep.name == "types-requests"
+            && dep.current_value.is_empty()
+            && dep.group_name.as_deref() == Some("typing")));
+        assert!(groups.iter().any(|dep| dep.name == "pytest-cov"
+            && dep.current_value == "==5.0.0"
+            && dep.group_name.as_deref() == Some("coverage")));
+        assert!(groups.iter().any(|dep| dep.name == "click"
+            && dep.current_value == "==8.1.7"
+            && dep.group_name.as_deref() == Some("all")));
     }
 
     // ── Fixture: pyproject.1.toml ─────────────────────────────────────────────
