@@ -346,6 +346,25 @@ mod tests {
         assert_eq!(deps[0].registry_urls, vec!["https://repo.example.com/"]);
     }
 
+    // Ported: "passes registry URLs to coords-style dependencies" — ant/extract.spec.ts line 979
+    #[test]
+    fn remote_repository_applies_to_coords_dependency() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <remoteRepository url="https://repo.example.com/maven2" />
+    <dependency coords="junit:junit:4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(
+            deps[0].registry_urls,
+            vec!["https://repo.example.com/maven2"]
+        );
+    }
+
     // Ported: "returns null for invalid XML" — ant/extract.spec.ts line 90
     #[test]
     fn empty_xml_returns_empty() {
