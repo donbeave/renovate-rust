@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 787 / 1217 actionable tests ported (65%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 791 / 1217 actionable tests ported (65%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2152,7 +2152,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 9 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 13 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2165,10 +2165,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns bazel_dep and git_override dependencies | 54 | ported | `bazel_module.rs` | `extracts_bazel_dep` (+ extracts_dev_dependency, extracts_multiline_dep, multiple_deps) | — |
 | returns bazel_dep with no version and git_override | 95 | ported | `bazel_module.rs` | `dep_without_version_skipped` | — |
 | returns dependencies and custom registry URLs when specified in a bazelrc | 125 | pending | — | — | Requires .bazelrc registry parsing |
-| returns bazel_dep and archive_override dependencies | 148 | pending | — | — | Requires archive_override extraction |
-| returns bazel_dep with no version and archive_override dependencies | 179 | pending | — | — | Requires archive_override + bazel_dep no-version handling |
-| returns bazel_dep and local_path_override dependencies | 209 | pending | — | — | Requires local_path_override extraction |
-| returns bazel_dep with no version and local_path_override dependencies | 238 | pending | — | — | Requires local_path_override + no-version handling |
+| returns bazel_dep and archive_override dependencies | 148 | ported | `bazel_module.rs` | `extracts_archive_override_with_bazel_dep_version` | — |
+| returns bazel_dep with no version and archive_override dependencies | 179 | ported | `bazel_module.rs` | `extracts_archive_override_with_unversioned_bazel_dep` | — |
+| returns bazel_dep and local_path_override dependencies | 209 | ported | `bazel_module.rs` | `extracts_local_path_override_with_bazel_dep_version` | — |
+| returns bazel_dep with no version and local_path_override dependencies | 238 | ported | `bazel_module.rs` | `extracts_local_path_override_with_unversioned_bazel_dep` | — |
 | returns bazel_dep and single_version_override dependencies if a version is specified | 266 | ported | `bazel_module.rs` | `extracts_single_version_override_with_bazel_dep_version` | — |
 | returns bazel_dep with no version and single_version_override dependencies if a version is specified | 299 | ported | `bazel_module.rs` | `extracts_single_version_override_with_unversioned_bazel_dep` | — |
 | returns bazel_dep dependency if single_version_override does not have a version | 331 | ported | `bazel_module.rs` | `single_version_override_without_version_only_adds_registry_to_versioned_bazel_dep` | — |

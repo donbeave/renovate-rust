@@ -50,10 +50,14 @@ pub enum BazelModuleDepType {
     BazelDep,
     /// `single_version_override(...)`
     SingleVersionOverride,
+    /// `archive_override(...)`
+    ArchiveOverride,
+    /// `local_path_override(...)`
+    LocalPathOverride,
 }
 
 /// Why a Bazel dep is skipped.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BazelSkipReason {
     /// No version attribute in the `bazel_dep()` call.
     UnspecifiedVersion,
@@ -61,6 +65,12 @@ pub enum BazelSkipReason {
     IsPinned,
     /// Override declarations are metadata for pinning and are not updated.
     Ignored,
+    /// Module is pinned to an archive URL.
+    FileDependency,
+    /// Module is pinned to a local path.
+    LocalDependency,
+    /// Override declaration does not use a supported datasource.
+    UnsupportedDatasource,
 }
 
 /// Matches a `bazel_dep(name = "...", version = "...", ...)` call.
@@ -71,6 +81,14 @@ static BAZEL_DEP_BLOCK_RE: LazyLock<Regex> =
 /// Matches a `single_version_override(...)` call.
 static SINGLE_VERSION_OVERRIDE_BLOCK_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)single_version_override\s*\(([^)]+)\)").unwrap());
+
+/// Matches an `archive_override(...)` call.
+static ARCHIVE_OVERRIDE_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)archive_override\s*\(([^)]+)\)").unwrap());
+
+/// Matches a `local_path_override(...)` call.
+static LOCAL_PATH_OVERRIDE_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)local_path_override\s*\(([^)]+)\)").unwrap());
 
 /// Extracts `name = "value"` or `name = 'value'` from a call argument list.
 static ATTR_RE: LazyLock<Regex> =
@@ -86,12 +104,19 @@ struct SingleVersionOverride {
     registry_urls: Vec<String>,
 }
 
+struct UnsupportedOverride {
+    name: String,
+    dep_type: BazelModuleDepType,
+    bazel_dep_skip_reason: BazelSkipReason,
+}
+
 /// Extract Bazel module deps from a `MODULE.bazel` file.
 pub fn extract(content: &str) -> Vec<BazelModuleDep> {
     // Strip single-line comments
     let stripped = strip_comments(content);
 
     let overrides = parse_single_version_overrides(&stripped);
+    let unsupported_overrides = parse_unsupported_overrides(&stripped);
     let mut deps = Vec::new();
 
     for cap in BAZEL_DEP_BLOCK_RE.captures_iter(&stripped) {
@@ -119,10 +144,16 @@ pub fn extract(content: &str) -> Vec<BazelModuleDep> {
             .iter()
             .find(|override_dep| override_dep.name == name);
         let pinned = override_metadata.filter(|override_dep| !override_dep.version.is_empty());
+        let unsupported_override = unsupported_overrides
+            .iter()
+            .find(|override_dep| override_dep.name == name);
         let registry_urls = pinned
             .or(override_metadata)
             .map(|override_dep| override_dep.registry_urls.clone())
             .unwrap_or_default();
+        let skip_reason = unsupported_override
+            .map(|override_dep| override_dep.bazel_dep_skip_reason)
+            .or_else(|| pinned.map(|_| BazelSkipReason::IsPinned));
 
         if version.is_empty() {
             deps.push(BazelModuleDep {
@@ -131,11 +162,7 @@ pub fn extract(content: &str) -> Vec<BazelModuleDep> {
                 dep_type: BazelModuleDepType::BazelDep,
                 registry_urls,
                 dev_dependency,
-                skip_reason: Some(if pinned.is_some() {
-                    BazelSkipReason::IsPinned
-                } else {
-                    BazelSkipReason::UnspecifiedVersion
-                }),
+                skip_reason: Some(skip_reason.unwrap_or(BazelSkipReason::UnspecifiedVersion)),
             });
         } else {
             deps.push(BazelModuleDep {
@@ -144,11 +171,23 @@ pub fn extract(content: &str) -> Vec<BazelModuleDep> {
                 dep_type: BazelModuleDepType::BazelDep,
                 registry_urls,
                 dev_dependency,
-                skip_reason: pinned.map(|_| BazelSkipReason::IsPinned),
+                skip_reason,
             });
         }
     }
 
+    deps.extend(
+        unsupported_overrides
+            .into_iter()
+            .map(|override_dep| BazelModuleDep {
+                name: override_dep.name,
+                current_value: String::new(),
+                dep_type: override_dep.dep_type,
+                registry_urls: Vec::new(),
+                dev_dependency: false,
+                skip_reason: Some(BazelSkipReason::UnsupportedDatasource),
+            }),
+    );
     deps.extend(
         overrides
             .into_iter()
@@ -163,6 +202,49 @@ pub fn extract(content: &str) -> Vec<BazelModuleDep> {
             }),
     );
     deps
+}
+
+fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
+    let mut deps = Vec::new();
+    deps.extend(parse_named_overrides(
+        content,
+        &ARCHIVE_OVERRIDE_BLOCK_RE,
+        BazelModuleDepType::ArchiveOverride,
+        BazelSkipReason::FileDependency,
+    ));
+    deps.extend(parse_named_overrides(
+        content,
+        &LOCAL_PATH_OVERRIDE_BLOCK_RE,
+        BazelModuleDepType::LocalPathOverride,
+        BazelSkipReason::LocalDependency,
+    ));
+    deps
+}
+
+fn parse_named_overrides(
+    content: &str,
+    regex: &Regex,
+    dep_type: BazelModuleDepType,
+    bazel_dep_skip_reason: BazelSkipReason,
+) -> Vec<UnsupportedOverride> {
+    regex
+        .captures_iter(content)
+        .filter_map(|cap| {
+            let args = &cap[1];
+            let name = ATTR_RE.captures_iter(args).find_map(|kv| {
+                if &kv[1] == "module_name" {
+                    Some(kv[2].to_owned())
+                } else {
+                    None
+                }
+            })?;
+            Some(UnsupportedOverride {
+                name,
+                dep_type,
+                bazel_dep_skip_reason,
+            })
+        })
+        .collect()
 }
 
 fn parse_single_version_overrides(content: &str) -> Vec<SingleVersionOverride> {
@@ -284,6 +366,106 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         assert_eq!(
             deps[0].skip_reason,
             Some(BazelSkipReason::UnspecifiedVersion)
+        );
+    }
+
+    // Ported: "returns bazel_dep and archive_override dependencies" — bazel-module/extract.spec.ts line 148
+    #[test]
+    fn extracts_archive_override_with_bazel_dep_version() {
+        let content = r#"
+bazel_dep(name = "rules_foo", version = "1.2.3")
+archive_override(
+  module_name = "rules_foo",
+  urls = [
+    "https://example.com/archive.tar.gz",
+  ],
+)
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(deps[0].name, "rules_foo");
+        assert_eq!(deps[0].current_value, "1.2.3");
+        assert_eq!(deps[0].skip_reason, Some(BazelSkipReason::FileDependency));
+        assert_eq!(deps[1].dep_type, BazelModuleDepType::ArchiveOverride);
+        assert_eq!(deps[1].name, "rules_foo");
+        assert_eq!(
+            deps[1].skip_reason,
+            Some(BazelSkipReason::UnsupportedDatasource)
+        );
+    }
+
+    // Ported: "returns bazel_dep with no version and archive_override dependencies" — bazel-module/extract.spec.ts line 179
+    #[test]
+    fn extracts_archive_override_with_unversioned_bazel_dep() {
+        let content = r#"
+bazel_dep(name = "rules_foo")
+archive_override(
+  module_name = "rules_foo",
+  urls = [
+    "https://example.com/archive.tar.gz",
+  ],
+)
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(deps[0].name, "rules_foo");
+        assert!(deps[0].current_value.is_empty());
+        assert_eq!(deps[0].skip_reason, Some(BazelSkipReason::FileDependency));
+        assert_eq!(deps[1].dep_type, BazelModuleDepType::ArchiveOverride);
+        assert_eq!(deps[1].name, "rules_foo");
+        assert_eq!(
+            deps[1].skip_reason,
+            Some(BazelSkipReason::UnsupportedDatasource)
+        );
+    }
+
+    // Ported: "returns bazel_dep and local_path_override dependencies" — bazel-module/extract.spec.ts line 209
+    #[test]
+    fn extracts_local_path_override_with_bazel_dep_version() {
+        let content = r#"
+bazel_dep(name = "rules_foo", version = "1.2.3")
+local_path_override(
+  module_name = "rules_foo",
+  urls = "/path/to/repo",
+)
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(deps[0].name, "rules_foo");
+        assert_eq!(deps[0].current_value, "1.2.3");
+        assert_eq!(deps[0].skip_reason, Some(BazelSkipReason::LocalDependency));
+        assert_eq!(deps[1].dep_type, BazelModuleDepType::LocalPathOverride);
+        assert_eq!(deps[1].name, "rules_foo");
+        assert_eq!(
+            deps[1].skip_reason,
+            Some(BazelSkipReason::UnsupportedDatasource)
+        );
+    }
+
+    // Ported: "returns bazel_dep with no version and local_path_override dependencies" — bazel-module/extract.spec.ts line 238
+    #[test]
+    fn extracts_local_path_override_with_unversioned_bazel_dep() {
+        let content = r#"
+bazel_dep(name = "rules_foo")
+local_path_override(
+  module_name = "rules_foo",
+  urls = "/path/to/repo",
+)
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(deps[0].name, "rules_foo");
+        assert!(deps[0].current_value.is_empty());
+        assert_eq!(deps[0].skip_reason, Some(BazelSkipReason::LocalDependency));
+        assert_eq!(deps[1].dep_type, BazelModuleDepType::LocalPathOverride);
+        assert_eq!(deps[1].name, "rules_foo");
+        assert_eq!(
+            deps[1].skip_reason,
+            Some(BazelSkipReason::UnsupportedDatasource)
         );
     }
 
