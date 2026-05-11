@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1446 / 1650 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1447 / 1648 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3992,14 +3992,14 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/cli.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/cli.spec.ts
-**Total tests:** 30 | **Ported:** 11 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 12 | **Actionable:** 28 | **Status:** partial
 
 ### `workers/global/config/parse/cli › .getCliName(definition)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| generates CLI value | 15 | pending | — | — | — |
-| generates returns empty if CLI false | 22 | pending | — | — | — |
+| generates CLI value | 15 | not-applicable | — | — | TypeScript option-definition helper; Rust CLI names are static `clap` attributes |
+| generates returns empty if CLI false | 22 | not-applicable | — | — | TypeScript option-definition helper; Rust has no runtime `cli: false` option metadata |
 
 ### `workers/global/config/parse/cli › .getConfig(argv)`
 
@@ -4015,7 +4015,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | supports list single | 74 | pending | — | — | — |
 | supports list multiple | 79 | pending | — | — | — |
 | supports string | 84 | ported | `config_builder.rs` | `token_is_set` | — |
-| supports repositories | 89 | pending | — | — | — |
+| supports repositories | 89 | ported | `config_builder.rs` | `repositories_are_set` | — |
 | parses json lists correctly | 95 | pending | — | — | — |
 | parses [] correctly as empty list of hostRules | 111 | pending | — | — | — |
 | parses an empty string correctly as empty list of hostRules | 118 | pending | — | — | — |

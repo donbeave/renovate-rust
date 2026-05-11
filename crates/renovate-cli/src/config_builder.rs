@@ -202,6 +202,18 @@ mod tests {
         );
     }
 
+    // Ported: "supports repositories" — workers/global/config/parse/cli.spec.ts line 89
+    #[test]
+    fn repositories_are_set() {
+        let cli = cli_with(|c| {
+            c.repositories = vec!["foo".to_owned(), "bar".to_owned()];
+        });
+        assert_eq!(
+            build(&cli, GlobalConfig::default()).repositories,
+            vec!["foo".to_owned(), "bar".to_owned()]
+        );
+    }
+
     #[test]
     fn dry_run_full_is_mapped() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::Full));
