@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1370 / 1661 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1372 / 1661 actionable tests ported (83%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2592,7 +2592,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/terraform/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extract.spec.ts
-**Total tests:** 18 | **Ported:** 8 | **Actionable:** 18 | **Status:** partial
+**Total tests:** 18 | **Ported:** 10 | **Actionable:** 18 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2601,8 +2601,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns null for empty | 39 | ported | `terraform.rs` | `empty_file_returns_empty` | — |
 | returns null for no deps | 43 | ported | `terraform.rs` | `data_block_not_extracted` | — |
 | extracts  modules | 54 | ported | `terraform.rs` | `module_with_version` (+ module_without_version_skipped, module_with_git_source_skipped, mixed_providers_and_modules) | — |
-| extracts bitbucket modules | 221 | pending | — | — | Requires Bitbucket source URL detection |
-| extracts azureDevOps modules | 306 | pending | — | — | Requires Azure DevOps source URL detection |
+| extracts bitbucket modules | 221 | ported | `terraform.rs` | `bitbucket_module_sources_are_extracted` | — |
+| extracts azureDevOps modules | 306 | ported | `terraform.rs` | `azure_devops_module_sources_are_extracted` | — |
 | resolves OCI registry aliases | 338 | pending | — | — | registryAliases not yet implemented |
 | handles invalid OCI source URL | 358 | pending | — | — | Requires OCI source validation |
 | extracts OCI modules and providers | 374 | pending | — | — | Requires OCI module / provider source parsing |

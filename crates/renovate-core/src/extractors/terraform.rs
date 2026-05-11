@@ -70,8 +70,18 @@ pub struct TerraformExtractedDep {
     pub current_value: String,
     /// Which block this dep came from.
     pub dep_type: TerraformDepType,
+    pub datasource: Option<&'static str>,
+    pub package_name: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<TerraformSkipReason>,
+}
+
+struct ModuleSource {
+    name: String,
+    current_value: String,
+    datasource: Option<&'static str>,
+    package_name: Option<String>,
+    skip_reason: Option<TerraformSkipReason>,
 }
 
 // ── Compiled regexes ──────────────────────────────────────────────────────────
@@ -187,6 +197,8 @@ impl Parser {
                     name: "hashicorp/terraform".to_owned(),
                     current_value: version,
                     dep_type: TerraformDepType::RequiredVersion,
+                    datasource: None,
+                    package_name: None,
                     skip_reason: None,
                 });
             }
@@ -219,6 +231,8 @@ impl Parser {
                 name,
                 current_value: version,
                 dep_type: TerraformDepType::Provider,
+                datasource: None,
+                package_name: None,
                 skip_reason: None,
             });
         }
@@ -236,6 +250,8 @@ impl Parser {
                 name,
                 current_value: self.prov_version.clone(),
                 dep_type: TerraformDepType::Provider,
+                datasource: None,
+                package_name: None,
                 skip_reason: None,
             });
             self.state = State::InRequiredProviders;
@@ -254,14 +270,14 @@ impl Parser {
 
     fn handle_module_block(&mut self, trimmed: &str) {
         if trimmed == "}" {
-            let source = self.mod_source.clone();
-            let version = self.mod_version.clone();
-            let skip_reason = classify_module_source(&source, &version);
+            let source = resolve_module_source(&self.mod_source, &self.mod_version);
             self.deps.push(TerraformExtractedDep {
-                name: source,
-                current_value: version,
+                name: source.name,
+                current_value: source.current_value,
                 dep_type: TerraformDepType::Module,
-                skip_reason,
+                datasource: source.datasource,
+                package_name: source.package_name,
+                skip_reason: source.skip_reason,
             });
             self.state = State::TopLevel;
             return;
@@ -322,6 +338,105 @@ fn classify_module_source(source: &str, version: &str) -> Option<TerraformSkipRe
         return Some(TerraformSkipReason::NoVersionConstraint);
     }
     None
+}
+
+fn resolve_module_source(source: &str, version: &str) -> ModuleSource {
+    if let Some(source) = parse_azure_devops_module_source(source) {
+        return source;
+    }
+    if let Some(source) = parse_bitbucket_module_source(source) {
+        return source;
+    }
+
+    ModuleSource {
+        name: source.to_owned(),
+        current_value: version.to_owned(),
+        datasource: None,
+        package_name: None,
+        skip_reason: classify_module_source(source, version),
+    }
+}
+
+fn parse_azure_devops_module_source(source: &str) -> Option<ModuleSource> {
+    let without_git = source.strip_prefix("git::").unwrap_or(source);
+    let rest = without_git.strip_prefix("git@ssh.dev.azure.com:v3/")?;
+    let (path, current_value) = split_ref(rest)?;
+    let (repo, subdir) = split_double_slash(path);
+    let mut parts = repo.split('/');
+    let org = parts.next()?;
+    let project = parts.next()?;
+    let repository = parts.next()?;
+    let package_name = format!("git@ssh.dev.azure.com:v3/{org}/{project}/{repository}");
+    let name = subdir
+        .map(|subdir| format!("{org}/{project}/{repository}//{subdir}"))
+        .unwrap_or_else(|| format!("{org}/{project}/{repository}"));
+
+    Some(ModuleSource {
+        name,
+        current_value: current_value.to_owned(),
+        datasource: Some("git-tags"),
+        package_name: Some(package_name),
+        skip_reason: None,
+    })
+}
+
+fn parse_bitbucket_module_source(source: &str) -> Option<ModuleSource> {
+    let without_git = source.strip_prefix("git::").unwrap_or(source);
+    let (path, current_value) = split_ref(without_git)?;
+
+    if let Some(rest) = path
+        .strip_prefix("https://bitbucket.com/")
+        .or_else(|| path.strip_prefix("http://bitbucket.com/"))
+        .or_else(|| path.strip_prefix("ssh://git@bitbucket.com/"))
+    {
+        let scheme = if path.starts_with("http://") {
+            "http://"
+        } else if path.starts_with("ssh://") {
+            "ssh://git@"
+        } else {
+            "https://"
+        };
+        let (repo, _) = split_double_slash(rest);
+        let repo = repo.trim_end_matches(".git");
+        return Some(ModuleSource {
+            name: format!("bitbucket.com/{repo}"),
+            current_value: current_value.to_owned(),
+            datasource: Some("git-tags"),
+            package_name: Some(format!("{scheme}bitbucket.com/{repo}")),
+            skip_reason: None,
+        });
+    }
+
+    if let Some(rest) = path
+        .strip_prefix("ssh://git@bitbucket.org/")
+        .or_else(|| path.strip_prefix("https://git@bitbucket.org/"))
+        .or_else(|| path.strip_prefix("bitbucket.org/"))
+    {
+        let (repo, _) = split_double_slash(rest);
+        let repo = repo.split(".git").next().unwrap_or(repo);
+        return Some(ModuleSource {
+            name: repo.to_owned(),
+            current_value: current_value.to_owned(),
+            datasource: Some("bitbucket-tags"),
+            package_name: Some(repo.to_owned()),
+            skip_reason: None,
+        });
+    }
+
+    None
+}
+
+fn split_ref(source: &str) -> Option<(&str, &str)> {
+    let (path, query) = source.split_once("?ref=")?;
+    Some((path, query.split('&').next().unwrap_or(query)))
+}
+
+fn split_double_slash(path: &str) -> (&str, Option<&str>) {
+    if let Some((repo, subdir)) = path.split_once("//") {
+        (repo, Some(subdir))
+    } else {
+        (path, None)
+    }
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -458,6 +573,98 @@ module "git_module" {
         assert_eq!(
             deps[0].skip_reason,
             Some(TerraformSkipReason::ExternalSource)
+        );
+    }
+
+    // Ported: "extracts bitbucket modules" — terraform/extract.spec.ts line 221
+    #[test]
+    fn bitbucket_module_sources_are_extracted() {
+        let content = r#"
+module "foobar" {
+  source = "https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+}
+
+module "gittags_subdir" {
+  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.1"
+}
+
+module "gittags_http" {
+  source = "git::http://bitbucket.com/hashicorp/example?ref=v1.0.2"
+}
+
+module "gittags_ssh" {
+  source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3"
+}
+
+module "bitbucket_ssh" {
+  source = "git::ssh://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0"
+}
+
+module "bitbucket_subfolder" {
+  source = "bitbucket.org/hashicorp/example.git//terraform?ref=v1.0.0"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 6);
+        assert!(deps.iter().all(|d| d.skip_reason.is_none()));
+
+        let https = deps
+            .iter()
+            .find(|d| d.package_name.as_deref() == Some("https://bitbucket.com/hashicorp/example"))
+            .unwrap();
+        assert_eq!(https.name, "bitbucket.com/hashicorp/example");
+        assert_eq!(https.current_value, "v1.0.0");
+        assert_eq!(https.datasource, Some("git-tags"));
+
+        let http = deps
+            .iter()
+            .find(|d| d.package_name.as_deref() == Some("http://bitbucket.com/hashicorp/example"))
+            .unwrap();
+        assert_eq!(http.current_value, "v1.0.2");
+
+        let ssh = deps
+            .iter()
+            .find(|d| {
+                d.package_name.as_deref() == Some("ssh://git@bitbucket.com/hashicorp/example")
+            })
+            .unwrap();
+        assert_eq!(ssh.current_value, "v1.0.3");
+
+        let bitbucket_tags = deps
+            .iter()
+            .filter(|d| d.datasource == Some("bitbucket-tags"))
+            .collect::<Vec<_>>();
+        assert_eq!(bitbucket_tags.len(), 2);
+        assert!(bitbucket_tags.iter().all(|d| d.name == "hashicorp/example"
+            && d.package_name.as_deref() == Some("hashicorp/example")));
+    }
+
+    // Ported: "extracts azureDevOps modules" — terraform/extract.spec.ts line 306
+    #[test]
+    fn azure_devops_module_sources_are_extracted() {
+        let content = r#"
+module "foobar" {
+  source = "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=v1.0.0"
+}
+
+module "gittags" {
+  source = "git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=v1.0.0"
+}
+
+module "gittags_subdir" {
+  source = "git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=v1.0.0"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert!(deps.iter().all(|d| d.skip_reason.is_none()));
+        assert!(deps.iter().all(|d| d.datasource == Some("git-tags")
+            && d.package_name.as_deref()
+                == Some("git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository")
+            && d.current_value == "v1.0.0"));
+        assert!(
+            deps.iter()
+                .any(|d| d.name == "MyOrg/MyProject/MyRepository//some-module/path")
         );
     }
 
