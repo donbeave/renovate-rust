@@ -360,7 +360,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/github-actions/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/extract.spec.ts
-**Total tests:** 27 | **Ported:** 17 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 27 | **Ported:** 20 | **Actionable:** 20 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2076,7 +2076,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 58 | **Ported:** 3 | **Actionable:** 58 | **Status:** partial
+**Total tests:** 59 | **Ported:** 3 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 

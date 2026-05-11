@@ -85,7 +85,7 @@ mod tests {
         assert!(!deps.iter().any(|d| d.image.contains("MY_IMAGE")));
     }
 
-    // Ported: "extracts image and replaces registry" — ansible/extract.spec.ts line 22
+    // Ported: "extracts multiple image lines from docker_container" — ansible/extract.spec.ts line 10
     #[test]
     fn extracts_custom_registry_image() {
         let deps = extract(SAMPLE);
