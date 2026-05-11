@@ -47,6 +47,14 @@ pub struct PipExtractedDep {
     pub skip_reason: Option<PipSkipReason>,
 }
 
+/// Package-file level pip requirements extraction data.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PipExtract {
+    pub deps: Vec<PipExtractedDep>,
+    pub registry_urls: Vec<String>,
+    pub additional_registry_urls: Vec<String>,
+}
+
 /// Errors from parsing a `requirements.txt`.
 #[derive(Debug, Error)]
 pub enum PipExtractError {
@@ -61,15 +69,32 @@ pub enum PipExtractError {
 /// Lines that do not yield a dependency (blank lines, pure comment lines,
 /// directive lines that are not `-r`/`-c`) are silently ignored.
 pub fn extract(content: &str) -> Result<Vec<PipExtractedDep>, PipExtractError> {
+    Ok(extract_package_file(content).deps)
+}
+
+/// Parse a `requirements.txt` string and extract deps plus package-file metadata.
+pub fn extract_package_file(content: &str) -> PipExtract {
     let mut out = Vec::new();
+    let mut registry_urls = Vec::new();
+    let mut additional_registry_urls = Vec::new();
 
     for raw_line in content.lines() {
+        let line = raw_line.split('#').next().unwrap_or("").trim();
+        if let Some(url) = directive_value(line, &["-i", "--index-url"]) {
+            registry_urls.push(url.to_owned());
+        } else if let Some(url) = directive_value(line, &["--extra-index-url"]) {
+            additional_registry_urls.push(url.to_owned());
+        }
         if let Some(dep) = parse_line(raw_line) {
             out.push(dep);
         }
     }
 
-    Ok(out)
+    PipExtract {
+        deps: out,
+        registry_urls,
+        additional_registry_urls,
+    }
 }
 
 // ── Line parser ───────────────────────────────────────────────────────────────
@@ -174,6 +199,16 @@ fn parse_line(raw: &str) -> Option<PipExtractedDep> {
         current_value,
         skip_reason: None,
     })
+}
+
+fn directive_value<'a>(line: &'a str, flags: &[&str]) -> Option<&'a str> {
+    let mut parts = line.split_whitespace();
+    let flag = parts.next()?;
+    if flags.contains(&flag) {
+        parts.next()
+    } else {
+        None
+    }
 }
 
 /// Split a line into the package name and the remainder (extras + specifier).
@@ -427,6 +462,82 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "some-package");
         assert_eq!(deps[0].current_value, "==0.3.1");
+    }
+
+    // Ported: "handles extras and complex index url" — pip_requirements/extract.spec.ts line 102
+    #[test]
+    fn handles_extras_and_complex_index_url_registry() {
+        let content = "--index-url https://artifactory.company.com/artifactory/api/pypi/python/simple --trusted-host artifactory.company.com --default-timeout 600\n\
+                       Django[argon2]==2.0.12\n\
+                       celery [redis]==4.1.1\n\
+                       foo [bar] == 3.2.1";
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.registry_urls,
+            vec!["https://artifactory.company.com/artifactory/api/pypi/python/simple".to_owned()]
+        );
+        assert_eq!(package_file.deps.len(), 3);
+    }
+
+    // Ported: "handles extra index url" — pip_requirements/extract.spec.ts line 111
+    #[test]
+    fn handles_extra_index_url() {
+        let content = "--index-url https://artifactory.company.com/artifactory/api/pypi/python/simple --trusted-host artifactory.company.com --default-timeout 600\n\
+                       --extra-index-url http://example.com/private-pypi/\n\
+                       Django[argon2]==2.0.12\n\
+                       celery [redis]==4.1.1\n\
+                       foo [bar] == 3.2.1\n\
+                       some-package==0.3.1\n\
+                       some-other-package==1.0.0\n\
+                       not_semver==1.9";
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.registry_urls,
+            vec!["https://artifactory.company.com/artifactory/api/pypi/python/simple".to_owned()]
+        );
+        assert_eq!(
+            package_file.additional_registry_urls,
+            vec!["http://example.com/private-pypi/".to_owned()]
+        );
+        assert_eq!(package_file.deps.len(), 6);
+    }
+
+    // Ported: "handles extra index url and defaults without index to config" — pip_requirements/extract.spec.ts line 123
+    #[test]
+    fn handles_extra_index_url_without_index_for_config_default() {
+        let content = "--extra-index-url http://example.com/private-pypi/\n\
+                       Django[argon2]==2.0.12\n\
+                       celery [redis]==4.1.1\n\
+                       foo [bar] == 3.2.1\n\
+                       some-package==0.3.1\n\
+                       some-other-package==1.0.0\n\
+                       not_semver==1.9";
+        let package_file = extract_package_file(content);
+        assert!(package_file.registry_urls.is_empty());
+        assert_eq!(
+            package_file.additional_registry_urls,
+            vec!["http://example.com/private-pypi/".to_owned()]
+        );
+        assert_eq!(package_file.deps.len(), 6);
+    }
+
+    // Ported: "handles extra index url and defaults without index to pypi" — pip_requirements/extract.spec.ts line 132
+    #[test]
+    fn handles_extra_index_url_without_index_for_pypi_default() {
+        let content = "--extra-index-url http://example.com/private-pypi/\n\
+                       Django[argon2]==2.0.12\n\
+                       celery [redis]==4.1.1\n\
+                       foo [bar] == 3.2.1\n\
+                       some-package==0.3.1\n\
+                       some-other-package==1.0.0\n\
+                       not_semver==1.9";
+        let package_file = extract_package_file(content);
+        assert!(package_file.registry_urls.is_empty());
+        assert_eq!(
+            package_file.additional_registry_urls,
+            vec!["http://example.com/private-pypi/".to_owned()]
+        );
+        assert_eq!(package_file.deps.len(), 6);
     }
 
     // Ported: "handles extra spaces around pinned dependency equal signs" — pip_requirements/extract.spec.ts line 141

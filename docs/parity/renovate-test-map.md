@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 797 / 1217 actionable tests ported (65%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 800 / 1217 actionable tests ported (66%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1205,7 +1205,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pip_requirements/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/extract.spec.ts
-**Total tests:** 22 | **Ported:** 17 | **Actionable:** 22 | **Status:** partial
+**Total tests:** 22 | **Ported:** 20 | **Actionable:** 22 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1218,10 +1218,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts --constraints short code option | 79 | ported | `pip.rs` | `constraints_file_is_skipped` | — |
 | extracts multiple dependencies | 90 | ported | `pip.rs` | `handles_multiple_packages` (+ requirements2_fixture) | — |
 | handles comments and commands | 96 | ported | `pip.rs` | `comment_only_lines_ignored` (+ blank_lines_ignored, index_url_directive_ignored) | — |
-| handles extras and complex index url | 102 | ported | `pip.rs` | `extracts_range_constraint` | — |
-| handles extra index url | 111 | pending | — | — | Requires extra-index-url propagation to dep registryUrls |
-| handles extra index url and defaults without index to config | 123 | pending | — | — | Requires registryUrls propagation |
-| handles extra index url and defaults without index to pypi | 132 | pending | — | — | Requires default pypi registryUrl plumbing |
+| handles extras and complex index url | 102 | ported | `pip.rs` | `extracts_range_constraint` (+ handles_extras_and_complex_index_url_registry) | — |
+| handles extra index url | 111 | ported | `pip.rs` | `handles_extra_index_url` | — |
+| handles extra index url and defaults without index to config | 123 | ported | `pip.rs` | `handles_extra_index_url_without_index_for_config_default` | — |
+| handles extra index url and defaults without index to pypi | 132 | ported | `pip.rs` | `handles_extra_index_url_without_index_for_pypi_default` | — |
 | handles extra spaces around pinned dependency equal signs | 141 | ported | `pip.rs` | `extra_spaces_around_equal_signs` | — |
 | should not replace env vars in low trust mode | 155 | pending | — | — | Requires trust-mode env-var substitution feature |
 | should replace env vars in high trust mode | 166 | pending | — | — | Requires trust-mode env-var substitution feature |
