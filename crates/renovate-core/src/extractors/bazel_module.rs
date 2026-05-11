@@ -196,6 +196,12 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns null if fails to parse" — bazel-module/extract.spec.ts line 25
+    #[test]
+    fn malformed_content_returns_empty() {
+        assert!(extract("blahhhhh:foo:@what\n").is_empty());
+    }
+
     // Ported: "returns null if file has unrecognized declarations" — bazel-module/extract.spec.ts line 46
     #[test]
     fn comment_lines_stripped() {
