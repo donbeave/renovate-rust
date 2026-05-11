@@ -42,6 +42,7 @@ pub struct PipfileDep {
     pub current_value: String,
     /// True for `[dev-packages]` entries.
     pub is_dev: bool,
+    pub registry_urls: Vec<String>,
     pub skip_reason: Option<PipfileSkipReason>,
 }
 
@@ -67,6 +68,7 @@ pub fn extract_package_file(content: &str) -> PipfileExtract {
 
     let mut out = Vec::new();
     let registry_urls = extract_sources(&table);
+    let source_urls_by_name = extract_sources_by_name(&table);
     let mut extracted_constraints = extract_requires(&table);
 
     for (section_key, is_dev) in [("packages", false), ("dev-packages", true)] {
@@ -77,12 +79,13 @@ pub fn extract_package_file(content: &str) -> PipfileExtract {
                         name: normalize_name(raw_name),
                         current_value: String::new(),
                         is_dev,
+                        registry_urls: Vec::new(),
                         skip_reason: Some(PipfileSkipReason::Wildcard),
                     });
                     continue;
                 }
                 let name = normalize_name(raw_name);
-                let dep = parse_entry(name, val, is_dev);
+                let dep = parse_entry(name, val, is_dev, &source_urls_by_name);
                 if dep.name == "pipenv" && dep.skip_reason.is_none() {
                     extracted_constraints.insert("pipenv".to_owned(), dep.current_value.clone());
                 }
@@ -100,7 +103,12 @@ pub fn extract_package_file(content: &str) -> PipfileExtract {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
+fn parse_entry(
+    name: String,
+    val: &Value,
+    is_dev: bool,
+    source_urls_by_name: &BTreeMap<String, String>,
+) -> PipfileDep {
     match val {
         Value::String(s) => {
             if s == "*" {
@@ -108,6 +116,7 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
                     name,
                     current_value: String::new(),
                     is_dev,
+                    registry_urls: Vec::new(),
                     skip_reason: Some(PipfileSkipReason::Wildcard),
                 }
             } else if !is_valid_version(s) {
@@ -115,6 +124,7 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
                     name,
                     current_value: s.clone(),
                     is_dev,
+                    registry_urls: Vec::new(),
                     skip_reason: Some(PipfileSkipReason::Wildcard),
                 }
             } else {
@@ -122,6 +132,7 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
                     name,
                     current_value: s.clone(),
                     is_dev,
+                    registry_urls: Vec::new(),
                     skip_reason: None,
                 }
             }
@@ -132,6 +143,7 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
                     name,
                     current_value: String::new(),
                     is_dev,
+                    registry_urls: Vec::new(),
                     skip_reason: Some(PipfileSkipReason::GitDependency),
                 };
             }
@@ -140,15 +152,23 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
                     name,
                     current_value: String::new(),
                     is_dev,
+                    registry_urls: Vec::new(),
                     skip_reason: Some(PipfileSkipReason::LocalDependency),
                 };
             }
             let version = t.get("version").and_then(|v| v.as_str()).unwrap_or("");
+            let registry_urls = t
+                .get("index")
+                .and_then(Value::as_str)
+                .and_then(|name| source_urls_by_name.get(name))
+                .map(|url| vec![url.clone()])
+                .unwrap_or_default();
             if version == "*" || version.is_empty() {
                 PipfileDep {
                     name,
                     current_value: String::new(),
                     is_dev,
+                    registry_urls,
                     skip_reason: Some(PipfileSkipReason::Wildcard),
                 }
             } else {
@@ -156,6 +176,7 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
                     name,
                     current_value: version.to_owned(),
                     is_dev,
+                    registry_urls,
                     skip_reason: None,
                 }
             }
@@ -164,6 +185,7 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
             name,
             current_value: String::new(),
             is_dev,
+            registry_urls: Vec::new(),
             skip_reason: Some(PipfileSkipReason::Wildcard),
         },
     }
@@ -181,6 +203,23 @@ fn extract_sources(table: &toml::Table) -> Vec<String> {
             })
             .collect(),
         _ => Vec::new(),
+    }
+}
+
+fn extract_sources_by_name(table: &toml::Table) -> BTreeMap<String, String> {
+    match table.get("source") {
+        Some(Value::Array(sources)) => sources
+            .iter()
+            .filter_map(|source| match source {
+                Value::Table(source) => {
+                    let name = source.get("name").and_then(Value::as_str)?;
+                    let url = source.get("url").and_then(Value::as_str)?;
+                    Some((name.to_owned(), url.to_owned()))
+                }
+                _ => None,
+            })
+            .collect(),
+        _ => BTreeMap::new(),
     }
 }
 
@@ -410,6 +449,42 @@ foo = "==1.0.0"
             package_file.registry_urls,
             vec!["source-url".to_owned(), "other-source-url".to_owned()]
         );
+    }
+
+    // Ported: "supports custom index" — pipenv/extract.spec.ts line 313
+    #[test]
+    fn supports_custom_index() {
+        let content = r#"
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://testpypi.python.org/pypi"
+verify_ssl = true
+name = "testpypi"
+
+[packages]
+requests = {version = "==0.21.0", index = "testpypi"}
+"#;
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.registry_urls,
+            vec![
+                "https://pypi.python.org/simple".to_owned(),
+                "https://testpypi.python.org/pypi".to_owned(),
+            ]
+        );
+        assert_eq!(package_file.deps.len(), 1);
+        let dep = &package_file.deps[0];
+        assert_eq!(dep.name, "requests");
+        assert_eq!(dep.current_value, "==0.21.0");
+        assert_eq!(
+            dep.registry_urls,
+            vec!["https://testpypi.python.org/pypi".to_owned()]
+        );
+        assert!(dep.skip_reason.is_none());
     }
 
     // Ported: "gets python constraint from python_version" — pipenv/extract.spec.ts line 338
