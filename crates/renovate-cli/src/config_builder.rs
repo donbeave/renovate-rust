@@ -228,6 +228,12 @@ mod tests {
     }
 
     #[test]
+    fn dry_run_legacy_null_disables_dry_run() {
+        let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyNull));
+        assert_eq!(build(&cli, GlobalConfig::default()).dry_run, None);
+    }
+
+    #[test]
     fn require_config_legacy_true_maps_to_required() {
         let cli = cli_with(|c| c.require_config = Some(RequireConfigArg::LegacyTrue));
         assert_eq!(

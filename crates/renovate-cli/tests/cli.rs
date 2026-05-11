@@ -129,6 +129,11 @@ fn dry_run_bare_is_accepted_via_migrate() {
 }
 
 #[test]
+fn dry_run_last_argument_after_repository_is_accepted() {
+    renovate().arg("myrepo").arg("--dry-run").assert().success();
+}
+
+#[test]
 fn dry_run_full_is_accepted_directly() {
     renovate().arg("--dry-run=full").assert().success();
 }

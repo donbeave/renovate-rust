@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1271 / 1402 actionable tests ported (91%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1282 / 1402 actionable tests ported (91%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 9 spec files not yet converted to per-test format (9 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 8 spec files not yet converted to per-test format (8 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3769,11 +3769,63 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/workers/global/config/parse/cli.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/cli.spec.ts
+**Total tests:** 30 | **Ported:** 11 | **Actionable:** 30 | **Status:** partial
+
+### `workers/global/config/parse/cli › .getCliName(definition)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| generates CLI value | 15 | pending | — | — | — |
+| generates returns empty if CLI false | 22 | pending | — | — | — |
+
+### `workers/global/config/parse/cli › .getConfig(argv)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty argv | 32 | ported | `config_builder.rs` | `default_cli_produces_default_config` | — |
+| supports boolean no value | 36 | pending | — | — | — |
+| supports boolean space true | 42 | pending | — | — | — |
+| throws exception for invalid boolean value | 48 | pending | — | — | — |
+| supports boolean space false | 58 | pending | — | — | — |
+| supports boolean equals true | 64 | pending | — | — | — |
+| supports boolean equals false | 69 | pending | — | — | — |
+| supports list single | 74 | pending | — | — | — |
+| supports list multiple | 79 | pending | — | — | — |
+| supports string | 84 | ported | `config_builder.rs` | `token_is_set` | — |
+| supports repositories | 89 | pending | — | — | — |
+| parses json lists correctly | 95 | pending | — | — | — |
+| parses [] correctly as empty list of hostRules | 111 | pending | — | — | — |
+| parses an empty string correctly as empty list of hostRules | 118 | pending | — | — | — |
+| "$arg" -> $config | 125 | pending | — | — | — |
+| parses json object correctly when empty | 145 | pending | — | — | — |
+| parses json {} object correctly | 152 | pending | — | — | — |
+| parses json object correctly | 159 | pending | — | — | — |
+| throws exception for invalid json object | 168 | pending | — | — | — |
+| dryRun boolean true | 175 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` | — |
+| dryRun no value | 180 | ported | `cli.rs` | `dry_run_bare_is_accepted_via_migrate` | — |
+| dryRun boolean false | 185 | ported | `config_builder.rs` | `dry_run_legacy_false_disables_dry_run` | — |
+| dryRun  null | 190 | ported | `config_builder.rs` | `dry_run_legacy_null_disables_dry_run` | — |
+| requireConfig boolean true | 195 | ported | `config_builder.rs` | `require_config_legacy_true_maps_to_required` | — |
+| requireConfig no value | 200 | ported | `cli.rs` | `require_config_bare_is_accepted_via_migrate` | — |
+| requireConfig boolean false | 205 | ported | `config_builder.rs` | `require_config_legacy_false_maps_to_optional` | — |
+
+### `workers/global/config/parse/cli › .parseEarlyFlags(argv)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| prints version and exits when --version is passed | 212 | ported | `cli.rs` | `version_long_flag_prints_bare_version` | — |
+| does not error when --dry-run is the last argument | 229 | ported | `cli.rs` | `dry_run_last_argument_after_repository_is_accepted` | — |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
-| `lib/workers/global/config/parse/cli.spec.ts` | 29 | `crates/renovate-cli/src/cli.rs` | 0 | pending |
+<!-- workers/global/config/parse/cli.spec.ts converted to per-test format above -->
 | `lib/workers/global/config/parse/env.spec.ts` | — | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
 | `lib/workers/global/config/parse/file.spec.ts` | — | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
 | `lib/workers/repository/init/merge.spec.ts` | 37 | `crates/renovate-core/src/repo_config.rs` | 0 | pending |
