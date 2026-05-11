@@ -2,7 +2,7 @@
 
 **Overall progress (per-test sections only):** 1271 / 1402 actionable tests ported (91%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 10 spec files not yet converted to per-test format (10 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 9 spec files not yet converted to per-test format (9 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3469,6 +3469,35 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/index.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `config/index › mergeChildConfig(parentConfig, childConfig)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| merges | 16 | pending | — | — | — |
+| merges packageRules | 32 | pending | — | — | — |
+| merges constraints | 55 | pending | — | — | — |
+| merges forced options | 73 | pending | — | — | — |
+| handles null parent packageRules | 92 | pending | — | — | — |
+| handles null child packageRules | 105 | pending | — | — | — |
+| handles undefined childConfig | 118 | pending | — | — | — |
+| getManagerConfig() | 124 | pending | — | — | — |
+| filterConfig() | 142 | pending | — | — | — |
+| highest vulnerabilitySeverity maintained when config is vulnerability alert | 148 | pending | — | — | — |
+
+### `config/index › removeGlobalConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| removes all global config | 163 | pending | — | — | — |
+| retains inherited config | 170 | pending | — | — | — |
+
+---
+
 ## Config specs (`lib/config/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3483,7 +3512,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- config/massage.spec.ts converted to per-test format above -->
 <!-- config/secrets.spec.ts converted to per-test format above -->
 <!-- config/inherit.spec.ts converted to per-test format above -->
-| `lib/config/index.spec.ts` | 12 | — | 0 | pending |
+<!-- config/index.spec.ts converted to per-test format above -->
 <!-- config/decrypt.spec.ts converted to per-test format above -->
 
 ---
