@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 746 / 1217 actionable tests ported (61%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 747 / 1217 actionable tests ported (61%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1879,7 +1879,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 12 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 16 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1929,7 +1929,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | ignores coords with fewer than 3 parts | 821 | ported | `ant.rs` | `coords_with_fewer_than_3_parts_skipped` | — |
 | ignores coords with empty groupId | 840 | ported | `ant.rs` | `coords_with_empty_groupid_skipped` | — |
 | resolves property references in coords version | 859 | pending | — | — | Requires coords + property resolution |
-| marks coords dependency with unresolvable property | 890 | pending | — | — | Requires coords + unresolved-property skip |
+| marks coords dependency with unresolvable property | 890 | ported | `ant.rs` | `coords_with_unresolvable_property_is_skipped` | — |
 | treats last part as version when it is not a known scope | 919 | ported | `ant.rs` | `four_part_coords_last_segment_is_version_when_not_a_scope` | — |
 | collects registry URLs from remoteRepository elements | 949 | ported | `ant.rs` | `remote_repository_collected` | — |
 | passes registry URLs to coords-style dependencies | 979 | ported | `ant.rs` | `remote_repository_applies_to_coords_dependency` | — |

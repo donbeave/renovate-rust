@@ -446,6 +446,21 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "marks coords dependency with unresolvable property" — ant/extract.spec.ts line 890
+    #[test]
+    fn coords_with_unresolvable_property_is_skipped() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency coords="junit:junit:${missing}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
+    }
+
     // Ported: "treats last part as version when it is not a known scope" — ant/extract.spec.ts line 919
     #[test]
     fn four_part_coords_last_segment_is_version_when_not_a_scope() {
