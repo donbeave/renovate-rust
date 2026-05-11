@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1354 / 1661 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1355 / 1661 actionable tests ported (82%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2664,7 +2664,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/mix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mix/extract.spec.ts
-**Total tests:** 3 | **Ported:** 2 | **Actionable:** 3 | **Status:** partial
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2672,7 +2672,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 |---|---|---|---|---|---|
 | returns empty for invalid dependency file | 11 | ported | `mix.rs` | `no_deps_function_returns_empty` (+ deps_without_do_end_block) | — |
 | extracts all dependencies when no lockfile | 16 | ported | `mix.rs` | `simple_hex_dep` (+ real_world_mix_exs, dep_with_only_option, git_dep_skipped, github_dep_skipped, path_dep_skipped, dep_without_version_skipped) | — |
-| extracts all dependencies and adds the locked version if lockfile present | 139 | pending | — | — | Requires mix.lock parsing + lockedVersion plumbing |
+| extracts all dependencies and adds the locked version if lockfile present | 139 | ported | `mix.rs` | `applies_locked_versions_from_mix_lock` | — |
 
 ---
 

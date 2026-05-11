@@ -18,7 +18,7 @@
 //! | `{:plug, path: "../plug"}` | Skipped — `LocalPath` |
 //! | `{:plug}` | Skipped — `NoVersion` (no constraint) |
 
-use std::sync::LazyLock;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use regex::Regex;
 
@@ -40,6 +40,8 @@ pub struct MixExtractedDep {
     pub name: String,
     /// Version constraint (e.g. `~> 1.7.0`). Empty when `skip_reason` is set.
     pub current_value: String,
+    /// Version pinned in the sibling `mix.lock`, when available.
+    pub locked_version: Option<String>,
     /// Set when no Hex.pm lookup should be performed.
     pub skip_reason: Option<MixSkipReason>,
 }
@@ -63,16 +65,22 @@ static DEP_TUPLE: LazyLock<Regex> =
 
 /// Parse a `mix.exs` file and extract all Hex.pm dependencies.
 pub fn extract(content: &str) -> Vec<MixExtractedDep> {
+    extract_with_lock(content, None)
+}
+
+pub fn extract_with_lock(content: &str, lock_content: Option<&str>) -> Vec<MixExtractedDep> {
     // Find the deps function body.
     let Some(deps_block) = extract_deps_block(content) else {
         return Vec::new();
     };
 
+    let locked_versions = lock_content.map(parse_mix_lock).unwrap_or_default();
     let mut deps = Vec::new();
     for cap in DEP_TUPLE.captures_iter(&deps_block) {
         let name = cap[1].to_owned();
         let version = cap.get(2).map(|m| m.as_str().to_owned());
         let opts = cap.get(3).map(|m| m.as_str());
+        let locked_version = locked_versions.get(&name).cloned();
 
         // Check for special source options.
         if let Some(tail) = opts {
@@ -80,6 +88,7 @@ pub fn extract(content: &str) -> Vec<MixExtractedDep> {
                 deps.push(MixExtractedDep {
                     name,
                     current_value: String::new(),
+                    locked_version,
                     skip_reason: Some(MixSkipReason::GitSource),
                 });
                 continue;
@@ -88,6 +97,7 @@ pub fn extract(content: &str) -> Vec<MixExtractedDep> {
                 deps.push(MixExtractedDep {
                     name,
                     current_value: String::new(),
+                    locked_version: None,
                     skip_reason: Some(MixSkipReason::LocalPath),
                 });
                 continue;
@@ -99,6 +109,7 @@ pub fn extract(content: &str) -> Vec<MixExtractedDep> {
                 deps.push(MixExtractedDep {
                     name,
                     current_value: String::new(),
+                    locked_version: None,
                     skip_reason: Some(MixSkipReason::NoVersion),
                 });
             }
@@ -106,6 +117,7 @@ pub fn extract(content: &str) -> Vec<MixExtractedDep> {
                 deps.push(MixExtractedDep {
                     name,
                     current_value: v,
+                    locked_version,
                     skip_reason: None,
                 });
             }
@@ -188,6 +200,22 @@ fn extract_deps_block(content: &str) -> Option<String> {
     }
 
     Some(result)
+}
+
+fn parse_mix_lock(content: &str) -> BTreeMap<String, String> {
+    static HEX_LOCK: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#""([^"]+)":\s*\{:hex,\s*:[^,]+,\s*"([^"]+)""#).unwrap());
+    static GIT_TAG_LOCK: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#""([^"]+)":\s*\{:git,[^}]+\[tag:\s*"([^"]+)""#).unwrap());
+
+    let mut out = BTreeMap::new();
+    for cap in HEX_LOCK.captures_iter(content) {
+        out.insert(cap[1].to_owned(), cap[2].to_owned());
+    }
+    for cap in GIT_TAG_LOCK.captures_iter(content) {
+        out.insert(cap[1].to_owned(), cap[2].to_owned());
+    }
+    out
 }
 
 #[cfg(test)]
@@ -324,6 +352,45 @@ end
 
         let local = deps.iter().find(|d| d.name == "local_dep").unwrap();
         assert_eq!(local.skip_reason, Some(MixSkipReason::LocalPath));
+    }
+
+    // Ported: "extracts all dependencies and adds the locked version if lockfile present" — mix/extract.spec.ts line 139
+    #[test]
+    fn applies_locked_versions_from_mix_lock() {
+        let content = r#"
+defp deps do
+  [
+    {:postgrex, "~> 0.8.1"},
+    {:ranch, "<1.7.0 or ~>1.7.1"},
+    {:cowboy, "0.6.0", github: "ninenines/cowboy"},
+    {:phoenix, "main", git: "https://github.com/phoenixframework/phoenix.git"},
+    {:gun, "~> 2.0.0"}
+  ]
+end
+"#;
+        let lock = r#"%{
+  "cowboy": {:git, "https://github.com/ninenines/cowboy.git", "0c2e222", [tag: "0.6.0"]},
+  "gun": {:hex, :grpc_gun, "2.0.1", "221b792", [:rebar3], [], "hexpm", "hash"},
+  "phoenix": {:git, "https://github.com/phoenixframework/phoenix.git", "61cbfeb", [branch: "main"]},
+  "postgrex": {:hex, :postgrex, "0.8.4", "344dbb", [:mix], [], "hexpm", "hash"},
+  "ranch": {:hex, :ranch, "1.7.1", "6b1fab", [:rebar3], [], "hexpm", "hash"}
+}"#;
+        let deps = extract_with_lock(content, Some(lock));
+
+        let postgrex = deps.iter().find(|d| d.name == "postgrex").unwrap();
+        assert_eq!(postgrex.locked_version.as_deref(), Some("0.8.4"));
+
+        let ranch = deps.iter().find(|d| d.name == "ranch").unwrap();
+        assert_eq!(ranch.locked_version.as_deref(), Some("1.7.1"));
+
+        let gun = deps.iter().find(|d| d.name == "gun").unwrap();
+        assert_eq!(gun.locked_version.as_deref(), Some("2.0.1"));
+
+        let cowboy = deps.iter().find(|d| d.name == "cowboy").unwrap();
+        assert_eq!(cowboy.locked_version.as_deref(), Some("0.6.0"));
+
+        let phoenix = deps.iter().find(|d| d.name == "phoenix").unwrap();
+        assert_eq!(phoenix.locked_version, None);
     }
 
     #[test]
