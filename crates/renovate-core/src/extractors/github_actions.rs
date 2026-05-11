@@ -97,6 +97,13 @@ pub struct GithubActionsCommentData {
     pub index: Option<usize>,
 }
 
+/// A possibly quoted GitHub Actions scalar value.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GithubActionsQuotedValue {
+    pub value: String,
+    pub quote: Option<char>,
+}
+
 // ── Compiled regexes ───────────────────────────────────────────────────────
 
 /// Matches a `uses:` line inside a workflow YAML file.
@@ -200,6 +207,29 @@ pub fn parse_comment(comment_body: &str) -> GithubActionsCommentData {
     }
 
     GithubActionsCommentData::default()
+}
+
+/// Parse surrounding quotes from a GitHub Actions scalar value.
+///
+/// Renovate reference: `lib/modules/manager/github-actions/parse.ts`
+/// `parseQuote`.
+pub fn parse_quote(input: &str) -> GithubActionsQuotedValue {
+    let trimmed = input.trim();
+    let mut chars = trimmed.chars();
+    let first = chars.next();
+    let last = trimmed.chars().next_back();
+
+    if trimmed.len() >= 2 && first == last && matches!(first, Some('"') | Some('\'')) {
+        return GithubActionsQuotedValue {
+            value: trimmed[1..trimmed.len() - 1].to_owned(),
+            quote: first,
+        };
+    }
+
+    GithubActionsQuotedValue {
+        value: trimmed.to_owned(),
+        quote: None,
+    }
 }
 
 /// Extract and normalise the version string from a trailing `# <version>` comment.
@@ -1415,6 +1445,13 @@ mod tests {
         }
     }
 
+    fn quoted_value(value: &str, quote: Option<char>) -> GithubActionsQuotedValue {
+        GithubActionsQuotedValue {
+            value: value.to_owned(),
+            quote,
+        }
+    }
+
     // Ported: "returns null for empty string" — github-actions/parse.spec.ts line 11
     #[test]
     fn parse_action_reference_returns_none_for_empty_string() {
@@ -1776,6 +1813,58 @@ mod tests {
             parse_comment("do not update"),
             GithubActionsCommentData::default()
         );
+    }
+
+    // Ported: "returns empty quote for unquoted string" — github-actions/parse.spec.ts line 291
+    #[test]
+    fn parse_quote_returns_empty_quote_for_unquoted_string() {
+        assert_eq!(parse_quote("value"), quoted_value("value", None));
+    }
+
+    // Ported: "returns empty quote for empty string" — github-actions/parse.spec.ts line 295
+    #[test]
+    fn parse_quote_returns_empty_quote_for_empty_string() {
+        assert_eq!(parse_quote(""), quoted_value("", None));
+    }
+
+    // Ported: "returns empty quote for single char" — github-actions/parse.spec.ts line 299
+    #[test]
+    fn parse_quote_returns_empty_quote_for_single_char() {
+        assert_eq!(parse_quote("a"), quoted_value("a", None));
+    }
+
+    // Ported: "parses double quoted string" — github-actions/parse.spec.ts line 303
+    #[test]
+    fn parse_quote_parses_double_quoted_string() {
+        assert_eq!(parse_quote("\"value\""), quoted_value("value", Some('"')));
+    }
+
+    // Ported: "parses single quoted string" — github-actions/parse.spec.ts line 307
+    #[test]
+    fn parse_quote_parses_single_quoted_string() {
+        assert_eq!(parse_quote("'value'"), quoted_value("value", Some('\'')));
+    }
+
+    // Ported: "handles whitespace around quotes" — github-actions/parse.spec.ts line 311
+    #[test]
+    fn parse_quote_handles_whitespace_around_quotes() {
+        assert_eq!(
+            parse_quote("  \"value\"  "),
+            quoted_value("value", Some('"'))
+        );
+    }
+
+    // Ported: "returns empty quote for mismatched quotes" — github-actions/parse.spec.ts line 315
+    #[test]
+    fn parse_quote_returns_empty_quote_for_mismatched_quotes() {
+        assert_eq!(parse_quote("\"value'"), quoted_value("\"value'", None));
+        assert_eq!(parse_quote("'value\""), quoted_value("'value\"", None));
+    }
+
+    // Ported: "returns empty quote for only opening quote" — github-actions/parse.spec.ts line 320
+    #[test]
+    fn parse_quote_returns_empty_quote_for_only_opening_quote() {
+        assert_eq!(parse_quote("\"value"), quoted_value("\"value", None));
     }
 
     // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 65

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1154 / 1368 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1162 / 1368 actionable tests ported (85%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 29 spec files not yet converted to per-test format (24 pending, 4 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -412,7 +412,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/github-actions/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/parse.spec.ts
-**Total tests:** 53 | **Ported:** 31 | **Actionable:** 53 | **Status:** partial
+**Total tests:** 53 | **Ported:** 39 | **Actionable:** 53 | **Status:** partial
 
 ### `modules/manager/github-actions/parse › parseActionReference`
 
@@ -459,14 +459,14 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty quote for unquoted string | 291 | pending | — | — | — |
-| returns empty quote for empty string | 295 | pending | — | — | — |
-| returns empty quote for single char | 299 | pending | — | — | — |
-| parses double quoted string | 303 | pending | — | — | — |
-| parses single quoted string | 307 | pending | — | — | — |
-| handles whitespace around quotes | 311 | pending | — | — | — |
-| returns empty quote for mismatched quotes | 315 | pending | — | — | — |
-| returns empty quote for only opening quote | 320 | pending | — | — | — |
+| returns empty quote for unquoted string | 291 | ported | `github_actions.rs` | `parse_quote_returns_empty_quote_for_unquoted_string` | — |
+| returns empty quote for empty string | 295 | ported | `github_actions.rs` | `parse_quote_returns_empty_quote_for_empty_string` | — |
+| returns empty quote for single char | 299 | ported | `github_actions.rs` | `parse_quote_returns_empty_quote_for_single_char` | — |
+| parses double quoted string | 303 | ported | `github_actions.rs` | `parse_quote_parses_double_quoted_string` | — |
+| parses single quoted string | 307 | ported | `github_actions.rs` | `parse_quote_parses_single_quoted_string` | — |
+| handles whitespace around quotes | 311 | ported | `github_actions.rs` | `parse_quote_handles_whitespace_around_quotes` | — |
+| returns empty quote for mismatched quotes | 315 | ported | `github_actions.rs` | `parse_quote_returns_empty_quote_for_mismatched_quotes` | — |
+| returns empty quote for only opening quote | 320 | ported | `github_actions.rs` | `parse_quote_returns_empty_quote_for_only_opening_quote` | — |
 
 ### `modules/manager/github-actions/parse › parseUsesLine`
 
