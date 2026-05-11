@@ -190,38 +190,25 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
         }
 
         // Parse `tool = "version"` or `tool = '...'`
-        let Some((tool_raw, val_raw)) = trimmed.split_once('=') else {
+        let Some((tool_raw, val_raw)) = split_tool_assignment(trimmed) else {
             continue;
         };
 
         let tool_name = tool_raw.trim().trim_matches('"').trim_matches('\'');
         let version_raw = val_raw.trim();
 
-        // Determine version string based on value type.
-        let version: Option<&str> = if version_raw.starts_with('"') || version_raw.starts_with('\'')
+        let parsed_value = if version_raw.starts_with('"')
+            || version_raw.starts_with('\'')
+            || version_raw.starts_with('{')
         {
-            // Simple quoted string.
-            let v = version_raw.trim_matches('"').trim_matches('\'').trim();
-            if v.is_empty() { None } else { Some(v) }
-        } else if version_raw.starts_with('{') {
-            // Inline table: try to extract `version = "..."` or `version = '...'`.
-            let inner = version_raw.trim_start_matches('{').trim_end_matches('}');
-            inner.split(',').find_map(|kv| {
-                let kv = kv.trim();
-                let (k, v) = kv.split_once('=')?;
-                if k.trim() != "version" {
-                    return None;
-                }
-                let v = v.trim().trim_matches('"').trim_matches('\'').trim();
-                if v.is_empty() { None } else { Some(v) }
-            })
+            parse_tool_value(version_raw)
         } else {
             // Arrays, other formats — skip.
             continue;
         };
 
         // No version → UnspecifiedVersion.
-        let Some(version) = version else {
+        let Some(version) = parsed_value.version else {
             out.push(AsdfDep {
                 tool_name: tool_name.to_owned(),
                 dep_name: tool_name.to_owned(),
@@ -232,7 +219,7 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
             continue;
         };
 
-        if let Some(dep) = resolve_backend_tool(tool_name, version) {
+        if let Some(dep) = resolve_backend_tool(tool_name, version, &parsed_value) {
             out.push(dep);
             continue;
         }
@@ -272,7 +259,75 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
     out
 }
 
-fn resolve_backend_tool(tool_name: &str, version: &str) -> Option<AsdfDep> {
+#[derive(Debug, Default)]
+struct ParsedToolValue<'a> {
+    version: Option<&'a str>,
+    tag_regex: Option<String>,
+    has_options: bool,
+}
+
+fn parse_tool_value(raw: &str) -> ParsedToolValue<'_> {
+    if raw.starts_with('"') || raw.starts_with('\'') {
+        let value = raw.trim_matches('"').trim_matches('\'').trim();
+        return ParsedToolValue {
+            version: (!value.is_empty()).then_some(value),
+            ..Default::default()
+        };
+    }
+
+    let mut parsed = ParsedToolValue::default();
+    let inner = raw.trim_start_matches('{').trim_end_matches('}');
+    for kv in inner.split(',') {
+        let Some((k, v)) = kv.trim().split_once('=') else {
+            continue;
+        };
+        let key = k.trim();
+        let value = v.trim().trim_matches('"').trim_matches('\'').trim();
+        if key == "version" {
+            if !value.is_empty() {
+                parsed.version = Some(value);
+            }
+        } else {
+            parsed.has_options = true;
+            if key == "tag_regex" && !value.is_empty() {
+                parsed.tag_regex = Some(unescape_toml_backslashes(value));
+            }
+        }
+    }
+    parsed
+}
+
+fn split_tool_assignment(line: &str) -> Option<(&str, &str)> {
+    let mut quote = None;
+    let mut escaped = false;
+
+    for (idx, ch) in line.char_indices() {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+
+        if quote.is_some() && ch == '\\' {
+            escaped = true;
+            continue;
+        }
+
+        match quote {
+            Some(q) if ch == q => quote = None,
+            None if ch == '"' || ch == '\'' => quote = Some(ch),
+            None if ch == '=' => return Some((&line[..idx], &line[idx + 1..])),
+            _ => {}
+        }
+    }
+
+    None
+}
+
+fn resolve_backend_tool(
+    tool_name: &str,
+    version: &str,
+    parsed_value: &ParsedToolValue<'_>,
+) -> Option<AsdfDep> {
     let (backend, name) = tool_name.split_once(':')?;
     match backend {
         "core" => MISE_CORE_TABLE
@@ -343,6 +398,13 @@ fn resolve_backend_tool(tool_name: &str, version: &str) -> Option<AsdfDep> {
             strip_tool_options(name),
             None,
         )),
+        "ubi" => Some(backend_dep(
+            tool_name,
+            version,
+            "github-releases",
+            strip_tool_options(name),
+            ubi_extract_version(name, parsed_value),
+        )),
         _ => None,
     }
 }
@@ -397,6 +459,37 @@ fn github_package_name(value: &str) -> Option<String> {
 
 fn strip_tool_options(value: &str) -> &str {
     value.split_once('[').map(|(name, _)| name).unwrap_or(value)
+}
+
+fn tool_option_value(value: &str, option: &str) -> Option<String> {
+    let (_, options) = value.split_once('[')?;
+    let options = options.strip_suffix(']').unwrap_or(options);
+    options.split(',').find_map(|kv| {
+        let (key, value) = kv.trim().split_once('=')?;
+        (key.trim() == option).then(|| unescape_toml_backslashes(value.trim()))
+    })
+}
+
+fn unescape_toml_backslashes(value: &str) -> String {
+    value.replace("\\\\", "\\")
+}
+
+fn ubi_extract_version(name: &str, parsed_value: &ParsedToolValue<'_>) -> Option<&'static str> {
+    if let Some(tag_regex) = parsed_value
+        .tag_regex
+        .clone()
+        .or_else(|| tool_option_value(name, "tag_regex"))
+    {
+        return Some(Box::leak(
+            format!("^v?(?<version>{tag_regex})").into_boxed_str(),
+        ));
+    }
+
+    if parsed_value.has_options || name.contains('[') {
+        return Some("^v?(?<version>.+)");
+    }
+
+    None
 }
 
 #[cfg(test)]
@@ -759,6 +852,74 @@ mod tests {
             deps.iter()
                 .any(|dep| dep.package_name.as_deref() == Some("tuist/tuist")
                     && dep.current_value == "4.13.0")
+        );
+    }
+
+    // Ported: "extracts ubi backend tools" — mise/extract.spec.ts line 682
+    #[test]
+    fn extracts_ubi_backend_tools() {
+        let content = r#"[tools]
+"ubi:nekto/act" = "v0.2.70"
+"ubi:cli/cli" = { exe = "gh", version = "1.14.0" }
+"ubi:cli/cli[exe=gh]" = "1.14.0"
+"ubi:cargo-bins/cargo-binstall" = { tag_regex = "^\\d+\\.\\d+\\.", version = "1.0.0" }
+"ubi:cargo-bins/cargo-binstall[tag_regex=^\\d+\\.]" = "1.0.0"
+"ubi:cargo-bins/cargo-binstall[tag_regex=^\\d+\\.\\d+\\.]" = { tag_regex = "^\\d+\\.", version = "1.0.0" }
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 6);
+        assert!(
+            deps.iter()
+                .all(|dep| dep.datasource_id == Some("github-releases"))
+        );
+
+        let act = deps
+            .iter()
+            .find(|dep| dep.dep_name == "ubi:nekto/act")
+            .unwrap();
+        assert_eq!(act.current_value, "v0.2.70");
+        assert_eq!(act.package_name.as_deref(), Some("nekto/act"));
+        assert!(act.extract_version.is_none());
+
+        let gh_object = deps
+            .iter()
+            .find(|dep| dep.dep_name == "ubi:cli/cli")
+            .unwrap();
+        assert_eq!(gh_object.current_value, "1.14.0");
+        assert_eq!(gh_object.package_name.as_deref(), Some("cli/cli"));
+        assert_eq!(gh_object.extract_version, Some("^v?(?<version>.+)"));
+
+        let gh_bracket = deps
+            .iter()
+            .find(|dep| dep.dep_name == "ubi:cli/cli[exe=gh]")
+            .unwrap();
+        assert_eq!(gh_bracket.package_name.as_deref(), Some("cli/cli"));
+        assert_eq!(gh_bracket.extract_version, Some("^v?(?<version>.+)"));
+
+        let table_regex = deps
+            .iter()
+            .find(|dep| dep.dep_name == "ubi:cargo-bins/cargo-binstall")
+            .unwrap();
+        assert_eq!(
+            table_regex.extract_version,
+            Some("^v?(?<version>^\\d+\\.\\d+\\.)")
+        );
+
+        let key_regex = deps
+            .iter()
+            .find(|dep| dep.dep_name == "ubi:cargo-bins/cargo-binstall[tag_regex=^\\\\d+\\\\.]")
+            .unwrap();
+        assert_eq!(key_regex.extract_version, Some("^v?(?<version>^\\d+\\.)"));
+
+        let overridden_regex = deps
+            .iter()
+            .find(|dep| {
+                dep.dep_name == "ubi:cargo-bins/cargo-binstall[tag_regex=^\\\\d+\\\\.\\\\d+\\\\.]"
+            })
+            .unwrap();
+        assert_eq!(
+            overridden_regex.extract_version,
+            Some("^v?(?<version>^\\d+\\.)")
         );
     }
 
