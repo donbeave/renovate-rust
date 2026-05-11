@@ -81,6 +81,13 @@ pub struct PoetryExtractedDep {
     pub skip_reason: Option<PoetrySkipReason>,
 }
 
+/// Package-file level Poetry extraction data.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PoetryExtract {
+    pub deps: Vec<PoetryExtractedDep>,
+    pub registry_urls: Vec<String>,
+}
+
 /// Errors from parsing a Poetry `pyproject.toml`.
 #[derive(Debug, Error)]
 pub enum PoetryExtractError {
@@ -92,8 +99,14 @@ pub enum PoetryExtractError {
 
 /// Parse a Poetry `pyproject.toml` and extract all Python dependencies.
 pub fn extract(content: &str) -> Result<Vec<PoetryExtractedDep>, PoetryExtractError> {
+    Ok(extract_package_file(content)?.deps)
+}
+
+/// Parse a Poetry `pyproject.toml` and extract deps plus package-file metadata.
+pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtractError> {
     let doc: Value = toml::from_str(content)?;
     let mut deps = Vec::new();
+    let registry_urls = extract_registry_urls(&doc);
 
     // [tool.poetry.dependencies]
     if let Some(tbl) = nested_table(&doc, &["tool", "poetry", "dependencies"]) {
@@ -141,7 +154,10 @@ pub fn extract(content: &str) -> Result<Vec<PoetryExtractedDep>, PoetryExtractEr
         }
     }
 
-    Ok(deps)
+    Ok(PoetryExtract {
+        deps,
+        registry_urls,
+    })
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -228,6 +244,33 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
         // Array form (platform-conditional) — skip for now.
         _ => None,
     }
+}
+
+fn extract_registry_urls(doc: &Value) -> Vec<String> {
+    let Some(sources) = doc
+        .get("tool")
+        .and_then(|tool| tool.get("poetry"))
+        .and_then(|poetry| poetry.get("source"))
+        .and_then(Value::as_array)
+    else {
+        return Vec::new();
+    };
+
+    let mut urls = Vec::new();
+    for source in sources {
+        if let Some(url) = source.get("url").and_then(Value::as_str)
+            && !urls.iter().any(|existing| existing == url)
+        {
+            urls.push(url.to_owned());
+        }
+    }
+
+    const PYPI: &str = "https://pypi.org/pypi/";
+    if !sources.is_empty() && !urls.iter().any(|url| url == PYPI) {
+        urls.push(PYPI.to_owned());
+    }
+
+    urls
 }
 
 /// Normalize a Python package name per PEP 503.
@@ -423,6 +466,91 @@ Typing_Extensions = "^4.0"
         let deps = extract_ok(content);
         assert!(deps.iter().any(|d| d.name == "pyyaml"));
         assert!(deps.iter().any(|d| d.name == "typing-extensions"));
+    }
+
+    // Ported: "can parse empty registries" — poetry/extract.spec.ts line 436
+    #[test]
+    fn empty_registry_list_returns_no_registry_urls() {
+        let content = r#"
+[tool.poetry]
+name = "example"
+version = "0.1.0"
+source = []
+
+[tool.poetry.dependencies]
+dep0 = "0.0.0"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert!(package_file.registry_urls.is_empty());
+    }
+
+    // Ported: "can parse missing registries" — poetry/extract.spec.ts line 441
+    #[test]
+    fn missing_registry_list_returns_no_registry_urls() {
+        let content = r#"
+[tool.poetry]
+name = "example"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+dep0 = "0.0.0"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert!(package_file.registry_urls.is_empty());
+    }
+
+    // Ported: "extracts registries" — poetry/extract.spec.ts line 446
+    #[test]
+    fn extracts_registry_urls() {
+        let content = r#"
+[tool.poetry.dependencies]
+dep0 = "0.0.0"
+
+[[tool.poetry.source]]
+name = "foo"
+url = "https://foo.bar/simple/"
+
+[[tool.poetry.source]]
+name = "bar"
+url = "https://bar.baz/+simple/"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert_eq!(
+            package_file.registry_urls,
+            vec![
+                "https://foo.bar/simple/".to_owned(),
+                "https://bar.baz/+simple/".to_owned(),
+                "https://pypi.org/pypi/".to_owned(),
+            ]
+        );
+    }
+
+    // Ported: "dedupes registries" — poetry/extract.spec.ts line 455
+    #[test]
+    fn dedupes_registry_urls() {
+        let content = r#"
+[tool.poetry.dependencies]
+dep0 = "0.0.0"
+
+[[tool.poetry.source]]
+name = "foo"
+url = "https://pypi.org/pypi/"
+
+[[tool.poetry.source]]
+name = "bar"
+url = "https://bar.baz/+simple/"
+
+[[tool.poetry.source]]
+name = "baz"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert_eq!(
+            package_file.registry_urls,
+            vec![
+                "https://pypi.org/pypi/".to_owned(),
+                "https://bar.baz/+simple/".to_owned(),
+            ]
+        );
     }
 
     // ── Fixture: pyproject.1.toml ─────────────────────────────────────────────
