@@ -100,6 +100,8 @@ impl NpmDepType {
 pub struct NpmExtractedDep {
     /// Package name (the key in the dep section).
     pub name: String,
+    /// Registry package name when it differs from the package.json key.
+    pub package_name: Option<String>,
     /// The version constraint string (e.g. `"^18.0.0"`).
     pub current_value: String,
     /// Which dep section this came from.
@@ -760,23 +762,109 @@ fn unquote_yarnrc_token(token: &str) -> String {
 }
 
 fn classify(name: String, value: &DependencySpec, dep_type: NpmDepType) -> NpmExtractedDep {
-    let current_value = match value {
+    let mut package_name = None;
+    let mut current_value = match value {
         DependencySpec::Version(value) => value.clone(),
         DependencySpec::InvalidValue => String::new(),
     };
-    let skip_reason = match dep_type {
-        NpmDepType::Engines => engine_skip_reason_for(&name, value, &current_value),
-        NpmDepType::Volta => volta_skip_reason_for(&name, value, &current_value),
-        _ if invalid_package_name(&name) => Some(NpmSkipReason::InvalidName),
-        _ if matches!(value, DependencySpec::InvalidValue) => Some(NpmSkipReason::InvalidValue),
-        _ => skip_reason_for(&current_value),
+    let skip_reason = if matches!(value, DependencySpec::Version(_))
+        && current_value.starts_with("npm:")
+    {
+        let alias = parse_npm_alias(&name, &current_value);
+        package_name = alias.package_name;
+        current_value = alias.current_value;
+        alias.skip_reason
+    } else {
+        match dep_type {
+            NpmDepType::Engines => engine_skip_reason_for(&name, value, &current_value),
+            NpmDepType::Volta => volta_skip_reason_for(&name, value, &current_value),
+            _ if invalid_package_name(&name) => Some(NpmSkipReason::InvalidName),
+            _ if matches!(value, DependencySpec::InvalidValue) => Some(NpmSkipReason::InvalidValue),
+            _ => skip_reason_for(&current_value),
+        }
     };
     NpmExtractedDep {
         name,
+        package_name,
         current_value,
         dep_type,
         skip_reason,
     }
+}
+
+struct ParsedNpmAlias {
+    package_name: Option<String>,
+    current_value: String,
+    skip_reason: Option<NpmSkipReason>,
+}
+
+fn parse_npm_alias(dep_name: &str, raw_value: &str) -> ParsedNpmAlias {
+    let Some(alias) = raw_value.strip_prefix("npm:") else {
+        return ParsedNpmAlias {
+            package_name: None,
+            current_value: raw_value.to_owned(),
+            skip_reason: None,
+        };
+    };
+
+    if let Some((package_name, version)) = split_npm_alias(alias) {
+        return ParsedNpmAlias {
+            package_name: Some(package_name),
+            current_value: version.to_owned(),
+            skip_reason: skip_reason_for(version),
+        };
+    }
+
+    if looks_like_version(alias) {
+        return ParsedNpmAlias {
+            package_name: Some(dep_name.to_owned()),
+            current_value: alias.to_owned(),
+            skip_reason: skip_reason_for(alias),
+        };
+    }
+
+    ParsedNpmAlias {
+        package_name: Some(dep_name.to_owned()).filter(|_| !invalid_scoped_alias(alias)),
+        current_value: if invalid_scoped_alias(alias) {
+            raw_value.to_owned()
+        } else {
+            alias.to_owned()
+        },
+        skip_reason: Some(NpmSkipReason::UnspecifiedVersion),
+    }
+}
+
+fn split_npm_alias(alias: &str) -> Option<(String, &str)> {
+    if let Some(scoped) = alias.strip_prefix('@') {
+        let slash = scoped.find('/')?;
+        let package_end = slash + 1 + scoped[slash + 1..].find('@')?;
+        let package_name = format!("@{}", &scoped[..package_end]);
+        let version = &scoped[package_end + 1..];
+        if invalid_package_name(&package_name) || version.is_empty() {
+            return None;
+        }
+        return Some((package_name, version));
+    }
+
+    let (package_name, version) = alias.split_once('@')?;
+    if package_name.is_empty() || version.is_empty() {
+        return None;
+    }
+    Some((package_name.to_owned(), version))
+}
+
+fn looks_like_version(value: &str) -> bool {
+    value
+        .chars()
+        .next()
+        .is_some_and(|ch| ch.is_ascii_digit() || matches!(ch, '^' | '~' | '>' | '<' | '=' | '*'))
+}
+
+fn invalid_scoped_alias(alias: &str) -> bool {
+    alias
+        .strip_prefix('@')
+        .and_then(|scoped| scoped.split_once('/'))
+        .is_some_and(|(_, package)| package.starts_with('@'))
 }
 
 fn volta_skip_reason_for(
@@ -1607,11 +1695,54 @@ chalk@^2.4.1:
         assert_eq!(deps[0].skip_reason, Some(NpmSkipReason::UrlInstall));
     }
 
+    // Ported: "extracts npm package alias" — npm/extract/index.spec.ts line 815
     #[test]
-    fn npm_alias_is_skipped() {
-        let json = r#"{ "dependencies": { "react": "npm:preact@^10" } }"#;
+    fn npm_aliases_are_extracted() {
+        let json = r#"{
+          "dependencies": {
+            "a": "npm:foo@1",
+            "b": "npm:@foo/bar@1.2.3",
+            "c": "npm:^1.2.3",
+            "d": "npm:1.2.3",
+            "e": "npm:1.x.x",
+            "f": "npm:foo",
+            "g": "npm:@foo/@bar/@1.2.3"
+          }
+        }"#;
         let deps = extract_ok(json);
-        assert_eq!(deps[0].skip_reason, Some(NpmSkipReason::NpmAlias));
+
+        assert!(deps.iter().any(|dep| {
+            dep.name == "a"
+                && dep.package_name.as_deref() == Some("foo")
+                && dep.current_value == "1"
+                && dep.skip_reason.is_none()
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "b"
+                && dep.package_name.as_deref() == Some("@foo/bar")
+                && dep.current_value == "1.2.3"
+                && dep.skip_reason.is_none()
+        }));
+        for (name, current_value) in [("c", "^1.2.3"), ("d", "1.2.3"), ("e", "1.x.x")] {
+            assert!(deps.iter().any(|dep| {
+                dep.name == name
+                    && dep.package_name.as_deref() == Some(name)
+                    && dep.current_value == current_value
+                    && dep.skip_reason.is_none()
+            }));
+        }
+        assert!(deps.iter().any(|dep| {
+            dep.name == "f"
+                && dep.package_name.as_deref() == Some("f")
+                && dep.current_value == "foo"
+                && dep.skip_reason == Some(NpmSkipReason::UnspecifiedVersion)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "g"
+                && dep.package_name.is_none()
+                && dep.current_value == "npm:@foo/@bar/@1.2.3"
+                && dep.skip_reason == Some(NpmSkipReason::UnspecifiedVersion)
+        }));
     }
 
     #[test]

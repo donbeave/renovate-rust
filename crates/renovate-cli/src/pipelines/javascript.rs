@@ -56,8 +56,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             d.dep_type.as_renovate_str(),
                         )
                 })
-                .filter(|d| seen.insert(d.name.clone()))
-                .map(|d| d.name.clone())
+                .filter(|d| seen.insert(d.package_name.as_ref().unwrap_or(&d.name).clone()))
+                .map(|d| d.package_name.clone().unwrap_or_else(|| d.name.clone()))
                 .collect()
         };
         tracing::debug!(
@@ -98,10 +98,11 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
             > = actionable
                 .iter()
                 .map(|d| {
+                    let lookup_name = d.package_name.as_ref().unwrap_or(&d.name);
                     let summary = versions_cache
-                        .get(&d.name)
+                        .get(lookup_name)
                         .map(|entry| npm_datasource::summary_from_cache(&d.current_value, entry))
-                        .ok_or(npm_datasource::NpmError::NotFound(d.name.clone()));
+                        .ok_or(npm_datasource::NpmError::NotFound(lookup_name.clone()));
                     (d.name.clone(), summary)
                 })
                 .collect();
