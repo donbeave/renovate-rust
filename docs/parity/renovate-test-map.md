@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 927 / 1217 actionable tests ported (76%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 928 / 1217 actionable tests ported (76%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1675,7 +1675,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kubernetes/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kubernetes/extract.spec.ts
-**Total tests:** 15 | **Ported:** 14 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 15 | **Actionable:** 15 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1691,7 +1691,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts images and replaces registries | 133 | ported | `kubernetes.rs` | `extracts_images_and_replaces_registries` | — |
 | extracts images but does no replacement | 155 | ported | `kubernetes.rs` | `extracts_images_without_registry_replacement` | — |
 | extracts images and does no double replacements | 177 | ported | `kubernetes.rs` | `extracts_images_without_double_registry_replacement` | — |
-| extracts from complex templates | 200 | pending | — | — | Requires complex YAML template path coverage |
+| extracts from complex templates | 200 | ported | `kubernetes.rs` | `extracts_from_complex_templates` | — |
 | extracts image volumes from $kind | 223 | ported | `kubernetes.rs` | `extracts_image_volumes_from_workload_kinds` | — |
 | extracts image volumes from Pod and CronJob | 265 | ported | `kubernetes.rs` | `extracts_image_volumes_from_pod_and_cronjob` | — |
 | does not extract image volumes for unsupported kind | 326 | ported | `kubernetes.rs` | `does_not_extract_image_volumes_for_unsupported_kind` | — |

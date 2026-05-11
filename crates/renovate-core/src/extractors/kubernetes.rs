@@ -443,6 +443,37 @@ spec:
         assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/node");
     }
 
+    // Ported: "extracts from complex templates" — kubernetes/extract.spec.ts line 200
+    #[test]
+    fn extracts_from_complex_templates() {
+        let content = r#"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "jitsi-meet.web.fullname" . }}-test-connection"
+spec:
+  containers:
+    - name: wget
+      image: busybox
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.jvb.image.repository }}:{{ default .Chart.AppVersion .Values.jvb.image.tag }}"
+        - name: metrics
+          image: {{ .Values.jvb.metrics.image.repository }}:{{ .Values.jvb.metrics.image.tag }}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image_name, "busybox");
+        assert_eq!(deps[0].current_value, "");
+        assert_eq!(deps[0].skip_reason, Some(KubernetesSkipReason::NoVersion));
+    }
+
     // Ported: "ignores non-Kubernetes YAML files" — kubernetes/extract.spec.ts line 121
     #[test]
     fn ignores_non_kubernetes_yaml() {
