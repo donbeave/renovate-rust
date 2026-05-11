@@ -51,6 +51,8 @@ pub enum MavenDepType {
     Extension,
     /// `<parent>`
     Parent,
+    /// `<parent>` pointing at the repository root `pom.xml`
+    ParentRoot,
     /// `<profiles><profile><dependencies>`
     Profile,
 }
@@ -72,6 +74,7 @@ impl MavenDepType {
             // Plugins and extensions map to Renovate's "build" dep type.
             MavenDepType::Plugin | MavenDepType::Extension => "build",
             MavenDepType::Parent => "parent",
+            MavenDepType::ParentRoot => "parent-root",
             MavenDepType::Profile => "compile",
         }
     }
@@ -276,6 +279,10 @@ pub fn extract_extensions(content: &str) -> Option<Vec<MavenExtractedDep>> {
 pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtractedDep>> {
     let mut package_files = Vec::new();
     let registry_urls = extract_package_registry_urls(files);
+    let root_coordinates = files
+        .iter()
+        .find_map(|(path, content)| (*path == "pom.xml").then(|| project_coordinates(content)))
+        .flatten();
     for (path, content) in files {
         if path.ends_with(".mvn/extensions.xml") || *path == ".mvn/extensions.xml" {
             if let Some(mut deps) = extract_extensions(content)
@@ -292,6 +299,7 @@ pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtract
             && let Ok(mut deps) = extract(content)
             && !deps.is_empty()
         {
+            mark_parent_root_deps(&mut deps, &root_coordinates);
             apply_registry_urls(&mut deps, &registry_urls);
             package_files.push(deps);
         }
@@ -331,6 +339,21 @@ fn apply_registry_urls(deps: &mut [MavenExtractedDep], registry_urls: &[String])
     for dep in deps {
         if dep.datasource == "maven" {
             dep.registry_urls = registry_urls.to_vec();
+        }
+    }
+}
+
+fn mark_parent_root_deps(deps: &mut [MavenExtractedDep], root_coordinates: &Option<ProjectCoords>) {
+    let Some(root) = root_coordinates else {
+        return;
+    };
+    let root_dep_name = format!("{}:{}", root.group_id, root.artifact_id);
+    for dep in deps {
+        if dep.dep_type == MavenDepType::Parent
+            && dep.dep_name == root_dep_name
+            && dep.current_value == root.version
+        {
+            dep.dep_type = MavenDepType::ParentRoot;
         }
     }
 }
@@ -415,7 +438,7 @@ fn parse_pom(
                     let container = match dep.dep_type {
                         MavenDepType::Plugin => "plugin",
                         MavenDepType::Extension => "extension",
-                        MavenDepType::Parent => "parent",
+                        MavenDepType::Parent | MavenDepType::ParentRoot => "parent",
                         _ => "dependency",
                     };
                     if name == container
@@ -680,6 +703,59 @@ fn stack_ends_with(stack: &[String], suffix: &[&str]) -> bool {
             .iter()
             .map(String::as_str)
             .eq(suffix.iter().copied())
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct ProjectCoords {
+    group_id: String,
+    artifact_id: String,
+    version: String,
+}
+
+fn project_coordinates(content: &str) -> Option<ProjectCoords> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut stack: Vec<String> = Vec::new();
+    let mut group_id = String::new();
+    let mut artifact_id = String::new();
+    let mut version = String::new();
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                stack.push(String::from_utf8_lossy(e.name().as_ref()).into_owned());
+            }
+            Ok(Event::End(_)) => {
+                stack.pop();
+            }
+            Ok(Event::Text(e)) => {
+                if stack.len() == 2 && stack[0] == "project" {
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                    match stack.last().map(String::as_str) {
+                        Some("groupId") => group_id = text,
+                        Some("artifactId") => artifact_id = text,
+                        Some("version") => version = text,
+                        _ => {}
+                    }
+                }
+            }
+            Ok(Event::Eof) => break,
+            Ok(_) => {}
+            Err(_) => return None,
+        }
+        buf.clear();
+    }
+
+    (!group_id.is_empty() && !artifact_id.is_empty() && !version.is_empty()).then_some(
+        ProjectCoords {
+            group_id,
+            artifact_id,
+            version,
+        },
+    )
 }
 
 /// Infer the dep type from the current element stack when we encounter a
@@ -1168,6 +1244,104 @@ mod tests {
         );
     }
 
+    // Ported: "should skip root pom.xml" — maven/extract.spec.ts line 930
+    #[test]
+    fn extract_all_package_files_marks_child_parent_as_parent_root() {
+        let root = r#"<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>root</artifactId>
+  <version>1.0.0</version>
+</project>"#;
+        let child = r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>root</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>child</artifactId>
+</project>"#;
+
+        let packages = extract_all_package_files(&[("pom.xml", root), ("foo.bar/pom.xml", child)]);
+        assert_eq!(packages.len(), 1);
+        assert_eq!(packages[0][0].dep_name, "org.example:root");
+        assert_eq!(packages[0][0].dep_type, MavenDepType::ParentRoot);
+        assert_eq!(packages[0][0].renovate_dep_type(), "parent-root");
+    }
+
+    // Ported: "should skip root pom.xml when it has an external parent" — maven/extract.spec.ts line 964
+    #[test]
+    fn extract_all_package_files_keeps_external_root_parent() {
+        let root = r#"<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>root</artifactId>
+  <version>1.0.0</version>
+  <parent>
+    <groupId>org.acme</groupId>
+    <artifactId>external-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+</project>"#;
+        let child = r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>root</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>child</artifactId>
+</project>"#;
+
+        let packages = extract_all_package_files(&[("pom.xml", root), ("foo.bar/pom.xml", child)]);
+        assert_eq!(packages.len(), 2);
+        assert_eq!(packages[0][0].dep_name, "org.acme:external-parent");
+        assert_eq!(packages[0][0].dep_type, MavenDepType::Parent);
+        assert_eq!(packages[1][0].dep_name, "org.example:root");
+        assert_eq!(packages[1][0].dep_type, MavenDepType::ParentRoot);
+    }
+
+    // Ported: "handles cross-referencing" — maven/extract.spec.ts line 1006
+    #[test]
+    fn extract_all_package_files_handles_cross_referencing_modules() {
+        let foo = r#"<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>foo</artifactId>
+  <version>1.0.0</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>bar</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        let bar = r#"<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>bar</artifactId>
+  <version>1.0.0</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>foo</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+
+        let packages = extract_all_package_files(&[("foo.xml", foo), ("bar.xml", bar)]);
+        assert_eq!(packages.len(), 2);
+        assert_eq!(packages[0][0].dep_name, "org.example:bar");
+        assert_eq!(packages[0][0].skip_reason, None);
+        assert_eq!(packages[1][0].dep_name, "org.example:foo");
+        assert_eq!(packages[1][0].skip_reason, None);
+    }
+
     // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
     #[test]
     fn extracts_build_extensions() {
@@ -1620,6 +1794,7 @@ mod tests {
         assert_eq!(MavenDepType::Plugin.as_renovate_str(), "build");
         assert_eq!(MavenDepType::Extension.as_renovate_str(), "build");
         assert_eq!(MavenDepType::Parent.as_renovate_str(), "parent");
+        assert_eq!(MavenDepType::ParentRoot.as_renovate_str(), "parent-root");
         assert_eq!(MavenDepType::Profile.as_renovate_str(), "compile");
     }
 

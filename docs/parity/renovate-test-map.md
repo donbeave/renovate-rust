@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1501 / 1657 actionable tests ported (91%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1504 / 1657 actionable tests ported (91%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2442,7 +2442,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 29 | **Ported:** 24 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 27 | **Actionable:** 29 | **Status:** partial
 
 ### `extractPackage`
 
@@ -2499,9 +2499,9 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should skip root pom.xml | 930 | pending | — | — | Requires root-pom detection |
-| should skip root pom.xml when it has an external parent | 964 | pending | — | — | Requires root-pom detection with external parent |
-| handles cross-referencing | 1006 | pending | — | — | Requires multi-file pom cross-reference resolution |
+| should skip root pom.xml | 930 | ported | `maven.rs` | `extract_all_package_files_marks_child_parent_as_parent_root` | — |
+| should skip root pom.xml when it has an external parent | 964 | ported | `maven.rs` | `extract_all_package_files_keeps_external_root_parent` | — |
+| handles cross-referencing | 1006 | ported | `maven.rs` | `extract_all_package_files_handles_cross_referencing_modules` | — |
 
 ---
 
