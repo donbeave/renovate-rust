@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 791 / 1217 actionable tests ported (65%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 792 / 1217 actionable tests ported (65%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1945,7 +1945,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 12 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 44 | **Ported:** 13 | **Actionable:** 39 | **Status:** partial
 
 ### `parseKustomize` (top-level)
 
@@ -1980,7 +1980,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | should return null on a null input | 208 | not-applicable | — | — | Tests TS-internal extractHelmChart helper directly with null input |
 | should correctly extract a chart | 217 | ported | `kustomize.rs` | `extracts_helm_charts` | — |
-| should correctly extract an OCI chart | 233 | pending | — | — | Requires OCI chart extraction |
+| should correctly extract an OCI chart | 233 | ported | `kustomize.rs` | `extracts_oci_helm_chart` | — |
 | should correctly extract an OCI chart with registryAliases | 249 | pending | — | — | registryAliases not yet implemented |
 
 ### `image extraction`

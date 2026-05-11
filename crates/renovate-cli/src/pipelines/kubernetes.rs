@@ -50,9 +50,19 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         }
                     })
                     .collect();
+                let oci_helm_deps: Vec<_> = deps
+                    .iter()
+                    .filter_map(|d| {
+                        if let renovate_core::extractors::kustomize::KustomizeDep::OciHelm(h) = d {
+                            Some(h)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
 
                 // Look up Docker images.
-                let image_inputs: Vec<docker_datasource::DockerDepInput> = image_deps
+                let image_inputs = image_deps
                     .iter()
                     .filter(|i| i.skip_reason.is_none())
                     .filter_map(|i| {
@@ -62,11 +72,19 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             image: i.image.clone(),
                             tag: tag.to_owned(),
                         })
-                    })
-                    .collect();
+                    });
+                let oci_helm_inputs = oci_helm_deps.iter().map(|h| {
+                    let dep_name = format!("{}:{}", h.package_name, h.current_value);
+                    docker_datasource::DockerDepInput {
+                        dep_name,
+                        image: h.package_name.clone(),
+                        tag: h.current_value.clone(),
+                    }
+                });
+                let docker_inputs: Vec<_> = image_inputs.chain(oci_helm_inputs).collect();
                 let image_updates = docker_datasource::fetch_updates_concurrent(
                     http,
-                    &image_inputs,
+                    &docker_inputs,
                     docker_datasource::DOCKER_HUB_API,
                     10,
                 )
@@ -208,6 +226,52 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         range_strategy: None,
                         follow_tag: None,
                         pin_digests: None,
+                        versioning: None,
+                        dependency_dashboard_approval: None,
+                        replacement_name: None,
+                        replacement_version: None,
+                        name: helm.chart_name.clone(),
+                        status,
+                    });
+                }
+                for helm in &oci_helm_deps {
+                    let dep_name = format!("{}:{}", helm.package_name, helm.current_value);
+                    let status = match image_update_map.get(&dep_name) {
+                        Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
+                            current: s.current_tag.clone(),
+                            latest: s.latest.clone().unwrap_or_default(),
+                        },
+                        Some(Ok(s)) => output::DepStatus::UpToDate {
+                            latest: s.latest.clone(),
+                        },
+                        Some(Err(docker_datasource::DockerHubError::NonDockerHub(_))) => {
+                            output::DepStatus::Skipped {
+                                reason: "non-docker-hub registry".into(),
+                            }
+                        }
+                        Some(Err(e)) => output::DepStatus::LookupError {
+                            message: e.to_string(),
+                        },
+                        None => output::DepStatus::UpToDate { latest: None },
+                    };
+                    file_deps.push(output::DepReport {
+                        branch_name: None,
+                        group_name: None,
+                        automerge: None,
+                        labels: Vec::new(),
+                        assignees: Vec::new(),
+                        reviewers: Vec::new(),
+                        update_type: None,
+                        pr_priority: None,
+                        pr_title: None,
+                        release_timestamp: None,
+                        current_version_timestamp: None,
+
+                        dep_type: None,
+                        package_name: Some(helm.package_name.clone()),
+                        range_strategy: None,
+                        follow_tag: None,
+                        pin_digests: Some(false),
                         versioning: None,
                         dependency_dashboard_approval: None,
                         replacement_name: None,

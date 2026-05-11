@@ -37,6 +37,17 @@ pub struct KustomizeHelmDep {
     pub current_value: String,
 }
 
+/// An OCI Helm chart reference from a kustomize `helmCharts:` entry.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KustomizeOciHelmDep {
+    /// Chart name (e.g. `"redis"`).
+    pub chart_name: String,
+    /// OCI image package name (e.g. `"registry-1.docker.io/bitnamicharts/redis"`).
+    pub package_name: String,
+    /// Chart version.
+    pub current_value: String,
+}
+
 /// A single dependency extracted from a `kustomization.yaml`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KustomizeDep {
@@ -44,6 +55,8 @@ pub enum KustomizeDep {
     Image(DockerfileExtractedDep),
     /// Helm chart from `helmCharts:` section.
     Helm(KustomizeHelmDep),
+    /// OCI Helm chart from `helmCharts:` section.
+    OciHelm(KustomizeOciHelmDep),
 }
 
 /// Extract dependencies from a `kustomization.yaml` file.
@@ -186,6 +199,14 @@ fn flush_helm(
     let repository_url = repo.take().unwrap_or_default();
     let current_value = version.take().unwrap_or_default();
     if chart_name.is_empty() || current_value.is_empty() {
+        return;
+    }
+    if let Some(oci_repo) = repository_url.strip_prefix("oci://") {
+        out.push(KustomizeDep::OciHelm(KustomizeOciHelmDep {
+            package_name: format!("{}/{}", oci_repo.trim_end_matches('/'), chart_name),
+            chart_name,
+            current_value,
+        }));
         return;
     }
     out.push(KustomizeDep::Helm(KustomizeHelmDep {
@@ -368,6 +389,28 @@ helmCharts:
                 .iter()
                 .any(|c| c.chart_name == "nginx-ingress" && c.current_value == "4.9.0")
         );
+    }
+
+    // Ported: "should correctly extract an OCI chart" — kustomize/extract.spec.ts line 233
+    #[test]
+    fn extracts_oci_helm_chart() {
+        let content = r#"
+helmCharts:
+  - name: redis
+    repo: oci://registry-1.docker.io/bitnamicharts
+    version: 18.12.1
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::OciHelm(chart) = &deps[0] else {
+            panic!("expected OCI Helm dependency");
+        };
+        assert_eq!(chart.chart_name, "redis");
+        assert_eq!(
+            chart.package_name,
+            "registry-1.docker.io/bitnamicharts/redis"
+        );
+        assert_eq!(chart.current_value, "18.12.1");
     }
 
     // Ported: "parses helmChart field" — kustomize/extract.spec.ts line 799
