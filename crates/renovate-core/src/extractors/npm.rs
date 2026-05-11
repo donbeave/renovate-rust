@@ -84,6 +84,19 @@ pub struct NpmExtractedDep {
     pub skip_reason: Option<NpmSkipReason>,
 }
 
+/// Yarn registry configuration relevant to npm package extraction.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct YarnConfig {
+    pub npm_registry_server: Option<String>,
+    pub npm_scopes: BTreeMap<String, YarnScopeConfig>,
+}
+
+/// Per-scope Yarn npm registry configuration.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct YarnScopeConfig {
+    pub npm_registry_server: Option<String>,
+}
+
 /// Errors from parsing a `package.json`.
 #[derive(Debug, Error)]
 pub enum NpmExtractError {
@@ -135,6 +148,138 @@ pub fn extract(content: &str) -> Result<Vec<NpmExtractedDep>, NpmExtractError> {
     }
 
     Ok(out)
+}
+
+/// Resolve the registry URL for a package name from Yarn config.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/yarnrc.ts` `resolveRegistryUrl`.
+pub fn resolve_yarn_registry_url(package_name: &str, config: &YarnConfig) -> Option<String> {
+    if let Some(scope) = package_name
+        .strip_prefix('@')
+        .and_then(|rest| rest.split_once('/').map(|(scope, _)| scope))
+        && let Some(scope_config) = config.npm_scopes.get(scope)
+    {
+        return scope_config.npm_registry_server.clone();
+    }
+
+    config.npm_registry_server.clone()
+}
+
+/// Parse the subset of `.yarnrc.yml` used for npm registry resolution.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/yarnrc.ts` `loadConfigFromYarnrcYml`.
+pub fn load_config_from_yarnrc_yml(content: &str) -> Option<YarnConfig> {
+    if content.trim().is_empty() {
+        return None;
+    }
+
+    let mut config = YarnConfig::default();
+    let mut current_scope: Option<String> = None;
+    let mut saw_relevant_key = false;
+
+    for raw_line in content.lines() {
+        let line = raw_line.trim_end();
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+
+        if !line.starts_with(' ') {
+            current_scope = None;
+            if let Some(value) = trimmed.strip_prefix("npmRegistryServer:") {
+                let value = parse_yarn_string_value(value)?;
+                config.npm_registry_server = Some(value);
+                saw_relevant_key = true;
+            } else if let Some(value) = trimmed.strip_prefix("npmScopes:") {
+                if !value.trim().is_empty() {
+                    return None;
+                }
+                saw_relevant_key = true;
+            }
+            continue;
+        }
+
+        let indent = raw_line.chars().take_while(|ch| *ch == ' ').count();
+        if indent == 2 && trimmed.ends_with(':') {
+            let scope = trimmed.trim_end_matches(':').to_owned();
+            config.npm_scopes.entry(scope.clone()).or_default();
+            current_scope = Some(scope);
+        } else if indent == 2 && trimmed.contains(':') {
+            return None;
+        } else if indent == 4
+            && let Some(scope) = &current_scope
+            && let Some(value) = trimmed.strip_prefix("npmRegistryServer:")
+        {
+            let value = parse_yarn_string_value(value)?;
+            config
+                .npm_scopes
+                .entry(scope.clone())
+                .or_default()
+                .npm_registry_server = Some(value);
+        }
+    }
+
+    saw_relevant_key.then_some(config)
+}
+
+/// Parse legacy `.yarnrc` registry settings.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/yarnrc.ts`
+/// `loadConfigFromLegacyYarnrc`.
+pub fn load_config_from_legacy_yarnrc(content: &str) -> YarnConfig {
+    let mut config = YarnConfig::default();
+
+    for raw_line in content.lines() {
+        let line = raw_line.trim();
+        if line.is_empty() || line.starts_with('#') || line.starts_with("--") {
+            continue;
+        }
+
+        let Some((raw_key, raw_value)) = split_legacy_yarnrc_line(line) else {
+            continue;
+        };
+        let key = unquote_yarnrc_token(raw_key);
+        let value = unquote_yarnrc_token(raw_value);
+
+        if key == "registry" {
+            config.npm_registry_server = Some(value);
+        } else if let Some(scope) = key
+            .strip_prefix('@')
+            .and_then(|key| key.strip_suffix(":registry"))
+        {
+            config
+                .npm_scopes
+                .entry(scope.to_owned())
+                .or_default()
+                .npm_registry_server = Some(value);
+        }
+    }
+
+    config
+}
+
+fn parse_yarn_string_value(value: &str) -> Option<String> {
+    let value = value.trim().trim_matches('"').trim_matches('\'');
+    if value.is_empty() || value.parse::<i64>().is_ok() {
+        return None;
+    }
+    Some(value.to_owned())
+}
+
+fn split_legacy_yarnrc_line(line: &str) -> Option<(&str, &str)> {
+    let trimmed = line.trim();
+    if let Some(rest) = trimmed.strip_prefix('"') {
+        let end = rest.find('"')? + 1;
+        let key = &trimmed[..=end];
+        let value = trimmed[end + 1..].trim();
+        return (!value.is_empty()).then_some((key, value));
+    }
+
+    trimmed.split_once(char::is_whitespace)
+}
+
+fn unquote_yarnrc_token(token: &str) -> String {
+    token.trim().trim_matches('"').trim_matches('\'').to_owned()
 }
 
 fn classify(name: String, value: &str, dep_type: NpmDepType) -> NpmExtractedDep {
@@ -200,6 +345,130 @@ mod tests {
 
     fn extract_ok(json: &str) -> Vec<NpmExtractedDep> {
         extract(json).expect("parse should succeed")
+    }
+
+    fn yarn_config(default_registry: Option<&str>, scopes: &[(&str, Option<&str>)]) -> YarnConfig {
+        YarnConfig {
+            npm_registry_server: default_registry.map(str::to_owned),
+            npm_scopes: scopes
+                .iter()
+                .map(|(scope, registry)| {
+                    (
+                        (*scope).to_owned(),
+                        YarnScopeConfig {
+                            npm_registry_server: registry.map(str::to_owned),
+                        },
+                    )
+                })
+                .collect(),
+        }
+    }
+
+    // Ported: "considers default registry" — npm/extract/yarnrc.spec.ts line 10
+    #[test]
+    fn yarnrc_resolve_registry_url_considers_default_registry() {
+        let config = yarn_config(Some("https://private.example.com/npm"), &[]);
+        assert_eq!(
+            resolve_yarn_registry_url("a-package", &config).as_deref(),
+            Some("https://private.example.com/npm")
+        );
+    }
+
+    // Ported: "chooses matching scoped registry over default registry" — npm/extract/yarnrc.spec.ts line 17
+    #[test]
+    fn yarnrc_resolve_registry_url_prefers_matching_scope() {
+        let config = yarn_config(
+            Some("https://private.example.com/npm"),
+            &[("scope", Some("https://scope.example.com/npm"))],
+        );
+        assert_eq!(
+            resolve_yarn_registry_url("@scope/a-package", &config).as_deref(),
+            Some("https://scope.example.com/npm")
+        );
+    }
+
+    // Ported: "ignores non matching scoped registry" — npm/extract/yarnrc.spec.ts line 29
+    #[test]
+    fn yarnrc_resolve_registry_url_ignores_non_matching_scope() {
+        let config = yarn_config(
+            None,
+            &[("other-scope", Some("https://other-scope.example.com/npm"))],
+        );
+        assert!(resolve_yarn_registry_url("@scope/a-package", &config).is_none());
+    }
+
+    // Ported: "ignores partial scope match" — npm/extract/yarnrc.spec.ts line 40
+    #[test]
+    fn yarnrc_resolve_registry_url_ignores_partial_scope_match() {
+        let config = yarn_config(None, &[("scope", Some("https://scope.example.com/npm"))]);
+        assert!(resolve_yarn_registry_url("@scope-2/a-package", &config).is_none());
+    }
+
+    // Ported: "ignores missing scope registryServer" — npm/extract/yarnrc.spec.ts line 51
+    #[test]
+    fn yarnrc_resolve_registry_url_ignores_missing_scope_registry_server() {
+        let config = yarn_config(Some("https://private.example.com/npm"), &[("scope", None)]);
+        assert!(resolve_yarn_registry_url("@scope/a-package", &config).is_none());
+    }
+
+    // Ported: "produces expected config (%s)" — npm/extract/yarnrc.spec.ts line 63
+    #[test]
+    fn load_config_from_yarnrc_yml_produces_expected_config() {
+        let cases = [
+            (
+                "npmRegistryServer: https://npm.example.com",
+                Some(yarn_config(Some("https://npm.example.com"), &[])),
+            ),
+            (
+                "npmRegistryServer: https://npm.example.com\nnpmScopes:\n  foo:\n    npmRegistryServer: https://npm-foo.example.com\n",
+                Some(yarn_config(
+                    Some("https://npm.example.com"),
+                    &[("foo", Some("https://npm-foo.example.com"))],
+                )),
+            ),
+            (
+                "npmRegistryServer: https://npm.example.com\nnodeLinker: pnp\n",
+                Some(yarn_config(Some("https://npm.example.com"), &[])),
+            ),
+            ("npmRegistryServer: 42", None),
+            ("npmScopes: 42", None),
+            ("npmScopes:\n  foo: 42\n", None),
+            ("npmScopes:\n  foo:\n    npmRegistryServer: 42\n", None),
+            ("", None),
+        ];
+
+        for (content, expected) in cases {
+            assert_eq!(load_config_from_yarnrc_yml(content), expected);
+        }
+    }
+
+    // Ported: "produces expected config (%s)" — npm/extract/yarnrc.spec.ts line 117
+    #[test]
+    fn load_config_from_legacy_yarnrc_produces_expected_config() {
+        let cases = [
+            (
+                "# yarn lockfile v1\nregistry \"https://npm.example.com\"\n",
+                yarn_config(Some("https://npm.example.com"), &[]),
+            ),
+            (
+                "disturl \"https://npm-dist.example.com\"\nregistry https://npm.example.com\nsass_binary_site \"https://node-sass.example.com\"\n",
+                yarn_config(Some("https://npm.example.com"), &[]),
+            ),
+            (
+                "--install.frozen-lockfile true\n\"registry\" \"https://npm.example.com\"\n\"@foo:registry\" \"https://npm-foo.example.com\"\n\"@bar:registry\" \"https://npm-bar.example.com\"\n",
+                yarn_config(
+                    Some("https://npm.example.com"),
+                    &[
+                        ("foo", Some("https://npm-foo.example.com")),
+                        ("bar", Some("https://npm-bar.example.com")),
+                    ],
+                ),
+            ),
+        ];
+
+        for (content, expected) in cases {
+            assert_eq!(load_config_from_legacy_yarnrc(content), expected);
+        }
     }
 
     #[test]

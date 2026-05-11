@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1087 / 1274 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1094 / 1281 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 35 spec files not yet converted to per-test format (25 pending, 9 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 34 spec files not yet converted to per-test format (24 pending, 9 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2722,6 +2722,35 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/npm/extract/yarnrc.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/yarnrc.spec.ts
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+
+### `modules/manager/npm/extract/yarnrc › resolveRegistryUrl()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| considers default registry | 10 | ported | `npm.rs` | `yarnrc_resolve_registry_url_considers_default_registry` | — |
+| chooses matching scoped registry over default registry | 17 | ported | `npm.rs` | `yarnrc_resolve_registry_url_prefers_matching_scope` | — |
+| ignores non matching scoped registry | 29 | ported | `npm.rs` | `yarnrc_resolve_registry_url_ignores_non_matching_scope` | — |
+| ignores partial scope match | 40 | ported | `npm.rs` | `yarnrc_resolve_registry_url_ignores_partial_scope_match` | — |
+| ignores missing scope registryServer | 51 | ported | `npm.rs` | `yarnrc_resolve_registry_url_ignores_missing_scope_registry_server` | — |
+
+### `modules/manager/npm/extract/yarnrc › loadConfigFromYarnrcYml()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| produces expected config (%s) | 63 | ported | `npm.rs` | `load_config_from_yarnrc_yml_produces_expected_config` | — |
+
+### `modules/manager/npm/extract/yarnrc › loadConfigFromLegacyYarnrc()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| produces expected config (%s) | 117 | ported | `npm.rs` | `load_config_from_legacy_yarnrc_produces_expected_config` | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -2809,7 +2838,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/modules/manager/npm/extract/npm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 | `lib/modules/manager/npm/extract/pnpm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 | `lib/modules/manager/npm/extract/yarn.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
-| `lib/modules/manager/npm/extract/yarnrc.spec.ts` | — | — | — | pending |
+<!-- npm/extract/yarnrc.spec.ts converted to per-test format above -->
 <!-- ruby-version/extract.spec.ts converted to per-test format above -->
 <!-- nvm/extract.spec.ts, terraform-version/extract.spec.ts, terragrunt-version/extract.spec.ts also covered in per-test sections above (all use version_file.rs) -->
 
