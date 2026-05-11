@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1402 / 1653 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1403 / 1653 actionable tests ported (85%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2508,7 +2508,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 32 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 33 | **Actionable:** 34 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2524,7 +2524,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | can parse TOML v1 heterogeneous arrays | 112 | ported | `poetry.rs` | `toml_v1_heterogeneous_arrays_are_tolerated` | — |
 | extracts mixed versioning types | 118 | ported | `poetry.rs` | `name_normalized_per_pep503` | — |
 | extracts dependencies from dependency groups | 160 | ported | `poetry.rs` | `extracts_group_dependencies` (+ extracts_dev_dependencies) | — |
-| resolves lockedVersions from the lockfile | 197 | pending | — | — | Requires poetry.lock parsing |
+| resolves lockedVersions from the lockfile | 197 | ported | `poetry.rs` | `lockfile_versions_are_applied` | — |
 | parses git dependencies long commit hashes on http urls | 209 | ported | `poetry.rs` | `git_dependencies_with_revisions_are_extracted` | — |
 | parses git dependencies short commit hashes on http urls | 234 | ported | `poetry.rs` | `git_dependencies_with_revisions_are_extracted` | — |
 | parses git dependencies long commit hashes on ssh urls | 259 | ported | `poetry.rs` | `git_dependencies_with_revisions_are_extracted` | — |

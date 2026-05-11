@@ -28,6 +28,8 @@
 //! | `python = "…"` | skip (`PythonVersion`) |
 //! | `pkg = "*"` | actionable, empty constraint |
 
+use std::collections::BTreeMap;
+
 use thiserror::Error;
 use toml::Value;
 
@@ -91,6 +93,7 @@ pub struct PoetryExtractedDep {
     pub datasource: &'static str,
     pub package_name: Option<String>,
     pub current_digest: Option<String>,
+    pub locked_version: Option<String>,
     pub replace_string: Option<String>,
     pub registry_urls: Vec<String>,
     pub source_name: Option<String>,
@@ -117,11 +120,25 @@ pub enum PoetryExtractError {
 
 /// Parse a Poetry `pyproject.toml` and extract all Python dependencies.
 pub fn extract(content: &str) -> Result<Vec<PoetryExtractedDep>, PoetryExtractError> {
-    Ok(extract_package_file(content)?.deps)
+    Ok(extract_package_file_with_lockfile(content, None)?.deps)
 }
 
 /// Parse a Poetry `pyproject.toml` and extract deps plus package-file metadata.
 pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtractError> {
+    extract_package_file_with_lockfile(content, None)
+}
+
+pub fn extract_with_lockfile(
+    content: &str,
+    lockfile: Option<&str>,
+) -> Result<Vec<PoetryExtractedDep>, PoetryExtractError> {
+    Ok(extract_package_file_with_lockfile(content, lockfile)?.deps)
+}
+
+pub fn extract_package_file_with_lockfile(
+    content: &str,
+    lockfile: Option<&str>,
+) -> Result<PoetryExtract, PoetryExtractError> {
     let sanitized = strip_template_lines(content);
     let doc: Value = toml::from_str(&sanitized)?;
     let mut deps = Vec::new();
@@ -227,6 +244,10 @@ pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtrac
         }
     }
 
+    if let Some(lockfile) = lockfile {
+        apply_locked_versions(&mut deps, lockfile);
+    }
+
     Ok(PoetryExtract {
         deps,
         registry_urls,
@@ -259,7 +280,7 @@ fn parse_dep(
     name: &str,
     value: &Value,
     dep_type: PoetryDepType,
-    source_urls_by_name: &std::collections::BTreeMap<String, String>,
+    source_urls_by_name: &BTreeMap<String, String>,
 ) -> Option<PoetryExtractedDep> {
     // Python itself is not a PyPI package.
     if name == "python" {
@@ -270,6 +291,7 @@ fn parse_dep(
             datasource: "github-releases",
             package_name: Some("containerbase/python-prebuild".to_owned()),
             current_digest: None,
+            locked_version: None,
             replace_string: None,
             registry_urls: Vec::new(),
             source_name: None,
@@ -290,6 +312,7 @@ fn parse_dep(
                 datasource: "pypi",
                 package_name: None,
                 current_digest: None,
+                locked_version: None,
                 replace_string: None,
                 registry_urls: Vec::new(),
                 source_name: None,
@@ -317,6 +340,7 @@ fn parse_dep(
                     datasource: "pypi",
                     package_name: None,
                     current_digest: None,
+                    locked_version: None,
                     replace_string: None,
                     registry_urls: Vec::new(),
                     source_name: None,
@@ -332,6 +356,7 @@ fn parse_dep(
                     datasource: "pypi",
                     package_name: None,
                     current_digest: None,
+                    locked_version: None,
                     replace_string: None,
                     registry_urls: Vec::new(),
                     source_name: None,
@@ -347,6 +372,7 @@ fn parse_dep(
                     datasource: "pypi",
                     package_name: None,
                     current_digest: None,
+                    locked_version: None,
                     replace_string: None,
                     registry_urls: Vec::new(),
                     source_name: None,
@@ -374,6 +400,7 @@ fn parse_dep(
                 datasource: "pypi",
                 package_name: None,
                 current_digest: None,
+                locked_version: None,
                 replace_string: None,
                 registry_urls,
                 source_name,
@@ -388,6 +415,7 @@ fn parse_dep(
             datasource: "pypi",
             package_name: None,
             current_digest: None,
+            locked_version: None,
             replace_string: None,
             registry_urls: Vec::new(),
             source_name: None,
@@ -425,6 +453,7 @@ fn parse_pep508_entry(
         datasource: "pypi",
         package_name: None,
         current_digest: None,
+        locked_version: None,
         replace_string: None,
         registry_urls: Vec::new(),
         source_name: None,
@@ -451,6 +480,7 @@ fn parse_git_dep(
             datasource: "git-refs",
             package_name: Some(git.to_owned()),
             current_digest: Some(rev.to_owned()),
+            locked_version: None,
             replace_string: Some(rev.to_owned()),
             registry_urls: Vec::new(),
             source_name: None,
@@ -468,6 +498,7 @@ fn parse_git_dep(
         datasource,
         package_name: Some(package_name),
         current_digest: None,
+        locked_version: None,
         replace_string: None,
         registry_urls: Vec::new(),
         source_name: None,
@@ -536,10 +567,7 @@ fn extract_registry_urls(doc: &Value) -> Vec<String> {
 }
 
 fn extract_source_urls_by_name(doc: &Value) -> std::collections::BTreeMap<String, String> {
-    let mut urls = std::collections::BTreeMap::from([(
-        "pypi".to_owned(),
-        "https://pypi.org/pypi/".to_owned(),
-    )]);
+    let mut urls = BTreeMap::from([("pypi".to_owned(), "https://pypi.org/pypi/".to_owned())]);
     if let Some(sources) = doc
         .get("tool")
         .and_then(|tool| tool.get("poetry"))
@@ -557,6 +585,37 @@ fn extract_source_urls_by_name(doc: &Value) -> std::collections::BTreeMap<String
         }
     }
     urls
+}
+
+fn apply_locked_versions(deps: &mut [PoetryExtractedDep], lockfile: &str) {
+    let locked_versions = parse_lockfile_versions(lockfile);
+    if locked_versions.is_empty() {
+        return;
+    }
+
+    for dep in deps {
+        if let Some(version) = locked_versions.get(&dep.name) {
+            dep.locked_version = Some(version.clone());
+        }
+    }
+}
+
+fn parse_lockfile_versions(lockfile: &str) -> BTreeMap<String, String> {
+    let Ok(doc) = toml::from_str::<Value>(lockfile) else {
+        return BTreeMap::new();
+    };
+
+    doc.get("package")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|package| {
+            let table = package.as_table()?;
+            let name = table.get("name").and_then(Value::as_str)?;
+            let version = table.get("version").and_then(Value::as_str)?;
+            Some((normalize_name(name), version.to_owned()))
+        })
+        .collect()
 }
 
 /// Normalize a Python package name per PEP 503.
@@ -583,6 +642,7 @@ fn parse_build_system_req(req: &str) -> Option<PoetryExtractedDep> {
         datasource: "pypi",
         package_name: None,
         current_digest: None,
+        locked_version: None,
         replace_string: None,
         registry_urls: Vec::new(),
         source_name: None,
@@ -1174,6 +1234,39 @@ requires = ["poetry>=1.1.2", "setuptools", "poetry-dynamic-versioning"]
                 && dep.current_value.is_empty()
                 && dep.dep_type == PoetryDepType::BuildSystem
         }));
+    }
+
+    // Ported: "resolves lockedVersions from the lockfile" — poetry/extract.spec.ts line 197
+    #[test]
+    fn lockfile_versions_are_applied() {
+        let content = r#"
+[tool.poetry.dependencies]
+python = "^3.9"
+boto3 = "*"
+"#;
+        let lockfile = r#"
+[[package]]
+name = "boto3"
+version = "1.17.5"
+description = "The AWS SDK for Python"
+category = "main"
+optional = false
+python-versions = ">= 2.7"
+
+[[package]]
+name = "botocore"
+version = "1.20.7"
+"#;
+
+        let deps = extract_with_lockfile(content, Some(lockfile)).expect("parse should succeed");
+
+        let boto3 = deps.iter().find(|dep| dep.name == "boto3").unwrap();
+        assert_eq!(boto3.current_value, "");
+        assert_eq!(boto3.locked_version.as_deref(), Some("1.17.5"));
+
+        let python = deps.iter().find(|dep| dep.name == "python").unwrap();
+        assert_eq!(python.current_value, "^3.9");
+        assert_eq!(python.locked_version, None);
     }
 
     // Ported: "can parse TOML v1 heterogeneous arrays" — poetry/extract.spec.ts line 112
