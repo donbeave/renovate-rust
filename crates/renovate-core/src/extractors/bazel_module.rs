@@ -64,6 +64,17 @@ pub struct BazelMavenDep {
     pub registry_urls: Vec<String>,
 }
 
+/// A dependency extracted from `oci.pull(...)`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazelOciPullDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub datasource: &'static str,
+    pub dep_type: &'static str,
+}
+
 /// Which Bazel module declaration produced the dep.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BazelModuleDepType {
@@ -126,6 +137,10 @@ static MAVEN_INSTALL_BLOCK_RE: LazyLock<Regex> =
 /// Matches a `maven.artifact(...)` call.
 static MAVEN_ARTIFACT_BLOCK_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)maven\.artifact\s*\(([^)]+)\)").unwrap());
+
+/// Matches an `oci.pull(...)` call.
+static OCI_PULL_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)oci\.pull\s*\(([^)]+)\)").unwrap());
 
 /// Extracts `name = "value"` or `name = 'value'` from a call argument list.
 static ATTR_RE: LazyLock<Regex> =
@@ -360,6 +375,31 @@ pub fn extract_maven_deps(content: &str) -> Vec<BazelMavenDep> {
     deps
 }
 
+/// Extract OCI image dependencies from `oci.pull(...)`.
+pub fn extract_oci_pull_deps(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<BazelOciPullDep> {
+    let stripped = strip_comments(content);
+    OCI_PULL_BLOCK_RE
+        .captures_iter(&stripped)
+        .filter_map(|cap| {
+            let attrs = attrs_from_args(&cap[1]);
+            let dep_name = attrs.get("name")?.clone();
+            let image = attrs.get("image")?;
+
+            Some(BazelOciPullDep {
+                dep_name,
+                package_name: apply_registry_alias(image, registry_aliases),
+                current_value: attrs.get("tag").cloned(),
+                current_digest: attrs.get("digest").cloned(),
+                datasource: "docker",
+                dep_type: "oci_pull",
+            })
+        })
+        .collect()
+}
+
 fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
     let mut deps = Vec::new();
     deps.extend(parse_named_overrides(
@@ -477,6 +517,22 @@ fn parse_maven_coordinate(raw: &str) -> Option<(String, String)> {
     } else {
         Some((format!("{group}:{artifact}"), (*version).to_owned()))
     }
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
 }
 
 fn github_package_name(url: &str) -> Option<String> {
@@ -676,6 +732,145 @@ maven.install(
         assert_eq!(
             deps[2].registry_urls,
             vec!["https://repo1.maven.org/maven2/"]
+        );
+    }
+
+    // Ported: "returns oci.pull dependencies" — bazel-module/extract.spec.ts line 507
+    #[test]
+    fn extracts_oci_pull_dependency() {
+        let input = r#"
+oci.pull(
+    name = "nginx_image",
+    digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+    image = "index.docker.io/library/nginx",
+    platforms = ["linux/amd64"],
+    tag = "1.27.1",
+)
+"#;
+        let deps = extract_oci_pull_deps(input, &[]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, "docker");
+        assert_eq!(deps[0].dep_type, "oci_pull");
+        assert_eq!(deps[0].dep_name, "nginx_image");
+        assert_eq!(deps[0].package_name, "index.docker.io/library/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("1.27.1"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720")
+        );
+    }
+
+    // Ported: "returns oci.pull dependencies without tags" — bazel-module/extract.spec.ts line 544
+    #[test]
+    fn extracts_oci_pull_dependency_without_tag() {
+        let input = r#"
+oci.pull(
+    name = "nginx_image",
+    digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+    image = "index.docker.io/library/nginx",
+    platforms = ["linux/amd64"],
+)
+"#;
+        let deps = extract_oci_pull_deps(input, &[]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "nginx_image");
+        assert_eq!(deps[0].package_name, "index.docker.io/library/nginx");
+        assert_eq!(deps[0].current_value, None);
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720")
+        );
+    }
+
+    // Ported: "returns oci.pull dependencies with tag only (no digest)" — bazel-module/extract.spec.ts line 578
+    #[test]
+    fn extracts_oci_pull_dependency_with_tag_only() {
+        let input = r#"
+oci.pull(
+    name = "nginx_image",
+    image = "index.docker.io/library/nginx",
+    platforms = ["linux/amd64"],
+    tag = "1.27.1",
+)
+"#;
+        let deps = extract_oci_pull_deps(input, &[]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "nginx_image");
+        assert_eq!(deps[0].package_name, "index.docker.io/library/nginx");
+        assert_eq!(deps[0].current_value.as_deref(), Some("1.27.1"));
+        assert_eq!(deps[0].current_digest, None);
+    }
+
+    // Ported: "returns oci.pull dependencies without tag or digest" — bazel-module/extract.spec.ts line 611
+    #[test]
+    fn extracts_oci_pull_dependency_without_tag_or_digest() {
+        let input = r#"
+oci.pull(
+    name = "nginx_image",
+    image = "index.docker.io/library/nginx",
+    platforms = ["linux/amd64"],
+)
+"#;
+        let deps = extract_oci_pull_deps(input, &[]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "nginx_image");
+        assert_eq!(deps[0].package_name, "index.docker.io/library/nginx");
+        assert_eq!(deps[0].current_value, None);
+        assert_eq!(deps[0].current_digest, None);
+    }
+
+    // Ported: "returns oci.pull dependencies with registryAliases" — bazel-module/extract.spec.ts line 641
+    #[test]
+    fn extracts_oci_pull_dependency_with_registry_alias() {
+        let input = r#"
+oci.pull(
+    name = "nginx_image",
+    digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+    image = "index.docker.io/library/nginx",
+    platforms = ["linux/amd64"],
+    tag = "1.27.1",
+)
+"#;
+        let deps = extract_oci_pull_deps(
+            input,
+            &[("index.docker.io", "my-docker-mirror.registry.com")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "nginx_image");
+        assert_eq!(
+            deps[0].package_name,
+            "my-docker-mirror.registry.com/library/nginx"
+        );
+        assert_eq!(deps[0].current_value.as_deref(), Some("1.27.1"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720")
+        );
+    }
+
+    // Ported: "returns oci.pull dependencies with registryAliases with multiple segments" — bazel-module/extract.spec.ts line 682
+    #[test]
+    fn extracts_oci_pull_dependency_with_multisegment_registry_alias() {
+        let input = r#"
+oci.pull(
+    name = "custom_image",
+    digest = "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    image = "quay.io/myorg/myapp",
+    platforms = ["linux/amd64"],
+    tag = "v2.0.0",
+)
+"#;
+        let deps = extract_oci_pull_deps(input, &[("quay.io", "my-registry.com/mirror/quay.io")]);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "custom_image");
+        assert_eq!(
+            deps[0].package_name,
+            "my-registry.com/mirror/quay.io/myorg/myapp"
+        );
+        assert_eq!(deps[0].current_value.as_deref(), Some("v2.0.0"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
         );
     }
 

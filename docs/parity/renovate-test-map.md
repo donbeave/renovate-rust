@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 863 / 1217 actionable tests ported (71%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 869 / 1217 actionable tests ported (71%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2152,7 +2152,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 15 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 21 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2175,12 +2175,12 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns bazel_dep with no version dependency if single_version_override does not have a version | 355 | ported | `bazel_module.rs` | `single_version_override_without_version_keeps_unversioned_bazel_dep_skipped` | — |
 | returns crate.spec dependencies | 377 | ported | `bazel_module.rs` | `extracts_crate_spec_dependencies` | — |
 | returns maven.install and maven.artifact dependencies | 453 | ported | `bazel_module.rs` | `extracts_maven_install_and_artifact_dependencies` | — |
-| returns oci.pull dependencies | 507 | pending | — | — | Requires oci.pull extraction |
-| returns oci.pull dependencies without tags | 544 | pending | — | — | Requires oci.pull no-tag handling |
-| returns oci.pull dependencies with tag only (no digest) | 578 | pending | — | — | Requires oci.pull tag-only handling |
-| returns oci.pull dependencies without tag or digest | 611 | pending | — | — | Requires oci.pull missing-ref handling |
-| returns oci.pull dependencies with registryAliases | 641 | pending | — | — | registryAliases not yet implemented |
-| returns oci.pull dependencies with registryAliases with multiple segments | 682 | pending | — | — | registryAliases not yet implemented |
+| returns oci.pull dependencies | 507 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency` | — |
+| returns oci.pull dependencies without tags | 544 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_without_tag` | — |
+| returns oci.pull dependencies with tag only (no digest) | 578 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_with_tag_only` | — |
+| returns oci.pull dependencies without tag or digest | 611 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_without_tag_or_digest` | — |
+| returns oci.pull dependencies with registryAliases | 641 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_with_registry_alias` | — |
+| returns oci.pull dependencies with registryAliases with multiple segments | 682 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_with_multisegment_registry_alias` | — |
 | returns maven.install and bazel_dep dependencies together | 723 | pending | — | — | Requires maven + bazel_dep combined extraction |
 | returns git_repository dependencies with digest | 772 | pending | — | — | Requires git_repository digest extraction |
 | returns git_repository dependencies with tag | 796 | pending | — | — | Requires git_repository tag extraction |
