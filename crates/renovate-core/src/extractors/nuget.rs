@@ -106,6 +106,14 @@ pub struct NuGetGlobalJsonExtract {
     pub dotnet_sdk_constraint: Option<String>,
 }
 
+/// Extracted content from an MSBuild project file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NuGetProjectExtract {
+    pub deps: Vec<NuGetExtractedDep>,
+    pub package_file_version: Option<String>,
+    pub lock_files: Vec<String>,
+}
+
 /// Errors from parsing a NuGet project file.
 #[derive(Debug, Error)]
 pub enum NuGetExtractError {
@@ -210,6 +218,31 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
     }
 
     Ok(deps)
+}
+
+/// Parse a NuGet project file and include package-file level metadata.
+pub fn extract_project_file(
+    content: &str,
+    package_file: &str,
+    lock_file_exists: bool,
+) -> Result<Option<NuGetProjectExtract>, NuGetExtractError> {
+    let deps = extract(content)?;
+    if deps.is_empty() {
+        return Ok(None);
+    }
+
+    let package_file_version = extract_package_file_version(content)?;
+    let lock_files = if lock_file_exists {
+        vec![sibling_file_name(package_file, "packages.lock.json")]
+    } else {
+        Vec::new()
+    };
+
+    Ok(Some(NuGetProjectExtract {
+        deps,
+        package_file_version,
+        lock_files,
+    }))
 }
 
 /// Parse a `.config/dotnet-tools.json` local tool manifest.
@@ -341,6 +374,58 @@ pub fn extract_global_json(content: &str) -> Option<NuGetGlobalJsonExtract> {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
+
+fn sibling_file_name(package_file: &str, sibling: &str) -> String {
+    if let Some((dir, _)) = package_file.rsplit_once('/') {
+        format!("{dir}/{sibling}")
+    } else {
+        sibling.to_owned()
+    }
+}
+
+fn extract_package_file_version(content: &str) -> Result<Option<String>, NuGetExtractError> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut stack: Vec<String> = Vec::new();
+    let mut capture_version = false;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf)? {
+            Event::Start(ref e) => {
+                let elem = elem_name(e);
+                stack.push(elem.clone());
+                if stack.len() == 3
+                    && stack[0] == "Project"
+                    && stack[1] == "PropertyGroup"
+                    && (elem == "Version" || elem == "VersionPrefix")
+                {
+                    capture_version = true;
+                }
+            }
+            Event::End(e) => {
+                let elem = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if capture_version && (elem == "Version" || elem == "VersionPrefix") {
+                    capture_version = false;
+                }
+                stack.pop();
+            }
+            Event::Text(e) if capture_version => {
+                let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                if !text.is_empty() {
+                    return Ok(Some(text));
+                }
+            }
+            Event::Eof => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    Ok(None)
+}
 
 struct PendingDep {
     package_id: String,
@@ -635,6 +720,30 @@ mod tests {
         assert_eq!(deps[0].current_value, "4.5.0");
         assert_eq!(deps[0].dep_type, NuGetDepType::PackageVersion);
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts package file version" — nuget/extract.spec.ts line 70
+    #[test]
+    fn package_file_version_and_lock_file_extracted() {
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="1.1.3" />
+  </ItemGroup>
+</Project>"#;
+        let extracted = extract_project_file(content, "sample.csproj", true)
+            .expect("project should parse")
+            .expect("project should contain deps");
+        assert_eq!(extracted.package_file_version, Some("0.1.0".to_owned()));
+        assert_eq!(extracted.lock_files, vec!["packages.lock.json"]);
+        assert_eq!(extracted.deps.len(), 1);
+        assert_eq!(
+            extracted.deps[0].package_id,
+            "Microsoft.AspNetCore.Mvc.Core"
+        );
     }
 
     // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
