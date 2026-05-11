@@ -55,6 +55,8 @@ pub struct GoModExtractedDep {
     pub is_toolchain_directive: bool,
     /// Set for a `replace X => Y version` directive (remote replacement).
     pub is_replace_directive: bool,
+    /// Set to `Some(false)` for indirect tool-module candidates that do not match a tool directive.
+    pub enabled: Option<bool>,
 }
 
 // ── Compiled regexes ───────────────────────────────────────────────────────
@@ -107,12 +109,24 @@ static GO_DIRECTIVE: LazyLock<Regex> =
 static TOOLCHAIN_DIRECTIVE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*toolchain\s+go(\d+\.\d+(?:\.\d+)?)\s*$").unwrap());
 
+/// Matches a single-line `tool <module>` directive.
+static TOOL_DIRECTIVE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*tool\s+(\S+)\s*$").unwrap());
+
+/// Matches the start of a `tool (` block.
+static TOOL_BLOCK_START: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*tool\s*\(\s*$").unwrap());
+
+/// Matches `module/path` inside a tool block.
+static TOOL_BLOCK_ITEM: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*(\S+)\s*$").unwrap());
+
 // ── Public API ─────────────────────────────────────────────────────────────
 
 /// Parse a `go.mod` file and extract all `require` and `replace` directives.
 pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
     // First pass: collect locally-replaced module paths.
     let local_replaces: HashSet<String> = collect_local_replaces(content);
+    let tool_directives = collect_tool_directives(content);
 
     let mut deps = Vec::new();
     let mut in_require_block = false;
@@ -188,6 +202,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 is_go_directive: true,
                 is_toolchain_directive: false,
                 is_replace_directive: false,
+                enabled: None,
             });
             continue;
         }
@@ -201,6 +216,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
                 is_go_directive: false,
                 is_toolchain_directive: true,
                 is_replace_directive: false,
+                enabled: None,
             });
             continue;
         }
@@ -227,6 +243,7 @@ pub fn extract(content: &str) -> Vec<GoModExtractedDep> {
         }
     }
 
+    apply_tool_directives(&mut deps, &tool_directives);
     deps
 }
 
@@ -240,6 +257,75 @@ fn collect_local_replaces(content: &str) -> HashSet<String> {
         }
     }
     set
+}
+
+fn collect_tool_directives(content: &str) -> Vec<String> {
+    let mut tools = Vec::new();
+    let mut in_tool_block = false;
+
+    for line in content.lines() {
+        let bare = strip_comment(line);
+
+        if in_tool_block {
+            if BLOCK_END.is_match(bare) {
+                in_tool_block = false;
+                continue;
+            }
+            if let Some(cap) = TOOL_BLOCK_ITEM.captures(bare) {
+                tools.push(cap[1].to_owned());
+            }
+            continue;
+        }
+
+        if TOOL_BLOCK_START.is_match(bare) {
+            in_tool_block = true;
+            continue;
+        }
+
+        if let Some(cap) = TOOL_DIRECTIVE.captures(bare) {
+            tools.push(cap[1].to_owned());
+        }
+    }
+
+    tools
+}
+
+fn apply_tool_directives(deps: &mut [GoModExtractedDep], tool_directives: &[String]) {
+    if tool_directives.is_empty() {
+        return;
+    }
+
+    let mut active_indirect_modules = HashSet::new();
+    for tool in tool_directives {
+        if let Some(module_path) = deps
+            .iter()
+            .filter(|dep| is_require_dep(dep) && module_path_matches_tool(&dep.module_path, tool))
+            .max_by_key(|dep| dep.module_path.len())
+            .map(|dep| dep.module_path.clone())
+        {
+            active_indirect_modules.insert(module_path);
+        }
+    }
+
+    for dep in deps {
+        if is_require_dep(dep)
+            && dep.is_indirect
+            && !active_indirect_modules.contains(&dep.module_path)
+        {
+            dep.enabled = Some(false);
+        }
+    }
+}
+
+fn is_require_dep(dep: &GoModExtractedDep) -> bool {
+    !dep.is_go_directive && !dep.is_toolchain_directive && !dep.is_replace_directive
+}
+
+fn module_path_matches_tool(module_path: &str, tool: &str) -> bool {
+    tool == module_path
+        || tool
+            .strip_prefix(module_path)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn make_dep(
@@ -264,6 +350,7 @@ fn make_dep(
         is_go_directive: false,
         is_toolchain_directive: false,
         is_replace_directive: false,
+        enabled: None,
     }
 }
 
@@ -280,6 +367,7 @@ fn make_replace_dep(
         is_go_directive: false,
         is_toolchain_directive: false,
         is_replace_directive: true,
+        enabled: None,
     }
 }
 
@@ -586,6 +674,67 @@ replace (
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert!(!deps[0].is_indirect);
+        assert_eq!(deps[0].enabled, None);
+    }
+
+    // Ported: "extracts tool directives of sub-modules" — gomod/extract.spec.ts line 323
+    #[test]
+    fn tool_directive_sub_modules_disable_non_matching_indirects() {
+        let content = r#"require (
+  github.com/foo/bar v1.2.3
+  github.com/foo/bar/sub1/sub2 v4.5.6 // indirect
+  github.com/foo/bar/sub1 v7.8.9 // indirect
+  github.com/foo/bar/sub1/sub2/cmd/hell v10.11.12 // indirect
+)
+tool github.com/foo/bar/sub1/sub2/cmd/hello
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 4);
+
+        let root = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/foo/bar")
+            .unwrap();
+        assert_eq!(root.current_value, "v1.2.3");
+        assert!(!root.is_indirect);
+        assert_eq!(root.enabled, None);
+
+        let matched = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/foo/bar/sub1/sub2")
+            .unwrap();
+        assert_eq!(matched.current_value, "v4.5.6");
+        assert!(matched.is_indirect);
+        assert_eq!(matched.enabled, None);
+
+        let shorter = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/foo/bar/sub1")
+            .unwrap();
+        assert_eq!(shorter.current_value, "v7.8.9");
+        assert!(shorter.is_indirect);
+        assert_eq!(shorter.enabled, Some(false));
+
+        let non_boundary = deps
+            .iter()
+            .find(|d| d.module_path == "github.com/foo/bar/sub1/sub2/cmd/hell")
+            .unwrap();
+        assert_eq!(non_boundary.current_value, "v10.11.12");
+        assert!(non_boundary.is_indirect);
+        assert_eq!(non_boundary.enabled, Some(false));
+    }
+
+    // Ported: "extracts tool directives with exact match" — gomod/extract.spec.ts line 370
+    #[test]
+    fn tool_directive_exact_match_keeps_indirect_enabled() {
+        let content = "require github.com/foo/bar v1.2.3 // indirect\n\
+                       tool github.com/foo/bar\n";
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].module_path, "github.com/foo/bar");
+        assert_eq!(deps[0].current_value, "v1.2.3");
+        assert!(deps[0].is_indirect);
+        assert_eq!(deps[0].enabled, None);
     }
 
     // Ported: "extracts tool directives with no matching dependencies" — gomod/extract.spec.ts line 389

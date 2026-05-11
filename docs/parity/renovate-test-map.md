@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 902 / 1216 actionable tests ported (74%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 904 / 1216 actionable tests ported (74%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -430,7 +430,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 21 | **Ported:** 15 | **Actionable:** 17 | **Status:** partial
+**Total tests:** 21 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -447,8 +447,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts single-line tool directives | 263 | ported | `gomod.rs` | `tool_directive_single_line_ignored` | — |
 | extracts multi-line tool directives | 282 | ported | `gomod.rs` | `tool_directive_multi_line_ignored` | — |
 | extracts tool directives with required modules | 304 | ported | `gomod.rs` | `tool_directive_with_required_module_not_indirect` | — |
-| extracts tool directives of sub-modules | 323 | pending | — | — | Requires enabled/disabled logic for sub-module deps |
-| extracts tool directives with exact match | 370 | pending | — | — | Requires enabled/disabled logic |
+| extracts tool directives of sub-modules | 323 | ported | `gomod.rs` | `tool_directive_sub_modules_disable_non_matching_indirects` | — |
+| extracts tool directives with exact match | 370 | ported | `gomod.rs` | `tool_directive_exact_match_keeps_indirect_enabled` | — |
 | extracts tool directives with no matching dependencies | 389 | ported | `gomod.rs` | `tool_directive_alone_produces_no_deps` | — |
 | ignores directives unrelated to dependencies | 402 | ported | `gomod.rs` | `unrelated_directives_ignored` | — |
 | marks placeholder pseudo versions with skipReason invalid-version | 426 | ported | `gomod.rs` | `placeholder_pseudo_versions_have_skip_reason` | — |
