@@ -36,6 +36,8 @@ use quick_xml::Reader;
 use quick_xml::events::Event;
 use thiserror::Error;
 
+use crate::extractors::dockerfile;
+
 /// Which POM section the dep came from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MavenDepType {
@@ -85,10 +87,16 @@ pub enum MavenSkipReason {
 /// A single extracted Maven dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MavenExtractedDep {
+    /// Renovate datasource used for lookup.
+    pub datasource: &'static str,
     /// `groupId:artifactId`
     pub dep_name: String,
+    /// Datasource package name when it differs from or supplements `dep_name`.
+    pub package_name: Option<String>,
     /// Raw version string (empty = unversioned).
     pub current_value: String,
+    /// Current digest for container-style dependencies.
+    pub current_digest: Option<String>,
     /// Which POM section this dep came from.
     pub dep_type: MavenDepType,
     /// Maven scope value for `<dependency>` elements (e.g. "compile", "test").
@@ -98,6 +106,8 @@ pub struct MavenExtractedDep {
     pub skip_reason: Option<MavenSkipReason>,
     /// Registry URLs extracted from Maven settings files or related metadata.
     pub registry_urls: Vec<String>,
+    /// Full string to replace for container-style dependencies.
+    pub replace_string: Option<String>,
 }
 
 impl MavenExtractedDep {
@@ -319,7 +329,9 @@ fn apply_registry_urls(deps: &mut [MavenExtractedDep], registry_urls: &[String])
         return;
     }
     for dep in deps {
-        dep.registry_urls = registry_urls.to_vec();
+        if dep.datasource == "maven" {
+            dep.registry_urls = registry_urls.to_vec();
+        }
     }
 }
 
@@ -434,12 +446,20 @@ fn parse_pom(
                     && stack.len() == collect_start_depth + 1
                 {
                     match stack.last().map(String::as_str) {
-                        Some("groupId") => dep.group_id = text,
-                        Some("artifactId") => dep.artifact_id = text,
-                        Some("version") => dep.version = text,
-                        Some("scope") => dep.scope = Some(text),
+                        Some("groupId") => dep.group_id = text.clone(),
+                        Some("artifactId") => dep.artifact_id = text.clone(),
+                        Some("version") => dep.version = text.clone(),
+                        Some("scope") => dep.scope = Some(text.clone()),
                         _ => {}
                     }
+                }
+
+                if let Some(ref dep) = current
+                    && dep.dep_type == MavenDepType::Plugin
+                    && is_spring_boot_plugin(dep)
+                    && let Some(image_dep) = spring_boot_image_dep(&stack, &text)
+                {
+                    deps.push(image_dep);
                 }
             }
 
@@ -539,13 +559,127 @@ fn build_dep(dep: &CurrentDep) -> Option<MavenExtractedDep> {
     };
 
     Some(MavenExtractedDep {
+        datasource: "maven",
         dep_name,
+        package_name: None,
         current_value,
+        current_digest: None,
         dep_type: dep.dep_type,
         scope: dep.scope.clone(),
         skip_reason,
         registry_urls: Vec::new(),
+        replace_string: None,
     })
+}
+
+fn is_spring_boot_plugin(dep: &CurrentDep) -> bool {
+    dep.group_id == "org.springframework.boot" && dep.artifact_id == "spring-boot-maven-plugin"
+}
+
+fn spring_boot_image_dep(stack: &[String], text: &str) -> Option<MavenExtractedDep> {
+    let tag = stack.last().map(String::as_str)?;
+    match tag {
+        "builder" | "runImage" if stack_ends_with(stack, &["configuration", "image", tag]) => {
+            docker_image_dep(text)
+        }
+        "buildpack"
+            if stack_ends_with(
+                stack,
+                &["configuration", "image", "buildpacks", "buildpack"],
+            ) =>
+        {
+            buildpack_dep(text)
+        }
+        _ => None,
+    }
+}
+
+fn buildpack_dep(text: &str) -> Option<MavenExtractedDep> {
+    let reference = text.trim();
+    if let Some(stripped) = reference.strip_prefix("docker://") {
+        return docker_image_dep(stripped);
+    }
+    if reference.contains("://") || reference.starts_with("urn:") {
+        return None;
+    }
+    if let Some((package_name, version)) = reference.split_once('@')
+        && package_name.contains('/')
+        && !package_name.is_empty()
+        && !version.is_empty()
+    {
+        return Some(container_style_dep(
+            "buildpacks-registry",
+            package_name,
+            Some(package_name),
+            version,
+            None,
+            None,
+        ));
+    }
+    docker_image_dep(reference)
+}
+
+fn docker_image_dep(reference: &str) -> Option<MavenExtractedDep> {
+    let dep = dockerfile::classify_image_ref(reference.trim());
+    if dep.skip_reason.is_some() || (dep.tag.is_none() && dep.digest.is_none()) {
+        return None;
+    }
+    let replace_string = image_ref(&dep.image, dep.tag.as_deref(), dep.digest.as_deref());
+    Some(container_style_dep(
+        "docker",
+        &dep.image,
+        Some(&dep.image),
+        dep.tag.as_deref().unwrap_or_default(),
+        dep.digest,
+        Some(replace_string),
+    ))
+}
+
+fn container_style_dep(
+    datasource: &'static str,
+    dep_name: &str,
+    package_name: Option<&str>,
+    current_value: &str,
+    current_digest: Option<String>,
+    replace_string: Option<String>,
+) -> MavenExtractedDep {
+    MavenExtractedDep {
+        datasource,
+        dep_name: dep_name.to_owned(),
+        package_name: package_name.map(str::to_owned),
+        current_value: current_value.to_owned(),
+        current_digest,
+        dep_type: MavenDepType::Plugin,
+        scope: None,
+        skip_reason: None,
+        registry_urls: Vec::new(),
+        replace_string,
+    }
+}
+
+fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
+    let mut out = image.to_owned();
+    if let Some(tag) = tag
+        && !tag.is_empty()
+    {
+        out.push(':');
+        out.push_str(tag);
+    }
+    if let Some(digest) = digest
+        && !digest.is_empty()
+    {
+        out.push('@');
+        out.push_str(digest);
+    }
+    out
+}
+
+fn stack_ends_with(stack: &[String], suffix: &[&str]) -> bool {
+    stack.len() >= suffix.len()
+        && stack[stack.len() - suffix.len()..]
+            .iter()
+            .map(String::as_str)
+            .eq(suffix.iter().copied())
 }
 
 /// Infer the dep type from the current element stack when we encounter a
@@ -619,6 +753,12 @@ mod tests {
 
     fn extract_ok(content: &str) -> Vec<MavenExtractedDep> {
         extract(content).expect("parse should succeed")
+    }
+
+    fn cnb_deps(deps: &[MavenExtractedDep]) -> Vec<&MavenExtractedDep> {
+        deps.iter()
+            .filter(|dep| dep.datasource == "docker" || dep.datasource == "buildpacks-registry")
+            .collect()
     }
 
     const SIMPLE_POM: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
@@ -1304,6 +1444,169 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.2.3");
     }
 
+    // Ported: "extracts builder and buildpack images from spring-boot plugin" — maven/extract.spec.ts line 279
+    #[test]
+    fn spring_boot_plugin_extracts_builder_run_image_and_buildpacks() {
+        let content = r#"<project>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.2</version>
+  </parent>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <image>
+            <builder>paketobuildpacks/builder-jammy-base:0.4.316</builder>
+            <runImage>paketobuildpacks/run-noble-full:0.0.28</runImage>
+            <buildpacks>
+              <buildpack>paketo-buildpacks/nodejs@6.1.1</buildpack>
+              <buildpack>urn:cnb:builder:paketo-buildpacks/php@2.13.1</buildpack>
+              <buildpack>gcr.io/paketo-buildpacks/nodejs:1.8.0</buildpack>
+              <buildpack>docker://docker.io/paketobuildpacks/python:2.22.1@sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138</buildpack>
+              <buildpack>docker://docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a</buildpack>
+              <buildpack>paketobuildpacks/java:12.1.0</buildpack>
+              <buildpack>paketobuildpacks/go</buildpack>
+            </buildpacks>
+          </image>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>"#;
+        let deps = extract_ok(content);
+        assert!(deps.iter().any(|dep| {
+            dep.datasource == "maven"
+                && dep.dep_name == "org.springframework.boot:spring-boot-starter-parent"
+                && dep.current_value == "3.2.2"
+        }));
+
+        let cnb_deps = cnb_deps(&deps);
+        assert_eq!(
+            cnb_deps
+                .iter()
+                .map(|dep| (
+                    dep.datasource,
+                    dep.dep_name.as_str(),
+                    dep.current_value.as_str(),
+                    dep.current_digest.as_deref()
+                ))
+                .collect::<Vec<_>>(),
+            vec![
+                (
+                    "docker",
+                    "paketobuildpacks/builder-jammy-base",
+                    "0.4.316",
+                    None
+                ),
+                ("docker", "paketobuildpacks/run-noble-full", "0.0.28", None),
+                (
+                    "buildpacks-registry",
+                    "paketo-buildpacks/nodejs",
+                    "6.1.1",
+                    None
+                ),
+                ("docker", "gcr.io/paketo-buildpacks/nodejs", "1.8.0", None),
+                (
+                    "docker",
+                    "docker.io/paketobuildpacks/python",
+                    "2.22.1",
+                    Some("sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138")
+                ),
+                (
+                    "docker",
+                    "docker.io/paketobuildpacks/ruby",
+                    "",
+                    Some("sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a")
+                ),
+                ("docker", "paketobuildpacks/java", "12.1.0", None),
+            ]
+        );
+        assert_eq!(
+            cnb_deps[4].replace_string.as_deref(),
+            Some(
+                "docker.io/paketobuildpacks/python:2.22.1@sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138"
+            )
+        );
+    }
+
+    // Ported: "extracts only builder if defaults are used in spring-boot plugin" — maven/extract.spec.ts line 370
+    #[test]
+    fn spring_boot_plugin_extracts_only_configured_builder() {
+        let content = r#"<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <image>
+            <builder>paketobuildpacks/builder-jammy-base:0.4.316</builder>
+          </image>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>"#;
+        let deps = extract_ok(content);
+        let cnb_deps = cnb_deps(&deps);
+        assert_eq!(cnb_deps.len(), 1);
+        assert_eq!(cnb_deps[0].datasource, "docker");
+        assert_eq!(cnb_deps[0].dep_name, "paketobuildpacks/builder-jammy-base");
+        assert_eq!(cnb_deps[0].current_value, "0.4.316");
+    }
+
+    // Ported: "returns no buildpack dependencies when image tag is missing in spring boot plugin configuration" — maven/extract.spec.ts line 398
+    #[test]
+    fn spring_boot_plugin_skips_missing_image_tag() {
+        let content = r#"<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <image-tag-missing></image-tag-missing>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>"#;
+        let deps = extract_ok(content);
+        assert!(cnb_deps(&deps).is_empty());
+    }
+
+    // Ported: "returns no buildpack dependencies when dependencies are invalid in spring boot plugin" — maven/extract.spec.ts line 407
+    #[test]
+    fn spring_boot_plugin_skips_invalid_buildpack_dependencies() {
+        let content = r#"<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <image>
+            <builder>invalid-builder</builder>
+            <runImage>invalid-run</runImage>
+            <buildpacks>
+              <buildpack>invalid-image</buildpack>
+              <buildpack>urn:cnb:builder:buildpacks:invalid@2.13.1</buildpack>
+              <buildpack>invalid://identifier/type:1.8.0</buildpack>
+            </buildpacks>
+          </image>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>"#;
+        let deps = extract_ok(content);
+        assert!(cnb_deps(&deps).is_empty());
+    }
+
     #[test]
     fn dep_type_as_renovate_str() {
         // Renovate uses scope-based dep types for Maven (compile, test, etc.)
@@ -1323,12 +1626,16 @@ mod tests {
     #[test]
     fn renovate_dep_type_uses_scope() {
         let dep = MavenExtractedDep {
+            datasource: "maven",
             dep_name: "org.example:lib".to_owned(),
+            package_name: None,
             current_value: "1.0.0".to_owned(),
+            current_digest: None,
             dep_type: MavenDepType::Regular,
             scope: Some("test".to_owned()),
             skip_reason: None,
             registry_urls: Vec::new(),
+            replace_string: None,
         };
         assert_eq!(dep.renovate_dep_type(), "test");
     }
@@ -1336,12 +1643,16 @@ mod tests {
     #[test]
     fn renovate_dep_type_defaults_to_compile_without_scope() {
         let dep = MavenExtractedDep {
+            datasource: "maven",
             dep_name: "org.example:lib".to_owned(),
+            package_name: None,
             current_value: "1.0.0".to_owned(),
+            current_digest: None,
             dep_type: MavenDepType::Regular,
             scope: None,
             skip_reason: None,
             registry_urls: Vec::new(),
+            replace_string: None,
         };
         assert_eq!(dep.renovate_dep_type(), "compile");
     }

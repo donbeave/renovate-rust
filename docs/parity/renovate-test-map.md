@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1497 / 1657 actionable tests ported (90%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1501 / 1657 actionable tests ported (91%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2442,7 +2442,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 29 | **Ported:** 20 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 24 | **Actionable:** 29 | **Status:** partial
 
 ### `extractPackage`
 
@@ -2453,10 +2453,10 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extract dependencies with windows line endings | 237 | ported | `maven.rs` | `windows_line_endings_are_tolerated` | — |
 | tries minimum manifests | 249 | ported | `maven.rs` | `extracts_regular_dependencies` | — |
 | tries minimum snapshot manifests | 264 | ported | `maven.rs` | `extracts_regular_dependencies` | — |
-| extracts builder and buildpack images from spring-boot plugin | 279 | pending | — | — | Requires spring-boot plugin builder/buildpack extraction |
-| extracts only builder if defaults are used in spring-boot plugin | 370 | pending | — | — | Requires spring-boot plugin builder default handling |
-| returns no buildpack dependencies when image tag is missing in spring boot plugin configuration | 398 | pending | — | — | Requires spring-boot plugin missing-tag handling |
-| returns no buildpack dependencies when dependencies are invalid in spring boot plugin | 407 | pending | — | — | Requires spring-boot plugin tolerant parsing |
+| extracts builder and buildpack images from spring-boot plugin | 279 | ported | `maven.rs` | `spring_boot_plugin_extracts_builder_run_image_and_buildpacks` | — |
+| extracts only builder if defaults are used in spring-boot plugin | 370 | ported | `maven.rs` | `spring_boot_plugin_extracts_only_configured_builder` | — |
+| returns no buildpack dependencies when image tag is missing in spring boot plugin configuration | 398 | ported | `maven.rs` | `spring_boot_plugin_skips_missing_image_tag` | — |
+| returns no buildpack dependencies when dependencies are invalid in spring boot plugin | 407 | ported | `maven.rs` | `spring_boot_plugin_skips_invalid_buildpack_dependencies` | — |
 
 ### `resolveParents`
 
