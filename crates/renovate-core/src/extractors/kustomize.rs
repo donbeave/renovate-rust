@@ -64,6 +64,28 @@ pub struct KustomizeOciHelmDep {
     pub current_value: String,
 }
 
+/// OCI Helm chart metadata after applying registry aliases.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KustomizeResolvedOciHelmDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub pin_digests: bool,
+}
+
+/// Docker image metadata after applying registry aliases.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KustomizeResolvedImageDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub replace_string: String,
+    pub auto_replace_string_template: String,
+    pub datasource: &'static str,
+}
+
 /// A single dependency extracted from a `kustomization.yaml`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KustomizeDep {
@@ -195,6 +217,50 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
     flush_helm(&mut helm_name, &mut helm_repo, &mut helm_version, &mut out);
 
     out
+}
+
+pub fn resolve_oci_helm_dep(
+    dep: KustomizeOciHelmDep,
+    registry_aliases: &[(&str, &str)],
+) -> KustomizeResolvedOciHelmDep {
+    KustomizeResolvedOciHelmDep {
+        dep_name: dep.chart_name,
+        package_name: apply_registry_alias(&dep.package_name, registry_aliases),
+        current_value: dep.current_value,
+        datasource: "docker",
+        pin_digests: false,
+    }
+}
+
+pub fn resolve_image_dep(
+    dep: DockerfileExtractedDep,
+    registry_aliases: &[(&str, &str)],
+) -> KustomizeResolvedImageDep {
+    let replace_string = dep.tag.clone().unwrap_or_default();
+    KustomizeResolvedImageDep {
+        package_name: apply_registry_alias(&dep.image, registry_aliases),
+        dep_name: dep.image,
+        current_value: dep.tag,
+        current_digest: dep.digest,
+        replace_string,
+        auto_replace_string_template: "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+            .to_owned(),
+        datasource: "docker",
+    }
+}
+
+fn apply_registry_alias(value: &str, registry_aliases: &[(&str, &str)]) -> String {
+    registry_aliases
+        .iter()
+        .filter_map(|(from, to)| {
+            value
+                .strip_prefix(*from)
+                .filter(|rest| rest.is_empty() || rest.starts_with('/'))
+                .map(|rest| (from.len(), format!("{to}{rest}")))
+        })
+        .max_by_key(|(len, _)| *len)
+        .map(|(_, aliased)| aliased)
+        .unwrap_or_else(|| value.to_owned())
 }
 
 /// Parse Kustomize metadata needed by the extractor.
@@ -572,6 +638,33 @@ images:
         assert!(image.skip_reason.is_none());
     }
 
+    // Ported: "should correctly extract with registryAliases" — kustomize/extract.spec.ts line 377
+    #[test]
+    fn extracts_image_with_registry_aliases() {
+        let deps = extract(
+            r#"
+images:
+  - name: localhost:5000/repo/image/service
+    newTag: v1.0.0
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Image(image) = &deps[0] else {
+            panic!("expected image dependency");
+        };
+        let resolved = resolve_image_dep(image.clone(), &[("localhost:5000/repo", "docker.io")]);
+        assert_eq!(resolved.dep_name, "localhost:5000/repo/image/service");
+        assert_eq!(resolved.package_name, "docker.io/image/service");
+        assert_eq!(resolved.current_value.as_deref(), Some("v1.0.0"));
+        assert_eq!(resolved.current_digest, None);
+        assert_eq!(resolved.replace_string, "v1.0.0");
+        assert_eq!(
+            resolved.auto_replace_string_template,
+            "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+        assert_eq!(resolved.datasource, "docker");
+    }
+
     // Ported: "extracts newName" — kustomize/extract.spec.ts line 757
     #[test]
     fn extracts_new_name_override() {
@@ -648,6 +741,32 @@ helmCharts:
             "registry-1.docker.io/bitnamicharts/redis"
         );
         assert_eq!(chart.current_value, "18.12.1");
+    }
+
+    // Ported: "should correctly extract an OCI chart with registryAliases" — kustomize/extract.spec.ts line 249
+    #[test]
+    fn extracts_oci_helm_chart_with_registry_aliases() {
+        let content = r#"
+helmCharts:
+  - name: redis
+    repo: oci://localhost:5000/bitnamicharts
+    version: 18.12.1
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::OciHelm(chart) = &deps[0] else {
+            panic!("expected OCI Helm dependency");
+        };
+        let resolved =
+            resolve_oci_helm_dep(chart.clone(), &[("localhost:5000", "registry-1.docker.io")]);
+        assert_eq!(resolved.dep_name, "redis");
+        assert_eq!(
+            resolved.package_name,
+            "registry-1.docker.io/bitnamicharts/redis"
+        );
+        assert_eq!(resolved.current_value, "18.12.1");
+        assert_eq!(resolved.datasource, "docker");
+        assert!(!resolved.pin_digests);
     }
 
     // Ported: "should return null for a local base" — kustomize/extract.spec.ts line 66

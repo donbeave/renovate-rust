@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 937 / 1217 actionable tests ported (77%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 939 / 1217 actionable tests ported (77%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1946,7 +1946,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 35 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 44 | **Ported:** 37 | **Actionable:** 39 | **Status:** partial
 
 ### `parseKustomize` (top-level)
 
@@ -1982,7 +1982,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | should return null on a null input | 208 | not-applicable | — | — | Tests TS-internal extractHelmChart helper directly with null input |
 | should correctly extract a chart | 217 | ported | `kustomize.rs` | `extracts_helm_charts` | — |
 | should correctly extract an OCI chart | 233 | ported | `kustomize.rs` | `extracts_oci_helm_chart` | — |
-| should correctly extract an OCI chart with registryAliases | 249 | pending | — | — | registryAliases not yet implemented |
+| should correctly extract an OCI chart with registryAliases | 249 | ported | `kustomize.rs` | `extracts_oci_helm_chart_with_registry_aliases` | — |
 
 ### `image extraction`
 
@@ -1995,7 +1995,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | should correctly extract from a different registry | 323 | ported | `kustomize.rs` | `extracts_image_from_different_registry` | — |
 | should correctly extract from a different port | 341 | ported | `kustomize.rs` | `extracts_image_from_registry_with_port` | — |
 | should correctly extract from a multi-depth registry | 359 | ported | `kustomize.rs` | `extracts_image_from_multi_depth_registry` | — |
-| should correctly extract with registryAliases | 377 | pending | — | — | registryAliases not yet implemented |
+| should correctly extract with registryAliases | 377 | ported | `kustomize.rs` | `extracts_image_with_registry_aliases` | — |
 
 ### `extractPackageFile()`
 
