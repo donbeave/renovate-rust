@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1425 / 1650 actionable tests ported (86%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1428 / 1650 actionable tests ported (87%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 10 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 13 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2214,7 +2214,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes nixpkgs with ref and shallow arguments | 452 | ported | `nix.rs` | `includes_git_input_with_ref_and_shallow_arguments` | — |
 | includes nixpkgs but using indirect type that cannot be updated | 494 | pending | — | — | Requires indirect-type skip-reason |
 | includes nixpkgs but using indirect type and path locked type that cannot be updated | 524 | pending | — | — | Requires indirect+path-type skip-reason |
-| includes flake from GitHub Enterprise | 553 | pending | — | — | Requires GitHub Enterprise detection |
+| includes flake from GitHub Enterprise | 553 | ported | `nix.rs` | `includes_github_enterprise_input` | — |
 | includes flake with tarball type | 649 | pending | — | — | Requires tarball-type handling |
 | uri decode gitlab subgroup | 750 | pending | — | — | Requires URI-decode for gitlab subgroup |
 | includes flake with only tarball type | 790 | pending | — | — | Requires tarball-only handling |
@@ -2229,8 +2229,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles currentDigest replacement when config provided | 1065 | pending | — | — | Requires currentDigest replacement plumbing |
 | includes nixpkgs with ref when original has rev | 1112 | pending | — | — | Requires ref+rev priority handling |
 | includes github flake with ref when original has rev | 1154 | pending | — | — | Requires github flake ref+rev handling |
-| includes gitlab flake with custom host | 1196 | pending | — | — | Requires gitlab custom-host handling |
-| includes sourcehut flake with custom host | 1238 | pending | — | — | Requires sourcehut custom-host handling |
+| includes gitlab flake with custom host | 1196 | ported | `nix.rs` | `includes_gitlab_input_with_custom_host` | — |
+| includes sourcehut flake with custom host | 1238 | ported | `nix.rs` | `includes_sourcehut_input_with_custom_host` | — |
 | includes tarball flake with ref when original has rev | 1280 | pending | — | — | Requires tarball ref+rev handling |
 | handles unknown flake lock type | 1321 | ported | `nix.rs` | `unknown_flake_lock_type_returns_empty` | — |
 | ignores unsupported file type and still extracts other inputs | 1348 | ported | `nix.rs` | `unsupported_file_type_is_ignored_while_other_inputs_extract` | — |

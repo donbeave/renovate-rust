@@ -588,6 +588,160 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "includes flake from GitHub Enterprise" — nix/extract.spec.ts line 553
+    #[test]
+    fn includes_github_enterprise_input() {
+        let content = r#"{
+  "nodes": {
+    "flake-utils": {
+      "locked": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs-extra-pkgs": {
+      "inputs": {
+        "flake-utils": "flake-utils"
+      },
+      "locked": {
+        "host": "github.corp.example.com",
+        "lastModified": 1728666512,
+        "narHash": "sha256-p+l16Zzyl2DXG695yks6KQP7NkjsnEksu5GBvtL1QYg=",
+        "owner": "my-org",
+        "repo": "nixpkgs-extra-pkgs",
+        "rev": "6bf2706348447df6f8b86b1c3e54f87b0afda84f",
+        "type": "github"
+      },
+      "original": {
+        "host": "github.corp.example.com",
+        "owner": "my-org",
+        "repo": "nixpkgs-extra-pkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs-extra-pkgs": "nixpkgs-extra-pkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs-extra-pkgs");
+        assert_eq!(
+            deps[0].locked_rev,
+            "6bf2706348447df6f8b86b1c3e54f87b0afda84f"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.corp.example.com/my-org/nixpkgs-extra-pkgs")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Github);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes gitlab flake with custom host" — nix/extract.spec.ts line 1196
+    #[test]
+    fn includes_gitlab_input_with_custom_host() {
+        let content = r#"{
+  "nodes": {
+    "custom-project": {
+      "locked": {
+        "lastModified": 1728650932,
+        "narHash": "sha256-mGKzqdsRyLnGNl6WjEr7+sghGgBtYHhJQ4mjpgRTCsU=",
+        "owner": "group",
+        "repo": "project",
+        "rev": "65ae9c147349829d3df0222151f53f79821c5134",
+        "type": "gitlab",
+        "host": "gitlab.example.com"
+      },
+      "original": {
+        "owner": "group",
+        "repo": "project",
+        "type": "gitlab",
+        "host": "gitlab.example.com"
+      }
+    },
+    "root": {
+      "inputs": {
+        "custom-project": "custom-project"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "custom-project");
+        assert_eq!(
+            deps[0].locked_rev,
+            "65ae9c147349829d3df0222151f53f79821c5134"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://gitlab.example.com/group/project")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Gitlab);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes sourcehut flake with custom host" — nix/extract.spec.ts line 1238
+    #[test]
+    fn includes_sourcehut_input_with_custom_host() {
+        let content = r#"{
+  "nodes": {
+    "custom-project": {
+      "locked": {
+        "lastModified": 1723569650,
+        "narHash": "sha256-Ho/sAhEUeSug52JALgjrKVUPCBe8+PovbJj/lniKxp8=",
+        "owner": "~user",
+        "repo": "project",
+        "rev": "88f0d9ae98942bf49cba302c42b2a0f6e05f9b58",
+        "type": "sourcehut",
+        "host": "git.custom.org"
+      },
+      "original": {
+        "owner": "~user",
+        "repo": "project",
+        "type": "sourcehut",
+        "host": "git.custom.org"
+      }
+    },
+    "root": {
+      "inputs": {
+        "custom-project": "custom-project"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "custom-project");
+        assert_eq!(
+            deps[0].locked_rev,
+            "88f0d9ae98942bf49cba302c42b2a0f6e05f9b58"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://git.custom.org/~user/project")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Sourcehut);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "returns null when flake.lock has invalid JSON" — nix/extract.spec.ts line 1046
     #[test]
     fn invalid_json_returns_empty() {
