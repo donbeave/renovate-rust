@@ -318,6 +318,64 @@ terraform {
         assert_eq!(deps[0].current_value, "v1.0.0");
     }
 
+    // Ported: "extracts terragrunt sources with depth specified after the branch" — terragrunt/extract.spec.ts line 269
+    #[test]
+    fn extracts_sources_with_depth_after_ref() {
+        let content = r#"
+terraform {
+  source = "github.com/myuser/myrepo//folder/modules/moduleone?ref=v0.0.9&depth=1"
+}
+
+terraform {
+  source = "git::https://mygit.com/hashicorp/example//subdir/test?ref=v1.0.1&depth=1"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(
+            deps[0].source,
+            Some(TerragruntSource::GitHub("myuser/myrepo".to_owned()))
+        );
+        assert_eq!(deps[0].current_value, "v0.0.9");
+        assert_eq!(
+            deps[1].source,
+            Some(TerragruntSource::Git(
+                "https://mygit.com/hashicorp/example//subdir/test".to_owned()
+            ))
+        );
+        assert_eq!(deps[1].current_value, "v1.0.1");
+        assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
+    }
+
+    // Ported: "extracts terragrunt sources with depth specified before the branch" — terragrunt/extract.spec.ts line 487
+    #[test]
+    fn extracts_sources_with_depth_before_ref() {
+        let content = r#"
+terraform {
+  source = "github.com/myuser/myrepo//folder/modules/moduleone?depth=1&ref=v0.0.9"
+}
+
+terraform {
+  source = "git::https://mygit.com/hashicorp/example//subdir/test?depth=1&ref=v1.0.1"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(
+            deps[0].source,
+            Some(TerragruntSource::GitHub("myuser/myrepo".to_owned()))
+        );
+        assert_eq!(deps[0].current_value, "v0.0.9");
+        assert_eq!(
+            deps[1].source,
+            Some(TerragruntSource::Git(
+                "https://mygit.com/hashicorp/example//subdir/test".to_owned()
+            ))
+        );
+        assert_eq!(deps[1].current_value, "v1.0.1");
+        assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
+    }
+
     // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
     #[test]
     fn local_path_skipped() {

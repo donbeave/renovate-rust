@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 771 / 1217 actionable tests ported (63%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 773 / 1217 actionable tests ported (64%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1355,7 +1355,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/terragrunt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/extract.spec.ts
-**Total tests:** 7 | **Ported:** 5 | **Actionable:** 7 | **Status:** partial
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1364,8 +1364,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for empty | 6 | ported | `terragrunt.rs` | `no_terraform_block_returns_empty` | — |
 | extracts terragrunt sources using tfr protocol | 10 | ported | `terragrunt.rs` | `extracts_tfr_protocol_sources` | — |
 | extracts terragrunt sources | 51 | ported | `terragrunt.rs` | `extracts_github_ref_source` (+ extracts_git_prefix_github, multiple_terraform_blocks, local_path_skipped) | — |
-| extracts terragrunt sources with depth specified after the branch | 269 | pending | — | — | Requires depth=N parameter parsing |
-| extracts terragrunt sources with depth specified before the branch | 487 | pending | — | — | Requires depth=N parameter parsing |
+| extracts terragrunt sources with depth specified after the branch | 269 | ported | `terragrunt.rs` | `extracts_sources_with_depth_after_ref` | — |
+| extracts terragrunt sources with depth specified before the branch | 487 | ported | `terragrunt.rs` | `extracts_sources_with_depth_before_ref` | — |
 | returns null if only local terragrunt deps | 698 | ported | `terragrunt.rs` | `local_only_deps_returns_empty` | — |
 | returns empty deps if only local terragrunt includes | 707 | ported | `terragrunt.rs` | `include_block_only_returns_empty` | — |
 
