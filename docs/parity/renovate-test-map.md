@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1217 / 1402 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1226 / 1402 actionable tests ported (87%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 20 spec files not yet converted to per-test format (20 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 18 spec files not yet converted to per-test format (18 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3540,6 +3540,39 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/util/package-rules/managers.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/managers.spec.ts
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `util/package-rules/managers › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true | 7 | ported | `package_rule.rs` | `managers_matcher_returns_true_for_matching_manager` | — |
+| should return false for no match | 19 | ported | `package_rule.rs` | `managers_matcher_returns_false_for_no_match` | — |
+| should return null if matchManagers is undefined | 31 | ported | `package_rule.rs` | `managers_matcher_without_patterns_is_not_a_constraint` | Rust matcher uses `true` to represent "no constraint"; the TypeScript matcher returns `null` before the package-rule combiner skips it |
+| should return false if no manager | 41 | ported | `package_rule.rs` | `managers_matcher_returns_false_if_no_manager` | — |
+| should match custom managers | 51 | ported | `package_rule.rs` | `managers_matcher_matches_custom_managers` | — |
+
+---
+
+## `lib/util/package-rules/dep-names.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/dep-names.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `util/package-rules/dep-names › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false if packageFile is not defined | 7 | ported | `package_rule.rs` | `dep_name_matcher_returns_false_if_dep_name_is_empty` | Rust `DepContext` carries a string dep name; empty string covers the missing depName case |
+| should return false if depName is excluded prefix | 19 | ported | `package_rule.rs` | `dep_name_matcher_returns_false_if_dep_name_is_excluded_prefix` | — |
+| should return true if depName is included prefix | 42 | ported | `package_rule.rs` | `dep_name_matcher_returns_true_if_dep_name_is_included_prefix` | — |
+| should return false if for wrong prefix | 65 | ported | `package_rule.rs` | `dep_name_matcher_returns_false_for_wrong_prefix` | — |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3559,8 +3592,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 |--------------------|---------------|-----------|------------|--------|
 <!-- util/string-match.spec.ts converted to per-test format above -->
 | `lib/util/package-rules/index.spec.ts` | 73 | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
-| `lib/util/package-rules/managers.spec.ts` | 5 | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
-| `lib/util/package-rules/dep-names.spec.ts` | 4 | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
+<!-- util/package-rules/managers.spec.ts converted to per-test format above -->
+<!-- util/package-rules/dep-names.spec.ts converted to per-test format above -->
 | `lib/util/package-rules/current-age.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
 | `lib/util/package-rules/current-value.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
 | `lib/util/package-rules/current-version.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |

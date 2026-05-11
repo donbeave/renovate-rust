@@ -1153,3 +1153,96 @@ pub(crate) fn version_matches_ignore_list(proposed_version: &str, ignore_list: &
     }
     false
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn rule_with_managers(patterns: &[&str]) -> PackageRule {
+        PackageRule {
+            match_managers: patterns
+                .iter()
+                .map(|pattern| (*pattern).to_owned())
+                .collect(),
+            ..Default::default()
+        }
+    }
+
+    fn rule_with_dep_names(patterns: &[&str]) -> PackageRule {
+        PackageRule {
+            match_dep_names: patterns
+                .iter()
+                .map(|pattern| (*pattern).to_owned())
+                .collect(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn managers_matcher_returns_true_for_matching_manager() {
+        let rule = rule_with_managers(&["npm", "regex"]);
+
+        assert!(rule.manager_matches("npm"));
+    }
+
+    #[test]
+    fn managers_matcher_returns_false_for_no_match() {
+        let rule = rule_with_managers(&["docker"]);
+
+        assert!(!rule.manager_matches("npm"));
+    }
+
+    #[test]
+    fn managers_matcher_without_patterns_is_not_a_constraint() {
+        let rule = PackageRule::default();
+
+        assert!(rule.manager_matches("npm"));
+    }
+
+    #[test]
+    fn managers_matcher_returns_false_if_no_manager() {
+        let rule = rule_with_managers(&["npm"]);
+        let ctx = DepContext::for_dep("lodash");
+
+        assert!(!rule.matches_context(&ctx));
+    }
+
+    #[test]
+    fn managers_matcher_matches_custom_managers() {
+        let rule = rule_with_managers(&["custom.regex"]);
+
+        assert!(rule.manager_matches("regex"));
+    }
+
+    #[test]
+    fn dep_name_matcher_returns_false_if_dep_name_is_empty() {
+        let rule = rule_with_dep_names(&["@opentelemetry/http"]);
+
+        assert!(!rule.dep_name_matches(""));
+    }
+
+    #[test]
+    fn dep_name_matcher_returns_false_if_dep_name_is_excluded_prefix() {
+        let regex_rule = rule_with_dep_names(&["!/^@opentelemetry/"]);
+        let glob_rule = rule_with_dep_names(&["!@opentelemetry{/,}**"]);
+
+        assert!(!regex_rule.dep_name_matches("@opentelemetry/http"));
+        assert!(!glob_rule.dep_name_matches("@opentelemetry/http"));
+    }
+
+    #[test]
+    fn dep_name_matcher_returns_true_if_dep_name_is_included_prefix() {
+        let regex_rule = rule_with_dep_names(&["/^@opentelemetry/"]);
+        let glob_rule = rule_with_dep_names(&["@opentelemetry{/,}**"]);
+
+        assert!(regex_rule.dep_name_matches("@opentelemetry/http"));
+        assert!(glob_rule.dep_name_matches("@opentelemetry/http"));
+    }
+
+    #[test]
+    fn dep_name_matcher_returns_false_for_wrong_prefix() {
+        let rule = rule_with_dep_names(&["@opentelemetry**"]);
+
+        assert!(!rule.dep_name_matches("@opentelemetry/http"));
+    }
+}
