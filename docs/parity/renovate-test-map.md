@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1448 / 1648 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1457 / 1657 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1939,7 +1939,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 30 | **Ported:** 21 | **Actionable:** 21 | **Status:** ported
+**Total tests:** 30 | **Ported:** 22 | **Actionable:** 30 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1954,16 +1954,16 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts tools with multiple versions | 409 | ported | `mise.rs` | `unknown_tool_skipped` | — |
 | extracts tools with plugin options | 432 | ported | `mise.rs` | `tool_with_version_object` | — |
 | extracts tools in the default registry with backends | 448 | ported | `mise.rs` | `extracts_default_registry_backend_prefixed_tools` | — |
-| extracts aqua backend tool | 487 | pending | — | — | Requires aqua backend support |
-| extracts cargo backend tools | 514 | pending | — | — | Requires cargo backend support |
-| extracts dotnet backend tool | 553 | pending | — | — | Requires dotnet backend support |
-| extracts gem backend tool | 571 | pending | — | — | Requires gem backend support |
-| extracts go backend tool | 589 | pending | — | — | Requires go backend support |
-| extracts npm backend tool | 607 | pending | — | — | Requires npm backend support |
-| extracts pipx backend tools | 625 | pending | — | — | Requires pipx backend support |
-| extracts spm backend tools | 657 | pending | — | — | Requires spm backend support |
+| extracts aqua backend tool | 487 | ported | `mise.rs` | `extracts_aqua_backend_tools` | — |
+| extracts cargo backend tools | 514 | ported | `mise.rs` | `extracts_cargo_backend_tools` | — |
+| extracts dotnet backend tool | 553 | ported | `mise.rs` | `extracts_dotnet_backend_tool` | — |
+| extracts gem backend tool | 571 | ported | `mise.rs` | `extracts_gem_backend_tool` | — |
+| extracts go backend tool | 589 | ported | `mise.rs` | `extracts_go_backend_tool` | — |
+| extracts npm backend tool | 607 | ported | `mise.rs` | `extracts_npm_backend_tool` | — |
+| extracts pipx backend tools | 625 | ported | `mise.rs` | `extracts_pipx_backend_tools` | — |
+| extracts spm backend tools | 657 | ported | `mise.rs` | `extracts_spm_backend_tools` | — |
 | extracts ubi backend tools | 682 | pending | — | — | Requires ubi backend support |
-| extracts github backend tools | 740 | pending | — | — | Requires github backend support |
+| extracts github backend tools | 740 | ported | `mise.rs` | `extracts_github_backend_tools` | — |
 | provides skipReason for lines with unsupported tooling | 781 | ported | `mise.rs` | `unknown_tool_skipped` | — |
 | provides skipReason for missing version - empty string | 802 | ported | `mise.rs` | `empty_version_string_skipped` | — |
 | provides skipReason for missing version - missing version in object | 818 | ported | `mise.rs` | `object_without_version_skipped` | — |

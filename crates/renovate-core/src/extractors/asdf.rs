@@ -97,7 +97,7 @@ pub struct AsdfDep {
     /// Full datasource ID string (e.g., `"node-version"`, `"github-releases"`).
     pub datasource_id: Option<&'static str>,
     /// Lookup package name (e.g., `"hashicorp/terraform"`).
-    pub package_name: Option<&'static str>,
+    pub package_name: Option<String>,
     /// `extractVersion` regex pattern (e.g., `"^v(?<version>\\S+)"`).
     pub extract_version: Option<&'static str>,
     /// Versioning scheme ID.
@@ -202,7 +202,7 @@ fn parse_line(line: &str) -> Option<AsdfDep> {
                     current_value: raw_version,
                     datasource: legacy,
                     datasource_id: Some(def.datasource),
-                    package_name: def.package_name,
+                    package_name: def.package_name.map(str::to_owned),
                     extract_version: def.extract_version,
                     versioning: def.versioning,
                     skip_reason: None,
@@ -277,7 +277,7 @@ fn parse_java_inner(_tool_name: &str, version: &str) -> AsdfDep {
 
     AsdfDep {
         current_value,
-        package_name: Some(pkg_name),
+        package_name: Some(pkg_name.to_owned()),
         ..base
     }
 }
@@ -323,7 +323,7 @@ fn parse_scala(version: &str) -> AsdfDep {
                 current_value: version.to_owned(),
                 datasource: def.legacy_datasource(),
                 datasource_id: Some(def.datasource),
-                package_name: def.package_name,
+                package_name: def.package_name.map(str::to_owned),
                 extract_version: def.extract_version,
                 versioning: def.versioning,
                 skip_reason: None,
@@ -338,7 +338,7 @@ fn parse_scala(version: &str) -> AsdfDep {
                 tag_strip: "",
             }),
             datasource_id: Some(datasource_id::GITHUB_TAGS),
-            package_name: Some("lampepfl/dotty"),
+            package_name: Some("lampepfl/dotty".to_owned()),
             extract_version: None,
             versioning: None,
             skip_reason: None,
@@ -365,7 +365,7 @@ fn parse_hugo(version: &str) -> AsdfDep {
             tag_strip: "v",
         }),
         datasource_id: Some(datasource_id::GITHUB_RELEASES),
-        package_name: Some("gohugoio/hugo"),
+        package_name: Some("gohugoio/hugo".to_owned()),
         extract_version: Some("^v(?<version>\\S+)"),
         versioning: None,
         skip_reason: None,
@@ -1511,7 +1511,7 @@ unknowntool 9.9.9
             })
         );
         assert_eq!(tf.datasource_id, Some("github-releases"));
-        assert_eq!(tf.package_name, Some("hashicorp/terraform"));
+        assert_eq!(tf.package_name.as_deref(), Some("hashicorp/terraform"));
         assert_eq!(tf.extract_version, Some("^v(?<version>\\S+)"));
         assert!(tf.skip_reason.is_none());
     }
@@ -1638,21 +1638,21 @@ unknowntool 9.9.9
         assert_eq!(adr.dep_name, "adr-tools");
         assert_eq!(adr.current_value, "3.0.0");
         assert_eq!(adr.datasource_id, Some("github-tags"));
-        assert_eq!(adr.package_name, Some("npryce/adr-tools"));
+        assert_eq!(adr.package_name.as_deref(), Some("npryce/adr-tools"));
         assert!(adr.extract_version.is_none());
 
         let argocd = &deps[1];
         assert_eq!(argocd.tool_name, "argocd");
         assert_eq!(argocd.current_value, "2.5.4");
         assert_eq!(argocd.datasource_id, Some("github-releases"));
-        assert_eq!(argocd.package_name, Some("argoproj/argo-cd"));
+        assert_eq!(argocd.package_name.as_deref(), Some("argoproj/argo-cd"));
         assert_eq!(argocd.extract_version, Some("^v(?<version>\\S+)"));
 
         let awscli = &deps[2];
         assert_eq!(awscli.tool_name, "awscli");
         assert_eq!(awscli.current_value, "2.8.6");
         assert_eq!(awscli.datasource_id, Some("github-tags"));
-        assert_eq!(awscli.package_name, Some("aws/aws-cli"));
+        assert_eq!(awscli.package_name.as_deref(), Some("aws/aws-cli"));
     }
 
     // Ported: "can handle flutter version channel" — asdf/extract.spec.ts line 923
@@ -1682,7 +1682,7 @@ unknowntool 9.9.9
         assert_eq!(d.dep_name, "java");
         assert_eq!(d.current_value, "16.0.0+36");
         assert_eq!(d.datasource_id, Some("java-version"));
-        assert_eq!(d.package_name, Some("java-jdk"));
+        assert_eq!(d.package_name.as_deref(), Some("java-jdk"));
         assert!(d.skip_reason.is_none());
     }
 
@@ -1692,7 +1692,7 @@ unknowntool 9.9.9
         let deps = extract("java adoptopenjdk-jre-16.0.0+36\n");
         let d = &deps[0];
         assert_eq!(d.current_value, "16.0.0+36");
-        assert_eq!(d.package_name, Some("java-jre"));
+        assert_eq!(d.package_name.as_deref(), Some("java-jre"));
         assert!(d.skip_reason.is_none());
     }
 
@@ -1702,7 +1702,7 @@ unknowntool 9.9.9
         let deps = extract("java temurin-16.0.0+36\n");
         let d = &deps[0];
         assert_eq!(d.current_value, "16.0.0+36");
-        assert_eq!(d.package_name, Some("java-jdk"));
+        assert_eq!(d.package_name.as_deref(), Some("java-jdk"));
         assert!(d.skip_reason.is_none());
     }
 
@@ -1712,7 +1712,7 @@ unknowntool 9.9.9
         let deps = extract("java temurin-jre-16.0.0+36\n");
         let d = &deps[0];
         assert_eq!(d.current_value, "16.0.0+36");
-        assert_eq!(d.package_name, Some("java-jre"));
+        assert_eq!(d.package_name.as_deref(), Some("java-jre"));
         assert!(d.skip_reason.is_none());
     }
 
@@ -1734,7 +1734,7 @@ unknowntool 9.9.9
         assert_eq!(d.dep_name, "scala");
         assert_eq!(d.current_value, "2.0.0");
         assert_eq!(d.datasource_id, Some("github-tags"));
-        assert_eq!(d.package_name, Some("scala/scala"));
+        assert_eq!(d.package_name.as_deref(), Some("scala/scala"));
         assert_eq!(d.extract_version, Some("^v(?<version>\\S+)"));
         assert!(d.skip_reason.is_none());
     }
@@ -1745,7 +1745,7 @@ unknowntool 9.9.9
         let deps = extract("scala 3.0.0\n");
         let d = &deps[0];
         assert_eq!(d.datasource_id, Some("github-tags"));
-        assert_eq!(d.package_name, Some("lampepfl/dotty"));
+        assert_eq!(d.package_name.as_deref(), Some("lampepfl/dotty"));
         assert!(d.extract_version.is_none());
         assert!(d.skip_reason.is_none());
     }
@@ -1795,7 +1795,7 @@ unknowntool 9.9.9
         let d = &deps[0];
         assert_eq!(d.current_value, "0.104.3");
         assert_eq!(d.datasource_id, Some("github-releases"));
-        assert_eq!(d.package_name, Some("gohugoio/hugo"));
+        assert_eq!(d.package_name.as_deref(), Some("gohugoio/hugo"));
     }
 
     // Ported: "can handle multiple tools in one file" — asdf/extract.spec.ts line 44
