@@ -1,13 +1,12 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1291 / 1545 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1291 / 1672 actionable tests ported (77%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 1 spec file not yet converted to per-test format (1 pending, 0 partial, 0 not-applicable). It is a non-extract validation spec that needs a different test-port strategy than the per-test extract sections above.
+All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
 Status key: `ported` · `pending` · `not-applicable`
 
-> Note: Files below the per-test sections are in the legacy summary format and
-> will be converted to per-test format in future iterations.
+> Note: New parity work should add or update per-test rows directly.
 
 ---
 
@@ -3545,6 +3544,180 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/validation.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
+**Total tests:** 127 | **Ported:** 0 | **Actionable:** 127 | **Status:** pending
+
+### `config/validation › validateConfig(config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns custom deprecation warnings for %s | 10 | pending | — | — | — |
+| returns the deprecationMsg for `dnsCache` as a warning | 26 | pending | — | — | — |
+| allow enabled field in vulnerabilityAlerts | 47 | pending | — | — | — |
+| catches global options in repo config | 61 | pending | — | — | — |
+| catches global options in inherit config | 86 | pending | — | — | — |
+| only warns for actual globals in repo config | 107 | pending | — | — | — |
+| does not warn for valid inheritConfig | 124 | pending | — | — | — |
+| does not warn for valid platformConfig | 135 | pending | — | — | — |
+| warns for invalid platformConfig | 147 | pending | — | — | — |
+| catches invalid templates | 156 | pending | — | — | — |
+| catches invalid jsonata expressions | 165 | pending | — | — | — |
+| catches invalid allowedVersions regex | 179 | pending | — | — | — |
+| catches invalid matchCurrentValue | 209 | pending | — | — | — |
+| catches invalid matchNewValue | 243 | pending | — | — | — |
+| validates matchBaseBranches | 277 | pending | — | — | — |
+| catches invalid matchBaseBranches when baseBranchPatterns is not defined | 295 | pending | — | — | — |
+| catches invalid matchCurrentVersion regex | 312 | pending | — | — | — |
+| catches invalid customDatasources content | 347 | pending | — | — | — |
+| validates invalid statusCheckNames | 384 | pending | — | — | — |
+| catches invalid customDatasources record type | 408 | pending | — | — | — |
+| catches invalid baseBranchPatterns regex | 423 | pending | — | — | — |
+| returns nested errors | 436 | pending | — | — | — |
+| included managers of the wrong type | 466 | pending | — | — | — |
+| empty configuration | 484 | pending | — | — | — |
+| single not supported manager | 503 | pending | — | — | — |
+| errors for all types | 523 | pending | — | — | — |
+| selectors outside packageRules array trigger errors | 558 | pending | — | — | — |
+| ignore packageRule nesting validation for presets | 588 | pending | — | — | — |
+| errors for unsafe managerFilePatterns | 608 | pending | — | — | — |
+| validates regEx for each managerFilePatterns of format regex | 627 | pending | — | — | — |
+| errors if customManager has empty managerFilePatterns | 649 | pending | — | — | — |
+| errors if no customManager customType | 675 | pending | — | — | — |
+| errors if invalid customManager customType | 703 | pending | — | — | — |
+| errors if empty customManager matchStrings | 732 | pending | — | — | — |
+| errors if no customManager managerFilePatterns | 774 | pending | — | — | — |
+| validates regEx for each matchStrings | 793 | pending | — | — | — |
+| error if no fileFormat in custom JSONata manager | 815 | pending | — | — | — |
+| validates JSONata query for each matchStrings | 841 | pending | — | — | — |
+| validates all possible regex manager options | 871 | pending | — | — | — |
+| passes if customManager fields are present | 890 | pending | — | — | — |
+| errors if extra customManager fields are present | 922 | pending | — | — | — |
+| errors if customManager fields are missing | 945 | pending | — | — | — |
+| errors if customManager fields are missing: JSONataManager | 967 | pending | — | — | — |
+| ignore keys | 1000 | pending | — | — | — |
+| validates timezone preset | 1013 | pending | — | — | — |
+
+### `config/validation › validateConfig(config) › constraints`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| can contain a valid tool name for Containerbase | 1027 | pending | — | — | — |
+| can contain a constraint for a non-Containerbase tool | 1042 | pending | — | — | — |
+| warns if an unsupported constraint is specified | 1057 | pending | — | — | — |
+| warns if a constraint is not valid | 1079 | pending | — | — | — |
+| errors if constraints is a malformed object | 1100 | pending | — | — | — |
+| errors if constraints is a malformed array | 1120 | pending | — | — | — |
+
+### `config/validation › validateConfig(config) › constraintsVersioning`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| cannot contain a valid tool name for Containerbase | 1142 | pending | — | — | — |
+| can contain a constraint for a non-Containerbase tool | 1164 | pending | — | — | — |
+| cannot contain an additional constraint name with an invalid versioning scheme | 1179 | pending | — | — | — |
+| can contain an additional constraint name with a regex versioning scheme | 1200 | pending | — | — | — |
+| cannot contain an unsupported constraint | 1216 | pending | — | — | — |
+| errors if constraintsVersioning is a malformed object | 1238 | pending | — | — | — |
+| errors if constraintsVersioning is a malformed array | 1260 | pending | — | — | — |
+
+### `config/validation › validateConfig(config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validates object with ignored children | 1281 | pending | — | — | — |
+| validates valid registryAlias objects | 1294 | pending | — | — | — |
+| errors if registryAliases depth is more than 1 | 1309 | pending | — | — | — |
+| errors if registryAliases have invalid value | 1331 | pending | — | — | — |
+| errors if managerFilePatterns has wrong parent | 1352 | pending | — | — | — |
+| errors if manager objects are nested | 1395 | pending | — | — | — |
+| warns if hostType has the wrong parent | 1415 | pending | — | — | — |
+| validates preset values | 1429 | pending | — | — | — |
+| errors on invalid preset syntax | 1442 | pending | — | — | — |
+| warns if only selectors in packageRules | 1459 | pending | — | — | — |
+| errors if invalid combinations in packageRules | 1473 | pending | — | — | — |
+| warns when registryUrls is set at the top level of repo config | 1492 | pending | — | — | — |
+| warns when defaultRegistryUrls is set at the top level of repo config | 1507 | pending | — | — | — |
+| warns on nested group packageRules | 1522 | pending | — | — | — |
+| does not error on use of `global:` presets in `globalExtends` | 1541 | pending | — | — | — |
+| does not error on use of `global:` presets in global `extends` | 1554 | pending | — | — | — |
+| errors on use of `global:` presets in inherit `extends` | 1567 | pending | — | — | — |
+| errors on use of `global:` presets in repo `extends` | 1580 | pending | — | — | — |
+| warns if customEnvVariables are found in repo config | 1594 | pending | — | — | — |
+| errors if schedule is cron and has no * minutes | 1613 | pending | — | — | — |
+| errors if invalid matchHost values in hostRules | 1631 | pending | — | — | — |
+| errors if forbidden header in hostRules | 1673 | pending | — | — | — |
+| errors if headers values are not string | 1701 | pending | — | — | — |
+| errors if allowedHeaders is empty or not defined | 1728 | pending | — | — | — |
+| catches invalid variable name in env config option | 1755 | pending | — | — | — |
+| catches env config option if configured inside a parent | 1783 | pending | — | — | — |
+| catches when * or ** is combined with others patterns in a regexOrGlob option | 1820 | pending | — | — | — |
+| catches when negative number is used for integer type | 1848 | pending | — | — | — |
+| validates prPriority | 1862 | pending | — | — | — |
+| errors if no bumpVersion filePattern is provided | 1883 | pending | — | — | — |
+| errors if no matchStrings are provided for bumpVersion | 1909 | pending | — | — | — |
+| allow bumpVersion | 1933 | pending | — | — | — |
+
+### `config/validation › validateConfig() -> globaOnly options`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns errors for invalid options | 1959 | pending | — | — | — |
+| validates hostRules.headers | 1981 | pending | — | — | — |
+| errors if hostRules.headers is defined but allowedHeaders is not | 2001 | pending | — | — | — |
+| validates env | 2025 | pending | — | — | — |
+| handles prefixed onboardingConfigFileName | 2040 | pending | — | — | — |
+| allows unique onboardingConfigFileName if it is set in configFileNames | 2054 | pending | — | — | — |
+| errors if env object is defined but allowedEnv is empty or undefined | 2067 | pending | — | — | — |
+| validates env against the allowedEnv regex | 2086 | pending | — | — | — |
+| validates options with different type but defaultValue=null | 2101 | pending | — | — | — |
+
+### `config/validation › validate globalOptions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| binarySource=docker is deprecated | 2137 | pending | — | — | — |
+| binarySource | 2154 | pending | — | — | — |
+
+### `config/validation › validate globalOptions() › validates string type options`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| binarySource | 2172 | pending | — | — | — |
+| baseDir | 2189 | pending | — | — | — |
+| requireConfig | 2205 | pending | — | — | — |
+| dryRun | 2222 | pending | — | — | — |
+| repositoryCache | 2239 | pending | — | — | — |
+| onboardingConfigFileName | 2256 | pending | — | — | — |
+| onboardingConfig | 2272 | pending | — | — | — |
+| force | 2299 | pending | — | — | — |
+| gitUrl | 2324 | pending | — | — | — |
+
+### `config/validation › validate globalOptions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validates boolean type options | 2343 | pending | — | — | — |
+| validates integer type options | 2363 | pending | — | — | — |
+| validates array type options | 2383 | pending | — | — | — |
+| validates object type options | 2414 | pending | — | — | — |
+| warns if negative number is used for integer type | 2444 | pending | — | — | — |
+| warns on invalid customEnvVariables objects | 2461 | pending | — | — | — |
+| validates valid customEnvVariables objects | 2482 | pending | — | — | — |
+| validates options with different type but defaultValue=null | 2497 | pending | — | — | — |
+| fails for missing reportPath if reportType is "s3" | 2517 | pending | — | — | — |
+| validates reportPath if reportType is "s3" | 2529 | pending | — | — | — |
+| fails for missing reportPath if reportType is "file" | 2542 | pending | — | — | — |
+| validates reportPath if reportType is "file" | 2554 | pending | — | — | — |
+| warns when registryUrls is set at the top level of global config | 2567 | pending | — | — | — |
+| warns when defaultRegistryUrls is set at the top level of global config | 2582 | pending | — | — | — |
+| validates postUpgradeTasks.installTools tool names | 2597 | pending | — | — | — |
+| rejects invalid postUpgradeTasks.installTools tool names | 2615 | pending | — | — | — |
+| catches when * or ** is combined with others patterns in a regexOrGlob option | 2639 | pending | — | — | — |
+
+---
+
 ## Config specs (`lib/config/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3553,7 +3726,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- config/app-strings.spec.ts converted to per-test format above -->
 <!-- config/parse.spec.ts converted to per-test format above -->
 <!-- config/global.spec.ts converted to per-test format above -->
-| `lib/config/validation.spec.ts` | 124 | — | 0 | pending |
+<!-- config/validation.spec.ts converted to per-test format above -->
 <!-- config/migration.spec.ts converted to per-test format above -->
 <!-- config/migrate-validate.spec.ts converted to per-test format above -->
 <!-- config/massage.spec.ts converted to per-test format above -->
