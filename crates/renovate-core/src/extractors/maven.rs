@@ -309,9 +309,16 @@ pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtract
 
 fn extract_package_registry_urls(files: &[(&str, &str)]) -> Vec<String> {
     let mut urls = Vec::new();
+    let properties = package_file_properties(files);
     for (path, content) in files {
         if is_settings_xml_path(path) {
             for url in extract_registries(content) {
+                if !urls.iter().any(|existing| existing == &url) {
+                    urls.push(url);
+                }
+            }
+        } else if path.ends_with(".xml") && !path.ends_with(".mvn/extensions.xml") {
+            for url in extract_pom_registries(content, &properties) {
                 if !urls.iter().any(|existing| existing == &url) {
                     urls.push(url);
                 }
@@ -326,6 +333,69 @@ fn extract_package_registry_urls(files: &[(&str, &str)]) -> Vec<String> {
         urls.push("https://repo.maven.apache.org/maven2".to_owned());
     }
     urls
+}
+
+fn package_file_properties(files: &[(&str, &str)]) -> HashMap<String, String> {
+    let mut properties = HashMap::new();
+    for (path, content) in files {
+        if path.ends_with(".xml")
+            && !is_settings_xml_path(path)
+            && !path.ends_with(".mvn/extensions.xml")
+            && let Ok((_, pom_properties)) = parse_pom(content)
+        {
+            for (key, value) in pom_properties {
+                properties.entry(key).or_insert(value);
+            }
+        }
+    }
+    properties
+}
+
+fn extract_pom_registries(content: &str, properties: &HashMap<String, String>) -> Vec<String> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut stack: Vec<String> = Vec::new();
+    let mut urls = Vec::new();
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                stack.push(String::from_utf8_lossy(e.name().as_ref()).into_owned());
+            }
+            Ok(Event::End(_)) => {
+                stack.pop();
+            }
+            Ok(Event::Text(e)) => {
+                if is_pom_registry_url_path(&stack) {
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                    let url = apply_props(&text, properties);
+                    if !url.is_empty() && !url.contains("${") && !urls.iter().any(|u| u == &url) {
+                        urls.push(url);
+                    }
+                }
+            }
+            Ok(Event::Eof) => break,
+            Ok(_) => {}
+            Err(_) => return Vec::new(),
+        }
+        buf.clear();
+    }
+
+    urls
+}
+
+fn is_pom_registry_url_path(stack: &[String]) -> bool {
+    matches!(
+        stack,
+        [project, repositories, repository, url]
+            if project == "project"
+                && repositories == "repositories"
+                && repository == "repository"
+                && url == "url"
+    )
 }
 
 fn is_settings_xml_path(path: &str) -> bool {
@@ -1209,6 +1279,59 @@ mod tests {
         ];
         assert_eq!(packages.len(), 1);
         assert_eq!(packages[0][0].registry_urls, expected);
+    }
+
+    // Ported: "should include registryUrls from parent pom files" — maven/extract.spec.ts line 581
+    #[test]
+    fn extract_all_package_files_includes_registry_urls_from_parent_poms() {
+        let parent = r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>child</artifactId>
+    <version>42</version>
+    <relativePath>child.pom.xml</relativePath>
+  </parent>
+  <properties>
+    <repoUrl>http://example.com/</repoUrl>
+  </properties>
+  <repositories>
+    <repository>
+      <url>http://example.com/nexus/xyz</url>
+    </repository>
+  </repositories>
+</project>"#;
+        let child = r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>42</version>
+    <relativePath>parent.pom.xml</relativePath>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>foo</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+  </dependencies>
+  <repositories>
+    <repository>
+      <url>${repoUrl}</url>
+    </repository>
+  </repositories>
+</project>"#;
+
+        let packages =
+            extract_all_package_files(&[("parent.pom.xml", parent), ("child.pom.xml", child)]);
+        let expected = vec![
+            "http://example.com/nexus/xyz".to_owned(),
+            "http://example.com/".to_owned(),
+            "https://repo.maven.apache.org/maven2".to_owned(),
+        ];
+        assert_eq!(packages.len(), 2);
+        for dep in packages.iter().flatten() {
+            assert_eq!(dep.registry_urls, expected);
+        }
     }
 
     // Ported: "should extract from .mvn/extensions.xml file" — maven/extract.spec.ts line 888
