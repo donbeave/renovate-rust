@@ -117,8 +117,24 @@ pub struct NixFlakeDep {
     pub skip_reason: Option<NixSkipReason>,
 }
 
+/// Optional extraction context used while confirming digest replacement updates.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct NixExtractConfig<'a> {
+    pub flake_nix_content: Option<&'a str>,
+    pub current_digest: Option<&'a str>,
+    pub new_digest: Option<&'a str>,
+}
+
 /// Parse `flake.lock` content and extract top-level flake input deps.
 pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
+    extract_with_config(flake_lock_content, NixExtractConfig::default())
+}
+
+/// Parse `flake.lock` content with optional `flake.nix` replacement context.
+pub fn extract_with_config(
+    flake_lock_content: &str,
+    config: NixExtractConfig<'_>,
+) -> Vec<NixFlakeDep> {
     let lock: FlakeLock = match serde_json::from_str(flake_lock_content) {
         Ok(l) => l,
         Err(_) => return Vec::new(),
@@ -236,12 +252,13 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
             .git_ref
             .clone()
             .or_else(|| tarball_channel_ref(original));
+        let current_digest = replacement_current_digest(original, config);
 
         deps.push(NixFlakeDep {
             input_name: name.clone(),
             locked_rev: rev,
             current_ref,
-            current_digest: original.rev.clone(),
+            current_digest,
             package_name,
             input_type: locked.input_type.clone(),
             skip_reason: None,
@@ -249,6 +266,25 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
     }
 
     deps
+}
+
+fn replacement_current_digest(
+    original: &FlakeOriginal,
+    config: NixExtractConfig<'_>,
+) -> Option<String> {
+    let original_rev = original.rev.as_deref()?;
+    match (
+        config.current_digest,
+        config.new_digest,
+        config.flake_nix_content,
+    ) {
+        (Some(current_digest), Some(new_digest), Some(flake_nix_content))
+            if original_rev == current_digest && flake_nix_content.contains(new_digest) =>
+        {
+            Some(new_digest.to_owned())
+        }
+        _ => Some(original_rev.to_owned()),
+    }
 }
 
 fn build_package_name(locked: &FlakeLocked, original: &FlakeOriginal) -> Option<String> {
@@ -1262,6 +1298,59 @@ mod tests {
             Some("https://github.com/nix-community/disko")
         );
         assert_eq!(deps[0].input_type, FlakeInputType::Github);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles currentDigest replacement when config provided" — nix/extract.spec.ts line 1065
+    #[test]
+    fn replaces_current_digest_when_config_matches_flake_nix() {
+        let flake_nix = r#"{
+  inputs = {
+    disko.url = "github:nix-community/disko/newdigest123";
+  };
+}"#;
+        let content = r#"{
+  "nodes": {
+    "disko": {
+      "locked": {
+        "lastModified": 1744145203,
+        "narHash": "sha256-I2oILRiJ6G+BOSjY+0dGrTPe080L3pbKpc+gCV3Nmyk=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "76c0a6dba345490508f36c1aa3c7ba5b6b460989",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "olddigest123",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "disko": "disko"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract_with_config(
+            content,
+            NixExtractConfig {
+                flake_nix_content: Some(flake_nix),
+                current_digest: Some("olddigest123"),
+                new_digest: Some("newdigest123"),
+            },
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "disko");
+        assert_eq!(deps[0].current_digest.as_deref(), Some("newdigest123"));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/nix-community/disko")
+        );
         assert!(deps[0].skip_reason.is_none());
     }
 

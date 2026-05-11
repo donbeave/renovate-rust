@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1458 / 1657 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1459 / 1657 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 30 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 31 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2226,7 +2226,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null when flake.nix file cannot be read | 1033 | pending | — | — | Requires flake.nix read-failure path |
 | returns null when flake.lock has invalid JSON | 1046 | ported | `nix.rs` | `invalid_json_returns_empty` | — |
 | returns deps when no root inputs but deps exist | 1051 | ported | `nix.rs` | `root_without_inputs_returns_empty` | — |
-| handles currentDigest replacement when config provided | 1065 | pending | — | — | Requires currentDigest replacement plumbing |
+| handles currentDigest replacement when config provided | 1065 | ported | `nix.rs` | `replaces_current_digest_when_config_matches_flake_nix` | — |
 | includes nixpkgs with ref when original has rev | 1112 | ported | `nix.rs` | `includes_nixpkgs_ref_and_original_rev` | — |
 | includes github flake with ref when original has rev | 1154 | ported | `nix.rs` | `includes_github_ref_and_original_rev` | — |
 | includes gitlab flake with custom host | 1196 | ported | `nix.rs` | `includes_gitlab_input_with_custom_host` | — |
