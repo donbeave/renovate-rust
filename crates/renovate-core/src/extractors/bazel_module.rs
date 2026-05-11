@@ -75,6 +75,17 @@ pub struct BazelOciPullDep {
     pub dep_type: &'static str,
 }
 
+/// A dependency extracted from `git_repository(...)` or `new_git_repository(...)`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazelGitRepositoryDep {
+    pub dep_name: String,
+    pub package_name: Option<String>,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub datasource: &'static str,
+    pub dep_type: &'static str,
+}
+
 /// Which Bazel module declaration produced the dep.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BazelModuleDepType {
@@ -141,6 +152,14 @@ static MAVEN_ARTIFACT_BLOCK_RE: LazyLock<Regex> =
 /// Matches an `oci.pull(...)` call.
 static OCI_PULL_BLOCK_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)oci\.pull\s*\(([^)]+)\)").unwrap());
+
+/// Matches a `git_repository(...)` call without matching `new_git_repository(...)`.
+static GIT_REPOSITORY_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)(?:^|[^\w.])git_repository\s*\(([^)]+)\)").unwrap());
+
+/// Matches a `new_git_repository(...)` call.
+static NEW_GIT_REPOSITORY_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)new_git_repository\s*\(([^)]+)\)").unwrap());
 
 /// Extracts `name = "value"` or `name = 'value'` from a call argument list.
 static ATTR_RE: LazyLock<Regex> =
@@ -400,6 +419,23 @@ pub fn extract_oci_pull_deps(
         .collect()
 }
 
+/// Extract Git repository dependencies from Bazel repository rules.
+pub fn extract_git_repository_deps(content: &str) -> Vec<BazelGitRepositoryDep> {
+    let stripped = strip_comments(content);
+    let mut deps = Vec::new();
+    deps.extend(parse_git_repository_deps(
+        &stripped,
+        &GIT_REPOSITORY_BLOCK_RE,
+        "git_repository",
+    ));
+    deps.extend(parse_git_repository_deps(
+        &stripped,
+        &NEW_GIT_REPOSITORY_BLOCK_RE,
+        "new_git_repository",
+    ));
+    deps
+}
+
 fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
     let mut deps = Vec::new();
     deps.extend(parse_named_overrides(
@@ -517,6 +553,28 @@ fn parse_maven_coordinate(raw: &str) -> Option<(String, String)> {
     } else {
         Some((format!("{group}:{artifact}"), (*version).to_owned()))
     }
+}
+
+fn parse_git_repository_deps(
+    content: &str,
+    regex: &Regex,
+    dep_type: &'static str,
+) -> Vec<BazelGitRepositoryDep> {
+    regex
+        .captures_iter(content)
+        .filter_map(|cap| {
+            let attrs = attrs_from_args(&cap[1]);
+            let remote = attrs.get("remote")?;
+            Some(BazelGitRepositoryDep {
+                dep_name: attrs.get("name")?.clone(),
+                package_name: github_package_name(remote),
+                current_value: attrs.get("tag").cloned(),
+                current_digest: attrs.get("commit").cloned(),
+                datasource: "github-tags",
+                dep_type,
+            })
+        })
+        .collect()
 }
 
 fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
@@ -916,6 +974,73 @@ maven.install(
         assert_eq!(
             maven_deps[1].registry_urls,
             vec!["https://repo1.maven.org/maven2/"]
+        );
+    }
+
+    // Ported: "returns git_repository dependencies with digest" — bazel-module/extract.spec.ts line 772
+    #[test]
+    fn extracts_git_repository_dependency_with_digest() {
+        let input = r#"
+git_repository(
+    name = "rules_foo",
+    commit = "850cb49c8649e463b80ef7984e7c744279746170",
+    remote = "https://github.com/example/rules_foo.git"
+)
+"#;
+        let deps = extract_git_repository_deps(input);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_type, "git_repository");
+        assert_eq!(deps[0].dep_name, "rules_foo");
+        assert_eq!(deps[0].datasource, "github-tags");
+        assert_eq!(deps[0].package_name.as_deref(), Some("example/rules_foo"));
+        assert_eq!(deps[0].current_value, None);
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("850cb49c8649e463b80ef7984e7c744279746170")
+        );
+    }
+
+    // Ported: "returns git_repository dependencies with tag" — bazel-module/extract.spec.ts line 796
+    #[test]
+    fn extracts_git_repository_dependency_with_tag() {
+        let input = r#"
+git_repository(
+    name = "rules_foo",
+    tag = "1.2.3",
+    remote = "https://github.com/example/rules_foo.git"
+)
+"#;
+        let deps = extract_git_repository_deps(input);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_type, "git_repository");
+        assert_eq!(deps[0].dep_name, "rules_foo");
+        assert_eq!(deps[0].datasource, "github-tags");
+        assert_eq!(deps[0].package_name.as_deref(), Some("example/rules_foo"));
+        assert_eq!(deps[0].current_value.as_deref(), Some("1.2.3"));
+        assert_eq!(deps[0].current_digest, None);
+    }
+
+    // Ported: "returns new_git_repository dependencies" — bazel-module/extract.spec.ts line 820
+    #[test]
+    fn extracts_new_git_repository_dependency() {
+        let input = r#"
+new_git_repository(
+    name = "rules_foo",
+    commit = "850cb49c8649e463b80ef7984e7c744279746170",
+    remote = "https://github.com/example/rules_foo.git",
+    tag = "1.2.3"
+)
+"#;
+        let deps = extract_git_repository_deps(input);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_type, "new_git_repository");
+        assert_eq!(deps[0].dep_name, "rules_foo");
+        assert_eq!(deps[0].datasource, "github-tags");
+        assert_eq!(deps[0].package_name.as_deref(), Some("example/rules_foo"));
+        assert_eq!(deps[0].current_value.as_deref(), Some("1.2.3"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("850cb49c8649e463b80ef7984e7c744279746170")
         );
     }
 
