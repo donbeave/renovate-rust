@@ -137,10 +137,8 @@ pub fn extract(content: &str, manager_name: &str) -> Option<VersionFileDep> {
         })
         .find(|l| !l.is_empty())?;
 
-    // Skip NVM aliases like `lts/*`, `latest`, `stable`, `node`.
-    if manager_name == "nvmrc"
-        && (version.contains('/') || matches!(version, "lts" | "latest" | "stable" | "node"))
-    {
+    // Skip NVM aliases with wildcard selectors such as `lts/*`.
+    if manager_name == "nvmrc" && version.contains('/') {
         return None;
     }
 
@@ -247,16 +245,26 @@ mod tests {
         assert!(extract("lts/*\n", "nvmrc").is_none());
     }
 
-    #[test]
-    fn nvmrc_latest_alias_returns_none() {
-        assert!(extract("latest\n", "nvmrc").is_none());
-    }
-
     // Ported: "returns a result" — nvm/extract.spec.ts line 5
     #[test]
     fn nvmrc_plain_version() {
         let dep = extract("20.9.0\n", "nvmrc").unwrap();
         assert_eq!(dep.current_value, "20.9.0");
+    }
+
+    // Ported: "skips non ranges" — nvm/extract.spec.ts line 27
+    #[test]
+    fn nvmrc_passes_through_latest_literal() {
+        let dep = extract("latest\n", "nvmrc").unwrap();
+        assert_eq!(dep.tool, "nodejs");
+        assert_eq!(dep.current_value, "latest");
+        assert_eq!(
+            dep.datasource,
+            AsdfDatasource::GithubReleases {
+                repo: "nodejs/node",
+                tag_strip: "v",
+            }
+        );
     }
 
     #[test]

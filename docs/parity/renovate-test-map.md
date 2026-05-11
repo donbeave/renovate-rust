@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 752 / 1217 actionable tests ported (62%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 753 / 1217 actionable tests ported (62%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -990,7 +990,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nvm/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nvm/extract.spec.ts
-**Total tests:** 4 | **Ported:** 3 | **Actionable:** 4 | **Status:** partial
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -998,7 +998,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns a result | 5 | ported | `version_file.rs` | `nvmrc_plain_version` | — |
 | supports ranges | 16 | ported | `version_file.rs` | `nvmrc_partial_version_range` | — |
-| skips non ranges | 27 | pending | — | — | Rust `extract` returns None for the `latest` alias; TS keeps the literal value as the dep |
+| skips non ranges | 27 | ported | `version_file.rs` | `nvmrc_passes_through_latest_literal` | — |
 | supports code comments | 38 | ported | `version_file.rs` | `nvmrc_skips_full_line_comments_and_inline_comment` | — |
 
 ---
