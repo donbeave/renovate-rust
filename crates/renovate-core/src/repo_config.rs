@@ -3657,6 +3657,73 @@ fn resolve_extends_parameterized(extends: &[String]) -> ParamOverrides {
 /// - Contains `*`, `?`, or `[` → glob
 /// - Otherwise → exact string
 impl RepoConfig {
+    /// Parse config after applying Renovate's `migratePresets` mapping.
+    ///
+    /// Empty replacement strings remove the preset. Non-empty replacements
+    /// substitute the preset name before regular built-in preset normalization.
+    pub fn parse_with_migrate_presets(
+        content: &str,
+        migrate_presets: &std::collections::BTreeMap<String, String>,
+    ) -> Self {
+        let mut value: serde_json::Value = match json5::from_str(content) {
+            Ok(value) => value,
+            Err(e) => {
+                tracing::debug!(%e, "failed to parse repo renovate config; using defaults");
+                return Self::default();
+            }
+        };
+
+        if let Some(obj) = value.as_object_mut()
+            && let Some(extends) = obj.get_mut("extends")
+        {
+            let (migrated, should_set) = match extends.take() {
+                serde_json::Value::String(preset) => migrate_presets
+                    .get(&preset)
+                    .map(|replacement| {
+                        if replacement.is_empty() {
+                            Vec::new()
+                        } else {
+                            vec![replacement.clone()]
+                        }
+                    })
+                    .map_or_else(|| (vec![preset], true), |presets| (presets, true)),
+                serde_json::Value::Array(presets) => (
+                    presets
+                        .into_iter()
+                        .filter_map(|value| {
+                            let serde_json::Value::String(preset) = value else {
+                                return None;
+                            };
+                            match migrate_presets.get(&preset) {
+                                Some(replacement) if replacement.is_empty() => None,
+                                Some(replacement) => Some(replacement.clone()),
+                                None => Some(preset),
+                            }
+                        })
+                        .collect(),
+                    true,
+                ),
+                other => {
+                    *extends = other;
+                    (Vec::new(), false)
+                }
+            };
+
+            if should_set {
+                *extends = serde_json::Value::Array(
+                    migrated
+                        .into_iter()
+                        .map(serde_json::Value::String)
+                        .collect(),
+                );
+            }
+        }
+
+        serde_json::to_string(&value)
+            .ok()
+            .map_or_else(Self::default, |content| Self::parse(&content))
+    }
+
     /// Parse the raw content of a `renovate.json` / `.renovaterc` file.
     ///
     /// Supports JSON and JSON5.  Unknown fields are silently ignored.
@@ -9092,6 +9159,20 @@ mod schedule_preset_tests {
             has_pin_rule,
             "array :js-app should normalize among unrelated presets"
         );
+    }
+
+    // Ported: "migrates presets" — config/migration.spec.ts line 655
+    #[test]
+    fn migrate_presets_rewrites_extends_and_drops_empty_replacements() {
+        let migrate_presets = std::collections::BTreeMap::from([
+            ("@org".to_owned(), "local>org/renovate-config".to_owned()),
+            ("@org2/foo".to_owned(), String::new()),
+        ]);
+        let c = RepoConfig::parse_with_migrate_presets(
+            r#"{"extends": ["@org", "@org2/foo"]}"#,
+            &migrate_presets,
+        );
+        assert_eq!(c.extends, vec!["local>org/renovate-config"]);
     }
 
     #[test]
