@@ -12,6 +12,7 @@ mod run;
 
 pub mod file;
 pub mod massage;
+pub mod migrate_validate;
 pub mod secrets;
 
 pub use platform::Platform;

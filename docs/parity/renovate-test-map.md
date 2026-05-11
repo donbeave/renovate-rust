@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1075 / 1262 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1079 / 1266 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 39 spec files not yet converted to per-test format (27 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 38 spec files not yet converted to per-test format (26 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,23 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/migrate-validate.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
+**Total tests:** 5 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `config/migrate-validate › migrateAndValidate()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty | 14 | ported | `migrate_validate.rs` | `migrate_and_validate_handles_empty` | — |
+| handles migration | 22 | ported | `migrate_validate.rs` | `migrate_and_validate_handles_migration` | — |
+| handles invalid | 32 | ported | `migrate_validate.rs` | `migrate_and_validate_handles_invalid` | — |
+| isOnboarded | 40 | ported | `migrate_validate.rs` | `migrate_and_validate_omits_warnings_when_onboarded` | — |
+| logs errors | 50 | not-applicable | — | — | mocking framework/logging internals |
+
+---
+
 ## `lib/config/massage.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/massage.spec.ts
@@ -2915,7 +2932,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- config/global.spec.ts converted to per-test format above -->
 | `lib/config/validation.spec.ts` | 124 | — | 0 | pending |
 | `lib/config/migration.spec.ts` | 30 | — | 0 | pending |
-| `lib/config/migrate-validate.spec.ts` | 5 | — | 0 | pending |
+<!-- config/migrate-validate.spec.ts converted to per-test format above -->
 <!-- config/massage.spec.ts converted to per-test format above -->
 <!-- config/secrets.spec.ts converted to per-test format above -->
 <!-- config/inherit.spec.ts converted to per-test format above -->

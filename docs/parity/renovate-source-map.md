@@ -1048,7 +1048,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/config/global.ts` | `crates/renovate-core/src/config.rs` | partial | Global option list and config types partially ported |
 | `lib/config/validation.ts` | — | not-started | Not ported |
 | `lib/config/migration.ts` | — | not-started | Not ported |
-| `lib/config/migrate-validate.ts` | — | not-started | Not ported |
+| `lib/config/migrate-validate.ts` | `crates/renovate-core/src/config/migrate_validate.rs` | partial | Runtime migrate/massage/validate flow ported |
 | `lib/config/massage.ts` | `crates/renovate-core/src/config/massage.rs` | partial | Config massage helpers for scalar, packageRules, and update-type expansion ported |
 | `lib/config/secrets.ts` | `crates/renovate-core/src/config/secrets.rs` | partial | Secret/variable validation and interpolation ported |
 | `lib/config/inherit.ts` | `crates/renovate-core/src/config.rs` | partial | Inheritable option list and configFileNames lookup ported |
