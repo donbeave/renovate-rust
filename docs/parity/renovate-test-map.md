@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 933 / 1217 actionable tests ported (77%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 935 / 1217 actionable tests ported (77%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1880,7 +1880,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 23 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 25 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1910,8 +1910,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | groups multiple dependencies sharing the same property | 368 | ported | `ant.rs` | `resolves_shared_property_for_multiple_dependencies` | — |
 | handles properties file in subdirectory | 400 | pending | — | — | Requires subdirectory .properties resolution |
 | handles unreadable properties file gracefully | 434 | pending | — | — | Requires .properties read-failure tolerance |
-| returns deps with mixed inline and property versions | 464 | pending | — | — | Requires mixed inline/property handling |
-| ignores dependency without version during property resolution | 495 | pending | — | — | Requires version-missing skip during resolution |
+| returns deps with mixed inline and property versions | 464 | ported | `ant.rs` | `returns_mixed_inline_and_property_versions` | — |
+| ignores dependency without version during property resolution | 495 | ported | `ant.rs` | `ignores_dependency_without_version_during_property_resolution` | — |
 | skips partial placeholder in version string | 522 | ported | `ant.rs` | `partial_placeholder_version_is_skipped` | — |
 
 ### `edge cases`

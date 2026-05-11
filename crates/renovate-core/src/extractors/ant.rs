@@ -169,14 +169,7 @@ fn parse_dependency_attrs(
     };
 
     if version.is_empty() {
-        return Some(AntDep {
-            dep_name,
-            current_value: String::new(),
-            dep_type,
-            registry_urls: registry_urls.to_vec(),
-            skip_reason: Some(AntSkipReason::MissingVersion),
-            shared_variable_name: None,
-        });
+        return None;
     }
 
     if version.contains("${") {
@@ -296,14 +289,7 @@ fn parse_coords_dep(
     }
 
     if version.is_empty() {
-        return Some(AntDep {
-            dep_name,
-            current_value: String::new(),
-            dep_type,
-            registry_urls: registry_urls.to_vec(),
-            skip_reason: Some(AntSkipReason::MissingVersion),
-            shared_variable_name: None,
-        });
+        return None;
     }
 
     Some(AntDep {
@@ -528,6 +514,51 @@ mod tests {
         assert!(
             deps.iter()
                 .all(|dep| dep.shared_variable_name.as_deref() == Some("jackson.version"))
+        );
+    }
+
+    // Ported: "returns deps with mixed inline and property versions" — ant/extract.spec.ts line 464
+    #[test]
+    fn returns_mixed_inline_and_property_versions() {
+        let content = r#"
+<project>
+  <property name="junit.version" value="4.13.2"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="${junit.version}" />
+    <dependency groupId="org.slf4j" artifactId="slf4j-api" version="1.7.36" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].current_value, "4.13.2");
+        assert_eq!(
+            deps[0].shared_variable_name.as_deref(),
+            Some("junit.version")
+        );
+        assert_eq!(deps[1].dep_name, "org.slf4j:slf4j-api");
+        assert_eq!(deps[1].current_value, "1.7.36");
+        assert!(deps[1].shared_variable_name.is_none());
+    }
+
+    // Ported: "ignores dependency without version during property resolution" — ant/extract.spec.ts line 495
+    #[test]
+    fn ignores_dependency_without_version_during_property_resolution() {
+        let content = r#"
+<project>
+  <property name="junit.version" value="4.13.2"/>
+  <artifact:dependencies>
+    <dependency groupId="org.example" artifactId="lib" />
+    <dependency groupId="junit" artifactId="junit" version="${junit.version}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].current_value, "4.13.2");
+        assert_eq!(
+            deps[0].shared_variable_name.as_deref(),
+            Some("junit.version")
         );
     }
 
