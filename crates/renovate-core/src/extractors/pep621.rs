@@ -103,6 +103,7 @@ pub struct Pep621ExtractedDep {
     pub datasource: Option<Pep621Datasource>,
     pub package_name: Option<String>,
     pub registry_urls: Vec<String>,
+    pub locked_version: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<Pep621SkipReason>,
 }
@@ -130,6 +131,13 @@ pub fn extract(content: &str) -> Result<Vec<Pep621ExtractedDep>, Pep621ExtractEr
 
 /// Parse a `pyproject.toml` string and extract deps plus package-file metadata.
 pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621ExtractError> {
+    extract_package_file_with_uv_lock(content, None)
+}
+
+pub fn extract_package_file_with_uv_lock(
+    content: &str,
+    uv_lock: Option<&str>,
+) -> Result<Pep621Extract, Pep621ExtractError> {
     let doc: Value = toml::from_str(content)?;
     let mut deps = Vec::new();
     let registry_urls = extract_pdm_sources(&doc);
@@ -185,6 +193,7 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
                             datasource: None,
                             package_name: None,
                             registry_urls: Vec::new(),
+                            locked_version: None,
                             skip_reason: Some(Pep621SkipReason::GroupInclude),
                         });
                     } else if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::Group) {
@@ -250,6 +259,10 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
         }
     }
 
+    if let Some(lock_content) = uv_lock {
+        apply_uv_locked_versions(&mut deps, lock_content);
+    }
+
     Ok(Pep621Extract {
         deps,
         registry_urls,
@@ -283,6 +296,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             datasource: None,
             package_name: None,
             registry_urls: Vec::new(),
+            locked_version: None,
             skip_reason: Some(Pep621SkipReason::DirectReference),
         };
     }
@@ -308,6 +322,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
             datasource: None,
             package_name: None,
             registry_urls: Vec::new(),
+            locked_version: None,
             skip_reason: Some(Pep621SkipReason::GroupInclude),
         };
     }
@@ -330,6 +345,7 @@ fn parse_pep508(raw: &str, dep_type: Pep621DepType) -> Pep621ExtractedDep {
         datasource: None,
         package_name: None,
         registry_urls: Vec::new(),
+        locked_version: None,
         skip_reason: None,
     }
 }
@@ -378,6 +394,7 @@ fn extract_uv_sources(doc: &Value) -> BTreeMap<String, Pep621ExtractedDep> {
                 datasource: None,
                 package_name: None,
                 registry_urls: Vec::new(),
+                locked_version: None,
                 skip_reason: None,
             };
 
@@ -410,6 +427,38 @@ fn extract_uv_sources(doc: &Value) -> BTreeMap<String, Pep621ExtractedDep> {
             Some((name, dep))
         })
         .collect()
+}
+
+fn apply_uv_locked_versions(deps: &mut [Pep621ExtractedDep], lock_content: &str) {
+    let Ok(lock) = toml::from_str::<Value>(lock_content) else {
+        return;
+    };
+    let locked_versions: BTreeMap<String, String> = lock
+        .get("package")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|package| {
+            let table = package.as_table()?;
+            let name = table.get("name").and_then(Value::as_str)?;
+            let version = table.get("version").and_then(Value::as_str)?;
+            if table
+                .get("source")
+                .and_then(Value::as_table)
+                .and_then(|source| source.get("virtual"))
+                .is_some()
+            {
+                return None;
+            }
+            Some((normalize_name(name), version.to_owned()))
+        })
+        .collect();
+
+    for dep in deps {
+        if let Some(version) = locked_versions.get(&dep.name) {
+            dep.locked_version = Some(version.clone());
+        }
+    }
 }
 
 fn github_repo_from_git_url(url: &str) -> Option<String> {
@@ -995,5 +1044,57 @@ pytest = [
                 .iter()
                 .any(|d| d.name == "pytest" && d.current_value == ">12")
         );
+    }
+
+    // Ported: "should resolve lockedVersions from uv.lock" — pep621/extract.spec.ts line 595
+    #[test]
+    fn uv_lock_applies_locked_versions() {
+        let content = r#"
+[project]
+name = "pep621-uv"
+version = "0.1.0"
+dependencies = ["attrs>=24.1.0"]
+requires-python = ">=3.11"
+"#;
+        let uv_lock = r#"
+version = 1
+requires-python = ">=3.11"
+
+[[package]]
+name = "attrs"
+version = "24.2.0"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "pep621-uv"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "attrs" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "attrs", specifier = ">=24.1.0" }]
+"#;
+        let extract = extract_package_file_with_uv_lock(content, Some(uv_lock)).unwrap();
+        let attrs = extract.deps.iter().find(|d| d.name == "attrs").unwrap();
+        assert_eq!(attrs.current_value, ">=24.1.0");
+        assert_eq!(attrs.locked_version.as_deref(), Some("24.2.0"));
+    }
+
+    // Ported: "should resolve dependencies without locked versions on invalid uv.lock" — pep621/extract.spec.ts line 661
+    #[test]
+    fn invalid_uv_lock_leaves_deps_without_locked_versions() {
+        let content = r#"
+[project]
+name = "pep621-uv"
+version = "0.1.0"
+dependencies = ["attrs>=24.1.0"]
+requires-python = ">=3.11"
+"#;
+        let extract = extract_package_file_with_uv_lock(content, Some("invalid_toml")).unwrap();
+        let attrs = extract.deps.iter().find(|d| d.name == "attrs").unwrap();
+        assert_eq!(attrs.current_value, ">=24.1.0");
+        assert_eq!(attrs.locked_version, None);
     }
 }

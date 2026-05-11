@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1362 / 1661 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1364 / 1661 actionable tests ported (82%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1389,7 +1389,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pep621/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/extract.spec.ts
-**Total tests:** 14 | **Ported:** 11 | **Actionable:** 14 | **Status:** partial
+**Total tests:** 14 | **Ported:** 13 | **Actionable:** 14 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1406,8 +1406,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | should extract project version | 498 | ported | `pep621.rs` | `project_version_field_is_parseable` | — |
 | should extract dependencies from build-system.requires | 510 | ported | `pep621.rs` | `build_system_requires_extracted_with_project_deps` | — |
 | should resolve lockedVersions from pdm.lock | 551 | ported | `pep621.rs` | `pdm_fixture` | — |
-| should resolve lockedVersions from uv.lock | 595 | pending | — | — | Requires uv.lock support |
-| should resolve dependencies without locked versions on invalid uv.lock | 661 | pending | — | — | Requires uv.lock support |
+| should resolve lockedVersions from uv.lock | 595 | ported | `pep621.rs` | `uv_lock_applies_locked_versions` | — |
+| should resolve dependencies without locked versions on invalid uv.lock | 661 | ported | `pep621.rs` | `invalid_uv_lock_leaves_deps_without_locked_versions` | — |
 | should resolve dependencies with template | 694 | pending | — | — | Requires templating support in pep621 extractor |
 
 ---
