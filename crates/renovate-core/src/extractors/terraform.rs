@@ -43,6 +43,7 @@ pub enum TerraformDepType {
     DockerContainer,
     DockerService,
     DockerRegistryImage,
+    HelmRelease,
 }
 
 impl TerraformDepType {
@@ -56,6 +57,7 @@ impl TerraformDepType {
             TerraformDepType::DockerContainer => "docker_container",
             TerraformDepType::DockerService => "docker_service",
             TerraformDepType::DockerRegistryImage => "docker_registry_image",
+            TerraformDepType::HelmRelease => "helm_release",
         }
     }
 }
@@ -71,6 +73,8 @@ pub enum TerraformSkipReason {
     UnspecifiedVersion,
     ContainsVariable,
     InvalidDependencySpecification,
+    InvalidName,
+    LocalChart,
 }
 
 /// A single extracted Terraform dependency.
@@ -122,6 +126,9 @@ static DOCKER_RESOURCE_BLOCK: LazyLock<Regex> = LazyLock::new(|| {
         .unwrap()
 });
 
+static HELM_RELEASE_BLOCK: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^\s*resource\s+"helm_release"\s+"[^"]+"\s*\{"#).unwrap());
+
 /// `required_providers {` inside a terraform block.
 static REQUIRED_PROVIDERS: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*required_providers\s*\{").unwrap());
@@ -147,6 +154,7 @@ enum State {
         dep_type: TerraformDepType,
         depth: usize,
     },
+    InHelmReleaseBlock(usize),
     Skip(usize), // skip other blocks, depth counter
 }
 
@@ -164,6 +172,8 @@ struct Parser {
     registry_aliases: BTreeMap<String, String>,
     resource_version: String,
     resource_image: String,
+    resource_repository: String,
+    resource_chart: String,
 }
 
 impl Parser {
@@ -180,6 +190,8 @@ impl Parser {
             registry_aliases: registry_aliases.clone(),
             resource_version: String::new(),
             resource_image: String::new(),
+            resource_repository: String::new(),
+            resource_chart: String::new(),
         }
     }
 
@@ -199,6 +211,7 @@ impl Parser {
             State::InDockerResourceBlock { dep_type, depth } => {
                 self.handle_docker_resource_block(*dep_type, *depth, trimmed);
             }
+            State::InHelmReleaseBlock(depth) => self.handle_helm_release_block(*depth, trimmed),
             State::Skip(depth) => self.handle_skip(*depth, trimmed),
         }
     }
@@ -219,6 +232,11 @@ impl Parser {
                 _ => unreachable!("regex only matches supported docker resources"),
             };
             self.state = State::InDockerResourceBlock { dep_type, depth: 1 };
+        } else if HELM_RELEASE_BLOCK.is_match(trimmed) {
+            self.resource_repository.clear();
+            self.resource_chart.clear();
+            self.resource_version.clear();
+            self.state = State::InHelmReleaseBlock(1);
         } else if let Some(cap) = MODULE_BLOCK.captures(trimmed) {
             self.mod_name = cap[1].to_owned();
             self.mod_source.clear();
@@ -459,6 +477,36 @@ impl Parser {
                 dep_type,
                 depth: new_depth,
             };
+        }
+    }
+
+    fn handle_helm_release_block(&mut self, depth: usize, trimmed: &str) {
+        if let Some(cap) = KV_LINE.captures(trimmed) {
+            let val = cap[2].trim().to_owned();
+            match &cap[1] {
+                "repository" => self.resource_repository = val,
+                "chart" => self.resource_chart = val,
+                "version" => self.resource_version = val,
+                _ => {}
+            }
+        }
+
+        let opens = trimmed.chars().filter(|&c| c == '{').count();
+        let closes = trimmed.chars().filter(|&c| c == '}').count();
+        let new_depth = depth.saturating_add(opens).saturating_sub(closes);
+        if new_depth == 0 {
+            self.deps.push(resolve_helm_release(
+                &self.resource_repository,
+                &self.resource_chart,
+                &self.resource_version,
+                &self.registry_aliases,
+            ));
+            self.resource_repository.clear();
+            self.resource_chart.clear();
+            self.resource_version.clear();
+            self.state = State::TopLevel;
+        } else {
+            self.state = State::InHelmReleaseBlock(new_depth);
         }
     }
 }
@@ -727,6 +775,55 @@ fn docker_skip(
         package_name: None,
         current_digest: None,
         skip_reason: Some(skip_reason),
+    }
+}
+
+fn resolve_helm_release(
+    repository: &str,
+    chart: &str,
+    version: &str,
+    registry_aliases: &BTreeMap<String, String>,
+) -> TerraformExtractedDep {
+    let (name, datasource, package_name, skip_reason) = if chart.is_empty() {
+        (
+            String::new(),
+            Some("helm"),
+            None,
+            Some(TerraformSkipReason::InvalidName),
+        )
+    } else if chart.starts_with("./") || chart.starts_with("../") || chart.starts_with('/') {
+        (
+            chart.to_owned(),
+            Some("helm"),
+            None,
+            Some(TerraformSkipReason::LocalChart),
+        )
+    } else if let Some(path) = chart.strip_prefix("oci://") {
+        (path.to_owned(), Some("docker"), None, None)
+    } else if let Some(repo_path) = repository.strip_prefix("oci://") {
+        let package_name = repo_path.split_once('/').map_or_else(
+            || format!("{repo_path}/{chart}"),
+            |(host, path)| {
+                let registry = registry_aliases
+                    .get(host)
+                    .map(String::as_str)
+                    .unwrap_or(host);
+                format!("{registry}/{path}/{chart}")
+            },
+        );
+        (chart.to_owned(), Some("docker"), Some(package_name), None)
+    } else {
+        (chart.to_owned(), Some("helm"), None, None)
+    };
+
+    TerraformExtractedDep {
+        name,
+        current_value: version.to_owned(),
+        dep_type: TerraformDepType::HelmRelease,
+        datasource,
+        package_name,
+        current_digest: None,
+        skip_reason,
     }
 }
 
@@ -1179,6 +1276,114 @@ resource "not_supported_resource" "foo" {
         assert!(deps.iter().any(|dep| {
             dep.dep_type == TerraformDepType::DockerContainer
                 && dep.skip_reason == Some(TerraformSkipReason::InvalidDependencySpecification)
+        }));
+    }
+
+    // Ported: "extract helm releases" — terraform/extract.spec.ts line 776
+    #[test]
+    fn helm_releases_are_extracted() {
+        let content = r#"
+resource "helm_release" "redis" {
+  name       = "my-redis-release"
+  repository = "https://charts.helm.sh/stable"
+  chart      = "redis"
+  version    = "1.0.1"
+}
+
+resource "helm_release" "redis_without_version" {
+  name       = "my-redis-release"
+  repository = "https://charts.helm.sh/stable"
+  chart      = "redis"
+}
+
+resource "helm_release" "local" {
+  name       = "my-local-chart"
+  chart      = "./charts/example"
+}
+
+resource "helm_release" "invalid_1" {
+  name       = "my-redis-release"
+  repository = "https://charts.helm.sh/stable"
+  version    = "4.0.1"
+}
+
+resource "helm_release" "invalid_2" {
+  repository = "https://charts.helm.sh/stable"
+  chart      = "redis"
+  version    = "5.0.1"
+}
+
+resource "helm_release" "invalid_3" {
+  name       = "my-redis-release"
+  chart      = "redis"
+  version    = "6.0.1"
+}
+
+resource "helm_release" "karpenter" {
+  name  = "karpenter"
+  chart = "oci://public.ecr.aws/karpenter/karpenter"
+  version = "v0.22.1"
+}
+
+resource "helm_release" "karpenter_oci_repo" {
+  name  = "karpenter"
+  repository = "oci://public.ecr.aws/karpenter"
+  chart = "karpenter"
+  version = "v0.22.1"
+}
+
+resource "helm_release" "proxy_oci_repo" {
+  name  = "kube-prometheus"
+  repository = "oci://hub.proxy.test/bitnamicharts"
+  chart = "kube-prometheus"
+  version = "8.9.1"
+}
+"#;
+        let aliases = BTreeMap::from([("hub.proxy.test".to_owned(), "index.docker.io".to_owned())]);
+        let deps = extract_with_registry_aliases(content, &aliases);
+
+        assert_eq!(deps.len(), 9);
+        assert_eq!(
+            deps.iter().filter(|dep| dep.skip_reason.is_some()).count(),
+            2
+        );
+        assert!(
+            deps.iter()
+                .all(|dep| dep.dep_type == TerraformDepType::HelmRelease)
+        );
+
+        assert!(deps.iter().any(|dep| {
+            dep.name == "redis" && dep.current_value == "1.0.1" && dep.datasource == Some("helm")
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "redis" && dep.current_value.is_empty() && dep.datasource == Some("helm")
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name.is_empty()
+                && dep.current_value == "4.0.1"
+                && dep.skip_reason == Some(TerraformSkipReason::InvalidName)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "./charts/example"
+                && dep.skip_reason == Some(TerraformSkipReason::LocalChart)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "public.ecr.aws/karpenter/karpenter"
+                && dep.current_value == "v0.22.1"
+                && dep.datasource == Some("docker")
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "karpenter"
+                && dep.current_value == "v0.22.1"
+                && dep.datasource == Some("docker")
+                && dep.package_name.as_deref() == Some("public.ecr.aws/karpenter/karpenter")
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.name == "kube-prometheus"
+                && dep.current_value == "8.9.1"
+                && dep.datasource == Some("docker")
+                && dep.package_name.as_deref()
+                    == Some("index.docker.io/bitnamicharts/kube-prometheus")
         }));
     }
 

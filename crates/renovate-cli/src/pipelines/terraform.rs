@@ -50,7 +50,8 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             | terraform_extractor::TerraformDepType::DockerImage
                             | terraform_extractor::TerraformDepType::DockerContainer
                             | terraform_extractor::TerraformDepType::DockerService
-                            | terraform_extractor::TerraformDepType::DockerRegistryImage => {
+                            | terraform_extractor::TerraformDepType::DockerRegistryImage
+                            | terraform_extractor::TerraformDepType::HelmRelease => {
                                 return None;
                             }
                         };
