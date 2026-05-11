@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 773 / 1217 actionable tests ported (64%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 774 / 1217 actionable tests ported (64%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1817,7 +1817,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nuget/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/extract.spec.ts
-**Total tests:** 35 | **Ported:** 14 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 15 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1825,7 +1825,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null for invalid csproj | 28 | ported | `nuget.rs` | `invalid_xml_returns_error_or_empty` | — |
 | returns null if not xml | 43 | ported | `nuget.rs` | `non_xml_content_returns_empty_or_error` | — |
-| extracts package version dependency | 61 | pending | — | — | Requires `<PackageVersion>` (Central Package Management) extraction |
+| extracts package version dependency | 61 | ported | `nuget.rs` | `package_version_dependency_extracted` | — |
 | extracts package file version | 70 | pending | — | — | Requires packageFileVersion plumbing |
 | does not fail on package file without version | 79 | ported | `nuget.rs` | `no_version_skipped` | — |
 | extracts all dependencies | 86 | ported | `nuget.rs` | `simple_package_reference` (+ update_attribute_extracted, version_override_attribute_wins, version_child_element, exact_nuget_range_normalized, minimum_only_range_normalized) | — |

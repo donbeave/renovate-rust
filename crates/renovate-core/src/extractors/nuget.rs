@@ -476,6 +476,22 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NuGetSkipReason::NoVersion));
     }
 
+    // Ported: "extracts package version dependency" — nuget/extract.spec.ts line 61
+    #[test]
+    fn package_version_dependency_extracted() {
+        let content = r#"<Project>
+  <ItemGroup>
+    <PackageVersion Include="Autofac" Version="4.5.0" />
+  </ItemGroup>
+</Project>"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].package_id, "Autofac");
+        assert_eq!(deps[0].current_value, "4.5.0");
+        assert_eq!(deps[0].dep_type, NuGetDepType::PackageVersion);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
     #[test]
     fn exact_nuget_range_normalized() {
