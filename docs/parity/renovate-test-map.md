@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1435 / 1650 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1437 / 1650 actionable tests ported (87%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 20 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 22 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2218,14 +2218,14 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes flake with tarball type | 649 | ported | `nix.rs` | `includes_tarball_input_with_archive_url` | — |
 | uri decode gitlab subgroup | 750 | ported | `nix.rs` | `decodes_gitlab_subgroup_owner` | — |
 | includes flake with only tarball type | 790 | pending | — | — | Requires tarball-only handling |
-| includes flake with nixpkgs-lib as tarball type | 818 | pending | — | — | Requires nixpkgs-lib tarball detection |
+| includes flake with nixpkgs-lib as tarball type | 818 | ported | `nix.rs` | `ignores_transitive_nixpkgs_lib_tarball_while_extracting_root_inputs` | — |
 | includes flake with nixpkgs channel as tarball type | 897 | ported | `nix.rs` | `includes_nixpkgs_channel_tarball_input` | — |
 | finds currentDigest correctly when input sha is pinned | 937 | ported | `nix.rs` | `extracts_current_digest_from_original_rev` | — |
 | does not duplicate nixpkgs dependency | 983 | pending | — | — | Requires dedup logic |
 | returns null when flake.lock file cannot be read | 1028 | pending | — | — | Requires flake.lock read-failure path |
 | returns null when flake.nix file cannot be read | 1033 | pending | — | — | Requires flake.nix read-failure path |
 | returns null when flake.lock has invalid JSON | 1046 | ported | `nix.rs` | `invalid_json_returns_empty` | — |
-| returns deps when no root inputs but deps exist | 1051 | pending | — | — | Requires non-root deps fallback |
+| returns deps when no root inputs but deps exist | 1051 | ported | `nix.rs` | `root_without_inputs_returns_empty` | — |
 | handles currentDigest replacement when config provided | 1065 | pending | — | — | Requires currentDigest replacement plumbing |
 | includes nixpkgs with ref when original has rev | 1112 | ported | `nix.rs` | `includes_nixpkgs_ref_and_original_rev` | — |
 | includes github flake with ref when original has rev | 1154 | ported | `nix.rs` | `includes_github_ref_and_original_rev` | — |

@@ -776,6 +776,92 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "includes flake with nixpkgs-lib as tarball type" — nix/extract.spec.ts line 818
+    #[test]
+    fn ignores_transitive_nixpkgs_lib_tarball_while_extracting_root_inputs() {
+        let content = r#"{
+  "nodes": {
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1733312601,
+        "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1734649271,
+        "narHash": "sha256-4EVBRhOjMDuGtMaofAIqzJbg4Ql7Ai0PSeuVZTHjyKQ=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d70bd19e0a38ad4790d3913bf08fcbfc9eeca507",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lib": {
+      "locked": {
+        "lastModified": 1733096140,
+        "narHash": "sha256-1qRH7uAUsyQI7R1Uwl4T+XvdNv778H0Nb5njNrqvylY=",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(!deps.iter().any(|dep| dep.input_name == "nixpkgs-lib"));
+
+        let flake_parts = deps
+            .iter()
+            .find(|dep| dep.input_name == "flake-parts")
+            .unwrap();
+        assert_eq!(
+            flake_parts.package_name.as_deref(),
+            Some("https://github.com/hercules-ci/flake-parts")
+        );
+        assert_eq!(
+            flake_parts.locked_rev,
+            "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9"
+        );
+
+        let nixpkgs = deps.iter().find(|dep| dep.input_name == "nixpkgs").unwrap();
+        assert_eq!(nixpkgs.current_ref.as_deref(), Some("nixos-unstable"));
+        assert_eq!(
+            nixpkgs.package_name.as_deref(),
+            Some("https://github.com/nixos/nixpkgs")
+        );
+    }
+
     // Ported: "includes tarball flake with ref when original has rev" — nix/extract.spec.ts line 1280
     #[test]
     fn includes_tarball_input_ref_and_current_digest() {
@@ -1100,6 +1186,19 @@ mod tests {
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
+    }
+
+    // Ported: "returns deps when no root inputs but deps exist" — nix/extract.spec.ts line 1051
+    #[test]
+    fn root_without_inputs_returns_empty() {
+        let content = r#"{
+  "nodes": {
+    "root": {}
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        assert!(extract(content).is_empty());
     }
 
     // Ported: "handles unknown flake lock type" — nix/extract.spec.ts line 1321
