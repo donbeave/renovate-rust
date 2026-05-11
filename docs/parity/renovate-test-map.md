@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 941 / 1217 actionable tests ported (77%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 951 / 1217 actionable tests ported (78%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 3 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 13 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2087,16 +2087,16 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts version and components from system manifest at $filepath | 72 | ported | `flux.rs` | `extracts_version_with_components` | — |
 | considers components optional in system manifests | 102 | ported | `flux.rs` | `extracts_version_without_components` | — |
 | ignores system manifests without a version | 111 | ported | `flux.rs` | `no_header_returns_none` | — |
-| extracts releases without repositories | 119 | pending | — | — | Requires HelmRelease without HelmRepository pairing |
-| falls back to unknown-registry when registryAliases has no matching HelmRelease sourceRef name | 136 | pending | — | — | registryAliases not yet implemented |
-| uses registryAliases to resolve HelmRelease sourceRef name when repository is missing | 158 | pending | — | — | registryAliases not yet implemented |
-| uses registryAliases with an OCI URL for HelmRelease sourceRef name | 180 | pending | — | — | registryAliases not yet implemented |
-| ignores HelmRelease resources without an apiVersion | 202 | pending | — | — | Requires apiVersion validation |
-| ignores HelmRepository resources without an apiVersion | 207 | pending | — | — | Requires apiVersion validation |
-| ignores HelmRepository resources without metadata | 212 | pending | — | — | Requires metadata validation |
-| ignores HelmRelease resources without any chart reference | 234 | pending | — | — | Requires HelmRelease chart-ref validation |
-| ignores HelmRelease resources without a chart name | 250 | pending | — | — | Requires HelmRelease chart-name validation |
-| skip HelmRelease with local chart | 271 | pending | — | — | Requires local-chart skip-reason |
+| extracts releases without repositories | 119 | ported | `flux.rs` | `extracts_helm_release_without_repository` | — |
+| falls back to unknown-registry when registryAliases has no matching HelmRelease sourceRef name | 136 | ported | `flux.rs` | `helm_release_registry_alias_without_source_match_is_unknown` | — |
+| uses registryAliases to resolve HelmRelease sourceRef name when repository is missing | 158 | ported | `flux.rs` | `helm_release_registry_alias_resolves_source_name` | — |
+| uses registryAliases with an OCI URL for HelmRelease sourceRef name | 180 | ported | `flux.rs` | `helm_release_registry_alias_oci_url_uses_docker` | — |
+| ignores HelmRelease resources without an apiVersion | 202 | ported | `flux.rs` | `ignores_helm_release_without_api_version` | — |
+| ignores HelmRepository resources without an apiVersion | 207 | ported | `flux.rs` | `ignores_helm_repository_without_api_version` | — |
+| ignores HelmRepository resources without metadata | 212 | ported | `flux.rs` | `ignores_helm_repository_without_metadata` | — |
+| ignores HelmRelease resources without any chart reference | 234 | ported | `flux.rs` | `ignores_helm_release_without_chart_reference` | — |
+| ignores HelmRelease resources without a chart name | 250 | ported | `flux.rs` | `ignores_helm_release_without_chart_name` | — |
+| skip HelmRelease with local chart | 271 | ported | `flux.rs` | `skips_helm_release_with_local_chart` | — |
 | does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace | 299 | pending | — | — | Requires namespace pairing |
 | does not match HelmRelease resources without a sourceRef | 325 | pending | — | — | Requires sourceRef pairing |
 | does not match HelmRelease resources without a namespace | 355 | pending | — | — | Requires namespace pairing |
