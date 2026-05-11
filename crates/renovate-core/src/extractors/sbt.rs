@@ -621,6 +621,41 @@ object Dependencies {
         assert_eq!(abc.shared_variable_name.as_deref(), Some("abcVersion"));
     }
 
+    // Ported: "extract deps when they are defined in a new line" — sbt/extract.spec.ts line 371
+    #[test]
+    fn package_file_extracts_deps_defined_in_named_seq() {
+        let content = r#"
+name := "service"
+scalaVersion := "2.13.8"
+
+lazy val compileDependencies =
+  Seq(
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
+    "ch.qos.logback" % "logback-classic" % "1.2.10"
+  )
+
+libraryDependencies ++= compileDependencies
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "org.scala-lang:scala-library"
+                    && dep.current_value.as_deref() == Some("2.13.8"))
+        );
+        assert!(package_file.deps.iter().any(|dep| dep.package_name
+            == "com.typesafe.scala-logging:scala-logging_2.13"
+            && dep.current_value.as_deref() == Some("3.9.4")));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "ch.qos.logback:logback-classic"
+                    && dep.current_value.as_deref() == Some("1.2.10"))
+        );
+    }
+
     // Ported: "extracts packageFileVersion when scala version is defined in a variable" — sbt/extract.spec.ts line 159
     #[test]
     fn package_file_resolves_package_file_version_variable() {
