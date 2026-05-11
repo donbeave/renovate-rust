@@ -65,11 +65,13 @@ pub enum DockerfileExtractError {
 /// `FROM` lines and other non-image uses).
 pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileExtractError> {
     let content = content.trim_start_matches('\u{FEFF}');
-    let logical_lines = join_continuations(content);
+    let escape_char = detect_escape_char(content);
+    let logical_lines = join_continuations(content, escape_char);
     let mut stage_names: Vec<String> = Vec::new();
     let mut args: HashMap<String, String> = HashMap::new();
     let mut out = Vec::new();
     let mut seen_non_comment = false;
+    let mut directives_allowed = true;
 
     for line in &logical_lines {
         let trimmed = line.trim();
@@ -81,13 +83,13 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
         if trimmed.starts_with('#') {
             // Check for `# syntax=<image>` parser directive (only valid before any
             // instruction; we track whether we've seen any non-comment line).
-            if !seen_non_comment {
-                let comment = trimmed.strip_prefix('#').unwrap_or("").trim();
-                if let Some(image_ref) = comment.strip_prefix("syntax=") {
-                    let image_ref = image_ref.trim();
-                    if !image_ref.is_empty() {
+            if !seen_non_comment && directives_allowed {
+                match parse_parser_directive(trimmed) {
+                    Some(ParserDirective::Syntax(image_ref)) if !image_ref.is_empty() => {
                         out.push(classify_from(image_ref, &stage_names));
                     }
+                    Some(ParserDirective::Syntax(_)) | Some(ParserDirective::Escape(_)) => {}
+                    None => directives_allowed = false,
                 }
             }
             continue;
@@ -150,7 +152,7 @@ pub fn extract(content: &str) -> Result<Vec<DockerfileExtractedDep>, DockerfileE
 /// Join logical lines: whenever a physical line ends with `\` (ignoring
 /// trailing whitespace), the next non-comment, non-blank physical line is
 /// appended.  This mirrors Dockerfile parser behaviour.
-fn join_continuations(content: &str) -> Vec<String> {
+fn join_continuations(content: &str, escape_char: char) -> Vec<String> {
     let mut result = Vec::new();
     let mut current = String::new();
     let mut continuation = false;
@@ -171,14 +173,19 @@ fn join_continuations(content: &str) -> Vec<String> {
             continue;
         }
 
-        if stripped.trim_end().ends_with('\\') {
+        if !continuation && stripped.trim_start().starts_with('#') {
+            result.push(raw_line.to_owned());
+            continue;
+        }
+
+        if stripped.trim_end().ends_with(escape_char) {
             // Remove the `\` and start / continue a logical line.
-            let without_bs = stripped.trim_end().trim_end_matches('\\');
+            let without_bs = stripped.trim_end().trim_end_matches(escape_char);
             if continuation {
                 current.push(' ');
                 current.push_str(without_bs.trim());
             } else {
-                current.push_str(without_bs);
+                current.push_str(without_bs.trim());
             }
             continuation = true;
         } else {
@@ -196,6 +203,49 @@ fn join_continuations(content: &str) -> Vec<String> {
         result.push(current);
     }
     result
+}
+
+enum ParserDirective<'a> {
+    Syntax(&'a str),
+    Escape(char),
+}
+
+fn parse_parser_directive(line: &str) -> Option<ParserDirective<'_>> {
+    let comment = line.trim_start().strip_prefix('#')?.trim_start();
+    let (key, value) = comment.split_once('=')?;
+    let key = key.trim();
+    let value = value.trim();
+
+    if key.eq_ignore_ascii_case("syntax") {
+        Some(ParserDirective::Syntax(value))
+    } else if key.eq_ignore_ascii_case("escape") {
+        value.chars().next().map(ParserDirective::Escape)
+    } else {
+        None
+    }
+}
+
+fn detect_escape_char(content: &str) -> char {
+    let mut escape_char = '\\';
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        if !trimmed.starts_with('#') {
+            break;
+        }
+
+        match parse_parser_directive(trimmed) {
+            Some(ParserDirective::Escape(ch)) => escape_char = ch,
+            Some(ParserDirective::Syntax(_)) => {}
+            None => break,
+        }
+    }
+
+    escape_char
 }
 
 /// If `line` starts with `INSTRUCTION` (case-insensitive), return the
@@ -1035,6 +1085,54 @@ FROM $nginx_version as stage2
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].image, "nginx");
         assert_eq!(deps[0].tag.as_deref(), Some("1.20"));
+    }
+
+    // Ported: "handles an alternative escape character" — dockerfile/extract.spec.ts line 1152
+    #[test]
+    fn alternative_escape_character() {
+        let content = r#"#  syntax=docker/dockerfile:1
+ # EsCaPe=`
+ ARG `
+	# multi-line arg
+   ALPINE_VERSION=alpine:3.15.4
+
+FROM `
+${ALPINE_VERSION} as stage1
+
+ARG   `
+  `
+ # multi-line arg
+ # and multi-line comment
+   nginx_version="nginx:18.04@sha256:abcdef"
+
+FROM $nginx_version as stage2
+
+	FROM 	`
+ 	  `
+   image5 `
+	#comment5
+	as name3
+
+	COPY 	`
+ 	  `
+   --from=image12 a `
+	#comment5
+	b
+"#;
+        let deps = extract_ok(content);
+        assert_eq!(deps.len(), 5);
+        assert_eq!(deps[0].image, "docker/dockerfile");
+        assert_eq!(deps[0].tag.as_deref(), Some("1"));
+        assert_eq!(deps[1].image, "alpine");
+        assert_eq!(deps[1].tag.as_deref(), Some("3.15.4"));
+        assert_eq!(deps[2].image, "nginx");
+        assert_eq!(deps[2].tag.as_deref(), Some("18.04"));
+        assert_eq!(deps[2].digest.as_deref(), Some("sha256:abcdef"));
+        assert_eq!(deps[3].image, "image5");
+        assert!(deps[3].tag.is_none());
+        assert_eq!(deps[4].image, "image12");
+        assert!(deps[4].tag.is_none());
+        assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
     }
 
     // ── RUN --mount=from ──────────────────────────────────────────────────────
