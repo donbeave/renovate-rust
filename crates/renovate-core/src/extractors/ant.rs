@@ -712,17 +712,40 @@ fn resolve_relative_path(package_file: &str, reference: &str) -> String {
 }
 
 fn parse_properties_file(content: &str) -> Vec<(String, String)> {
-    content
-        .lines()
-        .filter_map(|line| {
-            let line = line.trim();
-            if line.is_empty() || line.starts_with('#') || line.starts_with('!') {
-                return None;
-            }
-            let (name, value) = line.split_once('=')?;
-            Some((name.trim().to_owned(), value.trim().to_owned()))
-        })
-        .collect()
+    let mut seen = HashSet::new();
+    let mut properties = Vec::new();
+
+    for line in content.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') || line.starts_with('!') {
+            continue;
+        }
+
+        if let Some((name, value)) = parse_property_line(line)
+            && seen.insert(name.clone())
+        {
+            properties.push((name, value));
+        }
+    }
+
+    properties
+}
+
+fn parse_property_line(line: &str) -> Option<(String, String)> {
+    let separator_index = line
+        .char_indices()
+        .find_map(|(idx, ch)| (ch == '=' || ch == ':' || ch.is_whitespace()).then_some(idx))?;
+    if separator_index == 0 {
+        return None;
+    }
+
+    let name = &line[..separator_index];
+    let mut value = line[separator_index..].trim_start();
+    if let Some(rest) = value.strip_prefix(['=', ':']) {
+        value = rest.trim_start();
+    }
+
+    Some((name.to_owned(), value.trim().to_owned()))
 }
 
 fn exact_property_ref(value: &str) -> Option<&str> {
@@ -778,6 +801,64 @@ fn resolve_property_placeholders(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Ported: "parses key=value pairs" — ant/properties.spec.ts line 6
+    #[test]
+    fn properties_file_parses_key_value_pairs() {
+        let props = parse_properties_file("key1=value1\nkey2=value2\n");
+        assert_eq!(
+            props,
+            vec![
+                ("key1".to_owned(), "value1".to_owned()),
+                ("key2".to_owned(), "value2".to_owned())
+            ]
+        );
+    }
+
+    // Ported: "skips comments and blank lines" — ant/properties.spec.ts line 28
+    #[test]
+    fn properties_file_skips_comments_and_blank_lines() {
+        let props = parse_properties_file("# comment\n\nkey=value\n! another comment\n");
+        assert_eq!(props, vec![("key".to_owned(), "value".to_owned())]);
+    }
+
+    // Ported: "supports colon separator" — ant/properties.spec.ts line 39
+    #[test]
+    fn properties_file_supports_colon_separator() {
+        let props = parse_properties_file("key:value\n");
+        assert_eq!(props, vec![("key".to_owned(), "value".to_owned())]);
+    }
+
+    // Ported: "skips malformed lines without separators" — ant/properties.spec.ts line 46
+    #[test]
+    fn properties_file_skips_malformed_lines_without_separators() {
+        let props = parse_properties_file("key=value\nmalformed_line_no_separator\nother=val\n");
+        assert_eq!(
+            props,
+            vec![
+                ("key".to_owned(), "value".to_owned()),
+                ("other".to_owned(), "val".to_owned())
+            ]
+        );
+    }
+
+    // Ported: "implements first-definition-wins" — ant/properties.spec.ts line 57
+    #[test]
+    fn properties_file_implements_first_definition_wins() {
+        let props = parse_properties_file("key=first\nkey=second\n");
+        assert_eq!(props, vec![("key".to_owned(), "first".to_owned())]);
+    }
+
+    // Ported: "respects pre-existing props (first-definition-wins across sources)" — ant/properties.spec.ts line 64
+    #[test]
+    fn properties_file_respects_pre_existing_props_across_sources() {
+        let mut props = HashMap::from([("key".to_owned(), "existing".to_owned())]);
+        for (name, value) in parse_properties_file("key=new\n") {
+            props.entry(name).or_insert(value);
+        }
+
+        assert_eq!(props.get("key").map(String::as_str), Some("existing"));
+    }
 
     // Ported: "extracts inline version dependencies from build.xml" — ant/extract.spec.ts line 9
     #[test]

@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1080 / 1267 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1086 / 1273 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 37 spec files not yet converted to per-test format (26 pending, 10 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 36 spec files not yet converted to per-test format (26 pending, 9 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2669,6 +2669,24 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/ant/properties.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/properties.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `modules/manager/ant/properties › parsePropertiesFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses key=value pairs | 6 | ported | `ant.rs` | `properties_file_parses_key_value_pairs` | — |
+| skips comments and blank lines | 28 | ported | `ant.rs` | `properties_file_skips_comments_and_blank_lines` | — |
+| supports colon separator | 39 | ported | `ant.rs` | `properties_file_supports_colon_separator` | — |
+| skips malformed lines without separators | 46 | ported | `ant.rs` | `properties_file_skips_malformed_lines_without_separators` | — |
+| implements first-definition-wins | 57 | ported | `ant.rs` | `properties_file_implements_first_definition_wins` | — |
+| respects pre-existing props (first-definition-wins across sources) | 64 | ported | `ant.rs` | `properties_file_respects_pre_existing_props_across_sources` | — |
+
+---
+
 ## `lib/modules/manager/ant/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/update.spec.ts
@@ -2763,7 +2781,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
 <!-- asdf/index.spec.ts converted to per-test format above -->
-| `lib/modules/manager/ant/properties.spec.ts` | — | `crates/renovate-core/src/extractors/ant.rs` | — | partial |
+<!-- ant/properties.spec.ts converted to per-test format above -->
 <!-- ant/update.spec.ts converted to per-test format above -->
 | `lib/modules/manager/bazel-module/bazelrc.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/bazel-module/lockfile.spec.ts` | — | — | — | pending |
