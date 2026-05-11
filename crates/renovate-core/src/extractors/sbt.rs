@@ -89,8 +89,8 @@ pub fn extract(content: &str) -> Vec<SbtDep> {
         // Strip single-line comments.
         let line = line.split("//").next().unwrap_or(line).trim_end();
 
-        // Detect addSbtPlugin calls.
-        let is_plugin = line.contains("addSbtPlugin");
+        // Detect plugin calls.
+        let is_plugin = line.contains("addSbtPlugin") || line.contains("addCompilerPlugin");
 
         for cap in DEP_EXPR.captures_iter(line) {
             let style = if &cap["op"] == "%%" {
@@ -179,6 +179,18 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
             .unwrap();
         assert_eq!(plugin.artifact_id, "sbt-native-packager");
         assert_eq!(plugin.current_value, "1.9.16");
+    }
+
+    // Ported: "extract addCompilerPlugin" — sbt/extract.spec.ts line 452
+    #[test]
+    fn extracts_add_compiler_plugin() {
+        let deps = extract(r#"addCompilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.3.0")"#);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].group_id, "org.scala-tools.sxr");
+        assert_eq!(deps[0].artifact_id, "sxr");
+        assert_eq!(deps[0].current_value, "0.3.0");
+        assert_eq!(deps[0].style, SbtDepStyle::Scala);
+        assert_eq!(deps[0].dep_type, SbtDepType::Plugin);
     }
 
     // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47

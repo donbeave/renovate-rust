@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 827 / 1217 actionable tests ported (68%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 828 / 1217 actionable tests ported (68%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2390,7 +2390,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/sbt/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/extract.spec.ts
-**Total tests:** 26 | **Ported:** 5 | **Actionable:** 26 | **Status:** partial
+**Total tests:** 26 | **Ported:** 6 | **Actionable:** 26 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2414,7 +2414,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extract deps from native scala file with private variables | 349 | pending | — | — | Requires private variable resolution in .scala files |
 | extract deps when they are defined in a new line | 371 | pending | — | — | Requires multi-line dep continuation parsing |
 | extract deps with comment | 412 | pending | — | — | Requires inline-comment-stripping in dep position |
-| extract addCompilerPlugin | 452 | pending | — | — | Requires addCompilerPlugin extraction |
+| extract addCompilerPlugin | 452 | ported | `sbt.rs` | `extracts_add_compiler_plugin` | — |
 | extract sbt version | 469 | ported | `sbt.rs` | `build_properties_extracts_sbt_version` | — |
 | extract sbt version if the file contains other properties | 492 | ported | `sbt.rs` | `build_properties_with_other_props_extracts_sbt_version` | — |
 | ignores build.properties file if does not contain sbt version | 516 | ported | `sbt.rs` | `build_properties_without_sbt_version_returns_none` | — |
