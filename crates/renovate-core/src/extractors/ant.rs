@@ -367,8 +367,14 @@ mod tests {
 
     // Ported: "returns null for invalid XML" — ant/extract.spec.ts line 90
     #[test]
-    fn empty_xml_returns_empty() {
-        assert!(extract("<project />").is_empty());
+    fn invalid_xml_returns_empty() {
+        assert!(extract("<<< not xml >>>").is_empty());
+    }
+
+    // Ported: "handles unparseable XML returned by readLocalFile" — ant/extract.spec.ts line 549
+    #[test]
+    fn unparseable_xml_returns_empty() {
+        assert!(extract("<<< not xml >>>").is_empty());
     }
 
     // Ported: "returns null for build.xml with no dependencies" — ant/extract.spec.ts line 94
