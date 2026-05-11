@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 828 / 1217 actionable tests ported (68%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 830 / 1217 actionable tests ported (68%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2026,7 +2026,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 2 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 4 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2068,8 +2068,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes gitlab flake with custom host | 1196 | pending | — | — | Requires gitlab custom-host handling |
 | includes sourcehut flake with custom host | 1238 | pending | — | — | Requires sourcehut custom-host handling |
 | includes tarball flake with ref when original has rev | 1280 | pending | — | — | Requires tarball ref+rev handling |
-| handles unknown flake lock type | 1321 | pending | — | — | Requires unknown-type tolerance |
-| ignores unsupported file type and still extracts other inputs | 1348 | pending | — | — | Requires unsupported-type filtering with fallthrough |
+| handles unknown flake lock type | 1321 | ported | `nix.rs` | `unknown_flake_lock_type_returns_empty` | — |
+| ignores unsupported file type and still extracts other inputs | 1348 | ported | `nix.rs` | `unsupported_file_type_is_ignored_while_other_inputs_extract` | — |
 
 ---
 

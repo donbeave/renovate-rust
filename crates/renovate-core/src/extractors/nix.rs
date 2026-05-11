@@ -173,6 +173,16 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
             continue;
         };
 
+        if matches!(
+            locked.input_type,
+            FlakeInputType::Unknown | FlakeInputType::File
+        ) || matches!(
+            original.input_type,
+            FlakeInputType::Unknown | FlakeInputType::File
+        ) {
+            continue;
+        }
+
         // Skip indirect and local-path inputs.
         if matches!(
             locked.input_type,
@@ -341,6 +351,84 @@ mod tests {
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
+    }
+
+    // Ported: "handles unknown flake lock type" — nix/extract.spec.ts line 1321
+    #[test]
+    fn unknown_flake_lock_type_returns_empty() {
+        let content = r#"{
+  "nodes": {
+    "unknown-flake": {
+      "locked": {
+        "rev": "c7e39452affcc0f89e023091524e38b3aaf109e9",
+        "type": "unknown-type"
+      },
+      "original": {
+        "type": "unknown-type"
+      }
+    },
+    "root": {
+      "inputs": {
+        "unknown-flake": "unknown-flake"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "ignores unsupported file type and still extracts other inputs" — nix/extract.spec.ts line 1348
+    #[test]
+    fn unsupported_file_type_is_ignored_while_other_inputs_extract() {
+        let content = r#"{
+  "nodes": {
+    "file": {
+      "locked": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/NixOS/nixpkgs/abc/README.md"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/NixOS/nixpkgs/abc/README.md"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "8eb28adfa3dc4de28e792e3bf49fcf9007ca8ac9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "file": "file",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(
+            deps[0].locked_rev,
+            "8eb28adfa3dc4de28e792e3bf49fcf9007ca8ac9"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/NixOS/nixpkgs")
+        );
     }
 
     #[test]
