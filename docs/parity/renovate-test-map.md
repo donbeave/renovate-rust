@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1353 / 1661 actionable tests ported (81%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1354 / 1661 actionable tests ported (82%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2723,7 +2723,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/quadlet/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/quadlet/extract.spec.ts
-**Total tests:** 11 | **Ported:** 10 | **Actionable:** 11 | **Status:** partial
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2738,7 +2738,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | handles docker-daemon prefix | 101 | ported | `quadlet.rs` | `docker_daemon_prefix_stripped` | — |
 | does not extract an image file reference | 119 | ported | `quadlet.rs` | `image_file_reference_skipped` | — |
 | does not extract an build file reference | 129 | ported | `quadlet.rs` | `build_file_reference_skipped` | — |
-| extract data from file with registry aliases | 139 | pending | — | — | registryAliases not yet implemented |
+| extract data from file with registry aliases | 139 | ported | `quadlet.rs` | `applies_registry_aliases_to_package_name` | — |
 | handles an unsuccessful parse | 158 | ported | `quadlet.rs` | `container_section_without_image_returns_empty` | — |
 
 ---

@@ -47,6 +47,8 @@ pub struct DockerfileExtractedDep {
     pub tag: Option<String>,
     /// The digest portion (e.g. `"sha256:abcdef…"`).  `None` when absent.
     pub digest: Option<String>,
+    /// Optional package name after applying registry aliases.
+    pub package_name: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<DockerfileSkipReason>,
 }
@@ -508,6 +510,7 @@ fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtracted
             image: image_ref.to_owned(),
             tag: None,
             digest: None,
+            package_name: None,
             skip_reason: Some(DockerfileSkipReason::ArgVariable),
         };
     }
@@ -518,6 +521,7 @@ fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtracted
             image: "scratch".into(),
             tag: None,
             digest: None,
+            package_name: None,
             skip_reason: Some(DockerfileSkipReason::Scratch),
         };
     }
@@ -528,6 +532,7 @@ fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtracted
             image: image_ref.to_owned(),
             tag: None,
             digest: None,
+            package_name: None,
             skip_reason: Some(DockerfileSkipReason::ArgVariable),
         };
     }
@@ -562,6 +567,7 @@ fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtracted
             image,
             tag,
             digest,
+            package_name: None,
             skip_reason: Some(DockerfileSkipReason::BuildStageRef),
         };
     }
@@ -570,6 +576,7 @@ fn classify_from(image_ref: &str, stage_names: &[String]) -> DockerfileExtracted
         image,
         tag,
         digest,
+        package_name: None,
         skip_reason: None,
     }
 }

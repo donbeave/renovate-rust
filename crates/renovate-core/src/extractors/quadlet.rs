@@ -33,6 +33,13 @@ const LOCAL_TRANSPORTS: &[&str] = &[
 /// Scans for `Image=` keys in `[Container]` sections. Ignores local transport
 /// prefixes (`dir:`, `oci:`, etc.) and strips `docker://` transport prefix.
 pub fn extract(content: &str) -> Vec<DockerfileExtractedDep> {
+    extract_with_registry_aliases(content, &[])
+}
+
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<DockerfileExtractedDep> {
     let mut out = Vec::new();
     let mut in_container = false;
 
@@ -68,12 +75,28 @@ pub fn extract(content: &str) -> Vec<DockerfileExtractedDep> {
                 .or_else(|| image_str.strip_prefix("docker-daemon:"))
                 .unwrap_or(image_str);
             if !image.is_empty() {
-                out.push(classify_image_ref(image));
+                let mut dep = classify_image_ref(image);
+                let package_name = apply_registry_alias(&dep.image, registry_aliases);
+                if package_name != dep.image {
+                    dep.package_name = Some(package_name);
+                }
+                out.push(dep);
             }
         }
     }
 
     out
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            image
+                .strip_prefix(&format!("{from}/"))
+                .map(|rest| format!("{to}/{rest}"))
+        })
+        .unwrap_or_else(|| image.to_owned())
 }
 
 #[cfg(test)]
@@ -187,5 +210,22 @@ mod tests {
     fn container_section_without_image_returns_empty() {
         let content = "[Container]\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extract data from file with registry aliases" — quadlet/extract.spec.ts line 139
+    #[test]
+    fn applies_registry_aliases_to_package_name() {
+        let content = "[Container]\nImage=quay.io/metallb/controller:v0.13.10\n";
+        let deps = extract_with_registry_aliases(
+            content,
+            &[("quay.io", "registry.internal/mirror/quay.io")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "quay.io/metallb/controller");
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("registry.internal/mirror/quay.io/metallb/controller")
+        );
+        assert_eq!(deps[0].tag.as_deref(), Some("v0.13.10"));
     }
 }
