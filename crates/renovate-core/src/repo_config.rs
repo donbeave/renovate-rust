@@ -3861,6 +3861,9 @@ impl RepoConfig {
             #[serde(rename = "rangeStrategy")]
             range_strategy: Option<String>,
             versioning: Option<String>,
+            /// Deprecated: versionScheme → versioning.
+            #[serde(rename = "versionScheme")]
+            version_scheme: Option<String>,
             #[serde(rename = "pinDigests")]
             pin_digests: Option<bool>,
             #[serde(rename = "followTag")]
@@ -3995,6 +3998,9 @@ impl RepoConfig {
             separate_multiple_major: bool,
             #[serde(rename = "separateMinorPatch", default)]
             separate_minor_patch: bool,
+            /// Deprecated: separatePatchReleases is an alias for separateMinorPatch.
+            #[serde(rename = "separatePatchReleases")]
+            separate_patch_releases: Option<bool>,
             #[serde(rename = "separateMultipleMinor", default)]
             separate_multiple_minor: bool,
             #[serde(rename = "maxMajorIncrement", default = "default_max_major_increment")]
@@ -4574,7 +4580,7 @@ impl RepoConfig {
                     commit_message_extra: r.commit_message_extra,
                     commit_message_suffix: r.commit_message_suffix,
                     range_strategy: r.range_strategy,
-                    versioning: r.versioning,
+                    versioning: r.versioning.or(r.version_scheme),
                     pin_digests: r.pin_digests,
                     follow_tag: r.follow_tag,
                     replacement_name: r.replacement_name,
@@ -4807,6 +4813,7 @@ impl RepoConfig {
             separate_multiple_major: scalar_sep_multi_major.unwrap_or(raw.separate_multiple_major),
             max_major_increment: raw.max_major_increment,
             separate_minor_patch: scalar_sep_minor_patch
+                .or(raw.separate_patch_releases)
                 .unwrap_or(raw.separate_minor_patch || preset_separate_minor_patch),
             separate_multiple_minor: scalar_sep_multi_minor.unwrap_or(raw.separate_multiple_minor),
             semantic_commit_type: param_sem_type
@@ -8036,6 +8043,95 @@ mod tests {
         assert!(c.separate_minor_patch);
         assert!(c.package_rules.is_empty());
         assert!(c.extends.is_empty());
+    }
+
+    // Ported: "migrates config" — config/migration.spec.ts line 17
+    #[test]
+    fn broad_config_migration_covers_representable_fields() {
+        let c = RepoConfig::parse(
+            r#"{
+                "enabled": true,
+                "automerge": "none",
+                "automergeType": "branch-push",
+                "baseBranch": "next",
+                "branchPrefix": "renovate/{{parentDir}}-",
+                "ignoreNodeModules": true,
+                "separateMajorReleases": true,
+                "separatePatchReleases": true,
+                "upgradeInRange": true,
+                "semanticPrefix": "fix(deps): ",
+                "enabledManagers": ["yarn"],
+                "pathRules": [
+                    {
+                        "paths": ["examples/**"],
+                        "extends": ["foo"]
+                    }
+                ],
+                "packageRules": [
+                    {
+                        "packagePatterns": ["^(@angular|typescript)"],
+                        "groupName": ["angular packages"],
+                        "excludePackageNames": ["foo"]
+                    },
+                    {
+                        "packageNames": ["guava"],
+                        "versionScheme": "maven"
+                    },
+                    {
+                        "packageNames": ["foo"],
+                        "packageRules": [
+                            {
+                                "depTypeList": ["bar"],
+                                "automerge": true
+                            }
+                        ]
+                    }
+                ]
+            }"#,
+        );
+
+        assert!(c.enabled);
+        assert!(!c.automerge);
+        assert_eq!(c.automerge_type.as_deref(), Some("branch-push"));
+        assert_eq!(c.base_branches, vec!["next"]);
+        assert_eq!(c.branch_prefix, "renovate/{{parentDir}}-");
+        assert!(c.ignore_paths.contains(&"node_modules/".to_owned()));
+        assert!(c.separate_major_minor);
+        assert!(c.separate_minor_patch);
+        assert_eq!(c.range_strategy, "bump");
+        assert_eq!(c.semantic_commit_type, "fix");
+        assert_eq!(c.semantic_commit_scope, "deps");
+        assert_eq!(c.enabled_managers, vec!["npm"]);
+
+        assert_eq!(c.package_rules.len(), 4);
+        assert!(
+            c.package_rules
+                .iter()
+                .any(|rule| rule.match_file_names == vec!["examples/**"])
+        );
+        let angular_rule = c
+            .package_rules
+            .iter()
+            .find(|rule| rule.group_name.as_deref() == Some("angular packages"))
+            .expect("angular package rule should be present");
+        assert!(
+            angular_rule
+                .match_package_names
+                .contains(&"/^(@angular|typescript)/".to_owned())
+        );
+        assert!(
+            angular_rule
+                .match_package_names
+                .contains(&"!foo".to_owned())
+        );
+        assert!(c.package_rules.iter().any(|rule| {
+            rule.match_package_names == vec!["guava"] && rule.versioning.as_deref() == Some("maven")
+        }));
+        assert!(
+            c.package_rules
+                .iter()
+                .any(|rule| rule.match_dep_types == vec!["bar"] && rule.automerge == Some(true))
+        );
     }
 
     #[test]

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1388 / 1653 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1389 / 1653 actionable tests ported (84%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3500,13 +3500,13 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 12 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 22 | **Actionable:** 22 | **Status:** ported
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| migrates config | 17 | pending | — | — | — |
+| migrates config | 17 | ported | `repo_config.rs` | `broad_config_migration_covers_representable_fields` | Covers the fields represented in Rust's typed config model; raw TS-only migration output remains covered by narrower not-applicable rows below |
 | migrates before and after schedules | 184 | ported | `repo_config.rs` | `schedule_before_after_migration_matches_renovate_cases` | — |
 | migrates every friday | 205 | ported | `repo_config.rs` | `schedule_every_friday_migrated_to_on_friday` | — |
 | migrates semantic prefix with no scope | 215 | ported | `repo_config.rs` | `semantic_prefix_without_scope_migrates_to_type_and_empty_scope` | — |
