@@ -77,6 +77,8 @@ pub struct PoetryExtractedDep {
     pub current_value: String,
     /// Which section this dep came from.
     pub dep_type: PoetryDepType,
+    pub registry_urls: Vec<String>,
+    pub source_name: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<PoetrySkipReason>,
 }
@@ -107,11 +109,13 @@ pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtrac
     let doc: Value = toml::from_str(content)?;
     let mut deps = Vec::new();
     let registry_urls = extract_registry_urls(&doc);
+    let source_urls_by_name = extract_source_urls_by_name(&doc);
 
     // [tool.poetry.dependencies]
     if let Some(tbl) = nested_table(&doc, &["tool", "poetry", "dependencies"]) {
         for (name, value) in tbl {
-            if let Some(dep) = parse_dep(name, value, PoetryDepType::Regular) {
+            if let Some(dep) = parse_dep(name, value, PoetryDepType::Regular, &source_urls_by_name)
+            {
                 deps.push(dep);
             }
         }
@@ -120,7 +124,7 @@ pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtrac
     // [tool.poetry.dev-dependencies]
     if let Some(tbl) = nested_table(&doc, &["tool", "poetry", "dev-dependencies"]) {
         for (name, value) in tbl {
-            if let Some(dep) = parse_dep(name, value, PoetryDepType::Dev) {
+            if let Some(dep) = parse_dep(name, value, PoetryDepType::Dev, &source_urls_by_name) {
                 deps.push(dep);
             }
         }
@@ -131,7 +135,9 @@ pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtrac
         for (_group_name, group_val) in groups {
             if let Some(group_deps) = group_val.get("dependencies").and_then(|d| d.as_table()) {
                 for (name, value) in group_deps {
-                    if let Some(dep) = parse_dep(name, value, PoetryDepType::Group) {
+                    if let Some(dep) =
+                        parse_dep(name, value, PoetryDepType::Group, &source_urls_by_name)
+                    {
                         deps.push(dep);
                     }
                 }
@@ -171,13 +177,20 @@ fn nested_table<'v>(root: &'v Value, keys: &[&str]) -> Option<&'v toml::map::Map
     cur.as_table()
 }
 
-fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<PoetryExtractedDep> {
+fn parse_dep(
+    name: &str,
+    value: &Value,
+    dep_type: PoetryDepType,
+    source_urls_by_name: &std::collections::BTreeMap<String, String>,
+) -> Option<PoetryExtractedDep> {
     // Python itself is not a PyPI package.
     if name == "python" {
         return Some(PoetryExtractedDep {
             name: name.to_owned(),
             current_value: value.as_str().unwrap_or("").to_owned(),
             dep_type,
+            registry_urls: Vec::new(),
+            source_name: None,
             skip_reason: Some(PoetrySkipReason::PythonVersion),
         });
     }
@@ -191,6 +204,8 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
                 name: normalized,
                 current_value,
                 dep_type,
+                registry_urls: Vec::new(),
+                source_name: None,
                 skip_reason: None,
             })
         }
@@ -208,6 +223,8 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
                     name: normalized,
                     current_value: table_version(tbl),
                     dep_type,
+                    registry_urls: Vec::new(),
+                    source_name: None,
                     skip_reason: Some(PoetrySkipReason::GitSource),
                 });
             }
@@ -216,6 +233,8 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
                     name: normalized,
                     current_value: table_version(tbl),
                     dep_type,
+                    registry_urls: Vec::new(),
+                    source_name: None,
                     skip_reason: Some(PoetrySkipReason::LocalPath),
                 });
             }
@@ -224,6 +243,8 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
                     name: normalized,
                     current_value: table_version(tbl),
                     dep_type,
+                    registry_urls: Vec::new(),
+                    source_name: None,
                     skip_reason: Some(PoetrySkipReason::UrlInstall),
                 });
             }
@@ -234,10 +255,18 @@ fn parse_dep(name: &str, value: &Value, dep_type: PoetryDepType) -> Option<Poetr
             } else {
                 v.to_owned()
             };
+            let source_name = tbl.get("source").and_then(Value::as_str).map(str::to_owned);
+            let registry_urls = source_name
+                .as_deref()
+                .and_then(|name| source_urls_by_name.get(name))
+                .map(|url| vec![url.clone()])
+                .unwrap_or_default();
             Some(PoetryExtractedDep {
                 name: normalized,
                 current_value,
                 dep_type,
+                registry_urls,
+                source_name,
                 skip_reason: None,
             })
         }
@@ -285,6 +314,30 @@ fn extract_registry_urls(doc: &Value) -> Vec<String> {
     urls
 }
 
+fn extract_source_urls_by_name(doc: &Value) -> std::collections::BTreeMap<String, String> {
+    let mut urls = std::collections::BTreeMap::from([(
+        "pypi".to_owned(),
+        "https://pypi.org/pypi/".to_owned(),
+    )]);
+    if let Some(sources) = doc
+        .get("tool")
+        .and_then(|tool| tool.get("poetry"))
+        .and_then(|poetry| poetry.get("source"))
+        .and_then(Value::as_array)
+    {
+        for source in sources {
+            let Some(name) = source.get("name").and_then(Value::as_str) else {
+                continue;
+            };
+            let Some(url) = source.get("url").and_then(Value::as_str) else {
+                continue;
+            };
+            urls.insert(name.to_owned(), url.to_owned());
+        }
+    }
+    urls
+}
+
 /// Normalize a Python package name per PEP 503.
 /// Parse a PEP 508 build-system requirement string like `"poetry-core>=1.0.0"`.
 fn parse_build_system_req(req: &str) -> Option<PoetryExtractedDep> {
@@ -306,6 +359,8 @@ fn parse_build_system_req(req: &str) -> Option<PoetryExtractedDep> {
         name: normalized,
         current_value: version.to_owned(),
         dep_type: PoetryDepType::BuildSystem,
+        registry_urls: Vec::new(),
+        source_name: None,
         skip_reason: None,
     })
 }
@@ -609,6 +664,55 @@ priority = "explicit"
         assert_eq!(
             package_file.registry_urls,
             vec!["https://foo.bar/simple/".to_owned()]
+        );
+    }
+
+    // Ported: "supports dependencies with explicit source" — poetry/extract.spec.ts line 500
+    #[test]
+    fn dependencies_with_explicit_source_get_registry_urls() {
+        let content = r#"
+[tool.poetry.dependencies]
+attrs = "^23.1.0"
+typer = { version = "^0.9.0", source = "pypi" }
+requests-cache = { version = "^1.1.0", source = "artifactory" }
+
+[[tool.poetry.source]]
+name = "artifactory"
+url = "https://example.com"
+priority = "explicit"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        let attrs = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "attrs")
+            .unwrap();
+        assert_eq!(attrs.current_value, "^23.1.0");
+        assert!(attrs.registry_urls.is_empty());
+        assert_eq!(attrs.source_name, None);
+
+        let typer = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "typer")
+            .unwrap();
+        assert_eq!(typer.current_value, "^0.9.0");
+        assert_eq!(typer.source_name.as_deref(), Some("pypi"));
+        assert_eq!(
+            typer.registry_urls,
+            vec!["https://pypi.org/pypi/".to_owned()]
+        );
+
+        let requests_cache = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.name == "requests-cache")
+            .unwrap();
+        assert_eq!(requests_cache.current_value, "^1.1.0");
+        assert_eq!(requests_cache.source_name.as_deref(), Some("artifactory"));
+        assert_eq!(
+            requests_cache.registry_urls,
+            vec!["https://example.com".to_owned()]
         );
     }
 
