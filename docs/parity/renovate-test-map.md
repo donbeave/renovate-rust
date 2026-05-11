@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1030 / 1217 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1030 / 1227 actionable tests ported (84%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 46 spec files not yet converted to per-test format (34 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2656,6 +2656,28 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/ant/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/update.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `modules/manager/ant/update`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates inline XML version attribute | 4 | pending | — | — | — |
+| updates single-quoted XML version attribute | 23 | pending | — | — | — |
+| updates .properties file value | 42 | pending | — | — | — |
+| updates .properties value at end of file without trailing newline | 58 | pending | — | — | — |
+| returns fileContent unchanged when already updated | 74 | pending | — | — | — |
+| updates when sharedVariableName is set even if currentValue differs | 91 | pending | — | — | — |
+| returns null when fileReplacePosition is undefined | 108 | pending | — | — | — |
+| updates version within coords attribute | 122 | pending | — | — | — |
+| updates version within 4-part coords attribute | 140 | pending | — | — | — |
+| returns null when value at position does not match | 158 | pending | — | — | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -2729,7 +2751,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 |--------------------|---------------|-----------|------------|--------|
 | `lib/modules/manager/asdf/index.spec.ts` | — | `crates/renovate-core/src/extractors/asdf.rs` | — | partial |
 | `lib/modules/manager/ant/properties.spec.ts` | — | `crates/renovate-core/src/extractors/ant.rs` | — | partial |
-| `lib/modules/manager/ant/update.spec.ts` | — | — | — | pending |
+<!-- ant/update.spec.ts converted to per-test format above -->
 | `lib/modules/manager/bazel-module/bazelrc.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/bazel-module/lockfile.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/bazel-module/parser/context.spec.ts` | — | `crates/renovate-core/src/extractors/bazel_module.rs` | — | partial |
