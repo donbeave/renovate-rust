@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 971 / 1217 actionable tests ported (80%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 976 / 1217 actionable tests ported (80%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 33 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 38 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2118,11 +2118,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts GitRepository with a tag from gitlab | 750 | ported | `flux.rs` | `extracts_git_repository_tag_from_gitlab` | — |
 | extracts GitRepository with a tag from bitbucket | 778 | ported | `flux.rs` | `extracts_git_repository_tag_from_bitbucket` | — |
 | extracts GitRepository with a tag from an unkown domain | 806 | ported | `flux.rs` | `extracts_git_repository_tag_from_unknown_domain` | — |
-| ignores OCIRepository with no tag and no digest | 834 | pending | — | — | Requires OCIRepository ref validation |
-| extracts OCIRepository with a tag | 861 | pending | — | — | Requires OCIRepository tag extraction |
-| extracts OCIRepository with a digest | 897 | pending | — | — | Requires OCIRepository digest extraction |
-| extracts OCIRepository with a tag that contains a digest | 925 | pending | — | — | Requires OCIRepository tag+inline-digest |
-| extracts OCIRepository with a digest and tag | 958 | pending | — | — | Requires OCIRepository tag+digest extraction |
+| ignores OCIRepository with no tag and no digest | 834 | ported | `flux.rs` | `oci_repository_without_tag_or_digest_is_unversioned` | — |
+| extracts OCIRepository with a tag | 861 | ported | `flux.rs` | `extracts_oci_repository_with_tag` | — |
+| extracts OCIRepository with a digest | 897 | ported | `flux.rs` | `extracts_oci_repository_with_digest` | — |
+| extracts OCIRepository with a tag that contains a digest | 925 | ported | `flux.rs` | `extracts_oci_repository_with_tag_containing_digest` | — |
+| extracts OCIRepository with a digest and tag | 958 | ported | `flux.rs` | `extracts_oci_repository_with_digest_and_tag` | — |
 | extracts OCIRepository with quoted digest and tag | 994 | pending | — | — | Requires OCIRepository quoted-value tolerance |
 | extracts OCIRepository with quoted keys | 1030 | pending | — | — | Requires OCIRepository quoted-key tolerance |
 | extracts OCIRepository when ref key is quoted | 1063 | pending | — | — | Requires OCIRepository quoted ref-key tolerance |

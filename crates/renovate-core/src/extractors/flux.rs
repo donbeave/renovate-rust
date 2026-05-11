@@ -71,6 +71,17 @@ pub struct FluxGitRepositoryDep {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FluxOciRepositoryDep {
+    pub dep_name: String,
+    pub datasource: &'static str,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub package_name: String,
+    pub replace_string: Option<String>,
+    pub skip_reason: Option<FluxSkipReason>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct HelmRepository {
     name: String,
     namespace: String,
@@ -124,6 +135,20 @@ pub fn extract_git_repositories(content: &str) -> Vec<FluxGitRepositoryDep> {
     yaml_documents(content)
         .iter()
         .filter_map(|doc| extract_git_repository_doc(doc))
+        .collect()
+}
+
+pub fn extract_oci_repositories(content: &str) -> Vec<FluxOciRepositoryDep> {
+    extract_oci_repositories_with_registry_aliases(content, &[])
+}
+
+pub fn extract_oci_repositories_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<FluxOciRepositoryDep> {
+    yaml_documents(content)
+        .iter()
+        .filter_map(|doc| extract_oci_repository_doc(doc, registry_aliases))
         .collect()
 }
 
@@ -192,6 +217,73 @@ fn extract_git_repository_doc(scalars: &[(Vec<String>, String)]) -> Option<FluxG
         source_url: None,
         skip_reason: Some(FluxSkipReason::UnversionedReference),
     })
+}
+
+fn extract_oci_repository_doc(
+    scalars: &[(Vec<String>, String)],
+    registry_aliases: &[(&str, &str)],
+) -> Option<FluxOciRepositoryDep> {
+    if value_at(scalars, &["apiVersion"]).is_none()
+        || value_at(scalars, &["kind"]) != Some("OCIRepository")
+    {
+        return None;
+    }
+
+    let image = value_at(scalars, &["spec", "url"])?.strip_prefix("oci://")?;
+    let package_name = apply_registry_alias(image, registry_aliases);
+    let tag = value_at(scalars, &["spec", "ref", "tag"]);
+    let digest = value_at(scalars, &["spec", "ref", "digest"]);
+
+    let (current_value, current_digest, replace_string) = match (tag, digest) {
+        (Some(tag), Some(digest)) => (
+            Some(tag.to_owned()),
+            Some(digest.to_owned()),
+            Some(format!("digest: {digest}\n            tag: {tag}")),
+        ),
+        (Some(tag), None) => {
+            if let Some((tag, digest)) = tag.split_once('@') {
+                (
+                    Some(tag.to_owned()),
+                    Some(digest.to_owned()),
+                    Some(format!("{tag}@{digest}")),
+                )
+            } else {
+                (Some(tag.to_owned()), None, Some(tag.to_owned()))
+            }
+        }
+        (None, Some(digest)) => (None, Some(digest.to_owned()), None),
+        (None, None) => (None, None, None),
+    };
+
+    let skip_reason = if current_value.is_none() && current_digest.is_none() {
+        Some(FluxSkipReason::UnversionedReference)
+    } else {
+        None
+    };
+
+    Some(FluxOciRepositoryDep {
+        dep_name: image.to_owned(),
+        datasource: DOCKER_DATASOURCE,
+        current_value,
+        current_digest,
+        package_name,
+        replace_string,
+        skip_reason,
+    })
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    registry_aliases
+        .iter()
+        .filter(|(source, _)| image == *source || image.starts_with(&format!("{source}/")))
+        .max_by_key(|(source, _)| source.len())
+        .map_or_else(
+            || image.to_owned(),
+            |(source, replacement)| {
+                let suffix = image.strip_prefix(source).unwrap_or_default();
+                format!("{}{}", replacement.trim_end_matches('/'), suffix)
+            },
+        )
 }
 
 fn normalize_git_source_url(url: &str) -> String {
@@ -920,6 +1012,93 @@ spec:
         );
     }
 
+    // Ported: "ignores OCIRepository with no tag and no digest" — flux/extract.spec.ts line 834
+    #[test]
+    fn oci_repository_without_tag_or_digest_is_unversioned() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec:\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n",
+        );
+        assert_eq!(
+            deps,
+            vec![FluxOciRepositoryDep {
+                dep_name: "ghcr.io/kyverno/manifests/kyverno".to_owned(),
+                datasource: DOCKER_DATASOURCE,
+                current_value: None,
+                current_digest: None,
+                package_name: "ghcr.io/kyverno/manifests/kyverno".to_owned(),
+                replace_string: None,
+                skip_reason: Some(FluxSkipReason::UnversionedReference),
+            }]
+        );
+    }
+
+    // Ported: "extracts OCIRepository with a tag" — flux/extract.spec.ts line 861
+    #[test]
+    fn extracts_oci_repository_with_tag() {
+        let deps = extract_oci_repositories_with_registry_aliases(
+            OCI_REPOSITORY,
+            &[("ghcr.io", "ghcr.proxy.test/some/path")],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(deps[0].current_digest, None);
+        assert_eq!(deps[0].dep_name, "ghcr.io/kyverno/manifests/kyverno");
+        assert_eq!(
+            deps[0].package_name,
+            "ghcr.proxy.test/some/path/kyverno/manifests/kyverno"
+        );
+        assert_eq!(deps[0].replace_string.as_deref(), Some("v1.8.2"));
+    }
+
+    // Ported: "extracts OCIRepository with a digest" — flux/extract.spec.ts line 897
+    #[test]
+    fn extracts_oci_repository_with_digest() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec:\n  ref:\n    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+        assert_eq!(deps[0].current_value, None);
+    }
+
+    // Ported: "extracts OCIRepository with a tag that contains a digest" — flux/extract.spec.ts line 925
+    #[test]
+    fn extracts_oci_repository_with_tag_containing_digest() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec:\n  ref:\n    tag: v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+        assert_eq!(
+            deps[0].replace_string.as_deref(),
+            Some("v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
+    // Ported: "extracts OCIRepository with a digest and tag" — flux/extract.spec.ts line 958
+    #[test]
+    fn extracts_oci_repository_with_digest_and_tag() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec:\n  ref:\n    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n    tag: v1.8.2\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+        assert!(deps[0].replace_string.as_deref().is_some_and(|value| {
+            value.contains("digest: sha256:") && value.contains("tag: v1.8.2")
+        }));
+    }
+
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
@@ -999,5 +1178,19 @@ spec:
   url: https://github.com/renovatebot/renovate
   ref:
     tag: v11.35.4
+"#;
+
+    const OCI_REPOSITORY: &str = r#"
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: kyverno-controller
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  provider: generic
+  url: oci://ghcr.io/kyverno/manifests/kyverno
+  ref:
+    tag: v1.8.2
 "#;
 }
