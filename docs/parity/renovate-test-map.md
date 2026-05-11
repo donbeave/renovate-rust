@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 997 / 1217 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 998 / 1217 actionable tests ported (82%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1177,7 +1177,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pipenv/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pipenv/extract.spec.ts
-**Total tests:** 16 | **Ported:** 15 | **Actionable:** 16 | **Status:** partial
+**Total tests:** 16 | **Ported:** 16 | **Actionable:** 16 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1193,7 +1193,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | ignores relative path dependencies | 213 | ported | `pipfile.rs` | `relative_path_in_mixed_list_skipped` (+ local_dep_skipped) | — |
 | ignores invalid versions | 223 | ported | `pipfile.rs` | `version_with_spaces_skipped` (+ wildcard_skipped, dev_wildcard_skipped) | — |
 | extracts all sources | 234 | ported | `pipfile.rs` | `extracts_all_sources` | — |
-| extracts example pipfile | 247 | pending | — | — | Requires full Pipfile fixture round-trip with sources |
+| extracts example pipfile | 247 | ported | `pipfile.rs` | `extracts_example_pipfile` | — |
 | supports custom index | 313 | ported | `pipfile.rs` | `supports_custom_index` | — |
 | gets python constraint from python_version | 338 | ported | `pipfile.rs` | `gets_python_constraint_from_python_version` | — |
 | gets python constraint from python_full_version | 350 | ported | `pipfile.rs` | `gets_python_constraint_from_python_full_version` | — |

@@ -29,6 +29,8 @@ pub enum PipfileSkipReason {
     Wildcard,
     /// Declared with a `git` key.
     GitDependency,
+    /// Declared with a `file` key.
+    FileDependency,
     /// Declared with a `path` key.
     LocalDependency,
 }
@@ -52,6 +54,7 @@ pub struct PipfileExtract {
     pub deps: Vec<PipfileDep>,
     pub registry_urls: Vec<String>,
     pub extracted_constraints: BTreeMap<String, String>,
+    pub lock_files: Vec<String>,
 }
 
 /// Parse a `Pipfile` and extract all deps.
@@ -98,6 +101,7 @@ pub fn extract_package_file(content: &str) -> PipfileExtract {
         deps: out,
         registry_urls,
         extracted_constraints,
+        lock_files: vec!["Pipfile.lock".to_owned()],
     }
 }
 
@@ -111,15 +115,7 @@ fn parse_entry(
 ) -> PipfileDep {
     match val {
         Value::String(s) => {
-            if s == "*" {
-                PipfileDep {
-                    name,
-                    current_value: String::new(),
-                    is_dev,
-                    registry_urls: Vec::new(),
-                    skip_reason: Some(PipfileSkipReason::Wildcard),
-                }
-            } else if !is_valid_version(s) {
+            if s == "*" || !is_valid_version(s) {
                 PipfileDep {
                     name,
                     current_value: s.clone(),
@@ -147,7 +143,16 @@ fn parse_entry(
                     skip_reason: Some(PipfileSkipReason::GitDependency),
                 };
             }
-            if t.contains_key("path") || t.contains_key("file") {
+            if t.contains_key("file") {
+                return PipfileDep {
+                    name,
+                    current_value: String::new(),
+                    is_dev,
+                    registry_urls: Vec::new(),
+                    skip_reason: Some(PipfileSkipReason::FileDependency),
+                };
+            }
+            if t.contains_key("path") {
                 return PipfileDep {
                     name,
                     current_value: String::new(),
@@ -166,7 +171,7 @@ fn parse_entry(
             if version == "*" || version.is_empty() {
                 PipfileDep {
                     name,
-                    current_value: String::new(),
+                    current_value: version.to_owned(),
                     is_dev,
                     registry_urls,
                     skip_reason: Some(PipfileSkipReason::Wildcard),
@@ -451,6 +456,112 @@ foo = "==1.0.0"
         );
     }
 
+    // Ported: "extracts example pipfile" — pipenv/extract.spec.ts line 247
+    #[test]
+    fn extracts_example_pipfile() {
+        let package_file = extract_package_file(PIPFILE4);
+        assert_eq!(
+            package_file.registry_urls,
+            vec!["https://pypi.python.org/simple".to_owned()]
+        );
+        assert_eq!(package_file.lock_files, vec!["Pipfile.lock".to_owned()]);
+        assert_eq!(
+            package_file.extracted_constraints.get("python"),
+            Some(&"== 2.7.*".to_owned())
+        );
+        assert_eq!(package_file.deps.len(), 8);
+
+        assert_dep(
+            find_dep(&package_file.deps, "requests"),
+            "requests",
+            false,
+            "",
+            Some(&PipfileSkipReason::Wildcard),
+            &[],
+        );
+        assert_dep(
+            find_dep(&package_file.deps, "records"),
+            "records",
+            false,
+            ">0.5.0",
+            None,
+            &[],
+        );
+        assert_dep(
+            find_dep(&package_file.deps, "django"),
+            "django",
+            false,
+            "",
+            Some(&PipfileSkipReason::GitDependency),
+            &[],
+        );
+        assert_dep(
+            find_dep(&package_file.deps, "e682b37"),
+            "e682b37",
+            false,
+            "",
+            Some(&PipfileSkipReason::FileDependency),
+            &[],
+        );
+        assert_dep(
+            find_dep(&package_file.deps, "e1839a8"),
+            "e1839a8",
+            false,
+            "",
+            Some(&PipfileSkipReason::LocalDependency),
+            &[],
+        );
+        assert_dep(
+            find_dep(&package_file.deps, "pywinusb"),
+            "pywinusb",
+            false,
+            "*",
+            Some(&PipfileSkipReason::Wildcard),
+            &["https://pypi.python.org/simple"],
+        );
+        assert_dep(
+            find_dep(&package_file.deps, "nose"),
+            "nose",
+            true,
+            "*",
+            Some(&PipfileSkipReason::Wildcard),
+            &[],
+        );
+        assert_dep(
+            find_dep(&package_file.deps, "unittest2"),
+            "unittest2",
+            true,
+            ">=1.0,<3.0",
+            None,
+            &[],
+        );
+    }
+
+    fn find_dep<'a>(deps: &'a [PipfileDep], name: &str) -> &'a PipfileDep {
+        deps.iter().find(|dep| dep.name == name).unwrap()
+    }
+
+    fn assert_dep(
+        dep: &PipfileDep,
+        name: &str,
+        is_dev: bool,
+        current_value: &str,
+        skip_reason: Option<&PipfileSkipReason>,
+        registry_urls: &[&str],
+    ) {
+        assert_eq!(dep.name, name);
+        assert_eq!(dep.is_dev, is_dev);
+        assert_eq!(dep.current_value, current_value);
+        assert_eq!(dep.skip_reason.as_ref(), skip_reason);
+        assert_eq!(
+            dep.registry_urls,
+            registry_urls
+                .iter()
+                .map(|url| (*url).to_owned())
+                .collect::<Vec<_>>()
+        );
+    }
+
     // Ported: "supports custom index" — pipenv/extract.spec.ts line 313
     #[test]
     fn supports_custom_index() {
@@ -544,4 +655,26 @@ pipenv = "==2020.8.13"
             Some(&"==2020.8.13".to_owned())
         );
     }
+
+    const PIPFILE4: &str = r#"
+[[source]]
+url = 'https://pypi.python.org/simple'
+verify_ssl = true
+name = 'pypi'
+
+[requires]
+python_version = '2.7'
+
+[packages]
+requests = { extras = ['socks'] }
+records = '>0.5.0'
+django = { git = 'https://github.com/django/django.git', ref = '1.11.4', editable = true }
+"e682b37" = {file = "https://github.com/divio/django-cms/archive/release/3.4.x.zip"}
+"e1839a8" = {path = ".", editable = true}
+pywinusb = { version = "*", os_name = "=='nt'", index="pypi"}
+
+[dev-packages]
+nose = '*'
+unittest2 = {version = ">=1.0,<3.0", markers="python_version < '2.7.9' or (python_version >= '3.0' and python_version < '3.4')"}
+"#;
 }
