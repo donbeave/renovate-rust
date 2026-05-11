@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1282 / 1402 actionable tests ported (91%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1282 / 1442 actionable tests ported (89%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 4 spec files not yet converted to per-test format (4 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, migration, and worker configuration — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 3 spec files not yet converted to per-test format (3 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — parser, integration, package-rules index, validation, and migration — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3967,6 +3967,98 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/workers/repository/init/merge.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/merge.spec.ts
+**Total tests:** 40 | **Ported:** 0 | **Actionable:** 40 | **Status:** pending
+
+### `workers/repository/init/merge › detectRepoFileConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns config if not found | 75 | pending | — | — | — |
+| returns config if not found - uses cache | 81 | pending | — | — | — |
+| returns cache config from onboarding cache - package.json | 95 | pending | — | — | — |
+| clones, if onboarding cache is valid but parsed config is undefined | 110 | pending | — | — | — |
+| returns cache config from onboarding cache - renovate.json | 133 | pending | — | — | — |
+| uses package.json config if found | 152 | pending | — | — | — |
+| massages package.json renovate string | 173 | pending | — | — | — |
+| returns error if cannot parse | 187 | pending | — | — | — |
+| throws error if duplicate keys | 199 | pending | — | — | — |
+| finds and parse renovate.json5 | 214 | pending | — | — | — |
+| finds .github/renovate.json | 226 | pending | — | — | — |
+| finds .gitlab/renovate.json | 238 | pending | — | — | — |
+| finds .renovaterc.json | 250 | pending | — | — | — |
+| finds .renovaterc.json5 | 266 | pending | — | — | — |
+
+### `workers/repository/init/merge › checkForRepoConfigError`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no error | 284 | pending | — | — | — |
+| throws on error | 288 | pending | — | — | — |
+
+### `workers/repository/init/merge › mergeRenovateConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses onboarding config if silent | 305 | pending | — | — | — |
+| throws error if misconfigured | 317 | pending | — | — | — |
+| migrates nested config | 333 | pending | — | — | — |
+| ignores presets | 363 | pending | — | — | — |
+| continues if no errors | 382 | pending | — | — | — |
+| continues if no errors-2 | 393 | pending | — | — | — |
+| sets npmToken to npmrc when it is not inside encrypted | 413 | pending | — | — | — |
+| sets npmToken to npmrc when it is inside encrypted | 436 | pending | — | — | — |
+| deletes user conifgured env after setting in mem cache | 463 | pending | — | — | — |
+| applies repositoryEntryConfig between global and repo file config | 485 | pending | — | — | — |
+| supports repositoryEntryConfig without extends or ignorePresets | 608 | pending | — | — | — |
+
+### `workers/repository/init/merge › setNpmTokenInNpmrc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips in no npmToken found | 641 | pending | — | — | — |
+| adds default npmrc registry if it does not exist | 647 | pending | — | — | — |
+| adds npmToken at end of npmrc string if ${NPM_TOKEN} string not found | 655 | pending | — | — | — |
+| replaces ${NPM_TOKEN} with npmToken value | 661 | pending | — | — | — |
+
+### `workers/repository/init/merge › applyNpmrc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing if npmrc is missing after token migration | 672 | pending | — | — | — |
+| migrates npmToken and sets npmrc | 680 | pending | — | — | — |
+
+### `workers/repository/init/merge › applyHostRules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing when hostRules is not configured | 698 | pending | — | — | — |
+| adds hostRules and clears queue and throttle | 710 | pending | — | — | — |
+| warns on invalid hostRule and continues applying others | 730 | pending | — | — | — |
+
+### `workers/repository/init/merge › static repository config › resolveStaticRepoConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $name | 796 | pending | — | — | — |
+
+### `workers/repository/init/merge › static repository config › resolveStaticRepoConfig termination cases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $name | 820 | pending | — | — | — |
+| should log static config validation errors and warnings | 840 | pending | — | — | — |
+
+### `workers/repository/init/merge › static repository config › mergeRenovateConfig() with a static repository config`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $name | 868 | pending | — | — | — |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3974,7 +4066,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- workers/global/config/parse/cli.spec.ts converted to per-test format above -->
 <!-- workers/global/config/parse/env.spec.ts converted to per-test format above -->
 <!-- workers/global/config/parse/file.spec.ts converted to per-test format above -->
-| `lib/workers/repository/init/merge.spec.ts` | 37 | `crates/renovate-core/src/repo_config.rs` | 0 | pending |
+<!-- workers/repository/init/merge.spec.ts converted to per-test format above -->
 <!-- workers/repository/init/apis.spec.ts converted to per-test format above -->
 <!-- workers/repository/init/cache.spec.ts converted to per-test format above -->
 
