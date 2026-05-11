@@ -520,6 +520,70 @@ releases:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::InvalidVersion));
     }
 
+    // Ported: "parses multidoc yaml" — helmfile/extract.spec.ts line 204
+    #[test]
+    fn parses_multidoc_yaml() {
+        let content = r#"
+environments:
+  beta: {}
+---
+repositories:
+  - name: stable
+    url: https://charts.helm.sh/stable/
+  - name: incubator
+    url: https://charts.helm.sh/incubator/
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+---
+releases:
+  - name: manifests
+    chart: ./environment/beta/static
+  - name: rabbitmq
+    chart: bitnami/rabbitmq
+    version: 7.4.3
+  - name: prometheus-operator
+    chart: prometheus-community/kube-prometheus-stack
+    version: 13.7
+  - name: external-dns
+    chart: bitnami/external-dns
+    version: {{ .Values | getOrNil "external_dns.version" | default "4.5.5" }}
+  - name: raw1
+    chart: incubator/raw
+    version: 0.1.0
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 5);
+
+        let manifests = deps.iter().find(|d| d.name == "manifests").unwrap();
+        assert_eq!(manifests.skip_reason, Some(HelmSkipReason::LocalChart));
+
+        let rabbitmq = deps.iter().find(|d| d.name == "rabbitmq").unwrap();
+        assert_eq!(rabbitmq.current_value, "7.4.3");
+        assert_eq!(rabbitmq.repository, "https://charts.bitnami.com/bitnami");
+
+        let kube = deps
+            .iter()
+            .find(|d| d.name == "kube-prometheus-stack")
+            .unwrap();
+        assert_eq!(kube.current_value, "13.7");
+        assert_eq!(
+            kube.repository,
+            "https://prometheus-community.github.io/helm-charts"
+        );
+
+        let external_dns = deps.iter().find(|d| d.name == "external-dns").unwrap();
+        assert_eq!(
+            external_dns.skip_reason,
+            Some(HelmSkipReason::InvalidVersion)
+        );
+
+        let raw = deps.iter().find(|d| d.name == "raw").unwrap();
+        assert_eq!(raw.current_value, "0.1.0");
+        assert_eq!(raw.repository, "https://charts.helm.sh/incubator/");
+    }
+
     // Ported: "parses a chart with a go templating" — helmfile/extract.spec.ts line 242
     #[test]
     fn go_template_chart_skipped_real_chart_kept() {
