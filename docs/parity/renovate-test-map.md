@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 951 / 1217 actionable tests ported (78%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 957 / 1217 actionable tests ported (79%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 13 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 19 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2097,12 +2097,12 @@ Status key: `ported` · `pending` · `not-applicable`
 | ignores HelmRelease resources without any chart reference | 234 | ported | `flux.rs` | `ignores_helm_release_without_chart_reference` | — |
 | ignores HelmRelease resources without a chart name | 250 | ported | `flux.rs` | `ignores_helm_release_without_chart_name` | — |
 | skip HelmRelease with local chart | 271 | ported | `flux.rs` | `skips_helm_release_with_local_chart` | — |
-| does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace | 299 | pending | — | — | Requires namespace pairing |
-| does not match HelmRelease resources without a sourceRef | 325 | pending | — | — | Requires sourceRef pairing |
-| does not match HelmRelease resources without a namespace | 355 | pending | — | — | Requires namespace pairing |
-| ignores HelmRepository resources without a namespace | 376 | pending | — | — | Requires namespace pairing |
-| ignores HelmRepository resources without a URL | 400 | pending | — | — | Requires url validation |
-| ignores HelmRelease resources using an invalid chartRef | 425 | pending | — | — | Requires chartRef validation |
+| does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace | 299 | ported | `flux.rs` | `does_not_match_release_without_namespace_to_repository_without_namespace` | — |
+| does not match HelmRelease resources without a sourceRef | 325 | ported | `flux.rs` | `release_without_source_ref_is_unknown_registry` | — |
+| does not match HelmRelease resources without a namespace | 355 | ported | `flux.rs` | `does_not_match_release_without_namespace` | — |
+| ignores HelmRepository resources without a namespace | 376 | ported | `flux.rs` | `ignores_helm_repository_without_namespace` | — |
+| ignores HelmRepository resources without a URL | 400 | ported | `flux.rs` | `ignores_helm_repository_without_url` | — |
+| ignores HelmRelease resources using an invalid chartRef | 425 | ported | `flux.rs` | `ignores_helm_release_with_invalid_chart_ref` | — |
 | ignores HelmRelease resources using a chartRef targetting a HelmChart | 433 | pending | — | — | Requires HelmChart chartRef detection |
 | ignores HelmRelease resources using a chartRef targetting an OCIRepository | 457 | pending | — | — | Requires OCIRepository chartRef detection |
 | extracts HelmChart version | 492 | pending | — | — | Requires HelmChart resource extraction |
