@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1428 / 1650 actionable tests ported (87%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1431 / 1650 actionable tests ported (87%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 13 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 16 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2215,11 +2215,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes nixpkgs but using indirect type that cannot be updated | 494 | pending | — | — | Requires indirect-type skip-reason |
 | includes nixpkgs but using indirect type and path locked type that cannot be updated | 524 | pending | — | — | Requires indirect+path-type skip-reason |
 | includes flake from GitHub Enterprise | 553 | ported | `nix.rs` | `includes_github_enterprise_input` | — |
-| includes flake with tarball type | 649 | pending | — | — | Requires tarball-type handling |
+| includes flake with tarball type | 649 | ported | `nix.rs` | `includes_tarball_input_with_archive_url` | — |
 | uri decode gitlab subgroup | 750 | pending | — | — | Requires URI-decode for gitlab subgroup |
 | includes flake with only tarball type | 790 | pending | — | — | Requires tarball-only handling |
 | includes flake with nixpkgs-lib as tarball type | 818 | pending | — | — | Requires nixpkgs-lib tarball detection |
-| includes flake with nixpkgs channel as tarball type | 897 | pending | — | — | Requires nixpkgs-channel tarball detection |
+| includes flake with nixpkgs channel as tarball type | 897 | ported | `nix.rs` | `includes_nixpkgs_channel_tarball_input` | — |
 | finds currentDigest correctly when input sha is pinned | 937 | pending | — | — | Requires currentDigest extraction |
 | does not duplicate nixpkgs dependency | 983 | pending | — | — | Requires dedup logic |
 | returns null when flake.lock file cannot be read | 1028 | pending | — | — | Requires flake.lock read-failure path |
@@ -2231,7 +2231,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes github flake with ref when original has rev | 1154 | pending | — | — | Requires github flake ref+rev handling |
 | includes gitlab flake with custom host | 1196 | ported | `nix.rs` | `includes_gitlab_input_with_custom_host` | — |
 | includes sourcehut flake with custom host | 1238 | ported | `nix.rs` | `includes_sourcehut_input_with_custom_host` | — |
-| includes tarball flake with ref when original has rev | 1280 | pending | — | — | Requires tarball ref+rev handling |
+| includes tarball flake with ref when original has rev | 1280 | ported | `nix.rs` | `includes_tarball_input_ref_and_current_digest` | — |
 | handles unknown flake lock type | 1321 | ported | `nix.rs` | `unknown_flake_lock_type_returns_empty` | — |
 | ignores unsupported file type and still extracts other inputs | 1348 | ported | `nix.rs` | `unsupported_file_type_is_ignored_while_other_inputs_extract` | — |
 

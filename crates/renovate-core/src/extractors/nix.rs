@@ -108,6 +108,8 @@ pub struct NixFlakeDep {
     pub locked_rev: String,
     /// Current branch/tag ref from `original.ref` (e.g. `"nixos-24.05"`).
     pub current_ref: Option<String>,
+    /// Explicit commit/digest from `original.rev`, when the declared input pins one.
+    pub current_digest: Option<String>,
     /// GitHub/GitLab package name (e.g. `"NixOS/nixpkgs"`).
     pub package_name: Option<String>,
     /// Input type for routing to the correct datasource.
@@ -154,6 +156,7 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
                 input_name: name.clone(),
                 locked_rev: String::new(),
                 current_ref: None,
+                current_digest: None,
                 package_name: None,
                 input_type: FlakeInputType::Unknown,
                 skip_reason: Some(NixSkipReason::NoRev),
@@ -166,6 +169,7 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
                 input_name: name.clone(),
                 locked_rev: String::new(),
                 current_ref: None,
+                current_digest: None,
                 package_name: None,
                 input_type: locked.input_type.clone(),
                 skip_reason: Some(NixSkipReason::NoRev),
@@ -195,6 +199,7 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
                 input_name: name.clone(),
                 locked_rev: String::new(),
                 current_ref: None,
+                current_digest: None,
                 package_name: None,
                 input_type: locked.input_type.clone(),
                 skip_reason: Some(if locked.input_type == FlakeInputType::Path {
@@ -213,6 +218,7 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
                     input_name: name.clone(),
                     locked_rev: String::new(),
                     current_ref: None,
+                    current_digest: None,
                     package_name: None,
                     input_type: locked.input_type.clone(),
                     skip_reason: Some(NixSkipReason::NoRev),
@@ -222,11 +228,16 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
         };
 
         let package_name = build_package_name(locked, original);
+        let current_ref = original
+            .git_ref
+            .clone()
+            .or_else(|| tarball_channel_ref(original));
 
         deps.push(NixFlakeDep {
             input_name: name.clone(),
             locked_rev: rev,
-            current_ref: original.git_ref.clone(),
+            current_ref,
+            current_digest: original.rev.clone(),
             package_name,
             input_type: locked.input_type.clone(),
             skip_reason: None,
@@ -250,7 +261,8 @@ fn build_package_name(locked: &FlakeLocked, original: &FlakeOriginal) -> Option<
             let repo = original.repo.as_deref()?;
             Some(format!("https://{host}/{owner}/{repo}"))
         }
-        FlakeInputType::Git | FlakeInputType::Tarball => original.url.clone(),
+        FlakeInputType::Git => original.url.clone(),
+        FlakeInputType::Tarball => original.url.as_deref().and_then(tarball_package_name),
         FlakeInputType::Sourcehut => {
             let host = original.host.as_deref().unwrap_or("git.sr.ht");
             let owner = original.owner.as_deref()?;
@@ -258,6 +270,28 @@ fn build_package_name(locked: &FlakeLocked, original: &FlakeOriginal) -> Option<
             Some(format!("https://{host}/{owner}/{repo}"))
         }
         _ => None,
+    }
+}
+
+fn tarball_package_name(url: &str) -> Option<String> {
+    if let Some(stripped) = url.strip_prefix("https://channels.nixos.org/")
+        && stripped.ends_with("/nixexprs.tar.xz")
+    {
+        return Some("https://github.com/NixOS/nixpkgs".to_owned());
+    }
+
+    let (base, _) = url.split_once("/archive/")?;
+    Some(base.to_owned())
+}
+
+fn tarball_channel_ref(original: &FlakeOriginal) -> Option<String> {
+    let url = original.url.as_deref()?;
+    let stripped = url.strip_prefix("https://channels.nixos.org/")?;
+    let (channel, rest) = stripped.split_once('/')?;
+    if rest == "nixexprs.tar.xz" {
+        Some(channel.to_owned())
+    } else {
+        None
     }
 }
 
@@ -647,6 +681,139 @@ mod tests {
             Some("https://github.corp.example.com/my-org/nixpkgs-extra-pkgs")
         );
         assert_eq!(deps[0].input_type, FlakeInputType::Github);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes flake with tarball type" — nix/extract.spec.ts line 649
+    #[test]
+    fn includes_tarball_input_with_archive_url() {
+        let content = r#"{
+  "nodes": {
+    "data-mesher": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1727355895,
+        "narHash": "sha256-grZIaLgk5GgoDuTt49RTCLBh458H4YJdIAU4B3onXRw=",
+        "rev": "c7e39452affcc0f89e023091524e38b3aaf109e9",
+        "type": "tarball",
+        "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/c7e39452affcc0f89e023091524e38b3aaf109e9.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://git.clan.lol/clan/data-mesher/archive/main.tar.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "data-mesher": "data-mesher"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "data-mesher");
+        assert_eq!(
+            deps[0].locked_rev,
+            "c7e39452affcc0f89e023091524e38b3aaf109e9"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://git.clan.lol/clan/data-mesher")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Tarball);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes flake with nixpkgs channel as tarball type" — nix/extract.spec.ts line 897
+    #[test]
+    fn includes_nixpkgs_channel_tarball_input() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1756904031,
+        "narHash": "sha256-V29Bu1nR6Ayt+uUhf/6L43DSxb66BQ+8E2wH1GHa5IA=",
+        "rev": "0e6684e6c5755325f801bda1751a8a4038145d7d",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(
+            deps[0].locked_rev,
+            "0e6684e6c5755325f801bda1751a8a4038145d7d"
+        );
+        assert_eq!(deps[0].current_ref.as_deref(), Some("nixpkgs-unstable"));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/NixOS/nixpkgs")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Tarball);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes tarball flake with ref when original has rev" — nix/extract.spec.ts line 1280
+    #[test]
+    fn includes_tarball_input_ref_and_current_digest() {
+        let content = r#"{
+  "nodes": {
+    "data-mesher": {
+      "locked": {
+        "lastModified": 1727355895,
+        "narHash": "sha256-grZIaLgk5GgoDuTt49RTCLBh458H4YJdIAU4B3onXRw=",
+        "rev": "c7e39452affcc0f89e023091524e38b3aaf109e9",
+        "type": "tarball",
+        "url": "https://git.clan.lol/api/v1/repos/clan/data-mesher/archive/c7e39452affcc0f89e023091524e38b3aaf109e9.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://git.clan.lol/clan/data-mesher/archive/main.tar.gz",
+        "ref": "main",
+        "rev": "specific-commit-hash"
+      }
+    },
+    "root": {
+      "inputs": {
+        "data-mesher": "data-mesher"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "data-mesher");
+        assert_eq!(deps[0].current_ref.as_deref(), Some("main"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("specific-commit-hash")
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://git.clan.lol/clan/data-mesher")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Tarball);
         assert!(deps[0].skip_reason.is_none());
     }
 
