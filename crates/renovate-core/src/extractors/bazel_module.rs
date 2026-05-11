@@ -150,6 +150,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")
         assert!(deps[0].dev_dependency);
     }
 
+    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
     #[test]
     fn extracts_multiline_dep() {
         let content = r#"
@@ -164,6 +165,7 @@ bazel_dep(
         assert_eq!(deps[0].current_value, "0.24.0");
     }
 
+    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
     #[test]
     fn multiple_deps() {
         let content = r#"
@@ -188,6 +190,7 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         );
     }
 
+    // Ported: "returns null if file has unrecognized declarations" — bazel-module/extract.spec.ts line 46
     #[test]
     fn comment_lines_stripped() {
         let content = r#"
