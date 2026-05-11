@@ -59,6 +59,8 @@ pub struct KubernetesDockerDep {
 /// K8s manifest signature: both `apiVersion:` and `kind:` present.
 static API_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^\s*apiVersion\s*:").unwrap());
 static KIND_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?m)^\s*kind\s*:").unwrap());
+static KIND_VALUE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"(?m)^\s*kind\s*:\s*["']?([^"'\s]+)"#).unwrap());
 
 /// `image: <value>` YAML line (with optional list prefix `-`).
 static IMAGE_RE: LazyLock<Regex> =
@@ -76,10 +78,21 @@ pub fn extract(content: &str) -> Vec<KubernetesDep> {
         return Vec::new();
     }
 
+    content
+        .split("\n---")
+        .filter(|doc| API_RE.is_match(doc) && KIND_RE.is_match(doc))
+        .flat_map(extract_doc)
+        .collect()
+}
+
+fn extract_doc(doc: &str) -> Vec<KubernetesDep> {
     let mut deps = Vec::new();
     let mut in_image_volume = false;
+    let supports_image_volumes = KIND_VALUE_RE
+        .captures(doc)
+        .is_some_and(|cap| supports_image_volume_kind(&cap[1]));
 
-    for line in content.lines() {
+    for line in doc.lines() {
         let stripped = match line.find(" #") {
             Some(pos) => &line[..pos],
             None => line,
@@ -87,7 +100,7 @@ pub fn extract(content: &str) -> Vec<KubernetesDep> {
         let trimmed = stripped.trim_start();
 
         let image_ref = if trimmed == "image:" {
-            in_image_volume = true;
+            in_image_volume = supports_image_volumes;
             continue;
         } else if in_image_volume {
             if let Some(cap) = IMAGE_VOLUME_RE.captures(stripped) {
@@ -111,6 +124,20 @@ pub fn extract(content: &str) -> Vec<KubernetesDep> {
     }
 
     deps
+}
+
+fn supports_image_volume_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "CronJob"
+            | "DaemonSet"
+            | "Deployment"
+            | "Job"
+            | "Pod"
+            | "ReplicaSet"
+            | "ReplicationController"
+            | "StatefulSet"
+    )
 }
 
 /// Extract Docker deps and apply Renovate-style registry aliases.
@@ -421,6 +448,95 @@ spec:
     fn ignores_non_kubernetes_yaml() {
         // GitLab CI YAML has no apiVersion or kind → empty
         let content = "stages:\n  - build\nbuild:\n  image: node:18\n  script:\n    - npm ci\n";
+        assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extracts image volumes from $kind" — kubernetes/extract.spec.ts line 223
+    #[test]
+    fn extracts_image_volumes_from_workload_kinds() {
+        for (kind, api_version) in [
+            ("DaemonSet", "apps/v1"),
+            ("Deployment", "apps/v1"),
+            ("Job", "batch/v1"),
+            ("ReplicaSet", "apps/v1"),
+            ("ReplicationController", "v1"),
+            ("StatefulSet", "apps/v1"),
+        ] {
+            let content = format!(
+                r#"
+apiVersion: {api_version}
+kind: {kind}
+metadata:
+  name: test
+spec:
+  template:
+    spec:
+      volumes:
+        - name: vol
+          image:
+            reference: quay.io/test/image:v1.0.0
+"#
+            );
+            let deps = extract(&content);
+            assert!(
+                deps.iter()
+                    .any(|dep| dep.image_name == "quay.io/test/image"
+                        && dep.current_value == "v1.0.0"),
+                "expected image volume for {kind}"
+            );
+        }
+    }
+
+    // Ported: "extracts image volumes from Pod and CronJob" — kubernetes/extract.spec.ts line 265
+    #[test]
+    fn extracts_image_volumes_from_pod_and_cronjob() {
+        let content = r#"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-test
+spec:
+  volumes:
+    - name: vol
+      image:
+        reference: quay.io/test/pod-image:v1.0.0
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-test
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+            - name: vol
+              image:
+                reference: quay.io/test/cronjob-image:v2.0.0
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].image_name, "quay.io/test/pod-image");
+        assert_eq!(deps[0].current_value, "v1.0.0");
+        assert_eq!(deps[1].image_name, "quay.io/test/cronjob-image");
+        assert_eq!(deps[1].current_value, "v2.0.0");
+    }
+
+    // Ported: "does not extract image volumes for unsupported kind" — kubernetes/extract.spec.ts line 326
+    #[test]
+    fn does_not_extract_image_volumes_for_unsupported_kind() {
+        let content = r#"
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  name: test-network-policy
+spec:
+  volumes:
+    - name: vol
+      image:
+        reference: quay.io/test/image:v1.0.0
+"#;
         assert!(extract(content).is_empty());
     }
 
