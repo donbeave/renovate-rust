@@ -7918,6 +7918,16 @@ mod tests {
         assert_eq!(c.schedule, vec!["after 1:00pm and before 5:00pm"]);
     }
 
+    // Ported: "does not migrate config" — config/migration.spec.ts line 297
+    #[test]
+    fn non_deprecated_config_fields_parse_without_migration_effects() {
+        let c = RepoConfig::parse(r#"{"enabled": true, "separateMinorPatch": true}"#);
+        assert!(c.enabled);
+        assert!(c.separate_minor_patch);
+        assert!(c.package_rules.is_empty());
+        assert!(c.extends.is_empty());
+    }
+
     #[test]
     fn schedule_every_weekday_not_migrated_by_list() {
         // "every weekday" is left as-is (handled natively by the scheduler)

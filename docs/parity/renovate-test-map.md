@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1383 / 1661 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1384 / 1661 actionable tests ported (83%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1939,7 +1939,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 30 | **Ported:** 16 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 17 | **Actionable:** 30 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -3515,7 +3515,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | does not migrate hour range | 247 | ported | `repo_config.rs` | `schedule_compound_non_straddling_not_split` | — |
 | migrates packages | 257 | ported | `repo_config.rs` | `deprecated_packages_field_merged_into_package_rules` | — |
 | overrides existing automerge setting | 279 | pending | — | — | — |
-| does not migrate config | 297 | pending | — | — | — |
+| does not migrate config | 297 | ported | `repo_config.rs` | `non_deprecated_config_fields_parse_without_migration_effects` | — |
 | migrates subconfig | 308 | pending | — | — | — |
 | migrates packageFiles | 334 | pending | — | — | — |
 | migrates more packageFiles | 360 | pending | — | — | — |
