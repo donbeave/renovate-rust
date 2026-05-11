@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 821 / 1217 actionable tests ported (67%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 825 / 1217 actionable tests ported (68%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1817,7 +1817,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nuget/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/extract.spec.ts
-**Total tests:** 35 | **Ported:** 20 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 24 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1847,10 +1847,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles NuGet.config with whitespaces in package source keys | 385 | pending | — | — | Requires NuGet.config key normalization |
 | ignores local feed in NuGet.config | 404 | pending | — | — | Requires NuGet.config local-feed filtering |
 | extracts registry URLs independently | 422 | pending | — | — | Requires registryUrls plumbing |
-| extracts msbuild-sdks from global.json | 461 | pending | — | — | Requires global.json msbuild-sdks parsing |
-| extracts dotnet-sdk from global.json | 483 | pending | — | — | Requires global.json sdk version parsing |
-| handles malformed global.json | 501 | pending | — | — | Requires global.json tolerant parsing |
-| handles not-a-nuget global.json | 509 | pending | — | — | Requires global.json type-detection |
+| extracts msbuild-sdks from global.json | 461 | ported | `nuget.rs` | `global_json_extracts_dotnet_sdk_and_msbuild_sdks` | — |
+| extracts dotnet-sdk from global.json | 483 | ported | `nuget.rs` | `global_json_extracts_dotnet_sdk_only` | — |
+| handles malformed global.json | 501 | ported | `nuget.rs` | `global_json_malformed_returns_none` | — |
+| handles not-a-nuget global.json | 509 | ported | `nuget.rs` | `global_json_without_nuget_content_returns_none` | — |
 
 ### `extractPackageFile() › .config/dotnet-tools.json`
 

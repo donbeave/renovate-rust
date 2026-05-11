@@ -46,6 +46,8 @@ pub enum NuGetDepType {
     Global,
     /// MSBuild SDK reference (`<Project Sdk="…/version">`, `<Sdk Name="…" Version="…">`, `<Import Sdk="…" Version="…">`)
     MsbuildSdk,
+    /// .NET SDK version from `global.json`.
+    DotnetSdk,
     /// Local .NET tool manifest entry from `.config/dotnet-tools.json`.
     DotnetTool,
     /// `#:package` directive in a single C# file.
@@ -62,6 +64,7 @@ impl NuGetDepType {
             NuGetDepType::CliTool => "DotNetCliToolReference",
             NuGetDepType::Global => "GlobalPackageReference",
             NuGetDepType::MsbuildSdk => "msbuild-sdk",
+            NuGetDepType::DotnetSdk => "dotnet-sdk",
             NuGetDepType::DotnetTool => "nuget",
             NuGetDepType::SingleFilePackage => "nuget",
             NuGetDepType::ContainerImage => "docker",
@@ -94,6 +97,13 @@ pub struct NuGetExtractedDep {
     pub dep_type: NuGetDepType,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<NuGetSkipReason>,
+}
+
+/// Extracted content from an MSBuild `global.json` manifest.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NuGetGlobalJsonExtract {
+    pub deps: Vec<NuGetExtractedDep>,
+    pub dotnet_sdk_constraint: Option<String>,
 }
 
 /// Errors from parsing a NuGet project file.
@@ -280,6 +290,54 @@ pub fn extract_single_csharp_file(content: &str) -> Vec<NuGetExtractedDep> {
             })
         })
         .collect()
+}
+
+/// Parse a NuGet-relevant `global.json` manifest.
+///
+/// Invalid JSON and manifests with neither `sdk.version` nor `msbuild-sdks`
+/// return `None`, matching Renovate's null extraction result.
+pub fn extract_global_json(content: &str) -> Option<NuGetGlobalJsonExtract> {
+    let manifest = serde_json::from_str::<Value>(content).ok()?;
+    let mut deps = Vec::new();
+    let mut dotnet_sdk_constraint = None;
+
+    if let Some(version) = manifest
+        .get("sdk")
+        .and_then(|sdk| sdk.get("version"))
+        .and_then(Value::as_str)
+    {
+        dotnet_sdk_constraint = Some(version.to_owned());
+        deps.push(NuGetExtractedDep {
+            package_id: "dotnet-sdk".to_owned(),
+            current_value: version.to_owned(),
+            current_digest: None,
+            dep_type: NuGetDepType::DotnetSdk,
+            skip_reason: None,
+        });
+    }
+
+    if let Some(msbuild_sdks) = manifest.get("msbuild-sdks").and_then(Value::as_object) {
+        for (name, version) in msbuild_sdks {
+            if let Some(version) = version.as_str() {
+                deps.push(NuGetExtractedDep {
+                    package_id: name.clone(),
+                    current_value: version.to_owned(),
+                    current_digest: None,
+                    dep_type: NuGetDepType::MsbuildSdk,
+                    skip_reason: None,
+                });
+            }
+        }
+    }
+
+    if deps.is_empty() {
+        None
+    } else {
+        Some(NuGetGlobalJsonExtract {
+            deps,
+            dotnet_sdk_constraint,
+        })
+    }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -894,5 +952,58 @@ mod tests {
         assert_eq!(deps[1].current_value, "3.0.1");
         assert_eq!(deps[1].dep_type, NuGetDepType::SingleFilePackage);
         assert_eq!(deps[1].dep_type.as_renovate_str(), "nuget");
+    }
+
+    // Ported: "extracts msbuild-sdks from global.json" — nuget/extract.spec.ts line 461
+    #[test]
+    fn global_json_extracts_dotnet_sdk_and_msbuild_sdks() {
+        let content = r#"{
+  "sdk": {
+    "version": "5.0.302",
+    "rollForward": "latestMajor"
+  },
+  "msbuild-sdks": {
+    "YoloDev.Sdk": "0.2.0"
+  }
+}"#;
+        let extracted = extract_global_json(content).expect("global.json should extract");
+        assert_eq!(extracted.dotnet_sdk_constraint, Some("5.0.302".to_owned()));
+        assert_eq!(extracted.deps.len(), 2);
+        assert_eq!(extracted.deps[0].package_id, "dotnet-sdk");
+        assert_eq!(extracted.deps[0].current_value, "5.0.302");
+        assert_eq!(extracted.deps[0].dep_type, NuGetDepType::DotnetSdk);
+        assert_eq!(extracted.deps[0].dep_type.as_renovate_str(), "dotnet-sdk");
+        assert_eq!(extracted.deps[1].package_id, "YoloDev.Sdk");
+        assert_eq!(extracted.deps[1].current_value, "0.2.0");
+        assert_eq!(extracted.deps[1].dep_type, NuGetDepType::MsbuildSdk);
+    }
+
+    // Ported: "extracts dotnet-sdk from global.json" — nuget/extract.spec.ts line 483
+    #[test]
+    fn global_json_extracts_dotnet_sdk_only() {
+        let content = r#"{
+  "sdk": {
+    "version": "5.0.302",
+    "rollForward": "latestMajor"
+  }
+}"#;
+        let extracted = extract_global_json(content).expect("global.json should extract");
+        assert_eq!(extracted.dotnet_sdk_constraint, Some("5.0.302".to_owned()));
+        assert_eq!(extracted.deps.len(), 1);
+        assert_eq!(extracted.deps[0].package_id, "dotnet-sdk");
+        assert_eq!(extracted.deps[0].current_value, "5.0.302");
+        assert_eq!(extracted.deps[0].dep_type, NuGetDepType::DotnetSdk);
+    }
+
+    // Ported: "handles malformed global.json" — nuget/extract.spec.ts line 501
+    #[test]
+    fn global_json_malformed_returns_none() {
+        assert!(extract_global_json("{{").is_none());
+    }
+
+    // Ported: "handles not-a-nuget global.json" — nuget/extract.spec.ts line 509
+    #[test]
+    fn global_json_without_nuget_content_returns_none() {
+        assert!(extract_global_json(r#"{"sdk": {"rollForward": "latestMajor"}}"#).is_none());
     }
 }
