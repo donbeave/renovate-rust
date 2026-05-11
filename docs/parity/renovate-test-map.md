@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 781 / 1217 actionable tests ported (64%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 782 / 1217 actionable tests ported (64%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2152,7 +2152,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 3 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 4 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2160,7 +2160,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | returns null if fails to parse | 25 | pending | — | — | Requires MODULE.bazel parser failure path |
 | returns null if something throws an error | 33 | pending | — | — | Requires generic error tolerance |
-| returns null if file is empty | 41 | pending | — | — | Requires empty-file null-result path |
+| returns null if file is empty | 41 | ported | `bazel_module.rs` | `empty_content_returns_empty` | — |
 | returns null if file has unrecognized declarations | 46 | ported | `bazel_module.rs` | `empty_file_returns_empty` (+ comment_lines_stripped) | — |
 | returns bazel_dep and git_override dependencies | 54 | ported | `bazel_module.rs` | `extracts_bazel_dep` (+ extracts_dev_dependency, extracts_multiline_dep, multiple_deps) | — |
 | returns bazel_dep with no version and git_override | 95 | ported | `bazel_module.rs` | `dep_without_version_skipped` | — |

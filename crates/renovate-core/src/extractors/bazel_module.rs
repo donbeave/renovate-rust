@@ -190,6 +190,12 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         );
     }
 
+    // Ported: "returns null if file is empty" — bazel-module/extract.spec.ts line 41
+    #[test]
+    fn empty_content_returns_empty() {
+        assert!(extract("").is_empty());
+    }
+
     // Ported: "returns null if file has unrecognized declarations" — bazel-module/extract.spec.ts line 46
     #[test]
     fn comment_lines_stripped() {
