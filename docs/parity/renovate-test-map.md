@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1048 / 1235 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1052 / 1239 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 43 spec files not yet converted to per-test format (31 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 42 spec files not yet converted to per-test format (30 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,27 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/parse.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/parse.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `config/parse › json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses | 6 | ported | `file.rs` | `parse_file_config_json_parses` | — |
+| returns error | 13 | ported | `file.rs` | `parse_file_config_json_returns_error` | — |
+
+### `config/parse › json5`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses | 43 | ported | `file.rs` | `parse_file_config_json5_parses` | — |
+| returns error | 50 | ported | `file.rs` | `parse_file_config_json5_returns_error` | — |
+
+---
+
 ## `lib/config/app-strings.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/app-strings.spec.ts
@@ -2821,7 +2842,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 |--------------------|---------------|-----------|------------|--------|
 <!-- config/defaults.spec.ts converted to per-test format above -->
 <!-- config/app-strings.spec.ts converted to per-test format above -->
-| `lib/config/parse.spec.ts` | 4 | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
+<!-- config/parse.spec.ts converted to per-test format above -->
 <!-- config/global.spec.ts converted to per-test format above -->
 | `lib/config/validation.spec.ts` | 124 | — | 0 | pending |
 | `lib/config/migration.spec.ts` | 30 | — | 0 | pending |

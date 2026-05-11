@@ -47,6 +47,18 @@ pub enum ConfigFileError {
     Parse { path: PathBuf, message: String },
 }
 
+/// Parsed config-file contents or a Renovate-compatible validation error.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ParsedFileConfig {
+    /// File parsed successfully.
+    Success { parsed_contents: serde_json::Value },
+    /// File parsing failed.
+    Error {
+        validation_error: String,
+        validation_message: String,
+    },
+}
+
 /// Resolve which config file path to load, if any.
 ///
 /// Returns `Some(path)` when a file should be loaded, `None` when there is
@@ -120,6 +132,33 @@ pub fn load(path: &Path) -> Result<GlobalConfig, ConfigFileError> {
     };
 
     Ok(config)
+}
+
+/// Parse config file contents without loading from disk.
+///
+/// Mirrors `parseFileConfig()` in `lib/config/parse.ts` for JSON and JSON5
+/// config files.
+pub fn parse_file_config(file_name: &str, file_contents: &str) -> ParsedFileConfig {
+    if file_name.ends_with(".json5") {
+        return match json5::from_str(file_contents) {
+            Ok(parsed_contents) => ParsedFileConfig::Success { parsed_contents },
+            Err(err) => ParsedFileConfig::Error {
+                validation_error: "Invalid JSON5 (parsing failed)".to_owned(),
+                validation_message: format!(
+                    "JSON5.parse error: `{}`",
+                    err.to_string().replace('`', "'")
+                ),
+            },
+        };
+    }
+
+    match serde_json::from_str(file_contents) {
+        Ok(parsed_contents) => ParsedFileConfig::Success { parsed_contents },
+        Err(err) => ParsedFileConfig::Error {
+            validation_error: "Invalid JSON (parsing failed)".to_owned(),
+            validation_message: err.to_string(),
+        },
+    }
 }
 
 /// Apply a file-loaded config on top of the default config.
@@ -241,6 +280,56 @@ mod tests {
         let (_f, path) = write_temp("not json", ".json");
         let err = load(&path).unwrap_err();
         assert!(matches!(err, ConfigFileError::Parse { .. }));
+    }
+
+    // Ported: "parses" — config/parse.spec.ts line 6
+    #[test]
+    fn parse_file_config_json_parses() {
+        assert_eq!(
+            parse_file_config("config.json", "{}"),
+            ParsedFileConfig::Success {
+                parsed_contents: serde_json::json!({})
+            }
+        );
+    }
+
+    // Ported: "returns error" — config/parse.spec.ts line 13
+    #[test]
+    fn parse_file_config_json_returns_error() {
+        let result = parse_file_config("config.json", "{");
+
+        assert!(matches!(
+            result,
+            ParsedFileConfig::Error {
+                validation_error,
+                ..
+            } if validation_error == "Invalid JSON (parsing failed)"
+        ));
+    }
+
+    // Ported: "parses" — config/parse.spec.ts line 43
+    #[test]
+    fn parse_file_config_json5_parses() {
+        assert_eq!(
+            parse_file_config("config.json5", "{}"),
+            ParsedFileConfig::Success {
+                parsed_contents: serde_json::json!({})
+            }
+        );
+    }
+
+    // Ported: "returns error" — config/parse.spec.ts line 50
+    #[test]
+    fn parse_file_config_json5_returns_error() {
+        let result = parse_file_config("config.json5", "{");
+
+        assert!(matches!(
+            result,
+            ParsedFileConfig::Error {
+                validation_error,
+                ..
+            } if validation_error == "Invalid JSON5 (parsing failed)"
+        ));
     }
 
     // ── merge_over_base ──────────────────────────────────────────────────────
