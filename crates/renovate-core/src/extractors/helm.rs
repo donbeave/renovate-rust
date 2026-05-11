@@ -74,6 +74,21 @@ pub struct HelmExtractedDep {
     pub package_name: Option<String>,
 }
 
+/// Host credentials used by Helm v3 OCI registry login.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HelmHostRule {
+    pub username: Option<String>,
+    pub password: Option<String>,
+}
+
+/// Helm v3 repository rule with optional registry credentials.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HelmRepositoryRule {
+    pub name: String,
+    pub repository: String,
+    pub host_rule: HelmHostRule,
+}
+
 // ── Regexes ───────────────────────────────────────────────────────────────────
 
 /// Key-value line: `  key: value` (with optional quotes and trailing comment).
@@ -180,7 +195,34 @@ pub fn extract(content: &str) -> Vec<HelmExtractedDep> {
     deps
 }
 
+/// Generate the Helm registry login command for basic-auth repository rules.
+///
+/// Renovate reference: `lib/modules/manager/helmv3/common.ts` `generateLoginCmd`.
+pub fn generate_login_cmd(repository_rule: &HelmRepositoryRule) -> Option<String> {
+    let username = repository_rule.host_rule.username.as_deref()?;
+    let password = repository_rule.host_rule.password.as_deref()?;
+    let host_part = repository_rule.repository.split('/').next()?;
+
+    Some(format!(
+        "helm registry login --username {} --password {} {}",
+        shell_quote(username),
+        shell_quote(password),
+        shell_quote(host_part)
+    ))
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+fn shell_quote(value: &str) -> String {
+    if value
+        .chars()
+        .all(|ch| ch.is_ascii_alphanumeric() || "-_./:@%+".contains(ch))
+    {
+        return value.to_owned();
+    }
+
+    format!("'{}'", value.replace('\'', "'\"'\"'"))
+}
 
 fn apply_kv(key: &str, val: &str, name: &mut String, version: &mut String, repo: &mut String) {
     match key {
@@ -233,6 +275,24 @@ fn classify_repository(repo: &str) -> (String, Option<HelmSkipReason>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Ported: "should generate a login command with username and password" — helmv3/common.spec.ts line 5
+    #[test]
+    fn generate_login_cmd_with_username_and_password() {
+        let repository_rule = HelmRepositoryRule {
+            name: "test-repo".to_owned(),
+            repository: "example.com/repo".to_owned(),
+            host_rule: HelmHostRule {
+                username: Some("testuser".to_owned()),
+                password: Some("testpass".to_owned()),
+            },
+        };
+
+        assert_eq!(
+            generate_login_cmd(&repository_rule).as_deref(),
+            Some("helm registry login --username testuser --password testpass example.com")
+        );
+    }
 
     // Ported: "parses simple requirements.yaml correctly" — helm-requirements/extract.spec.ts line 64
     #[test]

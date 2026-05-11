@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1086 / 1273 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1087 / 1274 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 36 spec files not yet converted to per-test format (26 pending, 9 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 35 spec files not yet converted to per-test format (25 pending, 9 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -1517,6 +1517,19 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ---
 
+## `lib/modules/manager/helmv3/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/common.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/manager/helmv3/common`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should generate a login command with username and password | 5 | ported | `helm.rs` | `generate_login_cmd_with_username_and_password` | — |
+
+---
+
 ## `lib/modules/manager/homebrew/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/extract.spec.ts
@@ -2791,7 +2804,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | — | — | — | pending |
 | `lib/modules/manager/github-actions/integration.spec.ts` | — | `crates/renovate-core/src/extractors/github_actions.rs` | — | partial |
 | `lib/modules/manager/github-actions/parse.spec.ts` | — | `crates/renovate-core/src/extractors/github_actions.rs` | — | partial |
-| `lib/modules/manager/helmv3/common.spec.ts` | — | — | — | pending |
+<!-- helmv3/common.spec.ts converted to per-test format above -->
 | `lib/modules/manager/npm/extract/index.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 | `lib/modules/manager/npm/extract/npm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 | `lib/modules/manager/npm/extract/pnpm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |

@@ -520,6 +520,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
+| `lib/modules/manager/helmv3/common.ts` | `crates/renovate-core/src/extractors/helm.rs` | partial | Basic-auth login command generation |
 | `lib/modules/manager/helmv3/extract.ts` | — | not-started | No Rust equivalent |
 | `lib/modules/manager/helmv3/index.ts` | — | not-started | Not ported |
 
