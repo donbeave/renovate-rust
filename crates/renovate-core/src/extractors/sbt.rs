@@ -463,6 +463,63 @@ libraryDependencies += "org.example" % "foo" % versions.example
         );
     }
 
+    // Ported: "skips deps when dotted symbolds do not resolve to anything" — sbt/extract.spec.ts line 136
+    #[test]
+    fn package_file_keeps_unresolved_dotted_symbols_without_current_value() {
+        let content = r#"
+scalaVersion := versions.scala
+version := "3.2.1"
+libraryDependencies += "org.example" % "foo" % versions.example
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.package_file_version.as_deref(), Some("3.2.1"));
+        assert!(package_file.scala_version.is_none());
+        let foo = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.dep_name == "org.example:foo")
+            .unwrap();
+        assert_eq!(foo.current_value, None);
+        assert_eq!(foo.package_name, "org.example:foo");
+    }
+
+    // Ported: "skips deps when scala version is missing" — sbt/extract.spec.ts line 185
+    #[test]
+    fn package_file_extracts_deps_when_scala_version_is_missing() {
+        let content = r#"
+version := "1.0.1"
+
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "3.0.0"
+)
+
+val sbtReleaseVersion = "1.0.11"
+addSbtPlugin("com.github.gseitz" % "sbt-release" % sbtReleaseVersion)
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.package_file_version.as_deref(), Some("1.0.1"));
+        assert!(package_file.scala_version.is_none());
+        let scalatest = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.dep_name == "org.scalatest:scalatest")
+            .unwrap();
+        assert_eq!(scalatest.package_name, "org.scalatest:scalatest");
+        assert_eq!(scalatest.current_value.as_deref(), Some("3.0.0"));
+
+        let plugin = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.dep_name == "com.github.gseitz:sbt-release")
+            .unwrap();
+        assert_eq!(plugin.dep_type, SbtDepType::Plugin);
+        assert_eq!(plugin.current_value.as_deref(), Some("1.0.11"));
+        assert_eq!(
+            plugin.shared_variable_name.as_deref(),
+            Some("sbtReleaseVersion")
+        );
+    }
+
     // Ported: "extracts typed variables" — sbt/extract.spec.ts line 170
     #[test]
     fn package_file_resolves_typed_variables() {
@@ -478,6 +535,90 @@ libraryDependencies += "foo" % "bar" % version
             .unwrap();
         assert_eq!(dep.current_value.as_deref(), Some("1.2.3"));
         assert_eq!(dep.shared_variable_name.as_deref(), Some("version"));
+    }
+
+    // Ported: "extract deps from native scala file with variables" — sbt/extract.spec.ts line 213
+    #[test]
+    fn package_file_extracts_native_scala_file_variables() {
+        let content = r#"
+import sbt._
+
+object Dependencies {
+  val moreSettings = Seq(
+    scalaVersion := "2.13.0-RC5"
+  )
+
+  val abcVersion = "1.2.3"
+
+  val ujson = "com.example" %% "foo" % "0.7.1"
+
+  lazy val abc = "com.abc" % "abc" % abcVersion
+
+  val relatedDeps = Seq(
+    "com.abc" % "abc-a" % abcVersion,
+    "com.abc" % "abc-b" % abcVersion
+  )
+
+  val aloneDepInSeq = List("com.abc" % "abc-c" % abcVersion)
+}
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.13"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "com.example:foo_2.13"
+                    && dep.current_value.as_deref() == Some("0.7.1"))
+        );
+        for artifact in ["abc", "abc-a", "abc-b", "abc-c"] {
+            assert!(
+                package_file
+                    .deps
+                    .iter()
+                    .any(|dep| dep.package_name == format!("com.abc:{artifact}")
+                        && dep.current_value.as_deref() == Some("1.2.3")),
+                "missing {artifact}"
+            );
+        }
+    }
+
+    // Ported: "extract deps from native scala file with private variables" — sbt/extract.spec.ts line 349
+    #[test]
+    fn package_file_extracts_native_scala_private_variables() {
+        let content = r#"
+import sbt._
+
+object Dependencies {
+  val moreSettings = Seq(
+    scalaVersion := "2.13.0-RC5"
+  )
+
+  private val abcVersion = "1.2.3"
+
+  private lazy val ujson = "com.example" %% "foo" % "0.7.1"
+
+  lazy val abc = "com.abc" % "abc" % abcVersion
+
+  lazy val dependentLibraries = Seq(ujson, abc)
+}
+"#;
+        let package_file = extract_package_file(content).unwrap();
+        assert_eq!(package_file.scala_version.as_deref(), Some("2.13"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.package_name == "com.example:foo_2.13"
+                    && dep.current_value.as_deref() == Some("0.7.1"))
+        );
+        let abc = package_file
+            .deps
+            .iter()
+            .find(|dep| dep.package_name == "com.abc:abc")
+            .unwrap();
+        assert_eq!(abc.current_value.as_deref(), Some("1.2.3"));
+        assert_eq!(abc.shared_variable_name.as_deref(), Some("abcVersion"));
     }
 
     // Ported: "extracts packageFileVersion when scala version is defined in a variable" — sbt/extract.spec.ts line 159
