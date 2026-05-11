@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 910 / 1216 actionable tests ported (75%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 911 / 1216 actionable tests ported (75%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -968,7 +968,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/fleet/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/fleet/extract.spec.ts
-**Total tests:** 10 | **Ported:** 9 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -978,7 +978,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | should return null if a unknown manifest is supplied | 30 | ported | `fleet.rs` | `unknown_manifest_returns_empty` | — |
 | should return null if content is a malformed YAML (fleet.yaml) | 37 | ported | `fleet.rs` | `malformed_fleet_yaml_returns_empty` | — |
 | should parse valid configuration (fleet.yaml) | 49 | ported | `fleet.rs` | `extracts_helm_dep_from_fleet_yaml` | — |
-| should support registryAlias configuration | 88 | pending | — | — | registryAliases not yet implemented |
+| should support registryAlias configuration | 88 | ported | `fleet.rs` | `supports_registry_alias_configuration` | — |
 | should parse valid configuration with target customization | 132 | ported | `fleet.rs` | `extracts_target_customizations` | — |
 | should parse parse invalid configurations | 208 | ported | `fleet.rs` | `missing_chart_sets_skip_reason` / `no_version_sets_skip_reason` | — |
 | should return null if content is a malformed YAML (GitRepo) | 242 | ported | `fleet.rs` | `malformed_gitrepo_yaml_returns_empty` | — |

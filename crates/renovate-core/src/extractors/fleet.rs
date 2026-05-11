@@ -92,6 +92,18 @@ pub struct FleetDeps {
     pub git_deps: Vec<FleetGitDep>,
 }
 
+/// Renovate-style Fleet dependency metadata after applying registry aliases.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FleetResolvedDep {
+    pub datasource: &'static str,
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: String,
+    pub registry_urls: Vec<String>,
+    pub dep_type: &'static str,
+    pub pin_digests: Option<bool>,
+}
+
 static KV: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r##"^\s+(\w+):\s*"?([^"#\n]+?)"?\s*(?:#.*)?$"##).unwrap());
 
@@ -111,6 +123,23 @@ pub fn extract(content: &str, is_fleet_yaml: bool) -> FleetDeps {
 pub fn is_fleet_yaml_path(path: &str) -> bool {
     let base = path.rsplit('/').next().unwrap_or(path);
     base == "fleet.yaml" || base == "fleet.yml"
+}
+
+/// Extract Fleet deps and apply Renovate-style registry aliases.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    is_fleet_yaml: bool,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<FleetResolvedDep> {
+    if !is_fleet_yaml {
+        return Vec::new();
+    }
+
+    content
+        .split("---")
+        .flat_map(|doc| extract_fleet_yaml(doc).helm_deps)
+        .filter_map(|dep| fleet_resolved_dep(dep, registry_aliases))
+        .collect()
 }
 
 // ── fleet.yaml parsing ────────────────────────────────────────────────────────
@@ -340,6 +369,45 @@ fn build_helm_dep(
     }
 }
 
+fn fleet_resolved_dep(
+    dep: FleetHelmDep,
+    registry_aliases: &[(&str, &str)],
+) -> Option<FleetResolvedDep> {
+    match dep.skip_reason {
+        None => Some(FleetResolvedDep {
+            datasource: "helm",
+            dep_name: dep.chart.clone(),
+            package_name: dep.chart,
+            current_value: dep.current_value,
+            registry_urls: vec![apply_registry_alias(&dep.registry_url, registry_aliases)],
+            dep_type: "fleet",
+            pin_digests: None,
+        }),
+        Some(FleetSkipReason::OciRegistry) => Some(FleetResolvedDep {
+            datasource: "docker",
+            package_name: apply_registry_alias(&dep.chart, registry_aliases),
+            dep_name: dep.chart,
+            current_value: dep.current_value,
+            registry_urls: Vec::new(),
+            dep_type: "fleet",
+            pin_digests: Some(false),
+        }),
+        Some(_) => None,
+    }
+}
+
+fn apply_registry_alias(value: &str, registry_aliases: &[(&str, &str)]) -> String {
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            value
+                .strip_prefix(from)
+                .filter(|rest| rest.is_empty() || rest.starts_with('/'))
+                .map(|rest| format!("{to}{rest}"))
+        })
+        .unwrap_or_else(|| value.to_owned())
+}
+
 // ── GitRepo CRD parsing ───────────────────────────────────────────────────────
 
 /// Parse a GitRepo CRD YAML file. Handles multi-document YAML (`---`).
@@ -451,6 +519,58 @@ helm:
         assert_eq!(d.registry_url, "https://charts.example.com/");
         assert_eq!(d.current_value, "1.2.3");
         assert!(d.skip_reason.is_none());
+    }
+
+    // Ported: "should support registryAlias configuration" — fleet/extract.spec.ts line 88
+    #[test]
+    fn supports_registry_alias_configuration() {
+        let content = r#"
+defaultNamespace: cert-manager
+helm:
+  chart: cert-manager
+  repo: https://registry.com/jetstack
+  releaseName: cert-manager
+  version: v1.8.0
+---
+defaultNamespace: external-dns
+helm:
+  chart: oci://registry.com/docker-io/bitnamicharts/external-dns
+  version: 7.1.2
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            true,
+            &[
+                (
+                    "https://registry.com/jetstack",
+                    "https://charts.jetstack.io",
+                ),
+                ("registry.com/docker-io", "registry-1.docker.io"),
+            ],
+        );
+
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].datasource, "helm");
+        assert_eq!(deps[0].dep_name, "cert-manager");
+        assert_eq!(deps[0].package_name, "cert-manager");
+        assert_eq!(deps[0].current_value, "v1.8.0");
+        assert_eq!(deps[0].registry_urls, ["https://charts.jetstack.io"]);
+        assert_eq!(deps[0].dep_type, "fleet");
+        assert_eq!(deps[0].pin_digests, None);
+
+        assert_eq!(deps[1].datasource, "docker");
+        assert_eq!(
+            deps[1].dep_name,
+            "registry.com/docker-io/bitnamicharts/external-dns"
+        );
+        assert_eq!(
+            deps[1].package_name,
+            "registry-1.docker.io/bitnamicharts/external-dns"
+        );
+        assert_eq!(deps[1].current_value, "7.1.2");
+        assert!(deps[1].registry_urls.is_empty());
+        assert_eq!(deps[1].dep_type, "fleet");
+        assert_eq!(deps[1].pin_digests, Some(false));
     }
 
     // Ported: "should parse valid configuration with target customization" — fleet/extract.spec.ts line 132
