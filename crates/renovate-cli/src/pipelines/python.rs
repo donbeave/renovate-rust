@@ -574,6 +574,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         .iter()
                         .filter(|d| {
                             d.skip_reason.is_none()
+                                && d.datasource == "pypi"
                                 && !repo_cfg.is_dep_ignored_for_manager(&d.name, "poetry")
                         })
                         .collect();

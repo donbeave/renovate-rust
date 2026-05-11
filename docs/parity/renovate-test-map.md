@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1395 / 1653 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1402 / 1653 actionable tests ported (85%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2508,7 +2508,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 25 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 32 | **Actionable:** 34 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2525,13 +2525,13 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extracts mixed versioning types | 118 | ported | `poetry.rs` | `name_normalized_per_pep503` | — |
 | extracts dependencies from dependency groups | 160 | ported | `poetry.rs` | `extracts_group_dependencies` (+ extracts_dev_dependencies) | — |
 | resolves lockedVersions from the lockfile | 197 | pending | — | — | Requires poetry.lock parsing |
-| parses git dependencies long commit hashes on http urls | 209 | pending | — | — | Requires git dep + commit hash extraction |
-| parses git dependencies short commit hashes on http urls | 234 | pending | — | — | Requires git dep + short commit hash extraction |
-| parses git dependencies long commit hashes on ssh urls | 259 | pending | — | — | Requires git dep + ssh URL extraction |
-| parses git dependencies long commit hashes on http urls with branch marker | 284 | pending | — | — | Requires git dep + branch marker handling |
-| parses github dependencies tags on ssh urls | 310 | pending | — | — | Requires git dep + GitHub-tags datasource selection on ssh |
-| parses github dependencies tags on http urls | 325 | pending | — | — | Requires git dep + GitHub-tags datasource selection |
-| parses git dependencies with tags that are not on GitHub | 340 | pending | — | — | Requires generic git-tags datasource selection |
+| parses git dependencies long commit hashes on http urls | 209 | ported | `poetry.rs` | `git_dependencies_with_revisions_are_extracted` | — |
+| parses git dependencies short commit hashes on http urls | 234 | ported | `poetry.rs` | `git_dependencies_with_revisions_are_extracted` | — |
+| parses git dependencies long commit hashes on ssh urls | 259 | ported | `poetry.rs` | `git_dependencies_with_revisions_are_extracted` | — |
+| parses git dependencies long commit hashes on http urls with branch marker | 284 | ported | `poetry.rs` | `git_dependencies_with_revisions_are_extracted` | — |
+| parses github dependencies tags on ssh urls | 310 | ported | `poetry.rs` | `git_dependencies_with_tags_are_extracted` | — |
+| parses github dependencies tags on http urls | 325 | ported | `poetry.rs` | `git_dependencies_with_tags_are_extracted` | — |
+| parses git dependencies with tags that are not on GitHub | 340 | ported | `poetry.rs` | `git_dependencies_with_tags_are_extracted` | — |
 | skips git dependencies | 363 | ported | `poetry.rs` | `git_source_skipped` | — |
 | skips git dependencies with version | 375 | ported | `poetry.rs` | `git_dep_with_version_shows_version` | — |
 | skips path dependencies | 388 | ported | `poetry.rs` | `path_source_skipped` | — |

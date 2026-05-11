@@ -816,7 +816,7 @@ pub(crate) fn build_dep_reports_poetry(
             release_timestamp,
             current_version_timestamp,
             dep_type: Some(dep.dep_type.as_renovate_str().to_owned()),
-            package_name: None,
+            package_name: dep.package_name.clone(),
             range_strategy: None,
             follow_tag: None,
             pin_digests: None,

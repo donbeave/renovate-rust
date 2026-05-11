@@ -88,6 +88,10 @@ pub struct PoetryExtractedDep {
     pub current_value: String,
     /// Which section this dep came from.
     pub dep_type: PoetryDepType,
+    pub datasource: &'static str,
+    pub package_name: Option<String>,
+    pub current_digest: Option<String>,
+    pub replace_string: Option<String>,
     pub registry_urls: Vec<String>,
     pub source_name: Option<String>,
     pub group_name: Option<String>,
@@ -263,6 +267,10 @@ fn parse_dep(
             name: name.to_owned(),
             current_value: value.as_str().unwrap_or("").to_owned(),
             dep_type,
+            datasource: "github-releases",
+            package_name: Some("containerbase/python-prebuild".to_owned()),
+            current_digest: None,
+            replace_string: None,
             registry_urls: Vec::new(),
             source_name: None,
             group_name: None,
@@ -279,6 +287,10 @@ fn parse_dep(
                 name: normalized,
                 current_value,
                 dep_type,
+                datasource: "pypi",
+                package_name: None,
+                current_digest: None,
+                replace_string: None,
                 registry_urls: Vec::new(),
                 source_name: None,
                 group_name: None,
@@ -295,10 +307,17 @@ fn parse_dep(
                     .to_owned()
             };
             if tbl.contains_key("git") {
+                if let Some(dep) = parse_git_dep(&normalized, tbl, dep_type) {
+                    return Some(dep);
+                }
                 return Some(PoetryExtractedDep {
                     name: normalized,
                     current_value: table_version(tbl),
                     dep_type,
+                    datasource: "pypi",
+                    package_name: None,
+                    current_digest: None,
+                    replace_string: None,
                     registry_urls: Vec::new(),
                     source_name: None,
                     group_name: None,
@@ -310,6 +329,10 @@ fn parse_dep(
                     name: normalized,
                     current_value: table_version(tbl),
                     dep_type,
+                    datasource: "pypi",
+                    package_name: None,
+                    current_digest: None,
+                    replace_string: None,
                     registry_urls: Vec::new(),
                     source_name: None,
                     group_name: None,
@@ -321,6 +344,10 @@ fn parse_dep(
                     name: normalized,
                     current_value: table_version(tbl),
                     dep_type,
+                    datasource: "pypi",
+                    package_name: None,
+                    current_digest: None,
+                    replace_string: None,
                     registry_urls: Vec::new(),
                     source_name: None,
                     group_name: None,
@@ -344,6 +371,10 @@ fn parse_dep(
                 name: normalized,
                 current_value,
                 dep_type,
+                datasource: "pypi",
+                package_name: None,
+                current_digest: None,
+                replace_string: None,
                 registry_urls,
                 source_name,
                 group_name: None,
@@ -354,6 +385,10 @@ fn parse_dep(
             name: normalized,
             current_value: String::new(),
             dep_type,
+            datasource: "pypi",
+            package_name: None,
+            current_digest: None,
+            replace_string: None,
             registry_urls: Vec::new(),
             source_name: None,
             group_name: None,
@@ -387,11 +422,78 @@ fn parse_pep508_entry(
         name: normalize_name(name_raw),
         current_value: specifier.to_owned(),
         dep_type,
+        datasource: "pypi",
+        package_name: None,
+        current_digest: None,
+        replace_string: None,
         registry_urls: Vec::new(),
         source_name: None,
         group_name: group_name.map(str::to_owned),
         skip_reason: None,
     })
+}
+
+fn parse_git_dep(
+    normalized_name: &str,
+    tbl: &toml::map::Map<String, Value>,
+    dep_type: PoetryDepType,
+) -> Option<PoetryExtractedDep> {
+    let git = tbl.get("git")?.as_str()?;
+    if let Some(rev) = tbl.get("rev").and_then(Value::as_str) {
+        return Some(PoetryExtractedDep {
+            name: normalized_name.to_owned(),
+            current_value: tbl
+                .get("branch")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_owned(),
+            dep_type,
+            datasource: "git-refs",
+            package_name: Some(git.to_owned()),
+            current_digest: Some(rev.to_owned()),
+            replace_string: Some(rev.to_owned()),
+            registry_urls: Vec::new(),
+            source_name: None,
+            group_name: None,
+            skip_reason: None,
+        });
+    }
+
+    let tag = tbl.get("tag").and_then(Value::as_str)?;
+    let (datasource, package_name) = classify_git_tag_source(git);
+    Some(PoetryExtractedDep {
+        name: normalized_name.to_owned(),
+        current_value: tag.to_owned(),
+        dep_type,
+        datasource,
+        package_name: Some(package_name),
+        current_digest: None,
+        replace_string: None,
+        registry_urls: Vec::new(),
+        source_name: None,
+        group_name: None,
+        skip_reason: None,
+    })
+}
+
+fn classify_git_tag_source(git: &str) -> (&'static str, String) {
+    if let Some(repo) = github_repo_slug(git) {
+        ("github-tags", repo)
+    } else if let Some(repo) = git
+        .strip_prefix("https://gitlab.com/")
+        .map(|repo| repo.trim_end_matches(".git").to_owned())
+    {
+        ("gitlab-tags", repo)
+    } else {
+        ("git-tags", git.to_owned())
+    }
+}
+
+fn github_repo_slug(git: &str) -> Option<String> {
+    git.strip_prefix("https://github.com/")
+        .or_else(|| git.strip_prefix("http://github.com/"))
+        .or_else(|| git.strip_prefix("git@github.com:"))
+        .map(|repo| repo.trim_end_matches(".git").to_owned())
 }
 
 fn extract_registry_urls(doc: &Value) -> Vec<String> {
@@ -478,6 +580,10 @@ fn parse_build_system_req(req: &str) -> Option<PoetryExtractedDep> {
         name: normalized,
         current_value: version.to_owned(),
         dep_type: PoetryDepType::BuildSystem,
+        datasource: "pypi",
+        package_name: None,
+        current_digest: None,
+        replace_string: None,
         registry_urls: Vec::new(),
         source_name: None,
         group_name: None,
@@ -566,7 +672,7 @@ mypackage = {version = "^1.0", extras = ["security"]}
     fn git_source_skipped() {
         let content = r#"
 [tool.poetry.dependencies]
-mylib = {git = "https://github.com/example/mylib.git", tag = "v1.0"}
+mylib = {git = "https://github.com/example/mylib.git"}
 "#;
         let deps = extract_ok(content);
         assert_eq!(deps[0].skip_reason, Some(PoetrySkipReason::GitSource));
@@ -1150,6 +1256,102 @@ werkzeug = ">=0.14"
         let flask = deps.iter().find(|d| d.name == "flask").unwrap();
         assert_eq!(flask.current_value, "1.2.3");
         assert_eq!(flask.skip_reason, Some(PoetrySkipReason::GitSource));
+    }
+
+    // Ported:
+    // - "parses git dependencies long commit hashes on http urls" — poetry/extract.spec.ts line 209
+    // - "parses git dependencies short commit hashes on http urls" — poetry/extract.spec.ts line 234
+    // - "parses git dependencies long commit hashes on ssh urls" — poetry/extract.spec.ts line 259
+    // - "parses git dependencies long commit hashes on http urls with branch marker" — poetry/extract.spec.ts line 284
+    #[test]
+    fn git_dependencies_with_revisions_are_extracted() {
+        let content = r#"[tool.poetry.dependencies]
+fastapi_long = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+fastapi_short = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81"}
+fastapi_ssh = {git = "git@github.com:tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+fastapi_branch = {git = "https://github.com/tiangolo/fastapi.git", branch="develop", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+dep = "^2.0"
+"#;
+        let deps = extract_ok(content);
+
+        let long = deps.iter().find(|d| d.name == "fastapi-long").unwrap();
+        assert_eq!(long.datasource, "git-refs");
+        assert_eq!(
+            long.current_digest.as_deref(),
+            Some("6f5aa81c076d22e38afbe7d602db6730e28bc3cc")
+        );
+        assert_eq!(
+            long.replace_string.as_deref(),
+            Some("6f5aa81c076d22e38afbe7d602db6730e28bc3cc")
+        );
+        assert_eq!(
+            long.package_name.as_deref(),
+            Some("https://github.com/tiangolo/fastapi.git")
+        );
+        assert!(long.skip_reason.is_none());
+
+        let short = deps.iter().find(|d| d.name == "fastapi-short").unwrap();
+        assert_eq!(short.current_digest.as_deref(), Some("6f5aa81"));
+        assert_eq!(short.replace_string.as_deref(), Some("6f5aa81"));
+
+        let ssh = deps.iter().find(|d| d.name == "fastapi-ssh").unwrap();
+        assert_eq!(
+            ssh.package_name.as_deref(),
+            Some("git@github.com:tiangolo/fastapi.git")
+        );
+
+        let branch = deps.iter().find(|d| d.name == "fastapi-branch").unwrap();
+        assert_eq!(branch.current_value, "develop");
+        assert_eq!(
+            branch.current_digest.as_deref(),
+            Some("6f5aa81c076d22e38afbe7d602db6730e28bc3cc")
+        );
+
+        let dep = deps.iter().find(|d| d.name == "dep").unwrap();
+        assert_eq!(dep.datasource, "pypi");
+        assert_eq!(dep.current_value, "^2.0");
+    }
+
+    // Ported:
+    // - "parses github dependencies tags on ssh urls" — poetry/extract.spec.ts line 310
+    // - "parses github dependencies tags on http urls" — poetry/extract.spec.ts line 325
+    // - "parses git dependencies with tags that are not on GitHub" — poetry/extract.spec.ts line 340
+    #[test]
+    fn git_dependencies_with_tags_are_extracted() {
+        let content = r#"[tool.poetry.dependencies]
+fastapi_ssh = {git = "git@github.com:tiangolo/fastapi.git", tag="1.2.3"}
+fastapi_http = {git = "https://github.com/tiangolo/fastapi.git", tag="1.2.3"}
+aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
+platform-tools = {git = "https://some.company.com/platform-tools", tag="1.2.3"}
+werkzeug = ">=0.14"
+"#;
+        let deps = extract_ok(content);
+
+        for name in ["fastapi-ssh", "fastapi-http"] {
+            let dep = deps.iter().find(|d| d.name == name).unwrap();
+            assert_eq!(dep.datasource, "github-tags");
+            assert_eq!(dep.package_name.as_deref(), Some("tiangolo/fastapi"));
+            assert_eq!(dep.current_value, "1.2.3");
+            assert!(dep.skip_reason.is_none());
+        }
+
+        let gitlab = deps.iter().find(|d| d.name == "aws-sam").unwrap();
+        assert_eq!(gitlab.datasource, "gitlab-tags");
+        assert_eq!(
+            gitlab.package_name.as_deref(),
+            Some("gitlab-examples/aws-sam")
+        );
+        assert_eq!(gitlab.current_value, "1.2.3");
+
+        let generic = deps.iter().find(|d| d.name == "platform-tools").unwrap();
+        assert_eq!(generic.datasource, "git-tags");
+        assert_eq!(
+            generic.package_name.as_deref(),
+            Some("https://some.company.com/platform-tools")
+        );
+        assert_eq!(generic.current_value, "1.2.3");
+
+        assert_eq!(deps.len(), 5);
     }
 
     // Ported: "skips path dependencies with version" — poetry/extract.spec.ts line 400
