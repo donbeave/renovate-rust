@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1375 / 1661 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1376 / 1661 actionable tests ported (83%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2592,7 +2592,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/terraform/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extract.spec.ts
-**Total tests:** 18 | **Ported:** 13 | **Actionable:** 18 | **Status:** partial
+**Total tests:** 18 | **Ported:** 14 | **Actionable:** 18 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2614,7 +2614,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | extract helm releases | 776 | pending | — | — | Requires helm_release resource extraction |
 | update lockfile constraints with range strategy update-lockfile | 845 | pending | — | — | Requires .terraform.lock.hcl parsing |
 | test terraform block with only requirement_terraform_version | 884 | ported | `terraform.rs` | `required_version_extracted_as_hashicorp_terraform` | — |
-| extracts terraform_version for tfe_workspace and ignores missing terraform_version keys | 904 | pending | — | — | Requires tfe_workspace resource extraction |
+| extracts terraform_version for tfe_workspace and ignores missing terraform_version keys | 904 | ported | `terraform.rs` | `tfe_workspace_terraform_versions_are_extracted` | — |
 | return null if invalid HCL file | 933 | ported | `terraform.rs` | `invalid_hcl_returns_empty` | — |
 
 ---

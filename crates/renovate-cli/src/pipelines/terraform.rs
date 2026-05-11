@@ -39,11 +39,12 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             terraform_extractor::TerraformDepType::Module => {
                                 terraform_datasource::TerraformLookupKind::Module
                             }
-                            // `required_version` is the terraform CLI itself —
-                            // looked up via hashicorp/terraform GitHub Releases,
-                            // not the Terraform Registry. Skip it here; a
-                            // dedicated lookup path is a separate feature.
-                            terraform_extractor::TerraformDepType::RequiredVersion => return None,
+                            // These are terraform CLI versions looked up via
+                            // hashicorp/terraform GitHub Releases, not the
+                            // Terraform Registry. Skip them here; a dedicated
+                            // lookup path is a separate feature.
+                            terraform_extractor::TerraformDepType::RequiredVersion
+                            | terraform_extractor::TerraformDepType::TfeWorkspace => return None,
                         };
                         Some(terraform_datasource::TerraformDepInput {
                             name: d.name.clone(),

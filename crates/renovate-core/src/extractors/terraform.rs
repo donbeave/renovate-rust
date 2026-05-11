@@ -38,6 +38,7 @@ pub enum TerraformDepType {
     /// Declared as `terraform { required_version = "…" }` — pins the
     /// terraform CLI itself (looked up via hashicorp/terraform releases).
     RequiredVersion,
+    TfeWorkspace,
 }
 
 impl TerraformDepType {
@@ -46,6 +47,7 @@ impl TerraformDepType {
             TerraformDepType::Provider => "provider",
             TerraformDepType::Module => "module",
             TerraformDepType::RequiredVersion => "required_version",
+            TerraformDepType::TfeWorkspace => "tfe_workspace",
         }
     }
 }
@@ -102,6 +104,9 @@ static MODULE_BLOCK: LazyLock<Regex> =
 static TERRAFORM_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*terraform\s*\{").unwrap());
 
+static TFE_WORKSPACE_BLOCK: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^\s*resource\s+"tfe_workspace"\s+"[^"]+"\s*\{"#).unwrap());
+
 /// `required_providers {` inside a terraform block.
 static REQUIRED_PROVIDERS: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*required_providers\s*\{").unwrap());
@@ -122,6 +127,7 @@ enum State {
     InRequiredProviders,
     InProviderEntry,
     InModuleBlock,
+    InTfeWorkspaceBlock(usize),
     Skip(usize), // skip other blocks, depth counter
 }
 
@@ -137,6 +143,7 @@ struct Parser {
     mod_source: String,
     mod_version: String,
     registry_aliases: BTreeMap<String, String>,
+    resource_version: String,
 }
 
 impl Parser {
@@ -151,6 +158,7 @@ impl Parser {
             mod_source: String::new(),
             mod_version: String::new(),
             registry_aliases: registry_aliases.clone(),
+            resource_version: String::new(),
         }
     }
 
@@ -166,6 +174,7 @@ impl Parser {
             State::InRequiredProviders => self.handle_required_providers(trimmed),
             State::InProviderEntry => self.handle_provider_entry(trimmed),
             State::InModuleBlock => self.handle_module_block(trimmed),
+            State::InTfeWorkspaceBlock(depth) => self.handle_tfe_workspace_block(*depth, trimmed),
             State::Skip(depth) => self.handle_skip(*depth, trimmed),
         }
     }
@@ -173,6 +182,9 @@ impl Parser {
     fn handle_top_level(&mut self, trimmed: &str) {
         if TERRAFORM_BLOCK.is_match(trimmed) {
             self.state = State::InTerraformBlock;
+        } else if TFE_WORKSPACE_BLOCK.is_match(trimmed) {
+            self.resource_version.clear();
+            self.state = State::InTfeWorkspaceBlock(1);
         } else if let Some(cap) = MODULE_BLOCK.captures(trimmed) {
             self.mod_name = cap[1].to_owned();
             self.mod_source.clear();
@@ -345,6 +357,38 @@ impl Parser {
             };
         } else {
             self.state = State::Skip(new_depth);
+        }
+    }
+
+    fn handle_tfe_workspace_block(&mut self, depth: usize, trimmed: &str) {
+        if let Some(cap) = KV_LINE.captures(trimmed)
+            && &cap[1] == "terraform_version"
+        {
+            self.resource_version = cap[2].trim().to_owned();
+        }
+
+        let opens = trimmed.chars().filter(|&c| c == '{').count();
+        let closes = trimmed.chars().filter(|&c| c == '}').count();
+        let new_depth = depth.saturating_add(opens).saturating_sub(closes);
+        if new_depth == 0 {
+            let (current_value, skip_reason) = if self.resource_version.is_empty() {
+                (String::new(), Some(TerraformSkipReason::UnspecifiedVersion))
+            } else {
+                (self.resource_version.clone(), None)
+            };
+            self.deps.push(TerraformExtractedDep {
+                name: "hashicorp/terraform".to_owned(),
+                current_value,
+                dep_type: TerraformDepType::TfeWorkspace,
+                datasource: Some("github-releases"),
+                package_name: Some("hashicorp/terraform".to_owned()),
+                current_digest: None,
+                skip_reason,
+            });
+            self.resource_version.clear();
+            self.state = State::TopLevel;
+        } else {
+            self.state = State::InTfeWorkspaceBlock(new_depth);
         }
     }
 }
@@ -1039,5 +1083,67 @@ terraform {
         assert_eq!(deps[0].current_value, "1.0.0");
         assert_eq!(deps[0].dep_type, TerraformDepType::RequiredVersion);
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts terraform_version for tfe_workspace and ignores missing terraform_version keys" — terraform/extract.spec.ts line 904
+    #[test]
+    fn tfe_workspace_terraform_versions_are_extracted() {
+        let content = r#"
+resource "tfe_workspace" "test_workspace" {
+  name = "test-workspace"
+  organization = "renovate-fixtures"
+  terraform_version = "1.1.6"
+}
+
+resource "tfe_workspace" "test_workspace" {
+  name = "test-workspace"
+  organization = "renovate-fixtures"
+}
+
+resource "tfe_workspace" "workspace_with_block" {
+  vcs_repo {
+    identifier = "organization/repository"
+    oauth_token_id = "invalidToken"
+  }
+
+  name = "lifecycle-workspace"
+  organization = "renovate-fixtures"
+  terraform_version = "1.1.9"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+
+        let workspace_versions = deps
+            .iter()
+            .filter(|d| d.skip_reason.is_none())
+            .collect::<Vec<_>>();
+        assert_eq!(workspace_versions.len(), 2);
+        assert!(
+            workspace_versions
+                .iter()
+                .all(|d| d.name == "hashicorp/terraform"
+                    && d.dep_type == TerraformDepType::TfeWorkspace
+                    && d.datasource == Some("github-releases")
+                    && d.package_name.as_deref() == Some("hashicorp/terraform"))
+        );
+        assert!(
+            workspace_versions
+                .iter()
+                .any(|d| d.current_value == "1.1.6")
+        );
+        assert!(
+            workspace_versions
+                .iter()
+                .any(|d| d.current_value == "1.1.9")
+        );
+
+        let missing_version = deps
+            .iter()
+            .find(|d| d.skip_reason == Some(TerraformSkipReason::UnspecifiedVersion))
+            .unwrap();
+        assert_eq!(missing_version.current_value, "");
+        assert_eq!(missing_version.dep_type, TerraformDepType::TfeWorkspace);
+        assert_eq!(missing_version.datasource, Some("github-releases"));
     }
 }
