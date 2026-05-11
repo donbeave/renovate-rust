@@ -1376,6 +1376,53 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "does not duplicate nixpkgs dependency" — nix/extract.spec.ts line 983
+    #[test]
+    fn package_file_does_not_duplicate_nixpkgs_dependency() {
+        let flake_nix = r#"{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
+  };
+}"#;
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1756904031,
+        "narHash": "sha256-V29Bu1nR6Ayt+uUhf/6L43DSxb66BQ+8E2wH1GHa5IA=",
+        "rev": "0e6684e6c5755325f801bda1751a8a4038145d7d",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract_package_file(Some(flake_nix), Some(content)).unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(deps[0].current_ref.as_deref(), Some("nixpkgs-unstable"));
+        assert_eq!(
+            deps[0].locked_rev,
+            "0e6684e6c5755325f801bda1751a8a4038145d7d"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/NixOS/nixpkgs")
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "handles currentDigest replacement when config provided" — nix/extract.spec.ts line 1065
     #[test]
     fn replaces_current_digest_when_config_matches_flake_nix() {
