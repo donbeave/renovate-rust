@@ -296,6 +296,21 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
     }
 
+    // Ported: "defaults depType to compile when no scope is set" — ant/extract.spec.ts line 68
+    #[test]
+    fn defaults_dep_type_to_compile_without_scope() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "junit:junit");
+        assert_eq!(deps[0].dep_type, "compile");
+    }
+
     // Ported: "extracts multiple dependencies" — ant/extract.spec.ts line 33
     #[test]
     fn multiple_deps_extracted() {
@@ -304,12 +319,16 @@ mod tests {
   <artifact:dependencies>
     <dependency groupId="junit" artifactId="junit" version="4.13.2" scope="test" />
     <dependency groupId="org.slf4j" artifactId="slf4j-api" version="1.7.36" scope="compile" />
+    <dependency groupId="org.apache.commons" artifactId="commons-lang3" version="3.12.0" scope="runtime" />
   </artifact:dependencies>
 </project>"#;
         let deps = extract(content);
-        assert_eq!(deps.len(), 2);
+        assert_eq!(deps.len(), 3);
         assert_eq!(deps[0].dep_name, "junit:junit");
         assert_eq!(deps[1].dep_name, "org.slf4j:slf4j-api");
+        assert_eq!(deps[2].dep_name, "org.apache.commons:commons-lang3");
+        assert_eq!(deps[2].current_value, "3.12.0");
+        assert_eq!(deps[2].dep_type, "runtime");
     }
 
     // Ported: "collects registry URLs from remoteRepository elements" — ant/extract.spec.ts line 949

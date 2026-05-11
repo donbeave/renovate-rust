@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 744 / 1217 actionable tests ported (61%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 745 / 1217 actionable tests ported (61%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1887,7 +1887,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | extracts inline version dependencies from build.xml | 9 | ported | `ant.rs` | `extracts_inline_dependency` | — |
 | extracts multiple dependencies | 33 | ported | `ant.rs` | `multiple_deps_extracted` | — |
-| defaults depType to compile when no scope is set | 68 | pending | — | — | Requires depType plumbing |
+| defaults depType to compile when no scope is set | 68 | ported | `ant.rs` | `defaults_dep_type_to_compile_without_scope` | — |
 | returns null for invalid XML | 90 | ported | `ant.rs` | `empty_xml_returns_empty` | — |
 | returns null for build.xml with no dependencies | 94 | ported | `ant.rs` | `project_without_artifact_dependencies_returns_empty` | — |
 | ignores dependency nodes without version | 104 | ported | `ant.rs` | `dependency_without_version_returns_empty` | — |
