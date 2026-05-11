@@ -347,6 +347,187 @@ mod tests {
         assert!(np.skip_reason.is_none());
     }
 
+    // Ported: "includes nixpkgs with no explicit ref" — nix/extract.spec.ts line 260
+    #[test]
+    fn includes_nixpkgs_with_no_explicit_ref() {
+        let content = r#"{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1728650607,
+        "narHash": "sha256-0lOnVTzRXzpk5uxbHLm3Ti3tyPAvirAIQDfwEUd8arg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "612ee628421ba2c1abca4c99684862f76cb3b089",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "nixpkgs");
+        assert_eq!(
+            deps[0].locked_rev,
+            "612ee628421ba2c1abca4c99684862f76cb3b089"
+        );
+        assert_eq!(deps[0].current_ref, None);
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/NixOS/nixpkgs")
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes patchelf from HEAD" — nix/extract.spec.ts line 300
+    #[test]
+    fn includes_git_input_from_head() {
+        let content = r#"{
+  "nodes": {
+    "patchelf": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1718457448,
+        "narHash": "sha256-FSoxTcRZMGHNJh8dNtKOkcUtjhmhU6yQXcZZfUPLhQM=",
+        "ref": "refs/heads/master",
+        "rev": "a0f54334df36770b335c051e540ba40afcbf8378",
+        "revCount": 844,
+        "type": "git",
+        "url": "https://github.com/NixOS/patchelf.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://github.com/NixOS/patchelf.git"
+      }
+    },
+    "root": {
+      "inputs": {
+        "patchelf": "patchelf"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "patchelf");
+        assert_eq!(
+            deps[0].locked_rev,
+            "a0f54334df36770b335c051e540ba40afcbf8378"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://github.com/NixOS/patchelf.git")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Git);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes ijq from sourcehut without a flake" — nix/extract.spec.ts line 358
+    #[test]
+    fn includes_sourcehut_input_without_flake() {
+        let content = r#"{
+  "nodes": {
+    "ijq": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1723569650,
+        "narHash": "sha256-Ho/sAhEUeSug52JALgjrKVUPCBe8+PovbJj/lniKxp8=",
+        "owner": "~gpanders",
+        "repo": "ijq",
+        "rev": "88f0d9ae98942bf49cba302c42b2a0f6e05f9b58",
+        "type": "sourcehut"
+      },
+      "original": {
+        "owner": "~gpanders",
+        "repo": "ijq",
+        "type": "sourcehut"
+      }
+    },
+    "root": {
+      "inputs": {
+        "ijq": "ijq"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "ijq");
+        assert_eq!(
+            deps[0].locked_rev,
+            "88f0d9ae98942bf49cba302c42b2a0f6e05f9b58"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://git.sr.ht/~gpanders/ijq")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Sourcehut);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "includes home-manager from gitlab" — nix/extract.spec.ts line 399
+    #[test]
+    fn includes_gitlab_input() {
+        let content = r#"{
+  "nodes": {
+    "home-manager": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1728650932,
+        "narHash": "sha256-mGKzqdsRyLnGNl6WjEr7+sghGgBtYHhJQ4mjpgRTCsU=",
+        "owner": "rycee",
+        "repo": "home-manager",
+        "rev": "65ae9c147349829d3df0222151f53f79821c5134",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "rycee",
+        "repo": "home-manager",
+        "type": "gitlab"
+      }
+    },
+    "root": {
+      "inputs": {
+        "home-manager": "home-manager"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].input_name, "home-manager");
+        assert_eq!(
+            deps[0].locked_rev,
+            "65ae9c147349829d3df0222151f53f79821c5134"
+        );
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("https://gitlab.com/rycee/home-manager")
+        );
+        assert_eq!(deps[0].input_type, FlakeInputType::Gitlab);
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // Ported: "returns null when flake.lock has invalid JSON" — nix/extract.spec.ts line 1046
     #[test]
     fn invalid_json_returns_empty() {
