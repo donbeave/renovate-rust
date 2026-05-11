@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1265 / 1402 actionable tests ported (90%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1271 / 1402 actionable tests ported (91%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 12 spec files not yet converted to per-test format (12 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 11 spec files not yet converted to per-test format (11 pending, 0 partial, 0 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -3689,6 +3689,28 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/util/package-rules/current-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/current-version.spec.ts
+**Total tests:** 10 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `util/package-rules/current-version › match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for null versioning | 8 | ported | `package_rule.rs` | `current_version_matcher_returns_true_for_null_versioning_equivalent` | — |
+| return false on version exception | 22 | not-applicable | — | — | Mocks Renovate's dynamic PEP440 versioning API exception path; Rust matcher does not dispatch through that API |
+| return true for a valid match | 39 | not-applicable | — | — | Exercises Renovate PEP440 range matching; Rust package-rule matcher currently uses semver-compatible matching only |
+| return false if no version could be found | 52 | ported | `package_rule.rs` | `current_version_matcher_returns_false_if_no_version_found` | — |
+| case insensitive match | 66 | ported | `package_rule.rs` | `current_version_matcher_regex_is_case_insensitive` | — |
+| return false for regex version non match | 79 | ported | `package_rule.rs` | `current_version_matcher_returns_false_for_regex_version_non_match` | — |
+| return true for regex version match | 93 | ported | `package_rule.rs` | `current_version_matcher_returns_true_for_regex_version_match` | — |
+| return false for regex value match | 107 | ported | `package_rule.rs` | `current_version_matcher_returns_false_for_regex_value_match_without_version` | — |
+| return true for same-major verisioning if version lies in expected range | 120 | not-applicable | — | — | Exercises Renovate's same-major versioning API; Rust matcher does not implement same-major dispatch |
+| return false for same-major verisioning if version lies outside of expected range | 133 | not-applicable | — | — | Exercises Renovate's same-major versioning API; Rust matcher does not implement same-major dispatch |
+
+---
+
 ## Workers specs
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
@@ -3712,7 +3734,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 <!-- util/package-rules/dep-names.spec.ts converted to per-test format above -->
 <!-- util/package-rules/current-value.spec.ts converted to per-test format above -->
 <!-- util/package-rules/current-age.spec.ts converted to per-test format above -->
-| `lib/util/package-rules/current-version.spec.ts` | — | `crates/renovate-core/src/package_rule.rs` | 0 | pending |
+<!-- util/package-rules/current-version.spec.ts converted to per-test format above -->
 <!-- util/package-rules/files.spec.ts converted to per-test format above -->
 <!-- util/package-rules/new-value.spec.ts converted to per-test format above -->
 <!-- util/package-rules/package-names.spec.ts converted to per-test format above -->

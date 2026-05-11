@@ -1230,6 +1230,13 @@ mod tests {
         }
     }
 
+    fn rule_with_current_version(pattern: &str) -> PackageRule {
+        PackageRule {
+            match_current_version: Some(pattern.to_owned()),
+            ..Default::default()
+        }
+    }
+
     #[test]
     fn managers_matcher_returns_true_for_matching_manager() {
         let rule = rule_with_managers(&["npm", "regex"]);
@@ -1574,5 +1581,47 @@ mod tests {
         let rule = rule_with_repositories(&["!/^org/repo$/", "!**/*-archived"]);
 
         assert!(!rule.repository_matches("org/repo-archived"));
+    }
+
+    #[test]
+    fn current_version_matcher_returns_true_for_null_versioning_equivalent() {
+        let rule = rule_with_current_version("1.2.3");
+
+        assert!(rule.current_version_matches("1.2.3", None, None));
+    }
+
+    #[test]
+    fn current_version_matcher_returns_false_if_no_version_found() {
+        let rule = rule_with_current_version("bbbbbb");
+
+        assert!(!rule.current_version_matches("aaaaaa", None, Some("bbbbbb")));
+    }
+
+    #[test]
+    fn current_version_matcher_regex_is_case_insensitive() {
+        let rule = rule_with_current_version("/BBB.*/i");
+
+        assert!(rule.current_version_matches("bbbbbb", None, None));
+    }
+
+    #[test]
+    fn current_version_matcher_returns_false_for_regex_version_non_match() {
+        let rule = rule_with_current_version("/^v?[~ -]?0/");
+
+        assert!(!rule.current_version_matches("\"~> 1.1.0\"", None, Some("1.1.4")));
+    }
+
+    #[test]
+    fn current_version_matcher_returns_true_for_regex_version_match() {
+        let rule = rule_with_current_version("/^v?[~ -]?0/");
+
+        assert!(rule.current_version_matches("\"~> 0.1.0\"", None, Some("0.1.0")));
+    }
+
+    #[test]
+    fn current_version_matcher_returns_false_for_regex_value_match_without_version() {
+        let rule = rule_with_current_version("/^v?[~ -]?0/");
+
+        assert!(!rule.current_version_matches("\"~> 0.1.0\"", None, None));
     }
 }
