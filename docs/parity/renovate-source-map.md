@@ -1042,7 +1042,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/config/defaults.ts` | `crates/renovate-core/src/config.rs` | partial | Core defaults ported |
+| `lib/config/defaults.ts` | `crates/renovate-core/src/config.rs` | partial | Core implicit default factories ported |
 | `lib/config/app-strings.ts` | `crates/renovate-core/src/config.rs` | partial | App strings partially ported |
 | `lib/config/parse.ts` | `crates/renovate-cli/src/config_builder.rs` | partial | Config parsing in CLI |
 | `lib/config/global.ts` | `crates/renovate-core/src/config.rs` | partial | Global option list and config types partially ported |

@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1041 / 1228 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1044 / 1231 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 45 spec files not yet converted to per-test format (33 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 44 spec files not yet converted to per-test format (32 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,21 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/defaults.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/defaults.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/defaults › getDefault()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns new instances of arrays when called repeatedly | 6 | ported | `config.rs` | `default_array_values_are_independent` | — |
+| returns true for boolean values | 20 | ported | `config.rs` | `default_boolean_value_is_true` | — |
+| returns null for %s values | 31 | ported | `config.rs` | `default_scalar_values_are_null` | — |
+
+---
+
 ## `lib/config/global.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/global.spec.ts
@@ -2788,7 +2803,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
 |--------------------|---------------|-----------|------------|--------|
-| `lib/config/defaults.spec.ts` | 2 | `crates/renovate-core/src/config.rs` | 0 | pending |
+<!-- config/defaults.spec.ts converted to per-test format above -->
 | `lib/config/app-strings.spec.ts` | 3 | `crates/renovate-core/src/config.rs` | 0 | pending |
 | `lib/config/parse.spec.ts` | 4 | `crates/renovate-cli/src/config_builder.rs` | 0 | pending |
 <!-- config/global.spec.ts converted to per-test format above -->

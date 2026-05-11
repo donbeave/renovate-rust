@@ -75,6 +75,47 @@ pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
     "userAgent",
 ];
 
+/// Renovate option value categories used by default-value generation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConfigOptionType {
+    /// Boolean options default to `true`.
+    Boolean,
+    /// Array options default to a fresh empty array.
+    Array,
+    /// String options default to null.
+    String,
+    /// Object options default to null.
+    Object,
+    /// Integer options default to null.
+    Integer,
+}
+
+/// Default value produced for a Renovate option type.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ConfigDefaultValue {
+    /// Boolean default.
+    Boolean(bool),
+    /// Array default. The element type is intentionally empty because the
+    /// upstream default factory produces only an empty array for this path.
+    Array(Vec<()>),
+    /// Null default.
+    Null,
+}
+
+/// Return Renovate's implicit default for an option type.
+///
+/// Mirrors `getDefault()` in `lib/config/defaults.ts` for options without an
+/// explicit default.
+pub fn default_value_for_type(option_type: ConfigOptionType) -> ConfigDefaultValue {
+    match option_type {
+        ConfigOptionType::Boolean => ConfigDefaultValue::Boolean(true),
+        ConfigOptionType::Array => ConfigDefaultValue::Array(Vec::new()),
+        ConfigOptionType::String | ConfigOptionType::Object | ConfigOptionType::Integer => {
+            ConfigDefaultValue::Null
+        }
+    }
+}
+
 /// Canonical global Renovate configuration.
 ///
 /// Fields correspond to Renovate's `globalOnly` options. All have the same
@@ -147,7 +188,9 @@ impl Default for GlobalConfig {
 
 #[cfg(test)]
 mod tests {
-    use super::GLOBAL_CONFIG_OPTIONS;
+    use super::{
+        ConfigDefaultValue, ConfigOptionType, GLOBAL_CONFIG_OPTIONS, default_value_for_type,
+    };
 
     // Ported: "all values in OPTIONS are sorted" — config/global.spec.ts line 4
     #[test]
@@ -155,5 +198,47 @@ mod tests {
         let mut sorted = GLOBAL_CONFIG_OPTIONS.to_vec();
         sorted.sort_unstable();
         assert_eq!(GLOBAL_CONFIG_OPTIONS, sorted.as_slice());
+    }
+
+    // Ported: "returns new instances of arrays when called repeatedly" — config/defaults.spec.ts line 6
+    #[test]
+    fn default_array_values_are_independent() {
+        let ConfigDefaultValue::Array(mut array1) = default_value_for_type(ConfigOptionType::Array)
+        else {
+            panic!("array option must produce an array default");
+        };
+        let ConfigDefaultValue::Array(array2) = default_value_for_type(ConfigOptionType::Array)
+        else {
+            panic!("array option must produce an array default");
+        };
+
+        array1.push(());
+
+        assert_eq!(array1, vec![()]);
+        assert!(array2.is_empty());
+    }
+
+    // Ported: "returns true for boolean values" — config/defaults.spec.ts line 20
+    #[test]
+    fn default_boolean_value_is_true() {
+        assert_eq!(
+            default_value_for_type(ConfigOptionType::Boolean),
+            ConfigDefaultValue::Boolean(true)
+        );
+    }
+
+    // Ported: "returns null for %s values" — config/defaults.spec.ts line 31
+    #[test]
+    fn default_scalar_values_are_null() {
+        for option_type in [
+            ConfigOptionType::String,
+            ConfigOptionType::Object,
+            ConfigOptionType::Integer,
+        ] {
+            assert_eq!(
+                default_value_for_type(option_type),
+                ConfigDefaultValue::Null
+            );
+        }
     }
 }
