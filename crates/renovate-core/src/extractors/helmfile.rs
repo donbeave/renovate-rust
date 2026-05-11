@@ -32,20 +32,55 @@ use std::collections::HashMap;
 
 use crate::extractors::helm::{HelmExtractedDep, HelmSkipReason, STABLE_REPO};
 
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct HelmfileExtract {
+    pub deps: Vec<HelmExtractedDep>,
+    pub need_kustomize: bool,
+}
+
 /// Parse all chart dependencies from a Helmfile YAML.
 pub fn extract(content: &str) -> Vec<HelmExtractedDep> {
+    extract_package_file(content).deps
+}
+
+pub fn extract_package_file(content: &str) -> HelmfileExtract {
+    extract_package_file_with_registry_aliases(content, &HashMap::new())
+}
+
+pub fn extract_package_file_with_registry_aliases(
+    content: &str,
+    registry_aliases: &HashMap<String, String>,
+) -> HelmfileExtract {
+    let content = remove_template_control_lines(content);
+
     // ── Pass 1: collect repositories ─────────────────────────────────────────
-    let repo_map = collect_repositories(content);
+    let repo_map = collect_repositories(&content);
 
     // ── Pass 2: collect and resolve releases ──────────────────────────────────
-    let raw_releases = collect_releases(content);
+    let raw_releases = collect_releases(&content);
 
-    raw_releases
+    let mut need_kustomize = false;
+    let deps = raw_releases
         .into_iter()
-        .filter_map(|(release_name, chart_ref, version)| {
-            resolve_release(&release_name, &chart_ref, &version, &repo_map)
+        .filter_map(|release| {
+            let dep = resolve_release(
+                &release.name,
+                &release.chart,
+                &release.version,
+                &repo_map,
+                registry_aliases,
+            )?;
+            if release.has_kustomize_keys || dep.skip_reason == Some(HelmSkipReason::LocalChart) {
+                need_kustomize = true;
+            }
+            Some(dep)
         })
-        .collect()
+        .collect();
+
+    HelmfileExtract {
+        deps,
+        need_kustomize,
+    }
 }
 
 // ── Internal types ────────────────────────────────────────────────────────────
@@ -53,6 +88,24 @@ pub fn extract(content: &str) -> Vec<HelmExtractedDep> {
 struct RepoEntry {
     url: String,
     oci: bool,
+}
+
+struct RawRelease {
+    name: String,
+    chart: String,
+    version: String,
+    has_kustomize_keys: bool,
+}
+
+fn remove_template_control_lines(content: &str) -> String {
+    content
+        .lines()
+        .filter(|line| {
+            let trimmed = line.trim_start();
+            !trimmed.starts_with("{{") || trimmed.contains(':')
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 // ── Pass 1: repositories ──────────────────────────────────────────────────────
@@ -130,12 +183,13 @@ fn flush_repo(
 
 // ── Pass 2: releases ──────────────────────────────────────────────────────────
 
-fn collect_releases(content: &str) -> Vec<(String, String, String)> {
-    let mut out: Vec<(String, String, String)> = Vec::new();
+fn collect_releases(content: &str) -> Vec<RawRelease> {
+    let mut out: Vec<RawRelease> = Vec::new();
     let mut in_releases = false;
     let mut cur_name: Option<String> = None;
     let mut cur_chart: Option<String> = None;
     let mut cur_version: Option<String> = None;
+    let mut cur_has_kustomize_keys = false;
 
     for raw in content.lines() {
         let line = raw.split(" #").next().unwrap_or(raw).trim_end();
@@ -147,7 +201,13 @@ fn collect_releases(content: &str) -> Vec<(String, String, String)> {
 
         if indent == 0 && !trimmed.starts_with('-') {
             if in_releases {
-                flush_release(&mut out, &mut cur_name, &mut cur_chart, &mut cur_version);
+                flush_release(
+                    &mut out,
+                    &mut cur_name,
+                    &mut cur_chart,
+                    &mut cur_version,
+                    &mut cur_has_kustomize_keys,
+                );
             }
             in_releases = trimmed == "releases:";
             continue;
@@ -158,7 +218,13 @@ fn collect_releases(content: &str) -> Vec<(String, String, String)> {
         }
 
         if trimmed.starts_with("- ") {
-            flush_release(&mut out, &mut cur_name, &mut cur_chart, &mut cur_version);
+            flush_release(
+                &mut out,
+                &mut cur_name,
+                &mut cur_chart,
+                &mut cur_version,
+                &mut cur_has_kustomize_keys,
+            );
             let rest = trimmed.strip_prefix("- ").unwrap_or("");
             if let Some(v) = strip_key(rest, "name") {
                 cur_name = Some(v.trim().trim_matches('"').trim_matches('\'').to_owned());
@@ -177,30 +243,45 @@ fn collect_releases(content: &str) -> Vec<(String, String, String)> {
                 cur_chart = Some(v.trim().trim_matches('"').trim_matches('\'').to_owned());
             } else if let Some(v) = strip_key(trimmed, "version") {
                 cur_version = Some(v.trim().trim_matches('"').trim_matches('\'').to_owned());
+            } else if is_kustomize_key(trimmed) {
+                cur_has_kustomize_keys = true;
             }
         }
     }
     if in_releases {
-        flush_release(&mut out, &mut cur_name, &mut cur_chart, &mut cur_version);
+        flush_release(
+            &mut out,
+            &mut cur_name,
+            &mut cur_chart,
+            &mut cur_version,
+            &mut cur_has_kustomize_keys,
+        );
     }
 
     out
 }
 
 fn flush_release(
-    out: &mut Vec<(String, String, String)>,
+    out: &mut Vec<RawRelease>,
     release_name: &mut Option<String>,
     chart: &mut Option<String>,
     version: &mut Option<String>,
+    has_kustomize_keys: &mut bool,
 ) {
     if let Some(c) = chart.take() {
         let name = release_name.take().unwrap_or_default();
         let ver = version.take().unwrap_or_default();
-        out.push((name, c, ver));
+        out.push(RawRelease {
+            name,
+            chart: c,
+            version: ver,
+            has_kustomize_keys: *has_kustomize_keys,
+        });
     } else {
         release_name.take();
         version.take();
     }
+    *has_kustomize_keys = false;
 }
 
 // ── Resolution ────────────────────────────────────────────────────────────────
@@ -222,7 +303,12 @@ fn resolve_release(
     chart_ref: &str,
     version: &str,
     repos: &HashMap<String, RepoEntry>,
+    registry_aliases: &HashMap<String, String>,
 ) -> Option<HelmExtractedDep> {
+    if chart_ref.contains("{{") {
+        return None;
+    }
+
     // Local path → dep with LocalChart skip reason (depName = release name)
     if chart_ref.starts_with("./") || chart_ref.starts_with("../") || chart_ref.starts_with('/') {
         return Some(HelmExtractedDep {
@@ -339,6 +425,8 @@ fn resolve_release(
     // Resolve repo URL
     let repo_url = if let Some(entry) = repos.get(&repo_alias) {
         entry.url.clone()
+    } else if let Some(url) = registry_aliases.get(&repo_alias) {
+        url.clone()
     } else if repo_alias == "stable" {
         STABLE_REPO.to_owned()
     } else {
@@ -370,6 +458,12 @@ fn leading_spaces(s: &str) -> usize {
 fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
     let prefix = format!("{key}:");
     line.strip_prefix(prefix.as_str())
+}
+
+fn is_kustomize_key(line: &str) -> bool {
+    ["strategicMergePatches", "jsonPatches", "transformers"]
+        .iter()
+        .any(|key| strip_key(line, key).is_some())
 }
 
 #[cfg(test)]
@@ -725,6 +819,125 @@ releases:
             deps[0].package_name.as_deref(),
             Some("ghcr.io/example/oci-repo/example")
         );
+    }
+
+    // Ported: "parses and replaces templating strings" — helmfile/extract.spec.ts line 423
+    #[test]
+    fn go_template_fixture_resolves_fallbacks_and_registry_aliases() {
+        let content = r#"
+repositories:
+- name: incubator
+  url: https://charts.helm.sh/incubator/
+- name: bitnami
+  url: https://charts.bitnami.com/bitnami
+- name: prometheus-community
+  url: https://prometheus-community.github.io/helm-charts
+
+releases:
+  - name: "{{ requiredEnv "RELEASE_NAME" }}"
+    namespace: default
+    chart: ./foo
+{{ if .Values.nginx.intranet.enabled }}
+  - name: nginx-intranet
+    chart: ingress-nginx/ingress-nginx
+    version: 3.37.0
+{{ end }}
+  - name: example
+{{- if neq .Values.example.version  "" }}
+    version: {{ .Values.example.version }}
+{{- else }}
+    version: 6.0.0
+{{- end }}
+    chart: bitnami/memcached
+  - name: example-internal
+    version: 1.30.0
+    chart: stable/example
+  - name: example-private
+    version: {{ .Values.example.version }}
+    chart: prometheus-community/kube-prometheus-stack
+  - name: example-external
+    version: 1.48.0
+    chart: {{ .Values.example.repository }}
+  - name: example-public
+    version: 2.0.0
+    chart: stable/external-dns
+"#;
+        let aliases = HashMap::from([(
+            "stable".to_owned(),
+            "https://charts.helm.sh/stable".to_owned(),
+        )]);
+        let result = extract_package_file_with_registry_aliases(content, &aliases);
+
+        assert!(result.need_kustomize);
+
+        let ingress = result
+            .deps
+            .iter()
+            .find(|d| d.name == "ingress-nginx")
+            .unwrap();
+        assert_eq!(ingress.skip_reason, Some(HelmSkipReason::UnknownRegistry));
+
+        let memcached = result.deps.iter().find(|d| d.name == "memcached").unwrap();
+        assert_eq!(memcached.current_value, "6.0.0");
+        assert_eq!(memcached.repository, "https://charts.bitnami.com/bitnami");
+
+        let example = result.deps.iter().find(|d| d.name == "example").unwrap();
+        assert_eq!(example.current_value, "1.30.0");
+        assert_eq!(example.repository, "https://charts.helm.sh/stable");
+
+        let kube = result
+            .deps
+            .iter()
+            .find(|d| d.name == "kube-prometheus-stack")
+            .unwrap();
+        assert_eq!(kube.skip_reason, Some(HelmSkipReason::InvalidVersion));
+
+        let external_dns = result
+            .deps
+            .iter()
+            .find(|d| d.name == "external-dns")
+            .unwrap();
+        assert_eq!(external_dns.current_value, "2.0.0");
+        assert_eq!(external_dns.repository, "https://charts.helm.sh/stable");
+        assert!(
+            result
+                .deps
+                .iter()
+                .all(|d| d.name != "{{ .Values.example.repository }}")
+        );
+    }
+
+    // Ported: "detects kustomize and respects relative paths" — helmfile/extract.spec.ts line 477
+    #[test]
+    fn local_chart_marks_need_kustomize_and_keeps_relative_dep() {
+        let content = r#"
+repositories:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+
+releases:
+  - name: my-chart
+    chart: ../charts/my-chart
+  - name: memcached
+    version: 6.0.0
+    chart: bitnami/memcached
+"#;
+        let result = extract_package_file_with_registry_aliases(
+            content,
+            &HashMap::from([(
+                "stable".to_owned(),
+                "https://charts.helm.sh/stable".to_owned(),
+            )]),
+        );
+
+        assert!(result.need_kustomize);
+        let local = result.deps.iter().find(|d| d.name == "my-chart").unwrap();
+        assert_eq!(local.skip_reason, Some(HelmSkipReason::LocalChart));
+
+        let memcached = result.deps.iter().find(|d| d.name == "memcached").unwrap();
+        assert_eq!(memcached.current_value, "6.0.0");
+        assert_eq!(memcached.repository, "https://charts.bitnami.com/bitnami");
+        assert!(memcached.skip_reason.is_none());
     }
 
     // Ported: "makes sure url joiner works correctly" — helmfile/extract.spec.ts line 513

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1360 / 1661 actionable tests ported (82%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1362 / 1661 actionable tests ported (82%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1603,7 +1603,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/helmfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmfile/extract.spec.ts
-**Total tests:** 19 | **Ported:** 17 | **Actionable:** 19 | **Status:** partial
+**Total tests:** 19 | **Ported:** 19 | **Actionable:** 19 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1624,8 +1624,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | parses a chart with an oci repository and non-oci one | 316 | ported | `helmfile.rs` | `oci_backed_repo_uses_docker_datasource` | — |
 | allows OCI chart names containing forward slashes | 366 | ported | `helmfile.rs` | `oci_nested_path_chart_uses_docker_datasource` | — |
 | parses a chart with an oci repository with --- | 392 | ported | `helmfile.rs` | `oci_repo_with_yaml_document_separator` | — |
-| parses and replaces templating strings | 423 | pending | — | — | Requires helmfile go-template substitution |
-| detects kustomize and respects relative paths | 477 | pending | — | — | Requires kustomize detection inside helmfile releases |
+| parses and replaces templating strings | 423 | ported | `helmfile.rs` | `go_template_fixture_resolves_fallbacks_and_registry_aliases` | — |
+| detects kustomize and respects relative paths | 477 | ported | `helmfile.rs` | `local_chart_marks_need_kustomize_and_keeps_relative_dep` | — |
 | makes sure url joiner works correctly | 513 | ported | `helmfile.rs` | `oci_url_with_port_in_chart_ref` | — |
 | skips helm-git repos | 539 | ported | `helmfile.rs` | `helm_git_repo_releases_get_unknown_registry` | — |
 
