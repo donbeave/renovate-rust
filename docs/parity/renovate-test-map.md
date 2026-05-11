@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 820 / 1217 actionable tests ported (67%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 821 / 1217 actionable tests ported (67%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1817,7 +1817,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nuget/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/extract.spec.ts
-**Total tests:** 35 | **Ported:** 19 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 20 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1866,7 +1866,7 @@ Status key: `ported` · `pending` · `not-applicable`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| reads sdk and package directives | 583 | pending | — | — | Requires .NET 10 single-file `#:sdk` / `#:package` directive parsing |
+| reads sdk and package directives | 583 | ported | `nuget.rs` | `single_csharp_file_reads_sdk_and_package_directives` | — |
 
 ### `extractPackageFile() › single-csharp-file-nuget`
 

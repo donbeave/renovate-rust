@@ -48,6 +48,8 @@ pub enum NuGetDepType {
     MsbuildSdk,
     /// Local .NET tool manifest entry from `.config/dotnet-tools.json`.
     DotnetTool,
+    /// `#:package` directive in a single C# file.
+    SingleFilePackage,
     /// `<ContainerBaseImage>` property — Docker image for .NET container publishing.
     ContainerImage,
 }
@@ -61,6 +63,7 @@ impl NuGetDepType {
             NuGetDepType::Global => "GlobalPackageReference",
             NuGetDepType::MsbuildSdk => "msbuild-sdk",
             NuGetDepType::DotnetTool => "nuget",
+            NuGetDepType::SingleFilePackage => "nuget",
             NuGetDepType::ContainerImage => "docker",
         }
     }
@@ -229,6 +232,50 @@ pub fn extract_dotnet_tools(content: &str) -> Vec<NuGetExtractedDep> {
                 current_value: version.to_owned(),
                 current_digest: None,
                 dep_type: NuGetDepType::DotnetTool,
+                skip_reason: None,
+            })
+        })
+        .collect()
+}
+
+/// Parse NuGet directives from a .NET 10 single C# file.
+///
+/// Supports Renovate's current directive forms:
+/// `#:sdk Name@Version` and `#:package Name@Version`.
+pub fn extract_single_csharp_file(content: &str) -> Vec<NuGetExtractedDep> {
+    content
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim_start();
+            let (dep_type, rest) = if let Some(rest) = line.strip_prefix("#:sdk ") {
+                (NuGetDepType::MsbuildSdk, rest)
+            } else if let Some(rest) = line.strip_prefix("#:package ") {
+                (NuGetDepType::SingleFilePackage, rest)
+            } else {
+                return None;
+            };
+
+            let (name, version) = rest.split_once('@')?;
+            if name.is_empty()
+                || version.is_empty()
+                || !version.starts_with(|ch: char| ch.is_ascii_digit())
+                || !name
+                    .chars()
+                    .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '_' | '.' | '-'))
+            {
+                return None;
+            }
+
+            let current_value = version.split_whitespace().next().unwrap_or_default();
+            if current_value.is_empty() {
+                return None;
+            }
+
+            Some(NuGetExtractedDep {
+                package_id: name.to_owned(),
+                current_value: current_value.to_owned(),
+                current_digest: None,
+                dep_type,
                 skip_reason: None,
             })
         })
@@ -826,5 +873,26 @@ mod tests {
     fn dotnet_tools_manifest_malformed_returns_empty() {
         let deps = extract_dotnet_tools("{{");
         assert!(deps.is_empty());
+    }
+
+    // Ported: "reads sdk and package directives" — nuget/extract.spec.ts line 583
+    #[test]
+    fn single_csharp_file_reads_sdk_and_package_directives() {
+        let content = r#"
+          #:sdk Some.Sdk@6.0.0
+          #:package Some.NuGet.Package@3.0.1
+
+          Console.WriteLine("Hello World!");
+        "#;
+        let deps = extract_single_csharp_file(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].package_id, "Some.Sdk");
+        assert_eq!(deps[0].current_value, "6.0.0");
+        assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
+        assert_eq!(deps[0].dep_type.as_renovate_str(), "msbuild-sdk");
+        assert_eq!(deps[1].package_id, "Some.NuGet.Package");
+        assert_eq!(deps[1].current_value, "3.0.1");
+        assert_eq!(deps[1].dep_type, NuGetDepType::SingleFilePackage);
+        assert_eq!(deps[1].dep_type.as_renovate_str(), "nuget");
     }
 }
