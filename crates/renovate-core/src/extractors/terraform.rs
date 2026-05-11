@@ -123,6 +123,7 @@ pub struct TerraformExtractedDep {
     pub datasource: Option<&'static str>,
     pub package_name: Option<String>,
     pub current_digest: Option<String>,
+    pub locked_version: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<TerraformSkipReason>,
 }
@@ -168,6 +169,9 @@ static KUBERNETES_RESOURCE_BLOCK: LazyLock<Regex> = LazyLock::new(|| {
 
 static KUBERNETES_CONTAINER_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\s*(?:init_)?container\s*\{"#).unwrap());
+
+static LOCK_PROVIDER_BLOCK: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^\s*provider\s+"([^"]+)"\s*\{"#).unwrap());
 
 /// `required_providers {` inside a terraform block.
 static REQUIRED_PROVIDERS: LazyLock<Regex> =
@@ -328,6 +332,7 @@ impl Parser {
                     datasource: None,
                     package_name: None,
                     current_digest: None,
+                    locked_version: None,
                     skip_reason: None,
                 });
             }
@@ -363,6 +368,7 @@ impl Parser {
                 datasource: None,
                 package_name: None,
                 current_digest: None,
+                locked_version: None,
                 skip_reason: None,
             });
         }
@@ -381,6 +387,7 @@ impl Parser {
                     datasource: oci.datasource,
                     package_name: oci.package_name,
                     current_digest: oci.current_digest,
+                    locked_version: None,
                     skip_reason: oci.skip_reason,
                 });
             } else {
@@ -396,6 +403,7 @@ impl Parser {
                     datasource: None,
                     package_name: None,
                     current_digest: None,
+                    locked_version: None,
                     skip_reason: None,
                 });
             }
@@ -428,6 +436,7 @@ impl Parser {
                 datasource: source.datasource,
                 package_name: source.package_name,
                 current_digest: source.current_digest,
+                locked_version: None,
                 skip_reason: source.skip_reason,
             });
             self.state = State::TopLevel;
@@ -493,6 +502,7 @@ impl Parser {
                 datasource: Some("github-releases"),
                 package_name: Some("hashicorp/terraform".to_owned()),
                 current_digest: None,
+                locked_version: None,
                 skip_reason,
             });
             self.resource_version.clear();
@@ -868,6 +878,7 @@ fn resolve_docker_image(
         datasource: Some("docker"),
         package_name,
         current_digest,
+        locked_version: None,
         skip_reason: None,
     }
 }
@@ -883,6 +894,7 @@ fn docker_skip(
         datasource: Some("docker"),
         package_name: None,
         current_digest: None,
+        locked_version: None,
         skip_reason: Some(skip_reason),
     }
 }
@@ -932,6 +944,7 @@ fn resolve_helm_release(
         datasource,
         package_name,
         current_digest: None,
+        locked_version: None,
         skip_reason,
     }
 }
@@ -960,11 +973,87 @@ fn kubernetes_dep_type(resource_type: &str) -> Option<TerraformDepType> {
     }
 }
 
+fn parse_provider_lockfile(lockfile: &str) -> BTreeMap<String, String> {
+    let mut locked_versions = BTreeMap::new();
+    let mut current_provider: Option<String> = None;
+    let mut depth = 0usize;
+
+    for line in lockfile.lines() {
+        let trimmed = line.trim();
+        if current_provider.is_none()
+            && let Some(cap) = LOCK_PROVIDER_BLOCK.captures(trimmed)
+        {
+            current_provider = Some(normalize_lock_provider_name(&cap[1]));
+            depth = 1;
+            continue;
+        }
+
+        if let Some(provider) = current_provider.as_ref() {
+            if let Some(cap) = KV_LINE.captures(trimmed)
+                && &cap[1] == "version"
+            {
+                locked_versions.insert(provider.clone(), cap[2].trim().to_owned());
+            }
+
+            let opens = trimmed.chars().filter(|&c| c == '{').count();
+            let closes = trimmed.chars().filter(|&c| c == '}').count();
+            depth = depth.saturating_add(opens).saturating_sub(closes);
+            if depth == 0 {
+                current_provider = None;
+            }
+        }
+    }
+
+    locked_versions
+}
+
+fn normalize_lock_provider_name(provider: &str) -> String {
+    provider
+        .strip_prefix("registry.terraform.io/")
+        .or_else(|| provider.strip_prefix("https://"))
+        .or_else(|| provider.strip_prefix("http://"))
+        .unwrap_or(provider)
+        .to_owned()
+}
+
+fn apply_locked_versions(
+    deps: &mut [TerraformExtractedDep],
+    locked_versions: &BTreeMap<String, String>,
+) {
+    for dep in deps
+        .iter_mut()
+        .filter(|dep| dep.dep_type == TerraformDepType::Provider)
+    {
+        let mut candidates = vec![dep.name.as_str().to_owned()];
+        if !dep.name.contains('/') {
+            candidates.push(format!("hashicorp/{}", dep.name));
+        }
+        if let Some(package_name) = dep.package_name.as_ref() {
+            candidates.push(package_name.clone());
+        }
+        if let Some(version) = candidates
+            .iter()
+            .find_map(|candidate| locked_versions.get(candidate))
+        {
+            dep.locked_version = Some(version.clone());
+        }
+    }
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /// Parse a Terraform `.tf` file and extract all provider and module deps.
 pub fn extract(content: &str) -> Vec<TerraformExtractedDep> {
-    extract_with_registry_aliases(content, &BTreeMap::new())
+    extract_with_lockfile(content, None)
+}
+
+pub fn extract_with_lockfile(content: &str, lockfile: Option<&str>) -> Vec<TerraformExtractedDep> {
+    let mut deps = extract_with_registry_aliases(content, &BTreeMap::new());
+    if let Some(lockfile) = lockfile {
+        let locked_versions = parse_provider_lockfile(lockfile);
+        apply_locked_versions(&mut deps, &locked_versions);
+    }
+    deps
 }
 
 pub fn extract_with_registry_aliases(
@@ -1883,6 +1972,63 @@ terraform {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "random");
         assert_eq!(deps[0].current_value, "~> 3.0");
+    }
+
+    // Ported: "update lockfile constraints with range strategy update-lockfile" — terraform/extract.spec.ts line 845
+    #[test]
+    fn provider_lockfile_versions_are_applied() {
+        let content = r#"
+terraform {
+  required_providers {
+    aws = {
+      source  = "aws"
+      version = "~> 3.0"
+    }
+    azurerm = {
+      version = "~> 2.50.0"
+    }
+    kubernetes = {
+      source  = "terraform.example.com/example/kubernetes"
+      version = ">= 1.0"
+    }
+  }
+}
+"#;
+        let lockfile = r#"
+provider "registry.terraform.io/hashicorp/aws" {
+  version     = "3.1.0"
+  constraints = "~> 3.0"
+}
+
+provider "registry.terraform.io/hashicorp/azurerm" {
+  version     = "2.50.0"
+  constraints = "~> 2.50.0"
+}
+
+provider "https://terraform.example.com/example/kubernetes" {
+  version     = "1.5.0"
+  constraints = ">= 1.0"
+}
+"#;
+        let deps = extract_with_lockfile(content, Some(lockfile));
+
+        assert_eq!(deps.len(), 3);
+        assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
+
+        let aws = deps.iter().find(|dep| dep.name == "aws").unwrap();
+        assert_eq!(aws.current_value, "~> 3.0");
+        assert_eq!(aws.locked_version.as_deref(), Some("3.1.0"));
+
+        let azurerm = deps.iter().find(|dep| dep.name == "azurerm").unwrap();
+        assert_eq!(azurerm.current_value, "~> 2.50.0");
+        assert_eq!(azurerm.locked_version.as_deref(), Some("2.50.0"));
+
+        let kubernetes = deps
+            .iter()
+            .find(|dep| dep.name == "terraform.example.com/example/kubernetes")
+            .unwrap();
+        assert_eq!(kubernetes.current_value, ">= 1.0");
+        assert_eq!(kubernetes.locked_version.as_deref(), Some("1.5.0"));
     }
 
     // Ported: "returns dep with skipReason local" — terraform/extract.spec.ts line 756

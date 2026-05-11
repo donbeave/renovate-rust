@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1392 / 1653 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1393 / 1653 actionable tests ported (84%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2592,7 +2592,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/terraform/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extract.spec.ts
-**Total tests:** 18 | **Ported:** 17 | **Actionable:** 18 | **Status:** partial
+**Total tests:** 18 | **Ported:** 18 | **Actionable:** 18 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2612,7 +2612,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns dep with skipReason local | 756 | ported | `terraform.rs` | `module_with_local_path_skipped` (+ local_module_has_skip_reason) | — |
 | returns null with only not added resources | 767 | ported | `terraform.rs` | `resource_block_not_extracted` | — |
 | extract helm releases | 776 | ported | `terraform.rs` | `helm_releases_are_extracted` | — |
-| update lockfile constraints with range strategy update-lockfile | 845 | pending | — | — | Requires .terraform.lock.hcl parsing |
+| update lockfile constraints with range strategy update-lockfile | 845 | ported | `terraform.rs` | `provider_lockfile_versions_are_applied` | — |
 | test terraform block with only requirement_terraform_version | 884 | ported | `terraform.rs` | `required_version_extracted_as_hashicorp_terraform` | — |
 | extracts terraform_version for tfe_workspace and ignores missing terraform_version keys | 904 | ported | `terraform.rs` | `tfe_workspace_terraform_versions_are_extracted` | — |
 | return null if invalid HCL file | 933 | ported | `terraform.rs` | `invalid_hcl_returns_empty` | — |
