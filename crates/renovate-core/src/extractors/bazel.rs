@@ -32,6 +32,11 @@ pub enum BazelSource {
     },
     /// `oci_pull()` → Docker datasource (full image URL).
     OciPull { image: String },
+    /// `go_repository()` → Go datasource.
+    GoRepository {
+        importpath: String,
+        package_name: String,
+    },
     /// Non-GitHub/GitLab or unrecognised URL.
     Unsupported,
 }
@@ -43,6 +48,8 @@ pub enum BazelSkipReason {
     NoGithubUrl,
     /// `sha256` field is missing (reproducibility concern, skip).
     MissingSha256,
+    /// `go_repository(remote=...)` points at an unsupported remote.
+    UnsupportedRemote,
 }
 
 /// A single Bazel dependency.
@@ -89,6 +96,7 @@ pub fn extract(content: &str) -> Vec<BazelDep> {
     extract_rule(content, "http_archive(", parse_http_archive, &mut deps);
     extract_rule(content, "container_pull(", parse_container_pull, &mut deps);
     extract_rule(content, "oci_pull(", parse_oci_pull, &mut deps);
+    extract_rule(content, "go_repository(", parse_go_repository, &mut deps);
     deps
 }
 
@@ -184,6 +192,50 @@ fn parse_oci_pull(block: &str) -> Option<BazelDep> {
         source: BazelSource::OciPull { image },
         skip_reason: None,
     })
+}
+
+fn parse_go_repository(block: &str) -> Option<BazelDep> {
+    let dep_name = extract_field(block, "name").unwrap_or("unknown").to_owned();
+    let importpath = extract_field(block, "importpath")?.to_owned();
+    let remote = extract_field(block, "remote");
+    let commit = extract_field(block, "commit").unwrap_or("").to_owned();
+
+    let package_name = match remote {
+        Some(remote) => normalize_go_remote(remote),
+        None => Some(importpath.clone()),
+    };
+
+    let Some(package_name) = package_name else {
+        return Some(BazelDep {
+            dep_name,
+            current_value: String::new(),
+            current_digest: Some(commit),
+            source: BazelSource::GoRepository {
+                importpath,
+                package_name: String::new(),
+            },
+            skip_reason: Some(BazelSkipReason::UnsupportedRemote),
+        });
+    };
+
+    Some(BazelDep {
+        dep_name,
+        current_value: String::new(),
+        current_digest: Some(commit),
+        source: BazelSource::GoRepository {
+            importpath,
+            package_name,
+        },
+        skip_reason: None,
+    })
+}
+
+fn normalize_go_remote(remote: &str) -> Option<String> {
+    let path = remote.strip_prefix("https://github.com/")?;
+    if path.contains('#') {
+        return None;
+    }
+    Some(format!("github.com/{}", path.trim_end_matches(".git")))
 }
 
 fn parse_http_archive(block: &str) -> Option<BazelDep> {
@@ -528,5 +580,56 @@ oci_pull(
             }
         );
         assert!(d.skip_reason.is_none());
+    }
+
+    // Ported: "check remote option in go_repository" — bazel/extract.spec.ts line 113
+    #[test]
+    fn go_repository_remote_option() {
+        let success = extract(
+            r#"
+go_repository(
+  name = "test_repository",
+  importpath = "github.com/google/uuid",
+  remote = "https://github.com/test/uuid-fork",
+  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+)
+"#,
+        );
+        assert_eq!(success.len(), 1);
+        assert_eq!(
+            success[0].current_digest.as_deref(),
+            Some("dec09d789f3dba190787f8b4454c7d3c936fed9e")
+        );
+        assert_eq!(
+            success[0].source,
+            BazelSource::GoRepository {
+                importpath: "github.com/google/uuid".to_owned(),
+                package_name: "github.com/test/uuid-fork".to_owned(),
+            }
+        );
+        assert!(success[0].skip_reason.is_none());
+
+        for remote in [
+            "https://github.com/test/uuid.git#branch",
+            "https://github.mycompany.com/test/uuid",
+            "https://gitlab.com/test/uuid",
+        ] {
+            let content = format!(
+                r#"
+go_repository(
+  name = "test_repository",
+  importpath = "github.com/google/uuid",
+  remote = "{remote}",
+  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+)
+"#
+            );
+            let deps = extract(&content);
+            assert_eq!(deps.len(), 1);
+            assert_eq!(
+                deps[0].skip_reason,
+                Some(BazelSkipReason::UnsupportedRemote)
+            );
+        }
     }
 }

@@ -169,6 +169,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 reason: match reason {
                                     BazelSkipReason::NoGithubUrl => "no-github-url".to_owned(),
                                     BazelSkipReason::MissingSha256 => "missing-sha256".to_owned(),
+                                    BazelSkipReason::UnsupportedRemote => {
+                                        "unsupported-remote".to_owned()
+                                    }
                                 },
                             },
                         });
@@ -248,6 +251,9 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 reason: "docker-not-yet-supported".to_owned(),
                             }
                         }
+                        BazelSource::GoRepository { .. } => output::DepStatus::Skipped {
+                            reason: "go-not-yet-supported".to_owned(),
+                        },
                         BazelSource::Unsupported => output::DepStatus::Skipped {
                             reason: "no-github-url".to_owned(),
                         },
