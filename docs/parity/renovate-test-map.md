@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1485 / 1657 actionable tests ported (90%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1490 / 1657 actionable tests ported (90%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2442,7 +2442,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 29 | **Ported:** 8 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 13 | **Actionable:** 29 | **Status:** partial
 
 ### `extractPackage`
 
@@ -2470,11 +2470,11 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for invalid XML | 471 | pending | — | — | Requires settings.xml registry-extraction parser |
-| extract registries from a simple mirror settings file | 478 | pending | — | — | Requires settings.xml mirror parser |
-| extract registries from a simple profile settings file | 485 | pending | — | — | Requires settings.xml profile parser |
-| extract registries from a complex profile settings file | 492 | pending | — | — | Requires settings.xml complex profile parser |
-| extract registries from a settings file that uses a newer schema | 503 | pending | — | — | Requires settings.xml newer-schema tolerance |
+| returns null for invalid XML | 471 | ported | `maven.rs` | `settings_registries_invalid_xml_returns_empty` | — |
+| extract registries from a simple mirror settings file | 478 | ported | `maven.rs` | `settings_registries_extracts_simple_mirror` | — |
+| extract registries from a simple profile settings file | 485 | ported | `maven.rs` | `settings_registries_extracts_simple_profile_repository` | — |
+| extract registries from a complex profile settings file | 492 | ported | `maven.rs` | `settings_registries_extracts_complex_settings` | — |
+| extract registries from a settings file that uses a newer schema | 503 | ported | `maven.rs` | `settings_registries_extracts_newer_schema` | — |
 
 ### `extractExtensions`
 

@@ -153,6 +153,50 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
     Ok(deps)
 }
 
+/// Extract Maven registry URLs from a `settings.xml` file.
+pub fn extract_registries(content: &str) -> Vec<String> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut stack: Vec<String> = Vec::new();
+    let mut urls = Vec::new();
+    let mut saw_settings = false;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                let name = String::from_utf8_lossy(e.name().as_ref()).into_owned();
+                if stack.is_empty() && name != "settings" {
+                    return Vec::new();
+                }
+                if stack.is_empty() {
+                    saw_settings = true;
+                }
+                stack.push(name);
+            }
+            Ok(Event::End(_)) => {
+                stack.pop();
+            }
+            Ok(Event::Text(e)) => {
+                if is_settings_registry_url_path(&stack) {
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                    if !text.is_empty() && !urls.iter().any(|url| url == &text) {
+                        urls.push(text);
+                    }
+                }
+            }
+            Ok(Event::Eof) => break,
+            Ok(_) => {}
+            Err(_) => return Vec::new(),
+        }
+        buf.clear();
+    }
+
+    if saw_settings { urls } else { Vec::new() }
+}
+
 /// SAX parse a POM and return (deps, properties).
 fn parse_pom(
     content: &str,
@@ -425,6 +469,23 @@ fn is_extension_context(stack: &[String]) -> bool {
     parent == "extensions" && grandparent == "build"
 }
 
+fn is_settings_registry_url_path(stack: &[String]) -> bool {
+    matches!(
+        stack,
+        [settings, mirrors, mirror, url]
+            if settings == "settings" && mirrors == "mirrors" && mirror == "mirror" && url == "url"
+    ) || matches!(
+        stack,
+        [settings, profiles, profile, repositories, repository, url]
+            if settings == "settings"
+                && profiles == "profiles"
+                && profile == "profile"
+                && repositories == "repositories"
+                && repository == "repository"
+                && url == "url"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -573,6 +634,134 @@ mod tests {
         assert_eq!(
             plugins[0].dep_name,
             "org.apache.maven.plugins:maven-release-plugin"
+        );
+    }
+
+    // Ported: "returns null for invalid XML" — maven/extract.spec.ts line 471
+    #[test]
+    fn settings_registries_invalid_xml_returns_empty() {
+        assert!(extract_registries("").is_empty());
+        assert!(extract_registries("invalid xml content").is_empty());
+        assert!(extract_registries("<foobar></foobar>").is_empty());
+        assert!(extract_registries("<settings></settings>").is_empty());
+    }
+
+    // Ported: "extract registries from a simple mirror settings file" — maven/extract.spec.ts line 478
+    #[test]
+    fn settings_registries_extracts_simple_mirror() {
+        let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+  <mirrors>
+    <mirror>
+      <id>my-maven-repo</id>
+      <url>https://artifactory.company.com/artifactory/my-maven-repo</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>"#;
+        assert_eq!(
+            extract_registries(content),
+            vec!["https://artifactory.company.com/artifactory/my-maven-repo"]
+        );
+    }
+
+    // Ported: "extract registries from a simple profile settings file" — maven/extract.spec.ts line 485
+    #[test]
+    fn settings_registries_extracts_simple_profile_repository() {
+        let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+  <profiles>
+    <profile>
+      <id>adobe-public</id>
+      <repositories>
+        <repository>
+          <id>adobe-public-releases</id>
+          <url>https://repo.adobe.com/nexus/content/groups/public</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>"#;
+        assert_eq!(
+            extract_registries(content),
+            vec!["https://repo.adobe.com/nexus/content/groups/public"]
+        );
+    }
+
+    // Ported: "extract registries from a complex profile settings file" — maven/extract.spec.ts line 492
+    #[test]
+    fn settings_registries_extracts_complex_settings() {
+        let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+  <mirrors>
+    <mirror>
+      <id>my-maven-repo</id>
+      <url>https://artifactory.company.com/artifactory/my-maven-repo</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+    <mirror>
+      <id>my-maven-repo-v2</id>
+      <url>https://repo.adobe.com/nexus/content/groups/public</url>
+      <mirrorOf>custom-repo</mirrorOf>
+    </mirror>
+  </mirrors>
+  <profiles>
+    <profile>
+      <id>adobe-public</id>
+      <repositories>
+        <repository>
+          <id>adobe-public-releases</id>
+          <url>https://repo.adobe.com/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+          <id>adobe-public-releases-v2</id>
+          <url>https://repo.adobe.com/v2/nexus/content/groups/public</url>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
+      <id>adobe-public-v2</id>
+      <repositories>
+        <repository>
+          <id>adobe-public-releases-v3</id>
+          <url>https://repo.adobe.com/v3/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+          <id>adobe-public-releases-v4</id>
+          <url>https://repo.adobe.com/v4/nexus/content/groups/public</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>"#;
+        assert_eq!(
+            extract_registries(content),
+            vec![
+                "https://artifactory.company.com/artifactory/my-maven-repo",
+                "https://repo.adobe.com/nexus/content/groups/public",
+                "https://repo.adobe.com/v2/nexus/content/groups/public",
+                "https://repo.adobe.com/v3/nexus/content/groups/public",
+                "https://repo.adobe.com/v4/nexus/content/groups/public",
+            ]
+        );
+    }
+
+    // Ported: "extract registries from a settings file that uses a newer schema" — maven/extract.spec.ts line 503
+    #[test]
+    fn settings_registries_extracts_newer_schema() {
+        let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <mirrors>
+    <mirror>
+      <id>Test-Internal-repository</id>
+      <name>Proxy Repository Manager</name>
+      <url>https://proxy-repo.com/artifactory/apache-maven</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+  </mirrors>
+  <profiles/>
+  <activeProfiles/>
+</settings>"#;
+        assert_eq!(
+            extract_registries(content),
+            vec!["https://proxy-repo.com/artifactory/apache-maven"]
         );
     }
 
