@@ -15,6 +15,7 @@
 //! | `[project].dependencies` | `Regular` |
 //! | `[project.optional-dependencies].*` | `Optional` |
 //! | `[dependency-groups].*` (PEP 735) | `Group` |
+//! | `[tool.pdm.dev-dependencies].*` | `PdmDev` |
 //! | `[build-system].requires` | `BuildSystem` |
 //!
 //! ## PEP 508 string format
@@ -38,6 +39,8 @@ pub enum Pep621DepType {
     Optional,
     /// `[dependency-groups].*` (PEP 735)
     Group,
+    /// `[tool.pdm.dev-dependencies].*`
+    PdmDev,
     /// `[build-system].requires`
     BuildSystem,
 }
@@ -48,6 +51,7 @@ impl Pep621DepType {
             Pep621DepType::Regular => "dependencies",
             Pep621DepType::Optional => "optional-dependencies",
             Pep621DepType::Group => "dependency-groups",
+            Pep621DepType::PdmDev => "tool.pdm.dev-dependencies",
             Pep621DepType::BuildSystem => "build-system",
         }
     }
@@ -149,6 +153,24 @@ pub fn extract_package_file(content: &str) -> Result<Pep621Extract, Pep621Extrac
                             skip_reason: Some(Pep621SkipReason::GroupInclude),
                         });
                     } else if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::Group) {
+                        deps.push(with_registry_urls(dep, &registry_urls));
+                    }
+                }
+            }
+        }
+    }
+
+    // [tool.pdm.dev-dependencies].*
+    if let Some(pdm_dev_deps) = doc
+        .get("tool")
+        .and_then(|tool| tool.get("pdm"))
+        .and_then(|pdm| pdm.get("dev-dependencies"))
+        .and_then(|d| d.as_table())
+    {
+        for (_group, entries) in pdm_dev_deps {
+            if let Some(arr) = entries.as_array() {
+                for entry in arr {
+                    if let Some(dep) = parse_pep508_entry(entry, Pep621DepType::PdmDev) {
                         deps.push(with_registry_urls(dep, &registry_urls));
                     }
                 }
@@ -440,6 +462,96 @@ name = "internal"
             package_file.deps[0].registry_urls,
             vec!["https://private-site.org/pypi/simple".to_owned()]
         );
+    }
+
+    // Ported: "should return dependencies with overwritten pypi registryUrl" — pep621/extract.spec.ts line 233
+    #[test]
+    fn pdm_sources_apply_registry_urls_to_project_optional_and_dev_dependencies() {
+        let content = r#"
+[project]
+name = "pdm"
+dynamic = ["version"]
+requires-python = ">=3.7"
+license = {text = "MIT"}
+dependencies = [
+  "blinker",
+  "packaging>=20.9,!=22.0",
+]
+readme = "README.md"
+
+[project.optional-dependencies]
+pytest = [
+  "pytest>12",
+]
+
+[tool.pdm.dev-dependencies]
+test = [
+  "pytest-rerunfailures>=10.2",
+]
+tox = [
+  "tox-pdm>=0.5",
+]
+
+[[tool.pdm.source]]
+url = "https://private-site.org/pypi/simple"
+verify_ssl = true
+name = "internal"
+
+[[tool.pdm.source]]
+url = "https://private.pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        let expected_registry_urls = vec![
+            "https://private-site.org/pypi/simple".to_owned(),
+            "https://private.pypi.org/simple".to_owned(),
+        ];
+        assert_eq!(package_file.registry_urls, expected_registry_urls);
+
+        let actionable: Vec<_> = package_file
+            .deps
+            .iter()
+            .filter(|d| d.skip_reason.is_none())
+            .collect();
+        assert_eq!(actionable.len(), 5);
+
+        for name in [
+            "blinker",
+            "packaging",
+            "pytest",
+            "pytest-rerunfailures",
+            "tox-pdm",
+        ] {
+            let dep = actionable
+                .iter()
+                .find(|d| d.name == name)
+                .unwrap_or_else(|| panic!("missing dep {name}"));
+            assert_eq!(dep.registry_urls, expected_registry_urls);
+        }
+
+        let blinker = actionable.iter().find(|d| d.name == "blinker").unwrap();
+        assert_eq!(blinker.dep_type, Pep621DepType::Regular);
+        assert!(blinker.current_value.is_empty());
+
+        let packaging = actionable.iter().find(|d| d.name == "packaging").unwrap();
+        assert_eq!(packaging.dep_type, Pep621DepType::Regular);
+        assert_eq!(packaging.current_value, ">=20.9,!=22.0");
+
+        let pytest = actionable.iter().find(|d| d.name == "pytest").unwrap();
+        assert_eq!(pytest.dep_type, Pep621DepType::Optional);
+        assert_eq!(pytest.current_value, ">12");
+
+        let pytest_rerunfailures = actionable
+            .iter()
+            .find(|d| d.name == "pytest-rerunfailures")
+            .unwrap();
+        assert_eq!(pytest_rerunfailures.dep_type, Pep621DepType::PdmDev);
+        assert_eq!(pytest_rerunfailures.current_value, ">=10.2");
+
+        let tox_pdm = actionable.iter().find(|d| d.name == "tox-pdm").unwrap();
+        assert_eq!(tox_pdm.dep_type, Pep621DepType::PdmDev);
+        assert_eq!(tox_pdm.current_value, ">=0.5");
     }
 
     // ── empty / no deps ───────────────────────────────────────────────────────
