@@ -42,6 +42,18 @@ pub struct GitlabCiDep {
     pub dep: DockerfileExtractedDep,
 }
 
+/// Docker dep metadata after applying GitLab CI registry aliases.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GitlabCiDockerDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub dep_type: &'static str,
+    pub replace_string: String,
+    pub auto_replace_string_template: String,
+}
+
 // ── Compiled regexes ─────────────────────────────────────────────────────────
 
 /// Matches `image: ref` with an inline value.
@@ -153,6 +165,81 @@ pub fn extract(content: &str) -> Vec<GitlabCiDep> {
     out
 }
 
+/// Extract Docker image deps and apply Renovate-style registry aliases.
+pub fn extract_docker_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<GitlabCiDockerDep> {
+    let mut out = Vec::new();
+    let mut in_image_block = false;
+    let mut in_services_block = false;
+    let mut image_indent: usize = 0;
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        if line.trim().is_empty() {
+            continue;
+        }
+
+        let indent = leading_spaces(line);
+        let trimmed = line.trim_start();
+
+        if trimmed == "services:" {
+            in_services_block = true;
+            in_image_block = false;
+            continue;
+        }
+
+        if in_services_block {
+            if let Some(cap) = SERVICE_ITEM.captures(line) {
+                let value = cap[1].trim();
+                if let Some(name) = value.strip_prefix("name:") {
+                    let image = unquote(name.trim());
+                    if !image.is_empty() {
+                        out.push(gitlab_docker_dep(image, "service-image", registry_aliases));
+                    }
+                } else {
+                    let image = unquote(value);
+                    if !image.is_empty() {
+                        out.push(gitlab_docker_dep(image, "service-image", registry_aliases));
+                    }
+                }
+            } else if indent == 0 {
+                in_services_block = false;
+            }
+        }
+
+        if let Some(cap) = IMAGE_INLINE.captures(line) {
+            let image = unquote(cap[1].trim());
+            if !image.is_empty() {
+                in_image_block = false;
+                out.push(gitlab_docker_dep(image, "image-name", registry_aliases));
+            }
+            continue;
+        }
+
+        if IMAGE_KEY_ONLY.is_match(line) {
+            in_image_block = true;
+            image_indent = indent;
+            continue;
+        }
+
+        if in_image_block {
+            if indent <= image_indent {
+                in_image_block = false;
+            } else if let Some(cap) = IMAGE_NAME.captures(line) {
+                let image = unquote(cap[1].trim());
+                if !image.is_empty() {
+                    out.push(gitlab_docker_dep(image, "image-name", registry_aliases));
+                    in_image_block = false;
+                }
+            }
+        }
+    }
+
+    out
+}
+
 fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
 }
@@ -177,6 +264,14 @@ pub struct GitlabCiComponentDep {
 /// - `registry_url` = `https://{host}`
 /// - `current_value` = `{version}`
 pub fn extract_components(content: &str) -> Vec<GitlabCiComponentDep> {
+    extract_components_with_registry_aliases(content, &[])
+}
+
+/// Extract GitLab CI component references and apply registry aliases to hosts.
+pub fn extract_components_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<GitlabCiComponentDep> {
     let mut out = Vec::new();
     let mut in_include = false;
     let mut in_include_item = false;
@@ -212,7 +307,7 @@ pub fn extract_components(content: &str) -> Vec<GitlabCiComponentDep> {
             let rest = after_dash.trim();
             if let Some(val) = rest.strip_prefix("component:") {
                 let val = val.trim().trim_matches('"').trim_matches('\'');
-                if let Some(dep) = parse_component_ref(val) {
+                if let Some(dep) = parse_component_ref(val, registry_aliases) {
                     out.push(dep);
                 }
             }
@@ -225,7 +320,7 @@ pub fn extract_components(content: &str) -> Vec<GitlabCiComponentDep> {
             // Only parse if it's a scalar (not a nested object starting with `{`).
             if !val.is_empty()
                 && !val.starts_with('{')
-                && let Some(dep) = parse_component_ref(val)
+                && let Some(dep) = parse_component_ref(val, registry_aliases)
             {
                 out.push(dep);
             }
@@ -239,12 +334,13 @@ pub fn extract_components(content: &str) -> Vec<GitlabCiComponentDep> {
 ///
 /// Returns `None` for malformed references (missing `@`, too few path segments,
 /// or dep_name with no `/`).
-fn parse_component_ref(s: &str) -> Option<GitlabCiComponentDep> {
+fn parse_component_ref(s: &str, registry_aliases: &[(&str, &str)]) -> Option<GitlabCiComponentDep> {
     let (path_part, version) = s.split_once('@')?;
     if version.is_empty() || path_part.is_empty() {
         return None;
     }
 
+    let path_part = apply_registry_alias(path_part, registry_aliases);
     let segments: Vec<&str> = path_part.split('/').collect();
     // Need: host + at least 2 path segments + component = 4 total.
     if segments.len() < 4 {
@@ -274,6 +370,94 @@ fn parse_component_ref(s: &str) -> Option<GitlabCiComponentDep> {
         registry_url,
         skip_reason,
     })
+}
+
+fn gitlab_docker_dep(
+    image_ref: &str,
+    dep_type: &'static str,
+    registry_aliases: &[(&str, &str)],
+) -> GitlabCiDockerDep {
+    let (dep_name, current_value, current_digest) = split_image_ref(image_ref);
+    let package_name = apply_registry_alias(&dep_name, registry_aliases);
+    let replace_string = image_ref_string(
+        &dep_name,
+        current_value.as_deref(),
+        current_digest.as_deref(),
+    );
+    let auto_replace_string_template = format!(
+        "{dep_name}:{{{{#if newValue}}}}{{{{newValue}}}}{{{{/if}}}}{{{{#if newDigest}}}}@{{{{newDigest}}}}{{{{/if}}}}"
+    );
+
+    GitlabCiDockerDep {
+        dep_name,
+        package_name,
+        current_value,
+        current_digest,
+        dep_type,
+        replace_string,
+        auto_replace_string_template,
+    }
+}
+
+fn split_image_ref(image_ref: &str) -> (String, Option<String>, Option<String>) {
+    let (ref_no_digest, digest) = if let Some(at) = image_ref.find('@') {
+        (&image_ref[..at], Some(image_ref[at + 1..].to_owned()))
+    } else {
+        (image_ref, None)
+    };
+
+    let (image, tag) = if let Some(colon) = ref_no_digest.rfind(':') {
+        let slash_pos = ref_no_digest.rfind('/').unwrap_or(0);
+        if colon > slash_pos {
+            (
+                ref_no_digest[..colon].to_owned(),
+                Some(ref_no_digest[colon + 1..].to_owned()),
+            )
+        } else {
+            (ref_no_digest.to_owned(), None)
+        }
+    } else {
+        (ref_no_digest.to_owned(), None)
+    };
+
+    (image, tag, digest)
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
+}
+
+fn image_ref_string(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
+    let mut out = image.to_owned();
+    if let Some(tag) = tag {
+        out.push(':');
+        out.push_str(tag);
+    }
+    if let Some(digest) = digest {
+        out.push('@');
+        out.push_str(digest);
+    }
+    out
+}
+
+fn unquote(s: &str) -> &str {
+    if (s.starts_with('"') && s.ends_with('"')) || (s.starts_with('\'') && s.ends_with('\'')) {
+        &s[1..s.len() - 1]
+    } else {
+        s
+    }
 }
 
 /// If the image reference uses a GitLab CI Dependency Proxy prefix variable,
@@ -455,6 +639,114 @@ services:
             deps.iter()
                 .any(|d| d.dep.image == "mariadb" && d.dep.skip_reason.is_none())
         );
+    }
+
+    // Ported: "extract images via registry aliases" — gitlabci/extract.spec.ts line 229
+    #[test]
+    fn extract_images_via_registry_aliases() {
+        let content = r#"
+image:
+  name: $CI_REGISTRY/renovate/renovate:31.65.1-slim
+
+services:
+  - foo/mariadb:10.4.11
+  - name: $CI_REGISTRY/other/image1:1.0.0
+    alias: imagealias1
+  - $BUILD_IMAGES/image2:1.0.0
+"#;
+        let deps = extract_docker_with_registry_aliases(
+            content,
+            &[
+                ("$CI_REGISTRY", "registry.com"),
+                ("$BUILD_IMAGES", "registry.com/build-images"),
+                ("foo", "foo.registry.com"),
+            ],
+        );
+
+        assert_eq!(deps.len(), 4);
+        assert_eq!(deps[0].dep_name, "$CI_REGISTRY/renovate/renovate");
+        assert_eq!(deps[0].package_name, "registry.com/renovate/renovate");
+        assert_eq!(deps[0].current_value.as_deref(), Some("31.65.1-slim"));
+        assert_eq!(deps[0].dep_type, "image-name");
+        assert_eq!(
+            deps[0].replace_string,
+            "$CI_REGISTRY/renovate/renovate:31.65.1-slim"
+        );
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "$CI_REGISTRY/renovate/renovate:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
+
+        assert_eq!(deps[1].dep_name, "foo/mariadb");
+        assert_eq!(deps[1].package_name, "foo.registry.com/mariadb");
+        assert_eq!(deps[1].current_value.as_deref(), Some("10.4.11"));
+        assert_eq!(deps[1].dep_type, "service-image");
+
+        assert_eq!(deps[2].dep_name, "$CI_REGISTRY/other/image1");
+        assert_eq!(deps[2].package_name, "registry.com/other/image1");
+        assert_eq!(deps[2].current_value.as_deref(), Some("1.0.0"));
+        assert_eq!(deps[2].dep_type, "service-image");
+
+        assert_eq!(deps[3].dep_name, "$BUILD_IMAGES/image2");
+        assert_eq!(deps[3].package_name, "registry.com/build-images/image2");
+        assert_eq!(deps[3].current_value.as_deref(), Some("1.0.0"));
+        assert_eq!(deps[3].dep_type, "service-image");
+    }
+
+    // Ported: "extracts component references via registry aliases" — gitlabci/extract.spec.ts line 299
+    #[test]
+    fn extracts_component_references_via_registry_aliases() {
+        let content = r#"include:
+  - component: $CI_SERVER_HOST/an-org/a-project/a-component@1.0
+    inputs:
+      stage: build
+  - component: $CI_SERVER_HOST/an-org/a-subgroup/a-project/a-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8
+  - component: $CI_SERVER_HOST/an-org/a-subgroup/another-project/a-component@main
+  - component: $CI_SERVER_HOST/another-org/a-project/a-component@~latest
+    inputs:
+      stage: test
+  - component: $CI_SERVER_HOST/malformed-component-reference
+  - component:
+      malformed: true
+  - component: $CI_SERVER_HOST/an-org/a-component@1.0
+  - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
+  - component: $COMPONENT_REGISTRY/a-project/a-component@1.0
+"#;
+        let deps = extract_components_with_registry_aliases(
+            content,
+            &[
+                ("$CI_SERVER_HOST", "gitlab.example.com"),
+                ("$COMPONENT_REGISTRY", "gitlab.example.com/a-group"),
+            ],
+        );
+
+        assert_eq!(deps.len(), 6);
+        assert_eq!(deps[0].dep_name, "an-org/a-project");
+        assert_eq!(deps[0].current_value, "1.0");
+        assert_eq!(deps[0].registry_url, "https://gitlab.example.com");
+
+        assert_eq!(deps[1].dep_name, "an-org/a-subgroup/a-project");
+        assert_eq!(
+            deps[1].current_value,
+            "e3262fdd0914fa823210cdb79a8c421e2cef79d8"
+        );
+        assert_eq!(deps[1].registry_url, "https://gitlab.example.com");
+
+        assert_eq!(deps[2].dep_name, "an-org/a-subgroup/another-project");
+        assert_eq!(deps[2].current_value, "main");
+        assert_eq!(deps[2].registry_url, "https://gitlab.example.com");
+
+        assert_eq!(deps[3].dep_name, "another-org/a-project");
+        assert_eq!(deps[3].current_value, "~latest");
+        assert_eq!(deps[3].registry_url, "https://gitlab.example.com");
+        assert_eq!(deps[3].skip_reason, Some("unsupported-version"));
+
+        assert_eq!(deps[4].dep_name, "an-org/a-project");
+        assert_eq!(deps[4].registry_url, "https://other-gitlab.example.com");
+
+        assert_eq!(deps[5].dep_name, "a-group/a-project");
+        assert_eq!(deps[5].current_value, "1.0");
+        assert_eq!(deps[5].registry_url, "https://gitlab.example.com");
     }
 
     // Ported: "extracts component references" — gitlabci/extract.spec.ts line 377

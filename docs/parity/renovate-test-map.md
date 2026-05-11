@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 900 / 1216 actionable tests ported (74%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 902 / 1216 actionable tests ported (74%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -399,7 +399,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gitlabci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/extract.spec.ts
-**Total tests:** 14 | **Ported:** 8 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 14 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `extractAllPackageFile()`
 
@@ -421,8 +421,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | catches errors | 110 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
 | skips images with variables | 118 | ported | `gitlabci.rs` | `variable_image_has_skip_reason` | — |
 | extract images from dependency proxy | 172 | ported | `gitlabci.rs` | `dependency_proxy_prefix_stripped` | — |
-| extract images via registry aliases | 229 | pending | — | — | registryAliases not yet implemented |
-| extracts component references via registry aliases | 299 | pending | — | — | registryAliases not yet implemented |
+| extract images via registry aliases | 229 | ported | `gitlabci.rs` | `extract_images_via_registry_aliases` | — |
+| extracts component references via registry aliases | 299 | ported | `gitlabci.rs` | `extracts_component_references_via_registry_aliases` | — |
 | extracts component references | 377 | ported | `gitlabci.rs` | `extracts_component_references` | — |
 
 ---
