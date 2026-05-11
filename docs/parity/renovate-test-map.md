@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1013 / 1217 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1018 / 1217 actionable tests ported (84%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1880,7 +1880,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 39 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 44 | **Actionable:** 44 | **Status:** ported
 
 ### `extractPackageFile`
 
@@ -1934,11 +1934,11 @@ Status key: `ported` · `pending` · `not-applicable`
 | treats last part as version when it is not a known scope | 919 | ported | `ant.rs` | `four_part_coords_last_segment_is_version_when_not_a_scope` | — |
 | collects registry URLs from remoteRepository elements | 949 | ported | `ant.rs` | `remote_repository_collected` | — |
 | passes registry URLs to coords-style dependencies | 979 | ported | `ant.rs` | `remote_repository_applies_to_coords_dependency` | — |
-| collects registry URLs from settingsFile attribute | 1009 | pending | — | — | Requires settingsFile attribute parsing |
-| merges registries from settingsFile and remoteRepository | 1047 | pending | — | — | Requires registries merging |
-| handles absolute settingsFile path | 1089 | pending | — | — | Requires absolute settingsFile path |
-| logs debug when settingsFile cannot be read | 1127 | pending | — | — | Requires settingsFile read-failure tolerance |
-| does not pass registries to dependencies outside the block | 1155 | pending | — | — | Requires registry-block scoping |
+| collects registry URLs from settingsFile attribute | 1009 | ported | `ant.rs` | `extract_all_package_files_collects_settings_file_registries` | — |
+| merges registries from settingsFile and remoteRepository | 1047 | ported | `ant.rs` | `extract_all_package_files_merges_settings_and_remote_repository_registries` | — |
+| handles absolute settingsFile path | 1089 | ported | `ant.rs` | `extract_all_package_files_resolves_absolute_settings_file` | — |
+| logs debug when settingsFile cannot be read | 1127 | ported | `ant.rs` | `extract_all_package_files_ignores_missing_settings_file` | — |
+| does not pass registries to dependencies outside the block | 1155 | ported | `ant.rs` | `remote_repository_registry_is_scoped_to_dependency_block` | — |
 | handles chain referencing undefined property | 1191 | ported | `ant.rs` | `chain_referencing_undefined_property_is_skipped` | — |
 
 ---

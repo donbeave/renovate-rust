@@ -65,33 +65,40 @@ const SCOPE_NAMES: &[&str] = &["compile", "runtime", "test", "provided", "system
 
 /// Extract Maven deps from an Apache Ant `build.xml` file.
 pub fn extract(content: &str) -> Vec<AntDep> {
-    extract_with_external_properties(content, &HashMap::new())
+    extract_with_context(content, &HashMap::new(), "", &HashMap::new())
 }
 
-fn extract_with_external_properties(
+fn extract_with_context(
     content: &str,
     external_properties: &HashMap<String, String>,
+    package_file: &str,
+    file_contents: &HashMap<&str, &str>,
 ) -> Vec<AntDep> {
     let cursor = BufReader::new(content.as_bytes());
     let mut reader = Reader::from_reader(cursor);
     reader.config_mut().trim_text(true);
 
     let mut deps: Vec<AntDep> = Vec::new();
-    let mut registry_urls: Vec<String> = Vec::new();
+    let mut current_registry_urls: Option<Vec<String>> = None;
     let mut properties = external_properties.clone();
     let mut inline_properties = HashSet::new();
     let mut buf = Vec::new();
 
     loop {
         match reader.read_event_into(&mut buf) {
-            Ok(Event::Empty(e) | Event::Start(e)) => {
+            Ok(Event::Start(e)) => {
                 // Local name (strip namespace prefix like `artifact:`)
                 let raw_name = e.name();
                 let local = local_name(raw_name.as_ref());
 
                 match local.as_str() {
+                    "dependencies" => {
+                        current_registry_urls =
+                            Some(settings_file_registry_urls(&e, package_file, file_contents));
+                    }
                     "dependency" => {
-                        if let Some(dep) = parse_dependency_attrs(&e, &registry_urls, &properties) {
+                        let registry_urls = current_registry_urls.as_deref().unwrap_or(&[]);
+                        if let Some(dep) = parse_dependency_attrs(&e, registry_urls, &properties) {
                             deps.push(dep);
                         }
                     }
@@ -103,31 +110,51 @@ fn extract_with_external_properties(
                         }
                     }
                     "remoteRepository" => {
-                        for attr in e.attributes().flatten() {
-                            if attr.key.as_ref() == b"url"
-                                && let Ok(url) = std::str::from_utf8(attr.value.as_ref())
-                            {
-                                registry_urls.push(url.to_owned());
-                            }
+                        if let Some(url) = remote_repository_url(&e)
+                            && let Some(registry_urls) = &mut current_registry_urls
+                        {
+                            registry_urls.push(url);
                         }
                     }
                     _ => {}
                 }
+            }
+            Ok(Event::Empty(e)) => {
+                let raw_name = e.name();
+                let local = local_name(raw_name.as_ref());
+
+                match local.as_str() {
+                    "dependency" => {
+                        let registry_urls = current_registry_urls.as_deref().unwrap_or(&[]);
+                        if let Some(dep) = parse_dependency_attrs(&e, registry_urls, &properties) {
+                            deps.push(dep);
+                        }
+                    }
+                    "property" => {
+                        if let Some((name, value)) = parse_property_attrs(&e)
+                            && inline_properties.insert(name.clone())
+                        {
+                            properties.insert(name, value);
+                        }
+                    }
+                    "remoteRepository" => {
+                        if let Some(url) = remote_repository_url(&e)
+                            && let Some(registry_urls) = &mut current_registry_urls
+                        {
+                            registry_urls.push(url);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Ok(Event::End(e)) if local_name(e.name().as_ref()) == "dependencies" => {
+                current_registry_urls = None;
             }
             Ok(Event::Eof) => break,
             Err(_) => break,
             _ => {}
         }
         buf.clear();
-    }
-
-    // Attach collected registry URLs to all deps that don't already have them
-    if !registry_urls.is_empty() {
-        for dep in &mut deps {
-            if dep.registry_urls.is_empty() {
-                dep.registry_urls.clone_from(&registry_urls);
-            }
-        }
     }
 
     deps
@@ -216,7 +243,7 @@ fn process_ant_file(
         }
     }
 
-    for dep in extract_with_external_properties(content, &properties) {
+    for dep in extract_with_context(content, &properties, path, content_by_path) {
         let package_file = dep
             .shared_variable_name
             .as_ref()
@@ -455,6 +482,74 @@ fn parse_property_file_attr(e: &quick_xml::events::BytesStart<'_>) -> Option<Str
         }
     }
     None
+}
+
+fn remote_repository_url(e: &quick_xml::events::BytesStart<'_>) -> Option<String> {
+    for attr in e.attributes().flatten() {
+        if attr.key.as_ref() == b"url" {
+            return std::str::from_utf8(attr.value.as_ref())
+                .ok()
+                .map(str::to_owned);
+        }
+    }
+    None
+}
+
+fn settings_file_registry_urls(
+    e: &quick_xml::events::BytesStart<'_>,
+    package_file: &str,
+    file_contents: &HashMap<&str, &str>,
+) -> Vec<String> {
+    let Some(settings_file) = settings_file_attr(e) else {
+        return Vec::new();
+    };
+    let settings_path = resolve_relative_path(package_file, &settings_file);
+    file_contents
+        .get(settings_path.as_str())
+        .map(|content| settings_mirror_urls(content))
+        .unwrap_or_default()
+}
+
+fn settings_file_attr(e: &quick_xml::events::BytesStart<'_>) -> Option<String> {
+    for attr in e.attributes().flatten() {
+        if attr.key.as_ref() == b"settingsFile" {
+            return std::str::from_utf8(attr.value.as_ref())
+                .ok()
+                .map(str::to_owned);
+        }
+    }
+    None
+}
+
+fn settings_mirror_urls(content: &str) -> Vec<String> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+    let mut urls = Vec::new();
+    let mut in_url = false;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) if local_name(e.name().as_ref()) == "url" => {
+                in_url = true;
+            }
+            Ok(Event::Text(e)) if in_url => {
+                if let Ok(url) = std::str::from_utf8(e.as_ref()) {
+                    urls.push(url.to_owned());
+                }
+            }
+            Ok(Event::End(e)) if local_name(e.name().as_ref()) == "url" => {
+                in_url = false;
+            }
+            Ok(Event::Eof) => break,
+            Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    urls
 }
 
 fn property_file_refs(content: &str, package_file: &str) -> Vec<String> {
@@ -988,6 +1083,133 @@ mod tests {
             deps[0].registry_urls,
             vec!["https://repo.example.com/maven2"]
         );
+    }
+
+    // Ported: "collects registry URLs from settingsFile attribute" — ant/extract.spec.ts line 1009
+    #[test]
+    fn extract_all_package_files_collects_settings_file_registries() {
+        let build_xml = r#"
+<project>
+  <artifact:dependencies settingsFile="build/settings.xml">
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let settings_xml = r#"
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+  <mirrors>
+    <mirror>
+      <url>https://artifactory.example.com/maven</url>
+    </mirror>
+  </mirrors>
+</settings>"#;
+        let files = [
+            ("build.xml", Some(build_xml)),
+            ("build/settings.xml", Some(settings_xml)),
+        ];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(package_files.len(), 1);
+        assert_eq!(
+            package_files[0].deps[0].registry_urls,
+            vec!["https://artifactory.example.com/maven"]
+        );
+    }
+
+    // Ported: "merges registries from settingsFile and remoteRepository" — ant/extract.spec.ts line 1047
+    #[test]
+    fn extract_all_package_files_merges_settings_and_remote_repository_registries() {
+        let build_xml = r#"
+<project>
+  <artifact:dependencies settingsFile="build/settings.xml">
+    <remoteRepository url="https://repo.example.com/maven2" />
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let settings_xml = r#"
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+  <mirrors>
+    <mirror>
+      <url>https://artifactory.example.com/maven</url>
+    </mirror>
+  </mirrors>
+</settings>"#;
+        let files = [
+            ("build.xml", Some(build_xml)),
+            ("build/settings.xml", Some(settings_xml)),
+        ];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(
+            package_files[0].deps[0].registry_urls,
+            vec![
+                "https://artifactory.example.com/maven",
+                "https://repo.example.com/maven2"
+            ]
+        );
+    }
+
+    // Ported: "handles absolute settingsFile path" — ant/extract.spec.ts line 1089
+    #[test]
+    fn extract_all_package_files_resolves_absolute_settings_file() {
+        let build_xml = r#"
+<project>
+  <artifact:dependencies settingsFile="/etc/maven/settings.xml">
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let settings_xml = r#"
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+  <mirrors>
+    <mirror>
+      <url>https://internal.example.com/maven</url>
+    </mirror>
+  </mirrors>
+</settings>"#;
+        let files = [
+            ("build.xml", Some(build_xml)),
+            ("/etc/maven/settings.xml", Some(settings_xml)),
+        ];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(
+            package_files[0].deps[0].registry_urls,
+            vec!["https://internal.example.com/maven"]
+        );
+    }
+
+    // Ported: "logs debug when settingsFile cannot be read" — ant/extract.spec.ts line 1127
+    #[test]
+    fn extract_all_package_files_ignores_missing_settings_file() {
+        let build_xml = r#"
+<project>
+  <artifact:dependencies settingsFile="missing/settings.xml">
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let files = [("build.xml", Some(build_xml))];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(package_files.len(), 1);
+        assert_eq!(package_files[0].deps[0].dep_name, "junit:junit");
+        assert!(package_files[0].deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "does not pass registries to dependencies outside the block" — ant/extract.spec.ts line 1155
+    #[test]
+    fn remote_repository_registry_is_scoped_to_dependency_block() {
+        let content = r#"
+<project>
+  <artifact:dependencies>
+    <remoteRepository url="https://repo.example.com/maven2" />
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+  <artifact:dependencies>
+    <dependency groupId="org.slf4j" artifactId="slf4j-api" version="1.7.36" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(
+            deps[0].registry_urls,
+            vec!["https://repo.example.com/maven2"]
+        );
+        assert!(deps[1].registry_urls.is_empty());
     }
 
     // Ported: "returns null for invalid XML" — ant/extract.spec.ts line 90
