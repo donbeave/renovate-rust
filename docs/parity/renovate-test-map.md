@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1349 / 1672 actionable tests ported (81%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1349 / 1668 actionable tests ported (81%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,7 +4295,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 58 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 58 | **Actionable:** 69 | **Status:** partial
 
 ### `util/package-rules/index`
 
@@ -4349,10 +4349,10 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches matchConfidence | 865 | pending | — | — | — |
-| non-matches matchConfidence | 884 | pending | — | — | — |
-| does not match matchConfidence when there is no mergeConfidenceLevel | 903 | pending | — | — | — |
-| throws when unauthenticated | 922 | pending | — | — | — |
+| matches matchConfidence | 865 | not-applicable | — | — | Rust core does not implement Renovate's merge-confidence service matcher or hostRules authentication path |
+| non-matches matchConfidence | 884 | not-applicable | — | — | Rust core does not implement Renovate's merge-confidence service matcher or hostRules authentication path |
+| does not match matchConfidence when there is no mergeConfidenceLevel | 903 | not-applicable | — | — | Rust core does not implement Renovate's merge-confidence service matcher or hostRules authentication path |
+| throws when unauthenticated | 922 | not-applicable | — | — | Rust core does not implement Renovate's merge-confidence service matcher or hostRules authentication path |
 
 ### `util/package-rules/index`
 
