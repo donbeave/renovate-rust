@@ -99,6 +99,36 @@ pub struct BazelRulesImgPullDep {
     pub dep_type: &'static str,
 }
 
+/// A parsed `.bazelrc` option.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazelrcOption {
+    pub name: String,
+    pub value: Option<String>,
+}
+
+/// A parsed `.bazelrc` entry.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BazelrcEntry {
+    Import {
+        path: String,
+        is_try: bool,
+    },
+    Command {
+        command: String,
+        options: Vec<BazelrcOption>,
+        config: Option<String>,
+    },
+}
+
+impl BazelrcEntry {
+    pub fn get_option(&self, name: &str) -> Option<&BazelrcOption> {
+        match self {
+            Self::Command { options, .. } => options.iter().find(|option| option.name == name),
+            Self::Import { .. } => None,
+        }
+    }
+}
+
 /// Parser fragment produced while reading `MODULE.bazel` Starlark calls.
 ///
 /// Renovate reference: `lib/modules/manager/bazel-module/parser/fragments.ts`.
@@ -890,6 +920,99 @@ pub fn extract_bazelrc_registry_urls(files: &[(&str, &str)]) -> Vec<String> {
     registry_urls
 }
 
+/// Parse a `.bazelrc` option string.
+///
+/// Renovate reference: `lib/modules/manager/bazel-module/bazelrc.ts`
+/// `BazelOption.parse`.
+pub fn parse_bazelrc_options(input: &str) -> Vec<BazelrcOption> {
+    let parts = input.split_whitespace().collect::<Vec<_>>();
+    let mut options = Vec::new();
+    for (index, part) in parts.iter().enumerate() {
+        let Some(without_prefix) = part.strip_prefix("--") else {
+            continue;
+        };
+
+        if let Some((name, value)) = without_prefix.split_once('=') {
+            options.push(BazelrcOption {
+                name: name.to_owned(),
+                value: Some(value.to_owned()),
+            });
+            continue;
+        }
+
+        let value = parts
+            .get(index + 1)
+            .filter(|next| !next.starts_with("--"))
+            .map(|value| (*value).to_owned());
+        options.push(BazelrcOption {
+            name: without_prefix.to_owned(),
+            value,
+        });
+    }
+    options
+}
+
+/// Parse `.bazelrc` entries from file contents.
+///
+/// Renovate reference: `lib/modules/manager/bazel-module/bazelrc.ts`
+/// `parse`.
+pub fn parse_bazelrc(contents: &str) -> Vec<BazelrcEntry> {
+    contents
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .filter_map(parse_bazelrc_entry)
+        .collect()
+}
+
+/// Expand `%workspace%` in a `.bazelrc` option if the resolved path is valid.
+///
+/// The caller supplies path validation so tests and higher-level file readers can
+/// enforce their own local-path policy.
+pub fn expand_bazelrc_workspace_path<F>(
+    value: &str,
+    workspace_dir: &str,
+    mut is_valid_local_path: F,
+) -> Option<String>
+where
+    F: FnMut(&str) -> bool,
+{
+    if !value.contains("%workspace%") {
+        return Some(value.to_owned());
+    }
+
+    let workspace = workspace_dir.trim_end_matches('/');
+    let expanded = value.replace("%workspace%", workspace);
+    is_valid_local_path(&expanded).then_some(expanded)
+}
+
+/// Expand `%workspace%` paths across a list of `.bazelrc` options.
+pub fn sanitize_bazelrc_options<F>(
+    options: &[BazelrcOption],
+    workspace_dir: &str,
+    mut is_valid_local_path: F,
+) -> Vec<BazelrcOption>
+where
+    F: FnMut(&str) -> bool,
+{
+    options
+        .iter()
+        .filter_map(|option| {
+            let Some(value) = option.value.as_deref() else {
+                return Some(option.clone());
+            };
+            Some(BazelrcOption {
+                name: option.name.clone(),
+                value: Some(expand_bazelrc_workspace_path(
+                    value,
+                    workspace_dir,
+                    &mut is_valid_local_path,
+                )?),
+            })
+        })
+        .collect()
+}
+
 fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
     let mut deps = Vec::new();
     deps.extend(parse_named_overrides(
@@ -931,6 +1054,38 @@ fn parse_named_overrides(
             })
         })
         .collect()
+}
+
+fn parse_bazelrc_entry(line: &str) -> Option<BazelrcEntry> {
+    if let Some((kind, path)) = line.split_once(char::is_whitespace)
+        && (kind == "import" || kind == "try-import")
+        && !path.trim().is_empty()
+        && !path.trim().contains(char::is_whitespace)
+    {
+        return Some(BazelrcEntry::Import {
+            path: path.trim().to_owned(),
+            is_try: kind == "try-import",
+        });
+    }
+
+    let (command_part, options) = line.split_once(char::is_whitespace)?;
+    let (command, config) = command_part
+        .split_once(':')
+        .map(|(command, config)| (command, Some(config.to_owned())))
+        .unwrap_or((command_part, None));
+    if command.is_empty()
+        || !command
+            .chars()
+            .all(|ch| ch == '_' || ch.is_ascii_alphanumeric())
+    {
+        return None;
+    }
+
+    Some(BazelrcEntry::Command {
+        command: command.to_owned(),
+        options: parse_bazelrc_options(options),
+        config,
+    })
 }
 
 fn parse_single_version_overrides(content: &str) -> Vec<SingleVersionOverride> {
@@ -1200,6 +1355,190 @@ fn strip_comments(content: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn bazelrc_option(name: &str, value: Option<&str>) -> BazelrcOption {
+        BazelrcOption {
+            name: name.to_owned(),
+            value: value.map(str::to_owned),
+        }
+    }
+
+    fn bazelrc_command(
+        command: &str,
+        options: Vec<BazelrcOption>,
+        config: Option<&str>,
+    ) -> BazelrcEntry {
+        BazelrcEntry::Command {
+            command: command.to_owned(),
+            options,
+            config: config.map(str::to_owned),
+        }
+    }
+
+    fn bazelrc_import(path: &str, is_try: bool) -> BazelrcEntry {
+        BazelrcEntry::Import {
+            path: path.to_owned(),
+            is_try,
+        }
+    }
+
+    // Ported: "parse($a)" — bazel-module/bazelrc.spec.ts line 35
+    #[test]
+    fn bazelrc_option_parse_cases() {
+        let cases = [
+            (
+                "--show_timestamps",
+                vec![bazelrc_option("show_timestamps", None)],
+            ),
+            (
+                "--host_jvm_args=-XX:-UseParallelGC",
+                vec![bazelrc_option("host_jvm_args", Some("-XX:-UseParallelGC"))],
+            ),
+            (
+                "--host_jvm_args=",
+                vec![bazelrc_option("host_jvm_args", Some(""))],
+            ),
+            ("--jobs 600", vec![bazelrc_option("jobs", Some("600"))]),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(parse_bazelrc_options(input), expected);
+        }
+    }
+
+    // Ported: "getOption" — bazel-module/bazelrc.spec.ts line 51
+    #[test]
+    fn bazelrc_command_entry_get_option() {
+        let opt0 = bazelrc_option("show_timestamps", None);
+        let opt1 = bazelrc_option("keep_going", None);
+        let opt2 = bazelrc_option("jobs", Some("600"));
+        let cmd_entry = bazelrc_command("build", vec![opt0.clone(), opt1, opt2.clone()], None);
+
+        assert_eq!(cmd_entry.get_option("does_not_exist"), None);
+        assert_eq!(cmd_entry.get_option(&opt0.name), Some(&opt0));
+        assert_eq!(cmd_entry.get_option(&opt2.name), Some(&opt2));
+    }
+
+    // Ported: "parse" — bazel-module/bazelrc.spec.ts line 62
+    #[test]
+    fn bazelrc_parse_entries() {
+        let input = r#"
+        # Bob's Bazel option defaults
+
+        startup --host_jvm_args=-XX:-UseParallelGC
+        import /home/bobs_project/bazelrc
+        build --show_timestamps --keep_going --jobs 600
+        build --color=yes
+        query --keep_going
+
+        # Definition of --config=memcheck
+        build:memcheck --strip=never --test_timeout=3600
+
+        try-import %workspace%/local.bazelrc
+      "#;
+
+        assert_eq!(
+            parse_bazelrc(input),
+            vec![
+                bazelrc_command(
+                    "startup",
+                    vec![bazelrc_option("host_jvm_args", Some("-XX:-UseParallelGC"))],
+                    None,
+                ),
+                bazelrc_import("/home/bobs_project/bazelrc", false),
+                bazelrc_command(
+                    "build",
+                    vec![
+                        bazelrc_option("show_timestamps", None),
+                        bazelrc_option("keep_going", None),
+                        bazelrc_option("jobs", Some("600")),
+                    ],
+                    None,
+                ),
+                bazelrc_command("build", vec![bazelrc_option("color", Some("yes"))], None),
+                bazelrc_command("query", vec![bazelrc_option("keep_going", None)], None),
+                bazelrc_command(
+                    "build",
+                    vec![
+                        bazelrc_option("strip", Some("never")),
+                        bazelrc_option("test_timeout", Some("3600")),
+                    ],
+                    Some("memcheck"),
+                ),
+                bazelrc_import("%workspace%/local.bazelrc", true),
+            ]
+        );
+    }
+
+    // Ported: "should return original value if no workspace path" — bazel-module/bazelrc.spec.ts line 304
+    #[test]
+    fn bazelrc_expand_workspace_path_returns_original_without_workspace_path() {
+        assert_eq!(
+            expand_bazelrc_workspace_path("--some-option", "/workspace", |_| false),
+            Some("--some-option".to_owned())
+        );
+    }
+
+    // Ported: "should expand valid workspace path" — bazel-module/bazelrc.spec.ts line 310
+    #[test]
+    fn bazelrc_expand_workspace_path_expands_valid_workspace_path() {
+        assert_eq!(
+            expand_bazelrc_workspace_path("%workspace%/some/path", "/workspace", |path| {
+                path == "/workspace" || path == "/workspace/some/path"
+            }),
+            Some("/workspace/some/path".to_owned())
+        );
+    }
+
+    // Ported: "should throw error for invalid workspace path" — bazel-module/bazelrc.spec.ts line 320
+    #[test]
+    fn bazelrc_expand_workspace_path_returns_none_for_invalid_workspace_path() {
+        assert_eq!(
+            expand_bazelrc_workspace_path("%workspace%/../../outside", "/workspace", |_| false),
+            None
+        );
+    }
+
+    // Ported: "should handle options without values" — bazel-module/bazelrc.spec.ts line 328
+    #[test]
+    fn bazelrc_sanitize_options_handles_options_without_values() {
+        let options = vec![bazelrc_option("build", None)];
+        assert_eq!(
+            sanitize_bazelrc_options(&options, "/workspace", |_| false),
+            options
+        );
+    }
+
+    // Ported: "should expand valid workspace paths" — bazel-module/bazelrc.spec.ts line 333
+    #[test]
+    fn bazelrc_sanitize_options_expands_valid_workspace_paths() {
+        let options = vec![
+            bazelrc_option("build", Some("%workspace%/some/path")),
+            bazelrc_option("test", Some("%workspace%/other/path")),
+        ];
+        let result = sanitize_bazelrc_options(&options, "/workspace", |path| {
+            path == "/workspace"
+                || path == "/workspace/some/path"
+                || path == "/workspace/other/path"
+        });
+        assert_eq!(
+            result,
+            vec![
+                bazelrc_option("build", Some("/workspace/some/path")),
+                bazelrc_option("test", Some("/workspace/other/path")),
+            ]
+        );
+    }
+
+    // Ported: "should throw error for invalid workspace paths" — bazel-module/bazelrc.spec.ts line 352
+    #[test]
+    fn bazelrc_sanitize_options_drops_invalid_workspace_paths() {
+        let options = vec![
+            bazelrc_option("build", Some("%workspace%/valid/path")),
+            bazelrc_option("test", Some("%workspace%/../../invalid")),
+        ];
+        assert!(sanitize_bazelrc_options(&options, "/workspace", |_| false).is_empty());
+    }
 
     // Ported: ".string()" — bazel-module/parser/fragments.spec.ts line 13
     #[test]

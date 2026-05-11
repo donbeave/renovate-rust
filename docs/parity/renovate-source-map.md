@@ -118,7 +118,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/manager/bazel-module/parser/rules.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/parser/starlark.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Inlined |
 | `lib/modules/manager/bazel-module/artifacts.ts` | — | not-started | Artifacts not ported |
-| `lib/modules/manager/bazel-module/bazelrc.ts` | — | not-started | Not ported |
+| `lib/modules/manager/bazel-module/bazelrc.ts` | `crates/renovate-core/src/extractors/bazel_module.rs` | partial | Option, entry, workspace path expansion, and option sanitization helpers ported; async file reader not ported |
 | `lib/modules/manager/bazel-module/lockfile.ts` | — | not-started | Lockfile not ported |
 | `lib/modules/manager/bazel-module/rules-img.ts` | — | not-started | Not ported |
 | `lib/modules/manager/bazel-module/rules.ts` | — | not-started | Not ported |
