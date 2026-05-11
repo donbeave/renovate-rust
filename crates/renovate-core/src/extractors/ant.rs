@@ -135,58 +135,113 @@ fn extract_with_external_properties(
 
 pub fn extract_all_package_files(files: &[(&str, Option<&str>)]) -> Vec<AntPackageFile> {
     let mut seen = HashSet::new();
-    let content_by_path: HashMap<&str, &str> = files
-        .iter()
-        .filter_map(|(path, content)| content.map(|content| (*path, content)))
-        .collect();
+    let mut content_by_path: HashMap<&str, &str> = HashMap::new();
+    for (path, content) in files {
+        if let Some(content) = content {
+            content_by_path.entry(*path).or_insert(content);
+        }
+    }
     let mut package_files_by_path: BTreeMap<String, Vec<AntDep>> = BTreeMap::new();
+    let mut processed_files = HashSet::new();
 
     for (path, content) in files {
         if !seen.insert((*path).to_owned()) {
             continue;
         }
-        let Some(content) = content else {
+        if content.is_none() {
             continue;
-        };
-        let property_file_refs = property_file_refs(content, path);
-        let mut external_properties = HashMap::new();
-        let mut property_sources = HashMap::new();
-        let mut seen_property_files = HashSet::new();
-        for property_file in property_file_refs {
-            if !seen_property_files.insert(property_file.clone()) {
-                continue;
-            }
-            let Some(properties_content) = content_by_path.get(property_file.as_str()) else {
-                continue;
-            };
-            for (name, value) in parse_properties_file(properties_content) {
-                external_properties.entry(name.clone()).or_insert(value);
-                property_sources
-                    .entry(name)
-                    .or_insert(property_file.clone());
-            }
         }
-
-        let inline_properties = inline_property_names(content);
-        for dep in extract_with_external_properties(content, &external_properties) {
-            let package_file = dep
-                .shared_variable_name
-                .as_ref()
-                .filter(|name| !inline_properties.contains(*name))
-                .and_then(|name| property_sources.get(name))
-                .cloned()
-                .unwrap_or_else(|| (*path).to_owned());
-            package_files_by_path
-                .entry(package_file)
-                .or_default()
-                .push(dep);
-        }
+        process_ant_file(
+            path,
+            &content_by_path,
+            &HashMap::new(),
+            &HashMap::new(),
+            &mut HashSet::new(),
+            &mut processed_files,
+            &mut package_files_by_path,
+        );
     }
 
     package_files_by_path
         .into_iter()
         .map(|(package_file, deps)| AntPackageFile { package_file, deps })
         .collect()
+}
+
+fn process_ant_file(
+    path: &str,
+    content_by_path: &HashMap<&str, &str>,
+    inherited_properties: &HashMap<String, String>,
+    inherited_sources: &HashMap<String, String>,
+    stack: &mut HashSet<String>,
+    processed_files: &mut HashSet<String>,
+    package_files_by_path: &mut BTreeMap<String, Vec<AntDep>>,
+) {
+    if !stack.insert(path.to_owned()) {
+        return;
+    }
+    if !processed_files.insert(path.to_owned()) {
+        stack.remove(path);
+        return;
+    }
+
+    let Some(content) = content_by_path.get(path) else {
+        stack.remove(path);
+        return;
+    };
+
+    let mut properties = inherited_properties.clone();
+    let mut property_sources = inherited_sources.clone();
+    let mut seen_property_files = HashSet::new();
+    for property_file in property_file_refs(content, path) {
+        if !seen_property_files.insert(property_file.clone()) {
+            continue;
+        }
+        let Some(properties_content) = content_by_path.get(property_file.as_str()) else {
+            continue;
+        };
+        for (name, value) in parse_properties_file(properties_content) {
+            properties.entry(name.clone()).or_insert(value);
+            property_sources
+                .entry(name)
+                .or_insert(property_file.clone());
+        }
+    }
+
+    let mut inline_seen = HashSet::new();
+    for (name, value) in inline_properties(content) {
+        if inline_seen.insert(name.clone()) {
+            properties.insert(name.clone(), value);
+            property_sources.insert(name, path.to_owned());
+        }
+    }
+
+    for dep in extract_with_external_properties(content, &properties) {
+        let package_file = dep
+            .shared_variable_name
+            .as_ref()
+            .and_then(|name| property_sources.get(name))
+            .cloned()
+            .unwrap_or_else(|| path.to_owned());
+        package_files_by_path
+            .entry(package_file)
+            .or_default()
+            .push(dep);
+    }
+
+    for import_file in import_file_refs(content, path) {
+        process_ant_file(
+            &import_file,
+            content_by_path,
+            &properties,
+            &property_sources,
+            stack,
+            processed_files,
+            package_files_by_path,
+        );
+    }
+
+    stack.remove(path);
 }
 
 /// Strip XML namespace prefix: `artifact:dependency` → `dependency`.
@@ -428,20 +483,18 @@ fn property_file_refs(content: &str, package_file: &str) -> Vec<String> {
     refs
 }
 
-fn inline_property_names(content: &str) -> HashSet<String> {
+fn import_file_refs(content: &str, package_file: &str) -> Vec<String> {
     let cursor = BufReader::new(content.as_bytes());
     let mut reader = Reader::from_reader(cursor);
     reader.config_mut().trim_text(true);
-    let mut names = HashSet::new();
+    let mut refs = Vec::new();
     let mut buf = Vec::new();
 
     loop {
         match reader.read_event_into(&mut buf) {
-            Ok(Event::Empty(e) | Event::Start(e))
-                if local_name(e.name().as_ref()) == "property" =>
-            {
-                if let Some((name, _)) = parse_property_attrs(&e) {
-                    names.insert(name);
+            Ok(Event::Empty(e) | Event::Start(e)) if local_name(e.name().as_ref()) == "import" => {
+                if let Some(file) = parse_property_file_attr(&e) {
+                    refs.push(resolve_relative_path(package_file, &file));
                 }
             }
             Ok(Event::Eof) => break,
@@ -451,7 +504,33 @@ fn inline_property_names(content: &str) -> HashSet<String> {
         buf.clear();
     }
 
-    names
+    refs
+}
+
+fn inline_properties(content: &str) -> Vec<(String, String)> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+    let mut properties = Vec::new();
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Empty(e) | Event::Start(e))
+                if local_name(e.name().as_ref()) == "property" =>
+            {
+                if let Some(property) = parse_property_attrs(&e) {
+                    properties.push(property);
+                }
+            }
+            Ok(Event::Eof) => break,
+            Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    properties
 }
 
 fn resolve_relative_path(package_file: &str, reference: &str) -> String {
@@ -969,6 +1048,89 @@ mod tests {
         assert_eq!(package_files[0].package_file, "versions.properties");
         assert_eq!(package_files[0].deps.len(), 1);
         assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
+    }
+
+    // Ported: "follows import file references" — ant/extract.spec.ts line 628
+    #[test]
+    fn extract_all_package_files_follows_import_file_refs() {
+        let build_xml = r#"
+<project>
+  <import file="deps.xml" />
+</project>"#;
+        let deps_xml = r#"
+<project>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let files = [("build.xml", Some(build_xml)), ("deps.xml", Some(deps_xml))];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(package_files.len(), 1);
+        assert_eq!(package_files[0].package_file, "deps.xml");
+        assert_eq!(package_files[0].deps[0].dep_name, "junit:junit");
+        assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
+    }
+
+    // Ported: "skips missing import files" — ant/extract.spec.ts line 662
+    #[test]
+    fn extract_all_package_files_skips_missing_import_files() {
+        let build_xml = r#"
+<project>
+  <import file="missing.xml" />
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let files = [("build.xml", Some(build_xml))];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(package_files.len(), 1);
+        assert_eq!(package_files[0].package_file, "build.xml");
+        assert_eq!(package_files[0].deps[0].dep_name, "junit:junit");
+        assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
+    }
+
+    // Ported: "does not loop on self-importing files" — ant/extract.spec.ts line 692
+    #[test]
+    fn extract_all_package_files_does_not_loop_on_self_imports() {
+        let build_xml = r#"
+<project>
+  <import file="build.xml" />
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let files = [("build.xml", Some(build_xml))];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(package_files.len(), 1);
+        assert_eq!(package_files[0].package_file, "build.xml");
+        assert_eq!(package_files[0].deps.len(), 1);
+        assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
+    }
+
+    // Ported: "shares properties across imported files" — ant/extract.spec.ts line 722
+    #[test]
+    fn extract_all_package_files_shares_properties_with_imported_files() {
+        let build_xml = r#"
+<project>
+  <property name="junit.version" value="4.13.2" />
+  <import file="deps.xml" />
+</project>"#;
+        let deps_xml = r#"
+<project>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="${junit.version}" />
+  </artifact:dependencies>
+</project>"#;
+        let files = [("build.xml", Some(build_xml)), ("deps.xml", Some(deps_xml))];
+        let package_files = extract_all_package_files(&files);
+        assert_eq!(package_files.len(), 1);
+        assert_eq!(package_files[0].package_file, "build.xml");
+        assert_eq!(package_files[0].deps[0].dep_name, "junit:junit");
+        assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
+        assert_eq!(
+            package_files[0].deps[0].shared_variable_name.as_deref(),
+            Some("junit.version")
+        );
     }
 
     // Ported: "returns null for build.xml with no dependencies" — ant/extract.spec.ts line 94

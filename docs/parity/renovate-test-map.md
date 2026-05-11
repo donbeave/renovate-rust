@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1009 / 1217 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1013 / 1217 actionable tests ported (83%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1880,7 +1880,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 35 | **Actionable:** 44 | **Status:** partial
+**Total tests:** 44 | **Ported:** 39 | **Actionable:** 44 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -1921,10 +1921,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles unparseable XML returned by readLocalFile | 549 | ported | `ant.rs` | `unparseable_xml_returns_empty` | — |
 | handles absolute path in property file reference | 557 | ported | `ant.rs` | `extract_all_package_files_resolves_absolute_properties_file` | — |
 | skips duplicate property file references | 591 | ported | `ant.rs` | `extract_all_package_files_deduplicates_properties_file_refs` | — |
-| follows import file references | 628 | pending | — | — | Requires `<import>` element resolution |
-| skips missing import files | 662 | pending | — | — | Requires missing-import tolerance |
-| does not loop on self-importing files | 692 | pending | — | — | Requires self-import detection |
-| shares properties across imported files | 722 | pending | — | — | Requires multi-file property sharing |
+| follows import file references | 628 | ported | `ant.rs` | `extract_all_package_files_follows_import_file_refs` | — |
+| skips missing import files | 662 | ported | `ant.rs` | `extract_all_package_files_skips_missing_import_files` | — |
+| does not loop on self-importing files | 692 | ported | `ant.rs` | `extract_all_package_files_does_not_loop_on_self_imports` | — |
+| shares properties across imported files | 722 | ported | `ant.rs` | `extract_all_package_files_shares_properties_with_imported_files` | — |
 | extracts dependency from 3-part coords attribute | 760 | ported | `ant.rs` | `extracts_coords_form` | — |
 | extracts scope from 4-part coords attribute | 791 | ported | `ant.rs` | `four_part_coords_with_scope_at_end` | — |
 | ignores coords with fewer than 3 parts | 821 | ported | `ant.rs` | `coords_with_fewer_than_3_parts_skipped` | — |
