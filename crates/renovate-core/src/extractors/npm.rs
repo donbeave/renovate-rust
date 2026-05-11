@@ -26,7 +26,7 @@
 
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use thiserror::Error;
 
 /// Why an npm dependency is being skipped.
@@ -163,20 +163,53 @@ struct PackageJson {
     id: Option<serde_json::Value>,
     #[serde(rename = "_resolved")]
     resolved: Option<serde_json::Value>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_dependency_section")]
     dependencies: BTreeMap<String, String>,
-    #[serde(rename = "devDependencies", default)]
+    #[serde(
+        rename = "devDependencies",
+        default,
+        deserialize_with = "deserialize_dependency_section"
+    )]
     dev_dependencies: BTreeMap<String, String>,
-    #[serde(rename = "peerDependencies", default)]
+    #[serde(
+        rename = "peerDependencies",
+        default,
+        deserialize_with = "deserialize_dependency_section"
+    )]
     peer_dependencies: BTreeMap<String, String>,
-    #[serde(rename = "optionalDependencies", default)]
+    #[serde(
+        rename = "optionalDependencies",
+        default,
+        deserialize_with = "deserialize_dependency_section"
+    )]
     optional_dependencies: BTreeMap<String, String>,
     /// yarn `resolutions` block — flat `{ "pkg": "version" }`.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_dependency_section")]
     resolutions: BTreeMap<String, String>,
     /// npm 8+ `overrides` block — flat `{ "pkg": "version" }`.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_dependency_section")]
     overrides: BTreeMap<String, String>,
+}
+
+fn deserialize_dependency_section<'de, D>(
+    deserializer: D,
+) -> Result<BTreeMap<String, String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = serde_json::Value::deserialize(deserializer)?;
+    let Some(object) = value.as_object() else {
+        return Ok(BTreeMap::new());
+    };
+
+    Ok(object
+        .iter()
+        .filter_map(|(name, value)| {
+            value
+                .as_str()
+                .map(|version| (name.clone(), version.to_owned()))
+        })
+        .collect())
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -1426,6 +1459,14 @@ chalk@^2.4.1:
     #[test]
     fn empty_package_json_returns_empty_list() {
         let json = r#"{}"#;
+        let deps = extract_ok(json);
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "handles invalid" — npm/extract/index.spec.ts line 86
+    #[test]
+    fn package_json_invalid_dependency_sections_return_empty() {
+        let json = r#"{"dependencies": true, "devDependencies": []}"#;
         let deps = extract_ok(json);
         assert!(deps.is_empty());
     }
