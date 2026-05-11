@@ -21,6 +21,7 @@
 //! </artifact:dependencies>
 //! ```
 
+use std::collections::{HashMap, HashSet};
 use std::io::BufReader;
 
 use quick_xml::Reader;
@@ -31,6 +32,8 @@ use quick_xml::events::Event;
 pub enum AntSkipReason {
     /// Version is a property reference (`${...}`).
     PropertyRef,
+    /// Version property resolution recursed back to an already-seen property.
+    RecursivePropertyRef,
     /// Required attributes missing.
     MissingVersion,
 }
@@ -48,6 +51,8 @@ pub struct AntDep {
     pub registry_urls: Vec<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<AntSkipReason>,
+    /// Name of the property that supplied the version.
+    pub shared_variable_name: Option<String>,
 }
 
 const SCOPE_NAMES: &[&str] = &["compile", "runtime", "test", "provided", "system"];
@@ -60,6 +65,7 @@ pub fn extract(content: &str) -> Vec<AntDep> {
 
     let mut deps: Vec<AntDep> = Vec::new();
     let mut registry_urls: Vec<String> = Vec::new();
+    let mut properties: HashMap<String, String> = HashMap::new();
     let mut buf = Vec::new();
 
     loop {
@@ -71,8 +77,13 @@ pub fn extract(content: &str) -> Vec<AntDep> {
 
                 match local.as_str() {
                     "dependency" => {
-                        if let Some(dep) = parse_dependency_attrs(&e, &registry_urls) {
+                        if let Some(dep) = parse_dependency_attrs(&e, &registry_urls, &properties) {
                             deps.push(dep);
+                        }
+                    }
+                    "property" => {
+                        if let Some((name, value)) = parse_property_attrs(&e) {
+                            properties.entry(name).or_insert(value);
                         }
                     }
                     "remoteRepository" => {
@@ -119,6 +130,7 @@ fn local_name(raw: &[u8]) -> String {
 fn parse_dependency_attrs(
     e: &quick_xml::events::BytesStart<'_>,
     registry_urls: &[String],
+    properties: &HashMap<String, String>,
 ) -> Option<AntDep> {
     let mut group_id = String::new();
     let mut artifact_id = String::new();
@@ -142,7 +154,7 @@ fn parse_dependency_attrs(
     }
 
     if !coords.is_empty() {
-        return parse_coords_dep(&coords, registry_urls);
+        return parse_coords_dep(&coords, registry_urls, properties);
     }
 
     if group_id.is_empty() || artifact_id.is_empty() {
@@ -163,16 +175,42 @@ fn parse_dependency_attrs(
             dep_type,
             registry_urls: registry_urls.to_vec(),
             skip_reason: Some(AntSkipReason::MissingVersion),
+            shared_variable_name: None,
         });
     }
 
     if version.contains("${") {
+        if let Some(property_name) = exact_property_ref(&version) {
+            match resolve_property(property_name, properties, &mut HashSet::new()) {
+                Ok(resolved) => {
+                    return Some(AntDep {
+                        dep_name,
+                        current_value: resolved,
+                        dep_type,
+                        registry_urls: registry_urls.to_vec(),
+                        skip_reason: None,
+                        shared_variable_name: Some(property_name.to_owned()),
+                    });
+                }
+                Err(skip_reason) => {
+                    return Some(AntDep {
+                        dep_name,
+                        current_value: version,
+                        dep_type,
+                        registry_urls: registry_urls.to_vec(),
+                        skip_reason: Some(skip_reason),
+                        shared_variable_name: None,
+                    });
+                }
+            }
+        }
         return Some(AntDep {
             dep_name,
             current_value: version,
             dep_type,
             registry_urls: registry_urls.to_vec(),
             skip_reason: Some(AntSkipReason::PropertyRef),
+            shared_variable_name: None,
         });
     }
 
@@ -182,10 +220,15 @@ fn parse_dependency_attrs(
         dep_type,
         registry_urls: registry_urls.to_vec(),
         skip_reason: None,
+        shared_variable_name: None,
     })
 }
 
-fn parse_coords_dep(coords: &str, registry_urls: &[String]) -> Option<AntDep> {
+fn parse_coords_dep(
+    coords: &str,
+    registry_urls: &[String],
+    properties: &HashMap<String, String>,
+) -> Option<AntDep> {
     // coords: groupId:artifactId:[type:[classifier:]]version[:scope]
     let normalized = coords.replace('/', ":");
     let parts: Vec<&str> = normalized.split(':').collect();
@@ -218,12 +261,37 @@ fn parse_coords_dep(coords: &str, registry_urls: &[String]) -> Option<AntDep> {
     };
 
     if version.contains("${") {
+        if let Some(property_name) = exact_property_ref(&version) {
+            match resolve_property(property_name, properties, &mut HashSet::new()) {
+                Ok(resolved) => {
+                    return Some(AntDep {
+                        dep_name,
+                        current_value: resolved,
+                        dep_type,
+                        registry_urls: registry_urls.to_vec(),
+                        skip_reason: None,
+                        shared_variable_name: Some(property_name.to_owned()),
+                    });
+                }
+                Err(skip_reason) => {
+                    return Some(AntDep {
+                        dep_name,
+                        current_value: version,
+                        dep_type,
+                        registry_urls: registry_urls.to_vec(),
+                        skip_reason: Some(skip_reason),
+                        shared_variable_name: None,
+                    });
+                }
+            }
+        }
         return Some(AntDep {
             dep_name,
             current_value: version,
             dep_type,
             registry_urls: registry_urls.to_vec(),
             skip_reason: Some(AntSkipReason::PropertyRef),
+            shared_variable_name: None,
         });
     }
 
@@ -234,6 +302,7 @@ fn parse_coords_dep(coords: &str, registry_urls: &[String]) -> Option<AntDep> {
             dep_type,
             registry_urls: registry_urls.to_vec(),
             skip_reason: Some(AntSkipReason::MissingVersion),
+            shared_variable_name: None,
         });
     }
 
@@ -243,7 +312,71 @@ fn parse_coords_dep(coords: &str, registry_urls: &[String]) -> Option<AntDep> {
         dep_type,
         registry_urls: registry_urls.to_vec(),
         skip_reason: None,
+        shared_variable_name: None,
     })
+}
+
+fn parse_property_attrs(e: &quick_xml::events::BytesStart<'_>) -> Option<(String, String)> {
+    let mut name = String::new();
+    let mut value = String::new();
+    for attr in e.attributes().flatten() {
+        let key = std::str::from_utf8(attr.key.as_ref()).unwrap_or("");
+        let val = std::str::from_utf8(attr.value.as_ref())
+            .unwrap_or("")
+            .to_owned();
+        match key {
+            "name" => name = val,
+            "value" => value = val,
+            _ => {}
+        }
+    }
+    (!name.is_empty()).then_some((name, value))
+}
+
+fn exact_property_ref(value: &str) -> Option<&str> {
+    value
+        .strip_prefix("${")
+        .and_then(|inner| inner.strip_suffix('}'))
+        .filter(|name| !name.contains("${") && !name.is_empty())
+}
+
+fn resolve_property(
+    name: &str,
+    properties: &HashMap<String, String>,
+    seen: &mut HashSet<String>,
+) -> Result<String, AntSkipReason> {
+    if !seen.insert(name.to_owned()) {
+        return Err(AntSkipReason::RecursivePropertyRef);
+    }
+    let Some(value) = properties.get(name) else {
+        seen.remove(name);
+        return Err(AntSkipReason::PropertyRef);
+    };
+    let resolved = resolve_property_placeholders(value, properties, seen);
+    seen.remove(name);
+    resolved
+}
+
+fn resolve_property_placeholders(
+    value: &str,
+    properties: &HashMap<String, String>,
+    seen: &mut HashSet<String>,
+) -> Result<String, AntSkipReason> {
+    let mut out = String::new();
+    let mut rest = value;
+    while let Some(start) = rest.find("${") {
+        out.push_str(&rest[..start]);
+        let after_start = &rest[start + 2..];
+        let Some(end) = after_start.find('}') else {
+            out.push_str(&rest[start..]);
+            return Ok(out);
+        };
+        let property_name = &after_start[..end];
+        out.push_str(&resolve_property(property_name, properties, seen)?);
+        rest = &after_start[end + 1..];
+    }
+    out.push_str(rest);
+    Ok(out)
 }
 
 #[cfg(test)]
@@ -294,6 +427,108 @@ mod tests {
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
+    }
+
+    // Ported: "resolves inline property references" — ant/extract.spec.ts line 167
+    #[test]
+    fn resolves_inline_property_references() {
+        let content = r#"
+<project>
+  <property name="slf4j.version" value="1.7.36"/>
+  <artifact:dependencies>
+    <dependency groupId="org.slf4j" artifactId="slf4j-api" version="${slf4j.version}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "org.slf4j:slf4j-api");
+        assert_eq!(deps[0].current_value, "1.7.36");
+        assert_eq!(
+            deps[0].shared_variable_name.as_deref(),
+            Some("slf4j.version")
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "implements first-definition-wins for inline properties" — ant/extract.spec.ts line 228
+    #[test]
+    fn first_inline_property_definition_wins() {
+        let content = r#"
+<project>
+  <property name="junit.version" value="4.13.2"/>
+  <property name="junit.version" value="4.12"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="${junit.version}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value, "4.13.2");
+        assert_eq!(
+            deps[0].shared_variable_name.as_deref(),
+            Some("junit.version")
+        );
+    }
+
+    // Ported: "detects circular property references" — ant/extract.spec.ts line 312
+    #[test]
+    fn circular_property_reference_is_skipped() {
+        let content = r#"
+<project>
+  <property name="a" value="${b}"/>
+  <property name="b" value="${a}"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="${a}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].skip_reason,
+            Some(AntSkipReason::RecursivePropertyRef)
+        );
+    }
+
+    // Ported: "resolves chained property references" — ant/extract.spec.ts line 338
+    #[test]
+    fn resolves_chained_property_references() {
+        let content = r#"
+<project>
+  <property name="base.version" value="1.7"/>
+  <property name="full.version" value="${base.version}.36"/>
+  <property name="slf4j.version" value="${full.version}"/>
+  <artifact:dependencies>
+    <dependency groupId="org.slf4j" artifactId="slf4j-api" version="${slf4j.version}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "org.slf4j:slf4j-api");
+        assert_eq!(deps[0].current_value, "1.7.36");
+        assert_eq!(
+            deps[0].shared_variable_name.as_deref(),
+            Some("slf4j.version")
+        );
+    }
+
+    // Ported: "groups multiple dependencies sharing the same property" — ant/extract.spec.ts line 368
+    #[test]
+    fn resolves_shared_property_for_multiple_dependencies() {
+        let content = r#"
+<project>
+  <property name="jackson.version" value="2.15.2"/>
+  <artifact:dependencies>
+    <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-core" version="${jackson.version}" />
+    <dependency groupId="com.fasterxml.jackson.core" artifactId="jackson-databind" version="${jackson.version}" />
+  </artifact:dependencies>
+</project>"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 2);
+        assert!(deps.iter().all(|dep| dep.current_value == "2.15.2"));
+        assert!(
+            deps.iter()
+                .all(|dep| dep.shared_variable_name.as_deref() == Some("jackson.version"))
+        );
     }
 
     // Ported: "skips partial placeholder in version string" — ant/extract.spec.ts line 522
