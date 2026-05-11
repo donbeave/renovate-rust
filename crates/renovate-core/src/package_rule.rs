@@ -691,16 +691,7 @@ impl PackageRule {
         if self.match_base_branches.is_empty() {
             return true;
         }
-        self.match_base_branches.iter().any(|pattern| {
-            if pattern.contains('*') || pattern.contains('?') || pattern.contains('[') {
-                globset::Glob::new(pattern)
-                    .ok()
-                    .map(|g| g.compile_matcher().is_match(branch))
-                    .unwrap_or(false)
-            } else {
-                pattern == branch
-            }
-        })
+        crate::string_match::match_regex_or_glob_list(branch, &self.match_base_branches)
     }
 
     /// Return `true` when this rule's `matchCurrentAge` condition is satisfied.

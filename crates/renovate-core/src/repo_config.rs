@@ -6173,6 +6173,37 @@ mod tests {
         assert!(!rule.manager_matches("npm"));
     }
 
+    // Ported: "filters managers with matching manager" — util/package-rules/index.spec.ts line 426
+    #[test]
+    fn match_managers_matching_manager_applies_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["npm", "meteor"], "matchPackageNames": ["node"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "node",
+            manager: Some("meteor"),
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
+    }
+
+    // Ported: "filters managers with non-matching manager" — util/package-rules/index.spec.ts line 446
+    #[test]
+    fn match_managers_non_matching_manager_skips_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchManagers": ["dockerfile", "npm"], "matchPackageNames": ["node"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "node",
+            manager: Some("pipenv"),
+            dep_type: Some("dependencies"),
+            categories: &["python"],
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx).automerge, None);
+    }
+
     // ── Ported from Renovate managers.spec.ts ────────────────────────────────
 
     #[test]
@@ -6539,6 +6570,42 @@ mod tests {
         assert!(!rule.datasource_matches("docker"));
     }
 
+    // Ported: "filters datasources with matching datasource" — util/package-rules/index.spec.ts line 529
+    #[test]
+    fn match_datasources_matching_datasource_applies_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchDatasources": ["orb", "docker"], "automerge": true},
+                {"matchDatasources": ["docker"], "labels": ["docker"]}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "dep",
+            datasource: Some("orb"),
+            base_branch: Some("master"),
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(effects.automerge, Some(true));
+        assert!(effects.labels.is_empty());
+    }
+
+    // Ported: "filters datasources with non-matching datasource" — util/package-rules/index.spec.ts line 573
+    #[test]
+    fn match_datasources_missing_datasource_skips_rule() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["orb"], "automerge": true}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "dep",
+            base_branch: Some("staging"),
+            dep_type: Some("dependencies"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx).automerge, None);
+    }
+
     #[test]
     fn package_rules_multiple_names_match_any() {
         let c = RepoConfig::parse(
@@ -6650,6 +6717,24 @@ mod tests {
         );
         let rule2 = &c2.package_rules[0];
         assert!(!rule2.update_type_matches(UpdateType::Minor, true));
+    }
+
+    // Ported: "filters updateType" — util/package-rules/index.spec.ts line 647
+    #[test]
+    fn match_update_types_patch_matches_patch_minor_rule_only() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {"matchUpdateTypes": ["minor", "patch"], "labels": ["patch-or-minor"]},
+                {"matchUpdateTypes": ["minor"], "labels": ["minor-only"]}
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "a",
+            dep_type: Some("dependencies"),
+            update_type: Some(UpdateType::Patch),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx).labels, vec!["patch-or-minor"]);
     }
 
     #[test]
@@ -9009,6 +9094,8 @@ mod schedule_preset_tests {
 mod source_url_tests {
     use super::*;
 
+    // Ported: "matches matchSourceUrls" — util/package-rules/index.spec.ts line 740
+    // Ported: "non-matches matchSourceUrls" — util/package-rules/index.spec.ts line 763
     #[test]
     fn match_source_urls_exact_disables_dep() {
         let c = RepoConfig::parse(
@@ -9033,6 +9120,7 @@ mod source_url_tests {
     // ── Ported from Renovate index.spec.ts matchSourceUrls tests ─────────────
 
     // Ported: "matches matchSourceUrls with glob" — util/package-rules/index.spec.ts line 672
+    // Ported: "non-matches matchSourceUrls with globs" — util/package-rules/index.spec.ts line 695
     #[test]
     fn match_source_urls_with_double_star_glob() {
         // 'https://github.com/renovatebot/**' matches sub-repos.
@@ -9362,6 +9450,8 @@ mod categories_base_branch_tests {
         assert!(rule.base_branch_matches("release/1.0"));
     }
 
+    // Ported: "filters branches with matching branch" — util/package-rules/index.spec.ts line 554
+    // Ported: "filters branches with non-matching branch" — util/package-rules/index.spec.ts line 591
     #[test]
     fn match_base_branches_multiple_entries() {
         let c = RepoConfig::parse(
@@ -9371,6 +9461,18 @@ mod categories_base_branch_tests {
         assert!(rule.base_branch_matches("main"));
         assert!(rule.base_branch_matches("develop"));
         assert!(!rule.base_branch_matches("feature/foo"));
+    }
+
+    // Ported: "filters branches with matching branch regex" — util/package-rules/index.spec.ts line 609
+    // Ported: "filters branches with non-matching branch regex" — util/package-rules/index.spec.ts line 628
+    #[test]
+    fn match_base_branches_regex_matches_release_branch_only() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchBaseBranches": ["/^release\\/.*/"], "enabled": false}]}"#,
+        );
+        let rule = &c.package_rules[0];
+        assert!(rule.base_branch_matches("release/5.8"));
+        assert!(!rule.base_branch_matches("master"));
     }
 
     // ── Ported from Renovate index.spec.ts ───────────────────────────────────

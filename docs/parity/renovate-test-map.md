@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1317 / 1672 actionable tests ported (79%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1329 / 1672 actionable tests ported (79%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,7 +4295,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 26 | **Actionable:** 73 | **Status:** partial
+**Total tests:** 73 | **Ported:** 38 | **Actionable:** 73 | **Status:** partial
 
 ### `util/package-rules/index`
 
@@ -4324,23 +4324,23 @@ resolver) and the inner `extractPackageFile()` adapter.
 | filters requested depType | 370 | ported | `repo_config.rs` | `match_dep_types_multiple_types_in_list` | — |
 | filters from list of requested depTypes | 389 | ported | `repo_config.rs` | `match_dep_types_plural_array_any_matches` | — |
 | returns false if no depTypes | 408 | ported | `repo_config.rs` | `match_dep_types_no_dep_type_rule_does_not_fire` | — |
-| filters managers with matching manager | 426 | pending | — | — | — |
-| filters managers with non-matching manager | 446 | pending | — | — | — |
+| filters managers with matching manager | 426 | ported | `repo_config.rs` | `match_managers_matching_manager_applies_rule` | — |
+| filters managers with non-matching manager | 446 | ported | `repo_config.rs` | `match_managers_non_matching_manager_skips_rule` | — |
 | filters categories with matching category | 468 | ported | `repo_config.rs` | `match_categories_dep_provided_categories_override_manager_derived` | — |
 | filters categories with non-matching category | 489 | ported | `repo_config.rs` | `match_categories_dep_provided_categories_non_matching` | — |
 | filters categories with undefined category | 510 | ported | `repo_config.rs` | `needs_categories_to_match_rule_does_not_fire_without_it` | — |
-| filters datasources with matching datasource | 529 | pending | — | — | — |
-| filters branches with matching branch | 554 | pending | — | — | — |
-| filters datasources with non-matching datasource | 573 | pending | — | — | — |
-| filters branches with non-matching branch | 591 | pending | — | — | — |
-| filters branches with matching branch regex | 609 | pending | — | — | — |
-| filters branches with non-matching branch regex | 628 | pending | — | — | — |
-| filters updateType | 647 | pending | — | — | — |
+| filters datasources with matching datasource | 529 | ported | `repo_config.rs` | `match_datasources_matching_datasource_applies_rule` | — |
+| filters branches with matching branch | 554 | ported | `repo_config.rs` | `match_base_branches_multiple_entries` | — |
+| filters datasources with non-matching datasource | 573 | ported | `repo_config.rs` | `match_datasources_missing_datasource_skips_rule` | — |
+| filters branches with non-matching branch | 591 | ported | `repo_config.rs` | `match_base_branches_multiple_entries` | — |
+| filters branches with matching branch regex | 609 | ported | `repo_config.rs` | `match_base_branches_regex_matches_release_branch_only` | — |
+| filters branches with non-matching branch regex | 628 | ported | `repo_config.rs` | `match_base_branches_regex_matches_release_branch_only` | — |
+| filters updateType | 647 | ported | `repo_config.rs` | `match_update_types_patch_matches_patch_minor_rule_only` | — |
 | matches matchSourceUrls with glob | 672 | ported | `repo_config.rs` | `match_source_urls_with_double_star_glob` | — |
-| non-matches matchSourceUrls with globs | 695 | pending | — | — | — |
+| non-matches matchSourceUrls with globs | 695 | ported | `repo_config.rs` | `match_source_urls_with_double_star_glob` | — |
 | handles matchSourceUrls when missing sourceUrl | 718 | ported | `repo_config.rs` | `match_source_urls_missing_returns_false` | — |
-| matches matchSourceUrls | 740 | pending | — | — | — |
-| non-matches matchSourceUrls | 763 | pending | — | — | — |
+| matches matchSourceUrls | 740 | ported | `repo_config.rs` | `match_source_urls_exact_disables_dep` | — |
+| non-matches matchSourceUrls | 763 | ported | `repo_config.rs` | `match_source_urls_exact_disables_dep` | — |
 | handles matchRegistryUrls when missing registryUrls | 786 | ported | `repo_config.rs` | `match_registry_urls_no_dep_urls_fails_when_constraint_set` | — |
 | matches matchRegistryUrls | 808 | ported | `repo_config.rs` | `match_registry_urls_exact_hit` | — |
 | non-matches matchRegistryUrls | 831 | ported | `repo_config.rs` | `match_registry_urls_exact_hit` | — |
