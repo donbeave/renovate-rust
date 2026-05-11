@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1291 / 1672 actionable tests ported (77%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1309 / 1672 actionable tests ported (78%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,7 +4295,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 0 | **Actionable:** 73 | **Status:** pending
+**Total tests:** 73 | **Ported:** 18 | **Actionable:** 73 | **Status:** partial
 
 ### `util/package-rules/index`
 
@@ -4321,14 +4321,14 @@ resolver) and the inner `extractPackageFile()` adapter.
 | skips skipReason=package-rules if enabled=true | 312 | pending | — | — | — |
 | matches anything if missing inclusive rules | 326 | pending | — | — | — |
 | supports inclusive or | 348 | pending | — | — | — |
-| filters requested depType | 370 | pending | — | — | — |
-| filters from list of requested depTypes | 389 | pending | — | — | — |
-| returns false if no depTypes | 408 | pending | — | — | — |
+| filters requested depType | 370 | ported | `repo_config.rs` | `match_dep_types_multiple_types_in_list` | — |
+| filters from list of requested depTypes | 389 | ported | `repo_config.rs` | `match_dep_types_plural_array_any_matches` | — |
+| returns false if no depTypes | 408 | ported | `repo_config.rs` | `match_dep_types_no_dep_type_rule_does_not_fire` | — |
 | filters managers with matching manager | 426 | pending | — | — | — |
 | filters managers with non-matching manager | 446 | pending | — | — | — |
-| filters categories with matching category | 468 | pending | — | — | — |
-| filters categories with non-matching category | 489 | pending | — | — | — |
-| filters categories with undefined category | 510 | pending | — | — | — |
+| filters categories with matching category | 468 | ported | `repo_config.rs` | `match_categories_dep_provided_categories_override_manager_derived` | — |
+| filters categories with non-matching category | 489 | ported | `repo_config.rs` | `match_categories_dep_provided_categories_non_matching` | — |
+| filters categories with undefined category | 510 | ported | `repo_config.rs` | `needs_categories_to_match_rule_does_not_fire_without_it` | — |
 | filters datasources with matching datasource | 529 | pending | — | — | — |
 | filters branches with matching branch | 554 | pending | — | — | — |
 | filters datasources with non-matching datasource | 573 | pending | — | — | — |
@@ -4336,14 +4336,14 @@ resolver) and the inner `extractPackageFile()` adapter.
 | filters branches with matching branch regex | 609 | pending | — | — | — |
 | filters branches with non-matching branch regex | 628 | pending | — | — | — |
 | filters updateType | 647 | pending | — | — | — |
-| matches matchSourceUrls with glob | 672 | pending | — | — | — |
+| matches matchSourceUrls with glob | 672 | ported | `repo_config.rs` | `match_source_urls_with_double_star_glob` | — |
 | non-matches matchSourceUrls with globs | 695 | pending | — | — | — |
-| handles matchSourceUrls when missing sourceUrl | 718 | pending | — | — | — |
+| handles matchSourceUrls when missing sourceUrl | 718 | ported | `repo_config.rs` | `match_source_urls_missing_returns_false` | — |
 | matches matchSourceUrls | 740 | pending | — | — | — |
 | non-matches matchSourceUrls | 763 | pending | — | — | — |
-| handles matchRegistryUrls when missing registryUrls | 786 | pending | — | — | — |
-| matches matchRegistryUrls | 808 | pending | — | — | — |
-| non-matches matchRegistryUrls | 831 | pending | — | — | — |
+| handles matchRegistryUrls when missing registryUrls | 786 | ported | `repo_config.rs` | `match_registry_urls_no_dep_urls_fails_when_constraint_set` | — |
+| matches matchRegistryUrls | 808 | ported | `repo_config.rs` | `match_registry_urls_exact_hit` | — |
+| non-matches matchRegistryUrls | 831 | ported | `repo_config.rs` | `match_registry_urls_exact_hit` | — |
 
 ### `util/package-rules/index › matchConfidence`
 
@@ -4358,8 +4358,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| filters naked depType | 950 | pending | — | — | — |
-| filters out unrequested depType | 968 | pending | — | — | — |
+| filters naked depType | 950 | ported | `repo_config.rs` | `match_dep_types_naked_dep_type_matches` | — |
+| filters out unrequested depType | 968 | ported | `repo_config.rs` | `match_dep_types_out_of_requested_does_not_match` | — |
 | checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap | 987 | pending | — | — | — |
 | checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap | 1026 | pending | — | — | — |
 | checks if matchCurrentVersion selector is a version and matches if currentValue is a range | 1049 | pending | — | — | — |
@@ -4370,12 +4370,12 @@ resolver) and the inner `extractPackageFile()` adapter.
 | matches lock files | 1187 | pending | — | — | — |
 | matches paths | 1203 | pending | — | — | — |
 | empty rules | 1233 | pending | — | — | — |
-| creates groupSlug if necessary | 1242 | pending | — | — | — |
-| matches matchSourceUrls with patterns (case-insensitive) | 1261 | pending | — | — | — |
-| matches matchSourceUrls(case-insensitive) | 1284 | pending | — | — | — |
+| creates groupSlug if necessary | 1242 | ported | `repo_config.rs` | `group_slug_auto_generated_from_group_name_when_prior_slug_exists` | — |
+| matches matchSourceUrls with patterns (case-insensitive) | 1261 | ported | `repo_config.rs` | `match_source_urls_case_insensitive` | — |
+| matches matchSourceUrls(case-insensitive) | 1284 | ported | `repo_config.rs` | `match_source_urls_case_insensitive` | — |
 | needs language to match | 1307 | pending | — | — | — |
-| needs baseBranch to match | 1325 | pending | — | — | — |
-| needs manager to match | 1343 | pending | — | — | — |
+| needs baseBranch to match | 1325 | ported | `repo_config.rs` | `needs_base_branch_to_match_rule_does_not_fire_without_it` | — |
+| needs manager to match | 1343 | ported | `repo_config.rs` | `needs_manager_to_match_rule_does_not_fire_without_it` | — |
 | matches matchDepNames(depName) | 1361 | pending | — | — | — |
 | matches if there are no matchers | 1386 | pending | — | — | — |
 | overrides | 1404 | pending | — | — | — |

@@ -6283,9 +6283,9 @@ mod tests {
 
     // ── Ported from Renovate index.spec.ts matchDepTypes ─────────────────────
 
+    // Ported: "filters requested depType" — util/package-rules/index.spec.ts line 370
     #[test]
     fn match_dep_types_multiple_types_in_list() {
-        // Ported: "filters requested depType" — matchDepTypes: ['dependencies', 'peerDependencies']
         // matches dep with depType: 'dependencies'.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchDepTypes": ["dependencies", "peerDependencies"], "matchPackageNames": ["a"], "automerge": true}]}"#,
@@ -6302,9 +6302,9 @@ mod tests {
         );
     }
 
+    // Ported: "returns false if no depTypes" — util/package-rules/index.spec.ts line 408
     #[test]
     fn match_dep_types_no_dep_type_rule_does_not_fire() {
-        // Ported: "returns false if no depTypes" — when dep_type is None and matchDepTypes set → false.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchDepTypes": ["test"], "matchPackageNames": ["a"], "automerge": true}]}"#,
         );
@@ -6380,9 +6380,9 @@ mod tests {
         );
     }
 
+    // Ported: "filters from list of requested depTypes" — util/package-rules/index.spec.ts line 389
     #[test]
     fn match_dep_types_plural_array_any_matches() {
-        // Ported: "filters from list of requested depTypes"
         // index.spec.ts line ~389 — dep has depTypes: ['build', 'test'], rule matchDepTypes: ['test']
         // anyMatchRegexOrGlobList(['build', 'test'], ['test']) → true
         let c = RepoConfig::parse(
@@ -6420,9 +6420,9 @@ mod tests {
         );
     }
 
+    // Ported: "filters naked depType" — util/package-rules/index.spec.ts line 950
     #[test]
     fn match_dep_types_naked_dep_type_matches() {
-        // Ported: "filters naked depType" — index.spec.ts line ~950
         // dep has plain dep_type: "dependencies", matchDepTypes: ["dependencies", "peerDependencies"]
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchDepTypes": ["dependencies", "peerDependencies"], "automerge": true}]}"#,
@@ -6439,9 +6439,9 @@ mod tests {
         );
     }
 
+    // Ported: "filters out unrequested depType" — util/package-rules/index.spec.ts line 968
     #[test]
     fn match_dep_types_out_of_requested_does_not_match() {
-        // Ported: "filters out unrequested depType" — index.spec.ts line ~968
         // dep_type: "devDependencies", matchDepTypes: ["dependencies", "peerDependencies"] → no match
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchDepTypes": ["dependencies", "peerDependencies"], "matchPackageNames": ["a"], "automerge": true}]}"#,
@@ -9007,9 +9007,9 @@ mod source_url_tests {
 
     // ── Ported from Renovate index.spec.ts matchSourceUrls tests ─────────────
 
+    // Ported: "matches matchSourceUrls with glob" — util/package-rules/index.spec.ts line 672
     #[test]
     fn match_source_urls_with_double_star_glob() {
-        // Ported: "matches matchSourceUrls with glob" from index.spec.ts
         // 'https://github.com/renovatebot/**' matches sub-repos.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/foo/bar**", "https://github.com/renovatebot/**"], "automerge": true}]}"#,
@@ -9020,9 +9020,10 @@ mod source_url_tests {
         assert!(!rule.source_url_matches("https://github.com/vuejs/vue"));
     }
 
+    // Ported: "matches matchSourceUrls with patterns (case-insensitive)" — util/package-rules/index.spec.ts line 1261
+    // Ported: "matches matchSourceUrls(case-insensitive)" — util/package-rules/index.spec.ts line 1284
     #[test]
     fn match_source_urls_case_insensitive() {
-        // Ported: "matches matchSourceUrls with patterns (case-insensitive)" from index.spec.ts
         // Glob matching is case-insensitive (Renovate: minimatch nocase:true).
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/Renovatebot/**"], "automerge": true}]}"#,
@@ -9031,9 +9032,9 @@ mod source_url_tests {
         assert!(rule.source_url_matches("https://github.com/renovatebot/Presets"));
     }
 
+    // Ported: "handles matchSourceUrls when missing sourceUrl" — util/package-rules/index.spec.ts line 718
     #[test]
     fn match_source_urls_missing_returns_false() {
-        // Ported: "handles matchSourceUrls when missing sourceUrl" — when sourceUrl is absent,
         // rule with matchSourceUrls set must NOT fire.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchSourceUrls": ["https://github.com/**"], "automerge": true}]}"#,
@@ -9349,9 +9350,9 @@ mod categories_base_branch_tests {
 
     // ── Ported from Renovate index.spec.ts ───────────────────────────────────
 
+    // Ported: "needs baseBranch to match" — util/package-rules/index.spec.ts line 1325
     #[test]
     fn needs_base_branch_to_match_rule_does_not_fire_without_it() {
-        // Ported: "needs baseBranch to match" — when baseBranch is absent from context
         // and matchBaseBranches is set, the rule must not fire.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchPackageNames": ["abc"], "matchBaseBranches": ["dev"], "automerge": true}]}"#,
@@ -9368,9 +9369,9 @@ mod categories_base_branch_tests {
         );
     }
 
+    // Ported: "needs manager to match" — util/package-rules/index.spec.ts line 1343
     #[test]
     fn needs_manager_to_match_rule_does_not_fire_without_it() {
-        // Ported: "needs manager to match" — when manager is absent from context
         // and matchManagers is set, the rule must not fire.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchPackageNames": ["abc"], "matchManagers": ["npm"], "automerge": true}]}"#,
@@ -9387,9 +9388,9 @@ mod categories_base_branch_tests {
         );
     }
 
+    // Ported: "filters categories with undefined category" — util/package-rules/index.spec.ts line 510
     #[test]
     fn needs_categories_to_match_rule_does_not_fire_without_it() {
-        // Ported: "filters categories with undefined category" — when categories is empty
         // but matchCategories is set, rule must not fire.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchCategories": ["docker"], "automerge": true}]}"#,
@@ -9406,9 +9407,9 @@ mod categories_base_branch_tests {
         );
     }
 
+    // Ported: "filters categories with matching category" — util/package-rules/index.spec.ts line 468
     #[test]
     fn match_categories_dep_provided_categories_override_manager_derived() {
-        // Ported: "filters categories with matching category"
         // Dep provides explicit categories: ['javascript', 'node']; rule matches 'node'.
         // Even though meteor manager only derives ['js'], the explicit dep categories win.
         let c = RepoConfig::parse(
@@ -9427,9 +9428,9 @@ mod categories_base_branch_tests {
         );
     }
 
+    // Ported: "filters categories with non-matching category" — util/package-rules/index.spec.ts line 489
     #[test]
     fn match_categories_dep_provided_categories_non_matching() {
-        // Ported: "filters categories with non-matching category"
         // Dep has categories: ['python'], rule requires 'docker' → must not fire.
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchCategories": ["docker"], "matchPackageNames": ["node"], "automerge": true}]}"#,
@@ -9473,6 +9474,8 @@ mod registry_url_repository_tests {
 
     // ── matchRegistryUrls ────────────────────────────────────────────────────
 
+    // Ported: "matches matchRegistryUrls" — util/package-rules/index.spec.ts line 808
+    // Ported: "non-matches matchRegistryUrls" — util/package-rules/index.spec.ts line 831
     #[test]
     fn match_registry_urls_exact_hit() {
         let c = RepoConfig::parse(
@@ -9514,6 +9517,7 @@ mod registry_url_repository_tests {
         assert!(rule.registry_url_matches(&[]));
     }
 
+    // Ported: "handles matchRegistryUrls when missing registryUrls" — util/package-rules/index.spec.ts line 786
     #[test]
     fn match_registry_urls_no_dep_urls_fails_when_constraint_set() {
         let c = RepoConfig::parse(
@@ -10556,9 +10560,9 @@ mod rule_effects_tests {
         );
     }
 
+    // Ported: "creates groupSlug if necessary" — util/package-rules/index.spec.ts line 1242
     #[test]
     fn group_slug_auto_generated_from_group_name_when_prior_slug_exists() {
-        // Ported: "creates groupSlug if necessary" — index.spec.ts line 1242
         // Two rules both match '*':
         //   Rule 1: groupName:'A', groupSlug:'a' → sets groupSlug='a'
         //   Rule 2: groupName:'B' (no groupSlug) → since prior groupSlug exists, auto-generate
