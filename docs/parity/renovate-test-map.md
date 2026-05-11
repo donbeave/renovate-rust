@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1409 / 1653 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1409 / 1652 actionable tests ported (85%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2891,7 +2891,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/npm/extract/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/index.spec.ts
-**Total tests:** 41 | **Ported:** 7 | **Actionable:** 20 | **Status:** partial
+**Total tests:** 41 | **Ported:** 7 | **Actionable:** 19 | **Status:** partial
 
 ### `modules/manager/npm/extract/index › .extractPackageFile()`
 
@@ -2900,7 +2900,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns null if cannot parse | 38 | ported | `npm.rs` | `package_json_extract_returns_error_if_cannot_parse` | — |
 | catches invalid names | 47 | ported | `npm.rs` | `package_json_invalid_dependency_names_are_skipped` | — |
 | ignores vendorised package.json | 58 | ported | `npm.rs` | `package_json_vendorised_installed_package_is_ignored` | — |
-| throws error if non-root renovate config | 67 | pending | — | — | — |
+| throws error if non-root renovate config | 67 | not-applicable | — | — | Requires package-file path wrapper validation; Rust package.json extractor is content-only |
 | returns null if no deps | 77 | ported | `npm.rs` | `empty_package_json_returns_empty_list` | — |
 | handles invalid | 86 | ported | `npm.rs` | `package_json_invalid_dependency_sections_return_empty` | — |
 | returns an array of dependencies | 95 | ported | `npm.rs` | `package_json_fixture_extracts_dependency_array` | — |
