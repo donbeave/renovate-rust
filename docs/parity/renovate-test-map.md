@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 826 / 1217 actionable tests ported (68%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 827 / 1217 actionable tests ported (68%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1593,14 +1593,14 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/tekton/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/tekton/extract.spec.ts
-**Total tests:** 5 | **Ported:** 4 | **Actionable:** 5 | **Status:** partial
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | extracts deps from a file | 6 | ported | `tekton.rs` | `extracts_step_images` (+ extracts_gcr_images_without_skip) | — |
-| extracts deps from a file in annotations | 15 | pending | — | — | Requires Tekton bundle annotation parsing |
+| extracts deps from a file in annotations | 15 | ported | `tekton.rs` | `extracts_annotation_task_and_pipeline_refs` | — |
 | ignores file without any deps | 96 | ported | `tekton.rs` | `ignores_file_without_deps` | — |
 | ignores invalid YAML | 100 | ported | `tekton.rs` | `ignores_invalid_yaml_with_stray_bundle_key` | — |
 | ignores empty file | 112 | ported | `tekton.rs` | `ignores_empty_file` | — |

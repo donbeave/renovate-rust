@@ -33,6 +33,22 @@ pub use crate::extractors::kubernetes::{KubernetesDep, KubernetesSkipReason};
 static TEKTON_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"apiVersion:\s*tekton\.dev/").unwrap());
 
+static ANNOTATION_URL_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"https://(?:(?P<release_host>github\.com)/(?P<release_org>[A-Za-z0-9_.-]+)/(?P<release_repo>[A-Za-z0-9_.-]+)/releases/download/(?P<release_version>v[^\s,\]/]+)|raw\.githubusercontent\.com/(?P<raw_org>[A-Za-z0-9_.-]+)/(?P<raw_repo>[A-Za-z0-9_.-]+)/(?P<raw_version>v[^\s,\]/]+)|github\.com/(?P<github_raw_org>[A-Za-z0-9_.-]+)/(?P<github_raw_repo>[A-Za-z0-9_.-]+)/raw/(?P<github_raw_version>v[^\s,\]/]+))",
+    )
+    .unwrap()
+});
+
+/// Dependency extracted from Pipelines-as-Code Tekton annotations.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TektonAnnotationDep {
+    pub dep_name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub package_name: String,
+}
+
 /// Extract Tekton step image deps from a resource file.
 ///
 /// Returns an empty Vec if the file is not a Tekton resource.
@@ -44,6 +60,50 @@ pub fn extract(content: &str) -> Vec<KubernetesDep> {
     // Delegate to the kubernetes image extractor (it checks apiVersion+kind which
     // Tekton resources also have).
     crate::extractors::kubernetes::extract(content)
+}
+
+/// Extract Pipelines-as-Code task/pipeline URLs from Tekton annotations.
+pub fn extract_annotation_deps(content: &str) -> Vec<TektonAnnotationDep> {
+    ANNOTATION_URL_RE
+        .captures_iter(content)
+        .filter_map(|caps| {
+            if let (Some(org), Some(repo), Some(version)) = (
+                caps.name("release_org"),
+                caps.name("release_repo"),
+                caps.name("release_version"),
+            ) {
+                return Some(TektonAnnotationDep {
+                    dep_name: format!("github.com/{}/{}", org.as_str(), repo.as_str()),
+                    current_value: version.as_str().to_owned(),
+                    datasource: "github-releases",
+                    package_name: format!("{}/{}", org.as_str(), repo.as_str()),
+                });
+            }
+
+            let (org, repo, version) = if let (Some(org), Some(repo), Some(version)) = (
+                caps.name("raw_org"),
+                caps.name("raw_repo"),
+                caps.name("raw_version"),
+            ) {
+                (org, repo, version)
+            } else if let (Some(org), Some(repo), Some(version)) = (
+                caps.name("github_raw_org"),
+                caps.name("github_raw_repo"),
+                caps.name("github_raw_version"),
+            ) {
+                (org, repo, version)
+            } else {
+                return None;
+            };
+
+            Some(TektonAnnotationDep {
+                dep_name: format!("github.com/{}/{}", org.as_str(), repo.as_str()),
+                current_value: version.as_str().to_owned(),
+                datasource: "git-tags",
+                package_name: format!("https://github.com/{}/{}", org.as_str(), repo.as_str()),
+            })
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -99,6 +159,57 @@ spec:
         assert_eq!(deps.len(), 1);
         assert!(deps[0].skip_reason.is_none());
         assert_eq!(deps[0].image_name, "gcr.io/google-containers/busybox");
+    }
+
+    // Ported: "extracts deps from a file in annotations" — tekton/extract.spec.ts line 15
+    #[test]
+    fn extracts_annotation_task_and_pipeline_refs() {
+        let content = r#"
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/task: "[git-clone,https://github.com/foo/bar/releases/download/v0.0.4/stakater-create-git-tag.yaml]"
+    pipelinesascode.tekton.dev/pipeline: "https://raw.githubusercontent.com/foo/baz/v0.0.12/pipeline/deploy/deploy.yaml"
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/task: "[git-clone,
+      https://raw.githubusercontent.com/foo/bar/v0.0.6/tasks/create-git-tag/create-git-tag.yaml]"
+    pipelinesascode.tekton.dev/pipeline: "
+      https://raw.githubusercontent.com/foo/baz/v0.0.12/pipeline/deploy/deploy.yaml"
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/task: "git-clone"
+    pipelinesascode.tekton.dev/task-1: "https://github.com/foo/bar/raw/v0.0.8/tasks/create-git-tag/create-git-tag.yaml"
+    pipelinesascode.tekton.dev/pipeline: "https://github.com/foo/baz/raw/v0.0.14/pipeline/deploy/deploy.yaml"
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/task: "[git-clone,
+      https://github.com/foo/bar/releases/download/v0.0.9/stakater-create-git-tag.yaml,
+      https://github.com/foo/bar/raw/v0.0.7/tasks/create-git-tag/create-git-tag.yaml,
+      https://raw.githubusercontent.com/foo/bar/v0.0.5/tasks/create-git-tag/create-git-tag.yaml]"
+    pipelinesascode.tekton.dev/pipeline: "https://raw.githubusercontent.com/foo/baz/v0.0.25/pipeline/deploy/deploy.yaml"
+"#;
+        let deps = extract_annotation_deps(content);
+        assert_eq!(deps.len(), 10);
+        assert_eq!(deps[0].dep_name, "github.com/foo/bar");
+        assert_eq!(deps[0].current_value, "v0.0.4");
+        assert_eq!(deps[0].datasource, "github-releases");
+        assert_eq!(deps[0].package_name, "foo/bar");
+        assert_eq!(deps[1].dep_name, "github.com/foo/baz");
+        assert_eq!(deps[1].current_value, "v0.0.12");
+        assert_eq!(deps[1].datasource, "git-tags");
+        assert_eq!(deps[1].package_name, "https://github.com/foo/baz");
+        assert_eq!(deps[8].dep_name, "github.com/foo/bar");
+        assert_eq!(deps[8].current_value, "v0.0.5");
+        assert_eq!(deps[9].dep_name, "github.com/foo/baz");
+        assert_eq!(deps[9].current_value, "v0.0.25");
     }
 
     // Ported: "ignores file without any deps" — tekton/extract.spec.ts line 96
