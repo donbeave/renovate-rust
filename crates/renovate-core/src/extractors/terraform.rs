@@ -44,6 +44,20 @@ pub enum TerraformDepType {
     DockerService,
     DockerRegistryImage,
     HelmRelease,
+    KubernetesCronJobV1,
+    KubernetesCronJob,
+    KubernetesDaemonSetV1,
+    KubernetesDaemonset,
+    KubernetesDeployment,
+    KubernetesDeploymentV1,
+    KubernetesJob,
+    KubernetesJobV1,
+    KubernetesPod,
+    KubernetesPodV1,
+    KubernetesReplicationController,
+    KubernetesReplicationControllerV1,
+    KubernetesStatefulSet,
+    KubernetesStatefulSetV1,
 }
 
 impl TerraformDepType {
@@ -58,6 +72,24 @@ impl TerraformDepType {
             TerraformDepType::DockerService => "docker_service",
             TerraformDepType::DockerRegistryImage => "docker_registry_image",
             TerraformDepType::HelmRelease => "helm_release",
+            TerraformDepType::KubernetesCronJobV1 => "kubernetes_cron_job_v1",
+            TerraformDepType::KubernetesCronJob => "kubernetes_cron_job",
+            TerraformDepType::KubernetesDaemonSetV1 => "kubernetes_daemon_set_v1",
+            TerraformDepType::KubernetesDaemonset => "kubernetes_daemonset",
+            TerraformDepType::KubernetesDeployment => "kubernetes_deployment",
+            TerraformDepType::KubernetesDeploymentV1 => "kubernetes_deployment_v1",
+            TerraformDepType::KubernetesJob => "kubernetes_job",
+            TerraformDepType::KubernetesJobV1 => "kubernetes_job_v1",
+            TerraformDepType::KubernetesPod => "kubernetes_pod",
+            TerraformDepType::KubernetesPodV1 => "kubernetes_pod_v1",
+            TerraformDepType::KubernetesReplicationController => {
+                "kubernetes_replication_controller"
+            }
+            TerraformDepType::KubernetesReplicationControllerV1 => {
+                "kubernetes_replication_controller_v1"
+            }
+            TerraformDepType::KubernetesStatefulSet => "kubernetes_stateful_set",
+            TerraformDepType::KubernetesStatefulSetV1 => "kubernetes_stateful_set_v1",
         }
     }
 }
@@ -129,6 +161,14 @@ static DOCKER_RESOURCE_BLOCK: LazyLock<Regex> = LazyLock::new(|| {
 static HELM_RELEASE_BLOCK: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\s*resource\s+"helm_release"\s+"[^"]+"\s*\{"#).unwrap());
 
+static KUBERNETES_RESOURCE_BLOCK: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"^\s*resource\s+"(kubernetes_(?:cron_job_v1|cron_job|daemon_set_v1|daemonset|deployment_v1|deployment|job_v1|job|pod_v1|pod|replication_controller_v1|replication_controller|stateful_set_v1|stateful_set))"\s+"[^"]+"\s*\{"#)
+        .unwrap()
+});
+
+static KUBERNETES_CONTAINER_BLOCK: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"^\s*(?:init_)?container\s*\{"#).unwrap());
+
 /// `required_providers {` inside a terraform block.
 static REQUIRED_PROVIDERS: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s*required_providers\s*\{").unwrap());
@@ -155,6 +195,10 @@ enum State {
         depth: usize,
     },
     InHelmReleaseBlock(usize),
+    InKubernetesResourceBlock {
+        dep_type: TerraformDepType,
+        depth: usize,
+    },
     Skip(usize), // skip other blocks, depth counter
 }
 
@@ -174,6 +218,8 @@ struct Parser {
     resource_image: String,
     resource_repository: String,
     resource_chart: String,
+    resource_images: Vec<String>,
+    container_depth: Option<usize>,
 }
 
 impl Parser {
@@ -192,6 +238,8 @@ impl Parser {
             resource_image: String::new(),
             resource_repository: String::new(),
             resource_chart: String::new(),
+            resource_images: Vec::new(),
+            container_depth: None,
         }
     }
 
@@ -212,6 +260,9 @@ impl Parser {
                 self.handle_docker_resource_block(*dep_type, *depth, trimmed);
             }
             State::InHelmReleaseBlock(depth) => self.handle_helm_release_block(*depth, trimmed),
+            State::InKubernetesResourceBlock { dep_type, depth } => {
+                self.handle_kubernetes_resource_block(*dep_type, *depth, trimmed);
+            }
             State::Skip(depth) => self.handle_skip(*depth, trimmed),
         }
     }
@@ -237,6 +288,13 @@ impl Parser {
             self.resource_chart.clear();
             self.resource_version.clear();
             self.state = State::InHelmReleaseBlock(1);
+        } else if let Some(cap) = KUBERNETES_RESOURCE_BLOCK.captures(trimmed) {
+            self.resource_images.clear();
+            self.container_depth = None;
+            let Some(dep_type) = kubernetes_dep_type(&cap[1]) else {
+                unreachable!("regex only matches supported kubernetes resources");
+            };
+            self.state = State::InKubernetesResourceBlock { dep_type, depth: 1 };
         } else if let Some(cap) = MODULE_BLOCK.captures(trimmed) {
             self.mod_name = cap[1].to_owned();
             self.mod_source.clear();
@@ -507,6 +565,57 @@ impl Parser {
             self.state = State::TopLevel;
         } else {
             self.state = State::InHelmReleaseBlock(new_depth);
+        }
+    }
+
+    fn handle_kubernetes_resource_block(
+        &mut self,
+        dep_type: TerraformDepType,
+        depth: usize,
+        trimmed: &str,
+    ) {
+        let entered_container =
+            self.container_depth.is_none() && KUBERNETES_CONTAINER_BLOCK.is_match(trimmed);
+
+        if self.container_depth.is_some()
+            && let Some(cap) = KV_LINE.captures(trimmed)
+            && &cap[1] == "image"
+        {
+            self.resource_images.push(cap[2].trim().to_owned());
+        }
+
+        let opens = trimmed.chars().filter(|&c| c == '{').count();
+        let closes = trimmed.chars().filter(|&c| c == '}').count();
+        let new_depth = depth.saturating_add(opens).saturating_sub(closes);
+
+        if entered_container {
+            self.container_depth = Some(1);
+        } else if let Some(container_depth) = self.container_depth {
+            let new_container_depth = container_depth.saturating_add(opens).saturating_sub(closes);
+            self.container_depth = (new_container_depth > 0).then_some(new_container_depth);
+        }
+
+        if new_depth == 0 {
+            if self.resource_images.is_empty() {
+                self.deps.push(docker_skip(
+                    dep_type,
+                    TerraformSkipReason::InvalidDependencySpecification,
+                ));
+            } else {
+                self.deps.extend(
+                    self.resource_images
+                        .iter()
+                        .map(|image| resolve_docker_image(dep_type, image, &self.registry_aliases)),
+                );
+            }
+            self.resource_images.clear();
+            self.container_depth = None;
+            self.state = State::TopLevel;
+        } else {
+            self.state = State::InKubernetesResourceBlock {
+                dep_type,
+                depth: new_depth,
+            };
         }
     }
 }
@@ -824,6 +933,30 @@ fn resolve_helm_release(
         package_name,
         current_digest: None,
         skip_reason,
+    }
+}
+
+fn kubernetes_dep_type(resource_type: &str) -> Option<TerraformDepType> {
+    match resource_type {
+        "kubernetes_cron_job_v1" => Some(TerraformDepType::KubernetesCronJobV1),
+        "kubernetes_cron_job" => Some(TerraformDepType::KubernetesCronJob),
+        "kubernetes_daemon_set_v1" => Some(TerraformDepType::KubernetesDaemonSetV1),
+        "kubernetes_daemonset" => Some(TerraformDepType::KubernetesDaemonset),
+        "kubernetes_deployment" => Some(TerraformDepType::KubernetesDeployment),
+        "kubernetes_deployment_v1" => Some(TerraformDepType::KubernetesDeploymentV1),
+        "kubernetes_job" => Some(TerraformDepType::KubernetesJob),
+        "kubernetes_job_v1" => Some(TerraformDepType::KubernetesJobV1),
+        "kubernetes_pod" => Some(TerraformDepType::KubernetesPod),
+        "kubernetes_pod_v1" => Some(TerraformDepType::KubernetesPodV1),
+        "kubernetes_replication_controller" => {
+            Some(TerraformDepType::KubernetesReplicationController)
+        }
+        "kubernetes_replication_controller_v1" => {
+            Some(TerraformDepType::KubernetesReplicationControllerV1)
+        }
+        "kubernetes_stateful_set" => Some(TerraformDepType::KubernetesStatefulSet),
+        "kubernetes_stateful_set_v1" => Some(TerraformDepType::KubernetesStatefulSetV1),
+        _ => None,
     }
 }
 
@@ -1384,6 +1517,278 @@ resource "helm_release" "proxy_oci_repo" {
                 && dep.datasource == Some("docker")
                 && dep.package_name.as_deref()
                     == Some("index.docker.io/bitnamicharts/kube-prometheus")
+        }));
+    }
+
+    // Ported: "extracts kubernetes resources" — terraform/extract.spec.ts line 655
+    #[test]
+    fn kubernetes_resources_are_extracted() {
+        let content = r#"
+resource "kubernetes_cron_job_v1" "demo" {
+  spec {
+    job_template {
+      spec {
+        template {
+          spec {
+            container {
+              image = "gcr.io/kaniko-project/executor:v1.7.0@sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52"
+            }
+            container {
+              image = "node:14"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_cron_job" "demo" {
+  spec {
+    job_template {
+      spec {
+        template {
+          spec {
+            container {
+              image = "gcr.io/kaniko-project/executor:v1.8.0@sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_daemon_set_v1" "example" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.1"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_daemonset" "example" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.2"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_deployment" "example" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.3"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_deployment_v1" "example" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.4"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_job" "demo" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.5"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_job" "demo_invalid" {
+  spec {
+    template {
+      spec {
+        container {
+          name = "example5-invalid"
+        }
+      }
+    }
+    image = "nginx:1.21.6"
+  }
+}
+
+resource "kubernetes_job_invalid" "demo_invalid2" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.6"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_job_v1" "demo" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.6"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_pod" "test" {
+  spec {
+    container {
+      image = "nginx:1.21.7"
+    }
+  }
+}
+
+resource "kubernetes_pod_v1" "test" {
+  spec {
+    container {
+      image = "nginx:1.21.8"
+    }
+  }
+}
+
+resource "kubernetes_replication_controller" "example" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.9"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_replication_controller_v1" "example" {
+  spec {
+    template {
+      spec {
+        container {
+          image = "nginx:1.21.10"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_stateful_set" "prometheus" {
+  spec {
+    template {
+      spec {
+        init_container {
+          image = "nginx:1.21.11"
+        }
+        container {
+          image = "prom/prometheus:v2.2.1"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_stateful_set_v1" "prometheus" {
+  spec {
+    template {
+      spec {
+        init_container {
+          image = "nginx:1.21.12"
+        }
+        container {
+          image = "prom/prometheus:v2.2.2"
+        }
+      }
+    }
+  }
+}
+"#;
+        let deps = extract(content);
+
+        assert_eq!(deps.len(), 18);
+        assert_eq!(
+            deps.iter().filter(|dep| dep.skip_reason.is_some()).count(),
+            1
+        );
+
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::KubernetesCronJobV1
+                && dep.name == "gcr.io/kaniko-project/executor"
+                && dep.current_value == "v1.7.0"
+                && dep.current_digest.as_deref()
+                    == Some(
+                        "sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52",
+                    )
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::KubernetesCronJobV1
+                && dep.name == "node"
+                && dep.current_value == "14"
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::KubernetesCronJob
+                && dep.name == "gcr.io/kaniko-project/executor"
+                && dep.current_value == "v1.8.0"
+        }));
+
+        for (dep_type, version) in [
+            (TerraformDepType::KubernetesDaemonSetV1, "1.21.1"),
+            (TerraformDepType::KubernetesDaemonset, "1.21.2"),
+            (TerraformDepType::KubernetesDeployment, "1.21.3"),
+            (TerraformDepType::KubernetesDeploymentV1, "1.21.4"),
+            (TerraformDepType::KubernetesJob, "1.21.5"),
+            (TerraformDepType::KubernetesJobV1, "1.21.6"),
+            (TerraformDepType::KubernetesPod, "1.21.7"),
+            (TerraformDepType::KubernetesPodV1, "1.21.8"),
+            (TerraformDepType::KubernetesReplicationController, "1.21.9"),
+            (
+                TerraformDepType::KubernetesReplicationControllerV1,
+                "1.21.10",
+            ),
+            (TerraformDepType::KubernetesStatefulSet, "1.21.11"),
+            (TerraformDepType::KubernetesStatefulSetV1, "1.21.12"),
+        ] {
+            assert!(deps.iter().any(|dep| {
+                dep.dep_type == dep_type && dep.name == "nginx" && dep.current_value == version
+            }));
+        }
+
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::KubernetesJob
+                && dep.skip_reason == Some(TerraformSkipReason::InvalidDependencySpecification)
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::KubernetesStatefulSet
+                && dep.name == "prom/prometheus"
+                && dep.current_value == "v2.2.1"
+        }));
+        assert!(deps.iter().any(|dep| {
+            dep.dep_type == TerraformDepType::KubernetesStatefulSetV1
+                && dep.name == "prom/prometheus"
+                && dep.current_value == "v2.2.2"
         }));
     }
 

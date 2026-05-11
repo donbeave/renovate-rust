@@ -51,7 +51,21 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             | terraform_extractor::TerraformDepType::DockerContainer
                             | terraform_extractor::TerraformDepType::DockerService
                             | terraform_extractor::TerraformDepType::DockerRegistryImage
-                            | terraform_extractor::TerraformDepType::HelmRelease => {
+                            | terraform_extractor::TerraformDepType::HelmRelease
+                            | terraform_extractor::TerraformDepType::KubernetesCronJobV1
+                            | terraform_extractor::TerraformDepType::KubernetesCronJob
+                            | terraform_extractor::TerraformDepType::KubernetesDaemonSetV1
+                            | terraform_extractor::TerraformDepType::KubernetesDaemonset
+                            | terraform_extractor::TerraformDepType::KubernetesDeployment
+                            | terraform_extractor::TerraformDepType::KubernetesDeploymentV1
+                            | terraform_extractor::TerraformDepType::KubernetesJob
+                            | terraform_extractor::TerraformDepType::KubernetesJobV1
+                            | terraform_extractor::TerraformDepType::KubernetesPod
+                            | terraform_extractor::TerraformDepType::KubernetesPodV1
+                            | terraform_extractor::TerraformDepType::KubernetesReplicationController
+                            | terraform_extractor::TerraformDepType::KubernetesReplicationControllerV1
+                            | terraform_extractor::TerraformDepType::KubernetesStatefulSet
+                            | terraform_extractor::TerraformDepType::KubernetesStatefulSetV1 => {
                                 return None;
                             }
                         };
