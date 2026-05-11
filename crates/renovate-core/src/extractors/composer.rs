@@ -21,6 +21,8 @@
 //! | `PlatformPackage` | `php`, `ext-intl`, `lib-curl`, `composer-plugin-api` |
 //! | `DevBranch` | `dev-master`, `2.x-dev` — VCS branch references |
 
+use std::collections::HashMap;
+
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -63,6 +65,18 @@ pub struct ComposerExtractedDep {
     /// Which section this dep came from.
     pub dep_type: ComposerDepType,
     /// Set when no registry lookup should be performed.
+    pub skip_reason: Option<ComposerSkipReason>,
+}
+
+/// Composer dependency metadata after applying repository configuration.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ComposerResolvedDep {
+    pub dep_name: String,
+    pub current_value: String,
+    pub dep_type: ComposerDepType,
+    pub datasource: Option<&'static str>,
+    pub package_name: Option<String>,
+    pub registry_urls: Vec<String>,
     pub skip_reason: Option<ComposerSkipReason>,
 }
 
@@ -114,6 +128,43 @@ pub fn extract(content: &str) -> Result<Vec<ComposerExtractedDep>, ComposerExtra
     Ok(deps)
 }
 
+/// Parse a `composer.json` string and extract Renovate-style dependency metadata.
+pub fn extract_resolved(content: &str) -> Result<Vec<ComposerResolvedDep>, ComposerExtractError> {
+    #[derive(Deserialize)]
+    struct Manifest {
+        #[serde(default)]
+        require: HashMap<String, String>,
+        #[serde(rename = "require-dev", default)]
+        require_dev: HashMap<String, String>,
+        #[serde(default)]
+        repositories: serde_json::Value,
+    }
+
+    let manifest: Manifest = serde_json::from_str(content)?;
+    let repo_config = collect_repository_config(&manifest.repositories);
+    let mut deps = Vec::new();
+
+    for (name, version) in &manifest.require {
+        deps.push(make_resolved_dep(
+            name,
+            version,
+            ComposerDepType::Regular,
+            &repo_config,
+        ));
+    }
+    for (name, version) in &manifest.require_dev {
+        deps.push(make_resolved_dep(
+            name,
+            version,
+            ComposerDepType::Dev,
+            &repo_config,
+        ));
+    }
+
+    deps.sort_by(|a, b| a.dep_name.cmp(&b.dep_name));
+    Ok(deps)
+}
+
 /// Collect names of path-type repositories (both array and object forms).
 fn collect_path_repos(repos: &serde_json::Value) -> std::collections::HashSet<&str> {
     let mut names = std::collections::HashSet::new();
@@ -153,6 +204,181 @@ fn collect_path_repos(repos: &serde_json::Value) -> std::collections::HashSet<&s
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
+
+#[derive(Debug, Default)]
+struct RepositoryConfig {
+    packagist_disabled: bool,
+    registry_urls: Vec<String>,
+    package_sources: HashMap<String, PackageSource>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum PackageSource {
+    Vcs { url: String, bitbucket: bool },
+    Path,
+}
+
+fn collect_repository_config(repos: &serde_json::Value) -> RepositoryConfig {
+    let mut config = RepositoryConfig::default();
+
+    match repos {
+        serde_json::Value::Array(arr) => {
+            for entry in arr {
+                collect_repository_entry(entry, None, &mut config);
+            }
+        }
+        serde_json::Value::Object(obj) => {
+            for (key, entry) in obj {
+                collect_repository_entry(entry, Some(key.as_str()), &mut config);
+            }
+        }
+        _ => {}
+    }
+
+    if !config.packagist_disabled {
+        push_unique(
+            &mut config.registry_urls,
+            "https://repo.packagist.org".to_owned(),
+        );
+    }
+
+    config
+}
+
+fn collect_repository_entry(
+    entry: &serde_json::Value,
+    key: Option<&str>,
+    config: &mut RepositoryConfig,
+) {
+    if key == Some("packagist.org") && entry.as_bool() == Some(false) {
+        config.packagist_disabled = true;
+        return;
+    }
+
+    if entry.get("packagist").and_then(|value| value.as_bool()) == Some(false) {
+        config.packagist_disabled = true;
+        return;
+    }
+
+    let repo_type = entry.get("type").and_then(|value| value.as_str());
+    match repo_type {
+        Some("composer") => {
+            if let Some(url) = entry.get("url").and_then(|value| value.as_str()) {
+                push_unique(&mut config.registry_urls, normalize_composer_repo_url(url));
+            }
+        }
+        Some("vcs") | Some("git") => {
+            if let Some(name) = entry.get("name").and_then(|value| value.as_str()).or(key)
+                && let Some(url) = entry.get("url").and_then(|value| value.as_str())
+            {
+                config.package_sources.insert(
+                    name.to_owned(),
+                    PackageSource::Vcs {
+                        url: url.to_owned(),
+                        bitbucket: is_bitbucket_url(url),
+                    },
+                );
+            }
+        }
+        Some("path") => {
+            if let Some(name) = entry.get("name").and_then(|value| value.as_str()).or(key) {
+                config
+                    .package_sources
+                    .insert(name.to_owned(), PackageSource::Path);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn make_resolved_dep(
+    name: &str,
+    version: &str,
+    dep_type: ComposerDepType,
+    repo_config: &RepositoryConfig,
+) -> ComposerResolvedDep {
+    if name == "php" {
+        return ComposerResolvedDep {
+            dep_name: name.to_owned(),
+            current_value: version.to_owned(),
+            dep_type,
+            datasource: Some("github-tags"),
+            package_name: Some("containerbase/php-prebuild".to_owned()),
+            registry_urls: Vec::new(),
+            skip_reason: None,
+        };
+    }
+
+    let mut dep = ComposerResolvedDep {
+        dep_name: name.to_owned(),
+        current_value: version.to_owned(),
+        dep_type,
+        datasource: Some("packagist"),
+        package_name: None,
+        registry_urls: repo_config.registry_urls.clone(),
+        skip_reason: None,
+    };
+
+    if is_platform_package(name) {
+        dep.datasource = None;
+        dep.registry_urls.clear();
+        dep.skip_reason = Some(ComposerSkipReason::PlatformPackage);
+        return dep;
+    }
+
+    match repo_config.package_sources.get(name) {
+        Some(PackageSource::Vcs { url, bitbucket }) => {
+            dep.datasource = Some(if *bitbucket {
+                "bitbucket-tags"
+            } else {
+                "git-tags"
+            });
+            dep.package_name = Some(if *bitbucket {
+                normalize_bitbucket_package_name(url).unwrap_or_else(|| name.to_owned())
+            } else {
+                url.to_owned()
+            });
+            dep.registry_urls.clear();
+            dep.skip_reason = None;
+        }
+        Some(PackageSource::Path) => {
+            dep.datasource = None;
+            dep.registry_urls.clear();
+            dep.skip_reason = Some(ComposerSkipReason::PathDependency);
+        }
+        None => {}
+    }
+
+    dep
+}
+
+fn normalize_composer_repo_url(url: &str) -> String {
+    url.strip_suffix("/packages.json").unwrap_or(url).to_owned()
+}
+
+fn push_unique(values: &mut Vec<String>, value: String) {
+    if !values.contains(&value) {
+        values.push(value);
+    }
+}
+
+fn is_bitbucket_url(url: &str) -> bool {
+    url.contains("bitbucket.org")
+}
+
+fn normalize_bitbucket_package_name(url: &str) -> Option<String> {
+    let trimmed = url.trim_end_matches(".git");
+    if let Some(path) = trimmed.strip_prefix("https://bitbucket.org/") {
+        return Some(path.to_owned());
+    }
+    if let Some(path) = trimmed.strip_prefix("git@bitbucket.org/") {
+        return Some(path.to_owned());
+    }
+    if let Some(path) = trimmed.strip_prefix("git@bitbucket.org:") {
+        return Some(path.to_owned());
+    }
+    None
+}
 
 fn make_dep(name: &str, version: &str, dep_type: ComposerDepType) -> ComposerExtractedDep {
     let skip_reason = if is_platform_package(name) {
@@ -376,6 +602,156 @@ mod tests {
             deps[0].skip_reason,
             Some(ComposerSkipReason::PathDependency)
         );
+    }
+
+    // Ported: "extracts registryUrls" — composer/extract.spec.ts line 38
+    #[test]
+    fn extracts_registry_urls() {
+        let content = r#"{
+            "repositories": [
+                {"type": "composer", "url": "https://wpackagist.org"},
+                {"packagist": false}
+            ],
+            "require": {
+                "aws/aws-sdk-php": "*",
+                "composer/composer": "^1.10.0",
+                "wpackagist-plugin/akismet": "dev-trunk",
+                "wpackagist-plugin/wordpress-seo": ">=7.0.2",
+                "wpackagist-theme/hueman": "*"
+            }
+        }"#;
+        let deps = extract_resolved(content).unwrap();
+        assert_eq!(deps.len(), 5);
+        assert!(
+            deps.iter()
+                .all(|dep| dep.registry_urls == ["https://wpackagist.org"])
+        );
+        let akismet = deps
+            .iter()
+            .find(|dep| dep.dep_name == "wpackagist-plugin/akismet")
+            .unwrap();
+        assert_eq!(akismet.datasource, Some("packagist"));
+        assert_eq!(akismet.current_value, "dev-trunk");
+        assert!(akismet.skip_reason.is_none());
+    }
+
+    // Ported: "extracts object registryUrls" — composer/extract.spec.ts line 81
+    #[test]
+    fn extracts_object_registry_urls() {
+        let content = r#"{
+            "type": "project",
+            "repositories": {
+                "packagist.org": false,
+                "wp-packagist": {"type": "composer", "url": "https://wpackagist.org"},
+                "theme": {
+                    "type": "package",
+                    "package": {"name": "asha23/wp-seed-timber", "version": "1.2.6"}
+                }
+            },
+            "require": {
+                "php": ">=5.5",
+                "composer/installers": "~1.0.12",
+                "johnpbloch/wordpress": "*",
+                "vlucas/phpdotenv": "^2.0.1",
+                "asha23/wp-seed-timber": "*"
+            }
+        }"#;
+        let deps = extract_resolved(content).unwrap();
+        let php = deps.iter().find(|dep| dep.dep_name == "php").unwrap();
+        assert_eq!(php.datasource, Some("github-tags"));
+        assert_eq!(
+            php.package_name.as_deref(),
+            Some("containerbase/php-prebuild")
+        );
+        assert!(php.registry_urls.is_empty());
+
+        for name in [
+            "composer/installers",
+            "johnpbloch/wordpress",
+            "vlucas/phpdotenv",
+            "asha23/wp-seed-timber",
+        ] {
+            let dep = deps.iter().find(|dep| dep.dep_name == name).unwrap();
+            assert_eq!(dep.datasource, Some("packagist"));
+            assert_eq!(dep.registry_urls, ["https://wpackagist.org"]);
+        }
+    }
+
+    // Ported: "extracts repositories and registryUrls" — composer/extract.spec.ts line 186
+    #[test]
+    fn extracts_repositories_and_registry_urls() {
+        let content = r#"{
+            "repositories": [
+                {"name": "awesome/vcs", "type": "vcs", "url": "https://my-vcs.example/my-vcs-repo"},
+                {"name": "awesome/git", "type": "git", "url": "https://my-git.example/my-git-repo"},
+                {"type": "composer", "url": "https://wpackagist.org"},
+                {"type": "composer", "url": "https://gitlab.vendor.com/api/v4/group/2/-/packages/composer/packages.json"}
+            ],
+            "require": {
+                "aws/aws-sdk-php": "*",
+                "awesome/vcs": "dev-trunk",
+                "awesome/git": ">=7.0.2"
+            }
+        }"#;
+        let deps = extract_resolved(content).unwrap();
+        let aws = deps
+            .iter()
+            .find(|dep| dep.dep_name == "aws/aws-sdk-php")
+            .unwrap();
+        assert_eq!(
+            aws.registry_urls,
+            [
+                "https://wpackagist.org",
+                "https://gitlab.vendor.com/api/v4/group/2/-/packages/composer",
+                "https://repo.packagist.org",
+            ]
+        );
+
+        let vcs = deps
+            .iter()
+            .find(|dep| dep.dep_name == "awesome/vcs")
+            .unwrap();
+        assert_eq!(vcs.datasource, Some("git-tags"));
+        assert_eq!(
+            vcs.package_name.as_deref(),
+            Some("https://my-vcs.example/my-vcs-repo")
+        );
+        assert!(vcs.registry_urls.is_empty());
+
+        let git = deps
+            .iter()
+            .find(|dep| dep.dep_name == "awesome/git")
+            .unwrap();
+        assert_eq!(git.datasource, Some("git-tags"));
+        assert_eq!(
+            git.package_name.as_deref(),
+            Some("https://my-git.example/my-git-repo")
+        );
+    }
+
+    // Ported: "extracts bitbucket repositories and registryUrls" — composer/extract.spec.ts line 219
+    #[test]
+    fn extracts_bitbucket_repositories() {
+        let content = r#"{
+            "repositories": [
+                {"name": "awesome/bitbucket-repo1", "type": "vcs", "url": "https://bitbucket.org/awesome/bitbucket-repo1.git"},
+                {"name": "awesome/bitbucket-repo2", "type": "vcs", "url": "git@bitbucket.org/awesome/bitbucket-repo2.git"},
+                {"name": "awesome/bitbucket-repo3", "type": "vcs", "url": "git@bitbucket.org/awesome/bitbucket-repo3"}
+            ],
+            "require": {
+                "awesome/bitbucket-repo1": "dev-trunk",
+                "awesome/bitbucket-repo2": "dev-trunk",
+                "awesome/bitbucket-repo3": "dev-trunk"
+            }
+        }"#;
+        let deps = extract_resolved(content).unwrap();
+        assert_eq!(deps.len(), 3);
+        for dep in deps {
+            assert_eq!(dep.datasource, Some("bitbucket-tags"));
+            assert_eq!(dep.package_name.as_deref(), Some(dep.dep_name.as_str()));
+            assert!(dep.registry_urls.is_empty());
+            assert!(dep.skip_reason.is_none());
+        }
     }
 
     // Ported: "returns null for empty deps" — composer/extract.spec.ts line 28
