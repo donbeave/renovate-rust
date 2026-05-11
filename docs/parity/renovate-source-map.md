@@ -35,7 +35,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/ant/extract.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Core extraction ported |
 | `lib/modules/manager/ant/properties.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Inlined |
-| `lib/modules/manager/ant/update.ts` | — | not-started | Update logic not ported |
+| `lib/modules/manager/ant/update.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Core fileReplacePosition update logic ported |
 | `lib/modules/manager/ant/index.ts` | `crates/renovate-core/src/extractors/ant.rs` | partial | Manager metadata |
 | `lib/modules/manager/ant/types.ts` | — | not-started | Type definitions only |
 

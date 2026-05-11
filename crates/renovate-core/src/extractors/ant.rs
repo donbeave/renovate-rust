@@ -61,11 +61,84 @@ pub struct AntPackageFile {
     pub deps: Vec<AntDep>,
 }
 
+/// Ant dependency update data produced by extraction and lookup planning.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AntUpgrade<'a> {
+    /// `groupId:artifactId`.
+    pub dep_name: &'a str,
+    /// Version Renovate expected to find at `file_replace_position`.
+    pub current_value: &'a str,
+    /// Version to write into the manifest.
+    pub new_value: &'a str,
+    /// Byte offset where the current version starts.
+    pub file_replace_position: Option<usize>,
+    /// Property name that supplied the version, when updating a shared version.
+    pub shared_variable_name: Option<&'a str>,
+}
+
 const SCOPE_NAMES: &[&str] = &["compile", "runtime", "test", "provided", "system"];
 
 /// Extract Maven deps from an Apache Ant `build.xml` file.
 pub fn extract(content: &str) -> Vec<AntDep> {
     extract_with_context(content, &HashMap::new(), "", &HashMap::new())
+}
+
+/// Replace the Ant dependency version at the extractor-provided position.
+///
+/// Renovate reference: `lib/modules/manager/ant/update.ts`.
+pub fn update_dependency(file_content: &str, upgrade: &AntUpgrade<'_>) -> Option<String> {
+    let file_replace_position = upgrade.file_replace_position?;
+    if file_replace_position > file_content.len()
+        || !file_content.is_char_boundary(file_replace_position)
+    {
+        return None;
+    }
+
+    let left_part = &file_content[..file_replace_position];
+    let right_part = &file_content[file_replace_position..];
+    let end_index = replacement_end_index(left_part, right_part)?;
+    let current_found = &right_part[..end_index];
+
+    if current_found == upgrade.new_value {
+        return Some(file_content.to_owned());
+    }
+
+    if current_found == upgrade.current_value || upgrade.shared_variable_name.is_some() {
+        let mut updated = String::with_capacity(
+            file_content.len() + upgrade.new_value.len().saturating_sub(current_found.len()),
+        );
+        updated.push_str(left_part);
+        updated.push_str(upgrade.new_value);
+        updated.push_str(&right_part[end_index..]);
+        return Some(updated);
+    }
+
+    None
+}
+
+fn replacement_end_index(left_part: &str, right_part: &str) -> Option<usize> {
+    let quote_char = left_part.chars().next_back();
+    match quote_char {
+        Some(quote @ ('"' | '\'')) => right_part.find(quote),
+        _ => {
+            let line_end = right_part.find('\n').unwrap_or(right_part.len());
+            let nearest_quote = [right_part.find('"'), right_part.find('\'')]
+                .into_iter()
+                .flatten()
+                .filter(|idx| *idx < line_end)
+                .min();
+
+            if let Some(quote_end) = nearest_quote {
+                let colon_index = right_part.find(':');
+                Some(match colon_index {
+                    Some(colon_index) if colon_index < quote_end => colon_index,
+                    _ => quote_end,
+                })
+            } else {
+                Some(line_end)
+            }
+        }
+    }
 }
 
 fn extract_with_context(
@@ -1527,5 +1600,184 @@ mod tests {
             deps[0].skip_reason,
             Some(AntSkipReason::RecursivePropertyRef)
         );
+    }
+
+    fn update(
+        file_content: &str,
+        current_value: &str,
+        new_value: &str,
+        file_replace_position: Option<usize>,
+    ) -> Option<String> {
+        update_dependency(
+            file_content,
+            &AntUpgrade {
+                dep_name: "junit:junit",
+                current_value,
+                new_value,
+                file_replace_position,
+                shared_variable_name: None,
+            },
+        )
+    }
+
+    // Ported: "updates inline XML version attribute" — ant/update.spec.ts line 4
+    #[test]
+    fn update_inline_xml_version_attribute() {
+        let file_content = r#"<dependency groupId="junit" artifactId="junit" version="4.13.1" />"#;
+
+        let result = update(
+            file_content,
+            "4.13.1",
+            "4.13.2",
+            file_content.find("4.13.1"),
+        );
+
+        assert_eq!(
+            result.as_deref(),
+            Some(r#"<dependency groupId="junit" artifactId="junit" version="4.13.2" />"#)
+        );
+    }
+
+    // Ported: "updates single-quoted XML version attribute" — ant/update.spec.ts line 23
+    #[test]
+    fn update_single_quoted_xml_version_attribute() {
+        let file_content = "<dependency groupId='junit' artifactId='junit' version='4.13.1' />";
+
+        let result = update(
+            file_content,
+            "4.13.1",
+            "4.13.2",
+            file_content.find("4.13.1"),
+        );
+
+        assert_eq!(
+            result.as_deref(),
+            Some("<dependency groupId='junit' artifactId='junit' version='4.13.2' />")
+        );
+    }
+
+    // Ported: "updates .properties file value" — ant/update.spec.ts line 42
+    #[test]
+    fn update_properties_file_value() {
+        let file_content = "junit.version=4.13.1\nother.key=value\n";
+
+        let result = update(
+            file_content,
+            "4.13.1",
+            "4.13.2",
+            file_content.find("4.13.1"),
+        );
+
+        assert_eq!(
+            result.as_deref(),
+            Some("junit.version=4.13.2\nother.key=value\n")
+        );
+    }
+
+    // Ported: "updates .properties value at end of file without trailing newline" — ant/update.spec.ts line 58
+    #[test]
+    fn update_properties_value_at_eof_without_trailing_newline() {
+        let file_content = "junit.version=4.13.1";
+
+        let result = update(
+            file_content,
+            "4.13.1",
+            "4.13.2",
+            file_content.find("4.13.1"),
+        );
+
+        assert_eq!(result.as_deref(), Some("junit.version=4.13.2"));
+    }
+
+    // Ported: "returns fileContent unchanged when already updated" — ant/update.spec.ts line 74
+    #[test]
+    fn update_returns_file_content_unchanged_when_already_updated() {
+        let file_content = r#"<dependency groupId="junit" artifactId="junit" version="4.13.2" />"#;
+
+        let result = update(
+            file_content,
+            "4.13.1",
+            "4.13.2",
+            file_content.find("4.13.2"),
+        );
+
+        assert_eq!(result.as_deref(), Some(file_content));
+    }
+
+    // Ported: "updates when sharedVariableName is set even if currentValue differs" — ant/update.spec.ts line 91
+    #[test]
+    fn update_shared_variable_even_when_current_value_differs() {
+        let file_content = r#"<property name="junit.version" value="4.13.1"/>"#;
+
+        let result = update_dependency(
+            file_content,
+            &AntUpgrade {
+                dep_name: "junit:junit",
+                current_value: "4.13.0",
+                new_value: "4.13.2",
+                shared_variable_name: Some("junit.version"),
+                file_replace_position: file_content.find("4.13.1"),
+            },
+        );
+
+        assert_eq!(
+            result.as_deref(),
+            Some(r#"<property name="junit.version" value="4.13.2"/>"#)
+        );
+    }
+
+    // Ported: "returns null when fileReplacePosition is undefined" — ant/update.spec.ts line 108
+    #[test]
+    fn update_returns_none_when_file_replace_position_is_missing() {
+        let result = update(r#"<dependency version="1.0"/>"#, "1.0", "2.0", None);
+        assert!(result.is_none());
+    }
+
+    // Ported: "updates version within coords attribute" — ant/update.spec.ts line 122
+    #[test]
+    fn update_version_within_coords_attribute() {
+        let file_content = r#"<project><dependency coords="junit:junit:4.13.2" /></project>"#;
+
+        let result = update(
+            file_content,
+            "4.13.2",
+            "4.13.3",
+            file_content.find("4.13.2"),
+        );
+
+        assert!(
+            result
+                .as_deref()
+                .is_some_and(|updated| updated.contains(r#"coords="junit:junit:4.13.3""#))
+        );
+    }
+
+    // Ported: "updates version within 4-part coords attribute" — ant/update.spec.ts line 140
+    #[test]
+    fn update_version_within_four_part_coords_attribute() {
+        let file_content = r#"<project><dependency coords="junit:junit:4.13.2:test" /></project>"#;
+
+        let result = update(
+            file_content,
+            "4.13.2",
+            "4.13.3",
+            file_content.find("4.13.2"),
+        );
+
+        assert!(
+            result
+                .as_deref()
+                .is_some_and(|updated| updated.contains(r#"coords="junit:junit:4.13.3:test""#))
+        );
+    }
+
+    // Ported: "returns null when value at position does not match" — ant/update.spec.ts line 158
+    #[test]
+    fn update_returns_none_when_value_at_position_does_not_match() {
+        let file_content = r#"<dependency groupId="junit" artifactId="junit" version="9.9.9" />"#;
+
+        let result = update(file_content, "4.13.1", "4.13.2", file_content.find("9.9.9"));
+
+        assert!(result.is_none());
     }
 }
