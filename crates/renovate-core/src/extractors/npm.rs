@@ -97,6 +97,13 @@ pub struct YarnScopeConfig {
     pub npm_registry_server: Option<String>,
 }
 
+/// Parsed npm package-lock data relevant to dependency extraction.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct NpmLock {
+    pub locked_versions: BTreeMap<String, String>,
+    pub lockfile_version: Option<u64>,
+}
+
 /// Errors from parsing a `package.json`.
 #[derive(Debug, Error)]
 pub enum NpmExtractError {
@@ -256,6 +263,47 @@ pub fn load_config_from_legacy_yarnrc(content: &str) -> YarnConfig {
     }
 
     config
+}
+
+/// Parse npm `package-lock.json` content into locked versions.
+///
+/// Renovate reference: `lib/modules/manager/npm/extract/npm.ts` `getNpmLock`.
+pub fn parse_npm_lock(content: Option<&str>) -> NpmLock {
+    let Some(content) = content else {
+        return NpmLock::default();
+    };
+    let Ok(value) = serde_json::from_str::<serde_json::Value>(content) else {
+        return NpmLock::default();
+    };
+
+    let lockfile_version = value.get("lockfileVersion").and_then(|v| v.as_u64());
+    let mut locked_versions = BTreeMap::new();
+
+    if let Some(dependencies) = value.get("dependencies").and_then(|v| v.as_object()) {
+        for (name, dep) in dependencies {
+            if let Some(version) = dep.get("version").and_then(|v| v.as_str()) {
+                locked_versions.insert(name.clone(), version.to_owned());
+            }
+        }
+    }
+
+    if locked_versions.is_empty()
+        && let Some(packages) = value.get("packages").and_then(|v| v.as_object())
+    {
+        for (path, package) in packages {
+            let Some(name) = path.strip_prefix("node_modules/") else {
+                continue;
+            };
+            if let Some(version) = package.get("version").and_then(|v| v.as_str()) {
+                locked_versions.insert(name.to_owned(), version.to_owned());
+            }
+        }
+    }
+
+    NpmLock {
+        locked_versions,
+        lockfile_version,
+    }
 }
 
 fn parse_yarn_string_value(value: &str) -> Option<String> {
@@ -469,6 +517,118 @@ mod tests {
         for (content, expected) in cases {
             assert_eq!(load_config_from_legacy_yarnrc(content), expected);
         }
+    }
+
+    // Ported: "returns null if failed to parse" — npm/extract/npm.spec.ts line 9
+    #[test]
+    fn npm_lock_returns_empty_if_failed_to_parse() {
+        let lock = parse_npm_lock(Some("abcd"));
+        assert!(lock.locked_versions.is_empty());
+    }
+
+    // Ported: "extracts" — npm/extract/npm.spec.ts line 15
+    #[test]
+    fn npm_lock_extracts_v1_dependencies() {
+        let lock = parse_npm_lock(Some(
+            r#"{
+              "lockfileVersion": 1,
+              "dependencies": {
+                "ansi-styles": { "version": "3.2.1" },
+                "chalk": { "version": "2.4.1" },
+                "color-convert": { "version": "1.9.1" },
+                "color-name": { "version": "1.1.3" },
+                "escape-string-regexp": { "version": "1.0.5" },
+                "has-flag": { "version": "3.0.0" },
+                "supports-color": { "version": "5.4.0" }
+              }
+            }"#,
+        ));
+
+        assert_eq!(lock.lockfile_version, Some(1));
+        assert_eq!(lock.locked_versions.len(), 7);
+        assert_eq!(
+            lock.locked_versions.get("ansi-styles").map(String::as_str),
+            Some("3.2.1")
+        );
+        assert_eq!(
+            lock.locked_versions
+                .get("supports-color")
+                .map(String::as_str),
+            Some("5.4.0")
+        );
+    }
+
+    // Ported: "extracts npm 7 lockfile" — npm/extract/npm.spec.ts line 34
+    #[test]
+    fn npm_lock_extracts_v2_packages() {
+        let lock = parse_npm_lock(Some(
+            r#"{
+              "lockfileVersion": 2,
+              "packages": {
+                "": { "name": "root", "version": "1.0.0" },
+                "node_modules/ansi-styles": { "version": "3.2.1" },
+                "node_modules/chalk": { "version": "2.4.1" },
+                "node_modules/color-convert": { "version": "1.9.1" },
+                "node_modules/color-name": { "version": "1.1.3" },
+                "node_modules/escape-string-regexp": { "version": "1.0.5" },
+                "node_modules/has-flag": { "version": "3.0.0" },
+                "node_modules/supports-color": { "version": "5.4.0" }
+              }
+            }"#,
+        ));
+
+        assert_eq!(lock.lockfile_version, Some(2));
+        assert_eq!(lock.locked_versions.len(), 7);
+        assert_eq!(
+            lock.locked_versions.get("chalk").map(String::as_str),
+            Some("2.4.1")
+        );
+    }
+
+    // Ported: "extracts npm 9 lockfile" — npm/extract/npm.spec.ts line 53
+    #[test]
+    fn npm_lock_extracts_v3_packages() {
+        let lock = parse_npm_lock(Some(
+            r#"{
+              "lockfileVersion": 3,
+              "packages": {
+                "node_modules/ansi-styles": { "version": "3.2.1" },
+                "node_modules/chalk": { "version": "2.4.2" },
+                "node_modules/color-convert": { "version": "1.9.3" },
+                "node_modules/color-name": { "version": "1.1.3" },
+                "node_modules/escape-string-regexp": { "version": "1.0.5" },
+                "node_modules/has-flag": { "version": "3.0.0" },
+                "node_modules/supports-color": { "version": "5.5.0" }
+              }
+            }"#,
+        ));
+
+        assert_eq!(lock.lockfile_version, Some(3));
+        assert_eq!(lock.locked_versions.len(), 7);
+        assert_eq!(
+            lock.locked_versions.get("chalk").map(String::as_str),
+            Some("2.4.2")
+        );
+        assert_eq!(
+            lock.locked_versions
+                .get("supports-color")
+                .map(String::as_str),
+            Some("5.5.0")
+        );
+    }
+
+    // Ported: "returns null if no deps" — npm/extract/npm.spec.ts line 72
+    #[test]
+    fn npm_lock_returns_empty_if_no_deps() {
+        let lock = parse_npm_lock(Some("{}"));
+        assert!(lock.locked_versions.is_empty());
+    }
+
+    // Ported: "returns null on read error" — npm/extract/npm.spec.ts line 78
+    #[test]
+    fn npm_lock_returns_empty_on_read_error() {
+        let lock = parse_npm_lock(None);
+        assert!(lock.locked_versions.is_empty());
     }
 
     #[test]

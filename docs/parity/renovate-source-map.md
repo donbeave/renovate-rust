@@ -649,6 +649,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/npm/extract/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Core extraction ported |
+| `lib/modules/manager/npm/extract/npm.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | package-lock parser |
 | `lib/modules/manager/npm/extract/yarnrc.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Yarn registry config parsing |
 | `lib/modules/manager/npm/index.ts` | `crates/renovate-core/src/extractors/npm.rs` | partial | Manager metadata |
 | `lib/modules/manager/npm/npmrc.ts` | — | not-started | npmrc parsing not ported |

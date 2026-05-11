@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1094 / 1281 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1100 / 1287 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 34 spec files not yet converted to per-test format (24 pending, 9 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 33 spec files not yet converted to per-test format (24 pending, 8 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2751,6 +2751,24 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/modules/manager/npm/extract/npm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/npm.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `modules/manager/npm/extract/npm › .getNpmLock()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if failed to parse | 9 | ported | `npm.rs` | `npm_lock_returns_empty_if_failed_to_parse` | — |
+| extracts | 15 | ported | `npm.rs` | `npm_lock_extracts_v1_dependencies` | — |
+| extracts npm 7 lockfile | 34 | ported | `npm.rs` | `npm_lock_extracts_v2_packages` | — |
+| extracts npm 9 lockfile | 53 | ported | `npm.rs` | `npm_lock_extracts_v3_packages` | — |
+| returns null if no deps | 72 | ported | `npm.rs` | `npm_lock_returns_empty_if_no_deps` | — |
+| returns null on read error | 78 | ported | `npm.rs` | `npm_lock_returns_empty_on_read_error` | — |
+
+---
+
 ## Managers (`lib/modules/manager/`) — legacy summary
 
 ### Extract specs
@@ -2835,7 +2853,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/modules/manager/github-actions/parse.spec.ts` | — | `crates/renovate-core/src/extractors/github_actions.rs` | — | partial |
 <!-- helmv3/common.spec.ts converted to per-test format above -->
 | `lib/modules/manager/npm/extract/index.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
-| `lib/modules/manager/npm/extract/npm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
+<!-- npm/extract/npm.spec.ts converted to per-test format above -->
 | `lib/modules/manager/npm/extract/pnpm.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 | `lib/modules/manager/npm/extract/yarn.spec.ts` | — | `crates/renovate-core/src/extractors/npm.rs` | — | partial |
 <!-- npm/extract/yarnrc.spec.ts converted to per-test format above -->
