@@ -116,6 +116,52 @@ pub fn default_value_for_type(option_type: ConfigOptionType) -> ConfigDefaultVal
     }
 }
 
+/// Renovate globally inheritable option names.
+///
+/// Mirrors `InheritConfig.OPTIONS` in `lib/config/inherit.ts`.
+pub const INHERIT_CONFIG_OPTIONS: &[&str] = &[
+    "bbUseDevelopmentBranch",
+    "configFileNames",
+    "onboarding",
+    "onboardingAutoCloseAge",
+    "onboardingBranch",
+    "onboardingCommitMessage",
+    "onboardingConfig",
+    "onboardingConfigFileName",
+    "onboardingNoDeps",
+    "onboardingPrTitle",
+    "requireConfig",
+];
+
+/// Value returned by inherited-config lookups.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum InheritedValue<T> {
+    /// The key was explicitly configured.
+    Present(T),
+    /// The key was not present in inherited config.
+    NotPresent,
+}
+
+/// Minimal inherited config state used for global inheritable options.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct InheritConfig {
+    config_file_names: Option<Vec<String>>,
+}
+
+impl InheritConfig {
+    /// Create inherited config state from optional `configFileNames`.
+    pub fn new(config_file_names: Option<Vec<String>>) -> Self {
+        Self { config_file_names }
+    }
+
+    /// Return inherited `configFileNames`, or [`InheritedValue::NotPresent`].
+    pub fn config_file_names(&self) -> InheritedValue<&[String]> {
+        self.config_file_names
+            .as_deref()
+            .map_or(InheritedValue::NotPresent, InheritedValue::Present)
+    }
+}
+
 /// Canonical global Renovate configuration.
 ///
 /// Fields correspond to Renovate's `globalOnly` options. All have the same
@@ -189,7 +235,8 @@ impl Default for GlobalConfig {
 #[cfg(test)]
 mod tests {
     use super::{
-        ConfigDefaultValue, ConfigOptionType, GLOBAL_CONFIG_OPTIONS, default_value_for_type,
+        ConfigDefaultValue, ConfigOptionType, GLOBAL_CONFIG_OPTIONS, INHERIT_CONFIG_OPTIONS,
+        InheritConfig, InheritedValue, default_value_for_type,
     };
 
     // Ported: "all values in OPTIONS are sorted" — config/global.spec.ts line 4
@@ -240,5 +287,30 @@ mod tests {
                 ConfigDefaultValue::Null
             );
         }
+    }
+
+    // Ported: "all values in OPTIONS are sorted" — config/inherit.spec.ts line 4
+    #[test]
+    fn inherit_config_options_are_sorted() {
+        let mut sorted = INHERIT_CONFIG_OPTIONS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(INHERIT_CONFIG_OPTIONS, sorted.as_slice());
+    }
+
+    // Ported: "return NOT_PRESENT if key is not set" — config/inherit.spec.ts line 15
+    #[test]
+    fn inherit_config_returns_not_present_for_missing_key() {
+        let config = InheritConfig::default();
+        assert_eq!(config.config_file_names(), InheritedValue::NotPresent);
+    }
+
+    // Ported: "return value if key is set" — config/inherit.spec.ts line 20
+    #[test]
+    fn inherit_config_returns_value_when_key_is_set() {
+        let config = InheritConfig::new(Some(vec!["inherited".to_owned()]));
+        assert_eq!(
+            config.config_file_names(),
+            InheritedValue::Present(&["inherited".to_owned()][..])
+        );
     }
 }

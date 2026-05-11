@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1052 / 1239 actionable tests ported (85%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1055 / 1242 actionable tests ported (85%) — updated 2026-05-11
 
-Legacy summary tables below cover the remaining 42 spec files not yet converted to per-test format (30 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
+Legacy summary tables below cover the remaining 41 spec files not yet converted to per-test format (29 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -2771,6 +2771,26 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 ---
 
+## `lib/config/inherit.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/inherit.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/inherit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| all values in OPTIONS are sorted | 4 | ported | `config.rs` | `inherit_config_options_are_sorted` | — |
+
+### `config/inherit › InheritConfig.get()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return NOT_PRESENT if key is not set | 15 | ported | `config.rs` | `inherit_config_returns_not_present_for_missing_key` | — |
+| return value if key is set | 20 | ported | `config.rs` | `inherit_config_returns_value_when_key_is_set` | — |
+
+---
+
 ## `lib/config/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/parse.spec.ts
@@ -2849,7 +2869,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | `lib/config/migrate-validate.spec.ts` | 5 | — | 0 | pending |
 | `lib/config/massage.spec.ts` | 7 | — | 0 | pending |
 | `lib/config/secrets.spec.ts` | 11 | — | 0 | pending |
-| `lib/config/inherit.spec.ts` | 3 | — | 0 | pending |
+<!-- config/inherit.spec.ts converted to per-test format above -->
 | `lib/config/index.spec.ts` | 12 | — | 0 | pending |
 | `lib/config/decrypt.spec.ts` | 12 | — | 0 | not-applicable |
 

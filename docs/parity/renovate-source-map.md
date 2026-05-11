@@ -1051,7 +1051,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/config/migrate-validate.ts` | — | not-started | Not ported |
 | `lib/config/massage.ts` | — | not-started | Not ported |
 | `lib/config/secrets.ts` | — | not-started | Not ported |
-| `lib/config/inherit.ts` | — | not-started | Not ported |
+| `lib/config/inherit.ts` | `crates/renovate-core/src/config.rs` | partial | Inheritable option list and configFileNames lookup ported |
 | `lib/config/decrypt.ts` | — | out-of-scope | Platform encryption feature |
 
 ---
