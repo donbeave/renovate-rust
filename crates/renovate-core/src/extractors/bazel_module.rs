@@ -43,6 +43,18 @@ pub struct BazelModuleDep {
     pub skip_reason: Option<BazelSkipReason>,
 }
 
+/// A dependency extracted from `crate.spec(...)`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazelCrateSpecDep {
+    pub name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub package_name: Option<String>,
+    pub registry_urls: Vec<String>,
+    pub nested_version: bool,
+    pub skip_reason: Option<BazelSkipReason>,
+}
+
 /// Which Bazel module declaration produced the dep.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BazelModuleDepType {
@@ -71,6 +83,10 @@ pub enum BazelSkipReason {
     LocalDependency,
     /// Override declaration does not use a supported datasource.
     UnsupportedDatasource,
+    /// Crate is local-path based.
+    PathDependency,
+    /// Crate spec has neither a version nor a supported alternate source.
+    InvalidDependencySpecification,
 }
 
 /// Matches a `bazel_dep(name = "...", version = "...", ...)` call.
@@ -89,6 +105,10 @@ static ARCHIVE_OVERRIDE_BLOCK_RE: LazyLock<Regex> =
 /// Matches a `local_path_override(...)` call.
 static LOCAL_PATH_OVERRIDE_BLOCK_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?s)local_path_override\s*\(([^)]+)\)").unwrap());
+
+/// Matches a `crate.spec(...)` call.
+static CRATE_SPEC_BLOCK_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)crate\.spec\s*\(([^)]+)\)").unwrap());
 
 /// Extracts `name = "value"` or `name = 'value'` from a call argument list.
 static ATTR_RE: LazyLock<Regex> =
@@ -204,6 +224,67 @@ pub fn extract(content: &str) -> Vec<BazelModuleDep> {
     deps
 }
 
+/// Extract `crate.spec(...)` dependencies from a `MODULE.bazel` file.
+pub fn extract_crate_specs(content: &str) -> Vec<BazelCrateSpecDep> {
+    let stripped = strip_comments(content);
+    CRATE_SPEC_BLOCK_RE
+        .captures_iter(&stripped)
+        .filter_map(|cap| {
+            let args = &cap[1];
+            let attrs = attrs_from_args(args);
+            let name = attrs.get("package")?.clone();
+
+            if let Some(tag) = attrs.get("tag")
+                && let Some(git) = attrs.get("git")
+            {
+                return Some(BazelCrateSpecDep {
+                    name,
+                    current_value: tag.clone(),
+                    datasource: "github-tags",
+                    package_name: github_package_name(git),
+                    registry_urls: vec!["https://github.com".to_owned()],
+                    nested_version: false,
+                    skip_reason: None,
+                });
+            }
+
+            if attrs.contains_key("path") {
+                return Some(BazelCrateSpecDep {
+                    name,
+                    current_value: String::new(),
+                    datasource: "crate",
+                    package_name: None,
+                    registry_urls: Vec::new(),
+                    nested_version: false,
+                    skip_reason: Some(BazelSkipReason::PathDependency),
+                });
+            }
+
+            let Some(version) = attrs.get("version") else {
+                return Some(BazelCrateSpecDep {
+                    name,
+                    current_value: String::new(),
+                    datasource: "crate",
+                    package_name: None,
+                    registry_urls: Vec::new(),
+                    nested_version: false,
+                    skip_reason: Some(BazelSkipReason::InvalidDependencySpecification),
+                });
+            };
+
+            Some(BazelCrateSpecDep {
+                name,
+                current_value: version.clone(),
+                datasource: "crate",
+                package_name: None,
+                registry_urls: Vec::new(),
+                nested_version: true,
+                skip_reason: None,
+            })
+        })
+        .collect()
+}
+
 fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
     let mut deps = Vec::new();
     deps.extend(parse_named_overrides(
@@ -287,6 +368,28 @@ fn parse_single_version_overrides(content: &str) -> Vec<SingleVersionOverride> {
     deps
 }
 
+fn attrs_from_args(args: &str) -> std::collections::BTreeMap<String, String> {
+    ATTR_RE
+        .captures_iter(args)
+        .map(|cap| (cap[1].to_owned(), cap[2].to_owned()))
+        .collect()
+}
+
+fn github_package_name(url: &str) -> Option<String> {
+    let rest = url
+        .strip_prefix("https://github.com/")
+        .or_else(|| url.strip_prefix("git@github.com:"))?;
+    let rest = rest.strip_suffix(".git").unwrap_or(rest);
+    let mut parts = rest.split('/');
+    let owner = parts.next()?;
+    let repo = parts.next()?;
+    if owner.is_empty() || repo.is_empty() {
+        None
+    } else {
+        Some(format!("{owner}/{repo}"))
+    }
+}
+
 /// Strip `# comment` lines from Starlark content.
 fn strip_comments(content: &str) -> String {
     content
@@ -366,6 +469,61 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         assert_eq!(
             deps[0].skip_reason,
             Some(BazelSkipReason::UnspecifiedVersion)
+        );
+    }
+
+    // Ported: "returns crate.spec dependencies" — bazel-module/extract.spec.ts line 377
+    #[test]
+    fn extracts_crate_spec_dependencies() {
+        let input = r#"
+crate.spec(
+    package = "axum",
+    version = "0.8.4",
+)
+crate.spec(
+    package = "tokio",
+    version = "1.45.1",
+    features = [
+        "full",
+    ],
+)
+crate.spec(
+    package = "custom_crate",
+    git = "https://github.com/example/custom_crate.git",
+    tag = "v1.0.0",
+)
+crate.spec(
+    package = "local_crate",
+    path = "/var/crate",
+)
+crate.spec(
+    package = "no_version_crate",
+)
+"#;
+        let deps = extract_crate_specs(input);
+        assert_eq!(deps.len(), 5);
+        assert_eq!(deps[0].name, "axum");
+        assert_eq!(deps[0].current_value, "0.8.4");
+        assert_eq!(deps[0].datasource, "crate");
+        assert!(deps[0].nested_version);
+        assert_eq!(deps[1].name, "tokio");
+        assert_eq!(deps[1].current_value, "1.45.1");
+        assert!(deps[1].nested_version);
+        assert_eq!(deps[2].name, "custom_crate");
+        assert_eq!(deps[2].current_value, "v1.0.0");
+        assert_eq!(deps[2].datasource, "github-tags");
+        assert_eq!(
+            deps[2].package_name.as_deref(),
+            Some("example/custom_crate")
+        );
+        assert_eq!(deps[2].registry_urls, vec!["https://github.com"]);
+        assert!(!deps[2].nested_version);
+        assert_eq!(deps[3].name, "local_crate");
+        assert_eq!(deps[3].skip_reason, Some(BazelSkipReason::PathDependency));
+        assert_eq!(deps[4].name, "no_version_crate");
+        assert_eq!(
+            deps[4].skip_reason,
+            Some(BazelSkipReason::InvalidDependencySpecification)
         );
     }
 

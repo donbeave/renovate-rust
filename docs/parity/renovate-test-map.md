@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 861 / 1217 actionable tests ported (71%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 862 / 1217 actionable tests ported (71%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2152,7 +2152,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 13 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 14 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2173,7 +2173,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns bazel_dep with no version and single_version_override dependencies if a version is specified | 299 | ported | `bazel_module.rs` | `extracts_single_version_override_with_unversioned_bazel_dep` | — |
 | returns bazel_dep dependency if single_version_override does not have a version | 331 | ported | `bazel_module.rs` | `single_version_override_without_version_only_adds_registry_to_versioned_bazel_dep` | — |
 | returns bazel_dep with no version dependency if single_version_override does not have a version | 355 | ported | `bazel_module.rs` | `single_version_override_without_version_keeps_unversioned_bazel_dep_skipped` | — |
-| returns crate.spec dependencies | 377 | pending | — | — | Requires crate.spec extraction (Rust crates) |
+| returns crate.spec dependencies | 377 | ported | `bazel_module.rs` | `extracts_crate_spec_dependencies` | — |
 | returns maven.install and maven.artifact dependencies | 453 | pending | — | — | Requires maven.install / maven.artifact extraction |
 | returns oci.pull dependencies | 507 | pending | — | — | Requires oci.pull extraction |
 | returns oci.pull dependencies without tags | 544 | pending | — | — | Requires oci.pull no-tag handling |
