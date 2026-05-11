@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1459 / 1657 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1461 / 1657 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2190,7 +2190,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nix/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/extract.spec.ts
-**Total tests:** 38 | **Ported:** 31 | **Actionable:** 38 | **Status:** partial
+**Total tests:** 38 | **Ported:** 33 | **Actionable:** 38 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2222,8 +2222,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | includes flake with nixpkgs channel as tarball type | 897 | ported | `nix.rs` | `includes_nixpkgs_channel_tarball_input` | — |
 | finds currentDigest correctly when input sha is pinned | 937 | ported | `nix.rs` | `extracts_current_digest_from_original_rev` | — |
 | does not duplicate nixpkgs dependency | 983 | pending | — | — | Requires dedup logic |
-| returns null when flake.lock file cannot be read | 1028 | pending | — | — | Requires flake.lock read-failure path |
-| returns null when flake.nix file cannot be read | 1033 | pending | — | — | Requires flake.nix read-failure path |
+| returns null when flake.lock file cannot be read | 1028 | ported | `nix.rs` | `package_file_returns_none_when_flake_lock_missing` | — |
+| returns null when flake.nix file cannot be read | 1033 | ported | `nix.rs` | `package_file_returns_none_when_flake_nix_missing` | — |
 | returns null when flake.lock has invalid JSON | 1046 | ported | `nix.rs` | `invalid_json_returns_empty` | — |
 | returns deps when no root inputs but deps exist | 1051 | ported | `nix.rs` | `root_without_inputs_returns_empty` | — |
 | handles currentDigest replacement when config provided | 1065 | ported | `nix.rs` | `replaces_current_digest_when_config_matches_flake_nix` | — |

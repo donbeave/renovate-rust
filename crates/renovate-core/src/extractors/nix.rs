@@ -125,6 +125,36 @@ pub struct NixExtractConfig<'a> {
     pub new_digest: Option<&'a str>,
 }
 
+/// Extract a `flake.nix` package file when both sibling file contents are available.
+pub fn extract_package_file(
+    flake_nix_content: Option<&str>,
+    flake_lock_content: Option<&str>,
+) -> Option<Vec<NixFlakeDep>> {
+    extract_package_file_with_config(
+        flake_nix_content,
+        flake_lock_content,
+        NixExtractConfig::default(),
+    )
+}
+
+/// Extract a `flake.nix` package file with optional replacement context.
+pub fn extract_package_file_with_config(
+    flake_nix_content: Option<&str>,
+    flake_lock_content: Option<&str>,
+    config: NixExtractConfig<'_>,
+) -> Option<Vec<NixFlakeDep>> {
+    let flake_nix_content = flake_nix_content?;
+    let flake_lock_content = flake_lock_content?;
+    let deps = extract_with_config(
+        flake_lock_content,
+        NixExtractConfig {
+            flake_nix_content: Some(flake_nix_content),
+            ..config
+        },
+    );
+    (!deps.is_empty()).then_some(deps)
+}
+
 /// Parse `flake.lock` content and extract top-level flake input deps.
 pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
     extract_with_config(flake_lock_content, NixExtractConfig::default())
@@ -1352,6 +1382,25 @@ mod tests {
             Some("https://github.com/nix-community/disko")
         );
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "returns null when flake.lock file cannot be read" — nix/extract.spec.ts line 1028
+    #[test]
+    fn package_file_returns_none_when_flake_lock_missing() {
+        assert!(extract_package_file(Some(""), None).is_none());
+    }
+
+    // Ported: "returns null when flake.nix file cannot be read" — nix/extract.spec.ts line 1033
+    #[test]
+    fn package_file_returns_none_when_flake_nix_missing() {
+        let content = r#"{
+  "nodes": {
+    "root": {}
+  },
+  "root": "root",
+  "version": 7
+}"#;
+        assert!(extract_package_file(None, Some(content)).is_none());
     }
 
     // Ported: "includes nixpkgs with ref when original has rev" — nix/extract.spec.ts line 1112
