@@ -46,6 +46,7 @@ pub enum FluxSkipReason {
     LocalChart,
     UnsupportedDatasource,
     UnversionedReference,
+    InvalidValue,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -233,6 +234,12 @@ fn extract_oci_repository_doc(
     let package_name = apply_registry_alias(image, registry_aliases);
     let tag = value_at(scalars, &["spec", "ref", "tag"]);
     let digest = value_at(scalars, &["spec", "ref", "digest"]);
+    let tag_is_yaml_alias = tag.is_some_and(|tag| tag.starts_with('*'));
+    let tag = if tag_is_yaml_alias {
+        tag.and_then(|tag| resolve_yaml_alias(scalars, tag))
+    } else {
+        tag
+    };
 
     let (current_value, current_digest, replace_string) = match (tag, digest) {
         (Some(tag), Some(digest)) => (
@@ -255,7 +262,9 @@ fn extract_oci_repository_doc(
         (None, None) => (None, None, None),
     };
 
-    let skip_reason = if current_value.is_none() && current_digest.is_none() {
+    let skip_reason = if tag_is_yaml_alias {
+        Some(FluxSkipReason::InvalidValue)
+    } else if current_value.is_none() && current_digest.is_none() {
         Some(FluxSkipReason::UnversionedReference)
     } else {
         None
@@ -270,6 +279,17 @@ fn extract_oci_repository_doc(
         replace_string,
         skip_reason,
     })
+}
+
+fn resolve_yaml_alias<'a>(
+    scalars: &'a [(Vec<String>, String)],
+    alias_reference: &str,
+) -> Option<&'a str> {
+    let alias = alias_reference.strip_prefix('*')?;
+    let anchor = format!("&{alias} ");
+    scalars
+        .iter()
+        .find_map(|(_, value)| value.strip_prefix(&anchor))
 }
 
 fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
@@ -1097,6 +1117,63 @@ spec:
         assert!(deps[0].replace_string.as_deref().is_some_and(|value| {
             value.contains("digest: sha256:") && value.contains("tag: v1.8.2")
         }));
+    }
+
+    // Ported: "extracts OCIRepository with quoted digest and tag" — flux/extract.spec.ts line 994
+    #[test]
+    fn extracts_oci_repository_with_quoted_digest_and_tag() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\n  namespace: flux-system\nspec:\n  ref:\n    tag: \"v1.8.2\"\n    digest: \"sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\"\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
+    // Ported: "extracts OCIRepository with quoted keys" — flux/extract.spec.ts line 1030
+    #[test]
+    fn extracts_oci_repository_with_quoted_keys() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\nspec:\n  ref:\n    \"tag\": v1.8.2\n    \"digest\": sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
+    // Ported: "extracts OCIRepository when ref key is quoted" — flux/extract.spec.ts line 1063
+    #[test]
+    fn extracts_oci_repository_with_quoted_ref_key() {
+        let deps = extract_oci_repositories(
+            "apiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\nspec:\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n  \"ref\":\n    tag: v1.8.2\n    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+    }
+
+    // Ported: "skips OCIRepository when tag value is a YAML alias" — flux/extract.spec.ts line 1098
+    #[test]
+    fn skips_oci_repository_when_tag_value_is_yaml_alias() {
+        let deps = extract_oci_repositories(
+            "x-tag: &mytag v1.8.2\napiVersion: source.toolkit.fluxcd.io/v1beta2\nkind: OCIRepository\nmetadata:\n  name: kyverno-controller\nspec:\n  url: oci://ghcr.io/kyverno/manifests/kyverno\n  ref:\n    tag: *mytag\n    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
+        assert_eq!(
+            deps[0].current_digest.as_deref(),
+            Some("sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc")
+        );
+        assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::InvalidValue));
     }
 
     #[test]

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 976 / 1217 actionable tests ported (80%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 980 / 1217 actionable tests ported (81%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2077,7 +2077,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/flux/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/extract.spec.ts
-**Total tests:** 59 | **Ported:** 38 | **Actionable:** 59 | **Status:** partial
+**Total tests:** 59 | **Ported:** 42 | **Actionable:** 59 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2123,10 +2123,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts OCIRepository with a digest | 897 | ported | `flux.rs` | `extracts_oci_repository_with_digest` | — |
 | extracts OCIRepository with a tag that contains a digest | 925 | ported | `flux.rs` | `extracts_oci_repository_with_tag_containing_digest` | — |
 | extracts OCIRepository with a digest and tag | 958 | ported | `flux.rs` | `extracts_oci_repository_with_digest_and_tag` | — |
-| extracts OCIRepository with quoted digest and tag | 994 | pending | — | — | Requires OCIRepository quoted-value tolerance |
-| extracts OCIRepository with quoted keys | 1030 | pending | — | — | Requires OCIRepository quoted-key tolerance |
-| extracts OCIRepository when ref key is quoted | 1063 | pending | — | — | Requires OCIRepository quoted ref-key tolerance |
-| skips OCIRepository when tag value is a YAML alias | 1098 | pending | — | — | Requires YAML-alias filtering |
+| extracts OCIRepository with quoted digest and tag | 994 | ported | `flux.rs` | `extracts_oci_repository_with_quoted_digest_and_tag` | — |
+| extracts OCIRepository with quoted keys | 1030 | ported | `flux.rs` | `extracts_oci_repository_with_quoted_keys` | — |
+| extracts OCIRepository when ref key is quoted | 1063 | ported | `flux.rs` | `extracts_oci_repository_with_quoted_ref_key` | — |
+| skips OCIRepository when tag value is a YAML alias | 1098 | ported | `flux.rs` | `skips_oci_repository_when_tag_value_is_yaml_alias` | — |
 | extracts OCIRepository with tag and digest preceded by other document types | 1129 | pending | — | — | Requires multi-document YAML preceded-by-others handling |
 | extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref | 1195 | pending | — | — | Requires multi-document same-name resource handling |
 | extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec | 1241 | pending | — | — | Requires multi-document same-name resource handling |
