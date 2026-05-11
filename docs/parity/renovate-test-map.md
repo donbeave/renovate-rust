@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 762 / 1217 actionable tests ported (63%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 767 / 1217 actionable tests ported (63%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -871,7 +871,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 75 | **Ported:** 55 | **Actionable:** 66 | **Status:** partial
+**Total tests:** 75 | **Ported:** 60 | **Actionable:** 66 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -923,14 +923,14 @@ Status key: `ported` · `pending` · `not-applicable`
 | handles FROM with digest in ARG default value | 1002 | ported | `dockerfile.rs` | `from_with_digest_in_arg_value` | — |
 | handles FROM with overwritten ARG value | 1026 | ported | `dockerfile.rs` | `from_with_overwritten_arg_value` | — |
 | handles FROM with multiple ARG values | 1058 | ported | `dockerfile.rs` | `from_with_multiple_arg_values` | — |
-| skips scratch if provided in ARG value | 1079 | pending | — | — | — |
+| skips scratch if provided in ARG value | 1079 | ported | `dockerfile.rs` | `scratch_from_arg_value_is_skipped` | — |
 | extracts images from multi-line ARG statements | 1088 | pending | — | — | — |
 | ignores parser directives in wrong order | 1131 | ported | `dockerfile.rs` | `parser_directives_in_wrong_order_ignored` | — |
 | handles an alternative escape character | 1152 | pending | — | — | — |
-| handles FROM with version in ARG default value and quotes | 1227 | pending | — | — | — |
-| handles version in ARG and digest in FROM with CRLF linefeed | 1249 | pending | — | — | — |
-| handles updates of multiple ARG values | 1272 | pending | — | — | — |
-| handles same argument multiple times | 1308 | pending | — | — | — |
+| handles FROM with version in ARG default value and quotes | 1227 | ported | `dockerfile.rs` | `from_with_quoted_arg_default_value` | — |
+| handles version in ARG and digest in FROM with CRLF linefeed | 1249 | ported | `dockerfile.rs` | `from_with_arg_tag_and_digest_with_crlf` | — |
+| handles updates of multiple ARG values | 1272 | ported | `dockerfile.rs` | `from_with_multiple_arg_components` | — |
+| handles same argument multiple times | 1308 | ported | `dockerfile.rs` | `same_arg_used_multiple_times` | — |
 | handles empty optional parameters | 1329 | ported | `dockerfile.rs` | `handles_empty_optional_parameters` | — |
 | handles registry alias | 1352 | pending | — | — | registryAliases not yet implemented |
 | replaces registry alias from start only | 1380 | pending | — | — | registryAliases not yet implemented |

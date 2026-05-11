@@ -841,6 +841,66 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "skips scratch if provided in ARG value" — dockerfile/extract.spec.ts line 1079
+    #[test]
+    fn scratch_from_arg_value_is_skipped() {
+        let deps = extract_ok("ARG img=\"scratch\"\nFROM $img as base\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::Scratch));
+    }
+
+    // Ported: "handles FROM with version in ARG default value and quotes" — dockerfile/extract.spec.ts line 1227
+    #[test]
+    fn from_with_quoted_arg_default_value() {
+        let deps = extract_ok(
+            "ARG REF_NAME=${REF_NAME:-\"gcr.io/distroless/static-debian11:nonroot@sha256:abc\"}\nfrom ${REF_NAME}",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "gcr.io/distroless/static-debian11");
+        assert_eq!(deps[0].tag.as_deref(), Some("nonroot"));
+        assert_eq!(deps[0].digest.as_deref(), Some("sha256:abc"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles version in ARG and digest in FROM with CRLF linefeed" — dockerfile/extract.spec.ts line 1249
+    #[test]
+    fn from_with_arg_tag_and_digest_with_crlf() {
+        let deps = extract_ok(
+            "ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc\r\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "ubuntu");
+        assert_eq!(deps[0].tag.as_deref(), Some("14.04"));
+        assert_eq!(deps[0].digest.as_deref(), Some("sha256:abc"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles updates of multiple ARG values" — dockerfile/extract.spec.ts line 1272
+    #[test]
+    fn from_with_multiple_arg_components() {
+        let deps = extract_ok(
+            "# random comment\n\nARG NODE_IMAGE_HASH=\"@sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4\"\nARG NODE_IMAGE_HOST=\"docker.io/library/\"\nARG NODE_IMAGE_NAME=node\nARG NODE_IMAGE_TAG=\"16.14.2-alpine3.14\"\nARG DUMMY_PREFIX=\nFROM ${DUMMY_PREFIX}${NODE_IMAGE_HOST}${NODE_IMAGE_NAME}:${NODE_IMAGE_TAG}${NODE_IMAGE_HASH} as yarn\n",
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "docker.io/library/node");
+        assert_eq!(deps[0].tag.as_deref(), Some("16.14.2-alpine3.14"));
+        assert_eq!(
+            deps[0].digest.as_deref(),
+            Some("sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4")
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles same argument multiple times" — dockerfile/extract.spec.ts line 1308
+    #[test]
+    fn same_arg_used_multiple_times() {
+        let deps = extract_ok("ARG DOCKER=docker\nFROM ${DOCKER}.io/library/${DOCKER}:29.1.1-dind");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].image, "docker.io/library/docker");
+        assert_eq!(deps[0].tag.as_deref(), Some("29.1.1-dind"));
+        assert!(deps[0].skip_reason.is_none());
+    }
+
     // ── BOM marker ───────────────────────────────────────────────────────────
 
     // Ported: "extracts tags from Dockerfile which begins with a BOM marker" — dockerfile/extract.spec.ts line 386
