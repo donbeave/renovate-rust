@@ -24,7 +24,7 @@
 //! multi-line values, or heredocs. Covers the common single-file patterns
 //! that most Terraform projects use.
 
-use std::sync::LazyLock;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use regex::Regex;
 
@@ -57,6 +57,8 @@ pub enum TerraformSkipReason {
     NoVersionConstraint,
     /// Module source is a git URL, HTTPS URL, or local path.
     ExternalSource,
+    InvalidUrl,
+    UnspecifiedVersion,
 }
 
 /// A single extracted Terraform dependency.
@@ -72,6 +74,7 @@ pub struct TerraformExtractedDep {
     pub dep_type: TerraformDepType,
     pub datasource: Option<&'static str>,
     pub package_name: Option<String>,
+    pub current_digest: Option<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<TerraformSkipReason>,
 }
@@ -81,6 +84,7 @@ struct ModuleSource {
     current_value: String,
     datasource: Option<&'static str>,
     package_name: Option<String>,
+    current_digest: Option<String>,
     skip_reason: Option<TerraformSkipReason>,
 }
 
@@ -132,10 +136,11 @@ struct Parser {
     mod_name: String,
     mod_source: String,
     mod_version: String,
+    registry_aliases: BTreeMap<String, String>,
 }
 
 impl Parser {
-    fn new() -> Self {
+    fn with_registry_aliases(registry_aliases: &BTreeMap<String, String>) -> Self {
         Self {
             state: State::TopLevel,
             deps: Vec::new(),
@@ -145,6 +150,7 @@ impl Parser {
             mod_name: String::new(),
             mod_source: String::new(),
             mod_version: String::new(),
+            registry_aliases: registry_aliases.clone(),
         }
     }
 
@@ -199,6 +205,7 @@ impl Parser {
                     dep_type: TerraformDepType::RequiredVersion,
                     datasource: None,
                     package_name: None,
+                    current_digest: None,
                     skip_reason: None,
                 });
             }
@@ -233,6 +240,7 @@ impl Parser {
                 dep_type: TerraformDepType::Provider,
                 datasource: None,
                 package_name: None,
+                current_digest: None,
                 skip_reason: None,
             });
         }
@@ -241,19 +249,34 @@ impl Parser {
     fn handle_provider_entry(&mut self, trimmed: &str) {
         if trimmed == "}" {
             // Emit the provider dep.
-            let name = if self.prov_source.is_empty() {
-                self.prov_name.clone()
+            if let Some(oci) =
+                resolve_oci_source(&self.prov_name, &self.prov_source, &self.registry_aliases)
+            {
+                self.deps.push(TerraformExtractedDep {
+                    name: oci.name,
+                    current_value: oci.current_value,
+                    dep_type: TerraformDepType::Provider,
+                    datasource: oci.datasource,
+                    package_name: oci.package_name,
+                    current_digest: oci.current_digest,
+                    skip_reason: oci.skip_reason,
+                });
             } else {
-                self.prov_source.clone()
-            };
-            self.deps.push(TerraformExtractedDep {
-                name,
-                current_value: self.prov_version.clone(),
-                dep_type: TerraformDepType::Provider,
-                datasource: None,
-                package_name: None,
-                skip_reason: None,
-            });
+                let name = if self.prov_source.is_empty() {
+                    self.prov_name.clone()
+                } else {
+                    self.prov_source.clone()
+                };
+                self.deps.push(TerraformExtractedDep {
+                    name,
+                    current_value: self.prov_version.clone(),
+                    dep_type: TerraformDepType::Provider,
+                    datasource: None,
+                    package_name: None,
+                    current_digest: None,
+                    skip_reason: None,
+                });
+            }
             self.state = State::InRequiredProviders;
             return;
         }
@@ -270,13 +293,19 @@ impl Parser {
 
     fn handle_module_block(&mut self, trimmed: &str) {
         if trimmed == "}" {
-            let source = resolve_module_source(&self.mod_source, &self.mod_version);
+            let source = resolve_module_source(
+                &self.mod_name,
+                &self.mod_source,
+                &self.mod_version,
+                &self.registry_aliases,
+            );
             self.deps.push(TerraformExtractedDep {
                 name: source.name,
                 current_value: source.current_value,
                 dep_type: TerraformDepType::Module,
                 datasource: source.datasource,
                 package_name: source.package_name,
+                current_digest: source.current_digest,
                 skip_reason: source.skip_reason,
             });
             self.state = State::TopLevel;
@@ -340,7 +369,15 @@ fn classify_module_source(source: &str, version: &str) -> Option<TerraformSkipRe
     None
 }
 
-fn resolve_module_source(source: &str, version: &str) -> ModuleSource {
+fn resolve_module_source(
+    module_name: &str,
+    source: &str,
+    version: &str,
+    registry_aliases: &BTreeMap<String, String>,
+) -> ModuleSource {
+    if let Some(source) = resolve_oci_source(module_name, source, registry_aliases) {
+        return source;
+    }
     if let Some(source) = parse_azure_devops_module_source(source) {
         return source;
     }
@@ -353,8 +390,67 @@ fn resolve_module_source(source: &str, version: &str) -> ModuleSource {
         current_value: version.to_owned(),
         datasource: None,
         package_name: None,
+        current_digest: None,
         skip_reason: classify_module_source(source, version),
     }
+}
+
+fn resolve_oci_source(
+    dep_name: &str,
+    source: &str,
+    registry_aliases: &BTreeMap<String, String>,
+) -> Option<ModuleSource> {
+    let rest = source.strip_prefix("oci://")?;
+    if rest.chars().any(char::is_whitespace) {
+        return Some(ModuleSource {
+            name: dep_name.to_owned(),
+            current_value: String::new(),
+            datasource: Some("docker"),
+            package_name: None,
+            current_digest: None,
+            skip_reason: Some(TerraformSkipReason::InvalidUrl),
+        });
+    }
+
+    let (path, query) = rest.split_once('?').unwrap_or((rest, ""));
+    let Some((host, image_path)) = path.split_once('/') else {
+        return Some(ModuleSource {
+            name: dep_name.to_owned(),
+            current_value: String::new(),
+            datasource: Some("docker"),
+            package_name: None,
+            current_digest: None,
+            skip_reason: Some(TerraformSkipReason::InvalidUrl),
+        });
+    };
+    if host.is_empty() || image_path.is_empty() {
+        return Some(ModuleSource {
+            name: dep_name.to_owned(),
+            current_value: String::new(),
+            datasource: Some("docker"),
+            package_name: None,
+            current_digest: None,
+            skip_reason: Some(TerraformSkipReason::InvalidUrl),
+        });
+    }
+
+    let registry = registry_aliases
+        .get(host)
+        .map(String::as_str)
+        .unwrap_or(host);
+    let current_value = query_param(query, "tag").unwrap_or_default();
+    let current_digest = query_param(query, "digest");
+    let skip_reason = (current_value.is_empty() && current_digest.is_none())
+        .then_some(TerraformSkipReason::UnspecifiedVersion);
+
+    Some(ModuleSource {
+        name: dep_name.to_owned(),
+        current_value,
+        datasource: Some("docker"),
+        package_name: Some(format!("{registry}/{image_path}")),
+        current_digest,
+        skip_reason,
+    })
 }
 
 fn parse_azure_devops_module_source(source: &str) -> Option<ModuleSource> {
@@ -376,6 +472,7 @@ fn parse_azure_devops_module_source(source: &str) -> Option<ModuleSource> {
         current_value: current_value.to_owned(),
         datasource: Some("git-tags"),
         package_name: Some(package_name),
+        current_digest: None,
         skip_reason: None,
     })
 }
@@ -403,6 +500,7 @@ fn parse_bitbucket_module_source(source: &str) -> Option<ModuleSource> {
             current_value: current_value.to_owned(),
             datasource: Some("git-tags"),
             package_name: Some(format!("{scheme}bitbucket.com/{repo}")),
+            current_digest: None,
             skip_reason: None,
         });
     }
@@ -419,6 +517,7 @@ fn parse_bitbucket_module_source(source: &str) -> Option<ModuleSource> {
             current_value: current_value.to_owned(),
             datasource: Some("bitbucket-tags"),
             package_name: Some(repo.to_owned()),
+            current_digest: None,
             skip_reason: None,
         });
     }
@@ -439,11 +538,25 @@ fn split_double_slash(path: &str) -> (&str, Option<&str>) {
     }
 }
 
+fn query_param(query: &str, key: &str) -> Option<String> {
+    query.split('&').find_map(|part| {
+        let (name, value) = part.split_once('=')?;
+        (name == key && !value.is_empty()).then(|| value.to_owned())
+    })
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /// Parse a Terraform `.tf` file and extract all provider and module deps.
 pub fn extract(content: &str) -> Vec<TerraformExtractedDep> {
-    let mut parser = Parser::new();
+    extract_with_registry_aliases(content, &BTreeMap::new())
+}
+
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &BTreeMap<String, String>,
+) -> Vec<TerraformExtractedDep> {
+    let mut parser = Parser::with_registry_aliases(registry_aliases);
     for line in content.lines() {
         parser.process_line(line);
     }
@@ -665,6 +778,126 @@ module "gittags_subdir" {
         assert!(
             deps.iter()
                 .any(|d| d.name == "MyOrg/MyProject/MyRepository//some-module/path")
+        );
+    }
+
+    // Ported: "resolves OCI registry aliases" — terraform/extract.spec.ts line 338
+    #[test]
+    fn oci_module_registry_alias_is_applied() {
+        let content = r#"
+module "aliased_oci" {
+  source = "oci://hub.proxy.test/terraform-modules/vpc?tag=1.0.0"
+}
+"#;
+        let aliases = BTreeMap::from([("hub.proxy.test".to_owned(), "index.docker.io".to_owned())]);
+        let deps = extract_with_registry_aliases(content, &aliases);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "aliased_oci");
+        assert_eq!(deps[0].current_value, "1.0.0");
+        assert_eq!(deps[0].datasource, Some("docker"));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("index.docker.io/terraform-modules/vpc")
+        );
+        assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "handles invalid OCI source URL" — terraform/extract.spec.ts line 358
+    #[test]
+    fn invalid_oci_module_source_has_skip_reason() {
+        let content = r#"
+module "bad_oci" {
+  source = "oci://not a valid url"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "bad_oci");
+        assert_eq!(deps[0].dep_type, TerraformDepType::Module);
+        assert_eq!(deps[0].skip_reason, Some(TerraformSkipReason::InvalidUrl));
+    }
+
+    // Ported: "extracts OCI modules and providers" — terraform/extract.spec.ts line 374
+    #[test]
+    fn oci_modules_and_required_providers_are_extracted() {
+        let content = r#"
+module "vpc_oci" {
+  source = "oci://registry.example.com/terraform-modules/vpc?tag=1.2.3"
+}
+
+module "storage_oci_tagged" {
+  source = "oci://ghcr.io/terraform-modules/storage?tag=3.1.0"
+}
+
+module "digest_oci" {
+  source = "oci://ghcr.io/terraform-modules/pinned?digest=sha256:abc123"
+}
+
+module "no_version_oci" {
+  source = "oci://registry.example.com/terraform-modules/noversion"
+}
+
+terraform {
+  required_providers {
+    custom_oci = {
+      source = "oci://registry.example.com/providers/custom?tag=1.0.0"
+    }
+
+    tagged_oci = {
+      source = "oci://ghcr.io/providers/tagged?tag=4.2.0"
+    }
+
+    no_version_oci = {
+      source = "oci://registry.example.com/providers/noversion"
+    }
+  }
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 7);
+
+        let vpc = deps.iter().find(|d| d.name == "vpc_oci").unwrap();
+        assert_eq!(vpc.current_value, "1.2.3");
+        assert_eq!(vpc.datasource, Some("docker"));
+        assert_eq!(
+            vpc.package_name.as_deref(),
+            Some("registry.example.com/terraform-modules/vpc")
+        );
+
+        let digest = deps.iter().find(|d| d.name == "digest_oci").unwrap();
+        assert_eq!(digest.current_digest.as_deref(), Some("sha256:abc123"));
+        assert_eq!(
+            digest.package_name.as_deref(),
+            Some("ghcr.io/terraform-modules/pinned")
+        );
+        assert!(digest.skip_reason.is_none());
+
+        let no_version_module = deps
+            .iter()
+            .find(|d| d.name == "no_version_oci" && d.dep_type == TerraformDepType::Module)
+            .unwrap();
+        assert_eq!(
+            no_version_module.skip_reason,
+            Some(TerraformSkipReason::UnspecifiedVersion)
+        );
+
+        let provider = deps
+            .iter()
+            .find(|d| d.name == "custom_oci" && d.dep_type == TerraformDepType::Provider)
+            .unwrap();
+        assert_eq!(provider.current_value, "1.0.0");
+        assert_eq!(
+            provider.package_name.as_deref(),
+            Some("registry.example.com/providers/custom")
+        );
+
+        let no_version_provider = deps
+            .iter()
+            .find(|d| d.name == "no_version_oci" && d.dep_type == TerraformDepType::Provider)
+            .unwrap();
+        assert_eq!(
+            no_version_provider.skip_reason,
+            Some(TerraformSkipReason::UnspecifiedVersion)
         );
     }
 
