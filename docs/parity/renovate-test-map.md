@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1018 / 1217 actionable tests ported (84%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1026 / 1217 actionable tests ported (84%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1818,7 +1818,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/nuget/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/extract.spec.ts
-**Total tests:** 35 | **Ported:** 25 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 33 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1840,14 +1840,14 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts all dependencies from global packages file | 226 | ported | `nuget.rs` | `global_and_cli_tool_references` | — |
 | extracts ContainerBaseImage | 234 | ported | `nuget.rs` | `extracts_container_base_image` | — |
 | extracts ContainerBaseImage with pinned digest | 260 | ported | `nuget.rs` | `extracts_container_base_image_with_digest` | — |
-| considers NuGet.config | 289 | pending | — | — | Requires NuGet.config sibling-file resolution |
-| considers lower-case nuget.config | 309 | pending | — | — | Requires NuGet.config sibling-file resolution |
-| considers pascal-case NuGet.Config | 330 | pending | — | — | Requires NuGet.config sibling-file resolution |
-| handles malformed NuGet.config | 351 | pending | — | — | Requires NuGet.config tolerant parsing |
-| handles NuGet.config without package sources | 368 | pending | — | — | Requires NuGet.config tolerant parsing |
-| handles NuGet.config with whitespaces in package source keys | 385 | pending | — | — | Requires NuGet.config key normalization |
-| ignores local feed in NuGet.config | 404 | pending | — | — | Requires NuGet.config local-feed filtering |
-| extracts registry URLs independently | 422 | pending | — | — | Requires registryUrls plumbing |
+| considers NuGet.config | 289 | ported | `nuget.rs` | `project_file_considers_nuget_config` | — |
+| considers lower-case nuget.config | 309 | ported | `nuget.rs` | `project_file_considers_lowercase_nuget_config` | — |
+| considers pascal-case NuGet.Config | 330 | ported | `nuget.rs` | `project_file_considers_pascal_case_nuget_config` | — |
+| handles malformed NuGet.config | 351 | ported | `nuget.rs` | `project_file_ignores_malformed_nuget_config` | — |
+| handles NuGet.config without package sources | 368 | ported | `nuget.rs` | `project_file_ignores_nuget_config_without_package_sources` | — |
+| handles NuGet.config with whitespaces in package source keys | 385 | ported | `nuget.rs` | `project_file_handles_whitespace_package_source_keys` | — |
+| ignores local feed in NuGet.config | 404 | ported | `nuget.rs` | `project_file_ignores_local_feed_in_nuget_config` | — |
+| extracts registry URLs independently | 422 | ported | `nuget.rs` | `project_files_extract_registry_urls_independently` | — |
 | extracts msbuild-sdks from global.json | 461 | ported | `nuget.rs` | `global_json_extracts_dotnet_sdk_and_msbuild_sdks` | — |
 | extracts dotnet-sdk from global.json | 483 | ported | `nuget.rs` | `global_json_extracts_dotnet_sdk_only` | — |
 | handles malformed global.json | 501 | ported | `nuget.rs` | `global_json_malformed_returns_none` | — |

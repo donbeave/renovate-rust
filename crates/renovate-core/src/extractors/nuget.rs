@@ -26,6 +26,7 @@
 //! | `$(Variable)` | Skipped — `PropertyRef` |
 //! | `[,1.2.3)` or range with upper bound | Skipped — `VersionRange` |
 
+use std::collections::HashMap;
 use std::io::BufReader;
 
 use quick_xml::Reader;
@@ -95,6 +96,7 @@ pub struct NuGetExtractedDep {
     pub current_digest: Option<String>,
     /// Which element type this came from.
     pub dep_type: NuGetDepType,
+    pub registry_urls: Vec<String>,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<NuGetSkipReason>,
 }
@@ -199,6 +201,7 @@ pub fn extract(content: &str) -> Result<Vec<NuGetExtractedDep>, NuGetExtractErro
                             current_value: tag,
                             current_digest: digest,
                             dep_type: NuGetDepType::ContainerImage,
+                            registry_urls: Vec::new(),
                             skip_reason: None,
                         });
                     }
@@ -226,9 +229,35 @@ pub fn extract_project_file(
     package_file: &str,
     lock_file_exists: bool,
 ) -> Result<Option<NuGetProjectExtract>, NuGetExtractError> {
-    let deps = extract(content)?;
+    extract_project_file_with_config(content, package_file, lock_file_exists, &[])
+}
+
+pub fn extract_project_file_with_config(
+    content: &str,
+    package_file: &str,
+    lock_file_exists: bool,
+    files: &[(&str, Option<&str>)],
+) -> Result<Option<NuGetProjectExtract>, NuGetExtractError> {
+    let mut deps = extract(content)?;
     if deps.is_empty() {
         return Ok(None);
+    }
+
+    let registry_urls = nuget_config_registry_urls(package_file, files);
+    if !registry_urls.is_empty() {
+        for dep in &mut deps {
+            if matches!(
+                dep.dep_type,
+                NuGetDepType::Package
+                    | NuGetDepType::PackageVersion
+                    | NuGetDepType::CliTool
+                    | NuGetDepType::Global
+                    | NuGetDepType::DotnetTool
+                    | NuGetDepType::SingleFilePackage
+            ) {
+                dep.registry_urls.clone_from(&registry_urls);
+            }
+        }
     }
 
     let package_file_version = extract_package_file_version(content)?;
@@ -275,6 +304,7 @@ pub fn extract_dotnet_tools(content: &str) -> Vec<NuGetExtractedDep> {
                 current_value: version.to_owned(),
                 current_digest: None,
                 dep_type: NuGetDepType::DotnetTool,
+                registry_urls: Vec::new(),
                 skip_reason: None,
             })
         })
@@ -319,6 +349,7 @@ pub fn extract_single_csharp_file(content: &str) -> Vec<NuGetExtractedDep> {
                 current_value: current_value.to_owned(),
                 current_digest: None,
                 dep_type,
+                registry_urls: Vec::new(),
                 skip_reason: None,
             })
         })
@@ -345,6 +376,7 @@ pub fn extract_global_json(content: &str) -> Option<NuGetGlobalJsonExtract> {
             current_value: version.to_owned(),
             current_digest: None,
             dep_type: NuGetDepType::DotnetSdk,
+            registry_urls: Vec::new(),
             skip_reason: None,
         });
     }
@@ -357,6 +389,7 @@ pub fn extract_global_json(content: &str) -> Option<NuGetGlobalJsonExtract> {
                     current_value: version.to_owned(),
                     current_digest: None,
                     dep_type: NuGetDepType::MsbuildSdk,
+                    registry_urls: Vec::new(),
                     skip_reason: None,
                 });
             }
@@ -381,6 +414,67 @@ fn sibling_file_name(package_file: &str, sibling: &str) -> String {
     } else {
         sibling.to_owned()
     }
+}
+
+fn nuget_config_registry_urls(package_file: &str, files: &[(&str, Option<&str>)]) -> Vec<String> {
+    let file_contents: HashMap<&str, &str> = files
+        .iter()
+        .filter_map(|(path, content)| content.map(|content| (*path, content)))
+        .collect();
+
+    for config_name in ["NuGet.config", "nuget.config", "NuGet.Config"] {
+        let path = sibling_file_name(package_file, config_name);
+        if let Some(content) = file_contents.get(path.as_str()) {
+            return parse_nuget_config_registry_urls(content);
+        }
+    }
+
+    Vec::new()
+}
+
+fn parse_nuget_config_registry_urls(content: &str) -> Vec<String> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+    let mut urls = Vec::new();
+    let mut in_package_sources = false;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) if elem_name(&e) == "packageSources" => {
+                in_package_sources = true;
+            }
+            Ok(Event::End(e)) if String::from_utf8_lossy(e.name().as_ref()) == "packageSources" => {
+                in_package_sources = false;
+            }
+            Ok(Event::Empty(e) | Event::Start(e))
+                if in_package_sources && elem_name(&e) == "add" =>
+            {
+                if let Some(url) = attr_value(&e, "value")
+                    && (url.starts_with("https://") || url.starts_with("http://"))
+                {
+                    urls.push(url);
+                }
+            }
+            Ok(Event::Eof) => break,
+            Err(_) => break,
+            _ => {}
+        }
+        buf.clear();
+    }
+
+    urls
+}
+
+fn attr_value(e: &BytesStart<'_>, name: &str) -> Option<String> {
+    for attr in e.attributes().flatten() {
+        let key = String::from_utf8_lossy(attr.key.as_ref());
+        if key.eq_ignore_ascii_case(name) {
+            return Some(attr.unescape_value().unwrap_or_default().into_owned());
+        }
+    }
+    None
 }
 
 fn extract_package_file_version(content: &str) -> Result<Option<String>, NuGetExtractError> {
@@ -539,6 +633,7 @@ fn build_dep(dep: PendingDep) -> NuGetExtractedDep {
             current_value: String::new(),
             current_digest: None,
             dep_type: dep.dep_type,
+            registry_urls: Vec::new(),
             skip_reason: Some(NuGetSkipReason::NoVersion),
         };
     }
@@ -549,6 +644,7 @@ fn build_dep(dep: PendingDep) -> NuGetExtractedDep {
             current_value: dep.version,
             current_digest: None,
             dep_type: dep.dep_type,
+            registry_urls: Vec::new(),
             skip_reason: Some(NuGetSkipReason::PropertyRef),
         };
     }
@@ -559,6 +655,7 @@ fn build_dep(dep: PendingDep) -> NuGetExtractedDep {
         current_value,
         current_digest: None,
         dep_type: dep.dep_type,
+        registry_urls: Vec::new(),
         skip_reason,
     }
 }
@@ -996,6 +1093,289 @@ mod tests {
         );
         assert_eq!(deps[0].dep_type, NuGetDepType::ContainerImage);
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    fn project_with_autofac() -> &'static str {
+        r#"<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.5.0" />
+  </ItemGroup>
+</Project>"#
+    }
+
+    fn nuget_config_with_sources(sources: &[&str]) -> String {
+        let mut config = String::from("<configuration><packageSources>");
+        for (index, source) in sources.iter().enumerate() {
+            config.push_str(&format!(r#"<add key="source {index}" value="{source}" />"#));
+        }
+        config.push_str("</packageSources></configuration>");
+        config
+    }
+
+    // Ported: "considers NuGet.config" — nuget/extract.spec.ts line 289
+    #[test]
+    fn project_file_considers_nuget_config() {
+        let config = nuget_config_with_sources(&[
+            "https://api.nuget.org/v3/index.json#protocolVersion=3",
+            "https://contoso.com/packages/",
+        ]);
+        let files = [
+            (
+                "with-config-file/with-config-file.csproj",
+                Some(project_with_autofac()),
+            ),
+            ("with-config-file/NuGet.config", Some(config.as_str())),
+        ];
+        let package_file = extract_project_file_with_config(
+            project_with_autofac(),
+            "with-config-file/with-config-file.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        assert_eq!(
+            package_file.deps[0].registry_urls,
+            vec![
+                "https://api.nuget.org/v3/index.json#protocolVersion=3",
+                "https://contoso.com/packages/"
+            ]
+        );
+        assert_eq!(package_file.package_file_version.as_deref(), Some("0.1.0"));
+    }
+
+    // Ported: "considers lower-case nuget.config" — nuget/extract.spec.ts line 309
+    #[test]
+    fn project_file_considers_lowercase_nuget_config() {
+        let config = nuget_config_with_sources(&[
+            "https://api.nuget.org/v3/index.json#protocolVersion=3",
+            "https://contoso.com/packages/",
+        ]);
+        let files = [
+            (
+                "with-lower-case-config-file/with-lower-case-config-file.csproj",
+                Some(project_with_autofac()),
+            ),
+            (
+                "with-lower-case-config-file/nuget.config",
+                Some(config.as_str()),
+            ),
+        ];
+        let package_file = extract_project_file_with_config(
+            project_with_autofac(),
+            "with-lower-case-config-file/with-lower-case-config-file.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        assert_eq!(
+            package_file.deps[0].registry_urls,
+            vec![
+                "https://api.nuget.org/v3/index.json#protocolVersion=3",
+                "https://contoso.com/packages/"
+            ]
+        );
+    }
+
+    // Ported: "considers pascal-case NuGet.Config" — nuget/extract.spec.ts line 330
+    #[test]
+    fn project_file_considers_pascal_case_nuget_config() {
+        let config = nuget_config_with_sources(&[
+            "https://api.nuget.org/v3/index.json#protocolVersion=3",
+            "https://contoso.com/packages/",
+        ]);
+        let files = [
+            (
+                "with-pascal-case-config-file/with-pascal-case-config-file.csproj",
+                Some(project_with_autofac()),
+            ),
+            (
+                "with-pascal-case-config-file/NuGet.Config",
+                Some(config.as_str()),
+            ),
+        ];
+        let package_file = extract_project_file_with_config(
+            project_with_autofac(),
+            "with-pascal-case-config-file/with-pascal-case-config-file.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        assert_eq!(
+            package_file.deps[0].registry_urls,
+            vec![
+                "https://api.nuget.org/v3/index.json#protocolVersion=3",
+                "https://contoso.com/packages/"
+            ]
+        );
+    }
+
+    // Ported: "handles malformed NuGet.config" — nuget/extract.spec.ts line 351
+    #[test]
+    fn project_file_ignores_malformed_nuget_config() {
+        let files = [
+            (
+                "with-malformed-config-file/with-malformed-config-file.csproj",
+                Some(project_with_autofac()),
+            ),
+            (
+                "with-malformed-config-file/NuGet.config",
+                Some("<<< not xml >>>"),
+            ),
+        ];
+        let package_file = extract_project_file_with_config(
+            project_with_autofac(),
+            "with-malformed-config-file/with-malformed-config-file.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        assert!(package_file.deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "handles NuGet.config without package sources" — nuget/extract.spec.ts line 368
+    #[test]
+    fn project_file_ignores_nuget_config_without_package_sources() {
+        let files = [
+            (
+                "without-package-sources/without-package-sources.csproj",
+                Some(project_with_autofac()),
+            ),
+            (
+                "without-package-sources/NuGet.config",
+                Some("<configuration></configuration>"),
+            ),
+        ];
+        let package_file = extract_project_file_with_config(
+            project_with_autofac(),
+            "without-package-sources/without-package-sources.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        assert!(package_file.deps[0].registry_urls.is_empty());
+    }
+
+    // Ported: "handles NuGet.config with whitespaces in package source keys" — nuget/extract.spec.ts line 385
+    #[test]
+    fn project_file_handles_whitespace_package_source_keys() {
+        let project = r#"<Project>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+</Project>"#;
+        let config = r#"<configuration>
+  <packageSources>
+    <add key=" nuget.org " value="https://api.nuget.org/v3/index.json#protocolVersion=3" />
+    <add key=" my get " value="https://my.myget.org/F/my/auth/guid/api/v3/index.json" />
+  </packageSources>
+</configuration>"#;
+        let files = [
+            ("with-whitespaces/with-whitespaces.csproj", Some(project)),
+            ("with-whitespaces/NuGet.config", Some(config)),
+        ];
+        let package_file = extract_project_file_with_config(
+            project,
+            "with-whitespaces/with-whitespaces.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        assert_eq!(package_file.deps[0].package_id, "Newtonsoft.Json");
+        assert_eq!(
+            package_file.deps[0].registry_urls,
+            vec![
+                "https://api.nuget.org/v3/index.json#protocolVersion=3",
+                "https://my.myget.org/F/my/auth/guid/api/v3/index.json"
+            ]
+        );
+    }
+
+    // Ported: "ignores local feed in NuGet.config" — nuget/extract.spec.ts line 404
+    #[test]
+    fn project_file_ignores_local_feed_in_nuget_config() {
+        let config =
+            nuget_config_with_sources(&[r#"C:\local\packages"#, "https://contoso.com/packages/"]);
+        let files = [
+            (
+                "with-local-feed-in-config-file/with-local-feed-in-config-file.csproj",
+                Some(project_with_autofac()),
+            ),
+            (
+                "with-local-feed-in-config-file/NuGet.config",
+                Some(config.as_str()),
+            ),
+        ];
+        let package_file = extract_project_file_with_config(
+            project_with_autofac(),
+            "with-local-feed-in-config-file/with-local-feed-in-config-file.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        assert_eq!(
+            package_file.deps[0].registry_urls,
+            vec!["https://contoso.com/packages/"]
+        );
+    }
+
+    // Ported: "extracts registry URLs independently" — nuget/extract.spec.ts line 422
+    #[test]
+    fn project_files_extract_registry_urls_independently() {
+        let one_config = nuget_config_with_sources(&["https://api.nuget.org/v3/index.json"]);
+        let two_config = nuget_config_with_sources(&["https://contoso.com/packages/"]);
+        let files = [
+            (
+                "multiple-package-files/one/one.csproj",
+                Some(project_with_autofac()),
+            ),
+            (
+                "multiple-package-files/one/NuGet.config",
+                Some(one_config.as_str()),
+            ),
+            (
+                "multiple-package-files/two/two.csproj",
+                Some(project_with_autofac()),
+            ),
+            (
+                "multiple-package-files/two/NuGet.config",
+                Some(two_config.as_str()),
+            ),
+        ];
+        let one = extract_project_file_with_config(
+            project_with_autofac(),
+            "multiple-package-files/one/one.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+        let two = extract_project_file_with_config(
+            project_with_autofac(),
+            "multiple-package-files/two/two.csproj",
+            false,
+            &files,
+        )
+        .expect("parse should succeed")
+        .expect("deps should be extracted");
+
+        assert_eq!(
+            one.deps[0].registry_urls,
+            vec!["https://api.nuget.org/v3/index.json"]
+        );
+        assert_eq!(
+            two.deps[0].registry_urls,
+            vec!["https://contoso.com/packages/"]
+        );
     }
 
     // Ported: "works" — nuget/extract.spec.ts line 521
