@@ -38,6 +38,15 @@ pub struct AzPipelineTaskDep {
     pub version: String,
 }
 
+/// Repository resource dependency from `resources.repositories`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AzPipelineRepositoryDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+}
+
 /// A dependency extracted from an Azure Pipelines YAML file.
 #[derive(Debug, Clone)]
 pub enum AzPipelinesDep {
@@ -128,6 +137,57 @@ pub fn extract(content: &str) -> Vec<AzPipelinesDep> {
     out
 }
 
+/// Extract one Azure Pipelines repository resource.
+pub fn extract_repository(
+    repo_type: &str,
+    name: &str,
+    git_ref: Option<&str>,
+    current_repository: Option<&str>,
+    platform: Option<&str>,
+    endpoint: Option<&str>,
+) -> Option<AzPipelineRepositoryDep> {
+    let tag = git_ref?.strip_prefix("refs/tags/")?;
+    if tag.is_empty() {
+        return None;
+    }
+
+    match repo_type {
+        "github" => {
+            let (owner, repo) = name.split_once('/')?;
+            if owner.is_empty() || repo.is_empty() {
+                return None;
+            }
+            let dep_name = format!("{owner}/{repo}");
+            Some(AzPipelineRepositoryDep {
+                package_name: format!("https://github.com/{dep_name}.git"),
+                dep_name,
+                current_value: tag.to_owned(),
+                datasource: "github-tags",
+            })
+        }
+        "git" if platform == Some("azure") => {
+            let endpoint = endpoint?.trim_end_matches('/');
+            let (project, repo) = if let Some((project, repo)) = name.split_once('/') {
+                (project, repo)
+            } else {
+                let (project, _) = current_repository?.split_once('/')?;
+                (project, name)
+            };
+            if project.is_empty() || repo.is_empty() {
+                return None;
+            }
+            let dep_name = format!("{project}/{repo}");
+            Some(AzPipelineRepositoryDep {
+                package_name: format!("{endpoint}/{project}/_git/{repo}"),
+                dep_name,
+                current_value: tag.to_owned(),
+                datasource: "git-tags",
+            })
+        }
+        _ => None,
+    }
+}
+
 /// Parse `TaskName@MajorVersion` into an [`AzPipelineTaskDep`].
 fn parse_task(s: &str) -> Option<AzPipelineTaskDep> {
     let (name, version) = s.split_once('@')?;
@@ -187,6 +247,151 @@ resources:
         assert_eq!(c.len(), 1);
         assert_eq!(c[0].image, "ubuntu");
         assert_eq!(c[0].tag.as_deref(), Some("22.04"));
+    }
+
+    // Ported: "should extract repository information" — azure-pipelines/extract.spec.ts line 36
+    #[test]
+    fn extracts_github_repository_information() {
+        let dep = extract_repository(
+            "github",
+            "user/repo",
+            Some("refs/tags/v1.0.0"),
+            Some("user"),
+            None,
+            None,
+        )
+        .unwrap();
+        assert_eq!(dep.dep_name, "user/repo");
+        assert_eq!(dep.package_name, "https://github.com/user/repo.git");
+        assert_eq!(dep.current_value, "v1.0.0");
+        assert_eq!(dep.datasource, "github-tags");
+    }
+
+    // Ported: "should return null when repository type is not github" — azure-pipelines/extract.spec.ts line 52
+    #[test]
+    fn non_github_repository_type_returns_none() {
+        assert!(
+            extract_repository(
+                "bitbucket",
+                "user/repo",
+                Some("refs/tags/v1.0.0"),
+                Some("user/repo"),
+                None,
+                None
+            )
+            .is_none()
+        );
+    }
+
+    // Ported: "should return null when reference is not defined specified" — azure-pipelines/extract.spec.ts line 65
+    #[test]
+    fn repository_without_ref_returns_none() {
+        assert!(
+            extract_repository("github", "user/repo", None, Some("user/repo"), None, None)
+                .is_none()
+        );
+    }
+
+    // Ported: "should return null when reference is invalid tag format" — azure-pipelines/extract.spec.ts line 77
+    #[test]
+    fn repository_with_invalid_ref_returns_none() {
+        assert!(
+            extract_repository(
+                "github",
+                "user/repo",
+                Some("refs/head/master"),
+                Some("user/repo"),
+                None,
+                None
+            )
+            .is_none()
+        );
+    }
+
+    // Ported: "should extract Azure repository information if project in name" — azure-pipelines/extract.spec.ts line 90
+    #[test]
+    fn extracts_azure_repository_when_project_in_name() {
+        let dep = extract_repository(
+            "git",
+            "project/repo",
+            Some("refs/tags/v1.0.0"),
+            Some("otherProject/otherRepo"),
+            Some("azure"),
+            Some("https://dev.azure.com/renovate-org"),
+        )
+        .unwrap();
+        assert_eq!(dep.dep_name, "project/repo");
+        assert_eq!(
+            dep.package_name,
+            "https://dev.azure.com/renovate-org/project/_git/repo"
+        );
+    }
+
+    // Ported: "should extract Azure repository information if project is not in name but is in the config repository" — azure-pipelines/extract.spec.ts line 111
+    #[test]
+    fn extracts_azure_repository_project_from_current_repository() {
+        let dep = extract_repository(
+            "git",
+            "repo",
+            Some("refs/tags/v1.0.0"),
+            Some("project/otherrepo"),
+            Some("azure"),
+            Some("https://dev.azure.com/renovate-org"),
+        )
+        .unwrap();
+        assert_eq!(dep.dep_name, "project/repo");
+        assert_eq!(
+            dep.package_name,
+            "https://dev.azure.com/renovate-org/project/_git/repo"
+        );
+    }
+
+    // Ported: "should return null if repository type is git and project not in name nor in config repository name" — azure-pipelines/extract.spec.ts line 132
+    #[test]
+    fn azure_repository_without_project_returns_none() {
+        assert!(
+            extract_repository(
+                "git",
+                "repo",
+                Some("refs/tags/v1.0.0"),
+                Some(""),
+                Some("azure"),
+                Some("https://dev.azure.com/renovate-org")
+            )
+            .is_none()
+        );
+    }
+
+    // Ported: "should return null if repository type is git and currentRepository is undefined" — azure-pipelines/extract.spec.ts line 150
+    #[test]
+    fn azure_repository_without_current_repository_returns_none() {
+        assert!(
+            extract_repository(
+                "git",
+                "repo",
+                Some("refs/tags/v1.0.0"),
+                None,
+                Some("azure"),
+                Some("https://dev.azure.com/renovate-org")
+            )
+            .is_none()
+        );
+    }
+
+    // Ported: "should return null for git repo type if platform not Azure" — azure-pipelines/extract.spec.ts line 168
+    #[test]
+    fn git_repository_non_azure_platform_returns_none() {
+        assert!(
+            extract_repository(
+                "git",
+                "project/repo",
+                Some("refs/tags/v1.0.0"),
+                Some(""),
+                Some("github"),
+                None
+            )
+            .is_none()
+        );
     }
 
     // Ported: "should extract container information" — azure-pipelines/extract.spec.ts line 187

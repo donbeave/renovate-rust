@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 852 / 1217 actionable tests ported (70%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 861 / 1217 actionable tests ported (71%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1701,7 +1701,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/azure-pipelines/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/azure-pipelines/extract.spec.ts
-**Total tests:** 29 | **Ported:** 19 | **Actionable:** 28 | **Status:** partial
+**Total tests:** 29 | **Ported:** 28 | **Actionable:** 28 | **Status:** ported
 
 ### `extractRepository / extractContainer / extractAzurePipelinesTaskDependency` helpers
 
@@ -1709,15 +1709,15 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | should parse a valid azure-pipelines file | 25 | not-applicable | — | — | Tests TS-internal YAML parser helper directly; Rust extractor goes through full pipeline only |
 | return null on an invalid file | 30 | ported | `azure_pipelines.rs` | `invalid_yaml_returns_empty` | — |
-| should extract repository information | 36 | pending | — | — | Requires GitHub `repositories[]` extraction |
-| should return null when repository type is not github | 52 | pending | — | — | Requires repository-type filtering |
-| should return null when reference is not defined specified | 65 | pending | — | — | Requires repository ref validation |
-| should return null when reference is invalid tag format | 77 | pending | — | — | Requires repository ref tag-format validation |
-| should extract Azure repository information if project in name | 90 | pending | — | — | Requires Azure DevOps `repositories[]` extraction |
-| should extract Azure repository information if project is not in name but is in the config repository | 111 | pending | — | — | Requires Azure DevOps repo + currentRepository config |
-| should return null if repository type is git and project not in name nor in config repository name | 132 | pending | — | — | Requires Azure DevOps repo project resolution |
-| should return null if repository type is git and currentRepository is undefined | 150 | pending | — | — | Requires currentRepository config plumbing |
-| should return null for git repo type if platform not Azure | 168 | pending | — | — | Requires platform-specific repo filtering |
+| should extract repository information | 36 | ported | `azure_pipelines.rs` | `extracts_github_repository_information` | — |
+| should return null when repository type is not github | 52 | ported | `azure_pipelines.rs` | `non_github_repository_type_returns_none` | — |
+| should return null when reference is not defined specified | 65 | ported | `azure_pipelines.rs` | `repository_without_ref_returns_none` | — |
+| should return null when reference is invalid tag format | 77 | ported | `azure_pipelines.rs` | `repository_with_invalid_ref_returns_none` | — |
+| should extract Azure repository information if project in name | 90 | ported | `azure_pipelines.rs` | `extracts_azure_repository_when_project_in_name` | — |
+| should extract Azure repository information if project is not in name but is in the config repository | 111 | ported | `azure_pipelines.rs` | `extracts_azure_repository_project_from_current_repository` | — |
+| should return null if repository type is git and project not in name nor in config repository name | 132 | ported | `azure_pipelines.rs` | `azure_repository_without_project_returns_none` | — |
+| should return null if repository type is git and currentRepository is undefined | 150 | ported | `azure_pipelines.rs` | `azure_repository_without_current_repository_returns_none` | — |
+| should return null for git repo type if platform not Azure | 168 | ported | `azure_pipelines.rs` | `git_repository_non_azure_platform_returns_none` | — |
 | should extract container information | 187 | ported | `azure_pipelines.rs` | `extracts_container_image` (+ extracts_multiple_containers) | — |
 | should extract azure-pipelines task information | 201 | ported | `azure_pipelines.rs` | `extracts_tasks` (+ tasks_in_nested_jobs_stages) | — |
 | should return null for invalid task format | 209 | ported | `azure_pipelines.rs` | `task_without_at_ignored` | — |
