@@ -874,6 +874,51 @@ oci.pull(
         );
     }
 
+    // Ported: "returns maven.install and bazel_dep dependencies together" — bazel-module/extract.spec.ts line 723
+    #[test]
+    fn extracts_maven_install_and_bazel_dep_together() {
+        let input = r#"
+bazel_dep(name = "bazel_jar_jar", version = "0.1.0")
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+
+maven.install(
+    artifacts = [
+        "junit:junit:4.13.2",
+        "com.google.guava:guava:31.1-jre",
+    ],
+    lock_file = "//:maven_install.json",
+    repositories = [
+        "https://repo1.maven.org/maven2/",
+    ],
+    version_conflict_policy = "pinned",
+)
+"#;
+        let bazel_deps = extract(input);
+        assert_eq!(bazel_deps.len(), 1);
+        assert_eq!(bazel_deps[0].dep_type, BazelModuleDepType::BazelDep);
+        assert_eq!(bazel_deps[0].name, "bazel_jar_jar");
+        assert_eq!(bazel_deps[0].current_value, "0.1.0");
+        assert!(bazel_deps[0].skip_reason.is_none());
+
+        let maven_deps = extract_maven_deps(input);
+        assert_eq!(maven_deps.len(), 2);
+        assert_eq!(maven_deps[0].dep_name, "junit:junit");
+        assert_eq!(maven_deps[0].current_value, "4.13.2");
+        assert_eq!(maven_deps[0].dep_type, "maven_install");
+        assert_eq!(
+            maven_deps[0].registry_urls,
+            vec!["https://repo1.maven.org/maven2/"]
+        );
+        assert_eq!(maven_deps[1].dep_name, "com.google.guava:guava");
+        assert_eq!(maven_deps[1].current_value, "31.1-jre");
+        assert_eq!(maven_deps[1].dep_type, "maven_install");
+        assert_eq!(
+            maven_deps[1].registry_urls,
+            vec!["https://repo1.maven.org/maven2/"]
+        );
+    }
+
     // Ported: "returns bazel_dep and archive_override dependencies" — bazel-module/extract.spec.ts line 148
     #[test]
     fn extracts_archive_override_with_bazel_dep_version() {

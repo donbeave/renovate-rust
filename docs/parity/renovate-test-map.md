@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 869 / 1217 actionable tests ported (71%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 870 / 1217 actionable tests ported (71%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2152,7 +2152,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 21 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 22 | **Actionable:** 35 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2181,7 +2181,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns oci.pull dependencies without tag or digest | 611 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_without_tag_or_digest` | — |
 | returns oci.pull dependencies with registryAliases | 641 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_with_registry_alias` | — |
 | returns oci.pull dependencies with registryAliases with multiple segments | 682 | ported | `bazel_module.rs` | `extracts_oci_pull_dependency_with_multisegment_registry_alias` | — |
-| returns maven.install and bazel_dep dependencies together | 723 | pending | — | — | Requires maven + bazel_dep combined extraction |
+| returns maven.install and bazel_dep dependencies together | 723 | ported | `bazel_module.rs` | `extracts_maven_install_and_bazel_dep_together` | — |
 | returns git_repository dependencies with digest | 772 | pending | — | — | Requires git_repository digest extraction |
 | returns git_repository dependencies with tag | 796 | pending | — | — | Requires git_repository tag extraction |
 | returns new_git_repository dependencies | 820 | pending | — | — | Requires new_git_repository extraction |
