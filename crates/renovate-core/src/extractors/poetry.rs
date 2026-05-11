@@ -257,7 +257,19 @@ fn extract_registry_urls(doc: &Value) -> Vec<String> {
     };
 
     let mut urls = Vec::new();
+    let mut pypi_explicit = false;
     for source in sources {
+        if source
+            .get("name")
+            .and_then(Value::as_str)
+            .is_some_and(|name| name.eq_ignore_ascii_case("pypi"))
+            && source
+                .get("priority")
+                .and_then(Value::as_str)
+                .is_some_and(|priority| priority == "explicit")
+        {
+            pypi_explicit = true;
+        }
         if let Some(url) = source.get("url").and_then(Value::as_str)
             && !urls.iter().any(|existing| existing == url)
         {
@@ -266,7 +278,7 @@ fn extract_registry_urls(doc: &Value) -> Vec<String> {
     }
 
     const PYPI: &str = "https://pypi.org/pypi/";
-    if !sources.is_empty() && !urls.iter().any(|url| url == PYPI) {
+    if !sources.is_empty() && !pypi_explicit && !urls.iter().any(|url| url == PYPI) {
         urls.push(PYPI.to_owned());
     }
 
@@ -550,6 +562,53 @@ name = "baz"
                 "https://pypi.org/pypi/".to_owned(),
                 "https://bar.baz/+simple/".to_owned(),
             ]
+        );
+    }
+
+    // Ported: "source with priority=\"default\" and implicit PyPI priority=\"primary\"" — poetry/extract.spec.ts line 463
+    #[test]
+    fn source_default_with_implicit_pypi_primary() {
+        let content = r#"
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[[tool.poetry.source]]
+name = "foo"
+url = "https://foo.bar/simple/"
+priority = "default"
+
+[[tool.poetry.source]]
+name = "PyPI"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert_eq!(
+            package_file.registry_urls,
+            vec![
+                "https://foo.bar/simple/".to_owned(),
+                "https://pypi.org/pypi/".to_owned(),
+            ]
+        );
+    }
+
+    // Ported: "source with implicit priority and PyPI with priority=\"explicit\"" — poetry/extract.spec.ts line 483
+    #[test]
+    fn source_with_explicit_pypi_suppresses_implicit_pypi_url() {
+        let content = r#"
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[[tool.poetry.source]]
+name = "foo"
+url = "https://foo.bar/simple/"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "explicit"
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert_eq!(
+            package_file.registry_urls,
+            vec!["https://foo.bar/simple/".to_owned()]
         );
     }
 
