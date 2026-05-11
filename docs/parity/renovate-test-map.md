@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 814 / 1217 actionable tests ported (67%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 815 / 1217 actionable tests ported (67%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -2344,7 +2344,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/poetry/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/extract.spec.ts
-**Total tests:** 34 | **Ported:** 22 | **Actionable:** 34 | **Status:** partial
+**Total tests:** 34 | **Ported:** 23 | **Actionable:** 34 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -2380,7 +2380,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | source with priority="default" and implicit PyPI priority="primary" | 463 | ported | `poetry.rs` | `source_default_with_implicit_pypi_primary` | — |
 | source with implicit priority and PyPI with priority="explicit" | 483 | ported | `poetry.rs` | `source_with_explicit_pypi_suppresses_implicit_pypi_url` | — |
 | supports dependencies with explicit source | 500 | ported | `poetry.rs` | `dependencies_with_explicit_source_get_registry_urls` | — |
-| parses package file with template | 535 | pending | — | — | Requires Jinja-template tolerance |
+| parses package file with template | 535 | ported | `poetry.rs` | `parses_package_file_with_template_lines` | — |
 | extract dependencies from the project section | 555 | ported | `poetry.rs` | `extracts_poetry_v2_project_section_dependencies` | — |
 | extracts dependencies from pep735 dependency-groups | 616 | ported | `poetry.rs` | `extracts_pep735_dependency_groups` | — |
 | enriches pep621/pep735 dependencies with poetry managerData | 663 | pending | — | — | Requires PEP 621/735 enrichment with poetry managerData |

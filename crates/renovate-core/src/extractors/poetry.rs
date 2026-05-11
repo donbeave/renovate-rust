@@ -116,7 +116,8 @@ pub fn extract(content: &str) -> Result<Vec<PoetryExtractedDep>, PoetryExtractEr
 
 /// Parse a Poetry `pyproject.toml` and extract deps plus package-file metadata.
 pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtractError> {
-    let doc: Value = toml::from_str(content)?;
+    let sanitized = strip_template_lines(content);
+    let doc: Value = toml::from_str(&sanitized)?;
     let mut deps = Vec::new();
     let registry_urls = extract_registry_urls(&doc);
     let source_urls_by_name = extract_source_urls_by_name(&doc);
@@ -227,6 +228,17 @@ pub fn extract_package_file(content: &str) -> Result<PoetryExtract, PoetryExtrac
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
+
+fn strip_template_lines(content: &str) -> String {
+    content
+        .lines()
+        .filter(|line| {
+            let trimmed = line.trim_start();
+            !(trimmed.starts_with("{#") || trimmed.starts_with("{%") || trimmed.starts_with("{{"))
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
 
 /// Traverse nested table keys, returning `None` at the first missing key.
 fn nested_table<'v>(root: &'v Value, keys: &[&str]) -> Option<&'v toml::map::Map<String, Value>> {
@@ -833,6 +845,31 @@ priority = "explicit"
         assert_eq!(
             requests_cache.registry_urls,
             vec!["https://example.com".to_owned()]
+        );
+    }
+
+    // Ported: "parses package file with template" — poetry/extract.spec.ts line 535
+    #[test]
+    fn parses_package_file_with_template_lines() {
+        let content = r#"
+[tool.poetry]
+name = "{{ name }}"
+{# comment #}
+[tool.poetry.dependencies]
+python = "^3.9"
+{{ foo }} = "{{ bar }}"
+{% if foo %}
+dep1 = "^1.0.0"
+{% endif %}
+"#;
+        let package_file = extract_package_file(content).expect("parse should succeed");
+        assert_eq!(package_file.deps.len(), 2);
+        assert!(package_file.deps.iter().any(|dep| dep.name == "python"));
+        assert!(
+            package_file
+                .deps
+                .iter()
+                .any(|dep| dep.name == "dep1" && dep.current_value == "^1.0.0")
         );
     }
 
