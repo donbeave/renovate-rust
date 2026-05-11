@@ -2382,6 +2382,19 @@ fn resolve_extends_semantic_type_scope(extends: &[String]) -> (Option<String>, O
     (sem_type, None)
 }
 
+/// Parse deprecated `semanticPrefix`, e.g. `fix(deps): ` or `fix`.
+fn parse_legacy_semantic_prefix(prefix: &str) -> (String, String) {
+    let text = prefix.split(':').next().unwrap_or(prefix);
+    if let Some((semantic_type, rest)) = text.split_once('(') {
+        (
+            semantic_type.to_owned(),
+            rest.split(')').next().unwrap_or("").to_owned(),
+        )
+    } else {
+        (text.to_owned(), String::new())
+    }
+}
+
 /// Resolve packageRules injected by semantic-prefix presets.
 ///
 /// `:semanticPrefixFixDepsChoreOthers` is the most commonly used — it sets
@@ -3932,6 +3945,9 @@ impl RepoConfig {
                 default = "default_semantic_commit_scope"
             )]
             semantic_commit_scope: String,
+            /// Deprecated: semanticPrefix -> semanticCommitType + semanticCommitScope.
+            #[serde(rename = "semanticPrefix")]
+            semantic_prefix: Option<String>,
             #[serde(default, deserialize_with = "deserialize_string_or_vec")]
             extends: Vec<String>,
             #[serde(rename = "ignorePresets", default)]
@@ -4241,6 +4257,13 @@ impl RepoConfig {
             scalar_pr_concurrent,
             scalar_pr_hourly,
         ) = resolve_extends_scalar_overrides(&effective_extends);
+        let (legacy_sem_type, legacy_sem_scope) = raw
+            .semantic_prefix
+            .as_deref()
+            .map(parse_legacy_semantic_prefix)
+            .map_or((None, None), |(semantic_type, semantic_scope)| {
+                (Some(semantic_type), Some(semantic_scope))
+            });
 
         // Convert `enabled: false` inside major/minor/patch blocks to synthetic
         // packageRules so the existing is_update_blocked_ctx path handles them.
@@ -4680,8 +4703,12 @@ impl RepoConfig {
             separate_minor_patch: scalar_sep_minor_patch
                 .unwrap_or(raw.separate_minor_patch || preset_separate_minor_patch),
             separate_multiple_minor: scalar_sep_multi_minor.unwrap_or(raw.separate_multiple_minor),
-            semantic_commit_type: param_sem_type.unwrap_or(raw.semantic_commit_type),
-            semantic_commit_scope: param_sem_scope.unwrap_or(raw.semantic_commit_scope),
+            semantic_commit_type: param_sem_type
+                .or(legacy_sem_type)
+                .unwrap_or(raw.semantic_commit_type),
+            semantic_commit_scope: param_sem_scope
+                .or(legacy_sem_scope)
+                .unwrap_or(raw.semantic_commit_scope),
             semantic_commits: raw.semantic_commits.or_else(|| {
                 // `:semanticCommits` preset implies semanticCommits = "enabled"
                 if effective_extends.iter().any(|e| e == ":semanticCommits") {
@@ -7946,6 +7973,14 @@ mod tests {
             Some("disabled"),
             "semanticCommits: false must migrate to 'disabled'"
         );
+    }
+
+    // Ported: "migrates semantic prefix with no scope" — config/migration.spec.ts line 215
+    #[test]
+    fn semantic_prefix_without_scope_migrates_to_type_and_empty_scope() {
+        let c = RepoConfig::parse(r#"{"semanticPrefix": "fix"}"#);
+        assert_eq!(c.semantic_commit_type, "fix");
+        assert_eq!(c.semantic_commit_scope, "");
     }
 
     #[test]

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1376 / 1661 actionable tests ported (83%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1377 / 1661 actionable tests ported (83%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3500,7 +3500,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migration.spec.ts
-**Total tests:** 30 | **Ported:** 9 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 10 | **Actionable:** 30 | **Status:** partial
 
 ### `config/migration › migrateConfig(config, parentConfig)`
 
@@ -3509,7 +3509,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | migrates config | 17 | pending | — | — | — |
 | migrates before and after schedules | 184 | ported | `repo_config.rs` | `schedule_before_after_migration_matches_renovate_cases` | — |
 | migrates every friday | 205 | ported | `repo_config.rs` | `schedule_every_friday_migrated_to_on_friday` | — |
-| migrates semantic prefix with no scope | 215 | pending | — | — | — |
+| migrates semantic prefix with no scope | 215 | ported | `repo_config.rs` | `semantic_prefix_without_scope_migrates_to_type_and_empty_scope` | — |
 | does not migrate every weekday | 226 | ported | `repo_config.rs` | `schedule_every_weekday_not_migrated` | — |
 | does not migrate multi days | 236 | pending | — | — | — |
 | does not migrate hour range | 247 | ported | `repo_config.rs` | `schedule_compound_non_straddling_not_split` | — |
