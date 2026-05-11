@@ -18,6 +18,8 @@
 //! | `unspecified = "*"` | `Wildcard` skip |
 //! | `unspecified = {version = "*"}` | `Wildcard` skip |
 
+use std::collections::BTreeMap;
+
 use toml::Value;
 
 /// Why a Pipfile dep is being skipped.
@@ -43,14 +45,29 @@ pub struct PipfileDep {
     pub skip_reason: Option<PipfileSkipReason>,
 }
 
+/// Package-file level Pipenv extraction data.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PipfileExtract {
+    pub deps: Vec<PipfileDep>,
+    pub registry_urls: Vec<String>,
+    pub extracted_constraints: BTreeMap<String, String>,
+}
+
 /// Parse a `Pipfile` and extract all deps.
 pub fn extract(content: &str) -> Vec<PipfileDep> {
+    extract_package_file(content).deps
+}
+
+/// Parse a `Pipfile` and extract deps plus package-file metadata.
+pub fn extract_package_file(content: &str) -> PipfileExtract {
     let table: toml::Table = match toml::from_str(content) {
         Ok(t) => t,
-        Err(_) => return Vec::new(),
+        Err(_) => return PipfileExtract::default(),
     };
 
     let mut out = Vec::new();
+    let registry_urls = extract_sources(&table);
+    let mut extracted_constraints = extract_requires(&table);
 
     for (section_key, is_dev) in [("packages", false), ("dev-packages", true)] {
         if let Some(Value::Table(section)) = table.get(section_key) {
@@ -66,12 +83,19 @@ pub fn extract(content: &str) -> Vec<PipfileDep> {
                 }
                 let name = normalize_name(raw_name);
                 let dep = parse_entry(name, val, is_dev);
+                if dep.name == "pipenv" && dep.skip_reason.is_none() {
+                    extracted_constraints.insert("pipenv".to_owned(), dep.current_value.clone());
+                }
                 out.push(dep);
             }
         }
     }
 
-    out
+    PipfileExtract {
+        deps: out,
+        registry_urls,
+        extracted_constraints,
+    }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -143,6 +167,33 @@ fn parse_entry(name: String, val: &Value, is_dev: bool) -> PipfileDep {
             skip_reason: Some(PipfileSkipReason::Wildcard),
         },
     }
+}
+
+fn extract_sources(table: &toml::Table) -> Vec<String> {
+    match table.get("source") {
+        Some(Value::Array(sources)) => sources
+            .iter()
+            .filter_map(|source| match source {
+                Value::Table(source) => {
+                    source.get("url").and_then(Value::as_str).map(str::to_owned)
+                }
+                _ => None,
+            })
+            .collect(),
+        _ => Vec::new(),
+    }
+}
+
+fn extract_requires(table: &toml::Table) -> BTreeMap<String, String> {
+    let mut constraints = BTreeMap::new();
+    if let Some(Value::Table(requires)) = table.get("requires") {
+        if let Some(version) = requires.get("python_full_version").and_then(Value::as_str) {
+            constraints.insert("python".to_owned(), format!("== {version}"));
+        } else if let Some(version) = requires.get("python_version").and_then(Value::as_str) {
+            constraints.insert("python".to_owned(), format!("== {version}.*"));
+        }
+    }
+    constraints
 }
 
 /// Normalize PyPI package name: lowercase, replace `-`/`_`/`.` with `-`.
@@ -341,5 +392,81 @@ some-package = "==0 0"
         let valid: Vec<_> = deps.iter().filter(|d| d.skip_reason.is_none()).collect();
         assert_eq!(valid.len(), 1);
         assert_eq!(valid[0].name, "foo");
+    }
+
+    // Ported: "extracts all sources" — pipenv/extract.spec.ts line 234
+    #[test]
+    fn extracts_all_sources() {
+        let content = r#"
+[[source]]
+url = "source-url"
+[[source]]
+url = "other-source-url"
+[packages]
+foo = "==1.0.0"
+"#;
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.registry_urls,
+            vec!["source-url".to_owned(), "other-source-url".to_owned()]
+        );
+    }
+
+    // Ported: "gets python constraint from python_version" — pipenv/extract.spec.ts line 338
+    #[test]
+    fn gets_python_constraint_from_python_version() {
+        let content = r#"
+[packages]
+foo = "==1.0.0"
+[requires]
+python_version = "3.8"
+"#;
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.extracted_constraints.get("python"),
+            Some(&"== 3.8.*".to_owned())
+        );
+    }
+
+    // Ported: "gets python constraint from python_full_version" — pipenv/extract.spec.ts line 350
+    #[test]
+    fn gets_python_constraint_from_python_full_version() {
+        let content = r#"
+[packages]
+foo = "==1.0.0"
+[requires]
+python_full_version = "3.8.6"
+"#;
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.extracted_constraints.get("python"),
+            Some(&"== 3.8.6".to_owned())
+        );
+    }
+
+    // Ported: "gets pipenv constraint from packages" — pipenv/extract.spec.ts line 362
+    #[test]
+    fn gets_pipenv_constraint_from_packages() {
+        let content = r#"[packages]
+pipenv = "==2020.8.13"
+"#;
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.extracted_constraints.get("pipenv"),
+            Some(&"==2020.8.13".to_owned())
+        );
+    }
+
+    // Ported: "gets pipenv constraint from dev-packages" — pipenv/extract.spec.ts line 372
+    #[test]
+    fn gets_pipenv_constraint_from_dev_packages() {
+        let content = r#"[dev-packages]
+pipenv = "==2020.8.13"
+"#;
+        let package_file = extract_package_file(content);
+        assert_eq!(
+            package_file.extracted_constraints.get("pipenv"),
+            Some(&"==2020.8.13".to_owned())
+        );
     }
 }
