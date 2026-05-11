@@ -4414,8 +4414,11 @@ impl RepoConfig {
                     match_file_names: {
                         let mut f = r.match_file_names;
                         f.extend(r.paths);
-                        f.extend(r.match_paths);
-                        f.extend(r.match_files);
+                        if !r.match_paths.is_empty() {
+                            f.extend(r.match_paths);
+                        } else {
+                            f.extend(r.match_files);
+                        }
                         f
                     },
                     // Deprecated: depTypeList → matchDepTypes (plain alias)
@@ -10591,6 +10594,22 @@ mod rule_effects_tests {
 
         // matchUpdateTypes = major
         assert!(rule.match_update_types.contains(&UpdateType::Major));
+    }
+
+    // Ported: "migrates in order of precedence" — config/migration.spec.ts line 593
+    #[test]
+    fn deprecated_match_file_aliases_obey_precedence() {
+        let c = RepoConfig::parse(
+            r#"{
+                "packageRules": [
+                    {"matchFiles": ["matchFiles"], "matchPaths": ["matchPaths"]},
+                    {"matchPaths": ["matchPaths"], "matchFiles": ["matchFiles"]}
+                ]
+            }"#,
+        );
+        assert_eq!(c.package_rules.len(), 2);
+        assert_eq!(c.package_rules[0].match_file_names, vec!["matchPaths"]);
+        assert_eq!(c.package_rules[1].match_file_names, vec!["matchPaths"]);
     }
 
     #[test]
