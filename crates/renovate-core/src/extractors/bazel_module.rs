@@ -472,6 +472,14 @@ pub fn extract_rules_img_pull_deps(content: &str) -> Vec<BazelRulesImgPullDep> {
         .collect()
 }
 
+/// Extract unconfigured Bazel registry URLs from a workspace `.bazelrc` file set.
+pub fn extract_bazelrc_registry_urls(files: &[(&str, &str)]) -> Vec<String> {
+    let mut read_files = std::collections::BTreeSet::new();
+    let mut registry_urls = Vec::new();
+    collect_bazelrc_registry_urls(".bazelrc", files, &mut read_files, &mut registry_urls);
+    registry_urls
+}
+
 fn parse_unsupported_overrides(content: &str) -> Vec<UnsupportedOverride> {
     let mut deps = Vec::new();
     deps.extend(parse_named_overrides(
@@ -652,6 +660,85 @@ fn parse_rules_img_pull_alias(content: &str, alias: &str) -> Vec<BazelRulesImgPu
             })
         })
         .collect()
+}
+
+fn collect_bazelrc_registry_urls(
+    path: &str,
+    files: &[(&str, &str)],
+    read_files: &mut std::collections::BTreeSet<String>,
+    registry_urls: &mut Vec<String>,
+) {
+    if !read_files.insert(path.to_owned()) {
+        return;
+    }
+    let Some((_, content)) = files.iter().find(|(file_path, _)| *file_path == path) else {
+        return;
+    };
+
+    for line in content.lines().map(str::trim) {
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+
+        if let Some(import_path) = bazelrc_import_path(line) {
+            if let Some(local_path) = workspace_bazelrc_path(import_path) {
+                collect_bazelrc_registry_urls(&local_path, files, read_files, registry_urls);
+            }
+            continue;
+        }
+
+        let Some((command, options)) = line.split_once(char::is_whitespace) else {
+            continue;
+        };
+        if command.contains(':') {
+            continue;
+        }
+
+        registry_urls.extend(bazelrc_registry_options(options));
+    }
+}
+
+fn bazelrc_import_path(line: &str) -> Option<&str> {
+    let (kind, path) = line.split_once(char::is_whitespace)?;
+    if kind == "import" || kind == "try-import" {
+        Some(path.trim())
+    } else {
+        None
+    }
+}
+
+fn workspace_bazelrc_path(path: &str) -> Option<String> {
+    path.strip_prefix("%workspace%/")
+        .map(str::to_owned)
+        .or_else(|| (!path.starts_with('/')).then(|| path.to_owned()))
+}
+
+fn bazelrc_registry_options(options: &str) -> Vec<String> {
+    let parts = options.split_whitespace().collect::<Vec<_>>();
+    let mut registries = Vec::new();
+    let mut index = 0;
+    while index < parts.len() {
+        let part = parts[index];
+        if let Some(value) = part.strip_prefix("--registry=") {
+            registries.push(strip_quote_wrappers(value));
+        } else if part == "--registry"
+            && let Some(value) = parts.get(index + 1)
+        {
+            registries.push(strip_quote_wrappers(value));
+            index += 1;
+        }
+        index += 1;
+    }
+    registries
+}
+
+fn strip_quote_wrappers(value: &str) -> String {
+    value
+        .strip_prefix(['"', '\''])
+        .unwrap_or(value)
+        .strip_suffix(['"', '\''])
+        .unwrap_or(value)
+        .to_owned()
 }
 
 fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
@@ -1152,6 +1239,65 @@ register_toolchains("@local_posix_config//...")
         assert_eq!(deps[2].current_value, "0.6.2");
         assert!(deps[2].dev_dependency);
         assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
+    }
+
+    // Ported: "returns dependencies and custom registry URLs when specified in a bazelrc" — bazel-module/extract.spec.ts line 125
+    #[test]
+    fn extracts_bazelrc_registry_urls_for_module() {
+        let module_bazel = r#"bazel_dep(name = "rules_foo", version = "1.2.3")"#;
+        let bazelrc = r#"
+# .bazelrc
+
+build --registry=https://example.com/custom_registry.git
+build --registry=https://github.com/bazelbuild/bazel-central-registry
+build --registry='http://example.com/registry-with-single-quotes.git'
+build --registry="http://example.com/registry-with-double-quotes.git"
+
+import %workspace%/shared.bazelrc
+
+build --jobs 600
+
+# This file does not exist.
+try-import %workspace%/local.bazelrc
+
+# This file does not exist/is outside of the basePath
+try-import /does-not-exist/.bazelrc
+"#;
+        let shared_bazelrc = r#"
+# shared.bazelrc
+
+build --show_timestamps
+
+import %workspace%/foo.bazelrc
+"#;
+        let foo_bazelrc = r#"
+# foo.bazelrc
+
+# This should be ignored, because it is registered for the ci configuration.
+build:ci --registry=https://example.com/debug_registry.git
+
+build --color=yes
+"#;
+
+        let deps = extract(module_bazel);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].name, "rules_foo");
+        assert_eq!(deps[0].current_value, "1.2.3");
+
+        let registry_urls = extract_bazelrc_registry_urls(&[
+            (".bazelrc", bazelrc),
+            ("shared.bazelrc", shared_bazelrc),
+            ("foo.bazelrc", foo_bazelrc),
+        ]);
+        assert_eq!(
+            registry_urls,
+            vec![
+                "https://example.com/custom_registry.git",
+                "https://github.com/bazelbuild/bazel-central-registry",
+                "http://example.com/registry-with-single-quotes.git",
+                "http://example.com/registry-with-double-quotes.git",
+            ]
+        );
     }
 
     // Ported: "returns rules_img pull dependencies" — bazel-module/extract.spec.ts line 1005
