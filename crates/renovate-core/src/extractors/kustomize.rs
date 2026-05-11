@@ -237,6 +237,102 @@ images:
         );
     }
 
+    // Ported: "should correctly extract an image in a repo" — kustomize/extract.spec.ts line 305
+    #[test]
+    fn extracts_image_in_repo() {
+        let deps = extract(
+            r#"
+images:
+  - name: test/node
+    newTag: v1.0.0
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Image(image) = &deps[0] else {
+            panic!("expected image dependency");
+        };
+        assert_eq!(image.image, "test/node");
+        assert_eq!(image.tag.as_deref(), Some("v1.0.0"));
+        assert!(image.skip_reason.is_none());
+    }
+
+    // Ported: "should correctly extract from a different registry" — kustomize/extract.spec.ts line 323
+    #[test]
+    fn extracts_image_from_different_registry() {
+        let deps = extract(
+            r#"
+images:
+  - name: quay.io/repo/image
+    newTag: v1.0.0
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Image(image) = &deps[0] else {
+            panic!("expected image dependency");
+        };
+        assert_eq!(image.image, "quay.io/repo/image");
+        assert_eq!(image.tag.as_deref(), Some("v1.0.0"));
+        assert!(image.skip_reason.is_none());
+    }
+
+    // Ported: "should correctly extract from a different port" — kustomize/extract.spec.ts line 341
+    #[test]
+    fn extracts_image_from_registry_with_port() {
+        let deps = extract(
+            r#"
+images:
+  - name: localhost:5000/repo/image
+    newTag: v1.0.0
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Image(image) = &deps[0] else {
+            panic!("expected image dependency");
+        };
+        assert_eq!(image.image, "localhost:5000/repo/image");
+        assert_eq!(image.tag.as_deref(), Some("v1.0.0"));
+        assert!(image.skip_reason.is_none());
+    }
+
+    // Ported: "should correctly extract from a multi-depth registry" — kustomize/extract.spec.ts line 359
+    #[test]
+    fn extracts_image_from_multi_depth_registry() {
+        let deps = extract(
+            r#"
+images:
+  - name: localhost:5000/repo/image/service
+    newTag: v1.0.0
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Image(image) = &deps[0] else {
+            panic!("expected image dependency");
+        };
+        assert_eq!(image.image, "localhost:5000/repo/image/service");
+        assert_eq!(image.tag.as_deref(), Some("v1.0.0"));
+        assert!(image.skip_reason.is_none());
+    }
+
+    // Ported: "extracts newName" — kustomize/extract.spec.ts line 757
+    #[test]
+    fn extracts_new_name_override() {
+        let deps = extract(
+            r#"
+images:
+  - name: node
+    newName: registry.example.com/runtime/node
+    newTag: 20.10.0
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Image(image) = &deps[0] else {
+            panic!("expected image dependency");
+        };
+        assert_eq!(image.image, "registry.example.com/runtime/node");
+        assert_eq!(image.tag.as_deref(), Some("20.10.0"));
+        assert!(image.skip_reason.is_none());
+    }
+
     #[test]
     fn extracts_helm_charts() {
         let content = r#"

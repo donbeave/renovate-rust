@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 774 / 1217 actionable tests ported (64%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 779 / 1217 actionable tests ported (64%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -1945,7 +1945,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/kustomize/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/extract.spec.ts
-**Total tests:** 44 | **Ported:** 5 | **Actionable:** 39 | **Status:** partial
+**Total tests:** 44 | **Ported:** 10 | **Actionable:** 39 | **Status:** partial
 
 ### `parseKustomize` (top-level)
 
@@ -1990,10 +1990,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | should return null on a null input | 270 | not-applicable | — | — | Tests TS-internal image-extraction helper directly with null input |
 | should return null on invalid input | 278 | not-applicable | — | — | Tests TS-internal image-extraction helper directly with invalid input |
 | should correctly extract a default image | 287 | ported | `kustomize.rs` | `extracts_images` | — |
-| should correctly extract an image in a repo | 305 | pending | — | — | Requires repo image newName/newTag extraction |
-| should correctly extract from a different registry | 323 | pending | — | — | Requires custom-registry handling |
-| should correctly extract from a different port | 341 | pending | — | — | Requires port-in-registry handling |
-| should correctly extract from a multi-depth registry | 359 | pending | — | — | Requires multi-depth registry handling |
+| should correctly extract an image in a repo | 305 | ported | `kustomize.rs` | `extracts_image_in_repo` | — |
+| should correctly extract from a different registry | 323 | ported | `kustomize.rs` | `extracts_image_from_different_registry` | — |
+| should correctly extract from a different port | 341 | ported | `kustomize.rs` | `extracts_image_from_registry_with_port` | — |
+| should correctly extract from a multi-depth registry | 359 | ported | `kustomize.rs` | `extracts_image_from_multi_depth_registry` | — |
 | should correctly extract with registryAliases | 377 | pending | — | — | registryAliases not yet implemented |
 
 ### `extractPackageFile()`
@@ -2017,7 +2017,7 @@ Status key: `ported` · `pending` · `not-applicable`
 |---|---|---|---|---|---|
 | extracts from newTag | 675 | ported | `kustomize.rs` | `extracts_images` | — |
 | extracts from digest | 710 | pending | — | — | Requires digest-pinned image handling |
-| extracts newName | 757 | pending | — | — | Requires newName override |
+| extracts newName | 757 | ported | `kustomize.rs` | `extracts_new_name_override` | — |
 | parses helmChart field | 799 | ported | `kustomize.rs` | `mixed_images_and_helm` | — |
 | extracts from various URL forms (it.each) | 1104 | not-applicable | — | — | Tests TS-internal `extractResource` helper directly across many URL forms; Rust extractor has no equivalent public-API entry point |
 
