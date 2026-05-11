@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1447 / 1648 actionable tests ported (88%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1448 / 1648 actionable tests ported (88%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1953,7 +1953,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts tools - asdf plugins | 393 | ported | `mise.rs` | `asdf_tools_fall_through_to_asdf_table` | — |
 | extracts tools with multiple versions | 409 | ported | `mise.rs` | `unknown_tool_skipped` | — |
 | extracts tools with plugin options | 432 | ported | `mise.rs` | `tool_with_version_object` | — |
-| extracts tools in the default registry with backends | 448 | pending | — | — | Requires backend prefix syntax (e.g. `aqua:`, `cargo:`) parsing |
+| extracts tools in the default registry with backends | 448 | ported | `mise.rs` | `extracts_default_registry_backend_prefixed_tools` | — |
 | extracts aqua backend tool | 487 | pending | — | — | Requires aqua backend support |
 | extracts cargo backend tools | 514 | pending | — | — | Requires cargo backend support |
 | extracts dotnet backend tool | 553 | pending | — | — | Requires dotnet backend support |

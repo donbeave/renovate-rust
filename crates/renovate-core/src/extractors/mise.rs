@@ -232,6 +232,11 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
             continue;
         };
 
+        if let Some(dep) = resolve_backend_tool(tool_name, version) {
+            out.push(dep);
+            continue;
+        }
+
         // Dynamic tools with version-dependent datasource.
         if tool_name == "java" {
             out.push(asdf::parse_java_dep(tool_name, version));
@@ -265,6 +270,26 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
     }
 
     out
+}
+
+fn resolve_backend_tool(tool_name: &str, version: &str) -> Option<AsdfDep> {
+    let (backend, name) = tool_name.split_once(':')?;
+    match backend {
+        "core" => MISE_CORE_TABLE
+            .iter()
+            .find(|(k, _)| *k == name)
+            .map(|(_, def)| make_dep_from_def(tool_name, version, def)),
+        "asdf" => asdf::TOOL_TABLE
+            .iter()
+            .find(|(k, _)| *k == name)
+            .map(|(_, def)| make_dep_from_def(tool_name, version, def)),
+        "vfox" if name == "scala" => Some(asdf::parse_scala_dep(tool_name, version)),
+        "aqua" => asdf::TOOL_TABLE
+            .iter()
+            .find(|(k, _)| *k == name)
+            .map(|(_, def)| make_dep_from_def(tool_name, version, def)),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -423,5 +448,41 @@ mod tests {
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].current_value, "3.12.3");
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "extracts tools in the default registry with backends" — mise/extract.spec.ts line 448
+    #[test]
+    fn extracts_default_registry_backend_prefixed_tools() {
+        let content = r#"[tools]
+"core:node" = "16"
+"asdf:rust" = "1.82.0"
+"vfox:scala" = "3.5.2"
+"aqua:act" = "0.2.70"
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 4);
+
+        let node = deps.iter().find(|dep| dep.dep_name == "core:node").unwrap();
+        assert_eq!(node.current_value, "16");
+        assert_eq!(node.package_name, Some("node"));
+        assert_eq!(node.datasource_id, Some("node-version"));
+
+        let rust = deps.iter().find(|dep| dep.dep_name == "asdf:rust").unwrap();
+        assert_eq!(rust.current_value, "1.82.0");
+        assert_eq!(rust.package_name, Some("rust-lang/rust"));
+        assert_eq!(rust.datasource_id, Some("github-tags"));
+
+        let scala = deps
+            .iter()
+            .find(|dep| dep.dep_name == "vfox:scala")
+            .unwrap();
+        assert_eq!(scala.current_value, "3.5.2");
+        assert_eq!(scala.package_name, Some("lampepfl/dotty"));
+        assert_eq!(scala.datasource_id, Some("github-tags"));
+
+        let act = deps.iter().find(|dep| dep.dep_name == "aqua:act").unwrap();
+        assert_eq!(act.current_value, "0.2.70");
+        assert_eq!(act.package_name, Some("nektos/act"));
+        assert_eq!(act.datasource_id, Some("github-releases"));
     }
 }
