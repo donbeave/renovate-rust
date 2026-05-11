@@ -284,6 +284,15 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `changelogUrl`.
     pub changelog_url: Option<String>,
+    /// Override source URL for matching deps. Stored after lightweight template
+    /// rendering by `RepoConfig::collect_rule_effects`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `sourceUrl`.
+    pub source_url: Option<String>,
+    /// Changelog fetching mode for matching deps, e.g. `"off"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `fetchChangeLogs`.
+    pub fetch_change_logs: Option<String>,
     /// When `Some(true)`, requires Dependency Dashboard approval before Renovate
     /// creates a PR for matching deps.  Forwarded to PR generator.
     ///
@@ -928,6 +937,10 @@ pub struct RuleEffects {
     pub version_compatibility: Option<String>,
     /// Custom changelog URL template (forwarded to PR generator; not evaluated here).
     pub changelog_url: Option<String>,
+    /// Rendered source URL override from a matching package rule.
+    pub source_url: Option<String>,
+    /// Changelog fetching mode from a matching package rule.
+    pub fetch_change_logs: Option<String>,
     /// Whether Dependency Dashboard approval is required before creating a PR.
     pub dependency_dashboard_approval: Option<bool>,
     /// Whether this dep is force-disabled (skipReason should be set).

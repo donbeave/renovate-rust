@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1349 / 1668 actionable tests ported (81%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1353 / 1668 actionable tests ported (81%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4295,7 +4295,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/util/package-rules/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/package-rules/index.spec.ts
-**Total tests:** 73 | **Ported:** 58 | **Actionable:** 69 | **Status:** partial
+**Total tests:** 73 | **Ported:** 62 | **Actionable:** 69 | **Status:** partial
 
 ### `util/package-rules/index`
 
@@ -4380,10 +4380,10 @@ resolver) and the inner `extractPackageFile()` adapter.
 | matches if there are no matchers | 1386 | ported | `repo_config.rs` | `package_rule_without_matchers_applies_to_any_dep` | — |
 | overrides | 1404 | pending | — | — | — |
 | overrides with templates | 1447 | pending | — | — | — |
-| propagates fetchChangeLogs from matching packageRule | 1464 | pending | — | — | — |
-| does not set fetchChangeLogs when packageRule does not match | 1479 | pending | — | — | — |
-| compiles sourceUrl with template helper functions | 1494 | pending | — | — | — |
-| compiles sourceUrl with template variables | 1513 | pending | — | — | — |
+| propagates fetchChangeLogs from matching packageRule | 1464 | ported | `repo_config.rs` | `package_rule_fetch_change_logs_applies_when_rule_matches` | — |
+| does not set fetchChangeLogs when packageRule does not match | 1479 | ported | `repo_config.rs` | `package_rule_fetch_change_logs_skipped_when_rule_does_not_match` | — |
+| compiles sourceUrl with template helper functions | 1494 | ported | `repo_config.rs` | `package_rule_source_url_template_replace_helper` | — |
+| compiles sourceUrl with template variables | 1513 | ported | `repo_config.rs` | `package_rule_source_url_template_package_name_variable` | — |
 
 ---
 

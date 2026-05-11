@@ -3793,6 +3793,10 @@ impl RepoConfig {
             version_compatibility: Option<String>,
             #[serde(rename = "changelogUrl")]
             changelog_url: Option<String>,
+            #[serde(rename = "sourceUrl")]
+            source_url: Option<String>,
+            #[serde(rename = "fetchChangeLogs")]
+            fetch_change_logs: Option<String>,
             #[serde(default)]
             extends: Vec<String>,
             #[serde(rename = "dependencyDashboardApproval")]
@@ -4448,6 +4452,8 @@ impl RepoConfig {
                     replacement_version: r.replacement_version,
                     version_compatibility: r.version_compatibility,
                     changelog_url: r.changelog_url,
+                    source_url: r.source_url,
+                    fetch_change_logs: r.fetch_change_logs,
                     dependency_dashboard_approval: r.dependency_dashboard_approval,
                     force_enabled: r.force.and_then(|f| f.enabled),
                 }
@@ -5199,6 +5205,14 @@ impl RepoConfig {
             if rule.changelog_url.is_some() {
                 effects.changelog_url.clone_from(&rule.changelog_url);
             }
+            if let Some(source_url) = &rule.source_url {
+                effects.source_url = Some(render_package_rule_template(source_url, ctx));
+            }
+            if rule.fetch_change_logs.is_some() {
+                effects
+                    .fetch_change_logs
+                    .clone_from(&rule.fetch_change_logs);
+            }
             if rule.dependency_dashboard_approval.is_some() {
                 effects.dependency_dashboard_approval = rule.dependency_dashboard_approval;
             }
@@ -5241,6 +5255,39 @@ impl RepoConfig {
         }
         effects
     }
+}
+
+fn render_package_rule_template(template: &str, ctx: &DepContext<'_>) -> String {
+    let package_name = ctx.package_name.unwrap_or(ctx.dep_name);
+    let mut out = template
+        .replace("{{packageName}}", package_name)
+        .replace("{{depName}}", ctx.dep_name);
+
+    while let Some(start) = out.find("{{replace \"") {
+        let Some(close_offset) = out[start..].find("}}") else {
+            break;
+        };
+        let end = start + close_offset + 2;
+        let expression = &out[start..end];
+        let Some(rest) = expression.strip_prefix("{{replace \"") else {
+            break;
+        };
+        let Some((from, rest)) = rest.split_once("\" \"") else {
+            break;
+        };
+        let Some((to, rest)) = rest.split_once("\" ") else {
+            break;
+        };
+        let variable = rest.trim_end_matches("}}").trim();
+        let value = match variable {
+            "packageName" => package_name,
+            "depName" => ctx.dep_name,
+            _ => "",
+        };
+        out.replace_range(start..end, &value.replace(from, to));
+    }
+
+    out
 }
 
 impl Default for RepoConfig {
@@ -7501,6 +7548,79 @@ mod tests {
         let c = RepoConfig::parse(r#"{"packageRules": [{"automerge": true}]}"#);
         let ctx = DepContext::for_dep("test2");
         assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
+    }
+
+    // Ported: "propagates fetchChangeLogs from matching packageRule" — util/package-rules/index.spec.ts line 1464
+    #[test]
+    fn package_rule_fetch_change_logs_applies_when_rule_matches() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["npm"], "fetchChangeLogs": "off"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "some-dep",
+            datasource: Some("npm"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).fetch_change_logs.as_deref(),
+            Some("off")
+        );
+    }
+
+    // Ported: "does not set fetchChangeLogs when packageRule does not match" — util/package-rules/index.spec.ts line 1479
+    #[test]
+    fn package_rule_fetch_change_logs_skipped_when_rule_does_not_match() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{"matchDatasources": ["pypi"], "fetchChangeLogs": "off"}]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "some-dep",
+            datasource: Some("npm"),
+            ..Default::default()
+        };
+        assert_eq!(c.collect_rule_effects(&ctx).fetch_change_logs, None);
+    }
+
+    // Ported: "compiles sourceUrl with template helper functions" — util/package-rules/index.spec.ts line 1494
+    #[test]
+    fn package_rule_source_url_template_replace_helper() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{
+                "matchDatasources": ["terraform-provider"],
+                "sourceUrl": "https://github.com/{{replace \"/\" \"/terraform-provider-\" packageName}}"
+            }]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "aws",
+            package_name: Some("hashicorp/aws"),
+            datasource: Some("terraform-provider"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).source_url.as_deref(),
+            Some("https://github.com/hashicorp/terraform-provider-aws")
+        );
+    }
+
+    // Ported: "compiles sourceUrl with template variables" — util/package-rules/index.spec.ts line 1513
+    #[test]
+    fn package_rule_source_url_template_package_name_variable() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [{
+                "matchDatasources": ["terraform-provider"],
+                "sourceUrl": "https://github.com/{{packageName}}"
+            }]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "aws",
+            package_name: Some("hashicorp/aws"),
+            datasource: Some("terraform-provider"),
+            ..Default::default()
+        };
+        assert_eq!(
+            c.collect_rule_effects(&ctx).source_url.as_deref(),
+            Some("https://github.com/hashicorp/aws")
+        );
     }
 
     // ── Ported from Renovate dep-names.spec.ts ────────────────────────────────
