@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 889 / 1216 actionable tests ported (73%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 890 / 1216 actionable tests ported (73%) — updated 2026-05-11
 
 Legacy summary tables below cover the remaining 47 spec files not yet converted to per-test format (35 pending, 11 partial, 1 not-applicable). They are dominated by non-extract specs — index, parser, integration, lockfile, properties, update — that need a different test-port strategy than the per-test extract sections above.
 
@@ -666,14 +666,14 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/circleci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/extract.spec.ts
-**Total tests:** 9 | **Ported:** 6 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 9 | **Ported:** 7 | **Actionable:** 9 | **Status:** partial
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null for empty | 12 | ported | `circleci.rs` | `empty_content_returns_no_deps` | — |
-| handles registry alias | 16 | pending | — | — | registryAliases not yet implemented |
+| handles registry alias | 16 | ported | `circleci.rs` | `handles_registry_alias` | — |
 | extracts multiple image and resolves yaml anchors | 48 | pending | — | — | YAML anchor resolution not implemented |
 | extracts orbs too | 93 | ported | `circleci.rs` | `extracts_orbs` | — |
 | extracts image without leading dash | 200 | pending | — | — | YAML anchor resolution not implemented |

@@ -43,6 +43,18 @@ pub struct CircleCiDep {
     pub dep: DockerfileExtractedDep,
 }
 
+/// Docker dep metadata after applying CircleCI registry alias config.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CircleCiDockerDep {
+    pub dep_name: String,
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub replace_string: String,
+    pub auto_replace_string_template: String,
+    pub dep_type: &'static str,
+}
+
 /// A single orb reference extracted from a CircleCI config `orbs:` block.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CircleCiOrbDep {
@@ -103,6 +115,17 @@ pub fn extract(content: &str) -> Vec<CircleCiDep> {
     out
 }
 
+/// Extract Docker image deps and apply Renovate-style registry aliases.
+pub fn extract_with_registry_aliases(
+    content: &str,
+    registry_aliases: &[(&str, &str)],
+) -> Vec<CircleCiDockerDep> {
+    extract(content)
+        .into_iter()
+        .map(|dep| circleci_docker_dep(dep.dep, registry_aliases))
+        .collect()
+}
+
 /// Extract orb references from the `orbs:` block of a CircleCI config.
 ///
 /// Supports the simple `alias: owner/name@version` form only.
@@ -158,6 +181,63 @@ pub fn extract_orbs(content: &str) -> Vec<CircleCiOrbDep> {
 
 fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
+}
+
+fn circleci_docker_dep(
+    dep: DockerfileExtractedDep,
+    registry_aliases: &[(&str, &str)],
+) -> CircleCiDockerDep {
+    let dep_name = dep.image;
+    let package_name = apply_registry_alias(&dep_name, registry_aliases);
+    let alias_applied = package_name != dep_name;
+    let replace_string = image_ref(&dep_name, dep.tag.as_deref(), dep.digest.as_deref());
+    let auto_replace_string_template = if alias_applied {
+        format!(
+            "{dep_name}:{{{{#if newValue}}}}{{{{newValue}}}}{{{{/if}}}}{{{{#if newDigest}}}}@{{{{newDigest}}}}{{{{/if}}}}"
+        )
+    } else {
+        "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+            .to_owned()
+    };
+
+    CircleCiDockerDep {
+        dep_name,
+        package_name,
+        current_value: dep.tag,
+        current_digest: dep.digest,
+        replace_string,
+        auto_replace_string_template,
+        dep_type: "docker",
+    }
+}
+
+fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
+    let Some((registry, rest)) = image.split_once('/') else {
+        return image.to_owned();
+    };
+    registry_aliases
+        .iter()
+        .find_map(|(from, to)| {
+            if *from == registry {
+                Some(format!("{to}/{rest}"))
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| image.to_owned())
+}
+
+fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
+    let mut value = image.to_owned();
+    if let Some(tag) = tag {
+        value.push(':');
+        value.push_str(tag);
+    }
+    if let Some(digest) = digest {
+        value.push('@');
+        value.push_str(digest);
+    }
+    value
 }
 
 #[cfg(test)]
@@ -233,6 +313,38 @@ jobs:
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
+    }
+
+    // Ported: "handles registry alias" — circleci/extract.spec.ts line 16
+    #[test]
+    fn handles_registry_alias() {
+        let content = r#"
+executors:
+  my-executor:
+    docker:
+      - image: quay.io/myName/myPackage:0.6.2
+"#;
+        let deps = extract_with_registry_aliases(
+            content,
+            &[
+                ("quay.io", "my-quay-mirror.registry.com"),
+                ("index.docker.io", "my-docker-mirror.registry.com"),
+            ],
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_type, "docker");
+        assert_eq!(deps[0].dep_name, "quay.io/myName/myPackage");
+        assert_eq!(
+            deps[0].package_name,
+            "my-quay-mirror.registry.com/myName/myPackage"
+        );
+        assert_eq!(deps[0].current_value.as_deref(), Some("0.6.2"));
+        assert_eq!(deps[0].current_digest, None);
+        assert_eq!(deps[0].replace_string, "quay.io/myName/myPackage:0.6.2");
+        assert_eq!(
+            deps[0].auto_replace_string_template,
+            "quay.io/myName/myPackage:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
+        );
     }
 
     // Ported: "extracts orbs without jobs" — circleci/extract.spec.ts line 237
