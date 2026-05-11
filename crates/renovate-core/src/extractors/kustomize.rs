@@ -79,6 +79,7 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
         Default,
         InImages,
         InHelmCharts,
+        InResources,
     }
 
     let mut state = State::Default;
@@ -105,6 +106,8 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
                     state = State::InImages;
                 } else if trimmed == "helmCharts:" {
                     state = State::InHelmCharts;
+                } else if matches!(trimmed, "bases:" | "resources:" | "components:") {
+                    state = State::InResources;
                 }
             }
             State::InImages => {
@@ -114,6 +117,8 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
                     state = State::Default;
                     if trimmed == "helmCharts:" {
                         state = State::InHelmCharts;
+                    } else if matches!(trimmed, "bases:" | "resources:" | "components:") {
+                        state = State::InResources;
                     }
                     continue;
                 }
@@ -137,6 +142,8 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
                     state = State::Default;
                     if trimmed == "images:" {
                         state = State::InImages;
+                    } else if matches!(trimmed, "bases:" | "resources:" | "components:") {
+                        state = State::InResources;
                     }
                     continue;
                 }
@@ -152,6 +159,25 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
                     helm_repo = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
                 } else if let Some(val) = strip_key(trimmed, "version") {
                     helm_version = Some(val.trim().trim_matches('"').trim_matches('\'').to_owned());
+                }
+            }
+            State::InResources => {
+                if indent == 0 && !trimmed.starts_with('-') {
+                    state = State::Default;
+                    if trimmed == "images:" {
+                        state = State::InImages;
+                    } else if trimmed == "helmCharts:" {
+                        state = State::InHelmCharts;
+                    } else if matches!(trimmed, "bases:" | "resources:" | "components:") {
+                        state = State::InResources;
+                    }
+                    continue;
+                }
+                if let Some(rest) = trimmed.strip_prefix("- ")
+                    && let Some(dep) =
+                        extract_resource(rest.trim().trim_matches('"').trim_matches('\''))
+                {
+                    out.push(KustomizeDep::Resource(dep));
                 }
             }
         }
@@ -261,14 +287,14 @@ fn github_dep_name(path: &str) -> Option<String> {
 fn dep_name_from_remote_path(path: &str) -> Option<String> {
     let clean = repo_base(path)?;
     let clean = clean.strip_suffix(".git").unwrap_or(clean.as_str());
-    let mut parts = clean.split('/');
-    let host = parts.next()?;
-    let owner = parts.next()?;
-    let repo = parts.next()?;
-    if host.is_empty() || owner.is_empty() || repo.is_empty() {
-        return None;
+    let parts = clean.split('/').collect::<Vec<_>>();
+    match parts.as_slice() {
+        [owner, repo] if !owner.is_empty() && !repo.is_empty() => Some(format!("{owner}/{repo}")),
+        [host, owner, repo, ..] if !host.is_empty() && !owner.is_empty() && !repo.is_empty() => {
+            Some(format!("{host}/{owner}/{repo}"))
+        }
+        _ => None,
     }
-    Some(format!("{host}/{owner}/{repo}"))
 }
 
 fn repo_base(path: &str) -> Option<String> {
@@ -277,7 +303,7 @@ fn repo_base(path: &str) -> Option<String> {
         return Some(format!("{before_git}.git"));
     }
     let parts = without_subdir.split('/').take(3).collect::<Vec<_>>();
-    if parts.len() < 3 {
+    if parts.len() < 2 {
         return None;
     }
     Some(parts.join("/"))
@@ -654,6 +680,169 @@ helmCharts:
             extract_resource("https://github.com/user/test-repo.git?ref=v1.0.0&ref=v0").unwrap();
         assert_eq!(dep.current_value, "v1.0.0");
         assert_eq!(dep.dep_name, "user/test-repo");
+    }
+
+    // Ported: "extracts multiple image lines" — kustomize/extract.spec.ts line 416
+    #[test]
+    fn extracts_multiple_base_lines() {
+        let deps = extract(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- service-1
+- https://moredhel/remote-kustomize.git?ref=v0.0.1
+- https://moredhel/remote-kustomize.git//deploy?ref=v0.0.1
+"#,
+        );
+        let resources: Vec<_> = deps
+            .iter()
+            .filter_map(|dep| {
+                if let KustomizeDep::Resource(resource) = dep {
+                    Some(resource)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(resources.len(), 2);
+        assert!(
+            resources
+                .iter()
+                .all(|dep| dep.dep_name == "moredhel/remote-kustomize")
+        );
+        assert!(resources.iter().all(|dep| dep.current_value == "v0.0.1"));
+    }
+
+    // Ported: "extracts ssh dependency" — kustomize/extract.spec.ts line 444
+    #[test]
+    fn package_file_extracts_ssh_dependency() {
+        let deps = extract(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+  - git@github.com:moredhel/remote-kustomize.git?ref=v0.0.1
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Resource(resource) = &deps[0] else {
+            panic!("expected resource dependency");
+        };
+        assert_eq!(resource.dep_name, "moredhel/remote-kustomize");
+        assert_eq!(resource.current_value, "v0.0.1");
+        assert_eq!(resource.datasource, "github-tags");
+    }
+
+    // Ported: "extracts ssh dependency with a subdir" — kustomize/extract.spec.ts line 462
+    #[test]
+    fn package_file_extracts_ssh_dependency_with_subdir() {
+        let deps = extract(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld?ref=v2.0.0
+"#,
+        );
+        assert_eq!(deps.len(), 1);
+        let KustomizeDep::Resource(resource) = &deps[0] else {
+            panic!("expected resource dependency");
+        };
+        assert_eq!(resource.dep_name, "kubernetes-sigs/kustomize");
+        assert_eq!(resource.current_value, "v2.0.0");
+    }
+
+    // Ported: "extracts http dependency" — kustomize/extract.spec.ts line 481
+    #[test]
+    fn package_file_extracts_http_dependencies() {
+        let deps = extract(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- github.com/user/repo//deploy?ref=v0.0.1
+- github.com/fluxcd/flux/deploy?ref=1.19.0
+"#,
+        );
+        let resources: Vec<_> = deps
+            .iter()
+            .filter_map(|dep| {
+                if let KustomizeDep::Resource(resource) = dep {
+                    Some(resource)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(resources.len(), 2);
+        assert_eq!(resources[0].dep_name, "user/repo");
+        assert_eq!(resources[0].current_value, "v0.0.1");
+        assert_eq!(resources[1].dep_name, "fluxcd/flux");
+        assert_eq!(resources[1].current_value, "1.19.0");
+    }
+
+    // Ported: "should extract bases resources and components from their respective blocks" — kustomize/extract.spec.ts line 598
+    #[test]
+    fn extracts_bases_resources_and_components_blocks() {
+        let deps = extract(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- git@github.com:moredhel/remote-kustomize.git?ref=v0.0.1
+resources:
+- github.com/fluxcd/flux/deploy?ref=1.19.0
+components:
+- github.com/fluxcd/flux/memcache-dep?ref=1.18.0
+"#,
+        );
+        let resources: Vec<_> = deps
+            .iter()
+            .filter_map(|dep| {
+                if let KustomizeDep::Resource(resource) = dep {
+                    Some(resource)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(resources.len(), 3);
+        assert_eq!(resources[0].dep_name, "moredhel/remote-kustomize");
+        assert_eq!(resources[1].dep_name, "fluxcd/flux");
+        assert_eq!(resources[2].dep_name, "fluxcd/flux");
+        assert_eq!(resources[2].current_value, "1.18.0");
+    }
+
+    // Ported: "should extract dependencies when kind is Component" — kustomize/extract.spec.ts line 632
+    #[test]
+    fn extracts_dependencies_when_kind_is_component() {
+        let deps = extract(
+            r#"
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+- deployment.yaml
+- github.com/fluxcd/flux/deploy?ref=1.19.0
+components:
+- github.com/fluxcd/flux/memcache-dep?ref=1.18.0
+"#,
+        );
+        let resources: Vec<_> = deps
+            .iter()
+            .filter_map(|dep| {
+                if let KustomizeDep::Resource(resource) = dep {
+                    Some(resource)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(resources.len(), 2);
+        assert_eq!(resources[0].dep_name, "fluxcd/flux");
+        assert_eq!(resources[0].current_value, "1.19.0");
+        assert_eq!(resources[1].dep_name, "fluxcd/flux");
+        assert_eq!(resources[1].current_value, "1.18.0");
     }
 
     // Ported: "parses helmChart field" — kustomize/extract.spec.ts line 799
