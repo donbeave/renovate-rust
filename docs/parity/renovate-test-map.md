@@ -3557,6 +3557,94 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts
+**Total tests:** 6 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `config/migrations/custom/azure-gitlab-automerge-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate non undefined gitLabAutomerge | 4 | ported | `migrate_validate.rs` | `git_lab_automerge_migrates_to_platform_automerge` | — |
+| should just remove undefined gitLabAutomerge | 14 | not-applicable | — | — | Rust JSON config has no `undefined` value; absent keys already produce the migrated empty object behavior |
+| should override platformAutomerge when gitLabAutomerge defined | 24 | ported | `migrate_validate.rs` | `git_lab_automerge_overrides_platform_automerge` | — |
+| should migrate non undefined azureAutoComplete | 36 | ported | `migrate_validate.rs` | `azure_auto_complete_migrates_to_platform_automerge` | — |
+| should just remove undefined azureAutoComplete | 46 | not-applicable | — | — | Rust JSON config has no `undefined` value; absent keys already produce the migrated empty object behavior |
+| should override platformAutomerge when azureAutoComplete defined | 56 | ported | `migrate_validate.rs` | `azure_auto_complete_overrides_platform_automerge` | — |
+
+---
+
+## `lib/config/migrations/custom/compatibility-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/compatibility-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/compatibility-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate object | 4 | ported | `migrate_validate.rs` | `compatibility_object_migrates_to_constraints` | — |
+| should just remove property when compatibility is not an object | 18 | ported | `migrate_validate.rs` | `compatibility_non_object_is_removed` | — |
+
+---
+
+## `lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/composer-ignore-platform-reqs-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true to empty array | 4 | ported | `migrate_validate.rs` | `composer_ignore_platform_reqs_true_migrates_to_empty_array` | — |
+| should migrate false to null | 14 | ported | `migrate_validate.rs` | `composer_ignore_platform_reqs_false_migrates_to_null` | — |
+| should not change array value | 24 | ported | `migrate_validate.rs` | `composer_ignore_platform_reqs_array_is_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/custom-managers-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/custom-managers-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/custom-managers-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates | 6 | ported | `migrate_validate.rs` | `custom_managers_missing_custom_type_migrates_to_regex` | — |
+
+---
+
+## `lib/config/migrations/custom/datasource-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/datasource-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/datasource-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate adoptium-java | 4 | ported | `migrate_validate.rs` | `datasource_adoptium_java_migrates_to_java_version` | — |
+| should migrate donet | 14 | ported | `migrate_validate.rs` | `datasource_dotnet_migrates_to_dotnet_version` | — |
+| should migrate node | 24 | ported | `migrate_validate.rs` | `datasource_node_migrates_to_node_version` | — |
+
+---
+
+## `lib/config/migrations/custom/enabled-managers-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/enabled-managers-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/enabled-managers-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates | 4 | ported | `migrate_validate.rs` | `enabled_managers_legacy_names_migrate` | — |
+
+---
+
 ## `lib/config/migrations/custom/base-branch-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/base-branch-migration.spec.ts

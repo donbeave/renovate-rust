@@ -128,6 +128,68 @@ fn migrate_config(input: &Value) -> Value {
                 Value::String("global".to_owned()),
             );
         }
+        for key in ["azureAutoComplete", "gitLabAutomerge"] {
+            if let Some(value) = map.remove(key)
+                && let Some(value) = value.as_bool()
+            {
+                map.insert("platformAutomerge".to_owned(), Value::Bool(value));
+            }
+        }
+        if let Some(compatibility) = map.remove("compatibility")
+            && compatibility.is_object()
+        {
+            set_safely(map, "constraints", compatibility);
+        }
+        if matches!(
+            map.get("composerIgnorePlatformReqs"),
+            Some(Value::Bool(true))
+        ) {
+            map.insert(
+                "composerIgnorePlatformReqs".to_owned(),
+                Value::Array(Vec::new()),
+            );
+        } else if matches!(
+            map.get("composerIgnorePlatformReqs"),
+            Some(Value::Bool(false))
+        ) {
+            map.insert("composerIgnorePlatformReqs".to_owned(), Value::Null);
+        }
+        if let Some(Value::Array(custom_managers)) = map.get_mut("customManagers") {
+            for manager in custom_managers {
+                let Some(manager) = manager.as_object_mut() else {
+                    continue;
+                };
+                if !manager.contains_key("customType") {
+                    manager.insert("customType".to_owned(), Value::String("regex".to_owned()));
+                }
+            }
+        }
+        if let Some(Value::String(datasource)) = map.get_mut("datasource")
+            && let Some(migrated) = match datasource.as_str() {
+                "adoptium-java" => Some("java-version"),
+                "dotnet" => Some("dotnet-version"),
+                "node" => Some("node-version"),
+                _ => None,
+            }
+        {
+            *datasource = migrated.to_owned();
+        }
+        if let Some(Value::Array(enabled_managers)) = map.get_mut("enabledManagers") {
+            for manager in enabled_managers {
+                let Some(manager_name) = manager.as_str() else {
+                    continue;
+                };
+                *manager = Value::String(
+                    match manager_name {
+                        "yarn" => "npm",
+                        "regex" => "custom.regex",
+                        "renovate-config-presets" => "renovate-config",
+                        _ => manager_name,
+                    }
+                    .to_owned(),
+                );
+            }
+        }
         if let Some(base_branch) = map.remove("baseBranch") {
             let base_branch_patterns = map
                 .entry("baseBranchPatterns".to_owned())
@@ -3686,6 +3748,180 @@ mod tests {
         assert_eq!(
             migrate_config(&json!({"binarySource": "auto"})),
             json!({"binarySource": "global"})
+        );
+    }
+
+    // Ported: "should migrate non undefined gitLabAutomerge" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 4
+    #[test]
+    fn git_lab_automerge_migrates_to_platform_automerge() {
+        assert_eq!(
+            migrate_config(&json!({"gitLabAutomerge": true})),
+            json!({"platformAutomerge": true})
+        );
+    }
+
+    // Ported: "should override platformAutomerge when gitLabAutomerge defined" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 24
+    #[test]
+    fn git_lab_automerge_overrides_platform_automerge() {
+        assert_eq!(
+            migrate_config(&json!({"gitLabAutomerge": true, "platformAutomerge": false})),
+            json!({"platformAutomerge": true})
+        );
+    }
+
+    // Ported: "should migrate non undefined azureAutoComplete" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 36
+    #[test]
+    fn azure_auto_complete_migrates_to_platform_automerge() {
+        assert_eq!(
+            migrate_config(&json!({"azureAutoComplete": true})),
+            json!({"platformAutomerge": true})
+        );
+    }
+
+    // Ported: "should override platformAutomerge when azureAutoComplete defined" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 56
+    #[test]
+    fn azure_auto_complete_overrides_platform_automerge() {
+        assert_eq!(
+            migrate_config(&json!({"azureAutoComplete": true, "platformAutomerge": false})),
+            json!({"platformAutomerge": true})
+        );
+    }
+
+    // Ported: "should migrate object" — config/migrations/custom/compatibility-migration.spec.ts line 4
+    #[test]
+    fn compatibility_object_migrates_to_constraints() {
+        assert_eq!(
+            migrate_config(&json!({"compatibility": {"test": "test"}})),
+            json!({"constraints": {"test": "test"}})
+        );
+    }
+
+    // Ported: "should just remove property when compatibility is not an object" — config/migrations/custom/compatibility-migration.spec.ts line 18
+    #[test]
+    fn compatibility_non_object_is_removed() {
+        assert_eq!(migrate_config(&json!({"compatibility": "test"})), json!({}));
+    }
+
+    // Ported: "should migrate true to empty array" — config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 4
+    #[test]
+    fn composer_ignore_platform_reqs_true_migrates_to_empty_array() {
+        assert_eq!(
+            migrate_config(&json!({"composerIgnorePlatformReqs": true})),
+            json!({"composerIgnorePlatformReqs": []})
+        );
+    }
+
+    // Ported: "should migrate false to null" — config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 14
+    #[test]
+    fn composer_ignore_platform_reqs_false_migrates_to_null() {
+        assert_eq!(
+            migrate_config(&json!({"composerIgnorePlatformReqs": false})),
+            json!({"composerIgnorePlatformReqs": null})
+        );
+    }
+
+    // Ported: "should not change array value" — config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 24
+    #[test]
+    fn composer_ignore_platform_reqs_array_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"composerIgnorePlatformReqs": []})),
+            json!({"composerIgnorePlatformReqs": []})
+        );
+    }
+
+    // Ported: "migrates" — config/migrations/custom/custom-managers-migration.spec.ts line 6
+    #[test]
+    fn custom_managers_missing_custom_type_migrates_to_regex() {
+        assert_eq!(
+            migrate_config(&json!({
+                "customManagers": [
+                    {
+                        "managerFilePatterns": ["js", "***$}{]["],
+                        "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                        "datasourceTemplate": "maven",
+                        "versioningTemplate": "gradle"
+                    },
+                    {
+                        "customType": "regex",
+                        "managerFilePatterns": ["js", "***$}{]["],
+                        "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                        "datasourceTemplate": "maven",
+                        "versioningTemplate": "gradle"
+                    }
+                ]
+            })),
+            json!({
+                "customManagers": [
+                    {
+                        "customType": "regex",
+                        "managerFilePatterns": ["js", "***$}{]["],
+                        "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                        "datasourceTemplate": "maven",
+                        "versioningTemplate": "gradle"
+                    },
+                    {
+                        "customType": "regex",
+                        "managerFilePatterns": ["js", "***$}{]["],
+                        "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                        "datasourceTemplate": "maven",
+                        "versioningTemplate": "gradle"
+                    }
+                ]
+            })
+        );
+    }
+
+    // Ported: "should migrate adoptium-java" — config/migrations/custom/datasource-migration.spec.ts line 4
+    #[test]
+    fn datasource_adoptium_java_migrates_to_java_version() {
+        assert_eq!(
+            migrate_config(&json!({"datasource": "adoptium-java"})),
+            json!({"datasource": "java-version"})
+        );
+    }
+
+    // Ported: "should migrate donet" — config/migrations/custom/datasource-migration.spec.ts line 14
+    #[test]
+    fn datasource_dotnet_migrates_to_dotnet_version() {
+        assert_eq!(
+            migrate_config(&json!({"datasource": "dotnet"})),
+            json!({"datasource": "dotnet-version"})
+        );
+    }
+
+    // Ported: "should migrate node" — config/migrations/custom/datasource-migration.spec.ts line 24
+    #[test]
+    fn datasource_node_migrates_to_node_version() {
+        assert_eq!(
+            migrate_config(&json!({"datasource": "node"})),
+            json!({"datasource": "node-version"})
+        );
+    }
+
+    // Ported: "migrates" — config/migrations/custom/enabled-managers-migration.spec.ts line 4
+    #[test]
+    fn enabled_managers_legacy_names_migrate() {
+        assert_eq!(
+            migrate_config(&json!({
+                "enabledManagers": [
+                    "test1",
+                    "yarn",
+                    "test2",
+                    "regex",
+                    "custom.regex",
+                    "renovate-config-presets"
+                ]
+            })),
+            json!({
+                "enabledManagers": [
+                    "test1",
+                    "npm",
+                    "test2",
+                    "custom.regex",
+                    "custom.regex",
+                    "renovate-config"
+                ]
+            })
         );
     }
 
