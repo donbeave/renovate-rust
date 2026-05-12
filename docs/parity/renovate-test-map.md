@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1586 / 1657 actionable tests ported (96%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1597 / 1657 actionable tests ported (96%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 62 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 73 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3635,17 +3635,17 @@ resolver) and the inner `extractPackageFile()` adapter.
 | warns if hostType has the wrong parent | 1415 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_host_type_wrong_parent` | — |
 | validates preset values | 1429 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_non_string_preset_values` | — |
 | errors on invalid preset syntax | 1442 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_preset_syntax` | — |
-| warns if only selectors in packageRules | 1459 | pending | — | — | — |
-| errors if invalid combinations in packageRules | 1473 | pending | — | — | — |
-| warns when registryUrls is set at the top level of repo config | 1492 | pending | — | — | — |
-| warns when defaultRegistryUrls is set at the top level of repo config | 1507 | pending | — | — | — |
-| warns on nested group packageRules | 1522 | pending | — | — | — |
-| does not error on use of `global:` presets in `globalExtends` | 1541 | pending | — | — | — |
-| does not error on use of `global:` presets in global `extends` | 1554 | pending | — | — | — |
-| errors on use of `global:` presets in inherit `extends` | 1567 | pending | — | — | — |
-| errors on use of `global:` presets in repo `extends` | 1580 | pending | — | — | — |
-| warns if customEnvVariables are found in repo config | 1594 | pending | — | — | — |
-| errors if schedule is cron and has no * minutes | 1613 | pending | — | — | — |
+| warns if only selectors in packageRules | 1459 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_selector_only_package_rules` | — |
+| errors if invalid combinations in packageRules | 1473 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_package_rule_combinations` | — |
+| warns when registryUrls is set at the top level of repo config | 1492 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_top_level_registry_urls` | — |
+| warns when defaultRegistryUrls is set at the top level of repo config | 1507 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_top_level_default_registry_urls` | — |
+| warns on nested group packageRules | 1522 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_on_nested_group_package_rules` | — |
+| does not error on use of `global:` presets in `globalExtends` | 1541 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_global_presets_in_global_extends` | — |
+| does not error on use of `global:` presets in global `extends` | 1554 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_global_presets_in_global_extends_field` | — |
+| errors on use of `global:` presets in inherit `extends` | 1567 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_global_presets_in_inherit_extends` | — |
+| errors on use of `global:` presets in repo `extends` | 1580 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_global_presets_in_repo_extends` | — |
+| warns if customEnvVariables are found in repo config | 1594 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_custom_env_variables_in_repo_config` | — |
+| errors if schedule is cron and has no * minutes | 1613 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_cron_schedule_without_wildcard_minutes` | — |
 | errors if invalid matchHost values in hostRules | 1631 | pending | — | — | — |
 | errors if forbidden header in hostRules | 1673 | pending | — | — | — |
 | errors if headers values are not string | 1701 | pending | — | — | — |

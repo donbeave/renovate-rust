@@ -75,7 +75,9 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_manager_object_nesting(map, &mut errors);
     validate_registry_aliases(map, &mut errors);
     validate_host_type_parent(map, &mut warnings);
-    validate_extends(map, &mut errors);
+    validate_extends(source, map, &mut errors);
+    validate_top_level_registry_urls(map, &mut warnings);
+    validate_schedule(map, &mut errors);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
     validate_constraints_versioning(map, &mut errors);
@@ -138,7 +140,10 @@ fn is_known_key(key: &str) -> bool {
 }
 
 fn is_global_only_key(key: &str) -> bool {
-    matches!(key, "binarySource" | "ignorePrAuthor" | "username")
+    matches!(
+        key,
+        "binarySource" | "customEnvVariables" | "ignorePrAuthor" | "username"
+    )
 }
 
 fn is_allowed_in_source(source: &str, key: &str) -> bool {
@@ -199,6 +204,36 @@ fn validate_package_rules(
             }));
         }
 
+        if is_selector_only_package_rule(rule_map) {
+            warnings.push(json!({
+                "topic": "Configuration Warning",
+                "message": "packageRules entries should include at least one action in addition to match selectors"
+            }));
+        }
+
+        if rule_map.get("matchUpdateTypes").is_some() && rule_map.get("registryUrls").is_some() {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "packageRules cannot combine matchUpdateTypes and registryUrls"
+            }));
+        }
+
+        if rule_map
+            .get("extends")
+            .and_then(Value::as_array)
+            .is_some_and(|presets| {
+                presets
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .any(|preset| preset.starts_with("group:"))
+            })
+        {
+            warnings.push(json!({
+                "topic": "Configuration Warning",
+                "message": "Nested group presets inside packageRules can be hard to reason about"
+            }));
+        }
+
         for key in [
             "allowedVersions",
             "matchCurrentValue",
@@ -226,6 +261,13 @@ fn validate_package_rules(
             }
         }
     }
+}
+
+fn is_selector_only_package_rule(rule: &Map<String, Value>) -> bool {
+    !rule.is_empty()
+        && rule
+            .keys()
+            .all(|key| key.starts_with("match") || key == "excludePackageNames")
 }
 
 fn validate_enabled_managers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
@@ -468,7 +510,7 @@ fn validate_host_type_parent(map: &Map<String, Value>, warnings: &mut Vec<Value>
     }
 }
 
-fn validate_extends(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+fn validate_extends(source: &str, map: &Map<String, Value>, errors: &mut Vec<Value>) {
     let Some(Value::Array(extends)) = map.get("extends") else {
         return;
     };
@@ -488,6 +530,45 @@ fn validate_extends(map: &Map<String, Value>, errors: &mut Vec<Value>) {
             "topic": "Configuration Error",
             "message": "Invalid preset syntax"
         }));
+    }
+
+    if source != "global"
+        && extends
+            .iter()
+            .filter_map(Value::as_str)
+            .any(|preset| preset.starts_with("global:"))
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "`global:` presets can only be used in global configuration"
+        }));
+    }
+}
+
+fn validate_top_level_registry_urls(map: &Map<String, Value>, warnings: &mut Vec<Value>) {
+    for key in ["registryUrls", "defaultRegistryUrls"] {
+        if map.get(key).is_some() {
+            warnings.push(json!({
+                "topic": "Configuration Warning",
+                "message": format!("Setting `{key}` at the top level of your config will apply it to all managers")
+            }));
+        }
+    }
+}
+
+fn validate_schedule(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Array(schedules)) = map.get("schedule") else {
+        return;
+    };
+
+    for schedule in schedules.iter().filter_map(Value::as_str) {
+        let fields: Vec<_> = schedule.split_whitespace().collect();
+        if fields.len() == 5 && fields.first().is_some_and(|minute| *minute != "*") {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid schedule: `Invalid schedule: \"{schedule}\" has cron syntax, but doesn't have * as minutes`")
+            }));
+        }
     }
 }
 
@@ -1844,6 +1925,138 @@ mod tests {
         );
         assert!(result.warnings.is_empty());
         assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "warns if only selectors in packageRules" — config/validation.spec.ts line 1459
+    #[test]
+    fn validate_config_warns_for_selector_only_package_rules() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"packageRules": [{"matchDepTypes": ["foo"], "matchPackageNames": ["bar"]}]}),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "errors if invalid combinations in packageRules" — config/validation.spec.ts line 1473
+    #[test]
+    fn validate_config_errors_for_invalid_package_rule_combinations() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"packageRules": [{"matchUpdateTypes": ["major"], "registryUrls": ["https://registry.npmjs.org"]}]}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "warns when registryUrls is set at the top level of repo config" — config/validation.spec.ts line 1492
+    #[test]
+    fn validate_config_warns_for_top_level_registry_urls() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"registryUrls": ["https://registry.npmjs.org"]}),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+        assert!(
+            result.warnings[0]["message"]
+                .as_str()
+                .unwrap()
+                .contains("Setting `registryUrls` at the top level")
+        );
+    }
+
+    // Ported: "warns when defaultRegistryUrls is set at the top level of repo config" — config/validation.spec.ts line 1507
+    #[test]
+    fn validate_config_warns_for_top_level_default_registry_urls() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"defaultRegistryUrls": ["https://registry.npmjs.org"]}),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+        assert!(
+            result.warnings[0]["message"]
+                .as_str()
+                .unwrap()
+                .contains("Setting `defaultRegistryUrls` at the top level")
+        );
+    }
+
+    // Ported: "warns on nested group packageRules" — config/validation.spec.ts line 1522
+    #[test]
+    fn validate_config_warns_on_nested_group_package_rules() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "extends": ["group:fortawesome"],
+                "packageRules": [{"automerge": true, "extends": ["group:fortawesome"]}]
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "does not error on use of `global:` presets in `globalExtends`" — config/validation.spec.ts line 1541
+    #[test]
+    fn validate_config_allows_global_presets_in_global_extends() {
+        let result =
+            validate_config_for_source("global", &json!({"globalExtends": ["global:safeEnv"]}));
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "does not error on use of `global:` presets in global `extends`" — config/validation.spec.ts line 1554
+    #[test]
+    fn validate_config_allows_global_presets_in_global_extends_field() {
+        let result = validate_config_for_source("global", &json!({"extends": ["global:safeEnv"]}));
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "errors on use of `global:` presets in inherit `extends`" — config/validation.spec.ts line 1567
+    #[test]
+    fn validate_config_errors_for_global_presets_in_inherit_extends() {
+        let result = validate_config_for_source("inherit", &json!({"extends": ["global:safeEnv"]}));
+        assert_eq!(result.errors.len(), 1);
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "errors on use of `global:` presets in repo `extends`" — config/validation.spec.ts line 1580
+    #[test]
+    fn validate_config_errors_for_global_presets_in_repo_extends() {
+        let result = validate_config_for_source("repo", &json!({"extends": ["global:safeEnv"]}));
+        assert_eq!(result.errors.len(), 1);
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "warns if customEnvVariables are found in repo config" — config/validation.spec.ts line 1594
+    #[test]
+    fn validate_config_warns_for_custom_env_variables_in_repo_config() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"customEnvVariables": {"example1": "abc", "example2": "123"}}),
+        );
+        assert_eq!(result.warnings.len(), 1);
+        assert!(
+            result.warnings[0]["message"]
+                .as_str()
+                .unwrap()
+                .contains("customEnvVariables")
+        );
+    }
+
+    // Ported: "errors if schedule is cron and has no * minutes" — config/validation.spec.ts line 1613
+    #[test]
+    fn validate_config_errors_for_cron_schedule_without_wildcard_minutes() {
+        let result = validate_config_for_source("repo", &json!({"schedule": ["30 5 * * *"]}));
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "Invalid schedule: `Invalid schedule: \"30 5 * * *\" has cron syntax, but doesn't have * as minutes`"
+            ]
+        );
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
