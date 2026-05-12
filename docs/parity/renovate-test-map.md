@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1541 / 1657 actionable tests ported (93%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1545 / 1657 actionable tests ported (93%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 17 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 21 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3570,10 +3570,10 @@ resolver) and the inner `extractPackageFile()` adapter.
 | validates matchBaseBranches | 277 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_match_base_branches` | — |
 | catches invalid matchBaseBranches when baseBranchPatterns is not defined | 295 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_match_base_branches_without_base_branch_patterns` | — |
 | catches invalid matchCurrentVersion regex | 312 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_match_current_version_regex` | — |
-| catches invalid customDatasources content | 347 | pending | — | — | — |
-| validates invalid statusCheckNames | 384 | pending | — | — | — |
-| catches invalid customDatasources record type | 408 | pending | — | — | — |
-| catches invalid baseBranchPatterns regex | 423 | pending | — | — | — |
+| catches invalid customDatasources content | 347 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_custom_datasources_content` | — |
+| validates invalid statusCheckNames | 384 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_invalid_status_check_names` | — |
+| catches invalid customDatasources record type | 408 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_custom_datasources_record_type` | — |
+| catches invalid baseBranchPatterns regex | 423 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_base_branch_patterns_regex` | — |
 | returns nested errors | 436 | pending | — | — | — |
 | included managers of the wrong type | 466 | pending | — | — | — |
 | empty configuration | 484 | pending | — | — | — |

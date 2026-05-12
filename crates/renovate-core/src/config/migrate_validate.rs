@@ -66,6 +66,9 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     }
 
     validate_template_options(map, &mut errors);
+    validate_custom_datasources(map, &mut errors);
+    validate_status_check_names(map, &mut errors);
+    validate_base_branch_patterns(map, &mut errors);
     validate_package_rules(map, &mut errors, &mut warnings);
 
     ValidationResult { errors, warnings }
@@ -201,6 +204,106 @@ fn validate_package_rules(
                     }));
                 }
             }
+        }
+    }
+}
+
+fn validate_custom_datasources(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Object(custom_datasources)) = map.get("customDatasources") else {
+        return;
+    };
+
+    for (name, datasource) in custom_datasources {
+        let Some(datasource) = datasource.as_object() else {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid `customDatasources.{name}` configuration: customDatasource is not an object")
+            }));
+            continue;
+        };
+
+        if datasource
+            .get("defaultRegistryUrlTemplate")
+            .is_some_and(|value| !value.is_string())
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string"
+            }));
+        }
+
+        if datasource
+            .get("description")
+            .is_some_and(|value| !value.is_string())
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Invalid `customDatasources.description` configuration: is not an array of strings"
+            }));
+        }
+
+        for key in datasource.keys() {
+            if !matches!(
+                key.as_str(),
+                "defaultRegistryUrlTemplate" | "description" | "transformTemplates"
+            ) {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Invalid `customDatasources.{key}` configuration: key is not allowed")
+                }));
+            }
+        }
+
+        if datasource.get("transformTemplates").is_some_and(|value| {
+            !value
+                .as_array()
+                .is_some_and(|templates| templates.iter().all(Value::is_string))
+        }) {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Invalid `customDatasources.transformTemplates` configuration: is not an array of string"
+            }));
+        }
+    }
+}
+
+fn validate_status_check_names(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Object(status_check_names)) = map.get("statusCheckNames") else {
+        return;
+    };
+
+    for (key, value) in status_check_names {
+        if !matches!(
+            key.as_str(),
+            "artifactError" | "configValidation" | "mergeConfidence"
+        ) {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid `statusCheckNames.statusCheckNames.{key}` configuration: key is not allowed.")
+            }));
+            continue;
+        }
+
+        if !value.is_string() && !value.is_null() {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid `statusCheckNames.{key}` configuration: status check is not a string.")
+            }));
+        }
+    }
+}
+
+fn validate_base_branch_patterns(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Array(patterns)) = map.get("baseBranchPatterns") else {
+        return;
+    };
+
+    for pattern in patterns.iter().filter_map(Value::as_str) {
+        if validate_renovate_regex_literal(pattern).is_err() {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid regExp for baseBranchPatterns: `{pattern}`")
+            }));
         }
     }
 }
@@ -495,6 +598,94 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
+    // Ported: "catches invalid customDatasources content" — config/validation.spec.ts line 347
+    #[test]
+    fn validate_config_catches_invalid_custom_datasources_content() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customDatasources": {
+                    "foo": {
+                        "description": 3,
+                        "randomKey": "",
+                        "defaultRegistryUrlTemplate": [],
+                        "transformTemplates": [{}]
+                    },
+                    "bar": {
+                        "description": "foo",
+                        "defaultRegistryUrlTemplate": "bar",
+                        "transformTemplates": ["foo = \"bar\"", "bar[0]"]
+                    }
+                }
+            }),
+        );
+        let messages = validation_error_messages(&result);
+        assert_eq!(messages.len(), 4);
+        assert!(messages.contains(
+            &"Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string"
+        ));
+        assert!(messages.contains(
+            &"Invalid `customDatasources.description` configuration: is not an array of strings"
+        ));
+        assert!(
+            messages.contains(
+                &"Invalid `customDatasources.randomKey` configuration: key is not allowed"
+            )
+        );
+        assert!(messages.contains(
+            &"Invalid `customDatasources.transformTemplates` configuration: is not an array of string"
+        ));
+    }
+
+    // Ported: "validates invalid statusCheckNames" — config/validation.spec.ts line 384
+    #[test]
+    fn validate_config_validates_invalid_status_check_names() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "statusCheckNames": {
+                    "randomKey": "",
+                    "mergeConfidence": 10,
+                    "configValidation": "",
+                    "artifactError": null
+                }
+            }),
+        );
+        let messages = validation_error_messages(&result);
+        assert_eq!(messages.len(), 2);
+        assert!(messages.contains(&"Invalid `statusCheckNames.mergeConfidence` configuration: status check is not a string."));
+        assert!(messages.contains(&"Invalid `statusCheckNames.statusCheckNames.randomKey` configuration: key is not allowed."));
+    }
+
+    // Ported: "catches invalid customDatasources record type" — config/validation.spec.ts line 408
+    #[test]
+    fn validate_config_catches_invalid_custom_datasources_record_type() {
+        let result =
+            validate_config_for_source("repo", &json!({"customDatasources": {"randomKey": ""}}));
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "Invalid `customDatasources.randomKey` configuration: customDatasource is not an object"
+            ]
+        );
+    }
+
+    // Ported: "catches invalid baseBranchPatterns regex" — config/validation.spec.ts line 423
+    #[test]
+    fn validate_config_catches_invalid_base_branch_patterns_regex() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"baseBranchPatterns": ["/***$}{]][/", "/branch/i"]}),
+        );
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Invalid regExp for baseBranchPatterns: `/***$}{]][/`"
+            })]
+        );
+    }
+
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
     #[test]
     fn migrate_and_validate_handles_empty() {
@@ -526,5 +717,13 @@ mod tests {
         let result = migrate_and_validate(&json!({"repoIsOnboarded": true}), &json!({}));
         assert!(result.get("warnings").is_none());
         assert_eq!(result["errors"], json!([]));
+    }
+
+    fn validation_error_messages(result: &super::ValidationResult) -> Vec<&str> {
+        result
+            .errors
+            .iter()
+            .map(|error| error["message"].as_str().unwrap())
+            .collect()
     }
 }
