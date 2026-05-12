@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1651 / 1657 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1652 / 1657 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2442,7 +2442,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 29 | **Ported:** 28 | **Actionable:** 29 | **Status:** partial
+**Total tests:** 29 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
 
 ### `extractPackage`
 
@@ -2491,7 +2491,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | should return packages with urls from a settings file | 560 | ported | `maven.rs` | `extract_all_package_files_applies_settings_registry_urls` | — |
 | should include registryUrls from parent pom files | 581 | ported | `maven.rs` | `extract_all_package_files_includes_registry_urls_from_parent_poms` | — |
 | should include registryUrls in the correct order | 791 | ported | `maven.rs` | `extract_all_package_files_preserves_settings_registry_url_order` | — |
-| should return package files info | 812 | pending | — | — | Requires package files info aggregation |
+| should return package files info | 812 | ported | `maven.rs` | `extract_all_package_file_infos_returns_package_file_metadata` | — |
 | should extract from .mvn/extensions.xml file | 888 | ported | `maven.rs` | `extract_all_package_files_extracts_extensions_xml` | — |
 | should return empty array if extensions file is invalid or empty | 917 | ported | `maven.rs` | `extract_all_package_files_invalid_extensions_return_empty` | — |
 

@@ -111,6 +111,8 @@ pub struct MavenExtractedDep {
     pub registry_urls: Vec<String>,
     /// Full string to replace for container-style dependencies.
     pub replace_string: Option<String>,
+    /// Maven property name that supplied the version, when the version is shared.
+    pub shared_variable_name: Option<String>,
 }
 
 impl MavenExtractedDep {
@@ -128,6 +130,17 @@ impl MavenExtractedDep {
             _ => self.dep_type.as_renovate_str(),
         }
     }
+}
+
+/// Extracted Maven package-file data.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MavenPackageFile {
+    /// Path of the source package file.
+    pub package_file: String,
+    /// Dependencies extracted from this package file.
+    pub deps: Vec<MavenExtractedDep>,
+    /// Top-level `<project><version>` value, when present.
+    pub package_file_version: Option<String>,
 }
 
 /// Errors from parsing a `pom.xml`.
@@ -156,6 +169,9 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
         }
         // Resolve version.
         if dep.skip_reason == Some(MavenSkipReason::PropertyRef) {
+            dep.shared_variable_name = exact_property_ref(&dep.current_value)
+                .filter(|key| properties.contains_key(*key))
+                .map(str::to_owned);
             let resolved = apply_props(&dep.current_value, &properties);
             if !resolved.contains("${") {
                 dep.current_value = resolved;
@@ -277,6 +293,14 @@ pub fn extract_extensions(content: &str) -> Option<Vec<MavenExtractedDep>> {
 
 /// Extract Maven package files from already-read path/content pairs.
 pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtractedDep>> {
+    extract_all_package_file_infos(files)
+        .into_iter()
+        .map(|package_file| package_file.deps)
+        .collect()
+}
+
+/// Extract Maven package-file data from already-read path/content pairs.
+pub fn extract_all_package_file_infos(files: &[(&str, &str)]) -> Vec<MavenPackageFile> {
     let mut package_files = Vec::new();
     let registry_urls = extract_package_registry_urls(files);
     let root_coordinates = files
@@ -289,7 +313,11 @@ pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtract
                 && !deps.is_empty()
             {
                 apply_registry_urls(&mut deps, &registry_urls);
-                package_files.push(deps);
+                package_files.push(MavenPackageFile {
+                    package_file: (*path).to_owned(),
+                    deps,
+                    package_file_version: None,
+                });
             }
             continue;
         }
@@ -301,7 +329,11 @@ pub fn extract_all_package_files(files: &[(&str, &str)]) -> Vec<Vec<MavenExtract
         {
             mark_parent_root_deps(&mut deps, &root_coordinates);
             apply_registry_urls(&mut deps, &registry_urls);
-            package_files.push(deps);
+            package_files.push(MavenPackageFile {
+                package_file: (*path).to_owned(),
+                deps,
+                package_file_version: project_version(content),
+            });
         }
     }
     package_files
@@ -580,6 +612,14 @@ fn apply_props(value: &str, properties: &HashMap<String, String>) -> String {
     result
 }
 
+fn exact_property_ref(value: &str) -> Option<&str> {
+    let trimmed = value.trim();
+    trimmed
+        .strip_prefix("${")
+        .and_then(|rest| rest.strip_suffix('}'))
+        .filter(|key| !key.contains("${") && !key.contains('}'))
+}
+
 fn substitute_props(value: &str, properties: &HashMap<String, String>) -> String {
     let mut out = String::with_capacity(value.len());
     let mut rest = value;
@@ -662,6 +702,7 @@ fn build_dep(dep: &CurrentDep) -> Option<MavenExtractedDep> {
         skip_reason,
         registry_urls: Vec::new(),
         replace_string: None,
+        shared_variable_name: None,
     })
 }
 
@@ -747,6 +788,7 @@ fn container_style_dep(
         skip_reason: None,
         registry_urls: Vec::new(),
         replace_string,
+        shared_variable_name: None,
     }
 }
 
@@ -826,6 +868,41 @@ fn project_coordinates(content: &str) -> Option<ProjectCoords> {
             version,
         },
     )
+}
+
+fn project_version(content: &str) -> Option<String> {
+    let cursor = BufReader::new(content.as_bytes());
+    let mut reader = Reader::from_reader(cursor);
+    reader.config_mut().trim_text(true);
+
+    let mut stack: Vec<String> = Vec::new();
+    let mut version = None;
+    let mut buf = Vec::new();
+
+    loop {
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(e)) => {
+                stack.push(String::from_utf8_lossy(e.name().as_ref()).into_owned());
+            }
+            Ok(Event::End(_)) => {
+                stack.pop();
+            }
+            Ok(Event::Text(e)) => {
+                if stack.len() == 2 && stack[0] == "project" && stack[1] == "version" {
+                    let text = e.decode().map(|s| s.trim().to_owned()).unwrap_or_default();
+                    if !text.is_empty() {
+                        version = Some(text);
+                    }
+                }
+            }
+            Ok(Event::Eof) => break,
+            Ok(_) => {}
+            Err(_) => return None,
+        }
+        buf.clear();
+    }
+
+    version
 }
 
 /// Infer the dep type from the current element stack when we encounter a
@@ -1279,6 +1356,64 @@ mod tests {
         ];
         assert_eq!(packages.len(), 1);
         assert_eq!(packages[0][0].registry_urls, expected);
+    }
+
+    // Ported: "should return package files info" — maven/extract.spec.ts line 812
+    #[test]
+    fn extract_all_package_file_infos_returns_package_file_metadata() {
+        let pom = r#"<project>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>42</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>ExamplePomFile</artifactId>
+  <version>0.0.1</version>
+  <properties>
+    <quuxVersion>1.2.3.4</quuxVersion>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>foo</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>quux</artifactId>
+      <version>${quuxVersion}</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+
+        let packages = extract_all_package_file_infos(&[("random.pom.xml", pom)]);
+        assert_eq!(packages.len(), 1);
+        let package = &packages[0];
+        assert_eq!(package.package_file, "random.pom.xml");
+        assert_eq!(package.package_file_version.as_deref(), Some("0.0.1"));
+        assert!(
+            package
+                .deps
+                .iter()
+                .any(|dep| dep.dep_name == "org.example:parent"
+                    && dep.current_value == "42"
+                    && dep.dep_type == MavenDepType::Parent)
+        );
+        assert!(
+            package
+                .deps
+                .iter()
+                .any(|dep| dep.dep_name == "org.example:foo" && dep.current_value == "0.0.1")
+        );
+        let quux = package
+            .deps
+            .iter()
+            .find(|dep| dep.dep_name == "org.example:quux")
+            .unwrap();
+        assert_eq!(quux.current_value, "1.2.3.4");
+        assert_eq!(quux.shared_variable_name.as_deref(), Some("quuxVersion"));
     }
 
     // Ported: "should include registryUrls from parent pom files" — maven/extract.spec.ts line 581
@@ -1934,6 +2069,7 @@ mod tests {
             skip_reason: None,
             registry_urls: Vec::new(),
             replace_string: None,
+            shared_variable_name: None,
         };
         assert_eq!(dep.renovate_dep_type(), "test");
     }
@@ -1951,6 +2087,7 @@ mod tests {
             skip_reason: None,
             registry_urls: Vec::new(),
             replace_string: None,
+            shared_variable_name: None,
         };
         assert_eq!(dep.renovate_dep_type(), "compile");
     }
