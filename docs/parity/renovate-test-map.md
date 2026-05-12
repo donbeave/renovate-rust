@@ -3753,6 +3753,106 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/go-mod-tidy-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/go-mod-tidy-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/go-mod-tidy-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add postUpdateOptions option when true | 4 | ported | `migrate_validate.rs` | `gomod_tidy_true_appends_post_update_option` | — |
+| should handle case when postUpdateOptions is not defined | 16 | ported | `migrate_validate.rs` | `gomod_tidy_true_initializes_post_update_options` | — |
+| should only remove when false | 27 | ported | `migrate_validate.rs` | `gomod_tidy_false_is_removed` | — |
+
+---
+
+## `lib/config/migrations/custom/ignore-node-modules-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/ignore-node-modules-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/ignore-node-modules-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate to ignorePaths | 4 | ported | `migrate_validate.rs` | `ignore_node_modules_true_migrates_to_ignore_paths` | — |
+
+---
+
+## `lib/config/migrations/custom/ignore-npmrc-file-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/ignore-npmrc-file-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/ignore-npmrc-file-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should init npmrc field | 4 | ported | `migrate_validate.rs` | `ignore_npmrc_file_initializes_npmrc` | — |
+| should not change npmrc field if it represents string value | 14 | ported | `migrate_validate.rs` | `ignore_npmrc_file_preserves_string_npmrc` | — |
+| should change npmrc field if it not represents string value | 26 | ported | `migrate_validate.rs` | `ignore_npmrc_file_replaces_non_string_npmrc` | — |
+
+---
+
+## `lib/config/migrations/custom/include-forks-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/include-forks-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/include-forks-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true | 4 | ported | `migrate_validate.rs` | `include_forks_true_migrates_to_enabled_fork_processing` | — |
+| should migrate false | 14 | ported | `migrate_validate.rs` | `include_forks_false_migrates_to_disabled_fork_processing` | — |
+| should not migrate non boolean value | 24 | ported | `migrate_validate.rs` | `include_forks_non_boolean_is_removed` | — |
+
+---
+
+## `lib/config/migrations/custom/node-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/node-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/node-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate node to travis | 4 | ported | `migrate_validate.rs` | `node_enabled_migrates_to_travis_enabled` | — |
+| should not delete node in case it has more than one property | 14 | ported | `migrate_validate.rs` | `node_enabled_migration_preserves_other_node_options` | — |
+
+---
+
+## `lib/config/migrations/custom/post-update-options-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/post-update-options-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/post-update-options-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate properly | 4 | ported | `migrate_validate.rs` | `post_update_options_removes_gomod_no_massage` | — |
+
+---
+
+## `lib/config/migrations/custom/renovate-fork-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/renovate-fork-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/renovate-fork-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true | 4 | ported | `migrate_validate.rs` | `renovate_fork_true_migrates_to_enabled_fork_processing` | — |
+| should migrate false | 14 | ported | `migrate_validate.rs` | `renovate_fork_false_migrates_to_disabled_fork_processing` | — |
+| should not migrate non boolean value | 24 | ported | `migrate_validate.rs` | `renovate_fork_non_boolean_is_removed` | — |
+
+---
+
 ## `lib/config/migrations/custom/base-branch-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/base-branch-migration.spec.ts

@@ -288,6 +288,74 @@ fn migrate_config(input: &Value) -> Value {
         if let Some(package_pattern) = map.remove("packagePattern") {
             set_safely(map, "packagePatterns", Value::Array(vec![package_pattern]));
         }
+        if matches!(map.remove("gomodTidy"), Some(value) if value.as_bool().unwrap_or(false)) {
+            let post_update_options = map
+                .entry("postUpdateOptions".to_owned())
+                .or_insert_with(|| Value::Array(Vec::new()));
+            if let Value::Array(options) = post_update_options {
+                options.push(Value::String("gomodTidy".to_owned()));
+            }
+        }
+        if let Some(ignore_node_modules) = map.remove("ignoreNodeModules") {
+            set_safely(
+                map,
+                "ignorePaths",
+                if ignore_node_modules.as_bool().unwrap_or(false) {
+                    Value::Array(vec![Value::String("node_modules/".to_owned())])
+                } else {
+                    Value::Array(Vec::new())
+                },
+            );
+        }
+        if map.remove("ignoreNpmrcFile").is_some()
+            && !matches!(map.get("npmrc"), Some(Value::String(_)))
+        {
+            map.insert("npmrc".to_owned(), Value::String(String::new()));
+        }
+        if let Some(include_forks) = map.remove("includeForks")
+            && let Some(value) = include_forks.as_bool()
+        {
+            set_safely(
+                map,
+                "forkProcessing",
+                Value::String(if value { "enabled" } else { "disabled" }.to_owned()),
+            );
+        }
+        if let Some(renovate_fork) = map.remove("renovateFork")
+            && let Some(value) = renovate_fork.as_bool()
+        {
+            set_safely(
+                map,
+                "forkProcessing",
+                Value::String(if value { "enabled" } else { "disabled" }.to_owned()),
+            );
+        }
+        if let Some(Value::Object(mut node)) = map.remove("node") {
+            if matches!(node.get("enabled"), Some(Value::Bool(true))) {
+                node.remove("enabled");
+                let travis = map
+                    .entry("travis".to_owned())
+                    .or_insert_with(|| Value::Object(Map::new()));
+                if let Value::Object(travis) = travis {
+                    travis
+                        .entry("enabled".to_owned())
+                        .or_insert(Value::Bool(true));
+                }
+                if !node.is_empty() {
+                    map.insert("node".to_owned(), Value::Object(node));
+                }
+            } else {
+                map.insert("node".to_owned(), Value::Object(node));
+            }
+        }
+        if let Some(Value::Array(post_update_options)) = map.get_mut("postUpdateOptions") {
+            *post_update_options = post_update_options
+                .iter()
+                .filter_map(|value| value.as_str())
+                .filter(|value| !value.is_empty() && *value != "gomodNoMassage")
+                .map(|value| Value::String(value.to_owned()))
+                .collect();
+        }
         if let Some(base_branch) = map.remove("baseBranch") {
             let base_branch_patterns = map
                 .entry("baseBranchPatterns".to_owned())
@@ -4228,6 +4296,141 @@ mod tests {
             migrate_config(&json!({"packagePattern": "test"})),
             json!({"packagePatterns": ["test"]})
         );
+    }
+
+    // Ported: "should add postUpdateOptions option when true" — config/migrations/custom/go-mod-tidy-migration.spec.ts line 4
+    #[test]
+    fn gomod_tidy_true_appends_post_update_option() {
+        assert_eq!(
+            migrate_config(&json!({"gomodTidy": true, "postUpdateOptions": ["test"]})),
+            json!({"postUpdateOptions": ["test", "gomodTidy"]})
+        );
+    }
+
+    // Ported: "should handle case when postUpdateOptions is not defined" — config/migrations/custom/go-mod-tidy-migration.spec.ts line 16
+    #[test]
+    fn gomod_tidy_true_initializes_post_update_options() {
+        assert_eq!(
+            migrate_config(&json!({"gomodTidy": true})),
+            json!({"postUpdateOptions": ["gomodTidy"]})
+        );
+    }
+
+    // Ported: "should only remove when false" — config/migrations/custom/go-mod-tidy-migration.spec.ts line 27
+    #[test]
+    fn gomod_tidy_false_is_removed() {
+        assert_eq!(migrate_config(&json!({"gomodTidy": false})), json!({}));
+    }
+
+    // Ported: "should migrate to ignorePaths" — config/migrations/custom/ignore-node-modules-migration.spec.ts line 4
+    #[test]
+    fn ignore_node_modules_true_migrates_to_ignore_paths() {
+        assert_eq!(
+            migrate_config(&json!({"ignoreNodeModules": true})),
+            json!({"ignorePaths": ["node_modules/"]})
+        );
+    }
+
+    // Ported: "should init npmrc field" — config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 4
+    #[test]
+    fn ignore_npmrc_file_initializes_npmrc() {
+        assert_eq!(
+            migrate_config(&json!({"ignoreNpmrcFile": true})),
+            json!({"npmrc": ""})
+        );
+    }
+
+    // Ported: "should not change npmrc field if it represents string value" — config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 14
+    #[test]
+    fn ignore_npmrc_file_preserves_string_npmrc() {
+        assert_eq!(
+            migrate_config(&json!({"ignoreNpmrcFile": true, "npmrc": ""})),
+            json!({"npmrc": ""})
+        );
+    }
+
+    // Ported: "should change npmrc field if it not represents string value" — config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 26
+    #[test]
+    fn ignore_npmrc_file_replaces_non_string_npmrc() {
+        assert_eq!(
+            migrate_config(&json!({"ignoreNpmrcFile": true, "npmrc": true})),
+            json!({"npmrc": ""})
+        );
+    }
+
+    // Ported: "should migrate true" — config/migrations/custom/include-forks-migration.spec.ts line 4
+    #[test]
+    fn include_forks_true_migrates_to_enabled_fork_processing() {
+        assert_eq!(
+            migrate_config(&json!({"includeForks": true})),
+            json!({"forkProcessing": "enabled"})
+        );
+    }
+
+    // Ported: "should migrate false" — config/migrations/custom/include-forks-migration.spec.ts line 14
+    #[test]
+    fn include_forks_false_migrates_to_disabled_fork_processing() {
+        assert_eq!(
+            migrate_config(&json!({"includeForks": false})),
+            json!({"forkProcessing": "disabled"})
+        );
+    }
+
+    // Ported: "should not migrate non boolean value" — config/migrations/custom/include-forks-migration.spec.ts line 24
+    #[test]
+    fn include_forks_non_boolean_is_removed() {
+        assert_eq!(migrate_config(&json!({"includeForks": "test"})), json!({}));
+    }
+
+    // Ported: "should migrate node to travis" — config/migrations/custom/node-migration.spec.ts line 4
+    #[test]
+    fn node_enabled_migrates_to_travis_enabled() {
+        assert_eq!(
+            migrate_config(&json!({"node": {"enabled": true}})),
+            json!({"travis": {"enabled": true}})
+        );
+    }
+
+    // Ported: "should not delete node in case it has more than one property" — config/migrations/custom/node-migration.spec.ts line 14
+    #[test]
+    fn node_enabled_migration_preserves_other_node_options() {
+        assert_eq!(
+            migrate_config(&json!({"node": {"enabled": true, "automerge": false}})),
+            json!({"node": {"automerge": false}, "travis": {"enabled": true}})
+        );
+    }
+
+    // Ported: "should migrate properly" — config/migrations/custom/post-update-options-migration.spec.ts line 4
+    #[test]
+    fn post_update_options_removes_gomod_no_massage() {
+        assert_eq!(
+            migrate_config(&json!({"postUpdateOptions": ["gomodTidy", "gomodNoMassage"]})),
+            json!({"postUpdateOptions": ["gomodTidy"]})
+        );
+    }
+
+    // Ported: "should migrate true" — config/migrations/custom/renovate-fork-migration.spec.ts line 4
+    #[test]
+    fn renovate_fork_true_migrates_to_enabled_fork_processing() {
+        assert_eq!(
+            migrate_config(&json!({"renovateFork": true})),
+            json!({"forkProcessing": "enabled"})
+        );
+    }
+
+    // Ported: "should migrate false" — config/migrations/custom/renovate-fork-migration.spec.ts line 14
+    #[test]
+    fn renovate_fork_false_migrates_to_disabled_fork_processing() {
+        assert_eq!(
+            migrate_config(&json!({"renovateFork": false})),
+            json!({"forkProcessing": "disabled"})
+        );
+    }
+
+    // Ported: "should not migrate non boolean value" — config/migrations/custom/renovate-fork-migration.spec.ts line 24
+    #[test]
+    fn renovate_fork_non_boolean_is_removed() {
+        assert_eq!(migrate_config(&json!({"renovateFork": "test"})), json!({}));
     }
 
     // Ported: "should migrate value to array" — config/migrations/custom/base-branch-migration.spec.ts line 4
