@@ -9506,6 +9506,80 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/util/markdown.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/markdown.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/markdown › .linkify`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 33 | not-applicable | — | — | Renovate's Markdown release-note linkification helper is not implemented as a Rust API. |
+| works with gitlab | 38 | not-applicable | — | — | Renovate's Markdown release-note linkification helper is not implemented as a Rust API. |
+| sanitizeMarkdown check massaged release notes | 48 | not-applicable | — | — | Renovate's Markdown release-note sanitizer is not implemented as a Rust API. |
+
+---
+
+## `lib/util/html.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/html.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/html`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses HTML | 5 | not-applicable | — | — | Renovate's Node HTML parser wrapper is not implemented as a Rust API; Rust HTML manager uses extractor-specific parsing. |
+| returns empty | 14 | not-applicable | — | — | Renovate's Node HTML parser wrapper is not implemented as a Rust API; Rust HTML manager uses extractor-specific parsing. |
+| parses HTML: PRE block hides child nodes | 19 | not-applicable | — | — | Renovate's node-html-parser PRE-block option behavior has no Rust API equivalent. |
+| parses HTML: use additional options to discover child nodes on PRE blocks | 25 | not-applicable | — | — | Renovate's node-html-parser option passthrough has no Rust API equivalent. |
+
+---
+
+## `lib/util/lazy.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/lazy.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/lazy › .getValue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets a value | 5 | not-applicable | — | — | Renovate's TypeScript `Lazy` class is not implemented as a Rust API; Rust call sites use standard lazy initialization primitives directly. |
+| caches the value | 13 | not-applicable | — | — | Renovate's TypeScript `Lazy` class is not implemented as a Rust API; Rust call sites use standard lazy initialization primitives directly. |
+| throws an error | 21 | not-applicable | — | — | Renovate's TypeScript `Lazy` class error caching behavior has no Rust API equivalent. |
+| caches the error | 30 | not-applicable | — | — | Renovate's TypeScript `Lazy` class error caching behavior has no Rust API equivalent. |
+
+### `util/lazy › .hasValue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has a value | 42 | not-applicable | — | — | Renovate's TypeScript `Lazy` class state inspection is not implemented as a Rust API. |
+| does not have a value | 51 | not-applicable | — | — | Renovate's TypeScript `Lazy` class state inspection is not implemented as a Rust API. |
+
+---
+
+## `lib/util/mutex.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/mutex.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/mutex › getMutex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns mutex with default namespace | 7 | not-applicable | — | — | Renovate's TypeScript named global mutex registry is not implemented as a Rust API. |
+
+### `util/mutex › acquireLock`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return lock function with default namespace | 17 | not-applicable | — | — | Renovate's TypeScript named global mutex registry is not implemented as a Rust API. |
+| should lock if already used | 21 | not-applicable | — | — | Renovate's TypeScript named global mutex registry is not implemented as a Rust API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
