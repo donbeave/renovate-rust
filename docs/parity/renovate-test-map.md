@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1691 / 1794 actionable tests ported (94%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1703 / 1794 actionable tests ported (95%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4113,7 +4113,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 23 | **Actionable:** 45 | **Status:** partial
+**Total tests:** 45 | **Ported:** 35 | **Actionable:** 45 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -4127,9 +4127,9 @@ resolver) and the inner `extractPackageFile()` adapter.
 | supports list multiple | 45 | ported | `config_env.rs` | `labels_multiple_values_are_parsed` | — |
 | supports list multiple without blank items | 50 | ported | `config_env.rs` | `labels_ignore_blank_items` | — |
 | supports string | 55 | ported | `config_env.rs` | `token_is_parsed` | — |
-| coerces string newlines | 60 | pending | — | — | — |
+| coerces string newlines | 60 | ported | `config_env.rs` | `string_newlines_are_coerced` | — |
 | supports custom prefixes | 67 | ported | `config_env.rs` | `custom_prefix_is_supported` | — |
-| supports json | 76 | pending | — | — | — |
+| supports json | 76 | ported | `config_env.rs` | `lock_file_maintenance_json_is_parsed` | — |
 | supports arrays of objects | 83 | ported | `config_env.rs` | `host_rules_array_is_parsed` | — |
 | "$envArg" -> $config | 91 | ported | `config_env.rs` | `recreate_env_aliases_are_parsed` | — |
 | skips misconfigured arrays | 103 | ported | `config_env.rs` | `host_rules_string_value_is_skipped` | — |
@@ -4144,8 +4144,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 | supports GitLab token | 231 | ported | `config_env.rs` | `gitlab_token_is_parsed` | — |
 | supports GitLab custom endpoint | 242 | ported | `config_env.rs` | `gitlab_custom_endpoint_is_parsed` | — |
 | supports Azure DevOps | 255 | ported | `config_env.rs` | `azure_devops_config_is_parsed` | — |
-| supports Bitbucket token | 268 | pending | — | — | — |
-| supports Bitbucket username/password | 283 | pending | — | — | — |
+| supports Bitbucket token | 268 | ported | `config_env.rs` | `bitbucket_token_config_is_parsed` | — |
+| supports Bitbucket username/password | 283 | ported | `config_env.rs` | `bitbucket_username_password_config_is_parsed` | — |
 | merges full config from env | 299 | pending | — | — | — |
 | massages converted experimental env vars | 309 | pending | — | — | — |
 | does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL | 336 | pending | — | — | — |
@@ -4162,7 +4162,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| renames migrated variables | 386 | pending | — | — | — |
+| renames migrated variables | 386 | ported | `config_env.rs` | `git_lab_automerge_env_sets_platform_automerge` | — |
 
 ### `workers/global/config/parse/env`
 
@@ -4177,13 +4177,13 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns empty | 418 | pending | — | — | — |
 | returns existing env | 426 | pending | — | — | — |
 | generates RENOVATE_ env | 434 | pending | — | — | — |
-| dryRun boolean true | 441 | pending | — | — | — |
-| dryRun boolean false | 449 | pending | — | — | — |
-| dryRun null | 457 | pending | — | — | — |
-| requireConfig boolean true | 465 | pending | — | — | — |
-| requireConfig boolean false | 473 | pending | — | — | — |
-| platformCommit boolean true | 481 | pending | — | — | — |
-| platformCommit boolean false | 489 | pending | — | — | — |
+| dryRun boolean true | 441 | ported | `config_env.rs` | `dry_run_true_maps_to_full` | — |
+| dryRun boolean false | 449 | ported | `config_env.rs` | `dry_run_false_disables_dry_run` | — |
+| dryRun null | 457 | ported | `config_env.rs` | `dry_run_null_disables_dry_run` | — |
+| requireConfig boolean true | 465 | ported | `config_env.rs` | `require_config_true_maps_to_required` | — |
+| requireConfig boolean false | 473 | ported | `config_env.rs` | `require_config_false_maps_to_optional` | — |
+| platformCommit boolean true | 481 | ported | `config_env.rs` | `platform_commit_true_maps_to_enabled` | — |
+| platformCommit boolean false | 489 | ported | `config_env.rs` | `platform_commit_false_maps_to_disabled` | — |
 
 ---
 

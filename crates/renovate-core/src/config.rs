@@ -291,6 +291,15 @@ pub struct GlobalConfig {
     /// Custom API endpoint override.
     pub endpoint: Option<String>,
 
+    /// Platform username for platforms that use username/password auth.
+    pub username: Option<String>,
+
+    /// Platform password for platforms that use username/password auth.
+    pub password: Option<String>,
+
+    /// Private key string, with escaped newlines normalized by env parsing.
+    pub git_private_key: Option<String>,
+
     // ── Run behavior ─────────────────────────────────────────────────────────
     /// Dry-run mode. `None` means dry-run is disabled (full updates).
     pub dry_run: Option<DryRun>,
@@ -309,6 +318,9 @@ pub struct GlobalConfig {
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Whether to use platform-native auto-merge. Default: `true`.
     pub platform_automerge: bool,
+
+    /// Whether to commit directly to the platform.
+    pub platform_commit: Option<String>,
 
     /// When to recreate closed PRs. Default: `RecreateWhen::Auto`.
     pub recreate_when: RecreateWhen,
@@ -332,6 +344,9 @@ pub struct GlobalConfig {
     /// Config used when onboarding repositories.
     pub onboarding_config: serde_json::Map<String, serde_json::Value>,
 
+    /// Lock file maintenance config.
+    pub lock_file_maintenance: serde_json::Map<String, serde_json::Value>,
+
     /// Repositories to process. Empty means "nothing to do" unless autodiscover
     /// is enabled (future slice).
     pub repositories: Vec<String>,
@@ -343,11 +358,15 @@ impl Default for GlobalConfig {
             platform: Platform::Github,
             token: None,
             endpoint: None,
+            username: None,
+            password: None,
+            git_private_key: None,
             dry_run: None,
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,
             config_migration: false,
             platform_automerge: true,
+            platform_commit: None,
             recreate_when: RecreateWhen::Auto,
             allowed_commands: Vec::new(),
             allow_command_templating: false,
@@ -355,6 +374,7 @@ impl Default for GlobalConfig {
             host_rules: Vec::new(),
             registry_aliases: std::collections::BTreeMap::new(),
             onboarding_config: serde_json::Map::new(),
+            lock_file_maintenance: serde_json::Map::new(),
             repositories: Vec::new(),
         }
     }

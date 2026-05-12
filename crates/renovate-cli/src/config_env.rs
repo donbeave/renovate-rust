@@ -4,10 +4,10 @@
 
 use std::collections::BTreeMap;
 
-use renovate_core::config::{GlobalConfig, Platform, RecreateWhen};
+use renovate_core::config::{DryRun, GlobalConfig, Platform, RecreateWhen, RequireConfig};
 use serde_json::json;
 
-use crate::config_builder::parse_json_array;
+use crate::config_builder::{parse_json_array, parse_json_object};
 
 /// Apply environment variables on top of a base config.
 pub(crate) fn apply_to_base(
@@ -32,11 +32,40 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "ENDPOINT") {
         config.endpoint = Some(value.to_owned());
     }
+    if let Some(value) = env_value(env, prefix, "USERNAME") {
+        config.username = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "PASSWORD") {
+        config.password = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "GIT_PRIVATE_KEY") {
+        config.git_private_key = Some(value.replace("\\n", "\n"));
+    }
     if let Some(value) = env_value(env, prefix, "PLATFORM") {
         config.platform = parse_platform(value)?;
     }
+    if let Some(value) = env_value(env, prefix, "DRY_RUN") {
+        config.dry_run = parse_dry_run(value)?;
+    }
+    if let Some(value) = env_value(env, prefix, "REQUIRE_CONFIG") {
+        config.require_config = if parse_bool("RENOVATE_REQUIRE_CONFIG", value)? {
+            RequireConfig::Required
+        } else {
+            RequireConfig::Optional
+        };
+    }
+    if let Some(value) = env_value(env, prefix, "PLATFORM_COMMIT") {
+        config.platform_commit = Some(if parse_bool("RENOVATE_PLATFORM_COMMIT", value)? {
+            "enabled".to_owned()
+        } else {
+            "disabled".to_owned()
+        });
+    }
     if let Some(value) = env_value(env, prefix, "HOST_RULES") {
         config.host_rules = parse_json_array(value).unwrap_or_default();
+    }
+    if let Some(value) = env_value(env, prefix, "LOCK_FILE_MAINTENANCE") {
+        config.lock_file_maintenance = parse_json_object(value).unwrap_or_default();
     }
     if let Some(token) = env
         .get("GITHUB_COM_TOKEN")
@@ -63,6 +92,9 @@ pub(crate) fn apply_to_base(
             "never" => RecreateWhen::Never,
             _ => return Err(format!("RENOVATE_RECREATE_WHEN was invalid: {value}")),
         };
+    }
+    if let Some(value) = env_value(env, prefix, "GIT_LAB_AUTOMERGE") {
+        config.platform_automerge = parse_bool("RENOVATE_GIT_LAB_AUTOMERGE", value)?;
     }
 
     Ok(config)
@@ -106,6 +138,17 @@ fn parse_platform(value: &str) -> Result<Platform, String> {
     }
 }
 
+fn parse_dry_run(value: &str) -> Result<Option<DryRun>, String> {
+    match value {
+        "true" => Ok(Some(DryRun::Full)),
+        "false" | "null" => Ok(None),
+        "extract" => Ok(Some(DryRun::Extract)),
+        "lookup" => Ok(Some(DryRun::Lookup)),
+        "full" => Ok(Some(DryRun::Full)),
+        _ => Err(format!("RENOVATE_DRY_RUN was invalid: {value}")),
+    }
+}
+
 fn split_list(value: &str) -> Vec<String> {
     value
         .split(',')
@@ -117,7 +160,7 @@ fn split_list(value: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::build_from_env;
-    use renovate_core::config::{Platform, RecreateWhen};
+    use renovate_core::config::{DryRun, Platform, RecreateWhen, RequireConfig};
     use std::collections::BTreeMap;
 
     fn env(pairs: &[(&str, &str)]) -> BTreeMap<String, String> {
@@ -187,12 +230,26 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("a"));
     }
 
+    // Ported: "coerces string newlines" — workers/global/config/parse/env.spec.ts line 60
+    #[test]
+    fn string_newlines_are_coerced() {
+        let config = build_from_env(&env(&[("RENOVATE_GIT_PRIVATE_KEY", r"abc\ndef")])).unwrap();
+        assert_eq!(config.git_private_key.as_deref(), Some("abc\ndef"));
+    }
+
     // Ported: "supports custom prefixes" — workers/global/config/parse/env.spec.ts line 67
     #[test]
     fn custom_prefix_is_supported() {
         let config =
             build_from_env(&env(&[("ENV_PREFIX", "FOOBAR_"), ("FOOBAR_TOKEN", "abc")])).unwrap();
         assert_eq!(config.token.as_deref(), Some("abc"));
+    }
+
+    // Ported: "supports json" — workers/global/config/parse/env.spec.ts line 76
+    #[test]
+    fn lock_file_maintenance_json_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_LOCK_FILE_MAINTENANCE", "{}")])).unwrap();
+        assert!(config.lock_file_maintenance.is_empty());
     }
 
     // Ported: "supports arrays of objects" — workers/global/config/parse/env.spec.ts line 83
@@ -354,5 +411,94 @@ mod tests {
         assert_eq!(config.platform, Platform::Azure);
         assert_eq!(config.token.as_deref(), Some("an Azure DevOps token"));
         assert_eq!(config.endpoint.as_deref(), Some("an Azure DevOps endpoint"));
+    }
+
+    // Ported: "supports Bitbucket token" — workers/global/config/parse/env.spec.ts line 268
+    #[test]
+    fn bitbucket_token_config_is_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_PLATFORM", "bitbucket"),
+            ("RENOVATE_ENDPOINT", "a bitbucket endpoint"),
+            ("RENOVATE_USERNAME", "some-username"),
+            ("RENOVATE_PASSWORD", "app-password"),
+        ]))
+        .unwrap();
+        assert_eq!(config.platform, Platform::Bitbucket);
+        assert_eq!(config.endpoint.as_deref(), Some("a bitbucket endpoint"));
+        assert_eq!(config.username.as_deref(), Some("some-username"));
+        assert_eq!(config.password.as_deref(), Some("app-password"));
+    }
+
+    // Ported: "supports Bitbucket username/password" — workers/global/config/parse/env.spec.ts line 283
+    #[test]
+    fn bitbucket_username_password_config_is_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_PLATFORM", "bitbucket"),
+            ("RENOVATE_ENDPOINT", "a bitbucket endpoint"),
+            ("RENOVATE_USERNAME", "some-username"),
+            ("RENOVATE_PASSWORD", "app-password"),
+        ]))
+        .unwrap();
+        assert_eq!(config.platform, Platform::Bitbucket);
+        assert_eq!(config.endpoint.as_deref(), Some("a bitbucket endpoint"));
+        assert!(config.host_rules.is_empty());
+        assert_eq!(config.username.as_deref(), Some("some-username"));
+        assert_eq!(config.password.as_deref(), Some("app-password"));
+    }
+
+    // Ported: "renames migrated variables" — workers/global/config/parse/env.spec.ts line 386
+    #[test]
+    fn git_lab_automerge_env_sets_platform_automerge() {
+        let config = build_from_env(&env(&[("RENOVATE_GIT_LAB_AUTOMERGE", "true")])).unwrap();
+        assert!(config.platform_automerge);
+    }
+
+    // Ported: "dryRun boolean true" — workers/global/config/parse/env.spec.ts line 441
+    #[test]
+    fn dry_run_true_maps_to_full() {
+        let config = build_from_env(&env(&[("RENOVATE_DRY_RUN", "true")])).unwrap();
+        assert_eq!(config.dry_run, Some(DryRun::Full));
+    }
+
+    // Ported: "dryRun boolean false" — workers/global/config/parse/env.spec.ts line 449
+    #[test]
+    fn dry_run_false_disables_dry_run() {
+        let config = build_from_env(&env(&[("RENOVATE_DRY_RUN", "false")])).unwrap();
+        assert_eq!(config.dry_run, None);
+    }
+
+    // Ported: "dryRun null" — workers/global/config/parse/env.spec.ts line 457
+    #[test]
+    fn dry_run_null_disables_dry_run() {
+        let config = build_from_env(&env(&[("RENOVATE_DRY_RUN", "null")])).unwrap();
+        assert_eq!(config.dry_run, None);
+    }
+
+    // Ported: "requireConfig boolean true" — workers/global/config/parse/env.spec.ts line 465
+    #[test]
+    fn require_config_true_maps_to_required() {
+        let config = build_from_env(&env(&[("RENOVATE_REQUIRE_CONFIG", "true")])).unwrap();
+        assert_eq!(config.require_config, RequireConfig::Required);
+    }
+
+    // Ported: "requireConfig boolean false" — workers/global/config/parse/env.spec.ts line 473
+    #[test]
+    fn require_config_false_maps_to_optional() {
+        let config = build_from_env(&env(&[("RENOVATE_REQUIRE_CONFIG", "false")])).unwrap();
+        assert_eq!(config.require_config, RequireConfig::Optional);
+    }
+
+    // Ported: "platformCommit boolean true" — workers/global/config/parse/env.spec.ts line 481
+    #[test]
+    fn platform_commit_true_maps_to_enabled() {
+        let config = build_from_env(&env(&[("RENOVATE_PLATFORM_COMMIT", "true")])).unwrap();
+        assert_eq!(config.platform_commit.as_deref(), Some("enabled"));
+    }
+
+    // Ported: "platformCommit boolean false" — workers/global/config/parse/env.spec.ts line 489
+    #[test]
+    fn platform_commit_false_maps_to_disabled() {
+        let config = build_from_env(&env(&[("RENOVATE_PLATFORM_COMMIT", "false")])).unwrap();
+        assert_eq!(config.platform_commit.as_deref(), Some("disabled"));
     }
 }

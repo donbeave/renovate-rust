@@ -173,6 +173,9 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         // For Option fields: file wins only if it's Some.
         token: file_config.token.or(base.token),
         endpoint: file_config.endpoint.or(base.endpoint),
+        username: file_config.username.or(base.username),
+        password: file_config.password.or(base.password),
+        git_private_key: file_config.git_private_key.or(base.git_private_key),
         dry_run: file_config.dry_run.or(base.dry_run),
         // For non-Option fields: file always wins (it was explicitly set in
         // the file or it carries the default — we cannot distinguish, so we
@@ -182,6 +185,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         fork_processing: file_config.fork_processing,
         config_migration: file_config.config_migration,
         platform_automerge: file_config.platform_automerge,
+        platform_commit: file_config.platform_commit.or(base.platform_commit),
         recreate_when: file_config.recreate_when,
         allowed_commands: if file_config.allowed_commands.is_empty() {
             base.allowed_commands
@@ -208,6 +212,11 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             base.onboarding_config
         } else {
             file_config.onboarding_config
+        },
+        lock_file_maintenance: if file_config.lock_file_maintenance.is_empty() {
+            base.lock_file_maintenance
+        } else {
+            file_config.lock_file_maintenance
         },
         // repositories are CLI-only; the file config never sets them.
         repositories: base.repositories,
