@@ -4523,6 +4523,47 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/rust-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rust-version/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/rust-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches and parses manifest data | 9 | not-applicable | — | — | Rust toolchain version datasource lookup and channel manifest parsing are not implemented in Rust. |
+| deduplicates versions with latest date | 46 | not-applicable | — | — | Rust toolchain version datasource lookup and channel manifest parsing are not implemented in Rust. |
+| ignores unexpected URLs | 69 | not-applicable | — | — | Rust toolchain version datasource lookup and channel manifest parsing are not implemented in Rust. |
+| throws for network error | 91 | not-applicable | — | — | Rust toolchain version datasource lookup and channel manifest parsing are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/rust-version/parse.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rust-version/parse.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/rust-version/parse`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses nightly URL | 5 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses versioned release URL | 15 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses beta versioned URL | 25 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses stable channel URL | 35 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses beta channel URL | 45 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses URL with https protocol | 55 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses URL with http protocol | 65 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| returns null for URL without date | 75 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| returns null for URL without channel-rust pattern | 82 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| returns null for empty string | 89 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| returns null for malformed date | 94 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses URL with different domain | 104 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+| parses URL with complex version | 114 | not-applicable | — | — | Rust toolchain manifest URL parsing helpers are not implemented in Rust because the Rust toolchain datasource is absent. |
+
+---
+
 ## `lib/modules/datasource/custom/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/custom/index.spec.ts
