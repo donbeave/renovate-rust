@@ -669,6 +669,13 @@ mod tests {
         assert_eq!(name, "renovate/angular-core-17.x");
     }
 
+    // Ported: "realistic defaults" — workers/repository/updates/branch-name.spec.ts line 269
+    #[test]
+    fn branch_name_realistic_defaults() {
+        let topic = branch_topic("jest", 42, 0, false, false, false, false);
+        assert_eq!(branch_name("renovate/", "", &topic), "renovate/jest-42.x");
+    }
+
     // ── pr_title ─────────────────────────────────────────────────────────────
 
     #[test]
@@ -975,6 +982,44 @@ mod tests {
         let name = hashed_branch_name("renovate/", "", "lodash-4.x", 10);
         assert_eq!(name.len(), 9 + 6, "should use minimum 6 hex chars");
         assert!(name.starts_with("renovate/"));
+    }
+
+    // Ported: "hashedBranchLength hashing" — workers/repository/updates/branch-name.spec.ts line 316
+    #[test]
+    fn hashed_branch_length_hashing_matches_renovate() {
+        assert_eq!(
+            hashed_branch_name("dep-", "", "jest-42.x", 14),
+            "dep-df9ca0f348"
+        );
+    }
+
+    // Ported: "hashedBranchLength hashing with group name" — workers/repository/updates/branch-name.spec.ts line 332
+    #[test]
+    fn hashed_branch_length_hashing_with_group_name_matches_renovate() {
+        assert_eq!(
+            hashed_branch_name("dep-", "", "jest-42.x", 20),
+            "dep-df9ca0f34833f3e0"
+        );
+    }
+
+    // Ported: "hashedBranchLength too short" — workers/repository/updates/branch-name.spec.ts line 350
+    #[test]
+    fn hashed_branch_length_too_short_matches_renovate_minimum() {
+        assert_eq!(hashed_branch_name("dep-", "", "jest-42.x", 3), "dep-df9ca0");
+    }
+
+    // Ported: "hashedBranchLength no topic" — workers/repository/updates/branch-name.spec.ts line 368
+    #[test]
+    fn hashed_branch_length_no_topic_matches_renovate_empty_hash() {
+        assert_eq!(hashed_branch_name("dep-", "", "", 3), "dep-cf83e1");
+    }
+
+    // Ported: "hashedBranchLength separates minor when separateMultipleMinor=true" — workers/repository/updates/branch-name.spec.ts line 386
+    #[test]
+    fn hashed_branch_length_separate_multiple_minor_matches_renovate() {
+        let topic = branch_topic("jest", 42, 3, false, true, false, true);
+        assert_eq!(topic, "jest-42.3.x");
+        assert_eq!(hashed_branch_name("dep-", "", &topic, 14), "dep-2e27927800");
     }
 
     #[test]
