@@ -3753,6 +3753,109 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/packages-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/packages-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/packages-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate to package rules | 4 | ported | `migrate_validate.rs` | `packages_migrates_to_package_rules` | — |
+| should concat with existing package rules | 14 | ported | `migrate_validate.rs` | `packages_appends_to_existing_package_rules` | — |
+| should ignore non array value | 26 | ported | `migrate_validate.rs` | `packages_non_array_is_removed` | — |
+
+---
+
+## `lib/config/migrations/custom/path-rules-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/path-rules-migration.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `config/migrations/custom/path-rules-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate to packageRules | 4 | ported | `migrate_validate.rs` | `path_rules_migrate_to_package_rules` | — |
+| should rewrite packageRules when it is not array | 22 | ported | `migrate_validate.rs` | `path_rules_rewrite_non_array_package_rules` | — |
+| should not migrate non array value | 42 | ported | `migrate_validate.rs` | `path_rules_non_array_is_removed` | — |
+| should concat with existing package rules | 50 | ported | `migrate_validate.rs` | `path_rules_append_to_existing_package_rules` | — |
+
+---
+
+## `lib/config/migrations/custom/package-files-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/package-files-migration.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `config/migrations/custom/package-files-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate value to array | 4 | ported | `migrate_validate.rs` | `package_files_object_migrates_to_include_paths_and_package_rules` | — |
+| should handle multiple packageFile | 21 | ported | `migrate_validate.rs` | `package_files_nested_array_migrates_to_include_paths` | — |
+| should still work for wrong config | 34 | ported | `migrate_validate.rs` | `package_files_appends_to_existing_package_rules` | — |
+| should work for non-object packageFiles | 55 | ported | `migrate_validate.rs` | `package_files_string_migrates_to_include_paths` | — |
+| should work for nested rules | 65 | ported | `migrate_validate.rs` | `package_files_preserves_nested_rules` | — |
+| no change for empty packageFiles | 92 | ported | `migrate_validate.rs` | `package_files_empty_is_removed_without_other_changes` | — |
+
+---
+
+## `lib/config/migrations/custom/pin-versions-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/pin-versions-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/pin-versions-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true | 4 | ported | `migrate_validate.rs` | `pin_versions_true_migrates_to_pin_range_strategy` | — |
+| should migrate false | 14 | ported | `migrate_validate.rs` | `pin_versions_false_migrates_to_replace_range_strategy` | — |
+
+---
+
+## `lib/config/migrations/custom/separate-major-release-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/separate-major-release-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/separate-major-release-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate | 4 | ported | `migrate_validate.rs` | `separate_major_releases_migrates_to_separate_major_minor` | — |
+
+---
+
+## `lib/config/migrations/custom/separate-multiple-major-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/separate-multiple-major-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/separate-multiple-major-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should remove if separateMajorReleases exists | 4 | ported | `migrate_validate.rs` | `separate_multiple_major_removed_when_separate_major_releases_exists` | — |
+| should skip if separateMajorReleases does not exist | 14 | ported | `migrate_validate.rs` | `separate_multiple_major_is_unchanged_without_separate_major_releases` | — |
+
+---
+
+## `lib/config/migrations/custom/stability-days-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/stability-days-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/stability-days-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates | 4 | ported | `migrate_validate.rs` | `stability_days_migrates_to_minimum_release_age` | — |
+
+---
+
 ## `lib/config/migrations/custom/go-mod-tidy-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/go-mod-tidy-migration.spec.ts

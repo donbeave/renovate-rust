@@ -288,6 +288,76 @@ fn migrate_config(input: &Value) -> Value {
         if let Some(package_pattern) = map.remove("packagePattern") {
             set_safely(map, "packagePatterns", Value::Array(vec![package_pattern]));
         }
+        if let Some(Value::Array(packages)) = map.remove("packages") {
+            package_rules_mut(map).extend(packages);
+        }
+        if let Some(Value::Array(path_rules)) = map.remove("pathRules") {
+            package_rules_mut(map).extend(path_rules);
+        }
+        if let Some(Value::Array(package_files)) = map.remove("packageFiles") {
+            let mut include_paths = Vec::new();
+            let mut migrated_package_rules = Vec::new();
+            for package_file in package_files {
+                match package_file {
+                    Value::String(path) => include_paths.push(path),
+                    Value::Array(paths) => {
+                        include_paths.extend(paths.into_iter().filter_map(|path| match path {
+                            Value::String(path) => Some(path),
+                            _ => None,
+                        }));
+                    }
+                    Value::Object(mut object) => {
+                        let Some(Value::String(path)) = object.remove("packageFile") else {
+                            continue;
+                        };
+                        include_paths.push(path.clone());
+                        object.insert("paths".to_owned(), Value::Array(vec![Value::String(path)]));
+                        if object.len() > 1 {
+                            migrated_package_rules.push(Value::Object(object));
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            if !include_paths.is_empty() {
+                set_safely(
+                    map,
+                    "includePaths",
+                    Value::Array(include_paths.into_iter().map(Value::String).collect()),
+                );
+            }
+            if !migrated_package_rules.is_empty() {
+                package_rules_mut(map).extend(migrated_package_rules);
+            }
+        }
+        if let Some(pin_versions) = map.remove("pinVersions")
+            && let Some(value) = pin_versions.as_bool()
+        {
+            set_safely(
+                map,
+                "rangeStrategy",
+                Value::String(if value { "pin" } else { "replace" }.to_owned()),
+            );
+        }
+        if let Some(separate_major_releases) = map.get("separateMajorReleases") {
+            set_safely(map, "separateMajorMinor", separate_major_releases.clone());
+        }
+        if map.get("separateMajorReleases").is_some() {
+            map.remove("separateMultipleMajor");
+        }
+        if let Some(stability_days) = map.remove("stabilityDays")
+            && let Some(days) = stability_days.as_i64()
+        {
+            set_safely(
+                map,
+                "minimumReleaseAge",
+                match days {
+                    0 => Value::Null,
+                    1 => Value::String("1 day".to_owned()),
+                    days => Value::String(format!("{days} days")),
+                },
+            );
+        }
         if matches!(map.remove("gomodTidy"), Some(value) if value.as_bool().unwrap_or(false)) {
             let post_update_options = map
                 .entry("postUpdateOptions".to_owned())
@@ -4295,6 +4365,240 @@ mod tests {
         assert_eq!(
             migrate_config(&json!({"packagePattern": "test"})),
             json!({"packagePatterns": ["test"]})
+        );
+    }
+
+    // Ported: "should migrate to package rules" — config/migrations/custom/packages-migration.spec.ts line 4
+    #[test]
+    fn packages_migrates_to_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({"packages": [{"matchPackageNames": ["*"]}]})),
+            json!({"packageRules": [{"matchPackageNames": ["*"]}]})
+        );
+    }
+
+    // Ported: "should concat with existing package rules" — config/migrations/custom/packages-migration.spec.ts line 14
+    #[test]
+    fn packages_appends_to_existing_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packages": [{"matchPackageNames": ["*"]}],
+                "packageRules": [{"matchPackageNames": []}]
+            })),
+            json!({"packageRules": [{"matchPackageNames": []}, {"matchPackageNames": ["*"]}]})
+        );
+    }
+
+    // Ported: "should ignore non array value" — config/migrations/custom/packages-migration.spec.ts line 26
+    #[test]
+    fn packages_non_array_is_removed() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packages": {"matchPackageNames": ["*"]},
+                "packageRules": [{"matchPackageNames": []}]
+            })),
+            json!({"packageRules": [{"matchPackageNames": []}]})
+        );
+    }
+
+    // Ported: "should migrate to packageRules" — config/migrations/custom/path-rules-migration.spec.ts line 4
+    #[test]
+    fn path_rules_migrate_to_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({"pathRules": [{"paths": ["examples/**"], "extends": ["foo"]}]})),
+            json!({"packageRules": [{"paths": ["examples/**"], "extends": ["foo"]}]})
+        );
+    }
+
+    // Ported: "should rewrite packageRules when it is not array" — config/migrations/custom/path-rules-migration.spec.ts line 22
+    #[test]
+    fn path_rules_rewrite_non_array_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": "test",
+                "pathRules": [{"paths": ["examples/**"], "extends": ["foo"]}]
+            })),
+            json!({"packageRules": [{"paths": ["examples/**"], "extends": ["foo"]}]})
+        );
+    }
+
+    // Ported: "should not migrate non array value" — config/migrations/custom/path-rules-migration.spec.ts line 42
+    #[test]
+    fn path_rules_non_array_is_removed() {
+        assert_eq!(migrate_config(&json!({"pathRules": "test"})), json!({}));
+    }
+
+    // Ported: "should concat with existing package rules" — config/migrations/custom/path-rules-migration.spec.ts line 50
+    #[test]
+    fn path_rules_append_to_existing_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({
+                "pathRules": [{"paths": ["examples/**"], "extends": ["foo"]}],
+                "packageRules": [{"packageNames": ["guava"], "versionScheme": "maven"}]
+            })),
+            json!({
+                "packageRules": [
+                    {"packageNames": ["guava"], "versionScheme": "maven"},
+                    {"paths": ["examples/**"], "extends": ["foo"]}
+                ]
+            })
+        );
+    }
+
+    // Ported: "should migrate value to array" — config/migrations/custom/package-files-migration.spec.ts line 4
+    #[test]
+    fn package_files_object_migrates_to_include_paths_and_package_rules() {
+        assert_eq!(
+            migrate_config(
+                &json!({"packageFiles": [{"packageFile": "package.json", "packageRules": []}]})
+            ),
+            json!({
+                "includePaths": ["package.json"],
+                "packageRules": [{"paths": ["package.json"], "packageRules": []}]
+            })
+        );
+    }
+
+    // Ported: "should handle multiple packageFile" — config/migrations/custom/package-files-migration.spec.ts line 21
+    #[test]
+    fn package_files_nested_array_migrates_to_include_paths() {
+        assert_eq!(
+            migrate_config(&json!({"packageFiles": [["package.json", "Chart.yaml"]]})),
+            json!({"includePaths": ["package.json", "Chart.yaml"]})
+        );
+    }
+
+    // Ported: "should still work for wrong config" — config/migrations/custom/package-files-migration.spec.ts line 34
+    #[test]
+    fn package_files_appends_to_existing_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": [{"labels": ["lint"]}],
+                "packageFiles": [{
+                    "packageFile": "package.json",
+                    "packageRules": [{"labels": ["breaking"]}]
+                }]
+            })),
+            json!({
+                "includePaths": ["package.json"],
+                "packageRules": [
+                    {"labels": ["lint"]},
+                    {"paths": ["package.json"], "packageRules": [{"labels": ["breaking"]}]}
+                ]
+            })
+        );
+    }
+
+    // Ported: "should work for non-object packageFiles" — config/migrations/custom/package-files-migration.spec.ts line 55
+    #[test]
+    fn package_files_string_migrates_to_include_paths() {
+        assert_eq!(
+            migrate_config(&json!({"packageFiles": ["package.json"]})),
+            json!({"includePaths": ["package.json"]})
+        );
+    }
+
+    // Ported: "should work for nested rules" — config/migrations/custom/package-files-migration.spec.ts line 65
+    #[test]
+    fn package_files_preserves_nested_rules() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageFiles": [{
+                    "packageFile": "package.json",
+                    "packageRules": [{
+                        "labels": ["linter"],
+                        "packageRules": [{"addLabels": ["es-lint"]}]
+                    }]
+                }]
+            })),
+            json!({
+                "includePaths": ["package.json"],
+                "packageRules": [{
+                    "paths": ["package.json"],
+                    "packageRules": [{
+                        "labels": ["linter"],
+                        "packageRules": [{"addLabels": ["es-lint"]}]
+                    }]
+                }]
+            })
+        );
+    }
+
+    // Ported: "no change for empty packageFiles" — config/migrations/custom/package-files-migration.spec.ts line 92
+    #[test]
+    fn package_files_empty_is_removed_without_other_changes() {
+        assert_eq!(
+            migrate_config(&json!({
+                "includePaths": ["package.json"],
+                "packageRules": [{"labels": ["linter"]}],
+                "packageFiles": []
+            })),
+            json!({
+                "includePaths": ["package.json"],
+                "packageRules": [{"labels": ["linter"]}]
+            })
+        );
+    }
+
+    // Ported: "should migrate true" — config/migrations/custom/pin-versions-migration.spec.ts line 4
+    #[test]
+    fn pin_versions_true_migrates_to_pin_range_strategy() {
+        assert_eq!(
+            migrate_config(&json!({"pinVersions": true})),
+            json!({"rangeStrategy": "pin"})
+        );
+    }
+
+    // Ported: "should migrate false" — config/migrations/custom/pin-versions-migration.spec.ts line 14
+    #[test]
+    fn pin_versions_false_migrates_to_replace_range_strategy() {
+        assert_eq!(
+            migrate_config(&json!({"pinVersions": false})),
+            json!({"rangeStrategy": "replace"})
+        );
+    }
+
+    // Ported: "should migrate" — config/migrations/custom/separate-major-release-migration.spec.ts line 4
+    #[test]
+    fn separate_major_releases_migrates_to_separate_major_minor() {
+        assert_eq!(
+            migrate_config(&json!({"separateMajorReleases": true})),
+            json!({"separateMajorReleases": true, "separateMajorMinor": true})
+        );
+    }
+
+    // Ported: "should remove if separateMajorReleases exists" — config/migrations/custom/separate-multiple-major-migration.spec.ts line 4
+    #[test]
+    fn separate_multiple_major_removed_when_separate_major_releases_exists() {
+        assert_eq!(
+            migrate_config(&json!({"separateMajorReleases": true, "separateMultipleMajor": true})),
+            json!({"separateMajorReleases": true, "separateMajorMinor": true})
+        );
+    }
+
+    // Ported: "should skip if separateMajorReleases does not exist" — config/migrations/custom/separate-multiple-major-migration.spec.ts line 14
+    #[test]
+    fn separate_multiple_major_is_unchanged_without_separate_major_releases() {
+        assert_eq!(
+            migrate_config(&json!({"separateMultipleMajor": true})),
+            json!({"separateMultipleMajor": true})
+        );
+    }
+
+    // Ported: "migrates" — config/migrations/custom/stability-days-migration.spec.ts line 4
+    #[test]
+    fn stability_days_migrates_to_minimum_release_age() {
+        assert_eq!(
+            migrate_config(&json!({"stabilityDays": 0})),
+            json!({"minimumReleaseAge": null})
+        );
+        assert_eq!(
+            migrate_config(&json!({"stabilityDays": 2})),
+            json!({"minimumReleaseAge": "2 days"})
+        );
+        assert_eq!(
+            migrate_config(&json!({"stabilityDays": 1})),
+            json!({"minimumReleaseAge": "1 day"})
         );
     }
 
