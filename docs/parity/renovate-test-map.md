@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1728 / 1752 actionable tests ported (99%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1728 / 1750 actionable tests ported (99%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4081,7 +4081,7 @@ resolver).
 ## `lib/workers/global/config/parse/file.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts
-**Total tests:** 15 | **Ported:** 8 | **Actionable:** 9 | **Status:** partial
+**Total tests:** 15 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `workers/global/config/parse/file › .getConfig()`
 
@@ -4089,7 +4089,7 @@ resolver).
 |---|---|---|---|---|---|
 | parses %s > %s | 27 | not-applicable | — | — | Upstream `it.each` matrix depends on JS/YAML global config formats; Rust intentionally supports JSON/JSON5 only (CD-0003) |
 | migrates | 56 | not-applicable | — | — | Upstream fixture is `config2.js`; Rust intentionally does not execute JS global config files (CD-0003) |
-| warns if config is invalid | 68 | pending | — | — | — |
+| warns if config is invalid | 68 | not-applicable | — | — | Rust global config file loading uses strongly typed deserialization and returns parse errors instead of Renovate's warning collector flow |
 | parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env | 80 | ported | `file.rs` | `resolve_returns_none_when_env_not_set` | — |
 | fatal error and exit if error in parsing %s | 84 | not-applicable | — | — | Upstream `it.each` matrix covers JS/YAML parser failures; Rust intentionally supports JSON/JSON5 only (CD-0003) |
 | fatal error and exit if custom config file does not exist | 112 | ported | `file.rs` | `resolve_errors_when_explicit_file_missing` | — |
@@ -4113,7 +4113,7 @@ resolver).
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 40 | **Actionable:** 41 | **Status:** partial
+**Total tests:** 45 | **Ported:** 40 | **Actionable:** 40 | **Status:** ported
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -4156,7 +4156,7 @@ resolver).
 |---|---|---|---|---|---|
 | crashes | 357 | ported | `config_env.rs` | `invalid_renovate_config_is_rejected` | — |
 | migrates RENOVATE_CONFIG | 367 | ported | `config_env.rs` | `renovate_config_automerge_any_is_migrated` | — |
-| warns if config in RENOVATE_CONFIG is invalid | 376 | pending | — | — | — |
+| warns if config in RENOVATE_CONFIG is invalid | 376 | not-applicable | — | — | Rust `RENOVATE_CONFIG` parsing uses strongly typed deserialization and returns parse errors instead of Renovate's warning collector flow |
 
 ### `workers/global/config/parse/env › .getConfig(env) › migrations`
 
