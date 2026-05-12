@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1703 / 1794 actionable tests ported (95%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1703 / 1790 actionable tests ported (95%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4113,7 +4113,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 35 | **Actionable:** 45 | **Status:** partial
+**Total tests:** 45 | **Ported:** 35 | **Actionable:** 41 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -4168,15 +4168,15 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has no duplicate env names across options | 396 | pending | — | — | — |
+| has no duplicate env names across options | 396 | not-applicable | — | — | TypeScript option metadata registry; Rust env names are static `clap` attributes |
 
 ### `workers/global/config/parse/env › .getEnvName(definition)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty | 418 | pending | — | — | — |
-| returns existing env | 426 | pending | — | — | — |
-| generates RENOVATE_ env | 434 | pending | — | — | — |
+| returns empty | 418 | not-applicable | — | — | TypeScript option-definition helper; Rust env names are static `clap` attributes |
+| returns existing env | 426 | not-applicable | — | — | TypeScript option-definition helper; Rust env names are static `clap` attributes |
+| generates RENOVATE_ env | 434 | not-applicable | — | — | TypeScript option-definition helper; Rust env names are static `clap` attributes |
 | dryRun boolean true | 441 | ported | `config_env.rs` | `dry_run_true_maps_to_full` | — |
 | dryRun boolean false | 449 | ported | `config_env.rs` | `dry_run_false_disables_dry_run` | — |
 | dryRun null | 457 | ported | `config_env.rs` | `dry_run_null_disables_dry_run` | — |
