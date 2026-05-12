@@ -10078,6 +10078,180 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/util/minimatch.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/minimatch.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/minimatch › minimatch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| caches minimatch | 5 | not-applicable | — | — | Renovate's JavaScript `minimatch()` cache wrapper is not implemented as a Rust API; Rust compiles glob matchers at call sites. |
+| does not cache minimatch | 12 | not-applicable | — | — | Renovate's JavaScript `minimatch()` cache wrapper is not implemented as a Rust API. |
+| matches | 20 | not-applicable | — | — | Renovate's JavaScript `minimatch()` wrapper is not implemented as a Rust API; Rust glob behavior is covered through config/string matching tests. |
+
+### `util/minimatch › minimatchFilter`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return a function | 32 | not-applicable | — | — | Renovate's JavaScript `minimatchFilter()` function factory is not implemented as a Rust API. |
+| should correctly match filenames | 37 | not-applicable | — | — | Renovate's JavaScript `minimatchFilter()` function factory is not implemented as a Rust API. |
+
+---
+
+## `lib/util/emoji.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/emoji.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/emoji › emojify`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| encodes known shortcodes | 53 | not-applicable | — | — | Renovate's emoji shortcode conversion helper is not implemented as a Rust API. |
+| encodes aliases | 57 | not-applicable | — | — | Renovate's emoji shortcode alias table is not implemented as a Rust API. |
+| omits unknown shortcodes | 63 | not-applicable | — | — | Renovate's emoji shortcode conversion helper is not implemented as a Rust API. |
+| convert warning shortcode to emoji | 67 | not-applicable | — | — | Renovate's emoji shortcode conversion helper is not implemented as a Rust API. |
+| does not encode when config option is disabled | 72 | not-applicable | — | — | Renovate's process-global emoji config helper is not implemented as a Rust API. |
+
+### `util/emoji › unemojify`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| strips emojis when the config has been set accordingly | 79 | not-applicable | — | — | Renovate's emoji stripping/config helper is not implemented as a Rust API. |
+| does not strip emojis when the config demands it | 88 | not-applicable | — | — | Renovate's process-global emoji config helper is not implemented as a Rust API. |
+| converts warning emoji to shortcode | 97 | not-applicable | — | — | Renovate's emoji-to-shortcode conversion helper is not implemented as a Rust API. |
+
+### `util/emoji › problematic characters`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| converts %s forth and back | 106 | not-applicable | — | — | Renovate's emoji round-trip conversion helper is not implemented as a Rust API. |
+
+### `util/emoji › stripEmojis`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is independent of config option | 124 | not-applicable | — | — | Renovate's emoji stripping helper is not implemented as a Rust API. |
+| does not throw on standalone modifiers | 135 | not-applicable | — | — | Renovate's emoji stripping helper is not implemented as a Rust API. |
+
+---
+
+## `lib/util/unicode.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/unicode.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/unicode › logWarningIfUnicodeHiddenCharactersInPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| logs a warning for hidden Unicode characters in text files | 146 | not-applicable | — | — | Renovate's hidden-Unicode package-file logger helper is not implemented as a Rust API. |
+| logs a trace message for BOM character only | 156 | not-applicable | — | — | Renovate's hidden-Unicode package-file logger helper is not implemented as a Rust API. |
+| does not log a warning for binary files with null bytes but no hidden unicode | 170 | not-applicable | — | — | Renovate's hidden-Unicode package-file logger helper is not implemented as a Rust API. |
+| logs a trace message (not warning) for binary files with hidden unicode characters | 183 | not-applicable | — | — | Renovate's hidden-Unicode package-file logger helper is not implemented as a Rust API. |
+| does not log a warning when no hidden characters are present | 203 | not-applicable | — | — | Renovate's hidden-Unicode package-file logger helper is not implemented as a Rust API. |
+
+---
+
+## `lib/util/pretty-time.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/pretty-time.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/pretty-time`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| toMs('$input') === $expected | 5 | not-applicable | — | — | Renovate's generic compact pretty-time parser is not implemented as a Rust API; Rust has narrower schedule/release-age parsing where needed. |
+| returns null for error | 45 | not-applicable | — | — | Renovate's JavaScript error-swallowing pretty-time helper behavior has no Rust API equivalent. |
+
+### `util/pretty-time › satisfiesDateRange()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| satisfiesRange('$date', '$range') === $expected | 60 | not-applicable | — | — | Renovate's generic `satisfiesDateRange()` helper is not implemented as a Rust API; Rust release-age checks use feature-specific schedule logic. |
+
+---
+
+## `lib/util/array.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/array.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/array`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| .isNotNullOrUndefined | 4 | not-applicable | — | — | Renovate's TypeScript nullish type-guard helper is not implemented as a Rust API; Rust uses `Option` explicitly. |
+| .toArray | 13 | not-applicable | — | — | Renovate's TypeScript value-to-array coercion helper is not implemented as a shared Rust API. |
+
+---
+
+## `lib/util/uniq.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/uniq.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/uniq`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return an array with unique elements | 4 | not-applicable | — | — | Renovate's TypeScript array de-duplication helper is not implemented as a shared Rust API; Rust call sites use standard collection logic. |
+| should use the provided equality function to compare elements | 10 | not-applicable | — | — | Renovate's TypeScript array de-duplication helper with custom comparator is not implemented as a Rust API. |
+
+---
+
+## `lib/util/object.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/object.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/object`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| finds key in regular object | 4 | not-applicable | — | — | Renovate's TypeScript dynamic object key helper is not implemented as a Rust API. |
+| detects missing key in regular object | 8 | not-applicable | — | — | Renovate's TypeScript dynamic object key helper is not implemented as a Rust API. |
+| returns false for wrong instance type | 12 | not-applicable | — | — | Renovate's TypeScript runtime object/type guard behavior has no Rust API equivalent. |
+
+### `util/object › coerceObject`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty object | 17 | not-applicable | — | — | Renovate's TypeScript nullable object coercion helper is not implemented as a shared Rust API. |
+| should return input object | 22 | not-applicable | — | — | Renovate's TypeScript nullable object coercion helper is not implemented as a shared Rust API. |
+
+---
+
+## `lib/util/memoize.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/memoize.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/memoize`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 6 | not-applicable | — | — | Renovate's TypeScript memoization helper is not implemented as a shared Rust API. |
+
+---
+
+## `lib/util/mask.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/mask.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/mask › .maskToken`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty string if passed value is falsy | 5 | not-applicable | — | — | Renovate's TypeScript token masking helper is not implemented as a Rust API. |
+| hides value content | 10 | not-applicable | — | — | Renovate's TypeScript token masking helper is not implemented as a Rust API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
