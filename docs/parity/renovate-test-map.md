@@ -3708,6 +3708,127 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/node-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/node-version/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/node-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for 500 | 9 | not-applicable | — | — | Node version datasource lookup is not implemented in Rust. |
+| returns null for error | 19 | not-applicable | — | — | Node version datasource lookup is not implemented in Rust. |
+| returns null for empty 200 OK | 32 | not-applicable | — | — | Node version datasource lookup is not implemented in Rust. |
+| processes real data | 42 | not-applicable | — | — | Node version datasource lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/dart-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/dart-version/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/dart-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for 500 | 16 | not-applicable | — | — | Dart version datasource lookup is not implemented in Rust. |
+| returns null for error | 26 | not-applicable | — | — | Dart version datasource lookup is not implemented in Rust. |
+| returns null for empty 200 OK | 36 | not-applicable | — | — | Dart version datasource lookup is not implemented in Rust. |
+| processes real data | 53 | not-applicable | — | — | Dart version datasource lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/gitea-releases/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/gitea-releases/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/gitea-releases/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags from gitea.com | 9 | not-applicable | — | — | Gitea releases datasource tag and commit lookup is not implemented in Rust. |
+| returns tags from codeberg.org | 100 | not-applicable | — | — | Gitea releases datasource tag and commit lookup is not implemented in Rust. |
+| returns commits from codeberg.org | 230 | not-applicable | — | — | Gitea releases datasource tag and commit lookup is not implemented in Rust. |
+| returns commits from gitea.com | 277 | not-applicable | — | — | Gitea releases datasource tag and commit lookup is not implemented in Rust. |
+| returns tags commit hash from gitea.com | 293 | not-applicable | — | — | Gitea releases datasource tag and commit lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/forgejo-releases/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/forgejo-releases/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/forgejo-releases/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags from forgejo.com | 9 | not-applicable | — | — | Forgejo releases datasource tag and commit lookup is not implemented in Rust. |
+| returns tags from codeberg.org | 106 | not-applicable | — | — | Forgejo releases datasource tag and commit lookup is not implemented in Rust. |
+| returns commits from codeberg.org | 236 | not-applicable | — | — | Forgejo releases datasource tag and commit lookup is not implemented in Rust. |
+| returns commits from forgejo.com | 283 | not-applicable | — | — | Forgejo releases datasource tag and commit lookup is not implemented in Rust. |
+| returns tags commit hash from forgejo.com | 299 | not-applicable | — | — | Forgejo releases datasource tag and commit lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/gitlab-releases/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/gitlab-releases/index.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/gitlab-releases/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns releases from custom registry | 18 | not-applicable | — | — | GitLab releases datasource lookup is not implemented in Rust; Rust only has a GitLab tags datasource. |
+| returns releases from default registry | 32 | not-applicable | — | — | GitLab releases datasource lookup is not implemented in Rust; Rust only has a GitLab tags datasource. |
+| return null if not found | 45 | not-applicable | — | — | GitLab releases datasource lookup is not implemented in Rust; Rust only has a GitLab tags datasource. |
+
+---
+
+## `lib/modules/datasource/bitbucket-tags/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bitbucket-tags/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/bitbucket-tags/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags from bitbucket cloud | 9 | not-applicable | — | — | Bitbucket tags datasource tag and commit lookup is not implemented in Rust. |
+| returns commits from bitbucket cloud | 43 | not-applicable | — | — | Bitbucket tags datasource tag and commit lookup is not implemented in Rust. |
+| returns commits from bitbucket cloud | 85 | not-applicable | — | — | Bitbucket tags datasource tag and commit lookup is not implemented in Rust. |
+| returns tags commit hash from bitbucket cloud | 112 | not-applicable | — | — | Bitbucket tags datasource tag and commit lookup is not implemented in Rust. |
+| returns null for missing hash | 136 | not-applicable | — | — | Bitbucket tags datasource tag and commit lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/bitbucket-server-tags/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bitbucket-server-tags/index.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/bitbucket-server-tags/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags | 12 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| returns null on empty result | 66 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| returns null on missing registryUrl | 80 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| handles not found | 88 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| returns commit hash of provided tag | 104 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| missing hash | 124 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| returns most recent commit hash | 146 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| no commits | 173 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| returns null on empty result | 195 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| returns null on missing registryUrl | 211 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| handles not found | 219 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
