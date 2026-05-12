@@ -3692,6 +3692,59 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/presets/local/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/local/common.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/local/common › fetchJSONFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for null | 8 | not-applicable | — | — | Platform-backed local preset file fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
+| throws for ExternalHostError | 16 | not-applicable | — | — | Platform-backed local preset file fetching and external-host error propagation are not implemented in Rust. |
+| throws for Error | 26 | not-applicable | — | — | Platform-backed local preset file fetching and fetch error mapping are not implemented in Rust. |
+
+### `config/presets/local/common › getPresetFromEndpoint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 36 | not-applicable | — | — | Platform-backed local preset endpoint fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
+
+---
+
+## `lib/config/presets/npm/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/npm/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/npm/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no package | 10 | not-applicable | — | — | npm-hosted preset package fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/npm preset references. |
+| should throw if no renovate-config | 17 | not-applicable | — | — | npm-hosted preset package fetching and renovate-config package parsing are not implemented in Rust. |
+| should throw if preset name not found | 48 | not-applicable | — | — | npm-hosted preset package fetching and preset-name lookup are not implemented in Rust. |
+| should return preset | 83 | not-applicable | — | — | npm-hosted preset package fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/npm preset references. |
+
+---
+
+## `lib/config/presets/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/util.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/util`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 16 | not-applicable | — | — | Generic remote preset fetch/deep-preset helper behavior is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote preset references. |
+| fails | 37 | not-applicable | — | — | Generic remote preset fetch error propagation is not implemented in Rust. |
+| dep not found | 42 | not-applicable | — | — | Generic remote preset dependency-not-found retry/error mapping is not implemented in Rust. |
+| preset not found | 54 | not-applicable | — | — | Generic remote preset nested-preset lookup and preset-not-found mapping are not implemented in Rust. |
+
+---
+
 ## `lib/config/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/parse.spec.ts
