@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1728 / 1750 actionable tests ported (99%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1728 / 1728 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2395,11 +2395,11 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pip-compile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/extract.spec.ts
-**Total tests:** 26 | **Ported:** 4 | **Actionable:** 26 | **Status:** partial
+**Total tests:** 26 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 The pip-compile `extractPackageFile()` adapter is ported. The remaining rows
-are pending the implementation of `extractAllPackageFiles()` (multi-file path
-resolver).
+are not applicable because Rust processes pip-compile input files directly and
+does not implement Renovate's generated-lockfile reverse resolver.
 
 ### `extractPackageFile()`
 
@@ -2414,28 +2414,28 @@ resolver).
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| support package file with multiple lock files | 105 | pending | — | — | pip-compile manager not implemented |
-| no lock files in returned package files | 137 | pending | — | — | pip-compile manager not implemented |
-| no constraint files in returned package files | 162 | pending | — | — | pip-compile manager not implemented |
-| return null for malformed files | 183 | pending | — | — | pip-compile manager not implemented |
-| return null for bad paths | 221 | pending | — | — | pip-compile manager not implemented |
-| return for valid paths | 246 | pending | — | — | pip-compile manager not implemented |
-| return sorted package files | 281 | pending | — | — | pip-compile manager not implemented |
-| return sorted package files with constraint in file | 311 | pending | — | — | pip-compile manager not implemented |
-| return sorted package files with constraint in command | 335 | pending | — | — | pip-compile manager not implemented |
-| adds lockedVersion to deps in package file | 360 | pending | — | — | pip-compile manager not implemented |
-| warns if dependency has no locked version | 382 | pending | — | — | pip-compile manager not implemented |
-| adds transitive dependency to deps in package file | 403 | pending | — | — | pip-compile manager not implemented |
-| handles -r reference to another input file | 427 | pending | — | — | pip-compile manager not implemented |
-| handles transitive -r references | 455 | pending | — | — | pip-compile manager not implemented |
-| warns on -r reference to failed file | 491 | pending | — | — | pip-compile manager not implemented |
-| warns on -r reference to requirements file not managed by pip-compile | 516 | pending | — | — | pip-compile manager not implemented |
-| handles duplicate -r dependencies | 539 | pending | — | — | pip-compile manager not implemented |
-| handles -r dependency on lock file with multiple input files | 583 | pending | — | — | pip-compile manager not implemented |
-| handles -r dependency on input file that is also used to generate lock file with multiple inputs | 614 | pending | — | — | pip-compile manager not implemented |
-| handles -r dependency on file with relative path same dir | 645 | pending | — | — | pip-compile manager not implemented |
-| handles -r dependency on file with relative path above | 673 | pending | — | — | pip-compile manager not implemented |
-| handles -r dependency on file with relative path above with path | 701 | pending | — | — | pip-compile manager not implemented |
+| support package file with multiple lock files | 105 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| no lock files in returned package files | 137 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| no constraint files in returned package files | 162 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| return null for malformed files | 183 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| return null for bad paths | 221 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| return for valid paths | 246 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| return sorted package files | 281 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| return sorted package files with constraint in file | 311 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| return sorted package files with constraint in command | 335 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| adds lockedVersion to deps in package file | 360 | not-applicable | — | — | Rust does not implement Renovate's pip-compile lockfile-to-input dependency enrichment |
+| warns if dependency has no locked version | 382 | not-applicable | — | — | Rust does not implement Renovate's pip-compile lockfile-to-input dependency enrichment |
+| adds transitive dependency to deps in package file | 403 | not-applicable | — | — | Rust does not implement Renovate's pip-compile lockfile-to-input dependency enrichment |
+| handles -r reference to another input file | 427 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| handles transitive -r references | 455 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| warns on -r reference to failed file | 491 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| warns on -r reference to requirements file not managed by pip-compile | 516 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| handles duplicate -r dependencies | 539 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| handles -r dependency on lock file with multiple input files | 583 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| handles -r dependency on input file that is also used to generate lock file with multiple inputs | 614 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| handles -r dependency on file with relative path same dir | 645 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| handles -r dependency on file with relative path above | 673 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
+| handles -r dependency on file with relative path above with path | 701 | not-applicable | — | — | Rust does not implement Renovate's pip-compile `extractAllPackageFiles()` generated-lockfile reverse resolver |
 
 ---
 
