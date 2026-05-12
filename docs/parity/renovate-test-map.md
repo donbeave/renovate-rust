@@ -3558,6 +3558,100 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/python-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/python-version/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/python-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns Python EOL data | 14 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| throws for 500 | 63 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| returns null for error | 73 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| falls back to prebuild releases on 429 | 83 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| returns null on 429 when prebuild releases are unavailable | 102 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| returns null for empty 200 OK | 116 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| returns the correct data | 134 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| only returns stable versions | 147 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| only returns versions that are prebuilt | 158 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+| returns isDeprecated status for Python 3 minor releases | 170 | not-applicable | — | — | Python version datasource lookup, EOL metadata, and prebuilt release filtering are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/deno/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deno/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/deno/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns releases of standard library | 10 | not-applicable | — | — | Deno module registry datasource lookup is not implemented in Rust. |
+| throws error if module endpoint fails | 75 | not-applicable | — | — | Deno module registry datasource lookup is not implemented in Rust. |
+| throws error if version endpoint fails | 89 | not-applicable | — | — | Deno module registry datasource lookup is not implemented in Rust. |
+| returns null if we could not match a deno land dependency | 117 | not-applicable | — | — | Deno module registry datasource lookup is not implemented in Rust. |
+| returns releases of third-party library | 125 | not-applicable | — | — | Deno module registry datasource lookup is not implemented in Rust. |
+| returns releases of a alternative registry server | 172 | not-applicable | — | — | Deno module registry datasource lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/flutter-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/flutter-version/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/flutter-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for 500 | 14 | not-applicable | — | — | Flutter version datasource lookup and channel filtering are not implemented in Rust. |
+| returns null for error | 24 | not-applicable | — | — | Flutter version datasource lookup and channel filtering are not implemented in Rust. |
+| returns null for empty 200 OK | 34 | not-applicable | — | — | Flutter version datasource lookup and channel filtering are not implemented in Rust. |
+| processes real data | 44 | not-applicable | — | — | Flutter version datasource lookup and channel filtering are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/gitlab-packages/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/gitlab-packages/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/gitlab-packages/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns package from custom registry | 8 | not-applicable | — | — | GitLab Packages datasource lookup is not implemented in Rust. |
+| returns conan package from custom registry | 48 | not-applicable | — | — | GitLab Packages datasource lookup is not implemented in Rust. |
+| returns null for 404 | 85 | not-applicable | — | — | GitLab Packages datasource lookup is not implemented in Rust. |
+| returns null for empty 200 OK | 103 | not-applicable | — | — | GitLab Packages datasource lookup is not implemented in Rust. |
+| throws for 5xx | 121 | not-applicable | — | — | GitLab Packages datasource lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/hexpm-bob/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/hexpm-bob/index.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/hexpm-bob/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for error | 9 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| returns null for 404 | 22 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| returns null for empty result | 35 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| returns empty list for empty 200 OK | 48 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| throws for 5xx | 61 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| processes real data | 74 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| processes real data (erlang / ubuntu 20.04) | 122 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| can override registry url | 155 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+| returns empty list for invalid package name | 172 | not-applicable | — | — | Hex.pm Bob build artifact datasource lookup is not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
