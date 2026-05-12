@@ -265,6 +265,13 @@ fn parse_java_inner(_tool_name: &str, version: &str) -> AsdfDep {
     };
 
     let Some(cap) = JAVA_RE.captures(version) else {
+        if version.chars().next().is_some_and(|ch| ch.is_ascii_digit()) {
+            return AsdfDep {
+                current_value: version.to_owned(),
+                package_name: Some("java-jdk".to_owned()),
+                ..base
+            };
+        }
         return AsdfDep {
             skip_reason: Some(AsdfSkipReason::UnsupportedDatasource),
             ..base

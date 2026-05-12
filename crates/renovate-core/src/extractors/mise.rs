@@ -243,10 +243,11 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
         let parsed_value = if version_raw.starts_with('"')
             || version_raw.starts_with('\'')
             || version_raw.starts_with('{')
+            || version_raw.starts_with('[')
         {
             parse_tool_value(version_raw)
         } else {
-            // Arrays, other formats — skip.
+            // Other formats — skip.
             continue;
         };
 
@@ -319,6 +320,18 @@ fn parse_tool_value(raw: &str) -> ParsedToolValue<'_> {
         let value = raw.trim_matches('"').trim_matches('\'').trim();
         return ParsedToolValue {
             version: (!value.is_empty()).then_some(value),
+            ..Default::default()
+        };
+    }
+
+    if raw.starts_with('[') {
+        let inner = raw.trim_start_matches('[').trim_end_matches(']');
+        let first = inner
+            .split(',')
+            .map(|value| value.trim().trim_matches('"').trim_matches('\'').trim())
+            .find(|value| !value.is_empty());
+        return ParsedToolValue {
+            version: first,
             ..Default::default()
         };
     }
@@ -623,10 +636,12 @@ mod tests {
     // Ported: "extracts tools with multiple versions" — mise/extract.spec.ts line 409
     #[test]
     fn ignores_array_versions() {
-        // Array versions are skipped in this implementation (Renovate picks the first).
         let content = "[tools]\nnode = [\"18\", \"20\"]\n";
         let deps = extract(content);
-        assert!(deps.is_empty());
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].tool_name, "node");
+        assert_eq!(deps[0].current_value, "18");
+        assert_eq!(deps[0].datasource_id, Some("node-version"));
     }
 
     // Ported: "returns null for empty" — mise/extract.spec.ts line 13
@@ -683,9 +698,65 @@ mod tests {
     fn empty_array_version_skipped() {
         let content = "[tools]\njava = '21.0.2'\nerlang = []\n";
         let deps = extract(content);
-        // erlang with empty array should be skipped
-        let erlang = deps.iter().find(|d| d.tool_name == "erlang");
-        assert!(erlang.map(|d| d.skip_reason.is_some()).unwrap_or(true));
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[1].tool_name, "erlang");
+        assert_eq!(
+            deps[1].skip_reason,
+            Some(AsdfSkipReason::UnspecifiedVersion)
+        );
+    }
+
+    // Ported: "complete mise.toml example" — mise/extract.spec.ts line 855
+    #[test]
+    fn complete_mise_toml_example() {
+        let content = r#"[env]
+NODE_ENV = 'production'
+
+[tools]
+java = '21.0.2'
+erlang = ['23.3', '24.0']
+node = ['16', 'prefix:20', 'ref:master', 'path:~/.nodes/14']
+
+[plugins]
+python = 'https://github.com/asdf-community/asdf-python'
+
+[alias.node]
+my_custom_node = '20'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(deps[0].dep_name, "java");
+        assert_eq!(deps[0].current_value, "21.0.2");
+        assert_eq!(deps[0].datasource_id, Some("java-version"));
+        assert_eq!(deps[1].dep_name, "erlang");
+        assert_eq!(deps[1].current_value, "23.3");
+        assert_eq!(deps[1].datasource_id, Some("github-tags"));
+        assert_eq!(deps[2].dep_name, "node");
+        assert_eq!(deps[2].current_value, "16");
+        assert_eq!(deps[2].datasource_id, Some("node-version"));
+    }
+
+    // Ported: "complete example with skip" — mise/extract.spec.ts line 878
+    #[test]
+    fn complete_mise_example_with_skip() {
+        let content = r#"[tools]
+java = '21.0.2'
+erlang = ['23.3', '24.0']
+terraform = {version='1.8.0'}
+fake-tool = '1.6.2'
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 4);
+        assert_eq!(deps[0].dep_name, "java");
+        assert_eq!(deps[0].current_value, "21.0.2");
+        assert_eq!(deps[0].datasource_id, Some("java-version"));
+        assert_eq!(deps[1].dep_name, "erlang");
+        assert_eq!(deps[1].current_value, "23.3");
+        assert_eq!(deps[1].datasource_id, Some("github-tags"));
+        assert_eq!(deps[2].dep_name, "terraform");
+        assert_eq!(deps[2].current_value, "1.8.0");
+        assert_eq!(deps[3].dep_name, "fake-tool");
+        assert_eq!(deps[3].skip_reason, Some(AsdfSkipReason::UnsupportedTool));
     }
 
     // Ported: "extracts tools with plugin options" — mise/extract.spec.ts line 432

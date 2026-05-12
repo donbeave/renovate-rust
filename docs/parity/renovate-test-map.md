@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1509 / 1657 actionable tests ported (91%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1511 / 1657 actionable tests ported (91%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1939,7 +1939,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 30 | **Ported:** 27 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 29 | **Actionable:** 30 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1968,8 +1968,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | provides skipReason for missing version - empty string | 802 | ported | `mise.rs` | `empty_version_string_skipped` | — |
 | provides skipReason for missing version - missing version in object | 818 | ported | `mise.rs` | `object_without_version_skipped` | — |
 | provides skipReason for missing version - empty array | 834 | ported | `mise.rs` | `empty_array_version_skipped` | — |
-| complete mise.toml example | 855 | pending | — | — | Requires fixture round-trip with full mise.toml |
-| complete example with skip | 878 | pending | — | — | Requires fixture round-trip with skip-reason mix |
+| complete mise.toml example | 855 | ported | `mise.rs` | `complete_mise_toml_example` | — |
+| complete example with skip | 878 | ported | `mise.rs` | `complete_mise_example_with_skip` | — |
 | core java plugin function | 911 | ported | `mise.rs` | `java_core_plugin_jdk` | — |
 | resolves tools from the mise registry data file via aqua backend | 1086 | ported | `mise.rs` | `resolves_mise_registry_aqua_backend_tool` | — |
 | resolves tools from the mise registry data file via cargo backend | 1104 | ported | `mise.rs` | `resolves_mise_registry_cargo_backend_tool` | — |
