@@ -3496,6 +3496,68 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/github-digest/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-digest/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/github-digest/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags and branches merged | 20 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| prioritizes tags over branches with same name | 72 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| returns only branches when no tags | 118 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| throws when tags query fails | 145 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| throws when branches query fails | 156 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| returns tag digest when tag exists | 171 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| returns branch digest when tag not found | 186 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| prefers tag over branch with same name | 202 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| returns null when not found in tags or branches | 217 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+| returns null when newValue is undefined | 226 | not-applicable | — | — | GitHub digest datasource tag/branch SHA lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/github-release-attachments/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-release-attachments/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/github-release-attachments/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns releases | 23 | not-applicable | — | — | GitHub release attachments datasource and asset digest update workflow are not implemented in Rust. |
+| requires currentDigest | 99 | not-applicable | — | — | GitHub release attachments datasource and asset digest update workflow are not implemented in Rust. |
+| defaults to currentDigest when currentVersion is missing | 107 | not-applicable | — | — | GitHub release attachments datasource and asset digest update workflow are not implemented in Rust. |
+| returns updated digest in new release | 119 | not-applicable | — | — | GitHub release attachments datasource and asset digest update workflow are not implemented in Rust. |
+| ignores failures verifying currentDigest | 141 | not-applicable | — | — | GitHub release attachments datasource and asset digest update workflow are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/github-release-attachments/digest.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-release-attachments/digest.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/github-release-attachments/digest`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| finds SHASUMS.txt file containing digest | 16 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| returns null when not found in digest file asset | 31 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| finds asset by digest | 49 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| returns null when no assets available | 67 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| downloads updated digest file | 86 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| maps digested file name to new version | 98 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| returns null when not found in digest file | 115 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| returns null when digest file not found | 127 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| falls back to digesting file when checksum file is removed | 136 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| digests updated file | 164 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+| returns null when not found | 178 | not-applicable | — | — | GitHub release attachment checksum discovery and digesting are not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
