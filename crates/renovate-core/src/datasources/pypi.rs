@@ -332,6 +332,7 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "supports custom datasource url" — datasource/pypi/index.spec.ts line 121
     async fn fetch_versions_returns_sorted() {
         let server = MockServer::start().await;
         let body = pypi_response("django", "4.2.7", &["4.0.0", "4.2.7", "4.2.5"]);
@@ -350,17 +351,18 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "normalizes the package name according to PEP 503" — datasource/pypi/index.spec.ts line 329
     async fn fetch_versions_normalizes_name() {
         let server = MockServer::start().await;
-        let body = pypi_response("my-package", "1.0.0", &["1.0.0"]);
+        let body = pypi_response("not-normalized-package", "1.0.0", &["1.0.0"]);
         Mock::given(method("GET"))
-            .and(path("/my-package/json"))
+            .and(path("/not-normalized-package/json"))
             .respond_with(ResponseTemplate::new(200).set_body_string(body))
             .mount(&server)
             .await;
 
         let http = HttpClient::new().unwrap();
-        let entry = fetch_versions(&http, "my_package", &server.uri())
+        let entry = fetch_versions(&http, "not_normalized.Package", &server.uri())
             .await
             .unwrap();
         assert_eq!(entry.latest, "1.0.0");
