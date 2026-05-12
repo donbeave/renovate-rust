@@ -3856,6 +3856,68 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/host-rules-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/host-rules-migration.spec.ts
+**Total tests:** 2 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/host-rules-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate array | 5 | ported | `migrate_validate.rs` | `host_rules_legacy_fields_migrate` | — |
+| throws when multiple hosts are present | 75 | not-applicable | — | — | Rust raw migration helper returns migrated JSON and does not model Renovate's throwing migration-service validation path |
+
+---
+
+## `lib/config/migrations/custom/suppress-notifications-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/suppress-notifications-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/suppress-notifications-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should remomve prEditNotification from array | 4 | ported | `migrate_validate.rs` | `suppress_notifications_removes_pr_edit_notification` | — |
+| should not migrate array without prEditNotification | 14 | ported | `migrate_validate.rs` | `suppress_notifications_without_pr_edit_notification_is_unchanged` | — |
+| should not migrate empty array | 25 | ported | `migrate_validate.rs` | `suppress_notifications_empty_is_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/trust-level-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/trust-level-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/trust-level-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should handle hight level | 4 | ported | `migrate_validate.rs` | `trust_level_high_sets_trust_options` | — |
+| should not rewrite provided properties | 18 | ported | `migrate_validate.rs` | `trust_level_high_preserves_existing_trust_options` | — |
+
+---
+
+## `lib/config/migrations/custom/unpublish-safe-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/unpublish-safe-migration.spec.ts
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+
+### `config/migrations/custom/unpublish-safe-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true | 4 | ported | `migrate_validate.rs` | `unpublish_safe_true_injects_security_preset` | — |
+| should migrate true and handle extends field | 14 | ported | `migrate_validate.rs` | `unpublish_safe_true_handles_string_extends` | — |
+| should migrate true and handle empty extends field | 26 | ported | `migrate_validate.rs` | `unpublish_safe_true_handles_empty_extends` | — |
+| should migrate true and save order of items inside extends field | 38 | ported | `migrate_validate.rs` | `unpublish_safe_true_rewrites_supported_extends_in_place` | — |
+| should migrate false and save order of items inside extends field | 68 | ported | `migrate_validate.rs` | `unpublish_safe_false_is_removed_and_preserves_extends` | — |
+| prevent duplicates | 80 | ported | `migrate_validate.rs` | `unpublish_safe_true_does_not_duplicate_security_preset` | — |
+| should not migrate npm:unpublishSafe | 92 | ported | `migrate_validate.rs` | `unpublish_safe_absent_leaves_npm_unpublish_safe_extends` | — |
+
+---
+
 ## `lib/config/migrations/custom/go-mod-tidy-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/go-mod-tidy-migration.spec.ts

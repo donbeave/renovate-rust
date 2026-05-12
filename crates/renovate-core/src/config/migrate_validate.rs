@@ -358,6 +358,86 @@ fn migrate_config(input: &Value) -> Value {
                 },
             );
         }
+        if let Some(Value::Array(host_rules)) = map.get_mut("hostRules") {
+            for host_rule in host_rules {
+                let Some(host_rule) = host_rule.as_object_mut() else {
+                    continue;
+                };
+                let mut migrated = Map::new();
+                let entries = std::mem::take(host_rule);
+                for (key, value) in entries {
+                    match (key.as_str(), value) {
+                        ("platform", Value::String(value)) => {
+                            migrated
+                                .entry("hostType".to_owned())
+                                .or_insert(Value::String(value));
+                        }
+                        ("hostType", Value::String(value)) => {
+                            migrated.entry("hostType".to_owned()).or_insert_with(|| {
+                                Value::String(migrate_datasource_alias(&value).to_owned())
+                            });
+                        }
+                        ("matchHost", Value::String(value)) => {
+                            migrated
+                                .entry("matchHost".to_owned())
+                                .or_insert_with(|| Value::String(massage_match_host(&value)));
+                        }
+                        ("endpoint" | "baseUrl" | "domainName", Value::String(value)) => {
+                            migrated
+                                .entry("matchHost".to_owned())
+                                .or_insert_with(|| Value::String(massage_host_url(&value)));
+                        }
+                        ("host" | "hostName", Value::String(value)) => {
+                            migrated
+                                .entry("matchHost".to_owned())
+                                .or_insert(Value::String(value));
+                        }
+                        (key, value) => {
+                            migrated.insert(key.to_owned(), value);
+                        }
+                    }
+                }
+                *host_rule = migrated;
+            }
+        }
+        if let Some(Value::Array(suppress_notifications)) = map.get_mut("suppressNotifications") {
+            suppress_notifications.retain(|item| item.as_str() != Some("prEditNotification"));
+        }
+        if matches!(map.remove("trustLevel"), Some(Value::String(value)) if value == "high") {
+            set_safely(map, "allowCustomCrateRegistries", Value::Bool(true));
+            set_safely(map, "allowScripts", Value::Bool(true));
+            set_safely(map, "exposeAllEnv", Value::Bool(true));
+        }
+        if let Some(unpublish_safe) = map.remove("unpublishSafe")
+            && matches!(unpublish_safe, Value::Bool(true))
+        {
+            let mut extends = match map.remove("extends") {
+                Some(Value::String(value)) => vec![value],
+                Some(Value::Array(values)) => values
+                    .into_iter()
+                    .filter_map(|value| value.as_str().map(ToOwned::to_owned))
+                    .collect(),
+                _ => Vec::new(),
+            };
+            if !extends.iter().any(|value| is_unpublish_safe_preset(value)) {
+                extends.push("security:minimumReleaseAgeNpm".to_owned());
+            }
+            map.insert(
+                "extends".to_owned(),
+                Value::Array(
+                    extends
+                        .into_iter()
+                        .map(|value| {
+                            Value::String(if is_unpublish_safe_preset(&value) {
+                                "security:minimumReleaseAgeNpm".to_owned()
+                            } else {
+                                value
+                            })
+                        })
+                        .collect(),
+                ),
+            );
+        }
         if matches!(map.remove("gomodTidy"), Some(value) if value.as_bool().unwrap_or(false)) {
             let post_update_options = map
                 .entry("postUpdateOptions".to_owned())
@@ -556,6 +636,34 @@ fn migrate_datasource_alias(value: &str) -> &str {
         "node" => "node-version",
         _ => value,
     }
+}
+
+fn massage_host_url(value: &str) -> String {
+    if value.contains("://") {
+        value.to_owned()
+    } else if value.ends_with('/') || value.contains(':') {
+        format!("https://{value}")
+    } else {
+        value.to_owned()
+    }
+}
+
+fn massage_match_host(value: &str) -> String {
+    if !value.contains("://") && (value.ends_with('/') || value.contains(':')) {
+        format!("https://{value}")
+    } else {
+        value.to_owned()
+    }
+}
+
+fn is_unpublish_safe_preset(value: &str) -> bool {
+    matches!(
+        value,
+        ":unpublishSafe"
+            | "default:unpublishSafe"
+            | "npm:unpublishSafe"
+            | "security:minimumReleaseAgeNpm"
+    )
 }
 
 fn validate_config(config: &Value) -> Vec<Value> {
@@ -4599,6 +4707,181 @@ mod tests {
         assert_eq!(
             migrate_config(&json!({"stabilityDays": 1})),
             json!({"minimumReleaseAge": "1 day"})
+        );
+    }
+
+    // Ported: "should migrate array" — config/migrations/custom/host-rules-migration.spec.ts line 5
+    #[test]
+    fn host_rules_legacy_fields_migrate() {
+        assert_eq!(
+            migrate_config(&json!({
+                "hostRules": [
+                    {"hostType": "dotnet", "baseUrl": "https://some.domain.com", "token": "123test"},
+                    {
+                        "hostType": "dotnet",
+                        "baseUrl": "https://some.domain.com",
+                        "matchHost": "https://some.domain.com",
+                        "token": "123test"
+                    },
+                    {"hostType": "adoptium-java", "domainName": "domain.com", "token": "123test"},
+                    {"domainName": "domain.com/", "token": "123test"},
+                    {"hostType": "docker", "matchHost": "domain.com/", "token": "123test"},
+                    {"hostName": "some.domain.com", "token": "123test"},
+                    {"endpoint": "domain.com/", "token": "123test"},
+                    {"host": "some.domain.com", "token": "123test"},
+                    {"matchHost": "some.domain.com:8080", "token": "123test"}
+                ]
+            })),
+            json!({
+                "hostRules": [
+                    {"hostType": "dotnet-version", "matchHost": "https://some.domain.com", "token": "123test"},
+                    {"hostType": "dotnet-version", "matchHost": "https://some.domain.com", "token": "123test"},
+                    {"hostType": "java-version", "matchHost": "domain.com", "token": "123test"},
+                    {"matchHost": "https://domain.com/", "token": "123test"},
+                    {"hostType": "docker", "matchHost": "https://domain.com/", "token": "123test"},
+                    {"matchHost": "some.domain.com", "token": "123test"},
+                    {"matchHost": "https://domain.com/", "token": "123test"},
+                    {"matchHost": "some.domain.com", "token": "123test"},
+                    {"matchHost": "https://some.domain.com:8080", "token": "123test"}
+                ]
+            })
+        );
+    }
+
+    // Ported: "should remomve prEditNotification from array" — config/migrations/custom/suppress-notifications-migration.spec.ts line 4
+    #[test]
+    fn suppress_notifications_removes_pr_edit_notification() {
+        assert_eq!(
+            migrate_config(&json!({"suppressNotifications": ["test", "prEditNotification"]})),
+            json!({"suppressNotifications": ["test"]})
+        );
+    }
+
+    // Ported: "should not migrate array without prEditNotification" — config/migrations/custom/suppress-notifications-migration.spec.ts line 14
+    #[test]
+    fn suppress_notifications_without_pr_edit_notification_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"suppressNotifications": ["test"]})),
+            json!({"suppressNotifications": ["test"]})
+        );
+    }
+
+    // Ported: "should not migrate empty array" — config/migrations/custom/suppress-notifications-migration.spec.ts line 25
+    #[test]
+    fn suppress_notifications_empty_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"suppressNotifications": []})),
+            json!({"suppressNotifications": []})
+        );
+    }
+
+    // Ported: "should handle hight level" — config/migrations/custom/trust-level-migration.spec.ts line 4
+    #[test]
+    fn trust_level_high_sets_trust_options() {
+        assert_eq!(
+            migrate_config(&json!({"trustLevel": "high"})),
+            json!({
+                "allowCustomCrateRegistries": true,
+                "allowScripts": true,
+                "exposeAllEnv": true
+            })
+        );
+    }
+
+    // Ported: "should not rewrite provided properties" — config/migrations/custom/trust-level-migration.spec.ts line 18
+    #[test]
+    fn trust_level_high_preserves_existing_trust_options() {
+        assert_eq!(
+            migrate_config(&json!({
+                "allowCustomCrateRegistries": false,
+                "allowScripts": false,
+                "exposeAllEnv": false,
+                "trustLevel": "high"
+            })),
+            json!({
+                "allowCustomCrateRegistries": false,
+                "allowScripts": false,
+                "exposeAllEnv": false
+            })
+        );
+    }
+
+    // Ported: "should migrate true" — config/migrations/custom/unpublish-safe-migration.spec.ts line 4
+    #[test]
+    fn unpublish_safe_true_injects_security_preset() {
+        assert_eq!(
+            migrate_config(&json!({"unpublishSafe": true})),
+            json!({"extends": ["security:minimumReleaseAgeNpm"]})
+        );
+    }
+
+    // Ported: "should migrate true and handle extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 14
+    #[test]
+    fn unpublish_safe_true_handles_string_extends() {
+        assert_eq!(
+            migrate_config(&json!({"extends": "test", "unpublishSafe": true})),
+            json!({"extends": ["test", "security:minimumReleaseAgeNpm"]})
+        );
+    }
+
+    // Ported: "should migrate true and handle empty extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 26
+    #[test]
+    fn unpublish_safe_true_handles_empty_extends() {
+        assert_eq!(
+            migrate_config(&json!({"extends": [], "unpublishSafe": true})),
+            json!({"extends": ["security:minimumReleaseAgeNpm"]})
+        );
+    }
+
+    // Ported: "should migrate true and save order of items inside extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 38
+    #[test]
+    fn unpublish_safe_true_rewrites_supported_extends_in_place() {
+        assert_eq!(
+            migrate_config(
+                &json!({"extends": ["foo", ":unpublishSafe", "bar"], "unpublishSafe": true})
+            ),
+            json!({"extends": ["foo", "security:minimumReleaseAgeNpm", "bar"]})
+        );
+        assert_eq!(
+            migrate_config(
+                &json!({"extends": ["foo", "default:unpublishSafe", "bar"], "unpublishSafe": true})
+            ),
+            json!({"extends": ["foo", "security:minimumReleaseAgeNpm", "bar"]})
+        );
+        assert_eq!(
+            migrate_config(
+                &json!({"extends": ["foo", "security:minimumReleaseAgeNpm", "bar"], "unpublishSafe": true})
+            ),
+            json!({"extends": ["foo", "security:minimumReleaseAgeNpm", "bar"]})
+        );
+    }
+
+    // Ported: "should migrate false and save order of items inside extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 68
+    #[test]
+    fn unpublish_safe_false_is_removed_and_preserves_extends() {
+        assert_eq!(
+            migrate_config(&json!({"extends": ["foo", "bar"], "unpublishSafe": false})),
+            json!({"extends": ["foo", "bar"]})
+        );
+    }
+
+    // Ported: "prevent duplicates" — config/migrations/custom/unpublish-safe-migration.spec.ts line 80
+    #[test]
+    fn unpublish_safe_true_does_not_duplicate_security_preset() {
+        assert_eq!(
+            migrate_config(
+                &json!({"extends": ["security:minimumReleaseAgeNpm"], "unpublishSafe": true})
+            ),
+            json!({"extends": ["security:minimumReleaseAgeNpm"]})
+        );
+    }
+
+    // Ported: "should not migrate npm:unpublishSafe" — config/migrations/custom/unpublish-safe-migration.spec.ts line 92
+    #[test]
+    fn unpublish_safe_absent_leaves_npm_unpublish_safe_extends() {
+        assert_eq!(
+            migrate_config(&json!({"extends": ["npm:unpublishSafe"]})),
+            json!({"extends": ["npm:unpublishSafe"]})
         );
     }
 
