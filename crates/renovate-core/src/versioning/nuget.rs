@@ -68,6 +68,10 @@ pub fn compare(a: &str, b: &str) -> Ordering {
 
 /// Returns `true` when the version is a stable release (no pre-release label).
 pub fn is_stable(version: &str) -> bool {
+    if version.trim().is_empty() || version.contains('*') {
+        return false;
+    }
+
     parse(version).prerelease.is_none()
 }
 
@@ -335,5 +339,33 @@ mod tests {
         assert!(!is_stable("1.2.3-preview1"));
         assert!(!is_stable("1.0.0-alpha"));
         assert!(!is_stable("1.0.0-rc.1"));
+    }
+
+    // Ported: "isStable(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 16
+    #[test]
+    fn is_stable_matches_renovate_index_spec() {
+        let cases = [
+            ("9.0.3", true),
+            ("1.2019.3.22", true),
+            ("3.0.0-beta", false),
+            ("2.0.2-pre20191018090318", false),
+            ("1.0.0+c30d7625", true),
+            ("2.3.4-beta+1990ef74", false),
+            ("[1.2.3]", true),
+            ("[1.2.3-beta]", false),
+            ("1.0.0+Metadata", true),
+            ("1.0.0", true),
+            ("1.0.0-Beta", false),
+            ("1.0.0-Beta+Meta", false),
+            ("1.0.0-RC.X+Meta", false),
+            ("1.0.0-RC.X.35.A.3455+Meta", false),
+            ("*", false),
+            ("1.0.*", false),
+            ("1.0.*-*", false),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(is_stable(input), expected, "is_stable({input})");
+        }
     }
 }
