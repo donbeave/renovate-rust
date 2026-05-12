@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2137 / 8606 actionable tests ported (25%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2142 / 8606 actionable tests ported (25%) — updated 2026-05-12
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -28518,7 +28518,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/updates/branch-name.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branch-name.spec.ts
-**Total tests:** 27 | **Ported:** 8 | **Actionable:** 27 | **Status:** partial
+**Total tests:** 27 | **Ported:** 13 | **Actionable:** 27 | **Status:** partial
 
 ### `workers/repository/updates/branch-name › getBranchName()`
 
@@ -28541,16 +28541,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | separates patches when separateMinorPatch=true | 229 | ported | `branch.rs` | `branch_name_separates_patches_when_separate_minor_patch_true` | — |
 | does not separate patches when separateMinorPatch=false | 249 | ported | `branch.rs` | `branch_name_does_not_separate_patches_when_separate_minor_patch_false` | — |
 | realistic defaults | 269 | ported | `branch.rs` | `branch_name_realistic_defaults` | — |
-| realistic defaults with strict branch name enabled | 284 | pending | — | — | — |
-| removes slashes from the non-suffix part | 300 | pending | — | — | — |
+| realistic defaults with strict branch name enabled | 284 | ported | `branch.rs` | `branch_name_realistic_defaults_with_strict_enabled` | — |
+| removes slashes from the non-suffix part | 300 | ported | `branch.rs` | `branch_name_strict_removes_slashes_from_non_suffix_part` | — |
 | hashedBranchLength hashing | 316 | ported | `branch.rs` | `hashed_branch_length_hashing_matches_renovate` | — |
 | hashedBranchLength hashing with group name | 332 | ported | `branch.rs` | `hashed_branch_length_hashing_with_group_name_matches_renovate` | — |
 | hashedBranchLength too short | 350 | ported | `branch.rs` | `hashed_branch_length_too_short_matches_renovate_minimum` | — |
 | hashedBranchLength no topic | 368 | ported | `branch.rs` | `hashed_branch_length_no_topic_matches_renovate_empty_hash` | — |
 | hashedBranchLength separates minor when separateMultipleMinor=true | 386 | ported | `branch.rs` | `hashed_branch_length_separate_multiple_minor_matches_renovate` | — |
-| enforces valid git branch name | 405 | pending | — | — | — |
-| strict branch name enabled group | 491 | pending | — | — | — |
-| strict branch name disabled | 506 | pending | — | — | — |
+| enforces valid git branch name | 405 | ported | `branch.rs` | `branch_name_enforces_valid_git_branch_name` | — |
+| strict branch name enabled group | 491 | ported | `branch.rs` | `branch_name_strict_enabled_group` | — |
+| strict branch name disabled | 506 | ported | `branch.rs` | `branch_name_strict_disabled_group` | — |
 
 ---
 

@@ -126,27 +126,30 @@ pub fn branch_topic(
 /// assert_eq!(group_branch_topic("Python packages"), "python-packages");
 /// ```
 pub fn group_branch_topic(group_name: &str) -> String {
-    let lower = group_name.to_lowercase();
-    let slug: String = lower
-        .chars()
-        .map(|c| if c.is_alphanumeric() { c } else { '-' })
-        .collect();
-    // Collapse runs of hyphens, strip leading/trailing hyphens.
-    let mut result = String::with_capacity(slug.len());
-    let mut last_was_hyphen = true; // treat start as if preceded by hyphen to trim leading
-    for ch in slug.chars() {
-        if ch == '-' {
-            if !last_was_hyphen {
-                result.push('-');
-                last_was_hyphen = true;
-            }
-        } else {
-            result.push(ch);
-            last_was_hyphen = false;
+    slugify_group_name(group_name)
+}
+
+fn slugify_group_name(group_name: &str) -> String {
+    let mut slug = String::with_capacity(group_name.len());
+    for ch in group_name.to_lowercase().chars() {
+        match ch {
+            c if c.is_alphanumeric() => slug.push(c),
+            '@' | '.' => slug.push(ch),
+            '$' => slug.push_str("dollar"),
+            '%' => slug.push_str("percent"),
+            '&' => slug.push_str("and"),
+            '|' => slug.push_str("or"),
+            '<' => slug.push_str("less"),
+            '>' => slug.push_str("greater"),
+            '#' | '^' => {}
+            _ => slug.push('-'),
         }
     }
-    // Trim trailing hyphen.
-    result.trim_end_matches('-').to_owned()
+    MULTI_DASH
+        .replace_all(&slug, "-")
+        .replace(".-", ".")
+        .trim_matches(['-', '@'])
+        .to_owned()
 }
 
 /// Apply Renovate's `separateMajorMinor` / `separateMultipleMajor` prefix to a
@@ -213,7 +216,18 @@ pub fn major_group_slug(
 /// ```
 pub fn branch_name(branch_prefix: &str, additional_prefix: &str, topic: &str) -> String {
     let raw = format!("{branch_prefix}{additional_prefix}{topic}");
-    clean_branch_name(&raw)
+    clean_branch_name(&raw, branch_prefix, false)
+}
+
+/// Compute a branch name with Renovate's optional `branchNameStrict` cleanup.
+pub fn branch_name_with_strict(
+    branch_prefix: &str,
+    additional_prefix: &str,
+    topic: &str,
+    branch_name_strict: bool,
+) -> String {
+    let raw = format!("{branch_prefix}{additional_prefix}{topic}");
+    clean_branch_name(&raw, branch_prefix, branch_name_strict)
 }
 
 /// Minimum hash length (in hex chars) after subtracting the prefix length.
@@ -446,25 +460,51 @@ pub fn pr_title_full(
 
 /// Remove characters that are invalid or disruptive in git branch names.
 ///
-/// Mirrors Renovate's `cleanBranchName` (default mode, `branchNameStrict=false`):
-/// - Strips `~`, `^`, `?`, `[`, `\`, leading `.`, trailing `.`
+/// Mirrors Renovate's `cleanBranchName`:
+/// - Replaces invalid git-ref characters with `-`
+/// - Removes whitespace
+/// - Removes `.lock` suffixes, leading `.`, trailing `.`, and `/.`
 /// - Collapses multiple consecutive `-` into one
 /// - Trims leading/trailing dashes from each path component
 ///
 /// Note: `clean-git-ref` in the original implementation is more exhaustive.
 /// This covers the common cases.
-fn clean_branch_name(name: &str) -> String {
-    let cleaned = name
+fn clean_branch_name(name: &str, branch_prefix: &str, branch_name_strict: bool) -> String {
+    let cleaned = if branch_name_strict {
+        if let Some(rest) = name.strip_prefix(branch_prefix) {
+            format!("{branch_prefix}{}", replace_strict_special_chars(rest))
+        } else {
+            replace_strict_special_chars(name)
+        }
+    } else {
+        name.to_owned()
+    };
+
+    let cleaned = cleaned
+        .split('/')
+        .map(|segment| segment.strip_suffix(".lock").unwrap_or(segment))
+        .collect::<Vec<_>>()
+        .join("/");
+
+    let cleaned = cleaned
+        .replace("/.", "/")
         .chars()
-        .filter(|c| !matches!(c, '~' | '^' | '?' | '[' | '\\' | '\x00'..='\x1f'))
+        .filter_map(|c| match c {
+            '\x00'..='\x1f' => None,
+            c if c.is_whitespace() => None,
+            '[' | ']' | '?' | ':' | '\\' | '^' | '~' | '<' | '>' => Some('-'),
+            _ => Some(c),
+        })
         .collect::<String>();
 
+    let cleaned = MULTI_DASH.replace_all(&cleaned, "-").into_owned();
+
     cleaned
+        .trim_end_matches('/')
         .trim_start_matches('.')
         .trim_end_matches('.')
         .split('/')
         .map(|segment| {
-            // Trim leading/trailing dashes from each segment.
             segment
                 .trim_start_matches('-')
                 .trim_end_matches('-')
@@ -472,6 +512,51 @@ fn clean_branch_name(name: &str) -> String {
         })
         .collect::<Vec<_>>()
         .join("/")
+}
+
+fn replace_strict_special_chars(input: &str) -> String {
+    input
+        .chars()
+        .map(|c| {
+            if matches!(
+                c,
+                '`' | '~'
+                    | '!'
+                    | '@'
+                    | '#'
+                    | '$'
+                    | '%'
+                    | '^'
+                    | '&'
+                    | '*'
+                    | '('
+                    | ')'
+                    | '_'
+                    | '='
+                    | '+'
+                    | '['
+                    | ']'
+                    | '\\'
+                    | '|'
+                    | '{'
+                    | '}'
+                    | ';'
+                    | '\''
+                    | ':'
+                    | '"'
+                    | ','
+                    | '.'
+                    | '<'
+                    | '>'
+                    | '?'
+                    | '/'
+            ) {
+                '-'
+            } else {
+                c
+            }
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -674,6 +759,120 @@ mod tests {
     fn branch_name_realistic_defaults() {
         let topic = branch_topic("jest", 42, 0, false, false, false, false);
         assert_eq!(branch_name("renovate/", "", &topic), "renovate/jest-42.x");
+    }
+
+    // Ported: "realistic defaults with strict branch name enabled" — workers/repository/updates/branch-name.spec.ts line 284
+    #[test]
+    fn branch_name_realistic_defaults_with_strict_enabled() {
+        let topic = branch_topic("jest", 42, 0, false, false, false, false);
+        assert_eq!(
+            branch_name_with_strict("renovate/", "", &topic, true),
+            "renovate/jest-42-x"
+        );
+    }
+
+    // Ported: "removes slashes from the non-suffix part" — workers/repository/updates/branch-name.spec.ts line 300
+    #[test]
+    fn branch_name_strict_removes_slashes_from_non_suffix_part() {
+        let topic = branch_topic("@foo/jest", 42, 0, false, false, false, false);
+        assert_eq!(
+            branch_name_with_strict("renovate/", "", &topic, true),
+            "renovate/foo-jest-42-x"
+        );
+    }
+
+    // Ported: "enforces valid git branch name" — workers/repository/updates/branch-name.spec.ts line 405
+    #[test]
+    fn branch_name_enforces_valid_git_branch_name() {
+        let cases = [
+            (
+                clean_branch_name(
+                    &format!("renovate/{}", group_branch_topic("/My Group/")),
+                    "renovate/",
+                    false,
+                ),
+                "renovate/my-group",
+            ),
+            (
+                clean_branch_name(
+                    &format!(
+                        "renovate/{}",
+                        group_branch_topic("invalid branch name.lock")
+                    ),
+                    "renovate/",
+                    false,
+                ),
+                "renovate/invalid-branch-name",
+            ),
+            (
+                clean_branch_name(
+                    &format!("renovate/{}", group_branch_topic(".a-bad-  name:@.lock")),
+                    "renovate/",
+                    false,
+                ),
+                "renovate/a-bad-name-@",
+            ),
+        ];
+
+        for (actual, expected) in cases {
+            assert_eq!(actual, expected);
+        }
+
+        let cases = [
+            ("renovate/bad-branch-name1..", "renovate/bad-branch-name1"),
+            ("renovate/~bad-branch-name2", "renovate/bad-branch-name2"),
+            ("renovate/bad-branch-^-name3", "renovate/bad-branch-name3"),
+            ("renovate/bad-branch-name : 4", "renovate/bad-branch-name-4"),
+            ("renovate/bad-branch-name5/", "renovate/bad-branch-name5"),
+            (".bad-branch-name6", "bad-branch-name6"),
+            ("renovate/.bad-branch-name7", "renovate/bad-branch-name7"),
+            ("renovate/.bad-branch-name8", "renovate/bad-branch-name8"),
+            ("renovate/bad-branch-name9.", "renovate/bad-branch-name9"),
+            ("renovate/bad-branch--name10", "renovate/bad-branch-name10"),
+            (
+                "renovate/bad--branch---name11",
+                "renovate/bad-branch-name11",
+            ),
+            (
+                "renovate-/[start]-something-[end]",
+                "renovate/start-something-end",
+            ),
+            (
+                "renovate/eslint-eslintrc>minimatch-10.x",
+                "renovate/eslint-eslintrc-minimatch-10.x",
+            ),
+            ("renovate/<<<hello>>>", "renovate/hello"),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(
+                clean_branch_name(input, "renovate/", false),
+                expected,
+                "{input}"
+            );
+        }
+    }
+
+    // Ported: "strict branch name enabled group" — workers/repository/updates/branch-name.spec.ts line 491
+    #[test]
+    fn branch_name_strict_enabled_group() {
+        let slug = group_branch_topic("some group name `~#$%^&*()-_=+[]{}|;,./<>? .version");
+        let raw = format!("{slug}-grouptopic");
+        assert_eq!(
+            clean_branch_name(&raw, "", true),
+            "some-group-name-dollarpercentand-or-lessgreater-version-grouptopic"
+        );
+    }
+
+    // Ported: "strict branch name disabled" — workers/repository/updates/branch-name.spec.ts line 506
+    #[test]
+    fn branch_name_strict_disabled_group() {
+        let slug = group_branch_topic("[some] group name.#$%version");
+        let raw = format!("{slug}-grouptopic");
+        assert_eq!(
+            clean_branch_name(&raw, "", false),
+            "some-group-name.dollarpercentversion-grouptopic"
+        );
     }
 
     // ── pr_title ─────────────────────────────────────────────────────────────
