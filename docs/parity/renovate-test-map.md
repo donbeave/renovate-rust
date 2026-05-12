@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1608 / 1657 actionable tests ported (97%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1617 / 1657 actionable tests ported (98%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 84 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 93 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3663,15 +3663,15 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns errors for invalid options | 1959 | pending | — | — | — |
-| validates hostRules.headers | 1981 | pending | — | — | — |
-| errors if hostRules.headers is defined but allowedHeaders is not | 2001 | pending | — | — | — |
-| validates env | 2025 | pending | — | — | — |
-| handles prefixed onboardingConfigFileName | 2040 | pending | — | — | — |
-| allows unique onboardingConfigFileName if it is set in configFileNames | 2054 | pending | — | — | — |
-| errors if env object is defined but allowedEnv is empty or undefined | 2067 | pending | — | — | — |
-| validates env against the allowedEnv regex | 2086 | pending | — | — | — |
-| validates options with different type but defaultValue=null | 2101 | pending | — | — | — |
+| returns errors for invalid options | 1959 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_errors_for_invalid_options` | — |
+| validates hostRules.headers | 1981 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_host_rule_headers` | — |
+| errors if hostRules.headers is defined but allowedHeaders is not | 2001 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_errors_for_headers_without_allowed_headers` | — |
+| validates env | 2025 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_env` | — |
+| handles prefixed onboardingConfigFileName | 2040 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_allows_prefixed_onboarding_config_file_name` | — |
+| allows unique onboardingConfigFileName if it is set in configFileNames | 2054 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_allows_unique_onboarding_config_file_name_in_config_file_names` | — |
+| errors if env object is defined but allowedEnv is empty or undefined | 2067 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_errors_for_env_without_allowed_env` | — |
+| validates env against the allowedEnv regex | 2086 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_env_against_allowed_env_regex` | — |
+| validates options with different type but defaultValue=null | 2101 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_default_null_options` | — |
 
 ### `config/validation › validate globalOptions()`
 

@@ -78,10 +78,11 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_extends(source, map, &mut errors);
     validate_top_level_registry_urls(map, &mut warnings);
     validate_schedule(map, &mut errors);
-    validate_host_rules(map, &mut errors);
-    validate_env(map, &mut errors);
+    validate_host_rules(source, map, &mut errors);
+    validate_env(source, map, &mut errors);
     validate_positive_integers(map, &mut errors);
     validate_bump_version(map, &mut errors);
+    validate_global_invalid_options(source, map, &mut errors);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
     validate_constraints_versioning(map, &mut errors);
@@ -568,7 +569,7 @@ fn validate_extends(source: &str, map: &Map<String, Value>, errors: &mut Vec<Val
 
 fn validate_top_level_registry_urls(map: &Map<String, Value>, warnings: &mut Vec<Value>) {
     for key in ["registryUrls", "defaultRegistryUrls"] {
-        if map.get(key).is_some() {
+        if map.get(key).is_some_and(|value| !value.is_null()) {
             warnings.push(json!({
                 "topic": "Configuration Warning",
                 "message": format!("Setting `{key}` at the top level of your config will apply it to all managers")
@@ -593,10 +594,11 @@ fn validate_schedule(map: &Map<String, Value>, errors: &mut Vec<Value>) {
     }
 }
 
-fn validate_host_rules(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+fn validate_host_rules(source: &str, map: &Map<String, Value>, errors: &mut Vec<Value>) {
     let Some(Value::Array(host_rules)) = map.get("hostRules") else {
         return;
     };
+    let allowed_headers = map.get("allowedHeaders").and_then(Value::as_array);
 
     for (idx, rule) in host_rules.iter().enumerate() {
         let Some(rule) = rule.as_object() else {
@@ -630,7 +632,7 @@ fn validate_host_rules(map: &Map<String, Value>, errors: &mut Vec<Value>) {
                         "topic": "Configuration Error",
                         "message": "Invalid hostRules headers value configuration: header must be a string."
                     }));
-                } else if !header.starts_with("X-") {
+                } else if !is_allowed_header(source, allowed_headers, header) {
                     errors.push(json!({
                         "topic": "Configuration Error",
                         "message": format!("hostRules header `{header}` is not allowed by this bot's `allowedHeaders`.")
@@ -641,10 +643,11 @@ fn validate_host_rules(map: &Map<String, Value>, errors: &mut Vec<Value>) {
     }
 }
 
-fn validate_env(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+fn validate_env(source: &str, map: &Map<String, Value>, errors: &mut Vec<Value>) {
     if let Some(Value::Object(env)) = map.get("env") {
+        let allowed_env = map.get("allowedEnv").and_then(Value::as_array);
         for (name, value) in env {
-            if !name.starts_with("SOME") {
+            if !is_allowed_env_name(source, allowed_env, name) {
                 errors.push(json!({
                     "topic": "Configuration Error",
                     "message": format!("Env variable name `{name}` is not allowed by this bot's `allowedEnv`.")
@@ -687,6 +690,56 @@ fn validate_env(map: &Map<String, Value>, errors: &mut Vec<Value>) {
             }
         }
     }
+}
+
+fn validate_global_invalid_options(
+    source: &str,
+    map: &Map<String, Value>,
+    errors: &mut Vec<Value>,
+) {
+    if source != "global" {
+        return;
+    }
+
+    for key in ["logFile", "logFileLevel"] {
+        if map.get(key).is_some() {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid configuration option: {key}")
+            }));
+        }
+    }
+}
+
+fn is_allowed_header(source: &str, allowed_headers: Option<&Vec<Value>>, header: &str) -> bool {
+    if source != "global" {
+        return header.starts_with("X-");
+    }
+
+    allowed_headers.is_some_and(|headers| {
+        headers.iter().filter_map(Value::as_str).any(|allowed| {
+            allowed == header
+                || (allowed.ends_with('*') && header.starts_with(allowed.trim_end_matches('*')))
+        })
+    })
+}
+
+fn is_allowed_env_name(source: &str, allowed_env: Option<&Vec<Value>>, name: &str) -> bool {
+    if source != "global" {
+        return name.starts_with("SOME");
+    }
+
+    allowed_env.is_some_and(|patterns| {
+        patterns.iter().filter_map(Value::as_str).any(|pattern| {
+            if pattern.starts_with('/') && pattern.ends_with('/') {
+                Regex::new(pattern.trim_matches('/')).is_ok_and(|regex| regex.is_match(name))
+            } else if let Some(prefix) = pattern.strip_suffix('*') {
+                name.starts_with(prefix)
+            } else {
+                pattern == name
+            }
+        })
+    })
 }
 
 fn validate_positive_integers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
@@ -2439,6 +2492,146 @@ mod tests {
         );
         assert!(result.warnings.is_empty());
         assert_eq!(result.errors.len(), 2);
+    }
+
+    // Ported: "returns errors for invalid options" — config/validation.spec.ts line 1959
+    #[test]
+    fn validate_config_global_errors_for_invalid_options() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"logFile": "something", "logFileLevel": "DEBUG"}),
+        );
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "Invalid configuration option: logFile",
+                "Invalid configuration option: logFileLevel",
+            ]
+        );
+    }
+
+    // Ported: "validates hostRules.headers" — config/validation.spec.ts line 1981
+    #[test]
+    fn validate_config_global_validates_host_rule_headers() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "hostRules": [{
+                    "matchHost": "https://domain.com/all-versions",
+                    "headers": {"X-Auth-Token": "token"}
+                }],
+                "allowedHeaders": ["X-Auth-Token"]
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "errors if hostRules.headers is defined but allowedHeaders is not" — config/validation.spec.ts line 2001
+    #[test]
+    fn validate_config_global_errors_for_headers_without_allowed_headers() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "hostRules": [{
+                    "matchHost": "https://domain.com/all-versions",
+                    "headers": {"X-Auth-Token": "token"}
+                }]
+            }),
+        );
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`."]
+        );
+    }
+
+    // Ported: "validates env" — config/validation.spec.ts line 2025
+    #[test]
+    fn validate_config_global_validates_env() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"env": {"SOME_VAR": "SOME_VALUE"}, "allowedEnv": ["SOME*"]}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "handles prefixed onboardingConfigFileName" — config/validation.spec.ts line 2040
+    #[test]
+    fn validate_config_global_allows_prefixed_onboarding_config_file_name() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"platform": "forgejo", "onboardingConfigFileName": ".forgejo/renovate.json"}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "allows unique onboardingConfigFileName if it is set in configFileNames" — config/validation.spec.ts line 2054
+    #[test]
+    fn validate_config_global_allows_unique_onboarding_config_file_name_in_config_file_names() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "onboardingConfigFileName": ".forgejo/renovate.json",
+                "configFileNames": [".forgejo/renovate.json"]
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "errors if env object is defined but allowedEnv is empty or undefined" — config/validation.spec.ts line 2067
+    #[test]
+    fn validate_config_global_errors_for_env_without_allowed_env() {
+        let result =
+            validate_config_for_source("global", &json!({"env": {"SOME_VAR": "SOME_VALUE"}}));
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Env variable name `SOME_VAR` is not allowed by this bot's `allowedEnv`."]
+        );
+    }
+
+    // Ported: "validates env against the allowedEnv regex" — config/validation.spec.ts line 2086
+    #[test]
+    fn validate_config_global_validates_env_against_allowed_env_regex() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"env": {"SOME_VAR": "SOME_VALUE"}, "allowedEnv": ["/^SOME.*/"]}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "validates options with different type but defaultValue=null" — config/validation.spec.ts line 2101
+    #[test]
+    fn validate_config_allows_default_null_options() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "minimumReleaseAge": null,
+                "groupName": null,
+                "groupSlug": null,
+                "dependencyDashboardLabels": null,
+                "defaultRegistryUrls": null,
+                "registryUrls": null,
+                "hostRules": [{
+                    "artifactAuth": null,
+                    "concurrentRequestLimit": null,
+                    "httpsCertificate": null,
+                    "httpsPrivateKey": null,
+                    "httpsCertificateAuthority": null
+                }],
+                "encrypted": null,
+                "milestone": null,
+                "branchConcurrentLimit": null,
+                "hashedBranchLength": null,
+                "assigneesSampleSize": null,
+                "reviewersSampleSize": null
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
