@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1559 / 1657 actionable tests ported (94%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1570 / 1657 actionable tests ported (95%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 35 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 46 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3593,22 +3593,22 @@ resolver) and the inner `extractPackageFile()` adapter.
 | validates JSONata query for each matchStrings | 841 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_jsonata_manager_queries` | — |
 | validates all possible regex manager options | 871 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_all_regex_custom_manager_options` | — |
 | passes if customManager fields are present | 890 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_valid_custom_managers` | — |
-| errors if extra customManager fields are present | 922 | pending | — | — | — |
-| errors if customManager fields are missing | 945 | pending | — | — | — |
-| errors if customManager fields are missing: JSONataManager | 967 | pending | — | — | — |
-| ignore keys | 1000 | pending | — | — | — |
-| validates timezone preset | 1013 | pending | — | — | — |
+| errors if extra customManager fields are present | 922 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_extra_custom_manager_fields` | — |
+| errors if customManager fields are missing | 945 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_missing_regex_custom_manager_fields` | — |
+| errors if customManager fields are missing: JSONataManager | 967 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_missing_jsonata_custom_manager_fields` | — |
+| ignore keys | 1000 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_ignores_schema_key` | — |
+| validates timezone preset | 1013 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_timezone_presets` | — |
 
 ### `config/validation › validateConfig(config) › constraints`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| can contain a valid tool name for Containerbase | 1027 | pending | — | — | — |
-| can contain a constraint for a non-Containerbase tool | 1042 | pending | — | — | — |
-| warns if an unsupported constraint is specified | 1057 | pending | — | — | — |
-| warns if a constraint is not valid | 1079 | pending | — | — | — |
-| errors if constraints is a malformed object | 1100 | pending | — | — | — |
-| errors if constraints is a malformed array | 1120 | pending | — | — | — |
+| can contain a valid tool name for Containerbase | 1027 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_containerbase_constraint_tool` | — |
+| can contain a constraint for a non-Containerbase tool | 1042 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_non_containerbase_constraint_tool` | — |
+| warns if an unsupported constraint is specified | 1057 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_unsupported_constraint` | — |
+| warns if a constraint is not valid | 1079 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_invalid_constraint_value` | — |
+| errors if constraints is a malformed object | 1100 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_malformed_constraints_object` | — |
+| errors if constraints is a malformed array | 1120 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_malformed_constraints_array` | — |
 
 ### `config/validation › validateConfig(config) › constraintsVersioning`
 

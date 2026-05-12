@@ -72,6 +72,7 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_enabled_managers(map, &mut errors);
     validate_manager_file_patterns(map, &mut errors);
     validate_custom_managers(map, &mut errors);
+    validate_constraints(map, &mut errors, &mut warnings);
     validate_package_rules(map, &mut errors, &mut warnings);
 
     ValidationResult { errors, warnings }
@@ -306,6 +307,17 @@ fn is_supported_manager(manager: &str) -> bool {
     )
 }
 
+fn is_supported_constraint(name: &str) -> bool {
+    matches!(name, "golang" | "gomodMod" | "node")
+}
+
+fn is_simple_version_constraint(version: &str) -> bool {
+    version == "latest"
+        || version
+            .chars()
+            .all(|ch| ch.is_ascii_digit() || matches!(ch, '.' | '<' | '>' | '=' | '^' | '~' | ' '))
+}
+
 fn validate_status_check_names(map: &Map<String, Value>, errors: &mut Vec<Value>) {
     let Some(Value::Object(status_check_names)) = map.get("statusCheckNames") else {
         return;
@@ -422,10 +434,37 @@ fn validate_custom_managers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
             continue;
         }
 
+        validate_custom_manager_keys(manager, errors);
+
         match custom_type {
             Some("regex") => validate_regex_custom_manager(manager, errors),
             Some("jsonata") => validate_jsonata_custom_manager(manager, errors),
             _ => {}
+        }
+    }
+}
+
+fn validate_custom_manager_keys(manager: &Map<String, Value>, errors: &mut Vec<Value>) {
+    for key in manager.keys() {
+        if !matches!(
+            key.as_str(),
+            "customType"
+                | "currentValueTemplate"
+                | "datasourceTemplate"
+                | "depNameTemplate"
+                | "depTypeTemplate"
+                | "extractVersionTemplate"
+                | "fileFormat"
+                | "managerFilePatterns"
+                | "matchStrings"
+                | "packageNameTemplate"
+                | "registryUrlTemplate"
+                | "versioningTemplate"
+        ) {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid customManager field: {key}")
+            }));
         }
     }
 }
@@ -500,11 +539,77 @@ fn validate_jsonata_custom_manager(manager: &Map<String, Value>, errors: &mut Ve
         return;
     }
 
+    let mut has_invalid_query = false;
     for query in match_strings.iter().filter_map(Value::as_str) {
         if has_invalid_jsonata_expression(query) {
+            has_invalid_query = true;
             errors.push(json!({
                 "topic": "Configuration Error",
                 "message": format!("Invalid JSONata query for customManagers: `{query}`")
+            }));
+        }
+    }
+    if has_invalid_query {
+        return;
+    }
+
+    if !has_template_or_query_field(manager, "currentValueTemplate", "currentValue") {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "JSONata Managers must contain currentValueTemplate configuration or currentValue in the query "
+        }));
+    }
+    if !has_template_or_query_field(manager, "datasourceTemplate", "datasource") {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "JSONata Managers must contain datasourceTemplate configuration or datasource in the query "
+        }));
+    }
+    if !has_template_or_query_field(manager, "depNameTemplate", "depName")
+        && !has_template_or_query_field(manager, "packageNameTemplate", "packageName")
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "JSONata Managers must contain depName or packageName in the query or their templates"
+        }));
+    }
+}
+
+fn validate_constraints(
+    map: &Map<String, Value>,
+    errors: &mut Vec<Value>,
+    warnings: &mut Vec<Value>,
+) {
+    let Some(constraints) = map.get("constraints") else {
+        return;
+    };
+
+    let Some(constraints) = constraints.as_object() else {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `constraints` should be a json object"
+        }));
+        return;
+    };
+
+    for (name, value) in constraints {
+        let Some(version) = value.as_str() else {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Configuration option `constraints.{name}` should be an object of key-value pairs of constraints and their value")
+            }));
+            continue;
+        };
+
+        if !is_supported_constraint(name) {
+            warnings.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Configuration option `constraints.{name}`: `{name}` is not a supported constraint name")
+            }));
+        } else if name == "node" && !is_simple_version_constraint(version) {
+            warnings.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Configuration option `constraints.node={version}` is not a valid tool version constraint, according to `node` versioning")
             }));
         }
     }
@@ -588,6 +693,21 @@ fn has_template_or_capture(
             .flatten()
             .filter_map(Value::as_str)
             .any(|pattern| pattern.contains(&format!("?<{capture}>")))
+}
+
+fn has_template_or_query_field(
+    manager: &Map<String, Value>,
+    template_key: &str,
+    field: &str,
+) -> bool {
+    manager.get(template_key).and_then(Value::as_str).is_some()
+        || manager
+            .get("matchStrings")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .any(|query| query.contains(field))
 }
 
 #[cfg(test)]
@@ -1186,6 +1306,167 @@ mod tests {
         );
         assert!(result.errors.is_empty());
         assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "errors if extra customManager fields are present" — config/validation.spec.ts line 922
+    #[test]
+    fn validate_config_errors_for_extra_custom_manager_fields() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "regex",
+                    "managerFilePatterns": ["Dockerfile"],
+                    "matchStrings": ["ENV (?<currentValue>.*?)\\s"],
+                    "depNameTemplate": "foo",
+                    "datasourceTemplate": "bar",
+                    "depTypeTemplate": "apple",
+                    "automerge": true
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "errors if customManager fields are missing" — config/validation.spec.ts line 945
+    #[test]
+    fn validate_config_errors_for_missing_regex_custom_manager_fields() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "regex",
+                    "managerFilePatterns": ["Dockerfile"],
+                    "matchStrings": ["ENV (.*?)\\s"],
+                    "depNameTemplate": "foo",
+                    "datasourceTemplate": "bar"
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "errors if customManager fields are missing: JSONataManager" — config/validation.spec.ts line 967
+    #[test]
+    fn validate_config_errors_for_missing_jsonata_custom_manager_fields() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "jsonata",
+                    "fileFormat": "json",
+                    "managerFilePatterns": ["package.json"],
+                    "matchStrings": ["packages"]
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "JSONata Managers must contain currentValueTemplate configuration or currentValue in the query ",
+                "JSONata Managers must contain datasourceTemplate configuration or datasource in the query ",
+                "JSONata Managers must contain depName or packageName in the query or their templates",
+            ]
+        );
+    }
+
+    // Ported: "ignore keys" — config/validation.spec.ts line 1000
+    #[test]
+    fn validate_config_ignores_schema_key() {
+        let result = validate_config_for_source("repo", &json!({"$schema": "renovate.json"}));
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "validates timezone preset" — config/validation.spec.ts line 1013
+    #[test]
+    fn validate_config_allows_timezone_presets() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"extends": [":timezone", ":timezone(Europe/Berlin)"]}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "can contain a valid tool name for Containerbase" — config/validation.spec.ts line 1027
+    #[test]
+    fn validate_config_allows_containerbase_constraint_tool() {
+        let result =
+            validate_config_for_source("repo", &json!({"constraints": {"golang": "1.26.0"}}));
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "can contain a constraint for a non-Containerbase tool" — config/validation.spec.ts line 1042
+    #[test]
+    fn validate_config_allows_non_containerbase_constraint_tool() {
+        let result =
+            validate_config_for_source("repo", &json!({"constraints": {"gomodMod": "latest"}}));
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "warns if an unsupported constraint is specified" — config/validation.spec.ts line 1057
+    #[test]
+    fn validate_config_warns_for_unsupported_constraint() {
+        let result =
+            validate_config_for_source("repo", &json!({"constraints": {"not-supported": "4.5.6"}}));
+        assert!(result.errors.is_empty());
+        assert_eq!(
+            result.warnings,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraints.not-supported`: `not-supported` is not a supported constraint name"
+            })]
+        );
+    }
+
+    // Ported: "warns if a constraint is not valid" — config/validation.spec.ts line 1079
+    #[test]
+    fn validate_config_warns_for_invalid_constraint_value() {
+        let result =
+            validate_config_for_source("repo", &json!({"constraints": {"node": "1.2.3foo"}}));
+        assert!(result.errors.is_empty());
+        assert_eq!(
+            result.warnings,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraints.node=1.2.3foo` is not a valid tool version constraint, according to `node` versioning"
+            })]
+        );
+    }
+
+    // Ported: "errors if constraints is a malformed object" — config/validation.spec.ts line 1100
+    #[test]
+    fn validate_config_errors_for_malformed_constraints_object() {
+        let result =
+            validate_config_for_source("repo", &json!({"constraints": {"packageRules": [{}]}}));
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraints.packageRules` should be an object of key-value pairs of constraints and their value"
+            })]
+        );
+    }
+
+    // Ported: "errors if constraints is a malformed array" — config/validation.spec.ts line 1120
+    #[test]
+    fn validate_config_errors_for_malformed_constraints_array() {
+        let result = validate_config_for_source("repo", &json!({"constraints": [1, 2, 3]}));
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraints` should be a json object"
+            })]
+        );
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
