@@ -166,6 +166,22 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "returns null for missing fields" — datasource/hex/index.spec.ts line 122
+    async fn fetch_latest_missing_stable_version_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/packages/phoenix"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("phoenix", &http, &server.uri()).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    // Ported: "returns null for 404" — datasource/hex/index.spec.ts line 135
     async fn fetch_latest_404_returns_none() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
@@ -178,6 +194,21 @@ mod tests {
         let result = fetch_latest("nonexistent", &http, &server.uri())
             .await
             .unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    // Ported: "returns null for 401" — datasource/hex/index.spec.ts line 142
+    async fn fetch_latest_unauthorized_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/packages/private"))
+            .respond_with(ResponseTemplate::new(401))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("private", &http, &server.uri()).await.unwrap();
         assert_eq!(result, None);
     }
 
