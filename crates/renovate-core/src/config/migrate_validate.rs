@@ -118,18 +118,57 @@ pub fn migrate_and_validate(base_config: &Value, input: &Value) -> Value {
 
 fn migrate_config(input: &Value) -> Value {
     let mut migrated = input.clone();
-    if let Value::Object(map) = &mut migrated
-        && matches!(map.get("automerge"), Some(Value::String(value)) if value == "none")
-    {
-        map.insert("automerge".to_owned(), Value::Bool(false));
-    }
-    if let Value::Object(map) = &mut migrated
-        && matches!(map.get("binarySource"), Some(Value::String(value)) if value == "auto")
-    {
-        map.insert(
-            "binarySource".to_owned(),
-            Value::String("global".to_owned()),
-        );
+    if let Value::Object(map) = &mut migrated {
+        if matches!(map.get("automerge"), Some(Value::String(value)) if value == "none") {
+            map.insert("automerge".to_owned(), Value::Bool(false));
+        }
+        if matches!(map.get("binarySource"), Some(Value::String(value)) if value == "auto") {
+            map.insert(
+                "binarySource".to_owned(),
+                Value::String("global".to_owned()),
+            );
+        }
+        if let Some(base_branch) = map.remove("baseBranch") {
+            let base_branch_patterns = map
+                .entry("baseBranchPatterns".to_owned())
+                .or_insert_with(|| Value::Array(Vec::new()));
+            if let Value::Array(patterns) = base_branch_patterns {
+                match base_branch {
+                    Value::String(branch) => patterns.push(Value::String(branch)),
+                    Value::Array(branches) => patterns.extend(branches),
+                    _ => {}
+                }
+            }
+        }
+        if let Some(Value::String(branch_name)) = map.get_mut("branchName") {
+            *branch_name =
+                branch_name.replace("{{managerBranchPrefix}}", "{{additionalBranchPrefix}}");
+        }
+        if let Some(Value::String(branch_prefix)) = map.get_mut("branchPrefix")
+            && let Some(idx) = branch_prefix.find("{{parentDir}}")
+        {
+            let additional_branch_prefix = branch_prefix[idx..].to_owned();
+            branch_prefix.truncate(idx);
+            map.insert(
+                "additionalBranchPrefix".to_owned(),
+                Value::String(additional_branch_prefix),
+            );
+        }
+        if matches!(map.get("platformCommit"), Some(Value::Bool(true))) {
+            map.insert(
+                "platformCommit".to_owned(),
+                Value::String("enabled".to_owned()),
+            );
+        } else if matches!(map.get("platformCommit"), Some(Value::Bool(false))) {
+            map.insert(
+                "platformCommit".to_owned(),
+                Value::String("disabled".to_owned()),
+            );
+        }
+        if matches!(map.get("requiredStatusChecks"), Some(Value::Null)) {
+            map.remove("requiredStatusChecks");
+            map.insert("ignoreTests".to_owned(), Value::Bool(true));
+        }
     }
     migrated
 }
@@ -3579,6 +3618,123 @@ mod tests {
         assert_eq!(
             migrate_config(&json!({"binarySource": "auto"})),
             json!({"binarySource": "global"})
+        );
+    }
+
+    // Ported: "should migrate value to array" — config/migrations/custom/base-branch-migration.spec.ts line 4
+    #[test]
+    fn base_branch_string_migrates_to_patterns() {
+        assert_eq!(
+            migrate_config(&json!({"baseBranch": "test"})),
+            json!({"baseBranchPatterns": ["test"]})
+        );
+    }
+
+    // Ported: "should migrate array" — config/migrations/custom/base-branch-migration.spec.ts line 14
+    #[test]
+    fn base_branch_array_migrates_to_patterns() {
+        assert_eq!(
+            migrate_config(&json!({"baseBranch": ["test"]})),
+            json!({"baseBranchPatterns": ["test"]})
+        );
+    }
+
+    // Ported: "should push to existing bassBranchPatterns" — config/migrations/custom/base-branch-migration.spec.ts line 24
+    #[test]
+    fn base_branch_migration_appends_existing_patterns() {
+        assert_eq!(
+            migrate_config(&json!({"baseBranch": ["test"], "baseBranchPatterns": ["base"]})),
+            json!({"baseBranchPatterns": ["base", "test"]})
+        );
+    }
+
+    // Ported: "should replace pattern" — config/migrations/custom/branch-name-migration.spec.ts line 4
+    #[test]
+    fn branch_name_manager_branch_prefix_migrates_to_additional_branch_prefix() {
+        assert_eq!(
+            migrate_config(&json!({"branchName": "test {{managerBranchPrefix}} test"})),
+            json!({"branchName": "test {{additionalBranchPrefix}} test"})
+        );
+    }
+
+    // Ported: "should not replace another string" — config/migrations/custom/branch-name-migration.spec.ts line 14
+    #[test]
+    fn branch_name_without_manager_branch_prefix_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"branchName": "test"})),
+            json!({"branchName": "test"})
+        );
+    }
+
+    // Ported: "should not replace non string value" — config/migrations/custom/branch-name-migration.spec.ts line 25
+    #[test]
+    fn branch_name_non_string_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"branchName": true})),
+            json!({"branchName": true})
+        );
+    }
+
+    // Ported: "should migrate template" — config/migrations/custom/branch-prefix-migration.spec.ts line 4
+    #[test]
+    fn branch_prefix_parent_dir_template_migrates_to_additional_prefix() {
+        assert_eq!(
+            migrate_config(&json!({"branchPrefix": "renovate/{{parentDir}}-"})),
+            json!({"branchPrefix": "renovate/", "additionalBranchPrefix": "{{parentDir}}-"})
+        );
+    }
+
+    // Ported: "should ignore string without template" — config/migrations/custom/branch-prefix-migration.spec.ts line 17
+    #[test]
+    fn branch_prefix_without_parent_dir_template_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"branchPrefix": "test"})),
+            json!({"branchPrefix": "test"})
+        );
+    }
+
+    // Ported: "should ignore non string without template" — config/migrations/custom/branch-prefix-migration.spec.ts line 28
+    #[test]
+    fn branch_prefix_non_string_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"branchPrefix": true})),
+            json!({"branchPrefix": true})
+        );
+    }
+
+    // Ported: "should migrate platformCommit=true to platformCommit=enabled" — config/migrations/custom/platform-commit-migration.spec.ts line 4
+    #[test]
+    fn platform_commit_true_migrates_to_enabled() {
+        assert_eq!(
+            migrate_config(&json!({"platformCommit": true})),
+            json!({"platformCommit": "enabled"})
+        );
+    }
+
+    // Ported: "should migrate platformCommit=false to platformCommit=disabled" — config/migrations/custom/platform-commit-migration.spec.ts line 14
+    #[test]
+    fn platform_commit_false_migrates_to_disabled() {
+        assert_eq!(
+            migrate_config(&json!({"platformCommit": false})),
+            json!({"platformCommit": "disabled"})
+        );
+    }
+
+    // Ported: "should not migrate platformCommit=auto" — config/migrations/custom/platform-commit-migration.spec.ts line 24
+    #[test]
+    fn platform_commit_auto_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"platformCommit": "auto"})),
+            json!({"platformCommit": "auto"})
+        );
+    }
+
+    // Ported: "should migrate requiredStatusChecks=null to ignoreTests=true" — config/migrations/custom/required-status-checks-migration.spec.ts line 4
+    #[test]
+    fn required_status_checks_null_migrates_to_ignore_tests() {
+        assert_eq!(
+            migrate_config(&json!({"requiredStatusChecks": null})),
+            json!({"ignoreTests": true})
         );
     }
 

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1733 / 1733 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1746 / 1746 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3557,6 +3557,51 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/base-branch-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/base-branch-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/base-branch-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate value to array | 4 | ported | `migrate_validate.rs` | `base_branch_string_migrates_to_patterns` | — |
+| should migrate array | 14 | ported | `migrate_validate.rs` | `base_branch_array_migrates_to_patterns` | — |
+| should push to existing bassBranchPatterns | 24 | ported | `migrate_validate.rs` | `base_branch_migration_appends_existing_patterns` | — |
+
+---
+
+## `lib/config/migrations/custom/branch-name-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/branch-name-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/branch-name-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should replace pattern | 4 | ported | `migrate_validate.rs` | `branch_name_manager_branch_prefix_migrates_to_additional_branch_prefix` | — |
+| should not replace another string | 14 | ported | `migrate_validate.rs` | `branch_name_without_manager_branch_prefix_is_unchanged` | — |
+| should not replace non string value | 25 | ported | `migrate_validate.rs` | `branch_name_non_string_is_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/branch-prefix-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/branch-prefix-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/branch-prefix-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate template | 4 | ported | `migrate_validate.rs` | `branch_prefix_parent_dir_template_migrates_to_additional_prefix` | — |
+| should ignore string without template | 17 | ported | `migrate_validate.rs` | `branch_prefix_without_parent_dir_template_is_unchanged` | — |
+| should ignore non string without template | 28 | ported | `migrate_validate.rs` | `branch_prefix_non_string_is_unchanged` | — |
+
+---
+
 ## `lib/config/migrations/custom/automerge-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/automerge-migration.spec.ts
@@ -3644,6 +3689,34 @@ does not implement Renovate's generated-lockfile reverse resolver.
 |---|---|---|---|---|---|
 | should migrate dryRun=true to dryRun=full | 4 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` | — |
 | should migrate dryRun=false to dryRun=null | 14 | ported | `config_builder.rs` | `dry_run_legacy_false_disables_dry_run` | — |
+
+---
+
+## `lib/config/migrations/custom/platform-commit-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/platform-commit-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/platform-commit-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate platformCommit=true to platformCommit=enabled | 4 | ported | `migrate_validate.rs` | `platform_commit_true_migrates_to_enabled` | — |
+| should migrate platformCommit=false to platformCommit=disabled | 14 | ported | `migrate_validate.rs` | `platform_commit_false_migrates_to_disabled` | — |
+| should not migrate platformCommit=auto | 24 | ported | `migrate_validate.rs` | `platform_commit_auto_is_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/required-status-checks-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/required-status-checks-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/required-status-checks-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate requiredStatusChecks=null to ignoreTests=true | 4 | ported | `migrate_validate.rs` | `required_status_checks_null_migrates_to_ignore_tests` | — |
 
 ---
 
