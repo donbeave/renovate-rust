@@ -334,6 +334,9 @@ fn migrate_config(input: &Value) -> Value {
         if let Some(package_pattern) = map.remove("packagePattern") {
             set_safely(map, "packagePatterns", Value::Array(vec![package_pattern]));
         }
+        if let Some(Value::Array(package_rules)) = map.get_mut("packageRules") {
+            migrate_package_rules(package_rules);
+        }
         if let Some(Value::Array(packages)) = map.remove("packages") {
             package_rules_mut(map).extend(packages);
         }
@@ -673,6 +676,122 @@ fn package_rules_mut(map: &mut Map<String, Value>) -> &mut Vec<Value> {
         *package_rules = Value::Array(Vec::new());
     }
     package_rules.as_array_mut().expect("packageRules array")
+}
+
+fn migrate_package_rules(package_rules: &mut [Value]) {
+    for package_rule in package_rules {
+        let Some(rule) = package_rule.as_object_mut() else {
+            continue;
+        };
+        migrate_package_rule(rule);
+    }
+}
+
+fn migrate_package_rule(rule: &mut Map<String, Value>) {
+    for (old_key, new_key) in [
+        ("matchFiles", "matchFileNames"),
+        ("matchPaths", "matchFileNames"),
+        ("paths", "matchFileNames"),
+        ("languages", "matchCategories"),
+        ("matchLanguages", "matchCategories"),
+        ("baseBranchList", "matchBaseBranches"),
+        ("managers", "matchManagers"),
+        ("datasources", "matchDatasources"),
+        ("depTypeList", "matchDepTypes"),
+        ("packageNames", "matchPackageNames"),
+        ("packagePatterns", "matchPackagePatterns"),
+        ("sourceUrlPrefixes", "matchSourceUrlPrefixes"),
+        ("updateTypes", "matchUpdateTypes"),
+    ] {
+        if let Some(value) = rule.remove(old_key) {
+            set_safely(rule, new_key, value);
+        }
+    }
+
+    merge_package_rule_matchers(rule, "matchDepPatterns", "matchDepNames", |value| {
+        format!("/{value}/")
+    });
+    merge_package_rule_matchers(rule, "matchDepPrefixes", "matchDepNames", |value| {
+        format!("{value}{{/,}}**")
+    });
+    merge_package_rule_matchers(rule, "excludeDepNames", "matchDepNames", |value| {
+        format!("!{value}")
+    });
+    merge_package_rule_matchers(rule, "excludeDepPatterns", "matchDepNames", |value| {
+        format!("!/{value}/")
+    });
+    merge_package_rule_matchers(rule, "excludeDepPrefixes", "matchDepNames", |value| {
+        format!("!{value}{{/,}}**")
+    });
+    merge_package_rule_matchers(rule, "matchPackagePatterns", "matchPackageNames", |value| {
+        if value == "*" {
+            value.to_owned()
+        } else {
+            format!("/{value}/")
+        }
+    });
+    merge_package_rule_matchers(rule, "matchPackagePrefixes", "matchPackageNames", |value| {
+        format!("{value}{{/,}}**")
+    });
+    merge_package_rule_matchers(rule, "excludePackageNames", "matchPackageNames", |value| {
+        format!("!{value}")
+    });
+    merge_package_rule_matchers(
+        rule,
+        "excludePackagePatterns",
+        "matchPackageNames",
+        |value| format!("!/{value}/"),
+    );
+    merge_package_rule_matchers(
+        rule,
+        "excludePackagePrefixes",
+        "matchPackageNames",
+        |value| format!("!{value}{{/,}}**"),
+    );
+    merge_package_rule_matchers(rule, "matchSourceUrlPrefixes", "matchSourceUrls", |value| {
+        format!("{value}{{/,}}**")
+    });
+    merge_package_rule_matchers(rule, "excludeRepositories", "matchRepositories", |value| {
+        format!("!{value}")
+    });
+}
+
+fn merge_package_rule_matchers<F>(
+    rule: &mut Map<String, Value>,
+    old_key: &str,
+    target_key: &str,
+    format_value: F,
+) where
+    F: Fn(&str) -> String,
+{
+    let Some(value) = rule.remove(old_key) else {
+        return;
+    };
+    let matchers = match value {
+        Value::String(value) => vec![value],
+        Value::Array(values) => values
+            .into_iter()
+            .filter_map(|value| value.as_str().map(ToOwned::to_owned))
+            .collect(),
+        _ => Vec::new(),
+    };
+    if matchers.is_empty() {
+        return;
+    }
+
+    let target = rule
+        .entry(target_key.to_owned())
+        .or_insert_with(|| Value::Array(Vec::new()));
+    if !target.is_array() {
+        *target = Value::Array(Vec::new());
+    }
+    if let Value::Array(target) = target {
+        target.extend(
+            matchers
+                .iter()
+                .map(|value| Value::String(format_value(value))),
+        );
+    }
 }
 
 fn migrate_datasource_alias(value: &str) -> &str {
@@ -4571,12 +4690,12 @@ mod tests {
             json!({
                 "packageRules": [
                     {
-                        "packagePatterns": "^(@angular|typescript)",
+                        "matchPackageNames": ["/^(@angular|typescript)/"],
                         "groupName": ["angular packages"],
                         "excludedPackageNames": "foo"
                     },
                     {
-                        "packageNames": ["foo"],
+                        "matchPackageNames": ["foo"],
                         "packageRules": [{"depTypeList": ["bar"], "automerge": true}]
                     },
                     {"matchDepTypes": ["peerDependencies"], "versionStrategy": "widen"},
@@ -4730,6 +4849,184 @@ mod tests {
         );
     }
 
+    // Ported: "should not migrate nested packageRules" — config/migrations/custom/package-rules-migration.spec.ts line 31
+    #[test]
+    fn package_rules_renames_top_level_paths_without_nested_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": [{
+                    "paths": [],
+                    "packgageRules": {"languages": ["javascript"]}
+                }]
+            })),
+            json!({
+                "packageRules": [{
+                    "matchFileNames": [],
+                    "packgageRules": {"languages": ["javascript"]}
+                }]
+            })
+        );
+    }
+
+    // Ported: "should migrate languages to categories" — config/migrations/custom/package-rules-migration.spec.ts line 53
+    #[test]
+    fn package_rules_languages_migrate_to_categories() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": [
+                    {"matchLanguages": ["js"]},
+                    {"languages": ["rust"]}
+                ]
+            })),
+            json!({
+                "packageRules": [
+                    {"matchCategories": ["js"]},
+                    {"matchCategories": ["rust"]}
+                ]
+            })
+        );
+    }
+
+    // Ported: "should migrate single match rule" — config/migrations/custom/package-rules-migration.spec.ts line 81
+    #[test]
+    fn package_rules_single_match_language_migrates_to_category() {
+        assert_eq!(
+            migrate_config(&json!({"packageRules": [{"matchLanguages": ["js"]}]})),
+            json!({"packageRules": [{"matchCategories": ["js"]}]})
+        );
+    }
+
+    // Ported: "should migrate excludePackageNames to matchPackageNames" — config/migrations/custom/package-rules-migration.spec.ts line 99
+    #[test]
+    fn package_rules_exclude_package_names_merge_into_match_package_names() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": [{
+                    "excludePackageNames": ["foo", "bar"],
+                    "matchPackageNames": ["baz"]
+                }]
+            })),
+            json!({
+                "packageRules": [{
+                    "matchPackageNames": ["baz", "!foo", "!bar"]
+                }]
+            })
+        );
+    }
+
+    // Ported: "should migrate matchPackagePatterns to matchPackageNames" — config/migrations/custom/package-rules-migration.spec.ts line 127
+    #[test]
+    fn package_rules_match_package_patterns_merge_into_match_package_names() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": [
+                    {"matchPackagePatterns": ["*"]},
+                    {"matchPackagePatterns": ["foo", "bar"], "matchPackageNames": ["baz"]}
+                ]
+            })),
+            json!({
+                "packageRules": [
+                    {"matchPackageNames": ["*"]},
+                    {"matchPackageNames": ["baz", "/foo/", "/bar/"]}
+                ]
+            })
+        );
+    }
+
+    // Ported: "should migrate all match/exclude when value is of type string" — config/migrations/custom/package-rules-migration.spec.ts line 163
+    #[test]
+    fn package_rules_string_matchers_merge_into_match_names() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": [{
+                    "matchPackagePatterns": "pattern",
+                    "matchPackagePrefixes": "prefix1",
+                    "matchSourceUrlPrefixes": "prefix1",
+                    "excludePackageNames": "excluded",
+                    "excludePackagePatterns": "excludepattern",
+                    "excludePackagePrefixes": "prefix1b",
+                    "matchDepPatterns": "pattern",
+                    "matchDepPrefixes": "prefix1",
+                    "excludeDepNames": "excluded",
+                    "excludeDepPatterns": "excludepattern",
+                    "excludeDepPrefixes": "prefix1b",
+                    "automerge": true
+                }]
+            })),
+            json!({
+                "packageRules": [{
+                    "matchPackageNames": [
+                        "/pattern/",
+                        "prefix1{/,}**",
+                        "!excluded",
+                        "!/excludepattern/",
+                        "!prefix1b{/,}**"
+                    ],
+                    "matchDepNames": [
+                        "/pattern/",
+                        "prefix1{/,}**",
+                        "!excluded",
+                        "!/excludepattern/",
+                        "!prefix1b{/,}**"
+                    ],
+                    "matchSourceUrls": ["prefix1{/,}**"],
+                    "automerge": true
+                }]
+            })
+        );
+    }
+
+    // Ported: "should migrate all match/exclude at once" — config/migrations/custom/package-rules-migration.spec.ts line 222
+    #[test]
+    fn package_rules_array_matchers_merge_into_match_names() {
+        assert_eq!(
+            migrate_config(&json!({
+                "packageRules": [{
+                    "matchPackagePatterns": ["pattern"],
+                    "matchPackagePrefixes": ["prefix1", "prefix2"],
+                    "matchSourceUrlPrefixes": ["prefix1", "prefix2"],
+                    "excludePackageNames": ["excluded"],
+                    "excludePackagePatterns": ["excludepattern"],
+                    "excludePackagePrefixes": ["prefix1b"],
+                    "matchPackageNames": ["mpn1", "mpn2"],
+                    "matchDepPatterns": ["pattern"],
+                    "matchDepPrefixes": ["prefix1", "prefix2"],
+                    "excludeDepNames": ["excluded"],
+                    "excludeDepPatterns": ["excludepattern"],
+                    "excludeDepPrefixes": ["prefix1b"],
+                    "matchDepNames": ["mpn1", "mpn2"],
+                    "automerge": true
+                }]
+            })),
+            json!({
+                "packageRules": [{
+                    "matchPackageNames": [
+                        "mpn1",
+                        "mpn2",
+                        "/pattern/",
+                        "prefix1{/,}**",
+                        "prefix2{/,}**",
+                        "!excluded",
+                        "!/excludepattern/",
+                        "!prefix1b{/,}**"
+                    ],
+                    "matchDepNames": [
+                        "mpn1",
+                        "mpn2",
+                        "/pattern/",
+                        "prefix1{/,}**",
+                        "prefix2{/,}**",
+                        "!excluded",
+                        "!/excludepattern/",
+                        "!prefix1b{/,}**"
+                    ],
+                    "matchSourceUrls": ["prefix1{/,}**", "prefix2{/,}**"],
+                    "automerge": true
+                }]
+            })
+        );
+    }
+
     // Ported: "should migrate to package rules" — config/migrations/custom/packages-migration.spec.ts line 4
     #[test]
     fn packages_migrates_to_package_rules() {
@@ -4800,7 +5097,7 @@ mod tests {
             })),
             json!({
                 "packageRules": [
-                    {"packageNames": ["guava"], "versionScheme": "maven"},
+                    {"matchPackageNames": ["guava"], "versionScheme": "maven"},
                     {"paths": ["examples/**"], "extends": ["foo"]}
                 ]
             })
