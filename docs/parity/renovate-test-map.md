@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1668 / 1794 actionable tests ported (93%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1681 / 1794 actionable tests ported (94%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4113,27 +4113,27 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 0 | **Actionable:** 45 | **Status:** pending
+**Total tests:** 45 | **Ported:** 13 | **Actionable:** 45 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty env | 11 | pending | — | — | — |
-| supports boolean true | 15 | pending | — | — | — |
-| supports boolean false | 20 | pending | — | — | — |
-| throws exception for invalid boolean value | 27 | pending | — | — | — |
-| supports list single | 40 | pending | — | — | — |
-| supports list multiple | 45 | pending | — | — | — |
-| supports list multiple without blank items | 50 | pending | — | — | — |
-| supports string | 55 | pending | — | — | — |
+| returns empty env | 11 | ported | `config_env.rs` | `empty_env_returns_default_config` | — |
+| supports boolean true | 15 | ported | `config_env.rs` | `config_migration_true_is_parsed` | — |
+| supports boolean false | 20 | ported | `config_env.rs` | `config_migration_false_is_parsed` | — |
+| throws exception for invalid boolean value | 27 | ported | `config_env.rs` | `config_migration_invalid_boolean_is_rejected` | — |
+| supports list single | 40 | ported | `config_env.rs` | `labels_single_value_is_parsed` | — |
+| supports list multiple | 45 | ported | `config_env.rs` | `labels_multiple_values_are_parsed` | — |
+| supports list multiple without blank items | 50 | ported | `config_env.rs` | `labels_ignore_blank_items` | — |
+| supports string | 55 | ported | `config_env.rs` | `token_is_parsed` | — |
 | coerces string newlines | 60 | pending | — | — | — |
-| supports custom prefixes | 67 | pending | — | — | — |
+| supports custom prefixes | 67 | ported | `config_env.rs` | `custom_prefix_is_supported` | — |
 | supports json | 76 | pending | — | — | — |
-| supports arrays of objects | 83 | pending | — | — | — |
-| "$envArg" -> $config | 91 | pending | — | — | — |
-| skips misconfigured arrays | 103 | pending | — | — | — |
-| skips garbage array values | 117 | pending | — | — | — |
+| supports arrays of objects | 83 | ported | `config_env.rs` | `host_rules_array_is_parsed` | — |
+| "$envArg" -> $config | 91 | ported | `config_env.rs` | `recreate_env_aliases_are_parsed` | — |
+| skips misconfigured arrays | 103 | ported | `config_env.rs` | `host_rules_string_value_is_skipped` | — |
+| skips garbage array values | 117 | ported | `config_env.rs` | `host_rules_garbage_value_is_skipped` | — |
 | supports GitHub token | 131 | pending | — | — | — |
 | supports GitHub custom endpoint | 140 | pending | — | — | — |
 | supports GitHub custom endpoint and github.com | 149 | pending | — | — | — |

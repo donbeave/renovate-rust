@@ -97,7 +97,7 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     Ok(config)
 }
 
-fn parse_json_array(raw: &str) -> Result<Vec<Value>, String> {
+pub(crate) fn parse_json_array(raw: &str) -> Result<Vec<Value>, String> {
     if raw.is_empty() {
         return Ok(Vec::new());
     }
@@ -108,7 +108,7 @@ fn parse_json_array(raw: &str) -> Result<Vec<Value>, String> {
     }
 }
 
-fn parse_json_object(raw: &str) -> Result<Map<String, Value>, String> {
+pub(crate) fn parse_json_object(raw: &str) -> Result<Map<String, Value>, String> {
     if raw.is_empty() {
         return Ok(Map::new());
     }

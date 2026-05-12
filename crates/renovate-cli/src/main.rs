@@ -14,6 +14,7 @@
 
 mod cli;
 mod config_builder;
+mod config_env;
 mod context;
 mod logging;
 mod migrate;
@@ -95,6 +96,15 @@ async fn main() -> ExitCode {
         }
         Err(err) => {
             tracing::error!(%err);
+            eprintln!("renovate: {err}");
+            return ExitCode::from(1);
+        }
+    };
+
+    let env_map = std::env::vars().collect();
+    let base = match config_env::apply_to_base(&env_map, base) {
+        Ok(config) => config,
+        Err(err) => {
             eprintln!("renovate: {err}");
             return ExitCode::from(1);
         }

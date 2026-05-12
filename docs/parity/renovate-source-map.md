@@ -1067,7 +1067,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/workers/repository/init/merge.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Repo config merge partially ported |
 | `lib/workers/global/config/parse/cli.ts` | `crates/renovate-cli/src/cli.rs` | partial | CLI arg parsing ported |
-| `lib/workers/global/config/parse/env.ts` | `crates/renovate-cli/src/config_builder.rs` | partial | Env config ported |
+| `lib/workers/global/config/parse/env.ts` | `crates/renovate-cli/src/config_env.rs` | partial | Env config parsing partially ported |
 | `lib/util/string-match.ts` | `crates/renovate-core/src/string_match.rs` | partial | String matching partially ported |
 | `lib/util/package-rules/index.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Package rule matching partially ported |
 | `lib/util/package-rules/managers.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |
