@@ -10489,6 +10489,153 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/platform/comment.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/comment.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/platform/comment › ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| caches created comment | 20 | not-applicable | — | — | Renovate's TypeScript PR comment cache wrapper is not implemented as a Rust API; Rust platform clients do not expose PR comment mutation. |
+| caches comment with no topic | 39 | not-applicable | — | — | Renovate's TypeScript PR comment cache wrapper is not implemented as a Rust API; Rust platform clients do not expose PR comment mutation. |
+| does not cache failed comment | 58 | not-applicable | — | — | Renovate's TypeScript PR comment cache wrapper is not implemented as a Rust API; Rust platform clients do not expose PR comment mutation. |
+| short-circuits if comment already exists | 71 | not-applicable | — | — | Renovate's TypeScript PR comment cache wrapper is not implemented as a Rust API; Rust platform clients do not expose PR comment mutation. |
+| rewrites content hash | 80 | not-applicable | — | — | Renovate's TypeScript PR comment content-hash cache is not implemented as a Rust API. |
+| caches comments many comments with different topics | 96 | not-applicable | — | — | Renovate's TypeScript PR comment topic cache is not implemented as a Rust API. |
+
+### `modules/platform/comment › ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes cached comment by topic | 123 | not-applicable | — | — | Renovate's TypeScript PR comment cache removal wrapper is not implemented as a Rust API. |
+| deletes cached comment by content | 131 | not-applicable | — | — | Renovate's TypeScript PR comment cache removal wrapper is not implemented as a Rust API. |
+| deletes by content only one comment | 143 | not-applicable | — | — | Renovate's TypeScript PR comment cache removal wrapper is not implemented as a Rust API. |
+| deletes only for selected PR | 160 | not-applicable | — | — | Renovate's TypeScript PR comment cache removal wrapper is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/platform/scm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/platform/scm`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no platform chosen | 9 | not-applicable | — | — | Renovate's TypeScript global SCM facade is not implemented as a Rust API; Rust uses `AnyPlatformClient` and local git behavior separately. |
+| unknown platform | 13 | not-applicable | — | — | Renovate's TypeScript global SCM facade and platform registry are not implemented as a Rust API. |
+| use util/git module as default implementation for platform %s | 19 | not-applicable | — | — | Renovate's TypeScript default SCM-to-git delegation facade is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/platform/pr-body.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/pr-body.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/platform/pr-body › getPrBodyStruct`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns hash for empty inputs | 6 | not-applicable | — | — | Renovate's TypeScript PR body metadata parser is not implemented as a Rust API; Rust currently has no PR body update workflow. |
+| checks if we reach warning | 29 | not-applicable | — | — | Renovate's TypeScript PR body debug-data parsing and warning side effect are not implemented as a Rust API. |
+| hashes ignoring debug info | 39 | not-applicable | — | — | Renovate's TypeScript PR body hashing helper is not implemented as a Rust API. |
+| hashes ignoring reviewable section | 45 | not-applicable | — | — | Renovate's TypeScript PR body hashing helper is not implemented as a Rust API. |
+| hashes an undefined body | 51 | not-applicable | — | — | Renovate's TypeScript PR body hashing helper is not implemented as a Rust API. |
+| returns rebaseRequested=true flag | 58 | not-applicable | — | — | Renovate's TypeScript PR rebase checkbox parser is not implemented as a Rust API. |
+| returns rebaseRequested=false flag | 67 | not-applicable | — | — | Renovate's TypeScript PR rebase checkbox parser is not implemented as a Rust API. |
+| returns rebaseRequested=undefined flag | 76 | not-applicable | — | — | Renovate's TypeScript PR rebase checkbox parser is not implemented as a Rust API. |
+| returns raw config hash | 84 | not-applicable | — | — | Renovate's TypeScript PR config-hash marker parser is not implemented as a Rust API. |
+| strips reviewable section | 95 | not-applicable | — | — | Renovate's TypeScript PR body reviewable-section stripping helper is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/platform/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/platform/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validates | 17 | not-applicable | — | — | Renovate's TypeScript dynamic platform module registry validation is not implemented as a Rust API. |
+| throws if no platform | 40 | not-applicable | — | — | Renovate's TypeScript singleton platform placeholder is not implemented as a Rust API. |
+| throws if wrong platform | 46 | not-applicable | — | — | Renovate's TypeScript platform initialization registry is not implemented as a Rust API; Rust uses a smaller `AnyPlatformClient::create` surface. |
+| initializes | 55 | not-applicable | — | — | Renovate's TypeScript platform initialization, host-rule generation, and Bitbucket API flow are not implemented as a Rust API. |
+| merges config hostRules with platform hostRules | 82 | not-applicable | — | — | Renovate's TypeScript platform host-rule merge behavior is not implemented as a Rust API. |
+| merges config hostRules with platform hostRules | 128 | not-applicable | — | — | Renovate's TypeScript GitHub package host-rule merge behavior is not implemented as a Rust API. |
+| merges platform hostRules with additionalHostRules | 196 | not-applicable | — | — | Renovate's TypeScript platform additional host-rule generation is not implemented as a Rust API. |
+
+### `modules/platform/index › getPlatformList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has the same values as PLATFORM_HOST_TYPES | 252 | not-applicable | — | — | Renovate's TypeScript exported platform list helper is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/platform/types.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/types.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/platform/types`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| `RepoParams` and `RepoGlobalConfig` types should be incompatible | 5 | not-applicable | — | — | TypeScript compile-time type compatibility assertion has no direct Rust runtime parity target. |
+
+---
+
+## `lib/modules/platform/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/util.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/platform/util › repoFingerprint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ("$repoId", "$endpoint") === $fingerprint | 8 | not-applicable | — | — | Renovate's TypeScript platform repo fingerprint helper is not implemented as a Rust API. |
+
+### `modules/platform/util › getNewBranchName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add refs/heads | 21 | not-applicable | — | — | Renovate's TypeScript Bitbucket branch ref helper is not implemented as a Rust API. |
+| should be the same | 26 | not-applicable | — | — | Renovate's TypeScript Bitbucket branch ref helper is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/platform/default-scm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/default-scm.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/platform/default-scm`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| delegate branchExists to util/git | 9 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate commitAndPush to util/git | 15 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate deleteBranch to util/git | 21 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate getBranchCommit to util/git | 27 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate getBranchUpdateDate to util/git | 33 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate isBranchBehindBase to util/git | 39 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate isBranchConflicted to util/git | 45 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate isBranchModified to util/git | 51 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate getFileList to util/git | 57 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate checkoutBranch to util/git | 63 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate mergeAndPush to util/git | 69 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| delegate mergeBranch to util/git | 75 | not-applicable | — | — | Renovate's TypeScript default SCM class delegating to `util/git` is not implemented as a Rust API. |
+| syncs fork with upstream | 81 | not-applicable | — | — | Renovate's TypeScript default SCM fork-sync delegation is not implemented as a Rust API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
