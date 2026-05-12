@@ -3995,6 +3995,40 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/utils.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/utils`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is artifactory server invalid | 10 | not-applicable | — | — | Renovate's TypeScript Artifactory server helper and Google auth token helper are not implemented in Rust. |
+| is artifactory server valid | 19 | not-applicable | — | — | Renovate's TypeScript Artifactory server helper and Google auth token helper are not implemented in Rust. |
+| retrieves a Google Access token | 28 | not-applicable | — | — | Renovate's TypeScript Artifactory server helper and Google auth token helper are not implemented in Rust. |
+| no Google Access token results in null | 42 | not-applicable | — | — | Renovate's TypeScript Artifactory server helper and Google auth token helper are not implemented in Rust. |
+| Google Access token error throws an exception | 56 | not-applicable | — | — | Renovate's TypeScript Artifactory server helper and Google auth token helper are not implemented in Rust. |
+| Google Access token could not load default credentials | 70 | not-applicable | — | — | Renovate's TypeScript Artifactory server helper and Google auth token helper are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/span-processor.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/span-processor.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/span-processor`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates an instance | 16 | not-applicable | — | — | JavaScript OpenTelemetry datasource span processor and stats datapoint collection are not implemented in Rust. |
+| writes span datapoints to GetDatasourceReleasesStats | 24 | not-applicable | — | — | JavaScript OpenTelemetry datasource span processor and stats datapoint collection are not implemented in Rust. |
+| defaults registryUrl to an empty string if not provided | 50 | not-applicable | — | — | JavaScript OpenTelemetry datasource span processor and stats datapoint collection are not implemented in Rust. |
+| $name | 128 | not-applicable | — | — | JavaScript OpenTelemetry datasource span processor and stats datapoint collection are not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
