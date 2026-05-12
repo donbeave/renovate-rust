@@ -353,6 +353,7 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "should fetch package info from custom registry" — datasource/npm/index.spec.ts line 348
     async fn fetch_versions_returns_non_deprecated_sorted() {
         let server = MockServer::start().await;
         let body = packument_json(
@@ -409,6 +410,41 @@ mod tests {
             .unwrap();
         assert_eq!(entry.versions, vec!["1.0.0"]);
         assert_eq!(entry.latest_tag, None);
+    }
+
+    #[tokio::test]
+    // Ported: "should throw error for unparseable" — datasource/npm/index.spec.ts line 222
+    async fn fetch_versions_unparseable_returns_parse_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/foobar"))
+            .respond_with(ResponseTemplate::new(200).set_body_string("oops"))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_versions(&http, "foobar", &server.uri()).await;
+        assert!(matches!(result, Err(NpmError::Parse(_))));
+    }
+
+    #[tokio::test]
+    // Ported: "should throw error for 429" — datasource/npm/index.spec.ts line 229
+    // Ported: "should throw error for 5xx" — datasource/npm/index.spec.ts line 236
+    // Ported: "should throw error for 408" — datasource/npm/index.spec.ts line 243
+    // Ported: "should throw error for others" — datasource/npm/index.spec.ts line 250
+    async fn fetch_versions_non_success_statuses_return_error() {
+        for status in [429, 503, 408, 451] {
+            let server = MockServer::start().await;
+            Mock::given(method("GET"))
+                .and(path("/foobar"))
+                .respond_with(ResponseTemplate::new(status))
+                .mount(&server)
+                .await;
+
+            let http = HttpClient::new().unwrap();
+            let result = fetch_versions(&http, "foobar", &server.uri()).await;
+            assert!(matches!(result, Err(NpmError::Http(_))));
+        }
     }
 
     #[tokio::test]
