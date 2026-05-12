@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1993 / 1993 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1999 / 1999 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -12397,6 +12397,24 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | should parse 3.0 | 9 | ported | `pvp.rs` | `extract_all_parts_parses_numeric_components` | — |
 | "0" is valid major version | 15 | ported | `pvp.rs` | `get_parts_accepts_zero_major_version` | — |
 | returns null when no parts could be extracted | 19 | ported | `pvp.rs` | `get_parts_returns_none_when_no_parts_can_be_extracted` | — |
+
+---
+
+## `lib/modules/versioning/rpm/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/rpm/index.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `modules/versioning/rpm/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$version") === $expected | 3 | ported | `rpm.rs` | `is_valid_matches_renovate_rpm_spec` | — |
+| equals("$a", "$b") === $expected | 62 | ported | `rpm.rs` | `equals_matches_renovate_rpm_spec` | — |
+| isGreaterThan("$a", "$b") === $expected | 96 | ported | `rpm.rs` | `is_greater_than_matches_renovate_rpm_spec` | — |
+| getMajor("$version") === $expected | 154 | ported | `rpm.rs` | `get_major_matches_renovate_rpm_spec` | — |
+| getMinor("$version") === $expected | 168 | ported | `rpm.rs` | `get_minor_matches_renovate_rpm_spec` | — |
+| getPatch("$version") === $expected | 182 | ported | `rpm.rs` | `get_patch_matches_renovate_rpm_spec` | — |
 
 ---
 
