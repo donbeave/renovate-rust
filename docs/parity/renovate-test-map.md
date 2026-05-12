@@ -11427,6 +11427,28 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/versioning/cargo/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/cargo/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/cargo/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches("$version", "$range") === "$expected" | 4 | not-applicable | — | — | Renovate's full Cargo `VersioningApi` range matcher is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| getSatisfyingVersion($versions, "$range") === "$expected" | 27 | not-applicable | — | — | Renovate's full Cargo satisfying-version helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| isValid("$version") === $expected | 40 | not-applicable | — | — | Renovate's full Cargo validation contract is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| isVersion("$version") === $expected | 53 | not-applicable | — | — | Renovate's full Cargo version classifier is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| isLessThanRange("$version", "$range") === "$expected" | 61 | not-applicable | — | — | Renovate's full Cargo range comparison helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| minSatisfyingVersion($versions, "$range") === "$expected" | 74 | not-applicable | — | — | Renovate's full Cargo satisfying-version helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| isSingleVersion("$version") === $expected | 92 | not-applicable | — | — | Renovate's full Cargo single-version classifier is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| returns a pinned value | 107 | not-applicable | — | — | Renovate's Cargo pinned-value helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 111 | not-applicable | — | — | Renovate's full Cargo update-value helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| isBreaking("$currentVersion", "$newVersion") === $expected | 176 | not-applicable | — | — | Renovate's Cargo breaking-change helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
