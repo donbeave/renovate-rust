@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2106 / 2106 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2109 / 2109 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1150,6 +1150,21 @@ Status key: `ported` · `pending` · `not-applicable`
 | supports ranges | 16 | ported | `version_file.rs` | `nvmrc_partial_version_range` | — |
 | skips non ranges | 27 | ported | `version_file.rs` | `nvmrc_passes_through_latest_literal` | — |
 | supports code comments | 38 | ported | `version_file.rs` | `nvmrc_skips_full_line_comments_and_inline_comment` | — |
+
+---
+
+## `lib/modules/manager/pyenv/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pyenv/extract.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns a result | 5 | ported | `pyenv.rs` | `returns_a_result` | — |
+| supports ranges | 18 | ported | `pyenv.rs` | `supports_ranges` | — |
+| skips non ranges | 31 | ported | `pyenv.rs` | `skips_non_ranges` | — |
 
 ---
 
