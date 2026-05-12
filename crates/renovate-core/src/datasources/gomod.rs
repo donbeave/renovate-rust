@@ -250,6 +250,10 @@ mod tests {
             encode_module_path("github.com/Azure/azure-sdk-for-go"),
             "github.com/!azure/azure-sdk-for-go"
         );
+        assert_eq!(
+            encode_module_path("github.com/FOO/bar"),
+            "github.com/!f!o!o/bar"
+        );
     }
 
     #[tokio::test]
