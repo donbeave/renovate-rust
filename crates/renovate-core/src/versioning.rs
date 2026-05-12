@@ -14,5 +14,6 @@ pub mod pep440;
 pub mod pvp;
 pub mod redhat;
 pub mod rpm;
+pub mod semver_coerced;
 pub mod semver_generic;
 pub mod unity3d;
