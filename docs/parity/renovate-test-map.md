@@ -4859,6 +4859,45 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/github-releases/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-releases/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/github-releases/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns releases | 20 | not-applicable | — | — | Renovate's GitHub Releases `getReleases` full release-list, changelog URL, and digest contract are not implemented in Rust; Rust only exposes a latest-stable-release update summary. |
+| should be independent of the current digest | 116 | not-applicable | — | — | Renovate's GitHub Releases digest lookup is not implemented in Rust; Rust only exposes a latest-stable-release update summary. |
+| should be independent of the current value | 128 | not-applicable | — | — | Renovate's GitHub Releases digest lookup is not implemented in Rust; Rust only exposes a latest-stable-release update summary. |
+| returns updated digest in new release | 136 | not-applicable | — | — | Renovate's GitHub Releases digest lookup is not implemented in Rust; Rust only exposes a latest-stable-release update summary. |
+| returns null if the new value/tag does not exist | 149 | not-applicable | — | — | Renovate's GitHub Releases digest lookup is not implemented in Rust; Rust only exposes a latest-stable-release update summary. |
+
+---
+
+## `lib/modules/datasource/bazel/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bazel/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/bazel/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for error | 26 | not-applicable | — | — | Renovate's Bazel datasource `getReleases` release-list, external-host-error, and local-file registry contracts are not implemented in Rust; Rust only exposes a Bazel Central Registry latest-version summary. |
+| returns null for 404 | 33 | not-applicable | — | — | Renovate's Bazel datasource `getReleases` release-list, null-on-404, and local-file registry contracts are not implemented in Rust; Rust only exposes a Bazel Central Registry latest-version summary. |
+| returns null for empty result | 38 | not-applicable | — | — | Renovate's Bazel datasource `getReleases` release-list, empty-result, and local-file registry contracts are not implemented in Rust; Rust only exposes a Bazel Central Registry latest-version summary. |
+| returns null for empty 200 OK | 43 | not-applicable | — | — | Renovate's Bazel datasource `getReleases` release-list, empty-body, and local-file registry contracts are not implemented in Rust; Rust only exposes a Bazel Central Registry latest-version summary. |
+| throws for 5xx | 51 | not-applicable | — | — | Renovate's Bazel datasource `getReleases` release-list, external-host-error, and local-file registry contracts are not implemented in Rust; Rust only exposes a Bazel Central Registry latest-version summary. |
+| metadata without yanked versions | 58 | not-applicable | — | — | Renovate's Bazel datasource `getReleases` release-list response mapping is not implemented in Rust; Rust only exposes a Bazel Central Registry latest-version summary. |
+| metadata with yanked versions | 77 | not-applicable | — | — | Renovate's Bazel datasource `getReleases` release-list response mapping is not implemented in Rust; Rust only exposes a Bazel Central Registry latest-version summary. |
+| should handle local file correctly | 106 | not-applicable | — | — | Renovate's Bazel local-file registry lookup is not implemented in Rust. |
+| should return null for invalid file path | 135 | not-applicable | — | — | Renovate's Bazel local-file registry lookup is not implemented in Rust. |
+| should return null for empty file content | 146 | not-applicable | — | — | Renovate's Bazel local-file registry lookup is not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
