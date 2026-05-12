@@ -11656,6 +11656,44 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/versioning/pep440/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/pep440/range.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/pep440/range`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| checkRange("$rangeInput, "$newVersion"") === "$expected" | 8 | not-applicable | — | — | Renovate's PEP 440 range normalization helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| returns null without warning if new version is excluded from range | 24 | not-applicable | — | — | Renovate's PEP 440 range update-value/logging behavior is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| handles v-prefixed version as currentValue | 39 | not-applicable | — | — | Renovate's PEP 440 update-value helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| handles bare version that differs from currentVersion without v-prefix | 49 | not-applicable | — | — | Renovate's PEP 440 update-value helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+
+---
+
+## `lib/modules/versioning/pep440/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/pep440/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/pep440/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$input") === $expected | 4 | not-applicable | — | — | Renovate's full PEP 440 validation contract is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| isStable("$input") === $expected | 25 | not-applicable | — | — | Renovate's PEP 440 stability classifier is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| equals($a, $b) === $expected | 34 | not-applicable | — | — | Renovate's PEP 440 comparator is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| matches($a, $b) === $expected | 42 | not-applicable | — | — | Renovate's PEP 440 range matcher is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| isSingleVersion("$version") === $isSingle | 53 | not-applicable | — | — | Renovate's PEP 440 single-version classifier is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| getSatisfyingVersion($versions, "$range") === $expected | 78 | not-applicable | — | — | Renovate's PEP 440 satisfying-version helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| minSatisfyingVersion($versions, "$range") === $expected | 89 | not-applicable | — | — | Renovate's PEP 440 satisfying-version helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 100 | not-applicable | — | — | Renovate's PEP 440 update-value helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 190 | not-applicable | — | — | Renovate's PEP 440 replacement update-value helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+| isLessThanRange("$version", "$range") === "$expected" | 307 | not-applicable | — | — | Renovate's PEP 440 range comparison helper is not implemented as a Rust API; Rust currently exposes narrower exact-pin update-summary logic. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
