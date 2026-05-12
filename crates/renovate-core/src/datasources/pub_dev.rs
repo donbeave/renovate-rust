@@ -177,6 +177,7 @@ mod tests {
         assert_eq!(result.map(|(v, _)| v), Some("0.13.6".to_owned()));
     }
 
+    // Ported: "returns null for 404" — datasource/dart/index.spec.ts line 55
     #[tokio::test]
     async fn fetch_latest_404_returns_none() {
         let server = MockServer::start().await;
