@@ -393,6 +393,25 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "handles missing dist-tags latest" — datasource/npm/get.spec.ts line 378
+    async fn fetch_versions_allows_missing_latest_dist_tag() {
+        let server = MockServer::start().await;
+        let body = r#"{"name":"@neutrinojs/react","versions":{"1.0.0":{}}}"#;
+        Mock::given(method("GET"))
+            .and(path("/@neutrinojs%2Freact"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let entry = fetch_versions(&http, "@neutrinojs/react", &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(entry.versions, vec!["1.0.0"]);
+        assert_eq!(entry.latest_tag, None);
+    }
+
+    #[tokio::test]
     async fn fetch_versions_404_returns_error() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
