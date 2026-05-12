@@ -393,6 +393,18 @@ mod tests {
         assert_eq!(index_path("Serde"), "se/rd/serde");
     }
 
+    // Ported: "returns correct suffixes" — datasource/crate/index.spec.ts line 98
+    #[test]
+    fn index_path_returns_correct_suffixes() {
+        assert_eq!(index_path("a"), "1/a");
+        assert_eq!(index_path("1"), "1/1");
+        assert_eq!(index_path("1234567"), "12/34/1234567");
+        assert_eq!(index_path("ab"), "2/ab");
+        assert_eq!(index_path("abc"), "3/a/abc");
+        assert_eq!(index_path("abcd"), "ab/cd/abcd");
+        assert_eq!(index_path("abcde"), "ab/cd/abcde");
+    }
+
     // ── parse_index_body ─────────────────────────────────────────────────────
 
     #[test]
