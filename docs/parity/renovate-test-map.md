@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1902 / 1902 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1903 / 1903 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3302,6 +3302,19 @@ does not implement Renovate's generated-lockfile reverse resolver.
 |---|---|---|---|---|---|
 | should throw on 429 | 24 | not-applicable | — | — | TypeScript abstract Datasource base-class HTTP error handling is not implemented as a shared Rust datasource abstraction. |
 | should throw on statusCode >=500 && <600 | 35 | not-applicable | — | — | TypeScript abstract Datasource base-class HTTP error handling is not implemented as a shared Rust datasource abstraction. |
+
+---
+
+## `lib/modules/datasource/buildpacks-registry/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/buildpacks-registry/schema.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/datasource/buildpacks-registry/schema`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses buildpack-registry schema | 4 | ported | `buildpacks_registry.rs` | `buildpacks_registry_schema_parses_latest_and_versions` | — |
 
 ---
 
