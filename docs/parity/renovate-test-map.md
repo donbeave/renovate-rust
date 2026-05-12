@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1511 / 1657 actionable tests ported (91%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1512 / 1657 actionable tests ported (91%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1939,7 +1939,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 30 | **Ported:** 29 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 30 | **Actionable:** 30 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1949,7 +1949,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | returns null for invalid TOML | 17 | ported | `mise.rs` | `invalid_toml_returns_empty` | — |
 | returns null for empty tools section | 21 | ported | `mise.rs` | `empty_tools_section_returns_empty` | — |
 | extracts tools - mise core plugins | 28 | ported | `mise.rs` | `extracts_node_version` (+ extracts_erlang_core_plugin, extracts_multiple_tools) | — |
-| extracts tools - mise registry tools | 51 | pending | — | — | Requires mise registry resolution data file |
+| extracts tools - mise registry tools | 51 | ported | `mise.rs` | `extracts_mise_registry_tools` | — |
 | extracts tools - asdf plugins | 393 | ported | `mise.rs` | `asdf_tools_fall_through_to_asdf_table` | — |
 | extracts tools with multiple versions | 409 | ported | `mise.rs` | `unknown_tool_skipped` | — |
 | extracts tools with plugin options | 432 | ported | `mise.rs` | `tool_with_version_object` | — |

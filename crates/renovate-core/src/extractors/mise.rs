@@ -140,6 +140,436 @@ static MISE_CORE_TABLE: &[(&str, AsdfToolDef)] = &[
 
 static MISE_REGISTRY_TABLE: &[(&str, AsdfToolDef)] = &[
     (
+        "actionlint",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("rhysd/actionlint"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "astro",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("astronomer/astro-cli"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "aws-cli",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_TAGS,
+            package_name: Some("aws/aws-cli"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "aws-vault",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("99designs/aws-vault"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "buf",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("bufbuild/buf"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "caddy",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("caddyserver/caddy"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "ccache",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("ccache/ccache"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "clang-format",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("llvm/llvm-project"),
+            dep_name: None,
+            extract_version: Some("^llvmorg-(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "committed",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("crate-ci/committed"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "conan",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("conan-io/conan"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "consul",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("hashicorp/consul"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "gh",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("cli/cli"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "dotenv-linter",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("dotenv-linter/dotenv-linter"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "hivemind",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("DarthSim/hivemind"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "hk",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("jdx/hk"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "jq",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("jqlang/jq"),
+            dep_name: None,
+            extract_version: Some("^jq-(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "kafka",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_TAGS,
+            package_name: Some("apache/kafka"),
+            dep_name: None,
+            extract_version: Some("^apache-(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "lefthook",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("evilmartians/lefthook"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "localstack",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("localstack/localstack"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "lychee",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("lycheeverse/lychee"),
+            dep_name: None,
+            extract_version: Some("^lychee-v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "npm",
+        AsdfToolDef {
+            datasource: datasource_id::NPM,
+            package_name: Some("npm"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "opentofu",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("opentofu/opentofu"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "openfga",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("openfga/openfga"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "packer",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("hashicorp/packer"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "pipx",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("pypa/pipx"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "pkl",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("apple/pkl"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "protoc",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("protocolbuffers/protobuf"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "redis",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("redis/redis"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "ruff",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("astral-sh/ruff"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "rumdl",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("rvben/rumdl"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "shellcheck",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("koalaman/shellcheck"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "skeema",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("skeema/skeema"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "sops",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("getsops/sops"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "sqlite",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_TAGS,
+            package_name: Some("sqlite/sqlite"),
+            dep_name: None,
+            extract_version: Some("^version-(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "stripe",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("stripe/stripe-cli"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "swiftformat",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("nicklockwood/SwiftFormat"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "swiftlint",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("realm/SwiftLint"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "taplo",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("tamasfe/taplo"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "tart",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("cirruslabs/tart"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "terragrunt",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("gruntwork-io/terragrunt"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "tilt",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("tilt-dev/tilt"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "tusd",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("tus/tusd"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
+        "usage",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("jdx/usage"),
+            dep_name: None,
+            extract_version: Some("^v(?<version>\\S+)"),
+            versioning: None,
+        },
+    ),
+    (
         "zola",
         AsdfToolDef {
             datasource: datasource_id::GITHUB_TAGS,
@@ -185,6 +615,7 @@ fn make_dep_from_def(tool_name: &str, version: &str, def: &AsdfToolDef) -> AsdfD
     let dep_name = def.dep_name.unwrap_or(tool_name).to_owned();
     let pkg = def.package_name;
     let strip = tag_strip_from_extract_version(def.extract_version);
+    let current_value = version.strip_prefix(strip).unwrap_or(version);
     let legacy = match def.datasource {
         datasource_id::GITHUB_TAGS => pkg.map(|r| AsdfDatasource::GithubTags {
             repo: r,
@@ -199,7 +630,7 @@ fn make_dep_from_def(tool_name: &str, version: &str, def: &AsdfToolDef) -> AsdfD
     AsdfDep {
         tool_name: tool_name.to_owned(),
         dep_name,
-        current_value: version.to_owned(),
+        current_value: current_value.to_owned(),
         datasource: legacy,
         datasource_id: Some(def.datasource),
         package_name: pkg.map(str::to_owned),
@@ -284,13 +715,13 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
             continue;
         }
 
-        // Fall back to asdf TOOL_TABLE (same tool names work in both).
-        if let Some((_, def)) = asdf::TOOL_TABLE.iter().find(|(k, _)| *k == tool_name) {
+        if let Some((_, def)) = MISE_REGISTRY_TABLE.iter().find(|(k, _)| *k == tool_name) {
             out.push(make_dep_from_def(tool_name, version, def));
             continue;
         }
 
-        if let Some((_, def)) = MISE_REGISTRY_TABLE.iter().find(|(k, _)| *k == tool_name) {
+        // Fall back to asdf TOOL_TABLE (same tool names work in both).
+        if let Some((_, def)) = asdf::TOOL_TABLE.iter().find(|(k, _)| *k == tool_name) {
             out.push(make_dep_from_def(tool_name, version, def));
             continue;
         }
@@ -603,6 +1034,311 @@ mod tests {
             deps.iter()
                 .any(|d| d.tool_name == "go" && d.datasource_id == Some("github-tags"))
         );
+    }
+
+    // Ported: "extracts tools - mise registry tools" — mise/extract.spec.ts line 51
+    #[test]
+    fn extracts_mise_registry_tools() {
+        let content = r#"[tools]
+actionlint = "1.7.7"
+astro = "1.34.0"
+aws-cli = "2.25.10"
+aws-vault = "6.6.1"
+buf = "1.27.0"
+caddy = "2.10.2"
+ccache = "4.11.3"
+clang-format = "20.1.0"
+committed = "1.1.7"
+conan = "2.24.0"
+consul = "1.14.3"
+gh = "2.87.0"
+dotenv-linter = "3.3.0"
+hivemind = "1.1.0"
+hk = "1.1.2"
+jq = "1.7.1"
+kafka = "apache-3.9.0"
+lefthook = "1.11.13"
+localstack = "4.3.0"
+lychee = "0.19.1"
+npm = "11.2.0"
+opentofu = "1.6.1"
+openfga = "1.14.0"
+packer = "1.15.0"
+pipx = "1.7.1"
+pkl = "0.28.2"
+protoc = "30.2"
+redis = "8.0.1"
+ruff = "0.11.12"
+rumdl = "0.1.58"
+shellcheck = "0.10.0"
+skeema = "1.12.3"
+sops = "3.10.2"
+sqlite = "3.50.1"
+stripe = "1.25.0"
+swiftformat = "0.58.0"
+swiftlint = "0.55.1"
+taplo = "0.10.0"
+tart = "2.31.0"
+terragrunt = "0.72.6"
+tilt = "0.34.0"
+tusd = "2.8.0"
+usage = "2.1.1"
+"#;
+        let deps = extract(content);
+        let expected = [
+            (
+                "actionlint",
+                "1.7.7",
+                "github-releases",
+                "rhysd/actionlint",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "astro",
+                "1.34.0",
+                "github-releases",
+                "astronomer/astro-cli",
+                Some("^v(?<version>\\S+)"),
+            ),
+            ("aws-cli", "2.25.10", "github-tags", "aws/aws-cli", None),
+            (
+                "aws-vault",
+                "6.6.1",
+                "github-releases",
+                "99designs/aws-vault",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "buf",
+                "1.27.0",
+                "github-releases",
+                "bufbuild/buf",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "caddy",
+                "2.10.2",
+                "github-releases",
+                "caddyserver/caddy",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "ccache",
+                "4.11.3",
+                "github-releases",
+                "ccache/ccache",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "clang-format",
+                "20.1.0",
+                "github-releases",
+                "llvm/llvm-project",
+                Some("^llvmorg-(?<version>\\S+)"),
+            ),
+            (
+                "committed",
+                "1.1.7",
+                "github-releases",
+                "crate-ci/committed",
+                Some("^v(?<version>\\S+)"),
+            ),
+            ("conan", "2.24.0", "github-releases", "conan-io/conan", None),
+            (
+                "consul",
+                "1.14.3",
+                "github-releases",
+                "hashicorp/consul",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "gh",
+                "2.87.0",
+                "github-releases",
+                "cli/cli",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "dotenv-linter",
+                "3.3.0",
+                "github-releases",
+                "dotenv-linter/dotenv-linter",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "hivemind",
+                "1.1.0",
+                "github-releases",
+                "DarthSim/hivemind",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "hk",
+                "1.1.2",
+                "github-releases",
+                "jdx/hk",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "jq",
+                "1.7.1",
+                "github-releases",
+                "jqlang/jq",
+                Some("^jq-(?<version>\\S+)"),
+            ),
+            (
+                "kafka",
+                "3.9.0",
+                "github-tags",
+                "apache/kafka",
+                Some("^apache-(?<version>\\S+)"),
+            ),
+            (
+                "lefthook",
+                "1.11.13",
+                "github-releases",
+                "evilmartians/lefthook",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "localstack",
+                "4.3.0",
+                "github-releases",
+                "localstack/localstack",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "lychee",
+                "0.19.1",
+                "github-releases",
+                "lycheeverse/lychee",
+                Some("^lychee-v(?<version>\\S+)"),
+            ),
+            ("npm", "11.2.0", "npm", "npm", None),
+            (
+                "opentofu",
+                "1.6.1",
+                "github-releases",
+                "opentofu/opentofu",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "openfga",
+                "1.14.0",
+                "github-releases",
+                "openfga/openfga",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "packer",
+                "1.15.0",
+                "github-releases",
+                "hashicorp/packer",
+                Some("^v(?<version>\\S+)"),
+            ),
+            ("pipx", "1.7.1", "github-releases", "pypa/pipx", None),
+            ("pkl", "0.28.2", "github-releases", "apple/pkl", None),
+            (
+                "protoc",
+                "30.2",
+                "github-releases",
+                "protocolbuffers/protobuf",
+                Some("^v(?<version>\\S+)"),
+            ),
+            ("redis", "8.0.1", "github-releases", "redis/redis", None),
+            ("ruff", "0.11.12", "github-releases", "astral-sh/ruff", None),
+            ("rumdl", "0.1.58", "github-releases", "rvben/rumdl", None),
+            (
+                "shellcheck",
+                "0.10.0",
+                "github-releases",
+                "koalaman/shellcheck",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "skeema",
+                "1.12.3",
+                "github-releases",
+                "skeema/skeema",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "sops",
+                "3.10.2",
+                "github-releases",
+                "getsops/sops",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "sqlite",
+                "3.50.1",
+                "github-tags",
+                "sqlite/sqlite",
+                Some("^version-(?<version>\\S+)"),
+            ),
+            (
+                "stripe",
+                "1.25.0",
+                "github-releases",
+                "stripe/stripe-cli",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "swiftformat",
+                "0.58.0",
+                "github-releases",
+                "nicklockwood/SwiftFormat",
+                None,
+            ),
+            (
+                "swiftlint",
+                "0.55.1",
+                "github-releases",
+                "realm/SwiftLint",
+                None,
+            ),
+            ("taplo", "0.10.0", "github-releases", "tamasfe/taplo", None),
+            ("tart", "2.31.0", "github-releases", "cirruslabs/tart", None),
+            (
+                "terragrunt",
+                "0.72.6",
+                "github-releases",
+                "gruntwork-io/terragrunt",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "tilt",
+                "0.34.0",
+                "github-releases",
+                "tilt-dev/tilt",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "tusd",
+                "2.8.0",
+                "github-releases",
+                "tus/tusd",
+                Some("^v(?<version>\\S+)"),
+            ),
+            (
+                "usage",
+                "2.1.1",
+                "github-releases",
+                "jdx/usage",
+                Some("^v(?<version>\\S+)"),
+            ),
+        ];
+        assert_eq!(deps.len(), expected.len());
+        for (dep, (name, current_value, datasource, package_name, extract_version)) in
+            deps.iter().zip(expected)
+        {
+            assert_eq!(dep.dep_name, name);
+            assert_eq!(dep.current_value, current_value);
+            assert_eq!(dep.datasource_id, Some(datasource));
+            assert_eq!(dep.package_name.as_deref(), Some(package_name));
+            assert_eq!(dep.extract_version, extract_version);
+            assert!(dep.skip_reason.is_none());
+        }
     }
 
     // Ported: "extracts tools - asdf plugins" — mise/extract.spec.ts line 393
