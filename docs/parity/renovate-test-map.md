@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1724 / 1752 actionable tests ported (98%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1728 / 1752 actionable tests ported (99%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -2395,20 +2395,20 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/pip-compile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/extract.spec.ts
-**Total tests:** 26 | **Ported:** 0 | **Actionable:** 26 | **Status:** pending
+**Total tests:** 26 | **Ported:** 4 | **Actionable:** 26 | **Status:** partial
 
-The pip-compile manager has no Rust extractor yet — all rows pending
-the implementation of `extractAllPackageFiles()` (multi-file path
-resolver) and the inner `extractPackageFile()` adapter.
+The pip-compile `extractPackageFile()` adapter is ported. The remaining rows
+are pending the implementation of `extractAllPackageFiles()` (multi-file path
+resolver).
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns object for requirements.in | 40 | pending | — | — | pip-compile manager not implemented |
-| returns object for setup.py | 50 | pending | — | — | pip-compile manager not implemented |
-| returns object for pyproject.toml | 60 | pending | — | — | pip-compile manager not implemented |
-| handles different file extensions (it.each) | 93 | pending | — | — | pip-compile manager not implemented |
+| returns object for requirements.in | 40 | ported | `pip_compile.rs` | `returns_object_for_requirements_in` | — |
+| returns object for setup.py | 50 | ported | `pip_compile.rs` | `returns_object_for_setup_py` | — |
+| returns object for pyproject.toml | 60 | ported | `pip_compile.rs` | `returns_object_for_pyproject_toml` | — |
+| handles different file extensions (it.each) | 93 | ported | `pip_compile.rs` | `returns_null_on_not_supported_package_files` | — |
 
 ### `extractAllPackageFiles()`
 
