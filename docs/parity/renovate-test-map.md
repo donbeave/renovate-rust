@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1570 / 1657 actionable tests ported (95%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1577 / 1657 actionable tests ported (95%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 46 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 53 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3614,13 +3614,13 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| cannot contain a valid tool name for Containerbase | 1142 | pending | — | — | — |
-| can contain a constraint for a non-Containerbase tool | 1164 | pending | — | — | — |
-| cannot contain an additional constraint name with an invalid versioning scheme | 1179 | pending | — | — | — |
-| can contain an additional constraint name with a regex versioning scheme | 1200 | pending | — | — | — |
-| cannot contain an unsupported constraint | 1216 | pending | — | — | — |
-| errors if constraintsVersioning is a malformed object | 1238 | pending | — | — | — |
-| errors if constraintsVersioning is a malformed array | 1260 | pending | — | — | — |
+| cannot contain a valid tool name for Containerbase | 1142 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_containerbase_tool_constraints_versioning` | — |
+| can contain a constraint for a non-Containerbase tool | 1164 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_non_containerbase_constraints_versioning` | — |
+| cannot contain an additional constraint name with an invalid versioning scheme | 1179 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_constraints_versioning_scheme` | — |
+| can contain an additional constraint name with a regex versioning scheme | 1200 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_regex_constraints_versioning_scheme` | — |
+| cannot contain an unsupported constraint | 1216 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_unknown_constraints_versioning_name` | — |
+| errors if constraintsVersioning is a malformed object | 1238 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_malformed_constraints_versioning_object` | — |
+| errors if constraintsVersioning is a malformed array | 1260 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_malformed_constraints_versioning_array` | — |
 
 ### `config/validation › validateConfig(config)`
 

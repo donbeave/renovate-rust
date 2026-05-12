@@ -73,6 +73,7 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_manager_file_patterns(map, &mut errors);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
+    validate_constraints_versioning(map, &mut errors);
     validate_package_rules(map, &mut errors, &mut warnings);
 
     ValidationResult { errors, warnings }
@@ -309,6 +310,14 @@ fn is_supported_manager(manager: &str) -> bool {
 
 fn is_supported_constraint(name: &str) -> bool {
     matches!(name, "golang" | "gomodMod" | "node")
+}
+
+fn is_additional_constraint(name: &str) -> bool {
+    matches!(name, "gomodMod")
+}
+
+fn is_valid_versioning_scheme(versioning: &str) -> bool {
+    versioning == "semver" || versioning.starts_with("regex:")
 }
 
 fn is_simple_version_constraint(version: &str) -> bool {
@@ -610,6 +619,47 @@ fn validate_constraints(
             warnings.push(json!({
                 "topic": "Configuration Error",
                 "message": format!("Configuration option `constraints.node={version}` is not a valid tool version constraint, according to `node` versioning")
+            }));
+        }
+    }
+}
+
+fn validate_constraints_versioning(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(constraints_versioning) = map.get("constraintsVersioning") else {
+        return;
+    };
+
+    let Some(constraints_versioning) = constraints_versioning.as_object() else {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `constraintsVersioning` should be a json object"
+        }));
+        return;
+    };
+
+    for (name, value) in constraints_versioning {
+        let Some(versioning) = value.as_str() else {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Configuration option `constraintsVersioning.{name}` should be an object of key-value pairs of additional constraint names and their versioning")
+            }));
+            continue;
+        };
+
+        if name == "golang" {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraintsVersioning.golang` is not a valid additional constraint name, as `golang` is a tool name, and `constraintsVersioning` can only override the versioning for a non-tool constraint"
+            }));
+        } else if !is_additional_constraint(name) {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Configuration option `constraintsVersioning.{name}`: `{name}` is not a known additional constraint name")
+            }));
+        } else if !is_valid_versioning_scheme(versioning) {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Configuration option `constraintsVersioning.{name}={versioning}`: `{versioning}` is not a valid versioning scheme")
             }));
         }
     }
@@ -1465,6 +1515,111 @@ mod tests {
             vec![json!({
                 "topic": "Configuration Error",
                 "message": "Configuration option `constraints` should be a json object"
+            })]
+        );
+    }
+
+    // Ported: "cannot contain a valid tool name for Containerbase" — config/validation.spec.ts line 1142
+    #[test]
+    fn validate_config_errors_for_containerbase_tool_constraints_versioning() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"constraintsVersioning": {"golang": "semver"}}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraintsVersioning.golang` is not a valid additional constraint name, as `golang` is a tool name, and `constraintsVersioning` can only override the versioning for a non-tool constraint"
+            })]
+        );
+    }
+
+    // Ported: "can contain a constraint for a non-Containerbase tool" — config/validation.spec.ts line 1164
+    #[test]
+    fn validate_config_allows_non_containerbase_constraints_versioning() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"constraintsVersioning": {"gomodMod": "semver"}}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "cannot contain an additional constraint name with an invalid versioning scheme" — config/validation.spec.ts line 1179
+    #[test]
+    fn validate_config_errors_for_invalid_constraints_versioning_scheme() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"constraintsVersioning": {"gomodMod": "not-supported-versioning"}}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraintsVersioning.gomodMod=not-supported-versioning`: `not-supported-versioning` is not a valid versioning scheme"
+            })]
+        );
+    }
+
+    // Ported: "can contain an additional constraint name with a regex versioning scheme" — config/validation.spec.ts line 1200
+    #[test]
+    fn validate_config_allows_regex_constraints_versioning_scheme() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"constraintsVersioning": {"gomodMod": "regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$"}}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "cannot contain an unsupported constraint" — config/validation.spec.ts line 1216
+    #[test]
+    fn validate_config_errors_for_unknown_constraints_versioning_name() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"constraintsVersioning": {"not-supported": "4.5.6"}}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraintsVersioning.not-supported`: `not-supported` is not a known additional constraint name"
+            })]
+        );
+    }
+
+    // Ported: "errors if constraintsVersioning is a malformed object" — config/validation.spec.ts line 1238
+    #[test]
+    fn validate_config_errors_for_malformed_constraints_versioning_object() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"constraintsVersioning": {"packageRules": [{}]}}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraintsVersioning.packageRules` should be an object of key-value pairs of additional constraint names and their versioning"
+            })]
+        );
+    }
+
+    // Ported: "errors if constraintsVersioning is a malformed array" — config/validation.spec.ts line 1260
+    #[test]
+    fn validate_config_errors_for_malformed_constraints_versioning_array() {
+        let result =
+            validate_config_for_source("repo", &json!({"constraintsVersioning": [1, 2, 3]}));
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            result.errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "Configuration option `constraintsVersioning` should be a json object"
             })]
         );
     }
