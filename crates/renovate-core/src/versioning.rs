@@ -4,6 +4,7 @@
 //! and update planning. The Cargo module is first; others will follow.
 
 pub mod cargo;
+pub mod exact;
 pub mod hashicorp;
 pub mod maven;
 pub mod npm;
