@@ -4369,6 +4369,50 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/validation-helpers/match-base-branches.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation-helpers/match-base-branches.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/validation-helpers/match-base-branches`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns error when baseBranchPatterns is not defined | 4 | ported | `migrate_validate.rs` | `validation_helper_match_base_branches_requires_base_branch_patterns` | — |
+| returns empty array for valid configuration | 18 | ported | `migrate_validate.rs` | `validation_helper_match_base_branches_accepts_base_branch_patterns` | — |
+
+---
+
+## `lib/config/validation-helpers/regex-glob-matchers.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation-helpers/regex-glob-matchers.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/validation-helpers/regex-glob-matchers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should error for multiple match alls | 4 | ported | `migrate_validate.rs` | `validation_helper_regex_glob_matchers_rejects_multiple_match_alls` | — |
+| should error for invalid regex | 12 | ported | `migrate_validate.rs` | `validation_helper_regex_glob_matchers_rejects_invalid_regex` | — |
+| should error for non-strings | 20 | ported | `migrate_validate.rs` | `validation_helper_regex_glob_matchers_rejects_non_strings` | — |
+
+---
+
+## `lib/config/validation-helpers/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation-helpers/utils.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/validation-helpers/utils`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ignores encrypted in root | 5 | ported | `migrate_validate.rs` | `validation_helper_get_parent_name_ignores_encrypted_in_root` | — |
+| handles array types | 9 | ported | `migrate_validate.rs` | `validation_helper_get_parent_name_handles_array_types` | — |
+| handles encrypted within array types | 13 | ported | `migrate_validate.rs` | `validation_helper_get_parent_name_handles_encrypted_within_array_types` | — |
+
+---
+
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts

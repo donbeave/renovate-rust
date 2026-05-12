@@ -916,7 +916,7 @@ fn validate_package_rules(
         .and_then(Value::as_array)
         .is_some_and(|patterns| !patterns.is_empty());
 
-    for rule in package_rules {
+    for (idx, rule) in package_rules.iter().enumerate() {
         let Some(rule_map) = rule.as_object() else {
             errors.push(json!({
                 "topic": "Configuration Error",
@@ -932,17 +932,11 @@ fn validate_package_rules(
             }));
         }
 
-        if !has_base_branch_patterns
-            && rule_map
-                .get("matchBaseBranches")
-                .and_then(Value::as_array)
-                .is_some_and(|branches| !branches.is_empty())
-        {
-            warnings.push(json!({
-                "topic": "Configuration Warning",
-                "message": "packageRules.matchBaseBranches should only be used when baseBranchPatterns is configured."
-            }));
-        }
+        warnings.extend(validate_match_base_branches(
+            rule_map,
+            &format!("packageRules[{idx}]"),
+            has_base_branch_patterns,
+        ));
 
         if rule_map
             .get("matchManagers")
@@ -1065,6 +1059,70 @@ fn contains_match_all_with_other_patterns(patterns: &[Value]) -> bool {
             .iter()
             .filter_map(Value::as_str)
             .any(|pattern| matches!(pattern, "*" | "**"))
+}
+
+fn validate_match_base_branches(
+    resolved_rule: &Map<String, Value>,
+    current_path: &str,
+    has_base_branch_patterns: bool,
+) -> Vec<Value> {
+    if !has_base_branch_patterns
+        && matches!(
+            resolved_rule.get("matchBaseBranches"),
+            Some(Value::Array(_))
+        )
+    {
+        vec![json!({
+            "topic": "Configuration Error",
+            "message": format!("{current_path}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.")
+        })]
+    } else {
+        Vec::new()
+    }
+}
+
+fn validate_regex_glob_matchers(val: &Value, current_path: &str) -> Vec<Value> {
+    let Value::Array(matchers) = val else {
+        return vec![json!({
+            "topic": "Configuration Error",
+            "message": format!("{current_path}: should be an array of strings. You have included {}.", serde_json_typeof(val))
+        })];
+    };
+    if !matchers.iter().all(Value::is_string) {
+        return vec![json!({
+            "topic": "Configuration Error",
+            "message": format!("{current_path}: should be an array of strings. You have included object.")
+        })];
+    }
+
+    let mut errors = Vec::new();
+    if contains_match_all_with_other_patterns(matchers) {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": format!("{current_path}: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.")
+        }));
+    }
+    for matcher in matchers.iter().filter_map(Value::as_str) {
+        if (matcher.starts_with('/') || matcher.starts_with("!/"))
+            && validate_renovate_regex_literal(matcher).is_err()
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Failed to parse regex pattern for {current_path}: {matcher}")
+            }));
+        }
+    }
+    errors
+}
+
+fn serde_json_typeof(value: &Value) -> &'static str {
+    match value {
+        Value::Null => "object",
+        Value::Bool(_) => "boolean",
+        Value::Number(_) => "number",
+        Value::String(_) => "string",
+        Value::Array(_) | Value::Object(_) => "object",
+    }
 }
 
 fn validate_enabled_managers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
@@ -1830,13 +1888,8 @@ fn validate_global_option_values(
     }
 
     for key in ["allowedHeaders", "autodiscoverProjects"] {
-        if let Some(Value::Array(patterns)) = map.get(key)
-            && contains_match_all_with_other_patterns(patterns)
-        {
-            warnings.push(json!({
-                "topic": "Configuration Error",
-                "message": format!("{key}: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.")
-            }));
+        if let Some(value) = map.get(key) {
+            warnings.extend(validate_regex_glob_matchers(value, key));
         }
     }
 }
@@ -2326,9 +2379,46 @@ fn has_template_or_query_field(
 
 #[cfg(test)]
 mod tests {
+    use regex::Regex;
     use serde_json::json;
 
-    use super::{migrate_and_validate, migrate_config, validate_config_for_source};
+    use super::{
+        migrate_and_validate, migrate_config, validate_config_for_source,
+        validate_match_base_branches, validate_regex_glob_matchers,
+    };
+
+    fn get_parent_name(parent_path: &str) -> String {
+        let without_encrypted = parent_path
+            .strip_suffix(".encrypted")
+            .or_else(|| parent_path.strip_suffix("encrypted"))
+            .unwrap_or(parent_path);
+        let without_array = Regex::new(r"\[\d+\]$")
+            .expect("valid array suffix regex")
+            .replace(without_encrypted, "");
+        without_array
+            .split('.')
+            .next_back()
+            .unwrap_or("")
+            .to_owned()
+    }
+
+    // Ported: "ignores encrypted in root" — config/validation-helpers/utils.spec.ts line 5
+    #[test]
+    fn validation_helper_get_parent_name_ignores_encrypted_in_root() {
+        assert_eq!(get_parent_name("encrypted"), "");
+    }
+
+    // Ported: "handles array types" — config/validation-helpers/utils.spec.ts line 9
+    #[test]
+    fn validation_helper_get_parent_name_handles_array_types() {
+        assert_eq!(get_parent_name("hostRules[1]"), "hostRules");
+    }
+
+    // Ported: "handles encrypted within array types" — config/validation-helpers/utils.spec.ts line 13
+    #[test]
+    fn validation_helper_get_parent_name_handles_encrypted_within_array_types() {
+        assert_eq!(get_parent_name("hostRules[0].encrypted"), "hostRules");
+    }
 
     // Ported: "returns custom deprecation warnings for %s" — config/validation.spec.ts line 10
     #[test]
@@ -2547,6 +2637,30 @@ mod tests {
         );
         assert!(result.errors.is_empty());
         assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "returns error when baseBranchPatterns is not defined" — config/validation-helpers/match-base-branches.spec.ts line 4
+    #[test]
+    fn validation_helper_match_base_branches_requires_base_branch_patterns() {
+        let rule = json!({"matchBaseBranches": ["develop"], "addLabels": ["develop"]});
+        let errors =
+            validate_match_base_branches(rule.as_object().unwrap(), "packageRules[0]", false);
+        assert_eq!(
+            errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "packageRules[0]: You must configure baseBranchPatterns in order to use them inside matchBaseBranches."
+            })]
+        );
+    }
+
+    // Ported: "returns empty array for valid configuration" — config/validation-helpers/match-base-branches.spec.ts line 18
+    #[test]
+    fn validation_helper_match_base_branches_accepts_base_branch_patterns() {
+        let rule = json!({"matchBaseBranches": ["develop"], "addLabels": ["develop"]});
+        let errors =
+            validate_match_base_branches(rule.as_object().unwrap(), "packageRules[0]", true);
+        assert!(errors.is_empty());
     }
 
     // Ported: "catches invalid matchCurrentVersion regex" — config/validation.spec.ts line 312
@@ -3559,6 +3673,37 @@ mod tests {
         );
         assert_eq!(result.errors.len(), 1);
         assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "should error for multiple match alls" — config/validation-helpers/regex-glob-matchers.spec.ts line 4
+    #[test]
+    fn validation_helper_regex_glob_matchers_rejects_multiple_match_alls() {
+        let errors =
+            validate_regex_glob_matchers(&json!(["*", "**"]), "hostRules[0].allowedHeaders");
+        assert_eq!(errors.len(), 1);
+    }
+
+    // Ported: "should error for invalid regex" — config/validation-helpers/regex-glob-matchers.spec.ts line 12
+    #[test]
+    fn validation_helper_regex_glob_matchers_rejects_invalid_regex() {
+        let errors = validate_regex_glob_matchers(
+            &json!(["[", "/[/", "/.*[/"]),
+            "hostRules[0].allowedHeaders",
+        );
+        assert_eq!(errors.len(), 2);
+    }
+
+    // Ported: "should error for non-strings" — config/validation-helpers/regex-glob-matchers.spec.ts line 20
+    #[test]
+    fn validation_helper_regex_glob_matchers_rejects_non_strings() {
+        let errors = validate_regex_glob_matchers(&json!(["*", 2]), "hostRules[0].allowedHeaders");
+        assert_eq!(
+            errors,
+            vec![json!({
+                "topic": "Configuration Error",
+                "message": "hostRules[0].allowedHeaders: should be an array of strings. You have included object."
+            })]
+        );
     }
 
     // Ported: "catches when negative number is used for integer type" — config/validation.spec.ts line 1848
