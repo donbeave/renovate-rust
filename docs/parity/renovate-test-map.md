@@ -10790,6 +10790,81 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/versioning/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/schema.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/schema`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns existing version scheme | 5 | not-applicable | — | — | Renovate's TypeScript Zod versioning schema parser and configurable scheme registry are not implemented as a Rust API. |
+| falls back to default version scheme | 13 | not-applicable | — | — | Renovate's TypeScript default versioning schema fallback is not implemented as a Rust API. |
+| catches errors | 19 | not-applicable | — | — | Renovate's TypeScript Zod schema safe-parse error contract is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/versioning/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return versioning list | 8 | not-applicable | — | — | Renovate's TypeScript versioning registry list API is not implemented as a Rust API. |
+| should fallback to semver-coerced | 12 | not-applicable | — | — | Renovate's TypeScript versioning registry fallback API is not implemented as a Rust API. |
+| should accept config | 18 | not-applicable | — | — | Renovate's TypeScript configurable versioning registry API is not implemented as a Rust API. |
+| matches the API contract | 22 | not-applicable | — | — | TypeScript dynamic module/API contract validation has no direct Rust API parity target. |
+
+---
+
+## `lib/modules/versioning/versioning-metadata.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/versioning-metadata.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/versioning-metadata › %s`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| readme with no h1 or h2 markdown headers | 13 | not-applicable | — | — | Renovate's TypeScript versioning README metadata policy does not apply to this Rust crate layout. |
+| contains mandatory fields | 40 | not-applicable | — | — | Renovate's TypeScript versioning module metadata exports are not implemented as a Rust API. |
+
+---
+
+## `lib/modules/versioning/generic.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/generic.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/generic › GenericVersioningApi`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Scheme keys | 54 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base class shape is not implemented as a Rust API. |
+| equals | 82 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| getMajor | 87 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| getMinor | 92 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| getPatch | 97 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| getNewValue | 102 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class update-value helper is not implemented as a Rust API. |
+| isCompatible | 124 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| isGreaterThan | 128 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| isSingleVersion | 134 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| isStable | 138 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| isValid | 142 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| isVersion | 148 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| matches | 153 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class implementation is not implemented as a Rust API. |
+| sortVersions | 158 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class comparator is not implemented as a Rust API. |
+| isLessThanRange | 164 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class range helper is not implemented as a Rust API. |
+| minSatisfyingVersion | 169 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class satisfying-version helper is not implemented as a Rust API. |
+| getSatisfyingVersion | 179 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class satisfying-version helper is not implemented as a Rust API. |
+| isSame | 189 | not-applicable | — | — | Renovate's TypeScript `GenericVersioningApi` base-class same-range helper is not implemented as a Rust API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
