@@ -1019,6 +1019,20 @@ mod tests {
         }
     }
 
+    // Ported: "managerFilePatterns regex is correct" — manager/kotlin-script/index.spec.ts line 6
+    #[test]
+    fn kotlin_script_manager_file_patterns_regex_is_correct() {
+        let def = MANAGER_DEFS
+            .iter()
+            .find(|manager| manager.name == "kotlin-script")
+            .expect("kotlin-script manager must be registered");
+        assert_eq!(def.patterns.len(), 1);
+        let regex = Regex::new(def.patterns[0]).expect("kotlin-script pattern must compile");
+        assert!(regex.is_match("build.main.kts"));
+        assert!(regex.is_match("scripts/deps.main.kts"));
+        assert!(!regex.is_match("build.gradle.kts"));
+    }
+
     #[test]
     fn detects_github_actions_workflow() {
         let f = files(&[

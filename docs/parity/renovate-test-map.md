@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2109 / 2109 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2110 / 2110 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1551,6 +1551,19 @@ Status key: `ported` · `pending` · `not-applicable`
 | extracts from full configuration | 71 | ported | `tflint_plugin.rs` | `extracts_plugin_from_full_config` | — |
 | extracts no source | 112 | ported | `tflint_plugin.rs` | `plugins_without_source_get_missing_source_skip` | — |
 | extracts nothing if not from github | 138 | ported | `tflint_plugin.rs` | `non_github_source_skipped` (+ gitlab_source_gets_unsupported_datasource) | — |
+
+---
+
+## `lib/modules/manager/kotlin-script/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kotlin-script/index.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/manager/kotlin-script/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| managerFilePatterns regex is correct | 6 | ported | `managers.rs` | `kotlin_script_manager_file_patterns_regex_is_correct` | — |
 
 ---
 
