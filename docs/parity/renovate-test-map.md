@@ -4982,6 +4982,19 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/go/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/go/common.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/go/common › getSourceUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ($datasource, $packageName) => $expected | 5 | not-applicable | — | — | Renovate's Go datasource `getSourceUrl` helper for tag datasource IDs is not implemented as a Rust API; Rust Go module support uses proxy latest-version lookups and extractor metadata instead. |
+
+---
+
 ## `lib/modules/datasource/cdnjs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/cdnjs/index.spec.ts
