@@ -3652,6 +3652,62 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/sbt-plugin/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/sbt-plugin/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/sbt-plugin/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses Maven index directory | 15 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+| parses sbt index directory | 23 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+| uses proper hostType | 31 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+| returns null in case of errors | 40 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+| fetches sbt plugins | 88 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+| fetches sbt plugins 2 | 157 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+| extracts URL from Maven POM file | 226 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+| handles absolute and root relative paths | 312 | not-applicable | — | — | SBT plugin datasource repository traversal and Maven POM URL extraction are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/sbt-package/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/sbt-package/index.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/sbt-package/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses Maven index directory | 16 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| parses sbt index directory | 24 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| uses proper hostType | 32 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| returns null in case of errors | 41 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| returns null if there is no version | 61 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| fetches releases from Maven | 89 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| fetches Maven releases with Scala version | 140 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| fetches releases from Confluent | 169 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| extracts URL from Maven POM file | 209 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| falls back to Maven for orgarization root folder non-listable repositories | 243 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| extracts URL from Maven POM file | 287 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/sbt-package/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/sbt-package/util.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/sbt-package/util`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets latest version | 4 | not-applicable | — | — | SBT package datasource version-list helper is not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
