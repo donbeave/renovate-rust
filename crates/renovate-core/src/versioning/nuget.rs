@@ -62,7 +62,7 @@ pub fn compare(a: &str, b: &str) -> Ordering {
         (None, None) => Ordering::Equal,
         (None, Some(_)) => Ordering::Greater,
         (Some(_), None) => Ordering::Less,
-        (Some(la), Some(lb)) => la.cmp(lb),
+        (Some(la), Some(lb)) => compare_prerelease(la, lb),
     }
 }
 
@@ -80,6 +80,9 @@ struct ParsedVersion {
 }
 
 fn parse(version: &str) -> ParsedVersion {
+    let version = version.trim();
+    let version = version.split_once('+').map_or(version, |(base, _)| base);
+
     // Split off pre-release label at first `-`.
     let (numeric, prerelease) = if let Some(pos) = version.find('-') {
         (
@@ -99,6 +102,28 @@ fn parse(version: &str) -> ParsedVersion {
     ParsedVersion {
         components,
         prerelease,
+    }
+}
+
+fn compare_prerelease(a: &str, b: &str) -> Ordering {
+    let mut a_parts = a.split('.');
+    let mut b_parts = b.split('.');
+
+    loop {
+        match (a_parts.next(), b_parts.next()) {
+            (Some(a_part), Some(b_part)) => {
+                let cmp = match (a_part.parse::<u64>(), b_part.parse::<u64>()) {
+                    (Ok(a_num), Ok(b_num)) => a_num.cmp(&b_num),
+                    _ => a_part.cmp(b_part),
+                };
+                if cmp != Ordering::Equal {
+                    return cmp;
+                }
+            }
+            (Some(_), None) => return Ordering::Greater,
+            (None, Some(_)) => return Ordering::Less,
+            (None, None) => return Ordering::Equal,
+        }
     }
 }
 
@@ -155,6 +180,103 @@ mod tests {
         // alpha < beta < rc alphabetically
         assert_eq!(compare("1.0.0-beta", "1.0.0-alpha"), Ordering::Greater);
         assert_eq!(compare("1.0.0-alpha", "1.0.0-beta"), Ordering::Less);
+    }
+
+    // Ported: "compare($x, $y) === $expected" — versioning/nuget/version.spec.ts line 4
+    #[test]
+    fn compare_matches_renovate_version_spec() {
+        let cases = [
+            ("17.4", "17.04", Ordering::Equal),
+            ("1.4", "1.4.0", Ordering::Equal),
+            ("1.0.110", "1.0.110.0", Ordering::Equal),
+            ("1.0.0", "1.0.0+c30d7625", Ordering::Equal),
+            ("1.022", "1.22.0.0", Ordering::Equal),
+            ("23.2.3", "23.2.3.0", Ordering::Equal),
+            ("1.3.42.10133", "1.3.42.10133", Ordering::Equal),
+            ("1.0", "1.0.0.0", Ordering::Equal),
+            ("1.23.01", "1.23.1", Ordering::Equal),
+            ("1.45.6", "1.45.6.0", Ordering::Equal),
+            ("1.45.6-Alpha", "1.45.6-Alpha", Ordering::Equal),
+            ("1.6.2-BeTa", "1.6.02-beta", Ordering::Equal),
+            ("22.3.07     ", "22.3.07", Ordering::Equal),
+            ("1.0", "1.0.0.0+beta", Ordering::Equal),
+            ("1.0.0.0+beta.2", "1.0.0.0+beta.1", Ordering::Equal),
+            ("1.0.0", "1.0.0", Ordering::Equal),
+            ("1.0.0-BETA", "1.0.0-beta", Ordering::Equal),
+            ("1.0.0-BETA+AA", "1.0.0-beta+aa", Ordering::Equal),
+            (
+                "1.0.0-BETA.X.y.5.77.0+AA",
+                "1.0.0-beta.x.y.5.77.0+aa",
+                Ordering::Equal,
+            ),
+            ("1.0.0", "1.0.0+beta", Ordering::Equal),
+            ("1.0", "1.0.0.0", Ordering::Equal),
+            ("1.0+test", "1.0.0.0", Ordering::Equal),
+            ("1.0.0.1-1.2.A", "1.0.0.1-1.2.a+A", Ordering::Equal),
+            ("1.0.01", "1.0.1.0", Ordering::Equal),
+            ("0.0.0", "1.0.0", Ordering::Less),
+            ("1.1.0", "1.0.0", Ordering::Greater),
+            ("1.0.1", "1.0.0", Ordering::Greater),
+            ("1.0.0-BETA", "1.0.0-beta2", Ordering::Less),
+            ("1.0.0+AA", "1.0.0-beta+aa", Ordering::Greater),
+            ("1.0.0-BETA+AA", "1.0.0-beta", Ordering::Equal),
+            (
+                "1.0.0-BETA.X.y.5.77.0+AA",
+                "1.0.0-beta.x.y.5.79.0+aa",
+                Ordering::Less,
+            ),
+            ("1.2.3.4-RC+99", "1.2.3.4-RC+99", Ordering::Equal),
+            ("1.2.3", "1.2.3", Ordering::Equal),
+            ("1.2.3-Pre.2", "1.2.3-Pre.2", Ordering::Equal),
+            ("1.2.3+99", "1.2.3+99", Ordering::Equal),
+            ("1.2-Pre", "1.2.0-Pre", Ordering::Equal),
+            ("2.4.2", "2.4.1", Ordering::Greater),
+            ("2.4-beta", "2.4-alpha", Ordering::Greater),
+            ("1.9", "2", Ordering::Less),
+            ("1.9", "1.9.1", Ordering::Less),
+            ("2.4.0", "2.4.0-beta", Ordering::Greater),
+            ("2.4.0-alpha", "2.4.0", Ordering::Less),
+            ("1.2.0-beta.333", "1.2.0-beta.66", Ordering::Greater),
+            ("1.2.0-beta2", "1.2.0-beta10", Ordering::Greater),
+            ("1.2.0.1", "1.2.0", Ordering::Greater),
+            ("1.2.0.1", "1.2.0.1-beta", Ordering::Greater),
+            ("1.2.0.1-beta", "1.2.0.1", Ordering::Less),
+            ("1.2.0+1", "1.2.0", Ordering::Equal),
+            ("1.2.0", "1.2.0+1", Ordering::Equal),
+            ("1-a", "1-0", Ordering::Greater),
+            ("1-a.b", "1-a", Ordering::Greater),
+            ("1-a", "1-a.b", Ordering::Less),
+            ("1.0.1", "1.0", Ordering::Greater),
+            ("1.231", "1.23", Ordering::Greater),
+            ("1.45.6", "1.4.5.6", Ordering::Greater),
+            ("1.4.5.60", "1.4.5.6", Ordering::Greater),
+            ("1.10", "1.01", Ordering::Greater),
+            ("1.10-beta", "1.01-alpha", Ordering::Greater),
+            ("1.10.0-rc-2", "1.01.0-RC-1", Ordering::Greater),
+            ("1.01", "1.01-RC-1", Ordering::Greater),
+            ("1.2-preview", "1.01", Ordering::Greater),
+            ("1.0.0", "0.0.0", Ordering::Greater),
+            ("1.1.0", "1.0.0", Ordering::Greater),
+            ("1.0.1", "1.0.0", Ordering::Greater),
+            ("2.1.1", "1.999.9999", Ordering::Greater),
+            ("1.0.0-beta2", "1.0.0-BETA", Ordering::Greater),
+            ("1.0.0+aa", "1.0.0-beta+AA", Ordering::Greater),
+            ("1.0.0-beta.1+AA", "1.0.0-BETA", Ordering::Greater),
+            (
+                "1.0.0-beta.x.y.5.79.0+aa",
+                "1.0.0-BETA.X.y.5.77.0+AA",
+                Ordering::Greater,
+            ),
+            (
+                "1.0.0-beta.x.y.5.790.0+abc",
+                "1.0.0-BETA.X.y.5.79.0+AA",
+                Ordering::Greater,
+            ),
+        ];
+
+        for (x, y, expected) in cases {
+            assert_eq!(compare(x, y), expected, "compare({x}, {y})");
+        }
     }
 
     // ── nuget_update_summary ─────────────────────────────────────────────────

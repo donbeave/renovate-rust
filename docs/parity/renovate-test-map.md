@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1938 / 1938 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1939 / 1939 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -11915,6 +11915,19 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | getMajor("$version") === $expected | 136 | not-applicable | — | — | Renovate's `deb` major component parser is not implemented in Rust. |
 | getMinor("$version") === $expected | 149 | not-applicable | — | — | Renovate's `deb` minor component parser is not implemented in Rust. |
 | getPatch("$version") === $expected | 162 | not-applicable | — | — | Renovate's `deb` patch component parser is not implemented in Rust. |
+
+---
+
+## `lib/modules/versioning/nuget/version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/nuget/version.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/versioning/nuget/version › compare`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| compare($x, $y) === $expected | 4 | ported | `nuget.rs` | `compare_matches_renovate_version_spec` | — |
 
 ---
 
