@@ -4048,6 +4048,66 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/java-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/java-version/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/java-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for error | 16 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| returns null for 404 | 29 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| returns null for empty result | 39 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| returns null for empty 200 OK | 49 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| throws for 5xx | 62 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| processes real data | 72 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| processes real data (jre) | 85 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| processes real data (jre,windows,x64) | 98 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| pages | 110 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+| processes real data (jre,system) | 128 | not-applicable | — | — | Java version datasource lookup and package filtering are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/unity3d-packages/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/unity3d-packages/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/unity3d-packages/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| package with no versions | 6 | not-applicable | — | — | Unity3D packages datasource lookup is not implemented in Rust; Rust only has the Unity editor version datasource. |
+| package with no documentationUrl | 31 | not-applicable | — | — | Unity3D packages datasource lookup is not implemented in Rust; Rust only has the Unity editor version datasource. |
+| package from a custom registry | 70 | not-applicable | — | — | Unity3D packages datasource lookup is not implemented in Rust; Rust only has the Unity editor version datasource. |
+| package with changelog content and url | 112 | not-applicable | — | — | Unity3D packages datasource lookup is not implemented in Rust; Rust only has the Unity editor version datasource. |
+| package with repository | 200 | not-applicable | — | — | Unity3D packages datasource lookup is not implemented in Rust; Rust only has the Unity editor version datasource. |
+
+---
+
+## `lib/modules/datasource/clojure/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/clojure/index.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/clojure/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns releases from custom repository | 93 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| collects releases from all registry urls | 101 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| falls back to next registry url | 129 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| ignores unsupported protocols | 160 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| skips registry with invalid metadata structure | 173 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| skips registry with invalid XML | 192 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| handles optional slash at the end of registry url | 208 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| returns null for invalid registryUrls | 218 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+| supports scm.url values prefixed with "scm:" | 227 | not-applicable | — | — | Clojure datasource Maven metadata lookup and `scm:` URL handling are not implemented as a Rust datasource. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
