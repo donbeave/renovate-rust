@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1968 / 1968 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1970 / 1970 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -12324,6 +12324,20 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | matches("$version", "$range") === $expected | 75 | not-applicable | - | - | Renovate's Node.js codename range matcher is not implemented as a Rust versioning API. |
 | getSatisfyingVersion("$versions", "$range") === $expected | 87 | not-applicable | - | - | Renovate's Node.js codename satisfying-version selector is not implemented as a Rust versioning API. |
 | minSatisfyingVersion("$versions", "$range") === $expected | 102 | not-applicable | - | - | Renovate's Node.js codename satisfying-version selector is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/redhat/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/redhat/index.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `modules/versioning/redhat/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$input") === $expected | 3 | ported | `redhat.rs` | `is_valid_matches_renovate_redhat_spec` | — |
+| isGreaterThan($a, $b) === $expected | 27 | ported | `redhat.rs` | `is_greater_than_matches_renovate_redhat_spec` | — |
 
 ---
 

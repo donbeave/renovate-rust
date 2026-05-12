@@ -11,5 +11,6 @@ pub mod maven;
 pub mod npm;
 pub mod nuget;
 pub mod pep440;
+pub mod redhat;
 pub mod semver_generic;
 pub mod unity3d;
