@@ -218,6 +218,7 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "returns null for 404" — datasource/pod/index.spec.ts line 60
     async fn fetch_latest_404_returns_none() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
@@ -228,6 +229,23 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_latest("NonExistent", &http, &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
+    // Ported: "returns null for 401" — datasource/pod/index.spec.ts line 117
+    async fn fetch_latest_401_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/pods/PrivatePod"))
+            .respond_with(ResponseTemplate::new(401))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("PrivatePod", &http, &server.uri())
             .await
             .unwrap();
         assert_eq!(result, None);
