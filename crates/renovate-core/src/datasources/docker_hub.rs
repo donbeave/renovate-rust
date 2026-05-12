@@ -505,6 +505,15 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    #[test]
+    // Ported: "findLatestStable works" — datasource/docker/common.spec.ts line 270
+    fn empty_tag_list_produces_no_latest() {
+        let tags: Vec<String> = Vec::new();
+        let s = docker_update_summary("22.04", &tags);
+        assert_eq!(s.latest, None);
+        assert!(!s.update_available);
+    }
+
     // ── fetch_tags (wiremock) ─────────────────────────────────────────────────
 
     fn tags_page(tags: &[&str], next: Option<&str>) -> String {
