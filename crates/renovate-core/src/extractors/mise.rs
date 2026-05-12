@@ -21,6 +21,13 @@ use crate::extractors::asdf::{
     self, AsdfDep, AsdfSkipReason, AsdfToolDef, datasource_id, tag_strip_from_extract_version,
 };
 
+/// Parse a mise TOML file and validate the minimal schema Renovate requires.
+pub fn parse_toml_file(content: &str) -> Option<toml::Value> {
+    let root = toml::from_str::<toml::Value>(content).ok()?;
+    root.get("tools")?.as_table()?;
+    Some(root)
+}
+
 /// Mise-specific core tool names that differ from the asdf tool key.
 ///
 /// Source: `lib/modules/manager/mise/upgradeable-tooling.ts` → `miseCoreTooling`
@@ -987,6 +994,34 @@ fn ubi_extract_version(name: &str, parsed_value: &ParsedToolValue<'_>) -> Option
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Ported: "load and parse successfully" — manager/mise/utils.spec.ts line 9
+    #[test]
+    fn parse_toml_file_loads_and_parses_successfully() {
+        let actual = parse_toml_file("[tools]\nerlang = '23.3'\nnode = '16'\n").unwrap();
+        let tools = actual
+            .get("tools")
+            .and_then(toml::Value::as_table)
+            .expect("tools table");
+
+        assert_eq!(
+            tools.get("erlang").and_then(toml::Value::as_str),
+            Some("23.3")
+        );
+        assert_eq!(tools.get("node").and_then(toml::Value::as_str), Some("16"));
+    }
+
+    // Ported: "invalid toml" — manager/mise/utils.spec.ts line 22
+    #[test]
+    fn parse_toml_file_rejects_invalid_toml() {
+        assert!(parse_toml_file("clearly: \"invalid\" \"toml\"").is_none());
+    }
+
+    // Ported: "invalid schema" — manager/mise/utils.spec.ts line 30
+    #[test]
+    fn parse_toml_file_rejects_invalid_schema() {
+        assert!(parse_toml_file("[invalid]\nerlang = '23.3'\nnode = '16'\n").is_none());
+    }
 
     // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
     #[test]

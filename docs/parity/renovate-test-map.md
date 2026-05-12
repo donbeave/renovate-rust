@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2111 / 2111 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2114 / 2114 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1593,6 +1593,21 @@ Status key: `ported` · `pending` · `not-applicable`
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | matchRegexOrGlobList("$path") === $expected | 43 | ported | `managers.rs` | `mise_file_patterns_match_spec` | — |
+
+---
+
+## `lib/modules/manager/mise/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/utils.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `modules/manager/mise/utils › parseTomlFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| load and parse successfully | 9 | ported | `mise.rs` | `parse_toml_file_loads_and_parses_successfully` | — |
+| invalid toml | 22 | ported | `mise.rs` | `parse_toml_file_rejects_invalid_toml` | — |
+| invalid schema | 30 | ported | `mise.rs` | `parse_toml_file_rejects_invalid_schema` | — |
 
 ---
 
