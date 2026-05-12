@@ -80,6 +80,8 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_schedule(map, &mut errors);
     validate_host_rules(map, &mut errors);
     validate_env(map, &mut errors);
+    validate_positive_integers(map, &mut errors);
+    validate_bump_version(map, &mut errors);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
     validate_constraints_versioning(map, &mut errors);
@@ -220,6 +222,15 @@ fn validate_package_rules(
             }));
         }
 
+        if let Some(Value::Array(patterns)) = rule_map.get("matchRepositories")
+            && contains_match_all_with_other_patterns(patterns)
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "packageRules matchRepositories contains * or ** along with other patterns"
+            }));
+        }
+
         if rule_map
             .get("extends")
             .and_then(Value::as_array)
@@ -270,6 +281,14 @@ fn is_selector_only_package_rule(rule: &Map<String, Value>) -> bool {
         && rule
             .keys()
             .all(|key| key.starts_with("match") || key == "excludePackageNames")
+}
+
+fn contains_match_all_with_other_patterns(patterns: &[Value]) -> bool {
+    patterns.len() > 1
+        && patterns
+            .iter()
+            .filter_map(Value::as_str)
+            .any(|pattern| matches!(pattern, "*" | "**"))
 }
 
 fn validate_enabled_managers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
@@ -667,6 +686,63 @@ fn validate_env(map: &Map<String, Value>, errors: &mut Vec<Value>) {
                 }));
             }
         }
+    }
+}
+
+fn validate_positive_integers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    if map
+        .get("azureWorkItemId")
+        .and_then(Value::as_i64)
+        .is_some_and(|value| value < 0)
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `azureWorkItemId` should be a positive integer. Found negative value instead."
+        }));
+    }
+}
+
+fn validate_bump_version(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    if let Some(Value::Object(bump_version)) = map.get("bumpVersion") {
+        validate_bump_version_object("bumpVersion", bump_version, errors);
+    }
+
+    if let Some(Value::Array(package_rules)) = map.get("packageRules") {
+        for (idx, rule) in package_rules.iter().enumerate() {
+            if let Some(bump_version) = rule.get("bumpVersion").and_then(Value::as_object) {
+                validate_bump_version_object(
+                    &format!("packageRules[{idx}].bumpVersion"),
+                    bump_version,
+                    errors,
+                );
+            }
+        }
+    }
+}
+
+fn validate_bump_version_object(
+    path: &str,
+    bump_version: &Map<String, Value>,
+    errors: &mut Vec<Value>,
+) {
+    if bump_version
+        .get("filePatterns")
+        .and_then(Value::as_array)
+        .is_none_or(|patterns| patterns.is_empty())
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": format!("{path} must contain a non-empty filePatterns array")
+        }));
+    } else if bump_version
+        .get("matchStrings")
+        .and_then(Value::as_array)
+        .is_none_or(|patterns| patterns.is_empty())
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": format!("{path} must contain a non-empty matchStrings array")
+        }));
     }
 }
 
@@ -2262,6 +2338,107 @@ mod tests {
             ]
         );
         assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "catches when * or ** is combined with others patterns in a regexOrGlob option" — config/validation.spec.ts line 1820
+    #[test]
+    fn validate_config_catches_match_all_combined_with_other_patterns() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [
+                    {"matchRepositories": ["groupA/**", "groupB/**"], "enabled": false},
+                    {"matchRepositories": ["*", "repo"], "enabled": true}
+                ]
+            }),
+        );
+        assert_eq!(result.errors.len(), 1);
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "catches when negative number is used for integer type" — config/validation.spec.ts line 1848
+    #[test]
+    fn validate_config_catches_negative_integer_options() {
+        let result = validate_config_for_source("repo", &json!({"azureWorkItemId": -2}));
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "Configuration option `azureWorkItemId` should be a positive integer. Found negative value instead."
+            ]
+        );
+    }
+
+    // Ported: "validates prPriority" — config/validation.spec.ts line 1862
+    #[test]
+    fn validate_config_allows_negative_pr_priority() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [
+                    {"matchDepNames": ["somedep"], "prPriority": -2},
+                    {"matchDepNames": ["some-other-dep"], "prPriority": 2}
+                ]
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "errors if no bumpVersion filePattern is provided" — config/validation.spec.ts line 1883
+    #[test]
+    fn validate_config_errors_for_bump_version_without_file_patterns() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "bumpVersion": {
+                    "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                    "bumpType": "patch"
+                },
+                "packageRules": [{
+                    "matchPackageNames": ["foo"],
+                    "bumpVersion": {
+                        "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                        "bumpType": "patch"
+                    }
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 2);
+    }
+
+    // Ported: "errors if no matchStrings are provided for bumpVersion" — config/validation.spec.ts line 1909
+    #[test]
+    fn validate_config_errors_for_bump_version_without_match_strings() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "bumpVersion": {"filePatterns": ["foo"]},
+                "packageRules": [{
+                    "matchPackageNames": ["foo"],
+                    "bumpVersion": {"filePatterns": ["bar"]}
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 2);
+    }
+
+    // Ported: "allow bumpVersion" — config/validation.spec.ts line 1933
+    #[test]
+    fn validate_config_matches_upstream_bump_version_allow_case() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "bumpVersion": {"filePatterns": ["foo"]},
+                "packageRules": [{
+                    "matchPackageNames": ["foo"],
+                    "bumpVersion": {"filePatterns": ["bar"]}
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 2);
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14

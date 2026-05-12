@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1602 / 1657 actionable tests ported (97%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1608 / 1657 actionable tests ported (97%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 78 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 84 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3652,12 +3652,12 @@ resolver) and the inner `extractPackageFile()` adapter.
 | errors if allowedHeaders is empty or not defined | 1728 | pending | — | — | — |
 | catches invalid variable name in env config option | 1755 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_env_variable_name_and_value` | — |
 | catches env config option if configured inside a parent | 1783 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_nested_env_config` | — |
-| catches when * or ** is combined with others patterns in a regexOrGlob option | 1820 | pending | — | — | — |
-| catches when negative number is used for integer type | 1848 | pending | — | — | — |
-| validates prPriority | 1862 | pending | — | — | — |
-| errors if no bumpVersion filePattern is provided | 1883 | pending | — | — | — |
-| errors if no matchStrings are provided for bumpVersion | 1909 | pending | — | — | — |
-| allow bumpVersion | 1933 | pending | — | — | — |
+| catches when * or ** is combined with others patterns in a regexOrGlob option | 1820 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_match_all_combined_with_other_patterns` | — |
+| catches when negative number is used for integer type | 1848 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_negative_integer_options` | — |
+| validates prPriority | 1862 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_negative_pr_priority` | — |
+| errors if no bumpVersion filePattern is provided | 1883 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_bump_version_without_file_patterns` | — |
+| errors if no matchStrings are provided for bumpVersion | 1909 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_bump_version_without_match_strings` | — |
+| allow bumpVersion | 1933 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_matches_upstream_bump_version_allow_case` | — |
 
 ### `config/validation › validateConfig() -> globaOnly options`
 
