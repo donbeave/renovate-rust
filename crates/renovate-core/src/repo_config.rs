@@ -4975,6 +4975,12 @@ impl RepoConfig {
     pub fn parse_from_package_json(content: &str) -> Option<Self> {
         let pkg: serde_json::Value = serde_json::from_str(content).ok()?;
         let renovate_val = pkg.get("renovate")?;
+        if let Some(preset) = renovate_val.as_str() {
+            return Some(Self::parse(
+                &serde_json::json!({ "extends": [preset] }).to_string(),
+            ));
+        }
+
         // Re-serialize the renovate sub-value and parse it as a RepoConfig.
         let renovate_str = serde_json::to_string(renovate_val).ok()?;
         Some(Self::parse(&renovate_str))
@@ -5722,6 +5728,110 @@ mod tests {
         );
     }
 
+    async fn discover_with_config_file(path: &str, content: &str) -> RepoConfigResult {
+        let server = MockServer::start().await;
+        for candidate in CONFIG_FILE_CANDIDATES {
+            if *candidate == path {
+                Mock::given(method("GET"))
+                    .and(wm_path(format!("/repos/owner/repo/contents/{candidate}")))
+                    .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                        "path": candidate,
+                        "content": base64::engine::general_purpose::STANDARD.encode(content),
+                        "encoding": "base64"
+                    })))
+                    .mount(&server)
+                    .await;
+                break;
+            }
+
+            Mock::given(method("GET"))
+                .and(wm_path(format!("/repos/owner/repo/contents/{candidate}")))
+                .respond_with(ResponseTemplate::new(404))
+                .mount(&server)
+                .await;
+        }
+
+        let client = make_client(&server.uri());
+        discover(&client, "owner", "repo", &GlobalConfig::default())
+            .await
+            .unwrap()
+    }
+
+    // Ported: "finds and parse renovate.json5" — workers/repository/init/merge.spec.ts line 214
+    #[tokio::test]
+    async fn discover_finds_and_parses_renovate_json5() {
+        let result = discover_with_config_file(
+            "renovate.json5",
+            "{ // this is json5 format\n ignoreDeps: ['lodash'] }",
+        )
+        .await;
+
+        let (path, config) = match result {
+            RepoConfigResult::Found { path, config } => (path, config),
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(path, "renovate.json5");
+        assert_eq!(config.ignore_deps, vec!["lodash"]);
+    }
+
+    // Ported: "finds .github/renovate.json" — workers/repository/init/merge.spec.ts line 226
+    #[tokio::test]
+    async fn discover_finds_github_renovate_json() {
+        let result =
+            discover_with_config_file(".github/renovate.json", r#"{"ignoreDeps":["lodash"]}"#)
+                .await;
+
+        let (path, config) = match result {
+            RepoConfigResult::Found { path, config } => (path, config),
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(path, ".github/renovate.json");
+        assert_eq!(config.ignore_deps, vec!["lodash"]);
+    }
+
+    // Ported: "finds .gitlab/renovate.json" — workers/repository/init/merge.spec.ts line 238
+    #[tokio::test]
+    async fn discover_finds_gitlab_renovate_json() {
+        let result =
+            discover_with_config_file(".gitlab/renovate.json", r#"{"ignoreDeps":["lodash"]}"#)
+                .await;
+
+        let (path, config) = match result {
+            RepoConfigResult::Found { path, config } => (path, config),
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(path, ".gitlab/renovate.json");
+        assert_eq!(config.ignore_deps, vec!["lodash"]);
+    }
+
+    // Ported: "finds .renovaterc.json" — workers/repository/init/merge.spec.ts line 250
+    #[tokio::test]
+    async fn discover_finds_renovaterc_json() {
+        let result =
+            discover_with_config_file(".renovaterc.json", r#"{"ignoreDeps":["lodash"]}"#).await;
+
+        let (path, config) = match result {
+            RepoConfigResult::Found { path, config } => (path, config),
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(path, ".renovaterc.json");
+        assert_eq!(config.ignore_deps, vec!["lodash"]);
+    }
+
+    // Ported: "finds .renovaterc.json5" — workers/repository/init/merge.spec.ts line 266
+    #[tokio::test]
+    async fn discover_finds_renovaterc_json5() {
+        let result =
+            discover_with_config_file(".renovaterc.json5", "{ignoreDeps: ['lodash']}").await;
+
+        let (path, config) = match result {
+            RepoConfigResult::Found { path, config } => (path, config),
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(path, ".renovaterc.json5");
+        assert_eq!(config.ignore_deps, vec!["lodash"]);
+    }
+
     /// Mount 404 mocks for all dedicated config candidates AND package.json.
     async fn mock_all_configs_404(server: &MockServer) {
         for candidate in CONFIG_FILE_CANDIDATES {
@@ -5768,6 +5878,7 @@ mod tests {
         assert!(matches!(result, RepoConfigResult::NotFound));
     }
 
+    // Ported: "uses package.json config if found" — workers/repository/init/merge.spec.ts line 152
     #[tokio::test]
     async fn discovers_renovate_key_in_package_json() {
         let server = MockServer::start().await;
@@ -5849,6 +5960,14 @@ mod tests {
         let pkg = r#"{"name":"app","version":"1.0.0","renovate":{"ignoreDeps":["lodash"]}}"#;
         let c = RepoConfig::parse_from_package_json(pkg).expect("should find renovate key");
         assert_eq!(c.ignore_deps, vec!["lodash"]);
+    }
+
+    // Ported: "massages package.json renovate string" — workers/repository/init/merge.spec.ts line 173
+    #[test]
+    fn parse_from_package_json_converts_string_to_extends() {
+        let pkg = r#"{"name":"app","renovate":"github>renovatebot/renovate"}"#;
+        let c = RepoConfig::parse_from_package_json(pkg).expect("should find renovate key");
+        assert_eq!(c.extends, vec!["github>renovatebot/renovate"]);
     }
 
     #[test]

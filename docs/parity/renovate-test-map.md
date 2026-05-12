@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1716 / 1784 actionable tests ported (96%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1723 / 1784 actionable tests ported (97%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4190,7 +4190,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/repository/init/merge.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/merge.spec.ts
-**Total tests:** 40 | **Ported:** 0 | **Actionable:** 40 | **Status:** pending
+**Total tests:** 40 | **Ported:** 7 | **Actionable:** 40 | **Status:** partial
 
 ### `workers/repository/init/merge › detectRepoFileConfig()`
 
@@ -4201,15 +4201,15 @@ resolver) and the inner `extractPackageFile()` adapter.
 | returns cache config from onboarding cache - package.json | 95 | pending | — | — | — |
 | clones, if onboarding cache is valid but parsed config is undefined | 110 | pending | — | — | — |
 | returns cache config from onboarding cache - renovate.json | 133 | pending | — | — | — |
-| uses package.json config if found | 152 | pending | — | — | — |
-| massages package.json renovate string | 173 | pending | — | — | — |
+| uses package.json config if found | 152 | ported | `repo_config.rs` | `discovers_renovate_key_in_package_json` | — |
+| massages package.json renovate string | 173 | ported | `repo_config.rs` | `parse_from_package_json_converts_string_to_extends` | — |
 | returns error if cannot parse | 187 | pending | — | — | — |
 | throws error if duplicate keys | 199 | pending | — | — | — |
-| finds and parse renovate.json5 | 214 | pending | — | — | — |
-| finds .github/renovate.json | 226 | pending | — | — | — |
-| finds .gitlab/renovate.json | 238 | pending | — | — | — |
-| finds .renovaterc.json | 250 | pending | — | — | — |
-| finds .renovaterc.json5 | 266 | pending | — | — | — |
+| finds and parse renovate.json5 | 214 | ported | `repo_config.rs` | `discover_finds_and_parses_renovate_json5` | — |
+| finds .github/renovate.json | 226 | ported | `repo_config.rs` | `discover_finds_github_renovate_json` | — |
+| finds .gitlab/renovate.json | 238 | ported | `repo_config.rs` | `discover_finds_gitlab_renovate_json` | — |
+| finds .renovaterc.json | 250 | ported | `repo_config.rs` | `discover_finds_renovaterc_json` | — |
+| finds .renovaterc.json5 | 266 | ported | `repo_config.rs` | `discover_finds_renovaterc_json5` | — |
 
 ### `workers/repository/init/merge › checkForRepoConfigError`
 
