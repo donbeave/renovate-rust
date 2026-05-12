@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1703 / 1790 actionable tests ported (95%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1708 / 1790 actionable tests ported (95%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4113,7 +4113,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 35 | **Actionable:** 41 | **Status:** partial
+**Total tests:** 45 | **Ported:** 40 | **Actionable:** 41 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -4146,16 +4146,16 @@ resolver) and the inner `extractPackageFile()` adapter.
 | supports Azure DevOps | 255 | ported | `config_env.rs` | `azure_devops_config_is_parsed` | — |
 | supports Bitbucket token | 268 | ported | `config_env.rs` | `bitbucket_token_config_is_parsed` | — |
 | supports Bitbucket username/password | 283 | ported | `config_env.rs` | `bitbucket_username_password_config_is_parsed` | — |
-| merges full config from env | 299 | pending | — | — | — |
-| massages converted experimental env vars | 309 | pending | — | — | — |
-| does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL | 336 | pending | — | — | — |
+| merges full config from env | 299 | ported | `config_env.rs` | `renovate_config_merges_with_explicit_env` | — |
+| massages converted experimental env vars | 309 | ported | `config_env.rs` | `experimental_env_vars_are_massaged` | — |
+| does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL | 336 | ported | `config_env.rs` | `empty_repo_cache_force_local_is_not_migrated` | — |
 
 ### `workers/global/config/parse/env › .getConfig(env) › RENOVATE_CONFIG tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| crashes | 357 | pending | — | — | — |
-| migrates RENOVATE_CONFIG | 367 | pending | — | — | — |
+| crashes | 357 | ported | `config_env.rs` | `invalid_renovate_config_is_rejected` | — |
+| migrates RENOVATE_CONFIG | 367 | ported | `config_env.rs` | `renovate_config_automerge_any_is_migrated` | — |
 | warns if config in RENOVATE_CONFIG is invalid | 376 | pending | — | — | — |
 
 ### `workers/global/config/parse/env › .getConfig(env) › migrations`

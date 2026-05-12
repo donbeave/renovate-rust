@@ -300,6 +300,12 @@ pub struct GlobalConfig {
     /// Private key string, with escaped newlines normalized by env parsing.
     pub git_private_key: Option<String>,
 
+    /// Global enabled flag.
+    pub enabled: Option<bool>,
+
+    /// Global automerge flag.
+    pub automerge: Option<bool>,
+
     // ── Run behavior ─────────────────────────────────────────────────────────
     /// Dry-run mode. `None` means dry-run is disabled (full updates).
     pub dry_run: Option<DryRun>,
@@ -332,6 +338,33 @@ pub struct GlobalConfig {
     /// Whether command templating is allowed in post-upgrade tasks.
     pub allow_command_templating: bool,
 
+    /// Merge confidence API endpoint.
+    pub merge_confidence_endpoint: Option<String>,
+
+    /// Datasources supported by merge confidence.
+    pub merge_confidence_datasources: Vec<String>,
+
+    /// Autodiscover repository sort key.
+    pub autodiscover_repo_sort: Option<String>,
+
+    /// Autodiscover repository ordering.
+    pub autodiscover_repo_order: Option<String>,
+
+    /// Maximum Docker datasource pages.
+    pub docker_max_pages: Option<u32>,
+
+    /// Delete config file after loading.
+    pub delete_config_file: bool,
+
+    /// S3 endpoint for cache/storage.
+    pub s3_endpoint: Option<String>,
+
+    /// Whether to use S3 path-style access.
+    pub s3_path_style: bool,
+
+    /// Force local repository cache behavior.
+    pub repository_cache_force_local: Option<bool>,
+
     /// Labels to apply to created PRs.
     pub labels: Vec<String>,
 
@@ -361,6 +394,8 @@ impl Default for GlobalConfig {
             username: None,
             password: None,
             git_private_key: None,
+            enabled: None,
+            automerge: None,
             dry_run: None,
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,
@@ -370,6 +405,15 @@ impl Default for GlobalConfig {
             recreate_when: RecreateWhen::Auto,
             allowed_commands: Vec::new(),
             allow_command_templating: false,
+            merge_confidence_endpoint: None,
+            merge_confidence_datasources: Vec::new(),
+            autodiscover_repo_sort: None,
+            autodiscover_repo_order: None,
+            docker_max_pages: None,
+            delete_config_file: false,
+            s3_endpoint: None,
+            s3_path_style: false,
+            repository_cache_force_local: None,
             labels: Vec::new(),
             host_rules: Vec::new(),
             registry_aliases: std::collections::BTreeMap::new(),

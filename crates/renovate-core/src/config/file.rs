@@ -176,6 +176,8 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         username: file_config.username.or(base.username),
         password: file_config.password.or(base.password),
         git_private_key: file_config.git_private_key.or(base.git_private_key),
+        enabled: file_config.enabled.or(base.enabled),
+        automerge: file_config.automerge.or(base.automerge),
         dry_run: file_config.dry_run.or(base.dry_run),
         // For non-Option fields: file always wins (it was explicitly set in
         // the file or it carries the default — we cannot distinguish, so we
@@ -193,6 +195,27 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             file_config.allowed_commands
         },
         allow_command_templating: file_config.allow_command_templating,
+        merge_confidence_endpoint: file_config
+            .merge_confidence_endpoint
+            .or(base.merge_confidence_endpoint),
+        merge_confidence_datasources: if file_config.merge_confidence_datasources.is_empty() {
+            base.merge_confidence_datasources
+        } else {
+            file_config.merge_confidence_datasources
+        },
+        autodiscover_repo_sort: file_config
+            .autodiscover_repo_sort
+            .or(base.autodiscover_repo_sort),
+        autodiscover_repo_order: file_config
+            .autodiscover_repo_order
+            .or(base.autodiscover_repo_order),
+        docker_max_pages: file_config.docker_max_pages.or(base.docker_max_pages),
+        delete_config_file: file_config.delete_config_file,
+        s3_endpoint: file_config.s3_endpoint.or(base.s3_endpoint),
+        s3_path_style: file_config.s3_path_style,
+        repository_cache_force_local: file_config
+            .repository_cache_force_local
+            .or(base.repository_cache_force_local),
         labels: if file_config.labels.is_empty() {
             base.labels
         } else {

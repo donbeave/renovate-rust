@@ -8,6 +8,7 @@ use renovate_core::config::{DryRun, GlobalConfig, Platform, RecreateWhen, Requir
 use serde_json::json;
 
 use crate::config_builder::{parse_json_array, parse_json_object};
+use renovate_core::config::file as config_file;
 
 /// Apply environment variables on top of a base config.
 pub(crate) fn apply_to_base(
@@ -19,6 +20,11 @@ pub(crate) fn apply_to_base(
         .map(String::as_str)
         .unwrap_or("RENOVATE_");
     let mut config = base;
+
+    if let Some(raw) = env.get("RENOVATE_CONFIG") {
+        let parsed = parse_renovate_config(raw)?;
+        config = config_file::merge_over_base(config, parsed);
+    }
 
     if let Some(value) = env_value(env, prefix, "CONFIG_MIGRATION") {
         config.config_migration = parse_bool("RENOVATE_CONFIG_MIGRATION", value)?;
@@ -96,6 +102,37 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "GIT_LAB_AUTOMERGE") {
         config.platform_automerge = parse_bool("RENOVATE_GIT_LAB_AUTOMERGE", value)?;
     }
+    if let Some(value) = env.get("RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL") {
+        config.merge_confidence_endpoint = Some(value.to_owned());
+    }
+    if let Some(value) = env.get("RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES") {
+        config.merge_confidence_datasources = parse_string_array(value).unwrap_or_default();
+    }
+    if let Some(value) = env.get("RENOVATE_X_AUTODISCOVER_REPO_SORT") {
+        config.autodiscover_repo_sort = Some(value.to_owned());
+    }
+    if let Some(value) = env.get("RENOVATE_AUTODISCOVER_REPO_ORDER") {
+        config.autodiscover_repo_order = Some(value.to_owned());
+    }
+    if let Some(value) = env.get("RENOVATE_X_DOCKER_MAX_PAGES")
+        && let Ok(pages) = value.parse()
+    {
+        config.docker_max_pages = Some(pages);
+    }
+    if let Some(value) = env.get("RENOVATE_X_DELETE_CONFIG_FILE") {
+        config.delete_config_file = parse_bool("RENOVATE_X_DELETE_CONFIG_FILE", value)?;
+    }
+    if let Some(value) = env.get("RENOVATE_X_S3_ENDPOINT") {
+        config.s3_endpoint = Some(value.to_owned());
+    }
+    if let Some(value) = env.get("RENOVATE_X_S3_PATH_STYLE") {
+        config.s3_path_style = parse_bool("RENOVATE_X_S3_PATH_STYLE", value)?;
+    }
+    if let Some(value) = env.get("RENOVATE_X_REPO_CACHE_FORCE_LOCAL")
+        && !value.is_empty()
+    {
+        config.repository_cache_force_local = Some(true);
+    }
 
     Ok(config)
 }
@@ -147,6 +184,27 @@ fn parse_dry_run(value: &str) -> Result<Option<DryRun>, String> {
         "full" => Ok(Some(DryRun::Full)),
         _ => Err(format!("RENOVATE_DRY_RUN was invalid: {value}")),
     }
+}
+
+fn parse_string_array(raw: &str) -> Result<Vec<String>, String> {
+    match serde_json::from_str(raw) {
+        Ok(serde_json::Value::Array(values)) => Ok(values
+            .into_iter()
+            .filter_map(|value| value.as_str().map(str::to_owned))
+            .collect()),
+        _ => Err(format!("Invalid JSON value: '{raw}'")),
+    }
+}
+
+fn parse_renovate_config(raw: &str) -> Result<GlobalConfig, String> {
+    let mut value: serde_json::Value =
+        serde_json::from_str(raw).map_err(|_| format!("Invalid RENOVATE_CONFIG: '{raw}'"))?;
+    if let Some(object) = value.as_object_mut()
+        && matches!(object.get("automerge"), Some(serde_json::Value::String(value)) if value == "any")
+    {
+        object.insert("automerge".to_owned(), serde_json::Value::Bool(true));
+    }
+    serde_json::from_value(value).map_err(|err| format!("Invalid RENOVATE_CONFIG: {err}"))
 }
 
 fn split_list(value: &str) -> Vec<String> {
@@ -444,6 +502,76 @@ mod tests {
         assert!(config.host_rules.is_empty());
         assert_eq!(config.username.as_deref(), Some("some-username"));
         assert_eq!(config.password.as_deref(), Some("app-password"));
+    }
+
+    // Ported: "merges full config from env" — workers/global/config/parse/env.spec.ts line 299
+    #[test]
+    fn renovate_config_merges_with_explicit_env() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_CONFIG", r#"{"enabled":false,"token":"foo"}"#),
+            ("RENOVATE_TOKEN", "a"),
+        ]))
+        .unwrap();
+        assert_eq!(config.enabled, Some(false));
+        assert_eq!(config.token.as_deref(), Some("a"));
+    }
+
+    // Ported: "massages converted experimental env vars" — workers/global/config/parse/env.spec.ts line 309
+    #[test]
+    fn experimental_env_vars_are_massaged() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL", "some-url"),
+            (
+                "RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES",
+                r#"["docker"]"#,
+            ),
+            ("RENOVATE_X_AUTODISCOVER_REPO_SORT", "alpha"),
+            ("RENOVATE_X_DOCKER_MAX_PAGES", "10"),
+            ("RENOVATE_AUTODISCOVER_REPO_ORDER", "desc"),
+            ("RENOVATE_X_DELETE_CONFIG_FILE", "true"),
+            ("RENOVATE_X_S3_ENDPOINT", "endpoint"),
+            ("RENOVATE_X_S3_PATH_STYLE", "true"),
+            ("RENOVATE_X_REPO_CACHE_FORCE_LOCAL", "enabled"),
+        ]))
+        .unwrap();
+        assert_eq!(
+            config.merge_confidence_endpoint.as_deref(),
+            Some("some-url")
+        );
+        assert_eq!(config.merge_confidence_datasources, vec!["docker"]);
+        assert_eq!(config.autodiscover_repo_sort.as_deref(), Some("alpha"));
+        assert_eq!(config.autodiscover_repo_order.as_deref(), Some("desc"));
+        assert_eq!(config.docker_max_pages, Some(10));
+        assert!(config.delete_config_file);
+        assert_eq!(config.s3_endpoint.as_deref(), Some("endpoint"));
+        assert!(config.s3_path_style);
+        assert_eq!(config.repository_cache_force_local, Some(true));
+    }
+
+    // Ported: "does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL" — workers/global/config/parse/env.spec.ts line 336
+    #[test]
+    fn empty_repo_cache_force_local_is_not_migrated() {
+        let config = build_from_env(&env(&[("RENOVATE_X_REPO_CACHE_FORCE_LOCAL", "")])).unwrap();
+        assert_eq!(config.repository_cache_force_local, None);
+    }
+
+    // Ported: "crashes" — workers/global/config/parse/env.spec.ts line 357
+    #[test]
+    fn invalid_renovate_config_is_rejected() {
+        let err = build_from_env(&env(&[("RENOVATE_CONFIG", "!@#")])).unwrap_err();
+        assert_eq!(err, "Invalid RENOVATE_CONFIG: '!@#'");
+    }
+
+    // Ported: "migrates RENOVATE_CONFIG" — workers/global/config/parse/env.spec.ts line 367
+    #[test]
+    fn renovate_config_automerge_any_is_migrated() {
+        let config = build_from_env(&env(&[(
+            "RENOVATE_CONFIG",
+            r#"{"automerge":"any","token":"foo"}"#,
+        )]))
+        .unwrap();
+        assert_eq!(config.automerge, Some(true));
+        assert_eq!(config.token.as_deref(), Some("foo"));
     }
 
     // Ported: "renames migrated variables" — workers/global/config/parse/env.spec.ts line 386
