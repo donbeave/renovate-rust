@@ -295,6 +295,21 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "returns null for non 200 (v3)" — datasource/nuget/index.spec.ts line 494
+    async fn fetch_latest_non_success_returns_none() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/nunit/index.json"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("nunit", &http, &server.uri()).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
     async fn package_id_lowercased_in_url() {
         let server = MockServer::start().await;
         // URL should use lowercase even if package_id has capitals.
