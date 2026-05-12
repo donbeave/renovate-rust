@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1524 / 1657 actionable tests ported (92%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1533 / 1657 actionable tests ported (93%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,21 +3547,21 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 0 | **Actionable:** 127 | **Status:** pending
+**Total tests:** 127 | **Ported:** 9 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns custom deprecation warnings for %s | 10 | pending | — | — | — |
-| returns the deprecationMsg for `dnsCache` as a warning | 26 | pending | — | — | — |
-| allow enabled field in vulnerabilityAlerts | 47 | pending | — | — | — |
-| catches global options in repo config | 61 | pending | — | — | — |
-| catches global options in inherit config | 86 | pending | — | — | — |
-| only warns for actual globals in repo config | 107 | pending | — | — | — |
-| does not warn for valid inheritConfig | 124 | pending | — | — | — |
-| does not warn for valid platformConfig | 135 | pending | — | — | — |
-| warns for invalid platformConfig | 147 | pending | — | — | — |
+| returns custom deprecation warnings for %s | 10 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_returns_custom_deprecation_warnings` | — |
+| returns the deprecationMsg for `dnsCache` as a warning | 26 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_dns_cache_deprecation` | — |
+| allow enabled field in vulnerabilityAlerts | 47 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_vulnerability_alerts_enabled` | — |
+| catches global options in repo config | 61 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_global_options_in_repo_config` | — |
+| catches global options in inherit config | 86 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_global_options_in_inherit_config` | — |
+| only warns for actual globals in repo config | 107 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_ignores_host_rule_credentials` | — |
+| does not warn for valid inheritConfig | 124 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_inherited_onboarding` | — |
+| does not warn for valid platformConfig | 135 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_auto_platform_config` | — |
+| warns for invalid platformConfig | 147 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_platform_config` | — |
 | catches invalid templates | 156 | pending | — | — | — |
 | catches invalid jsonata expressions | 165 | pending | — | — | — |
 | catches invalid allowedVersions regex | 179 | pending | — | — | — |
