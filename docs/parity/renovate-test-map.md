@@ -4428,6 +4428,143 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/java-version/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/java-version/common.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/java-version/common`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no os and architecture | 10 | not-applicable | — | — | Java version datasource platform/package filtering helpers are not implemented in Rust. |
+| logs for unsupported os and architecture | 74 | not-applicable | — | — | Java version datasource platform/package filtering helpers are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/git-refs/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-refs/index.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/git-refs/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns nil if response is wrong | 38 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns nil if response is malformed | 48 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns nil if remote call throws exception | 58 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns versions filtered from tags | 68 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns null if not found | 82 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns digest for tag | 92 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| ignores refs/for/ | 104 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns digest for HEAD | 114 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| calls simpleGit with emptyEnv if no hostrules exist | 124 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| calls simpleGit with git envs if hostrules exist | 135 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| calls simpleGit with git envs if hostrules exist for datasource type git-refs | 162 | not-applicable | — | — | Git refs datasource simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/dotnet-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/dotnet-version/index.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/dotnet-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for non-dotnet package | 18 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| returns null for 404 for index | 27 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| returns null for 404 for version | 38 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| throws for 5xx for index | 54 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| throws for 5xx for version | 65 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| returns null for unknown error for index | 81 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| returns null for unknown error for version | 92 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| returns real data for sdk | 108 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+| returns real data for runtime | 159 | not-applicable | — | — | Dotnet version datasource channel index and release metadata lookup are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/elm-package/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/elm-package/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/elm-package/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty result | 19 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| returns null for 404 | 32 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| throws for 5xx | 45 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| throws for 429 | 58 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| returns null for invalid JSON response | 71 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| returns null for unknown error | 84 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| processes real data | 97 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| returns null when registryUrl is not provided | 120 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| returns null for invalid schema response | 129 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+| handles package without slash in name | 142 | not-applicable | — | — | Elm package datasource registry lookup and schema mapping are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/ruby-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/ruby-version/index.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/ruby-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses real data | 10 | not-applicable | — | — | Ruby version datasource lookup is not implemented in Rust; Rust only extracts `.ruby-version` constraints for lookup elsewhere. |
+| returns null for empty result | 22 | not-applicable | — | — | Ruby version datasource lookup is not implemented in Rust; Rust only extracts `.ruby-version` constraints for lookup elsewhere. |
+| throws for 404 | 34 | not-applicable | — | — | Ruby version datasource lookup is not implemented in Rust; Rust only extracts `.ruby-version` constraints for lookup elsewhere. |
+
+---
+
+## `lib/modules/datasource/custom/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/custom/index.spec.ts
+**Total tests:** 30 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/custom/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return null if only the prefix is supplied | 13 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return null if no registryUrl is provided as well no defaultRegistryTemplate is defined | 22 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return null if no custom datasource could  be found | 33 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return null on http error | 42 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return null if schema validation fails | 56 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for api directly exposing in renovate format | 72 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases with digests for api directly exposing in renovate format | 93 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases with tags and other optional fields for api directly exposing in renovate format | 123 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for plain text API directly exposing in Renovate format | 166 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for plain text API and trim the content | 199 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| returns null if transformation compilation using jsonata fails | 232 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| returns null if jsonata expression evaluation fails | 258 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for plain text API when only returns a single version | 284 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for yaml API directly exposing in Renovate format | 308 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for yaml file directly exposing in Renovate format | 348 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| returns releases for toml API directly exposing in Renovate format | 384 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for toml file directly exposing in Renovate format | 426 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for json file directly exposing in Renovate format | 464 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return null for plain text file if the body is not what is expected | 501 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for plain text file directly exposing in Renovate format | 518 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return release when templating registryUrl | 553 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return release with templated path | 578 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return release with templated path with multiple layers | 613 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases from HTML links | 650 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases from HTML links - local file | 688 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return null for local file read error - HTML format | 721 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases from nginx directory listing | 738 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for malformed HTML | 778 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return releases for incomplete HTML | 815 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| returns null as digest should be provided in releases | 854 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
