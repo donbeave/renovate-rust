@@ -3645,6 +3645,114 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/dep-types-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/dep-types-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/dep-types-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should only add depTypes to packageRules | 4 | ported | `migrate_validate.rs` | `dep_types_migration_adds_package_rules` | — |
+
+---
+
+## `lib/config/migrations/custom/fetch-release-notes-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/fetch-release-notes-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/fetch-release-notes-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates | 4 | ported | `migrate_validate.rs` | `fetch_release_notes_migrates_to_fetch_change_logs` | — |
+
+---
+
+## `lib/config/migrations/custom/file-match-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/file-match-migration.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `config/migrations/custom/file-match-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates fileMatch of type string | 4 | ported | `migrate_validate.rs` | `file_match_string_migrates_to_manager_file_patterns` | — |
+| migrates fileMatch of type array | 14 | ported | `migrate_validate.rs` | `file_match_array_migrates_to_manager_file_patterns` | — |
+| concats fileMatch to managerFilePatterns | 24 | ported | `migrate_validate.rs` | `file_match_appends_to_existing_manager_file_patterns` | — |
+| does nothing if fileMatch not defined | 38 | ported | `migrate_validate.rs` | `missing_file_match_leaves_manager_file_patterns_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/match-datasources-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/match-datasources-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/match-datasources-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate properly | 4 | ported | `migrate_validate.rs` | `match_datasources_legacy_names_migrate` | — |
+
+---
+
+## `lib/config/migrations/custom/match-managers-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/match-managers-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/match-managers-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates old custom manager syntax to new one | 4 | ported | `migrate_validate.rs` | `match_managers_legacy_names_migrate` | — |
+| only migrates when necessary | 24 | ported | `migrate_validate.rs` | `match_managers_missing_is_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/match-strings-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/match-strings-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/match-strings-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate properly | 4 | ported | `migrate_validate.rs` | `match_strings_lookup_name_migrates_to_package_name` | — |
+
+---
+
+## `lib/config/migrations/custom/package-name-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/package-name-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/package-name-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate value to array | 4 | ported | `migrate_validate.rs` | `package_name_migrates_to_package_names` | — |
+
+---
+
+## `lib/config/migrations/custom/package-pattern-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/package-pattern-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/package-pattern-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate value to array | 4 | ported | `migrate_validate.rs` | `package_pattern_migrates_to_package_patterns` | — |
+
+---
+
 ## `lib/config/migrations/custom/base-branch-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/base-branch-migration.spec.ts

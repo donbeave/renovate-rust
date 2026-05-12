@@ -165,14 +165,9 @@ fn migrate_config(input: &Value) -> Value {
             }
         }
         if let Some(Value::String(datasource)) = map.get_mut("datasource")
-            && let Some(migrated) = match datasource.as_str() {
-                "adoptium-java" => Some("java-version"),
-                "dotnet" => Some("dotnet-version"),
-                "node" => Some("node-version"),
-                _ => None,
-            }
+            && migrate_datasource_alias(datasource) != datasource
         {
-            *datasource = migrated.to_owned();
+            *datasource = migrate_datasource_alias(datasource).to_owned();
         }
         if let Some(Value::Array(enabled_managers)) = map.get_mut("enabledManagers") {
             for manager in enabled_managers {
@@ -189,6 +184,109 @@ fn migrate_config(input: &Value) -> Value {
                     .to_owned(),
                 );
             }
+        }
+        for key in [
+            "peerDependencies",
+            "dependencies",
+            "engines",
+            "optionalDependencies",
+            "devDependencies",
+        ] {
+            if let Some(Value::Object(dep_type_config)) = map.remove(key) {
+                let mut rule = Map::new();
+                rule.insert(
+                    "matchDepTypes".to_owned(),
+                    Value::Array(vec![Value::String(key.to_owned())]),
+                );
+                rule.extend(dep_type_config);
+                package_rules_mut(map).push(Value::Object(rule));
+            }
+        }
+        if let Some(Value::Array(dep_types)) = map.remove("depTypes") {
+            for mut dep_type in dep_types {
+                let Some(dep_type_config) = dep_type.as_object_mut() else {
+                    continue;
+                };
+                let Some(Value::String(dep_type_name)) = dep_type_config.remove("depType") else {
+                    continue;
+                };
+                dep_type_config.insert(
+                    "matchDepTypes".to_owned(),
+                    Value::Array(vec![Value::String(dep_type_name)]),
+                );
+                package_rules_mut(map).push(dep_type);
+            }
+        }
+        if let Some(fetch_release_notes) = map.remove("fetchReleaseNotes") {
+            let fetch_change_logs = match fetch_release_notes {
+                Value::Bool(true) => Value::String("pr".to_owned()),
+                Value::Bool(false) => Value::String("off".to_owned()),
+                value => value,
+            };
+            set_safely(map, "fetchChangeLogs", fetch_change_logs);
+        }
+        if let Some(file_match) = map.remove("fileMatch") {
+            let file_matches = match file_match {
+                Value::String(value) => vec![value],
+                Value::Array(values)
+                    if values.iter().all(|value| matches!(value, Value::String(_))) =>
+                {
+                    values
+                        .into_iter()
+                        .filter_map(|value| value.as_str().map(ToOwned::to_owned))
+                        .collect()
+                }
+                _ => Vec::new(),
+            };
+            if !file_matches.is_empty() {
+                let manager_file_patterns = map
+                    .entry("managerFilePatterns".to_owned())
+                    .or_insert_with(|| Value::Array(Vec::new()));
+                if let Value::Array(patterns) = manager_file_patterns {
+                    patterns.extend(
+                        file_matches
+                            .into_iter()
+                            .map(|pattern| Value::String(format!("/{pattern}/"))),
+                    );
+                }
+            }
+        }
+        if let Some(Value::Array(match_datasources)) = map.get_mut("matchDatasources") {
+            *match_datasources = match_datasources
+                .iter()
+                .filter_map(|value| value.as_str())
+                .filter(|value| !value.is_empty())
+                .map(|value| Value::String(migrate_datasource_alias(value).to_owned()))
+                .collect();
+        }
+        if let Some(Value::Array(match_managers)) = map.get_mut("matchManagers") {
+            for manager in match_managers {
+                let Some(manager_name) = manager.as_str() else {
+                    continue;
+                };
+                *manager = Value::String(
+                    match manager_name {
+                        "regex" => "custom.regex",
+                        "renovate-config-presets" => "renovate-config",
+                        _ => manager_name,
+                    }
+                    .to_owned(),
+                );
+            }
+        }
+        if let Some(Value::Array(match_strings)) = map.get_mut("matchStrings") {
+            *match_strings = match_strings
+                .iter()
+                .filter_map(|value| value.as_str())
+                .filter(|value| !value.is_empty())
+                .map(|value| Value::String(value.replace("(?<lookupName>", "(?<packageName>")))
+                .collect();
+        }
+        if let Some(package_name) = map.remove("packageName") {
+            set_safely(map, "packageNames", Value::Array(vec![package_name]));
+        }
+        if let Some(package_pattern) = map.remove("packagePattern") {
+            set_safely(map, "packagePatterns", Value::Array(vec![package_pattern]));
         }
         if let Some(base_branch) = map.remove("baseBranch") {
             let base_branch_patterns = map
@@ -301,6 +399,25 @@ fn migrate_config(input: &Value) -> Value {
 
 fn set_safely(map: &mut Map<String, Value>, key: &str, value: Value) {
     map.entry(key.to_owned()).or_insert(value);
+}
+
+fn package_rules_mut(map: &mut Map<String, Value>) -> &mut Vec<Value> {
+    let package_rules = map
+        .entry("packageRules".to_owned())
+        .or_insert_with(|| Value::Array(Vec::new()));
+    if !package_rules.is_array() {
+        *package_rules = Value::Array(Vec::new());
+    }
+    package_rules.as_array_mut().expect("packageRules array")
+}
+
+fn migrate_datasource_alias(value: &str) -> &str {
+    match value {
+        "adoptium-java" => "java-version",
+        "dotnet" => "dotnet-version",
+        "node" => "node-version",
+        _ => value,
+    }
 }
 
 fn validate_config(config: &Value) -> Vec<Value> {
@@ -3922,6 +4039,194 @@ mod tests {
                     "renovate-config"
                 ]
             })
+        );
+    }
+
+    // Ported: "should only add depTypes to packageRules" — config/migrations/custom/dep-types-migration.spec.ts line 4
+    #[test]
+    fn dep_types_migration_adds_package_rules() {
+        assert_eq!(
+            migrate_config(&json!({
+                "peerDependencies": {"versionStrategy": "widen"},
+                "dependencies": {"versionStrategy": "widen"},
+                "engines": {"rangeStrategy": "auto"},
+                "optionalDependencies": {"versionStrategy": "widen"},
+                "devDependencies": {"versionStrategy": "widen"},
+                "depTypes": [
+                    "dependencies",
+                    {"depType": "optionalDependencies", "respectLatest": false}
+                ],
+                "packageRules": [
+                    {
+                        "packagePatterns": "^(@angular|typescript)",
+                        "groupName": ["angular packages"],
+                        "excludedPackageNames": "foo"
+                    },
+                    {
+                        "packageNames": ["foo"],
+                        "packageRules": [{"depTypeList": ["bar"], "automerge": true}]
+                    }
+                ]
+            })),
+            json!({
+                "packageRules": [
+                    {
+                        "packagePatterns": "^(@angular|typescript)",
+                        "groupName": ["angular packages"],
+                        "excludedPackageNames": "foo"
+                    },
+                    {
+                        "packageNames": ["foo"],
+                        "packageRules": [{"depTypeList": ["bar"], "automerge": true}]
+                    },
+                    {"matchDepTypes": ["peerDependencies"], "versionStrategy": "widen"},
+                    {"matchDepTypes": ["dependencies"], "versionStrategy": "widen"},
+                    {"matchDepTypes": ["engines"], "rangeStrategy": "auto"},
+                    {"matchDepTypes": ["optionalDependencies"], "versionStrategy": "widen"},
+                    {"matchDepTypes": ["devDependencies"], "versionStrategy": "widen"},
+                    {"matchDepTypes": ["optionalDependencies"], "respectLatest": false}
+                ]
+            })
+        );
+    }
+
+    // Ported: "migrates" — config/migrations/custom/fetch-release-notes-migration.spec.ts line 4
+    #[test]
+    fn fetch_release_notes_migrates_to_fetch_change_logs() {
+        assert_eq!(
+            migrate_config(&json!({"fetchReleaseNotes": false})),
+            json!({"fetchChangeLogs": "off"})
+        );
+        assert_eq!(
+            migrate_config(&json!({"fetchReleaseNotes": true})),
+            json!({"fetchChangeLogs": "pr"})
+        );
+        assert_eq!(
+            migrate_config(&json!({"fetchReleaseNotes": "pr"})),
+            json!({"fetchChangeLogs": "pr"})
+        );
+        assert_eq!(
+            migrate_config(&json!({"fetchReleaseNotes": "off"})),
+            json!({"fetchChangeLogs": "off"})
+        );
+        assert_eq!(
+            migrate_config(&json!({"fetchReleaseNotes": "branch"})),
+            json!({"fetchChangeLogs": "branch"})
+        );
+    }
+
+    // Ported: "migrates fileMatch of type string" — config/migrations/custom/file-match-migration.spec.ts line 4
+    #[test]
+    fn file_match_string_migrates_to_manager_file_patterns() {
+        assert_eq!(
+            migrate_config(&json!({"fileMatch": "filename"})),
+            json!({"managerFilePatterns": ["/filename/"]})
+        );
+    }
+
+    // Ported: "migrates fileMatch of type array" — config/migrations/custom/file-match-migration.spec.ts line 14
+    #[test]
+    fn file_match_array_migrates_to_manager_file_patterns() {
+        assert_eq!(
+            migrate_config(&json!({"fileMatch": ["filename1", "filename2"]})),
+            json!({"managerFilePatterns": ["/filename1/", "/filename2/"]})
+        );
+    }
+
+    // Ported: "concats fileMatch to managerFilePatterns" — config/migrations/custom/file-match-migration.spec.ts line 24
+    #[test]
+    fn file_match_appends_to_existing_manager_file_patterns() {
+        assert_eq!(
+            migrate_config(
+                &json!({"fileMatch": ["filename1", "filename2"], "managerFilePatterns": ["filename3"]})
+            ),
+            json!({"managerFilePatterns": ["filename3", "/filename1/", "/filename2/"]})
+        );
+    }
+
+    // Ported: "does nothing if fileMatch not defined" — config/migrations/custom/file-match-migration.spec.ts line 38
+    #[test]
+    fn missing_file_match_leaves_manager_file_patterns_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"managerFilePatterns": ["filename3"]})),
+            json!({"managerFilePatterns": ["filename3"]})
+        );
+    }
+
+    // Ported: "should migrate properly" — config/migrations/custom/match-datasources-migration.spec.ts line 4
+    #[test]
+    fn match_datasources_legacy_names_migrate() {
+        assert_eq!(
+            migrate_config(
+                &json!({"matchDatasources": ["adoptium-java", "dotnet", "npm", "node"]})
+            ),
+            json!({"matchDatasources": ["java-version", "dotnet-version", "npm", "node-version"]})
+        );
+    }
+
+    // Ported: "migrates old custom manager syntax to new one" — config/migrations/custom/match-managers-migration.spec.ts line 4
+    #[test]
+    fn match_managers_legacy_names_migrate() {
+        assert_eq!(
+            migrate_config(&json!({
+                "matchManagers": [
+                    "npm",
+                    "regex",
+                    "custom.regex",
+                    "custom.someMgr",
+                    "renovate-config-presets"
+                ]
+            })),
+            json!({
+                "matchManagers": [
+                    "npm",
+                    "custom.regex",
+                    "custom.regex",
+                    "custom.someMgr",
+                    "renovate-config"
+                ]
+            })
+        );
+    }
+
+    // Ported: "only migrates when necessary" — config/migrations/custom/match-managers-migration.spec.ts line 24
+    #[test]
+    fn match_managers_missing_is_unchanged() {
+        assert_eq!(migrate_config(&json!({})), json!({}));
+    }
+
+    // Ported: "should migrate properly" — config/migrations/custom/match-strings-migration.spec.ts line 4
+    #[test]
+    fn match_strings_lookup_name_migrates_to_package_name() {
+        assert_eq!(
+            migrate_config(&json!({
+                "matchStrings": [
+                    null,
+                    "(?<lookupName>",
+                    null,
+                    "(?<lookupName>(?<lookupName>",
+                    ""
+                ]
+            })),
+            json!({"matchStrings": ["(?<packageName>", "(?<packageName>(?<packageName>"]})
+        );
+    }
+
+    // Ported: "should migrate value to array" — config/migrations/custom/package-name-migration.spec.ts line 4
+    #[test]
+    fn package_name_migrates_to_package_names() {
+        assert_eq!(
+            migrate_config(&json!({"packageName": "test"})),
+            json!({"packageNames": ["test"]})
+        );
+    }
+
+    // Ported: "should migrate value to array" — config/migrations/custom/package-pattern-migration.spec.ts line 4
+    #[test]
+    fn package_pattern_migrates_to_package_patterns() {
+        assert_eq!(
+            migrate_config(&json!({"packagePattern": "test"})),
+            json!({"packagePatterns": ["test"]})
         );
     }
 
