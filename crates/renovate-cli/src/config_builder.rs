@@ -10,6 +10,7 @@
 use renovate_core::config::{
     DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
 };
+use serde_json::{Map, Value};
 
 use crate::cli::{
     Cli, DryRunArg, ForkProcessing as CliForkProcessing, Platform as CliPlatform,
@@ -24,7 +25,14 @@ use crate::cli::{
 ///
 /// Applies Renovate-compatible coercions and emits `tracing::warn` for
 /// deprecated value forms (e.g. `--dry-run=true` → `full`).
+#[cfg(test)]
 pub(crate) fn build(cli: &Cli, base: GlobalConfig) -> GlobalConfig {
+    try_build(cli, base).expect("CLI config should be valid")
+}
+
+/// Apply CLI arguments on top of a base config, returning an error for invalid
+/// structured JSON flag values.
+pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, String> {
     let mut config = base;
 
     if let Some(p) = cli.platform {
@@ -72,12 +80,53 @@ pub(crate) fn build(cli: &Cli, base: GlobalConfig) -> GlobalConfig {
     if !cli.labels.is_empty() {
         config.labels = cli.labels.clone();
     }
+    if let Some(ref raw) = cli.host_rules {
+        config.host_rules = parse_json_array(raw)?;
+    }
+    if let Some(ref raw) = cli.registry_aliases {
+        config.registry_aliases = parse_string_map(raw)?;
+    }
+    if let Some(ref raw) = cli.onboarding_config {
+        config.onboarding_config = parse_json_object(raw)?;
+    }
 
     if !cli.repositories.is_empty() {
         config.repositories = cli.repositories.clone();
     }
 
-    config
+    Ok(config)
+}
+
+fn parse_json_array(raw: &str) -> Result<Vec<Value>, String> {
+    if raw.is_empty() {
+        return Ok(Vec::new());
+    }
+    match serde_json::from_str::<Value>(raw) {
+        Ok(Value::Array(values)) => Ok(values),
+        Ok(Value::Object(object)) => Ok(vec![Value::Object(object)]),
+        _ => Err(format!("Invalid JSON value: '{raw}'")),
+    }
+}
+
+fn parse_json_object(raw: &str) -> Result<Map<String, Value>, String> {
+    if raw.is_empty() {
+        return Ok(Map::new());
+    }
+    match serde_json::from_str::<Value>(raw) {
+        Ok(Value::Object(object)) => Ok(object),
+        _ => Err(format!("Invalid JSON value: '{raw}'")),
+    }
+}
+
+fn parse_string_map(raw: &str) -> Result<std::collections::BTreeMap<String, String>, String> {
+    let object = parse_json_object(raw)?;
+    object
+        .into_iter()
+        .map(|(key, value)| match value {
+            Value::String(value) => Ok((key, value)),
+            _ => Err(format!("Invalid JSON value: '{raw}'")),
+        })
+        .collect()
 }
 
 fn map_platform(p: CliPlatform) -> Platform {
@@ -145,10 +194,11 @@ fn map_recreate_when(rw: CliRecreateWhen) -> RecreateWhen {
 #[cfg(test)]
 mod tests {
     use clap::Parser as _;
-    use renovate_core::config::{DryRun, GlobalConfig, Platform, RequireConfig};
+    use renovate_core::config::{DryRun, GlobalConfig, Platform, RecreateWhen, RequireConfig};
 
-    use super::build;
+    use super::{build, try_build};
     use crate::cli::{Cli, DryRunArg, RequireConfigArg};
+    use crate::migrate::migrate_args;
 
     fn cli_with(mutate: impl FnOnce(&mut Cli)) -> Cli {
         let mut cli = Cli {
@@ -167,6 +217,7 @@ mod tests {
             labels: Vec::new(),
             host_rules: None,
             registry_aliases: None,
+            onboarding_config: None,
             quiet: false,
             output_format: crate::cli::OutputFormat::Human,
             repositories: Vec::new(),
@@ -178,6 +229,16 @@ mod tests {
     fn parse_and_build(args: &[&str]) -> GlobalConfig {
         let argv = std::iter::once("renovate").chain(args.iter().copied());
         let cli = Cli::try_parse_from(argv).expect("CLI args should parse");
+        build(&cli, GlobalConfig::default())
+    }
+
+    fn migrate_parse_and_build(args: &[&str]) -> GlobalConfig {
+        let raw: Vec<String> = std::iter::once("renovate")
+            .chain(args.iter().copied())
+            .map(str::to_owned)
+            .collect();
+        let migrated = migrate_args(&raw);
+        let cli = Cli::try_parse_from(migrated).expect("CLI args should parse after migration");
         build(&cli, GlobalConfig::default())
     }
 
@@ -282,6 +343,100 @@ mod tests {
             parse_and_build(&["--labels=a,b,c"]).labels,
             vec!["a", "b", "c"]
         );
+    }
+
+    // Ported: "parses json lists correctly" — workers/global/config/parse/cli.spec.ts line 95
+    #[test]
+    fn host_rules_json_list_is_parsed() {
+        let config = parse_and_build(&[
+            r#"--host-rules=[{"matchHost":"docker.io","hostType":"docker","username":"user","password":"password"}]"#,
+        ]);
+        assert_eq!(config.host_rules.len(), 1);
+        assert_eq!(config.host_rules[0]["matchHost"], "docker.io");
+        assert_eq!(config.host_rules[0]["hostType"], "docker");
+        assert_eq!(config.host_rules[0]["username"], "user");
+        assert_eq!(config.host_rules[0]["password"], "password");
+    }
+
+    // Ported: "parses [] correctly as empty list of hostRules" — workers/global/config/parse/cli.spec.ts line 111
+    #[test]
+    fn host_rules_empty_array_is_parsed() {
+        assert!(parse_and_build(&["--host-rules=[]"]).host_rules.is_empty());
+    }
+
+    // Ported: "parses an empty string correctly as empty list of hostRules" — workers/global/config/parse/cli.spec.ts line 118
+    #[test]
+    fn host_rules_empty_string_is_parsed() {
+        assert!(parse_and_build(&["--host-rules="]).host_rules.is_empty());
+    }
+
+    // Ported: "\"$arg\" -> $config" — workers/global/config/parse/cli.spec.ts line 125
+    #[test]
+    fn migrated_cli_aliases_produce_expected_config() {
+        let cases = [
+            ("--endpoints=", true, RecreateWhen::Auto),
+            ("--azure-auto-complete=false", false, RecreateWhen::Auto),
+            ("--azure-auto-complete=true", true, RecreateWhen::Auto),
+            ("--azure-auto-complete", true, RecreateWhen::Auto),
+            ("--git-lab-automerge=false", false, RecreateWhen::Auto),
+            ("--git-lab-automerge=true", true, RecreateWhen::Auto),
+            ("--git-lab-automerge", true, RecreateWhen::Auto),
+            ("--recreate-closed=false", true, RecreateWhen::Auto),
+            ("--recreate-closed=true", true, RecreateWhen::Always),
+            ("--recreate-closed", true, RecreateWhen::Always),
+            ("--recreate-when=auto", true, RecreateWhen::Auto),
+            ("--recreate-when=always", true, RecreateWhen::Always),
+            ("--recreate-when=never", true, RecreateWhen::Never),
+        ];
+
+        for (arg, expected_platform_automerge, expected_recreate) in cases {
+            let config = migrate_parse_and_build(&[arg]);
+            assert_eq!(
+                config.platform_automerge, expected_platform_automerge,
+                "{arg}"
+            );
+            if arg == "--endpoints=" {
+                assert!(config.host_rules.is_empty(), "{arg}");
+            }
+            assert_eq!(config.recreate_when, expected_recreate, "{arg}");
+        }
+    }
+
+    // Ported: "parses json object correctly when empty" — workers/global/config/parse/cli.spec.ts line 145
+    #[test]
+    fn onboarding_config_empty_string_is_parsed() {
+        assert!(
+            parse_and_build(&["--onboarding-config="])
+                .onboarding_config
+                .is_empty()
+        );
+    }
+
+    // Ported: "parses json {} object correctly" — workers/global/config/parse/cli.spec.ts line 152
+    #[test]
+    fn onboarding_config_empty_object_is_parsed() {
+        assert!(
+            parse_and_build(&["--onboarding-config={}"])
+                .onboarding_config
+                .is_empty()
+        );
+    }
+
+    // Ported: "parses json object correctly" — workers/global/config/parse/cli.spec.ts line 159
+    #[test]
+    fn onboarding_config_object_is_parsed() {
+        let config =
+            parse_and_build(&[r#"--onboarding-config={"extends": ["config:recommended"]}"#]);
+        assert_eq!(config.onboarding_config["extends"][0], "config:recommended");
+    }
+
+    // Ported: "throws exception for invalid json object" — workers/global/config/parse/cli.spec.ts line 168
+    #[test]
+    fn onboarding_config_invalid_json_is_rejected() {
+        let cli = Cli::try_parse_from(["renovate", "--onboarding-config=Hello_World"])
+            .expect("raw CLI string should parse");
+        let err = try_build(&cli, GlobalConfig::default()).expect_err("invalid JSON should fail");
+        assert_eq!(err, "Invalid JSON value: 'Hello_World'");
     }
 
     #[test]

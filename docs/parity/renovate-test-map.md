@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1660 / 1794 actionable tests ported (93%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1668 / 1794 actionable tests ported (93%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3992,7 +3992,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/cli.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/cli.spec.ts
-**Total tests:** 30 | **Ported:** 20 | **Actionable:** 28 | **Status:** partial
+**Total tests:** 30 | **Ported:** 28 | **Actionable:** 28 | **Status:** ported
 
 ### `workers/global/config/parse/cli › .getCliName(definition)`
 
@@ -4016,14 +4016,14 @@ resolver) and the inner `extractPackageFile()` adapter.
 | supports list multiple | 79 | ported | `config_builder.rs` | `labels_comma_separated_values_are_set` | — |
 | supports string | 84 | ported | `config_builder.rs` | `token_is_set` | — |
 | supports repositories | 89 | ported | `config_builder.rs` | `repositories_are_set` | — |
-| parses json lists correctly | 95 | pending | — | — | — |
-| parses [] correctly as empty list of hostRules | 111 | pending | — | — | — |
-| parses an empty string correctly as empty list of hostRules | 118 | pending | — | — | — |
-| "$arg" -> $config | 125 | pending | — | — | — |
-| parses json object correctly when empty | 145 | pending | — | — | — |
-| parses json {} object correctly | 152 | pending | — | — | — |
-| parses json object correctly | 159 | pending | — | — | — |
-| throws exception for invalid json object | 168 | pending | — | — | — |
+| parses json lists correctly | 95 | ported | `config_builder.rs` | `host_rules_json_list_is_parsed` | — |
+| parses [] correctly as empty list of hostRules | 111 | ported | `config_builder.rs` | `host_rules_empty_array_is_parsed` | — |
+| parses an empty string correctly as empty list of hostRules | 118 | ported | `config_builder.rs` | `host_rules_empty_string_is_parsed` | — |
+| "$arg" -> $config | 125 | ported | `config_builder.rs` | `migrated_cli_aliases_produce_expected_config` | — |
+| parses json object correctly when empty | 145 | ported | `config_builder.rs` | `onboarding_config_empty_string_is_parsed` | — |
+| parses json {} object correctly | 152 | ported | `config_builder.rs` | `onboarding_config_empty_object_is_parsed` | — |
+| parses json object correctly | 159 | ported | `config_builder.rs` | `onboarding_config_object_is_parsed` | — |
+| throws exception for invalid json object | 168 | ported | `config_builder.rs` | `onboarding_config_invalid_json_is_rejected` | — |
 | dryRun boolean true | 175 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` | — |
 | dryRun no value | 180 | ported | `cli.rs` | `dry_run_bare_is_accepted_via_migrate` | — |
 | dryRun boolean false | 185 | ported | `config_builder.rs` | `dry_run_legacy_false_disables_dry_run` | — |

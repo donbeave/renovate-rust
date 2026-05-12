@@ -194,6 +194,21 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         } else {
             file_config.labels
         },
+        host_rules: if file_config.host_rules.is_empty() {
+            base.host_rules
+        } else {
+            file_config.host_rules
+        },
+        registry_aliases: if file_config.registry_aliases.is_empty() {
+            base.registry_aliases
+        } else {
+            file_config.registry_aliases
+        },
+        onboarding_config: if file_config.onboarding_config.is_empty() {
+            base.onboarding_config
+        } else {
+            file_config.onboarding_config
+        },
         // repositories are CLI-only; the file config never sets them.
         repositories: base.repositories,
     }

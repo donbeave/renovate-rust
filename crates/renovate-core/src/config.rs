@@ -323,6 +323,15 @@ pub struct GlobalConfig {
     /// Labels to apply to created PRs.
     pub labels: Vec<String>,
 
+    /// Host rules supplied through CLI or global config.
+    pub host_rules: Vec<serde_json::Value>,
+
+    /// Registry alias map.
+    pub registry_aliases: std::collections::BTreeMap<String, String>,
+
+    /// Config used when onboarding repositories.
+    pub onboarding_config: serde_json::Map<String, serde_json::Value>,
+
     /// Repositories to process. Empty means "nothing to do" unless autodiscover
     /// is enabled (future slice).
     pub repositories: Vec<String>,
@@ -343,6 +352,9 @@ impl Default for GlobalConfig {
             allowed_commands: Vec::new(),
             allow_command_templating: false,
             labels: Vec::new(),
+            host_rules: Vec::new(),
+            registry_aliases: std::collections::BTreeMap::new(),
+            onboarding_config: serde_json::Map::new(),
             repositories: Vec::new(),
         }
     }

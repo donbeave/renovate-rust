@@ -173,7 +173,12 @@ pub(crate) struct Cli {
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Controls if platform-native auto-merge is used.
     /// Env: RENOVATE_PLATFORM_AUTOMERGE.
-    #[arg(long, env = "RENOVATE_PLATFORM_AUTOMERGE")]
+    #[arg(
+        long,
+        env = "RENOVATE_PLATFORM_AUTOMERGE",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
     pub(crate) platform_automerge: Option<bool>,
 
     /// When to recreate closed PRs.
@@ -206,6 +211,10 @@ pub(crate) struct Cli {
     /// Registry aliases (JSON object). Env: RENOVATE_REGISTRY_ALIASES.
     #[arg(long, env = "RENOVATE_REGISTRY_ALIASES")]
     pub(crate) registry_aliases: Option<String>,
+
+    /// Onboarding config (JSON object). Env: RENOVATE_ONBOARDING_CONFIG.
+    #[arg(long, env = "RENOVATE_ONBOARDING_CONFIG")]
+    pub(crate) onboarding_config: Option<String>,
 
     // ── Output control ───────────────────────────────────────────────────────
     /// Suppress per-dependency listing; show only per-file and run summaries.

@@ -100,7 +100,13 @@ async fn main() -> ExitCode {
         }
     };
 
-    let config = config_builder::build(&cli, base);
+    let config = match config_builder::try_build(&cli, base) {
+        Ok(config) => config,
+        Err(err) => {
+            eprintln!("renovate: {err}");
+            return ExitCode::from(1);
+        }
+    };
     tracing::info!(
         platform = %config.platform,
         dry_run = ?config.dry_run,
