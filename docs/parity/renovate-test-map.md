@@ -3573,6 +3573,66 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/automerge-major-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/automerge-major-migration.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/migrations/custom/automerge-major-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate value to object | 4 | not-applicable | — | — | Rust does not model Renovate's raw `automergeMajor` to generated `major.automerge` config migration output |
+| should migrate value to object and concat with existing minor object | 16 | not-applicable | — | — | Rust does not model Renovate's raw `automergeMajor` to generated `major.automerge` config migration output |
+| should ignore non object minor value | 32 | not-applicable | — | — | Rust does not model Renovate's raw `automergeMajor` to generated `major.automerge` config migration output |
+
+---
+
+## `lib/config/migrations/custom/automerge-minor-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/automerge-minor-migration.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/migrations/custom/automerge-minor-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate value to object | 4 | not-applicable | — | — | Rust does not model Renovate's raw `automergeMinor` to generated `minor.automerge` config migration output |
+| should migrate value to object and concat with existing minor object | 16 | not-applicable | — | — | Rust does not model Renovate's raw `automergeMinor` to generated `minor.automerge` config migration output |
+| should ignore non object minor value | 32 | not-applicable | — | — | Rust does not model Renovate's raw `automergeMinor` to generated `minor.automerge` config migration output |
+
+---
+
+## `lib/config/migrations/custom/automerge-patch-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/automerge-patch-migration.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/migrations/custom/automerge-patch-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate value to object | 4 | not-applicable | — | — | Rust does not model Renovate's raw `automergePatch` to generated `patch.automerge` config migration output |
+| should migrate value to object and concat with existing minor object | 16 | not-applicable | — | — | Rust does not model Renovate's raw `automergePatch` to generated `patch.automerge` config migration output |
+| should ignore non object minor value | 32 | not-applicable | — | — | Rust does not model Renovate's raw `automergePatch` to generated `patch.automerge` config migration output |
+
+---
+
+## `lib/config/migrations/custom/automerge-type-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/automerge-type-migration.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/migrations/custom/automerge-type-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate string like "branch-" to "branch" | 4 | not-applicable | — | — | Rust preserves typed `automergeType` values and does not expose Renovate's raw automergeType string cleanup migration output |
+| should not migrate another string value | 14 | not-applicable | — | — | Rust preserves typed `automergeType` values and does not expose Renovate's raw automergeType string cleanup migration output |
+| should not migrate non string value | 25 | not-applicable | — | — | Rust typed config parsing ignores non-string `automergeType` values instead of exposing raw migration output |
+
+---
+
 ## `lib/config/migrations/custom/dry-run-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/dry-run-migration.spec.ts
