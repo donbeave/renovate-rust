@@ -592,6 +592,21 @@ mod tests {
         Utc.with_ymd_and_hms(year, month, day, hour, 0, 0).unwrap()
     }
 
+    fn schedule(entries: &[&str]) -> Vec<String> {
+        entries.iter().map(|entry| (*entry).to_owned()).collect()
+    }
+
+    fn assert_schedule_cases(entries: &[&str], cases: &[(DateTime<Utc>, bool)]) {
+        let sched = schedule(entries);
+        for (datetime, expected) in cases {
+            assert_eq!(
+                is_within_schedule_at(&sched, *datetime),
+                *expected,
+                "schedule {sched:?} at {datetime}"
+            );
+        }
+    }
+
     // ── cron_matches ─────────────────────────────────────────────────────────
 
     #[test]
@@ -684,6 +699,166 @@ mod tests {
         let sched = vec!["* 0-3 * * *".to_owned()];
         assert!(is_within_schedule_at(&sched, utc(2024, 4, 15, 1)));
         assert!(!is_within_schedule_at(&sched, utc(2024, 4, 15, 10)));
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 19
+    #[test]
+    fn schedule_preset_daily_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* 0-3 * * *"],
+            &[
+                (utc(2017, 6, 30, 0), true),
+                (utc(2017, 6, 30, 1), true),
+                (utc(2017, 6, 30, 2), true),
+                (utc(2017, 6, 30, 3), true),
+                (utc(2017, 6, 30, 4), false),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 34
+    #[test]
+    fn schedule_preset_early_mondays_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* 0-3 * * 1"],
+            &[
+                (utc(2017, 6, 26, 0), true),
+                (utc(2017, 6, 26, 1), true),
+                (utc(2017, 6, 26, 2), true),
+                (utc(2017, 6, 26, 3), true),
+                (utc(2017, 6, 26, 4), false),
+                (utc(2017, 6, 30, 0), false),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 50
+    #[test]
+    fn schedule_preset_monthly_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* 0-3 1 * *"],
+            &[
+                (utc(2017, 6, 1, 0), true),
+                (utc(2017, 6, 1, 1), true),
+                (utc(2017, 6, 1, 2), true),
+                (utc(2017, 6, 1, 3), true),
+                (utc(2017, 6, 1, 4), false),
+                (utc(2017, 6, 2, 0), false),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 66
+    #[test]
+    fn schedule_preset_non_office_hours_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* 0-4,22-23 * * 1-5", "* * * * 0,6"],
+            &[
+                (utc(2017, 6, 1, 0), true),
+                (utc(2017, 6, 1, 1), true),
+                (utc(2017, 6, 1, 2), true),
+                (utc(2017, 6, 1, 3), true),
+                (utc(2017, 6, 1, 4), true),
+                (utc(2017, 6, 1, 10), false),
+                (utc(2017, 6, 1, 11), false),
+                (utc(2017, 6, 1, 22), true),
+                (utc(2017, 6, 1, 23), true),
+                (utc(2017, 6, 3, 9), true),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 86
+    #[test]
+    fn schedule_preset_office_hours_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* 8-17 * * 1-5"],
+            &[
+                (utc(2017, 6, 1, 7), false),
+                (utc(2017, 6, 1, 8), true),
+                (utc(2017, 6, 1, 12), true),
+                (utc(2017, 6, 1, 17), true),
+                (utc(2017, 6, 1, 18), false),
+                (utc(2017, 6, 2, 7), false),
+                (utc(2017, 6, 2, 8), true),
+                (utc(2017, 6, 2, 12), true),
+                (utc(2017, 6, 2, 17), true),
+                (utc(2017, 6, 2, 18), false),
+                (utc(2017, 6, 3, 7), false),
+                (utc(2017, 6, 3, 8), false),
+                (utc(2017, 6, 3, 12), false),
+                (utc(2017, 6, 3, 17), false),
+                (utc(2017, 6, 3, 18), false),
+                (utc(2017, 6, 4, 7), false),
+                (utc(2017, 6, 4, 8), false),
+                (utc(2017, 6, 4, 12), false),
+                (utc(2017, 6, 4, 17), false),
+                (utc(2017, 6, 4, 18), false),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 119
+    #[test]
+    fn schedule_preset_quarterly_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* * 1 */3 *"],
+            &[
+                (utc(2017, 1, 1, 0), true),
+                (utc(2017, 1, 2, 0), false),
+                (utc(2017, 4, 1, 1), true),
+                (utc(2017, 7, 1, 2), true),
+                (utc(2017, 10, 1, 3), true),
+                (utc(2017, 2, 1, 4), false),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 135
+    #[test]
+    fn schedule_preset_weekdays_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* * * * 1-5"],
+            &[
+                (utc(2017, 6, 1, 0), true),
+                (utc(2017, 6, 2, 1), true),
+                (utc(2017, 6, 3, 2), false),
+                (utc(2017, 6, 4, 3), false),
+                (utc(2017, 6, 5, 4), true),
+                (utc(2017, 6, 6, 10), true),
+                (utc(2017, 6, 7, 11), true),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 152
+    #[test]
+    fn schedule_preset_weekends_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* * * * 0,6"],
+            &[
+                (utc(2017, 6, 1, 0), false),
+                (utc(2017, 6, 2, 1), false),
+                (utc(2017, 6, 3, 2), true),
+                (utc(2017, 6, 4, 3), true),
+                (utc(2017, 6, 5, 4), false),
+                (utc(2017, 6, 6, 10), false),
+                (utc(2017, 6, 7, 11), false),
+            ],
+        );
+    }
+
+    // Ported: "$datetime" — config/presets/internal/schedule.spec.ts line 169
+    #[test]
+    fn schedule_preset_yearly_matches_upstream_cases() {
+        assert_schedule_cases(
+            &["* * 1 */12 *"],
+            &[
+                (utc(2017, 1, 1, 0), true),
+                (utc(2017, 2, 2, 1), false),
+                (utc(2018, 1, 1, 2), true),
+            ],
+        );
     }
 
     #[test]

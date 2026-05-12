@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1882 / 1882 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1891 / 1891 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3628,6 +3628,67 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | presets should have right name | 21 | ported | `monorepos.rs` | `monorepo_preset_names_use_supported_slug_format` | — |
+
+---
+
+## `lib/config/presets/internal/schedule.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/schedule.spec.ts
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+
+### `config/presets/internal/schedule › daily`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 19 | ported | `schedule.rs` | `schedule_preset_daily_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › earlyMondays`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 34 | ported | `schedule.rs` | `schedule_preset_early_mondays_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › monthly`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 50 | ported | `schedule.rs` | `schedule_preset_monthly_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › nonOfficeHours`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 66 | ported | `schedule.rs` | `schedule_preset_non_office_hours_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › officeHours`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 86 | ported | `schedule.rs` | `schedule_preset_office_hours_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › quarterly`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 119 | ported | `schedule.rs` | `schedule_preset_quarterly_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › weekdays`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 135 | ported | `schedule.rs` | `schedule_preset_weekdays_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › weekends`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 152 | ported | `schedule.rs` | `schedule_preset_weekends_matches_upstream_cases` | — |
+
+### `config/presets/internal/schedule › yearly`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $datetime | 169 | ported | `schedule.rs` | `schedule_preset_yearly_matches_upstream_cases` | — |
 
 ---
 
