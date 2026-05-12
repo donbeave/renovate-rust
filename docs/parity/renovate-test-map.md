@@ -5062,6 +5062,95 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/terraform-module/base.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/terraform-module/base.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/terraform-module/base`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws ExternalHostError for EAI_AGAIN errors | 7 | not-applicable | — | — | Renovate's Terraform module datasource external-host-error classification is not implemented in Rust; Rust latest-module lookup uses the shared HTTP error type. |
+| throws ExternalHostError for HTTP 503 errors | 22 | not-applicable | — | — | Renovate's Terraform module datasource external-host-error classification is not implemented in Rust; Rust latest-module lookup returns `None` for non-success HTTP statuses. |
+
+---
+
+## `lib/modules/datasource/terraform-module/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/terraform-module/index.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/terraform-module/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for the default registry when the module endpoint returns $description | 81 | not-applicable | — | — | Renovate's Terraform module `getReleases` error/null matrix is not implemented in Rust; Rust exposes latest-version lookup only. |
+| returns releases, homepage, and source URL from the default registry | 100 | not-applicable | — | — | Renovate's Terraform module full release-list, homepage, and sourceUrl mapping are not implemented in Rust; Rust exposes latest-version lookup only. |
+| returns null for a third-party registry when the versions endpoint returns $description | 127 | not-applicable | — | — | Renovate's Terraform module third-party registry error/null matrix is not implemented in Rust. |
+| returns releases from a third-party registry | 147 | not-applicable | — | — | Renovate's Terraform module service discovery and third-party registry release-list contract are not implemented in Rust. |
+| returns sourceUrl when a third-party registry includes one | 169 | not-applicable | — | — | Renovate's Terraform module service discovery, third-party registry sourceUrl mapping, and release-list contract are not implemented in Rust. |
+| uses the registry embedded in packageName | 199 | not-applicable | — | — | Renovate's Terraform module embedded-registry parsing and service-discovery URL routing are not implemented in Rust. |
+| uses the v1 extended endpoint for Terraform Cloud | 226 | not-applicable | — | — | Renovate's Terraform Cloud extended module endpoint is not implemented in Rust. |
+| returns null when the third-party versions response has no modules | 260 | not-applicable | — | — | Renovate's Terraform module third-party registry response validation is not implemented in Rust. |
+| returns null when service discovery fails | 277 | not-applicable | — | — | Renovate's Terraform module service discovery flow is not implemented in Rust. |
+| uses the service discovery modules path when the registry serves a custom subpath | 290 | not-applicable | — | — | Renovate's Terraform module service discovery custom-path routing is not implemented in Rust. |
+| processes real data from OpenTofu registry docs API | 313 | not-applicable | — | — | Renovate's OpenTofu registry docs API support is not implemented in Rust. |
+| returns an empty release list for OpenTofu registry without versions | 348 | not-applicable | — | — | Renovate's OpenTofu registry docs API support is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/terraform-module/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/terraform-module/utils.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/terraform-module/utils`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns URL with relative SD for modules | 7 | not-applicable | — | — | Renovate's Terraform service-discovery URL helper functions are not exposed as Rust datasource APIs. |
+| returns URL with relative SD for providers | 21 | not-applicable | — | — | Renovate's Terraform service-discovery URL helper functions are not exposed as Rust datasource APIs. |
+| returns URL with absolute SD  for modules | 35 | not-applicable | — | — | Renovate's Terraform service-discovery URL helper functions are not exposed as Rust datasource APIs. |
+| returns URL with absolute SD for providers and missing trailing slash | 49 | not-applicable | — | — | Renovate's Terraform service-discovery URL helper functions are not exposed as Rust datasource APIs. |
+| returns URL with with empty SD | 63 | not-applicable | — | — | Renovate's Terraform service-discovery URL helper functions are not exposed as Rust datasource APIs. |
+| returns URL with with missing SD | 75 | not-applicable | — | — | Renovate's Terraform service-discovery URL helper functions are not exposed as Rust datasource APIs. |
+| uses the configured registry URL for standard package names | 87 | not-applicable | — | — | Renovate's Terraform service-discovery URL helper functions are not exposed as Rust datasource APIs. |
+| extracts the registry from packageName when it is embedded | 99 | not-applicable | — | — | Renovate's Terraform embedded-registry URL helper is not exposed as a Rust datasource API. |
+| normalizes an embedded registry without a scheme | 111 | not-applicable | — | — | Renovate's Terraform embedded-registry URL helper is not exposed as a Rust datasource API. |
+
+---
+
+## `lib/modules/datasource/terraform-provider/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/terraform-provider/index.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/terraform-provider/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when both default registries return $description | 68 | not-applicable | — | — | Renovate's Terraform provider `getReleases` error/null matrix is not implemented in Rust; Rust exposes latest-version lookup only. |
+| processes real data | 87 | not-applicable | — | — | Renovate's Terraform provider full release-list and metadata mapping are not implemented in Rust; Rust exposes latest-version lookup only. |
+| returns null when a third-party registry returns $description | 136 | not-applicable | — | — | Renovate's Terraform provider third-party registry error/null matrix is not implemented in Rust. |
+| processes real data from third party | 156 | not-applicable | — | — | Renovate's Terraform provider service discovery and third-party registry release-list contract are not implemented in Rust. |
+| processes data with alternative backend | 184 | not-applicable | — | — | Renovate's Terraform provider alternative backend/service-discovery contract is not implemented in Rust. |
+| processes real data from OpenTofu registry docs API | 219 | not-applicable | — | — | Renovate's OpenTofu provider registry docs API support is not implemented in Rust. |
+| returns an empty release list for OpenTofu registry without versions | 253 | not-applicable | — | — | Renovate's OpenTofu provider registry docs API support is not implemented in Rust. |
+| throws for empty result | 274 | not-applicable | — | — | Renovate's Terraform provider `getReleases` empty-result error contract is not implemented in Rust. |
+| returns null for non hashicorp dependency and releases.hashicorp.com registryUrl | 290 | not-applicable | — | — | Renovate's releases.hashicorp.com provider fallback logic is not implemented in Rust. |
+| works for hashicorp dependency and releases.hashicorp.com | 299 | not-applicable | — | — | Renovate's releases.hashicorp.com provider fallback logic is not implemented in Rust. |
+| throws for hashicorp dependency and releases.hashicorp.com 500 | 312 | not-applicable | — | — | Renovate's releases.hashicorp.com provider fallback error handling is not implemented in Rust. |
+| rethrows external-host-error for hashicorp dependency and releases.hashicorp.com | 325 | not-applicable | — | — | Renovate's releases.hashicorp.com provider fallback error handling is not implemented in Rust. |
+| throws if service discovery error | 338 | not-applicable | — | — | Renovate's Terraform provider service discovery flow is not implemented in Rust. |
+| throws if a version is requested which is not available | 352 | not-applicable | — | — | Renovate's Terraform provider single-version build lookup is not implemented in Rust. |
+| processes real data | 367 | not-applicable | — | — | Renovate's Terraform provider single-version build metadata mapping is not implemented in Rust. |
+| throws if the retrieval of a single build fails | 447 | not-applicable | — | — | Renovate's Terraform provider single-version build lookup is not implemented in Rust. |
+| can fetch zip hashes | 487 | not-applicable | — | — | Renovate's Terraform provider zip hash endpoint support is not implemented in Rust. |
+| does not hard fail when the ziphashes endpoint is not available | 511 | not-applicable | — | — | Renovate's Terraform provider zip hash endpoint support is not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
