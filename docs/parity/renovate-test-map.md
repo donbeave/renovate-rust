@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1708 / 1790 actionable tests ported (95%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1715 / 1790 actionable tests ported (96%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4081,7 +4081,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/file.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts
-**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+**Total tests:** 15 | **Ported:** 7 | **Actionable:** 15 | **Status:** partial
 
 ### `workers/global/config/parse/file › .getConfig()`
 
@@ -4090,9 +4090,9 @@ resolver) and the inner `extractPackageFile()` adapter.
 | parses %s > %s | 27 | pending | — | — | — |
 | migrates | 56 | pending | — | — | — |
 | warns if config is invalid | 68 | pending | — | — | — |
-| parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env | 80 | pending | — | — | — |
+| parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env | 80 | ported | `file.rs` | `resolve_returns_none_when_env_not_set` | — |
 | fatal error and exit if error in parsing %s | 84 | pending | — | — | — |
-| fatal error and exit if custom config file does not exist | 112 | pending | — | — | — |
+| fatal error and exit if custom config file does not exist | 112 | ported | `file.rs` | `resolve_errors_when_explicit_file_missing` | — |
 | fatal error and exit if config.js contains unresolved env var | 126 | pending | — | — | — |
 | fatal error and exit if %s | 147 | pending | — | — | — |
 | exports env variables to environment from processEnv object | 161 | pending | — | — | — |
@@ -4102,11 +4102,11 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| skip when RENOVATE_CONFIG_FILE is not set ("%s") | 214 | pending | — | — | — |
-| skip when config file does not exist | 226 | pending | — | — | — |
-| skip if deleteConfigFile is not set ("%s") | 239 | pending | — | — | — |
-| removes the specified config file | 255 | pending | — | — | — |
-| fails silently when attempting to delete the config file | 278 | pending | — | — | — |
+| skip when RENOVATE_CONFIG_FILE is not set ("%s") | 214 | ported | `file.rs` | `delete_non_default_config_skips_when_env_not_set` | — |
+| skip when config file does not exist | 226 | ported | `file.rs` | `delete_non_default_config_skips_missing_file` | — |
+| skip if deleteConfigFile is not set ("%s") | 239 | ported | `file.rs` | `delete_non_default_config_skips_when_flag_is_false` | — |
+| removes the specified config file | 255 | ported | `file.rs` | `delete_non_default_config_removes_file` | — |
+| fails silently when attempting to delete the config file | 278 | ported | `file.rs` | `delete_non_default_config_fails_silently` | — |
 
 ---
 

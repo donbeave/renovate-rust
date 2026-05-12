@@ -71,7 +71,7 @@ pub fn resolve_config_path(
     config_file_env: Option<&str>,
     cwd: &Path,
 ) -> Result<Option<PathBuf>, ConfigFileError> {
-    let Some(explicit) = config_file_env else {
+    let Some(explicit) = config_file_env.filter(|value| !value.trim().is_empty()) else {
         return Ok(None);
     };
 
@@ -86,6 +86,34 @@ pub fn resolve_config_path(
     }
 
     Ok(Some(path))
+}
+
+/// Delete a non-default global config file after it has been loaded.
+///
+/// Mirrors `deleteNonDefaultConfig()` in Renovate's global config parser:
+/// skip when no explicit config path is set, skip when deletion is disabled,
+/// skip when the path does not exist, and ignore deletion failures.
+pub fn delete_non_default_config(config_file_env: Option<&str>, delete_config_file: bool) -> bool {
+    if !delete_config_file {
+        return false;
+    }
+
+    let Some(config_file) = config_file_env.filter(|value| !value.trim().is_empty()) else {
+        return false;
+    };
+
+    let path = Path::new(config_file);
+    if !path.exists() {
+        return false;
+    }
+
+    let result = if path.is_dir() {
+        std::fs::remove_dir_all(path)
+    } else {
+        std::fs::remove_file(path)
+    };
+
+    result.is_ok()
 }
 
 /// Load and parse a global config file into a [`GlobalConfig`].
@@ -265,10 +293,22 @@ mod tests {
 
     // ── resolve_config_path ──────────────────────────────────────────────────
 
+    // Ported: "parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env" — workers/global/config/parse/file.spec.ts line 80
     #[test]
     fn resolve_returns_none_when_env_not_set() {
         let dir = tempfile::tempdir().unwrap();
         assert!(resolve_config_path(None, dir.path()).unwrap().is_none());
+    }
+
+    // Ported: "skip when RENOVATE_CONFIG_FILE is not set (\"%s\")" — workers/global/config/parse/file.spec.ts line 214
+    #[test]
+    fn resolve_returns_none_when_env_is_blank() {
+        let dir = tempfile::tempdir().unwrap();
+        assert!(
+            resolve_config_path(Some(" "), dir.path())
+                .unwrap()
+                .is_none()
+        );
     }
 
     #[test]
@@ -280,11 +320,66 @@ mod tests {
         assert_eq!(resolved, Some(path));
     }
 
+    // Ported: "fatal error and exit if custom config file does not exist" — workers/global/config/parse/file.spec.ts line 112
     #[test]
     fn resolve_errors_when_explicit_file_missing() {
         let dir = tempfile::tempdir().unwrap();
         let err = resolve_config_path(Some("no_such_file.json"), dir.path()).unwrap_err();
         assert!(matches!(err, ConfigFileError::ExplicitPathNotFound(_)));
+    }
+
+    // ── delete_non_default_config ───────────────────────────────────────────
+
+    // Ported: "skip when RENOVATE_CONFIG_FILE is not set (\"%s\")" — workers/global/config/parse/file.spec.ts line 214
+    #[test]
+    fn delete_non_default_config_skips_when_env_not_set() {
+        assert!(!delete_non_default_config(None, true));
+        assert!(!delete_non_default_config(Some(" "), true));
+    }
+
+    // Ported: "skip when config file does not exist" — workers/global/config/parse/file.spec.ts line 226
+    #[test]
+    fn delete_non_default_config_skips_missing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let missing = dir.path().join("missing.json");
+        assert!(!delete_non_default_config(missing.to_str(), true));
+    }
+
+    // Ported: "skip if deleteConfigFile is not set (\"%s\")" — workers/global/config/parse/file.spec.ts line 239
+    #[test]
+    fn delete_non_default_config_skips_when_flag_is_false() {
+        let (_f, path) = write_temp("{}", ".json");
+        assert!(!delete_non_default_config(path.to_str(), false));
+        assert!(path.exists());
+    }
+
+    // Ported: "removes the specified config file" — workers/global/config/parse/file.spec.ts line 255
+    #[test]
+    fn delete_non_default_config_removes_file() {
+        let (_f, path) = write_temp("{}", ".json");
+        assert!(delete_non_default_config(path.to_str(), true));
+        assert!(!path.exists());
+    }
+
+    // Ported: "fails silently when attempting to delete the config file" — workers/global/config/parse/file.spec.ts line 278
+    #[cfg(unix)]
+    #[test]
+    fn delete_non_default_config_fails_silently() {
+        use std::os::unix::fs::PermissionsExt as _;
+
+        let dir = tempfile::tempdir().unwrap();
+        let parent = dir.path().join("parent");
+        std::fs::create_dir(&parent).unwrap();
+        let file = parent.join("config.json");
+        std::fs::write(&file, "{}").unwrap();
+
+        let original_permissions = std::fs::metadata(&parent).unwrap().permissions();
+        std::fs::set_permissions(&parent, std::fs::Permissions::from_mode(0o500)).unwrap();
+
+        assert!(!delete_non_default_config(file.to_str(), true));
+
+        std::fs::set_permissions(&parent, original_permissions).unwrap();
+        assert!(file.exists());
     }
 
     // ── load ─────────────────────────────────────────────────────────────────
