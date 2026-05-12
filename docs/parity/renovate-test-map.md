@@ -10403,6 +10403,92 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/util/s3.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/s3.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/s3`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses S3 URLs | 8 | not-applicable | — | — | Renovate's TypeScript S3 URL parser utility is not implemented as a Rust API; Rust only models S3-related config fields. |
+| returns null for non-S3 URLs | 15 | not-applicable | — | — | Renovate's TypeScript S3 URL parser utility is not implemented as a Rust API; Rust only models S3-related config fields. |
+| returns null for invalid URLs | 19 | not-applicable | — | — | Renovate's TypeScript S3 URL parser utility is not implemented as a Rust API; Rust only models S3-related config fields. |
+| returns a singleton S3 client instance | 23 | not-applicable | — | — | Renovate's TypeScript AWS S3 client singleton is not implemented as a Rust API. |
+| uses user-configured s3 values | 29 | not-applicable | — | — | Renovate's TypeScript AWS S3 client construction from global config is not implemented as a Rust API. |
+| uses s3 values from globalConfig instead of GlobalConfig class | 49 | not-applicable | — | — | Renovate's TypeScript AWS S3 client construction from explicit global config values is not implemented as a Rust API. |
+
+---
+
+## `lib/util/jsonata.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/jsonata.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/jsonata › getExpression`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return an expression | 6 | not-applicable | — | — | Renovate's TypeScript JSONata expression engine wrapper is not implemented as a Rust API; Rust only validates JSONata config syntax. |
+| should return an error | 10 | not-applicable | — | — | Renovate's TypeScript JSONata expression engine wrapper is not implemented as a Rust API; Rust only validates JSONata config syntax. |
+
+### `util/jsonata › getExpression › $detectPlatform`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return platform for known URL | 15 | not-applicable | — | — | Renovate's TypeScript JSONata custom `$detectPlatform` evaluator is not implemented as a Rust API. |
+| should return null for unknown URL | 28 | not-applicable | — | — | Renovate's TypeScript JSONata custom `$detectPlatform` evaluator is not implemented as a Rust API. |
+
+### `util/jsonata › getExpression › concurrent evaluation`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should maintain data isolation when evaluating same expression concurrently | 47 | not-applicable | — | — | Renovate's TypeScript JSONata runtime and concurrent evaluation behavior are not implemented as a Rust API. |
+| should maintain data isolation with complex $$ references | 73 | not-applicable | — | — | Renovate's TypeScript JSONata runtime and concurrent evaluation behavior are not implemented as a Rust API. |
+
+---
+
+## `lib/util/url.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/url.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/url`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $baseUrl + $x => $result | 18 | not-applicable | — | — | Renovate's TypeScript shared URL helper module is not implemented as a Rust API; Rust uses local `url` crate parsing and module-specific URL handling. |
+| replaceUrlPath("$baseUrl", "$x") => $result | 57 | not-applicable | — | — | Renovate's TypeScript shared URL path replacement helper is not implemented as a Rust API. |
+| getQueryString | 97 | not-applicable | — | — | Renovate's TypeScript shared query-string serializer helper is not implemented as a Rust API. |
+| validates http-based URLs | 101 | not-applicable | — | — | Renovate's TypeScript shared HTTP URL predicate is not implemented as a Rust API. |
+| parses URL | 112 | not-applicable | — | — | Renovate's TypeScript shared nullable URL parser wrapper is not implemented as a Rust API. |
+| trimTrailingSlash | 123 | not-applicable | — | — | Renovate's TypeScript shared URL/string slash helper is not implemented as a Rust API. |
+| trimSlashes | 130 | not-applicable | — | — | Renovate's TypeScript shared URL/string slash helper is not implemented as a Rust API. |
+| ensureTrailingSlash | 141 | not-applicable | — | — | Renovate's TypeScript shared URL/string slash helper is not implemented as a Rust API. |
+| ensures path prefix | 146 | not-applicable | — | — | Renovate's TypeScript shared URL path-prefix helper is not implemented as a Rust API. |
+| joinUrlParts | 164 | not-applicable | — | — | Renovate's TypeScript shared URL join helper is not implemented as a Rust API. |
+| createURLFromHostOrURL | 180 | not-applicable | — | — | Renovate's TypeScript shared host-or-URL constructor helper is not implemented as a Rust API. |
+| parseLinkHeader | 189 | not-applicable | — | — | Renovate's TypeScript shared HTTP Link header parser is not implemented as a Rust API. |
+| massageHostUrl | 221 | not-applicable | — | — | Renovate's TypeScript shared host URL normalization helper is not implemented as a Rust API. |
+
+---
+
+## `lib/util/toml.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/toml.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/toml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 5 | not-applicable | — | — | Renovate's TypeScript shared TOML parse wrapper is not implemented as a Rust API; Rust parses TOML inside individual extractors. |
+| handles invalid toml | 24 | not-applicable | — | — | Renovate's TypeScript shared TOML parse wrapper error contract is not implemented as a Rust API; Rust parses TOML inside individual extractors. |
+| handles templates | 32 | not-applicable | — | — | Renovate's TypeScript TOML template massaging helper is not implemented as a Rust API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
