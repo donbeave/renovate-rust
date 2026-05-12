@@ -16,4 +16,5 @@ pub mod redhat;
 pub mod rpm;
 pub mod semver_coerced;
 pub mod semver_generic;
+pub mod ubuntu;
 pub mod unity3d;
