@@ -70,6 +70,8 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_status_check_names(map, &mut errors);
     validate_base_branch_patterns(map, &mut errors);
     validate_enabled_managers(map, &mut errors);
+    validate_manager_file_patterns(map, &mut errors);
+    validate_custom_managers(map, &mut errors);
     validate_package_rules(map, &mut errors, &mut warnings);
 
     ValidationResult { errors, warnings }
@@ -345,6 +347,169 @@ fn validate_base_branch_patterns(map: &Map<String, Value>, errors: &mut Vec<Valu
     }
 }
 
+fn validate_manager_file_patterns(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    for (manager, config) in map {
+        let Some(config) = config.as_object() else {
+            continue;
+        };
+        let Some(Value::Array(patterns)) = config.get("managerFilePatterns") else {
+            continue;
+        };
+        for pattern in patterns.iter().filter_map(Value::as_str) {
+            if validate_renovate_regex_literal(pattern).is_err() {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Invalid regExp for {manager}.managerFilePatterns: `{pattern}`")
+                }));
+            }
+        }
+    }
+}
+
+fn validate_custom_managers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Array(custom_managers)) = map.get("customManagers") else {
+        return;
+    };
+
+    for manager in custom_managers {
+        let Some(manager) = manager.as_object() else {
+            continue;
+        };
+
+        let custom_type = manager.get("customType").and_then(Value::as_str);
+        match custom_type {
+            Some("regex" | "jsonata") => {}
+            Some(value) => {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Invalid customType: {value}. Key is not a custom manager")
+                }));
+                continue;
+            }
+            None => {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": "Each Custom Manager must contain a non-empty customType string"
+                }));
+                continue;
+            }
+        }
+
+        let invalid_manager_file_patterns = manager
+            .get("managerFilePatterns")
+            .and_then(Value::as_array)
+            .is_none_or(|patterns| patterns.is_empty());
+
+        if invalid_manager_file_patterns {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Each Custom Manager must contain a non-empty managerFilePatterns array"
+            }));
+        }
+
+        if let Some(Value::Array(patterns)) = manager.get("managerFilePatterns") {
+            for pattern in patterns.iter().filter_map(Value::as_str) {
+                if validate_renovate_regex_literal(pattern).is_err() {
+                    errors.push(json!({
+                        "topic": "Configuration Error",
+                        "message": format!("Invalid regExp for customManagers.managerFilePatterns: `{pattern}`")
+                    }));
+                }
+            }
+        }
+
+        if invalid_manager_file_patterns {
+            continue;
+        }
+
+        match custom_type {
+            Some("regex") => validate_regex_custom_manager(manager, errors),
+            Some("jsonata") => validate_jsonata_custom_manager(manager, errors),
+            _ => {}
+        }
+    }
+}
+
+fn validate_regex_custom_manager(manager: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(match_strings) = manager.get("matchStrings").and_then(Value::as_array) else {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array"
+        }));
+        return;
+    };
+
+    if match_strings.is_empty() {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each Custom Manager `matchStrings` array must have at least one item."
+        }));
+        return;
+    }
+
+    for pattern in match_strings.iter().filter_map(Value::as_str) {
+        if let Err(message) = validate_regex_pattern(pattern) {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid regExp for customManagers.matchStrings: {message}")
+            }));
+        }
+    }
+
+    if !has_template_or_capture(manager, "depNameTemplate", "depName") {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each Custom Manager must contain a depName capture group or depNameTemplate"
+        }));
+    }
+    if !has_template_or_capture(manager, "datasourceTemplate", "datasource") {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each Custom Manager must contain a datasource capture group or datasourceTemplate"
+        }));
+    }
+    if !has_template_or_capture(manager, "currentValueTemplate", "currentValue") {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each Custom Manager must contain a currentValue capture group or currentValueTemplate"
+        }));
+    }
+}
+
+fn validate_jsonata_custom_manager(manager: &Map<String, Value>, errors: &mut Vec<Value>) {
+    if manager.get("fileFormat").and_then(Value::as_str).is_none() {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each JSONata manager must contain a fileFormat field."
+        }));
+    }
+
+    let Some(match_strings) = manager.get("matchStrings").and_then(Value::as_array) else {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array"
+        }));
+        return;
+    };
+
+    if match_strings.is_empty() {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array"
+        }));
+        return;
+    }
+
+    for query in match_strings.iter().filter_map(Value::as_str) {
+        if has_invalid_jsonata_expression(query) {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid JSONata query for customManagers: `{query}`")
+            }));
+        }
+    }
+}
+
 fn has_invalid_template(template: &str) -> bool {
     template.contains("{{{") && !template.contains("}}}")
 }
@@ -387,9 +552,42 @@ fn validate_renovate_regex_literal(pattern: &str) -> Result<(), String> {
         body.to_owned()
     };
 
+    if regex_body.contains("?+") {
+        return Err("unsupported possessive quantifier".to_owned());
+    }
+
     Regex::new(&regex_body)
         .map(|_| ())
         .map_err(|err| err.to_string())
+}
+
+fn validate_regex_pattern(pattern: &str) -> Result<(), String> {
+    let normalized = normalize_named_capture_syntax(pattern);
+    Regex::new(&normalized)
+        .map(|_| ())
+        .map_err(|err| err.to_string())
+}
+
+fn normalize_named_capture_syntax(pattern: &str) -> String {
+    Regex::new(r"\(\?<([A-Za-z_][A-Za-z0-9_]*)>")
+        .expect("valid named capture regex")
+        .replace_all(pattern, "(?P<$1>")
+        .into_owned()
+}
+
+fn has_template_or_capture(
+    manager: &Map<String, Value>,
+    template_key: &str,
+    capture: &str,
+) -> bool {
+    manager.get(template_key).and_then(Value::as_str).is_some()
+        || manager
+            .get("matchStrings")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .any(|pattern| pattern.contains(&format!("?<{capture}>")))
 }
 
 #[cfg(test)]
@@ -757,6 +955,237 @@ mod tests {
             assert!(result.warnings.is_empty());
             assert_eq!(result.errors.len(), 1);
         }
+    }
+
+    // Ported: "errors for unsafe managerFilePatterns" — config/validation.spec.ts line 608
+    #[test]
+    fn validate_config_errors_for_unsafe_manager_file_patterns() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "npm": {"managerFilePatterns": ["/abc ([a-z]+) ([a-z]+))/"]},
+                "dockerfile": {"managerFilePatterns": ["/x?+/"]}
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 2);
+    }
+
+    // Ported: "validates regEx for each managerFilePatterns of format regex" — config/validation.spec.ts line 627
+    #[test]
+    fn validate_config_validates_custom_manager_file_pattern_regex() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "regex",
+                    "managerFilePatterns": ["/js/", "/***$}{]][/"],
+                    "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                    "datasourceTemplate": "maven",
+                    "versioningTemplate": "gradle"
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "errors if customManager has empty managerFilePatterns" — config/validation.spec.ts line 649
+    #[test]
+    fn validate_config_errors_for_empty_custom_manager_file_patterns() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"customManagers": [{"customType": "regex", "managerFilePatterns": []}]}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Each Custom Manager must contain a non-empty managerFilePatterns array"]
+        );
+    }
+
+    // Ported: "errors if no customManager customType" — config/validation.spec.ts line 675
+    #[test]
+    fn validate_config_errors_for_missing_custom_manager_type() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "managerFilePatterns": ["some-file"],
+                    "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                    "datasourceTemplate": "maven",
+                    "versioningTemplate": "gradle"
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Each Custom Manager must contain a non-empty customType string"]
+        );
+    }
+
+    // Ported: "errors if invalid customManager customType" — config/validation.spec.ts line 703
+    #[test]
+    fn validate_config_errors_for_invalid_custom_manager_type() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "unknown",
+                    "managerFilePatterns": ["some-file"],
+                    "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                    "datasourceTemplate": "maven",
+                    "versioningTemplate": "gradle"
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Invalid customType: unknown. Key is not a custom manager"]
+        );
+    }
+
+    // Ported: "errors if empty customManager matchStrings" — config/validation.spec.ts line 732
+    #[test]
+    fn validate_config_errors_for_empty_custom_manager_match_strings() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [
+                    {
+                        "customType": "regex",
+                        "managerFilePatterns": ["foo"],
+                        "matchStrings": [],
+                        "depNameTemplate": "foo",
+                        "datasourceTemplate": "bar",
+                        "currentValueTemplate": "baz"
+                    },
+                    {
+                        "customType": "jsonata",
+                        "fileFormat": "json",
+                        "managerFilePatterns": ["foo"],
+                        "depNameTemplate": "foo",
+                        "datasourceTemplate": "bar",
+                        "currentValueTemplate": "baz"
+                    }
+                ]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 2);
+    }
+
+    // Ported: "validates regEx for each matchStrings" — config/validation.spec.ts line 793
+    #[test]
+    fn validate_config_validates_custom_manager_match_string_regex() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "regex",
+                    "managerFilePatterns": ["Dockerfile"],
+                    "matchStrings": ["***$}{]]["],
+                    "depNameTemplate": "foo",
+                    "datasourceTemplate": "bar",
+                    "currentValueTemplate": "baz"
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "error if no fileFormat in custom JSONata manager" — config/validation.spec.ts line 815
+    #[test]
+    fn validate_config_errors_for_jsonata_manager_missing_file_format() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "jsonata",
+                    "managerFilePatterns": ["package.json"],
+                    "matchStrings": ["packages.{\"depName\": name, \"currentValue\": version, \"datasource\": \"npm\"}"]
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Each JSONata manager must contain a fileFormat field."]
+        );
+    }
+
+    // Ported: "validates JSONata query for each matchStrings" — config/validation.spec.ts line 841
+    #[test]
+    fn validate_config_validates_jsonata_manager_queries() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "jsonata",
+                    "fileFormat": "json",
+                    "managerFilePatterns": ["package.json"],
+                    "matchStrings": ["packages.{"],
+                    "depNameTemplate": "foo",
+                    "datasourceTemplate": "bar",
+                    "currentValueTemplate": "baz"
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Invalid JSONata query for customManagers: `packages.{`"]
+        );
+    }
+
+    // Ported: "validates all possible regex manager options" — config/validation.spec.ts line 871
+    #[test]
+    fn validate_config_validates_all_regex_custom_manager_options() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "customType": "regex",
+                    "managerFilePatterns": ["Dockerfile"],
+                    "matchStrings": ["***$}{]]["]
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 4);
+    }
+
+    // Ported: "passes if customManager fields are present" — config/validation.spec.ts line 890
+    #[test]
+    fn validate_config_allows_valid_custom_managers() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [
+                    {
+                        "customType": "regex",
+                        "managerFilePatterns": ["Dockerfile"],
+                        "matchStrings": ["ENV (?<currentValue>.*?)\\s"],
+                        "depNameTemplate": "foo",
+                        "datasourceTemplate": "bar",
+                        "registryUrlTemplate": "foobar",
+                        "extractVersionTemplate": "^(?<version>v\\d+\\.\\d+)",
+                        "depTypeTemplate": "apple"
+                    },
+                    {
+                        "customType": "jsonata",
+                        "fileFormat": "json",
+                        "managerFilePatterns": ["package.json"],
+                        "matchStrings": ["packages.{\"depName\": depName, \"currentValue\": version, \"datasource\": \"npm\"}"]
+                    }
+                ]
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14

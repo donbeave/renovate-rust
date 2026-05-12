@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1548 / 1657 actionable tests ported (93%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1559 / 1657 actionable tests ported (94%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 24 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 35 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3581,18 +3581,18 @@ resolver) and the inner `extractPackageFile()` adapter.
 | errors for all types | 523 | pending | — | — | — |
 | selectors outside packageRules array trigger errors | 558 | pending | — | — | — |
 | ignore packageRule nesting validation for presets | 588 | pending | — | — | — |
-| errors for unsafe managerFilePatterns | 608 | pending | — | — | — |
-| validates regEx for each managerFilePatterns of format regex | 627 | pending | — | — | — |
-| errors if customManager has empty managerFilePatterns | 649 | pending | — | — | — |
-| errors if no customManager customType | 675 | pending | — | — | — |
-| errors if invalid customManager customType | 703 | pending | — | — | — |
-| errors if empty customManager matchStrings | 732 | pending | — | — | — |
+| errors for unsafe managerFilePatterns | 608 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_unsafe_manager_file_patterns` | — |
+| validates regEx for each managerFilePatterns of format regex | 627 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_custom_manager_file_pattern_regex` | — |
+| errors if customManager has empty managerFilePatterns | 649 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_empty_custom_manager_file_patterns` | — |
+| errors if no customManager customType | 675 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_missing_custom_manager_type` | — |
+| errors if invalid customManager customType | 703 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_custom_manager_type` | — |
+| errors if empty customManager matchStrings | 732 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_empty_custom_manager_match_strings` | — |
 | errors if no customManager managerFilePatterns | 774 | pending | — | — | — |
-| validates regEx for each matchStrings | 793 | pending | — | — | — |
-| error if no fileFormat in custom JSONata manager | 815 | pending | — | — | — |
-| validates JSONata query for each matchStrings | 841 | pending | — | — | — |
-| validates all possible regex manager options | 871 | pending | — | — | — |
-| passes if customManager fields are present | 890 | pending | — | — | — |
+| validates regEx for each matchStrings | 793 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_custom_manager_match_string_regex` | — |
+| error if no fileFormat in custom JSONata manager | 815 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_jsonata_manager_missing_file_format` | — |
+| validates JSONata query for each matchStrings | 841 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_jsonata_manager_queries` | — |
+| validates all possible regex manager options | 871 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_all_regex_custom_manager_options` | — |
+| passes if customManager fields are present | 890 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_valid_custom_managers` | — |
 | errors if extra customManager fields are present | 922 | pending | — | — | — |
 | errors if customManager fields are missing | 945 | pending | — | — | — |
 | errors if customManager fields are missing: JSONataManager | 967 | pending | — | — | — |
