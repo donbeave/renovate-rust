@@ -3265,6 +3265,26 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/artifactory/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/artifactory/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/artifactory/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses real data (folders): with slash at the end | 26 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| parses real data (files): without slash at the end | 42 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| parses real data (merge strategy with 2 registries) | 58 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| returns null without registryUrl + warning | 80 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| returns null for empty 200 OK | 94 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| 404 returns null | 108 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| throws for error diff than 404 | 128 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| throws no Http error | 139 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+
+---
+
 ## `lib/modules/datasource/bazel/schema.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bazel/schema.spec.ts
@@ -3275,6 +3295,25 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | parses metadata | 6 | ported | `bazel.rs` | `bazel_module_metadata_parses_versions_with_yanked_versions` | — |
+
+---
+
+## `lib/modules/datasource/aws-eks-addon/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/aws-eks-addon/index.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/aws-eks-addon/index › getPkgReleases()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returned $des addons to be null | 92 | not-applicable | — | — | AWS EKS addon datasource lookup and AWS SDK-backed release filtering are not implemented in Rust. |
+| with addonName not supplied | 113 | not-applicable | — | — | AWS EKS addon datasource lookup and AWS SDK-backed release filtering are not implemented in Rust. |
+| with addonName only | 129 | not-applicable | — | — | AWS EKS addon datasource lookup and AWS SDK-backed release filtering are not implemented in Rust. |
+| with addon and profile | 160 | not-applicable | — | — | AWS EKS addon datasource lookup and AWS SDK-backed release filtering are not implemented in Rust. |
+| with addon and region | 169 | not-applicable | — | — | AWS EKS addon datasource lookup and AWS SDK-backed release filtering are not implemented in Rust. |
+| with addonName and default only config | 178 | not-applicable | — | — | AWS EKS addon datasource lookup and AWS SDK-backed release filtering are not implemented in Rust. |
+| with matched addon to return all versions of the addon | 204 | not-applicable | — | — | AWS EKS addon datasource lookup and AWS SDK-backed release filtering are not implemented in Rust. |
 
 ---
 
