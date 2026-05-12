@@ -9580,6 +9580,249 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/util/yaml.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/yaml.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/yaml › loadAll`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty array for empty string | 7 | not-applicable | — | — | Renovate's generic YAML parser helper is not implemented as a Rust API; Rust YAML handling is extractor-specific and global config YAML support is explicitly deferred. |
+| should parse content with single document | 11 | not-applicable | — | — | Renovate's generic YAML parser helper is not implemented as a Rust API; Rust YAML handling is extractor-specific. |
+| should parse content with single document with schema | 26 | not-applicable | — | — | Renovate's Zod schema validation wrapper around YAML parsing has no Rust API equivalent. |
+| should parse content with multiple documents | 50 | not-applicable | — | — | Renovate's generic multi-document YAML helper is not implemented as a Rust API; multi-document behavior is covered in extractor-specific specs where relevant. |
+| should parse content with multiple documents with schema | 70 | not-applicable | — | — | Renovate's Zod schema validation wrapper around multi-document YAML parsing has no Rust API equivalent. |
+| should throw if schema does not match | 102 | not-applicable | — | — | Renovate's Zod schema validation failure behavior has no Rust API equivalent. |
+| should throw if schema does not match and failureBehaviour "throw" | 122 | not-applicable | — | — | Renovate's Zod schema validation failure behavior has no Rust API equivalent. |
+| should still return valid elements if schema does not match with "filter" behaviour | 143 | not-applicable | — | — | Renovate's Zod schema filtering mode has no Rust API equivalent. |
+| should parse content with templates | 170 | not-applicable | — | — | Renovate's YAML template stripping helper is not implemented as a Rust API. |
+| should parse content with templates without quotes | 193 | not-applicable | — | — | Renovate's YAML template stripping helper is not implemented as a Rust API. |
+
+### `util/yaml › load`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return undefined | 222 | not-applicable | — | — | Renovate's single-document YAML parser helper is not implemented as a Rust API. |
+| should parse content with single document | 226 | not-applicable | — | — | Renovate's single-document YAML parser helper is not implemented as a Rust API. |
+| should parse invalid content using strict=false | 239 | not-applicable | — | — | Renovate's YAML `strict=false` parser behavior has no Rust API equivalent. |
+| should parse content with single document with schema | 253 | not-applicable | — | — | Renovate's Zod schema validation wrapper around single-document YAML parsing has no Rust API equivalent. |
+| should throw with single document with schema if parsing fails | 275 | not-applicable | — | — | Renovate's Zod schema validation failure behavior has no Rust API equivalent. |
+| should parse content with multiple documents | 292 | not-applicable | — | — | Renovate's single-document YAML helper error for multiple documents has no Rust API equivalent. |
+| should parse content with template | 303 | not-applicable | — | — | Renovate's YAML template stripping helper is not implemented as a Rust API. |
+| should parse content with template without quotes | 326 | not-applicable | — | — | Renovate's YAML template stripping helper is not implemented as a Rust API. |
+| should parse content with yaml tags | 353 | not-applicable | — | — | Renovate's YAML tag coercion behavior has no shared Rust API equivalent. |
+
+---
+
+## `lib/util/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/common.spec.ts
+**Total tests:** 22 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/common › detectPlatform`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ("$url") === $hostType | 46 | not-applicable | — | — | Renovate's URL-based platform detector helper is not implemented as a Rust API; Rust platform selection is config-driven. |
+| uses host rules | 67 | not-applicable | — | — | Renovate's host-rules-backed platform detector helper is not implemented as a Rust API. |
+
+### `util/common › parseJson`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null | 119 | not-applicable | — | — | Renovate's nullable TypeScript `parseJson` helper is not implemented as a Rust API; Rust config parsing uses typed file loaders. |
+| returns parsed json | 123 | not-applicable | — | — | Renovate's TypeScript `parseJson` helper is not implemented as a Rust API; Rust config parsing coverage is tracked under `config/parse.spec.ts`. |
+| supports jsonc | 131 | not-applicable | — | — | Renovate's JSONC-first helper behavior is not implemented as a Rust utility API; Rust repo config parsing has separate JSON5-based coverage. |
+| throws error for invalid json | 149 | not-applicable | — | — | Renovate's TypeScript `parseJson` helper is not implemented as a Rust API; Rust config parse errors are tracked under `config/parse.spec.ts`. |
+| catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse | 153 | not-applicable | — | — | Renovate's JSONC-to-JSON5 warning fallback is a TypeScript helper side effect with no Rust utility API equivalent. |
+| does not warn if filename ends with .jsonc | 167 | not-applicable | — | — | Renovate's TypeScript logger side effect around JSONC parsing has no Rust utility API equivalent. |
+| does not warn if filename ends with .json5 | 172 | not-applicable | — | — | Renovate's TypeScript logger side effect around JSON5 parsing has no Rust utility API equivalent. |
+
+### `util/common › parseJsonc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns parsed jsonc | 179 | not-applicable | — | — | Renovate's TypeScript `parseJson`/JSONC helper is not implemented as a Rust API; Rust config parsing uses typed file loaders. |
+| throws error for invalid jsonc | 187 | not-applicable | — | — | Renovate's TypeScript `parseJson`/JSONC helper is not implemented as a Rust API; Rust config parse errors are tracked under `config/parse.spec.ts`. |
+
+### `util/common › getInheritedOrGlobal`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined if not set | 198 | not-applicable | — | — | Renovate's process-global `GlobalConfig`/`InheritConfig` lookup helper is not implemented as a Rust API. |
+| returns inherited value if only inherited value is set | 202 | not-applicable | — | — | Renovate's process-global inherited config lookup helper is not implemented as a Rust API. |
+| returns global value if only global value is set | 209 | not-applicable | — | — | Renovate's process-global config lookup helper is not implemented as a Rust API. |
+| returns inherited value - when both global + inherited are set | 216 | not-applicable | — | — | Renovate's process-global config precedence helper is not implemented as a Rust API. |
+| handles null inherited values | 227 | not-applicable | — | — | Renovate's TypeScript null inherited-config coverage is not representable in the typed Rust config API. |
+| handles undefined inherited values | 238 | not-applicable | — | — | Renovate's TypeScript undefined inherited-config coverage is not representable in the typed Rust config API. |
+
+### `util/common › getInheritedOrGlobal › when requesting onboardingAutoCloseAge, do not allow inherit config to override global config`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns inherited value when inherited < global | 249 | not-applicable | — | — | Renovate's process-global `onboardingAutoCloseAge` inheritance helper is not implemented as a Rust API. |
+| returns global value when inherited > global value | 259 | not-applicable | — | — | Renovate's process-global `onboardingAutoCloseAge` inheritance helper is not implemented as a Rust API. |
+| returns inherited value when inherited == global | 269 | not-applicable | — | — | Renovate's process-global `onboardingAutoCloseAge` inheritance helper is not implemented as a Rust API. |
+| returns inherited value when global value is not set | 279 | not-applicable | — | — | Renovate's process-global `onboardingAutoCloseAge` inheritance helper is not implemented as a Rust API. |
+| returns global value when inherited value is not set | 289 | not-applicable | — | — | Renovate's process-global `onboardingAutoCloseAge` inheritance helper is not implemented as a Rust API. |
+
+---
+
+## `lib/util/string.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/string.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/string › replaceAt`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaceAt inserts newString which is one char longer than oldString | 11 | not-applicable | — | — | Renovate's TypeScript string replacement helper is not implemented as a shared Rust API. |
+| replaceAt inserts newString which is significantly longer than oldString | 22 | not-applicable | — | — | Renovate's TypeScript string replacement helper is not implemented as a shared Rust API. |
+
+### `util/string › looseEquals`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reverts to literal match if either is falsey | 35 | not-applicable | — | — | Renovate's JavaScript truthiness-aware loose equality helper has no Rust API equivalent. |
+
+### `util/string`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| coerceString | 42 | not-applicable | — | — | Renovate's TypeScript nullable string coercion helper is not implemented as a shared Rust API. |
+
+### `util/string › stripTemplates`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| "$input" -> "$expected" | 51 | not-applicable | — | — | Renovate's generic Handlebars/Jinja template stripping helper is not implemented as a shared Rust API; Rust template handling is extractor-specific. |
+
+### `util/string › capitalize`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| capitalizes | 81 | not-applicable | — | — | Renovate's TypeScript capitalization helper is not implemented as a shared Rust API. |
+
+---
+
+## `lib/util/interpolator.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/interpolator.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/interpolator › validateInterpolatedValues`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing if not input | 13 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust secrets/variables interpolation is covered under config-specific tests. |
+| does not throw error when keys and values are valid | 19 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust secrets/variables interpolation is covered under config-specific tests. |
+| throws when input is not a valid object | 25 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust secrets/variables validation is covered under config-specific tests. |
+| throws when keys do not follow specified regex patterns | 31 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust secrets/variables validation is covered under config-specific tests. |
+| throws when values are not of type string | 40 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust secrets/variables validation is covered under config-specific tests. |
+
+### `util/interpolator › replaceInterpolatedValuesInObject`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces values and deletes secrets | 48 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust secrets/variables interpolation is covered under config-specific tests. |
+| replaces values and keeps secrets | 97 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust secrets/variables interpolation is covered under config-specific tests. |
+| does not resolve secrets in onboaringConfig | 115 | not-applicable | — | — | Renovate's TypeScript onboardingConfig interpolation exclusion is not implemented as a standalone Rust utility API. |
+| throws error if secrets are used in disallowed options | 155 | not-applicable | — | — | Renovate's TypeScript option-level secrets substitution policy is not implemented as a standalone Rust utility API. |
+| throws error if secret key is not present in config | 175 | not-applicable | — | — | Renovate's TypeScript interpolator helper API is not implemented directly; Rust missing-secret behavior is covered under config-specific tests. |
+
+---
+
+## `lib/util/date.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/date.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/date › getElapsedDays › by default`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns elapsed days | 22 | not-applicable | — | — | Renovate's generic elapsed-time helper is not implemented as a shared Rust API; Rust date arithmetic is local to feature modules. |
+| returns floor'd version of floating point when partial days | 27 | not-applicable | — | — | Renovate's generic elapsed-time helper is not implemented as a shared Rust API. |
+
+### `util/date › getElapsedDays › when floor=false`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns floating point when partial days | 34 | not-applicable | — | — | Renovate's generic elapsed-time helper is not implemented as a shared Rust API. |
+| returns all decimal places | 39 | not-applicable | — | — | Renovate's generic elapsed-time helper is not implemented as a shared Rust API. |
+
+### `util/date › getElapsedMinutes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns elapsed minutes | 47 | not-applicable | — | — | Renovate's generic elapsed-time helper is not implemented as a shared Rust API. |
+
+### `util/date › getElapsedHours`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns elapsed hours | 54 | not-applicable | — | — | Renovate's generic elapsed-time helper is not implemented as a shared Rust API. |
+| returns zero when date passed is invalid | 60 | not-applicable | — | — | Renovate's JavaScript invalid-date fallback behavior has no shared Rust API equivalent. |
+
+### `util/date › getElapsedMs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns elapsed time in milliseconds | 66 | not-applicable | — | — | Renovate's generic elapsed-time helper is not implemented as a shared Rust API. |
+
+---
+
+## `lib/util/fingerprint.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/fingerprint.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/fingerprint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty string | 16 | not-applicable | — | — | Renovate's safe-stringify object fingerprint helper is not implemented as a shared Rust API. |
+| maintains deterministic order | 21 | not-applicable | — | — | Renovate's safe-stringify object fingerprint helper is not implemented as a shared Rust API. |
+
+---
+
+## `lib/util/hash.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/hash.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/hash`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| hashes data with sha256 | 6 | not-applicable | — | — | Renovate's generic string hash helper is not implemented as a shared Rust API; Rust hashing is local to call sites such as branch naming. |
+| hashes data with sha512 | 15 | not-applicable | — | — | Renovate's generic string hash helper is not implemented as a shared Rust API; Rust hashing is local to call sites such as branch naming. |
+| correctly hashes the content of a readable stream | 21 | not-applicable | — | — | Renovate's Node readable-stream hashing helper has no Rust API equivalent. |
+| uses sha512 if no algorithm is specified | 38 | not-applicable | — | — | Renovate's Node readable-stream hashing helper has no Rust API equivalent. |
+
+---
+
+## `lib/util/regex.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/regex.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/regex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses RE2 | 6 | not-applicable | — | — | Renovate's JavaScript `regEx()` wrapper and RE2 object type are not implemented as a Rust API; Rust uses the `regex` crate directly. |
+| throws unsafe 2 | 10 | not-applicable | — | — | Renovate's JavaScript `regEx()` validation wrapper has no shared Rust API equivalent. |
+| reuses flags from regex | 14 | not-applicable | — | — | Renovate's JavaScript RegExp flag normalization has no Rust API equivalent. |
+| caches non-stateful regex | 18 | not-applicable | — | — | Renovate's JavaScript regex instance cache has no Rust API equivalent. |
+| does not cache stateful regex | 23 | not-applicable | — | — | Renovate's JavaScript regex statefulness/cache behavior has no Rust API equivalent. |
+| Falls back to RegExp | 28 | not-applicable | — | — | Renovate's JavaScript RE2 module fallback behavior has no Rust API equivalent. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
