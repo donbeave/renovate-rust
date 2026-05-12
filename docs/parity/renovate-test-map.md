@@ -10636,6 +10636,160 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/manager/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/range.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/range`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | not-applicable | — | — | Renovate's TypeScript manager range-strategy dispatch helper is not implemented as a Rust API. |
+| returns manager strategy | 13 | not-applicable | — | — | Renovate's TypeScript manager range-strategy dispatch helper is not implemented as a Rust API. |
+| defaults to update-lockfile if updateLockedDependency() is supported | 22 | not-applicable | — | — | Renovate's TypeScript manager range-strategy dispatch helper is not implemented as a Rust API. |
+| defaults to replace | 30 | not-applicable | — | — | Renovate's TypeScript manager range-strategy dispatch helper is not implemented as a Rust API. |
+| returns rangeStrategy if not auto | 38 | not-applicable | — | — | Renovate's TypeScript manager range-strategy dispatch helper is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/manager/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/index.spec.ts
+**Total tests:** 22 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/index › supportedDatasources`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has valid supportedDatasources for ${m} | 18 | not-applicable | — | — | Renovate's TypeScript manager registry metadata validation is not implemented as a Rust API. |
+
+### `modules/manager/index › lockFileNames`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has lockFileNames for ${name} | 31 | not-applicable | — | — | Renovate's TypeScript manager registry lock-file metadata validation is not implemented as a Rust API. |
+
+### `modules/manager/index › get()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets something | 38 | not-applicable | — | — | Renovate's TypeScript manager registry lookup API is not implemented as a Rust API. |
+
+### `modules/manager/index › getManagerList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets | 45 | not-applicable | — | — | Renovate's TypeScript manager registry list API is not implemented as a Rust API. |
+
+### `modules/manager/index › getEnabledManagersList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 51 | not-applicable | — | — | Renovate's TypeScript enabled-manager list normalization helper is not implemented as a Rust API. |
+
+### `modules/manager/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validates | 60 | not-applicable | — | — | Renovate's TypeScript dynamic manager module registry validation is not implemented as a Rust API. |
+
+### `modules/manager/index › detectGlobalConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| iterates through managers | 108 | not-applicable | — | — | Renovate's TypeScript manager global-config detection hook is not implemented as a Rust API. |
+
+### `modules/manager/index › extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null | 114 | not-applicable | — | — | Renovate's TypeScript generic manager extraction dispatcher is not implemented as a Rust API; Rust invokes concrete extractor pipelines directly. |
+| returns non-null | 127 | not-applicable | — | — | Renovate's TypeScript generic manager extraction dispatcher is not implemented as a Rust API; Rust invokes concrete extractor pipelines directly. |
+
+### `modules/manager/index › extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null | 144 | not-applicable | — | — | Renovate's TypeScript generic manager extraction dispatcher is not implemented as a Rust API; Rust invokes concrete extractor pipelines directly. |
+| handles custom managers | 157 | not-applicable | — | — | Renovate's TypeScript custom-manager registry dispatcher is not implemented as a Rust API. |
+| returns non-null | 168 | not-applicable | — | — | Renovate's TypeScript generic manager extraction dispatcher is not implemented as a Rust API; Rust invokes concrete extractor pipelines directly. |
+
+### `modules/manager/index › getRangeStrategy`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null | 186 | not-applicable | — | — | Renovate's TypeScript manager range-strategy registry dispatch is not implemented as a Rust API. |
+| returns non-null | 196 | not-applicable | — | — | Renovate's TypeScript manager range-strategy registry dispatch is not implemented as a Rust API. |
+| returns update-lockfile for in-range-only | 219 | not-applicable | — | — | Renovate's TypeScript manager range-strategy registry dispatch is not implemented as a Rust API. |
+| returns update-lockfile for in-range-only if it is proposed my manager | 232 | not-applicable | — | — | Renovate's TypeScript manager range-strategy registry dispatch is not implemented as a Rust API. |
+
+### `modules/manager/index › isKnownManager`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true | 252 | not-applicable | — | — | Renovate's TypeScript manager registry predicate is not implemented as a Rust API. |
+| returns false | 258 | not-applicable | — | — | Renovate's TypeScript manager registry predicate is not implemented as a Rust API. |
+
+### `modules/manager/index › getPrettyDepType`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| when no manager found, returns undefined | 265 | not-applicable | — | — | Renovate's TypeScript pretty dependency-type registry helper is not implemented as a Rust API. |
+| when manager found, but no prettyDepType found, returns undefined | 271 | not-applicable | — | — | Renovate's TypeScript pretty dependency-type registry helper is not implemented as a Rust API. |
+| when manager found, but no prettyDepType found, returns undefined | 275 | not-applicable | — | — | Renovate's TypeScript pretty dependency-type registry helper is not implemented as a Rust API. |
+| when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType | 279 | not-applicable | — | — | Renovate's TypeScript pretty dependency-type registry helper is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/manager/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/util.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/util`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| applies GitHub source for tag | 14 | not-applicable | — | — | Renovate's TypeScript git-source dependency enrichment helper is not implemented as a Rust API. |
+| applies GitLab source for tag | 30 | not-applicable | — | — | Renovate's TypeScript git-source dependency enrichment helper is not implemented as a Rust API. |
+| applies other git source for tag | 46 | not-applicable | — | — | Renovate's TypeScript git-source dependency enrichment helper is not implemented as a Rust API. |
+| applies git source with subdomain | 61 | not-applicable | — | — | Renovate's TypeScript git-source dependency enrichment helper with host-rules lookup is not implemented as a Rust API. |
+| applies GitHub source for tag with SSH URL | 81 | not-applicable | — | — | Renovate's TypeScript git-source dependency enrichment helper is not implemented as a Rust API. |
+| applies GitLab source for tag with SSH URL | 97 | not-applicable | — | — | Renovate's TypeScript git-source dependency enrichment helper is not implemented as a Rust API. |
+| applies GitHub source for tag with HTTPS URL | 113 | not-applicable | — | — | Renovate's TypeScript git-source dependency enrichment helper is not implemented as a Rust API. |
+| applies git source for rev | 129 | not-applicable | — | — | Renovate's TypeScript git-source revision enrichment helper is not implemented as a Rust API. |
+| skips git source for branch | 145 | not-applicable | — | — | Renovate's TypeScript git-source branch skip behavior is not implemented as a Rust API. |
+| skips git source for git only | 160 | not-applicable | — | — | Renovate's TypeScript git-source unspecified-version skip behavior is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/manager/fingerprint.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/fingerprint.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/fingerprint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validate manager hash | 5 | not-applicable | — | — | Renovate's TypeScript manager hash metadata map is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/manager/metadata.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/metadata.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/manager/metadata`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| %s has readme with no h1 or h2 | 22 | not-applicable | — | — | Renovate's TypeScript manager README metadata policy does not apply to this Rust crate layout. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
