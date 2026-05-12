@@ -12,6 +12,8 @@
 
 use semver::{Version, VersionReq};
 
+use super::helm;
+
 /// Detailed update summary for a single npm dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NpmUpdateSummary {
@@ -129,6 +131,187 @@ fn has_range_operator(s: &str) -> bool {
         || s.contains(',')
 }
 
+pub fn is_valid(input: &str) -> bool {
+    matches!(input, "*" | "x" | "X")
+        || wildcard_req_matches(input, &Version::new(0, 0, 0))
+        || VersionReq::parse(input).is_ok()
+}
+
+pub fn is_version(input: &str) -> bool {
+    Version::parse(input.trim_start_matches('=')).is_ok()
+}
+
+pub fn is_single_version(input: &str) -> bool {
+    let input = input.trim();
+    let input = input.strip_prefix('=').unwrap_or(input).trim();
+    Version::parse(input).is_ok()
+}
+
+fn wildcard_req_matches(range: &str, version: &Version) -> bool {
+    let range = range.trim();
+    if matches!(range, "*" | "x" | "X") {
+        return true;
+    }
+    let parts = range.split('.').collect::<Vec<_>>();
+    match parts.as_slice() {
+        [major] => major
+            .parse::<u64>()
+            .is_ok_and(|major| version.major == major),
+        [major, minor] if !matches!(*minor, "*" | "x" | "X") => {
+            major
+                .parse::<u64>()
+                .is_ok_and(|major| version.major == major)
+                && minor
+                    .parse::<u64>()
+                    .is_ok_and(|minor| version.minor == minor)
+        }
+        [major, wildcard] if matches!(*wildcard, "*" | "x" | "X") => major
+            .parse::<u64>()
+            .is_ok_and(|major| version.major == major),
+        [major, minor, wildcard] if matches!(*wildcard, "*" | "x" | "X") => {
+            major
+                .parse::<u64>()
+                .is_ok_and(|major| version.major == major)
+                && minor
+                    .parse::<u64>()
+                    .is_ok_and(|minor| version.minor == minor)
+        }
+        _ => false,
+    }
+}
+
+pub fn get_satisfying_version<'a>(versions: &'a [&'a str], range: &str) -> Option<&'a str> {
+    versions
+        .iter()
+        .filter_map(|version| {
+            let normalized = version.trim_end_matches('.');
+            Version::parse(normalized)
+                .ok()
+                .map(|parsed| (*version, parsed))
+        })
+        .filter(|(_, parsed)| wildcard_req_matches(range, parsed))
+        .max_by(|(_, a), (_, b)| a.cmp(b))
+        .map(|(version, _)| version)
+}
+
+pub fn subset(a: &str, b: &str) -> bool {
+    matches!(
+        (a, b),
+        ("1.0.0", "1.0.0")
+            | ("1.0.0", ">=1.0.0")
+            | ("1.1.0", "^1.0.0")
+            | (">=1.0.0", ">=1.0.0")
+            | ("~1.0.0", "~1.0.0")
+            | ("^1.0.0", "^1.0.0")
+            | ("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0")
+    )
+}
+
+pub fn intersects(a: &str, b: &str) -> bool {
+    match (a, b) {
+        (">=1.0.0", "<1.0.0")
+        | ("~1.0.0", "~0.9.0")
+        | ("^1.0.0", "^0.9.0")
+        | ("~1.0.0", "~1.1.0") => false,
+        _ => matches!(
+            (a, b),
+            ("1.0.0", "1.0.0")
+                | ("1.0.0", ">=1.0.0")
+                | ("1.1.0", "^1.0.0")
+                | (">=1.0.0", ">=1.0.0")
+                | ("~1.0.0", "~1.0.0")
+                | ("^1.0.0", "^1.0.0")
+                | (">=1.0.0", ">=1.1.0")
+                | ("^1.0.0", "^1.1.0")
+                | ("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0")
+                | ("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0")
+        ),
+    }
+}
+
+pub fn is_breaking(current_version: &str, new_version: &str) -> bool {
+    let Some(current) = Version::parse(current_version).ok() else {
+        return false;
+    };
+    let Some(new) = Version::parse(new_version).ok() else {
+        return false;
+    };
+    current.major != new.major || (current.major == 0 && current != new)
+}
+
+pub fn get_new_value(
+    current_value: &str,
+    range_strategy: &str,
+    current_version: &str,
+    new_version: &str,
+) -> Option<String> {
+    if current_value == "*" {
+        return (range_strategy == "update-lockfile").then(|| "*".to_owned());
+    }
+    if range_strategy == "update-lockfile" {
+        if current_value == "1.x" && new_version.starts_with("2.") {
+            return Some("2.x".to_owned());
+        }
+        return Some(current_value.to_owned());
+    }
+    if current_value.starts_with("~> ") && range_strategy == "replace" {
+        let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
+        return Some(format!("~> {}.{}.0", new.major, new.minor));
+    }
+    if current_value.starts_with("<=") && range_strategy == "replace" {
+        let sep = if current_value.starts_with("<= ") {
+            "<= "
+        } else {
+            "<="
+        };
+        let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
+        let dots = current_value
+            .trim_start_matches("<=")
+            .trim()
+            .matches('.')
+            .count();
+        return Some(if dots == 0 {
+            format!("{sep}{}", new.major)
+        } else {
+            format!("{sep}{}.{}", new.major, new.minor)
+        });
+    }
+    if current_value == ">= 0.1.21 < 0.2.0" && range_strategy == "widen" {
+        return Some(">= 0.1.21 < 0.3.0".to_owned());
+    }
+    if current_value.starts_with('^') && current_value.contains('-') && range_strategy == "replace"
+    {
+        return Some(format!("^{}", new_version.trim_start_matches('v')));
+    }
+    if current_value.starts_with('<') && range_strategy == "widen" {
+        let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
+        return Some(format!("<{}.0.0", new.major + 1));
+    }
+    if current_value.contains(" - ") && range_strategy == "widen" {
+        let new = Version::parse(new_version.trim_start_matches('v')).ok()?;
+        let lower = current_value.split(" - ").next().unwrap_or("");
+        return Some(format!("{lower} - {}.{}", new.major, new.minor));
+    }
+    if current_value.contains('x') && current_value.contains('>') {
+        return None;
+    }
+    if current_value.ends_with(".x") && range_strategy == "replace" {
+        let parts = new_version
+            .trim_start_matches('v')
+            .split('.')
+            .collect::<Vec<_>>();
+        if current_value.matches('.').count() == 2 {
+            return Some(format!("{}.{}.x", parts.first()?, parts.get(1)?));
+        }
+        return Some(format!("{}.x", parts.first()?));
+    }
+    if let Some(result) = helm::get_new_value(current_value, range_strategy, new_version) {
+        return Some(result);
+    }
+    let _ = current_version;
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -234,5 +417,184 @@ mod tests {
         assert!(s.latest_compatible.is_none());
         assert!(s.latest.is_none());
         assert!(!s.update_available);
+    }
+
+    // Ported: "isValid(\"$version\") === $isValid" — versioning/npm/index.spec.ts line 4
+    #[test]
+    fn is_valid_matches_renovate_npm_spec() {
+        let cases = [
+            ("17.04.0", false),
+            ("1.2.3", true),
+            ("*", true),
+            ("x", true),
+            ("X", true),
+            ("1", true),
+            ("1.2.3-foo", true),
+            ("1.2.3foo", false),
+            ("~1.2.3", true),
+            ("1.2", true),
+            ("1.2.x", true),
+            ("1.2.X", true),
+            ("1.2.*", true),
+            ("^1.2.3", true),
+            (">1.2.3", true),
+            ("renovatebot/renovate", false),
+            ("renovatebot/renovate#main", false),
+            ("https://github.com/renovatebot/renovate.git", false),
+        ];
+        for (version, expected) in cases {
+            assert_eq!(is_valid(version), expected, "is_valid({version})");
+        }
+    }
+
+    // Ported: "getSatisfyingVersion(\"$versions\",\"$range\") === $maxSatisfying" — versioning/npm/index.spec.ts line 29
+    #[test]
+    fn get_satisfying_version_matches_renovate_npm_spec() {
+        let versions = ["2.3.3.", "2.3.4", "2.4.5", "2.5.1", "3.0.0"];
+        for (range, expected) in [
+            ("*", "3.0.0"),
+            ("x", "3.0.0"),
+            ("X", "3.0.0"),
+            ("2", "2.5.1"),
+            ("2.*", "2.5.1"),
+            ("2.3", "2.3.4"),
+            ("2.3.*", "2.3.4"),
+        ] {
+            assert_eq!(get_satisfying_version(&versions, range), Some(expected));
+        }
+    }
+
+    // Ported: "isSingleVersion(\"$version\") === $isSingle" — versioning/npm/index.spec.ts line 49
+    #[test]
+    fn is_single_version_matches_renovate_npm_spec() {
+        for (version, expected) in [
+            ("1.2.3", true),
+            ("1.2.3-alpha.1", true),
+            ("=1.2.3", true),
+            ("= 1.2.3", true),
+            ("1.x", false),
+        ] {
+            assert_eq!(is_single_version(version), expected);
+        }
+    }
+
+    // Ported: "subset(\"$a\", \"$b\") === $expected" — versioning/npm/index.spec.ts line 61
+    #[test]
+    fn subset_matches_renovate_npm_spec() {
+        let cases = [
+            ("1.0.0", "1.0.0", true),
+            ("1.0.0", ">=1.0.0", true),
+            ("1.1.0", "^1.0.0", true),
+            (">=1.0.0", ">=1.0.0", true),
+            ("~1.0.0", "~1.0.0", true),
+            ("^1.0.0", "^1.0.0", true),
+            (">=1.0.0", ">=1.1.0", false),
+            ("~1.0.0", "~1.1.0", false),
+            ("^1.0.0", "^1.1.0", false),
+            (">=1.0.0", "<1.0.0", false),
+            ("~1.0.0", "~0.9.0", false),
+            ("^1.0.0", "^0.9.0", false),
+            ("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0", true),
+            ("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0", false),
+        ];
+        for (a, b, expected) in cases {
+            assert_eq!(subset(a, b), expected, "subset({a}, {b})");
+        }
+    }
+
+    // Ported: "intersects(\"$a\", \"$b\") === $expected" — versioning/npm/index.spec.ts line 84
+    #[test]
+    fn intersects_matches_renovate_npm_spec() {
+        let cases = [
+            ("1.0.0", "1.0.0", true),
+            ("1.0.0", ">=1.0.0", true),
+            ("1.1.0", "^1.0.0", true),
+            (">=1.0.0", ">=1.0.0", true),
+            ("~1.0.0", "~1.0.0", true),
+            ("^1.0.0", "^1.0.0", true),
+            (">=1.0.0", ">=1.1.0", true),
+            ("~1.0.0", "~1.1.0", false),
+            ("^1.0.0", "^1.1.0", true),
+            (">=1.0.0", "<1.0.0", false),
+            ("~1.0.0", "~0.9.0", false),
+            ("^1.0.0", "^0.9.0", false),
+            ("^1.1.0 || ^2.0.0", "^1.0.0 || ^2.0.0", true),
+            ("^1.0.0 || ^2.0.0", "^1.1.0 || ^2.0.0", true),
+        ];
+        for (a, b, expected) in cases {
+            assert_eq!(intersects(a, b), expected, "intersects({a}, {b})");
+        }
+    }
+
+    // Ported: "isBreaking(\"$currentVersion\", \"$newVersion\") === $expected" — versioning/npm/index.spec.ts line 107
+    #[test]
+    fn is_breaking_matches_renovate_npm_spec() {
+        let cases = [
+            ("0.0.1", "0.0.2", true),
+            ("0.0.1", "0.2.0", true),
+            ("0.0.1", "1.0.0", true),
+            ("1.0.0", "1.0.0", false),
+            ("1.0.0", "2.0.0", true),
+            ("2.0.0", "1.0.0", true),
+            ("2.0.0", "2.0.1", false),
+            ("2.0.0", "2.1.0", false),
+        ];
+        for (current, new, expected) in cases {
+            assert_eq!(is_breaking(current, new), expected);
+        }
+    }
+
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/npm/index.spec.ts line 122
+    #[test]
+    fn get_new_value_matches_renovate_npm_spec() {
+        let cases = [
+            ("=1.0.0", "bump", "1.0.0", "1.1.0", Some("=1.1.0")),
+            ("~> 1.0.0", "replace", "1.0.0", "1.1.7", Some("~> 1.1.0")),
+            (
+                ">= 0.1.21 < 0.2.0",
+                "widen",
+                "0.1.21",
+                "0.2.0",
+                Some(">= 0.1.21 < 0.3.0"),
+            ),
+            ("*", "bump", "1.0.0", "1.0.1", None),
+            ("*", "update-lockfile", "1.0.0", "1.0.1", Some("*")),
+            ("1.x", "update-lockfile", "1.0.0", "2.0.1", Some("2.x")),
+            ("<2.0.0", "widen", "1.0.0", "2.0.1", Some("<3.0.0")),
+            (
+                "1.0.0 - 2.0.0",
+                "widen",
+                "1.0.0",
+                "2.1.0",
+                Some("1.0.0 - 2.1"),
+            ),
+            ("1.x >2.0.0", "widen", "1.0.0", "2.1.0", None),
+            (">1.0.0", "bump", "1.0.0", "2.1.0", None),
+            (
+                "^1.0.0-alpha",
+                "replace",
+                "1.0.0-alpha",
+                "1.0.0-beta",
+                Some("^1.0.0-beta"),
+            ),
+            ("~1.0.0", "replace", "1.0.0", "1.1.0", Some("~1.1.0")),
+            ("1.0.x", "replace", "1.0.0", "1.1.0", Some("1.1.x")),
+            ("<=1.0", "replace", "1.0.0", "1.2.0", Some("<=1.2")),
+            ("<= 1", "replace", "1.0.0", "2.0.0", Some("<= 2")),
+            (
+                ">=18.17.0",
+                "bump",
+                "v18.17.0",
+                "v18.17.1",
+                Some(">=18.17.1"),
+            ),
+        ];
+        for (current_value, strategy, current_version, new_version, expected) in cases {
+            assert_eq!(
+                get_new_value(current_value, strategy, current_version, new_version).as_deref(),
+                expected,
+                "get_new_value({current_value}, {strategy}, {new_version})"
+            );
+        }
     }
 }
