@@ -3318,6 +3318,35 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bitbucket-server-tags/schema.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/bitbucket-server-tags/schema`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses BitbucketServerTags | 4 | not-applicable | — | — | Bitbucket Server tags datasource and its response schema are not implemented in Rust. |
+| parses BitbucketServerCommits | 39 | not-applicable | — | — | Bitbucket Server commits response schema is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/cpan/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/cpan/schema.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/cpan/schema › MetaCpanApiFileSearchResponse`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| filters out entries with empty module arrays | 5 | not-applicable | — | — | Rust CPAN datasource uses the MetaCPAN module endpoint and does not implement Renovate's file-search response schema transform. |
+| filters out entries where module has no version | 29 | not-applicable | — | — | Rust CPAN datasource uses the MetaCPAN module endpoint and does not implement Renovate's file-search response schema transform. |
+| includes valid entries | 53 | not-applicable | — | — | Rust CPAN datasource uses the MetaCPAN module endpoint and does not implement Renovate's file-search response schema transform. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
