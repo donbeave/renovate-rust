@@ -206,6 +206,42 @@ pub fn rules_for_monorepo(name: &str) -> Vec<PackageRule> {
 mod tests {
     use super::*;
 
+    // Ported: "presets should have right name" — config/presets/internal/monorepos.spec.ts line 21
+    #[test]
+    fn monorepo_preset_names_use_supported_slug_format() {
+        let data = load_data().expect("embedded monorepo data must parse");
+        let todo = [
+            "arcus.background-jobs",
+            "arcus.event-grid",
+            "arcus.messaging",
+            "arcus.observability",
+            "arcus.security",
+            "arcus.webapi",
+            "aspnet aspnetwebstack",
+            "aspnet extensions",
+            "azure azure-libraries-for-net",
+            "azure azure-sdk-for-net",
+            "azure azure-storage-net",
+            "system.io.abstractions",
+            "vaadinWebComponents",
+        ];
+        let mut names = Vec::new();
+        names.extend(data.pattern_groups.keys());
+        names.extend(data.org_groups.keys());
+        names.extend(data.repo_groups.keys());
+
+        for name in names {
+            if todo.contains(&name.as_str()) {
+                continue;
+            }
+            assert!(
+                name.bytes()
+                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-'),
+                "monorepo preset name must be lowercase kebab-case: {name}"
+            );
+        }
+    }
+
     #[test]
     fn all_monorepo_group_names_returns_non_empty() {
         let names = all_monorepo_group_names();

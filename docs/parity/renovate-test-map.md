@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1881 / 1881 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1882 / 1882 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3602,6 +3602,32 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | throws if file not found | 38 | not-applicable | — | — | Generic HTTP remote preset fetching is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
 | throws on malformed URL | 46 | not-applicable | — | — | Generic HTTP remote preset fetching is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
 | throws external host error | 51 | not-applicable | — | — | Generic HTTP remote preset fetching and host-rule error handling are not implemented in Rust. |
+
+---
+
+## `lib/config/presets/internal/group.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/group.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/internal/group`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| group:%s contains packageRules | 10 | not-applicable | — | — | TypeScript static preset-map shape invariant; Rust resolves group presets through behavior-oriented match arms rather than exposing a preset object map. |
+
+---
+
+## `lib/config/presets/internal/monorepos.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/monorepos.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/presets/internal/monorepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| presets should have right name | 21 | ported | `monorepos.rs` | `monorepo_preset_names_use_supported_slug_format` | — |
 
 ---
 
