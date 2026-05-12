@@ -613,7 +613,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gradle/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract.spec.ts
-**Total tests:** 30 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+**Total tests:** 31 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `extractPackageFile()`
 
