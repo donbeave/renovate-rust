@@ -3829,6 +3829,87 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/galaxy-collection/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/galaxy-collection/index.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/galaxy-collection/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for 404 result | 29 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| throws for remote host error | 39 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns null for unexpected data at base | 49 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns null for unexpected data at versions | 62 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| throws error for remote host versions error | 77 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| throws error for remote host detailed versions error | 92 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns null for empty lookup | 113 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns null for null packageName | 122 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns null for unknown error | 131 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| processes real data | 144 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns null but matches automation hub URL | 167 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| processes real data with automation hub URL | 183 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns ansible url with artifactory URL | 212 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns galaxy url with automation hub URL | 223 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+| returns galaxy url with other url | 234 | not-applicable | — | — | Ansible Galaxy collection datasource lookup and Automation Hub URL mapping are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/galaxy/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/galaxy/index.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/galaxy/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty result | 11 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| returns null for missing fields | 24 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| returns null for empty list | 37 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| returns null for 404 | 50 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| returns null for unknown error | 63 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| processes real data | 76 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| handles multiple results when one user matches exactly | 90 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| rejects multiple results when no user matches exactly | 103 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| return null if searching random username and project name | 115 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| throws for 5xx | 127 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+| throws for 404 | 140 | not-applicable | — | — | Ansible Galaxy role datasource lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/repology/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/repology/index.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/repology/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty result | 69 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns null for missing repository or package | 88 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| throws error on unexpected API response | 105 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| throws error on unexpected Resolver response with binary package | 124 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| throws error on unexpected Resolver response with source package | 138 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| throws error on API request timeout | 156 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| throws error on Resolver request timeout | 175 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns null on Resolver ambiguous binary package | 189 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| throws without repository and package name | 204 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| throws on disabled host | 214 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns correct version for binary package | 225 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns correct version for source package | 241 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns correct version for api package | 260 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns correct version for multi-package project with same name | 276 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns correct version for multi-package project with different name | 292 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns multiple versions if they are present in repository | 308 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns null for scenario when repo is not in package results | 328 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns correct package types for api_call | 354 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+| returns correct package versions for multi-package project | 443 | not-applicable | — | — | Repology datasource API and resolver lookups are not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
