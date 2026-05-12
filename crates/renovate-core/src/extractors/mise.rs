@@ -1434,6 +1434,37 @@ usage = "2.1.1"
         assert!(d.skip_reason.is_none());
     }
 
+    // Ported: "uses semver-partial versioning for short java version $version" — mise/extract.spec.ts line 1034
+    #[test]
+    fn java_short_versions_use_semver_partial() {
+        for (version, current_value) in [
+            ("21", "21"),
+            ("21.0", "21.0"),
+            ("temurin-21", "21"),
+            ("corretto-21.0", "21.0"),
+        ] {
+            let content = format!("[tools]\njava = \"{version}\"\n");
+            let deps = extract(&content);
+            assert_eq!(deps.len(), 1, "{version}");
+            assert_eq!(deps[0].current_value, current_value, "{version}");
+            assert_eq!(deps[0].datasource_id, Some("java-version"), "{version}");
+            assert_eq!(deps[0].versioning, Some("semver-partial"), "{version}");
+        }
+    }
+
+    // Ported: "does not use semver-partial for full java version $version" — mise/extract.spec.ts line 1061
+    #[test]
+    fn java_full_versions_do_not_use_semver_partial() {
+        for (version, current_value) in [("21.0.2", "21.0.2"), ("temurin-21.0.2", "21.0.2")] {
+            let content = format!("[tools]\njava = \"{version}\"\n");
+            let deps = extract(&content);
+            assert_eq!(deps.len(), 1, "{version}");
+            assert_eq!(deps[0].current_value, current_value, "{version}");
+            assert_eq!(deps[0].datasource_id, Some("java-version"), "{version}");
+            assert!(deps[0].versioning.is_none(), "{version}");
+        }
+    }
+
     // Ported: "returns null for invalid TOML" — mise/extract.spec.ts line 17
     #[test]
     fn invalid_toml_returns_empty() {

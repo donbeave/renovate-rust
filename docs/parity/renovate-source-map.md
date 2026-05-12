@@ -1007,7 +1007,16 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/terraform-provider/index.ts` | `crates/renovate-core/src/datasources/terraform.rs` | stub | Stub only |
 | `lib/modules/datasource/typst/index.ts` | `crates/renovate-core/src/datasources/typst.rs` | stub | Stub only |
 | `lib/modules/datasource/unity3d/index.ts` | `crates/renovate-core/src/datasources/unity3d.rs` | stub | Stub only |
-| `lib/modules/datasource/artifactory/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/artifactory/index.ts` | `crates/renovate-core/src/datasources/artifactory.rs` | partial | HTML directory listing release extraction, registry merge behavior, empty/404/null handling, and non-404 external-host errors ported; package-cache integration not ported. |
+| `lib/modules/datasource/custom/index.ts` | — | not-started | Configurable custom datasource lookup, registry URL templating, HTTP/local file dispatch, transformation templates, schema validation, and format routing are not ported. |
+| `lib/modules/datasource/custom/formats/index.ts` | — | not-started | Format fetcher dispatch is not ported. |
+| `lib/modules/datasource/custom/formats/html.ts` | `crates/renovate-core/src/datasources/artifactory.rs` | partial | Shared HTML link extraction for directory listings ported; full custom datasource fetcher/templating/local file engine remains not-started. |
+| `lib/modules/datasource/custom/formats/json.ts` | — | not-started | Custom datasource JSON format parsing is not ported. |
+| `lib/modules/datasource/custom/formats/plain.ts` | — | not-started | Custom datasource plain text format parsing is not ported. |
+| `lib/modules/datasource/custom/formats/toml.ts` | — | not-started | Custom datasource TOML format parsing is not ported. |
+| `lib/modules/datasource/custom/formats/yaml.ts` | — | not-started | Custom datasource YAML format parsing is not ported. |
+| `lib/modules/datasource/custom/schema.ts` | — | not-started | Custom datasource schema validation is not ported. |
+| `lib/modules/datasource/custom/utils.ts` | — | not-started | Custom datasource helper utilities are not ported. |
 | `lib/modules/datasource/aws-eks-addon/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/aws-machine-image/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/aws-rds/index.ts` | — | not-started | Not ported |

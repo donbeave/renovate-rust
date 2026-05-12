@@ -179,7 +179,7 @@ static LINE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^([\w_-]+)\s+(\S
 
 /// Java version string pattern: `"<dist>-<version>"` or `"<dist>-jre-<version>"`.
 static JAVA_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(?:adoptopenjdk|temurin)(-jre)?-(.+)$").unwrap());
+    LazyLock::new(|| Regex::new(r"^(?:adoptopenjdk|temurin|corretto)(-jre)?-(.+)$").unwrap());
 
 fn parse_line(line: &str) -> Option<AsdfDep> {
     let cap = LINE_RE.captures(line)?;
@@ -269,6 +269,7 @@ fn parse_java_inner(_tool_name: &str, version: &str) -> AsdfDep {
             return AsdfDep {
                 current_value: version.to_owned(),
                 package_name: Some("java-jdk".to_owned()),
+                versioning: java_versioning(version),
                 ..base
             };
         }
@@ -283,10 +284,15 @@ fn parse_java_inner(_tool_name: &str, version: &str) -> AsdfDep {
     let current_value = cap[2].to_owned();
 
     AsdfDep {
+        versioning: java_versioning(&current_value),
         current_value,
         package_name: Some(pkg_name.to_owned()),
         ..base
     }
+}
+
+fn java_versioning(current_value: &str) -> Option<&'static str> {
+    (current_value.split('.').count() < 3).then_some("semver-partial")
 }
 
 fn parse_flutter(version: &str) -> AsdfDep {

@@ -41,7 +41,7 @@ pub enum CpanDepPhase {
 pub enum CpanSkipReason {
     /// No version specified.
     UnspecifiedVersion,
-    /// Module name is `perl` — skip, not a CPAN package.
+    /// Legacy marker for older Rust behavior; Perl core is now extracted.
     PerlCore,
 }
 
@@ -56,6 +56,14 @@ pub struct CpanDep {
     pub phase: CpanDepPhase,
     /// Set when no registry lookup should be performed.
     pub skip_reason: Option<CpanSkipReason>,
+    /// Datasource id for special non-CPAN dependencies.
+    pub datasource: Option<&'static str>,
+    /// Package lookup name for special non-CPAN dependencies.
+    pub package_name: Option<&'static str>,
+    /// Extract-version regex for special non-CPAN dependencies.
+    pub extract_version: Option<&'static str>,
+    /// Versioning scheme for special non-CPAN dependencies.
+    pub versioning: Option<&'static str>,
 }
 
 /// `requires 'Foo::Bar', '1.23';` or `requires 'Foo::Bar' => '1.23';`
@@ -136,17 +144,6 @@ pub fn extract(content: &str) -> Vec<CpanDep> {
             // independent of any surrounding `on 'phase' => sub {}` block.
             let phase = phase_for_keyword(&keyword).unwrap_or_else(|| current_phase.clone());
 
-            // Skip `perl` itself.
-            if dep_name == "perl" {
-                deps.push(CpanDep {
-                    dep_name,
-                    current_value: String::new(),
-                    phase,
-                    skip_reason: Some(CpanSkipReason::PerlCore),
-                });
-                continue;
-            }
-
             // Version: prefer quoted string (cap[3]), fall back to bare number (cap[4]).
             let raw_version = cap
                 .get(3)
@@ -166,6 +163,21 @@ pub fn extract(content: &str) -> Vec<CpanDep> {
                     current_value: String::new(),
                     phase,
                     skip_reason: Some(CpanSkipReason::UnspecifiedVersion),
+                    datasource: None,
+                    package_name: None,
+                    extract_version: None,
+                    versioning: None,
+                });
+            } else if dep_name == "perl" {
+                deps.push(CpanDep {
+                    dep_name,
+                    current_value: version,
+                    phase,
+                    skip_reason: None,
+                    datasource: Some("github-tags"),
+                    package_name: Some("Perl/perl5"),
+                    extract_version: Some("^v(?<version>\\S+)"),
+                    versioning: Some("perl"),
                 });
             } else {
                 deps.push(CpanDep {
@@ -173,6 +185,10 @@ pub fn extract(content: &str) -> Vec<CpanDep> {
                     current_value: version,
                     phase,
                     skip_reason: None,
+                    datasource: None,
+                    package_name: None,
+                    extract_version: None,
+                    versioning: None,
                 });
             }
         }
@@ -379,12 +395,26 @@ on 'test' => sub {
         assert_eq!(deps[1].phase, CpanDepPhase::Develop);
     }
 
+    // Ported: "$version" — cpanfile/extract.spec.ts line 12 (parse perl)
     #[test]
-    fn perl_core_skipped() {
-        let content = "requires 'perl', '5.036';\n";
-        let deps = extract(content);
-        assert_eq!(deps.len(), 1);
-        assert_eq!(deps[0].skip_reason, Some(CpanSkipReason::PerlCore));
+    fn parse_perl_core_dependency() {
+        for (version, expected) in [
+            ("5.012005", "5.012005"),
+            ("'5.008001'", "5.008001"),
+            ("\"5.008001\"", "5.008001"),
+        ] {
+            let content = format!("requires 'perl', {version};\n");
+            let deps = extract(&content);
+            assert_eq!(deps.len(), 1, "{version}");
+            let dep = &deps[0];
+            assert_eq!(dep.dep_name, "perl", "{version}");
+            assert_eq!(dep.current_value, expected, "{version}");
+            assert_eq!(dep.datasource, Some("github-tags"), "{version}");
+            assert_eq!(dep.package_name, Some("Perl/perl5"), "{version}");
+            assert_eq!(dep.extract_version, Some("^v(?<version>\\S+)"), "{version}");
+            assert_eq!(dep.versioning, Some("perl"), "{version}");
+            assert!(dep.skip_reason.is_none(), "{version}");
+        }
     }
 
     #[test]

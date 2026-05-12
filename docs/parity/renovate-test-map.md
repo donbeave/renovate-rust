@@ -1,8 +1,8 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2114 / 2114 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2127 / 8606 actionable tests ported (25%) — updated 2026-05-12
 
-All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
+All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
 Status key: `ported` · `pending` · `not-applicable`
 
@@ -580,7 +580,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 21 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
+**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -607,6 +607,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | matches version 1.19, even though it is not valid SemVer | 586 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
 | matches the current SemVer minor | 590 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
 | does not match the next SemVer minor | 595 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
+| does not match the previous SemVer minor | 600 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
 
 ---
 
@@ -1021,7 +1022,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 75 | **Ported:** 66 | **Actionable:** 66 | **Status:** ported
+**Total tests:** 76 | **Ported:** 66 | **Actionable:** 67 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1100,6 +1101,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | skips depName containing a non default variable with brackets at start | 1585 | ported | `dockerfile.rs` | `arg_braces_variable_is_skipped` | — |
 | skips depName containing a non default variable | 1596 | ported | `dockerfile.rs` | `variable_in_image_path_is_skipped` | — |
 | skips depName containing a non default variable with brackets | 1607 | ported | `dockerfile.rs` | `braced_variable_in_image_path_is_skipped` | — |
+| supports registry aliases - $name | 1623 | pending | — | — | Dockerfile `getDep` registry-alias table includes multi-segment aliases and variable-backed aliases that are not fully implemented in Rust yet. |
 
 ### `extractVariables()`
 
@@ -1995,7 +1997,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 30 | **Ported:** 30 | **Actionable:** 30 | **Status:** ported
+**Total tests:** 32 | **Ported:** 32 | **Actionable:** 32 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -2027,6 +2029,8 @@ Status key: `ported` · `pending` · `not-applicable`
 | complete mise.toml example | 855 | ported | `mise.rs` | `complete_mise_toml_example` | — |
 | complete example with skip | 878 | ported | `mise.rs` | `complete_mise_example_with_skip` | — |
 | core java plugin function | 911 | ported | `mise.rs` | `java_core_plugin_jdk` | — |
+| uses semver-partial versioning for short java version $version | 1034 | ported | `mise.rs` | `java_short_versions_use_semver_partial` | — |
+| does not use semver-partial for full java version $version | 1061 | ported | `mise.rs` | `java_full_versions_do_not_use_semver_partial` | — |
 | resolves tools from the mise registry data file via aqua backend | 1086 | ported | `mise.rs` | `resolves_mise_registry_aqua_backend_tool` | — |
 | resolves tools from the mise registry data file via cargo backend | 1104 | ported | `mise.rs` | `resolves_mise_registry_cargo_backend_tool` | — |
 | resolves tools from the mise registry data file via github backend | 1122 | ported | `mise.rs` | `resolves_mise_registry_github_backend_tool` | — |
@@ -2419,12 +2423,13 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/cpanfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cpanfile/extract.spec.ts
-**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
 
 ### `extractPackageFile() › parse perl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
+| $version | 12 | ported | `cpanfile.rs` | `parse_perl_core_dependency` | — |
 | returns null for empty | 6 | ported | `cpanfile.rs` | `empty_input_returns_no_deps` | — |
 | parse modules with requires | 39 | ported | `cpanfile.rs` | `extracts_basic_requires` (+ extracts_fat_arrow_form) | — |
 | parse modules with recommends | 113 | ported | `cpanfile.rs` | `parse_modules_with_recommends` | — |
@@ -3324,20 +3329,20 @@ does not implement Renovate's generated-lockfile reverse resolver.
 ## `lib/modules/datasource/artifactory/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/artifactory/index.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `modules/datasource/artifactory/index › getReleases`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses real data (folders): with slash at the end | 26 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
-| parses real data (files): without slash at the end | 42 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
-| parses real data (merge strategy with 2 registries) | 58 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
-| returns null without registryUrl + warning | 80 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
-| returns null for empty 200 OK | 94 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
-| 404 returns null | 108 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
-| throws for error diff than 404 | 128 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
-| throws no Http error | 139 | not-applicable | — | — | Artifactory datasource lookup and HTML directory listing parsing are not implemented in Rust. |
+| parses real data (folders): with slash at the end | 26 | ported | `artifactory.rs` | `parses_real_data_folders_with_slash_at_the_end` | — |
+| parses real data (files): without slash at the end | 42 | ported | `artifactory.rs` | `parses_real_data_files_without_slash_at_the_end` | — |
+| parses real data (merge strategy with 2 registries) | 58 | ported | `artifactory.rs` | `parses_real_data_merge_strategy_with_two_registries` | — |
+| returns null without registryUrl + warning | 80 | ported | `artifactory.rs` | `returns_null_without_registry_url` | — |
+| returns null for empty 200 OK | 94 | ported | `artifactory.rs` | `returns_null_for_empty_200_ok` | — |
+| 404 returns null | 108 | ported | `artifactory.rs` | `not_found_returns_null` | — |
+| throws for error diff than 404 | 128 | ported | `artifactory.rs` | `non_404_http_error_returns_external_host_error` | — |
+| throws no Http error | 139 | ported | `artifactory.rs` | `request_error_returns_null` | — |
 
 ---
 
@@ -4487,13 +4492,14 @@ does not implement Renovate's generated-lockfile reverse resolver.
 ## `lib/modules/datasource/java-version/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/java-version/common.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `modules/datasource/java-version/common`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | no os and architecture | 10 | not-applicable | — | — | Java version datasource platform/package filtering helpers are not implemented in Rust. |
+| system jdk -> (%s, %s, %s) => %o | 20 | not-applicable | — | — | Java version datasource platform/package filtering helpers are not implemented in Rust. |
 | logs for unsupported os and architecture | 74 | not-applicable | — | — | Java version datasource platform/package filtering helpers are not implemented in Rust. |
 
 ---
@@ -4623,42 +4629,42 @@ does not implement Renovate's generated-lockfile reverse resolver.
 ## `lib/modules/datasource/custom/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/custom/index.spec.ts
-**Total tests:** 30 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 30 | **Ported:** 1 | **Actionable:** 30 | **Status:** partial
 
 ### `modules/datasource/custom/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return null if only the prefix is supplied | 13 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return null if no registryUrl is provided as well no defaultRegistryTemplate is defined | 22 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return null if no custom datasource could  be found | 33 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return null on http error | 42 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return null if schema validation fails | 56 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for api directly exposing in renovate format | 72 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases with digests for api directly exposing in renovate format | 93 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases with tags and other optional fields for api directly exposing in renovate format | 123 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for plain text API directly exposing in Renovate format | 166 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for plain text API and trim the content | 199 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| returns null if transformation compilation using jsonata fails | 232 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| returns null if jsonata expression evaluation fails | 258 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for plain text API when only returns a single version | 284 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for yaml API directly exposing in Renovate format | 308 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for yaml file directly exposing in Renovate format | 348 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| returns releases for toml API directly exposing in Renovate format | 384 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for toml file directly exposing in Renovate format | 426 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for json file directly exposing in Renovate format | 464 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return null for plain text file if the body is not what is expected | 501 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for plain text file directly exposing in Renovate format | 518 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return release when templating registryUrl | 553 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return release with templated path | 578 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return release with templated path with multiple layers | 613 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases from HTML links | 650 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases from HTML links - local file | 688 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return null for local file read error - HTML format | 721 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases from nginx directory listing | 738 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for malformed HTML | 778 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| return releases for incomplete HTML | 815 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
-| returns null as digest should be provided in releases | 854 | not-applicable | — | — | Renovate's configurable custom datasource engine, templating, local file reads, format parsers, and JSONata transforms are not implemented in Rust. |
+| return null if only the prefix is supplied | 13 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return null if no registryUrl is provided as well no defaultRegistryTemplate is defined | 22 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return null if no custom datasource could  be found | 33 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return null on http error | 42 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return null if schema validation fails | 56 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for api directly exposing in renovate format | 72 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases with digests for api directly exposing in renovate format | 93 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases with tags and other optional fields for api directly exposing in renovate format | 123 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for plain text API directly exposing in Renovate format | 166 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for plain text API and trim the content | 199 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| returns null if transformation compilation using jsonata fails | 232 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| returns null if jsonata expression evaluation fails | 258 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for plain text API when only returns a single version | 284 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for yaml API directly exposing in Renovate format | 308 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for yaml file directly exposing in Renovate format | 348 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| returns releases for toml API directly exposing in Renovate format | 384 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for toml file directly exposing in Renovate format | 426 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for json file directly exposing in Renovate format | 464 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return null for plain text file if the body is not what is expected | 501 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for plain text file directly exposing in Renovate format | 518 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return release when templating registryUrl | 553 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return release with templated path | 578 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return release with templated path with multiple layers | 613 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases from HTML links | 650 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases from HTML links - local file | 688 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return null for local file read error - HTML format | 721 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases from nginx directory listing | 738 | ported | `artifactory.rs` | `parses_nginx_pre_directory_listing_links` | Rust ports the shared HTML directory-listing link extraction used by the custom HTML datasource; the broader custom datasource engine remains pending source-map work. |
+| return releases for malformed HTML | 778 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| return releases for incomplete HTML | 815 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
+| returns null as digest should be provided in releases | 854 | pending | — | — | Custom datasource engine, templating, local file reads, format parsers, and JSONata transforms remain pending implementation per source map. |
 
 ---
 
@@ -12697,3 +12703,16077 @@ does not implement Renovate's generated-lockfile reverse resolver.
 <!-- util/package-rules/package-names.spec.ts converted to per-test format above -->
 <!-- util/package-rules/repositories.spec.ts converted to per-test format above -->
 <!-- util/package-rules/jsonata.spec.ts converted to per-test format above -->
+---
+
+## Full Upstream Scan Backfill
+
+The sections below were generated from a full `../renovate/**/*.spec.ts` scan on 2026-05-12 so every currently unrepresented upstream spec has explicit rows. They should be converted from `pending` to `ported` or `not-applicable` during normal parity work.
+
+---
+
+## `lib/config/presets/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/index.spec.ts
+**Total tests:** 69 | **Ported:** 0 | **Actionable:** 69 | **Status:** pending
+
+### `config/presets/index › resolveConfigPresets`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if no presets | 93 | pending | — | — | — |
+| skips duplicate resolves | 102 | pending | — | — | — |
+| throws if invalid preset file | 118 | pending | — | — | — |
+| throws if invalid preset | 139 | pending | — | — | — |
+| throws if path + invalid syntax | 157 | pending | — | — | — |
+| throws if path + sub-preset | 173 | pending | — | — | — |
+| throws if invalid preset json | 191 | pending | — | — | — |
+| throws noconfig | 208 | pending | — | — | — |
+| throws throw | 226 | pending | — | — | — |
+| works with valid | 244 | pending | — | — | — |
+| throws if valid and invalid | 258 | pending | — | — | — |
+| resolves packageRule | 276 | pending | — | — | — |
+| resolves eslint | 306 | pending | — | — | — |
+| resolves linters | 314 | pending | — | — | — |
+| resolves nested groups | 322 | pending | — | — | — |
+| migrates automerge in presets | 331 | pending | — | — | — |
+| ignores presets | 339 | pending | — | — | — |
+| resolves self-hosted presets without baseConfig | 348 | pending | — | — | — |
+| returns the presets which have been merged into the resulting config | 361 | pending | — | — | — |
+| de-duplicates the presets which have been meregd into the resulting config | 378 | pending | — | — | — |
+| resolves self-hosted preset with templating | 410 | pending | — | — | — |
+| resolves self-hosted transitive presets without baseConfig | 430 | pending | — | — | — |
+| resolves http presets | 449 | pending | — | — | — |
+| resolves forgejo presets | 456 | pending | — | — | — |
+| resolves gitea presets | 463 | pending | — | — | — |
+| resolves gitlab presets | 470 | pending | — | — | — |
+| gets preset value from cache when it has been seen | 477 | pending | — | — | — |
+| default packageCache TTL should be 15 minutes | 512 | pending | — | — | — |
+| use packageCache when presetCachePersistence is set | 553 | pending | — | — | — |
+| throws | 594 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=true › when resolving an internal preset`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| merges `extends` | 614 | pending | — | — | — |
+| does not return any unmerged presets | 669 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=true › when resolving an internal preset which includes many other internal presets`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| merges `extends`, recursively | 694 | pending | — | — | — |
+| does not return any unmerged presets | 715 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=true › when resolving an external preset which references an internal preset`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| merges internal `extends` | 738 | pending | — | — | — |
+| does not return any unmerged presets | 776 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=true › when resolving mixed internal and external presets`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| merges internal `extends` | 798 | pending | — | — | — |
+| does not return any unmerged presets | 860 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=false › when resolving an internal preset`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not merge `extends` | 892 | pending | — | — | — |
+| returns the presets in the unmerged array | 918 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=false › when resolving an internal, parameterised preset`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not merge `extends` | 945 | pending | — | — | — |
+| returns the preset in the unmerged array | 959 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=false › when resolving an internal preset which includes many other internal presets`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not merge `extends` | 977 | pending | — | — | — |
+| returns the unmerged internal presets | 991 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=false › when resolving an external preset which references an internal preset`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not merge `extends` | 1010 | pending | — | — | — |
+| returns the unmerged internal presets | 1030 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=false › when resolving mixed internal and external presets`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not expand internal `extends` | 1052 | pending | — | — | — |
+| returns the unmerged internal presets | 1085 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=false › when resolving an internal preset inside a nested object config value`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the unmerged internal presets from a datasource | 1118 | pending | — | — | — |
+
+### `config/presets/index › resolveConfigPresets › when using mergeInternalPresets=false › when duplicate internal presets are found`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| they are de-duplicated when returned as unmerged | 1142 | pending | — | — | — |
+
+### `config/presets/index › replaceArgs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces args in strings | 1179 | pending | — | — | — |
+| replaces args twice in same string | 1185 | pending | — | — | — |
+| replaces objects | 1191 | pending | — | — | — |
+| replaces arrays | 1208 | pending | — | — | — |
+
+### `config/presets/index › getPreset`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not use cache for internal presets | 1220 | pending | — | — | — |
+| handles removed presets with a migration | 1227 | pending | — | — | — |
+| handles removed presets with no migration | 1249 | pending | — | — | — |
+| handles renamed monorepos | 1254 | pending | — | — | — |
+| handles renamed monorepo groups | 1268 | pending | — | — | — |
+| handles renamed regexManagers presets | 1293 | pending | — | — | — |
+| gets linters | 1301 | pending | — | — | — |
+| gets parameterised configs | 1309 | pending | — | — | — |
+| handles missing params | 1325 | pending | — | — | — |
+| ignores irrelevant params | 1338 | pending | — | — | — |
+| substitutes {{args}} | 1348 | pending | — | — | — |
+| handles 404 packages | 1375 | pending | — | — | — |
+| handles no config | 1388 | pending | — | — | — |
+| handles throw errors | 1401 | pending | — | — | — |
+| handles preset not found | 1414 | pending | — | — | — |
+
+---
+
+## `lib/config/presets/internal/custom-managers.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/custom-managers.spec.ts
+**Total tests:** 22 | **Ported:** 0 | **Actionable:** 22 | **Status:** pending
+
+### `config/presets/internal/custom-managers › Update `_VERSION` environment variables in Azure Pipelines files`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 10 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` environment variables in Azure Pipelines files › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 112 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `$schema` version in biome.json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 147 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `$schema` version in biome.json › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 171 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` variables in Bitbucket Pipelines`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 190 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` variables in Bitbucket Pipelines › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 293 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` variables in Dockerfiles`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 315 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` variables in Dockerfiles › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 398 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` environment variables in GitHub Action files`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 421 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` environment variables in GitHub Action files › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 526 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` environment variables in GitLab pipeline file`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 551 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` environment variables in GitLab pipeline file › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 610 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `appVersion` value in Helm chart Chart.yaml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 635 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `appVersion` value in Helm chart Chart.yaml › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 678 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` variables in Makefiles`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 698 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `_VERSION` variables in Makefiles › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 754 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › finds dependencies in pom.xml properties`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 774 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `*_version` variables in `.tfvars` files`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find dependencies in file | 823 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `tsconfig/node` version in tsconfig.json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find in tsconfig.json extends string | 857 | pending | — | — | — |
+| find in tsconfig.json extends string with short reference | 881 | pending | — | — | — |
+| find in tsconfig.json extends array | 905 | pending | — | — | — |
+
+### `config/presets/internal/custom-managers › Update `tsconfig/node` version in tsconfig.json › matches regexes patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $path | 933 | pending | — | — | — |
+
+---
+
+## `lib/config/presets/parse.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/parse.spec.ts
+**Total tests:** 46 | **Ported:** 0 | **Actionable:** 46 | **Status:** pending
+
+### `config/presets/parse › parsePreset`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns default package name | 6 | pending | — | — | — |
+| parses github | 17 | pending | — | — | — |
+| handles special chars | 28 | pending | — | — | — |
+| parses github subfiles | 39 | pending | — | — | — |
+| parses github subfiles with preset name | 50 | pending | — | — | — |
+| parses github file with preset name with .json extension | 61 | pending | — | — | — |
+| parses github file with preset name with .json5 extension | 73 | pending | — | — | — |
+| parses github subfiles with preset name with .json extension | 85 | pending | — | — | — |
+| parses github subfiles with preset name with .json5 extension | 97 | pending | — | — | — |
+| parses github subfiles with preset and sub-preset name | 111 | pending | — | — | — |
+| parses github subdirectories | 124 | pending | — | — | — |
+| parses github toplevel file using subdirectory syntax | 137 | pending | — | — | — |
+| parses gitlab | 148 | pending | — | — | — |
+| parses gitea | 159 | pending | — | — | — |
+| parses forgejo | 170 | pending | — | — | — |
+| parses local | 181 | pending | — | — | — |
+| parses local with spaces | 192 | pending | — | — | — |
+| parses local with subdirectory | 203 | pending | — | — | — |
+| parses local with spaces and subdirectory | 216 | pending | — | — | — |
+| parses local with sub preset and tag | 229 | pending | — | — | — |
+| parses local with subdirectory and tag | 243 | pending | — | — | — |
+| parses local with subdirectory and branch/tag with a slash | 257 | pending | — | — | — |
+| parses local with sub preset and branch/tag with a slash | 271 | pending | — | — | — |
+| parses local repo with presetPath with URL-encoded characters | 285 | pending | — | — | — |
+| parses local repo with URL-encoded characters | 298 | pending | — | — | — |
+| parses no prefix as local | 309 | pending | — | — | — |
+| parses local Bitbucket user repo with preset name | 320 | pending | — | — | — |
+| parses local Bitbucket user repo | 331 | pending | — | — | — |
+| returns default package name with params | 342 | pending | — | — | — |
+| returns simple scope | 354 | pending | — | — | — |
+| returns simple scope and params | 365 | pending | — | — | — |
+| returns scope with repo and default | 376 | pending | — | — | — |
+| returns scope with repo and params and default | 387 | pending | — | — | — |
+| returns scope with presetName | 400 | pending | — | — | — |
+| returns scope with presetName and params | 411 | pending | — | — | — |
+| returns scope with repo and presetName | 422 | pending | — | — | — |
+| returns scope with repo and presetName and params | 433 | pending | — | — | — |
+| returns non-scoped default | 449 | pending | — | — | — |
+| returns non-scoped package name | 460 | pending | — | — | — |
+| returns non-scoped package name full | 471 | pending | — | — | — |
+| returns non-scoped package name with params | 482 | pending | — | — | — |
+| parses HTTPS URLs for gitea | 493 | pending | — | — | — |
+| parses HTTPS URLs for forgejo | 508 | pending | — | — | — |
+| parses HTTP URLs | 523 | pending | — | — | — |
+| parses HTTPS URLs with parameters for gitea | 538 | pending | — | — | — |
+| parses HTTPS URLs with parameters for forgejo | 553 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/artifacts.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates commit-based http archive | 9 | pending | — | — | — |
+| updates http archive with content other then WORKSPACE | 69 | pending | — | — | — |
+| updates finds url instead of urls | 127 | pending | — | — | — |
+| throws error if no urls resolve hashes | 186 | pending | — | — | — |
+| errors for http_archive without urls | 232 | pending | — | — | — |
+| errors for maybe(http_archive) without urls | 259 | pending | — | — | — |
+| errors for _http_archive without urls | 287 | pending | — | — | — |
+| errors for maybe(_http_archive) without urls | 314 | pending | — | — | — |
+| updates http_archive with urls array | 342 | pending | — | — | — |
+| updates maybe(http_archive) with urls array | 409 | pending | — | — | — |
+| updates _http_archive with urls array | 476 | pending | — | — | — |
+| updates maybe(_http_archive) with urls array | 543 | pending | — | — | — |
+| updates one http_archive alongside others | 610 | pending | — | — | — |
+| updates one http_archive alongside others with matching versions | 680 | pending | — | — | — |
+| migrates rules_webtesting URL format | 752 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/common.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `updateCode`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns input for invalid | 5 | pending | — | — | — |
+| replaces whole rule | 11 | pending | — | — | — |
+| replaces rule key | 17 | pending | — | — | — |
+| returns input on wrong index | 23 | pending | — | — | — |
+| returns input on wrong key | 29 | pending | — | — | — |
+| replaces array values | 35 | pending | — | — | — |
+| updates using function | 43 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel/parser.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/parser.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses rules input | 6 | pending | — | — | — |
+| parses multiple archives | 81 | pending | — | — | — |
+| parses http_archive | 156 | pending | — | — | — |
+| parses http_archive with prefixes and multiple urls | 195 | pending | — | — | — |
+| parses Maven | 254 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel/rules/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel/rules/index.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses archiveUrl | 5 | pending | — | — | — |
+
+### `git`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts git dependencies | 47 | pending | — | — | — |
+
+### `go`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts go dependencies | 137 | pending | — | — | — |
+
+### `http`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts http dependencies | 229 | pending | — | — | — |
+
+### `docker`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts docker dependencies | 343 | pending | — | — | — |
+
+### `oci`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts oci dependencies | 373 | pending | — | — | — |
+
+### `maven`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts maven dependencies | 401 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel-module/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/artifacts.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no updated deps and not lockfile maintenance | 24 | pending | — | — | — |
+| returns null if no MODULE.bazel.lock found | 35 | pending | — | — | — |
+| writes package file and delegates to updateBazelLockfile | 50 | pending | — | — | — |
+| passes isLockFileMaintenance to updateBazelLockfile | 92 | pending | — | — | — |
+| passes bazelisk constraint to updateBazelLockfile | 113 | pending | — | — | — |
+| handles subdirectory MODULE.bazel | 134 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel-module/parser/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/parser/index.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `parse`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty string if invalid content | 7 | pending | — | — | — |
+| finds simple bazel_dep | 17 | pending | — | — | — |
+| finds the git_override | 44 | pending | — | — | — |
+| finds archive_override | 85 | pending | — | — | — |
+| finds local_path_override | 119 | pending | — | — | — |
+| finds single_version_override | 148 | pending | — | — | — |
+| finds maven.artifact | 179 | pending | — | — | — |
+| finds maven.install and maven.artifact | 248 | pending | — | — | — |
+| finds oci.pull | 335 | pending | — | — | — |
+| finds the git_repository | 376 | pending | — | — | — |
+| finds use_repo_rule and repo rule call | 408 | pending | — | — | — |
+| ignores use_repo_rule with insufficient args | 420 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel-module/parser/starlark.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/parser/starlark.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| .asBoolean($a) | 4 | pending | — | — | — |
+| asBoolean | 12 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel-module/rules-img.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/rules-img.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `transformRulesImgCalls()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ignores repo rule calls that are not rules_img | 5 | pending | — | — | — |
+| handles valid rules_img pull call | 32 | pending | — | — | — |
+| skips repo rule calls without corresponding use_repo_rule | 72 | pending | — | — | — |
+| skips malformed repo rule calls | 91 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazel-module/rules.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/rules.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `RuleToBazelModulePackageDep`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| .parse() with $msg | 145 | pending | — | — | — |
+
+### `GitRepositoryToPackageDep`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| .parse() with $msg | 176 | pending | — | — | — |
+
+### `.toPackageDependencies()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| with $msg | 239 | pending | — | — | — |
+
+### `.processModulePkgDeps`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns an empty array if the input is an empty array | 263 | pending | — | — | — |
+| returns the bazel_dep if more than one override is found | 267 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazelisk/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazelisk/artifacts.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no updated deps and not lockfile maintenance | 24 | pending | — | — | — |
+| returns null if no MODULE.bazel found | 35 | pending | — | — | — |
+| returns null if no MODULE.bazel.lock found | 49 | pending | — | — | — |
+| writes package file and delegates to updateBazelLockfile | 65 | pending | — | — | — |
+| passes bazelisk constraint to updateBazelLockfile | 106 | pending | — | — | — |
+| passes isLockFileMaintenance to updateBazelLockfile | 129 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bazelisk/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazelisk/extract.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns a result | 5 | pending | — | — | — |
+| supports ranges | 17 | pending | — | — | — |
+| skips non ranges | 29 | pending | — | — | — |
+| ignores comments past the first line | 41 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bitrise/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bitrise/utils.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `parseStep()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null on an empty string | 6 | pending | — | — | — |
+| returns dependency for step | 10 | pending | — | — | — |
+| parses missing version | 19 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bun/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bun/artifacts.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips if no updatedDeps and no lockFileMaintenance | 34 | pending | — | — | — |
+| skips if no lock file in config | 38 | pending | — | — | — |
+
+### `updateArtifacts() › when using .lockb lockfile format`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips if cannot read lock file | 44 | pending | — | — | — |
+| returns null if lock content unchanged | 51 | pending | — | — | — |
+| returns updated lock content | 61 | pending | — | — | — |
+| updates lock file when workspace package is updated | 82 | pending | — | — | — |
+| supports lockFileMaintenance | 116 | pending | — | — | — |
+| supports lockFileMaintenance (without updated deps) | 138 | pending | — | — | — |
+| handles temporary error | 158 | pending | — | — | — |
+| handles full error | 176 | pending | — | — | — |
+
+### `updateArtifacts() › when using .lock lockfile format`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips if cannot read lock file | 196 | pending | — | — | — |
+| returns null if lock content unchanged | 203 | pending | — | — | — |
+| returns updated lock content | 213 | pending | — | — | — |
+| supports lockFileMaintenance | 234 | pending | — | — | — |
+| supports lockFileMaintenance (without updated deps) | 256 | pending | — | — | — |
+| handles temporary error | 276 | pending | — | — | — |
+| handles full error | 294 | pending | — | — | — |
+
+### `bun command execution`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| check install options with configs | 315 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bun/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bun/extract.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ignores non-bun files | 8 | pending | — | — | — |
+
+### `extractAllPackageFiles() › when using the .lockb lockfile format`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ignores missing package.json file | 13 | pending | — | — | — |
+| ignores invalid package.json file | 17 | pending | — | — | — |
+| handles null response | 22 | pending | — | — | — |
+| parses valid package.json file | 35 | pending | — | — | — |
+
+### `extractAllPackageFiles() › when using the .lock lockfile format`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ignores missing package.json file | 72 | pending | — | — | — |
+| ignores invalid package.json file | 76 | pending | — | — | — |
+| handles null response | 81 | pending | — | — | — |
+| parses valid package.json file | 95 | pending | — | — | — |
+
+### `workspaces`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| processes workspace package files when workspaces are detected | 132 | pending | — | — | — |
+| skips workspace processing when workspaces is not a valid array | 178 | pending | — | — | — |
+| processes workspace package files when workspaces is an object with packages property | 218 | pending | — | — | — |
+| extracts .npmrc from sibling or parent directory | 267 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bun/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bun/utils.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `fileMatchesWorkspaces`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false when fileName does not start with pwd | 7 | pending | — | — | — |
+| should correctly evaluate fileName when it starts with pwd | 14 | pending | — | — | — |
+
+### `filesMatchingWorkspaces`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should filter files matching workspaces and pwd | 30 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bun-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bun-version/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns a result | 5 | pending | — | — | — |
+| handles empty files | 17 | pending | — | — | — |
+| handles no newline at the end | 22 | pending | — | — | — |
+| handles multiple lines | 27 | pending | — | — | — |
+| handles invalid versions | 32 | pending | — | — | — |
+| handles ranges | 45 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bundler/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/artifacts.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `updateArtifacts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null by default | 65 | pending | — | — | — |
+| returns null if Gemfile.lock was not changed | 76 | pending | — | — | — |
+| executes commands from lockFile path | 99 | pending | — | — | — |
+| works for default binarySource | 122 | pending | — | — | — |
+| works explicit global binarySource | 148 | pending | — | — | — |
+| supports conservative mode and updateType option | 175 | pending | — | — | — |
+| supports install mode | 216 | pending | — | — | — |
+
+### `updateArtifacts › Docker`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| .ruby-version | 258 | pending | — | — | — |
+| constraints options | 305 | pending | — | — | — |
+| invalid constraints options | 364 | pending | — | — | — |
+| injects bundler host configuration environment variables | 425 | pending | — | — | — |
+| returns error when failing in lockFileMaintenance true | 487 | pending | — | — | — |
+| performs lockFileMaintenance | 516 | pending | — | — | — |
+
+### `updateArtifacts › Error handling`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns error when failing in lockFileMaintenance true | 542 | pending | — | — | — |
+| rethrows for temporary error | 576 | pending | — | — | — |
+| handles "Could not parse object" error | 598 | pending | — | — | — |
+| throws on authentication errors | 620 | pending | — | — | — |
+| handles recursive resolved dependencies | 642 | pending | — | — | — |
+| updates the Gemfile.lock when upgrading ruby | 677 | pending | — | — | — |
+| updates the Gemfile.lock when upgrading bundler | 698 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bundler/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/common.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `getBundlerConstraint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses existing constraint | 31 | pending | — | — | — |
+| extracts from lockfile | 41 | pending | — | — | — |
+| returns null | 49 | pending | — | — | — |
+
+### `getRubyConstraint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses existing constraint | 59 | pending | — | — | — |
+| extracts from gemfile | 71 | pending | — | — | — |
+| extracts from .ruby-version | 81 | pending | — | — | — |
+| extracts from .tool-versions | 92 | pending | — | — | — |
+| extracts from lockfile | 105 | pending | — | — | — |
+| returns null | 120 | pending | — | — | — |
+
+### `getLockFileName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns packageFileName.lock | 132 | pending | — | — | — |
+| returns Gemfile.lock | 138 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bundler/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/extract.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 36 | pending | — | — | — |
+| parses rails Gemfile | 40 | pending | — | — | — |
+| parses sourceGroups | 57 | pending | — | — | — |
+| parse webpacker Gemfile | 63 | pending | — | — | — |
+| parse mastodon Gemfile | 75 | pending | — | — | — |
+| parse Ruby CI Gemfile | 91 | pending | — | — | — |
+| parse Gitlab Foss Gemfile | 104 | pending | — | — | — |
+| parse source blocks in Gemfile | 116 | pending | — | — | — |
+| parse source blocks with spaces in Gemfile | 122 | pending | — | — | — |
+| parses source blocks with groups in Gemfile | 132 | pending | — | — | — |
+| parses source variable in Gemfile | 146 | pending | — | — | — |
+| parses inline source in Gemfile | 171 | pending | — | — | — |
+| parses git refs in Gemfile | 223 | pending | — | — | — |
+| parses multiple current values Gemfile | 259 | pending | — | — | — |
+| skips local gems in Gemfile | 284 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bundler/gemfile.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/gemfile.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches the expected output | 7 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bundler/host-rules.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/host-rules.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `getAuthenticationHeaderValue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the authentication header with the password | 15 | pending | — | — | — |
+| returns the authentication header with the token | 24 | pending | — | — | — |
+| escapes special characters in the username but not the password | 32 | pending | — | — | — |
+
+### `findAllAuthenticatable()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns an empty array if matchHost is missing | 55 | pending | — | — | — |
+| returns an empty array if username is missing and password is present | 63 | pending | — | — | — |
+| returns an empty array if password and token are missing | 73 | pending | — | — | — |
+| returns the hostRule if using matchHost and password | 83 | pending | — | — | — |
+| returns the hostRule if using matchHost and token | 92 | pending | — | — | — |
+| returns the hostRule if using baseUrl and password | 101 | pending | — | — | — |
+| returns the hostRule if using baseUrl and token | 110 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bundler/locked-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/locked-version.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Parse Rails Gem Lock File | 13 | pending | — | — | — |
+| Parse WebPacker Gem Lock File | 19 | pending | — | — | — |
+| Parse Mastodon Gem Lock File | 25 | pending | — | — | — |
+| Parse Ruby CI Gem Lock File | 31 | pending | — | — | — |
+| Parse Gitlab Foss Gem Lock File | 37 | pending | — | — | — |
+| returns empty map for empty string | 43 | pending | — | — | — |
+| returns empty map when errors occur | 48 | pending | — | — | — |
+| strips platform suffixes from dependencies | 54 | pending | — | — | — |
+
+### `version extraction regex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts simple versions from parentheses | 84 | pending | — | — | — |
+| extracts complex version formats from parentheses | 98 | pending | — | — | — |
+| correctly extracts gem names when versions contain special characters | 114 | pending | — | — | — |
+| handles gems with platform-specific versions | 130 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/bundler/update-locked.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/update-locked.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects already updated | 9 | pending | — | — | — |
+| returns unsupported for empty lockfile | 21 | pending | — | — | — |
+| returns unsupported for empty depName | 32 | pending | — | — | — |
+| returns unsupported | 44 | pending | — | — | — |
+| returns update-failed in case of errors | 56 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cake/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cake/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts | 21 | pending | — | — | — |
+| extracts dotnet tools from single sdk style build file | 45 | pending | — | — | — |
+| skips invalid entries in InstallTools | 101 | pending | — | — | — |
+| calls applyRegistries to honor nuget.config files if present for .cake files | 124 | pending | — | — | — |
+| calls applyRegistries to honor nuget.config files if present for InstallTools | 141 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cargo/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/artifacts.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no Cargo.lock found | 43 | pending | — | — | — |
+| returns null if updatedDeps is empty | 61 | pending | — | — | — |
+| returns null if unchanged | 72 | pending | — | — | — |
+| returns updated Cargo.lock | 97 | pending | — | — | — |
+| returns updated Cargo.lock with precise version update | 121 | pending | — | — | — |
+| skips precise update when manifest range has changed | 163 | pending | — | — | — |
+| handles mixed deps where some have range changes and some do not | 198 | pending | — | — | — |
+| returns an artifact error when cargo update fails | 246 | pending | — | — | — |
+| returns updated Cargo.lock when a preceding dependency triggers an update in a later dependency | 283 | pending | — | — | — |
+| returns updated Cargo.lock when there are no more dependencies to update | 412 | pending | — | — | — |
+| updates Cargo.lock based on the packageName, when given | 433 | pending | — | — | — |
+| returns updated workspace Cargo.lock | 457 | pending | — | — | — |
+| returns updated Cargo.lock for lockfile maintenance | 487 | pending | — | — | — |
+| supports docker mode | 508 | pending | — | — | — |
+| supports docker mode with credentials | 563 | pending | — | — | — |
+| supports docker mode with many credentials | 660 | pending | — | — | — |
+| supports docker mode and ignores non git credentials | 748 | pending | — | — | — |
+| supports docker mode with Cargo specific credential | 808 | pending | — | — | — |
+| supports install mode | 877 | pending | — | — | — |
+| catches errors | 928 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cargo/locked-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/locked-version.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `extractLockFileVersions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for missing lock file | 19 | pending | — | — | — |
+| returns null for invalid lock file | 23 | pending | — | — | — |
+| returns empty map for lock file without packages | 28 | pending | — | — | — |
+| returns a map of package versions | 33 | pending | — | — | — |
+
+### `parseLockFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses v1 lockfile string into an object | 51 | pending | — | — | — |
+| parses v2 lockfile string into an object | 70 | pending | — | — | — |
+| parses v3 lockfile string into an object | 88 | pending | — | — | — |
+| can deal with invalid lockfiles | 106 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cargo/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/range.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | pending | — | — | — |
+| returns widen if current value includes < | 10 | pending | — | — | — |
+| defaults to update-lockfile | 18 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cargo/update-locked.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/update-locked.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects already updated | 9 | pending | — | — | — |
+| returns unsupported for empty lockfile | 21 | pending | — | — | — |
+| returns unsupported for empty depName | 32 | pending | — | — | — |
+| returns unsupported | 44 | pending | — | — | — |
+| returns update-failed in case of errors | 56 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cargo/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/update.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `bumpPackageVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| increments | 12 | pending | — | — | — |
+| no ops | 22 | pending | — | — | — |
+| updates | 31 | pending | — | — | — |
+| returns content if bumping errors | 41 | pending | — | — | — |
+| does not bump version if version is not a semantic version | 50 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cdnurl/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cdnurl/extract.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extractPackageFile | 5 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/circleci/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/index.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `file names match managerFilePatterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matchRegexOrGlobList("$path") === $expected | 6 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/circleci/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/range.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | pending | — | — | — |
+| defaults to bump | 10 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/cocoapods/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cocoapods/artifacts.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no Podfile.lock found | 54 | pending | — | — | — |
+| returns null if no updatedDeps were provided | 67 | pending | — | — | — |
+| returns null for invalid local directory | 80 | pending | — | — | — |
+| returns null if updatedDeps is empty | 97 | pending | — | — | — |
+| returns null if unchanged | 110 | pending | — | — | — |
+| returns updated Podfile | 132 | pending | — | — | — |
+| returns updated Podfile and Pods files | 156 | pending | — | — | — |
+| catches write error | 189 | pending | — | — | — |
+| returns pod exec error | 210 | pending | — | — | — |
+| dynamically selects Docker image tag | 231 | pending | — | — | — |
+| supports install mode | 274 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/composer/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/artifacts.spec.ts
+**Total tests:** 30 | **Ported:** 0 | **Actionable:** 30 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no composer.lock found | 69 | pending | — | — | — |
+| returns null if unchanged | 80 | pending | — | — | — |
+| uses hostRules to set COMPOSER_AUTH | 114 | pending | — | — | — |
+| git-tags hostRule for github.com set github-token in COMPOSER_AUTH | 191 | pending | — | — | — |
+| Skip github application access token hostRules in COMPOSER_AUTH | 225 | pending | — | — | — |
+| github hostRule for github.com with x-access-token set github-token in COMPOSER_AUTH | 263 | pending | — | — | — |
+| does set github COMPOSER_AUTH for github when only hostType git-tags artifactAuth does not include composer | 297 | pending | — | — | — |
+| does set github COMPOSER_AUTH for git-tags when only hostType github artifactAuth does not include composer | 336 | pending | — | — | — |
+| does not set github COMPOSER_AUTH when artifactAuth does not include composer, for both hostType github & git-tags | 375 | pending | — | — | — |
+| does not set gitlab COMPOSER_AUTH when artifactAuth does not include composer | 407 | pending | — | — | — |
+| does not set packagist COMPOSER_AUTH when artifactAuth does not include composer | 448 | pending | — | — | — |
+| does set gitlab COMPOSER_AUTH when artifactAuth does include composer | 509 | pending | — | — | — |
+| does set packagist COMPOSER_AUTH when artifactAuth does include composer | 553 | pending | — | — | — |
+| returns updated composer.lock | 620 | pending | — | — | — |
+| supports vendor directory update | 652 | pending | — | — | — |
+| performs lockFileMaintenance | 713 | pending | — | — | — |
+| supports docker mode | 749 | pending | — | — | — |
+| supports install mode | 823 | pending | — | — | — |
+| supports global mode | 881 | pending | — | — | — |
+| catches errors | 914 | pending | — | — | — |
+| catches unmet requirements errors | 938 | pending | — | — | — |
+| throws for disk space | 957 | pending | — | — | — |
+| disables ignorePlatformReqs | 976 | pending | — | — | — |
+| adds all ignorePlatformReq items | 1011 | pending | — | — | — |
+| installs before running the update when symfony flex is installed | 1046 | pending | — | — | — |
+| installs before running the update when symfony flex is installed as dev | 1095 | pending | — | — | — |
+| does not disable plugins when configured globally | 1144 | pending | — | — | — |
+| disable plugins when configured locally | 1169 | pending | — | — | — |
+| includes new dependency version in update command | 1194 | pending | — | — | — |
+| uses --with-all-dependencies instead of --with-dependencies when composerUpdateAllDependencies is set in postUpdateOptions | 1216 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/composer/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/range.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | pending | — | — | — |
+| replaces require-dev | 10 | pending | — | — | — |
+| replaces project require | 18 | pending | — | — | — |
+| widens complex ranges | 27 | pending | — | — | — |
+| widens complex bump | 36 | pending | — | — | — |
+| defaults to update-lockfile | 45 | pending | — | — | — |
+| defaults to widen for TYPO3 extensions | 50 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/composer/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/schema.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `ReposRecord`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 5 | pending | — | — | — |
+| parses repositories | 9 | pending | — | — | — |
+
+### `ReposArray`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 30 | pending | — | — | — |
+| parses repositories | 34 | pending | — | — | — |
+
+### `Repos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 58 | pending | — | — | — |
+| parses repositories | 66 | pending | — | — | — |
+| parses repositories with packagist disabled | 92 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/composer/update-locked.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/update-locked.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects already updated | 10 | pending | — | — | — |
+| returns unsupported | 22 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/composer/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/utils.spec.ts
+**Total tests:** 33 | **Ported:** 0 | **Actionable:** 33 | **Status:** pending
+
+### `extractConstraints`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns from require | 20 | pending | — | — | — |
+| returns platform php version | 31 | pending | — | — | — |
+| returns platform 0 minor php version | 43 | pending | — | — | — |
+| returns platform 0 patch php version | 55 | pending | — | — | — |
+| returns platform lowest minor php version | 67 | pending | — | — | — |
+| returns platform lowest patch php version | 79 | pending | — | — | — |
+| returns from require-dev | 91 | pending | — | — | — |
+| returns from composer platform require | 99 | pending | — | — | — |
+| returns from composer platform require-dev | 110 | pending | — | — | — |
+| returns from composer-runtime-api | 116 | pending | — | — | — |
+| returns from plugin-api-version | 124 | pending | — | — | — |
+| fallback to 1.* | 132 | pending | — | — | — |
+
+### `getComposerArguments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| disables scripts and plugins by default | 144 | pending | — | — | — |
+| disables platform requirements | 152 | pending | — | — | — |
+| disables all platform requirements with 2.1.0 | 165 | pending | — | — | — |
+| disables only extension and library platform requirements with ^2.1 | 178 | pending | — | — | — |
+| disables only extension and library platform requirements with 2.2.0 | 191 | pending | — | — | — |
+| disables only extension and library platform requirements with ^2.2 | 204 | pending | — | — | — |
+| disables only extension and library platform requirements with 2.3.0 | 217 | pending | — | — | — |
+| disables only extension and library platform requirements with ^2.3 | 230 | pending | — | — | — |
+| disables single platform requirement | 243 | pending | — | — | — |
+| disables multiple platform requirement | 256 | pending | — | — | — |
+| allows scripts when configured | 269 | pending | — | — | — |
+| disables scripts when configured locally | 278 | pending | — | — | — |
+| allows plugins when configured | 294 | pending | — | — | — |
+| disables plugins when configured locally | 303 | pending | — | — | — |
+
+### `getComposerUpdateArguments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not request an update with minimal changes with $constraint | 321 | pending | — | — | — |
+| requests an update with minimal changes with $constraint | 337 | pending | — | — | — |
+| does not use --minimal-changes when composerNoMinimalChanges is set in postUpdateOptions | 361 | pending | — | — | — |
+| does not use --minimal-changes for lock file maintenance | 374 | pending | — | — | — |
+
+### `requireComposerDependencyInstallation`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true when symfony/flex has been installed | 389 | pending | — | — | — |
+| returns true when symfony/flex has been installed as dev dependency | 396 | pending | — | — | — |
+| returns false when symfony/flex has not been installed | 403 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/conan/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/conan/artifacts.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if updatedDeps are empty and lockFileMaintenance is turned off | 30 | pending | — | — | — |
+| returns null if conan.lock was not found | 45 | pending | — | — | — |
+| returns null if conan.lock read operation failed | 64 | pending | — | — | — |
+| returns null if read operation failed for new conan.lock | 87 | pending | — | — | — |
+| returns null if original and updated conan.lock files are the same | 118 | pending | — | — | — |
+| returns updated conan.lock for conanfile.txt | 148 | pending | — | — | — |
+| supports install mode | 184 | pending | — | — | — |
+| returns updated conan.lock when updateType are not empty | 232 | pending | — | — | — |
+| returns updated conan.lock when updateType are empty, but isLockFileMaintenance is true | 268 | pending | — | — | — |
+| rethrows temporary error | 299 | pending | — | — | — |
+| returns an artifact error when conan.lock update fails | 320 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/conan/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/conan/range.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | pending | — | — | — |
+| defaults to bump | 10 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/copier/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/copier/artifacts.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if newVersion is not provided | 62 | pending | — | — | — |
+| uses newValue for vcs-ref when both newValue and newVersion are provided | 87 | pending | — | — | — |
+| reports an error if no upgrade is specified | 116 | pending | — | — | — |
+| reports an error updated deps is undefined | 137 | pending | — | — | — |
+| invokes copier update with the correct options by default | 159 | pending | — | — | — |
+| propagates Git environment from hostRules | 179 | pending | — | — | — |
+| invokes copier update with nested destination and answer file | 229 | pending | — | — | — |
+| supports dynamic install with constraints python=$pythonConstraint copier=$copierConstraint | 249 | pending | — | — | — |
+| includes --trust when allowScripts is true and ignoreScripts is false | 297 | pending | — | — | — |
+| does not include --trust when ignoreScripts is true | 320 | pending | — | — | — |
+| handles exec errors | 338 | pending | — | — | — |
+| does not report changes if answers-file was not changed | 357 | pending | — | — | — |
+| returns updated artifacts if repo status has changes | 380 | pending | — | — | — |
+| warns about, but adds conflicts | 443 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/copier/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/copier/update.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `updateDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should append a new marking line at the end to trigger the artifact update | 6 | pending | — | — | — |
+| should not update again if the new line has been appended | 19 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/custom/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/custom/index.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getCustomManagerList | 4 | pending | — | — | — |
+
+### `isCustomManager()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 9 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/custom/jsonata/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/custom/jsonata/index.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has default config | 7 | pending | — | — | — |
+| returns null when content does not match specified file format | 13 | pending | — | — | — |
+| returns null when no content | 25 | pending | — | — | — |
+| extracts data when no templates are used | 35 | pending | — | — | — |
+| extracts yaml | 88 | pending | — | — | — |
+| applies templates | 141 | pending | — | — | — |
+| logs warning if query result does not match schema | 224 | pending | — | — | — |
+| returns null if no dependencies found | 261 | pending | — | — | — |
+| returns null if invalid template | 281 | pending | — | — | — |
+| extracts and does not apply a registryUrlTemplate if the result is an invalid url | 298 | pending | — | — | — |
+| extracts multiple dependencies with multiple matchStrings | 315 | pending | — | — | — |
+| extracts other matchStrings if one finds no match | 340 | pending | — | — | — |
+| populates manager config and jsonata manager template fields in extract result | 368 | pending | — | — | — |
+| extracts toml | 399 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/custom/regex/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/custom/regex/index.spec.ts
+**Total tests:** 31 | **Ported:** 0 | **Actionable:** 31 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has default config | 13 | pending | — | — | — |
+| has displayName | 19 | pending | — | — | — |
+| extracts multiple dependencies | 23 | pending | — | — | — |
+| returns null if no dependencies found | 50 | pending | — | — | — |
+| returns null if invalid template | 64 | pending | — | — | — |
+| extracts extractVersion | 81 | pending | — | — | — |
+| extracts registryUrl | 103 | pending | — | — | — |
+| extracts and applies a registryUrlTemplate | 141 | pending | — | — | — |
+| extracts and does not apply a registryUrlTemplate if the result is an invalid url | 162 | pending | — | — | — |
+| extracts multiple dependencies with multiple matchStrings | 195 | pending | — | — | — |
+| extracts dependency with autoReplaceStringTemplate | 221 | pending | — | — | — |
+| extracts indentation: maintains indentation value if whitespace or empty | 241 | pending | — | — | — |
+| extracts indentation: discards non-whitespace content | 270 | pending | — | — | — |
+| extracts with combination strategy | 299 | pending | — | — | — |
+| extracts with combination strategy and non standard capture groups | 319 | pending | — | — | — |
+| extracts with combination strategy and multiple matches | 343 | pending | — | — | — |
+| extracts with combination strategy and registry url | 363 | pending | — | — | — |
+| extracts with combination strategy: sets replaceString when current version group present | 384 | pending | — | — | — |
+| extracts with combination strategy: sets replaceString when current digest group present | 413 | pending | — | — | — |
+| extracts with combination strategy and templates | 442 | pending | — | — | — |
+| extracts with combination strategy and empty file | 463 | pending | — | — | — |
+| extracts with recursive strategy and single match | 479 | pending | — | — | — |
+| extracts with recursive strategy and multiple matches | 498 | pending | — | — | — |
+| extracts with recursive strategy and multiple layers | 517 | pending | — | — | — |
+| extracts with recursive strategy and fail because of not sufficient regexes | 537 | pending | — | — | — |
+| extracts with recursive strategy and fail because there is no match | 552 | pending | — | — | — |
+| extracts with recursive strategy and merged groups | 567 | pending | — | — | — |
+| extracts with recursive strategy and without depName | 588 | pending | — | — | — |
+| dotnet | 620 | pending | — | — | — |
+| uses package file as dep name | 685 | pending | — | — | — |
+| uses package file dir as dep name | 705 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/custom/regex/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/custom/regex/utils.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not crash for lazy regex | 5 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/deno/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/artifacts.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips if no updatedDeps and no lockFileMaintenance | 38 | pending | — | — | — |
+| skips if no lock file in config | 42 | pending | — | — | — |
+| skips and returns an error if cannot read lock file | 47 | pending | — | — | — |
+| returns null if lock content unchanged | 59 | pending | — | — | — |
+| returns updated lock content | 68 | pending | — | — | — |
+| change directory if import map is used | 86 | pending | — | — | — |
+| supports lockFileMaintenance | 111 | pending | — | — | — |
+| handles temporary error | 130 | pending | — | — | — |
+| handles full error | 146 | pending | — | — | — |
+| depType tasks returns an error | 163 | pending | — | — | — |
+| depType tasks.command returns an error | 187 | pending | — | — | — |
+| supports lockFileMaintenance (without updated deps) | 211 | pending | — | — | — |
+| deno command execution | 236 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/deno/compat.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/compat.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `extractDenoCompatiblePackageJson()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if invalid package.json | 17 | pending | — | — | — |
+| handles null response | 24 | pending | — | — | — |
+
+### `collectPackageJson()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| node-compat package.json | 44 | pending | — | — | — |
+| handles workspaces with valid workspace member | 77 | pending | — | — | — |
+| returns empty array when rootPackageFile is null | 141 | pending | — | — | — |
+| handles null packageFile in workspace members | 148 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/deno/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/extract.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `getLockFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| found lock file | 22 | pending | — | — | — |
+| not found lock file | 29 | pending | — | — | — |
+
+### `processImportMap()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| importMap | 37 | pending | — | — | — |
+| remote importMap | 81 | pending | — | — | — |
+| importMap path specified but not exists | 91 | pending | — | — | — |
+| invalid importMap file | 98 | pending | — | — | — |
+
+### `processDenoExtract()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| importMap | 107 | pending | — | — | — |
+
+### `extractAllPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| invalid deno.json file | 133 | pending | — | — | — |
+| multiple matched files with deno.json only | 139 | pending | — | — | — |
+| deno.lock without package.json | 157 | pending | — | — | — |
+| deno.lock when collectPackageJson returns null | 163 | pending | — | — | — |
+| deno.lock when collectPackageJson returns empty array | 168 | pending | — | — | — |
+| complex config with imports, scopes, tasks and lint | 173 | pending | — | — | — |
+
+### `extractAllPackageFiles() › workspaces`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| npm workspace compatible | 362 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/deno/post.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/post.spec.ts
+**Total tests:** 30 | **Ported:** 0 | **Actionable:** 30 | **Status:** pending
+
+### `getDenoLock()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| empty lock file | 23 | pending | — | — | — |
+| not supported version | 29 | pending | — | — | — |
+| redirectVersions | 42 | pending | — | — | — |
+| remoteVersions | 61 | pending | — | — | — |
+| complex specifiers | 79 | pending | — | — | — |
+
+### `getLockedVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| empty lock file | 100 | pending | — | — | — |
+| deno datasource remoteVersions | 105 | pending | — | — | — |
+| deno datasource redirects | 122 | pending | — | — | — |
+| get exact lockedVersion | 139 | pending | — | — | — |
+| get latest lockedVersion | 155 | pending | — | — | — |
+| get intersects lockedVersion | 171 | pending | — | — | — |
+| gets lockedVersion for npm package names containing dots | 189 | pending | — | — | — |
+| invalid lock file content | 206 | pending | — | — | — |
+
+### `collectPackageJsonAsWorkspaceMember()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should collect package.json files as deno workspace members | 229 | pending | — | — | — |
+| should handle when extractDenoCompatiblePackageJson returns null | 287 | pending | — | — | — |
+
+### `normalizeWorkspace()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| nested workspace is invalid | 323 | pending | — | — | — |
+
+### `postExtract()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should handle lock file reading failure | 416 | pending | — | — | — |
+| should handle invalid lock file JSON | 422 | pending | — | — | — |
+| should handle deno datasource with no remoteVersions match | 428 | pending | — | — | — |
+| should handle deno datasource with no depName | 445 | pending | — | — | — |
+| should handle jsr datasource with no lockedVersions | 458 | pending | — | — | — |
+| should apply locked versions from lock files | 472 | pending | — | — | — |
+| should handle lock file with no lockFiles | 506 | pending | — | — | — |
+| should use lock file cache for multiple packages | 532 | pending | — | — | — |
+| should handle deno datasource with empty redirectVersions | 585 | pending | — | — | — |
+| should handle deno datasource with currentValue and depName for redirects | 599 | pending | — | — | — |
+| should handle dep without lockedVersion match | 616 | pending | — | — | — |
+
+### `normalizeWorkspace() - additional cases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| workspace member not matching any workspace pattern | 652 | pending | — | — | — |
+| nested workspace removal with packageMap.get returning undefined | 674 | pending | — | — | — |
+| invalidPackageFiles entry not found in packageMap | 699 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/deno/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/schema.spec.ts
+**Total tests:** 43 | **Ported:** 0 | **Actionable:** 43 | **Status:** pending
+
+### `DenoLock`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses lock file with specifiers | 21 | pending | — | — | — |
+| parses lock file with specifiers that do not match regex | 43 | pending | — | — | — |
+| parses lock file with redirects | 63 | pending | — | — | — |
+| parses lock file with remote entries | 85 | pending | — | — | — |
+
+### `Lock`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses lock as string | 107 | pending | — | — | — |
+| parses lock as object | 111 | pending | — | — | — |
+| parses lock as boolean true | 117 | pending | — | — | — |
+| parses lock as boolean false | 121 | pending | — | — | — |
+
+### `Imports`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 127 | pending | — | — | — |
+| parses imports | 131 | pending | — | — | — |
+
+### `scopes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 150 | pending | — | — | — |
+| parses scopes | 154 | pending | — | — | — |
+
+### `Tasks`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 175 | pending | — | — | — |
+| parses tasks | 179 | pending | — | — | — |
+| parses tasks.command | 196 | pending | — | — | — |
+
+### `CompilerOptionsTypes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses compilerOptions.types | 217 | pending | — | — | — |
+
+### `CompilerOptionsJsxImportSource`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses compilerOptions.jsxImportSource | 232 | pending | — | — | — |
+| parses undefined compilerOptions.jsxImportSource | 245 | pending | — | — | — |
+
+### `CompilerOptionsJsxImportSourceTypes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses compilerOptions.jsxImportSourceTypes | 251 | pending | — | — | — |
+| parses undefined compilerOptions.jsxImportSourceTypes | 266 | pending | — | — | — |
+
+### `Lint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 272 | pending | — | — | — |
+| parses lint.plugins | 276 | pending | — | — | — |
+
+### `Workspace`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses workspace array | 295 | pending | — | — | — |
+| parses workspace object | 302 | pending | — | — | — |
+
+### `DenoDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses npm package names containing dots | 313 | pending | — | — | — |
+| invalid npm package names | 329 | pending | — | — | — |
+| invalid npm package versions | 342 | pending | — | — | — |
+| invalid jsr package names | 355 | pending | — | — | — |
+| invalid jsr package versions | 368 | pending | — | — | — |
+| unsupported datasource | 381 | pending | — | — | — |
+| deno.land URL without package name | 395 | pending | — | — | — |
+| deno.land URL with version | 409 | pending | — | — | — |
+
+### `DenoLock via DenoDependency transform path`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty specifiers in lock file | 426 | pending | — | — | — |
+
+### `UpdateDenoJsonFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| keep original field that is irrelevant for schema | 446 | pending | — | — | — |
+
+### `ImportMapExtract`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses import map with imports and scopes | 464 | pending | — | — | — |
+| parses import map with only imports | 500 | pending | — | — | — |
+| parses empty import map | 523 | pending | — | — | — |
+
+### `DenoExtract`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses deno.json with all sections | 531 | pending | — | — | — |
+| parses minimal deno.json | 565 | pending | — | — | — |
+| parses deno.json with workspace | 575 | pending | — | — | — |
+| parses deno.json with lock config | 589 | pending | — | — | — |
+| parses deno.json with importMap | 600 | pending | — | — | — |
+
+### `UpdateImportMapJsonFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| keep original field that is irrelevant for schema | 613 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/deno/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/update.spec.ts
+**Total tests:** 38 | **Ported:** 0 | **Actionable:** 38 | **Status:** pending
+
+### `updateDependency › deno.json/jsonc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates dependency in imports | 9 | pending | — | — | — |
+| throws when multiple imports require more than one replacement | 39 | pending | — | — | — |
+| updates dependency in scopes | 64 | pending | — | — | — |
+| returns null when scopes element not found | 98 | pending | — | — | — |
+| updates dependency in tasks | 127 | pending | — | — | — |
+| updates dependency in tasks.command | 158 | pending | — | — | — |
+| returns null when tasks element not found | 191 | pending | — | — | — |
+| returns null when tasks.command element not found | 221 | pending | — | — | — |
+| updates dependency in compilerOptions.types | 251 | pending | — | — | — |
+| returns null when compilerOptions.types is empty array | 281 | pending | — | — | — |
+| returns null when compilerOptions.types element not found | 308 | pending | — | — | — |
+| updates dependency in compilerOptions.jsxImportSource | 335 | pending | — | — | — |
+| returns null when compilerOptions.jsxImportSource does not exist | 367 | pending | — | — | — |
+| returns null when compilerOptions.jsxImportSourceTypes does not exist | 394 | pending | — | — | — |
+| updates dependency in compilerOptions.jsxImportSourceTypes | 421 | pending | — | — | — |
+| updates dependency in lint plugins | 453 | pending | — | — | — |
+| returns null when lint.plugins element not found | 481 | pending | — | — | — |
+| returns null when lint.plugins is empty array | 508 | pending | — | — | — |
+| handles dependency without version | 535 | pending | — | — | — |
+| returns null if packageFile is not defined | 563 | pending | — | — | — |
+| returns null for not supported datasource | 575 | pending | — | — | — |
+| currentValue is not defined when deno datasource | 602 | pending | — | — | — |
+| returns null for missing required values | 629 | pending | — | — | — |
+| handles complex JSON with nested structures | 648 | pending | — | — | — |
+| handles the case where the desired version is already supported | 689 | pending | — | — | — |
+| returns null if empty file | 712 | pending | — | — | — |
+| handles error during update gracefully | 731 | pending | — | — | — |
+| depName is not defined | 750 | pending | — | — | — |
+| unsupported packageFile | 773 | pending | — | — | — |
+| replaces only exact matches | 792 | pending | — | — | — |
+| returns null when depType is not handled | 818 | pending | — | — | — |
+| returns null when compilerOptions.types does not exist | 841 | pending | — | — | — |
+| returns null when lint.plugins does not exist | 864 | pending | — | — | — |
+
+### `updateDependency › <importMap>.json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates dependency in imports | 889 | pending | — | — | — |
+| handles error during update gracefully | 916 | pending | — | — | — |
+| returns null for not supported datasource | 938 | pending | — | — | — |
+| depName is not defined | 968 | pending | — | — | — |
+
+### `updateDependency › package.json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces a dependency value | 997 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/deps-edn/parser.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deps-edn/parser.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `parseEdnFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| '$input' parses to $output | 7 | pending | — | — | — |
+| extracts file | 41 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/devbox/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/devbox/artifacts.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips if no updatedDeps and no lockFileMaintenance | 38 | pending | — | — | — |
+| skips if no lock file in config | 42 | pending | — | — | — |
+| skips if cannot read lock file | 47 | pending | — | — | — |
+| returns installed devbox.lock | 54 | pending | — | — | — |
+| calls install instead of update --no-install if an older version of devbox is constrained | 100 | pending | — | — | — |
+| returns installed devbox.lock with multiple updated deps | 150 | pending | — | — | — |
+| returns null if no updatedDeps are passed | 213 | pending | — | — | — |
+| returns null if no updatedDeps have depNames | 230 | pending | — | — | — |
+| returns updated devbox.lock | 252 | pending | — | — | — |
+| calls update without --no-install flag if an older version of devbox is being used | 299 | pending | — | — | — |
+| returns null if no changes are found | 349 | pending | — | — | — |
+| returns null if devbox.lock not found after update | 368 | pending | — | — | — |
+| returns null if devbox.lock not found | 395 | pending | — | — | — |
+| returns null if no lock file changes are found | 421 | pending | — | — | — |
+| returns an artifact error on failure | 449 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/flux/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/flux/artifacts.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces existing value | 15 | pending | — | — | — |
+| detects system manifests in subdirectories | 54 | pending | — | — | — |
+| ignores non-system manifests | 91 | pending | — | — | — |
+| ignores unchanged system manifests | 102 | pending | — | — | — |
+| ignores system manifests without a new version | 121 | pending | — | — | — |
+| failed to generate system manifest | 132 | pending | — | — | — |
+| failed to read system manifest | 151 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/git-submodules/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/update.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `updateDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null on error | 49 | pending | — | — | — |
+| returns content on update | 60 | pending | — | — | — |
+| returns content on update and uses git environment variables | 72 | pending | — | — | — |
+| update gitmodule branch value if value changed | 107 | pending | — | — | — |
+| do not update gitmodule branch value if value not changed | 136 | pending | — | — | — |
+| returns content on update and uses git environment variables for git-tags/git-refs | 154 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gitlabci/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/utils.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `getGitlabDep`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| offical image - $name | 11 | pending | — | — | — |
+| image with organization - $name | 28 | pending | — | — | — |
+| supports registry aliases - $name | 48 | pending | — | — | — |
+| no Docker hub | 73 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gleam/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gleam/artifacts.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips if no updatedDeps and no lockFileMaintenance | 30 | pending | — | — | — |
+| skips if no lock file is found | 34 | pending | — | — | — |
+| returns null if cannot read lock file | 39 | pending | — | — | — |
+| returns null if cannot read new lock file | 46 | pending | — | — | — |
+| returns null if lock content unchanged | 57 | pending | — | — | — |
+| returns updated lock content | 67 | pending | — | — | — |
+| supports lockFileMaintenance | 86 | pending | — | — | — |
+| returns null if lockfile content unchanged | 106 | pending | — | — | — |
+| handles temporary error | 118 | pending | — | — | — |
+| handles temporary error when reading the lock file | 134 | pending | — | — | — |
+| handles full error | 145 | pending | — | — | — |
+| prevents injections | 167 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gleam/locked-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gleam/locked-version.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `extractLockFileVersions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for missing lock file | 19 | pending | — | — | — |
+| returns null for invalid lock file | 23 | pending | — | — | — |
+| returns empty map for lock file without packages | 28 | pending | — | — | — |
+| returns a map of package versions | 33 | pending | — | — | — |
+
+### `parseLockFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses lockfile string into an object | 45 | pending | — | — | — |
+| can deal with invalid lockfiles | 63 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gleam/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gleam/range.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | pending | — | — | — |
+| widens complex bump | 10 | pending | — | — | — |
+| defaults to widen | 19 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gomod/artifacts-extra.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/artifacts-extra.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `getExtraDeps`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects extra dependencies | 34 | pending | — | — | — |
+
+### `extraDepsTable`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| generates a table | 55 | pending | — | — | — |
+
+### `getExtraDepsNotice`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when one of files is missing | 83 | pending | — | — | — |
+| returns null when all dependencies are excluded | 88 | pending | — | — | — |
+| returns a notice when there is an extra dependency | 94 | pending | — | — | — |
+| returns a notice when there are extra dependencies | 117 | pending | — | — | — |
+| adds special notice for updated `go` version | 141 | pending | — | — | — |
+| correctly identifies toolchain updates vs go version updates | 166 | pending | — | — | — |
+| correctly identifies and distinguishes toolchain updates vs go version updates when both are present | 215 | pending | — | — | — |
+| correctly handles the introduction of a toolchain directive by not indicating a change | 266 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gomod/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/artifacts.spec.ts
+**Total tests:** 56 | **Ported:** 0 | **Actionable:** 56 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no go.sum found | 93 | pending | — | — | — |
+| returns null if unchanged | 106 | pending | — | — | — |
+| returns updated go.sum | 144 | pending | — | — | — |
+| runs go mod vendor with gomodVendor | 191 | pending | — | — | — |
+| runs go work vendor with gomodVendor and go.work | 243 | pending | — | — | — |
+| supports vendor directory update | 299 | pending | — | — | — |
+| skips vendor directory update with gomodSkipVendor | 389 | pending | — | — | — |
+| supports vendor directory update with go.work | 440 | pending | — | — | — |
+| supports vendor directory in the parent directory | 543 | pending | — | — | — |
+| supports go generate when configured | 646 | pending | — | — | — |
+| only allows go generate usage when permitted globally | 734 | pending | — | — | — |
+| supports docker mode without credentials | 789 | pending | — | — | — |
+| supports install mode without credentials | 852 | pending | — | — | — |
+| supports global mode | 896 | pending | — | — | — |
+| supports docker mode with credentials | 933 | pending | — | — | — |
+| supports docker mode with 2 credentials | 1038 | pending | — | — | — |
+| supports docker mode with single credential | 1110 | pending | — | — | — |
+| supports docker mode with multiple credentials for different paths | 1169 | pending | — | — | — |
+| supports docker mode and ignores non http credentials | 1242 | pending | — | — | — |
+| supports docker mode with many credentials | 1306 | pending | — | — | — |
+| supports docker mode and ignores non git credentials | 1392 | pending | — | — | — |
+| supports docker mode with goModTidy | 1455 | pending | — | — | — |
+| supports docker mode with gomodTidy1.17 | 1519 | pending | — | — | — |
+| supports docker mode with gomodTidyE and gomodTidy1.17 | 1583 | pending | — | — | — |
+| supports docker mode with gomodTidyE | 1647 | pending | — | — | — |
+| catches errors | 1711 | pending | — | — | — |
+| updates import paths with gomodUpdateImportPaths | 1738 | pending | — | — | — |
+| updates correct import paths with gomodUpdateImportPaths and multiple dependencies | 1794 | pending | — | — | — |
+| skips updating import paths with gomodUpdateImportPaths on v0 to v1 | 1855 | pending | — | — | — |
+| skips updating import paths when invalid major version | 1901 | pending | — | — | — |
+| skips updating import paths when incompatible version | 1947 | pending | — | — | — |
+| skips gomodTidy without gomodUpdateImportPaths on major update | 1997 | pending | — | — | — |
+| does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set | 2035 | pending | — | — | — |
+| updates import paths with specific tool version from constraint | 2072 | pending | — | — | — |
+| updates import paths with latest tool version on invalid version constraint | 2132 | pending | — | — | — |
+| updates import paths for gopkg.in dependencies including v0 to v1 | 2192 | pending | — | — | — |
+| gomod file and config do not contain GoConstraints | 2251 | pending | — | — | — |
+| go.mod file contains go version | 2310 | pending | — | — | — |
+| go.mod file contains go toolchain version | 2383 | pending | — | — | — |
+| go.mod file contains full go version without toolchain | 2424 | pending | — | — | — |
+| returns artifact notices | 2465 | pending | — | — | — |
+| config contains go version | 2506 | pending | — | — | — |
+| handles goGetDirs configuration correctly | 2581 | pending | — | — | — |
+| returns updated go.sum when goGetDirs is specified | 2612 | pending | — | — | — |
+| errors when goGetDirs is specified with all invalid paths | 2653 | pending | — | — | — |
+| throws temporary error | 2680 | pending | — | — | — |
+| uses -modfile flag for non-default go.mod filename | 2697 | pending | — | — | — |
+| uses -modfile flag with go mod tidy for non-default go.mod filename | 2732 | pending | — | — | — |
+| uses -modfile flag with go mod vendor for non-default go.mod filename | 2778 | pending | — | — | — |
+
+### `deriveGoToolchainConstraints`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns config constraint when set | 2836 | pending | — | — | — |
+| config constraint takes precedence over go.mod content | 2842 | pending | — | — | — |
+| returns toolchain version when toolchain directive is present | 2851 | pending | — | — | — |
+| returns full go version when only full go directive is present (no toolchain) | 2857 | pending | — | — | — |
+| returns range constraint for major.minor go directive | 2861 | pending | — | — | — |
+| returns undefined when no go version in content and no config constraint | 2865 | pending | — | — | — |
+| ignores constraints.golang and falls back to go.mod content | 2872 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gomod/integration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/integration.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `when constraintsFiltering=strict`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| only suggests updates within the minor version of the `go` directive | 21 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gomod/line-parser.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/line-parser.spec.ts
+**Total tests:** 32 | **Ported:** 0 | **Actionable:** 32 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null for invalid input | 4 | pending | — | — | — |
+| should parse go version | 8 | pending | — | — | — |
+| should skip invalid go version | 21 | pending | — | — | — |
+| should parse toolchain version | 35 | pending | — | — | — |
+| should skip invalid toolchain version | 48 | pending | — | — | — |
+| should parse require definition | 61 | pending | — | — | — |
+| should parse require definition with pseudo-version | 73 | pending | — | — | — |
+| should parse require definition with placeholder pseudo-version | 87 | pending | — | — | — |
+| should parse require multi-line | 102 | pending | — | — | — |
+| should parse require definition with quotes | 117 | pending | — | — | — |
+| should parse go modules without paths - 1 | 129 | pending | — | — | — |
+| should parse go modules without paths - 2 | 140 | pending | — | — | — |
+| should parse require multi-line definition with quotes | 151 | pending | — | — | — |
+| should parse require definition with indirect dependency | 166 | pending | — | — | — |
+| should parse require multi-line definition with indirect dependency | 179 | pending | — | — | — |
+| should parse replace definition | 195 | pending | — | — | — |
+| should parse replace multi-line definition | 206 | pending | — | — | — |
+| should parse replace definition with quotes | 220 | pending | — | — | — |
+| should parse replace multi-line definition with quotes | 231 | pending | — | — | — |
+| should parse replace definition with version | 245 | pending | — | — | — |
+| should parse replace definition with pseudo-version | 257 | pending | — | — | — |
+| should parse replace definition with placeholder pseudo-version | 272 | pending | — | — | — |
+| should parse replace indirect definition | 288 | pending | — | — | — |
+| should parse replace multi-line definition with version | 301 | pending | — | — | — |
+| should parse replace definition pointing to relative local path | 316 | pending | — | — | — |
+| should parse replace definition pointing to absolute local path | 327 | pending | — | — | — |
+| should parse tool definition | 338 | pending | — | — | — |
+| should parse tool multi-line | 349 | pending | — | — | — |
+| should parse tool definition with quotes | 363 | pending | — | — | — |
+| should parse go tool without paths - 1 | 374 | pending | — | — | — |
+| should parse go tool without paths - 2 | 385 | pending | — | — | — |
+| should parse tool multi-line definition with quotes | 396 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gomod/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/update.spec.ts
+**Total tests:** 33 | **Ported:** 0 | **Actionable:** 33 | **Status:** pending
+
+### `updateDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces existing value | 12 | pending | — | — | — |
+| replaces golang version update | 28 | pending | — | — | — |
+| replaces go toolchain | 44 | pending | — | — | — |
+| replaces two values in one file | 60 | pending | — | — | — |
+| returns same | 90 | pending | — | — | — |
+| bumps major v0 > v1 | 104 | pending | — | — | — |
+| replaces major updates > 1 | 123 | pending | — | — | — |
+| bumps major with single package name component | 142 | pending | — | — | — |
+| bumps major with multiple package name components | 161 | pending | — | — | — |
+| replaces major gopkg.in updates | 182 | pending | — | — | — |
+| skip replacing incompatible major updates | 202 | pending | — | — | — |
+| returns null if mismatch | 223 | pending | — | — | — |
+| returns null if error | 237 | pending | — | — | — |
+| replaces multiline | 247 | pending | — | — | — |
+| replaces quoted multiline | 263 | pending | — | — | — |
+| replaces major multiline | 280 | pending | — | — | — |
+| bumps major multiline | 299 | pending | — | — | — |
+| bumps major v0 > v1 multiline | 318 | pending | — | — | — |
+| update multiline digest | 337 | pending | — | — | — |
+| skips already-updated multiline digest | 356 | pending | — | — | — |
+| updates pseudo-version with digest updateType | 373 | pending | — | — | — |
+| handles multiline mismatch | 403 | pending | — | — | — |
+| handles +incompatible tag | 418 | pending | — | — | — |
+| handles +incompatible tag without duplicating it | 437 | pending | — | — | — |
+| handles replace line with minor version update | 458 | pending | — | — | — |
+| handles replace line with major version update | 474 | pending | — | — | — |
+| handles replace line with major version update that bumps both sides of the replace | 494 | pending | — | — | — |
+| handles replace line with digest | 525 | pending | — | — | — |
+| handles no pinned version to latest available version | 546 | pending | — | — | — |
+| handles multiline replace update | 565 | pending | — | — | — |
+| should return null for replacement | 589 | pending | — | — | — |
+| should perform indirect upgrades when top-level | 598 | pending | — | — | — |
+| should perform indirect upgrades when in require blocks | 614 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/artifacts.spec.ts
+**Total tests:** 27 | **Ported:** 0 | **Actionable:** 27 | **Status:** pending
+
+### `isGradleExecutionAllowed`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false when allowedUnsafeExecutions is empty (as it not enabled by default option) | 90 | pending | — | — | — |
+| returns true when allowedUnsafeExecutions includes `gradleWrapper` | 101 | pending | — | — | — |
+| returns false when allowedUnsafeExecutions does not include `gradleWrapper` | 112 | pending | — | — | — |
+| logs when allowedUnsafeExecutions does not include `gradleWrapper` | 123 | pending | — | — | — |
+
+### `lockfile tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| aborts if no lockfile is found | 138 | pending | — | — | — |
+| aborts if lock file exists but no gradle wrapper | 157 | pending | — | — | — |
+| aborts if allowedUnsafeExecutions does not include `gradleWrapper` | 176 | pending | — | — | — |
+| uses custom JVM heap settings when toolSettings are configured | 202 | pending | — | — | — |
+| updates lock file | 247 | pending | — | — | — |
+| updates lock file in win32 | 288 | pending | — | — | — |
+| prefers packageName over depName if provided | 333 | pending | — | — | — |
+| aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project | 378 | pending | — | — | — |
+| performs lock file maintenance | 393 | pending | — | — | — |
+| performs lock file maintenance (docker) | 431 | pending | — | — | — |
+| performs lock file maintenance (install) | 495 | pending | — | — | — |
+| updates all included projects | 534 | pending | — | — | — |
+| does not update lockfile if content is unchanged | 578 | pending | — | — | — |
+| gradlew failed | 592 | pending | — | — | — |
+| rethrows temporary error | 621 | pending | — | — | — |
+| fallback to default Java version if Gradle version not extractable | 640 | pending | — | — | — |
+
+### `dependency verification tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates verification metadata file | 684 | pending | — | — | — |
+| aborts verification metadata updates if allowedUnsafeExecutions does not include `gradleWrapper` | 731 | pending | — | — | — |
+| updates existing checksums also if verify-checksums is disabled | 765 | pending | — | — | — |
+| updates verification metadata and lock file | 820 | pending | — | — | — |
+| uses sha256 as default if only weak hash algorithms are found | 894 | pending | — | — | — |
+| uses pgp hashType if verify-signatures is enabled | 939 | pending | — | — | — |
+| does not write verification metadata, when no checksums exist and neither checksum nor signature verification is enabled | 983 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle/extract/catalog.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract/catalog.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports versions declared as single string | 5 | pending | — | — | — |
+| deletes commit message for plugins with version reference | 134 | pending | — | — | — |
+| ignores empty TOML file | 180 | pending | — | — | — |
+| skips version entries with no resolvable literal value | 185 | pending | — | — | — |
+| changes the dependency version, not the comment version | 203 | pending | — | — | — |
+| supports templated toml | 254 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works for sub folders | 10 | pending | — | — | — |
+| detects lock file header introduced with gradle-consistent-versions version 2.20.0 | 24 | pending | — | — | — |
+| detects lock file header introduced with gradle-consistent-versions version 2.23.0 | 36 | pending | — | — | — |
+| correct position for CRLF and LF | 48 | pending | — | — | — |
+| test bogus input lines | 60 | pending | — | — | — |
+| supports multiple levels of glob | 97 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle/parser/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/parser/common.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| storeVarToken | 41 | pending | — | — | — |
+| increaseNestingDepth | 46 | pending | — | — | — |
+| reduceNestingDepth | 55 | pending | — | — | — |
+| prependNestingDepth | 61 | pending | — | — | — |
+| storeInTokenMap | 73 | pending | — | — | — |
+| loadFromTokenMap | 79 | pending | — | — | — |
+| cleanupTempVars | 89 | pending | — | — | — |
+| stripReservedPrefixFromKeyTokens | 98 | pending | — | — | — |
+| coalesceVariable | 115 | pending | — | — | — |
+| findVariable | 125 | pending | — | — | — |
+| interpolateString | 151 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle/parser.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/parser.spec.ts
+**Total tests:** 45 | **Ported:** 0 | **Actionable:** 45 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles end of input | 30 | pending | — | — | — |
+
+### `variables › Groovy: single var assignments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 37 | pending | — | — | — |
+
+### `variables › Groovy: single var assignments (non-match)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 62 | pending | — | — | — |
+
+### `variables › Groovy: multi var assignments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| simple map | 74 | pending | — | — | — |
+| nested map | 118 | pending | — | — | — |
+| map with interpolated dependency strings | 190 | pending | — | — | — |
+
+### `variables › Kotlin: single var assignments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 243 | pending | — | — | — |
+
+### `variables › Kotlin: single var assignments (non-match)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 255 | pending | — | — | — |
+
+### `variables › Kotlin: single extra var assignments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 266 | pending | — | — | — |
+
+### `variables › Kotlin: multi var assignments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| simple map | 279 | pending | — | — | — |
+| nested map | 300 | pending | — | — | — |
+| map with interpolated dependency strings | 350 | pending | — | — | — |
+
+### `dependencies › simple dependency strings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 384 | pending | — | — | — |
+
+### `dependencies › interpolated dependency strings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $str | 406 | pending | — | — | — |
+
+### `dependencies › concatenated dependency strings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $str | 430 | pending | — | — | — |
+
+### `dependencies › property accessors`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $accessor | 451 | pending | — | — | — |
+
+### `dependencies › kotlin() short notation dependencies`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $str | 489 | pending | — | — | — |
+
+### `dependencies › map notation dependencies`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $str | 511 | pending | — | — | — |
+
+### `dependencies › dependencySet dependencies`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| simple dependencySet | 541 | pending | — | — | — |
+
+### `dependencies › dependencySet dependencies › dependencySet variants`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $str | 590 | pending | — | — | — |
+
+### `dependencies › dependencySubstitution constructs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 617 | pending | — | — | — |
+
+### `dependencies › plugins`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $input | 630 | pending | — | — | — |
+
+### `registries › predefined registries`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 665 | pending | — | — | — |
+
+### `registries › custom registries`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $input | 679 | pending | — | — | — |
+| pluginManagement | 731 | pending | — | — | — |
+
+### `registries › content descriptors`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| valid combinations | 781 | pending | — | — | — |
+
+### `registries › content descriptors › invalid or unsupported regEx patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $pattern | 909 | pending | — | — | — |
+| exclusiveContent | 936 | pending | — | — | — |
+
+### `version catalog`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $str | 1018 | pending | — | — | — |
+
+### `heuristic dependency matching`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 1056 | pending | — | — | — |
+| handles 3 independent dependencies mismatched as groupId, artifactId, version | 1069 | pending | — | — | — |
+
+### `calculations`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calculates offset | 1082 | pending | — | — | — |
+| parses fixture from "gradle" manager | 1093 | pending | — | — | — |
+
+### `gradle.properties`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 1205 | pending | — | — | — |
+| handles multi-line file | 1218 | pending | — | — | — |
+| attaches packageFile | 1228 | pending | — | — | — |
+| parses dependencies | 1236 | pending | — | — | — |
+
+### `apply from`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $input | 1267 | pending | — | — | — |
+| recursion check | 1313 | pending | — | — | — |
+
+### `implicit gradle plugins`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $input | 1330 | pending | — | — | — |
+
+### `implicit gradle test suite dependencies`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $def \| $input | 1364 | pending | — | — | — |
+
+### `Kotlin object notation`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| simple objects | 1381 | pending | — | — | — |
+| nested objects | 1435 | pending | — | — | — |
+| imported objects | 1503 | pending | — | — | — |
+
+### `Java language version`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 1542 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/update.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces | 4 | pending | — | — | — |
+| groups | 20 | pending | — | — | — |
+| returns same content | 37 | pending | — | — | — |
+| returns null | 54 | pending | — | — | — |
+| should return null for replacement | 84 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/utils.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `versionLikeSubstring`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts the actual version | 23 | pending | — | — | — |
+| returns null for invalid inputs | 41 | pending | — | — | — |
+
+### `isDependencyString`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 57 | pending | — | — | — |
+
+### `parseDependencyString`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 85 | pending | — | — | — |
+| filetype checks | 105 | pending | — | — | — |
+| reorderFiles | 120 | pending | — | — | — |
+| getVars | 250 | pending | — | — | — |
+
+### `updateVars`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| empty registry | 276 | pending | — | — | — |
+| updates the registry | 285 | pending | — | — | — |
+
+### `updateVarsFromDefaultCatalog`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no default catalog file | 306 | pending | — | — | — |
+| adds variables with default "libs" prefix | 317 | pending | — | — | — |
+| adds variables with custom libraries extension name | 357 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle-wrapper/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/artifacts.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Custom Gradle Wrapper heap settings are populated | 77 | pending | — | — | — |
+| replaces existing value | 119 | pending | — | — | — |
+| aborts if allowedUnsafeExecutions does not include `toolSettings` | 167 | pending | — | — | — |
+| gradlew not found | 200 | pending | — | — | — |
+| gradlew failed | 220 | pending | — | — | — |
+| updates distributionSha256Sum (docker) | 243 | pending | — | — | — |
+| updates distributionSha256Sum (install) | 301 | pending | — | — | — |
+| distributionSha256Sum 404 | 342 | pending | — | — | — |
+| handles gradle-wrapper in subdirectory | 368 | pending | — | — | — |
+
+### `updateBuildFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates wrapper configuration in gradle build file | 418 | pending | — | — | — |
+| gradle build file update skips missing distributionSha256Sum property | 448 | pending | — | — | — |
+| gradle build file update returns early if file not found | 476 | pending | — | — | — |
+
+### `updateLockFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns early if build script file not found | 495 | pending | — | — | — |
+| includes gradle lockfile in result | 506 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/gradle-wrapper/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/util.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `getJavaConstraint() › returns Java constraint based on gradle support`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $gradleVersion \| $javaConstraint | 20 | pending | — | — | — |
+| returns toolChainVersion constraint if daemon JVM configured | 43 | pending | — | — | — |
+| returns languageVersion constraint if found | 52 | pending | — | — | — |
+
+### `getJvmConfiguration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts toolChainVersion value | 63 | pending | — | — | — |
+| returns null if gradle-daemon-jvm.properties file not found | 72 | pending | — | — | — |
+
+### `getJavaLanguageVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extract languageVersion value | 83 | pending | — | — | — |
+| returns null if build.gradle or build.gradle.kts file not found | 92 | pending | — | — | — |
+| returns null if build.gradle does not include languageVersion | 102 | pending | — | — | — |
+
+### `extractGradleVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null | 113 | pending | — | — | — |
+| returns gradle version | 121 | pending | — | — | — |
+
+### `gradleWrapperFileName()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works on windows | 135 | pending | — | — | — |
+| works on linux | 140 | pending | — | — | — |
+
+### `prepareGradleCommand`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 147 | pending | — | — | — |
+| returns null | 158 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/haskell-cabal/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/haskell-cabal/extract.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `countPackageNameLength`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches $input | 20 | pending | — | — | — |
+
+### `countPrecedingIndentation()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| countPrecedingIndentation($content, $index) | 45 | pending | — | — | — |
+
+### `findExtents()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| findExtents($indent, $content) | 62 | pending | — | — | — |
+
+### `splitSingleDependency()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| splitSingleDependency($depLine) | 75 | pending | — | — | — |
+
+### `extractNamesAndRanges()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| trims replaceString | 95 | pending | — | — | — |
+
+### `findDepends()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| strips comments | 105 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/haskell-cabal/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/haskell-cabal/index.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extractPackageFile($content).deps.map(x => x.packageName) | 15 | pending | — | — | — |
+
+### `getRangeStrategy()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getRangeStrategy({ rangeStrategy: $input }) | 46 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/helmfile/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmfile/artifacts.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no helmfile.lock found | 83 | pending | — | — | — |
+| returns null if updatedDeps is empty | 95 | pending | — | — | — |
+| returns null if unchanged | 106 | pending | — | — | — |
+| returns updated helmfile.lock | 128 | pending | — | — | — |
+| returns updated helmfile.lock if repositories were defined in ../helmfile-defaults.yaml. | 159 | pending | — | — | — |
+| log into private OCI registries, returns updated helmfile.lock | 219 | pending | — | — | — |
+| docker run --rm --name=renovate_sidecar --label=renovate_child | 310 | pending | — | — | — |
+| not found | 391 | pending | — | — | — |
+| updates lockfile with multidoc YAML | 421 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/helmv3/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/artifacts.spec.ts
+**Total tests:** 24 | **Ported:** 0 | **Actionable:** 24 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no Chart.lock found | 71 | pending | — | — | — |
+| returns null if updatedDeps is empty | 83 | pending | — | — | — |
+| returns null if unchanged | 94 | pending | — | — | — |
+| returns null if only "generated" is changed | 115 | pending | — | — | — |
+| returns updated Chart.lock | 154 | pending | — | — | — |
+| returns updated Chart.lock for lockfile maintenance | 184 | pending | — | — | — |
+| returns updated Chart.lock with docker | 213 | pending | — | — | — |
+| catches errors | 251 | pending | — | — | — |
+| add sub chart artifacts to file list if Chart.lock exists | 278 | pending | — | — | — |
+| add sub chart artifacts to file list if Chart.lock is missing | 338 | pending | — | — | — |
+| add sub chart artifacts without old archives | 413 | pending | — | — | — |
+| add sub chart artifacts and ignore files outside of the chart folder | 481 | pending | — | — | — |
+| skip artifacts which are not lock files or in the chart folder | 556 | pending | — | — | — |
+| sets repositories from registryAliases ignoring not well formed URI | 616 | pending | — | — | — |
+| sets repositories from registryAliases with docker | 653 | pending | — | — | — |
+| log into private registries and repositories already defined in registryAliases | 698 | pending | — | — | — |
+| log into private registries and repositories NOT defined in registryAliases | 748 | pending | — | — | — |
+| supports ECR authentication | 794 | pending | — | — | — |
+| does not use ECR authentication when the host rule's username is AWS | 860 | pending | — | — | — |
+| continues without auth if the ECR token is invalid | 917 | pending | — | — | — |
+| continues without auth if ECR authentication fails | 978 | pending | — | — | — |
+| alias name is picked, when repository is as alias and dependency defined | 1037 | pending | — | — | — |
+| do not add registryAliases to repository list | 1092 | pending | — | — | — |
+| prevents injections | 1141 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/helmv3/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/extract.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips invalid registry urls | 16 | pending | — | — | — |
+| parses simple Chart.yaml correctly | 40 | pending | — | — | — |
+| extract correctly oci references | 67 | pending | — | — | — |
+| resolves aliased registry urls | 100 | pending | — | — | — |
+| doesn't fail if Chart.yaml is invalid | 131 | pending | — | — | — |
+| skips local dependencies | 142 | pending | — | — | — |
+| returns null if no dependencies key | 167 | pending | — | — | — |
+| returns null if dependencies are an empty list | 183 | pending | — | — | — |
+| returns null if dependencies key is invalid | 199 | pending | — | — | — |
+| returns null if Chart.yaml is empty | 215 | pending | — | — | — |
+| returns null if Chart.yaml uses an unsupported apiVersion | 222 | pending | — | — | — |
+| returns null if name and version are missing for all dependencies | 235 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/helmv3/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/update.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `.bumpPackageVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| increments | 12 | pending | — | — | — |
+| no ops | 22 | pending | — | — | — |
+| updates | 31 | pending | — | — | — |
+| returns content if bumping errors | 41 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/helmv3/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/utils.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `.resolveAlias()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return alias with "alias:" | 6 | pending | — | — | — |
+| return alias with "@" | 14 | pending | — | — | — |
+| return null if alias repo is not defined | 22 | pending | — | — | — |
+| return resolved repository on OCI registries | 29 | pending | — | — | — |
+| return repository parameter if it is not an alias | 36 | pending | — | — | — |
+| return repository parameter if repository is null | 44 | pending | — | — | — |
+| return repository parameter if repository is undefined | 52 | pending | — | — | — |
+
+### `.isAlias()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return false if repository is null | 62 | pending | — | — | — |
+| return false if repository is undefined | 68 | pending | — | — | — |
+
+### `.isOCIRegistry()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return false if repository is null | 76 | pending | — | — | — |
+| return false if repository is undefined | 81 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/hermit/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/hermit/artifacts.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `updateArtifacts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should run hermit install for packages and return updated files | 23 | pending | — | — | — |
+| should uninstall old package for name replacement | 140 | pending | — | — | — |
+| should not uninstall package for version only replcaement | 246 | pending | — | — | — |
+| should fail if uninstallation fails | 321 | pending | — | — | — |
+| should fail on error getting link content | 371 | pending | — | — | — |
+| should return error on installation error | 420 | pending | — | — | — |
+| should return error on invalid update information | 458 | pending | — | — | — |
+| prevents injections | 523 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/hermit/default-config.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/hermit/default-config.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `excludeCommitPaths`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| minimatches("$path") === $expected | 13 | pending | — | — | — |
+
+### `managerFilePatterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matchRegexOrGlobList("$path") === $expected | 30 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/hermit/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/hermit/update.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `updateDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should append a new marking line at the end to trigger the artifact update | 6 | pending | — | — | — |
+| should not update again if the new line has been appended | 19 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/homebrew/handlers/github.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/github.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `parseUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty string | 8 | pending | — | — | — |
+| returns null for non-string input: %s | 12 | pending | — | — | — |
+| parses valid releases URL | 19 | pending | — | — | — |
+| parses valid archive URL | 33 | pending | — | — | — |
+
+### `buildArchiveUrls`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses original version when semver.coerce fails | 49 | pending | — | — | — |
+| uses coerced version for filename when semver succeeds | 66 | pending | — | — | — |
+
+### `createDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates dependency with github-releases datasource for releases URL | 85 | pending | — | — | — |
+| creates dependency with github-tags datasource for archive URL | 107 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/homebrew/handlers/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `findHandlerByType`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz | 5 | pending | — | — | — |
+| returns github handler for github type | 9 | pending | — | — | — |
+
+### `findHandler`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for null URL | 16 | pending | — | — | — |
+| returns null for unsupported URL | 20 | pending | — | — | — |
+| returns handler and parsed result for GitHub URL | 24 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/homebrew/handlers/npm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/npm.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `parseUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty string | 8 | pending | — | — | — |
+| returns null for non-string input: %s | 12 | pending | — | — | — |
+| returns null for non-npm registry URL | 19 | pending | — | — | — |
+| returns null for custom npm registry | 25 | pending | — | — | — |
+| parses scoped package URL | 33 | pending | — | — | — |
+| parses unscoped package URL | 45 | pending | — | — | — |
+| parses version with prerelease | 57 | pending | — | — | — |
+| parses version with build metadata | 69 | pending | — | — | — |
+| returns null for malformed URL | 81 | pending | — | — | — |
+
+### `createDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates dependency with npm datasource for scoped package | 89 | pending | — | — | — |
+| creates dependency with npm datasource for unscoped package | 116 | pending | — | — | — |
+
+### `buildArchiveUrls`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| builds URL for scoped package | 145 | pending | — | — | — |
+| builds URL for unscoped package | 160 | pending | — | — | — |
+| builds URL with prerelease version | 175 | pending | — | — | — |
+| builds URL for deeply scoped package | 190 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/homebrew/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/update.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 19 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates "releases" github dependency | 14 | pending | — | — | — |
+| updates "archive" github dependency | 49 | pending | — | — | — |
+| updates "archive" github dependency from old url format | 86 | pending | — | — | — |
+| returns unchanged content if fromStream promise rejects | 132 | pending | — | — | — |
+| returns unchanged content if url field in upgrade object is invalid | 165 | pending | — | — | — |
+| returns unchanged content if repoName in upgrade object is invalid | 190 | pending | — | — | — |
+| returns unchanged content if repoName in upgrade object is wrong | 215 | pending | — | — | — |
+| returns unchanged content if url field in Formula file is invalid | 240 | pending | — | — | — |
+| returns unchanged content if url field in Formula file is missing | 280 | pending | — | — | — |
+| returns unchanged content if sha256 field in Formula file is invalid | 319 | pending | — | — | — |
+| returns unchanged content if sha256 field in Formula file is missing | 359 | pending | — | — | — |
+| returns unchanged content if both got requests fail | 398 | pending | — | — | — |
+| returns unchanged content if managerData is missing required fields | 429 | pending | — | — | — |
+| returns unchanged content for unknown handler type | 452 | pending | — | — | — |
+| returns unchanged content if newValue is missing | 476 | pending | — | — | — |
+| returns unchanged content if handler buildArchiveUrls returns null | 500 | pending | — | — | — |
+| updates npm scoped package dependency | 542 | pending | — | — | — |
+| updates npm unscoped package dependency | 586 | pending | — | — | — |
+| returns unchanged content if npm tarball download fails | 630 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/jsonnet-bundler/artifacts.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if jsonnetfile.lock does not exist | 28 | pending | — | — | — |
+| returns null if there are no changes | 40 | pending | — | — | — |
+| updates the vendor dir when dependencies change | 64 | pending | — | — | — |
+| performs lock file maintenance | 139 | pending | — | — | — |
+| returns error when jb update fails | 173 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/kustomize/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/artifacts.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 19 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if newPackageFileContent is not parseable | 46 | pending | — | — | — |
+| returns null if no HelmChart dependencies found | 69 | pending | — | — | — |
+| returns null if no dependency name is found | 90 | pending | — | — | — |
+| returns null if no registryUrl is found | 111 | pending | — | — | — |
+| returns null if no packageName is found | 132 | pending | — | — | — |
+| returns null if neither currentVersion or newVersion is found | 153 | pending | — | — | — |
+| returns null if newVersion is not found and currentVersion is already inflated | 174 | pending | — | — | — |
+| returns null if old version is not inflated and kustomizeInflateHelmCharts is not enabled | 197 | pending | — | — | — |
+| returns null if newVersion and currentVersion is the same | 231 | pending | — | — | — |
+| inflates new version if old version is inflated and kustomizeInflateHelmCharts is not enabled | 262 | pending | — | — | — |
+| inflates new version if old version is not inflated but kustomizeInflateHelmCharts is enabled | 323 | pending | — | — | — |
+| inflates current version if no new version and kustomizeInflateHelmCharts is enabled | 367 | pending | — | — | — |
+| handles OCI repositories | 411 | pending | — | — | — |
+| installs binaries on install mode | 455 | pending | — | — | — |
+| installs binaries on docker mode | 505 | pending | — | — | — |
+| does not inflate current version if kustomizeInflateHelmCharts is not enabled | 574 | pending | — | — | — |
+| catches errors | 610 | pending | — | — | — |
+| throws on TEMPORARY_ERROR | 648 | pending | — | — | — |
+| prevents injections | 680 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/kustomize/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/kustomize/common.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `generateHelmEnvs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| generates envs for specific helm version not requiring HELM_EXPERIMENTAL_OCI | 19 | pending | — | — | — |
+| generates envs for helm version range not requiring HELM_EXPERIMENTAL_OCI | 34 | pending | — | — | — |
+| generates envs for specific helm version requiring HELM_EXPERIMENTAL_OCI | 49 | pending | — | — | — |
+| generates envs for helm range version requiring HELM_EXPERIMENTAL_OCI | 66 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/maven/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `updateDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update an existing dependency | 26 | pending | — | — | — |
+| should update existing dependency defined via properties | 43 | pending | — | — | — |
+| should not touch content if new and old versions are equal | 67 | pending | — | — | — |
+| should update to version of the latest dep in implicit group | 79 | pending | — | — | — |
+| should return null for ungrouped deps if content was updated outside | 135 | pending | — | — | — |
+| should return null if current versions in content and upgrade are not same | 150 | pending | — | — | — |
+| should update ranges | 162 | pending | — | — | — |
+| should preserve ranges | 181 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/maven/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/update.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `updateDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update version | 15 | pending | — | — | — |
+| should do simple replacement | 36 | pending | — | — | — |
+| should do full replacement | 58 | pending | — | — | — |
+| should do replacement if version is first | 90 | pending | — | — | — |
+| should ignore replacement if name does not match | 134 | pending | — | — | — |
+| should update a cloud native buildpack version | 151 | pending | — | — | — |
+| should update a cloud native buildpack digest | 173 | pending | — | — | — |
+
+### `bumpPackageVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| bumps pom.xml version | 215 | pending | — | — | — |
+| bumps pom.xml version keeping SNAPSHOT | 226 | pending | — | — | — |
+| bumps pom.xml minor version keeping SNAPSHOT | 237 | pending | — | — | — |
+| bumps pom.xml major version keeping SNAPSHOT | 248 | pending | — | — | — |
+| bumps pom.xml version keeping qualifier with -SNAPSHOT | 259 | pending | — | — | — |
+| does not bump version twice | 273 | pending | — | — | — |
+| does not bump version if version is not a semantic version | 288 | pending | — | — | — |
+| does not bump version if pom.xml has no version | 299 | pending | — | — | — |
+| returns content if bumping errors | 305 | pending | — | — | — |
+| bumps pom.xml version to SNAPSHOT with prerelease | 314 | pending | — | — | — |
+| bumps pom.xml version with prerelease semver level | 325 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/maven-wrapper/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven-wrapper/artifacts.spec.ts
+**Total tests:** 30 | **Ported:** 0 | **Actionable:** 30 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Should not update if there is no dep with maven:wrapper | 60 | pending | — | — | — |
+| Docker should use java 8 if version is lower then 2.0.0 | 72 | pending | — | — | — |
+| Should update when it is maven wrapper | 102 | pending | — | — | — |
+| Should not update deps when maven-wrapper.properties is not in git change | 147 | pending | — | — | — |
+| updates with docker | 182 | pending | — | — | — |
+| Should return null when cmd is not found | 244 | pending | — | — | — |
+| Should throw an error when it cant execute | 259 | pending | — | — | — |
+| updates with binarySource install | 279 | pending | — | — | — |
+| updates with binarySource install after detecting wrapper version from mvnw script | 329 | pending | — | — | — |
+| should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory | 371 | pending | — | — | — |
+| should run not include MVNW_REPOURL when run with default maven repo url | 413 | pending | — | — | — |
+| should run not include MVNW_REPOURL when run with a malformed replaceString | 455 | pending | — | — | — |
+
+### `checksum updates`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should not delete wrapper jar when only maven distribution checksum is updated | 503 | pending | — | — | — |
+| should update distribution checksum when maven version changes | 525 | pending | — | — | — |
+| should use cached distribution checksum when available | 554 | pending | — | — | — |
+| should skip checksum update when current content is missing | 585 | pending | — | — | — |
+| should update both checksums when wrapper version changes | 599 | pending | — | — | — |
+| should not attempt to delete old JAR file if doing a Maven Wrapper update | 639 | pending | — | — | — |
+| should preserve old checksum when fetch fails | 672 | pending | — | — | — |
+| should restore distribution checksum when fetch fails after stripping | 699 | pending | — | — | — |
+| should skip HTTP when no checksums in properties file | 724 | pending | — | — | — |
+| should return null when only maven is updated without checksums | 745 | pending | — | — | — |
+| should construct wrapper URL from version when wrapperUrl is missing | 758 | pending | — | — | — |
+| should add distribution checksum when it does not exist | 789 | pending | — | — | — |
+| should add wrapper checksum when it does not exist | 820 | pending | — | — | — |
+| should preserve wrapper checksum when fetch fails | 855 | pending | — | — | — |
+| should restore wrapper checksum when fetch fails after stripping | 885 | pending | — | — | — |
+| should unescape distributionUrl, honor wrapperVersion, and keep distributionType | 916 | pending | — | — | — |
+| should skip distribution checksum update when distributionUrl is missing | 953 | pending | — | — | — |
+| should skip wrapper checksum update when wrapperVersion is missing | 971 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/mise/backends.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/backends.spec.ts
+**Total tests:** 37 | **Ported:** 0 | **Actionable:** 37 | **Status:** pending
+
+### `createAquaToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config | 16 | pending | — | — | — |
+| should trim the leading v from version | 27 | pending | — | — | — |
+
+### `createCargoToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config for crate | 40 | pending | — | — | — |
+| should create a tooling config for git tag | 47 | pending | — | — | — |
+| should provide skipReason for git branch | 57 | pending | — | — | — |
+| should create a tooling config for git rev | 70 | pending | — | — | — |
+| should provide skipReason for invalid version | 80 | pending | — | — | — |
+
+### `createDotnetToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config | 91 | pending | — | — | — |
+
+### `createGemToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config | 100 | pending | — | — | — |
+
+### `createGithubToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config with empty options | 109 | pending | — | — | — |
+| should not set extractVersion if the version has leading v | 119 | pending | — | — | — |
+| should set extractVersion with custom version_prefix | 127 | pending | — | — | — |
+| should set extractVersion with version_prefix even if version has leading v | 140 | pending | — | — | — |
+| should handle empty version_prefix with version not having v | 153 | pending | — | — | — |
+| should handle empty version_prefix with version having v | 163 | pending | — | — | — |
+| should escape special regex characters in version_prefix | 173 | pending | — | — | — |
+| should escape brackets and parentheses in version_prefix | 186 | pending | — | — | — |
+
+### `createGoToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config | 201 | pending | — | — | — |
+
+### `createNpmToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config | 210 | pending | — | — | — |
+
+### `createPipxToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config for pypi package | 219 | pending | — | — | — |
+| should create a tooling config for github shorthand | 226 | pending | — | — | — |
+| should create a tooling config for github url | 233 | pending | — | — | — |
+| should create a tooling config for git url | 242 | pending | — | — | — |
+| provides skipReason for zip file url | 251 | pending | — | — | — |
+
+### `createSpmToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config for github shorthand | 262 | pending | — | — | — |
+| should create a tooling config for github url | 269 | pending | — | — | — |
+| provides skipReason for other url | 278 | pending | — | — | — |
+
+### `createUbiToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a tooling config with empty options | 289 | pending | — | — | — |
+| should set extractVersion if the version does not have leading v | 298 | pending | — | — | — |
+| should not set extractVersion if the version has leading v | 307 | pending | — | — | — |
+| should ignore options unless tag_regex is provided | 315 | pending | — | — | — |
+| should set extractVersion if tag_regex is provided | 326 | pending | — | — | — |
+| should set extractVersion without v? when tag_regex is provided and version starts with v | 339 | pending | — | — | — |
+| should trim the leading ^ from tag_regex | 352 | pending | — | — | — |
+| should only trim the leading ^ from tag_regex when version starts with v | 365 | pending | — | — | — |
+| should trim the leading ^v from tag_regex | 378 | pending | — | — | — |
+| should trim the leading ^v? from tag_regex | 391 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/mix/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mix/artifacts.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no mix.lock found | 47 | pending | — | — | — |
+| returns null if no updatedDeps were provided | 58 | pending | — | — | — |
+| returns null if updatedDeps is empty | 69 | pending | — | — | — |
+| returns null if unchanged | 80 | pending | — | — | — |
+| returns null when trying to use lockFileMaintenance with no mix.lock file | 96 | pending | — | — | — |
+| returns null if no updatedDeps and no lockFileMaintenance | 116 | pending | — | — | — |
+| returns null if using lockFileMaintenance in umbrella project | 127 | pending | — | — | — |
+| returns updated mix.lock | 143 | pending | — | — | — |
+| uses constraints on install mode | 188 | pending | — | — | — |
+| authenticates to private repositories in updated dependencies | 217 | pending | — | — | — |
+| authenticates to private repositories configured in hostRules | 281 | pending | — | — | — |
+| returns updated mix.lock in subdir | 344 | pending | — | — | — |
+| returns updated mix.lock in umbrella project | 378 | pending | — | — | — |
+| supports lockFileMaintenance | 414 | pending | — | — | — |
+| lockFileMaintenance returns null if unchanged | 452 | pending | — | — | — |
+| catches write errors | 468 | pending | — | — | — |
+| catches exec errors | 486 | pending | — | — | — |
+| detects read errors | 502 | pending | — | — | — |
+| detects read errors (umbrella) | 523 | pending | — | — | — |
+| handles updates and doesn't try to create mix.lock file if it doesn't exist | 547 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/mix/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mix/range.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | pending | — | — | — |
+| widens complex bump | 13 | pending | — | — | — |
+| bumps non-complex bump | 22 | pending | — | — | — |
+| widens complex auto | 31 | pending | — | — | — |
+| defaults to update-lockfile | 40 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nix/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/artifacts.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no flake.lock found | 55 | pending | — | — | — |
+| returns null if unchanged | 68 | pending | — | — | — |
+| returns updated flake.lock | 88 | pending | — | — | — |
+| adds GitHub token | 117 | pending | — | — | — |
+| trims "x-access-token:" prefix from GitHub token | 147 | pending | — | — | — |
+| supports docker mode | 177 | pending | — | — | — |
+| supports install mode | 222 | pending | — | — | — |
+| catches errors | 256 | pending | — | — | — |
+| returns updated flake.lock when doing lockfile maintenance | 275 | pending | — | — | — |
+| uses nix from config | 304 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nix/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/range.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns replace if currentValue not null | 5 | pending | — | — | — |
+| defaults to update-lockfile | 13 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nodenv/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nodenv/extract.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns a result | 5 | pending | — | — | — |
+| supports ranges | 16 | pending | — | — | — |
+| skips non ranges | 27 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/artifacts.spec.ts
+**Total tests:** 23 | **Ported:** 0 | **Actionable:** 23 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no packageManager updates present | 56 | pending | — | — | — |
+| returns null if currentValue is undefined | 67 | pending | — | — | — |
+| returns null if currentValue has no hash | 78 | pending | — | — | — |
+| returns null if unchanged | 89 | pending | — | — | — |
+| returns updated package.json | 104 | pending | — | — | — |
+| supports docker mode | 130 | pending | — | — | — |
+| supports install mode | 179 | pending | — | — | — |
+| catches errors | 220 | pending | — | — | — |
+
+### `updatePnpmWorkspace()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no security updates are found | 242 | pending | — | — | — |
+| returns null if pnpm workspace file does not exist | 253 | pending | — | — | — |
+| returns null if the pnpmShrinkwrap file is not found | 273 | pending | — | — | — |
+| returns null if no minimumReleaseAge setting found | 304 | pending | — | — | — |
+| returns null if minimumReleaseAgeExclude excludes all versions of updated dep | 325 | pending | — | — | — |
+| updates pnpm workspace - adds minimumReleaseAgeExclude block if not found | 358 | pending | — | — | — |
+| updates pnpm workspace - appends new minimumReleaseAgeExclude setting | 389 | pending | — | — | — |
+| updates pnpm workspace - expands existing minimumReleaseAgeExclude setting | 422 | pending | — | — | — |
+| updates pnpm workspace - handles comment with version already present on an inner minimumReleaseAgeExclude setting | 465 | pending | — | — | — |
+| updates pnpm workspace - handles comment on an inner minimumReleaseAgeExclude setting | 496 | pending | — | — | — |
+| updates pnpm workspace - uses newVersion over newValue in minimumReleaseAgeExclude | 536 | pending | — | — | — |
+| handles multiple security upgrades of the same package (at different versions) in a monorepo | 572 | pending | — | — | — |
+| handles multiple security upgrades of the same package (at the same version) in a monorepo | 643 | pending | — | — | — |
+| preserves catalog changes in pnpm-workspace.yaml when adding minimumReleaseAgeExclude | 706 | pending | — | — | — |
+| handles multiple security upgrades correctly (bug fix test) | 746 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/detect.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/detect.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `.detectGlobalConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects .npmrc in home directory | 8 | pending | — | — | — |
+| handles no .npmrc | 24 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/extract/common/catalogs.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/common/catalogs.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns correct dependencies for pnpm | 5 | pending | — | — | — |
+| returns correct dependencies for yarn | 39 | pending | — | — | — |
+| handles empty catalogs list | 73 | pending | — | — | — |
+| handles catalog with no dependencies | 80 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/extract/common/package-file.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/common/package-file.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for a valid packageManager with name@version(e.g. pnpm@8.15.4) | 20 | pending | — | — | — |
+| returns true for a valid range like npm@^9 | 31 | pending | — | — | — |
+| returns true for yarn classic pin yarn@1.22.19 | 38 | pending | — | — | — |
+| returns false when packageManager does not contain '@' (e.g. 'npm') | 45 | pending | — | — | — |
+| returns false when packageManager is missing | 52 | pending | — | — | — |
+| returns false when package.json is invalid | 57 | pending | — | — | — |
+| returns false if packageManager is an empty string | 62 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/extract/post/locked-versions.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/post/locked-versions.spec.ts
+**Total tests:** 21 | **Ported:** 0 | **Actionable:** 21 | **Status:** pending
+
+### `.getLockedVersions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses yarn.lock with yarn v1.22.0 | 57 | pending | — | — | — |
+| uses yarn.lock with yarn v2.1.0 | 94 | pending | — | — | — |
+| uses yarn.lock with yarn v2.2.0 | 141 | pending | — | — | — |
+| uses yarn.lock with yarn v3.0.0 | 188 | pending | — | — | — |
+| uses yarn.lock but doesn't override extractedConstraints | 227 | pending | — | — | — |
+| uses package-lock.json with npm v6.0.0 | 267 | pending | — | — | — |
+| uses locked version corresponding to workspace | 298 | pending | — | — | — |
+| does not set locked versions for engines, packageManager, and volta deps | 348 | pending | — | — | — |
+| does nothing if managerData is not present | 457 | pending | — | — | — |
+| uses package-lock.json with npm v7.0.0 | 485 | pending | — | — | — |
+| augments v2 lock file constraint | 522 | pending | — | — | — |
+| skips augmenting v2 lock file constraint | 559 | pending | — | — | — |
+| appends <7 to npm extractedConstraints | 596 | pending | — | — | — |
+| skips appending <7 to npm extractedConstraints | 641 | pending | — | — | — |
+| uses pnpm-lock | 687 | pending | — | — | — |
+| uses pnpm-lock for pnpm.catalog depType | 748 | pending | — | — | — |
+| uses pnpm-lock in subfolder | 808 | pending | — | — | — |
+| uses pnpm-lock with workspaces | 869 | pending | — | — | — |
+| should log warning if unsupported lockfileVersion is found | 947 | pending | — | — | — |
+
+### `lockfileVersion 3`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses package-lock.json with npm v9.0.0 | 978 | pending | — | — | — |
+| uses package-lock.json with npm v7.0.0 | 1019 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/extract/post/monorepo.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/post/monorepo.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `.extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles no monorepo | 8 | pending | — | — | — |
+| updates internal packages | 19 | pending | — | — | — |
+| uses yarn workspaces package settings | 74 | pending | — | — | — |
+| uses yarn workspaces package settings with extractedConstraints | 98 | pending | — | — | — |
+| uses yarnZeroInstall and skipInstalls from yarn workspaces package settings | 142 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/extract/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/utils.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `.matchesAnyPattern()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches package in nested directory | 5 | pending | — | — | — |
+| matches package in non-nested directory | 17 | pending | — | — | — |
+| matches package in explicitly defined directory | 29 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/npmrc.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/npmrc.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `resolveNpmrc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined if no .npmrc exists and no config.npmrc | 19 | pending | — | — | — |
+| uses config.npmrc if no .npmrc is found | 24 | pending | — | — | — |
+| finds and filters .npmrc | 31 | pending | — | — | — |
+| uses config.npmrc if .npmrc does exist but npmrcMerge=false | 53 | pending | — | — | — |
+| uses config.npmrc if no .npmrc file is found | 81 | pending | — | — | — |
+| merges config.npmrc and repo .npmrc when npmrcMerge=true | 98 | pending | — | — | — |
+| does not add a newline between config.npmrc and repo .npmrc when npmrcMerge is true, if a newline already exists | 123 | pending | — | — | — |
+| finds and filters .npmrc with variables | 156 | pending | — | — | — |
+| keeps variables when exposeAllEnv is true | 180 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/post-update/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/index.spec.ts
+**Total tests:** 33 | **Ported:** 0 | **Actionable:** 33 | **Status:** pending
+
+### `determineLockFileDirs()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 154 | pending | — | — | — |
+| lockfile maintenance | 168 | pending | — | — | — |
+
+### `writeExistingFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 193 | pending | — | — | — |
+| writes .npmrc files | 206 | pending | — | — | — |
+| only sources npmrc content from package config | 226 | pending | — | — | — |
+| works only on relevant folders | 249 | pending | — | — | — |
+| has no npm files | 262 | pending | — | — | — |
+
+### `writeUpdatedPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 268 | pending | — | — | — |
+| missing updated packages files | 276 | pending | — | — | — |
+| prefers artifact content over package file content for the same path | 283 | pending | — | — | — |
+
+### `updateYarnBinary()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update the Yarn binary | 320 | pending | — | — | — |
+| should return .yarnrc.yml content if it has been overwritten | 334 | pending | — | — | — |
+| should not update the Yarn binary if the old .yarnrc.yml doesn't exist | 348 | pending | — | — | — |
+| should not update the Yarn binary if the new .yarnrc.yml doesn't exist | 361 | pending | — | — | — |
+| should return existing .yarnrc.yml if the new one doesn't exist | 374 | pending | — | — | — |
+| should support Yarn with corepack | 386 | pending | — | — | — |
+
+### `getAdditionalFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 419 | pending | — | — | — |
+| works for npm | 429 | pending | — | — | — |
+| adds artifact notice on beforeFallback | 463 | pending | — | — | — |
+| detects if lock file contents are unchanged(reuseExistingBranch=true) | 493 | pending | — | — | — |
+| detects if lock file contents are unchanged(reuseExistingBranch=false) | 521 | pending | — | — | — |
+| works for yarn | 549 | pending | — | — | — |
+| works for pnpm | 570 | pending | — | — | — |
+| no npm files | 603 | pending | — | — | — |
+| no lockfiles updates | 611 | pending | — | — | — |
+| skip lock file updating | 621 | pending | — | — | — |
+| reuse existing up-to-date | 653 | pending | — | — | — |
+| lockfile maintenance branch exists | 670 | pending | — | — | — |
+| fails for npm | 690 | pending | — | — | — |
+| fails for yarn | 703 | pending | — | — | — |
+| fails for pnpm | 717 | pending | — | — | — |
+
+### `getAdditionalFiles() › should fuzzy merge yarn npmRegistries`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should fuzzy merge the yarnrc Files | 756 | pending | — | — | — |
+| should warn if there is an error writing the yarnrc.yml | 791 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/post-update/node-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/node-version.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `getNodeConstraint()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns from user constraints | 18 | pending | — | — | — |
+| returns .node-version value | 29 | pending | — | — | — |
+| returns .nvmrc value | 41 | pending | — | — | — |
+| ignores unusable ranges in dotfiles | 52 | pending | — | — | — |
+| returns from package.json | 64 | pending | — | — | — |
+| returns from package.json volta | 74 | pending | — | — | — |
+| prefers volta over engines | 84 | pending | — | — | — |
+
+### `getNodeUpdate()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns version | 101 | pending | — | — | — |
+| returns undefined | 107 | pending | — | — | — |
+
+### `getNodeToolConstraint()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns getNodeUpdate | 113 | pending | — | — | — |
+| returns getNodeConstraint | 127 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/post-update/npm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/npm.spec.ts
+**Total tests:** 35 | **Ported:** 0 | **Actionable:** 35 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| generates lock files | 26 | pending | — | — | — |
+| runs npm install twice | 54 | pending | — | — | — |
+| performs lock file updates | 87 | pending | — | — | — |
+| performs lock file updates retaining the package.json counterparts | 107 | pending | — | — | — |
+| performs npm-shrinkwrap.json updates | 136 | pending | — | — | — |
+| performs npm-shrinkwrap.json updates (no package-lock.json) | 163 | pending | — | — | — |
+| performs full install | 186 | pending | — | — | — |
+| deduplicates dependencies on installation with npm >= 7 | 204 | pending | — | — | — |
+| deduplicates package-lock.json dependencies after installation with npm <= 6 | 236 | pending | — | — | — |
+| deduplicates npm-shrinkwrap.json dependencies after installation with npm <= 6 | 271 | pending | — | — | — |
+| runs twice if remediating | 311 | pending | — | — | — |
+| catches errors | 328 | pending | — | — | — |
+| finds npm globally | 344 | pending | — | — | — |
+| uses docker npm | 369 | pending | — | — | — |
+| performs lock file maintenance | 384 | pending | — | — | — |
+| works for docker mode | 402 | pending | — | — | — |
+| works for install mode | 442 | pending | — | — | — |
+| does not install npm if no constraints specified | 468 | pending | — | — | — |
+
+### `passes NODE_OPTIONS`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| if nodeMaxMemory set on global config | 494 | pending | — | — | — |
+| if nodeMaxMemory set on repo config | 538 | pending | — | — | — |
+
+### `installs workspace only packages separately`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| workspace in sub-folder | 695 | pending | — | — | — |
+| workspace in root folder | 727 | pending | — | — | — |
+
+### `prevents injections`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| while performing lockfileUpdate (npm-workspaces) | 883 | pending | — | — | — |
+| while performing lockfileUpdate (npm) | 931 | pending | — | — | — |
+
+### `--before with minimumReleaseAge`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sets --before from minimumReleaseAge | 980 | pending | — | — | — |
+| skips --before on unparseable minimumReleaseAge | 1004 | pending | — | — | — |
+| uses stricter npmrc before date when older than minimumReleaseAge | 1026 | pending | — | — | — |
+| uses minimumReleaseAge date when stricter than npmrc before date | 1050 | pending | — | — | — |
+| skips --before when minimumReleaseAge is absent even if npmrc has before | 1074 | pending | — | — | — |
+| skips --before when .npmrc has min-release-age to avoid npm conflict | 1097 | pending | — | — | — |
+| retries without --before on ETARGET with "with a date before" | 1120 | pending | — | — | — |
+| does not retry on non-before ETARGET errors | 1166 | pending | — | — | — |
+
+### `parseNpmrcCooldownDate › returns null`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| for: $content | 1211 | pending | — | — | — |
+
+### `parseNpmrcCooldownDate › parses before= key`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 1225 | pending | — | — | — |
+
+### `parseNpmrcCooldownDate › parses min-release-age= key`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 1238 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/post-update/pnpm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/pnpm.spec.ts
+**Total tests:** 31 | **Ported:** 0 | **Actionable:** 31 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing when no upgrades | 48 | pending | — | — | — |
+| generates lock files | 55 | pending | — | — | — |
+| catches errors | 69 | pending | — | — | — |
+| finds pnpm globally | 86 | pending | — | — | — |
+| performs lock file updates | 100 | pending | — | — | — |
+| performs lock file updates for workspace with packages | 120 | pending | — | — | — |
+| performs lock file updates for workspace with packages using pnpm 10.x | 146 | pending | — | — | — |
+| performs lock file updates for non workspace using pnpm 10.x | 181 | pending | — | — | — |
+| performs lock file updates for workspace with empty package list | 210 | pending | — | — | — |
+| performs lock file updates for workspace with config but no package list | 234 | pending | — | — | — |
+| performs lock file updates and install when lock file updates mixed with regular updates | 261 | pending | — | — | — |
+| performs lock file maintenance | 290 | pending | — | — | — |
+| performs dedupe | 302 | pending | — | — | — |
+| uses the new version if packageManager is updated | 324 | pending | — | — | — |
+| uses constraint version if parent json has constraints | 341 | pending | — | — | — |
+| uses packageManager version and puts it into constraint | 385 | pending | — | — | — |
+| uses volta version and puts it into constraint | 429 | pending | — | — | — |
+| uses skips pnpm v7 if lockfileVersion indicates <7 | 486 | pending | — | — | — |
+| works for docker mode | 502 | pending | — | — | — |
+| works for install mode | 539 | pending | — | — | — |
+| allows pnpmfile even if ignoring scripts | 564 | pending | — | — | — |
+
+### `passes NODE_OPTIONS`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| if nodeMaxMemory set on global config | 591 | pending | — | — | — |
+| if nodeMaxMemory set on repo config | 621 | pending | — | — | — |
+
+### `getConstraintsFromLockFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no lock file | 650 | pending | — | — | — |
+| returns null when error reading lock file | 656 | pending | — | — | — |
+| returns null if no lockfileVersion | 662 | pending | — | — | — |
+| returns null if lockfileVersion is not a number or numeric string | 668 | pending | — | — | — |
+| returns default if lockfileVersion is 1 | 674 | pending | — | — | — |
+| maps supported versions | 680 | pending | — | — | — |
+| maps supported versions for v6 | 686 | pending | — | — | — |
+| maps supported versions for v9 | 692 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/post-update/rules.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/rules.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `processHostRules()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty if no rules | 10 | pending | — | — | — |
+| returns empty if no resolvedHost | 16 | pending | — | — | — |
+| returns rules content | 23 | pending | — | — | — |
+| returns mixed rules content | 64 | pending | — | — | — |
+| uses rules without host type | 146 | pending | — | — | — |
+| deduplicates host rules while prefering npm type ones | 167 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/post-update/yarn.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/post-update/yarn.spec.ts
+**Total tests:** 29 | **Ported:** 0 | **Actionable:** 29 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| generates lock files using yarn v%s | 58 | pending | — | — | — |
+| if nodeMaxMemory set on global config | 107 | pending | — | — | — |
+| if nodeMaxMemory set on repo config | 148 | pending | — | — | — |
+| only skips build if skipInstalls is false | 188 | pending | — | — | — |
+| allows and ignore scripts | 211 | pending | — | — | — |
+| sets http proxy | 238 | pending | — | — | — |
+| does not use global cache if zero install is detected | 273 | pending | — | — | — |
+| performs lock file updates using yarn v%s | 296 | pending | — | — | — |
+| performs lock file updates and full install using yarn v%s | 335 | pending | — | — | — |
+| performs lock file maintenance using yarn v%s | 359 | pending | — | — | — |
+| performs lock file maintenance in subdirectory independent workspaces using yarn v%s | 395 | pending | — | — | — |
+| performs yarn binary update using yarn v%s | 446 | pending | — | — | — |
+| catches errors | 479 | pending | — | — | — |
+| supports corepack | 489 | pending | — | — | — |
+| supports packageManager url corepack | 535 | pending | — | — | — |
+| supports corepack on grouping | 582 | pending | — | — | — |
+| supports customizing corepack version via config constraints | 631 | pending | — | — | — |
+| uses slim yarn instead of corepack | 690 | pending | — | — | — |
+| uses devEngine.packageManager(object) instead of corepack | 729 | pending | — | — | — |
+| uses devEngine.packageManager(array) instead of corepack | 768 | pending | — | — | — |
+| patches local yarn | 807 | pending | — | — | — |
+| patches local yarn (docker) | 853 | pending | — | — | — |
+
+### `checkYarnrc()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns offline mirror and yarn path | 900 | pending | — | — | — |
+| returns yarn path in subdir | 916 | pending | — | — | — |
+| returns offline mirror | 930 | pending | — | — | — |
+| returns no offline mirror and no absolute yarn path | 944 | pending | — | — | — |
+| returns offline mirror and no yarn path for non-existant yarn-path binary | 959 | pending | — | — | — |
+| removes pure-lockfile and frozen-lockfile from .yarnrc | 973 | pending | — | — | — |
+
+### `fuzzyMatchAdditionalYarnrcYml()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return $expectedRegistry when parsing $additionalRegistry against local $existingRegistry | 987 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/range.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 5 | pending | — | — | — |
+| widens peerDependencies | 10 | pending | — | — | — |
+| widens complex ranges | 18 | pending | — | — | — |
+| widens complex bump | 27 | pending | — | — | — |
+| defaults to update-lockfile | 36 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/dependency/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/dependency/index.spec.ts
+**Total tests:** 24 | **Ported:** 0 | **Actionable:** 24 | **Status:** pending
+
+### `.updateDependency(fileContent, depType, depName, newValue)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces a dependency value | 13 | pending | — | — | — |
+| replaces a github dependency value | 28 | pending | — | — | — |
+| replaces a npm package alias | 52 | pending | — | — | — |
+| replaces a github short hash | 77 | pending | — | — | — |
+| replaces a github fully specified version | 101 | pending | — | — | — |
+| updates resolutions too | 123 | pending | — | — | — |
+| updates glob resolutions | 138 | pending | — | — | — |
+| updates glob resolutions without dep | 153 | pending | — | — | — |
+| replaces only the first instance of a value | 170 | pending | — | — | — |
+| replaces only the second instance of a value | 185 | pending | — | — | — |
+| handles the case where the desired version is already supported | 200 | pending | — | — | — |
+| returns null if throws error | 214 | pending | — | — | — |
+| updates packageManager | 228 | pending | — | — | — |
+| returns null if empty file | 243 | pending | — | — | — |
+| replaces package | 257 | pending | — | — | — |
+| supports alias-based replacement | 273 | pending | — | — | — |
+| replaces glob package resolutions | 291 | pending | — | — | — |
+| pins also the version in patch with npm protocol in resolutions | 307 | pending | — | — | — |
+| replaces also the version in patch with range in resolutions | 322 | pending | — | — | — |
+| handles override dependency | 337 | pending | — | — | — |
+| handles override dependency object | 361 | pending | — | — | — |
+| handles override dependency object where lastParent === depName | 390 | pending | — | — | — |
+| handles pnpm.override dependency | 419 | pending | — | — | — |
+| handles yarn.catalogs dependencies | 446 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/dependency/pnpm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/dependency/pnpm.spec.ts
+**Total tests:** 24 | **Ported:** 0 | **Actionable:** 24 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null on invalid input | 8 | pending | — | — | — |
+| handles implicit default catalog dependency | 19 | pending | — | — | — |
+| handles explicit default catalog dependency | 46 | pending | — | — | — |
+| handles explicit named catalog dependency | 75 | pending | — | — | — |
+| does nothing if the new and old values match | 111 | pending | — | — | — |
+| replaces package | 132 | pending | — | — | — |
+| replaces a github dependency value | 160 | pending | — | — | — |
+| replaces a npm package alias | 189 | pending | — | — | — |
+| replaces a github short hash | 219 | pending | — | — | — |
+| replaces a github fully specified version | 248 | pending | — | — | — |
+| returns null if the dependency is not present in the target catalog | 277 | pending | — | — | — |
+| returns null if catalogs are missing | 298 | pending | — | — | — |
+| returns null if empty file | 316 | pending | — | — | — |
+| preserves literal whitespace | 330 | pending | — | — | — |
+| preserves single quote style | 357 | pending | — | — | — |
+| preserves comments | 384 | pending | — | — | — |
+| preserves double quote style | 415 | pending | — | — | — |
+| preserves anchors, replacing only the value | 442 | pending | — | — | — |
+| preserves whitespace with anchors | 474 | pending | — | — | — |
+| preserves quotation style with anchors | 501 | pending | — | — | — |
+| preserves formatting in flow style syntax | 528 | pending | — | — | — |
+| does not replace aliases in the value position | 559 | pending | — | — | — |
+| does not replace aliases in the key position | 587 | pending | — | — | — |
+| handles workspace overrides | 611 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/dependency/yarn.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/dependency/yarn.spec.ts
+**Total tests:** 26 | **Ported:** 0 | **Actionable:** 26 | **Status:** pending
+
+### `updateYarnrcCatalogDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if catalogName is missing and logs error | 8 | pending | — | — | — |
+| ensure continuation even if catalog list and update does not match | 33 | pending | — | — | — |
+| ensure continuation even if dependency and update does not match | 55 | pending | — | — | — |
+| ensure trace logging | 78 | pending | — | — | — |
+
+### `updateDependency`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if catalogName is missing | 103 | pending | — | — | — |
+| handles implicit default catalog dependency | 125 | pending | — | — | — |
+| handles explicit named catalog dependency | 150 | pending | — | — | — |
+| does nothing if the new and old values match | 177 | pending | — | — | — |
+| replaces package | 197 | pending | — | — | — |
+| replaces a github dependency value | 224 | pending | — | — | — |
+| replaces a npm package alias | 251 | pending | — | — | — |
+| replaces a github short hash | 279 | pending | — | — | — |
+| replaces a github fully specified version | 306 | pending | — | — | — |
+| returns null if the dependency is not present in the target catalog | 334 | pending | — | — | — |
+| returns null if catalogs are missing | 357 | pending | — | — | — |
+| returns null if empty file | 375 | pending | — | — | — |
+| preserves literal whitespace | 389 | pending | — | — | — |
+| preserves single quote style | 415 | pending | — | — | — |
+| preserves comments | 440 | pending | — | — | — |
+| preserves double quote style | 469 | pending | — | — | — |
+| preserves anchors, replacing only the value | 494 | pending | — | — | — |
+| preserves whitespace with anchors | 524 | pending | — | — | — |
+| preserves quotation style with anchors | 549 | pending | — | — | — |
+| preserves formatting in flow style syntax | 574 | pending | — | — | — |
+| does not replace aliases in the value position | 603 | pending | — | — | — |
+| does not replace aliases in the key position | 630 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `getLockedDependencies()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| finds indirect dependency | 10 | pending | — | — | — |
+| finds removed dependencies | 35 | pending | — | — | — |
+| finds when a greater version is needed | 58 | pending | — | — | — |
+| finds when a range matches greater versions | 78 | pending | — | — | — |
+| returns null if no matching | 97 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/locked-dependency/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/index.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `updateLockedDependency()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validates filename | 45 | pending | — | — | — |
+| validates versions | 54 | pending | — | — | — |
+| returns null for unparseable files | 63 | pending | — | — | — |
+| rejects lockFileVersion 2 | 72 | pending | — | — | — |
+| returns null if no locked deps | 81 | pending | — | — | — |
+| rejects null if no constraint found | 85 | pending | — | — | — |
+| remediates in-range | 97 | pending | — | — | — |
+| rejects in-range remediation if lockfile v2+ | 109 | pending | — | — | — |
+| fails to remediate if parent dep cannot support | 120 | pending | — | — | — |
+| remediates express | 140 | pending | — | — | — |
+| remediates lock file v2 express | 150 | pending | — | — | — |
+| returns already-updated if already remediated exactly | 161 | pending | — | — | — |
+| returns already-updated if already v2 remediated exactly | 169 | pending | — | — | — |
+| returns already-updated if already remediated higher | 178 | pending | — | — | — |
+| returns already-updated if not found | 187 | pending | — | — | — |
+| returns update-failed if other, lower version found | 196 | pending | — | — | — |
+| remediates mime | 205 | pending | — | — | — |
+| fails remediation if cannot update parent | 222 | pending | — | — | — |
+| fails remediation if bundled | 231 | pending | — | — | — |
+| rejects in-range remediation if pnpm | 241 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `findDepConstraints()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| finds indirect dependency | 11 | pending | — | — | — |
+| finds direct dependency | 29 | pending | — | — | — |
+| skips non-matching direct dependency | 41 | pending | — | — | — |
+| finds direct devDependency | 53 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `getLockedDependencies()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles error | 11 | pending | — | — | — |
+| returns empty if failed to parse | 17 | pending | — | — | — |
+| finds direct dependency | 21 | pending | — | — | — |
+| finds indirect dependency | 32 | pending | — | — | — |
+| finds any version | 43 | pending | — | — | — |
+| finds bundled dependency | 49 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `replaceConstraintVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| finds unscoped | 10 | pending | — | — | — |
+| finds scoped | 28 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `updateLockedDependency()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if cannot parse lock file | 17 | pending | — | — | — |
+| returns if yarn lock 2 | 22 | pending | — | — | — |
+| fails if cannot find dep | 30 | pending | — | — | — |
+| returns already-updated | 38 | pending | — | — | — |
+| fails if cannot update dep in-range | 46 | pending | — | — | — |
+| succeeds if can update within range | 54 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `replaceConstraintVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if Yarn 2+ | 11 | pending | — | — | — |
+| replaces without dependencies | 21 | pending | — | — | — |
+| replaces with dependencies | 46 | pending | — | — | — |
+| replaces constraint too | 71 | pending | — | — | — |
+| handles escaped constraints | 99 | pending | — | — | — |
+| handles quoted | 124 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/update/package-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/package-version/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `.bumpPackageVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| mirrors | 11 | pending | — | — | — |
+| aborts mirror | 21 | pending | — | — | — |
+| increments | 30 | pending | — | — | — |
+| no ops | 40 | pending | — | — | — |
+| updates | 49 | pending | — | — | — |
+| returns content if bumping errors | 59 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/npm/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/utils.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `parseLockFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses lockfile string into an object | 16 | pending | — | — | — |
+| can deal with invalid lockfiles | 37 | pending | — | — | — |
+
+### `composeLockFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| composes lockfile string out of an object | 48 | pending | — | — | — |
+| adds trailing newline to match npms behavior and avoid diffs | 66 | pending | — | — | — |
+
+### `loadPackageJson`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| loads and parses package.json correctly | 81 | pending | — | — | — |
+| returns empty object when package.json is missing | 100 | pending | — | — | — |
+| returns empty object when package.json is invalid | 105 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nuget/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/artifacts.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| re-throws TEMPORARY_ERROR | 53 | pending | — | — | — |
+| aborts if no lock file found | 72 | pending | — | — | — |
+| aborts if lock file is unchanged | 87 | pending | — | — | — |
+| runs workload restore and updates lock file | 121 | pending | — | — | — |
+| does not update lock file when non-proj file is changed | 174 | pending | — | — | — |
+| updates lock file for Directory.Build.props | 194 | pending | — | — | — |
+| updates lock file for nested Directory.Build.props | 231 | pending | — | — | — |
+| does not update lock file when no deps changed | 268 | pending | — | — | — |
+| performs lock file maintenance | 288 | pending | — | — | — |
+| supports docker mode | 331 | pending | — | — | — |
+| supports install mode | 397 | pending | — | — | — |
+| supports global mode | 451 | pending | — | — | — |
+| catches errors | 492 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nuget/config-formatter.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/config-formatter.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `createNuGetConfigXml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns xml with registries | 12 | pending | — | — | — |
+| returns xml with authenticated registries | 58 | pending | — | — | — |
+| escapes registry credential names containing special characters | 138 | pending | — | — | — |
+| strips protocol version from feed url | 181 | pending | — | — | — |
+| includes packageSourceMapping when defined | 202 | pending | — | — | — |
+| excludes packageSourceMapping when undefined | 245 | pending | — | — | — |
+| skips duplicate registry URLs | 265 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nuget/package-tree.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/package-tree.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `getDependentPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns self for single project | 32 | pending | — | — | — |
+| returns self for two projects with no references | 45 | pending | — | — | — |
+| returns projects for two projects with one reference | 60 | pending | — | — | — |
+| returns project for two projects with one reference and central versions | 77 | pending | — | — | — |
+| returns projects for two projects with one reference and Directory.Build.props | 99 | pending | — | — | — |
+| returns only projects under nested Directory.Build.props directory | 121 | pending | — | — | — |
+| returns project for two projects with one reference and global.json | 143 | pending | — | — | — |
+| returns projects for three projects with two linear references | 163 | pending | — | — | — |
+| returns projects for three projects with two tree-like references | 197 | pending | — | — | — |
+| throws error on circular reference | 229 | pending | — | — | — |
+| skips on invalid xml file | 245 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nuget/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/update.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `bumpPackageVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| bumps csproj version | 17 | pending | — | — | — |
+| does not bump version twice | 28 | pending | — | — | — |
+| issue 23526 does not bump version incorrectly | 43 | pending | — | — | — |
+| does not bump version if version is not a semantic version | 58 | pending | — | — | — |
+| does not bump version if extract found no version | 69 | pending | — | — | — |
+| does not bump version if csproj has no version | 75 | pending | — | — | — |
+| returns content if bumping errors | 87 | pending | — | — | — |
+| bumps csproj version with prerelease semver level | 96 | pending | — | — | — |
+| bumps csproj version prefix | 107 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/nuget/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/util.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `findVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| finds the version in a later property group | 17 | pending | — | — | — |
+| picks version over versionprefix | 28 | pending | — | — | — |
+
+### `getConfiguredRegistries`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads nuget config file | 41 | pending | — | — | — |
+| deduplicates registries | 78 | pending | — | — | — |
+| reads nuget config file with default registry | 99 | pending | — | — | — |
+| reads nuget config file with default registry disabled and added sources | 134 | pending | — | — | — |
+| reads nuget config file with default registry disabled given default registry added | 157 | pending | — | — | — |
+| reads nuget config file with unknown disabled source | 181 | pending | — | — | — |
+| reads nuget config file with disabled source with value false | 208 | pending | — | — | — |
+| reads nuget config file without packageSources and ignores disabledPackageSources | 237 | pending | — | — | — |
+
+### `applyRegistries`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| applies registry to package name via source mapping | 254 | pending | — | — | — |
+| applies registry to package name case insensitive | 323 | pending | — | — | — |
+| applies all registries to package name | 343 | pending | — | — | — |
+| applies nothing | 371 | pending | — | — | — |
+
+### `findGlobalJson`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| not found | 386 | pending | — | — | — |
+| no content | 392 | pending | — | — | — |
+| fails to parse | 398 | pending | — | — | — |
+| parses | 405 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/ocb/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ocb/update.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `bumpPackageVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| increments with all fields | 6 | pending | — | — | — |
+| increments with double quotes | 22 | pending | — | — | — |
+| increments with single quotes | 33 | pending | — | — | — |
+| no ops | 44 | pending | — | — | — |
+| updates | 53 | pending | — | — | — |
+| returns content if bumping errors | 63 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pep621/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/artifacts.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return null if all processors returns are empty | 26 | pending | — | — | — |
+| return artifact error if newPackageFile content is not valid | 41 | pending | — | — | — |
+| return processor result | 60 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pep621/processors/pdm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/processors/pdm.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws TEMPORARY_ERROR | 31 | pending | — | — | — |
+| return null if there is no lock file | 40 | pending | — | — | — |
+| return null if the lock file is unchanged | 55 | pending | — | — | — |
+| returns artifact error | 111 | pending | — | — | — |
+| return update dep update | 135 | pending | — | — | — |
+| discard dependencies if the devGroup is missing | 230 | pending | — | — | — |
+| return update on lockfileMaintenance | 273 | pending | — | — | — |
+| sets Git environment variables | 318 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pep621/processors/uv.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/processors/uv.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `process()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns initial dependencies if there is no tool.uv section | 38 | pending | — | — | — |
+| includes uv dev dependencies if there is a tool.uv section | 50 | pending | — | — | — |
+| applies git sources | 81 | pending | — | — | — |
+| pinned to non-default index | 150 | pending | — | — | — |
+| index with optional name | 222 | pending | — | — | — |
+| override implicit default index | 257 | pending | — | — | — |
+| override explicit default index | 303 | pending | — | — | — |
+
+### `extractLockedVersions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no lockfile found | 345 | pending | — | — | — |
+
+### `updateArtifacts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws TEMPORARY_ERROR | 362 | pending | — | — | — |
+| returns if no lockfile found | 371 | pending | — | — | — |
+| returns null if there is no lock file | 385 | pending | — | — | — |
+| returns null if the lock file is unchanged | 400 | pending | — | — | — |
+| returns artifact error | 464 | pending | — | — | — |
+| return update dep update | 488 | pending | — | — | — |
+| performs update on private package registry | 539 | pending | — | — | — |
+| dont propagate uv.tool.index into UV_EXTRA_INDEX_URL | 674 | pending | — | — | — |
+| continues if Google auth is not configured | 786 | pending | — | — | — |
+| return update on lockfileMaintenance | 850 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pep621/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/update.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `bumpPackageVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| increments | 13 | pending | — | — | — |
+| no ops | 23 | pending | — | — | — |
+| updates | 32 | pending | — | — | — |
+| returns content if bumping errors | 42 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pep621/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/utils.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `parsePEP508()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| (parse $value" | 6 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pep723/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep723/utils.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `parsePep723()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should extract dependencies | 6 | pending | — | — | — |
+| should skip invalid dependencies | 42 | pending | — | — | — |
+| should return null on missing dependencies | 71 | pending | — | — | — |
+| should return null on invalid TOML | 84 | pending | — | — | — |
+| should return null if there is no PEP 723 metadata | 101 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pip-compile/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/artifacts.spec.ts
+**Total tests:** 31 | **Ported:** 0 | **Actionable:** 31 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no requirements.txt found | 84 | pending | — | — | — |
+| returns null if all unchanged | 100 | pending | — | — | — |
+| returns null if no config.lockFiles | 121 | pending | — | — | — |
+| returns updated requirements.txt | 142 | pending | — | — | — |
+| supports docker mode | 169 | pending | — | — | — |
+| supports install mode | 223 | pending | — | — | — |
+| installs Python version according to the lock file | 260 | pending | — | — | — |
+| installs Python version according to the uv option | 299 | pending | — | — | — |
+| install uv tools without constraints | 342 | pending | — | — | — |
+| installs latest Python version if no constraints and not in header | 383 | pending | — | — | — |
+| catches errors | 431 | pending | — | — | — |
+| returns updated requirements.txt when doing lockfile maintenance | 453 | pending | — | — | — |
+| uses --upgrade-package only for isLockfileUpdate | 476 | pending | — | — | — |
+| uses pip-compile version from config | 504 | pending | — | — | — |
+
+### `constructPipCompileCmd()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for garbage | 565 | pending | — | — | — |
+| returns extracted common arguments (like those featured in the README) | 576 | pending | — | — | — |
+| returns extracted arguments for uv | 589 | pending | — | — | — |
+| returns --no-emit-index-url when credentials are found in PIP_INDEX_URL | 599 | pending | — | — | — |
+| returns --no-emit-index-url when credentials are found in PIP_EXTRA_INDEX_URL | 608 | pending | — | — | — |
+| returns --no-emit-index-url when only a username is found in PIP_INDEX_URL | 618 | pending | — | — | — |
+| returns --no-emit-index-url when only a username is found in PIP_EXTRA_INDEX_URL | 627 | pending | — | — | — |
+| returns --no-emit-index-url when only a password is found in PIP_INDEX_URL | 636 | pending | — | — | — |
+| returns --no-emit-index-url when only a password is found in PIP_EXTRA_INDEX_URL | 645 | pending | — | — | — |
+| returns --no-emit-index-url when PIP_INDEX_URL is invalid | 654 | pending | — | — | — |
+| returns --no-emit-index-url PIP_EXTRA_INDEX_URL is invalid | 663 | pending | — | — | — |
+| returns --no-emit-index-url only once when its in the header and credentials are present in the environment | 672 | pending | — | — | — |
+| allow explicit --emit-index-url | 687 | pending | — | — | — |
+| throws on unknown arguments | 699 | pending | — | — | — |
+| throws on custom command | 710 | pending | — | — | — |
+| add --upgrade-package to command if Upgrade[] passed | 721 | pending | — | — | — |
+| reports errors when a lock file is unchanged | 740 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pip-compile/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/common.spec.ts
+**Total tests:** 27 | **Ported:** 0 | **Actionable:** 27 | **Status:** pending
+
+### `extractHeaderCommand()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| -v | 27 | pending | — | — | — |
+| -v | 48 | pending | — | — | — |
+| errors on malformed options with argument | 77 | pending | — | — | — |
+| errors on unknown options | 89 | pending | — | — | — |
+| always errors on not allowed options | 101 | pending | — | — | — |
+| throws on duplicate options | 113 | pending | — | — | — |
+| throws when no source files passed as arguments | 127 | pending | — | — | — |
+| throws on malformed header | 136 | pending | — | — | — |
+| throws on mutually exclusive options | 140 | pending | — | — | — |
+| returned sourceFiles returns all source files | 151 | pending | — | — | — |
+| returned sourceFiles must not contain options (pip-compile) | 169 | pending | — | — | — |
+| returned sourceFiles must not contain options (uv) | 181 | pending | — | — | — |
+| detects custom command | 193 | pending | — | — | — |
+| infer exec directory (cwd) from output file path and header command | 202 | pending | — | — | — |
+
+### `extractPythonVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts Python version from valid header | 217 | pending | — | — | — |
+| returns undefined if version cannot be extracted | 226 | pending | — | — | — |
+
+### `getRegistryCredVarsFromPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles both registryUrls and additionalRegistryUrls | 232 | pending | — | — | — |
+| handles multiple additionalRegistryUrls | 259 | pending | — | — | — |
+| handles hosts with only a username | 288 | pending | — | — | — |
+| handles hosts with only a password | 306 | pending | — | — | — |
+| handles invalid URLs | 324 | pending | — | — | — |
+| handles multiple package files | 339 | pending | — | — | — |
+
+### `matchManager()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches pip_setup setup.py | 370 | pending | — | — | — |
+| matches setup-cfg setup.cfg | 374 | pending | — | — | — |
+| matches pep621 pyproject.toml | 378 | pending | — | — | — |
+| matches pip_requirements any .in file | 382 | pending | — | — | — |
+| matches pip_requirements any .txt file | 387 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pip-compile/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/utils.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `inferCommandExecDir()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns object on correct options | 5 | pending | — | — | — |
+| throw if --output-file basename differs from path | 23 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pip_requirements/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/artifacts.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no updatedDeps were provided | 50 | pending | — | — | — |
+| returns null if no hashes | 61 | pending | — | — | — |
+| returns null if unchanged | 73 | pending | — | — | — |
+| returns updated file | 97 | pending | — | — | — |
+| ignores falsy depNames | 129 | pending | — | — | — |
+| catches and returns errors | 161 | pending | — | — | — |
+| supports docker mode | 190 | pending | — | — | — |
+| supports install mode | 244 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pip_requirements/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/common.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `extractPackageFileFlags()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| extracts --index-url flag | 5 | pending | — | — | — |
+| extracts --index-url short code | 15 | pending | — | — | — |
+| extracts --extra-index-url flag | 27 | pending | — | — | — |
+| extracts --requirement short code option | 37 | pending | — | — | — |
+| extracts --constraints short code option | 48 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pip_requirements/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/index.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| default config file pattern | 5 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pipenv/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pipenv/artifacts.spec.ts
+**Total tests:** 21 | **Ported:** 0 | **Actionable:** 21 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no Pipfile.lock found | 119 | pending | — | — | — |
+| returns null if unchanged | 130 | pending | — | — | — |
+| gets python full version from Pipfile | 183 | pending | — | — | — |
+| gets python version from Pipfile | 236 | pending | — | — | — |
+| gets full python version from .python-version | 289 | pending | — | — | — |
+| gets python stream, from .python-version | 348 | pending | — | — | — |
+| handles no constraint | 406 | pending | — | — | — |
+| returns updated Pipfile.lock | 462 | pending | — | — | — |
+| supports docker mode | 525 | pending | — | — | — |
+| supports install mode | 613 | pending | — | — | — |
+| defaults to latest if no lock constraints | 685 | pending | — | — | — |
+| catches errors | 757 | pending | — | — | — |
+| returns updated Pipenv.lock when doing lockfile maintenance | 784 | pending | — | — | — |
+| uses pipenv version from Pipfile | 832 | pending | — | — | — |
+| uses pipenv version from Pipfile dev packages | 919 | pending | — | — | — |
+| uses pipenv version from config | 1006 | pending | — | — | — |
+| passes private credential environment vars | 1087 | pending | — | — | — |
+| returns no host rule on invalid url | 1140 | pending | — | — | — |
+| extractEnvironmentVariableName($credential) | 1144 | pending | — | — | — |
+| warns about duplicate placeholders with different values | 1156 | pending | — | — | — |
+| updates extraEnv if variable names differ from default | 1170 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pixi/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pixi/artifacts.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `updateArtifacts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no pixi.lock found | 69 | pending | — | — | — |
+| returns null if updatedDeps is empty | 82 | pending | — | — | — |
+| returns null if unchanged | 95 | pending | — | — | — |
+| handle TEMPORARY_ERROR | 121 | pending | — | — | — |
+| returns updated pixi.lock using docker | 139 | pending | — | — | — |
+| returns updated pixi.lock using install mode | 195 | pending | — | — | — |
+| returns updated pixi.lock using install mode for old version lock file | 234 | pending | — | — | — |
+| returns pixi version defined in requires-pixi | 272 | pending | — | — | — |
+| catches errors | 327 | pending | — | — | — |
+| returns updated pixi.lock when doing lockfile maintenance | 347 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/poetry/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/artifacts.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 19 | **Status:** pending
+
+### `getPythonConstraint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects from pyproject.toml | 56 | pending | — | — | — |
+| detects from poetry.ock | 67 | pending | — | — | — |
+
+### `getPoetryRequirement`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects poetry from first line of poetry.lock | 76 | pending | — | — | — |
+| detects poetry from metadata | 83 | pending | — | — | — |
+
+### `updateArtifacts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no poetry.lock found | 99 | pending | — | — | — |
+| returns null if updatedDeps is empty | 113 | pending | — | — | — |
+| returns null if unchanged | 126 | pending | — | — | — |
+| returns updated poetry.lock | 151 | pending | — | — | — |
+| passes private credential environment vars | 179 | pending | — | — | — |
+| passes Google Artifact Registry credentials environment vars | 228 | pending | — | — | — |
+| continues if Google auth is not configured | 277 | pending | — | — | — |
+| prioritizes pypi-scoped credentials | 317 | pending | — | — | — |
+| returns updated pyproject.lock | 356 | pending | — | — | — |
+| returns updated poetry.lock using docker | 387 | pending | — | — | — |
+| supports docker mode with github credentials | 452 | pending | — | — | — |
+| returns updated poetry.lock using docker (constraints) | 541 | pending | — | — | — |
+| returns updated poetry.lock using install mode | 607 | pending | — | — | — |
+| catches errors | 652 | pending | — | — | — |
+| returns updated poetry.lock when doing lockfile maintenance | 672 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/poetry/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/schema.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses project version | 4 | pending | — | — | — |
+
+### `PoetrySources`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses default values | 13 | pending | — | — | — |
+| parses unordered sources | 18 | pending | — | — | — |
+| implicit use of PyPI source | 89 | pending | — | — | — |
+| source with priority="default" | 133 | pending | — | — | — |
+| PyPI source with priority="default" | 151 | pending | — | — | — |
+| source with priority="primary" | 168 | pending | — | — | — |
+| source with implicit priority="primary" | 191 | pending | — | — | — |
+| sources with priority="secondary" | 213 | pending | — | — | — |
+| unordered sources and implicit PyPI priority="primary" | 246 | pending | — | — | — |
+| unordered sources with implicit PyPI priority="secondary" | 290 | pending | — | — | — |
+| source with priority="supplemental" | 322 | pending | — | — | — |
+| source with priority="explicit" | 345 | pending | — | — | — |
+
+### `PoetryPyProject`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| filters out invalid build-system requirements | 370 | pending | — | — | — |
+| handles build-system without poetry requirement | 384 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/poetry/update-locked.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/update-locked.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects already updated | 11 | pending | — | — | — |
+| returns unsupported | 23 | pending | — | — | — |
+| returns unsupported for mising locked content | 35 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/proto/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/proto/extract.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty content | 10 | pending | — | — | — |
+| returns null for invalid TOML | 14 | pending | — | — | — |
+| returns null when only config sections exist | 18 | pending | — | — | — |
+| extracts a single tool version | 29 | pending | — | — | — |
+| extracts multiple tool versions | 46 | pending | — | — | — |
+| skips non-version sections | 76 | pending | — | — | — |
+| handles proto self-versioning | 105 | pending | — | — | — |
+| handles moon tool | 122 | pending | — | — | — |
+| handles uv tool | 139 | pending | — | — | — |
+| marks unknown tools as unsupported-datasource | 156 | pending | — | — | — |
+| skips alias values like latest | 172 | pending | — | — | — |
+| skips alias value stable | 188 | pending | — | — | — |
+| handles partial versions | 204 | pending | — | — | — |
+| extracts all supported tools from fixture | 221 | pending | — | — | — |
+| extracts all supported built-in tools | 278 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/proto/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/proto/index.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `managerFilePatterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matchRegexOrGlobList("$path") === $expected | 6 | ported | `managers.rs` | `proto_file_patterns_match_spec` | — |
+
+---
+
+## `lib/modules/manager/pub/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pub/artifacts.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no pubspec.lock found | 61 | pending | — | — | — |
+| returns null if updatedDeps is empty | 65 | pending | — | — | — |
+| runs flutter pub get if only dart and flutter sdks are updated | 71 | pending | — | — | — |
+| returns null for ${params.sdk} if unchanged | 106 | pending | — | — | — |
+| returns updated ${params.sdk} pubspec.lock | 123 | pending | — | — | — |
+| runs ${params.sdk} pub get if only the sdk is updated | 149 | pending | — | — | — |
+| returns updated ${params.sdk} pubspec.lock for lockfile maintenance | 176 | pending | — | — | — |
+| supports ${params.sdk} docker mode | 203 | pending | — | — | — |
+| supports ${params.sdk} install mode | 251 | pending | — | — | — |
+| catches errors for ${params.sdk} | 278 | pending | — | — | — |
+| uses flutter constraint from pubspec.yaml | 295 | pending | — | — | — |
+| uses dart constraint from pubspec.yaml | 330 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pub/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pub/extract.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `extractPackageFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid pubspec file | 8 | pending | — | — | — |
+| returns dart sdk only | 16 | pending | — | — | — |
+| returns valid dependencies | 33 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/pub/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pub/utils.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `parsePubspec`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| load and parse successfully | 14 | pending | — | — | — |
+| invalid yaml | 32 | pending | — | — | — |
+| invalid schema | 37 | pending | — | — | — |
+
+### `parsePubspeckLock`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| load and parse successfully | 44 | pending | — | — | — |
+| invalid yaml | 56 | pending | — | — | — |
+| invalid schema | 61 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/puppet/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/puppet/common.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| access by index | 8 | pending | — | — | — |
+| access by named group | 18 | pending | — | — | — |
+
+### `parseGitOwnerRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| unable to parse url | 32 | pending | — | — | — |
+| parseable url | 36 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/puppet/puppetfile-parser.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/puppet/puppetfile-parser.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `parsePuppetfile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Puppetfile_github_tag | 9 | pending | — | — | — |
+| Puppetfile_github_tag_single_line | 31 | pending | — | — | — |
+| Puppetfile with an invalid module creates PuppetfileModule with skipReason "invalid-config" | 58 | pending | — | — | — |
+| get default forge with null or undefined returns the same | 74 | pending | — | — | — |
+| Puppetfile_multiple_forges | 88 | pending | — | — | — |
+| Puppetfile_no_forge | 133 | pending | — | — | — |
+| Puppetfile_single_forge | 161 | pending | — | — | — |
+| Puppetfile_with_comments | 192 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/renovate-config/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/renovate-config/extract.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty file | 7 | pending | — | — | — |
+| returns null for invalid file | 11 | pending | — | — | — |
+
+### `extractPackageFile() › presets`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for a config file without presets | 18 | pending | — | — | — |
+| returns null for a config file only contains built-in presets | 34 | pending | — | — | — |
+| provides skipReason for unsupported preset sources | 50 | pending | — | — | — |
+| provides skipReason for presets without versions | 88 | pending | — | — | — |
+| extracts from a config file with GitHub hosted presets | 120 | pending | — | — | — |
+| extracts from a config file with GitLab hosted presets | 161 | pending | — | — | — |
+| extracts from a config file with Gitea hosted presets | 202 | pending | — | — | — |
+| supports JSON5 | 243 | pending | — | — | — |
+
+### `extractPackageFile() › constraints`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for a config file without constraints | 269 | pending | — | — | — |
+| returns null for a config file has an empty constraints | 282 | pending | — | — | — |
+| extracts known `ToolName`s with explicit versions | 295 | pending | — | — | — |
+| extracts known `ToolName`s with ranges versions | 332 | pending | — | — | — |
+| extracts `ToolName`s from packageRules | 369 | pending | — | — | — |
+| handles no `constraints` in packageRules | 421 | pending | — | — | — |
+| sets skipReason=unsupported for a constraint that is not a tool | 451 | pending | — | — | — |
+| extracts known `ToolName`s with ranges versions | 476 | pending | — | — | — |
+| supports JSON5 | 513 | pending | — | — | — |
+| extracts all types of configuration | 543 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/sbt/update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/update.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `.bumpPackageVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| increments | 10 | pending | — | — | — |
+| no ops | 21 | pending | — | — | — |
+| updates | 31 | pending | — | — | — |
+| returns content if bumping errors | 41 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/sbt/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/util.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `sortPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| places build.sbt first | 5 | pending | — | — | — |
+
+### `normalizeScalaVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not normalize prior to 2.10 | 20 | pending | — | — | — |
+| normalizes a Scala 2.10 version number | 25 | pending | — | — | — |
+| normalizes a Scala 2.11 version number | 30 | pending | — | — | — |
+| normalizes a Scala 2.12 version number | 35 | pending | — | — | — |
+| normalizes a Scala 2.13 version number | 40 | pending | — | — | — |
+| normalizes a Scala 3 LTS version number | 45 | pending | — | — | — |
+| normalizes a Scala 3 current version number | 50 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/swift/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/artifacts.spec.ts
+**Total tests:** 27 | **Ported:** 0 | **Actionable:** 27 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when no Package.resolved files exist | 76 | pending | — | — | — |
+| returns null when updatedDeps is empty | 95 | pending | — | — | — |
+| returns null for lockFileMaintenance | 108 | pending | — | — | — |
+| returns null for unparseable JSON | 127 | pending | — | — | — |
+| returns null for unsupported v1 format | 147 | pending | — | — | — |
+| updates a single pin version and revision | 172 | pending | — | — | — |
+| does not write `from:` range to Package.resolved | 202 | pending | — | — | — |
+| updates multiple pins in one call | 227 | pending | — | — | — |
+| skips dep with no matching pin | 262 | pending | — | — | — |
+| handles getDigest failure — updates version, keeps old revision | 283 | pending | — | — | — |
+| updates multiple Package.resolved files | 311 | pending | — | — | — |
+| matches URL with .git suffix normalization | 340 | pending | — | — | — |
+| matches URL with trailing slash normalization | 365 | pending | — | — | — |
+| matches URL case-insensitively | 391 | pending | — | — | — |
+| handles git-tags datasource (full URL as depName) | 413 | pending | — | — | — |
+| handles gitlab-tags with custom registryUrls | 437 | pending | — | — | — |
+| uses dep.newDigest when already present | 481 | pending | — | — | — |
+| preserves v3 originHash | 507 | pending | — | — | — |
+| returns null when pin is already up-to-date | 532 | pending | — | — | — |
+| preserves formatting in targeted replacement | 553 | pending | — | — | — |
+| returns null when Package.resolved cannot be read | 579 | pending | — | — | — |
+| skips dep with no newValue | 599 | pending | — | — | — |
+| returns null when dep has no datasource or packageName | 619 | pending | — | — | — |
+| returns null when Package.resolved has no pins array | 646 | pending | — | — | — |
+| handles getDigest throwing an error | 668 | pending | — | — | — |
+| if newValue is present, but newVersion is absent, no update is performed | 698 | pending | — | — | — |
+| newValue is used to look up digest | 728 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/swift/extract.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/extract.spec.ts
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty content | 7 | pending | — | — | — |
+| returns null for content without dependencies | 11 | pending | — | — | — |
+| extracts GitHub dependencies with github-tags datasource | 31 | pending | — | — | — |
+| extracts GitLab dependencies with gitlab-tags datasource | 52 | pending | — | — | — |
+| extracts self-hosted GitHub dependencies with registryUrls | 73 | pending | — | — | — |
+| extracts self-hosted GitLab dependencies with registryUrls | 95 | pending | — | — | — |
+| extracts other dependencies with git-tags datasource | 117 | pending | — | — | — |
+| extracts exact version dependencies | 138 | pending | — | — | — |
+| extracts exact version with label syntax | 159 | pending | — | — | — |
+| extracts range version dependencies | 180 | pending | — | — | — |
+| extracts dependencies from sample package file | 201 | pending | — | — | — |
+| handles malformed URLs gracefully | 236 | pending | — | — | — |
+| handles dependencies without version | 249 | pending | — | — | — |
+| handles dependencies with local package | 262 | pending | — | — | — |
+| handles dependencies with name (deprecated args) | 275 | pending | — | — | — |
+| extracts multiple dependencies with different datasources | 290 | pending | — | — | — |
+| extracts multiple dependencies with traits arguments | 308 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/swift/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `extractPackageFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty content | 6 | pending | — | — | — |
+| returns null for invalid content | 12 | pending | — | — | — |
+| parses packages with invalid versions | 81 | pending | — | — | — |
+| parses package descriptions | 109 | pending | — | — | — |
+| parses multiple packages | 152 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/swift/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/range.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `getRangeStrategy()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns same if not auto | 6 | pending | — | — | — |
+| defaults to update-lockfile | 11 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/extractors/others/modules.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/others/modules.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return empty array if no module is found | 13 | pending | — | — | — |
+
+### `githubRefMatchRegex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should split project and tag from source | 19 | pending | — | — | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 43 | pending | — | — | — |
+
+### `gitTagsRefMatchRegex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should split project and tag from source | 55 | pending | — | — | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 108 | pending | — | — | — |
+
+### `bitbucketRefMatchRegex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should split workspace, project and tag from source | 156 | pending | — | — | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 224 | pending | — | — | — |
+
+### `azureDevOpsSshRefMatchRegex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should split organization, project, repository and tag from source url | 238 | pending | — | — | — |
+| should split organization, project, repository and tag from source url with git prefix | 253 | pending | — | — | — |
+| should split organization, project, repository and tag from source url with subfolder | 268 | pending | — | — | — |
+| should split organization, project, repository and tag from source url with depth argument | 283 | pending | — | — | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 309 | pending | — | — | — |
+
+### `hostnameMatchRegex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should extact hostname from source url | 326 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/extractors/others/providers.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/others/providers.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return null if no provider returned | 6 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return empty array if no resource is found | 7 | pending | — | — | — |
+| return resource and datasource types | 12 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return empty array if no resource is found | 6 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return empty array if no resource is found | 6 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return empty array if no terraform block is found | 8 | pending | — | — | — |
+| return empty array if no required_providers block is found | 13 | pending | — | — | — |
+| extract provider with version and registry url | 18 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return empty array if no terraform block is found | 6 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/hcl/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/hcl/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `parseHCL()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return flat modules | 11 | pending | — | — | — |
+| should return nested terraform block | 53 | pending | — | — | — |
+| should return resource blocks | 70 | pending | — | — | — |
+
+### `parseJSON`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should parse json | 101 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/lockfile/hash.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/lockfile/hash.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if getBuilds returns null | 43 | pending | — | — | — |
+| return null if requesting a version which is not available | 58 | pending | — | — | — |
+| backend index throws error | 72 | pending | — | — | — |
+| returns null for no builds | 86 | pending | — | — | — |
+| fail to create hashes | 99 | pending | — | — | — |
+| full walkthrough | 128 | pending | — | — | — |
+| full walkthrough on terraform cloud | 162 | pending | — | — | — |
+| full walkthrough with different shasum per build | 227 | pending | — | — | — |
+| full walkthrough without ziphashes available | 332 | pending | — | — | — |
+| does not add any ziphashes when the shasums endpoint fails` | 385 | pending | — | — | — |
+
+### `hashOfZipContent`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return hash for content with subfolders | 451 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/lockfile/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/lockfile/index.spec.ts
+**Total tests:** 26 | **Ported:** 0 | **Actionable:** 26 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns artifact error | 36 | pending | — | — | — |
+| returns null if no .terraform.lock.hcl found | 56 | pending | — | — | — |
+| returns null if .terraform.lock.hcl is empty | 67 | pending | — | — | — |
+| returns null if .terraform.lock.hcl is invalid | 81 | pending | — | — | — |
+| update single dependency with exact constraint and depType provider | 95 | pending | — | — | — |
+| update single dependency with exact constraint and and depType required_provider | 151 | pending | — | — | — |
+| does not update dependency with exact constraint during lockfile update | 209 | pending | — | — | — |
+| does not update dependency with exact constraint within multiple during lockfile update | 249 | pending | — | — | — |
+| do not update dependency with depType module | 289 | pending | — | — | — |
+| update single dependency with range constraint and minor update from private registry | 307 | pending | — | — | — |
+| update single dependency with range constraint and major update | 366 | pending | — | — | — |
+| update single dependency in subfolder | 424 | pending | — | — | — |
+| update multiple dependencies which are not ordered | 484 | pending | — | — | — |
+| do full lock file maintenance | 621 | pending | — | — | — |
+| do full lock file maintenance with lockfile in subfolder | 757 | pending | — | — | — |
+| do full lock file maintenance without necessary changes | 873 | pending | — | — | — |
+| return null if hashing fails | 933 | pending | — | — | — |
+| return null if experimental flag is not set | 1023 | pending | — | — | — |
+| preserves constraints when current value and new value are same | 1037 | pending | — | — | — |
+| replaces current value to new version within a constraint | 1097 | pending | — | — | — |
+| replaces current version to new version within a constraint | 1157 | pending | — | — | — |
+
+### `getNewConstraint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| correctly calculate new constraint on pinning | 1217 | pending | — | — | — |
+| update constraint with multiple elements | 1230 | pending | — | — | — |
+| update constraint when current version is matched multiple times | 1243 | pending | — | — | — |
+| update constraint when current version is in a complicated constraint | 1256 | pending | — | — | — |
+| create constraint with full version | 1269 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/lockfile/update-locked.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/lockfile/update-locked.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects already updated | 35 | pending | — | — | — |
+| returns unsupported if dependency is undefined | 47 | pending | — | — | — |
+| returns unsupported if lockfileContent is undefined | 59 | pending | — | — | — |
+| returns unsupported | 70 | pending | — | — | — |
+| returns update-failed for errors | 82 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terraform/lockfile/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/lockfile/util.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `extractLocks()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty | 6 | pending | — | — | — |
+| extracts | 11 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terragrunt/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/artifacts.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calls terraform updateArtifacts if the update type is lockfileMaintenance | 39 | pending | — | — | — |
+| does not call terraform updateArtifacts if the update type is %s | 57 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terragrunt/modules.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/modules.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `githubRefMatchRegex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should split project and tag from source | 5 | pending | — | — | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 15 | pending | — | — | — |
+
+### `gitTagsRefMatchRegex`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should split host, path and tag from source | 27 | pending | — | — | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 55 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/terragrunt/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/util.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `getTerragruntDependencyType()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns terraform | 5 | pending | — | — | — |
+| returns unknown | 9 | pending | — | — | — |
+| returns unknown on empty string | 13 | pending | — | — | — |
+| returns unknown on string with random chars | 17 | pending | — | — | — |
+
+---
+
+## `lib/modules/manager/vendir/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/vendir/artifacts.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no vendir.lock.yml found | 45 | pending | — | — | — |
+| returns null if empty vendir.lock.yml found | 57 | pending | — | — | — |
+| returns null if updatedDeps is empty | 71 | pending | — | — | — |
+| returns null if unchanged | 82 | pending | — | — | — |
+| returns updated vendir.lock | 104 | pending | — | — | — |
+| returns updated vendir.yml for lockfile maintenance | 133 | pending | — | — | — |
+| catches errors | 161 | pending | — | — | — |
+| rethrows for temporary error | 188 | pending | — | — | — |
+| add artifacts to file list if vendir.yml exists | 214 | pending | — | — | — |
+| add artifacts | 288 | pending | — | — | — |
+| sets GIT_CONFIG variables when Host Rules are configured | 349 | pending | — | — | — |
+| works explicit global binarySource | 431 | pending | — | — | — |
+| supports install mode | 461 | pending | — | — | — |
+
+### `Docker`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns updated vendir.yml for lockfile maintenance | 548 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/azure/azure-got-wrapper.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/azure-got-wrapper.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `gitApi`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw an error if no config found | 15 | pending | — | — | — |
+| should set personal access token and endpoint | 21 | pending | — | — | — |
+| should set bearer token and endpoint | 42 | pending | — | — | — |
+| should set password and endpoint | 63 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/azure/azure-helper.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/azure-helper.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 19 | **Status:** pending
+
+### `getRef`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should get the ref with short ref name | 23 | pending | — | — | — |
+| should not get ref | 34 | pending | — | — | — |
+| should get the ref with full ref name | 45 | pending | — | — | — |
+
+### `getAzureBranchObj`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should get the branch object | 58 | pending | — | — | — |
+| should get the branch object when ref missing | 73 | pending | — | — | — |
+
+### `getFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null error GitItemNotFoundException | 86 | pending | — | — | — |
+| should return null error GitUnresolvableToCommitException | 115 | pending | — | — | — |
+| should return the file content because it is not a json | 144 | pending | — | — | — |
+| should return null because the file is not readable | 173 | pending | — | — | — |
+
+### `getCommitDetails`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should get commit details | 193 | pending | — | — | — |
+
+### `getMergeMethod`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should default to NoFastForward | 208 | pending | — | — | — |
+| should return NoFastForward when policy explicitly set | 220 | pending | — | — | — |
+| should return RebaseMerge | 246 | pending | — | — | — |
+| should return Squash | 272 | pending | — | — | — |
+| should return Squash when Project wide exact branch policy exists | 298 | pending | — | — | — |
+| should return default branch policy | 327 | pending | — | — | — |
+| should return most specific exact branch policy | 366 | pending | — | — | — |
+| should return most specific prefix branch policy | 435 | pending | — | — | — |
+
+### `getAllProjectTeams`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should get all teams | 493 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/azure/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/index.spec.ts
+**Total tests:** 79 | **Ported:** 0 | **Actionable:** 79 | **Status:** pending
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no endpoint | 102 | pending | — | — | — |
+| should throw if no token nor a username and password | 107 | pending | — | — | — |
+| should throw if a username but no password | 116 | pending | — | — | — |
+| should throw if a password but no username | 126 | pending | — | — | — |
+| should init | 136 | pending | — | — | — |
+
+### `getRepos()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return an array of repos | 147 | pending | — | — | — |
+
+### `initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should initialise the config for a repo | 201 | pending | — | — | — |
+| throws if repo is disabled | 209 | pending | — | — | — |
+| throws if repo is not in repos list | 217 | pending | — | — | — |
+
+### `findPr(branchName, prTitle, state, targetBranch)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns pr if found it open | 227 | pending | — | — | — |
+| returns pr if found not open | 269 | pending | — | — | — |
+| returns pr if found it close | 311 | pending | — | — | — |
+| returns pr if found it all state | 353 | pending | — | — | — |
+| returns pr if found matches targetBranch | 394 | pending | — | — | — |
+| returns first pr if found does not match targetBranch | 442 | pending | — | — | — |
+| catches errors | 490 | pending | — | — | — |
+
+### `getPrList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty array | 505 | pending | — | — | — |
+
+### `getBranchPr(branchName, targetBranch)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null if no PR exists | 517 | pending | — | — | — |
+| should return the pr | 528 | pending | — | — | — |
+
+### `getBranchStatusCheck(branchName, context)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return green if status is succeeded | 568 | pending | — | — | — |
+| should return green if status is not applicable | 590 | pending | — | — | — |
+| should return red if status is failed | 612 | pending | — | — | — |
+| should return red if context status is error | 634 | pending | — | — | — |
+| should return yellow if status is pending | 656 | pending | — | — | — |
+| should return yellow if status is not set | 678 | pending | — | — | — |
+| should return yellow if status is unknown | 700 | pending | — | — | — |
+| should return null if status not found | 722 | pending | — | — | — |
+
+### `getBranchStatus(branchName, ignoreTests)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should pass through success | 746 | pending | — | — | — |
+| should not treat internal checks as success | 765 | pending | — | — | — |
+| should pass through failed | 784 | pending | — | — | — |
+| should pass through pending | 797 | pending | — | — | — |
+| should fall back to yellow if no statuses returned | 810 | pending | — | — | — |
+
+### `getPr(prNo)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null if no prNo is passed | 825 | pending | — | — | — |
+| should return null if no PR is returned from azure | 830 | pending | — | — | — |
+| should return a pr in the right format | 842 | pending | — | — | — |
+
+### `createPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create and return a PR object | 875 | pending | — | — | — |
+| should create and return a PR object from base branch | 897 | pending | — | — | — |
+
+### `createPr() › when usePlatformAutomerge is set`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create and return a PR object with auto-complete set | 920 | pending | — | — | — |
+| should only call getMergeMethod once per run when automergeStrategy is auto | 960 | pending | — | — | — |
+| should not call getMergeMethod when automergeStrategy is $automergeStrategy | 1043 | pending | — | — | — |
+| should create PR with mergeStrategy $prMergeStrategy | 1097 | pending | — | — | — |
+| should create and return an approved PR object | 1158 | pending | — | — | — |
+
+### `updatePr(prNo, title, body, platformPrOptions)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update the PR | 1198 | pending | — | — | — |
+| should update the PR including cache | 1216 | pending | — | — | — |
+| should update the PR without description | 1254 | pending | — | — | — |
+| should close the PR | 1270 | pending | — | — | — |
+| should reopen the PR | 1288 | pending | — | — | — |
+| should re-approve the PR | 1306 | pending | — | — | — |
+
+### `ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds comment if missing | 1346 | pending | — | — | — |
+| updates comment if missing | 1368 | pending | — | — | — |
+| does nothing if comment exists and is the same | 1394 | pending | — | — | — |
+| does nothing if comment exists and is the same when there is no topic | 1420 | pending | — | — | — |
+| passes comment through massageMarkdown | 1442 | pending | — | — | — |
+
+### `ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes comment by topic if found | 1494 | pending | — | — | — |
+| deletes comment by content if found | 1510 | pending | — | — | — |
+| comment not found | 1526 | pending | — | — | — |
+
+### `Assignees`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| addAssignees | 1539 | pending | — | — | — |
+
+### `Reviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| addReviewers one valid | 1567 | pending | — | — | — |
+| addReviewers all valid | 1593 | pending | — | — | — |
+
+### `massageMarkdown(input)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns updated pr body | 1621 | pending | — | — | — |
+| returns updated comment content | 1630 | pending | — | — | — |
+
+### `setBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should build and call the create status api properly | 1641 | pending | — | — | — |
+| should build and call the create status api properly with a complex context | 1673 | pending | — | — | — |
+
+### `mergePr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should complete the PR | 1707 | pending | — | — | — |
+| should complete PR with mergeStrategy $prMergeStrategy | 1754 | pending | — | — | — |
+| should return false if the PR does not update successfully | 1809 | pending | — | — | — |
+| should cache the mergeMethod for subsequent merges | 1838 | pending | — | — | — |
+| should refetch the PR if the update response has not yet been set to completed | 1869 | pending | — | — | — |
+| should log a warning after retrying if the PR has still not yet been set to completed | 1901 | pending | — | — | — |
+
+### `deleteLabel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Should delete a label | 1938 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns file content | 1956 | pending | — | — | — |
+| returns null when file not found | 1969 | pending | — | — | — |
+| returns file content in json5 format | 1979 | pending | — | — | — |
+| returns file content from branch or tag | 1995 | pending | — | — | — |
+| throws on malformed JSON | 2008 | pending | — | — | — |
+| throws on errors | 2017 | pending | — | — | — |
+| supports fetch from another repo | 2028 | pending | — | — | — |
+| returns null | 2048 | pending | — | — | — |
+| getRawFile should check tag first and then return branch if tag was not found | 2059 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/azure/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
+**Total tests:** 29 | **Ported:** 0 | **Actionable:** 29 | **Status:** pending
+
+### `getGitStatusContextCombinedName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return undefined if null context passed | 16 | pending | — | — | — |
+| should combine valid genre and name with slash | 21 | pending | — | — | — |
+| should combine valid empty genre and name without a slash | 29 | pending | — | — | — |
+
+### `getGitStatusContextFromCombinedName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return undefined if null context passed | 39 | pending | — | — | — |
+| should parse valid genre and name with slash | 44 | pending | — | — | — |
+| should parse valid genre and name with multiple slashes | 54 | pending | — | — | — |
+| should parse valid empty genre and name without a slash | 64 | pending | — | — | — |
+
+### `getBranchNameWithoutRefsheadsPrefix`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be renamed | 74 | pending | — | — | — |
+| should log error and return undefined | 79 | pending | — | — | — |
+| should return the input | 84 | pending | — | — | — |
+
+### `getRenovatePRFormat`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be formated (closed) | 91 | pending | — | — | — |
+| should be formated (closed v2) | 96 | pending | — | — | — |
+| should be formated (not closed) | 101 | pending | — | — | — |
+
+### `streamToString`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| converts Readable stream to string | 108 | pending | — | — | — |
+| handles error | 113 | pending | — | — | — |
+
+### `getStorageExtraCloneOpts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should configure basic auth | 122 | pending | — | — | — |
+| should configure personal access token | 130 | pending | — | — | — |
+| should configure bearer token | 137 | pending | — | — | — |
+
+### `max4000Chars`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be the same | 144 | pending | — | — | — |
+| should be truncated | 149 | pending | — | — | — |
+
+### `getProjectAndRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the object with same strings | 160 | pending | — | — | — |
+| should return the object with project and repo | 165 | pending | — | — | — |
+| should return an error | 170 | pending | — | — | — |
+
+### `getRepoByName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when repos array is empty | 180 | pending | — | — | — |
+| returns null when repo is not found | 186 | pending | — | — | — |
+| finds repo | 192 | pending | — | — | — |
+| supports shorthand names | 205 | pending | — | — | — |
+| is case-independent | 214 | pending | — | — | — |
+| throws when repo name is invalid | 224 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/bitbucket/comments.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket/comments.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `ensureComment()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 15 | pending | — | — | — |
+| add comment if not found | 31 | pending | — | — | — |
+| finds reopen comment | 50 | pending | — | — | — |
+| finds no reopen comment | 73 | pending | — | — | — |
+| add updates comment if necessary | 96 | pending | — | — | — |
+| skips comment | 120 | pending | — | — | — |
+
+### `ensureCommentRemoval()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 145 | pending | — | — | — |
+| deletes comment by topic if found | 160 | pending | — | — | — |
+| deletes comment by content if found | 185 | pending | — | — | — |
+| deletes nothing | 210 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/bitbucket/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket/index.spec.ts
+**Total tests:** 96 | **Ported:** 0 | **Actionable:** 96 | **Status:** pending
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no token or username/password | 68 | pending | — | — | — |
+| should show warning message if custom endpoint | 73 | pending | — | — | — |
+| should init with username/password | 85 | pending | — | — | — |
+| should init with only token | 99 | pending | — | — | — |
+| should warn for missing "profile" scope | 112 | pending | — | — | — |
+
+### `getRepos()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns repos | 126 | pending | — | — | — |
+| uses configured namespaces directly without fetching workspaces | 160 | pending | — | — | — |
+| filters repos based on autodiscoverProjects patterns | 177 | pending | — | — | — |
+| filters repos based on autodiscoverProjects patterns with negation | 205 | pending | — | — | — |
+
+### `initRepo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works with username and password | 235 | pending | — | — | — |
+| works with only API token | 255 | pending | — | — | — |
+| works with only access token | 279 | pending | — | — | — |
+
+### `bbUseDevelopmentBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| not enabled: defaults to using main branch | 305 | pending | — | — | — |
+| enabled: uses development branch when development branch exists | 325 | pending | — | — | — |
+| enabled: falls back to mainbranch if development branch does not exist | 352 | pending | — | — | — |
+
+### `getBranchPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| bitbucket finds PR for branch | 378 | pending | — | — | — |
+| returns null if no PR for branch | 390 | pending | — | — | — |
+
+### `getBranchStatus()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getBranchStatus 3 | 403 | pending | — | — | — |
+| getBranchStatus 4 | 425 | pending | — | — | — |
+| getBranchStatus 5 | 450 | pending | — | — | — |
+| getBranchStatus 6 | 477 | pending | — | — | — |
+| getBranchStatus 7 | 501 | pending | — | — | — |
+
+### `getBranchStatusCheck()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getBranchStatusCheck 1 | 549 | pending | — | — | — |
+| getBranchStatusCheck 2 | 553 | pending | — | — | — |
+| getBranchStatusCheck 3 | 557 | pending | — | — | — |
+
+### `setBranchStatus()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts status | 563 | pending | — | — | — |
+
+### `findIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 589 | pending | — | — | — |
+| returns null if no issues | 616 | pending | — | — | — |
+
+### `ensureIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates existing issues | 635 | pending | — | — | — |
+| creates new issue | 666 | pending | — | — | — |
+| noop for existing issue | 691 | pending | — | — | — |
+
+### `ensureIssueClosing()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw for disabled issues | 725 | pending | — | — | — |
+| closes issue | 730 | pending | — | — | — |
+
+### `getIssueList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty array for disabled issues | 761 | pending | — | — | — |
+| get issues | 766 | pending | — | — | — |
+| does not throw | 797 | pending | — | — | — |
+
+### `addAssignees()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 812 | pending | — | — | — |
+
+### `addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add the given reviewers to the PR | 818 | pending | — | — | — |
+| should handle reviewers as username or UUID | 830 | pending | — | — | — |
+
+### `ensureComment()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 853 | pending | — | — | — |
+
+### `ensureCommentRemoval()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 869 | pending | — | — | — |
+
+### `getPrList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| exists | 885 | pending | — | — | — |
+| filters PR list by author | 889 | pending | — | — | — |
+
+### `findPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| exists | 913 | pending | — | — | — |
+| finds pr | 917 | pending | — | — | — |
+| finds closed pr with no reopen comments | 931 | pending | — | — | — |
+| finds closed pr with reopen comment on private repository | 968 | pending | — | — | — |
+| finds closed pr with reopen comment on public repository from workspace member | 1005 | pending | — | — | — |
+| finds closed pr with reopen comment on public repository from non-workspace member | 1048 | pending | — | — | — |
+| finds pr from other authors | 1091 | pending | — | — | — |
+| returns null if no open pr exists - (includeOtherAuthors) | 1113 | pending | — | — | — |
+
+### `createPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts PR | 1133 | pending | — | — | — |
+| removes inactive reviewers when creating pr | 1179 | pending | — | — | — |
+| removes default reviewers no longer member of the workspace when creating pr | 1262 | pending | — | — | — |
+| throws exception when unable to check default reviewers workspace membership | 1325 | pending | — | — | — |
+| removes reviewer if they are also the author of the pr | 1373 | pending | — | — | — |
+| rethrows exception when PR create error due to unknown reviewers error | 1428 | pending | — | — | — |
+| rethrows exception when PR create error not due to reviewers field | 1469 | pending | — | — | — |
+| lists PR tasks and resolves the unresolved tasks | 1510 | pending | — | — | — |
+| swallows list PR error and PR creation succeeds | 1584 | pending | — | — | — |
+| swallows resolve PR task error and PR creation succeeds | 1613 | pending | — | — | — |
+
+### `getPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| exists | 1663 | pending | — | — | — |
+| canRebase | 1669 | pending | — | — | — |
+| reviewers | 1692 | pending | — | — | — |
+
+### `massageMarkdown()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| removes html tags | 1719 | pending | — | — | — |
+| updates pull request url links | 1728 | pending | — | — | — |
+| updates issues url links | 1736 | pending | — | — | — |
+| dependency dashboard: updates abandoned dependencies heading and place note inside | 1744 | pending | — | — | — |
+| dependency dashboard: updates vulnerabilities section with multiple collapsible details sections to nested list | 1761 | pending | — | — | — |
+| dependency dashboard: updates detected dependencies section with multiple collapsible details sections to nested list | 1786 | pending | — | — | — |
+| updates release notes section | 1812 | pending | — | — | — |
+| updates codeblocks to correct indentation level | 1830 | pending | — | — | — |
+| updates codeblocks to drop extra language data | 1851 | pending | — | — | — |
+
+### `updatePr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| puts PR | 1874 | pending | — | — | — |
+| removes inactive reviewers when updating pr | 1900 | pending | — | — | — |
+| removes reviewers no longer member of the workspace when updating pr | 1968 | pending | — | — | — |
+| throws exception when unable to check reviewers workspace membership | 2017 | pending | — | — | — |
+| rethrows exception when PR update error due to unknown reviewers error | 2051 | pending | — | — | — |
+| rethrows exception when PR create error not due to reviewers field | 2076 | pending | — | — | — |
+| throws an error on failure to get current list of reviewers | 2103 | pending | — | — | — |
+| closes PR | 2113 | pending | — | — | — |
+
+### `maintains pr cache integrity at runtime`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| pr cache gets updated after a pr is created | 2139 | pending | — | — | — |
+| pr cache gets updated after a pr is updated | 2202 | pending | — | — | — |
+
+### `mergePr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts Merge with optional merge strategy | 2246 | pending | — | — | — |
+| posts Merge with auto | 2257 | pending | — | — | — |
+| posts Merge with merge-commit | 2269 | pending | — | — | — |
+| posts Merge with squash | 2281 | pending | — | — | — |
+| does not post Merge with rebase | 2293 | pending | — | — | — |
+| posts Merge with fast-forward | 2302 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns file content | 2316 | pending | — | — | — |
+| returns file content in json5 format | 2326 | pending | — | — | — |
+| returns file content from given repo | 2341 | pending | — | — | — |
+| returns file content from branch or tag | 2351 | pending | — | — | — |
+| returns file content from branch with a slash in its name | 2361 | pending | — | — | — |
+| throws on malformed JSON | 2378 | pending | — | — | — |
+| throws on errors | 2386 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/bitbucket/pr-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket/pr-cache.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches cache | 55 | pending | — | — | — |
+| resets cache for not matching authors | 92 | pending | — | — | — |
+| syncs cache | 141 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/bitbucket-server/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket-server/index.spec.ts
+**Total tests:** 139 | **Ported:** 0 | **Actionable:** 139 | **Status:** pending
+
+### `endpoint with path › initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no endpoint | 240 | pending | — | — | — |
+| should throw if no username/password/token | 245 | pending | — | — | — |
+| should throw if password and token is set | 252 | pending | — | — | — |
+| should not throw if username/password | 264 | pending | — | — | — |
+| should not throw if token | 275 | pending | — | — | — |
+| should throw if version could not be fetched | 285 | pending | — | — | — |
+| should not throw if user info fetch fails | 307 | pending | — | — | — |
+| should skip users api call when gitAuthor is configured | 333 | pending | — | — | — |
+| should skip users api call when no username | 351 | pending | — | — | — |
+| should fetch user info if token with username | 367 | pending | — | — | — |
+| should collect username from headers if token with no username | 389 | pending | — | — | — |
+| should use fallback gitAuthor if user info has empty email address | 411 | pending | — | — | — |
+| should init | 442 | pending | — | — | — |
+
+### `endpoint with path › getRepos()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns repos | 463 | pending | — | — | — |
+
+### `endpoint with path › initRepo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 482 | pending | — | — | — |
+| no git url | 501 | pending | — | — | — |
+| gitUrl ssh returns ssh url | 524 | pending | — | — | — |
+| gitURL endpoint returns generates endpoint URL | 553 | pending | — | — | — |
+| gitUrl default returns http from API with injected auth | 586 | pending | — | — | — |
+| uses ssh url from API if http not in API response | 620 | pending | — | — | — |
+| uses http url from API with injected auth if http url in API response | 644 | pending | — | — | — |
+| generates URL if API does not contain clone links | 673 | pending | — | — | — |
+| throws REPOSITORY_EMPTY if there is no default branch | 701 | pending | — | — | — |
+
+### `endpoint with path › repoForceRebase()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false on missing mergeConfig | 720 | pending | — | — | — |
+| returns false on missing defaultStrategy | 734 | pending | — | — | — |
+| return true if %s strategy is enabled | 750 | pending | — | — | — |
+| return false if %s strategy is enabled | 771 | pending | — | — | — |
+
+### `endpoint with path › addAssignees()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 794 | pending | — | — | — |
+
+### `endpoint with path › addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 801 | pending | — | — | — |
+| sends the reviewer name as a reviewer | 817 | pending | — | — | — |
+| throws not-found 1 | 834 | pending | — | — | — |
+| throws not-found 2 | 841 | pending | — | — | — |
+| throws not-found 3 | 854 | pending | — | — | — |
+| does not throws repository-changed after 1 try | 871 | pending | — | — | — |
+| does not throws repository-changed after 2 tries | 890 | pending | — | — | — |
+| throws repository-changed after 3 tries | 910 | pending | — | — | — |
+| deals with invalid reviewers correctly | 928 | pending | — | — | — |
+| aborts instead of infinite recursion when invalid reviewers cannot be filtered | 984 | pending | — | — | — |
+| deals correctly with resolving reviewers | 1023 | pending | — | — | — |
+| throws | 1074 | pending | — | — | — |
+
+### `endpoint with path › getUsernamesByEmail`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws when lookup fails | 1092 | pending | — | — | — |
+| return empty array when no results found | 1113 | pending | — | — | — |
+| return only active users | 1131 | pending | — | — | — |
+| only returns exact matches | 1156 | pending | — | — | — |
+| returns multiple exact matches | 1187 | pending | — | — | — |
+
+### `endpoint with path › deleteLAbel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 1223 | pending | — | — | — |
+
+### `endpoint with path › ensureComment()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 1229 | pending | — | — | — |
+| add comment if not found 1 | 1244 | pending | — | — | — |
+| add comment if not found 2 | 1287 | pending | — | — | — |
+| add updates comment if necessary 1 | 1330 | pending | — | — | — |
+| add updates comment if necessary 2 | 1379 | pending | — | — | — |
+| skips comment 1 | 1422 | pending | — | — | — |
+| skips comment 2 | 1461 | pending | — | — | — |
+
+### `endpoint with path › ensureCommentRemoval()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not throw | 1501 | pending | — | — | — |
+| deletes comment by topic if found | 1539 | pending | — | — | — |
+| deletes comment by content if found | 1588 | pending | — | — | — |
+| deletes nothing | 1637 | pending | — | — | — |
+
+### `endpoint with path › getPrList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has pr | 1678 | pending | — | — | — |
+
+### `endpoint with path › getBranchPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has pr | 1693 | pending | — | — | — |
+| has no pr | 1713 | pending | — | — | — |
+| has no existing pr | 1729 | pending | — | — | — |
+
+### `endpoint with path › findPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has pr | 1747 | pending | — | — | — |
+| has no pr | 1767 | pending | — | — | — |
+| finds pr from other authors | 1787 | pending | — | — | — |
+| returns null if no pr found - (includeOtherAuthors) | 1812 | pending | — | — | — |
+
+### `endpoint with path › createPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts PR | 1833 | pending | — | — | — |
+| posts PR default branch | 1866 | pending | — | — | — |
+| should use platform automerge | 1900 | pending | — | — | — |
+| platform-native automerge returns early if usePlatformAutomerge is false | 1939 | pending | — | — | — |
+| platform-native automerge returns early if Bitbucket Server <= 8.15.0 is used | 1970 | pending | — | — | — |
+| platform-native automerge catches errors gracefully | 2004 | pending | — | — | — |
+
+### `endpoint with path › reattemptPlatformAutomerge()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should reattempt automerge | 2049 | pending | — | — | — |
+| handles unknown error | 2071 | pending | — | — | — |
+| handles missing prNo | 2087 | pending | — | — | — |
+
+### `endpoint with path › getPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for no prNo | 2102 | pending | — | — | — |
+| gets a PR | 2107 | pending | — | — | — |
+| canRebase | 2118 | pending | — | — | — |
+| gets a closed PR | 2138 | pending | — | — | — |
+
+### `endpoint with path › updatePr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| puts PR | 2158 | pending | — | — | — |
+| closes PR | 2194 | pending | — | — | — |
+| re-opens PR | 2231 | pending | — | — | — |
+| throws not-found 1 | 2268 | pending | — | — | — |
+| throws not-found 2 | 2279 | pending | — | — | — |
+| throws not-found 3 | 2291 | pending | — | — | — |
+| handles invalid users gracefully by retrying without invalid reviewers | 2308 | pending | — | — | — |
+| throws repository-changed | 2364 | pending | — | — | — |
+| throws | 2381 | pending | — | — | — |
+
+### `endpoint with path › mergePr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts Merge | 2400 | pending | — | — | — |
+| throws not-found 1 | 2420 | pending | — | — | — |
+| throws not-found 2 | 2429 | pending | — | — | — |
+| throws not-found 3 | 2445 | pending | — | — | — |
+| throws conflicted | 2465 | pending | — | — | — |
+| unknown error | 2485 | pending | — | — | — |
+
+### `endpoint with path › massageMarkdown()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns diff files | 2507 | pending | — | — | — |
+| sanitizes HTML comments in the body | 2515 | pending | — | — | — |
+| resizes mend.io merge confidence badges | 2530 | pending | — | — | — |
+
+### `endpoint with path › getBranchStatus()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be success | 2539 | pending | — | — | — |
+| should be pending | 2554 | pending | — | — | — |
+| should be failed | 2581 | pending | — | — | — |
+| throws repository-changed | 2604 | pending | — | — | — |
+
+### `endpoint with path › getBranchStatusCheck()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be success | 2614 | pending | — | — | — |
+| should be pending | 2636 | pending | — | — | — |
+| should be failure | 2658 | pending | — | — | — |
+| should be null | 2680 | pending | — | — | — |
+
+### `endpoint with path › setBranchStatus()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be success 1 | 2708 | pending | — | — | — |
+| should be success 2 | 2738 | pending | — | — | — |
+| should be success 3 | 2768 | pending | — | — | — |
+| should be success 4 | 2798 | pending | — | — | — |
+| should be success 5 | 2828 | pending | — | — | — |
+| should be success 6 | 2853 | pending | — | — | — |
+
+### `endpoint with path › getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns file content | 2876 | pending | — | — | — |
+| returns file content in json5 format | 2891 | pending | — | — | — |
+| returns file content from given repo | 2911 | pending | — | — | — |
+| returns file content from branch or tag | 2926 | pending | — | — | — |
+| throws on malformed JSON | 2945 | pending | — | — | — |
+| throws on long content | 2958 | pending | — | — | — |
+| throws on errors | 2971 | pending | — | — | — |
+
+### `endpoint with path › modules/platform/bitbucket-server/code-owners`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ignores comments and empty lines | 2982 | pending | — | — | — |
+| parses usernames with escaped spaces | 2992 | pending | — | — | — |
+| parses groups with escaped spaces | 3000 | pending | — | — | — |
+| supports reviewer groups with modifiers) | 3013 | pending | — | — | — |
+| matches paths correctly using glob patterns | 3027 | pending | — | — | — |
+| respects bottom-to-top rule precedence | 3044 | pending | — | — | — |
+| supports rules with no owners (ownership ignored) | 3054 | pending | — | — | — |
+| unescapes multiple escaped spaces correctly | 3064 | pending | — | — | — |
+
+### `endpoint with path › expandGroupMembers()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns input when it is not a group | 3073 | pending | — | — | — |
+| returns only active users from the matching reviewer group | 3080 | pending | — | — | — |
+| returns empty array if group is not found | 3124 | pending | — | — | — |
+| returns empty array if API call fails | 3153 | pending | — | — | — |
+| returns empty array if all users in group are inactive | 3167 | pending | — | — | — |
+| prefers repository-level reviewer group over project-level group with same name | 3200 | pending | — | — | — |
+| uses project-level group when repository-level group is not available | 3247 | pending | — | — | — |
+| deals with not found groups correctly | 3280 | pending | — | — | — |
+| handles random without number correctly | 3306 | pending | — | — | — |
+| handles random with number correctly | 3353 | pending | — | — | — |
+| handles non-existent modifier correctly | 3402 | pending | — | — | — |
+| handles paginated responses and finds matching group in next page | 3451 | pending | — | — | — |
+
+### `endpoint with no path › initRepo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gitURL endpoint generates URL without endpoint path | 3559 | pending | — | — | — |
+| generates URL without endpoint path if API does not contain clone links | 3584 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/bitbucket-server/pr-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket-server/pr-cache.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches cache - author defined | 67 | pending | — | — | — |
+| fetches cache - author undefined | 111 | pending | — | — | — |
+| resets cache for not matching authors | 154 | pending | — | — | — |
+| syncs cache | 202 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/bitbucket-server/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket-server/utils.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getInvalidReviewers | 94 | pending | — | — | — |
+
+### `getRepoGitUrl › endpoint with path`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works gitUrl:undefined generate endpoint | 127 | pending | — | — | — |
+| works gitUrl:undefined use endpoint with injected auth | 146 | pending | — | — | — |
+| works gitUrl:undefined use ssh | 165 | pending | — | — | — |
+| works gitUrl:default | 179 | pending | — | — | — |
+| gitUrl:default invalid http url throws CONFIG_GIT_URL_UNAVAILABLE | 196 | pending | — | — | — |
+| gitUrl:default no http url returns generated url | 210 | pending | — | — | — |
+| gitUrl:ssh no ssh url throws CONFIG_GIT_URL_UNAVAILABLE | 229 | pending | — | — | — |
+| works gitUrl:ssh | 243 | pending | — | — | — |
+| works gitUrl:endpoint | 255 | pending | — | — | — |
+| works gitUrl:endpoint no basic auth | 272 | pending | — | — | — |
+
+### `getRepoGitUrl › endpoint with no path`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works gitUrl:endpoint | 294 | pending | — | — | — |
+| gitUrl:default no http url returns generated url | 306 | pending | — | — | — |
+| actually respects the gitUrl Setting | 320 | pending | — | — | — |
+
+### `getExtraCloneOpts`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should not configure bearer token | 334 | pending | — | — | — |
+| should configure bearer token | 339 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/codecommit/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/codecommit/index.spec.ts
+**Total tests:** 58 | **Ported:** 0 | **Actionable:** 58 | **Status:** pending
+
+### `massageMarkdown`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validates massageMarkdown functionality | 66 | pending | — | — | — |
+| replaces pr links | 75 | pending | — | — | — |
+| replaces issue links | 84 | pending | — | — | — |
+| maxBodyLength | 94 | pending | — | — | — |
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should init | 99 | pending | — | — | — |
+| should init with env vars | 111 | pending | — | — | — |
+| should | 123 | pending | — | — | — |
+| should as well | 131 | pending | — | — | — |
+
+### `initRepos()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fails to git.initRepo | 139 | pending | — | — | — |
+| fails on getRepositoryInfo | 155 | pending | — | — | — |
+| getRepositoryInfo returns bad results | 164 | pending | — | — | — |
+| getRepositoryInfo returns bad results 2 | 172 | pending | — | — | — |
+| initiates repo successfully | 183 | pending | — | — | — |
+| gets the right url | 202 | pending | — | — | — |
+| gets the eu-central-1 url | 218 | pending | — | — | — |
+| gets url with username and token | 233 | pending | — | — | — |
+
+### `getRepos()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns repos | 262 | pending | — | — | — |
+| returns empty if error | 277 | pending | — | — | — |
+
+### `getPrList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets PR list by author | 292 | pending | — | — | — |
+| checks if nullcheck works for list prs | 336 | pending | — | — | — |
+
+### `findPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws error on findPr | 352 | pending | — | — | — |
+| finds pr | 365 | pending | — | — | — |
+| finds any pr with that title in regardless of state | 396 | pending | — | — | — |
+| finds closed/merged pr | 427 | pending | — | — | — |
+| finds any pr | 458 | pending | — | — | — |
+| returns empty list in case prs dont exist yet | 488 | pending | — | — | — |
+
+### `getBranchPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| codecommit find PR for branch | 499 | pending | — | — | — |
+| returns null if no PR for branch | 526 | pending | — | — | — |
+
+### `getPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets pr | 549 | pending | — | — | — |
+| gets closed pr | 576 | pending | — | — | — |
+| gets merged pr | 602 | pending | — | — | — |
+| returns null in case input is null | 631 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns file content | 641 | pending | — | — | — |
+| returns file content in json5 format | 651 | pending | — | — | — |
+| returns null | 666 | pending | — | — | — |
+
+### `getRawFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns file content | 676 | pending | — | — | — |
+| returns null | 686 | pending | — | — | — |
+| returns file content in json5 format | 694 | pending | — | — | — |
+
+### `createPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts PR | 720 | pending | — | — | — |
+| doesnt return a title | 755 | pending | — | — | — |
+
+### `updatePr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates PR | 777 | pending | — | — | — |
+| updates PR body if cache is not the same | 791 | pending | — | — | — |
+| updates PR body does not update if cache is the same | 830 | pending | — | — | — |
+| updates PR regardless of status failure | 868 | pending | — | — | — |
+| updates PR with status closed | 884 | pending | — | — | — |
+
+### `ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds comment if missing | 905 | pending | — | — | — |
+| updates comment if different content | 958 | pending | — | — | — |
+| does nothing if comment exists and is the same | 992 | pending | — | — | — |
+| does nothing if comment exists and is the same when there is no topic | 1025 | pending | — | — | — |
+| throws an exception in case of api failed connection | 1058 | pending | — | — | — |
+| fails at null check for response | 1074 | pending | — | — | — |
+| doesnt find comments obj and source or destination commit | 1084 | pending | — | — | — |
+
+### `ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes comment by topic if found | 1125 | pending | — | — | — |
+| doesnt find commentsForPullRequestData | 1157 | pending | — | — | — |
+| doesnt find comment obj | 1171 | pending | — | — | — |
+| deletes comment by content if found | 1197 | pending | — | — | — |
+| throws exception in case failed api connection | 1229 | pending | — | — | — |
+
+### `addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| checks that the function resolves | 1246 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/forgejo/forgejo-helper.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/forgejo/forgejo-helper.spec.ts
+**Total tests:** 40 | **Ported:** 0 | **Actionable:** 40 | **Status:** pending
+
+### `getCurrentUser`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/user endpoint | 200 | pending | — | — | — |
+
+### `getVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/version endpoint | 209 | pending | — | — | — |
+
+### `isOrg`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/orgs/[org] endpoint | 220 | pending | — | — | — |
+
+### `searchRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/search endpoint | 238 | pending | — | — | — |
+| should construct proper query parameters | 251 | pending | — | — | — |
+| should abort if ok flag was not set | 267 | pending | — | — | — |
+
+### `orgListRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/orgs/[organization]/repos endpoint | 278 | pending | — | — | — |
+
+### `getRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo] endpoint | 287 | pending | — | — | — |
+
+### `getRepoContents`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/contents/[file] endpoint | 299 | pending | — | — | — |
+| should support passing reference by query | 311 | pending | — | — | — |
+| should properly escape paths | 327 | pending | — | — | — |
+| should not fail if no content is returned | 342 | pending | — | — | — |
+
+### `createPR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls endpoint | 362 | pending | — | — | — |
+
+### `updatePR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull] endpoint | 382 | pending | — | — | — |
+
+### `closePR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull] endpoint | 407 | pending | — | — | — |
+
+### `mergePR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull]/merge endpoint | 418 | pending | — | — | — |
+
+### `getPR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull] endpoint | 433 | pending | — | — | — |
+
+### `getPRByBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[base]/[head] endpoint | 445 | pending | — | — | — |
+| should return null if pr not found | 461 | pending | — | — | — |
+| should log error | 477 | pending | — | — | — |
+
+### `addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint | 502 | pending | — | — | — |
+
+### `createIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues endpoint | 517 | pending | — | — | — |
+
+### `updateIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue] endpoint | 534 | pending | — | — | — |
+
+### `updateIssueLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint | 559 | pending | — | — | — |
+
+### `closeIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue] endpoint | 582 | pending | — | — | — |
+
+### `searchIssues`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues endpoint | 594 | pending | — | — | — |
+| should construct proper query parameters | 604 | pending | — | — | — |
+
+### `getIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue] endpoint | 618 | pending | — | — | — |
+
+### `getRepoLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/labels endpoint | 630 | pending | — | — | — |
+
+### `getOrgLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/orgs/[org]/labels endpoint | 642 | pending | — | — | — |
+
+### `unassignLabel`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/labels/[label] endpoint | 654 | pending | — | — | — |
+
+### `createComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint | 669 | pending | — | — | — |
+
+### `updateComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint | 687 | pending | — | — | — |
+
+### `deleteComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint | 708 | pending | — | — | — |
+
+### `getComments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint | 722 | pending | — | — | — |
+
+### `createCommitStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/statuses/[commit] endpoint | 734 | pending | — | — | — |
+
+### `getCombinedCommitStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/commits/[branch]/statuses endpoint | 751 | pending | — | — | — |
+| should properly determine worst commit status | 765 | pending | — | — | — |
+
+### `getBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/branches/[branch] endpoint | 838 | pending | — | — | — |
+| should properly escape branch names | 848 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/forgejo/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/forgejo/index.spec.ts
+**Total tests:** 137 | **Ported:** 0 | **Actionable:** 137 | **Status:** pending
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no token | 278 | pending | — | — | — |
+| should throw if auth fails | 282 | pending | — | — | — |
+| should support default endpoint | 291 | pending | — | — | — |
+| should support custom endpoint | 305 | pending | — | — | — |
+| should support custom endpoint including api path | 324 | pending | — | — | — |
+| should use username as author name if full name is missing | 343 | pending | — | — | — |
+
+### `getRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should propagate any other errors from getRepos | 362 | pending | — | — | — |
+| should return an array of repos | 376 | pending | — | — | — |
+| should return an filtered array of repos | 394 | pending | — | — | — |
+| should query the organization endpoint for each namespace | 431 | pending | — | — | — |
+| Sorts repos | 445 | pending | — | — | — |
+
+### `initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should propagate API errors | 474 | pending | — | — | — |
+| should propagate org API errors | 483 | pending | — | — | — |
+| should abort when repo is archived | 496 | pending | — | — | — |
+| should abort when repo is mirrored | 510 | pending | — | — | — |
+| should abort when repo is empty | 524 | pending | — | — | — |
+| should abort when repo has insufficient permissions | 538 | pending | — | — | — |
+| should abort when repo has pulls disabled | 556 | pending | — | — | — |
+| should abort when repo has no available merge methods | 570 | pending | — | — | — |
+| should select default merge method when it is allowed | 584 | pending | — | — | — |
+| should fall back to merge method as per ordered list when default not allowed | 607 | pending | — | — | — |
+| should throw if unknown default merge style is configured | 630 | pending | — | — | — |
+| should use clone_url of repo if gitUrl is not specified | 645 | pending | — | — | — |
+| should use clone_url of repo if gitUrl has value default | 664 | pending | — | — | — |
+| should use ssh_url of repo if gitUrl has value ssh | 684 | pending | — | — | — |
+| should abort when gitUrl has value ssh but ssh_url is empty | 704 | pending | — | — | — |
+| should use generated url of repo if gitUrl has value endpoint | 723 | pending | — | — | — |
+| should abort when clone_url is empty | 745 | pending | — | — | — |
+| should use given access token if gitUrl has value endpoint | 766 | pending | — | — | — |
+| should use given access token if gitUrl is not specified | 797 | pending | — | — | — |
+| should abort when clone_url is not valid | 825 | pending | — | — | — |
+
+### `setBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a new commit status | 848 | pending | — | — | — |
+| should default to pending state | 876 | pending | — | — | — |
+| should include url if specified | 904 | pending | — | — | — |
+| should gracefully fail with warning when setting branch status | 934 | pending | — | — | — |
+
+### `getBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return yellow for unknown result | 973 | pending | — | — | — |
+| should return pending state for pending result | 986 | pending | — | — | — |
+| should return green state for success result | 999 | pending | — | — | — |
+| should return yellow for all other results | 1012 | pending | — | — | — |
+| should abort when branch status returns 404 | 1025 | pending | — | — | — |
+| should propagate any other errors from getBranchStatus | 1038 | pending | — | — | — |
+| should treat internal checks as success | 1051 | pending | — | — | — |
+| should not treat internal checks as success | 1073 | pending | — | — | — |
+
+### `getBranchStatusCheck`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null with no results | 1097 | pending | — | — | — |
+| should return null with no matching results | 1110 | pending | — | — | — |
+| should return yellow with unknown status | 1135 | pending | — | — | — |
+| should return green of matching result | 1160 | pending | — | — | — |
+
+### `getPrList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return list of pull requests | 1187 | pending | — | — | — |
+| should filter list by creator | 1205 | pending | — | — | — |
+| should cache results after first query | 1248 | pending | — | — | — |
+| should update cache results | 1274 | pending | — | — | — |
+
+### `getPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return enriched pull request which exists if open | 1302 | pending | — | — | — |
+| should fallback to direct fetching if cache fails | 1316 | pending | — | — | — |
+| should return null for missing pull request in getPr | 1333 | pending | — | — | — |
+| should throw temporary error for null pull request | 1349 | pending | — | — | — |
+
+### `findPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should find pull request without title or state | 1363 | pending | — | — | — |
+| should find pull request with title | 1380 | pending | — | — | — |
+| should find pull request with state | 1400 | pending | — | — | — |
+| should not find pull request with inverted state | 1420 | pending | — | — | — |
+| should find pull request with title and state | 1441 | pending | — | — | — |
+| should find pull request with draft | 1463 | pending | — | — | — |
+| should find merged pull request | 1485 | pending | — | — | — |
+| should return null for missing pull request in findPr | 1503 | pending | — | — | — |
+| finds pr from other authors using base and head | 1517 | pending | — | — | — |
+| returns null if cannot find pr from other author | 1555 | pending | — | — | — |
+
+### `createPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should use base branch by default | 1599 | pending | — | — | — |
+| should use default branch if requested | 1623 | pending | — | — | — |
+| should resolve and apply optional repo and org labels to pull request | 1645 | pending | — | — | — |
+| should resolve and apply optional repo labels to pull request | 1671 | pending | — | — | — |
+| should ensure new pull request gets added to cached pull requests | 1695 | pending | — | — | — |
+| should attempt to resolve 409 conflict error (w/o update) | 1718 | pending | — | — | — |
+| should attempt to resolve 409 conflict error (w/ update) | 1742 | pending | — | — | — |
+| should abort when response for created pull request is invalid | 1768 | pending | — | — | — |
+| should use platform automerge | 1786 | pending | — | — | — |
+| should not use platform automerge on forgejo v7 | 1812 | pending | — | — | — |
+| should not use platform automerge on forgejo v7 LTS | 1836 | pending | — | — | — |
+| continues on platform automerge error | 1860 | pending | — | — | — |
+| continues if platform automerge is not supported | 1889 | pending | — | — | — |
+| should create PR with repository merge method when automergeStrategy is auto | 1917 | pending | — | — | — |
+| should create PR with mergeStrategy $prMergeStrategy | 1944 | pending | — | — | — |
+
+### `updatePr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update pull request with title | 1985 | pending | — | — | — |
+| should update pull target branch | 2002 | pending | — | — | — |
+| should update pull request with title and body | 2025 | pending | — | — | — |
+| should update pull request with draft | 2048 | pending | — | — | — |
+| should close pull request | 2071 | pending | — | — | — |
+| should update labels | 2096 | pending | — | — | — |
+| should log a warning if labels could not be looked up | 2135 | pending | — | — | — |
+
+### `mergePr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true when merging succeeds | 2180 | pending | — | — | — |
+| should return false when merging fails | 2198 | pending | — | — | — |
+
+### `getIssueList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty for disabled issues | 2219 | pending | — | — | — |
+
+### `getIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the issue | 2231 | pending | — | — | — |
+| should return null for disabled issues in getIssue | 2248 | pending | — | — | — |
+| should return null on error | 2258 | pending | — | — | — |
+
+### `findIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return existing open issue | 2273 | pending | — | — | — |
+| should not return existing closed issue | 2293 | pending | — | — | — |
+| should return null for missing issue | 2310 | pending | — | — | — |
+
+### `ensureIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create issue if not found | 2326 | pending | — | — | — |
+| should create issue with the correct labels | 2352 | pending | — | — | — |
+| should not reopen closed issue by default | 2387 | pending | — | — | — |
+| should not update labels when not necessary | 2412 | pending | — | — | — |
+| should update labels when missing | 2449 | pending | — | — | — |
+| should reset labels when others have been set | 2488 | pending | — | — | — |
+| should reopen closed issue if desired | 2528 | pending | — | — | — |
+| should not update existing closed issue if desired | 2554 | pending | — | — | — |
+| should close all open duplicate issues except first one when updating | 2574 | pending | — | — | — |
+| should reset issue cache when creating an issue | 2605 | pending | — | — | — |
+| should gracefully fail with warning when ensuring issue | 2629 | pending | — | — | — |
+| should return null for disabled issues in ensureIssue | 2651 | pending | — | — | — |
+
+### `ensureIssueClosing`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should close issues with matching title | 2668 | pending | — | — | — |
+| should return for disabled issues | 2683 | pending | — | — | — |
+
+### `deleteLabel`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should delete a label which exists | 2692 | pending | — | — | — |
+| should gracefully fail with warning if label is missing | 2708 | pending | — | — | — |
+
+### `ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add comment with topic if not found | 2728 | pending | — | — | — |
+| should add comment without topic if not found | 2749 | pending | — | — | — |
+| should update comment with topic if found | 2768 | pending | — | — | — |
+| should skip if comment is up-to-date | 2789 | pending | — | — | — |
+| should gracefully fail with warning when ensuring comment | 2806 | pending | — | — | — |
+
+### `ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should remove existing comment by topic | 2830 | pending | — | — | — |
+| should remove existing comment by content | 2849 | pending | — | — | — |
+| should gracefully fail with warning when removing comment | 2868 | pending | — | — | — |
+| should abort silently if comment is missing | 2894 | pending | — | — | — |
+
+### `getBranchPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return existing pull request for branch | 2913 | pending | — | — | — |
+| should return null if no pull request exists | 2927 | pending | — | — | — |
+
+### `addAssignees`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add assignees to the issue | 2941 | pending | — | — | — |
+
+### `addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should assign user and team reviewers | 2956 | pending | — | — | — |
+| should assign user reviewers | 2974 | pending | — | — | — |
+| catches errors | 2989 | pending | — | — | — |
+
+### `massageMarkdown`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces pr links | 3008 | pending | — | — | — |
+| replaces issue links | 3017 | pending | — | — | — |
+| maxBodyLength | 3027 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns file content | 3032 | pending | — | — | — |
+| returns file content from given repo | 3048 | pending | — | — | — |
+| returns file content from branch or tag | 3064 | pending | — | — | — |
+| returns file content in json5 format | 3080 | pending | — | — | — |
+| throws on malformed JSON | 3101 | pending | — | — | — |
+| returns null on missing content | 3113 | pending | — | — | — |
+| throws on errors | 3123 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/forgejo/pr-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/forgejo/pr-cache.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches cache - author defined | 67 | pending | — | — | — |
+| resets cache for not matching authors | 114 | pending | — | — | — |
+| syncs cache | 162 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/forgejo/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/forgejo/schema.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ContentsResponseSchema | 4 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/forgejo/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/forgejo/utils.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| trimTrailingApiPath | 26 | pending | — | — | — |
+
+### `getRepoUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should abort when endpoint is not valid | 45 | pending | — | — | — |
+| getMergeMethod("$value") == "$expected" | 53 | pending | — | — | — |
+
+### `usableRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true when repo is usable | 66 | pending | — | — | — |
+| should return false when repo lacks permissions | 70 | pending | — | — | — |
+| should return false when repo has disabled pull requests | 85 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gerrit/client.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gerrit/client.spec.ts
+**Total tests:** 43 | **Ported:** 0 | **Actionable:** 43 | **Status:** pending
+
+### `getGerritVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns version | 24 | pending | — | — | — |
+
+### `getRepos()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns repos | 39 | pending | — | — | — |
+
+### `getProjectInfo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| inactive | 56 | pending | — | — | — |
+| active | 74 | pending | — | — | — |
+
+### `getBranchInfo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| info | 96 | pending | — | — | — |
+
+### `findChanges()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| footer:Renovate-Branch=dependency-xyz | 113 | pending | — | — | — |
+| sets query.n as 1 if a single change is requested | 191 | pending | — | — | — |
+| sets query.n as 50 if pageLimit is not provided | 206 | pending | — | — | — |
+| sets query.n with pageLimit if provided | 219 | pending | — | — | — |
+| sets query.S with startOffset if provided | 233 | pending | — | — | — |
+| sets query.S as 0 if startOffset is not provided | 247 | pending | — | — | — |
+| handles pagination automatically | 260 | pending | — | — | — |
+| handles pagination with startOffset | 305 | pending | — | — | — |
+| allows disabling automatic pagination | 339 | pending | — | — | — |
+| sets query.o when requestDetails is provided | 361 | pending | — | — | — |
+
+### `getChange()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| get | 381 | pending | — | — | — |
+
+### `getMergeableInfo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| get | 394 | pending | — | — | — |
+
+### `abandonChange()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| abandon | 410 | pending | — | — | — |
+| abandon with message | 419 | pending | — | — | — |
+
+### `submitChange()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| submit | 434 | pending | — | — | — |
+
+### `moveChange()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| move change to different branch | 445 | pending | — | — | — |
+
+### `getBranchChange()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when no changes found | 460 | pending | — | — | — |
+| returns single change when only one found | 474 | pending | — | — | — |
+| returns first change when multiple found without targetBranch | 492 | pending | — | — | — |
+| returns matching change when targetBranch specified and match found | 514 | pending | — | — | — |
+| returns first change when targetBranch specified but no match found | 537 | pending | — | — | — |
+
+### `getMessages()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no messages | 562 | pending | — | — | — |
+| with messages | 570 | pending | — | — | — |
+
+### `addMessage()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add with tag | 590 | pending | — | — | — |
+| add without tag | 602 | pending | — | — | — |
+| add too big message | 613 | pending | — | — | — |
+
+### `checkForExistingMessage()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| msg not found | 633 | pending | — | — | — |
+| msg found | 643 | pending | — | — | — |
+
+### `addMessageIfNotAlreadyExists()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| msg not found | 662 | pending | — | — | — |
+| msg already exists | 685 | pending | — | — | — |
+
+### `setLabel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| setLabel | 704 | pending | — | — | — |
+
+### `setHashtags()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add hashtags | 719 | pending | — | — | — |
+| remove hashtags | 731 | pending | — | — | — |
+| add and remove hashtags in single call | 743 | pending | — | — | — |
+| does nothing when no hashtags provided | 759 | pending | — | — | — |
+
+### `addReviewer()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add | 770 | pending | — | — | — |
+
+### `addAssignee()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add | 783 | pending | — | — | — |
+
+### `getFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getFile() - repo and branch | 795 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gerrit/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gerrit/index.spec.ts
+**Total tests:** 63 | **Ported:** 0 | **Actionable:** 63 | **Status:** pending
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no endpoint | 59 | pending | — | — | — |
+| should throw if no username/password | 64 | pending | — | — | — |
+| should init | 71 | pending | — | — | — |
+| should throw if auth fails | 81 | pending | — | — | — |
+| should throw if version is unparseable | 92 | pending | — | — | — |
+
+### `getRepos()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns repos | 105 | pending | — | — | — |
+| initRepo() - inactive | 111 | pending | — | — | — |
+
+### `initRepo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| initRepo() - active | 133 | pending | — | — | — |
+| initRepo() - passes cloneSubmodules | 146 | pending | — | — | — |
+| initRepo() - abandon rejected changes | 163 | pending | — | — | — |
+
+### `findPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| findPr() - no results | 193 | pending | — | — | — |
+| findPr() - found | 214 | pending | — | — | — |
+
+### `getPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getPr() - found | 237 | pending | — | — | — |
+| getPr() - not found | 251 | pending | — | — | — |
+| getPr() - other error | 256 | pending | — | — | — |
+
+### `updatePr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updatePr() - closed => abandon the change | 267 | pending | — | — | — |
+| updatePr() - body set => add as message if needed | 278 | pending | — | — | — |
+| updatePr() - with addLabels => add hashtags | 295 | pending | — | — | — |
+| updatePr() - with removeLabels => remove hashtags | 308 | pending | — | — | — |
+| updatePr() - with addLabels and removeLabels => update hashtags in single call | 321 | pending | — | — | — |
+| updatePr() - targetBranch set => move the change | 337 | pending | — | — | — |
+
+### `createPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| createPr() - creates change by pushing to refs/for/ | 355 | pending | — | — | — |
+| createPr() - with autoApprove | 388 | pending | — | — | — |
+| createPr() - with labels | 424 | pending | — | — | — |
+| createPr() - no change found after push => rejects | 463 | pending | — | — | — |
+| createPr() - push fails => rejects | 478 | pending | — | — | — |
+
+### `getBranchPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getBranchPr() - no result | 494 | pending | — | — | — |
+| getBranchPr() - found | 509 | pending | — | — | — |
+| getBranchPr() - found even without targetBranch | 535 | pending | — | — | — |
+
+### `getPrList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getPrList() - empty list | 563 | pending | — | — | — |
+| getPrList() - multiple results | 575 | pending | — | — | — |
+
+### `mergePr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| mergePr() - blocker by Verified | 591 | pending | — | — | — |
+| mergePr() - success | 600 | pending | — | — | — |
+| mergePr() - other errors | 607 | pending | — | — | — |
+
+### `getBranchStatus()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getBranchStatus() - change not found => yellow | 616 | pending | — | — | — |
+| getBranchStatus() - change found, submittable and not hasProblems => green | 623 | pending | — | — | — |
+| getBranchStatus() - change found, submittable but hasProblems => red | 633 | pending | — | — | — |
+| getBranchStatus() - change found and hasProblems => red | 650 | pending | — | — | — |
+| getBranchStatus() - changes found and hasBlockingLabels but no problems => red | 667 | pending | — | — | — |
+
+### `getBranchStatusCheck() › GerritLabel is not available`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| unknownCtx | 694 | pending | — | — | — |
+
+### `getBranchStatusCheck() › GerritLabel is available`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $ctx/$labels | 718 | pending | — | — | — |
+
+### `setBranchStatus() › GerritLabel is not configured in Renovate`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| setBranchStatus(renovate/stability-days) | 766 | pending | — | — | — |
+| setBranchStatus(renovate/merge-confidence) | 778 | pending | — | — | — |
+
+### `setBranchStatus() › GerritLabel is configured in Renovate`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $ctx/$branchState | 803 | pending | — | — | — |
+| no change found | 855 | pending | — | — | — |
+| does not call setLabel() if label does not exist in change | 868 | pending | — | — | — |
+
+### `deleteLabel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deleteLabel() - deletes a label | 893 | pending | — | — | — |
+
+### `addReviewers()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| addReviewers() - add reviewers | 903 | pending | — | — | — |
+
+### `addAssignees()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| addAssignees() - set assignee | 916 | pending | — | — | — |
+
+### `ensureComment()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ensureComment() - without tag | 929 | pending | — | — | — |
+| ensureComment() - with tag | 942 | pending | — | — | — |
+
+### `getRawFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getRawFile() - repo and branch | 961 | pending | — | — | — |
+| getRawFile() - repo/branch from config | 972 | pending | — | — | — |
+| getRawFile() - branch defaults | 986 | pending | — | — | — |
+| getRawFile() - no repo | 1000 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getJsonFile() | 1013 | pending | — | — | — |
+
+### `massageMarkdown()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| massageMarkdown() | 1022 | pending | — | — | — |
+
+### `currently unused/not-implemented functions`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deleteLabel() | 1053 | pending | — | — | — |
+| ensureCommentRemoval() | 1059 | pending | — | — | — |
+| ensureIssueClosing() | 1069 | pending | — | — | — |
+| ensureIssue() | 1073 | pending | — | — | — |
+| findIssue() | 1079 | pending | — | — | — |
+| getIssueList() | 1083 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gerrit/scm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gerrit/scm.spec.ts
+**Total tests:** 29 | **Ported:** 0 | **Actionable:** 29 | **Status:** pending
+
+### `isBranchBehindBase()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no open change for with branchname found -> isBehind == true | 29 | pending | — | — | — |
+| open change found for branchname, rebase action is available -> isBehind == true | 46 | pending | — | — | — |
+| open change found for branch name, but rebase action is not available -> isBehind == false | 65 | pending | — | — | — |
+
+### `isBranchModified()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no open change for with branchname found -> not modified | 84 | pending | — | — | — |
+| open change found for branchname, but not modified | 101 | pending | — | — | — |
+| open change found for branchname, but modified from other user | 116 | pending | — | — | — |
+
+### `isBranchConflicted()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no open change with branch name found -> return true | 133 | pending | — | — | — |
+| open change found for branch name/baseBranch and its mergeable | 149 | pending | — | — | — |
+| open change found for branch name/baseBranch and its NOT mergeable | 164 | pending | — | — | — |
+
+### `branchExists()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no change found for branch name -> return result from git.branchExists | 181 | pending | — | — | — |
+| open change found for branch name -> return true | 196 | pending | — | — | — |
+
+### `getBranchCommit()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no change found for branch name -> return result from git.getBranchCommit | 207 | pending | — | — | — |
+| open change found for branchname -> return true | 224 | pending | — | — | — |
+
+### `getBranchUpdateDate()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no change found for branch name -> return result from git.getBranchUpdateDate | 234 | pending | — | — | — |
+| open change found for branchname -> return DateTime from Gerrit change | 258 | pending | — | — | — |
+
+### `pushForReview()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| pushes to refs/for/<targetBranch> and returns true on success | 280 | pending | — | — | — |
+| adds hashtag push options for each label | 297 | pending | — | — | — |
+| clears pending change branch on success | 320 | pending | — | — | — |
+| keeps pending change branch when push fails | 333 | pending | — | — | — |
+
+### `deleteBranch()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes local branch | 348 | pending | — | — | — |
+| clears pending change branch | 355 | pending | — | — | — |
+
+### `mergeToLocal()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no change exists | 363 | pending | — | — | — |
+| uses local merge when there is a pending change branch | 383 | pending | — | — | — |
+| change exists | 394 | pending | — | — | — |
+
+### `commitAndPush()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| commitAndPush() - empty commit | 424 | pending | — | — | — |
+| commitAndPush() - create first commit but does not push | 448 | pending | — | — | — |
+| commitAndPush() - existing change keeps original target branch | 482 | pending | — | — | — |
+| commitAndPush() - existing change without new changes | 531 | pending | — | — | — |
+| commitAndPush() - existing change with new changes - auto-approve | 575 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gerrit/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gerrit/utils.spec.ts
+**Total tests:** 23 | **Ported:** 0 | **Actionable:** 23 | **Status:** pending
+
+### `getGerritRepoUrl() › no gitUrl provided`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| create a git url with username/password | 28 | pending | — | — | — |
+| create a git url without username/password | 37 | pending | — | — | — |
+| throws on invalid endpoint | 44 | pending | — | — | — |
+
+### `getGerritRepoUrl() › default gitUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| create a git url with username/password | 51 | pending | — | — | — |
+
+### `getGerritRepoUrl() › endpoint gitUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| create a git url with username/password | 61 | pending | — | — | — |
+
+### `getGerritRepoUrl() › ssh gitUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| create a simple url | 71 | pending | — | — | — |
+| create a url with trailing slash | 80 | pending | — | — | — |
+| create a url when base has context | 93 | pending | — | — | — |
+
+### `mapPrStateToGerritFilter()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| maps pr state %p to gerrit filter %p | 109 | pending | — | — | — |
+
+### `mapGerritChangeStateToPrState()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| maps gerrit change state %p to PrState %p | 125 | pending | — | — | — |
+
+### `mapGerritChangeToPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| map a gerrit change to to Pr | 139 | pending | — | — | — |
+| map a gerrit change without reviewers to Pr | 191 | pending | — | — | — |
+| does not map a gerrit change without source branch to Pr | 222 | pending | — | — | — |
+| does not reject a broken commit message if knownProperties.sourceBranch is passed | 240 | pending | — | — | — |
+| avoids iterating through change messages knownProperties.prBody is passed | 274 | pending | — | — | — |
+
+### `extractSourceBranch()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no commit message | 310 | pending | — | — | — |
+| commit message with no footer | 315 | pending | — | — | — |
+| commit message with footer | 327 | pending | — | — | — |
+
+### `findPullRequestBody()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| find pull-request-body | 342 | pending | — | — | — |
+| no pull-request-body message found | 364 | pending | — | — | — |
+
+### `mapBranchStatusToLabel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Label with +1/-1 map branchState=%p to %p | 385 | pending | — | — | — |
+| Label with +2/-2, map branchState=%p to %p | 409 | pending | — | — | — |
+
+### `convertGerritDateToISO()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| converts Gerrit date format to ISO format | 424 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitea/gitea-helper.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/gitea-helper.spec.ts
+**Total tests:** 39 | **Ported:** 0 | **Actionable:** 39 | **Status:** pending
+
+### `getCurrentUser`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/user endpoint | 199 | pending | — | — | — |
+
+### `getVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/version endpoint | 208 | pending | — | — | — |
+
+### `searchRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/search endpoint | 219 | pending | — | — | — |
+| should construct proper query parameters | 232 | pending | — | — | — |
+| should abort if ok flag was not set | 248 | pending | — | — | — |
+
+### `orgListRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/orgs/[organization]/repos endpoint | 259 | pending | — | — | — |
+
+### `getRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo] endpoint | 268 | pending | — | — | — |
+
+### `getRepoContents`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/contents/[file] endpoint | 280 | pending | — | — | — |
+| should support passing reference by query | 292 | pending | — | — | — |
+| should properly escape paths | 308 | pending | — | — | — |
+| should not fail if no content is returned | 323 | pending | — | — | — |
+
+### `createPR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls endpoint | 343 | pending | — | — | — |
+
+### `updatePR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull] endpoint | 363 | pending | — | — | — |
+
+### `closePR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull] endpoint | 388 | pending | — | — | — |
+
+### `mergePR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull]/merge endpoint | 399 | pending | — | — | — |
+
+### `getPR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull] endpoint | 414 | pending | — | — | — |
+
+### `getPRByBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[base]/[head] endpoint | 426 | pending | — | — | — |
+| should return null if pr not found | 442 | pending | — | — | — |
+| should log error | 458 | pending | — | — | — |
+
+### `addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint | 483 | pending | — | — | — |
+
+### `createIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues endpoint | 498 | pending | — | — | — |
+
+### `updateIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue] endpoint | 515 | pending | — | — | — |
+
+### `updateIssueLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/labels endpoint | 540 | pending | — | — | — |
+
+### `closeIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue] endpoint | 563 | pending | — | — | — |
+
+### `searchIssues`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues endpoint | 575 | pending | — | — | — |
+| should construct proper query parameters | 585 | pending | — | — | — |
+
+### `getIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue] endpoint | 599 | pending | — | — | — |
+
+### `getRepoLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/labels endpoint | 611 | pending | — | — | — |
+
+### `getOrgLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/orgs/[org]/labels endpoint | 623 | pending | — | — | — |
+
+### `unassignLabel`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/labels/[label] endpoint | 635 | pending | — | — | — |
+
+### `createComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint | 650 | pending | — | — | — |
+
+### `updateComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint | 668 | pending | — | — | — |
+
+### `deleteComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/comments/[comment] endpoint | 689 | pending | — | — | — |
+
+### `getComments`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/issues/[issue]/comments endpoint | 703 | pending | — | — | — |
+
+### `createCommitStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/statuses/[commit] endpoint | 715 | pending | — | — | — |
+
+### `getCombinedCommitStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/commits/[branch]/statuses endpoint | 732 | pending | — | — | — |
+| should properly determine worst commit status | 746 | pending | — | — | — |
+
+### `getBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should call /api/v1/repos/[repo]/branches/[branch] endpoint | 819 | pending | — | — | — |
+| should properly escape branch names | 829 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitea/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/index.spec.ts
+**Total tests:** 134 | **Ported:** 0 | **Actionable:** 134 | **Status:** pending
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no token | 270 | pending | — | — | — |
+| should throw if auth fails | 274 | pending | — | — | — |
+| should support default endpoint | 283 | pending | — | — | — |
+| should support custom endpoint | 297 | pending | — | — | — |
+| should support custom endpoint including api path | 316 | pending | — | — | — |
+| should use username as author name if full name is missing | 335 | pending | — | — | — |
+
+### `getRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should propagate any other errors | 354 | pending | — | — | — |
+| should return an array of repos | 368 | pending | — | — | — |
+| should return an filtered array of repos | 386 | pending | — | — | — |
+| should query the organization endpoint for each namespace | 423 | pending | — | — | — |
+| Sorts repos | 437 | pending | — | — | — |
+
+### `initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should propagate API errors | 466 | pending | — | — | — |
+| should abort when repo is archived | 475 | pending | — | — | — |
+| should abort when repo is mirrored | 489 | pending | — | — | — |
+| should abort when repo is empty | 503 | pending | — | — | — |
+| should abort when repo has insufficient permissions | 517 | pending | — | — | — |
+| should abort when repo has pulls disabled | 535 | pending | — | — | — |
+| should abort when repo has no available merge methods | 549 | pending | — | — | — |
+| should select default merge method when it is allowed | 563 | pending | — | — | — |
+| should fall back to merge method as per ordered list when default not allowed | 584 | pending | — | — | — |
+| should throw if unknown default merge style is configured | 606 | pending | — | — | — |
+| should use clone_url of repo if gitUrl is not specified | 621 | pending | — | — | — |
+| should use clone_url of repo if gitUrl has value default | 638 | pending | — | — | — |
+| should use ssh_url of repo if gitUrl has value ssh | 656 | pending | — | — | — |
+| should abort when gitUrl has value ssh but ssh_url is empty | 674 | pending | — | — | — |
+| should use generated url of repo if gitUrl has value endpoint | 691 | pending | — | — | — |
+| should abort when clone_url is empty | 711 | pending | — | — | — |
+| should use given access token if gitUrl has value endpoint | 730 | pending | — | — | — |
+| should use given access token if gitUrl is not specified | 759 | pending | — | — | — |
+| should abort when clone_url is not valid | 785 | pending | — | — | — |
+
+### `setBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create a new commit status | 806 | pending | — | — | — |
+| should default to pending state | 834 | pending | — | — | — |
+| should include url if specified | 862 | pending | — | — | — |
+| should gracefully fail with warning | 892 | pending | — | — | — |
+
+### `getBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return yellow for unknown result | 931 | pending | — | — | — |
+| should return pending state for pending result | 944 | pending | — | — | — |
+| should return green state for success result | 957 | pending | — | — | — |
+| should return yellow for all other results | 970 | pending | — | — | — |
+| should abort when branch status returns 404 | 983 | pending | — | — | — |
+| should propagate any other errors | 996 | pending | — | — | — |
+| should treat internal checks as success | 1009 | pending | — | — | — |
+| should not treat internal checks as success | 1031 | pending | — | — | — |
+
+### `getBranchStatusCheck`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null with no results | 1055 | pending | — | — | — |
+| should return null with no matching results | 1068 | pending | — | — | — |
+| should return yellow with unknown status | 1093 | pending | — | — | — |
+| should return green of matching result | 1118 | pending | — | — | — |
+
+### `getPrList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return list of pull requests | 1145 | pending | — | — | — |
+| should filter list by creator | 1163 | pending | — | — | — |
+| should cache results after first query | 1206 | pending | — | — | — |
+| should update cache results | 1232 | pending | — | — | — |
+
+### `getPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return enriched pull request which exists if open | 1260 | pending | — | — | — |
+| should fallback to direct fetching if cache fails | 1274 | pending | — | — | — |
+| should return null for missing pull request | 1291 | pending | — | — | — |
+| should throw temporary error for null pull request | 1307 | pending | — | — | — |
+
+### `findPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should find pull request without title or state | 1321 | pending | — | — | — |
+| should find pull request with title | 1338 | pending | — | — | — |
+| should find pull request with state | 1358 | pending | — | — | — |
+| should not find pull request with inverted state | 1378 | pending | — | — | — |
+| should find pull request with title and state | 1399 | pending | — | — | — |
+| should find pull request with draft | 1421 | pending | — | — | — |
+| should find merged pull request | 1443 | pending | — | — | — |
+| should return null for missing pull request | 1461 | pending | — | — | — |
+| finds pr from other authors using base and head | 1475 | pending | — | — | — |
+| returns null if cannot find pr from other author | 1513 | pending | — | — | — |
+
+### `createPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should use base branch by default | 1557 | pending | — | — | — |
+| should use default branch if requested | 1581 | pending | — | — | — |
+| should resolve and apply optional labels to pull request | 1603 | pending | — | — | — |
+| should ensure new pull request gets added to cached pull requests | 1629 | pending | — | — | — |
+| should attempt to resolve 409 conflict error (w/o update) | 1652 | pending | — | — | — |
+| should attempt to resolve 409 conflict error (w/ update) | 1676 | pending | — | — | — |
+| should abort when response for created pull request is invalid | 1702 | pending | — | — | — |
+| should use platform automerge | 1720 | pending | — | — | — |
+| should not use platform automerge on forgejo v7 | 1746 | pending | — | — | — |
+| should not use platform automerge on forgejo v7 LTS | 1770 | pending | — | — | — |
+| continues on platform automerge error | 1794 | pending | — | — | — |
+| continues if platform automerge is not supported | 1823 | pending | — | — | — |
+| should create PR with repository merge method when automergeStrategy is auto | 1851 | pending | — | — | — |
+| should create PR with mergeStrategy $prMergeStrategy | 1878 | pending | — | — | — |
+
+### `updatePr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update pull request with title | 1919 | pending | — | — | — |
+| should update pull target branch | 1936 | pending | — | — | — |
+| should update pull request with title and body | 1959 | pending | — | — | — |
+| should update pull request with draft | 1982 | pending | — | — | — |
+| should close pull request | 2005 | pending | — | — | — |
+| should update labels | 2030 | pending | — | — | — |
+| should log a warning if labels could not be looked up | 2069 | pending | — | — | — |
+
+### `mergePr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true when merging succeeds | 2114 | pending | — | — | — |
+| should return false when merging fails | 2132 | pending | — | — | — |
+
+### `getIssueList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty for disabled issues | 2153 | pending | — | — | — |
+
+### `getIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the issue | 2165 | pending | — | — | — |
+| should return null for disabled issues | 2182 | pending | — | — | — |
+
+### `findIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return existing open issue | 2194 | pending | — | — | — |
+| should not return existing closed issue | 2214 | pending | — | — | — |
+| should return null for missing issue | 2231 | pending | — | — | — |
+
+### `ensureIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create issue if not found | 2247 | pending | — | — | — |
+| should create issue with the correct labels | 2273 | pending | — | — | — |
+| should not reopen closed issue by default | 2308 | pending | — | — | — |
+| should not update labels when not necessary | 2333 | pending | — | — | — |
+| should update labels when missing | 2370 | pending | — | — | — |
+| should reset labels when others have been set | 2409 | pending | — | — | — |
+| should reopen closed issue if desired | 2449 | pending | — | — | — |
+| should not update existing closed issue if desired | 2475 | pending | — | — | — |
+| should close all open duplicate issues except first one when updating | 2495 | pending | — | — | — |
+| should reset issue cache when creating an issue | 2526 | pending | — | — | — |
+| should gracefully fail with warning | 2550 | pending | — | — | — |
+| should return null for disabled issues | 2572 | pending | — | — | — |
+
+### `ensureIssueClosing`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should close issues with matching title | 2589 | pending | — | — | — |
+| should return for disabled issues | 2604 | pending | — | — | — |
+
+### `deleteLabel`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should delete a label which exists | 2613 | pending | — | — | — |
+| should gracefully fail with warning if label is missing | 2629 | pending | — | — | — |
+
+### `ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add comment with topic if not found | 2649 | pending | — | — | — |
+| should add comment without topic if not found | 2670 | pending | — | — | — |
+| should update comment with topic if found | 2689 | pending | — | — | — |
+| should skip if comment is up-to-date | 2710 | pending | — | — | — |
+| should gracefully fail with warning | 2727 | pending | — | — | — |
+
+### `ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should remove existing comment by topic | 2751 | pending | — | — | — |
+| should remove existing comment by content | 2770 | pending | — | — | — |
+| should gracefully fail with warning | 2789 | pending | — | — | — |
+| should abort silently if comment is missing | 2815 | pending | — | — | — |
+
+### `getBranchPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return existing pull request for branch | 2834 | pending | — | — | — |
+| should return null if no pull request exists | 2848 | pending | — | — | — |
+
+### `addAssignees`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add assignees to the issue | 2862 | pending | — | — | — |
+
+### `addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should assign reviewers | 2877 | pending | — | — | — |
+| should do nothing for older Gitea versions | 2892 | pending | — | — | — |
+| catches errors | 2900 | pending | — | — | — |
+
+### `massageMarkdown`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| replaces pr links | 2920 | pending | — | — | — |
+| replaces issue links | 2929 | pending | — | — | — |
+| maxBodyLength | 2939 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns file content | 2944 | pending | — | — | — |
+| returns file content from given repo | 2960 | pending | — | — | — |
+| returns file content from branch or tag | 2976 | pending | — | — | — |
+| returns file content in json5 format | 2992 | pending | — | — | — |
+| throws on malformed JSON | 3013 | pending | — | — | — |
+| returns null on missing content | 3025 | pending | — | — | — |
+| throws on errors | 3035 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitea/pr-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/pr-cache.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches cache - author defined | 71 | pending | — | — | — |
+| resets cache for not matching authors | 118 | pending | — | — | — |
+| syncs cache | 166 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitea/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/schema.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ContentsResponseSchema | 4 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitea/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitea/utils.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| trimTrailingApiPath | 26 | pending | — | — | — |
+
+### `getRepoUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should abort when endpoint is not valid | 45 | pending | — | — | — |
+| getMergeMethod("$value") == "$expected" | 53 | pending | — | — | — |
+
+### `usableRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true when repo is usable | 66 | pending | — | — | — |
+| should return false when repo lacks permissions | 70 | pending | — | — | — |
+| should return false when repo has disabled pull requests | 85 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/github/api-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/api-cache.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| stores and retrieves items | 12 | pending | — | — | — |
+
+### `getItems`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| maps items | 29 | pending | — | — | — |
+| resets cache on item update | 46 | pending | — | — | — |
+| resets cache on page reconcile | 69 | pending | — | — | — |
+
+### `getLastModified`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined when no lastModified in cache | 94 | pending | — | — | — |
+| returns stored value when present | 100 | pending | — | — | — |
+| returns updated value after reconcile | 106 | pending | — | — | — |
+
+### `updateLastModified`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sets lastModified when not present | 116 | pending | — | — | — |
+| advances lastModified to newer timestamp | 124 | pending | — | — | — |
+| does not regress lastModified to older timestamp | 132 | pending | — | — | — |
+
+### `reconcile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false for empty page | 142 | pending | — | — | — |
+| appends new items | 152 | pending | — | — | — |
+| handles updated items | 175 | pending | — | — | — |
+| ignores page overlap | 199 | pending | — | — | — |
+| does not require new page if all items are old | 226 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/github/branch.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/branch.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true if the branch exists | 5 | pending | — | — | — |
+| should return false if the branch does not exist | 16 | pending | — | — | — |
+| should throw an error for nested branches | 27 | pending | — | — | — |
+| should throw an error if the request fails for any other reason | 44 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/github/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/index.spec.ts
+**Total tests:** 201 | **Ported:** 0 | **Actionable:** 201 | **Status:** pending
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no token | 64 | pending | — | — | — |
+| should throw if using fine-grained token with GHE <3.10 | 70 | pending | — | — | — |
+| should throw if using fine-grained token with GHE unknown version | 85 | pending | — | — | — |
+| should support fine-grained token with GHE >=3.10 | 97 | pending | — | — | — |
+| should throw if user failure | 119 | pending | — | — | — |
+| should support default endpoint no email access | 124 | pending | — | — | — |
+| should support default endpoint no email result | 136 | pending | — | — | — |
+| should support gitAuthor and username | 148 | pending | — | — | — |
+
+### `initPlatform() › when using the default gitAuthor › when gitAuthor is not set › when no email access`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| if on GitHub.com, a warning is shown | 161 | pending | — | — | — |
+| if on GitHub Enterprise, a warning is not shown | 186 | pending | — | — | — |
+
+### `initPlatform() › when using the default gitAuthor › when gitAuthor is not set › when email access`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no warning is shown | 208 | pending | — | — | — |
+| if on GitHub Enterprise, a warning is not shown | 231 | pending | — | — | — |
+
+### `initPlatform() › when using the default gitAuthor › when explicitly set to only email address`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| if on GitHub.com, a warning is shown | 258 | pending | — | — | — |
+| if on GitHub Enterprise, a warning is not shown | 278 | pending | — | — | — |
+
+### `initPlatform() › when using the default gitAuthor › when explicitly set to RFC-RFC5322 format`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| if on GitHub.com, a warning is shown | 297 | pending | — | — | — |
+| if on GitHub Enterprise, a warning is not shown | 317 | pending | — | — | — |
+| should support default endpoint with email | 336 | pending | — | — | — |
+| should use public email from user profile when available | 352 | pending | — | — | — |
+| should fall back to user/emails when there is no public email | 366 | pending | — | — | — |
+| should fall back gracefully when user/emails returns an error (no user:email scope) | 385 | pending | — | — | — |
+| should autodetect email/user on default endpoint with GitHub App | 404 | pending | — | — | — |
+| should throw error when cant request App information on default endpoint with GitHub App | 494 | pending | — | — | — |
+| should autodetect email/user on custom endpoint with GitHub App | 501 | pending | — | — | — |
+| should autodetect email/user on GHE Cloud endpoint with GitHub App | 528 | pending | — | — | — |
+| should support custom endpoint | 554 | pending | — | — | — |
+| should support custom endpoint without version | 578 | pending | — | — | — |
+
+### `getRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return an array of repos | 604 | pending | — | — | — |
+| should filters repositories by topics | 627 | pending | — | — | — |
+| should return an array of repos when using Github App endpoint | 654 | pending | — | — | — |
+| should return an array of repos when using GitHub App Installation Token | 681 | pending | — | — | — |
+
+### `initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should squash | 792 | pending | — | — | — |
+| no token | 800 | pending | — | — | — |
+| app token | 808 | pending | — | — | — |
+| should fork when using forkToken | 817 | pending | — | — | — |
+| should throw if fork needed but forkCreation=false | 835 | pending | — | — | — |
+| throws if the repo is a fork | 850 | pending | — | — | — |
+| throws when cannot fork due to username error | 864 | pending | — | — | — |
+| throws when listing forks with 404 | 879 | pending | — | — | — |
+| throws when listing forks with 500 | 892 | pending | — | — | — |
+| throws when error creating fork | 905 | pending | — | — | — |
+| should update fork when using forkToken and forkOrg | 923 | pending | — | — | — |
+| detects fork default branch mismatch | 935 | pending | — | — | — |
+| should merge | 951 | pending | — | — | — |
+| should rebase | 980 | pending | — | — | — |
+| should not guess at merge | 1007 | pending | — | — | — |
+| should throw error if archived | 1027 | pending | — | — | — |
+| throws not-found | 1051 | pending | — | — | — |
+| throws unexpected graphql errors | 1058 | pending | — | — | — |
+| throws graphql rate limit error | 1075 | pending | — | — | — |
+| should throw error if renamed | 1092 | pending | — | — | — |
+| should not be case sensitive | 1115 | pending | — | — | — |
+
+### `getBranchForceRebase`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should detect repoForceRebase | 1142 | pending | — | — | — |
+| should handle 404 | 1176 | pending | — | — | — |
+| should handle 403 | 1189 | pending | — | — | — |
+| should throw 401 | 1202 | pending | — | — | — |
+| should return empty object when parentRepo is set | 1216 | pending | — | — | — |
+| should ignore non_fast_forward ruleset for determining rebase | 1236 | pending | — | — | — |
+| should detect strict required status checks ruleset | 1260 | pending | — | — | — |
+| should continue if no expected rulesets have been found | 1279 | pending | — | — | — |
+| should abort and throws on internal error | 1300 | pending | — | — | — |
+| should fallback to legacy branch protection when rulesets not found | 1311 | pending | — | — | — |
+| should return false when no force rebase rules found | 1328 | pending | — | — | — |
+| should return cached result on subsequent calls | 1351 | pending | — | — | — |
+| should return cached false result on subsequent calls | 1376 | pending | — | — | — |
+
+### `getPrList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches single page | 1450 | pending | — | — | — |
+| fetches multiple pages | 1461 | pending | — | — | — |
+| synchronizes cache | 1480 | pending | — | — | — |
+
+### `getPrList() › Body compaction`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| compacts body from response | 1533 | pending | — | — | — |
+
+### `getPrList() › PR author filtering`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| filters PRs by renovate username when no forkToken or ignorePrAuthor | 1578 | pending | — | — | — |
+| fetches all PRs when forkToken is set | 1593 | pending | — | — | — |
+| fetches all PRs when ignorePrAuthor is set | 1620 | pending | — | — | — |
+| stops sync early when non-Renovate PRs dominate | 1639 | pending | — | — | — |
+| advances watermark from unfiltered page so next sync is cheaper | 1685 | pending | — | — | — |
+| derives cutoff from cached items when lastModified is missing | 1742 | pending | — | — | — |
+| stops at max sync pages | 1808 | pending | — | — | — |
+| stops at custom max sync pages | 1852 | pending | — | — | — |
+| reconciles mixed pages with both Renovate and non-Renovate PRs | 1897 | pending | — | — | — |
+| continues past timestamp tie at page boundary | 1948 | pending | — | — | — |
+
+### `getBranchPr(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null if no PR exists | 1998 | pending | — | — | — |
+| should cache and return the PR object | 2012 | pending | — | — | — |
+
+### `tryReuseAutoclosedPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should reopen autoclosed PR | 2047 | pending | — | — | — |
+| force pushes when local SHA differs from PR SHA | 2082 | pending | — | — | — |
+| aborts reopening if branch recreation fails | 2126 | pending | — | — | — |
+| aborts reopening if PR reopening fails | 2155 | pending | — | — | — |
+
+### `getBranchStatus()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should pass through success | 2179 | pending | — | — | — |
+| should not consider internal statuses as success | 2195 | pending | — | — | — |
+| should pass through failed | 2217 | pending | — | — | — |
+| defaults to pending | 2233 | pending | — | — | — |
+| should fail if a check run has failed | 2248 | pending | — | — | — |
+| should succeed if no status and all passed check runs | 2280 | pending | — | — | — |
+| should fail if a check run is pending | 2318 | pending | — | — | — |
+
+### `getBranchStatusCheck`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns state if found | 2351 | pending | — | — | — |
+| returns null | 2380 | pending | — | — | — |
+| returns yellow if state not present in context object | 2406 | pending | — | — | — |
+
+### `setBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if already set | 2425 | pending | — | — | — |
+| sets branch status | 2450 | pending | — | — | — |
+
+### `getIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if issues disabled | 2496 | pending | — | — | — |
+| returns issue | 2504 | pending | — | — | — |
+| returns null if issue not found | 2524 | pending | — | — | — |
+| logs debug message if issue deleted | 2533 | pending | — | — | — |
+
+### `findIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no issue | 2548 | pending | — | — | — |
+| finds issue | 2585 | pending | — | — | — |
+
+### `ensureIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates issue | 2638 | pending | — | — | — |
+| creates issue if not ensuring only once | 2688 | pending | — | — | — |
+| does not create issue if ensuring only once | 2732 | pending | — | — | — |
+| creates issue with labels | 2774 | pending | — | — | — |
+| closes others if ensuring only once | 2810 | pending | — | — | — |
+| updates issue | 2863 | pending | — | — | — |
+| updates issue with labels | 2922 | pending | — | — | — |
+| skips update if unchanged | 2982 | pending | — | — | — |
+| deletes if duplicate | 3026 | pending | — | — | — |
+| creates issue if reopen flag false and issue is not open | 3070 | pending | — | — | — |
+| does not create issue if reopen flag false and issue is already open | 3123 | pending | — | — | — |
+
+### `ensureIssueClosing()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| closes issue | 3170 | pending | — | — | — |
+| swallows 410 Gone when the issue was deleted on the platform | 3214 | pending | — | — | — |
+| swallows 404 Not Found when the issue was deleted on the platform | 3245 | pending | — | — | — |
+| rethrows non-deletion errors | 3276 | pending | — | — | — |
+
+### `deleteLabel(issueNo, label)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should delete the label | 3309 | pending | — | — | — |
+
+### `addAssignees(issueNo, assignees)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add the given assignees to the issue | 3319 | pending | — | — | — |
+| should retry on 404 and succeed | 3335 | pending | — | — | — |
+| should throw after 3 consecutive 404 responses | 3355 | pending | — | — | — |
+| should throw immediately on non-404 errors | 3365 | pending | — | — | — |
+
+### `addReviewers(issueNo, reviewers)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add the given reviewers to the PR | 3377 | pending | — | — | — |
+
+### `ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add comment if not found | 3389 | pending | — | — | — |
+| adds comment if found in closed PR list | 3408 | pending | — | — | — |
+| add updates comment if necessary | 3436 | pending | — | — | — |
+| skips comment | 3455 | pending | — | — | — |
+| handles comment with no description | 3472 | pending | — | — | — |
+
+### `ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes comment by topic if found | 3491 | pending | — | — | — |
+| deletes comment by content if found | 3510 | pending | — | — | — |
+
+### `findPr(branchName, prTitle, state)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| finds PR by branch name | 3531 | pending | — | — | — |
+| finds PR with non-open state | 3573 | pending | — | — | — |
+| skips PR with non-matching state | 3602 | pending | — | — | — |
+| skips PRs from forks | 3628 | pending | — | — | — |
+| skips PR with non-matching title | 3653 | pending | — | — | — |
+| caches pr list | 3678 | pending | — | — | — |
+| finds pr from other authors | 3713 | pending | — | — | — |
+| returns null if no pr found - (includeOtherAuthors) | 3743 | pending | — | — | — |
+
+### `createPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create and return a PR object | 3760 | pending | — | — | — |
+| should use defaultBranch | 3782 | pending | — | — | — |
+| should create a draftPR if set in the settings | 3800 | pending | — | — | — |
+
+### `createPr() › with forkToken`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should allow maintainer edits if explicitly enabled via options | 3840 | pending | — | — | — |
+| should allow maintainer edits if not explicitly set | 3864 | pending | — | — | — |
+| should disallow maintainer edits if explicitly disabled | 3885 | pending | — | — | — |
+
+### `createPr() › automerge`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should skip automerge if disabled in repo settings | 4000 | pending | — | — | — |
+| should skip automerge if GHE <3.3.0 | 4013 | pending | — | — | — |
+| should perform automerge if GHE >=3.3.0 | 4048 | pending | — | — | — |
+| should set automatic merge | 4094 | pending | — | — | — |
+| should handle GraphQL errors | 4109 | pending | — | — | — |
+| should handle REST API errors | 4122 | pending | — | — | — |
+
+### `createPr() › milestone`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should set the milestone on the PR | 4137 | pending | — | — | — |
+| should log a warning but not throw on error | 4169 | pending | — | — | — |
+
+### `getPr(prNo)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null if no prNo is passed | 4231 | pending | — | — | — |
+| should return PR | 4236 | pending | — | — | — |
+| should return closed PR | 4279 | pending | — | — | — |
+| should return merged PR | 4304 | pending | — | — | — |
+| should return null if no PR is returned from GitHub | 4330 | pending | — | — | — |
+| should return a PR object - 0 | 4345 | pending | — | — | — |
+| should return a PR object - 1 | 4371 | pending | — | — | — |
+| should return a PR object - 2 | 4407 | pending | — | — | — |
+
+### `updatePr(prNo, title, body)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update the PR | 4441 | pending | — | — | — |
+| should update and close the PR | 4455 | pending | — | — | — |
+| should update target branch | 4470 | pending | — | — | — |
+| should add and remove labels | 4486 | pending | — | — | — |
+
+### `updatePr(prNo, title, body) › addLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| warns if adding labels failed | 4526 | pending | — | — | — |
+
+### `reattemptPlatformAutomerge(number, platformPrOptions)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should set automatic merge | 4630 | pending | — | — | — |
+| handles unknown error | 4648 | pending | — | — | — |
+
+### `mergePr(prNo)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should merge the PR | 4670 | pending | — | — | — |
+| should handle merge error | 4702 | pending | — | — | — |
+| should handle merge block | 4723 | pending | — | — | — |
+| should handle approvers required | 4745 | pending | — | — | — |
+| should warn if automergeStrategy is not supported | 4767 | pending | — | — | — |
+| should use configured automergeStrategy | 4786 | pending | — | — | — |
+
+### `massageMarkdown(input)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns updated pr body | 4813 | pending | — | — | — |
+| returns not-updated pr body for GHE | 4819 | pending | — | — | — |
+
+### `mergePr(prNo) - autodetection`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should try squash first | 4846 | pending | — | — | — |
+| should try merge after squash | 4865 | pending | — | — | — |
+| should try rebase after merge | 4886 | pending | — | — | — |
+| should give up | 4911 | pending | — | — | — |
+
+### `getVulnerabilityAlerts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| avoids fetching if repo has vulnerability alerts disabled | 4940 | pending | — | — | — |
+| returns empty if error | 4950 | pending | — | — | — |
+| returns array if found | 4963 | pending | — | — | — |
+| returns empty if disabled | 5013 | pending | — | — | — |
+| handles network error | 5027 | pending | — | — | — |
+| calls logger.debug with only items that include securityVulnerability | 5041 | pending | — | — | — |
+| returns normalized names for PIP ecosystem | 5097 | pending | — | — | — |
+| handles pagination correctly | 5133 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null | 5232 | pending | — | — | — |
+| returns file content | 5243 | pending | — | — | — |
+| returns file content in json5 format | 5255 | pending | — | — | — |
+| returns file content from given repo | 5272 | pending | — | — | — |
+| returns file content from branch or tag | 5284 | pending | — | — | — |
+| throws on malformed JSON | 5296 | pending | — | — | — |
+| throws on errors | 5306 | pending | — | — | — |
+
+### `pushFiles`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if pre-commit phase has failed | 5332 | pending | — | — | — |
+| returns null on REST error | 5352 | pending | — | — | — |
+| commits and returns SHA string | 5367 | pending | — | — | — |
+| performs rebase | 5396 | pending | — | — | — |
+| continues if rebase fails due to 422 | 5425 | pending | — | — | — |
+| aborts if rebase fails due to non-422 | 5456 | pending | — | — | — |
+| aborts if commit SHA doesn't exist | 5485 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/github/issue.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/issue.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `GithubIssueCache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty cache | 16 | pending | — | — | — |
+| stores issues to the cache | 20 | pending | — | — | — |
+| returns issues from the cache in the correct order | 64 | pending | — | — | — |
+| updates particular issue in the cache | 120 | pending | — | — | — |
+| removes particular issue from the cache | 162 | pending | — | — | — |
+| reconciles cache | 188 | pending | — | — | — |
+| resets cache during failed reconciliation | 246 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/github/massage-markdown-links.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/massage-markdown-links.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| performs multiple replacements | 4 | pending | — | — | — |
+| Unchanged: $input | 18 | pending | — | — | — |
+| $input -> $output | 60 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/github/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/schema.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be parse directory response | 5 | pending | — | — | — |
+| should parse response for single file | 87 | pending | — | — | — |
+| should skip vulnerability alerts with unsupported ecosystems | 111 | pending | — | — | — |
+| should log vulnerability alerts with parse errors | 152 | pending | — | — | — |
+| should filter vulnerability alerts with missing security_vulnerability | 181 | pending | — | — | — |
+| should parse severity and cvss_severities fields | 206 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/github/scm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/scm.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| platformCommit = disabled => delegate to git | 26 | pending | — | — | — |
+| platformCommit = enabled => delegate to github | 39 | pending | — | — | — |
+| platformCommit = auto => delegate to git | 52 | pending | — | — | — |
+| platformCommit = auto and is a github app => delegate to github | 65 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitlab/code-owners.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitlab/code-owners.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `CodeOwnersParser`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should extract an owner rule from a line | 5 | pending | — | — | — |
+| should extract an owner rule from a line with no usernames | 20 | pending | — | — | — |
+| should extract an owner rule from a line after a section header | 33 | pending | — | — | — |
+| should extract an owner rule from a line after a section header with no usernames | 47 | pending | — | — | — |
+| should extract an owner rule from a line after a section header with spaces | 61 | pending | — | — | — |
+| should extract an owner rule from a line after a section header with spaces and no usernames | 75 | pending | — | — | — |
+| should extract an owner rule from a line after a section header with spaces and multiple usernames | 89 | pending | — | — | — |
+| should extract an owner rule from a line after an optional section header with spaces | 103 | pending | — | — | — |
+| should extract an owner rule from a line after a section header with approval count and spaces | 117 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitlab/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitlab/index.spec.ts
+**Total tests:** 162 | **Ported:** 0 | **Actionable:** 162 | **Status:** pending
+
+### `initPlatform()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw if no token | 78 | pending | — | — | — |
+| should throw if auth fails | 82 | pending | — | — | — |
+| should default to gitlab.com | 92 | pending | — | — | — |
+| should accept custom endpoint | 108 | pending | — | — | — |
+| should reuse existing gitAuthor | 129 | pending | — | — | — |
+
+### `getRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw an error if it receives an error | 144 | pending | — | — | — |
+| should return an array of repos | 154 | pending | — | — | — |
+| should return an array of repos including mirrors | 176 | pending | — | — | — |
+| should encode the requested topics into the URL | 198 | pending | — | — | — |
+| should query the groups endpoint for each namespace | 216 | pending | — | — | — |
+| should consider topics when querying the groups endpoint | 242 | pending | — | — | — |
+| should include order and sort query parameters | 263 | pending | — | — | — |
+
+### `initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should escape all forward slashes in project names | 308 | pending | — | — | — |
+| should throw an error if receiving an error | 324 | pending | — | — | — |
+| should throw an error if repository is archived | 336 | pending | — | — | — |
+| should throw an error if repository is a mirror | 348 | pending | — | — | — |
+| should not throw an error if repository is a mirror when includeMirrors option is set | 360 | pending | — | — | — |
+| should throw an error if repository access is disabled | 380 | pending | — | — | — |
+| should throw an error if MRs are disabled | 392 | pending | — | — | — |
+| should throw an error if repository has empty_repo property | 404 | pending | — | — | — |
+| should throw an error if repository is empty | 416 | pending | — | — | — |
+| should fall back if http_url_to_repo is empty | 428 | pending | — | — | — |
+| should use ssh_url_to_repo if gitUrl is set to ssh | 447 | pending | — | — | — |
+| should throw if ssh_url_to_repo is not present but gitUrl is set to ssh | 464 | pending | — | — | — |
+| should fall back respecting when GITLAB_IGNORE_REPO_URL is set | 480 | pending | — | — | — |
+
+### `getBranchForceRebase`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false for merge_method=merge | 513 | pending | — | — | — |
+| should return true for merge_method=ff | 527 | pending | — | — | — |
+| should return false when merge trains are enabled | 541 | pending | — | — | — |
+
+### `getBranchPr(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null if no PR exists | 558 | pending | — | — | — |
+| should return the PR object | 570 | pending | — | — | — |
+| should strip draft prefix from title | 609 | pending | — | — | — |
+| should strip deprecated draft prefix from title | 648 | pending | — | — | — |
+
+### `getBranchStatus(branchName, ignoreTests)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns pending if no results | 689 | pending | — | — | — |
+| returns success if no results with merged results pipeline success | 704 | pending | — | — | — |
+| returns success if all are success | 751 | pending | — | — | — |
+| returns pending if all are internal success | 769 | pending | — | — | — |
+| returns pending if merge request with no pipelines | 787 | pending | — | — | — |
+| returns pending if all are internal success with no merged results pipeline | 830 | pending | — | — | — |
+| returns success if all are internal success with merged results pipeline success | 880 | pending | — | — | — |
+| returns success if optional jobs fail | 930 | pending | — | — | — |
+| returns success if all are optional | 948 | pending | — | — | — |
+| returns success if job is skipped | 963 | pending | — | — | — |
+| returns yellow if there are no jobs expect skipped | 978 | pending | — | — | — |
+| returns failure if any mandatory jobs fails and one job is skipped | 993 | pending | — | — | — |
+| returns failure if any mandatory jobs fails | 1008 | pending | — | — | — |
+| maps custom statuses to yellow | 1027 | pending | — | — | — |
+| throws repository-changed | 1042 | pending | — | — | — |
+
+### `getBranchStatusCheck`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no results | 1053 | pending | — | — | — |
+| returns null if no matching results | 1067 | pending | — | — | — |
+| returns status if name found | 1081 | pending | — | — | — |
+| returns yellow if unknown status found | 1099 | pending | — | — | — |
+
+### `setBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should log message that branch commit SHA not found | 1121 | pending | — | — | — |
+| should log message that failed to retrieve commit pipeline | 1136 | pending | — | — | — |
+| /api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e | 1168 | pending | — | — | — |
+| skips setting branch status %s when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is set and no pipeline is found | 1196 | pending | — | — | — |
+| does not skip setting branch status when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is not true | 1224 | pending | — | — | — |
+| sets branch status when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is true and pipeline is found | 1257 | pending | — | — | — |
+| waits for 1000ms by default | 1293 | pending | — | — | — |
+| set branch status with pipeline_id | 1322 | pending | — | — | — |
+| waits for RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY ms when set | 1357 | pending | — | — | — |
+| do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS attemps when set | 1402 | pending | — | — | — |
+
+### `findIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no issue | 1437 | pending | — | — | — |
+| finds issue | 1457 | pending | — | — | — |
+
+### `ensureIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates issue | 1481 | pending | — | — | — |
+| sets issue labels | 1506 | pending | — | — | — |
+| updates issue | 1523 | pending | — | — | — |
+| updates issue with labels | 1550 | pending | — | — | — |
+| skips update if unchanged | 1578 | pending | — | — | — |
+| creates confidential issue | 1603 | pending | — | — | — |
+| updates confidential issue | 1629 | pending | — | — | — |
+
+### `ensureIssueClosing()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| closes issue | 1660 | pending | — | — | — |
+
+### `addAssignees(issueNo, assignees)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should add the given assignee to the issue | 1683 | pending | — | — | — |
+| should add the given assignees to the issue | 1693 | pending | — | — | — |
+| should swallow error | 1709 | pending | — | — | — |
+| should log message for each assignee that could not be found | 1723 | pending | — | — | — |
+
+### `addReviewers(iid, reviewers) › 13.8.0`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should not be supported in too low version | 1757 | pending | — | — | — |
+
+### `addReviewers(iid, reviewers) › 13.9.0`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should fail to get existing reviewers | 1778 | pending | — | — | — |
+| should not fail if some reviewers are unknown | 1790 | pending | — | — | — |
+| should warn and return early if new reviewers IDs could be fetched | 1812 | pending | — | — | — |
+| should add gitlab group members as reviewers to MR | 1835 | pending | — | — | — |
+| should fail to add reviewers to the MR | 1857 | pending | — | — | — |
+| should add the given reviewers to the MR | 1877 | pending | — | — | — |
+| should only add reviewers if necessary | 1897 | pending | — | — | — |
+
+### `ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add comment if not found | 1918 | pending | — | — | — |
+| add updates comment if necessary | 1934 | pending | — | — | — |
+| skips comment | 1950 | pending | — | — | — |
+| handles comment with no description | 1964 | pending | — | — | — |
+
+### `ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes comment by topic if found | 1980 | pending | — | — | — |
+| deletes comment by content if found | 1996 | pending | — | — | — |
+
+### `findPr(branchName, prTitle, state)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true if no title and all state | 2014 | pending | — | — | — |
+| returns true if not open | 2038 | pending | — | — | — |
+| returns true if open and with title | 2063 | pending | — | — | — |
+| returns true with title | 2089 | pending | — | — | — |
+| returns true with draft prefix title | 2114 | pending | — | — | — |
+| returns true with deprecated draft prefix title | 2139 | pending | — | — | — |
+| finds pr from other authors | 2164 | pending | — | — | — |
+| returns null if no pr found - (includeOtherAuthors) | 2196 | pending | — | — | — |
+
+### `createPr(branchName, title, body)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the PR | 2236 | pending | — | — | — |
+| uses default branch | 2268 | pending | — | — | — |
+| supports draftPR on < 13.2 | 2300 | pending | — | — | — |
+| supports draftPR on >= 13.2 | 2332 | pending | — | — | — |
+| auto-accepts the MR when requested | 2364 | pending | — | — | — |
+| adds the MR to a merge train when merge trains are enabled on the project | 2407 | pending | — | — | — |
+| falls back to /merge endpoint when merge trains enabled but GitLab < 17.11 | 2459 | pending | — | — | — |
+| retries the merge_trains endpoint on transient failure | 2512 | pending | — | — | — |
+| should parse merge_status attribute if detailed_merge_status is not set (on < 15.6) | 2563 | pending | — | — | — |
+| should parse detailed_merge_status attribute on >= 15.6 | 2628 | pending | — | — | — |
+| should retry auto merge creation on 405 method not allowed | 2686 | pending | — | — | — |
+| should not retry if MR is mergeable and pipeline is running | 2764 | pending | — | — | — |
+| raises with squash enabled when repository squash option is default_on | 2808 | pending | — | — | — |
+| raises with squash enabled when repository squash option is always | 2851 | pending | — | — | — |
+| adds approval rule to ignore all approvals | 2894 | pending | — | — | — |
+| adds approval rule to ignore all approvals when platformAutomerge is false | 2948 | pending | — | — | — |
+| will modify a rule of type any_approvers, if such a rule exists | 2996 | pending | — | — | — |
+| will remove rules of type regular, if such rules exist | 3058 | pending | — | — | — |
+| does not try to remove "report_approver" and "code_owner" approval rules | 3131 | pending | — | — | — |
+| does not try to create already existing approval rule | 3214 | pending | — | — | — |
+| silently ignores approval rules adding errors | 3268 | pending | — | — | — |
+| auto-approves when enabled | 3322 | pending | — | — | — |
+| auto-approve with different user | 3359 | pending | — | — | — |
+| should swallow an error on auto-approve | 3398 | pending | — | — | — |
+
+### `getPr(prNo)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the PR | 3433 | pending | — | — | — |
+| removes draft prefix from returned title | 3457 | pending | — | — | — |
+| removes deprecated draft prefix from returned title | 3481 | pending | — | — | — |
+| returns the mergeable PR | 3505 | pending | — | — | — |
+| returns the PR with nonexisting branch | 3530 | pending | — | — | — |
+| returns the PR with reviewers | 3558 | pending | — | — | — |
+
+### `updatePr(prNo, title, body)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates the PR | 3601 | pending | — | — | — |
+| retains draft status when draft uses current prefix | 3634 | pending | — | — | — |
+| retains draft status when draft uses deprecated prefix | 3667 | pending | — | — | — |
+| updates target branch of the PR | 3700 | pending | — | — | — |
+| auto-approves when enabled | 3739 | pending | — | — | — |
+| closes the PR | 3782 | pending | — | — | — |
+| adds and removes labels | 3821 | pending | — | — | — |
+
+### `reattemptPlatformAutomerge(number, platformPrOptions)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should set automatic merge | 3871 | pending | — | — | — |
+| should skip retries when merge_when_pipeline_succeeds is already enabled | 3894 | pending | — | — | — |
+
+### `mergePr(pr)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| merges the PR | 3916 | pending | — | — | — |
+
+### `massageMarkdown(input)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| strips invalid unicode null characters | 3941 | pending | — | — | — |
+| replaces PR with MR including pluralization | 3949 | pending | — | — | — |
+| replaces PR reference with MR reference | 3957 | pending | — | — | — |
+| replaces PR relative link with MR reference | 3963 | pending | — | — | — |
+| replaces issues relative link with issue reference | 3971 | pending | — | — | — |
+| avoids false positives when replacing PR with MR | 3979 | pending | — | — | — |
+| returns updated pr body | 3984 | pending | — | — | — |
+| truncates description if too low API version | 3993 | pending | — | — | — |
+| truncates description for API version gt 13.4 | 4003 | pending | — | — | — |
+
+### `deleteLabel(issueNo, label)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should delete the label | 4015 | pending | — | — | — |
+
+### `getJsonFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null | 4040 | pending | — | — | — |
+| returns file content | 4053 | pending | — | — | — |
+| returns file content in json5 format | 4067 | pending | — | — | — |
+| returns file content from given repo | 4086 | pending | — | — | — |
+| returns file content from branch or tag | 4100 | pending | — | — | — |
+| throws on malformed JSON | 4118 | pending | — | — | — |
+| throws on errors | 4130 | pending | — | — | — |
+
+### `filterUnavailableUsers(users)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| filters users that are busy | 4142 | pending | — | — | — |
+| keeps users with missing availability | 4160 | pending | — | — | — |
+| keeps users with failing requests | 4169 | pending | — | — | — |
+
+### `expandGroupMembers(reviewersOrAssignees)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| expands group members for groups with members | 4180 | pending | — | — | — |
+| users are not expanded when 404 | 4200 | pending | — | — | — |
+| users are not expanded when non 404 | 4209 | pending | — | — | — |
+| groups with no members expand into empty list | 4225 | pending | — | — | — |
+| includes email in final result | 4236 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/gitlab/pr-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitlab/pr-cache.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches cache initially | 81 | pending | — | — | — |
+| fetches cache with ignorePrAuthor=true | 110 | pending | — | — | — |
+| resets cache for not matching authors | 128 | pending | — | — | — |
+| resets cache for older format with milliseconds | 169 | pending | — | — | — |
+| syncs cache with updated_after parameter | 210 | pending | — | — | — |
+| handles empty response | 251 | pending | — | — | — |
+| returns items in reverse order (most recent first) | 267 | pending | — | — | — |
+| normalizes timestamps by removing milliseconds | 280 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/local/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/local/index.spec.ts
+**Total tests:** 28 | **Ported:** 0 | **Actionable:** 28 | **Status:** pending
+
+### `initPlatform`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns input | 5 | pending | — | — | — |
+| preserves an explicit dryRun=extract override | 16 | pending | — | — | — |
+| falls back to lookup when dryRun=full is requested | 29 | pending | — | — | — |
+
+### `getRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty array | 44 | pending | — | — | — |
+
+### `initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns object | 50 | pending | — | — | — |
+
+### `dummy functions`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| findIssue | 62 | pending | — | — | — |
+| getIssueList | 66 | pending | — | — | — |
+| getRawFile | 70 | pending | — | — | — |
+| getJsonFile | 74 | pending | — | — | — |
+| getPrList | 78 | pending | — | — | — |
+| ensureIssueClosing | 82 | pending | — | — | — |
+| ensureIssue | 86 | pending | — | — | — |
+| massageMarkdown | 90 | pending | — | — | — |
+| maxBodyLength | 94 | pending | — | — | — |
+| updatePr | 98 | pending | — | — | — |
+| mergePr | 102 | pending | — | — | — |
+| addReviewers | 106 | pending | — | — | — |
+| addAssignees | 110 | pending | — | — | — |
+| createPr | 114 | pending | — | — | — |
+| deleteLabel | 118 | pending | — | — | — |
+| setBranchStatus | 122 | pending | — | — | — |
+| getBranchStatus | 126 | pending | — | — | — |
+| getBranchStatusCheck | 130 | pending | — | — | — |
+| ensureCommentRemoval | 134 | pending | — | — | — |
+| ensureComment | 138 | pending | — | — | — |
+| getPr | 142 | pending | — | — | — |
+| findPr | 146 | pending | — | — | — |
+| getBranchPr | 150 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/local/scm.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/local/scm.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `dummy functions`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| behindBaseBranch | 20 | pending | — | — | — |
+| isBranchModified | 24 | pending | — | — | — |
+| isBranchConflicted | 28 | pending | — | — | — |
+| branchExists | 32 | pending | — | — | — |
+| getBranchCommit | 36 | pending | — | — | — |
+| getBranchUpdateDate | 40 | pending | — | — | — |
+| deleteBranch | 44 | pending | — | — | — |
+| commitAndPush | 48 | pending | — | — | — |
+| checkoutBranch | 52 | pending | — | — | — |
+
+### `getFileList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return file list using git | 58 | pending | — | — | — |
+| should return file list using glob | 73 | pending | — | — | — |
+| mergeAndPush | 82 | pending | — | — | — |
+| mergeBranch | 86 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/scm-manager/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm-manager/index.spec.ts
+**Total tests:** 35 | **Ported:** 0 | **Actionable:** 35 | **Status:** pending
+
+### `initPlatform`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw error, when endpoint is not configured | 77 | pending | — | — | — |
+| should throw error, when token is not configured | 83 | pending | — | — | — |
+| should throw error, when token is invalid | 89 | pending | — | — | — |
+| should init platform | 97 | pending | — | — | — |
+
+### `initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should init repo | 107 | pending | — | — | — |
+
+### `getRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return all available repos | 144 | pending | — | — | — |
+
+### `getPrList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty array, because no PR could be found | 169 | pending | — | — | — |
+| should return empty array, because API request failed | 186 | pending | — | — | — |
+| should return all PRs of a repo | 197 | pending | — | — | — |
+
+### `findPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| search in Pull Request without explicitly setting the state as argument | 234 | pending | — | — | — |
+| search within available pull requests for branch name "$branchName", pr title "$prTitle" and state "$state" with result $result | 256 | pending | — | — | — |
+
+### `getBranchPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| search within available pull requests for branch name "$branchName" with result $result | 307 | pending | — | — | — |
+
+### `getPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null, because PR was not found | 342 | pending | — | — | — |
+| should return PR from cache | 364 | pending | — | — | — |
+| should return fetched pr | 383 | pending | — | — | — |
+
+### `createPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create PR with $draftPR and state $expectedState | 409 | pending | — | — | — |
+
+### `updatePr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update PR with state $state and bdoy $body | 478 | pending | — | — | — |
+
+### `mergePr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return false | 519 | pending | — | — | — |
+
+### `getBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return red | 526 | pending | — | — | — |
+
+### `setBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented | 533 | pending | — | — | — |
+
+### `getBranchStatusCheck`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return null | 546 | pending | — | — | — |
+
+### `addReviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented | 556 | pending | — | — | — |
+
+### `addAssignees`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented | 564 | pending | — | — | — |
+
+### `deleteLabel`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented | 572 | pending | — | — | — |
+
+### `getIssueList`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return empty list | 578 | pending | — | — | — |
+
+### `findIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return null | 585 | pending | — | — | — |
+
+### `ensureIssue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return null | 592 | pending | — | — | — |
+
+### `ensureIssueClosing`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented | 602 | pending | — | — | — |
+
+### `ensureCommentRemoval`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented | 610 | pending | — | — | — |
+
+### `ensureComment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented | 622 | pending | — | — | — |
+
+### `massageMarkdown`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should adjust smart link for Pull Requests | 634 | pending | — | — | — |
+
+### `getRepoForceRebase`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return false | 641 | pending | — | — | — |
+
+### `getRawFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return null | 648 | pending | — | — | — |
+
+### `getJsonFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should Not implemented and return undefined | 655 | pending | — | — | — |
+
+### `maxBodyLength`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the max body length allowed for an SCM-Manager request body | 662 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/scm-manager/mapper.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm-manager/mapper.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `tests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should correctly map the scm-manager type of a PR with the $scmPrState to the Renovate PR type | 5 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/scm-manager/scm-manager-helper.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm-manager/scm-manager-helper.spec.ts
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
+
+### `getCurrentUser`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the current user | 66 | pending | — | — | — |
+| should throw expected response $expectedResponse | 78 | pending | — | — | — |
+
+### `getRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the repo | 92 | pending | — | — | — |
+| should throw expected response $expectedResponse | 101 | pending | — | — | — |
+
+### `getAllRepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return all repos | 123 | pending | — | — | — |
+| should throw expected response $expectedResponse | 136 | pending | — | — | — |
+
+### `getDefaultBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the default branch | 155 | pending | — | — | — |
+| should throw expected response $expectedResponse | 166 | pending | — | — | — |
+
+### `getAllRepoPrs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return all repo PRs | 186 | pending | — | — | — |
+| should return all of my PRs | 205 | pending | — | — | — |
+| should throw expected response $expectedResponse | 224 | pending | — | — | — |
+
+### `getRepoPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the repo PR | 248 | pending | — | — | — |
+| should throw expected response $expectedResponse | 259 | pending | — | — | — |
+
+### `createScmPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should create PR for a repo | 283 | pending | — | — | — |
+| should throw expected response $expectedResponse | 314 | pending | — | — | — |
+
+### `updateScmPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should update PR for a repo | 342 | pending | — | — | — |
+| should throw expected response $expectedResponse | 371 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/scm-manager/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm-manager/utils.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `getMergeMethod`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| map merge strategy $strategy on PR merge method $method | 16 | pending | — | — | — |
+
+### `smartLinks`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adjust $body to smart link $result | 39 | pending | — | — | — |
+
+### `matchPrState`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| match scm pr state $pr.state to renovate pr state $state | 61 | pending | — | — | — |
+
+### `getRepoUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw error for option $gitUrl, because protocol links are missing | 117 | pending | — | — | — |
+| should throw error because of missing SSH link | 132 | pending | — | — | — |
+| should throw error because protocol links are not an array | 145 | pending | — | — | — |
+| should use the provided ssh link | 158 | pending | — | — | — |
+| should throw error because of missing HTTP link for option $gitUrl | 171 | pending | — | — | — |
+| should throw error because of malformed HTTP link with option $gitUrl | 192 | pending | — | — | — |
+| should use empty string, because username was not provided with option $gitUrl | 213 | pending | — | — | — |
+| should use empty string, because token was not provided. With option $gitUrl | 235 | pending | — | — | — |
+| should provide the HTTP link with username, for option $gitUrl | 258 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/utils/pr-body.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/utils/pr-body.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `.smartTruncate`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| truncates to 1000 | 9 | pending | — | — | — |
+| truncates to 300 not smart | 18 | pending | — | — | — |
+| includes truncation notice at end of truncated content (when "not smart") | 27 | pending | — | — | — |
+| includes truncation notice before Configuration section (when "smart") | 33 | pending | — | — | — |
+| truncates content without release notes structure when notice fits | 43 | pending | — | — | — |
+| truncates to below notice length with release notes structure | 49 | pending | — | — | — |
+| truncates to 10 | 55 | pending | — | — | — |
+| does not truncate | 63 | pending | — | — | — |
+
+---
+
+## `lib/modules/platform/utils/read-only-issue-body.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/utils/read-only-issue-body.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `.readOnlyIssueBody`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| removes all checkbox formatting | 8 | pending | — | — | — |
+| removes all checkbox-related instructions | 14 | pending | — | — | — |
+| removes all approval-all-pending-prs | 20 | pending | — | — | — |
+| removes the create-all-rate-limited-prs | 26 | pending | — | — | — |
+| removes create-config-migration-pr | 33 | pending | — | — | — |
+| removes the create-all-awaiting-schedule-prs | 40 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/memory/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/memory/index.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `util/cache/memory/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined if not init | 4 | pending | — | — | — |
+| sets and gets repo cache | 8 | pending | — | — | — |
+| resets | 14 | pending | — | — | — |
+
+### `util/cache/memory/index › cleanDatasourceKeys`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing if no matching keys exist | 26 | pending | — | — | — |
+| removes keys that start with datasource-mem:pkg-fetch: | 34 | pending | — | — | — |
+| removes keys that start with datasource-releases | 42 | pending | — | — | — |
+| removes all matching keys while keeping others | 50 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/backend.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/backend.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `util/cache/package/backend`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined when not initialized | 47 | pending | — | — | — |
+| silently ignores set when not initialized | 52 | pending | — | — | — |
+| silently ignores destroy when not initialized | 58 | pending | — | — | — |
+| initializes file backend | 62 | pending | — | — | — |
+| initializes redis backend | 69 | pending | — | — | — |
+| initializes sqlite backend | 79 | pending | — | — | — |
+| delegates get and set to backend instance | 88 | pending | — | — | — |
+| re-init destroys previous backend | 105 | pending | — | — | — |
+| clears backend when re-init has no config | 121 | pending | — | — | — |
+| destroys backend and clears state | 132 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/impl/file.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/impl/file.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `util/cache/package/impl/file › basic operations`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sets and gets | 26 | pending | — | — | — |
+| stores payload with value and expiry | 34 | pending | — | — | — |
+
+### `util/cache/package/impl/file › get`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined on cache miss | 47 | pending | — | — | — |
+| expires cached entries | 53 | pending | — | — | — |
+| returns undefined for null cached value | 65 | pending | — | — | — |
+| returns undefined for invalid JSON | 73 | pending | — | — | — |
+| returns undefined for corrupted cache payload | 81 | pending | — | — | — |
+| returns undefined for missing expiry | 93 | pending | — | — | — |
+| returns undefined for invalid expiry | 102 | pending | — | — | — |
+| retrieves value from cache payload | 114 | pending | — | — | — |
+
+### `util/cache/package/impl/file › destroy`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| removes expired and invalid entries | 127 | pending | — | — | — |
+| keeps entries without expiry field | 148 | pending | — | — | — |
+| removes entries with invalid expiry | 158 | pending | — | — | — |
+| continues on cleanup errors | 171 | pending | — | — | — |
+| skips disk read for entry written this run | 183 | pending | — | — | — |
+| skips disk read for expired entry written this run | 197 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/impl/redis.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/impl/redis.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `util/cache/package/impl/redis › normalizeRedisUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| rewrites $url to $expected | 10 | pending | — | — | — |
+
+### `util/cache/package/impl/redis › PackageCacheRedis › create`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| initializes single-node client and connects | 40 | pending | — | — | — |
+| initializes single-node client with secure url | 56 | pending | — | — | — |
+| initializes cluster client | 64 | pending | — | — | — |
+| initializes cluster client with username and password | 78 | pending | — | — | — |
+| initializes cluster client with username only | 91 | pending | — | — | — |
+| initializes cluster client with password only | 104 | pending | — | — | — |
+
+### `util/cache/package/impl/redis › PackageCacheRedis › get`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns value from cache payload | 119 | pending | — | — | — |
+| removes expired cached entry | 133 | pending | — | — | — |
+| returns undefined for missing expiry | 145 | pending | — | — | — |
+| returns undefined for invalid expiry | 155 | pending | — | — | — |
+| returns undefined on cache miss | 168 | pending | — | — | — |
+| returns undefined on error | 176 | pending | — | — | — |
+
+### `util/cache/package/impl/redis › PackageCacheRedis › set`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| stores payload with value and expiry | 186 | pending | — | — | — |
+| deletes entry with negative TTL | 204 | pending | — | — | — |
+| handles set error gracefully | 213 | pending | — | — | — |
+
+### `util/cache/package/impl/redis › PackageCacheRedis › destroy`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| destroys the client | 225 | pending | — | — | — |
+| handles destroy error gracefully | 233 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/impl/sqlite.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/impl/sqlite.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `util/cache/package/impl/sqlite › get`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined on cache miss | 53 | pending | — | — | — |
+| returns undefined for invalid compressed payload | 62 | pending | — | — | — |
+| returns undefined for invalid JSON payload | 77 | pending | — | — | — |
+| returns undefined when the read fails | 93 | pending | — | — | — |
+
+### `util/cache/package/impl/sqlite › set`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| logs a warning and continues when serialization fails | 120 | pending | — | — | — |
+| logs a warning and continues when the write fails | 137 | pending | — | — | — |
+
+### `util/cache/package/impl/sqlite › set and get`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| overwrites and returns latest value | 161 | pending | — | — | — |
+
+### `util/cache/package/impl/sqlite › expiry`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined for immediately expired entry | 174 | pending | — | — | — |
+
+### `util/cache/package/impl/sqlite › destroy`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes expired entries and closes database | 185 | pending | — | — | — |
+| resolves and still closes when cleanup throws | 204 | pending | — | — | — |
+| resolves when close throws | 219 | pending | — | — | — |
+
+### `util/cache/package/impl/sqlite › persistence`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| retrieves value from persistent storage after reopening | 245 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/index.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `util/cache/package/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined if not initialized | 23 | pending | — | — | — |
+| delegates init to backend | 33 | pending | — | — | — |
+| delegates get to backend | 41 | pending | — | — | — |
+| delegates set to backend | 51 | pending | — | — | — |
+| delegates setWithRawTtl to backend | 64 | pending | — | — | — |
+| deduplicates get via memCache | 77 | pending | — | — | — |
+| setWithRawTtl updates memCache | 89 | pending | — | — | — |
+| delegates cleanup to backend.destroy | 99 | pending | — | — | — |
+| delegates getCacheType to backend | 105 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/key.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/key.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `util/cache/package/key › getCombinedKey`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 5 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/ttl.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/ttl.spec.ts
+**Total tests:** 31 | **Ported:** 0 | **Actionable:** 31 | **Status:** pending
+
+### `util/cache/package/ttl › getTtlOverride › No configuration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns undefined when no cacheTtlOverride config exists | 12 | pending | — | — | — |
+| returns undefined when cacheTtlOverride is empty | 20 | pending | — | — | — |
+
+### `util/cache/package/ttl › getTtlOverride › Exact match`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns exact match when namespace exists in config | 30 | pending | — | — | — |
+| returns undefined when exact match is not a number | 45 | pending | — | — | — |
+| returns undefined when no matching namespace found | 58 | pending | — | — | — |
+
+### `util/cache/package/ttl › getTtlOverride › Glob patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches simple glob patterns | 72 | pending | — | — | — |
+| matches wildcard pattern for all namespaces | 88 | pending | — | — | — |
+| matches complex glob patterns with braces | 108 | pending | — | — | — |
+| handles special characters in namespace patterns | 124 | pending | — | — | — |
+
+### `util/cache/package/ttl › getTtlOverride › Regex patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches regex patterns | 143 | pending | — | — | — |
+| matches patterns with regex escape sequences | 161 | pending | — | — | — |
+
+### `util/cache/package/ttl › getTtlOverride › Priority and multiple patterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| prioritizes exact match over glob patterns | 179 | pending | — | — | — |
+| returns longest matching pattern when multiple patterns apply | 195 | pending | — | — | — |
+| selects longest matching pattern across all configs | 209 | pending | — | — | — |
+| skips non-numeric values and selects next longest matching pattern | 228 | pending | — | — | — |
+| returns undefined when no patterns match | 243 | pending | — | — | — |
+| applies patterns consistently regardless of case in config order | 256 | pending | — | — | — |
+
+### `util/cache/package/ttl › getTtlOverride › Edge cases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty string pattern | 271 | pending | — | — | — |
+| treats null and undefined values as invalid | 286 | pending | — | — | — |
+| handles very large numbers | 306 | pending | — | — | — |
+| handles negative numbers | 318 | pending | — | — | — |
+| treats string numbers as invalid, only accepts number types | 330 | pending | — | — | — |
+
+### `util/cache/package/ttl › resolveTtlValues › Default values`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns default values when no overrides set | 350 | pending | — | — | — |
+
+### `util/cache/package/ttl › resolveTtlValues › Override application`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses override for softTtlMinutes when available | 363 | pending | — | — | — |
+| applies custom cacheHardTtlMinutes from config | 378 | pending | — | — | — |
+| resolves TTL with glob pattern overrides | 391 | pending | — | — | — |
+| resolves TTL correctly with multiple overlapping overrides | 407 | pending | — | — | — |
+
+### `util/cache/package/ttl › resolveTtlValues › Hard TTL calculation`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses maximum of softTtlMinutes and cacheHardTtlMinutes for hardTtlMinutes | 427 | pending | — | — | — |
+| handles negative cacheHardTtlMinutes config | 443 | pending | — | — | — |
+
+### `util/cache/package/ttl › resolveTtlValues › Edge cases and special scenarios`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles zero as valid override value | 461 | pending | — | — | — |
+| uses fallback when override is not a number | 477 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/package/with-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/with-cache.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `util/cache/package/with-cache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| caches string result | 35 | pending | — | — | — |
+| disables cache if cacheable is false | 57 | pending | — | — | — |
+| forces cache if cachePrivatePackages=true | 83 | pending | — | — | — |
+| caches null values | 115 | pending | — | — | — |
+| does not cache undefined | 140 | pending | — | — | — |
+| uses custom ttlMinutes | 160 | pending | — | — | — |
+
+### `util/cache/package/with-cache › fallback with hard TTL`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates cached result after soft TTL expires | 184 | pending | — | — | — |
+| overrides soft ttl and updates result | 241 | pending | — | — | — |
+| returns stale result on error | 303 | pending | — | — | — |
+| drops stale value after hard TTL expires | 342 | pending | — | — | — |
+| does not use fallback when fallback=false | 393 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/repository/http-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/repository/http-cache.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `util/cache/repository/http-cache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should not throw if cache is not a valid HttpCache | 12 | pending | — | — | — |
+| should remove expired items from the cache | 16 | pending | — | — | — |
+| should remove all items if ttlDays is not configured | 50 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/repository/impl/local.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/repository/impl/local.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `util/cache/repository/impl/local`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty object before any data load | 41 | pending | — | — | — |
+| skip when receives non-string data | 51 | pending | — | — | — |
+| should not load empty repository cache files | 65 | pending | — | — | — |
+| skip when not found | 80 | pending | — | — | — |
+| loads previously stored cache from disk | 91 | pending | — | — | — |
+| resets if fingerprint does not match | 107 | pending | — | — | — |
+| handles invalid data | 124 | pending | — | — | — |
+| handles file read error | 137 | pending | — | — | — |
+| handles invalid json | 152 | pending | — | — | — |
+| resets if repository does not match | 166 | pending | — | — | — |
+| saves modified cache data to file | 181 | pending | — | — | — |
+| does not write cache that is not changed | 213 | pending | — | — | — |
+| does not write cache when only key order has changed | 234 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/repository/impl/s3.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/repository/impl/s3.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `util/cache/repository/impl/s3`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| successfully reads from s3 | 75 | pending | — | — | — |
+| successfully reads from s3://bucket/dir1/.../dirN/ | 86 | pending | — | — | — |
+| appends a missing traling slash to pathname when instantiating RepoCacheS3 | 107 | pending | — | — | — |
+| gets an unexpected response from s3 | 132 | pending | — | — | — |
+| doesnt warn when no cache is found | 142 | pending | — | — | — |
+| fails to read from s3 | 156 | pending | — | — | — |
+| successfully writes to s3 | 166 | pending | — | — | — |
+| successfully writes to s3://bucket/dir1/.../dirN/ | 177 | pending | — | — | — |
+| fails to write to s3 | 198 | pending | — | — | — |
+| creates an S3 client using the cache factory | 208 | pending | — | — | — |
+| should persists data locally after uploading to s3 | 213 | pending | — | — | — |
+
+---
+
+## `lib/util/cache/repository/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/repository/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `util/cache/repository/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if cache not enabled | 22 | pending | — | — | — |
+| saves cache | 29 | pending | — | — | — |
+| skips saves cache on dry run | 36 | pending | — | — | — |
+| resets cache | 48 | pending | — | — | — |
+| prints repository problems | 56 | pending | — | — | — |
+
+---
+
+## `lib/util/exec/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/common.spec.ts
+**Total tests:** 30 | **Ported:** 0 | **Actionable:** 30 | **Status:** pending
+
+### `util/exec/common › exec`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| command exits with code 0 | 175 | pending | — | — | — |
+| never extends the process environment | 194 | pending | — | — | — |
+| throws if an error occurs, when using CommandWithOptions | 214 | pending | — | — | — |
+| throws if an error occurs | 241 | pending | — | — | — |
+| throws if an error occurs, and we specify ignoreFailure=false | 265 | pending | — | — | — |
+| does not throw if an error occurs, but we specify ignoreFailure=true | 292 | pending | — | — | — |
+| can specify a shell | 320 | pending | — | — | — |
+| can specify a specific shell with CommandWithOptions | 343 | pending | — | — | — |
+| can specify shell=true with CommandWithOptions | 366 | pending | — | — | — |
+| can specify a command with spaces, with a shell | 389 | pending | — | — | — |
+| can specify a command with spaces, with no shell | 412 | pending | — | — | — |
+| defaults to shell=false | 435 | pending | — | — | — |
+| the command is provided as a string with no arguments when shell is a string | 455 | pending | — | — | — |
+| the command is provided as a string with no arguments when shell=true | 475 | pending | — | — | — |
+| the command is split into the command and arguments when shell=false | 495 | pending | — | — | — |
+| can specify shell=true | 515 | pending | — | — | — |
+| can specify shell=false | 538 | pending | — | — | — |
+| should invoke the output listeners | 561 | pending | — | — | — |
+| command exits with code 1 | 602 | pending | — | — | — |
+| process terminated with SIGTERM | 618 | pending | — | — | — |
+| process does nothing when signaled with SIGSTOP and eventually times out | 632 | pending | — | — | — |
+| process exits due to error | 644 | pending | — | — | — |
+| process exits with error due to exceeded stdout maxBuffer | 659 | pending | — | — | — |
+| process exits with error due to exceeded stderr maxBuffer | 683 | pending | — | — | — |
+
+### `util/exec/common › rawExec`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| command exits with code 0 | 708 | pending | — | — | — |
+| never extends the process environment | 727 | pending | — | — | — |
+
+### `util/exec/common › rawExec › is instrumented`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calls instrument function | 753 | pending | — | — | — |
+| command name and arguments are sanitized | 773 | pending | — | — | — |
+
+### `util/exec/common › handle gpid`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calls process.kill on the gpid | 806 | pending | — | — | — |
+| handles process.kill call on non existent gpid | 826 | pending | — | — | — |
+
+---
+
+## `lib/util/exec/containerbase.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/containerbase.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `util/exec/containerbase › isDynamicInstall()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if binarySource is not install | 22 | pending | — | — | — |
+| returns false if not containerbase | 26 | pending | — | — | — |
+| returns false if any unsupported tools | 31 | pending | — | — | — |
+| returns true if supported tools | 42 | pending | — | — | — |
+
+### `util/exec/containerbase › getToolConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns config for a known tool | 51 | pending | — | — | — |
+| returns undefined for an unknown tool | 60 | pending | — | — | — |
+
+### `util/exec/containerbase › resolveConstraint()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns from config | 67 | pending | — | — | — |
+| returns highest stable | 73 | pending | — | — | — |
+| returns highest unstable | 87 | pending | — | — | — |
+| respects latest | 96 | pending | — | — | — |
+| supports rust docker tags | 113 | pending | — | — | — |
+| throws for unknown tools | 127 | pending | — | — | — |
+| throws no releases | 133 | pending | — | — | — |
+| falls back to latest version if no compatible release | 142 | pending | — | — | — |
+| falls back to latest version if invalid constraint | 151 | pending | — | — | — |
+| supports python ranges "$version" => "$expected" | 160 | pending | — | — | — |
+| removes pep440 == | 184 | pending | — | — | — |
+| supports flutter ranges "$version" => "$expected" | 193 | pending | — | — | — |
+| supports dart ranges "$version" => "$expected" | 223 | pending | — | — | — |
+
+### `util/exec/containerbase › generateInstallCommands()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns install commands | 269 | pending | — | — | — |
+
+---
+
+## `lib/util/exec/docker/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/docker/index.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `util/exec/docker/index › prefetchDockerImage`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs prefetch command | 25 | pending | — | — | — |
+| performs prefetch once for each image | 31 | pending | — | — | — |
+
+### `util/exec/docker/index › removeDockerContainer`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gracefully handles container list error | 47 | pending | — | — | — |
+| gracefully handles container removal error | 52 | pending | — | — | — |
+| gracefully handles empty container list | 57 | pending | — | — | — |
+| runs Docker commands for container removal | 62 | pending | — | — | — |
+
+### `util/exec/docker/index › removeDanglingContainers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| short-circuits in non-Docker environment | 80 | pending | — | — | — |
+| handles insufficient memory error | 87 | pending | — | — | — |
+| handles missing Docker daemon | 96 | pending | — | — | — |
+| handles unknown error | 108 | pending | — | — | — |
+| handles empty container list | 118 | pending | — | — | — |
+| removes containers | 129 | pending | — | — | — |
+
+### `util/exec/docker/index › generateDockerCommand`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns executable command | 169 | pending | — | — | — |
+| adds `\|\| true` if ignoreFailure is set on a pre-command | 180 | pending | — | — | — |
+| adds `\|\| true` if ignoreFailure is set on a command | 210 | pending | — | — | — |
+| handles volumes | 240 | pending | — | — | — |
+| adds custom containerbaseDir to volumes | 264 | pending | — | — | — |
+| adds dedupes default containerbaseDir in volumes | 290 | pending | — | — | — |
+| add multiple docker cli option | 316 | pending | — | — | — |
+| handles tag constraint | 336 | pending | — | — | — |
+
+---
+
+## `lib/util/exec/env.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/env.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/exec/env`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns default environment variables | 35 | pending | — | — | — |
+| returns environment variable only if defined | 57 | pending | — | — | — |
+| returns custom environment variables if passed and defined | 62 | pending | — | — | — |
+
+### `util/exec/env › getChildProcessEnv when trustlevel set to high`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns process.env if trustlevel set to high | 79 | pending | — | — | — |
+
+---
+
+## `lib/util/exec/hermit.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/hermit.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/exec/hermit › isHermit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true when binarySource is hermit | 16 | pending | — | — | — |
+
+### `util/exec/hermit › findHermitCwd`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ("$dir") === $expected (hermit: $hermitLocation) | 30 | pending | — | — | — |
+| should throw error when hermit cwd is not found | 49 | pending | — | — | — |
+
+### `util/exec/hermit › getHermitEnvs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return hermit environment variables when hermit env returns successfully | 62 | pending | — | — | — |
+
+---
+
+## `lib/util/exec/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/index.spec.ts
+**Total tests:** 39 | **Ported:** 0 | **Actionable:** 39 | **Status:** pending
+
+### `util/exec/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| echo hello | 910 | pending | — | — | — |
+| Supports image prefetch | 943 | pending | — | — | — |
+| throws when an error is thrown | 985 | pending | — | — | — |
+| rejects and throws if an error is thrown, even if we specify ignoreFailure=true | 995 | pending | — | — | — |
+| does not reject and throw if rawExec returns an exit code, and we specify ignoreFailure=true | 1010 | pending | — | — | — |
+| exec takes an array with both `string`s and `CommandWithOptions` as an argument | 1038 | pending | — | — | — |
+| exec takes CommandWithOptions as an argument | 1059 | pending | — | — | — |
+| Supports binarySource=install | 1076 | pending | — | — | — |
+| Supports binarySource=install preCommands | 1087 | pending | — | — | — |
+| only calls removeDockerContainer in catch block is useDocker is set | 1101 | pending | — | — | — |
+| wraps error if removeDockerContainer throws an error | 1116 | pending | — | — | — |
+| converts to TEMPORARY_ERROR | 1150 | pending | — | — | — |
+
+### `util/exec/index › getToolSettingsOptions() › for JVM settings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns default values if no global or repo config | 1183 | pending | — | — | — |
+| returns default values if empty repo config | 1194 | pending | — | — | — |
+| returns default values if empty global config | 1205 | pending | — | — | — |
+
+### `util/exec/index › getToolSettingsOptions() › for JVM settings › does not allow floating point numbers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| in global config | 1219 | pending | — | — | — |
+| in repo config | 1232 | pending | — | — | — |
+
+### `util/exec/index › getToolSettingsOptions() › for JVM settings › when using repo config to override memory limits`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| when below global settings, repo settings are used | 1252 | pending | — | — | — |
+| when repo settings are the same as global settings, they are used | 1266 | pending | — | — | — |
+| when repo jvmMemory setting is higher than global setting, but lower than global jvmMaxMemory, the repo config is used | 1280 | pending | — | — | — |
+| when repo jvmMaxMemory setting is lower than global settings, it is applied | 1292 | pending | — | — | — |
+| when repo jvmMaxMemory setting is lower than global jvmMemory, jvmMemory is set to the same value | 1304 | pending | — | — | — |
+| when repo jvmMaxMemory setting is lower than repo jvmMemory, jvmMemory is set to the same value | 1317 | pending | — | — | — |
+| when repo jvmMaxMemory setting is higher than global settings, they are ignored | 1331 | pending | — | — | — |
+| when repo jvmMaxMemory setting is higher than global settings, a debug log is logged | 1344 | pending | — | — | — |
+
+### `util/exec/index › getToolSettingsOptions() › for JVM settings › a minimum of 512M is enforced`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| when global settings are lower than 512M, they are overridden to 512M | 1364 | pending | — | — | — |
+| when global settings are lower than 512M, a debug log is logged | 1377 | pending | — | — | — |
+| when repo settings are lower than 512M, they are overridden to 512M | 1389 | pending | — | — | — |
+| when repo settings are lower than 512M, a debug log is logged | 1403 | pending | — | — | — |
+
+### `util/exec/index › getToolSettingsOptions() › for Node settings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not return a default value if no global or repo config | 1428 | pending | — | — | — |
+| does not return default values if empty global config | 1438 | pending | — | — | — |
+
+### `util/exec/index › getToolSettingsOptions() › for Node settings › does not allow floating point numbers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| in global config | 1451 | pending | — | — | — |
+| in repo config | 1463 | pending | — | — | — |
+
+### `util/exec/index › getToolSettingsOptions() › for Node settings › when using repo config to override memory limits`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| when below global settings, repo settings are used | 1479 | pending | — | — | — |
+| when repo settings are the same as global settings, they are used | 1491 | pending | — | — | — |
+| when repo nodeMaxMemory setting is lower than global settings, it is applied | 1503 | pending | — | — | — |
+| when repo nodeMaxMemory setting is higher than global settings, they are ignored | 1515 | pending | — | — | — |
+| when repo nodeMaxMemory setting is higher than global settings, a debug log is logged | 1527 | pending | — | — | — |
+
+### `util/exec/index › gradleJvmArg()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| takes the values given to it, and returns the JVM arguments | 1547 | pending | — | — | — |
+
+---
+
+## `lib/util/exec/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/utils.spec.ts
+**Total tests:** 21 | **Ported:** 0 | **Actionable:** 21 | **Status:** pending
+
+### `util/exec/utils › isCommandWithOptions › when command is an array of 1 command`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 7 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is an array of many command`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 17 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is an empty array`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 27 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is a string`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 37 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is a mixed array of strings booleans`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 47 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is an array of booleans`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 57 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and no ignoreFailure is present`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 67 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and ignoreFailure is not a boolean`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 77 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and ignoreFailure=false`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 88 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and ignoreFailure=true`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 99 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and no shell is present`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 110 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and shell is not a string or a boolean`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 120 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and shell is an empty string`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 131 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and shell is a string with only whitespace`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 142 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and shell is a non-empty string`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is not a CommandWithOptions | 153 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and shell=false`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 165 | pending | — | — | — |
+
+### `util/exec/utils › isCommandWithOptions › when command is valid, and shell=true`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is a CommandWithOptions | 176 | pending | — | — | — |
+
+### `util/exec/utils › asRawCommands › with a string`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns array of strings | 189 | pending | — | — | — |
+
+### `util/exec/utils › asRawCommands › with an array of strings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns array of strings | 198 | pending | — | — | — |
+
+### `util/exec/utils › asRawCommands › with many commands`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns an array of many strings | 207 | pending | — | — | — |
+
+### `util/exec/utils › asRawCommands › with `CommandWithOptions``
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns commands from the `CommandWithOptions` | 220 | pending | — | — | — |
+
+---
+
+## `lib/util/fs/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/fs/index.spec.ts
+**Total tests:** 56 | **Ported:** 0 | **Actionable:** 56 | **Status:** pending
+
+### `util/fs/index › getParentDir`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ('$dir') -> '$expected' | 77 | pending | — | — | — |
+
+### `util/fs/index › getSiblingFileName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ('$file', '$sibling') -> '$expected' | 98 | pending | — | — | — |
+
+### `util/fs/index › readLocalFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads buffer | 112 | pending | — | — | — |
+| reads string | 118 | pending | — | — | — |
+| returns null if file is not found | 124 | pending | — | — | — |
+| logs a warning if hidden Unciode characters are found | 128 | pending | — | — | — |
+| does not log the same hidden Unciode characters if found multiple times | 139 | pending | — | — | — |
+| logs a trace message (not warning) if hidden Unicode characters are found in a binary file | 152 | pending | — | — | — |
+
+### `util/fs/index › readLocalFile › if hidden Byte Order Mark (BOM) Unciode characters are found`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| but no other hidden characters, it logs a trace message | 172 | pending | — | — | — |
+| as well as other hidden characters, it logs a warning | 187 | pending | — | — | — |
+
+### `util/fs/index › writeLocalFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| outputs file | 203 | pending | — | — | — |
+
+### `util/fs/index › deleteLocalFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws if platform is local | 213 | pending | — | — | — |
+| deletes file | 218 | pending | — | — | — |
+
+### `util/fs/index › renameLocalFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| renames file | 229 | pending | — | — | — |
+
+### `util/fs/index › ensureDir`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates directory | 243 | pending | — | — | — |
+
+### `util/fs/index › ensureLocalDir`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates local directory | 253 | pending | — | — | — |
+
+### `util/fs/index › ensureCacheDir`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| prefers environment variables over global config | 263 | pending | — | — | — |
+
+### `util/fs/index › privateCacheDir`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns cache dir | 272 | pending | — | — | — |
+
+### `util/fs/index › localPathExists`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for file | 279 | pending | — | — | — |
+| returns true for directory | 285 | pending | — | — | — |
+| returns false | 289 | pending | — | — | — |
+
+### `util/fs/index › isLocalPath`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for valid local path | 295 | pending | — | — | — |
+| returns false | 299 | pending | — | — | — |
+
+### `util/fs/index › readLocalSymlink`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads symlink | 305 | pending | — | — | — |
+| return null when link not exists | 317 | pending | — | — | — |
+
+### `util/fs/index › findLocalSiblingOrParent`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns path for file | 331 | pending | — | — | — |
+| immediately returns null when either path is absolute | 355 | pending | — | — | — |
+
+### `util/fs/index › readLocalDirectory`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns dir content | 362 | pending | — | — | — |
+| return empty array for non existing directory | 380 | pending | — | — | — |
+| return empty array for a existing but empty directory | 384 | pending | — | — | — |
+
+### `util/fs/index › createCacheWriteStream`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates write stream | 393 | pending | — | — | — |
+
+### `util/fs/index › createCacheReadStream`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates read stream | 410 | pending | — | — | — |
+
+### `util/fs/index › localPathIsFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for file | 433 | pending | — | — | — |
+| returns false for directory | 439 | pending | — | — | — |
+| returns false for non-existing path | 445 | pending | — | — | — |
+
+### `util/fs/index › localPathIsSymbolicLink`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false for file | 453 | pending | — | — | — |
+| returns false for directory | 459 | pending | — | — | — |
+| returns false for non-existing path | 465 | pending | — | — | — |
+| returns true for symlink | 470 | pending | — | — | — |
+| unnamed test | 472 | pending | — | — | — |
+
+### `util/fs/index › findUpLocal`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns relative path for file | 486 | pending | — | — | — |
+| returns null if nothing found | 492 | pending | — | — | — |
+| returns undefined if found a file outside of localDir | 498 | pending | — | — | — |
+
+### `util/fs/index › chmodLocalFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| changes file mode | 506 | pending | — | — | — |
+
+### `util/fs/index › statLocalFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns stat object | 523 | pending | — | — | — |
+
+### `util/fs/index › statCacheFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns stat object | 534 | pending | — | — | — |
+
+### `util/fs/index › listCacheDir`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| lists directory | 545 | pending | — | — | — |
+
+### `util/fs/index › rmCache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| removes cache dir | 552 | pending | — | — | — |
+
+### `util/fs/index › cachePathExists`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads file | 561 | pending | — | — | — |
+
+### `util/fs/index › cachePathIsFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if does not exist | 569 | pending | — | — | — |
+
+### `util/fs/index › readCacheFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads file | 575 | pending | — | — | — |
+
+### `util/fs/index › outputCacheFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| outputs file | 585 | pending | — | — | — |
+
+### `util/fs/index › readSystemFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads file | 593 | pending | — | — | — |
+
+### `util/fs/index › writeSystemFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| writes file | 602 | pending | — | — | — |
+
+### `util/fs/index › getLocalFiles`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reads list of files from local fs | 610 | pending | — | — | — |
+| returns null as content if file is not found | 622 | pending | — | — | — |
+
+---
+
+## `lib/util/fs/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/fs/util.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `util/fs/util`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ensureLocalPath('$path', '$fullPath') | 14 | pending | — | — | — |
+| ensureLocalPath('$path', '${localDir}') - throws | 22 | pending | — | — | — |
+| ensureCachePath('$path', '$fullPath') | 33 | pending | — | — | — |
+| ensureCachePath('$path', '${cacheDir}') - throws | 41 | pending | — | — | — |
+| isValidPath($value) == $expected | 53 | pending | — | — | — |
+
+---
+
+## `lib/util/git/auth.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/auth.spec.ts
+**Total tests:** 30 | **Ported:** 0 | **Actionable:** 30 | **Status:** pending
+
+### `util/git/auth › getGitAuthenticatedEnvironmentVariables()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns url with token | 13 | pending | — | — | — |
+| returns url with username and password | 31 | pending | — | — | — |
+| prefers token over username and password | 53 | pending | — | — | — |
+| returns url with token for different protocols | 73 | pending | — | — | — |
+| returns correct url if token already contains GitHub App username | 91 | pending | — | — | — |
+| returns url with token and already existing GIT_CONFIG_COUNT from parameter | 112 | pending | — | — | — |
+| returns url with token and already existing GIT_CONFIG_COUNT from parameter over environment | 134 | pending | — | — | — |
+| returns url with token and already existing GIT_CONFIG_COUNT from environment | 157 | pending | — | — | — |
+| returns url with token and passthrough existing variables | 176 | pending | — | — | — |
+| return url with token with invalid GIT_CONFIG_COUNT from environment | 199 | pending | — | — | — |
+| returns url with token containing username for GitLab token | 218 | pending | — | — | — |
+| returns url with token containing username for GitLab token without hostType | 239 | pending | — | — | — |
+| returns original environment variables when no token is set | 259 | pending | — | — | — |
+| returns url with token for http hosts | 274 | pending | — | — | — |
+| returns url with token for orgs | 292 | pending | — | — | — |
+| returns url with token for orgs and projects | 310 | pending | — | — | — |
+| returns url with token for orgs and projects and ports | 330 | pending | — | — | — |
+| returns url with token for bitbucket-server | 354 | pending | — | — | — |
+
+### `util/git/auth › getGitEnvironmentVariables()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty object if no environment variables exist | 381 | pending | — | — | — |
+| returns environment variables with token if hostRule for api.github.com exists | 385 | pending | — | — | — |
+| returns environment variables with token if hostRule for multiple hostsRules | 402 | pending | — | — | — |
+| returns environment variables with token if hostRule is for Gitlab | 446 | pending | — | — | — |
+| returns environment variables with username and password | 466 | pending | — | — | — |
+| returns environment variables with URL encoded username and password | 487 | pending | — | — | — |
+| returns no environment variables when hostType is not supported | 508 | pending | — | — | — |
+| returns no environment variables when only username is set | 517 | pending | — | — | — |
+| returns no environment variables when only password is set | 526 | pending | — | — | — |
+| returns environment variables when hostType is explicitly set | 535 | pending | — | — | — |
+| returns empty environment variables when matchHost contains invalid protocol | 554 | pending | — | — | — |
+| returns environment variables for bitbucket-server | 563 | pending | — | — | — |
+
+---
+
+## `lib/util/git/author.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/author.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `util/git/author › parseGitAuthor`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if empty email given | 8 | pending | — | — | — |
+| catches errors | 12 | pending | — | — | — |
+| handles a normal address | 19 | pending | — | — | — |
+| parses bot email | 23 | pending | — | — | — |
+| parses bot name and email | 30 | pending | — | — | — |
+| escapes names | 41 | pending | — | — | — |
+| tries again and fails | 47 | pending | — | — | — |
+| gives up | 51 | pending | — | — | — |
+
+---
+
+## `lib/util/git/behind-base-branch-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/behind-base-branch-cache.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `util/git/behind-base-branch-cache › getCachedBehindBaseResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if cache is not populated | 22 | pending | — | — | — |
+| returns null if branch not found | 33 | pending | — | — | — |
+| returns null if base branch SHA is different | 56 | pending | — | — | — |
+| returns null if branch sha is different | 79 | pending | — | — | — |
+| returns null if cached value is undefined | 102 | pending | — | — | — |
+| returns null if base branch SHA is null | 124 | pending | — | — | — |
+| returns null if branch SHA is null | 147 | pending | — | — | — |
+| returns cached value | 170 | pending | — | — | — |
+
+### `util/git/behind-base-branch-cache › setCachedBehindBasedResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns without updating when cache not populated | 195 | pending | — | — | — |
+| returns without updating when branch not found | 204 | pending | — | — | — |
+| updates cached value | 213 | pending | — | — | — |
+| handles multiple branches | 236 | pending | — | — | — |
+
+---
+
+## `lib/util/git/config.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/config.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `util/git/config`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses "close" events, ignores "exit" events from child processes | 9 | pending | — | — | — |
+| uses timeout value from GlobalConfig | 16 | pending | — | — | — |
+| throws | 27 | pending | — | — | — |
+
+---
+
+## `lib/util/git/conflicts-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/conflicts-cache.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `util/git/conflicts-cache › getCachedConflictResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if cache is not populated | 21 | pending | — | — | — |
+| returns null if branch cache not found | 27 | pending | — | — | — |
+| returns null if base branch SHA has changed | 42 | pending | — | — | — |
+| returns null if branch SHA has changed | 57 | pending | — | — | — |
+| returns null if isConfliced is undefined | 72 | pending | — | — | — |
+| returns true | 86 | pending | — | — | — |
+
+### `util/git/conflicts-cache › setCachedConflictResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return without updating value for unpopulated cache | 103 | pending | — | — | — |
+| updates value | 108 | pending | — | — | — |
+| handles multiple branches | 132 | pending | — | — | — |
+
+---
+
+## `lib/util/git/errors.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/errors.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `util/git/errors › bulkChangesDisallowed`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should match the expected error | 17 | pending | — | — | — |
+
+---
+
+## `lib/util/git/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/index.spec.ts
+**Total tests:** 105 | **Ported:** 0 | **Actionable:** 105 | **Status:** pending
+
+### `util/git/index › gitRetry`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns result if git returns successfully | 170 | pending | — | — | — |
+| retries the func call if ExternalHostError thrown | 183 | pending | — | — | — |
+| retries the func call up to retry count if ExternalHostError thrown | 198 | pending | — | — | — |
+| doesn't retry and throws an Error if non-ExternalHostError thrown by git | 209 | pending | — | — | — |
+
+### `util/git/index › validateGitVersion()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has a git version greater or equal to the minimum required | 219 | pending | — | — | — |
+
+### `util/git/index › checkoutBranch(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sets the base branch as master | 226 | pending | — | — | — |
+| sets non-master base branch | 230 | pending | — | — | — |
+
+### `util/git/index › checkoutBranch(branchName) › submodules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| verifies that the --recurse-submodule flag is needed | 265 | pending | — | — | — |
+| sets non-master base branch with submodule update | 272 | pending | — | — | — |
+
+### `util/git/index › getFileList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the correct files | 295 | pending | — | — | — |
+| should exclude submodules | 303 | pending | — | — | — |
+
+### `util/git/index › branchExists(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true if found | 327 | pending | — | — | — |
+| should return false if not found | 331 | pending | — | — | — |
+
+### `util/git/index › getBranchList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return all branches | 337 | pending | — | — | — |
+
+### `util/git/index › isBranchBehindBase()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false if same SHA as master | 346 | pending | — | — | — |
+| should return true if SHA different from master | 352 | pending | — | — | — |
+| should return result even if non-default and not under branchPrefix | 358 | pending | — | — | — |
+| returns cached value | 362 | pending | — | — | — |
+
+### `util/git/index › isBranchModified()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return false when branch is not found | 377 | pending | — | — | — |
+| should return false when author matches | 383 | pending | — | — | — |
+| should return false when author is ignored | 392 | pending | — | — | — |
+| should return true when non-ignored authors commit followed by an ignored author | 401 | pending | — | — | — |
+| should return false with multiple authors that are each ignored | 413 | pending | — | — | — |
+| should return true when custom author is unknown | 425 | pending | — | — | — |
+| should return value stored in modifiedCacheResult | 431 | pending | — | — | — |
+
+### `util/git/index › getBranchCommit(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return same value for equal refs | 440 | pending | — | — | — |
+| should return null | 446 | pending | — | — | — |
+
+### `util/git/index › getBranchUpdateDate(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return same value for equal refs | 452 | pending | — | — | — |
+| should return null when branch does not exist | 465 | pending | — | — | — |
+| should return null and log error when git show fails | 469 | pending | — | — | — |
+| returns cached result without syncing git when cache is populated | 500 | pending | — | — | — |
+| works if running with a Repo Cache | 510 | pending | — | — | — |
+
+### `util/git/index › getBranchFiles(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects changed files compared to current base branch | 547 | pending | — | — | — |
+
+### `util/git/index › getBranchFilesFromCommit(sha)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects changed files compared to the parent commit | 569 | pending | — | — | — |
+
+### `util/git/index › mergeBranch(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should perform a branch merge | 589 | pending | — | — | — |
+| should throw if branch merge throws | 599 | pending | — | — | — |
+
+### `util/git/index › mergeToLocal(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should perform a branch merge without push | 605 | pending | — | — | — |
+| should merge a local-only branch without fetching from origin | 615 | pending | — | — | — |
+| should throw | 641 | pending | — | — | — |
+
+### `util/git/index › deleteBranch(branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should send delete | 647 | pending | — | — | — |
+| should add no verify flag | 653 | pending | — | — | — |
+| should not add no verify flag | 664 | pending | — | — | — |
+| should only delete local branch when localBranch option is set | 677 | pending | — | — | — |
+
+### `util/git/index › getBranchLastCommitTime`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return a Date | 687 | pending | — | — | — |
+| handles error | 692 | pending | — | — | — |
+
+### `util/git/index › getFile(filePath, branchName)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets the file | 699 | pending | — | — | — |
+| short cuts 404 | 704 | pending | — | — | — |
+| returns null for 404 | 709 | pending | — | — | — |
+| logs a warning if hidden Unciode characters are found | 713 | pending | — | — | — |
+| logs a trace message (not warning) if hidden Unicode characters are found in a binary file | 722 | pending | — | — | — |
+
+### `util/git/index › getFiles(filePath)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets the file | 737 | pending | — | — | — |
+
+### `util/git/index › hasDiff(sourceRef, targetRef)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| compare without changes | 747 | pending | — | — | — |
+| compare with changes | 751 | pending | — | — | — |
+
+### `util/git/index › commitFiles({branchName, files, message})`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates file | 759 | pending | — | — | — |
+| link file | 773 | pending | — | — | — |
+| deletes file | 797 | pending | — | — | — |
+| updates multiple files | 810 | pending | — | — | — |
+| uses right commit SHA | 831 | pending | — | — | — |
+| updates git submodules | 855 | pending | — | — | — |
+| does not push when no diff | 871 | pending | — | — | — |
+| does not pass --no-verify | 887 | pending | — | — | — |
+| passes --no-verify to commit | 917 | pending | — | — | — |
+| passes --no-verify to push | 948 | pending | — | — | — |
+| creates file with the executable bit | 979 | pending | — | — | — |
+
+### `util/git/index › getCommitMessages()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns commit messages without merge commits | 1000 | pending | — | — | — |
+
+### `util/git/index › Storage.getUrl()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns https url | 1014 | pending | — | — | — |
+| returns ssh url | 1032 | pending | — | — | — |
+
+### `util/git/index › initRepo())`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should fetch latest | 1045 | pending | — | — | — |
+| should set branch prefix | 1075 | pending | — | — | — |
+| should fail clone ssh submodule | 1101 | pending | — | — | — |
+| should use extra clone configuration | 1126 | pending | — | — | — |
+| should not pass extraCloneOpts to ls-remote when local repo exists | 1142 | pending | — | — | — |
+
+### `util/git/index › setGitAuthor()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for invalid | 1164 | pending | — | — | — |
+
+### `util/git/index › isBranchConflicted`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for non-existing source branch | 1201 | pending | — | — | — |
+| returns true for non-existing target branch | 1209 | pending | — | — | — |
+| detects conflicted branch | 1217 | pending | — | — | — |
+| detects non-conflicted branch | 1233 | pending | — | — | — |
+
+### `util/git/index › isBranchConflicted › cachedConflictResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns cached values | 1250 | pending | — | — | — |
+| caches truthy return value | 1270 | pending | — | — | — |
+| caches falsy return value | 1284 | pending | — | — | — |
+
+### `util/git/index › Renovate non-branch refs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates renovate ref in default section | 1313 | pending | — | — | — |
+| creates custom section for renovate ref | 1322 | pending | — | — | — |
+| clears pushed Renovate refs | 1331 | pending | — | — | — |
+| clears remote Renovate refs | 1342 | pending | — | — | — |
+| preserves unknown sections by default | 1370 | pending | — | — | — |
+| falls back to sequential ref deletion if bulk changes are disallowed | 1379 | pending | — | — | — |
+
+### `util/git/index › listCommitTree`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates non-branch ref | 1400 | pending | — | — | — |
+
+### `util/git/index › getRepoStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should pass options into git status | 1415 | pending | — | — | — |
+| should reject when trying to access directory out of localDir | 1425 | pending | — | — | — |
+
+### `util/git/index › getSubmodules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty array | 1439 | pending | — | — | — |
+
+### `util/git/index › fetchRevSpec()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetchRevSpec() | 1445 | pending | — | — | — |
+
+### `util/git/index › syncGit()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should clone a specified base branch | 1456 | pending | — | — | — |
+| should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set | 1474 | pending | — | — | — |
+| should not inherit unsafe git environment variables from process.env | 1494 | pending | — | — | — |
+| should work when GIT_CONFIG_COUNT authentication environment variables are configured | 1522 | pending | — | — | — |
+| should work when PAGER is explicitly configured | 1556 | pending | — | — | — |
+
+### `util/git/index › pushCommit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should pass pushOptions to git.push | 1577 | pending | — | — | — |
+
+### `util/git/index › forkMode - normal working › syncForkWithUpstream()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws unknown error | 1638 | pending | — | — | — |
+| syncs fork when local for branch absent | 1654 | pending | — | — | — |
+
+### `util/git/index › forkMode - normal working › syncGit()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should fetch from upstream and update local branch | 1675 | pending | — | — | — |
+
+### `util/git/index › forkMode - errors`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| resetHardFromRemote() | 1721 | pending | — | — | — |
+| forcePushToRemote() | 1729 | pending | — | — | — |
+| checkoutBranchFromRemote() | 1737 | pending | — | — | — |
+| checkoutBranchFromRemote() - temporary error | 1745 | pending | — | — | — |
+| syncForkWithRemote() - returns if no upstream exists | 1753 | pending | — | — | — |
+
+---
+
+## `lib/util/git/modified-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/modified-cache.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `util/git/modified-cache › getCachedModifiedResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if cache is not populated | 21 | pending | — | — | — |
+| returns null if branch not found | 25 | pending | — | — | — |
+| returns null if branch SHA has changed | 32 | pending | — | — | — |
+| returns null if cached value is undefined | 39 | pending | — | — | — |
+| returns null if branch sha is null | 46 | pending | — | — | — |
+| returns cached value | 53 | pending | — | — | — |
+
+### `util/git/modified-cache › setCachedModifiedResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns without updating when cache not populated | 66 | pending | — | — | — |
+| returns without updating when branch not found | 75 | pending | — | — | — |
+| handles multiple branches | 84 | pending | — | — | — |
+
+---
+
+## `lib/util/git/pristine.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/pristine.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `util/git/pristine › getCachedPristineResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if cache is not populated | 18 | pending | — | — | — |
+| returns false if branch not found | 22 | pending | — | — | — |
+| returns true | 27 | pending | — | — | — |
+
+---
+
+## `lib/util/git/private-key.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/private-key.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `util/git/private-key › writePrivateKey()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no private key | 39 | pending | — | — | — |
+| throws error if failing | 45 | pending | — | — | — |
+| imports the private GPG key | 59 | pending | — | — | — |
+| does not import the key again | 89 | pending | — | — | — |
+| throws error if SSH key passphrase decryption fails | 94 | pending | — | — | — |
+| imports SSH key with passphrase successfully | 118 | pending | — | — | — |
+| warns about GPG key passphrase being ignored | 157 | pending | — | — | — |
+| accepts SSH key constructor with passphrase | 165 | pending | — | — | — |
+| imports the private SSH key without passphrase | 177 | pending | — | — | — |
+| handles SSH key with process.exit spy | 224 | pending | — | — | — |
+
+### `util/git/private-key › base64 key encoding`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| decodes base64-encoded GPG key | 259 | pending | — | — | — |
+| decodes base64-encoded SSH key (treated as GPG due to format detection) | 293 | pending | — | — | — |
+| handles non-base64 encoded key unchanged | 332 | pending | — | — | — |
+| handles invalid base64 that does not round-trip | 357 | pending | — | — | — |
+| decodes base64-encoded SSH key with passphrase (treated as GPG) | 382 | pending | — | — | — |
+| properly handles actual SSH key format with base64 content | 418 | pending | — | — | — |
+| sanitizes both base64 and decoded keys for secret protection | 454 | pending | — | — | — |
+| sanitizes passphrase for base64 keys | 471 | pending | — | — | — |
+
+---
+
+## `lib/util/git/semantic.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/semantic.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `util/git/semantic › detectSemanticCommits()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects false if unknown | 18 | pending | — | — | — |
+| detects true if known | 31 | pending | — | — | — |
+| detects false on malformed commits | 38 | pending | — | — | — |
+| detects true on breaking changes | 49 | pending | — | — | — |
+| detects true on breaking changes with scope | 56 | pending | — | — | — |
+
+---
+
+## `lib/util/git/set-branch-commit.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/set-branch-commit.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `util/git/set-branch-commit › setBranchCommit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sets new branch in cache if it does not exist | 21 | pending | — | — | — |
+| sets new values in branch when old state exists | 42 | pending | — | — | — |
+| sets commitTimestamp when DateTime is provided | 74 | pending | — | — | — |
+
+---
+
+## `lib/util/git/span-processor.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/span-processor.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `util/git/span-processor`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates an instance | 5 | pending | — | — | — |
+
+---
+
+## `lib/util/git/update-date-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/update-date-cache.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `util/git/update-date-cache › getCachedUpdateDateResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if cache is not populated | 22 | pending | — | — | — |
+| returns null if branch not found | 26 | pending | — | — | — |
+| returns null if branchSha is null | 33 | pending | — | — | — |
+| returns null if branch SHA has changed | 40 | pending | — | — | — |
+| returns null if commitTimestamp is not set | 51 | pending | — | — | — |
+| returns cached value | 58 | pending | — | — | — |
+
+### `util/git/update-date-cache › setCachedUpdateDateResult`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns without updating when cache not populated | 74 | pending | — | — | — |
+| returns without updating when branch not found | 85 | pending | — | — | — |
+| updates commitTimestamp | 101 | pending | — | — | — |
+| handles multiple branches | 116 | pending | — | — | — |
+
+---
+
+## `lib/util/git/url.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/url.spec.ts
+**Total tests:** 23 | **Ported:** 0 | **Actionable:** 23 | **Status:** pending
+
+### `util/git/url › parseGitUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports ports | 9 | pending | — | — | — |
+
+### `util/git/url › getHttpUrl()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns https url for git url | 40 | pending | — | — | — |
+| returns https url for https url | 44 | pending | — | — | — |
+| returns http url for http url | 48 | pending | — | — | — |
+| returns http url for ssh url with port | 52 | pending | — | — | — |
+| returns gitlab url with token | 60 | pending | — | — | — |
+| returns github url with token | 75 | pending | — | — | — |
+| returns bitbucket-server url | 90 | pending | — | — | — |
+| removes username/password from URL | 100 | pending | — | — | — |
+| replaces username/password with given token | 106 | pending | — | — | — |
+
+### `util/git/url › getRemoteUrlWithToken()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns original url if no host rule is found | 117 | pending | — | — | — |
+| transforms an ssh git url to https for the purpose of finding hostRules | 123 | pending | — | — | — |
+| does not transform urls that are not parseable as git urls | 132 | pending | — | — | — |
+| returns http url with token | 141 | pending | — | — | — |
+| returns https url with token | 148 | pending | — | — | — |
+| returns https url with token for non-http protocols | 155 | pending | — | — | — |
+| returns https url with encoded token | 162 | pending | — | — | — |
+| returns http url with username and password | 169 | pending | — | — | — |
+| returns https url with username and password | 179 | pending | — | — | — |
+| returns https url with username and password for non-http protocols | 189 | pending | — | — | — |
+| returns https url with encoded username and password | 199 | pending | — | — | — |
+| returns https url with encoded gitlab token | 209 | pending | — | — | — |
+| returns https url for ssh url with encoded github token | 218 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `util/github/graphql/cache-strategies/memory-cache-strategy`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| resets old cache | 43 | pending | — | — | — |
+| reconciles old cache record with new items | 88 | pending | — | — | — |
+| signals to stop pagination | 130 | pending | — | — | — |
+| reconciles entire page | 162 | pending | — | — | — |
+| detects removed packages | 206 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `util/github/graphql/cache-strategies/package-cache-strategy`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reconciles old cache record with new items | 24 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/datasource-fetcher.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/datasource-fetcher.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `util/github/graphql/datasource-fetcher › query`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| can perform query and receive result | 119 | pending | — | — | — |
+| performs query when persistence flag is set and cache is expired | 139 | pending | — | — | — |
+| throws on unknown errors | 160 | pending | — | — | — |
+| throws single GraphQL error wrapped into Error | 171 | pending | — | — | — |
+| throws multiple GraphQL errors wrapped into AggregatedError | 185 | pending | — | — | — |
+| throws when neither of data or errors were provided | 202 | pending | — | — | — |
+| throws when repository field is absent | 210 | pending | — | — | — |
+| throws when payload field is absent | 223 | pending | — | — | — |
+| receives, transforms, and return data | 236 | pending | — | — | — |
+| handles paginated data | 263 | pending | — | — | — |
+
+### `util/github/graphql/datasource-fetcher › query › Page shrinking`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| shrinks page from 100 to 50 | 333 | pending | — | — | — |
+| shrinks page from 50 to 25 | 360 | pending | — | — | — |
+| re-throws if shrinking did not help | 390 | pending | — | — | — |
+
+### `util/github/graphql/datasource-fetcher › query › Cacheable flag`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| private=$isPrivate => isPersistent=$isPersistent | 416 | pending | — | — | — |
+
+### `util/github/graphql/datasource-fetcher › query › maxItems limit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| stops pagination after maxItems | 450 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/index.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `util/github/graphql/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| queryTags | 8 | pending | — | — | — |
+| queryReleases | 44 | pending | — | — | — |
+| queryBranches | 84 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `util/github/graphql/query-adapters/branches-query-adapter`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| transforms Commit type | 5 | pending | — | — | — |
+| returns null for invalid input | 23 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/github/graphql/query-adapters/releases-query-adapter`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| transforms items | 17 | pending | — | — | — |
+| filters out drafts | 28 | pending | — | — | — |
+| handles invalid items | 32 | pending | — | — | — |
+| marks prereleases as unstable | 36 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/github/graphql/query-adapters/tags-query-adapter`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| transforms Commit type | 5 | pending | — | — | — |
+| transforms Tag type | 23 | pending | — | — | — |
+| transforms nested Tag type | 41 | pending | — | — | — |
+| returns null for other types | 59 | pending | — | — | — |
+
+---
+
+## `lib/util/github/graphql/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/util.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `util/github/graphql/util › prepareQuery`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns valid query for valid payload query | 10 | pending | — | — | — |
+| returns invalid query for invalid payload query | 28 | pending | — | — | — |
+| isDateExpired($currentTime, $initialTimestamp, $duration) === $expected | 35 | pending | — | — | — |
+
+---
+
+## `lib/util/github/tags.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/tags.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/github/tags › findCommitOfTag`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be able to find the hash of a Git tag | 11 | pending | — | — | — |
+| should support passing a custom registry URL | 36 | pending | — | — | — |
+| should return `null` if the tag does not exist | 55 | pending | — | — | — |
+| should gracefully return `null` if tags cannot be queried | 67 | pending | — | — | — |
+
+---
+
+## `lib/util/github/url.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/url.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/github/url › getSourceUrlBase`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ensures trailing slash | 5 | pending | — | — | — |
+| defaults to github.com | 10 | pending | — | — | — |
+
+### `util/github/url › getApiBaseUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| maps to api.github.com | 17 | pending | — | — | — |
+| supports local github installations | 22 | pending | — | — | — |
+
+---
+
+## `lib/util/http/auth.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/auth.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `util/http/auth › applyAuthorization`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing | 6 | pending | — | — | — |
+| gitea password | 24 | pending | — | — | — |
+| gittea token | 44 | pending | — | — | — |
+| github token | 64 | pending | — | — | — |
+| github token for datasource using github api | 82 | pending | — | — | — |
+| github app token with hostType not in GITHUB_API_USING_HOST_TYPES | 101 | pending | — | — | — |
+| gitlab personal access token | 115 | pending | — | — | — |
+| gitlab oauth token | 136 | pending | — | — | — |
+| npm basic token | 157 | pending | — | — | — |
+| bare token | 181 | pending | — | — | — |
+| honors authType | 203 | pending | — | — | — |
+
+---
+
+## `lib/util/http/bitbucket-server.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/bitbucket-server.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `util/http/bitbucket-server`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts | 25 | pending | — | — | — |
+| invalid path | 32 | pending | — | — | — |
+| pagination: uses default limit if not configured | 38 | pending | — | — | — |
+| pagination: uses configured limit | 82 | pending | — | — | — |
+| pagination: fetch only one entry with limit 1 and maxPages 1 | 113 | pending | — | — | — |
+
+---
+
+## `lib/util/http/bitbucket.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/bitbucket.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `util/http/bitbucket`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| posts | 25 | pending | — | — | — |
+| accepts custom baseUrl | 32 | pending | — | — | — |
+| paginates: adds default pagelen if non is present | 57 | pending | — | — | — |
+| paginates: respects pagelen if already set in path | 93 | pending | — | — | — |
+| paginates: respects pagelen if set in options | 129 | pending | — | — | — |
+
+---
+
+## `lib/util/http/cache/memory-http-cache-provider.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/cache/memory-http-cache-provider.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `util/http/cache/memory-http-cache-provider`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reuses data with etag | 17 | pending | — | — | — |
+| does not allow cached responses to be mutated | 40 | pending | — | — | — |
+
+---
+
+## `lib/util/http/cache/package-http-cache-provider.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/cache/package-http-cache-provider.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `util/http/cache/package-http-cache-provider`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips persisting null cache values | 74 | pending | — | — | — |
+| loads cache correctly | 83 | pending | — | — | — |
+| loads cache bypassing server | 100 | pending | — | — | — |
+| handles cache miss | 123 | pending | — | — | — |
+| applies writeSchema before persisting cache | 147 | pending | — | — | — |
+| skips cache write when writeSchema validation fails | 175 | pending | — | — | — |
+| prevents caching when cache-control is private | 189 | pending | — | — | — |
+| prevents caching when the request contains authorization header | 206 | pending | — | — | — |
+| allows caching when cache-control is private but cachePrivatePackages=true | 224 | pending | — | — | — |
+| allows caching when cache-control is private but checkCacheControlHeader=false | 242 | pending | — | — | — |
+| serves stale response during revalidation error | 258 | pending | — | — | — |
+| stores a trimmed body when refreshing cache after 304 | 274 | pending | — | — | — |
+
+### `util/http/cache/package-http-cache-provider › HEAD requests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles cache miss for HEAD request | 309 | pending | — | — | — |
+| loads cache correctly for HEAD request | 330 | pending | — | — | — |
+| loads cache bypassing server for HEAD request | 347 | pending | — | — | — |
+| serves stale HEAD response during revalidation error | 363 | pending | — | — | — |
+| prevents caching HEAD request when cache-control is private | 379 | pending | — | — | — |
+| caches HEAD and GET requests separately | 396 | pending | — | — | — |
+
+### `util/http/cache/package-http-cache-provider › cacheAllowed`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| cachePrivatePackages=$cachePrivatePackages, checkCacheControlHeader=$checkCacheControlHeader, cacheControl="$cacheControl", checkAuthorizationHeader=$checkAuthorizationHeader, authorization=$authorization => expected=$expected | 445 | pending | — | — | — |
+| handles case-insensitive cache-control values | 519 | pending | — | — | — |
+
+---
+
+## `lib/util/http/cache/repository-http-cache-provider.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/cache/repository-http-cache-provider.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `util/http/cache/repository-http-cache-provider`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| reuses data with etag | 24 | pending | — | — | — |
+| reuses data with last-modified | 44 | pending | — | — | — |
+| handles abrupt cache reset | 70 | pending | — | — | — |
+| bypasses for statuses other than 200 and 304 | 91 | pending | — | — | — |
+| supports authorization | 103 | pending | — | — | — |
+
+### `util/http/cache/repository-http-cache-provider › HEAD requests`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| caches HEAD requests separately from GET requests | 128 | pending | — | — | — |
+| reuses HEAD data with etag | 154 | pending | — | — | — |
+
+### `util/http/cache/repository-http-cache-provider › HEAD requests › aggressive cache provider`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| bypasses server when synced | 175 | pending | — | — | — |
+| bypasses server for HEAD requests when synced | 199 | pending | — | — | — |
+| returns null when cache is invalid | 214 | pending | — | — | — |
+
+---
+
+## `lib/util/http/forgejo.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/forgejo.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/http/forgejo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports responses without pagination when enabled | 15 | pending | — | — | — |
+| supports root-level pagination | 27 | pending | — | — | — |
+| supports pagination on data property | 46 | pending | — | — | — |
+| handles pagination with empty response | 66 | pending | — | — | — |
+
+---
+
+## `lib/util/http/gerrit.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/gerrit.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/http/gerrit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| content-type | 14 | pending | — | — | — |
+| getJson | 25 | pending | — | — | — |
+| postJson | 41 | pending | — | — | — |
+| putJson | 57 | pending | — | — | — |
+
+---
+
+## `lib/util/http/gitea.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/gitea.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/http/gitea`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports responses without pagination when enabled | 15 | pending | — | — | — |
+| supports root-level pagination | 27 | pending | — | — | — |
+| supports pagination on data property | 46 | pending | — | — | — |
+| handles pagination with empty response | 66 | pending | — | — | — |
+
+---
+
+## `lib/util/http/github.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/github.spec.ts
+**Total tests:** 54 | **Ported:** 0 | **Actionable:** 54 | **Status:** pending
+
+### `util/http/github › HTTP`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports app mode | 67 | pending | — | — | — |
+| supports different datasources | 81 | pending | — | — | — |
+| paginates | 95 | pending | — | — | — |
+| uses paginationField | 113 | pending | — | — | — |
+| paginates with auth and repo | 142 | pending | — | — | — |
+| paginates with auth and repo on GHE | 178 | pending | — | — | — |
+| attempts to paginate | 219 | pending | — | — | — |
+| rebases GHE Server pagination links | 234 | pending | — | — | — |
+| preserves pagination links by default | 263 | pending | — | — | — |
+| preserves pagination links for github.com | 285 | pending | — | — | — |
+
+### `util/http/github › HTTP › handleGotError`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should log a once warning for github.com 401 | 310 | pending | — | — | — |
+| should throw Not found | 350 | pending | — | — | — |
+| should throw 410 | 356 | pending | — | — | — |
+| should throw rate limit exceeded | 364 | pending | — | — | — |
+| when the rate limit is exceeded, and host rules are set for GitHub.com, a warn is logged | 373 | pending | — | — | — |
+| when the rate limit is exceeded, but no host rules are set for GitHub.com, a warn is logged | 391 | pending | — | — | — |
+| when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged | 410 | pending | — | — | — |
+| should throw secondary rate limit exceeded | 449 | pending | — | — | — |
+| should throw Bad credentials | 458 | pending | — | — | — |
+| should throw platform failure | 464 | pending | — | — | — |
+| should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN | 476 | pending | — | — | — |
+| should throw platform failure for 500 | 485 | pending | — | — | — |
+| should throw platform failure ParseError | 489 | pending | — | — | — |
+| should throw for unauthorized integration | 493 | pending | — | — | — |
+| should throw for unauthorized integration2 | 501 | pending | — | — | — |
+| should throw on abuse | 507 | pending | — | — | — |
+| should throw on repository change | 515 | pending | — | — | — |
+| should throw platform failure on 422 response | 524 | pending | — | — | — |
+| should throw original error when failed to add reviewers | 532 | pending | — | — | — |
+| should throw original error when pull requests aleady existed | 542 | pending | — | — | — |
+| should throw original error of unknown type | 551 | pending | — | — | — |
+| should throw original error when milestone not found | 559 | pending | — | — | — |
+
+### `util/http/github › GraphQL`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| strips path from baseUrl | 645 | pending | — | — | — |
+| supports app mode | 658 | pending | — | — | — |
+| returns empty array for undefined data | 672 | pending | — | — | — |
+| returns empty array for undefined data. | 688 | pending | — | — | — |
+| throws errors for invalid responses | 702 | pending | — | — | — |
+| halves node count and retries request | 713 | pending | — | — | — |
+| queryRepo | 728 | pending | — | — | — |
+| queryRepoField | 742 | pending | — | — | — |
+| limit result size | 756 | pending | — | — | — |
+| shrinks items count on 50x | 770 | pending | — | — | — |
+| expands items count on timeout | 799 | pending | — | — | — |
+| continues to iterate with a lower page size on error 502 | 827 | pending | — | — | — |
+| removes cache record once expanded to the maximum | 843 | pending | — | — | — |
+| throws on 50x if count < 10 | 871 | pending | — | — | — |
+
+### `util/http/github › getRawFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add header and return | 882 | pending | — | — | — |
+| support relative path | 900 | pending | — | — | — |
+| support default to api.github.com if no baseURL has been supplied | 918 | pending | — | — | — |
+| support custom host if a baseURL has been supplied | 934 | pending | — | — | — |
+| support default to api.github.com if no baseURL, but repository has been supplied | 953 | pending | — | — | — |
+| support custom host if a baseURL and repository has been supplied | 971 | pending | — | — | — |
+| support default to api.github.com if content path is used | 991 | pending | — | — | — |
+| support custom host if content path is used | 1007 | pending | — | — | — |
+
+---
+
+## `lib/util/http/gitlab.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/gitlab.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `util/http/gitlab`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| paginates | 35 | pending | — | — | — |
+| paginates with GITLAB_IGNORE_REPO_URL set | 63 | pending | — | — | — |
+| supports different datasources | 85 | pending | — | — | — |
+| attempts to paginate | 100 | pending | — | — | — |
+| posts | 110 | pending | — | — | — |
+| sets baseUrl | 117 | pending | — | — | — |
+
+### `util/http/gitlab › fails with`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| 403 | 122 | pending | — | — | — |
+| 404 | 131 | pending | — | — | — |
+| 500 | 140 | pending | — | — | — |
+| EAI_AGAIN | 147 | pending | — | — | — |
+| ParseError | 157 | pending | — | — | — |
+
+### `util/http/gitlab › handles 409 errors`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| retries the request on resource lock | 178 | pending | — | — | — |
+| does not retry more than twice on resource lock | 186 | pending | — | — | — |
+| does not retry for other reasons | 196 | pending | — | — | — |
+
+---
+
+## `lib/util/http/got.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/got.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `util/http/got`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| configures rejectUnauthorized when forced | 15 | pending | — | — | — |
+| does a flat clone of options | 25 | pending | — | — | — |
+
+---
+
+## `lib/util/http/hooks.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/hooks.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `util/http/hooks`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns $expected for status code $statusCode and followRedirect $followRedirect | 5 | pending | — | — | — |
+
+---
+
+## `lib/util/http/host-rules.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/host-rules.spec.ts
+**Total tests:** 28 | **Ported:** 0 | **Actionable:** 28 | **Status:** pending
+
+### `util/http/host-rules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds token | 63 | pending | — | — | — |
+| adds token to an api.github.com URL | 78 | pending | — | — | — |
+| adds auth | 95 | pending | — | — | — |
+| adds custom auth | 108 | pending | — | — | — |
+| skips | 126 | pending | — | — | — |
+| uses http2 | 138 | pending | — | — | — |
+| uses http keep-alive | 154 | pending | — | — | — |
+| disables http2 | 166 | pending | — | — | — |
+| noAuth | 183 | pending | — | — | — |
+| certificateAuthority | 195 | pending | — | — | — |
+| privateKey | 216 | pending | — | — | — |
+| certificate | 237 | pending | — | — | — |
+| no fallback to github | 258 | pending | — | — | — |
+| fallback to github | 332 | pending | — | — | — |
+| when multiple GitHub host types are set | 461 | pending | — | — | — |
+
+### `util/http/host-rules › GHE platform endpoint fallback`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fallback to github for non-listed hostType targeting GHE endpoint | 587 | pending | — | — | — |
+| no fallback when request targets a different host | 609 | pending | — | — | — |
+| no fallback to gitlab | 620 | pending | — | — | — |
+| fallback to gitlab | 677 | pending | — | — | — |
+| no fallback to bitbucket | 734 | pending | — | — | — |
+| fallback to bitbucket | 753 | pending | — | — | — |
+| no fallback to bitbucket-server | 768 | pending | — | — | — |
+| fallback to bitbucket-server | 787 | pending | — | — | — |
+| no fallback to gitea | 802 | pending | — | — | — |
+| fallback to gitea | 822 | pending | — | — | — |
+| should remove forbidden headers from request | 835 | pending | — | — | — |
+| should replace existing headers with host rule headers | 852 | pending | — | — | — |
+| enabled=false with noAuth | 872 | pending | — | — | — |
+
+---
+
+## `lib/util/http/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/index.spec.ts
+**Total tests:** 45 | **Ported:** 0 | **Actionable:** 45 | **Status:** pending
+
+### `util/http/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| get | 29 | pending | — | — | — |
+| returns 429 error | 40 | pending | — | — | — |
+| returns 401 error | 48 | pending | — | — | — |
+| converts 404 error to ExternalHostError | 84 | pending | — | — | — |
+| disables hosts | 93 | pending | — | — | — |
+| ignores 404 error and does not throw ExternalHostError | 100 | pending | — | — | — |
+| does not pass auth on redirects | 109 | pending | — | — | — |
+| getJson | 127 | pending | — | — | — |
+| postJson | 151 | pending | — | — | — |
+| putJson | 166 | pending | — | — | — |
+| patchJson | 181 | pending | — | — | — |
+| deleteJson | 196 | pending | — | — | — |
+| headJson | 211 | pending | — | — | — |
+| stream | 226 | pending | — | — | — |
+| disables hosts for stream | 251 | pending | — | — | — |
+| limits concurrency by host | 259 | pending | — | — | — |
+| getBuffer | 349 | pending | — | — | — |
+
+### `util/http/index › retry`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 369 | pending | — | — | — |
+
+### `util/http/index › Schema support › getPlain`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets plain text with correct headers | 402 | pending | — | — | — |
+| works with custom options | 412 | pending | — | — | — |
+
+### `util/http/index › Schema support › getYamlUnchecked`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses yaml response without schema | 427 | pending | — | — | — |
+| parses yaml with options | 434 | pending | — | — | — |
+| throws on invalid yaml | 447 | pending | — | — | — |
+
+### `util/http/index › Schema support › getYaml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses yaml with schema validation | 457 | pending | — | — | — |
+| parses yaml with options and schema | 464 | pending | — | — | — |
+| throws on schema validation failure | 479 | pending | — | — | — |
+| throws on invalid yaml | 487 | pending | — | — | — |
+
+### `util/http/index › Schema support › getYamlSafe`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns successful result with schema validation | 497 | pending | — | — | — |
+| returns schema error result | 508 | pending | — | — | — |
+| returns error result for invalid yaml | 522 | pending | — | — | — |
+| returns error result for network errors | 533 | pending | — | — | — |
+| works with options and schema | 547 | pending | — | — | — |
+
+### `util/http/index › Schema support › getJson`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses schema for response body | 568 | pending | — | — | — |
+| throws on schema mismatch | 588 | pending | — | — | — |
+
+### `util/http/index › Schema support › getJsonSafe`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses schema for response body | 605 | pending | — | — | — |
+| returns schema error result | 619 | pending | — | — | — |
+| returns error result | 633 | pending | — | — | — |
+
+### `util/http/index › Schema support › postJson`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses schema for response body | 646 | pending | — | — | — |
+| throws on schema mismatch | 661 | pending | — | — | — |
+
+### `util/http/index › Throttling`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works without throttling | 679 | pending | — | — | — |
+| limits request rate by host | 691 | pending | — | — | — |
+
+### `util/http/index › getToml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses toml with schema validation | 711 | pending | — | — | — |
+| parses toml with options and schema | 718 | pending | — | — | — |
+| throws on schema validation failure | 737 | pending | — | — | — |
+| throws on invalid toml | 752 | pending | — | — | — |
+
+---
+
+## `lib/util/http/jira.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/jira.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `util/http/jira`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws error if setBaseUrl not called | 7 | pending | — | — | — |
+| accepts custom baseUrl | 11 | pending | — | — | — |
+
+---
+
+## `lib/util/http/queue.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/queue.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `util/http/queue`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid URL | 14 | pending | — | — | — |
+| returns queue for valid url | 18 | pending | — | — | — |
+
+---
+
+## `lib/util/http/rate-limit.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/rate-limit.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `util/http/rate-limit › getConcurrentRequestsLimit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no limits are set | 15 | pending | — | — | — |
+| returns null if host does not match | 19 | pending | — | — | — |
+| gets the limit from the host rules | 27 | pending | — | — | — |
+| selects default value if host rule is greater | 32 | pending | — | — | — |
+| selects host rule value if default is greater | 41 | pending | — | — | — |
+| matches wildcard host | 50 | pending | — | — | — |
+
+### `util/http/rate-limit › getThrottleIntervalMs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if no limits are set | 57 | pending | — | — | — |
+| returns null if host does not match | 61 | pending | — | — | — |
+| gets the limit from the host rules | 69 | pending | — | — | — |
+| selects maximum throttle when default is greater | 74 | pending | — | — | — |
+| selects maximum throttle when host rule is greater | 82 | pending | — | — | — |
+| matches wildcard host | 90 | pending | — | — | — |
+
+---
+
+## `lib/util/http/retry-after.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/retry-after.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `util/http/retry-after › wrapWithRetry`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 27 | pending | — | — | — |
+| throws | 34 | pending | — | — | — |
+| retries | 44 | pending | — | — | — |
+| gives up after max retries | 59 | pending | — | — | — |
+| gives up when delay exceeds maxRetryAfter | 76 | pending | — | — | — |
+
+### `util/http/retry-after › getRetryAfter`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for non-RequestError | 89 | pending | — | — | — |
+| returns null for RequestError without response | 93 | pending | — | — | — |
+| returns null for status other than 429 | 97 | pending | — | — | — |
+| returns null missing "retry-after" header | 103 | pending | — | — | — |
+| returns null for non-integer "retry-after" header | 109 | pending | — | — | — |
+| returns delay in seconds from date | 122 | pending | — | — | — |
+| returns delay in seconds from number | 136 | pending | — | — | — |
+| returns null for invalid header value | 149 | pending | — | — | — |
+
+---
+
+## `lib/util/http/scm-manager.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/scm-manager.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `util/http/scm-manager`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports custom accept header | 13 | pending | — | — | — |
+
+---
+
+## `lib/util/http/throttle.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/throttle.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `util/http/throttle`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for invalid URL | 14 | pending | — | — | — |
+| returns throttle for valid url | 18 | pending | — | — | — |
+
+---
+
+## `lib/util/http/www-authenticate.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/www-authenticate.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `util/http/www-authenticate`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| bearer | 4 | pending | — | — | — |
+| parses empty string | 135 | pending | — | — | — |
+| throws on invalid input | 139 | pending | — | — | — |
+
+---
+
+## `lib/util/json-writer/editor-config.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/json-writer/editor-config.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `util/json-writer/editor-config`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should handle empty .editorconfig file | 31 | pending | — | — | — |
+| should handle global config from .editorconfig | 40 | pending | — | — | — |
+| should return undefined in case of exception | 51 | pending | — | — | — |
+| should not handle non json config from .editorconfig | 59 | pending | — | — | — |
+| should handle json config from .editorconfig | 70 | pending | — | — | — |
+
+---
+
+## `lib/util/json-writer/json-writer.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/json-writer/json-writer.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `util/json-writer/json-writer`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should apply 2 spaces indentation by default | 8 | pending | — | — | — |
+| should apply indentation size | 14 | pending | — | — | — |
+| should apply indentation type | 23 | pending | — | — | — |
+| new line at the end should be optional | 31 | pending | — | — | — |
+
+---
+
+## `lib/util/merge-confidence/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/merge-confidence/index.spec.ts
+**Total tests:** 28 | **Ported:** 0 | **Actionable:** 28 | **Status:** pending
+
+### `util/merge-confidence/index › isActiveConfidenceLevel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if null | 22 | pending | — | — | — |
+| returns false if low | 26 | pending | — | — | — |
+| returns false if nonsense | 30 | pending | — | — | — |
+| returns true if valid value (high) | 34 | pending | — | — | — |
+
+### `util/merge-confidence/index › satisfiesConfidenceLevel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if less | 40 | pending | — | — | — |
+| returns true if equal | 44 | pending | — | — | — |
+| returns true if more | 48 | pending | — | — | — |
+
+### `util/merge-confidence/index › API calling functions › getMergeConfidenceLevel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns neutral if undefined updateType | 71 | pending | — | — | — |
+| returns neutral if irrelevant updateType | 83 | pending | — | — | — |
+| returns high if pinning | 95 | pending | — | — | — |
+| returns undefined if no token | 107 | pending | — | — | — |
+| returns undefined if datasource is unsupported | 122 | pending | — | — | — |
+| returns valid confidence level | 134 | pending | — | — | — |
+| escapes a package name containing a forward slash | 157 | pending | — | — | — |
+| escapes a partial Maven coordinate of groupId:artifactId from the packageName | 181 | pending | — | — | — |
+| returns neutral on invalid merge confidence response from api | 207 | pending | — | — | — |
+| returns neutral on non 403/5xx error from API | 230 | pending | — | — | — |
+| throws on 403-Forbidden response from API | 258 | pending | — | — | — |
+| throws on server error responses | 286 | pending | — | — | — |
+| returns high if pinning digest | 314 | pending | — | — | — |
+
+### `util/merge-confidence/index › API calling functions › initMergeConfidence()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| using default base url and supported datasources if either is set | 332 | pending | — | — | — |
+| warns and then resolves if base url is invalid | 356 | pending | — | — | — |
+| uses custom supported datasources and a base URL containing a path | 377 | pending | — | — | — |
+| resolves if no token | 401 | pending | — | — | — |
+| resolves when token is valid | 411 | pending | — | — | — |
+| throws on 403-Forbidden from mc API | 424 | pending | — | — | — |
+| throws on 5xx host errors from mc API | 437 | pending | — | — | — |
+| throws on ECONNRESET | 450 | pending | — | — | — |
+
+---
+
+## `lib/util/schema-utils/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/schema-utils/index.spec.ts
+**Total tests:** 35 | **Ported:** 0 | **Actionable:** 35 | **Status:** pending
+
+### `util/schema-utils/index › LooseArray`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses array | 23 | pending | — | — | — |
+| drops wrong items | 28 | pending | — | — | — |
+| runs callback for wrong elements | 33 | pending | — | — | — |
+
+### `util/schema-utils/index › LooseRecord`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses record | 59 | pending | — | — | — |
+| drops wrong items | 64 | pending | — | — | — |
+| supports key schema | 69 | pending | — | — | — |
+| reports key schema errors | 80 | pending | — | — | — |
+| runs callback for wrong elements | 108 | pending | — | — | — |
+
+### `util/schema-utils/index › Json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses json | 148 | pending | — | — | — |
+
+### `util/schema-utils/index › Json5`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses JSON5 | 214 | pending | — | — | — |
+
+### `util/schema-utils/index › Jsonc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses JSONC | 280 | pending | — | — | — |
+
+### `util/schema-utils/index › UtcDate`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses date | 346 | pending | — | — | — |
+| rejects invalid date | 352 | pending | — | — | — |
+
+### `util/schema-utils/index › Yaml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid yaml | 362 | pending | — | — | — |
+| throws error for non-string | 368 | pending | — | — | — |
+| throws error for invalid yaml | 385 | pending | — | — | — |
+
+### `util/schema-utils/index › MultidocYaml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid yaml | 410 | pending | — | — | — |
+| throws error for non-string | 420 | pending | — | — | — |
+| throws error for invalid yaml | 437 | pending | — | — | — |
+
+### `util/schema-utils/index › multidocYaml()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid yaml | 462 | pending | — | — | — |
+
+### `util/schema-utils/index › Toml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid toml | 478 | pending | — | — | — |
+| throws error for invalid schema | 488 | pending | — | — | — |
+| throws error for invalid toml | 508 | pending | — | — | — |
+
+### `util/schema-utils/index › Ini`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid ini | 529 | pending | — | — | — |
+| throws error for invalid schema | 539 | pending | — | — | — |
+
+### `util/schema-utils/index › logging utils`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| logs debug message and returns fallback value | 556 | pending | — | — | — |
+| logs trace message and returns fallback value | 571 | pending | — | — | — |
+
+### `util/schema-utils/index › NotCircular`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| allows non-circular primitive values | 588 | pending | — | — | — |
+| allows non-circular arrays | 598 | pending | — | — | — |
+| allows non-circular objects | 614 | pending | — | — | — |
+| allows objects reuse | 624 | pending | — | — | — |
+| rejects circular objects | 639 | pending | — | — | — |
+| rejects circular arrays | 659 | pending | — | — | — |
+| rejects deeply nested circular references | 679 | pending | — | — | — |
+| can be combined with other schema types | 708 | pending | — | — | — |
+
+---
+
+## `lib/util/schema-utils/v4.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/schema-utils/v4.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `util/schema-utils/v4 › Json`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid JSON | 6 | pending | — | — | — |
+| fails for invalid JSON | 29 | pending | — | — | — |
+
+### `util/schema-utils/v4 › Json5`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid JSON5 | 50 | pending | — | — | — |
+| fails for invalid JSON5 | 74 | pending | — | — | — |
+
+### `util/schema-utils/v4 › Jsonc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid JSONC | 95 | pending | — | — | — |
+| fails for invalid JSONC | 119 | pending | — | — | — |
+
+### `util/schema-utils/v4 › Yaml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid YAML | 140 | pending | — | — | — |
+| fails for invalid YAML | 162 | pending | — | — | — |
+
+### `util/schema-utils/v4 › MultidocYaml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid multidoc YAML | 181 | pending | — | — | — |
+| fails for invalid multidoc YAML | 206 | pending | — | — | — |
+
+### `util/schema-utils/v4 › Toml`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses valid TOML | 226 | pending | — | — | — |
+| fails for invalid TOML | 249 | pending | — | — | — |
+
+---
+
+## `lib/util/template/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/template/index.spec.ts
+**Total tests:** 54 | **Ported:** 0 | **Actionable:** 54 | **Status:** pending
+
+### `util/template/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty string if cannot compile | 17 | pending | — | — | — |
+| has valid exposed config options | 21 | pending | — | — | — |
+| filters out disallowed fields | 29 | pending | — | — | — |
+| containsString | 43 | pending | — | — | — |
+| unless with equals - 1 | 51 | pending | — | — | — |
+| unless with equals - 2 | 64 | pending | — | — | — |
+| not containsString | 75 | pending | — | — | — |
+| and returns true when all parameters are true | 83 | pending | — | — | — |
+| and returns false when at least one parameter is false | 91 | pending | — | — | — |
+| or returns true when at least one is true | 99 | pending | — | — | — |
+| or returns false when all are false | 107 | pending | — | — | — |
+| string to pretty JSON | 115 | pending | — | — | — |
+| to JSON | 122 | pending | — | — | — |
+| to JSON empty array | 137 | pending | — | — | — |
+| to JSON empty object | 143 | pending | — | — | — |
+| to Object passing illegal number of elements | 149 | pending | — | — | — |
+| build complex json | 155 | pending | — | — | — |
+| do not escape common range symbols: $input -> $output | 174 | pending | — | — | — |
+| lowercase | 191 | pending | — | — | — |
+| has access to basic environment variables (basicEnvVars) | 197 | pending | — | — | — |
+| and has access to custom variables (customEnvVariables) | 203 | pending | — | — | — |
+| and has access to prBodyDefinitions | 209 | pending | — | — | — |
+| replace | 225 | pending | — | — | — |
+| add | 234 | pending | — | — | — |
+| add - throws if inputs are invalid | 240 | pending | — | — | — |
+
+### `util/template/index › proxyCompileInput`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| accessing allowed fields | 261 | pending | — | — | — |
+| supports object nesting | 272 | pending | — | — | — |
+| supports array nesting | 288 | pending | — | — | — |
+
+### `util/template/index › percent encoding`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| encodes values | 308 | pending | — | — | — |
+| decodes values | 316 | pending | — | — | — |
+
+### `util/template/index › base64 encoding`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| encodes values | 326 | pending | — | — | — |
+| handles null values gracefully | 334 | pending | — | — | — |
+| handles undefined values gracefully | 341 | pending | — | — | — |
+
+### `util/template/index › base64 decoding`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| decode values | 350 | pending | — | — | — |
+| handles null values gracefully | 358 | pending | — | — | — |
+| handles undefined values gracefully | 365 | pending | — | — | — |
+
+### `util/template/index › equals`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| equals | 374 | pending | — | — | — |
+| not equals | 385 | pending | — | — | — |
+| not strict equals | 396 | pending | — | — | — |
+
+### `util/template/index › includes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| includes is true | 408 | pending | — | — | — |
+| includes is false | 419 | pending | — | — | — |
+| includes with incorrect type first argument | 430 | pending | — | — | — |
+| includes with incorrect type second argument | 441 | pending | — | — | — |
+
+### `util/template/index › split`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty array on non string input | 454 | pending | — | — | — |
+| should return empty array on missing parameter | 461 | pending | — | — | — |
+| should return array on success | 468 | pending | — | — | — |
+| should return array element | 475 | pending | — | — | — |
+
+### `util/template/index › lookupArray`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| performs lookup for every array element | 487 | pending | — | — | — |
+| handles null input array | 512 | pending | — | — | — |
+| handles empty string key | 524 | pending | — | — | — |
+| handles null key | 540 | pending | — | — | — |
+
+### `util/template/index › distinct`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips duplicate values | 558 | pending | — | — | — |
+| handles null elements | 585 | pending | — | — | — |
+| handles null input | 597 | pending | — | — | — |
+
+---
+
+## `lib/util/vulnerability/ecosystem.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/vulnerability/ecosystem.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `util/vulnerability/ecosystem › datasourceToOsvEcosystem`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| maps crate datasource to crates.io ecosystem | 8 | pending | — | — | — |
+| maps clojure datasource to Maven ecosystem | 12 | pending | — | — | — |
+| maps go datasource to Go ecosystem | 16 | pending | — | — | — |
+| maps npm datasource to npm ecosystem | 20 | pending | — | — | — |
+| maps pypi datasource to PyPI ecosystem | 24 | pending | — | — | — |
+| returns undefined for unknown datasource | 28 | pending | — | — | — |
+
+### `util/vulnerability/ecosystem › githubEcosystemToDatasource`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| maps actions to github-tags datasource | 34 | pending | — | — | — |
+| maps pip to pypi datasource | 38 | pending | — | — | — |
+| maps rust to crate datasource | 42 | pending | — | — | — |
+| maps npm to npm datasource | 46 | pending | — | — | — |
+| maps composer to packagist datasource | 50 | pending | — | — | — |
+| maps maven to both maven and clojure datasources | 54 | pending | — | — | — |
+
+---
+
+## `lib/util/vulnerability/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/vulnerability/utils.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `util/vulnerability/utils › getHighestVulnerabilitySeverity`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parent CRITICAL vulnerability severity rating is maintained | 9 | pending | — | — | — |
+| child CRITICAL vulnerability severity rating is maintained | 26 | pending | — | — | — |
+| parent HIGH vulnerability severity rating is maintained | 43 | pending | — | — | — |
+| child HIGH vulnerability severity rating is maintained | 60 | pending | — | — | — |
+| parent MODERATE vulnerability severity rating is maintained | 77 | pending | — | — | — |
+| child MODERATE vulnerability severity rating is maintained | 94 | pending | — | — | — |
+| child MEDIUM vulnerability severity rating is maintained | 111 | pending | — | — | — |
+| parent LOW vulnerability severity rating is maintained | 128 | pending | — | — | — |
+| child LOW vulnerability severity rating is maintained | 145 | pending | — | — | — |
+| child UNKNOWN vulnerability severity rating is maintained | 162 | pending | — | — | — |
+| handled undefined parent and child vulnerability severity | 179 | pending | — | — | — |
+
+### `util/vulnerability/utils › getFixedVersionConstraint()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns correct range for %s | 198 | pending | — | — | — |
+
+### `util/vulnerability/utils › getLastAffectedVersionConstraint()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns correct range for %s | 215 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/autodiscover.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/autodiscover.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `workers/global/autodiscover`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws if local and repositories defined | 28 | pending | — | — | — |
+| returns local | 34 | pending | — | — | — |
+| returns if not autodiscovering | 41 | pending | — | — | — |
+| autodiscovers github but empty | 45 | pending | — | — | — |
+| autodiscovers github repos | 56 | pending | — | — | — |
+| filters autodiscovered github repos | 67 | pending | — | — | — |
+| filters autodiscovered dot repos | 81 | pending | — | — | — |
+| filters autodiscovered github repos but nothing matches | 95 | pending | — | — | — |
+| filters autodiscovered github repos with regex | 109 | pending | — | — | — |
+| filters autodiscovered github repos with regex negation | 123 | pending | — | — | — |
+| filters autodiscovered github repos with minimatch negation | 141 | pending | — | — | — |
+| fail if regex pattern is not valid | 155 | pending | — | — | — |
+| filters autodiscovered github repos with multiple values | 169 | pending | — | — | — |
+| filters autodiscovered github repos case-insensitive | 192 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/config/parse/additional-config-file.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/additional-config-file.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `workers/global/config/parse/additional-config-file › .getConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| custom js config file exporting a function returning a Promise | 26 | pending | — | — | — |
+| migrates | 55 | pending | — | — | — |
+| warns if config is invalid | 68 | pending | — | — | — |
+| parse and returns empty config if there is no RENOVATE_ADDITIONAL_CONFIG_FILE in env | 80 | pending | — | — | — |
+| config.invalid.js | 84 | pending | — | — | — |
+| fatal error and exit if custom config file does not exist | 112 | pending | — | — | — |
+| fatal error and exit if config.js contains unresolved env var | 125 | pending | — | — | — |
+| fatal error and exit if %s | 146 | pending | — | — | — |
+| exports env variables to environment from processEnv object | 160 | pending | — | — | — |
+| does not export env variables to environment from processEnv object if key/value is invalid | 183 | pending | — | — | — |
+
+### `workers/global/config/parse/additional-config-file › deleteConfigFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skip when RENOVATE_ADDITIONAL_CONFIG_FILE is not set ("%s") | 213 | pending | — | — | — |
+| skip when config file does not exist | 225 | pending | — | — | — |
+| skip if deleteConfigFile is not set ("%s") | 238 | pending | — | — | — |
+| removes the specified config file | 254 | pending | — | — | — |
+| fails silently when attempting to delete the config file | 276 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/config/parse/host-rules-from-env.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/host-rules-from-env.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `workers/global/config/parse/host-rules-from-env`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports docker username/password | 5 | pending | — | — | — |
+| supports password-only | 19 | pending | — | — | — |
+| supports domain and host names with case insensitivity | 28 | pending | — | — | — |
+| regression test for #10937 | 40 | pending | — | — | — |
+| support RENOVATE_ prefixed host rules | 55 | pending | — | — | — |
+| supports renovate in the env variable | 65 | pending | — | — | — |
+| support https authentication options | 77 | pending | — | — | — |
+| make sure {{PLATFORM}}_TOKEN will not be picked up | 95 | pending | — | — | — |
+| supports datasource env token | 106 | pending | — | — | — |
+| supports platform env token | 115 | pending | — | — | — |
+| rejects incomplete datasource env token | 130 | pending | — | — | — |
+| rejects npm env | 137 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/config/parse/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/index.spec.ts
+**Total tests:** 35 | **Ported:** 0 | **Actionable:** 35 | **Status:** pending
+
+### `workers/global/config/parse/index › .parseConfigs(env, defaultArgv)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports token in env | 44 | pending | — | — | — |
+| supports token in CLI options | 51 | pending | — | — | — |
+| supports forceCli | 69 | pending | — | — | — |
+| sets customEnvVariables | 84 | pending | — | — | — |
+| supports config.force | 98 | pending | — | — | — |
+| reads private key from file | 120 | pending | — | — | — |
+| supports Bitbucket username/password | 145 | pending | — | — | — |
+| massages trailing slash into endpoint | 163 | pending | — | — | — |
+| parses global manager config | 172 | pending | — | — | — |
+| parses host rules from env | 179 | pending | — | — | — |
+| env dryRun = true replaced to full | 187 | pending | — | — | — |
+| cli dryRun = true replaced to full | 197 | pending | — | — | — |
+| resolves global presets | 204 | pending | — | — | — |
+| throws exception if global presets cannot be resolved | 232 | pending | — | — | — |
+| cli dryRun replaced to full | 247 | pending | — | — | — |
+| env dryRun = false replaced to null | 254 | pending | — | — | — |
+| cli dryRun = false replaced to null | 264 | pending | — | — | — |
+| only initializes the file when the env var LOG_FILE is properly set | 271 | pending | — | — | — |
+| massage onboardingNoDeps when autodiscover is false | 278 | pending | — | — | — |
+| does not massage onboardingNoDeps when autodiscover is true | 289 | pending | — | — | — |
+| apply secrets to global config | 299 | pending | — | — | — |
+| overrides file config with additional file config | 319 | pending | — | — | — |
+| merges extends from file config with additional file config | 334 | pending | — | — | — |
+| adds extends from fileConfig only | 352 | pending | — | — | — |
+| appends files from configFileNames to config filenames list | 363 | pending | — | — | — |
+| supports setting configFileNames through cli | 380 | pending | — | — | — |
+| supports setting configFileNames through env | 391 | pending | — | — | — |
+
+### `workers/global/config/parse/index › .parseConfigs(env, defaultArgv) › when `repositories` is being overridden`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| warns when CLI config overrides repositories from file config | 405 | pending | — | — | — |
+| warns when CLI config overrides repositories from env config | 416 | pending | — | — | — |
+| does not warn when CLI config sets repositories without override | 429 | pending | — | — | — |
+| does not warn when CLI config has no repositories | 438 | pending | — | — | — |
+| does not warn when CLI config has same repositories as file config | 448 | pending | — | — | — |
+| warns when CLI overrides repositories with repo-specific configuration | 459 | pending | — | — | — |
+| does not warn when both values are the same | 475 | pending | — | — | — |
+| warns when both values are effectively the same | 487 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/config/parse/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/util.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `workers/global/config/parse/util`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| massages config | 5 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/index.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+
+### `workers/global/index › getRepositoryConfig`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should generate correct topLevelOrg/parentOrg with multiple levels | 56 | pending | — | — | — |
+| should generate correct topLevelOrg/parentOrg with two levels | 67 | pending | — | — | — |
+| stores repositoryEntryConfig for repositories[] object entries | 78 | pending | — | — | — |
+| does not store repositoryEntryConfig for repositories[] string entries | 91 | pending | — | — | — |
+| handles config warnings and errors | 101 | pending | — | — | — |
+| handles zero repos | 114 | pending | — | — | — |
+| handles local | 125 | pending | — | — | — |
+| processes repositories | 134 | pending | — | — | — |
+| processes repositories break | 152 | pending | — | — | — |
+| exits with non-zero when errors are logged | 173 | pending | — | — | — |
+| exits with zero when warnings are logged | 189 | pending | — | — | — |
+| does not log info message when log level is not info | 206 | pending | — | — | — |
+
+### `workers/global/index › processes platforms`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| github | 220 | pending | — | — | — |
+| gitlab | 231 | pending | — | — | — |
+
+### `workers/global/index › write repositories to file`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| successfully write file | 244 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/initialize.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/initialize.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `workers/global/initialize › checkVersions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws if invalid version | 15 | pending | — | — | — |
+| returns if valid git version | 21 | pending | — | — | — |
+| supports containerbase | 27 | pending | — | — | — |
+| supports containerbase cache dir | 33 | pending | — | — | — |
+
+### `workers/global/initialize › setGlobalHostRules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should have run before initPlatform | 48 | pending | — | — | — |
+
+### `workers/global/initialize › configureThirdPartyLibraries()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sets env vars when cloud metadata services disabled | 88 | pending | — | — | — |
+| does not set env vars when cloud metadata services enabled | 96 | pending | — | — | — |
+
+---
+
+## `lib/workers/global/limits.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/limits.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 19 | **Status:** pending
+
+### `workers/global/limits`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| increments limited value | 23 | pending | — | — | — |
+| defaults to unlimited | 38 | pending | — | — | — |
+| increments undefined | 42 | pending | — | — | — |
+| resets counter | 47 | pending | — | — | — |
+| resets limit | 55 | pending | — | — | — |
+| sets non-positive limit as reached | 63 | pending | — | — | — |
+
+### `workers/global/limits › calcLimit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles single upgrade | 71 | pending | — | — | — |
+| inherits prConcurrentLimit if branchConcurrentLimit is null | 85 | pending | — | — | — |
+| returns 0 if at least one upgrade has no limit in the branch | 99 | pending | — | — | — |
+| computes the lowest limit if multiple limits are present | 123 | pending | — | — | — |
+| de-duplicates upgrades by depName from debug log | 165 | pending | — | — | — |
+
+### `workers/global/limits › hasMultipleLimits`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles single limit | 195 | pending | — | — | — |
+| returns false if there are multiple limits with value | 208 | pending | — | — | — |
+| handles multiple limits | 226 | pending | — | — | — |
+
+### `workers/global/limits › isLimitReached`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false based on concurrent limits | 251 | pending | — | — | — |
+| returns true when pr hourly limit is reached | 280 | pending | — | — | — |
+| returns true when concurrent limit is reached | 309 | pending | — | — | — |
+| commit hourly limit only affects HourlyCommits check | 338 | pending | — | — | — |
+| commit hourly limit does not block branch or PR checks | 362 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/changelog/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/changelog/index.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `workers/repository/changelog/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| embedChangelogs | 13 | pending | — | — | — |
+| only fetches changelogs for upgrades whose fetchChangeLogs matches the stage name | 55 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/common.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/common › formatProblemLevel()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles trace level | 6 | pending | — | — | — |
+| handles debug level | 10 | pending | — | — | — |
+| handles info level | 14 | pending | — | — | — |
+| handles warn level | 18 | pending | — | — | — |
+| handles error level | 22 | pending | — | — | — |
+| handles fatal level | 26 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/config-migration/branch/commit-message.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/commit-message.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/config-migration/branch/commit-message`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates semantic commit message | 8 | pending | — | — | — |
+| creates semantic pr title | 19 | pending | — | — | — |
+| creates non-semantic commit message | 30 | pending | — | — | — |
+| creates non-semantic pr title | 41 | pending | — | — | — |
+| returns default values when commitMessage template string is empty | 50 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/config-migration/branch/create.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/create.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/config-migration/branch/create › createConfigMigrationBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| applies the default commit message | 36 | pending | — | — | — |
+| applies supplied commit message | 58 | pending | — | — | — |
+| migrates renovate config in package.json | 85 | pending | — | — | — |
+
+### `workers/repository/config-migration/branch/create › createConfigMigrationBranch › applies the commitMessagePrefix value`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| to the default commit message | 125 | pending | — | — | — |
+
+### `workers/repository/config-migration/branch/create › createConfigMigrationBranch › applies semanticCommit prefix`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| to the default commit message | 154 | pending | — | — | — |
+| uses user defined semantic commit type | 182 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/config-migration/branch/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/index.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `workers/repository/config-migration/branch/index › checkConfigMigrationBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing when migration disabled and checkbox unchecked | 31 | pending | — | — | — |
+| creates migration branch when migration disabled but checkbox checked | 50 | pending | — | — | — |
+| does not create a branch if migration branch is modified | 71 | pending | — | — | — |
+| updates migration branch & refreshes pr when migration disabled but open pr exists | 102 | pending | — | — | — |
+| creates migration branch when migration enabled but no pr exists | 134 | pending | — | — | — |
+| updates migration branch & refresh PR when migration enabled and open pr exists | 157 | pending | — | — | — |
+| Dry runs update migration branch | 184 | pending | — | — | — |
+| Dry runs create migration PR | 209 | pending | — | — | — |
+
+### `workers/repository/config-migration/branch/index › checkConfigMigrationBranch › handle closed PR`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not create a branch when migration is disabled but needed and a closed pr exists | 236 | pending | — | — | — |
+| deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked | 255 | pending | — | — | — |
+| does not create a branch when migration is enabled and a closed pr exists | 280 | pending | — | — | — |
+| dry run:deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked | 299 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/config-migration/branch/migrated-data.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/migrated-data.spec.ts
+**Total tests:** 19 | **Ported:** 0 | **Actionable:** 19 | **Status:** pending
+
+### `workers/repository/config-migration/branch/migrated-data › MigratedDataFactory.getAsync`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Calls getAsync a first when migration not needed | 54 | pending | — | — | — |
+| Calls getAsync a first time to initialize the factory | 62 | pending | — | — | — |
+| Calls getAsync a second time to get the saved data from before | 69 | pending | — | — | — |
+
+### `workers/repository/config-migration/branch/migrated-data › MigratedDataFactory.getAsync › MigratedData class`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets the filename from the class instance | 77 | pending | — | — | — |
+| gets the content from the class instance | 82 | pending | — | — | — |
+| Resets the factory and gets a new value | 88 | pending | — | — | — |
+| Resets the factory and gets a new value with default indentation | 95 | pending | — | — | — |
+| Migrate a JSON5 config file | 110 | pending | — | — | — |
+| Falls back to JSON.stringify when weave fails | 120 | pending | — | — | — |
+| Uses JSON.stringify when raw is null | 138 | pending | — | — | — |
+| Returns nothing due to detectRepoFileConfig throwing | 150 | pending | — | — | — |
+
+### `workers/repository/config-migration/branch/migrated-data › MigratedDataFactory.applyPrettierFormatting`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not format when no prettier config is present | 184 | pending | — | — | — |
+| does not format when failing to fetch package.json file | 193 | pending | — | — | — |
+| does not format when there is an invalid package.json file | 202 | pending | — | — | — |
+| formats when prettier config file is found | 211 | pending | — | — | — |
+| formats without prettier if in .renovaterc | 220 | pending | — | — | — |
+| formats when finds prettier config inside the package.json file | 231 | pending | — | — | — |
+| formats with default 2 spaces | 243 | pending | — | — | — |
+| formats with printWith=Infinity | 259 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/config-migration/branch/rebase.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/rebase.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/config-migration/branch/rebase › rebaseMigrationBranch()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing if branch is up to date (%s) | 48 | pending | — | — | — |
+| rebases migration branch (%s) | 66 | pending | — | — | — |
+| applies prettier formatting when rebasing the migration branch (%s) | 83 | pending | — | — | — |
+| does not rebases migration branch when in dryRun is on (%s) | 118 | pending | — | — | — |
+
+### `workers/repository/config-migration/branch/rebase › jsonStripWhiteSpaces()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should strip white spaces from json | 140 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/config-migration/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/config-migration/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing when in silent mode | 32 | pending | — | — | — |
+| skips pr creation when migration is not needed | 40 | pending | — | — | — |
+| creates migration pr if needed | 49 | pending | — | — | — |
+| returns add-checkbox if migration pr exists but is created by another user | 64 | pending | — | — | — |
+| returns pr-modified incase the migration pr has been modified | 77 | pending | — | — | — |
+| returns add-checkbox if migration is needed but not demanded | 94 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/config-migration/pr/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/pr/index.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `workers/repository/config-migration/pr/index › ensureConfigMigrationPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates PR | 52 | pending | — | — | — |
+| creates PR with default PR title | 59 | pending | — | — | — |
+| Founds an open PR and as it is up to date and returns | 66 | pending | — | — | — |
+| Founds an open PR and updates it | 76 | pending | — | — | — |
+| updates an open PR with unexpected PR title | 85 | pending | — | — | — |
+| Dry runs and does not update out of date PR | 96 | pending | — | — | — |
+| Creates PR in dry run mode | 116 | pending | — | — | — |
+| creates PR with labels | 128 | pending | — | — | — |
+| creates PR with empty footer and header | 144 | pending | — | — | — |
+| creates PR for JSON5 config file | 157 | pending | — | — | — |
+| creates PR with footer and header with trailing and leading newlines | 167 | pending | — | — | — |
+| creates non-semantic PR title | 181 | pending | — | — | — |
+| creates semantic PR title | 197 | pending | — | — | — |
+| creates PR with footer and header using templating | 215 | pending | — | — | — |
+
+### `workers/repository/config-migration/pr/index › ensureConfigMigrationPr() throws`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws when trying to create a new PR | 250 | pending | — | — | — |
+| deletes branch when PR already exists but cannot find it | 256 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/configured.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/configured.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `workers/repository/configured › checkIfConfigured()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns | 16 | pending | — | — | — |
+| throws if disabled | 20 | pending | — | — | — |
+| throws if unconfigured fork | 25 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/dependency-dashboard.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/dependency-dashboard.spec.ts
+**Total tests:** 63 | **Ported:** 0 | **Actionable:** 63 | **Status:** pending
+
+### `workers/repository/dependency-dashboard › readDashboardBody()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses invalid dashboard body without throwing error | 98 | pending | — | — | — |
+| reads dashboard body | 121 | pending | — | — | — |
+| reads dashboard body and apply checkedBranches | 149 | pending | — | — | — |
+| reads dashboard body all pending approval | 176 | pending | — | — | — |
+| reads dashboard body open all rate-limited | 204 | pending | — | — | — |
+| reads dashboard body open all awaiting schedule | 232 | pending | — | — | — |
+| reads dashboard body and config migration checkbox - checked | 260 | pending | — | — | — |
+| reads dashboard body and config migration checkbox - unchecked | 274 | pending | — | — | — |
+| reads dashboard body and config migration pr link | 288 | pending | — | — | — |
+| does not read dashboard body but applies checkedBranches regardless | 302 | pending | — | — | — |
+| reads dashboard body and group size not met branches | 321 | pending | — | — | — |
+
+### `workers/repository/dependency-dashboard › ensureDependencyDashboard()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing if mode=silent | 346 | pending | — | — | — |
+| do nothing if dependencyDashboard is disabled | 362 | pending | — | — | — |
+| do nothing if it has no dependencyDashboardApproval branches | 377 | pending | — | — | — |
+| closes Dependency Dashboard when there is 0 PR opened and dependencyDashboardAutoclose is true | 402 | pending | — | — | — |
+| closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true | 422 | pending | — | — | — |
+| open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false | 454 | pending | — | — | — |
+| open or update Dependency Dashboard when rules contain approvals | 476 | pending | — | — | — |
+| checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other | 512 | pending | — | — | — |
+| checks an issue with dependency dashboard categories | 607 | pending | — | — | — |
+| checks an issue with 2 PR pr-edited | 701 | pending | — | — | — |
+| checks an issue with 3 PR in progress and rebase all option | 743 | pending | — | — | — |
+| checks an issue with 2 PR closed / ignored | 793 | pending | — | — | — |
+| checks an issue with group size not met branches | 833 | pending | — | — | — |
+| checks an issue with 3 PR in approval | 874 | pending | — | — | — |
+| adds a checkbox for config migration | 929 | pending | — | — | — |
+| adds config migration pr link when it exists | 960 | pending | — | — | — |
+| adds related text when config migration pr has been modified | 992 | pending | — | — | — |
+| does not add a config migration checkbox when not needed | 1024 | pending | — | — | — |
+| contains logged problems | 1053 | pending | — | — | — |
+| contains logged problems with custom header | 1107 | pending | — | — | — |
+| dependency Dashboard All Pending Approval | 1144 | pending | — | — | — |
+| dependency Dashboard Open All rate-limited | 1211 | pending | — | — | — |
+| rechecks branches | 1275 | pending | — | — | — |
+| skips fetching issue if content unchanged | 1335 | pending | — | — | — |
+| forwards configured labels to the ensure issue call | 1365 | pending | — | — | — |
+
+### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › single base branch repo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add detected dependencies to the Dependency Dashboard body | 1404 | pending | — | — | — |
+| show default message in issues body when packageFiles is empty | 1419 | pending | — | — | — |
+| show default message in issues body when when packageFiles is null | 1436 | pending | — | — | — |
+| shows different combinations of version+digest for a given dependency | 1453 | pending | — | — | — |
+| shows deprecations | 1469 | pending | — | — | — |
+| handles missing version/digest values correctly | 1501 | pending | — | — | — |
+
+### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › multi base branch repo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| add detected dependencies to the Dependency Dashboard body | 1580 | pending | — | — | — |
+| show default message in issues body when packageFiles is empty | 1595 | pending | — | — | — |
+| show default message in issues body when when packageFiles is null | 1611 | pending | — | — | — |
+| truncates the body of a really big repo | 1627 | pending | — | — | — |
+
+### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › dependency dashboard lookup warnings`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Dependency Lookup Warnings message in issues body | 1659 | pending | — | — | — |
+
+### `workers/repository/dependency-dashboard › ensureDependencyDashboard() › checks detected dependencies section › PackageFiles.getDashboardMarkdown()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not truncates as there is enough space to fit | 1695 | pending | — | — | — |
+| removes a branch with no managers | 1705 | pending | — | — | — |
+| removes a manager with no package files | 1716 | pending | — | — | — |
+| does nothing when there are no base branches left | 1726 | pending | — | — | — |
+| removes an entire base branch | 1731 | pending | — | — | — |
+| ensures original data is unchanged | 1741 | pending | — | — | — |
+
+### `workers/repository/dependency-dashboard › getDashboardMarkdownVulnerabilities()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return empty string if summary is empty | 1761 | pending | — | — | — |
+| return empty string if summary is set to none | 1769 | pending | — | — | — |
+| return no data section if summary is set to all and no vulnerabilities | 1780 | pending | — | — | — |
+| return all vulnerabilities if set to all and disabled osvVulnerabilities | 1799 | pending | — | — | — |
+| return unresolved vulnerabilities if set to "unresolved" | 1871 | pending | — | — | — |
+
+### `workers/repository/dependency-dashboard › getAbandonedPackagesMd()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty string when no abandoned packages exist | 1938 | pending | — | — | — |
+| returns formatted markdown when abandoned packages exist | 1955 | pending | — | — | — |
+| handles multiple abandoned packages across different managers | 1986 | pending | — | — | — |
+| displays "unknown" when mostRecentTimestamp is missing | 2037 | pending | — | — | — |
+| handles empty deps array | 2069 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/error-config.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/error-config.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/error-config › raiseConfigWarningIssue()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if mode is silent | 30 | pending | — | — | — |
+| creates issues | 45 | pending | — | — | — |
+| creates issues (dryRun) | 71 | pending | — | — | — |
+| handles onboarding | 88 | pending | — | — | — |
+| handles onboarding (dryRun) | 107 | pending | — | — | — |
+| disable issue creation on config failure | 127 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/error.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/error.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `workers/repository/error › handleError()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| errors ${err} | 77 | pending | — | — | — |
+| handles ExternalHostError | 83 | pending | — | — | — |
+| rewrites git 5xx error | 91 | pending | — | — | — |
+| rewrites git remote error | 99 | pending | — | — | — |
+| rewrites git fatal error | 107 | pending | — | — | — |
+| handles unknown error | 115 | pending | — | — | — |
+| logs config validation errors as warnings by default | 120 | pending | — | — | — |
+| logs config validation errors as warnings when configValidationError is false | 130 | pending | — | — | — |
+| logs config validation errors as errors when configValidationError is true | 140 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/errors-warnings.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/errors-warnings.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `workers/repository/errors-warnings › getWarnings()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns warning text | 20 | pending | — | — | — |
+| getWarning returns empty string | 41 | pending | — | — | — |
+
+### `workers/repository/errors-warnings › getDepWarningsPR()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns 2 pr warnings text dependencyDashboard true | 49 | pending | — | — | — |
+| returns 2 pr warnings text dependencyDashboard true with issue link | 97 | pending | — | — | — |
+| returns 2 pr warnings text dependencyDashboard false | 120 | pending | — | — | — |
+| PR warning returns empty string | 168 | pending | — | — | — |
+| suppress notifications contains dependencyLookupWarnings flag then return empty string | 175 | pending | — | — | — |
+
+### `workers/repository/errors-warnings › getDepWarningsDashboard()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns dependency dashboard warning text | 186 | pending | — | — | — |
+| dependency dashboard warning returns empty string | 236 | pending | — | — | — |
+| suppress notifications contains dependencyLookupWarnings flag then return empty string | 243 | pending | — | — | — |
+
+### `workers/repository/errors-warnings › getErrors()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns error text | 260 | pending | — | — | — |
+| getError returns empty string | 281 | pending | — | — | — |
+
+### `workers/repository/errors-warnings › getDepWarningsOnboardingPR()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns onboarding warning text | 289 | pending | — | — | — |
+| handle empty package files | 345 | pending | — | — | — |
+| suppress notifications contains dependencyLookupWarnings flag then return empty string | 356 | pending | — | — | — |
+| handles undefined | 365 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/extract/extract-fingerprint-config.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/extract/extract-fingerprint-config.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `workers/repository/extract/extract-fingerprint-config`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| filter with enabledManagers | 7 | pending | — | — | — |
+| filter with all managers enabled | 80 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/extract/file-match.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/extract/file-match.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `workers/repository/extract/file-match › getIncludedFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns fileList if no includePaths | 8 | pending | — | — | — |
+| returns exact matches | 13 | pending | — | — | — |
+| returns minimatch matches | 20 | pending | — | — | — |
+
+### `workers/repository/extract/file-match › filterIgnoredFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns fileList if no ignoredPaths | 29 | pending | — | — | — |
+| ignores partial matches | 34 | pending | — | — | — |
+| returns minimatch matches | 41 | pending | — | — | — |
+
+### `workers/repository/extract/file-match › getMatchingFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns npm files | 57 | pending | — | — | — |
+| deduplicates | 64 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/extract/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/extract/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/extract/index › extractAllDependencies()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs | 23 | pending | — | — | — |
+| skips non-enabled managers | 32 | pending | — | — | — |
+| warns if no packages found for a enabled manager | 43 | pending | — | — | — |
+| warns if packageFiles is null | 54 | pending | — | — | — |
+| checks custom managers | 60 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/extract/manager-files.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/extract/manager-files.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/extract/manager-files › getManagerPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty of manager is disabled | 22 | pending | — | — | — |
+| returns empty of manager is not enabled | 28 | pending | — | — | — |
+| skips files if null content returned | 35 | pending | — | — | — |
+| returns files with extractPackageFile | 46 | pending | — | — | — |
+| returns files with extractAllPackageFiles | 66 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/extract/supersedes.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/extract/supersedes.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `workers/repository/extract/supersedes › processSupersedesManagers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty input | 6 | pending | — | — | — |
+| ignores extracts without superseding managers | 12 | pending | — | — | — |
+| removes superseded package files without lock files | 28 | pending | — | — | — |
+| keeps superseded package files with lock files | 52 | pending | — | — | — |
+| keeps non-superseded package files | 88 | pending | — | — | — |
+| handles primary extract with undefined packageFiles | 115 | pending | — | — | — |
+| handles missing secondary extract manager | 137 | pending | — | — | — |
+| handles secondary extract with undefined packageFiles | 153 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/finalize/prune.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/finalize/prune.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `workers/repository/finalize/prune › pruneStaleBranches()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no branchList | 24 | pending | — | — | — |
+| ignores reconfigure branch | 30 | pending | — | — | — |
+| returns if no defaultBranch | 36 | pending | — | — | — |
+| returns if no renovate branches | 43 | pending | — | — | — |
+| returns if no remaining branches | 51 | pending | — | — | — |
+| renames deletes remaining branch | 59 | pending | — | — | — |
+| skips rename but still deletes branch | 71 | pending | — | — | — |
+| deletes with base branches | 87 | pending | — | — | — |
+| uses single configured base branch instead of defaultBranch | 124 | pending | — | — | — |
+| uses defaultBranch when baseBranchPatterns exist but baseBranches are not computed yet | 145 | pending | — | — | — |
+| does nothing on dryRun | 172 | pending | — | — | — |
+| does nothing on prune stale branches disabled | 185 | pending | — | — | — |
+| notifies via PR changes if someone pushed to PR | 198 | pending | — | — | — |
+| skips appending - abandoned to PR title if already present | 213 | pending | — | — | — |
+| skips changes to PR if dry run | 227 | pending | — | — | — |
+| dry run delete branch no PR | 243 | pending | — | — | — |
+| delete branch no PR | 256 | pending | — | — | — |
+| does not delete modified orphan branch | 268 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/finalize/repository-statistics.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/finalize/repository-statistics.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `workers/repository/finalize/repository-statistics › runRenovateRepoStats`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| Calls runRenovateRepoStats | 41 | pending | — | — | — |
+
+### `workers/repository/finalize/repository-statistics › runBranchSummary`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| processes cache with baseBranches only | 63 | pending | — | — | — |
+| processes cache with baseBranches and branches | 94 | pending | — | — | — |
+| logs extended branch info if branchSummaryExtended | 159 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/index.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `workers/repository/index › renovateRepository()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not process a repository, but also does not error | 24 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/init/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/index.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `workers/repository/init/index › initRepo`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs | 40 | pending | — | — | — |
+| warns on unsupported options | 52 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/init/inherited.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/inherited.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `workers/repository/init/inherited`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return the same config if repository or inheritConfig is not defined | 38 | pending | — | — | — |
+| should return the same config if inheritConfigRepoName or inheritConfigFileName is not a string | 44 | pending | — | — | — |
+| should throw an error if getting the raw file fails and inheritConfigStrict is true | 50 | pending | — | — | — |
+| should return the same config if getting the raw file fails and inheritConfigStrict is false | 58 | pending | — | — | — |
+| should throw an error if parsing the inherited config fails | 64 | pending | — | — | — |
+| should throw an error if config includes an invalid option | 71 | pending | — | — | — |
+| should throw an error if config includes an invalid value | 78 | pending | — | — | — |
+| should warn if validateConfig returns warnings | 85 | pending | — | — | — |
+| should merge inherited config | 92 | pending | — | — | — |
+| should set hostRules from inherited config | 102 | pending | — | — | — |
+| should decrypt encrypted values from inherited config | 123 | pending | — | — | — |
+| should apply secrets to inherited config | 158 | pending | — | — | — |
+| should resolve presets found in inherited config | 182 | pending | — | — | — |
+| should warn if presets fails validation with warnings | 207 | pending | — | — | — |
+| should throw error if presets fails validation with errors | 252 | pending | — | — | — |
+| should remove global config from presets found in inherited config | 297 | pending | — | — | — |
+| overwrites configFileNames set by admin config | 336 | pending | — | — | — |
+| does not modify configFileNames set by admin config if configFileNames is not present in inherited config | 349 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/init/vulnerability.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/vulnerability.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `workers/repository/init/vulnerability › getFixedVersionByDatasource()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns ecosystem-specific version range | 13 | pending | — | — | — |
+| returns default version range | 18 | pending | — | — | — |
+
+### `workers/repository/init/vulnerability › detectVulnerabilityAlerts()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if vulnerabilityAlerts is undefined | 34 | pending | — | — | — |
+| returns if alerts are disabled | 39 | pending | — | — | — |
+| returns if no alerts are detected | 47 | pending | — | — | — |
+| throws if no alerts and vulnerabilityAlertsOnly | 52 | pending | — | — | — |
+| ignores alert if dismissed_reason is not nullish | 60 | pending | — | — | — |
+| ignores alert if firstPatchVersion is nullish | 93 | pending | — | — | — |
+| warns if an error occurs while parsing the alerts | 154 | pending | — | — | — |
+| returns go alerts | 185 | pending | — | — | — |
+| returns maven alerts | 249 | pending | — | — | — |
+| returns nuget alerts | 333 | pending | — | — | — |
+| returns pip alerts | 418 | pending | — | — | — |
+| returns GitHub Actions alerts | 732 | pending | — | — | — |
+| skips package rule if no valid firstPatchedVersion found across multiple alerts | 810 | pending | — | — | — |
+| computes highest severity across multiple alerts for the same dependency | 863 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/model/custom-commit-message.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/model/custom-commit-message.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `workers/repository/model/custom-commit-message › CustomCommitMessage`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| given subject $subject and prefix $prefix as arguments, returns $result | 5 | pending | — | — | — |
+| should provide ability to set body and footer | 31 | pending | — | — | — |
+| should remove empty subject by default | 46 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/model/semantic-commit-message.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/model/semantic-commit-message.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `workers/repository/model/semantic-commit-message`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should format message without prefix | 4 | pending | — | — | — |
+| should format sematic type | 11 | pending | — | — | — |
+| should format sematic prefix with scope | 19 | pending | — | — | — |
+| should transform to lowercase only first letter | 28 | pending | — | — | — |
+| should create instance from string without scope | 37 | pending | — | — | — |
+| should create instance from string with scope | 50 | pending | — | — | — |
+| should create instance from string with empty description | 65 | pending | — | — | — |
+| should return undefined for invalid string | 78 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/branch/check.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/check.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `workers/repository/onboarding/branch/check`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true if in silent mode | 31 | pending | — | — | — |
+| skips normal onboarding check if onboardingCache is valid | 36 | pending | — | — | — |
+| continues with normal logic if onboardingCache is invalid | 56 | pending | — | — | — |
+| continues with normal logic if closedPr exists - adds closing comment | 72 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/check › when closedPr exists and onboardingAutoCloseAge is set`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds closing comment if exactly at onboardingAutoCloseAge | 97 | pending | — | — | — |
+| skips closing comment if onboarding pr is slightly older than onboardingAutoCloseAge | 119 | pending | — | — | — |
+| skips closing comment if onboarding pr is 1 day older than onboardingAutoCloseAge | 141 | pending | — | — | — |
+| skips closing comment if onboarding pr is significantly older than onboardingAutoCloseAge | 162 | pending | — | — | — |
+| prefers inherited onboardingAutoCloseAge over global config | 179 | pending | — | — | — |
+| does not allow inherited onboardingAutoCloseAge to be higher than global config | 203 | pending | — | — | — |
+| checks git file list for config file when in fork mode | 228 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/branch/config.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/config.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `workers/repository/onboarding/branch/config › getOnboardingConfigContents`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the JSON stringified onboarding config | 32 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/config › getOnboardingConfig`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles finding a preset in the same group level | 48 | pending | — | — | — |
+| handles finding an organization dot platform preset | 58 | pending | — | — | — |
+| handles finding a preset in the same group | 71 | pending | — | — | — |
+| handles finding a preset in a parent group | 87 | pending | — | — | — |
+| handles falling back to finding a organization preset | 103 | pending | — | — | — |
+| handles not finding any preset | 119 | pending | — | — | — |
+| ignores an unknown error | 128 | pending | — | — | — |
+| ignores unsupported platform | 137 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/branch/create.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/create.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `workers/repository/onboarding/branch/create › createOnboardingBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| applies the default commit message | 27 | pending | — | — | — |
+| applies supplied commit message | 45 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/create › createOnboardingBranch › applies the commitBody value`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| to the default commit message | 74 | pending | — | — | — |
+| to the supplied commit message | 95 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/create › createOnboardingBranch › applies the commitMessagePrefix value`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| to the default commit message | 128 | pending | — | — | — |
+| to the supplied commit message | 152 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/create › createOnboardingBranch › applies semanticCommit prefix`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| to the default commit message | 187 | pending | — | — | — |
+| to the supplied commit message | 211 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/create › createOnboardingBranch › setting the onboarding configuration file name`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| falls back to the default option if not present | 246 | pending | — | — | — |
+| falls back to the default option if in list of allowed names | 274 | pending | — | — | — |
+| uses the given name if valid | 303 | pending | — | — | — |
+| applies to the default commit message | 333 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/branch/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/index.spec.ts
+**Total tests:** 26 | **Ported:** 0 | **Actionable:** 26 | **Status:** pending
+
+### `workers/repository/onboarding/branch/index › checkOnboardingBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws if no package files | 57 | pending | — | — | — |
+| doesn't throw if there are no package files and onboardingNoDeps config option is set | 63 | pending | — | — | — |
+| throws if fork | 73 | pending | — | — | — |
+| throws if bot disabled | 80 | pending | — | — | — |
+| has default onboarding config | 87 | pending | — | — | — |
+| uses discovered onboarding config | 127 | pending | — | — | — |
+| handles skipped onboarding combined with requireConfig = optional | 170 | pending | — | — | — |
+| handles skipped onboarding, requireConfig=required, and a config file | 181 | pending | — | — | — |
+| handles skipped onboarding, requireConfig=ignored | 192 | pending | — | — | — |
+| handles skipped onboarding, requireConfig=required, and no config file | 203 | pending | — | — | — |
+| detects repo is onboarded via file | 216 | pending | — | — | — |
+| handles removed cached file name | 223 | pending | — | — | — |
+| handles cached file name | 230 | pending | — | — | — |
+| handles cached package.json | 253 | pending | — | — | — |
+| detects repo is onboarded via package.json config | 279 | pending | — | — | — |
+| detects repo is onboarded via PR | 286 | pending | — | — | — |
+| throws if no required config | 297 | pending | — | — | — |
+| rebases onboarding branch | 310 | pending | — | — | — |
+| skips processing onboarding branch when main/onboarding SHAs have not changed | 347 | pending | — | — | — |
+| processes modified onboarding branch and invalidates extract cache | 379 | pending | — | — | — |
+| skips processing conflicted onboarding branch | 417 | pending | — | — | — |
+| sets onboarding cache for existing onboarding branch | 440 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/index › checkOnboardingBranch › tests onboarding rebase/retry checkbox handling`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| detects unsupported platfom | 474 | pending | — | — | — |
+| detects missing rebase checkbox | 495 | pending | — | — | — |
+| detects manual pr update requested | 511 | pending | — | — | — |
+| handles unchecked rebase checkbox | 527 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › setOnboardingCache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not create new cache | 24 | pending | — | — | — |
+| sets new cache | 31 | pending | — | — | — |
+| updates old cache | 45 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › deleteOnboardingCache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes cache | 68 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › hasOnboardingBranchChanged()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return true if cache is absent | 84 | pending | — | — | — |
+| returns true | 92 | pending | — | — | — |
+| returns false | 108 | pending | — | — | — |
+| returns false when branch is modified but has not changed since last run | 124 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › isOnboardingBranchModified()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| falls back to git if cache is absent | 142 | pending | — | — | — |
+| falls back to git if onboarding branch is updated | 153 | pending | — | — | — |
+| returns cached value | 172 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › isOnboardingBranchConflicted()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| falls back to git if cache is absent | 192 | pending | — | — | — |
+| falls back to git if default branch is updated | 203 | pending | — | — | — |
+| falls back to git if onboarding branch is modified | 222 | pending | — | — | — |
+| returns cached value | 241 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › getOnboardingFileNameFromCache()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns cached value | 261 | pending | — | — | — |
+| returns undefined | 271 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › getOnboardingConfigFromCache()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns cached value | 278 | pending | — | — | — |
+| returns undefined | 288 | pending | — | — | — |
+
+### `workers/repository/onboarding/branch/onboarding-branch-cache › setOnboardingConfigDetails()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns cached value | 295 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/branch/rebase.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/branch/rebase.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `workers/repository/onboarding/branch/rebase › rebaseOnboardingBranch()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does nothing if branch is up to date | 41 | pending | — | — | — |
+| rebases onboarding branch | 48 | pending | — | — | — |
+| uses the onboardingConfigFileName if set | 56 | pending | — | — | — |
+| falls back to "renovate.json" if onboardingConfigFileName is not set | 76 | pending | — | — | — |
+| handles a missing previous config hash | 95 | pending | — | — | — |
+| does nothing if config hashes match | 103 | pending | — | — | — |
+| dryRun=full | 110 | pending | — | — | — |
+| uses semantic commit PR title when semanticCommits is enabled | 120 | pending | — | — | — |
+| returns null for $platform | 140 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/pr/base-branch.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/pr/base-branch.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `workers/repository/onboarding/pr/base-branch › getBaseBranchDesc()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty if no baseBranch | 13 | pending | — | — | — |
+| describes baseBranch | 18 | pending | — | — | — |
+| describes baseBranchPatterns | 26 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/pr/config-description.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/pr/config-description.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `workers/repository/onboarding/pr/config-description › getConfigDesc()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty | 16 | pending | — | — | — |
+| returns a full list | 22 | pending | — | — | — |
+| assignees, labels and schedule | 38 | pending | — | — | — |
+| include retry/refresh checkbox message only if onboardingRebaseCheckbox is true | 58 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/pr/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/pr/index.spec.ts
+**Total tests:** 29 | **Ported:** 0 | **Actionable:** 29 | **Status:** pending
+
+### `workers/repository/onboarding/pr/index › ensureOnboardingPr()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if onboarded | 47 | pending | — | — | — |
+| returns if onboarded cache is valid | 56 | pending | — | — | — |
+| breaks early when onboarding | 65 | pending | — | — | — |
+| creates PR | 86 | pending | — | — | — |
+| creates semantic PR | 91 | pending | — | — | — |
+| creates PR with labels | 108 | pending | — | — | — |
+| creates PR with empty footer and header | 125 | pending | — | — | — |
+| creates PR with footer and header with trailing and leading newlines | 149 | pending | — | — | — |
+| creates PR with footer and header using templating | 174 | pending | — | — | — |
+| returns if PR does not need updating | 208 | pending | — | — | — |
+| ensures comment, when PR is conflicted | 232 | pending | — | — | — |
+
+### `workers/repository/onboarding/pr/index › ensureOnboardingPr() › when onboardingAutoCloseAge is set`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ensures comment, if onboarding cache is up-to-date, but when onboarding pr is over onboardingAutoCloseAge | 252 | pending | — | — | — |
+| does not comment, when onboarding pr is exactly at onboardingAutoCloseAge | 279 | pending | — | — | — |
+| ensures comment, when onboarding pr is partially over onboardingAutoCloseAge | 300 | pending | — | — | — |
+| ensures comment, when onboarding pr is 1 day older than onboardingAutoCloseAge | 327 | pending | — | — | — |
+| ensures comment,when onboarding pr is significantly older than onboardingAutoCloseAge | 354 | pending | — | — | — |
+| prefers inherited onboardingAutoCloseAge over global config | 376 | pending | — | — | — |
+| does not allow inherited onboardingAutoCloseAge to be higher than global config | 405 | pending | — | — | — |
+| does nothing in dry run when PR is conflicted | 435 | pending | — | — | — |
+| updates PR when modified | 454 | pending | — | — | — |
+| creates PR (no require config) | 467 | pending | — | — | — |
+| creates PR (require config) | 478 | pending | — | — | — |
+
+### `workers/repository/onboarding/pr/index › ensureOnboardingPr() › the created PR references onboardingConfigFileName`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| when set | 485 | pending | — | — | — |
+| when not set, falls back to "renovate.json" | 496 | pending | — | — | — |
+| when set, but not a valid filename, falls back to "renovate.json" | 504 | pending | — | — | — |
+| dryrun of creates PR | 513 | pending | — | — | — |
+| dryrun of updates PR | 528 | pending | — | — | — |
+
+### `workers/repository/onboarding/pr/index › ensureOnboardingPr() › ensureOnboardingPr() throws`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws when trying to create a new PR | 559 | pending | — | — | — |
+| deletes branch when PR already exists but cannot find it | 567 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/onboarding/pr/pr-list.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/pr/pr-list.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/onboarding/pr/pr-list › getExpectedPrList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty | 16 | pending | — | — | — |
+| has special lock file maintenance description | 28 | pending | — | — | — |
+| handles multiple | 66 | pending | — | — | — |
+| shows commitHourlyLimit message when limit is low | 145 | pending | — | — | — |
+| does not show commitHourlyLimit message when limit is high | 184 | pending | — | — | — |
+| shows only commitHourlyLimit message when both limits are set | 206 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/extract-update.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/extract-update.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `workers/repository/process/extract-update › extract()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs with no baseBranchPatterns | 57 | pending | — | — | — |
+| runs with baseBranchPatterns | 80 | pending | — | — | — |
+| uses repository cache | 99 | pending | — | — | — |
+| fetches vulnerabilities | 122 | pending | — | — | — |
+| handles exception when fetching vulnerabilities | 141 | pending | — | — | — |
+
+### `workers/repository/process/extract-update › extract() › malicious package detection › when using mocks`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips malicious package updates | 159 | pending | — | — | — |
+
+### `workers/repository/process/extract-update › extract() › malicious package detection › when manually specifying the `skipReason`s › when skipReason=malicious-version-in-use`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| logs a warning | 259 | pending | — | — | — |
+| deletes the skipReason and skipStage, to allow the update phase to continue updating | 313 | pending | — | — | — |
+| when skipReason=malicious-version-in-use, it logs a warning for each skipReason | 361 | pending | — | — | — |
+
+### `workers/repository/process/extract-update › isCacheExtractValid()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| undefined cache | 449 | pending | — | — | — |
+| returns false if no revision | 454 | pending | — | — | — |
+| returns false if revision mismatch | 460 | pending | — | — | — |
+| partial cache | 466 | pending | — | — | — |
+| sha mismatch | 471 | pending | — | — | — |
+| config change | 481 | pending | — | — | — |
+| invalid if no extractionFingerprints | 491 | pending | — | — | — |
+| invalid if changed fingerprints | 508 | pending | — | — | — |
+| valid cache and config | 515 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/fetch.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/fetch.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `workers/repository/process/fetch › fetchUpdates()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty deps | 21 | pending | — | — | — |
+| handles ignored, skipped and disabled | 31 | pending | — | — | — |
+| fetches updates | 85 | pending | — | — | — |
+
+### `workers/repository/process/fetch › fetchUpdates() › constraintsVersioning`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| is merged from packageFile with config | 119 | pending | — | — | — |
+| is set from packageFile if only set on packageFile | 147 | pending | — | — | — |
+| is not set if neither config nor packageFile are set | 168 | pending | — | — | — |
+| is set if config is set | 189 | pending | — | — | — |
+| skips deps with empty names | 211 | pending | — | — | — |
+| skips internal deps by default | 238 | pending | — | — | — |
+| fetch updates for internal deps if updateInternalDeps is true | 261 | pending | — | — | — |
+| throws lookup errors for onboarded repos | 283 | pending | — | — | — |
+| throws lookup errors for not onboarded repos | 300 | pending | — | — | — |
+| produces external host warnings for not onboarded repos | 317 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/index.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `workers/repository/process/index › processRepo()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| processes single branches | 28 | pending | — | — | — |
+| processes baseBranchPatterns | 33 | pending | — | — | — |
+| reads config from default branch if useBaseBranchConfig not specified | 49 | pending | — | — | — |
+| reads config from branches in baseBranchPatterns if useBaseBranchConfig specified | 68 | pending | — | — | — |
+| throws if base branch config is invalid | 92 | pending | — | — | — |
+| handles config name mismatch between baseBranches if useBaseBranchConfig specified | 107 | pending | — | — | — |
+| processes baseBranchPatterns dryRun extract | 127 | pending | — | — | — |
+| finds baseBranches via regular expressions | 140 | pending | — | — | — |
+| maps $default to defaultBranch | 191 | pending | — | — | — |
+
+### `workers/repository/process/index › getBaseBranchConfig`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds base branch name to branchPrefix if multiple base branches expected - more than one base branch configured | 212 | pending | — | — | — |
+| adds base branch name to branchPrefix if multiple base branches expected - base branch regex configured | 222 | pending | — | — | — |
+| does not add base branch name to branchPrefix if multiple base branches are not expected - only one base branch configured | 232 | pending | — | — | — |
+| does not add base branch name to branchPrefix if multiple base branches are not expected - baseBranchPatterns undefined | 242 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/libyear.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/libyear.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/process/libyear › calculateLibYears`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns early if no packageFiles | 14 | pending | — | — | — |
+| calculates libYears | 19 | pending | — | — | — |
+| skips disabled dependencies when calculating libYears | 144 | pending | — | — | — |
+| de-duplicates if same dep found in different files | 225 | pending | — | — | — |
+| ignores disabled dependencies | 304 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/limits.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/limits.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `workers/repository/process/limits › getPrHourlyCount()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calculates hourly pr count | 27 | pending | — | — | — |
+| returns zero if errored | 45 | pending | — | — | — |
+
+### `workers/repository/process/limits › getCommitHourlyCount()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calculates hourly commit count from SCM | 53 | pending | — | — | — |
+| uses cache when available and falls back to SCM when missing | 68 | pending | — | — | — |
+| returns zero if errored | 106 | pending | — | — | — |
+
+### `workers/repository/process/limits › getConcurrentPrsCount()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calculates concurrent prs present | 116 | pending | — | — | — |
+
+### `workers/repository/process/limits › getConcurrentBranchesCount()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calculates concurrent branches present | 137 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/lookup/abandonment.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/abandonment.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `workers/repository/process/lookup/abandonment › calculateAbandonment`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the original release result when no abandonment threshold is provided | 27 | pending | — | — | — |
+| returns the original release result when abandonment threshold is invalid | 39 | pending | — | — | — |
+| returns the original release result when no mostRecentTimestamp timestamp is available | 54 | pending | — | — | — |
+| marks a package as abandoned when mostRecentTimestamp plus threshold is before now | 69 | pending | — | — | — |
+| does not mark a package as abandoned when mostRecentTimestamp plus threshold is after now | 83 | pending | — | — | — |
+| preserves other properties in the release result | 97 | pending | — | — | — |
+| handles exactly at the threshold boundary | 117 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/lookup/filter-checks.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/filter-checks.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+
+### `workers/repository/process/lookup/filter-checks › .filterInternalChecks()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns latest release if internalChecksFilter=none | 74 | pending | — | — | — |
+| uses datasource-level interception mechanism | 87 | pending | — | — | — |
+| returns non-pending latest release if internalChecksFilter=flexible and none pass checks | 121 | pending | — | — | — |
+| returns pending latest release if internalChecksFilter=strict and none pass checks | 135 | pending | — | — | — |
+| returns non-latest release if internalChecksFilter=strict and some pass checks | 149 | pending | — | — | — |
+| returns non-latest release if internalChecksFilter=flexible and some pass checks | 163 | pending | — | — | — |
+| picks up minimumReleaseAge settings from packageRules | 177 | pending | — | — | — |
+| picks up minimumReleaseAge settings from updateType | 194 | pending | — | — | — |
+
+### `workers/repository/process/lookup/filter-checks › .filterInternalChecks() › if internalChecksFilter=strict, minimumReleaseAge is specified, and the latest release does not have a releaseTimestamp`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not return the latest release, if minimumReleaseAgeBehaviour=timestamp-required | 218 | pending | — | — | — |
+| returns the latest release, if minimumReleaseAgeBehaviour=timestamp-optional | 252 | pending | — | — | — |
+| returns latest release, if minimumReleaseAgeBehaviour=timestamp-required but minimumReleaseAge=0 days | 286 | pending | — | — | — |
+| picks up minimumConfidence settings from updateType | 321 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/lookup/filter.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/filter.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `workers/repository/process/lookup/filter › .filterVersions()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should filter versions allowed by semver syntax when allowedVersions is not valid version, range or pypi syntax | 12 | pending | — | — | — |
+| should filter versions when allowedVersions templating is used | 60 | pending | — | — | — |
+| allows unstable major upgrades | 98 | pending | — | — | — |
+| ignores version insufficient prefixes | 124 | pending | — | — | — |
+| single version range, but invalid current version (for coverage) | 153 | pending | — | — | — |
+| filters versions with major increment greater than maxMajorIncrement | 187 | pending | — | — | — |
+| allows all versions when maxMajorIncrement is 0 | 216 | pending | — | — | — |
+| filters with maxMajorIncrement set to 1 | 243 | pending | — | — | — |
+| handles maxMajorIncrement with 0.x versions | 272 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/lookup/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/index.spec.ts
+**Total tests:** 169 | **Ported:** 0 | **Actionable:** 169 | **Status:** pending
+
+### `workers/repository/process/lookup/index › .lookupUpdates()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if invalid currentValue | 100 | pending | — | — | — |
+| returns null if unknown datasource | 111 | pending | — | — | — |
+| handles error result from getPkgReleasesWithResult | 122 | pending | — | — | — |
+| returns rollback for pinned version | 134 | pending | — | — | — |
+| returns rollback for ranged version | 173 | pending | — | — | — |
+| supports minor and major upgrades for tilde ranges | 199 | pending | — | — | — |
+| supports lock file updates mixed with regular updates | 249 | pending | — | — | — |
+| returns multiple updates if grouping but separateMajorMinor=true | 309 | pending | — | — | — |
+| returns additional update if grouping but separateMinorPatch=true | 351 | pending | — | — | — |
+| returns one update if grouping and separateMajorMinor=false | 407 | pending | — | — | — |
+| returns both updates if automerging minor | 437 | pending | — | — | — |
+| enforces allowedVersions | 488 | pending | — | — | — |
+| enforces allowedVersions with regex | 516 | pending | — | — | — |
+| enforces allowedVersions with negative regex | 544 | pending | — | — | — |
+| falls back to semver syntax allowedVersions | 572 | pending | — | — | — |
+| falls back to pep440 syntax allowedVersions | 601 | pending | — | — | — |
+| skips invalid allowedVersions | 630 | pending | — | — | — |
+| returns patch update even if separate patches not configured | 642 | pending | — | — | — |
+| returns minor update if automerging both patch and minor | 683 | pending | — | — | — |
+| returns patch update if separateMinorPatch | 730 | pending | — | — | — |
+| returns patch minor and major | 772 | pending | — | — | — |
+| disables major release separation (major) | 827 | pending | — | — | — |
+| disables major release separation (minor) | 864 | pending | — | — | — |
+| uses minimum version for vulnerabilityAlerts | 893 | pending | — | — | — |
+| uses highest available version for vulnerabilityAlerts when vulnerabilityFixStrategy=highest | 921 | pending | — | — | — |
+| uses vulnerabilityFixVersion when a version | 950 | pending | — | — | — |
+| takes a later release when vulnerabilityFixVersion does not exist | 979 | pending | — | — | — |
+| uses vulnerabilityFixVersion when a range | 1008 | pending | — | — | — |
+| takes highest available version when using vulnerabilityFixStrategy=highest with vulnerabilityFixVersion | 1037 | pending | — | — | — |
+| ignores vulnerabilityFixVersion if not a version | 1067 | pending | — | — | — |
+| returns no results if vulnerabilityFixVersion is too high | 1096 | pending | — | — | — |
+| supports minor and major upgrades for ranged versions | 1111 | pending | — | — | — |
+| supports for x-range-all for replaceStrategy = pin (with lockfile) abcd | 1161 | pending | — | — | — |
+| doesnt offer updates for x-range-all (with lockfile) when replaceStrategy = $strategy | 1184 | pending | — | — | — |
+| supports pinning for x-range-all (no lockfile) | 1207 | pending | — | — | — |
+| covers pinning an unsupported x-range-all value | 1229 | pending | — | — | — |
+| doesnt offer updates for x-range-all (no lockfile) when replaceStrategy = $strategy | 1243 | pending | — | — | — |
+| ignores pinning for ranges when other upgrade exists | 1266 | pending | — | — | — |
+| upgrades minor ranged versions | 1302 | pending | — | — | — |
+| handles update-lockfile | 1338 | pending | — | — | — |
+| handles the in-range-only strategy and updates lockfile within range | 1369 | pending | — | — | — |
+| handles the in-range-only strategy and discards changes not within range | 1400 | pending | — | — | — |
+| handles unconstrainedValue values | 1431 | pending | — | — | — |
+| handles unconstrainedValue values with rangeStrategy !== update-lockfile and isVulnerabilityAlert | 1461 | pending | — | — | — |
+| widens minor ranged versions if configured | 1491 | pending | — | — | — |
+| replaces minor complex ranged versions if configured | 1520 | pending | — | — | — |
+| widens major ranged versions if configured | 1549 | pending | — | — | — |
+| replaces major complex ranged versions if configured | 1581 | pending | — | — | — |
+| pins minor ranged versions | 1613 | pending | — | — | — |
+| uses the locked version for pinning | 1635 | pending | — | — | — |
+| ignores minor ranged versions when not pinning | 1658 | pending | — | — | — |
+| ignores minor ranged versions when locked | 1672 | pending | — | — | — |
+| upgrades tilde ranges | 1687 | pending | — | — | — |
+| upgrades .x minor ranges | 1723 | pending | — | — | — |
+| upgrades tilde ranges without pinning | 1759 | pending | — | — | — |
+| upgrades .x major ranges without pinning | 1788 | pending | — | — | — |
+| upgrades .x minor ranges without pinning | 1817 | pending | — | — | — |
+| upgrades .x complex minor ranges without pinning | 1846 | pending | — | — | — |
+| upgrades shorthand major ranges without pinning | 1875 | pending | — | — | — |
+| upgrades shorthand minor ranges without pinning | 1904 | pending | — | — | — |
+| upgrades multiple tilde ranges without pinning | 1933 | pending | — | — | — |
+| upgrades multiple caret ranges without pinning | 1976 | pending | — | — | — |
+| supports complex ranges | 2019 | pending | — | — | — |
+| supports complex major ranges | 2062 | pending | — | — | — |
+| supports complex major hyphen ranges | 2094 | pending | — | — | — |
+| widens .x OR ranges | 2126 | pending | — | — | — |
+| widens stanndalone major OR ranges | 2158 | pending | — | — | — |
+| supports complex tilde ranges | 2190 | pending | — | — | — |
+| returns nothing for greater than ranges | 2219 | pending | — | — | — |
+| upgrades less than equal ranges without pinning | 2233 | pending | — | — | — |
+| upgrades less than ranges without pinning | 2276 | pending | — | — | — |
+| upgrades less than major ranges | 2319 | pending | — | — | — |
+| upgrades less than equal minor ranges | 2348 | pending | — | — | — |
+| upgrades equal minor ranges | 2377 | pending | — | — | — |
+| upgrades less than equal major ranges | 2406 | pending | — | — | — |
+| upgrades major less than equal ranges | 2436 | pending | — | — | — |
+| upgrades major less than ranges without pinning | 2465 | pending | — | — | — |
+| upgrades major greater than less than ranges without pinning | 2494 | pending | — | — | — |
+| upgrades minor greater than less than ranges without pinning | 2523 | pending | — | — | — |
+| upgrades minor greater than less than equals ranges without pinning | 2566 | pending | — | — | — |
+| rejects reverse ordered less than greater than | 2609 | pending | — | — | — |
+| supports > latest versions if configured | 2623 | pending | — | — | — |
+| should ignore unstable versions if the current version is stable | 2651 | pending | — | — | — |
+| should ignore unstable versions from datasource | 2664 | pending | — | — | — |
+| should allow unstable versions in same major for node | 2695 | pending | — | — | — |
+| should return pendingChecks | 2727 | pending | — | — | — |
+| should return pendingVersions | 2773 | pending | — | — | — |
+| should allow unstable versions if the ignoreUnstable=false | 2819 | pending | — | — | — |
+| should allow unstable versions if the current version is unstable | 2848 | pending | — | — | — |
+| should not jump unstable versions | 2878 | pending | — | — | — |
+| should update pinned versions if updatePinnedDependencies=true | 2908 | pending | — | — | — |
+| should not update pinned versions if updatePinnedDependencies=false | 2939 | pending | — | — | — |
+| should follow dist-tag even if newer version exists | 2956 | pending | — | — | — |
+| should roll back to dist-tag if current version is higher | 2987 | pending | — | — | — |
+| should jump unstable versions if followTag | 3019 | pending | — | — | — |
+| should update nothing if current version is dist-tag | 3050 | pending | — | — | — |
+| should warn if no version matches dist-tag | 3067 | pending | — | — | — |
+| should warn if no digest could be found but there is a current digest | 3090 | pending | — | — | — |
+
+### `workers/repository/process/lookup/index › .lookupUpdates() › pinning enabled but no existing digest`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should not warn if no new digest could be found | 3125 | pending | — | — | — |
+| should use registry of update to determine digest | 3154 | pending | — | — | — |
+| should treat zero zero tilde ranges as 0.0.x | 3199 | pending | — | — | — |
+| should treat zero zero caret ranges as pinned | 3216 | pending | — | — | — |
+| should downgrade from missing versions | 3248 | pending | — | — | — |
+| should upgrade to only one major | 3279 | pending | — | — | — |
+| should upgrade to two majors | 3322 | pending | — | — | — |
+| should upgrade to 16 minors | 3380 | pending | — | — | — |
+| does not jump  major unstable | 3395 | pending | — | — | — |
+| supports in-range caret updates | 3409 | pending | — | — | — |
+| supports in-range tilde updates | 3439 | pending | — | — | — |
+| supports in-range tilde patch updates | 3484 | pending | — | — | — |
+| supports in-range gte updates | 3529 | pending | — | — | — |
+| supports majorgte updates | 3559 | pending | — | — | — |
+| rejects in-range unsupported operator | 3590 | pending | — | — | — |
+| rejects non-fully specified in-range updates | 3604 | pending | — | — | — |
+| rejects complex range in-range updates | 3618 | pending | — | — | — |
+| replaces non-range in-range updates | 3632 | pending | — | — | — |
+| handles github 404 | 3661 | pending | — | — | — |
+| handles pypi 404 | 3675 | pending | — | — | — |
+| handles packagist | 3692 | pending | — | — | — |
+| handles unknown datasource | 3712 | pending | — | — | — |
+| handles PEP440 | 3725 | pending | — | — | — |
+| returns complex object | 3767 | pending | — | — | — |
+| prefers lockedVersion | 3803 | pending | — | — | — |
+| ignores deprecated when it is not the latest | 3820 | pending | — | — | — |
+| treats all versions as deprecated if latest is deprecated | 3873 | pending | — | — | — |
+| skips unsupported values | 3925 | pending | — | — | — |
+| skips undefined values | 3942 | pending | — | — | — |
+| handles digest pin | 3958 | pending | — | — | — |
+| skips uncompatible versions for 8.1.0 | 4010 | pending | — | — | — |
+| skips uncompatible versions for 8.1 | 4056 | pending | — | — | — |
+| skips uncompatible versions for 8 | 4114 | pending | — | — | — |
+| applies versionCompatibility for 18.10.0 | 4160 | pending | — | — | — |
+| applies versionCompatibility for maven | 4232 | pending | — | — | — |
+| handles versionCompatibility mismatch | 4272 | pending | — | — | — |
+| applies versionCompatibility for debian codenames with suffix | 4299 | pending | — | — | — |
+| handles digest pin for up to date version | 4340 | pending | — | — | — |
+| handles no fitting version and no version in lock file | 4379 | pending | — | — | — |
+| handles digest pin for non-version | 4408 | pending | — | — | — |
+| handles digest lookup failure | 4446 | pending | — | — | — |
+| handles digest update | 4473 | pending | — | — | — |
+| handles digest update for custom datasource | 4525 | pending | — | — | — |
+| handles digest update for non-version | 4552 | pending | — | — | — |
+| handles git submodule update | 4590 | pending | — | — | — |
+| handles sourceUrl packageRules with version restrictions | 4613 | pending | — | — | — |
+| handles current age packageRules with version restrictions | 4655 | pending | — | — | — |
+| does not apply package rules for matchCurrentAge if packageRules doesn not have a current age matcher | 4703 | pending | — | — | — |
+| does not apply package rules for matchCurrentAge if the releaseTimestamp for current version is missing | 4762 | pending | — | — | — |
+| handles replacements - name only without pinDigests enabled | 4815 | pending | — | — | — |
+| handles replacements - name only with pinDigests enabled | 4857 | pending | — | — | — |
+| handles replacements - name only no version/tag | 4912 | pending | — | — | — |
+| handles replacements - Digest configured and validating getDigest funtion call | 4934 | pending | — | — | — |
+| handles replacements - Digest configured with replacementNameTemplate and validating getDigest function call | 4994 | pending | — | — | — |
+| handles replacements - skips if package and replacement names match | 5083 | pending | — | — | — |
+| handles replacements - name and version | 5096 | pending | — | — | — |
+| handles replacements - can template replacement name without a replacement version | 5117 | pending | — | — | — |
+| handles replacements - can template replacement name with a replacement version | 5156 | pending | — | — | — |
+| handles replacements - replacementName takes precedence over replacementNameTemplate | 5196 | pending | — | — | — |
+| handles replacements - can template replacement version without a replacement name | 5236 | pending | — | — | — |
+| handles replacements - can template replacement version with a replacement name | 5275 | pending | — | — | — |
+| handles replacements - can template replacement version with a template replacement name | 5315 | pending | — | — | — |
+| handles replacements - replacementVersion takes precedence over replacementVersionTemplate | 5355 | pending | — | — | — |
+| handles replacements - can perform replacement even for invalid versioning | 5395 | pending | — | — | — |
+| handles replacements - from datasource | 5422 | pending | — | — | — |
+| rollback for invalid version to last stable version | 5445 | pending | — | — | — |
+
+### `workers/repository/process/lookup/index › .lookupUpdates() › handles merge confidence`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| gets a merge confidence level for a given update when corresponding packageRule is in use | 5493 | pending | — | — | — |
+| does not get a merge confidence level when no packageRule is set | 5536 | pending | — | — | — |
+| does not set merge confidence value when API is not in use | 5567 | pending | — | — | — |
+| detects gomod updates and uses updateType=digest when appropriate | 5588 | pending | — | — | — |
+| handles changelog with content | 5629 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/lookup/timestamps.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/timestamps.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+
+### `workers/repository/process/lookup/timestamps › calculateLatestReleaseBump`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the timestamp of the latest version | 10 | pending | — | — | — |
+| handles releases with missing timestamps | 33 | pending | — | — | — |
+| handles latest release with missing timestamp | 53 | pending | — | — | — |
+| handles latest release with deprecation flag | 75 | pending | — | — | — |
+| handles latest release with invalid version | 99 | pending | — | — | — |
+| returns undefined mostRecentTimestamp when no valid timestamps exist | 122 | pending | — | — | — |
+| handles empty releases array | 132 | pending | — | — | — |
+| preserves other properties in the release result | 138 | pending | — | — | — |
+| handles ancient versions that are higher than the ones recently released | 160 | pending | — | — | — |
+| handles errors thrown for invalid versions | 180 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/lookup/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/utils.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `workers/repository/process/lookup/utils › determineNewReplacementName()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the replacement name if defined | 14 | pending | — | — | — |
+| returns the replacement name template if defined | 23 | pending | — | — | — |
+| returns the package name if defined | 32 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/sort.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/sort.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `workers/repository/process/sort › sortBranches()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sorts based on updateType and prTitle | 6 | pending | — | — | — |
+| sorts based on prPriority | 49 | pending | — | — | — |
+| sorts based on isVulnerabilityAlert | 86 | pending | — | — | — |
+| sorts based on isVulnerabilityAlert symmetric | 124 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/vulnerabilities.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/vulnerabilities.spec.ts
+**Total tests:** 38 | **Ported:** 0 | **Actionable:** 38 | **Status:** pending
+
+### `workers/repository/process/vulnerabilities › create()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works, and is a singleton | 29 | pending | — | — | — |
+| throws when osv-offline error | 38 | pending | — | — | — |
+
+### `workers/repository/process/vulnerabilities › fetchVulnerabilities()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return list of Vulnerabilities | 62 | pending | — | — | — |
+
+### `workers/repository/process/vulnerabilities › fetchVulnerabilities() › malicious packages`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| are marked for dependencies with a MAL- advisory ID against their current version with malicious-version-in-use | 129 | pending | — | — | — |
+| are logged | 251 | pending | — | — | — |
+| are not counted if the affected versions do not match | 369 | pending | — | — | — |
+| handles a MAL- advisory with no affected field | 426 | pending | — | — | — |
+| handles a malicious dependency where updates is undefined | 477 | pending | — | — | — |
+
+### `workers/repository/process/vulnerabilities › fetchVulnerabilities() › malicious packages › when a malicious dependency update is proposed`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| applies to dependency updates, and sets malicious-update-proposed | 526 | pending | — | — | — |
+| logs | 590 | pending | — | — | — |
+| falls back to update.newValue when newVersion is missing, and skips updates that are not malicious | 662 | pending | — | — | — |
+
+### `workers/repository/process/vulnerabilities › appendVulnerabilityPackageRules()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| unsupported datasource | 760 | pending | — | — | — |
+| package found but no vulnerabilities | 780 | pending | — | — | — |
+| vulnerability without affected field | 801 | pending | — | — | — |
+| withdrawn vulnerability | 826 | pending | — | — | — |
+| invalid dep version | 855 | pending | — | — | — |
+| exception while fetching vulnerabilities | 882 | pending | — | — | — |
+| log event with invalid version | 911 | pending | — | — | — |
+| no version or range affected | 960 | pending | — | — | — |
+| no fixed version available | 990 | pending | — | — | — |
+| does not accidentally downgrade versions due to fixed version for other range | 1024 | pending | — | — | — |
+| vulnerability with multiple unsorted events | 1067 | pending | — | — | — |
+| vulnerability with multiple affected entries and version ranges | 1131 | pending | — | — | — |
+| package rules are sorted by fixed version even if affected is unsorted | 1203 | pending | — | — | — |
+| filters not applicable vulnerability | 1272 | pending | — | — | — |
+| returns a single packageRule for regex manager | 1292 | pending | — | — | — |
+| returns multiple packageRules for different vulnerabilities | 1395 | pending | — | — | — |
+| returns packageRules for Hackage | 1455 | pending | — | — | — |
+| filters not applicable vulnerability based on last_affected version | 1512 | pending | — | — | — |
+| describe fixed version as ecosystem-specific version constraint | 1555 | pending | — | — | — |
+| describe last_affected version as ecosystem-specific version constraint | 1680 | pending | — | — | — |
+| returns packageRule for deps-edn package using OSV Maven ecosystem | 1734 | pending | — | — | — |
+| returns packageRule based on last_affected version | 1786 | pending | — | — | — |
+| handles invalid CVSS scores gracefully | 1862 | pending | — | — | — |
+| prefer CVSS_V4 scores over CVSS_V3 | 1945 | pending | — | — | — |
+| show severity text in GHSA advisories without CVSS score | 2036 | pending | — | — | — |
+| formats headings of vulnerability details | 2097 | pending | — | — | — |
+
+### `workers/repository/process/vulnerabilities › evaluateCvssVector`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 2194 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/process/write.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/write.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `workers/repository/process/write › writeUpdates()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| stops after automerge | 48 | pending | — | — | — |
+| increments branch counter | 106 | pending | — | — | — |
+| return no-work if branch fingerprint is not different | 147 | pending | — | — | — |
+| updates branch fingerprint when new commit is made | 176 | pending | — | — | — |
+| caches same fingerprint when no commit is made and branch cache existed | 219 | pending | — | — | — |
+| caches same fingerprint when no commit is made | 264 | pending | — | — | — |
+| creates new branchCache when cache is not enabled | 306 | pending | — | — | — |
+
+### `workers/repository/process/write › canSkipBranchUpdateCheck()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if no cache | 357 | pending | — | — | — |
+| returns false when fingerprints are not same | 368 | pending | — | — | — |
+| returns true | 378 | pending | — | — | — |
+
+### `workers/repository/process/write › syncBranchState()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates minimal branch state when cache is not populated | 390 | pending | — | — | — |
+| when base branch name is different updates it and invalidates related cache | 405 | pending | — | — | — |
+| when base branch sha is different updates it and invalidates related values | 438 | pending | — | — | — |
+| when branch sha is different updates it and invalidates related values | 473 | pending | — | — | — |
+| when branch sha is different updates it and sets commitTimestamp | 509 | pending | — | — | — |
+| no change if all parameters are same | 548 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/reconfigure/comment.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/comment.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/reconfigure/comment › ensureReconfigurePrComment()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| ensures comment | 35 | pending | — | — | — |
+| ensures comment - when no package files detected | 47 | pending | — | — | — |
+| dryrun | 59 | pending | — | — | — |
+
+### `workers/repository/reconfigure/comment › getConfigDesc`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty | 87 | pending | — | — | — |
+| returns a full list | 92 | pending | — | — | — |
+| adds schedule | 115 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/reconfigure/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `workers/repository/reconfigure/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no effect when running with platform=local | 66 | pending | — | — | — |
+| no effect on repo with no reconfigure branch | 75 | pending | — | — | — |
+| skips if reconfigure branch unchanged | 85 | pending | — | — | — |
+| skips if error while finding reconfigure config | 103 | pending | — | — | — |
+| skips if reconfigure config is invalid | 115 | pending | — | — | — |
+| validates reconfigure branch and skips extraction if no reconfigure pr | 124 | pending | — | — | — |
+| extracts deps and adds comment when branch and reconfigure pr both exist | 133 | pending | — | — | — |
+| skips pr comment if error during deps extraction | 144 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/reconfigure/reconfigure-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/reconfigure-cache.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `workers/repository/reconfigure/reconfigure-cache › setReconfigureBranchCache()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sets new cache | 16 | pending | — | — | — |
+| updates old cache | 28 | pending | — | — | — |
+| updates extractResult old cache | 45 | pending | — | — | — |
+
+### `workers/repository/reconfigure/reconfigure-cache › deleteReconfigureBranchCache()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| deletes cache | 69 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/reconfigure/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/utils.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/reconfigure/utils › getReconfigureConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no config file found | 17 | pending | — | — | — |
+| handles error while reading reconfigure config file | 26 | pending | — | — | — |
+| handles invalid reconfigure config | 36 | pending | — | — | — |
+| return config | 51 | pending | — | — | — |
+
+### `workers/repository/reconfigure/utils › getReconfigureBranchName()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns reconfigure branch name | 64 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/reconfigure/validate.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/reconfigure/validate.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `workers/repository/reconfigure/validate`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles failed validation | 35 | pending | — | — | — |
+| adds comment if reconfigure PR exists | 55 | pending | — | — | — |
+| handles successful validation | 71 | pending | — | — | — |
+| skips adding status check if statusCheckNames.configValidation is null | 86 | pending | — | — | — |
+| skips adding status check if statusCheckNames.configValidation is empty string | 105 | pending | — | — | — |
+| skips validation if status check present | 124 | pending | — | — | — |
+| handles non-default config file | 138 | pending | — | — | — |
+| migrates config before validating | 153 | pending | — | — | — |
+| handles array fields which accept strings | 168 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/result.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/result.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `workers/repository/result › processResult()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| runs | 16 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/artifacts.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/artifacts.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+
+### `workers/repository/update/branch/artifacts › setArtifactsErrorStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds status | 26 | pending | — | — | — |
+| skips status | 32 | pending | — | — | — |
+| skips status if statusCheckNames.artifactError is null | 38 | pending | — | — | — |
+| skips status if statusCheckNames.artifactError is empty string | 52 | pending | — | — | — |
+| skips status if statusCheckNames is undefined | 66 | pending | — | — | — |
+| skips status (dry-run) | 78 | pending | — | — | — |
+| skips status (no errors) | 84 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/auto-replace.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/auto-replace.spec.ts
+**Total tests:** 70 | **Ported:** 0 | **Actionable:** 70 | **Status:** pending
+
+### `workers/repository/update/branch/auto-replace › doAutoReplace`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| rebases if the deps list has changed | 36 | pending | — | — | — |
+| rebases if the deps to update has changed | 47 | pending | — | — | — |
+| uses depName or packageName | 56 | pending | — | — | — |
+| updates version only | 78 | pending | — | — | — |
+| handles a double attempt | 93 | pending | — | — | — |
+| handles already updated | 107 | pending | — | — | — |
+| handles no work | 128 | pending | — | — | — |
+| returns existing content if replaceString mismatch | 144 | pending | — | — | — |
+| updates version and integrity | 163 | pending | — | — | — |
+| updates with autoReplaceNewString | 182 | pending | — | — | — |
+| succeeds when using autoReplaceStringTemplate to update depName when using regex | 204 | pending | — | — | — |
+| fails with oldversion in depName | 244 | pending | — | — | — |
+| fails with digest mismatch | 266 | pending | — | — | — |
+| updates with docker replacement | 284 | pending | — | — | — |
+| handles already replaced | 298 | pending | — | — | — |
+| handles replacement with depName===newName when replaceString exists | 309 | pending | — | — | — |
+| updates with terraform replacement | 333 | pending | — | — | — |
+| updates with ansible replacement | 350 | pending | — | — | — |
+| updates with ansible-galaxy roles replacement | 376 | pending | — | — | — |
+| updates with azure-pipeline image replacement | 398 | pending | — | — | — |
+| updates with batect image replacement | 422 | pending | — | — | — |
+| updates with bitbucket-pipelines image replacement | 445 | pending | — | — | — |
+| updates with buildkite plugin replacement | 464 | pending | — | — | — |
+| updates with bundler gem replacement | 487 | pending | — | — | — |
+| updates with cake #addin replacement | 509 | pending | — | — | — |
+| updates with cargo dependency replacement | 528 | pending | — | — | — |
+| updates with cloudbuild replacement | 549 | pending | — | — | — |
+| updates with podfile pod replacement | 572 | pending | — | — | — |
+| updates with composer require replacement | 590 | pending | — | — | — |
+| updates with edn deps replacement | 614 | pending | — | — | — |
+| updates with docker-compose image replacement | 637 | pending | — | — | — |
+| updates with Dockerfile image replacement | 660 | pending | — | — | — |
+| updates with Dockerfile image replacement with digest | 679 | pending | — | — | — |
+| updates with droneci image replacement | 701 | pending | — | — | — |
+| updates with gitlabci image replacement | 724 | pending | — | — | — |
+| updates with helm value image/repository replacement | 743 | pending | — | — | — |
+| updates with helm value image/repository replacement with digest | 767 | pending | — | — | — |
+| updates with helm value image/repository wrong version | 794 | pending | — | — | — |
+| updates with helm value image/repository prefix replacement | 816 | pending | — | — | — |
+| updates with helm value image/repository version prefix replacement | 840 | pending | — | — | — |
+| updates with jenkins plugin replacement | 864 | pending | — | — | — |
+| updates with meteor npm.depends replacement | 882 | pending | — | — | — |
+| checks for replaceWithoutReplaceString double update | 908 | pending | — | — | — |
+| updates with mix deps replacement | 942 | pending | — | — | — |
+| updates with nuget tools replacement | 983 | pending | — | — | — |
+| updates with pre-commit repo replacement | 1011 | pending | — | — | — |
+| updates with terraform image replacement | 1033 | pending | — | — | — |
+| updates with terraform module replacement | 1056 | pending | — | — | — |
+| updates with setup-cfg replacement | 1079 | pending | — | — | — |
+| updates with nvm version replacement | 1100 | pending | — | — | — |
+| updates with multiple same name replacement without replaceString | 1118 | pending | — | — | — |
+| updates with multiple same name replacement without replaceString 2 | 1142 | pending | — | — | — |
+| updates with multiple same version replacement without replaceString | 1166 | pending | — | — | — |
+| updates with multiple same digest replacement without replaceString | 1190 | pending | — | — | — |
+| docker: updates with pinDigest enabled but no currentDigest value | 1216 | pending | — | — | — |
+| docker: updates with pinDigest enabled and a currentDigest value | 1240 | pending | — | — | — |
+| autoReplaceGlobalMatch: throws error when globally replacing recurring values across version and digests | 1264 | pending | — | — | — |
+| autoReplaceGlobalMatch: updates when replacing first match only of recurring values across version and digests | 1284 | pending | — | — | — |
+| regex: updates with pinDigest enabled but no currentDigest value | 1309 | pending | — | — | — |
+| regex: updates with pinDigest enabled and a currentDigest value | 1333 | pending | — | — | — |
+| jsonata: update currentValue | 1361 | pending | — | — | — |
+| jsonata: update currentDigest | 1385 | pending | — | — | — |
+| jsonata: update currentValue and currentDigest | 1408 | pending | — | — | — |
+| github-actions: updates with newValue only | 1433 | pending | — | — | — |
+| github-actions: updates with newValue and newDigest | 1470 | pending | — | — | — |
+| github-actions: updates with pinDigest enabled but no currentDigest value | 1507 | pending | — | — | — |
+| github-actions: updates with pinDigest enabled and a currentDigest value | 1546 | pending | — | — | — |
+| github-actions: failes to update currentDigestShort | 1584 | pending | — | — | — |
+| docker: replacement with same digest should not corrupt digest via currentDigestShort | 1622 | pending | — | — | — |
+| updates only digest | 1653 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/automerge.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/automerge.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+
+### `workers/repository/update/branch/automerge › tryBranchAutomerge`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if not configured for automerge | 19 | pending | — | — | — |
+| returns false if automergeType is pr | 24 | pending | — | — | — |
+| returns false if off schedule | 30 | pending | — | — | — |
+| returns false if branch status is not success | 37 | pending | — | — | — |
+| returns branch status error if branch status is failure | 44 | pending | — | — | — |
+| returns false if PR exists | 51 | pending | — | — | — |
+| returns false if automerge fails | 61 | pending | — | — | — |
+| returns true if automerge succeeds | 76 | pending | — | — | — |
+| returns true if automerge succeeds (dry-run) | 88 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/bump-versions.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/bump-versions.spec.ts
+**Total tests:** 23 | **Ported:** 0 | **Actionable:** 23 | **Status:** pending
+
+### `workers/repository/update/branch/bump-versions › bumpVersions`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should be noop if bumpVersions is undefined | 11 | pending | — | — | — |
+| should be noop if bumpVersions is empty array | 18 | pending | — | — | — |
+| should be noop if no packageFiles or artifacts have been updated | 29 | pending | — | — | — |
+| should catch template error in filePatterns | 49 | pending | — | — | — |
+| should catch template error in matchString | 84 | pending | — | — | — |
+| should be noop if no files are matching | 122 | pending | — | — | — |
+| should log debug if no matchString could be applied | 165 | pending | — | — | — |
+| should catch template error in bumpType | 201 | pending | — | — | — |
+| should bump version in a non edited file and add to updatedArtifacts | 239 | pending | — | — | — |
+| should bump version with patch by default | 271 | pending | — | — | — |
+| should bump version in an already changed packageFiles | 302 | pending | — | — | — |
+| should bump version in an already changed artifact file | 347 | pending | — | — | — |
+| should bump version in deleted and recreated file changed artifact file | 392 | pending | — | — | — |
+| should ignore deleted file | 445 | pending | — | — | — |
+| should log if file is not readable | 474 | pending | — | — | — |
+| should ignore not matched strings | 518 | pending | — | — | — |
+| should bump major version | 568 | pending | — | — | — |
+| should bump major/minor version | 600 | pending | — | — | — |
+| should bump minor version | 632 | pending | — | — | — |
+| throws for invalid bump type and short version | 664 | pending | — | — | — |
+| should use matched version when bumpType is sync | 696 | pending | — | — | — |
+| should log debug when no upgrades found for sync type | 736 | pending | — | — | — |
+| should log debug when newVersion is not found in upgrades for sync type | 766 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/check-existing.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/check-existing.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `workers/repository/update/branch/check-existing › prAlreadyExisted`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if recreating closed PRs | 21 | pending | — | — | — |
+| returns false if check misses | 27 | pending | — | — | — |
+| returns true if first check hits | 33 | pending | — | — | — |
+| returns true if second check hits | 45 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/commit.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/commit.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `workers/repository/update/branch/commit › commitFilesToBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty files | 29 | pending | — | — | — |
+| commits files | 34 | pending | — | — | — |
+| dry runs | 62 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `workers/repository/update/branch/execute-post-upgrade-commands › postUpgradeCommandsExecutor`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles an artifact which is a directory | 34 | pending | — | — | — |
+| executes commands on update package files | 92 | pending | — | — | — |
+| does not execute command with shell mode by default | 140 | pending | — | — | — |
+| executes command with shell mode when allowShellExecutorForPostUpgradeCommands=true | 197 | pending | — | — | — |
+| does not execute command with shell mode when allowShellExecutorForPostUpgradeCommands=false | 255 | pending | — | — | — |
+| creates data file for commands | 313 | pending | — | — | — |
+| should not create data file if no commands given | 375 | pending | — | — | — |
+| logs files which do not match fileFilters | 426 | pending | — | — | — |
+| excludes .npmrc files when npmrc config is present | 480 | pending | — | — | — |
+| handles previously-deleted files which are re-added | 528 | pending | — | — | — |
+| does not add back files that are renamed | 576 | pending | — | — | — |
+| retains previously deleted files too | 666 | pending | — | — | — |
+| passes git environment variables to exec | 754 | pending | — | — | — |
+| uses workingDirTemplate when provided | 817 | pending | — | — | — |
+| uses localDir when workingDirTemplate is not provided | 869 | pending | — | — | — |
+| installed tool constraints that match package constraints are filtered out before templating | 919 | pending | — | — | — |
+
+### `workers/repository/update/branch/execute-post-upgrade-commands › postUpgradeCommandsExecutor › when using installTools`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| logs when skipping a constraint that isn't a known tool | 1036 | pending | — | — | — |
+| logs when skipping a value that isn't a known constraint | 1109 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/get-updated.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/get-updated.spec.ts
+**Total tests:** 53 | **Ported:** 0 | **Actionable:** 53 | **Status:** pending
+
+### `workers/repository/update/branch/get-updated › getUpdatedPackageFiles()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles autoreplace base updated | 64 | pending | — | — | — |
+| handles autoreplace branch no update | 79 | pending | — | — | — |
+| handles autoreplace failure | 96 | pending | — | — | — |
+| handles autoreplace branch needs update | 102 | pending | — | — | — |
+| handles empty | 119 | pending | — | — | — |
+| handles null content | 130 | pending | — | — | — |
+| handles content change | 139 | pending | — | — | — |
+| handles lock files | 159 | pending | — | — | — |
+| handles artifact notices | 195 | pending | — | — | — |
+| handles lockFileMaintenance | 243 | pending | — | — | — |
+| for updatedArtifacts passes proper lockFiles | 270 | pending | — | — | — |
+| for nonUpdatedArtifacts passes proper lockFiles | 306 | pending | — | — | — |
+| for lockFileMaintenance passes proper lockFiles | 345 | pending | — | — | — |
+| handles isRemediation success | 381 | pending | — | — | — |
+| handles unsupported isRemediation | 404 | pending | — | — | — |
+| handles isRemediation rebase | 426 | pending | — | — | — |
+| handles lockFileMaintenance error | 450 | pending | — | — | — |
+| handles lock file errors | 470 | pending | — | — | — |
+| handles git submodules | 492 | pending | — | — | — |
+| updates lock files in mixed-manager scenarios | 518 | pending | — | — | — |
+| update artifacts on update-lockfile strategy | 644 | pending | — | — | — |
+| update artifacts on update-lockfile strategy with no updateLockedDependency | 682 | pending | — | — | — |
+| does not update artifacts when skipArtifactsUpdate=true | 717 | pending | — | — | — |
+| updates artifacts when skipArtifactsUpdate=$0 | 788 | pending | — | — | — |
+| attempts updateLockedDependency and handles unsupported | 862 | pending | — | — | — |
+| attempts updateLockedDependency and handles already-updated | 885 | pending | — | — | — |
+| attempts updateLockedDependency and handles updated files with reuse branch | 909 | pending | — | — | — |
+| bumps versions in updateDependency managers | 935 | pending | — | — | — |
+| bumps versions in autoReplace managers | 957 | pending | — | — | — |
+| handles replacement | 981 | pending | — | — | — |
+| handles package files updated by multiple managers | 997 | pending | — | — | — |
+
+### `workers/repository/update/branch/get-updated › getUpdatedPackageFiles() › when some artifacts have changed and others have not › updated lockfile + unsupported lockfile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| only writes changed contents | 1071 | pending | — | — | — |
+
+### `workers/repository/update/branch/get-updated › getUpdatedPackageFiles() › when some artifacts have changed and others have not › unsupported lockfile + updated lockfile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| only writes changed contents | 1086 | pending | — | — | — |
+
+### `workers/repository/update/branch/get-updated › getUpdatedPackageFiles() › when some artifacts have changed and others have not › lockfile update + non-lockfile update`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| only writes changed contents | 1101 | pending | — | — | — |
+
+### `workers/repository/update/branch/get-updated › getUpdatedPackageFiles() › when some artifacts have changed and others have not › non-lockfile update + lockfile update`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| only writes changed contents | 1119 | pending | — | — | — |
+
+### `workers/repository/update/branch/get-updated › getUpdatedPackageFiles() › when some artifacts have changed and others have not › remediation update + lockfile unsupported update`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| only writes changed contents | 1137 | pending | — | — | — |
+
+### `workers/repository/update/branch/get-updated › getUpdatedPackageFiles() › when some artifacts have changed and others have not › lockfile unsupported update + remediation update`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| only writes changed contents | 1157 | pending | — | — | — |
+| passes package files to updateArtifacts in the same order they were returned by the manager | 1176 | pending | — | — | — |
+
+### `workers/repository/update/branch/get-updated › checks if an artifact update introduces a pending version › when artifact update introduces a pending version`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| logs an artifact error | 1242 | pending | — | — | — |
+| does not add artifact error when no deps match pending versions | 1345 | pending | — | — | — |
+| does not add artifact error when a different dependency has the same version as the pending version | 1376 | pending | — | — | — |
+| skips pending version check when upgrade has no pendingVersions | 1411 | pending | — | — | — |
+| skips pending version check when no artifact results | 1434 | pending | — | — | — |
+| does not add artifact error when extractPackageFile returns null | 1450 | pending | — | — | — |
+| adds multiple artifact errors when multiple deps match pending versions | 1474 | pending | — | — | — |
+| skips pending version check when minimumReleaseAgeBehaviour is not timestamp-required | 1519 | pending | — | — | — |
+| adds logs a debug log if it fails to re-extract the package file | 1561 | pending | — | — | — |
+| rejects when an updated dependency has no depName or packageName | 1590 | pending | — | — | — |
+| adds an artifact error when an updated dependency has no depName, but does have a packageName | 1634 | pending | — | — | — |
+| rejects when an updated dependency has no new version | 1671 | pending | — | — | — |
+| rejects when upgrade has no depName | 1719 | pending | — | — | — |
+| rejects when upgrade has no depName | 1734 | pending | — | — | — |
+| adds artifact error for nonUpdatedPackageFiles (lockfile update scenario) | 1748 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/index.spec.ts
+**Total tests:** 101 | **Ported:** 0 | **Actionable:** 101 | **Status:** pending
+
+### `workers/repository/update/branch/index › processBranch`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips branch if not scheduled and branch does not exist | 157 | pending | — | — | — |
+| skips branch creation if minimumGroupSize is not met | 167 | pending | — | — | — |
+| skips branch if not scheduled and not updating out of schedule | 180 | pending | — | — | — |
+| skips branch for fresh release with minimumReleaseAge | 198 | pending | — | — | — |
+| skips branch if minimumReleaseAge not met | 223 | pending | — | — | — |
+
+### `workers/repository/update/branch/index › processBranch › if release is missing releaseTimestamp with minimumReleaseAge set`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| skips branch if minimumReleaseAgeBehaviour=timestamp-required | 241 | pending | — | — | — |
+| does not skip branch if minimumReleaseAgeBehaviour=timestamp-optional | 260 | pending | — | — | — |
+| does not skip branch if minimumReleaseAgeBehaviour=timestamp-required and minimumReleaseAge=0 days | 275 | pending | — | — | — |
+| skips branch if minimumConfidence not met | 291 | pending | — | — | — |
+| processes branch if minimumConfidence is met | 310 | pending | — | — | — |
+| processes branch if not scheduled but updating out of schedule | 329 | pending | — | — | — |
+| skips branch if closed major PR found | 343 | pending | — | — | — |
+| skips branch if closed digest PR found | 358 | pending | — | — | — |
+| allows branch but disables automerge if merged PR found | 373 | pending | — | — | — |
+| skips branch if closed minor PR found | 388 | pending | — | — | — |
+| allows branch even if merged PR found | 402 | pending | — | — | — |
+| throws error if closed PR found | 418 | pending | — | — | — |
+| does not skip branch if edited PR found with rebaseLabel | 432 | pending | — | — | — |
+| skips branch if edited PR found | 451 | pending | — | — | — |
+| skips branch if tagretBranch of update PR is changed by user | 478 | pending | — | — | — |
+| skips branch if edited PR found without commenting | 510 | pending | — | — | — |
+| skips branch if target branch changed | 534 | pending | — | — | — |
+| skips branch if branch edited and no PR found | 570 | pending | — | — | — |
+| continues branch if branch edited and but PR found | 581 | pending | — | — | — |
+| skips branch if branch edited and and PR found with sha mismatch | 595 | pending | — | — | — |
+| returns if branch creation limit exceeded | 607 | pending | — | — | — |
+| returns if branch does not exist and in silent mode | 624 | pending | — | — | — |
+| returns if branch needs dependencyDashboardApproval | 642 | pending | — | — | — |
+| returns if pr creation limit exceeded and branch exists | 660 | pending | — | — | — |
+| returns if commits per run limit exceeded | 683 | pending | — | — | — |
+| does not return if commits per run limit exceeded but rebase requested | 707 | pending | — | — | — |
+| returns if commits hourly limit exceeded | 727 | pending | — | — | — |
+| does not return if commits hourly limit exceeded but rebase requested | 746 | pending | — | — | — |
+| returns if no work | 768 | pending | — | — | — |
+| returns if pending checks | 785 | pending | — | — | — |
+| returns if pending checks - but branch exists | 801 | pending | — | — | — |
+| automerges when there is no pr and, pr-creation is off-schedule | 826 | pending | — | — | — |
+| returns if branch automerged | 847 | pending | — | — | — |
+| returns if branch automerged and no checks | 865 | pending | — | — | — |
+| returns if branch automerged (dry-run) | 886 | pending | — | — | — |
+| returns if branch exists and prCreation set to approval | 906 | pending | — | — | — |
+| returns if branch exists but pending | 931 | pending | — | — | — |
+| returns if branch automerge is pending | 957 | pending | — | — | — |
+| returns if PR creation failed | 983 | pending | — | — | — |
+| handles unknown PrBlockedBy | 1009 | pending | — | — | — |
+| retries setting branch status checks after PR creation | 1035 | pending | — | — | — |
+| does not retry setting branch status checks when PR is not created | 1067 | pending | — | — | — |
+| returns if branch exists but updated | 1099 | pending | — | — | — |
+| updates branch when no fingerprint match | 1130 | pending | — | — | — |
+| updates branch when forceRebase=true | 1162 | pending | — | — | — |
+| ensures PR and comments notice | 1194 | pending | — | — | — |
+| fetches changelogs for the "branch" stage | 1228 | pending | — | — | — |
+| ensures PR and tries automerge | 1247 | pending | — | — | — |
+| ensures PR when impossible to automerge | 1271 | pending | — | — | — |
+| ensures PR when impossible to automerge with mismatch keepUpdatedLabel | 1299 | pending | — | — | — |
+| skips when automerge is off schedule | 1328 | pending | — | — | — |
+| ensures PR when impossible to automerge because off schedule | 1364 | pending | — | — | — |
+| ensures PR and adds lock file error comment with default message if no releaseTimestamp | 1392 | pending | — | — | — |
+| ensures PR and adds lock file error comment with user configured message if no releaseTimestamp | 1422 | pending | — | — | — |
+| ensures PR and adds lock file error comment with templated user configured message if no releaseTimestamp | 1458 | pending | — | — | — |
+| ensures PR and adds lock file error comment if old releaseTimestamp | 1495 | pending | — | — | — |
+| ensures PR and adds lock file error comment if new releaseTimestamp and branch exists | 1520 | pending | — | — | — |
+| throws error if lock file errors and new releaseTimestamp | 1545 | pending | — | — | — |
+| ensures PR and adds lock file error comment recreate closed | 1568 | pending | — | — | — |
+| swallows branch errors | 1593 | pending | — | — | — |
+| throws and swallows branch errors | 1606 | pending | — | — | — |
+| rebases branch onto new basebranch if baseBranch changed by user | 1627 | pending | — | — | — |
+| rebases branch onto new basebranch if no fingerprint found | 1660 | pending | — | — | — |
+| rebases branch onto new basebranch if no fingerprint found - 2 | 1700 | pending | — | — | — |
+| swallows pr errors | 1735 | pending | — | — | — |
+| closed pr (dry run) | 1761 | pending | — | — | — |
+| branch pr no rebase (dry run) | 1776 | pending | — | — | — |
+| branch pr no schedule lockfile (dry run) | 1797 | pending | — | — | — |
+| branch pr no schedule (dry run) | 1842 | pending | — | — | — |
+| branch pr no schedule | 1890 | pending | — | — | — |
+| skips branch update if stopUpdatingLabel presents | 1932 | pending | — | — | — |
+| skips branch update if same updates | 1968 | pending | — | — | — |
+| updates branch if stopUpdatingLabel presents and PR rebase/retry box checked | 1996 | pending | — | — | — |
+| updates branch if stopUpdatingLabel presents and dependency dashboard box checked | 2038 | pending | — | — | — |
+| executes post-upgrade tasks if trust is high | 2077 | pending | — | — | — |
+| handles post-upgrade task exec errors | 2176 | pending | — | — | — |
+| executes post-upgrade tasks with disabled post-upgrade command templating | 2260 | pending | — | — | — |
+| executes post-upgrade tasks with multiple dependecy in one branch | 2354 | pending | — | — | — |
+| executes post-upgrade tasks once when set to branch mode | 2521 | pending | — | — | — |
+| executes post-upgrade tasks with propagated post-upgrade file path via env variable | 2650 | pending | — | — | — |
+| should not propagate post-upgrade file path via env variable if the post-upgrade file creation failed | 2755 | pending | — | — | — |
+| returns when rebaseWhen=never | 2862 | pending | — | — | — |
+| continues when rebaseWhen=never and keepUpdatedLabel | 2878 | pending | — | — | — |
+| returns when rebaseWhen=never and keepUpdatedLabel does not match | 2905 | pending | — | — | — |
+| continues when rebaseWhen=never but checked | 2932 | pending | — | — | — |
+| continues when checked by checkedBranches | 2952 | pending | — | — | — |
+| does nothing when branchPrefixOld/branch and its pr exists | 2973 | pending | — | — | — |
+| does nothing when branchPrefixOld/branch and its pr exists but updates not necessary | 3012 | pending | — | — | — |
+| Dependency Dashboard All Pending approval | 3051 | pending | — | — | — |
+| Dependency Dashboard open all rate-limited | 3088 | pending | — | — | — |
+| Dependency Dashboard open all awaiting schedule | 3125 | pending | — | — | — |
+| continues branch, skips automerge if there are artifact errors | 3162 | pending | — | — | — |
+| continues to update PR, if branch got updated, even when prCreation!==immediate | 3189 | pending | — | — | — |
+| checks out baseBranch after committing files | 3222 | pending | — | — | — |
+| should not reattempt platform automerge without commitSha | 3244 | pending | — | — | — |
+| should not reattempt platform automerge in dry run | 3268 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/lock-files/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/lock-files/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/update/branch/lock-files/index › writeUpdatedPackageFiles`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if no updated packageFiles | 30 | pending | — | — | — |
+| returns if no updated packageFiles are package.json | 36 | pending | — | — | — |
+| writes updated packageFiles | 48 | pending | — | — | — |
+
+### `workers/repository/update/branch/lock-files/index › getAdditionalFiles`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns no error and empty lockfiles if skipArtifactsUpdate is true | 90 | pending | — | — | — |
+| returns no error and empty lockfiles if lock file maintenance exists | 100 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/reuse.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/reuse.spec.ts
+**Total tests:** 26 | **Ported:** 0 | **Actionable:** 26 | **Status:** pending
+
+### `workers/repository/update/branch/reuse › shouldReuseExistingBranch(config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false if branch does not exist | 28 | pending | — | — | — |
+| returns true if no PR | 34 | pending | — | — | — |
+| returns true if does not need rebasing | 41 | pending | — | — | — |
+| returns false if does not need rebasing but has upgrades that need lockfile maintenance along with upgrades that do not | 49 | pending | — | — | — |
+| returns true if does not need rebasing and lockfile update is on different packages | 77 | pending | — | — | — |
+| returns true if unmergeable and cannot rebase | 99 | pending | — | — | — |
+| returns true if unmergeable and can rebase, but rebaseWhen is never | 108 | pending | — | — | — |
+| returns false if unmergeable and can rebase | 118 | pending | — | — | — |
+| returns true if automerge branch and not stale | 127 | pending | — | — | — |
+| returns false if automerge branch and stale | 135 | pending | — | — | — |
+| returns true if rebaseWhen=behind-base-branch but cannot rebase | 145 | pending | — | — | — |
+| returns false if automerge pr and stale | 156 | pending | — | — | — |
+| returns false if getBranchForceRebase and stale | 166 | pending | — | — | — |
+| returns true if automerge, rebaseWhen=never and stale | 175 | pending | — | — | — |
+| returns true if automerge, rebaseWhen=conflicted and stale | 185 | pending | — | — | — |
+| returns false if rebaseWhen=never, keepUpdatedLabel and stale | 194 | pending | — | — | — |
+| returns false if rebaseWhen=conflicted, keepUpdatedLabel and modified | 204 | pending | — | — | — |
+| returns true if rebaseWhen=never, miss-match keepUpdatedLabel and stale | 216 | pending | — | — | — |
+| converts rebaseWhen=auto to behind-base-branch if automerge | 226 | pending | — | — | — |
+| converts rebaseWhen=auto to behind-base-branch if getBranchForceRebase | 236 | pending | — | — | — |
+| converts rebaseWhen=auto to behind-base-branch if keepUpdatedLabel | 246 | pending | — | — | — |
+| converts rebaseWhen=auto to conflicted | 257 | pending | — | — | — |
+| converts rebaseWhen=automerging to behind-base-branch | 266 | pending | — | — | — |
+| converts rebaseWhen=automerging to behind-base-branch if keep-updated | 278 | pending | — | — | — |
+| converts rebaseWhen=automerging to never | 292 | pending | — | — | — |
+| converts rebaseWhen=auto to behind-base-branch if automerge is true AND branch is new | 303 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/schedule.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
+**Total tests:** 68 | **Ported:** 0 | **Actionable:** 68 | **Status:** pending
+
+### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns false for invalid timezone | 7 | pending | — | — | — |
+| returns true for valid timezone | 11 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › hasValidSchedule(schedule)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for null | 17 | pending | — | — | — |
+| returns true for at any time | 21 | pending | — | — | — |
+| returns false for invalid schedule | 25 | pending | — | — | — |
+| returns false if any schedule fails to parse | 29 | pending | — | — | — |
+| returns false if using minutes | 33 | pending | — | — | — |
+| returns false for wildcard minutes | 39 | pending | — | — | — |
+| returns false if schedules have no days or time range | 47 | pending | — | — | — |
+| returns false if any schedule has no days or time range | 51 | pending | — | — | — |
+| returns false for every xday | 57 | pending | — | — | — |
+| returns true if schedule has days of week | 61 | pending | — | — | — |
+| returns true for multi day schedules | 67 | pending | — | — | — |
+| returns true if schedule has a start time | 75 | pending | — | — | — |
+| returns true for first day of the month | 79 | pending | — | — | — |
+| returns true for schedules longer than 1 month | 85 | pending | — | — | — |
+| returns true if schedule has an end time | 91 | pending | — | — | — |
+| returns true if schedule has a start and end time | 95 | pending | — | — | — |
+| returns true if schedule has days and a start and end time | 101 | pending | — | — | — |
+| returns true if schedule uses cron syntax | 109 | pending | — | — | — |
+| massages schedules | 117 | pending | — | — | — |
+| supports hours shorthand | 126 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › isScheduledNow(config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true if no schedule | 154 | pending | — | — | — |
+| returns true if at any time | 159 | pending | — | — | — |
+| returns true if at any time array | 165 | pending | — | — | — |
+| returns true if invalid schedule | 171 | pending | — | — | — |
+| returns true if invalid timezone | 177 | pending | — | — | — |
+| supports before hours true | 184 | pending | — | — | — |
+| supports before hours false | 190 | pending | — | — | — |
+| massages string | 196 | pending | — | — | — |
+| supports outside hours | 202 | pending | — | — | — |
+| supports cron syntax with hours | 208 | pending | — | — | — |
+| supports cron syntax with days | 218 | pending | — | — | — |
+| supports cron syntax with months | 228 | pending | — | — | — |
+| supports cron syntax with weekdays | 238 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports cron syntax on Sundays`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| approves if the weekday is * | 253 | pending | — | — | — |
+| approves if the weekday is 0 | 259 | pending | — | — | — |
+| rejects if the weekday is 1 | 265 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports L syntax in cron schedules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports last day of month | 277 | pending | — | — | — |
+| supports last day of week | 283 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports # syntax in cron schedules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports first Monday of month | 293 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › isScheduledNow(config) › handles schedule with Day Of Month and Day Of Week using AND logic`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $sched, $tz, $datetime | 303 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports timezone`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $sched, $tz, $datetime | 319 | pending | — | — | — |
+| reject if day mismatch | 337 | pending | — | — | — |
+| reject if month mismatch | 343 | pending | — | — | — |
+| reject if no schedule available | 349 | pending | — | — | — |
+| supports multiple schedules | 355 | pending | — | — | — |
+| supports day match | 361 | pending | — | — | — |
+| supports day mismatch | 367 | pending | — | — | — |
+| supports every weekday | 373 | pending | — | — | — |
+| supports every weekend | 379 | pending | — | — | — |
+| supports every weekday with time | 385 | pending | — | — | — |
+| supports o every weekday | 391 | pending | — | — | — |
+| rejects first day of the month | 397 | pending | — | — | — |
+| approves first day of the month | 403 | pending | — | — | — |
+| approves valid weeks of year | 410 | pending | — | — | — |
+| rejects on weeks of year | 417 | pending | — | — | — |
+| approves on months of year | 424 | pending | — | — | — |
+| rejects on months of year | 431 | pending | — | — | — |
+| approves schedule longer than 1 month | 438 | pending | — | — | — |
+| rejects schedule longer than 1 month | 445 | pending | — | — | — |
+| approves schedule longer than 1 month with day of month | 452 | pending | — | — | — |
+| rejects schedule longer than 1 month with day of month | 459 | pending | — | — | — |
+| supports weekday instances | 466 | pending | — | — | — |
+
+### `workers/repository/update/branch/schedule › log cron schedules`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should correctly convert "* 22 4 * *" to human-readable format | 483 | pending | — | — | — |
+| should correctly convert "* */2 * * *" to human-readable format | 490 | pending | — | — | — |
+| should correctly convert "* 23 * * *" to human-readable format | 495 | pending | — | — | — |
+| should not throw an error for an invalid cron expression "* * */2 6#1" | 500 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/branch/status-checks.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/status-checks.spec.ts
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
+
+### `workers/repository/update/branch/status-checks › setStability`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if not configured | 26 | pending | — | — | — |
+| sets status yellow | 31 | pending | — | — | — |
+| sets status green | 38 | pending | — | — | — |
+| skips status if already set | 45 | pending | — | — | — |
+| skips status if statusCheckNames.minimumReleaseAge is null | 53 | pending | — | — | — |
+| skips status if statusCheckNames.minimumReleaseAge is empty string | 68 | pending | — | — | — |
+| skips status if statusCheckNames is undefined | 83 | pending | — | — | — |
+| does not set status in dry mode | 96 | pending | — | — | — |
+
+### `workers/repository/update/branch/status-checks › setConfidence`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns if not configured | 121 | pending | — | — | — |
+| sets status yellow | 126 | pending | — | — | — |
+| sets status green | 134 | pending | — | — | — |
+| skips status if already set | 142 | pending | — | — | — |
+| skips status if statusCheckNames.mergeConfidence is null | 151 | pending | — | — | — |
+| skips status if statusCheckNames.mergeConfidence is empty string | 167 | pending | — | — | — |
+| skips status if statusCheckNames is undefined | 183 | pending | — | — | — |
+| does not set status in dry mode | 197 | pending | — | — | — |
+
+### `workers/repository/update/branch/status-checks › getBranchStatus`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return green if ignoreTests=true | 211 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/automerge.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/automerge.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+
+### `workers/repository/update/pr/automerge › checkAutoMerge(pr, config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should not automerge if not configured | 25 | pending | — | — | — |
+| should not automerge if off schedule | 30 | pending | — | — | — |
+| should automerge if enabled and pr is mergeable | 36 | pending | — | — | — |
+| should indicate if automerge failed | 46 | pending | — | — | — |
+| should automerge comment | 58 | pending | — | — | — |
+| should remove previous automerge comment when rebasing | 70 | pending | — | — | — |
+| should skip branch deletion after automerge if prune is disabled | 83 | pending | — | — | — |
+| should not automerge if enabled and pr is mergeable but cannot rebase | 93 | pending | — | — | — |
+| should not automerge if enabled and pr is mergeable but branch status is not success | 105 | pending | — | — | — |
+| should not automerge if enabled and pr is mergeable but unstable | 116 | pending | — | — | — |
+| should not automerge if enabled and pr is unmergeable | 127 | pending | — | — | — |
+| dryRun full should not automerge | 138 | pending | — | — | — |
+| dryRun full pr-comment | 150 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/changelogs.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/changelogs.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `workers/repository/update/pr/body/changelogs`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty string when there is no release notes | 9 | pending | — | — | — |
+| returns release notes | 22 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/config-description.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/config-description.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `workers/repository/update/pr/body/config-description › getPrConfigDescription`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| renders stopUpdating=true | 14 | pending | — | — | — |
+| renders rebaseWhen="never" | 25 | pending | — | — | — |
+| renders rebaseWhen="behind-base-branch" | 36 | pending | — | — | — |
+| renders timezone | 45 | pending | — | — | — |
+| renders UTC as the default timezone | 54 | pending | — | — | — |
+| summarizes cron schedules | 62 | pending | — | — | — |
+| displays later schedules | 73 | pending | — | — | — |
+| renders undefined schedule | 81 | pending | — | — | — |
+| summarizes cron schedules (for automergeSchedule) | 86 | pending | — | — | — |
+| summarizes both branch creation and automerge schedules | 97 | pending | — | — | — |
+| renders recreateClosed=true | 116 | pending | — | — | — |
+| does not render recreateClosed=false | 124 | pending | — | — | — |
+| does not render recreateClosed=undefined | 132 | pending | — | — | — |
+| renders singular | 137 | pending | — | — | — |
+| renders automerge | 145 | pending | — | — | — |
+| renders blocked automerge | 150 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/controls.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/controls.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `workers/repository/update/pr/body/controls`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| calls getControls | 4 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/footer.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/footer.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `workers/repository/update/pr/body/footer`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| renders empty footer | 8 | pending | — | — | — |
+| renders prFooter | 19 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/header.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/header.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `workers/repository/update/pr/body/header`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| renders empty header | 8 | pending | — | — | — |
+| renders prHeader | 19 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `workers/repository/update/pr/body/index › getPrBody`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles empty template | 53 | pending | — | — | — |
+| massages upgrades | 73 | pending | — | — | — |
+| templates changelogUrl | 177 | pending | — | — | — |
+| uses dependencyUrl as primary link | 225 | pending | — | — | — |
+| compiles template | 257 | pending | — | — | — |
+| supports custom rebasing message | 281 | pending | — | — | — |
+| updates PR due to body change without pr data | 305 | pending | — | — | — |
+| pr body warning | 330 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/notes.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/notes.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `workers/repository/update/pr/body/notes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| renders notes | 8 | pending | — | — | — |
+| handles render error | 25 | pending | — | — | — |
+| handles extra notes | 44 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/body/updates-table.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/body/updates-table.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/update/pr/body/updates-table`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| checks a case where prBodyColumns are undefined | 6 | pending | — | — | — |
+| checks results for getPrUpdatesTable | 18 | pending | — | — | — |
+| selects the best upgrade in case of duplicate table rows | 155 | pending | — | — | — |
+| handles replacements with new names | 257 | pending | — | — | — |
+| customizes table headers as per prBodyHeadingDefinitions | 318 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/bitbucket/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles release notes | 79 | pending | — | — | — |
+| handles missing release notes | 94 | pending | — | — | — |
+| handles release list | 103 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/bitbucket/index › source`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns api base url | 112 | pending | — | — | — |
+| returns get ref comparison url | 117 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/bitbucket-server/index › getChangeLogJSON`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses bitbucket-server tags | 52 | pending | — | — | — |
+| handles empty bitbucket-server tags response | 104 | pending | — | — | — |
+| uses bitbucket-server tags with error | 137 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/bitbucket-server/index › getReleaseNotesMdFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles release notes | 172 | pending | — | — | — |
+| handles release notes with sourceDirectory | 191 | pending | — | — | — |
+| handles missing release notes | 227 | pending | — | — | — |
+| getReleaseList | 239 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/bitbucket-server/index › source › getBaseUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $sourceUrl | 249 | pending | — | — | — |
+| getAPIBaseUrl | 267 | pending | — | — | — |
+| getCompareURL | 271 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/bitbucket-server/index › source › getRepositoryFromUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input | 284 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/bitbucket-server/index › hasValidRepository`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles invalid repository | 303 | pending | — | — | — |
+| handles valid repository | 308 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/bitbucket-server/index › getAllTags`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles endpoint | 314 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/common.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/common › slugifyUrl()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| slugifyUrl("$url") === $expected | 5 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/common › compareChangelogFilePath()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sorts $files to $expected | 18 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/forgejo/index › getChangeLogJSON`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if @types | 56 | pending | — | — | — |
+| returns null if currentVersion equals newVersion | 65 | pending | — | — | — |
+| skips invalid repos | 75 | pending | — | — | — |
+| works without forgejo | 84 | pending | — | — | — |
+| uses forgejo tags | 111 | pending | — | — | — |
+| handles empty forgejo tags response | 224 | pending | — | — | — |
+| uses forgejo tags with error | 259 | pending | — | — | — |
+| handles no sourceUrl | 294 | pending | — | — | — |
+| handles invalid sourceUrl | 303 | pending | — | — | — |
+| handles no releases | 312 | pending | — | — | — |
+| handles not enough releases | 321 | pending | — | — | — |
+| supports self-hosted forgejo changelog | 330 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/forgejo/index › hasValidRepository`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles invalid repository | 367 | pending | — | — | — |
+| handles valid repository | 372 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/forgejo/index › getAllTags`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles endpoint | 378 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/forgejo/index › getReleaseNotesMd`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 394 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/gitea/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/gitea/index.spec.ts
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/gitea/index › getChangeLogJSON`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if @types | 56 | pending | — | — | — |
+| returns null if currentVersion equals newVersion | 65 | pending | — | — | — |
+| skips invalid repos | 75 | pending | — | — | — |
+| works without gitea | 84 | pending | — | — | — |
+| uses gitea tags | 111 | pending | — | — | — |
+| handles empty gitea tags response | 224 | pending | — | — | — |
+| uses gitea tags with error | 259 | pending | — | — | — |
+| handles no sourceUrl | 294 | pending | — | — | — |
+| handles invalid sourceUrl | 303 | pending | — | — | — |
+| handles no releases | 312 | pending | — | — | — |
+| handles not enough releases | 321 | pending | — | — | — |
+| supports gitea enterprise and gitea enterprise changelog | 330 | pending | — | — | — |
+| supports self-hosted gitea changelog | 364 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/gitea/index › hasValidRepository`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles invalid repository | 401 | pending | — | — | — |
+| handles valid repository | 406 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/gitea/index › getAllTags`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles endpoint | 412 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/gitea/index › getReleaseNotesMd`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 428 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/github/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/github/index.spec.ts
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/github/index › getChangeLogJSON`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if @types | 55 | pending | — | — | — |
+| returns null if no currentVersion | 64 | pending | — | — | — |
+| returns null if currentVersion equals newVersion | 73 | pending | — | — | — |
+| skips invalid repos | 83 | pending | — | — | — |
+| works without Github | 92 | pending | — | — | — |
+| uses GitHub tags | 118 | pending | — | — | — |
+| filters unnecessary warns | 144 | pending | — | — | — |
+| supports node engines | 171 | pending | — | — | — |
+| handles no sourceUrl | 198 | pending | — | — | — |
+| handles invalid sourceUrl | 207 | pending | — | — | — |
+| handles missing Github token | 216 | pending | — | — | — |
+| handles suppressed Github warnings | 226 | pending | — | — | — |
+| handles no releases | 236 | pending | — | — | — |
+| handles not enough releases | 245 | pending | — | — | — |
+| supports github enterprise and github.com changelog | 254 | pending | — | — | — |
+| supports github enterprise and github enterprise changelog | 285 | pending | — | — | — |
+| works with same version releases but different prefix | 318 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 16 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/gitlab/index › getChangeLogJSON`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if @types | 54 | pending | — | — | — |
+| returns null if currentVersion equals newVersion | 63 | pending | — | — | — |
+| skips invalid repos | 73 | pending | — | — | — |
+| works without GitLab | 82 | pending | — | — | — |
+| uses GitLab tags | 108 | pending | — | — | — |
+| handles empty GitLab tags response | 151 | pending | — | — | — |
+| uses GitLab tags with error | 187 | pending | — | — | — |
+| handles no sourceUrl | 223 | pending | — | — | — |
+| handles invalid sourceUrl | 232 | pending | — | — | — |
+| handles no releases | 241 | pending | — | — | — |
+| handles not enough releases | 250 | pending | — | — | — |
+| supports gitlab enterprise and gitlab enterprise changelog | 259 | pending | — | — | — |
+| supports self-hosted gitlab changelog | 291 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/gitlab/index › hasValidRepository`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles invalid repository | 326 | pending | — | — | — |
+| handles valid repository | 330 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/gitlab/index › getAllTags`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles endpoint | 337 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/index.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/index › getChangeLogJSON`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if @types | 56 | pending | — | — | — |
+| handles unsupported changelog source | 65 | pending | — | — | — |
+| returns null if no currentVersion | 74 | pending | — | — | — |
+| returns null if currentVersion equals newVersion | 83 | pending | — | — | — |
+| skips invalid repos | 93 | pending | — | — | — |
+| works without Github | 102 | pending | — | — | — |
+| uses GitHub tags | 140 | pending | — | — | — |
+| filters unnecessary warns | 176 | pending | — | — | — |
+| supports node engines | 206 | pending | — | — | — |
+| handles no sourceUrl | 236 | pending | — | — | — |
+| handles invalid sourceUrl | 245 | pending | — | — | — |
+| handles missing Github token | 254 | pending | — | — | — |
+| handles no releases | 264 | pending | — | — | — |
+| handles not enough releases | 273 | pending | — | — | — |
+| will call getInRangeReleases when releases is undefined | 282 | pending | — | — | — |
+| supports github enterprise and github.com changelog | 291 | pending | — | — | — |
+| supports github enterprise and github enterprise changelog | 325 | pending | — | — | — |
+| supports github.com and github enterprise changelog | 364 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/release-notes.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/release-notes.spec.ts
+**Total tests:** 54 | **Ported:** 0 | **Actionable:** 54 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/release-notes › releaseNotesCacheMinutes`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works with string date (%s, %i) | 197 | pending | — | — | — |
+| handles date object | 205 | pending | — | — | — |
+| https://gitlab.com/api/v4/projects/gitlab-org%2Fgitter%2Fwebapp | 209 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/release-notes › addReleaseNotes()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if input is null/undefined | 215 | pending | — | — | — |
+| returns input if invalid | 224 | pending | — | — | — |
+| returns ChangeLogResult | 237 | pending | — | — | — |
+| returns ChangeLogResult without release notes | 265 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/release-notes › getReleaseList()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return empty array if no apiBaseUrl | 314 | pending | — | — | — |
+| should return release list for github repo | 322 | pending | — | — | — |
+| should return release list for gitlab.com project | 364 | pending | — | — | — |
+| should return release list for self hosted gitlab project | 400 | pending | — | — | — |
+| should return empty release list for self-hosted bitbucket-server | 439 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/release-notes › getReleaseNotes()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null for release notes without body and name | 452 | pending | — | — | — |
+| gets release notes with body "" | 486 | pending | — | — | — |
+| gets release notes with name "" | 529 | pending | — | — | — |
+| filters release note name when same as version | 571 | pending | — | — | — |
+| strips release note with version prefixed name | 613 | pending | — | — | — |
+| release notes without body and name that matches version tag returns null | 655 | pending | — | — | — |
+| gets release notes with body "v" | 689 | pending | — | — | — |
+| gets release notes with body "other-" (packageName) | 732 | pending | — | — | — |
+| gets release notes with body "other-" (depName) | 776 | pending | — | — | — |
+| gets release notes with body "other_v" | 821 | pending | — | — | — |
+| gets release notes with body "other@" | 865 | pending | — | — | — |
+| gets release notes with body from gitlab repo "" | 908 | pending | — | — | — |
+| gets release notes with body from gitlab repo "v" | 945 | pending | — | — | — |
+| gets release notes with body from gitlab repo "other-" | 982 | pending | — | — | — |
+| gets null from repository without gitlab/github in domain | 1019 | pending | — | — | — |
+| handles same version but different repo releases | 1036 | pending | — | — | — |
+| fallback to extractVersion | 1087 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/release-notes › getReleaseNotesMd()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles not found | 1125 | pending | — | — | — |
+| handles files mismatch | 1140 | pending | — | — | — |
+| handles wrong format | 1165 | pending | — | — | — |
+| handles bad markdown | 1189 | pending | — | — | — |
+| handles bitbucket release notes link | 1213 | pending | — | — | — |
+| handles bitbucket-server release notes link | 1238 | pending | — | — | — |
+| parses angular.js | 1267 | pending | — | — | — |
+| parses gitlab.com/gitlab-org/gitter/webapp | 1295 | pending | — | — | — |
+| parses self hosted gitlab | 1323 | pending | — | — | — |
+| parses jest | 1353 | pending | — | — | — |
+| handles github sourceDirectory | 1382 | pending | — | — | — |
+| parses js-yaml | 1417 | pending | — | — | — |
+| ignores invalid | 1446 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/release-notes › getReleaseNotesMd() › ReleaseNotes Correctness`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses yargs 15.3.0 | 1463 | pending | — | — | — |
+| parses yargs 15.2.0 | 1493 | pending | — | — | — |
+| parses adapter-utils 4.33.0 | 1523 | pending | — | — | — |
+| parses when version contained in the body 0.14.0 | 1553 | pending | — | — | — |
+| ignores trailing link reference definitions when searching body | 1585 | pending | — | — | — |
+| handles gitlab sourceDirectory | 1611 | pending | — | — | — |
+| handles skipped packages | 1647 | pending | — | — | — |
+| isUrl | 1661 | pending | — | — | — |
+| 15.3.0 is not equal to 15.2.0 | 1665 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/release-notes › getReleaseNotesMd() › shouldSkipChangelogMd`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should skip for flagged repository | 1671 | pending | — | — | — |
+| should continue for other repository | 1675 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/release-notes › massageBody()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not modify # inside codeblocks | 1682 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/releases.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/releases.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/releases › getReleaseNotes()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should contain only stable | 41 | pending | — | — | — |
+| should contain currentVersion unstable | 57 | pending | — | — | — |
+| should contain newVersion unstable | 74 | pending | — | — | — |
+| should contain both currentVersion newVersion unstable | 91 | pending | — | — | — |
+| should valueToVersion | 110 | pending | — | — | — |
+| should return any previous version if current version is non-existent | 126 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/changelog/source.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/source.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/update/pr/changelog/source › getBaseUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles unsupported sourceUrl | 13 | pending | — | — | — |
+| handles sourceUrl | 22 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/source › getRepositoryFromUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles unsupported sourceUrl | 28 | pending | — | — | — |
+| handles sourceUrl | 37 | pending | — | — | — |
+
+### `workers/repository/update/pr/changelog/source › hasValidRepository`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles invalid repository | 45 | pending | — | — | — |
+| handles valid repository | 50 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/code-owners.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/code-owners.spec.ts
+**Total tests:** 31 | **Ported:** 0 | **Actionable:** 31 | **Status:** pending
+
+### `workers/repository/update/pr/code-owners › codeOwnersForPr`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns global code owner | 28 | pending | — | — | — |
+| returns global code owner for commit with sha set | 35 | pending | — | — | — |
+| respects orphan files | 43 | pending | — | — | — |
+| does not return any owners if PR has no changes | 55 | pending | — | — | — |
+| returns more specific code owners | 62 | pending | — | — | — |
+
+### `workers/repository/update/pr/code-owners › codeOwnersForPr › returns more specific code owners in monorepos`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not assign changes for yarn.lock | 91 | pending | — | — | — |
+| assigns root changes to @john (*) | 98 | pending | — | — | — |
+| assigns changes in package A to @maria (a), @john (*) | 105 | pending | — | — | — |
+| assigns changes in package B to @jimmy (b), @john (*) | 115 | pending | — | — | — |
+| assigns changes in package C to @dan (c), @john (*) | 125 | pending | — | — | — |
+| assigns changes in package D to @maria (d), @jimmy (d), @john (*) | 135 | pending | — | — | — |
+| assigns changes in package A and B to @maria (a), @jimmy (b), @john (*) | 145 | pending | — | — | — |
+| assigns changes in package A, B and C to @john, @maria (a), @jimmy (b), @dan (c), @john (*) | 156 | pending | — | — | — |
+| assigns changes in package C and D to @dan (c), @maria (d), @jimmy (e), @john (*) | 168 | pending | — | — | — |
+| assigns changes in package D and E to @jimmy (d, e), @maria (d), @john (*) | 179 | pending | — | — | — |
+
+### `workers/repository/update/pr/code-owners › codeOwnersForPr › supports Gitlab sections`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns section code owner | 199 | pending | — | — | — |
+| returns code owners of multiple sections | 232 | pending | — | — | — |
+| returns default owners when none is explicitly set | 245 | pending | — | — | — |
+| parses only sections that start at the beginning of a line | 260 | pending | — | — | — |
+| returns code owners for optional sections | 271 | pending | — | — | — |
+
+### `workers/repository/update/pr/code-owners › codeOwnersForPr › Bitbucket Server CODEOWNERS integration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns code owners for matching file using escaped spaces | 297 | pending | — | — | — |
+| returns code owners from reviewer group with random selection | 308 | pending | — | — | — |
+| does not return owners when an empty rule overrides a broader rule | 322 | pending | — | — | — |
+| matches the most specific rule (bottom takes precedence) | 336 | pending | — | — | — |
+| handles multiple owners with mix of usernames and groups | 350 | pending | — | — | — |
+| does not require all files to match a single rule, regression test for #12611 | 386 | pending | — | — | — |
+| ignores comments and leading/trailing whitespace | 429 | pending | — | — | — |
+| returns empty array when no code owners set | 444 | pending | — | — | — |
+| returns empty array when no code owners match | 451 | pending | — | — | — |
+| returns empty array when error occurs | 460 | pending | — | — | — |
+| detects code owner file at '${codeOwnerFilePath}' | 473 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/index.spec.ts
+**Total tests:** 53 | **Ported:** 0 | **Actionable:** 53 | **Status:** pending
+
+### `workers/repository/update/pr/index › ensurePr › Create`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates PR | 78 | pending | — | — | — |
+| fetches changelogs for the "pr" stage | 98 | pending | — | — | — |
+| aborts PR creation once limit is exceeded | 109 | pending | — | — | — |
+| ignores PR limits on vulnerability alert | 122 | pending | — | — | — |
+| creates rollback PR | 135 | pending | — | — | — |
+| skips PR creation due to non-green branch check | 146 | pending | — | — | — |
+| creates PR for green branch checks | 158 | pending | — | — | — |
+| skips PR creation for unapproved dependencies | 169 | pending | — | — | — |
+| skips PR creation before prNotPendingHours is hit | 181 | pending | — | — | — |
+| skips PR creation due to stabilityStatus | 201 | pending | — | — | — |
+| creates PR after prNotPendingHours is hit | 221 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › Create › Error handling`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles unknown error | 240 | pending | — | — | — |
+| handles error for PR that already exists | 250 | pending | — | — | — |
+| deletes branch on 502 error | 268 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › Update`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates PR if labels have changed in config | 285 | pending | — | — | — |
+| skips pr update if existing pr does not have labels in debugData | 339 | pending | — | — | — |
+| skips pr update if pr labels have been modified by user | 366 | pending | — | — | — |
+| updates PR due to title change | 418 | pending | — | — | — |
+| updates PR due to body change | 435 | pending | — | — | — |
+| updates PR target branch if base branch changed in config | 455 | pending | — | — | — |
+| ignores reviewable content | 483 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › dry-run`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| dry-runs PR creation | 512 | pending | — | — | — |
+| dry-runs PR update | 530 | pending | — | — | — |
+| skips automerge failure comment | 545 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › Automerge`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles branch automerge | 563 | pending | — | — | — |
+| forces PR on dashboard check | 579 | pending | — | — | — |
+| adds assignees for PR automerge with red status | 596 | pending | — | — | — |
+| adds reviewers for PR automerge with red status and existing ignorable reviewers that can be ignored | 616 | pending | — | — | — |
+| skips branch automerge and forces PR creation due to artifact errors | 637 | pending | — | — | — |
+| skips branch automerge and forces PR creation due to prNotPendingHours exceeded | 653 | pending | — | — | — |
+| automerges branch when prNotPendingHours are not exceeded | 674 | pending | — | — | — |
+| comments on automerge failure | 697 | pending | — | — | — |
+| handles ensureComment error | 720 | pending | — | — | — |
+| logs unknown error | 737 | pending | — | — | — |
+| re-throws ExternalHostError | 761 | pending | — | — | — |
+| re-throws error with specific message: "$message" | 782 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › Changelog`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| processes changelogs | 854 | pending | — | — | — |
+| handles missing GitHub token | 880 | pending | — | — | — |
+| removes duplicate changelogs | 902 | pending | — | — | — |
+| remove duplicates release notes | 928 | pending | — | — | — |
+| stricter de-deuplication of changelogs | 958 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › Warnings › Attestations › when attestation is not removed`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not warn the user | 1026 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › Warnings › Attestations › when attestation is removed`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| warns the user | 1056 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › Warnings › Attestations › when attestation is removed in an intermediate version`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not warn the user | 1104 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › prCache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds pr-cache when not present | 1128 | pending | — | — | — |
+| does not update lastEdited pr-cache when pr fingerprint is same but pr was edited within 24hrs | 1144 | pending | — | — | — |
+| updates pr-cache when pr fingerprint is different | 1171 | pending | — | — | — |
+| skips fetching changelogs when cache is valid and pr was lastEdited before 24hrs | 1190 | pending | — | — | — |
+| updates PR when rebase requested by user regardless of pr-cache state | 1215 | pending | — | — | — |
+| logs when cache is enabled but pr-cache is absent | 1259 | pending | — | — | — |
+| does not log when cache is disabled and pr-cache is absent | 1268 | pending | — | — | — |
+| skips cache early return when autoApprove is set | 1278 | pending | — | — | — |
+
+### `workers/repository/update/pr/index › ensurePr › autoApprove`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| updates PR when autoApprove is set even if PR does not need updating | 1300 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/labels.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/labels.spec.ts
+**Total tests:** 20 | **Ported:** 0 | **Actionable:** 20 | **Status:** pending
+
+### `workers/repository/update/pr/labels › prepareLabels(config)`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty array if no labels are configured | 11 | pending | — | — | — |
+| only labels | 16 | pending | — | — | — |
+| only addLabels | 22 | pending | — | — | — |
+| merge labels and addLabels | 30 | pending | — | — | — |
+| deduplicate merged labels and addLabels | 39 | pending | — | — | — |
+| empty labels ignored | 48 | pending | — | — | — |
+| null labels ignored | 57 | pending | — | — | — |
+| template labels | 68 | pending | — | — | — |
+| template labels with empty datasource | 77 | pending | — | — | — |
+
+### `workers/repository/update/pr/labels › prepareLabels(config) › trim labels that go over the max char limit`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| github | 94 | pending | — | — | — |
+| gitlab | 102 | pending | — | — | — |
+| gitea | 115 | pending | — | — | — |
+
+### `workers/repository/update/pr/labels › getChangedLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds new labels | 126 | pending | — | — | — |
+| removes old labels | 133 | pending | — | — | — |
+
+### `workers/repository/update/pr/labels › areLabelsModified`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true | 142 | pending | — | — | — |
+| returns false | 146 | pending | — | — | — |
+
+### `workers/repository/update/pr/labels › shouldUpdateLabels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true | 153 | pending | — | — | — |
+| returns false if no labels found in debugData | 163 | pending | — | — | — |
+| returns false if labels have been modified by user | 169 | pending | — | — | — |
+| returns false if labels are not changed | 173 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/participants.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/participants.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 18 | **Status:** pending
+
+### `workers/repository/update/pr/participants › assignees`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not assignees when there are none | 31 | pending | — | — | — |
+| adds assignees | 36 | pending | — | — | — |
+| filters assignees | 45 | pending | — | — | — |
+| expands group code owners assignees | 56 | pending | — | — | — |
+| does not expand group code owners assignees when assigneesFromCodeOwners disabled | 91 | pending | — | — | — |
+| does not expand group code owners assignees when expandCodeOwnersGroups disabled | 106 | pending | — | — | — |
+| supports assigneesSampleSize | 125 | pending | — | — | — |
+| handles add assignee errors | 134 | pending | — | — | — |
+| supports dry run assignee adding | 139 | pending | — | — | — |
+| supports assigneesFromCodeOwners | 145 | pending | — | — | — |
+
+### `workers/repository/update/pr/participants › reviewers`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not assignees when there are none | 160 | pending | — | — | — |
+| adds reviewers | 165 | pending | — | — | — |
+| handles add assignee errors | 174 | pending | — | — | — |
+| supports reviewersSampleSize | 179 | pending | — | — | — |
+| supports dry run assignee adding | 188 | pending | — | — | — |
+| supports reviewersFromCodeOwners | 194 | pending | — | — | — |
+| filters out bare @ from malformed CODEOWNERS entries | 207 | pending | — | — | — |
+| supports additionalReviewers | 223 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/pr-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/pr-cache.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/update/pr/pr-cache › getPrCache()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| return null if cache is empty | 28 | pending | — | — | — |
+| return null if prCache is null/undefined | 33 | pending | — | — | — |
+| returns prCache | 38 | pending | — | — | — |
+
+### `workers/repository/update/pr/pr-cache › setPrCache()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| logs if branch not found | 52 | pending | — | — | — |
+| updates cache | 61 | pending | — | — | — |
+| does not update details if pr not modified | 78 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/update/pr/pr-reuse.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/pr-reuse.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+
+### `workers/repository/update/pr/pr-reuse`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if platform does not support PR reuse | 18 | pending | — | — | — |
+| returns null if PR is not found | 29 | pending | — | — | — |
+| returns null if PR title does not seem to be autoclosed | 37 | pending | — | — | — |
+| returns null if closedAt field is absent | 50 | pending | — | — | — |
+| returns null if it was closed long time ago | 63 | pending | — | — | — |
+| returns null for dry-runs | 77 | pending | — | — | — |
+| returns updated Pr after successful reopen | 94 | pending | — | — | — |
+| returns null if the retry throws | 130 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/updates/branch-name.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branch-name.spec.ts
+**Total tests:** 27 | **Ported:** 0 | **Actionable:** 27 | **Status:** pending
+
+### `workers/repository/updates/branch-name › getBranchName()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| falls back to sharedVariableName if no groupName | 7 | pending | — | — | — |
+| ignores grouping of replacement update | 19 | pending | — | — | — |
+| applies grouping for lockfile maintenance update | 36 | pending | — | — | — |
+| uses default branch name for lockfile maintenance without groupName | 52 | pending | — | — | — |
+| separates lockFileMaintenance from non-lockFileMaintenance with same groupName | 63 | pending | — | — | — |
+| uses groupName if no slug defined, ignores sharedVariableName | 89 | pending | — | — | — |
+| compile groupName before slugging | 102 | pending | — | — | — |
+| uses groupSlug if defined | 115 | pending | — | — | — |
+| separates major with groups | 129 | pending | — | — | — |
+| separates minor with groups | 146 | pending | — | — | — |
+| separates minor when separateMultipleMinor=true | 163 | pending | — | — | — |
+| uses single major with groups | 183 | pending | — | — | — |
+| separates patch groups and uses update topic | 200 | pending | — | — | — |
+| compiles multiple times | 218 | pending | — | — | — |
+| separates patches when separateMinorPatch=true | 229 | pending | — | — | — |
+| does not separate patches when separateMinorPatch=false | 249 | pending | — | — | — |
+| realistic defaults | 269 | pending | — | — | — |
+| realistic defaults with strict branch name enabled | 284 | pending | — | — | — |
+| removes slashes from the non-suffix part | 300 | pending | — | — | — |
+| hashedBranchLength hashing | 316 | pending | — | — | — |
+| hashedBranchLength hashing with group name | 332 | pending | — | — | — |
+| hashedBranchLength too short | 350 | pending | — | — | — |
+| hashedBranchLength no topic | 368 | pending | — | — | — |
+| hashedBranchLength separates minor when separateMultipleMinor=true | 386 | pending | — | — | — |
+| enforces valid git branch name | 405 | pending | — | — | — |
+| strict branch name enabled group | 491 | pending | — | — | — |
+| strict branch name disabled | 506 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/updates/branchify.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branchify.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/updates/branchify › branchifyUpgrades()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns empty | 24 | pending | — | — | — |
+| returns one branch if one input | 30 | pending | — | — | — |
+| deduplicates | 48 | pending | — | — | — |
+| groups if same compiled branch names | 76 | pending | — | — | — |
+| groups if same compiled group name | 103 | pending | — | — | — |
+| no fetch changelogs | 134 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/updates/flatten.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/flatten.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+
+### `workers/repository/updates/flatten › sanitizeDepName()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sanitizes urls | 20 | pending | — | — | — |
+
+### `workers/repository/updates/flatten › flattenUpdates()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| flattens | 28 | pending | — | — | — |
+| when a dependency is enabled=false, it is filtered | 241 | pending | — | — | — |
+| when a skipReason is found on a dependency, it is filtered | 280 | pending | — | — | — |
+| separates lockfile maintenance updates from other update types if grouping is applied | 319 | pending | — | — | — |
+
+### `workers/repository/updates/flatten › flattenUpdates() › hasAttestation is taken from the current value`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| current attestation %s, new attestation %s | 362 | pending | — | — | — |
+
+---
+
+## `lib/workers/repository/updates/generate.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/generate.spec.ts
+**Total tests:** 55 | **Ported:** 0 | **Actionable:** 55 | **Status:** pending
+
+### `workers/repository/updates/generate › generateBranchConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| does not group single upgrade | 31 | pending | — | — | — |
+| handles lockFileMaintenance | 52 | pending | — | — | — |
+| sets minimumGroupSize based on upgrades | 77 | pending | — | — | — |
+| handles lockFileUpdate | 106 | pending | — | — | — |
+| does not group same upgrades | 147 | pending | — | — | — |
+| groups multiple upgrades same version | 175 | pending | — | — | — |
+| groups major updates with different versions but same newValue, no recreateWhen | 246 | pending | — | — | — |
+| groups multiple digest updates immortally | 280 | pending | — | — | — |
+| recreates grouped pin & pinDigest | 310 | pending | — | — | — |
+| does not recreate grouped pin & pinDigest when closed if recreateWhen=never | 332 | pending | — | — | — |
+| recreates grouped pin | 356 | pending | — | — | — |
+| recreates grouped pinDigest | 383 | pending | — | — | — |
+| skips appending baseBranch and updateType to prTitle when prTitleStrict is true | 409 | pending | — | — | — |
+| groups multiple upgrades different version | 462 | pending | — | — | — |
+| groups multiple upgrades different version but same value | 513 | pending | — | — | — |
+| groups multiple upgrades different value but same version | 553 | pending | — | — | — |
+| groups multiple digest updates | 593 | pending | — | — | — |
+| pins digest to table | 629 | pending | — | — | — |
+| fixes different messages | 647 | pending | — | — | — |
+| uses semantic commits | 684 | pending | — | — | — |
+| calculates the highest priority semanticCommitType | 711 | pending | — | — | — |
+| scopes monorepo commits | 759 | pending | — | — | — |
+| scopes monorepo commits with nested package files using parent directory | 786 | pending | — | — | — |
+| scopes monorepo commits with nested package files using base directory | 816 | pending | — | — | — |
+| use prettyVersion in pr title when there is a v | 845 | pending | — | — | — |
+| use prettyVersion in pr title there is no v | 872 | pending | — | — | — |
+| use newMajor in pr title with v | 899 | pending | — | — | — |
+| Default commitMessageExtra pr title | 924 | pending | — | — | — |
+| adds commit message body | 950 | pending | — | — | — |
+| supports manual prTitle | 968 | pending | — | — | — |
+| handles @types specially | 984 | pending | — | — | — |
+| handles @types specially (reversed) | 1049 | pending | — | — | — |
+| handles upgrades | 1110 | pending | — | — | — |
+| combines prBodyColumns | 1257 | pending | — | — | — |
+| sorts upgrades, without position first | 1274 | pending | — | — | — |
+| passes through pendingChecks | 1315 | pending | — | — | — |
+| filters pendingChecks | 1339 | pending | — | — | — |
+| displays pending versions | 1362 | pending | — | — | — |
+| merge excludeCommitPaths if appears in upgrade | 1396 | pending | — | — | — |
+| generates pretty version name properly | 1429 | pending | — | — | — |
+| prevents issue with duplicating "v" character | 1453 | pending | — | — | — |
+| apply semanticCommits and commitMessagePrefix together | 1466 | pending | — | — | — |
+| dedupes duplicate table rows | 1486 | pending | — | — | — |
+| using commitMessagePrefix without separator | 1549 | pending | — | — | — |
+| merges additionalReviewers | 1566 | pending | — | — | — |
+| merges depTypes | 1590 | pending | — | — | — |
+| depTypes is available on each branch upgrade object | 1615 | pending | — | — | — |
+| allows upgrades in commitMessage | 1645 | pending | — | — | — |
+| allows upgrades in commitMessage (group) | 1670 | pending | — | — | — |
+| sets skipArtifactsUpdate to false when no upgrades specify a value | 1725 | pending | — | — | — |
+| sets skipArtifactsUpdate to true when all upgrades specify true | 1773 | pending | — | — | — |
+| sets skipArtifactsUpdate to false when not all upgrades specify true and first is $0 | 1824 | pending | — | — | — |
+| uses prettyDepType when already set | 1888 | pending | — | — | — |
+| falls back to depType when prettyDepType is not set | 1902 | pending | — | — | — |
+| defaults prettyDepType to dependency when neither prettyDepType nor depType is set | 1915 | pending | — | — | — |
+
+---
+
+## `test/docs/documentation.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/test/docs/documentation.spec.ts
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+
+### `docs/documentation`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has no invalid links | 12 | pending | — | — | — |
+
+### `docs/documentation › website-documentation › docs/usage/configuration-options.md`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has doc headers sorted alphabetically | 74 | pending | — | — | — |
+| has headers for every required option | 80 | pending | — | — | — |
+| has headers for every required sub-option | 135 | pending | — | — | — |
+| %s has sub-headers sorted alphabetically | 141 | pending | — | — | — |
+
+### `docs/documentation › website-documentation › docs/usage/self-hosted-configuration.md`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has headers sorted alphabetically | 177 | pending | — | — | — |
+| has headers for every required option | 185 | pending | — | — | — |
+| has complete cache namespaces list | 220 | pending | — | — | — |
+
+### `docs/documentation › website-documentation › docs/usage/self-hosted-experimental.md`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has headers sorted alphabetically | 236 | pending | — | — | — |
+
+### `docs/documentation › website-documentation › docs/usage/templates.md`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| has headers sorted alphabetically | 263 | pending | — | — | — |
+| documents all added Handlebars helpers | 269 | pending | — | — | — |
+
+---
+
+## `test/other/sync-module-labels.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/test/other/sync-module-labels.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+
+### `other/sync-module-labels`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| creates module labels with the expected metadata | 11 | pending | — | — | — |
+| reports missing labels without flagging existing ones | 19 | pending | — | — | — |
+| renders stable label creation commands for missing labels | 36 | pending | — | — | — |
+| includes labels for known runtime module ids | 62 | pending | — | — | — |
+
+---
+
+## `test/other/validate-config-files.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/test/other/validate-config-files.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `other/validate-config-files`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| tsdown entry points | 2 | pending | — | — | — |
+
+---
+
+## `test/other/validate-docker.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/test/other/validate-docker.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `other/validate-docker`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validate dockerfile has consistent base image versions | 4 | pending | — | — | — |
+
+---
+
+## `test/other/validate-schemas.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/test/other/validate-schemas.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+
+### `other/validate-schemas`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| validate json files in lib/data against their schemas | 8 | pending | — | — | — |
+
+---
+
+## `tools/docs/test/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/tools/docs/test/utils.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+
+### `tools/docs/test/utils`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parents row header should be a td block | 4 | pending | — | — | — |
+| parents content should be multiple code blocks, and . be display with "(the root document)" | 12 | pending | — | — | — |
+| parent named ".foo" should be not display with ".foo (the root document)" | 19 | pending | — | — | — |

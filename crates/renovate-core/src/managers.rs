@@ -757,6 +757,10 @@ const MANAGER_DEFS: &[ManagerDef] = &[
         patterns: &[r"(^|/)scripts?/[^/]+\.py$", r"(^|/)[^/]+\.script\.py$"],
     },
     ManagerDef {
+        name: "proto",
+        patterns: &[r"(^|/)\.prototools$"],
+    },
+    ManagerDef {
         // cdnurl — Cloudflare CDN URL extractor; upstream has empty patterns (user-configured).
         // Uses the same cloudflare URL regex as the html manager but without SRI hash updates.
         name: "cdnurl",
@@ -1031,6 +1035,46 @@ mod tests {
         assert!(regex.is_match("build.main.kts"));
         assert!(regex.is_match("scripts/deps.main.kts"));
         assert!(!regex.is_match("build.gradle.kts"));
+    }
+
+    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/proto/index.spec.ts line 15
+    #[test]
+    fn proto_file_patterns_match_spec() {
+        let should_match = &[
+            ".prototools",
+            "subdir/.prototools",
+            "deep/nested/path/.prototools",
+        ];
+        let should_not_match = &[
+            "prototools",
+            ".prototools.bak",
+            ".prototools.toml",
+            "prototools.toml",
+        ];
+        let all_files: Vec<String> = should_match
+            .iter()
+            .chain(should_not_match.iter())
+            .map(|s| s.to_string())
+            .collect();
+        let file_refs: Vec<&str> = all_files.iter().map(|s| s.as_str()).collect();
+        let f = files(&file_refs);
+        let result = detect(&f);
+        let proto = result
+            .iter()
+            .find(|m| m.name == "proto")
+            .expect("proto manager not detected");
+        for name in should_match {
+            assert!(
+                proto.matched_files.contains(&name.to_string()),
+                "{name} should match proto"
+            );
+        }
+        for name in should_not_match {
+            assert!(
+                !proto.matched_files.contains(&name.to_string()),
+                "{name} should NOT match proto"
+            );
+        }
     }
 
     #[test]
