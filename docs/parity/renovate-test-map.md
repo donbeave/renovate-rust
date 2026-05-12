@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1729 / 1729 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1733 / 1733 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3554,6 +3554,36 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | should migrate "auto" to "global" | 4 | ported | `migrate_validate.rs` | `binary_source_auto_migrates_to_global` | — |
+
+---
+
+## `lib/config/migrations/custom/automerge-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/automerge-migration.spec.ts
+**Total tests:** 4 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/automerge-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate none | 4 | ported | `repo_config.rs` | `automerge_legacy_none_string_migrated_to_false` | — |
+| should migrate patch | 16 | not-applicable | — | — | Rust does not model Renovate's generated per-update-type patch/minor/major automerge config blocks |
+| should migrate minor | 34 | not-applicable | — | — | Rust does not model Renovate's generated per-update-type patch/minor/major automerge config blocks |
+| should migrate any | 49 | ported | `repo_config.rs` | `automerge_legacy_any_string_migrated_to_true` | — |
+
+---
+
+## `lib/config/migrations/custom/dry-run-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/dry-run-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/dry-run-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate dryRun=true to dryRun=full | 4 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` | — |
+| should migrate dryRun=false to dryRun=null | 14 | ported | `config_builder.rs` | `dry_run_legacy_false_disables_dry_run` | — |
 
 ---
 
