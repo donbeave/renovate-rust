@@ -4726,6 +4726,74 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/gitea-tags/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/gitea-tags/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/gitea-tags/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags from gitea.com | 9 | not-applicable | — | — | Renovate's Gitea tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Gitea datasource IDs in extractor/config metadata. |
+| returns tags from codeberg.org | 124 | not-applicable | — | — | Renovate's Gitea tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Gitea datasource IDs in extractor/config metadata. |
+| returns commits from codeberg.org | 209 | not-applicable | — | — | Renovate's Gitea tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Gitea datasource IDs in extractor/config metadata. |
+| returns commits from gitea.com | 256 | not-applicable | — | — | Renovate's Gitea tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Gitea datasource IDs in extractor/config metadata. |
+| returns tags commit hash from gitea.com | 272 | not-applicable | — | — | Renovate's Gitea tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Gitea datasource IDs in extractor/config metadata. |
+
+---
+
+## `lib/modules/datasource/forgejo-tags/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/forgejo-tags/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/forgejo-tags/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags from code.forgejo.org | 9 | not-applicable | — | — | Renovate's Forgejo tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Forgejo datasource IDs in extractor/config metadata. |
+| returns tags from codeberg.org | 129 | not-applicable | — | — | Renovate's Forgejo tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Forgejo datasource IDs in extractor/config metadata. |
+| returns commits from codeberg.org | 214 | not-applicable | — | — | Renovate's Forgejo tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Forgejo datasource IDs in extractor/config metadata. |
+| returns null from code.forgejo.org when no commits found | 261 | not-applicable | — | — | Renovate's Forgejo tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Forgejo datasource IDs in extractor/config metadata. |
+| returns tags commit hash from code.forgejo.org | 277 | not-applicable | — | — | Renovate's Forgejo tags release-list and digest datasource APIs are not implemented in Rust; Rust only preserves Forgejo datasource IDs in extractor/config metadata. |
+
+---
+
+## `lib/modules/datasource/hex/v2/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/hex/v2/index.spec.ts
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/hex/v2/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| roundtrip | 34 | not-applicable | — | — | Renovate's Hex v2 binary cache encoding/decoding is not implemented in Rust; Rust Hex support uses latest-version JSON API lookup only. |
+| roundtrip | 55 | not-applicable | — | — | Renovate's Hex v2 binary cache encoding/decoding is not implemented in Rust; Rust Hex support uses latest-version JSON API lookup only. |
+
+---
+
+## `lib/modules/datasource/puppet-forge/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/puppet-forge/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/puppet-forge/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should use default forge if no other provided | 12 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+| parses real data | 34 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+| has a deprecated for reason | 79 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+| should return null if lookup fails 400 | 107 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+| should return null if lookup fails | 123 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+| should fetch package info from custom registry | 137 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+| load all possible null values | 182 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+| no releases available -> return null | 208 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
