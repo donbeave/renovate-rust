@@ -552,6 +552,27 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn fetch_tags_trims_trailing_api_base_slash() {
+        let server = MockServer::start().await;
+        let body = tags_page(&["1.0.0"], None);
+        Mock::given(method("GET"))
+            .and(path("/v2/repositories/my/node/tags"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let dhr = DockerHubRepo {
+            namespace: "my".into(),
+            repo: "node".into(),
+        };
+        let tags = fetch_tags(&http, &dhr, &format!("{}/", server.uri()))
+            .await
+            .unwrap();
+        assert_eq!(tags, vec!["1.0.0"]);
+    }
+
+    #[tokio::test]
     async fn fetch_updates_concurrent_detects_update() {
         let server = MockServer::start().await;
         let body = tags_page(&["22.04", "22.04.1", "22.04.2", "23.10"], None);
