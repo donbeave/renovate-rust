@@ -133,4 +133,23 @@ mod tests {
         assert_eq!(cmp_version("1.0.0", "2.0.0"), Less);
         assert_eq!(cmp_version("2.198.0", "2.20.0"), Greater);
     }
+
+    // Ported: "when versions is $a" — datasource/azure-pipelines-tasks/index.spec.ts line 222
+    #[test]
+    fn cmp_version_sorts_semver_cases() {
+        for (input, expected) in [
+            (vec![], vec![]),
+            (vec![""], vec![""]),
+            (vec!["", ""], vec!["", ""]),
+            (vec!["1.0.0"], vec!["1.0.0"]),
+            (
+                vec!["1.0.1", "1.1.0", "1.0.0"],
+                vec!["1.0.0", "1.0.1", "1.1.0"],
+            ),
+        ] {
+            let mut versions = input;
+            versions.sort_by(|a, b| cmp_version(a, b));
+            assert_eq!(versions, expected);
+        }
+    }
 }
