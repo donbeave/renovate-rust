@@ -122,6 +122,52 @@ fn migrate_config(input: &Value) -> Value {
         if matches!(map.get("automerge"), Some(Value::String(value)) if value == "none") {
             map.insert("automerge".to_owned(), Value::Bool(false));
         }
+        if let Some(extends) = map.get_mut("extends") {
+            let presets = match std::mem::take(extends) {
+                Value::String(value) => vec![value],
+                Value::Array(values) => values
+                    .into_iter()
+                    .filter_map(|value| value.as_str().map(ToOwned::to_owned))
+                    .collect(),
+                value => {
+                    *extends = value;
+                    Vec::new()
+                }
+            };
+            if !presets.is_empty() || !extends.is_array() {
+                *extends = Value::Array(
+                    presets
+                        .into_iter()
+                        .filter_map(|preset| migrate_extends_preset(&preset))
+                        .map(Value::String)
+                        .collect(),
+                );
+            }
+        }
+        if let Some(Value::String(schedule)) = map.get_mut("schedule") {
+            *schedule = migrate_schedule_string(schedule.to_owned());
+        }
+        if let Some(semantic_commits) = map.get_mut("semanticCommits") {
+            *semantic_commits = match semantic_commits {
+                Value::Bool(true) => Value::String("enabled".to_owned()),
+                Value::Bool(false) => Value::String("disabled".to_owned()),
+                Value::String(value) if value == "enabled" || value == "disabled" => {
+                    Value::String(value.clone())
+                }
+                _ => Value::String("auto".to_owned()),
+            };
+        }
+        if let Some(semantic_prefix) = map.remove("semanticPrefix")
+            && let Some(value) = semantic_prefix.as_str()
+        {
+            let (commit_type, scope) = parse_semantic_prefix(value);
+            set_safely(map, "semanticCommitType", Value::String(commit_type));
+            set_safely(
+                map,
+                "semanticCommitScope",
+                scope.map(Value::String).unwrap_or(Value::Null),
+            );
+        }
         if matches!(map.get("binarySource"), Some(Value::String(value)) if value == "auto") {
             map.insert(
                 "binarySource".to_owned(),
@@ -664,6 +710,33 @@ fn is_unpublish_safe_preset(value: &str) -> bool {
             | "npm:unpublishSafe"
             | "security:minimumReleaseAgeNpm"
     )
+}
+
+fn migrate_extends_preset(preset: &str) -> Option<String> {
+    match preset {
+        ":js-app" => Some("config:js-app".to_owned()),
+        "helpers:oddIsUnstable" => None,
+        "github>whitesource/merge-confidence:beta" => Some("mergeConfidence:all-badges".to_owned()),
+        _ => Some(preset.to_owned()),
+    }
+}
+
+fn migrate_schedule_string(value: String) -> String {
+    match value.as_str() {
+        "every friday" => "on friday".to_owned(),
+        _ => value,
+    }
+}
+
+fn parse_semantic_prefix(value: &str) -> (String, Option<String>) {
+    let text = value.split(':').next().unwrap_or_default();
+    let mut parts = text.split('(');
+    let commit_type = parts.next().unwrap_or_default().to_owned();
+    let scope = parts
+        .next()
+        .and_then(|scope| scope.split(')').next())
+        .map(str::to_owned);
+    (commit_type, scope)
 }
 
 fn validate_config(config: &Value) -> Vec<Value> {
@@ -4111,6 +4184,187 @@ mod tests {
         assert_eq!(
             migrate_config(&json!({"binarySource": "auto"})),
             json!({"binarySource": "global"})
+        );
+    }
+
+    // Ported: "migrates preset strings to array" — config/migrations/custom/extends-migration.spec.ts line 5
+    #[test]
+    fn extends_string_migrates_to_array_and_normalizes_js_app() {
+        assert_eq!(
+            migrate_config(&json!({"extends": ":js-app"})),
+            json!({"extends": ["config:js-app"]})
+        );
+        assert_eq!(
+            migrate_config(&json!({"extends": "foo"})),
+            json!({"extends": ["foo"]})
+        );
+    }
+
+    // Ported: "migrates presets array" — config/migrations/custom/extends-migration.spec.ts line 23
+    #[test]
+    fn extends_array_normalizes_presets_in_place() {
+        assert_eq!(
+            migrate_config(&json!({"extends": ["foo", ":js-app", "bar"]})),
+            json!({"extends": ["foo", "config:js-app", "bar"]})
+        );
+    }
+
+    // Ported: "should remove non string values" — config/migrations/custom/extends-migration.spec.ts line 34
+    #[test]
+    fn extends_array_removes_non_string_values() {
+        assert_eq!(
+            migrate_config(&json!({"extends": [{}]})),
+            json!({"extends": []})
+        );
+    }
+
+    // Ported: "should remove removed presets" — config/migrations/custom/extends-migration.spec.ts line 44
+    #[test]
+    fn extends_array_removes_deleted_presets() {
+        assert_eq!(
+            migrate_config(&json!({"extends": ["helpers:oddIsUnstable"]})),
+            json!({"extends": []})
+        );
+    }
+
+    // Ported: "migrate merge confidence config preset to internal preset" — config/migrations/custom/extends-migration.spec.ts line 67
+    #[test]
+    fn extends_merge_confidence_preset_migrates_to_internal_preset() {
+        assert_eq!(
+            migrate_config(&json!({"extends": ["github>whitesource/merge-confidence:beta"]})),
+            json!({"extends": ["mergeConfidence:all-badges"]})
+        );
+    }
+
+    // Ported: "migrates every friday" — config/migrations/custom/schedule-migration.spec.ts line 4
+    #[test]
+    fn schedule_every_friday_migrates_to_on_friday() {
+        assert_eq!(
+            migrate_config(&json!({"schedule": "every friday"})),
+            json!({"schedule": "on friday"})
+        );
+    }
+
+    // Ported: "does not migrate every weekday" — config/migrations/custom/schedule-migration.spec.ts line 14
+    #[test]
+    fn schedule_every_weekday_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"schedule": "every weekday"})),
+            json!({"schedule": "every weekday"})
+        );
+    }
+
+    // Ported: "does not migrate multi days" — config/migrations/custom/schedule-migration.spec.ts line 25
+    #[test]
+    fn schedule_multi_days_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"schedule": "after 5:00pm on wednesday and thursday"})),
+            json!({"schedule": "after 5:00pm on wednesday and thursday"})
+        );
+    }
+
+    // Ported: "does not migrate hour range" — config/migrations/custom/schedule-migration.spec.ts line 36
+    #[test]
+    fn schedule_hour_range_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"schedule": "after 1:00pm and before 5:00pm"})),
+            json!({"schedule": "after 1:00pm and before 5:00pm"})
+        );
+    }
+
+    // Ported: "does not migrate invalid range" — config/migrations/custom/schedule-migration.spec.ts line 47
+    #[test]
+    fn schedule_invalid_range_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"schedule": "after and before 5:00"})),
+            json!({"schedule": "after and before 5:00"})
+        );
+    }
+
+    // Ported: "should migrate true to \"enabled\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 4
+    #[test]
+    fn semantic_commits_true_migrates_to_enabled() {
+        assert_eq!(
+            migrate_config(&json!({"semanticCommits": true})),
+            json!({"semanticCommits": "enabled"})
+        );
+    }
+
+    // Ported: "should migrate false to \"disabled\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 13
+    #[test]
+    fn semantic_commits_false_migrates_to_disabled() {
+        assert_eq!(
+            migrate_config(&json!({"semanticCommits": false})),
+            json!({"semanticCommits": "disabled"})
+        );
+    }
+
+    // Ported: "should migrate null to \"auto\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 22
+    #[test]
+    fn semantic_commits_null_migrates_to_auto() {
+        assert_eq!(
+            migrate_config(&json!({"semanticCommits": null})),
+            json!({"semanticCommits": "auto"})
+        );
+    }
+
+    // Ported: "should migrate random string to \"auto\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 31
+    #[test]
+    fn semantic_commits_random_string_migrates_to_auto() {
+        assert_eq!(
+            migrate_config(&json!({"semanticCommits": "test"})),
+            json!({"semanticCommits": "auto"})
+        );
+    }
+
+    // Ported: "should not migrate valid enabled config" — config/migrations/custom/semantic-commits-migration.spec.ts line 40
+    #[test]
+    fn semantic_commits_enabled_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"semanticCommits": "enabled"})),
+            json!({"semanticCommits": "enabled"})
+        );
+    }
+
+    // Ported: "should not migrate valid disabled config" — config/migrations/custom/semantic-commits-migration.spec.ts line 51
+    #[test]
+    fn semantic_commits_disabled_is_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"semanticCommits": "disabled"})),
+            json!({"semanticCommits": "disabled"})
+        );
+    }
+
+    // Ported: "should work" — config/migrations/custom/semantic-prefix-migration.spec.ts line 4
+    #[test]
+    fn semantic_prefix_migrates_type_and_scope() {
+        assert_eq!(
+            migrate_config(&json!({"semanticPrefix": "fix(deps): "})),
+            json!({"semanticCommitType": "fix", "semanticCommitScope": "deps"})
+        );
+    }
+
+    // Ported: "should remove non-string values" — config/migrations/custom/semantic-prefix-migration.spec.ts line 12
+    #[test]
+    fn semantic_prefix_non_string_is_removed() {
+        assert_eq!(migrate_config(&json!({"semanticPrefix": true})), json!({}));
+    }
+
+    // Ported: "should migrate prefix with no-scope to null" — config/migrations/custom/semantic-prefix-migration.spec.ts line 21
+    #[test]
+    fn semantic_prefix_without_scope_migrates_scope_to_null() {
+        assert_eq!(
+            migrate_config(&json!({"semanticPrefix": "fix: "})),
+            json!({"semanticCommitType": "fix", "semanticCommitScope": null})
+        );
+    }
+
+    // Ported: "works for random string" — config/migrations/custom/semantic-prefix-migration.spec.ts line 30
+    #[test]
+    fn semantic_prefix_random_string_migrates_type_with_null_scope() {
+        assert_eq!(
+            migrate_config(&json!({"semanticPrefix": "test"})),
+            json!({"semanticCommitType": "test", "semanticCommitScope": null})
         );
     }
 

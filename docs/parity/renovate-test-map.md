@@ -3557,6 +3557,75 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/extends-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/extends-migration.spec.ts
+**Total tests:** 6 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `config/migrations/custom/extends-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates preset strings to array | 5 | ported | `migrate_validate.rs` | `extends_string_migrates_to_array_and_normalizes_js_app` | — |
+| migrates presets array | 23 | ported | `migrate_validate.rs` | `extends_array_normalizes_presets_in_place` | — |
+| should remove non string values | 34 | ported | `migrate_validate.rs` | `extends_array_removes_non_string_values` | — |
+| should remove removed presets | 44 | ported | `migrate_validate.rs` | `extends_array_removes_deleted_presets` | — |
+| migrates presets | 54 | not-applicable | — | — | Rust config has no mutable GlobalConfig.migratePresets registry equivalent for per-test custom preset rewrite injection |
+| migrate merge confidence config preset to internal preset | 67 | ported | `migrate_validate.rs` | `extends_merge_confidence_preset_migrates_to_internal_preset` | — |
+
+---
+
+## `lib/config/migrations/custom/schedule-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/schedule-migration.spec.ts
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `config/migrations/custom/schedule-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| migrates every friday | 4 | ported | `migrate_validate.rs` | `schedule_every_friday_migrates_to_on_friday` | — |
+| does not migrate every weekday | 14 | ported | `migrate_validate.rs` | `schedule_every_weekday_is_unchanged` | — |
+| does not migrate multi days | 25 | ported | `migrate_validate.rs` | `schedule_multi_days_is_unchanged` | — |
+| does not migrate hour range | 36 | ported | `migrate_validate.rs` | `schedule_hour_range_is_unchanged` | — |
+| does not migrate invalid range | 47 | ported | `migrate_validate.rs` | `schedule_invalid_range_is_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/semantic-commits-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/semantic-commits-migration.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `config/migrations/custom/semantic-commits-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true to "enabled" | 4 | ported | `migrate_validate.rs` | `semantic_commits_true_migrates_to_enabled` | — |
+| should migrate false to "disabled" | 13 | ported | `migrate_validate.rs` | `semantic_commits_false_migrates_to_disabled` | — |
+| should migrate null to "auto" | 22 | ported | `migrate_validate.rs` | `semantic_commits_null_migrates_to_auto` | — |
+| should migrate random string to "auto" | 31 | ported | `migrate_validate.rs` | `semantic_commits_random_string_migrates_to_auto` | — |
+| should not migrate valid enabled config | 40 | ported | `migrate_validate.rs` | `semantic_commits_enabled_is_unchanged` | — |
+| should not migrate valid disabled config | 51 | ported | `migrate_validate.rs` | `semantic_commits_disabled_is_unchanged` | — |
+
+---
+
+## `lib/config/migrations/custom/semantic-prefix-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/semantic-prefix-migration.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `config/migrations/custom/semantic-prefix-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should work | 4 | ported | `migrate_validate.rs` | `semantic_prefix_migrates_type_and_scope` | — |
+| should remove non-string values | 12 | ported | `migrate_validate.rs` | `semantic_prefix_non_string_is_removed` | — |
+| should migrate prefix with no-scope to null | 21 | ported | `migrate_validate.rs` | `semantic_prefix_without_scope_migrates_scope_to_null` | — |
+| works for random string | 30 | ported | `migrate_validate.rs` | `semantic_prefix_random_string_migrates_type_with_null_scope` | — |
+
+---
+
 ## `lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts
