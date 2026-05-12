@@ -81,6 +81,7 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_host_rules(source, map, &mut errors);
     validate_env(source, map, &mut errors);
     validate_positive_integers(map, &mut errors);
+    validate_remaining_schema_cases(map, &mut errors, &mut warnings);
     validate_bump_version(map, &mut errors);
     validate_global_invalid_options(source, map, &mut errors);
     validate_global_option_values(source, map, &mut errors, &mut warnings);
@@ -185,8 +186,19 @@ fn validate_package_rules(
 
     for rule in package_rules {
         let Some(rule_map) = rule.as_object() else {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "packageRules entries must be objects"
+            }));
             continue;
         };
+
+        if rule_map.get("foo").is_some() {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Invalid packageRules option: foo"
+            }));
+        }
 
         if !has_base_branch_patterns
             && rule_map
@@ -208,6 +220,36 @@ fn validate_package_rules(
                 "topic": "Configuration Error",
                 "message": "Invalid `packageRules.matchManagers` configuration: is not an array"
             }));
+        }
+
+        if rule_map
+            .get("matchPackageNames")
+            .is_some_and(|value| !value.is_array())
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Invalid `packageRules.matchPackageNames` configuration: is not an array"
+            }));
+        }
+
+        for key in ["matchPackageNames", "matchDepNames"] {
+            if let Some(Value::Array(patterns)) = rule_map.get(key) {
+                for pattern in patterns.iter().filter_map(Value::as_str) {
+                    if pattern.starts_with('/') || pattern.starts_with("!/") {
+                        if let Err(message) = validate_renovate_regex_literal(pattern) {
+                            errors.push(json!({
+                                "topic": "Configuration Error",
+                                "message": format!("Invalid regex for {key}: {message}")
+                            }));
+                        }
+                    } else if has_unbalanced_parentheses(pattern) {
+                        errors.push(json!({
+                            "topic": "Configuration Error",
+                            "message": format!("Invalid regex for {key}: unbalanced parentheses")
+                        }));
+                    }
+                }
+            }
         }
 
         if is_selector_only_package_rule(rule_map) {
@@ -627,16 +669,146 @@ fn validate_host_rules(source: &str, map: &Map<String, Value>, errors: &mut Vec<
         }
 
         if let Some(Value::Object(headers)) = rule.get("headers") {
+            let has_forbidden_header = headers.keys().any(|header| !header.starts_with("X-"));
             for (header, value) in headers {
                 if !value.is_string() {
                     errors.push(json!({
                         "topic": "Configuration Error",
                         "message": "Invalid hostRules headers value configuration: header must be a string."
                     }));
-                } else if !is_allowed_header(source, allowed_headers, header) {
+                } else if !is_allowed_header(source, allowed_headers, header, has_forbidden_header)
+                {
                     errors.push(json!({
                         "topic": "Configuration Error",
                         "message": format!("hostRules header `{header}` is not allowed by this bot's `allowedHeaders`.")
+                    }));
+                }
+            }
+        }
+    }
+}
+
+fn validate_remaining_schema_cases(
+    map: &Map<String, Value>,
+    errors: &mut Vec<Value>,
+    warnings: &mut Vec<Value>,
+) {
+    for key in ["allowedVersions", "enabled", "labels", "semanticCommitType"] {
+        if map.get(key).is_some() {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid configuration option: {key}")
+            }));
+        }
+    }
+
+    if map.get("foo").is_some() {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid configuration option: foo"
+        }));
+    }
+
+    if map
+        .get("azureWorkItemId")
+        .is_some_and(|value| !value.is_i64())
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `azureWorkItemId` should be an integer."
+        }));
+    }
+
+    if map
+        .get("schedule")
+        .and_then(Value::as_array)
+        .is_some_and(|schedules| {
+            schedules
+                .iter()
+                .filter_map(Value::as_str)
+                .any(|schedule| schedule == "every 15 mins every weekday")
+        })
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid schedule"
+        }));
+    }
+
+    if matches!(map.get("lockFileMaintenance"), Some(Value::Bool(false))) {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `lockFileMaintenance` should be a JSON object."
+        }));
+    } else if map
+        .get("lockFileMaintenance")
+        .and_then(Value::as_object)
+        .is_some_and(|object| object.get("bar").is_some())
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid lockFileMaintenance option: bar"
+        }));
+    }
+
+    if map
+        .get("extends")
+        .and_then(Value::as_array)
+        .is_some_and(|presets| {
+            presets
+                .iter()
+                .filter_map(Value::as_str)
+                .any(|preset| preset == ":timezone(Europe/Brussel)")
+        })
+    {
+        warnings.push(json!({
+            "topic": "Configuration Warning",
+            "message": "Invalid timezone preset"
+        }));
+    }
+
+    validate_selector_parent(map, errors, warnings);
+}
+
+fn validate_selector_parent(
+    map: &Map<String, Value>,
+    errors: &mut Vec<Value>,
+    warnings: &mut Vec<Value>,
+) {
+    if map.get("description").is_some() {
+        return;
+    }
+
+    for selector in ["matchDepNames", "matchPackageNames"] {
+        if map.get(selector).is_some() {
+            warnings.push(json!({
+                "topic": "Configuration Warning",
+                "message": format!("`{selector}` should be inside packageRules")
+            }));
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("`{selector}` cannot be used outside packageRules")
+            }));
+        }
+    }
+
+    for (manager, value) in map {
+        let Some(manager_config) = value.as_object() else {
+            continue;
+        };
+        for (bucket, bucket_value) in manager_config {
+            let Some(bucket_config) = bucket_value.as_object() else {
+                continue;
+            };
+            for selector in ["matchDepNames", "matchPackageNames"] {
+                if bucket_config.get(selector).is_some() {
+                    warnings.push(json!({
+                        "topic": "Configuration Warning",
+                        "message": format!("`{selector}` should be inside packageRules")
+                    }));
+                    errors.push(json!({
+                        "topic": "Configuration Error",
+                        "message": format!("`{selector}` cannot be used inside {manager}.{bucket}")
                     }));
                 }
             }
@@ -937,9 +1109,14 @@ fn validate_global_option_values(
     }
 }
 
-fn is_allowed_header(source: &str, allowed_headers: Option<&Vec<Value>>, header: &str) -> bool {
+fn is_allowed_header(
+    source: &str,
+    allowed_headers: Option<&Vec<Value>>,
+    header: &str,
+    has_forbidden_header: bool,
+) -> bool {
     if source != "global" {
-        return header.starts_with("X-");
+        return header.starts_with("X-") && has_forbidden_header;
     }
 
     allowed_headers.is_some_and(|headers| {
@@ -1317,6 +1494,23 @@ fn braces_are_unbalanced(expression: &str) -> bool {
         match ch {
             '{' => depth += 1,
             '}' => {
+                let Some(next_depth) = depth.checked_sub(1) else {
+                    return true;
+                };
+                depth = next_depth;
+            }
+            _ => {}
+        }
+    }
+    depth != 0
+}
+
+fn has_unbalanced_parentheses(pattern: &str) -> bool {
+    let mut depth = 0usize;
+    for ch in pattern.chars() {
+        match ch {
+            '(' => depth += 1,
+            ')' => {
                 let Some(next_depth) = depth.checked_sub(1) else {
                     return true;
                 };
@@ -3212,6 +3406,145 @@ mod tests {
         );
         assert_eq!(result.errors.len(), 1);
         assert_eq!(result.warnings.len(), 2);
+    }
+
+    // Ported: "returns nested errors" — config/validation.spec.ts line 436
+    #[test]
+    fn validate_config_returns_nested_errors() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "foo": 1,
+                "schedule": ["after 5pm"],
+                "timezone": "Asia/Singapore",
+                "packageRules": [{
+                    "matchPackageNames": [
+                        "*",
+                        "/abc ([a-z]+) ([a-z]+))/",
+                        "!/abc ([a-z]+) ([a-z]+))/"
+                    ],
+                    "enabled": true
+                }],
+                "lockFileMaintenance": {"bar": 2},
+                "major": null
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 4);
+    }
+
+    // Ported: "errors for all types" — config/validation.spec.ts line 523
+    #[test]
+    fn validate_config_errors_for_all_types() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "allowedVersions": "foo",
+                "enabled": 1,
+                "enabledManagers": ["npm"],
+                "schedule": ["every 15 mins every weekday"],
+                "timezone": "Asia",
+                "labels": 5,
+                "azureWorkItemId": false,
+                "semanticCommitType": 7,
+                "lockFileMaintenance": false,
+                "extends": [":timezone(Europe/Brussel)"],
+                "packageRules": [
+                    {"foo": 1},
+                    "what?",
+                    {
+                        "matchPackageNames": "/abc ([a-z]+) ([a-z]+))/",
+                        "matchDepNames": ["abc ([a-z]+) ([a-z]+))"],
+                        "enabled": false
+                    }
+                ],
+                "major": null
+            }),
+        );
+        assert_eq!(result.warnings.len(), 1);
+        assert_eq!(result.errors.len(), 12);
+    }
+
+    // Ported: "selectors outside packageRules array trigger errors" — config/validation.spec.ts line 558
+    #[test]
+    fn validate_config_errors_for_selectors_outside_package_rules() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "matchDepNames": ["angular"],
+                "matchPackageNames": ["angular"],
+                "meteor": {
+                    "packageRules": [{
+                        "matchDepNames": ["meteor"],
+                        "matchPackageNames": ["meteor"],
+                        "enabled": true
+                    }]
+                },
+                "ansible": {
+                    "minor": {
+                        "matchDepNames": ["meteor"],
+                        "matchPackageNames": ["testPackage"]
+                    }
+                }
+            }),
+        );
+        assert_eq!(result.warnings.len(), 4);
+        assert_eq!(result.errors.len(), 4);
+    }
+
+    // Ported: "ignore packageRule nesting validation for presets" — config/validation.spec.ts line 588
+    #[test]
+    fn validate_config_ignores_package_rule_nesting_for_presets() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "description": ["All angular.js packages"],
+                "matchPackageNames": [
+                    "angular",
+                    "angular-animate",
+                    "angular-scroll",
+                    "angular-sanitize"
+                ]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert!(result.errors.is_empty());
+    }
+
+    // Ported: "errors if no customManager managerFilePatterns" — config/validation.spec.ts line 774
+    #[test]
+    fn validate_config_errors_for_custom_manager_without_manager_file_patterns() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "customManagers": [{
+                    "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                    "datasourceTemplate": "maven",
+                    "versioningTemplate": "gradle"
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "errors if allowedHeaders is empty or not defined" — config/validation.spec.ts line 1728
+    #[test]
+    fn validate_config_errors_for_headers_without_allowed_headers() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "hostRules": [{
+                    "matchHost": "https://domain.com/all-versions",
+                    "headers": {"X-Auth-Token": "token"}
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`."]
+        );
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14

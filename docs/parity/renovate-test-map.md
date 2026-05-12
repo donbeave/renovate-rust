@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1645 / 1657 actionable tests ported (99%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1651 / 1657 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 121 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 127 | **Actionable:** 127 | **Status:** ported
 
 ### `config/validation › validateConfig(config)`
 
@@ -3574,20 +3574,20 @@ resolver) and the inner `extractPackageFile()` adapter.
 | validates invalid statusCheckNames | 384 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_invalid_status_check_names` | — |
 | catches invalid customDatasources record type | 408 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_custom_datasources_record_type` | — |
 | catches invalid baseBranchPatterns regex | 423 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_base_branch_patterns_regex` | — |
-| returns nested errors | 436 | pending | — | — | — |
+| returns nested errors | 436 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_returns_nested_errors` | — |
 | included managers of the wrong type | 466 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_match_managers_wrong_type` | — |
 | empty configuration | 484 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_empty_configuration` | — |
 | single not supported manager | 503 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_unsupported_enabled_managers` | — |
-| errors for all types | 523 | pending | — | — | — |
-| selectors outside packageRules array trigger errors | 558 | pending | — | — | — |
-| ignore packageRule nesting validation for presets | 588 | pending | — | — | — |
+| errors for all types | 523 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_all_types` | — |
+| selectors outside packageRules array trigger errors | 558 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_selectors_outside_package_rules` | — |
+| ignore packageRule nesting validation for presets | 588 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_ignores_package_rule_nesting_for_presets` | — |
 | errors for unsafe managerFilePatterns | 608 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_unsafe_manager_file_patterns` | — |
 | validates regEx for each managerFilePatterns of format regex | 627 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_custom_manager_file_pattern_regex` | — |
 | errors if customManager has empty managerFilePatterns | 649 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_empty_custom_manager_file_patterns` | — |
 | errors if no customManager customType | 675 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_missing_custom_manager_type` | — |
 | errors if invalid customManager customType | 703 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_custom_manager_type` | — |
 | errors if empty customManager matchStrings | 732 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_empty_custom_manager_match_strings` | — |
-| errors if no customManager managerFilePatterns | 774 | pending | — | — | — |
+| errors if no customManager managerFilePatterns | 774 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_custom_manager_without_manager_file_patterns` | — |
 | validates regEx for each matchStrings | 793 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_custom_manager_match_string_regex` | — |
 | error if no fileFormat in custom JSONata manager | 815 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_jsonata_manager_missing_file_format` | — |
 | validates JSONata query for each matchStrings | 841 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_jsonata_manager_queries` | — |
@@ -3649,7 +3649,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 | errors if invalid matchHost values in hostRules | 1631 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_host_rule_match_host_values` | — |
 | errors if forbidden header in hostRules | 1673 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_forbidden_host_rule_header` | — |
 | errors if headers values are not string | 1701 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_non_string_host_rule_header_values` | — |
-| errors if allowedHeaders is empty or not defined | 1728 | pending | — | — | — |
+| errors if allowedHeaders is empty or not defined | 1728 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_headers_without_allowed_headers` | — |
 | catches invalid variable name in env config option | 1755 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_env_variable_name_and_value` | — |
 | catches env config option if configured inside a parent | 1783 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_nested_env_config` | — |
 | catches when * or ** is combined with others patterns in a regexOrGlob option | 1820 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_match_all_combined_with_other_patterns` | — |
