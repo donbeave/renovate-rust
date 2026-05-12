@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1681 / 1794 actionable tests ported (94%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1691 / 1794 actionable tests ported (94%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4113,7 +4113,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 13 | **Actionable:** 45 | **Status:** partial
+**Total tests:** 45 | **Ported:** 23 | **Actionable:** 45 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -4134,16 +4134,16 @@ resolver) and the inner `extractPackageFile()` adapter.
 | "$envArg" -> $config | 91 | ported | `config_env.rs` | `recreate_env_aliases_are_parsed` | — |
 | skips misconfigured arrays | 103 | ported | `config_env.rs` | `host_rules_string_value_is_skipped` | — |
 | skips garbage array values | 117 | ported | `config_env.rs` | `host_rules_garbage_value_is_skipped` | — |
-| supports GitHub token | 131 | pending | — | — | — |
-| supports GitHub custom endpoint | 140 | pending | — | — | — |
-| supports GitHub custom endpoint and github.com | 149 | pending | — | — | — |
-| supports GitHub fine-grained PATs | 168 | pending | — | — | — |
-| supports RENOVATE_ prefixed github com token | 185 | pending | — | — | — |
-| GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN | 202 | pending | — | — | — |
-| supports GitHub custom endpoint and gitlab.com | 220 | pending | — | — | — |
-| supports GitLab token | 231 | pending | — | — | — |
-| supports GitLab custom endpoint | 242 | pending | — | — | — |
-| supports Azure DevOps | 255 | pending | — | — | — |
+| supports GitHub token | 131 | ported | `config_env.rs` | `github_token_is_parsed` | — |
+| supports GitHub custom endpoint | 140 | ported | `config_env.rs` | `github_endpoint_is_parsed` | — |
+| supports GitHub custom endpoint and github.com | 149 | ported | `config_env.rs` | `github_com_token_becomes_host_rule_with_custom_endpoint` | — |
+| supports GitHub fine-grained PATs | 168 | ported | `config_env.rs` | `github_fine_grained_pat_becomes_host_rule` | — |
+| supports RENOVATE_ prefixed github com token | 185 | ported | `config_env.rs` | `renovate_prefixed_github_com_token_becomes_host_rule` | — |
+| GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN | 202 | ported | `config_env.rs` | `github_com_token_takes_precedence_over_renovate_prefixed_token` | — |
+| supports GitHub custom endpoint and gitlab.com | 220 | ported | `config_env.rs` | `github_custom_endpoint_without_github_com_token_has_no_host_rule` | — |
+| supports GitLab token | 231 | ported | `config_env.rs` | `gitlab_token_is_parsed` | — |
+| supports GitLab custom endpoint | 242 | ported | `config_env.rs` | `gitlab_custom_endpoint_is_parsed` | — |
+| supports Azure DevOps | 255 | ported | `config_env.rs` | `azure_devops_config_is_parsed` | — |
 | supports Bitbucket token | 268 | pending | — | — | — |
 | supports Bitbucket username/password | 283 | pending | — | — | — |
 | merges full config from env | 299 | pending | — | — | — |

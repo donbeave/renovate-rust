@@ -4,7 +4,8 @@
 
 use std::collections::BTreeMap;
 
-use renovate_core::config::{GlobalConfig, RecreateWhen};
+use renovate_core::config::{GlobalConfig, Platform, RecreateWhen};
+use serde_json::json;
 
 use crate::config_builder::parse_json_array;
 
@@ -28,8 +29,24 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "TOKEN") {
         config.token = Some(value.to_owned());
     }
+    if let Some(value) = env_value(env, prefix, "ENDPOINT") {
+        config.endpoint = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "PLATFORM") {
+        config.platform = parse_platform(value)?;
+    }
     if let Some(value) = env_value(env, prefix, "HOST_RULES") {
         config.host_rules = parse_json_array(value).unwrap_or_default();
+    }
+    if let Some(token) = env
+        .get("GITHUB_COM_TOKEN")
+        .or_else(|| env.get("RENOVATE_GITHUB_COM_TOKEN"))
+    {
+        config.host_rules.push(json!({
+            "hostType": "github",
+            "matchHost": "github.com",
+            "token": token,
+        }));
     }
 
     if let Some(value) = env_value(env, prefix, "RECREATE_CLOSED") {
@@ -72,6 +89,23 @@ fn parse_bool(env_name: &str, value: &str) -> Result<bool, String> {
     }
 }
 
+fn parse_platform(value: &str) -> Result<Platform, String> {
+    match value {
+        "azure" => Ok(Platform::Azure),
+        "bitbucket" => Ok(Platform::Bitbucket),
+        "bitbucket-server" => Ok(Platform::BitbucketServer),
+        "codecommit" => Ok(Platform::Codecommit),
+        "forgejo" => Ok(Platform::Forgejo),
+        "gerrit" => Ok(Platform::Gerrit),
+        "gitea" => Ok(Platform::Gitea),
+        "github" => Ok(Platform::Github),
+        "gitlab" => Ok(Platform::Gitlab),
+        "local" => Ok(Platform::Local),
+        "scm-manager" => Ok(Platform::ScmManager),
+        _ => Err(format!("RENOVATE_PLATFORM was invalid: {value}")),
+    }
+}
+
 fn split_list(value: &str) -> Vec<String> {
     value
         .split(',')
@@ -83,7 +117,7 @@ fn split_list(value: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::build_from_env;
-    use renovate_core::config::RecreateWhen;
+    use renovate_core::config::{Platform, RecreateWhen};
     use std::collections::BTreeMap;
 
     fn env(pairs: &[(&str, &str)]) -> BTreeMap<String, String> {
@@ -199,5 +233,126 @@ mod tests {
     fn host_rules_garbage_value_is_skipped() {
         let config = build_from_env(&env(&[("RENOVATE_HOST_RULES", "!@#")])).unwrap();
         assert!(config.host_rules.is_empty());
+    }
+
+    // Ported: "supports GitHub token" — workers/global/config/parse/env.spec.ts line 131
+    #[test]
+    fn github_token_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_TOKEN", "github.com token")])).unwrap();
+        assert_eq!(config.platform, Platform::Github);
+        assert_eq!(config.token.as_deref(), Some("github.com token"));
+    }
+
+    // Ported: "supports GitHub custom endpoint" — workers/global/config/parse/env.spec.ts line 140
+    #[test]
+    fn github_endpoint_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_ENDPOINT", "a ghe endpoint")])).unwrap();
+        assert_eq!(config.platform, Platform::Github);
+        assert_eq!(config.endpoint.as_deref(), Some("a ghe endpoint"));
+    }
+
+    // Ported: "supports GitHub custom endpoint and github.com" — workers/global/config/parse/env.spec.ts line 149
+    #[test]
+    fn github_com_token_becomes_host_rule_with_custom_endpoint() {
+        let config = build_from_env(&env(&[
+            ("GITHUB_COM_TOKEN", "a github.com token"),
+            ("RENOVATE_ENDPOINT", "a ghe endpoint"),
+            ("RENOVATE_TOKEN", "a ghe token"),
+        ]))
+        .unwrap();
+        assert_eq!(config.endpoint.as_deref(), Some("a ghe endpoint"));
+        assert_eq!(config.token.as_deref(), Some("a ghe token"));
+        assert_eq!(config.host_rules.len(), 1);
+        assert_eq!(config.host_rules[0]["hostType"], "github");
+        assert_eq!(config.host_rules[0]["matchHost"], "github.com");
+        assert_eq!(config.host_rules[0]["token"], "a github.com token");
+    }
+
+    // Ported: "supports GitHub fine-grained PATs" — workers/global/config/parse/env.spec.ts line 168
+    #[test]
+    fn github_fine_grained_pat_becomes_host_rule() {
+        let config = build_from_env(&env(&[
+            ("GITHUB_COM_TOKEN", "github_pat_XXXXXX"),
+            ("RENOVATE_TOKEN", "a github.com token"),
+        ]))
+        .unwrap();
+        assert_eq!(config.token.as_deref(), Some("a github.com token"));
+        assert_eq!(config.host_rules[0]["token"], "github_pat_XXXXXX");
+    }
+
+    // Ported: "supports RENOVATE_ prefixed github com token" — workers/global/config/parse/env.spec.ts line 185
+    #[test]
+    fn renovate_prefixed_github_com_token_becomes_host_rule() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_GITHUB_COM_TOKEN", "github_pat_XXXXXX"),
+            ("RENOVATE_TOKEN", "a github.com token"),
+        ]))
+        .unwrap();
+        assert_eq!(config.host_rules[0]["token"], "github_pat_XXXXXX");
+    }
+
+    // Ported: "GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN" — workers/global/config/parse/env.spec.ts line 202
+    #[test]
+    fn github_com_token_takes_precedence_over_renovate_prefixed_token() {
+        let config = build_from_env(&env(&[
+            ("GITHUB_COM_TOKEN", "github_pat_XXXXXX"),
+            ("RENOVATE_GITHUB_COM_TOKEN", "github_pat_YYYYYY"),
+            ("RENOVATE_TOKEN", "a github.com token"),
+        ]))
+        .unwrap();
+        assert_eq!(config.host_rules[0]["token"], "github_pat_XXXXXX");
+    }
+
+    // Ported: "supports GitHub custom endpoint and gitlab.com" — workers/global/config/parse/env.spec.ts line 220
+    #[test]
+    fn github_custom_endpoint_without_github_com_token_has_no_host_rule() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_ENDPOINT", "a ghe endpoint"),
+            ("RENOVATE_TOKEN", "a ghe token"),
+        ]))
+        .unwrap();
+        assert_eq!(config.endpoint.as_deref(), Some("a ghe endpoint"));
+        assert_eq!(config.token.as_deref(), Some("a ghe token"));
+        assert!(config.host_rules.is_empty());
+    }
+
+    // Ported: "supports GitLab token" — workers/global/config/parse/env.spec.ts line 231
+    #[test]
+    fn gitlab_token_is_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_PLATFORM", "gitlab"),
+            ("RENOVATE_TOKEN", "a gitlab.com token"),
+        ]))
+        .unwrap();
+        assert_eq!(config.platform, Platform::Gitlab);
+        assert_eq!(config.token.as_deref(), Some("a gitlab.com token"));
+    }
+
+    // Ported: "supports GitLab custom endpoint" — workers/global/config/parse/env.spec.ts line 242
+    #[test]
+    fn gitlab_custom_endpoint_is_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_PLATFORM", "gitlab"),
+            ("RENOVATE_TOKEN", "a gitlab token"),
+            ("RENOVATE_ENDPOINT", "a gitlab endpoint"),
+        ]))
+        .unwrap();
+        assert_eq!(config.platform, Platform::Gitlab);
+        assert_eq!(config.token.as_deref(), Some("a gitlab token"));
+        assert_eq!(config.endpoint.as_deref(), Some("a gitlab endpoint"));
+    }
+
+    // Ported: "supports Azure DevOps" — workers/global/config/parse/env.spec.ts line 255
+    #[test]
+    fn azure_devops_config_is_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_PLATFORM", "azure"),
+            ("RENOVATE_TOKEN", "an Azure DevOps token"),
+            ("RENOVATE_ENDPOINT", "an Azure DevOps endpoint"),
+        ]))
+        .unwrap();
+        assert_eq!(config.platform, Platform::Azure);
+        assert_eq!(config.token.as_deref(), Some("an Azure DevOps token"));
+        assert_eq!(config.endpoint.as_deref(), Some("an Azure DevOps endpoint"));
     }
 }
