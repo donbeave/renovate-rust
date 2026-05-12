@@ -9,6 +9,7 @@ pub mod managers;
 pub mod monorepos;
 pub mod package_rule;
 pub mod platform;
+pub mod platform_constants;
 pub mod replacements;
 pub mod repo_config;
 pub mod schedule;
