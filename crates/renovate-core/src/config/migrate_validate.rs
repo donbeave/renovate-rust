@@ -2,6 +2,7 @@
 //!
 //! Renovate reference: `lib/config/migrate-validate.ts`.
 
+use regex::Regex;
 use serde_json::{Map, Value, json};
 
 use super::massage::massage_config;
@@ -63,6 +64,9 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
             "message": "Invalid platformConfig value"
         }));
     }
+
+    validate_template_options(map, &mut errors);
+    validate_package_rules(map, &mut errors, &mut warnings);
 
     ValidationResult { errors, warnings }
 }
@@ -126,6 +130,126 @@ fn is_global_only_key(key: &str) -> bool {
 
 fn is_allowed_in_source(source: &str, key: &str) -> bool {
     source == "global" || (source == "inherit" && key == "onboarding")
+}
+
+fn validate_template_options(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    for key in ["commitMessage"] {
+        if let Some(template) = map.get(key).and_then(Value::as_str)
+            && has_invalid_template(template)
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid template for {key}")
+            }));
+        }
+    }
+}
+
+fn validate_package_rules(
+    map: &Map<String, Value>,
+    errors: &mut Vec<Value>,
+    warnings: &mut Vec<Value>,
+) {
+    let Some(Value::Array(package_rules)) = map.get("packageRules") else {
+        return;
+    };
+
+    let has_base_branch_patterns = map
+        .get("baseBranchPatterns")
+        .and_then(Value::as_array)
+        .is_some_and(|patterns| !patterns.is_empty());
+
+    for rule in package_rules {
+        let Some(rule_map) = rule.as_object() else {
+            continue;
+        };
+
+        if !has_base_branch_patterns
+            && rule_map
+                .get("matchBaseBranches")
+                .and_then(Value::as_array)
+                .is_some_and(|branches| !branches.is_empty())
+        {
+            warnings.push(json!({
+                "topic": "Configuration Warning",
+                "message": "packageRules.matchBaseBranches should only be used when baseBranchPatterns is configured."
+            }));
+        }
+
+        for key in [
+            "allowedVersions",
+            "matchCurrentValue",
+            "matchCurrentVersion",
+            "matchNewValue",
+        ] {
+            if let Some(pattern) = rule_map.get(key).and_then(Value::as_str)
+                && let Err(message) = validate_renovate_regex_literal(pattern)
+            {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Invalid regex for {key}: {message}")
+                }));
+            }
+        }
+
+        if let Some(Value::Array(expressions)) = rule_map.get("matchJsonata") {
+            for expression in expressions.iter().filter_map(Value::as_str) {
+                if has_invalid_jsonata_expression(expression) {
+                    errors.push(json!({
+                        "topic": "Configuration Error",
+                        "message": "Invalid JSONata expression"
+                    }));
+                }
+            }
+        }
+    }
+}
+
+fn has_invalid_template(template: &str) -> bool {
+    template.contains("{{{") && !template.contains("}}}")
+}
+
+fn has_invalid_jsonata_expression(expression: &str) -> bool {
+    expression.contains("{{{") || braces_are_unbalanced(expression)
+}
+
+fn braces_are_unbalanced(expression: &str) -> bool {
+    let mut depth = 0usize;
+    for ch in expression.chars() {
+        match ch {
+            '{' => depth += 1,
+            '}' => {
+                let Some(next_depth) = depth.checked_sub(1) else {
+                    return true;
+                };
+                depth = next_depth;
+            }
+            _ => {}
+        }
+    }
+    depth != 0
+}
+
+fn validate_renovate_regex_literal(pattern: &str) -> Result<(), String> {
+    let pattern = pattern.strip_prefix('!').unwrap_or(pattern);
+    let Some(rest) = pattern.strip_prefix('/') else {
+        return Ok(());
+    };
+    let Some(close) = rest.rfind('/') else {
+        return Ok(());
+    };
+    let body = &rest[..close];
+    let flags = &rest[close + 1..];
+
+    let regex_body = if flags == "i" {
+        format!("(?i){body}")
+    } else {
+        body.to_owned()
+    };
+
+    Regex::new(&regex_body)
+        .map(|_| ())
+        .map_err(|err| err.to_string())
 }
 
 #[cfg(test)]
@@ -243,6 +367,132 @@ mod tests {
     fn validate_config_errors_for_invalid_platform_config() {
         let result = validate_config_for_source("repo", &json!({"platformConfig": "invalid"}));
         assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "catches invalid templates" — config/validation.spec.ts line 156
+    #[test]
+    fn validate_config_catches_invalid_templates() {
+        let result =
+            validate_config_for_source("repo", &json!({"commitMessage": "{{{something}}"}));
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "catches invalid jsonata expressions" — config/validation.spec.ts line 165
+    #[test]
+    fn validate_config_catches_invalid_jsonata_expressions() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [{
+                    "matchJsonata": ["packageName = \"foo\"", "{{{something wrong}"],
+                    "enabled": true
+                }]
+            }),
+        );
+        assert_eq!(result.errors.len(), 1);
+        assert!(
+            result.errors[0]["message"]
+                .as_str()
+                .unwrap()
+                .contains("Invalid JSONata expression")
+        );
+    }
+
+    // Ported: "catches invalid allowedVersions regex" — config/validation.spec.ts line 179
+    #[test]
+    fn validate_config_catches_invalid_allowed_versions_regex() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [
+                    {"matchPackageNames": ["foo"], "allowedVersions": "/^2/"},
+                    {"matchPackageNames": ["bar"], "allowedVersions": "/***$}{]][/"},
+                    {"matchPackageNames": ["baz"], "allowedVersions": "!/^2/"},
+                    {"matchPackageNames": ["quack"], "allowedVersions": "!/***$}{]][/"},
+                    {"matchPackageNames": ["quack"], "allowedVersions": "/quaCk/i"}
+                ]
+            }),
+        );
+        assert_eq!(result.errors.len(), 2);
+    }
+
+    // Ported: "catches invalid matchCurrentValue" — config/validation.spec.ts line 209
+    #[test]
+    fn validate_config_catches_invalid_match_current_value_regex() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [
+                    {"matchPackageNames": ["foo"], "matchCurrentValue": "/^2/", "enabled": true},
+                    {"matchPackageNames": ["bar"], "matchCurrentValue": "^1", "enabled": true},
+                    {"matchPackageNames": ["quack"], "matchCurrentValue": "<1.0.0", "enabled": true},
+                    {"matchPackageNames": ["foo"], "matchCurrentValue": "/^2/i", "enabled": true},
+                    {"matchPackageNames": ["bad"], "matchNewValue": "/^2(/", "enabled": true}
+                ]
+            }),
+        );
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "catches invalid matchNewValue" — config/validation.spec.ts line 243
+    #[test]
+    fn validate_config_catches_invalid_match_new_value_regex() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [
+                    {"matchPackageNames": ["foo"], "matchNewValue": "/^2/", "enabled": true},
+                    {"matchPackageNames": ["bar"], "matchNewValue": "^1", "enabled": true},
+                    {"matchPackageNames": ["quack"], "matchNewValue": "<1.0.0", "enabled": true},
+                    {"matchPackageNames": ["foo"], "matchNewValue": "/^2/i", "enabled": true},
+                    {"matchPackageNames": ["bad"], "matchNewValue": "/^2(/", "enabled": true}
+                ]
+            }),
+        );
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "validates matchBaseBranches" — config/validation.spec.ts line 277
+    #[test]
+    fn validate_config_validates_match_base_branches() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "baseBranchPatterns": ["foo"],
+                "packageRules": [{"matchBaseBranches": ["foo"], "addLabels": ["foo"]}]
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "catches invalid matchBaseBranches when baseBranchPatterns is not defined" — config/validation.spec.ts line 295
+    #[test]
+    fn validate_config_warns_for_match_base_branches_without_base_branch_patterns() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"packageRules": [{"matchBaseBranches": ["foo"], "addLabels": ["foo"]}]}),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "catches invalid matchCurrentVersion regex" — config/validation.spec.ts line 312
+    #[test]
+    fn validate_config_catches_invalid_match_current_version_regex() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [
+                    {"matchPackageNames": ["foo"], "matchCurrentVersion": "/^2/", "enabled": true},
+                    {"matchPackageNames": ["bar"], "matchCurrentVersion": "/***$}{]][/", "enabled": true},
+                    {"matchPackageNames": ["baz"], "matchCurrentVersion": "!/^2/", "enabled": true},
+                    {"matchPackageNames": ["quack"], "matchCurrentVersion": "!/***$}{]][/", "enabled": true},
+                    {"matchPackageNames": ["foo"], "matchCurrentVersion": "/^2/i", "enabled": true}
+                ]
+            }),
+        );
+        assert_eq!(result.errors.len(), 2);
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14

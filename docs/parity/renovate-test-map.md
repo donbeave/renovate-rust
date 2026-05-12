@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1533 / 1657 actionable tests ported (93%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1541 / 1657 actionable tests ported (93%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 9 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 17 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3562,14 +3562,14 @@ resolver) and the inner `extractPackageFile()` adapter.
 | does not warn for valid inheritConfig | 124 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_inherited_onboarding` | — |
 | does not warn for valid platformConfig | 135 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_auto_platform_config` | — |
 | warns for invalid platformConfig | 147 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_platform_config` | — |
-| catches invalid templates | 156 | pending | — | — | — |
-| catches invalid jsonata expressions | 165 | pending | — | — | — |
-| catches invalid allowedVersions regex | 179 | pending | — | — | — |
-| catches invalid matchCurrentValue | 209 | pending | — | — | — |
-| catches invalid matchNewValue | 243 | pending | — | — | — |
-| validates matchBaseBranches | 277 | pending | — | — | — |
-| catches invalid matchBaseBranches when baseBranchPatterns is not defined | 295 | pending | — | — | — |
-| catches invalid matchCurrentVersion regex | 312 | pending | — | — | — |
+| catches invalid templates | 156 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_templates` | — |
+| catches invalid jsonata expressions | 165 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_jsonata_expressions` | — |
+| catches invalid allowedVersions regex | 179 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_allowed_versions_regex` | — |
+| catches invalid matchCurrentValue | 209 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_match_current_value_regex` | — |
+| catches invalid matchNewValue | 243 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_match_new_value_regex` | — |
+| validates matchBaseBranches | 277 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_validates_match_base_branches` | — |
+| catches invalid matchBaseBranches when baseBranchPatterns is not defined | 295 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_match_base_branches_without_base_branch_patterns` | — |
+| catches invalid matchCurrentVersion regex | 312 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_match_current_version_regex` | — |
 | catches invalid customDatasources content | 347 | pending | — | — | — |
 | validates invalid statusCheckNames | 384 | pending | — | — | — |
 | catches invalid customDatasources record type | 408 | pending | — | — | — |
