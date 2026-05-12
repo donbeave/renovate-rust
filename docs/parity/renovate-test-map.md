@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1878 / 1878 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1880 / 1880 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4732,6 +4732,20 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | should return $expected for $input | 5 | not-applicable | — | — | JavaScript thrown-value normalization for OpenTelemetry instrumentation; Rust uses typed errors and has no equivalent throwable value model. |
+
+---
+
+## `lib/logger/bunyan.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/logger/bunyan.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `logger/bunyan`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| checks for valid log levels | 6 | ported | `logging.rs` | `parses_all_valid_renovate_levels` (+ `fatal_maps_to_error`) | — |
+| checks for invalid log level: $input | 16 | ported | `logging.rs` | `invalid_level_returns_none` | — |
 
 ---
 
