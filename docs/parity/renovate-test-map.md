@@ -9298,6 +9298,71 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/util/range.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/range.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/range`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| range($start, $end) | 4 | not-applicable | — | — | Renovate's TypeScript inclusive range generator is a JavaScript utility; Rust uses native inclusive ranges and has no shared helper API to port. |
+
+---
+
+## `lib/util/compress.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/compress.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/compress`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| compresses strings | 4 | not-applicable | — | — | Renovate's TypeScript deflate/base64 utility is not implemented as a Rust API; no Rust feature consumes this serialization format. |
+
+---
+
+## `lib/util/split.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/split.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/split`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| adds splits and returns results | 4 | not-applicable | — | — | Renovate's TypeScript global elapsed-time split tracker is not implemented as a Rust API. |
+
+---
+
+## `lib/util/streams.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/streams.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/streams › streamToString`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| handles Readables | 6 | not-applicable | — | — | Renovate's Node.js Readable-to-string helper has no Rust API equivalent. |
+
+---
+
+## `lib/util/timestamp.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/timestamp.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/timestamp › asTimestamp`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| $input -> $expected | 5 | not-applicable | — | — | Renovate's JavaScript date-coercion helper accepts JS Date, number, string, null, and undefined values; no equivalent dynamically typed Rust API exists. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
