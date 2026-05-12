@@ -5324,6 +5324,123 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/maven/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/schema.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/maven/schema`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| trims release metadata to the fields used by Renovate | 6 | not-applicable | — | — | Renovate's Maven XML trimming/cache schema is not exposed as a Rust datasource API; Rust parses latest version directly from metadata XML. |
+| trims snapshot metadata to the fields used by Renovate | 30 | not-applicable | — | — | Renovate's Maven XML trimming/cache schema is not exposed as a Rust datasource API; Rust parses latest version directly from metadata XML. |
+| trims pom files to the fields used by Renovate | 47 | not-applicable | — | — | Renovate's Maven POM XML trimming/cache schema is not implemented in Rust. |
+| preserves empty relocation tags | 99 | not-applicable | — | — | Renovate's Maven POM XML trimming/cache schema is not implemented in Rust. |
+| passes through unknown XML unchanged | 120 | not-applicable | — | — | Renovate's Maven XML trimming/cache schema is not exposed as a Rust datasource API. |
+| passes through prefixed pom XML unchanged | 125 | not-applicable | — | — | Renovate's Maven POM XML trimming/cache schema is not implemented in Rust. |
+| passes through pom XML when no retained fields are present | 131 | not-applicable | — | — | Renovate's Maven POM XML trimming/cache schema is not implemented in Rust. |
+| passes through metadata XML when no retained fields are present | 136 | not-applicable | — | — | Renovate's Maven XML trimming/cache schema is not exposed as a Rust datasource API. |
+| passes through invalid XML unchanged | 141 | not-applicable | — | — | Renovate's Maven XML trimming/cache schema is not exposed as a Rust datasource API. |
+
+---
+
+## `lib/modules/datasource/maven/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/util.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/maven/util`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns error for unsupported protocols | 52 | not-applicable | — | — | Renovate's Maven datasource HTTP/S3 utility error contract is not exposed as a Rust API. |
+| returns error for xml parse error | 63 | not-applicable | — | — | Renovate's Maven datasource HTTP/S3 utility error contract is not exposed as a Rust API. |
+| returns the downloaded text body | 81 | not-applicable | — | — | Renovate's Maven datasource download utility is not exposed as a Rust API. |
+| returns error for non-S3 URLs | 98 | not-applicable | — | — | Renovate's Maven S3 utility helpers are not implemented in Rust. |
+| returns empty for HOST_DISABLED error | 108 | not-applicable | — | — | Renovate's Maven datasource host-rule error classification is not implemented in Rust. |
+| returns empty for host error | 119 | not-applicable | — | — | Renovate's Maven datasource host-rule error classification is not implemented in Rust. |
+| returns empty for temporary error | 130 | not-applicable | — | — | Renovate's Maven datasource temporary error classification is not implemented in Rust. |
+| throws ExternalHostError for 429 status with redis cache | 153 | not-applicable | — | — | Renovate's Maven external-host-error and Redis cache behavior is not implemented in Rust. |
+| throws ExternalHostError for 429 status without redis cache | 174 | not-applicable | — | — | Renovate's Maven external-host-error behavior is not implemented in Rust. |
+| throws ExternalHostError for non-429 temporary error on maven central | 195 | not-applicable | — | — | Renovate's Maven external-host-error behavior is not implemented in Rust. |
+| returns empty for connection error | 210 | not-applicable | — | — | Renovate's Maven datasource connection-error classification is not implemented in Rust. |
+| returns empty for unsupported error | 221 | not-applicable | — | — | Renovate's Maven datasource utility error classification is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/maven/s3.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/s3.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/maven/s3`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns releases | 43 | not-applicable | — | — | Renovate's Maven S3 repository listing and object retrieval flow is not implemented in Rust. |
+| returns null on auth error | 78 | not-applicable | — | — | Renovate's Maven S3 repository auth-error handling is not implemented in Rust. |
+| returns null for incorrect region | 105 | not-applicable | — | — | Renovate's Maven S3 repository region-error handling is not implemented in Rust. |
+| returns null for NoSuchKey error | 125 | not-applicable | — | — | Renovate's Maven S3 repository object-error handling is not implemented in Rust. |
+| returns null for NotFound error | 145 | not-applicable | — | — | Renovate's Maven S3 repository object-error handling is not implemented in Rust. |
+| returns null for Deleted marker | 165 | not-applicable | — | — | Renovate's Maven S3 delete-marker handling is not implemented in Rust. |
+| returns null for unknown error | 178 | not-applicable | — | — | Renovate's Maven S3 repository unknown-error handling is not implemented in Rust. |
+| returns null for unexpected response type | 199 | not-applicable | — | — | Renovate's Maven S3 repository response-type handling is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/maven/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/index.spec.ts
+**Total tests:** 40 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/maven/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null when metadata is not found | 123 | not-applicable | — | — | Renovate's Maven `getReleases` null/error contract is not implemented in Rust; Rust exposes latest-version lookup only. |
+| returns releases | 134 | not-applicable | — | — | Renovate's Maven full release-list response mapping is not implemented in Rust; Rust exposes latest-version lookup only. |
+| returns releases when only snapshot | 142 | not-applicable | — | — | Renovate's Maven snapshot release-list mapping is not implemented in Rust. |
+| handles invalid snapshot | 173 | not-applicable | — | — | Renovate's Maven snapshot metadata validation is not implemented in Rust. |
+| returns releases from custom repository | 209 | not-applicable | — | — | Renovate's Maven multi-registry `getReleases` contract is not implemented in Rust; Rust latest lookup accepts one registry base. |
+| falls back to next registry url | 217 | not-applicable | — | — | Renovate's Maven registry fallback behavior is not implemented in Rust. |
+| throws EXTERNAL_HOST_ERROR for 50x | 248 | not-applicable | — | — | Renovate's Maven external-host-error contract is not implemented in Rust. |
+| ignores unsupported protocols | 257 | not-applicable | — | — | Renovate's Maven unsupported-protocol filtering is not implemented in Rust. |
+| skips registry with invalid metadata structure | 270 | not-applicable | — | — | Renovate's Maven invalid-metadata skip contract is not implemented in Rust. |
+| skips registry with invalid XML | 286 | not-applicable | — | — | Renovate's Maven invalid-XML skip contract is not implemented in Rust. |
+| handles optional slash at the end of registry url | 302 | not-applicable | — | — | Renovate's Maven registry URL normalization contract is not exposed as a Rust API. |
+| returns null for invalid registryUrls | 312 | not-applicable | — | — | Renovate's Maven registry URL validation/null contract is not implemented in Rust. |
+| supports scm.url values prefixed with "scm:" | 321 | not-applicable | — | — | Renovate's Maven POM SCM URL extraction is not implemented in the Rust datasource. |
+| with only groupId present | 331 | not-applicable | — | — | Renovate's Maven POM source/homepage extraction is not implemented in the Rust datasource. |
+| with only artifactId present | 351 | not-applicable | — | — | Renovate's Maven POM source/homepage extraction is not implemented in the Rust datasource. |
+| with all elments present | 371 | not-applicable | — | — | Renovate's Maven POM source/homepage extraction is not implemented in the Rust datasource. |
+| removes authentication header after redirect | 396 | not-applicable | — | — | Renovate's Maven redirect/auth header behavior is not implemented in Rust. |
+| supports artifactregistry urls with auth | 436 | not-applicable | — | — | Renovate's Google Artifact Registry Maven auth flow is not implemented in Rust. |
+| supports artifactregistry urls without auth | 497 | not-applicable | — | — | Renovate's Google Artifact Registry Maven auth flow is not implemented in Rust. |
+| should get source and homepage from parent | 558 | not-applicable | — | — | Renovate's Maven parent POM traversal for source/homepage is not implemented in the Rust datasource. |
+| should deal with missing parent fields | 574 | not-applicable | — | — | Renovate's Maven parent POM traversal for source/homepage is not implemented in the Rust datasource. |
+| should deal with circular hierarchy | 592 | not-applicable | — | — | Renovate's Maven parent POM traversal and circular hierarchy handling are not implemented in Rust. |
+| should get source from own pom and homepage from parent | 627 | not-applicable | — | — | Renovate's Maven POM source/homepage extraction is not implemented in the Rust datasource. |
+| should get homepage from own pom and source from parent | 643 | not-applicable | — | — | Renovate's Maven POM source/homepage extraction is not implemented in the Rust datasource. |
+| should get homepage and source from own pom | 659 | not-applicable | — | — | Renovate's Maven POM source/homepage extraction is not implemented in the Rust datasource. |
+| should be able to detect git@github.com:child-scm as valid sourceUrl | 674 | not-applicable | — | — | Renovate's Maven POM SCM URL extraction and normalization are not implemented in the Rust datasource. |
+| should be able to detect git@github.com/child-scm as valid sourceUrl | 688 | not-applicable | — | — | Renovate's Maven POM SCM URL extraction and normalization are not implemented in the Rust datasource. |
+| should be able to detect git://@github.com/child-scm as valid sourceUrl | 702 | not-applicable | — | — | Renovate's Maven POM SCM URL extraction and normalization are not implemented in the Rust datasource. |
+| returns null for 404 | 718 | not-applicable | — | — | Renovate's Maven `postprocessRelease` null-on-404 contract is not implemented in Rust. |
+| returns original value for unknown error | 729 | not-applicable | — | — | Renovate's Maven `postprocessRelease` error fallback contract is not implemented in Rust. |
+| returns original value for 200 response | 744 | not-applicable | — | — | Renovate's Maven `postprocessRelease` timestamp hook is not implemented in Rust. |
+| returns original value for 200 response with versionOrig | 756 | not-applicable | — | — | Renovate's Maven `postprocessRelease` timestamp hook is not implemented in Rust. |
+| returns original value for invalid configs | 768 | not-applicable | — | — | Renovate's Maven `postprocessRelease` invalid-config handling is not implemented in Rust. |
+| adds releaseTimestamp | 784 | not-applicable | — | — | Renovate's Maven `postprocessRelease` timestamp hook is not implemented in Rust; Rust timestamp lookup is best-effort inside update summaries. |
+| checks package | 815 | not-applicable | — | — | Renovate's Maven `postprocessRelease` timestamp package check is not implemented in Rust. |
+| supports timestamp | 833 | not-applicable | — | — | Renovate's Maven S3 timestamp object handling is not implemented in Rust. |
+| returns null for deleted object | 857 | not-applicable | — | — | Renovate's Maven S3 timestamp object handling is not implemented in Rust. |
+| returns null for NotFound response | 875 | not-applicable | — | — | Renovate's Maven S3 timestamp object handling is not implemented in Rust. |
+| returns null for NoSuchKey response | 893 | not-applicable | — | — | Renovate's Maven S3 timestamp object handling is not implemented in Rust. |
+| returns original value for any other error | 911 | not-applicable | — | — | Renovate's Maven S3 timestamp object error fallback is not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
