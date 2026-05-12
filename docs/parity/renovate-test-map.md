@@ -10865,6 +10865,93 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/versioning/distro.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/distro.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/distro`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isCodename("$version") === $expected | 12 | not-applicable | — | — | Renovate's TypeScript distro-info versioning helper and distro release data are not implemented as a Rust versioning API. |
+| getVersionByCodename("$version") === $expected | 27 | not-applicable | — | — | Renovate's TypeScript distro-info versioning helper and distro release data are not implemented as a Rust versioning API. |
+| getCodenameByVersion("$version") === $expected | 44 | not-applicable | — | — | Renovate's TypeScript distro-info versioning helper and distro release data are not implemented as a Rust versioning API. |
+| exists("$version") === $expected | 61 | not-applicable | — | — | Renovate's TypeScript distro-info versioning helper and distro release data are not implemented as a Rust versioning API. |
+| isEolLts("$version") === $expected | 80 | not-applicable | — | — | Renovate's TypeScript distro-info versioning helper and distro release data are not implemented as a Rust versioning API. |
+| isReleased("$version") === $expected | 98 | not-applicable | — | — | Renovate's TypeScript distro-info versioning helper and distro release data are not implemented as a Rust versioning API. |
+| retrieves schedule of the previous previous release | 115 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| retrieves schedule of the previous release | 122 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| retrieves schedule of the most recent release | 129 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| sends a float as an argument | 136 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| sends an out of bound argument | 143 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| sends another out of bound argument | 147 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| retrieves focal release schedule | 151 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| retrieves non-existent release schedule | 158 | not-applicable | — | — | Renovate's TypeScript distro release schedule lookup is not implemented as a Rust versioning API. |
+| works with debian | 162 | not-applicable | — | — | Renovate's TypeScript Debian/Ubuntu distro-info release data helpers are not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/kubernetes-api/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/kubernetes-api/index.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/kubernetes-api/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isStable("$version") === $expected | 6 | not-applicable | — | — | Renovate's Kubernetes API versioning scheme is not implemented as a Rust versioning API. |
+| isValid("$version") === $expected | 16 | not-applicable | — | — | Renovate's Kubernetes API versioning scheme is not implemented as a Rust versioning API. |
+| getMajor, getMinor, getPatch for "$version" | 37 | not-applicable | — | — | Renovate's Kubernetes API versioning scheme is not implemented as a Rust versioning API. |
+| equals("$version", "$other") === $expected | 54 | not-applicable | — | — | Renovate's Kubernetes API versioning scheme is not implemented as a Rust versioning API. |
+| matches("$version", "$other") === $expected | 81 | not-applicable | — | — | Renovate's Kubernetes API versioning scheme is not implemented as a Rust versioning API. |
+| isGreaterThan("$version", "$other") === $expected | 100 | not-applicable | — | — | Renovate's Kubernetes API versioning scheme is not implemented as a Rust versioning API. |
+| sorts versions in an ascending order | 116 | not-applicable | — | — | Renovate's Kubernetes API versioning scheme is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/deno/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/deno/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/deno/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$version") === $isValid | 4 | not-applicable | — | — | Renovate's Deno versioning scheme is not implemented as a Rust versioning API. |
+| getSatisfyingVersion("$versions","$range") === $maxSatisfying | 31 | not-applicable | — | — | Renovate's Deno semver-range wrapper is not implemented as a Rust versioning API. |
+| isSingleVersion("$version") === $isSingle | 47 | not-applicable | — | — | Renovate's Deno versioning scheme is not implemented as a Rust versioning API. |
+| subset("$a", "$b") === $expected | 58 | not-applicable | — | — | Renovate's Deno semver-range subset helper is not implemented as a Rust versioning API. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 72 | not-applicable | — | — | Renovate's Deno range update-value helper is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/docker/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/docker/index.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/docker/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$version") === $expected | 5 | not-applicable | — | — | Renovate's Docker tag versioning scheme is not implemented as a Rust versioning API; Rust Docker support is currently extractor/datasource oriented. |
+| getMajor, getMinor, getPatch for "$version" | 27 | not-applicable | — | — | Renovate's Docker tag versioning scheme is not implemented as a Rust versioning API. |
+| isGreaterThan($a, $b) === $expected | 43 | not-applicable | — | — | Renovate's Docker tag versioning comparator is not implemented as a Rust versioning API. |
+| isLessThanRange($version, $range) === $expected | 54 | not-applicable | — | — | Renovate's Docker tag versioning range helper is not implemented as a Rust versioning API. |
+| equals($a, $b) === $expected | 68 | not-applicable | — | — | Renovate's Docker tag versioning comparator is not implemented as a Rust versioning API. |
+| satisfying for $version -> $expected | 92 | not-applicable | — | — | Renovate's Docker tag satisfying-version helper is not implemented as a Rust versioning API. |
+| docker.sortVersions("$a", "$b") === semver.sortVersions("$a", "$b") | 108 | not-applicable | — | — | Renovate's Docker tag versioning comparator is not implemented as a Rust versioning API. |
+| sorts unstable | 123 | not-applicable | — | — | Renovate's Docker unstable-tag ordering behavior is not implemented as a Rust versioning API. |
+| getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected | 148 | not-applicable | — | — | Renovate's Docker tag update-value helper is not implemented as a Rust versioning API. |
+| isStable("$version") === $expected | 164 | not-applicable | — | — | Renovate's Docker tag stability classifier is not implemented as a Rust versioning API. |
+| isCompatible("$version") === $expected | 177 | not-applicable | — | — | Renovate's Docker tag compatibility helper is not implemented as a Rust versioning API. |
+| valueToVersion("$value") === $expected | 199 | not-applicable | — | — | Renovate's Docker tag value-to-version helper is not implemented as a Rust versioning API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
