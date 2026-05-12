@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1935 / 1935 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1938 / 1938 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -9418,6 +9418,91 @@ does not implement Renovate's generated-lockfile reverse resolver.
 |---|---|---|---|---|---|
 | return combined env | 11 | not-applicable | — | — | Renovate's TypeScript process/user/custom environment cache merger is not implemented as a Rust API. |
 | maintains precendence | 26 | not-applicable | — | — | Renovate's TypeScript process/user/custom environment precedence cache is not implemented as a Rust API. |
+
+---
+
+## `lib/util/ignore.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/ignore.spec.ts
+**Total tests:** 5 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `util/ignore`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns true for "renovate:ignore" comments | 9 | ported | `string_match.rs` | `skip_comment_renovate_ignore_returns_true` | — |
+| returns false for comments not starting with "renovate:" or "pyup:" | 13 | ported | `string_match.rs` | `skip_comment_other_prefix_returns_false` | — |
+| returns false for "renovate:" comments without "ignore" | 17 | ported | `string_match.rs` | `skip_comment_renovate_non_ignore_returns_false` | — |
+| logs unknown command for "renovate:" comments without "ignore" | 21 | not-applicable | — | — | Renovate's TypeScript logger side effect for unknown inline comment commands is not implemented in Rust. |
+| returns false when comment is undefined | 29 | not-applicable | — | — | TypeScript undefined input case; Rust `is_skip_comment` accepts `&str` and has no undefined value. |
+
+---
+
+## `lib/util/coerce.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/coerce.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/coerce › coerceToNull`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null | 5 | not-applicable | — | — | Renovate's TypeScript null/undefined coercion helper has no Rust API equivalent; Rust uses `Option<T>`. |
+| should return original value | 10 | not-applicable | — | — | Renovate's TypeScript null/undefined coercion helper has no Rust API equivalent; Rust uses `Option<T>`. |
+
+### `util/coerce › coerceToUndefined`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return undefined | 18 | not-applicable | — | — | TypeScript undefined coercion has no Rust value-level equivalent; Rust uses `Option<T>`. |
+| should return original value | 23 | not-applicable | — | — | TypeScript undefined coercion has no Rust value-level equivalent; Rust uses `Option<T>`. |
+
+---
+
+## `lib/util/sample.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/sample.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/sample › sampleSize`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns correct sized array | 7 | not-applicable | — | — | Renovate's TypeScript array sampling helper is not implemented as a Rust API. |
+| returns full array for undefined number | 12 | not-applicable | — | — | Renovate's TypeScript array sampling helper includes undefined input handling with no Rust API equivalent. |
+| returns full array for null number | 16 | not-applicable | — | — | Renovate's TypeScript array sampling helper includes null input handling with no Rust API equivalent. |
+| returns full array for 0 number | 20 | not-applicable | — | — | Renovate's TypeScript array sampling helper is not implemented as a Rust API. |
+| returns empty array for null array | 24 | not-applicable | — | — | Renovate's TypeScript array sampling helper includes null input handling with no Rust API equivalent. |
+| returns empty array for undefined array | 28 | not-applicable | — | — | Renovate's TypeScript array sampling helper includes undefined input handling with no Rust API equivalent. |
+| returns empty array for empty array | 32 | not-applicable | — | — | Renovate's TypeScript array sampling helper is not implemented as a Rust API. |
+
+---
+
+## `lib/util/promises.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/promises.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `util/promises › all`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 6 | not-applicable | — | — | Renovate's TypeScript promise queue helper is not implemented as a Rust API; Rust uses Tokio futures directly in call sites. |
+
+### `util/promises › map`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 17 | not-applicable | — | — | Renovate's TypeScript promise map helper is not implemented as a Rust API; Rust uses Tokio futures directly in call sites. |
+
+### `util/promises › Error handling`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws first ExternalHostError found | 24 | not-applicable | — | — | Renovate's TypeScript promise helper ExternalHostError aggregation policy is not implemented as a Rust API. |
+| throws first error if error messages are all the same | 43 | not-applicable | — | — | Renovate's TypeScript promise helper error aggregation policy is not implemented as a Rust API. |
+| throws aggregate error for different error messages | 62 | not-applicable | — | — | Renovate's TypeScript AggregateError behavior has no shared Rust API equivalent. |
+| re-throws when stopOnError=true | 69 | not-applicable | — | — | Renovate's TypeScript promise helper stopOnError policy is not implemented as a Rust API. |
 
 ---
 
