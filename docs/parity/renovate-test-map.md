@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2065 / 2065 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2068 / 2068 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -12505,6 +12505,21 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 382 | ported | `ubuntu.rs` | `get_new_value_matches_renovate_ubuntu_spec` | — |
 | $versions -> sortVersions -> $expected | 404 | ported | `ubuntu.rs` | `sort_versions_matches_renovate_ubuntu_spec` | — |
 | matches("$version", "$range") === "$expected" | 411 | ported | `ubuntu.rs` | `matches_matches_renovate_ubuntu_spec` | — |
+
+---
+
+## `lib/modules/versioning/helm/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/helm/index.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `modules/versioning/helm/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$version") === $isValid | 4 | ported | `helm.rs` | `is_valid_matches_renovate_helm_spec` | — |
+| isSingleVersion("$version") === $isSingle | 22 | ported | `helm.rs` | `is_single_version_matches_renovate_helm_spec` | — |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 35 | ported | `helm.rs` | `get_new_value_matches_renovate_helm_spec` | — |
 
 ---
 
