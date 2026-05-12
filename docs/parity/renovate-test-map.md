@@ -11207,6 +11207,119 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/versioning/debian/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/debian/index.spec.ts
+**Total tests:** 16 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/debian/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| test | 18 | not-applicable | — | — | Renovate's Debian versioning scheme and rolling release data helpers are not implemented as a Rust versioning API. |
+| isValid("$version") === $expected | 22 | not-applicable | — | — | Renovate's Debian versioning validation is not implemented as a Rust versioning API. |
+| isCompatible("$version") === $expected | 82 | not-applicable | — | — | Renovate's Debian versioning compatibility helper is not implemented as a Rust versioning API. |
+| isSingleVersion("$version") === $expected | 104 | not-applicable | — | — | Renovate's Debian single-version classifier is not implemented as a Rust versioning API. |
+| isStable("$version") === $expected | 115 | not-applicable | — | — | Renovate's Debian stability classifier is not implemented as a Rust versioning API. |
+| ensures that rolling release is not refreshed within frame time window: $version | 169 | not-applicable | — | — | Renovate's Debian rolling release data cache is not implemented as a Rust versioning API. |
+| isVersion("$version") === $expected | 188 | not-applicable | — | — | Renovate's Debian versioning scheme is not implemented as a Rust versioning API. |
+| getMajor, getMinor, getPatch for "$version" | 248 | not-applicable | — | — | Renovate's Debian version component parser is not implemented as a Rust versioning API. |
+| equals($a, $b) === $expected | 273 | not-applicable | — | — | Renovate's Debian version comparator is not implemented as a Rust versioning API. |
+| isGreaterThan("$a", "$b") === $expected | 297 | not-applicable | — | — | Renovate's Debian version comparator is not implemented as a Rust versioning API. |
+| getSatisfyingVersion($versions, "$range") === "$expected" | 340 | not-applicable | — | — | Renovate's Debian range satisfying-version helper is not implemented as a Rust versioning API. |
+| minSatisfyingVersion($versions, "$range") === "$expected" | 361 | not-applicable | — | — | Renovate's Debian range satisfying-version helper is not implemented as a Rust versioning API. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 383 | not-applicable | — | — | Renovate's Debian update-value helper is not implemented as a Rust versioning API. |
+| debian.sortVersions($a, $b) === $expected | 409 | not-applicable | — | — | Renovate's Debian version comparator is not implemented as a Rust versioning API. |
+| matches("$version", "$range") === "$expected" | 429 | not-applicable | — | — | Renovate's Debian range matcher is not implemented as a Rust versioning API. |
+| checks runtime date handling & refresh rolling release data | 441 | not-applicable | — | — | Renovate's Debian rolling release data refresh behavior is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/debian/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/debian/common.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/debian/common`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no rolling release data | 15 | not-applicable | — | — | Renovate's Debian rolling release data helper is not implemented as a Rust versioning API. |
+| isDatedCodeName("$input") === $expected | 31 | not-applicable | — | — | Renovate's Debian dated container codename helper is not implemented as a Rust versioning API. |
+| getDatedContainerImageCodename("$input") === $expected | 48 | not-applicable | — | — | Renovate's Debian dated container codename helper is not implemented as a Rust versioning API. |
+| getDatedContainerImageVersion("$input") === $expected | 69 | not-applicable | — | — | Renovate's Debian dated container version helper is not implemented as a Rust versioning API. |
+| getDatedContainerImageSuffix("$input") === $expected | 87 | not-applicable | — | — | Renovate's Debian dated container suffix helper is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/ivy/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/ivy/index.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/ivy/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parseDynamicRevision("$input") === { type: "$type", value: "$value" } | 10 | not-applicable | — | — | Renovate's Ivy dynamic revision/versioning scheme is not implemented as a Rust versioning API. |
+| parseDynamicRevision("$input") === null | 33 | not-applicable | — | — | Renovate's Ivy dynamic revision parser is not implemented as a Rust versioning API. |
+| isValid("$input") === $expected | 43 | not-applicable | — | — | Renovate's Ivy versioning validation is not implemented as a Rust versioning API. |
+| isVersion("$input") === $expected | 72 | not-applicable | — | — | Renovate's Ivy version classifier is not implemented as a Rust versioning API. |
+| matches("$version", "$range") === $expected | 100 | not-applicable | — | — | Renovate's Ivy range matcher is not implemented as a Rust versioning API. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 143 | not-applicable | — | — | Renovate's Ivy update-value helper is not implemented as a Rust versioning API. |
+| getSatisfyingVersion($versions, "$range") === $expected | 160 | not-applicable | — | — | Renovate's Ivy satisfying-version helper is not implemented as a Rust versioning API. |
+| isCompatible("$version") === $expected | 170 | not-applicable | — | — | Renovate's Ivy compatibility helper is not implemented as a Rust versioning API. |
+| isSingleVersion("$version") === $expected | 177 | not-applicable | — | — | Renovate's Ivy single-version classifier is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/python/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/python/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/python/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$version") === $expected | 4 | not-applicable | — | — | Renovate's Python legacy versioning scheme is not implemented as a Rust versioning API; Rust only has a separate PEP 440 summary helper. |
+| matches("$version", "$range") === "$expected" | 28 | not-applicable | — | — | Renovate's Python legacy range matcher is not implemented as a Rust versioning API. |
+| isLessThanRange("$version", "$range") === "$expected" | 54 | not-applicable | — | — | Renovate's Python legacy range comparison helper is not implemented as a Rust versioning API. |
+| minSatisfyingVersion($versions, "$range") === $expected | 66 | not-applicable | — | — | Renovate's Python legacy satisfying-version helper is not implemented as a Rust versioning API. |
+| getSatisfyingVersion($versions, "$range") === $expected | 83 | not-applicable | — | — | Renovate's Python legacy satisfying-version helper is not implemented as a Rust versioning API. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 97 | not-applicable | — | — | Renovate's Python legacy update-value helper is not implemented as a Rust versioning API. |
+| subset("$a", "$b") === $expected | 160 | not-applicable | — | — | Renovate's Python legacy range subset helper is not implemented as a Rust versioning API. |
+| isBreaking("$currentVersion", "$newVersion") === $expected | 182 | not-applicable | — | — | Renovate's Python legacy breaking-change helper is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/conda/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/conda/index.spec.ts
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/conda/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isVersion("$input") === $expected | 4 | not-applicable | — | — | Renovate's Conda versioning scheme is not implemented as a Rust versioning API. |
+| isValid("$input") === $expected | 26 | not-applicable | — | — | Renovate's Conda versioning validation is not implemented as a Rust versioning API. |
+| isStable("$input") === $expected | 47 | not-applicable | — | — | Renovate's Conda stability classifier is not implemented as a Rust versioning API. |
+| equals("$a", "$b") === $expected | 57 | not-applicable | — | — | Renovate's Conda version comparator is not implemented as a Rust versioning API. |
+| matches("$a", "$b") === $expected | 69 | not-applicable | — | — | Renovate's Conda matcher is not implemented as a Rust versioning API. |
+| getMajor("$a") === $expected | 82 | not-applicable | — | — | Renovate's Conda version component parser is not implemented as a Rust versioning API. |
+| getMinor($a) === $expected | 93 | not-applicable | — | — | Renovate's Conda version component parser is not implemented as a Rust versioning API. |
+| getPatch("$a") === $expected | 105 | not-applicable | — | — | Renovate's Conda version component parser is not implemented as a Rust versioning API. |
+| isSingleVersion("$version") === $isSingle | 116 | not-applicable | — | — | Renovate's Conda single-version classifier is not implemented as a Rust versioning API. |
+| always compatible | 131 | not-applicable | — | — | Renovate's Conda compatibility helper is not implemented as a Rust versioning API. |
+| getSatisfyingVersion($versions, "$range") === $expected | 146 | not-applicable | — | — | Renovate's Conda satisfying-version helper is not implemented as a Rust versioning API. |
+| minSatisfyingVersion($versions, "$range") === $expected | 157 | not-applicable | — | — | Renovate's Conda satisfying-version helper is not implemented as a Rust versioning API. |
+| isGreaterThan("$a", "$b") === $result | 168 | not-applicable | — | — | Renovate's Conda version comparator is not implemented as a Rust versioning API. |
+| returns a pinned value | 176 | not-applicable | — | — | Renovate's Conda pinned-value helper is not implemented as a Rust versioning API. |
+| getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion) === $expected | 180 | not-applicable | — | — | Renovate's Conda update-value helper is not implemented as a Rust versioning API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
