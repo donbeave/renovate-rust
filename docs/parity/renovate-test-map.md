@@ -3291,6 +3291,62 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/aws-machine-image/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/aws-machine-image/index.spec.ts
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/aws-machine-image/index › getSortedAwsMachineImages()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| with 3 returned images | 137 | not-applicable | — | — | AWS EC2 machine image datasource and AWS SDK-backed image sorting are not implemented in Rust. |
+| with 1 returned image | 147 | not-applicable | — | — | AWS EC2 machine image datasource and AWS SDK-backed image sorting are not implemented in Rust. |
+| without returned images | 157 | not-applicable | — | — | AWS EC2 machine image datasource and AWS SDK-backed image sorting are not implemented in Rust. |
+
+### `modules/datasource/aws-machine-image/index › getDigest()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| without newValue, without returned images to be null | 169 | not-applicable | — | — | AWS EC2 machine image datasource and digest lookup are not implemented in Rust. |
+| without newValue, with one matching image to return that image | 179 | not-applicable | — | — | AWS EC2 machine image datasource and digest lookup are not implemented in Rust. |
+| without newValue, with 3 matching image to return the newest image | 189 | not-applicable | — | — | AWS EC2 machine image datasource and digest lookup are not implemented in Rust. |
+| with matching newValue, with 3 matching image to return the matching image | 199 | not-applicable | — | — | AWS EC2 machine image datasource and digest lookup are not implemented in Rust. |
+| with not matching newValue, with 3 matching images to return the matching image | 212 | not-applicable | — | — | AWS EC2 machine image datasource and digest lookup are not implemented in Rust. |
+
+### `modules/datasource/aws-machine-image/index › getPkgReleases()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| without returned images to be null | 227 | not-applicable | — | — | AWS EC2 machine image datasource and release lookup are not implemented in Rust. |
+| with one matching image to return that image | 237 | not-applicable | — | — | AWS EC2 machine image datasource and release lookup are not implemented in Rust. |
+| with one deprecated matching image to return that image | 256 | not-applicable | — | — | AWS EC2 machine image datasource and release lookup are not implemented in Rust. |
+| with 3 matching image to return the newest image | 275 | not-applicable | — | — | AWS EC2 machine image datasource and release lookup are not implemented in Rust. |
+
+### `modules/datasource/aws-machine-image/index › loadConfig()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| loads filters without aws config | 298 | not-applicable | — | — | AWS EC2 machine image datasource filter/config parsing is not implemented in Rust. |
+| loads filters with multiple aws configs | 313 | not-applicable | — | — | AWS EC2 machine image datasource filter/config parsing is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/aws-rds/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/aws-rds/index.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/aws-rds/index › getPkgReleases()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| without returned versions | 104 | not-applicable | — | — | AWS RDS datasource and AWS SDK-backed engine version lookup are not implemented in Rust. |
+| with one deprecated version | 115 | not-applicable | — | — | AWS RDS datasource and AWS SDK-backed engine version lookup are not implemented in Rust. |
+| with 3 matching versions | 134 | not-applicable | — | — | AWS RDS datasource and AWS SDK-backed engine version lookup are not implemented in Rust. |
+
+---
+
 ## `lib/modules/datasource/datasource.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/datasource.spec.ts
@@ -3302,6 +3358,28 @@ does not implement Renovate's generated-lockfile reverse resolver.
 |---|---|---|---|---|---|
 | should throw on 429 | 24 | not-applicable | — | — | TypeScript abstract Datasource base-class HTTP error handling is not implemented as a shared Rust datasource abstraction. |
 | should throw on statusCode >=500 && <600 | 35 | not-applicable | — | — | TypeScript abstract Datasource base-class HTTP error handling is not implemented as a shared Rust datasource abstraction. |
+
+---
+
+## `lib/modules/datasource/azure-tags/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/azure-tags/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/azure-tags/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags from azure devops | 20 | not-applicable | — | — | Azure DevOps tags datasource and Azure platform Git API integration are not implemented in Rust. |
+| filters out undefined names | 47 | not-applicable | — | — | Azure DevOps tags datasource and Azure platform Git API integration are not implemented in Rust. |
+| handles api errors | 70 | not-applicable | — | — | Azure DevOps tags datasource and Azure platform Git API error handling are not implemented in Rust. |
+
+### `modules/datasource/azure-tags/index › static methods`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getCacheKey returns the expected format | 83 | not-applicable | — | — | Azure Tags datasource type and cache-key helper are not implemented in Rust. |
+| getSourceUrl returns the correct URL format | 92 | not-applicable | — | — | Azure Tags datasource type and source-url helper are not implemented in Rust. |
 
 ---
 
