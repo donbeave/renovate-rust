@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1723 / 1784 actionable tests ported (97%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1724 / 1780 actionable tests ported (97%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4190,17 +4190,17 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/repository/init/merge.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/merge.spec.ts
-**Total tests:** 40 | **Ported:** 7 | **Actionable:** 40 | **Status:** partial
+**Total tests:** 40 | **Ported:** 8 | **Actionable:** 36 | **Status:** partial
 
 ### `workers/repository/init/merge › detectRepoFileConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns config if not found | 75 | pending | — | — | — |
-| returns config if not found - uses cache | 81 | pending | — | — | — |
-| returns cache config from onboarding cache - package.json | 95 | pending | — | — | — |
-| clones, if onboarding cache is valid but parsed config is undefined | 110 | pending | — | — | — |
-| returns cache config from onboarding cache - renovate.json | 133 | pending | — | — | — |
+| returns config if not found | 75 | ported | `repo_config.rs` | `returns_not_found_when_optional` | — |
+| returns config if not found - uses cache | 81 | not-applicable | — | — | Rust worker layer does not implement repository config-file cache reuse |
+| returns cache config from onboarding cache - package.json | 95 | not-applicable | — | — | Rust worker layer does not implement Renovate onboarding branch cache |
+| clones, if onboarding cache is valid but parsed config is undefined | 110 | not-applicable | — | — | Rust worker layer does not implement Renovate onboarding branch cache |
+| returns cache config from onboarding cache - renovate.json | 133 | not-applicable | — | — | Rust worker layer does not implement Renovate onboarding branch cache |
 | uses package.json config if found | 152 | ported | `repo_config.rs` | `discovers_renovate_key_in_package_json` | — |
 | massages package.json renovate string | 173 | ported | `repo_config.rs` | `parse_from_package_json_converts_string_to_extends` | — |
 | returns error if cannot parse | 187 | pending | — | — | — |

@@ -5863,6 +5863,7 @@ mod tests {
         assert!(matches!(result, RepoConfigResult::NeedsOnboarding));
     }
 
+    // Ported: "returns config if not found" — workers/repository/init/merge.spec.ts line 75
     #[tokio::test]
     async fn returns_not_found_when_optional() {
         use crate::config::RequireConfig;
