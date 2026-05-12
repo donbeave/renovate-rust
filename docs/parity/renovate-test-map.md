@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1901 / 1901 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1902 / 1902 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3262,6 +3262,19 @@ does not implement Renovate's generated-lockfile reverse resolver.
 <!-- npm/extract/yarnrc.spec.ts converted to per-test format above -->
 <!-- ruby-version/extract.spec.ts converted to per-test format above -->
 <!-- nvm/extract.spec.ts, terraform-version/extract.spec.ts, terragrunt-version/extract.spec.ts also covered in per-test sections above (all use version_file.rs) -->
+
+---
+
+## `lib/modules/datasource/bazel/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bazel/schema.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/datasource/bazel/schema › BazelModuleMetadata`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses metadata | 6 | ported | `bazel.rs` | `bazel_module_metadata_parses_versions_with_yanked_versions` | — |
 
 ---
 

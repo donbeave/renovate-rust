@@ -101,3 +101,26 @@ pub async fn fetch_latest(
         update_available: summary.update_available,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Ported: "parses metadata" — datasource/bazel/schema.spec.ts line 6
+    #[test]
+    fn bazel_module_metadata_parses_versions_with_yanked_versions() {
+        let metadata_json = r#"{
+            "versions": ["0.14.8", "0.14.9", "0.15.0", "0.16.0"],
+            "yanked_versions": {
+                "0.15.0": "Very bad bug."
+            }
+        }"#;
+
+        let metadata: BazelMetadata = serde_json::from_str(metadata_json).unwrap();
+        assert_eq!(metadata.versions.len(), 4);
+        assert_eq!(
+            metadata.yanked_versions.get("0.15.0").map(String::as_str),
+            Some("Very bad bug.")
+        );
+    }
+}
