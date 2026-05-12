@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1628 / 1657 actionable tests ported (98%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1645 / 1657 actionable tests ported (99%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 104 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 121 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3698,23 +3698,23 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| validates boolean type options | 2343 | pending | — | — | — |
-| validates integer type options | 2363 | pending | — | — | — |
-| validates array type options | 2383 | pending | — | — | — |
-| validates object type options | 2414 | pending | — | — | — |
-| warns if negative number is used for integer type | 2444 | pending | — | — | — |
-| warns on invalid customEnvVariables objects | 2461 | pending | — | — | — |
-| validates valid customEnvVariables objects | 2482 | pending | — | — | — |
-| validates options with different type but defaultValue=null | 2497 | pending | — | — | — |
-| fails for missing reportPath if reportType is "s3" | 2517 | pending | — | — | — |
-| validates reportPath if reportType is "s3" | 2529 | pending | — | — | — |
-| fails for missing reportPath if reportType is "file" | 2542 | pending | — | — | — |
-| validates reportPath if reportType is "file" | 2554 | pending | — | — | — |
-| warns when registryUrls is set at the top level of global config | 2567 | pending | — | — | — |
-| warns when defaultRegistryUrls is set at the top level of global config | 2582 | pending | — | — | — |
-| validates postUpgradeTasks.installTools tool names | 2597 | pending | — | — | — |
-| rejects invalid postUpgradeTasks.installTools tool names | 2615 | pending | — | — | — |
-| catches when * or ** is combined with others patterns in a regexOrGlob option | 2639 | pending | — | — | — |
+| validates boolean type options | 2343 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_boolean_type_options` | — |
+| validates integer type options | 2363 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_integer_type_options` | — |
+| validates array type options | 2383 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_array_type_options` | — |
+| validates object type options | 2414 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_object_type_options` | — |
+| warns if negative number is used for integer type | 2444 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_warns_for_negative_integer_options` | — |
+| warns on invalid customEnvVariables objects | 2461 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_warns_for_invalid_custom_env_variables` | — |
+| validates valid customEnvVariables objects | 2482 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_allows_valid_custom_env_variables` | — |
+| validates options with different type but defaultValue=null | 2497 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_allows_default_null_options` | — |
+| fails for missing reportPath if reportType is "s3" | 2517 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_errors_for_missing_s3_report_path` | — |
+| validates reportPath if reportType is "s3" | 2529 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_allows_s3_report_path` | — |
+| fails for missing reportPath if reportType is "file" | 2542 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_errors_for_missing_file_report_path` | — |
+| validates reportPath if reportType is "file" | 2554 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_allows_file_report_path` | — |
+| warns when registryUrls is set at the top level of global config | 2567 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_warns_for_top_level_registry_urls` | — |
+| warns when defaultRegistryUrls is set at the top level of global config | 2582 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_warns_for_top_level_default_registry_urls` | — |
+| validates postUpgradeTasks.installTools tool names | 2597 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_validates_post_upgrade_install_tools` | — |
+| rejects invalid postUpgradeTasks.installTools tool names | 2615 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_rejects_invalid_post_upgrade_install_tools` | — |
+| catches when * or ** is combined with others patterns in a regexOrGlob option | 2639 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_catches_match_all_combined_with_other_patterns` | — |
 
 ---
 

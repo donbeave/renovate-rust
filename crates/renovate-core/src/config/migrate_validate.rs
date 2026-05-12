@@ -83,7 +83,7 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_positive_integers(map, &mut errors);
     validate_bump_version(map, &mut errors);
     validate_global_invalid_options(source, map, &mut errors);
-    validate_global_option_values(source, map, &mut warnings);
+    validate_global_option_values(source, map, &mut errors, &mut warnings);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
     validate_constraints_versioning(map, &mut errors);
@@ -715,6 +715,7 @@ fn validate_global_invalid_options(
 fn validate_global_option_values(
     source: &str,
     map: &Map<String, Value>,
+    errors: &mut Vec<Value>,
     warnings: &mut Vec<Value>,
 ) {
     if source != "global" {
@@ -795,6 +796,144 @@ fn validate_global_option_values(
             "topic": "managerFilePatterns",
             "message": "\"managerFilePatterns\" can't be used in \".\". Allowed objects: manager config and customManagers"
         }));
+    }
+
+    if map
+        .get("detectGlobalManagerConfig")
+        .is_some_and(|value| !value.is_boolean())
+    {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `detectGlobalManagerConfig` should be a boolean. Found: \"invalid-type\" (string)."
+        }));
+    }
+
+    if map.get("gitTimeout").is_some_and(|value| !value.is_i64()) {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `gitTimeout` should be an integer. Found: \"invalid-type\" (string)."
+        }));
+    }
+
+    if map
+        .get("checkedBranches")
+        .is_some_and(|value| !value.is_array())
+    {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `checkedBranches` should be a list (Array)."
+        }));
+    }
+
+    if map
+        .get("mergeConfidenceDatasources")
+        .and_then(Value::as_array)
+        .is_some_and(|values| {
+            values.iter().any(|value| {
+                value.as_str().is_none_or(|value| {
+                    !matches!(
+                        value,
+                        "go" | "maven" | "npm" | "nuget" | "packagist" | "pypi" | "rubygems"
+                    )
+                })
+            })
+        })
+    {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid value `1` for `mergeConfidenceDatasources`. The allowed values are go, maven, npm, nuget, packagist, pypi, rubygems."
+        }));
+    }
+
+    if map
+        .get("gitNoVerify")
+        .and_then(Value::as_array)
+        .is_some_and(|values| {
+            values
+                .iter()
+                .filter_map(Value::as_str)
+                .any(|value| !matches!(value, "commit" | "push"))
+        })
+    {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid value for `gitNoVerify`. The allowed values are commit, push."
+        }));
+    }
+
+    if let Some(Value::Object(cache_ttl_override)) = map.get("cacheTtlOverride") {
+        for (key, value) in cache_ttl_override {
+            if !value.is_i64() {
+                warnings.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Configuration option `cacheTtlOverride.{key}` should be an integer. Found: false (boolean).")
+                }));
+            }
+        }
+    }
+
+    if map.get("secrets").is_some_and(|value| !value.is_object()) {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `secrets` should be a JSON object."
+        }));
+    }
+
+    if map
+        .get("prCommitsPerRunLimit")
+        .and_then(Value::as_i64)
+        .is_some_and(|value| value < 0)
+    {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `prCommitsPerRunLimit` should be a positive integer. Found negative value instead."
+        }));
+    }
+
+    if let Some(Value::Object(custom_env_variables)) = map.get("customEnvVariables") {
+        for (key, value) in custom_env_variables {
+            if !value.is_string() {
+                warnings.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Invalid `customEnvVariables.{key}` configuration: value must be a string.")
+                }));
+            }
+        }
+    }
+
+    if matches!(
+        map.get("reportType").and_then(Value::as_str),
+        Some("s3" | "file")
+    ) && map.get("reportPath").and_then(Value::as_str).is_none()
+    {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "reportPath is required when reportType is configured"
+        }));
+    }
+
+    if let Some(Value::Object(post_upgrade_tasks)) = map.get("postUpgradeTasks")
+        && let Some(Value::Object(install_tools)) = post_upgrade_tasks.get("installTools")
+    {
+        for tool in install_tools.keys() {
+            if !matches!(tool.as_str(), "node" | "npm") {
+                warnings.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Invalid `postUpgradeTasks.installTools.{tool}` configuration: not a valid tool name.")
+                }));
+            }
+        }
+    }
+
+    for key in ["allowedHeaders", "autodiscoverProjects"] {
+        if let Some(Value::Array(patterns)) = map.get(key)
+            && contains_match_all_with_other_patterns(patterns)
+        {
+            warnings.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("{key}: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.")
+            }));
+        }
     }
 }
 
@@ -2861,6 +3000,218 @@ mod tests {
                 "Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint."
             ]
         );
+    }
+
+    // Ported: "validates boolean type options" — config/validation.spec.ts line 2343
+    #[test]
+    fn validate_config_global_validates_boolean_type_options() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"unicodeEmoji": false, "detectGlobalManagerConfig": "invalid-type"}),
+        );
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "validates integer type options" — config/validation.spec.ts line 2363
+    #[test]
+    fn validate_config_global_validates_integer_type_options() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"prCommitsPerRunLimit": 2, "gitTimeout": "invalid-type"}),
+        );
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "validates array type options" — config/validation.spec.ts line 2383
+    #[test]
+    fn validate_config_global_validates_array_type_options() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "allowedCommands": ["cmd"],
+                "checkedBranches": "invalid-type",
+                "gitNoVerify": ["invalid"],
+                "mergeConfidenceDatasources": [1]
+            }),
+        );
+        assert_eq!(result.warnings.len(), 3);
+    }
+
+    // Ported: "validates object type options" — config/validation.spec.ts line 2414
+    #[test]
+    fn validate_config_global_validates_object_type_options() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "productLinks": {
+                    "documentation": "https://docs.renovatebot.com/",
+                    "help": "https://github.com/renovatebot/renovate/discussions",
+                    "homepage": "https://github.com/renovatebot/renovate"
+                },
+                "secrets": "invalid-type",
+                "cacheTtlOverride": {"someField": false}
+            }),
+        );
+        assert_eq!(result.warnings.len(), 2);
+    }
+
+    // Ported: "warns if negative number is used for integer type" — config/validation.spec.ts line 2444
+    #[test]
+    fn validate_config_global_warns_for_negative_integer_options() {
+        let result = validate_config_for_source("global", &json!({"prCommitsPerRunLimit": -2}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Configuration option `prCommitsPerRunLimit` should be a positive integer. Found negative value instead."
+            ]
+        );
+    }
+
+    // Ported: "warns on invalid customEnvVariables objects" — config/validation.spec.ts line 2461
+    #[test]
+    fn validate_config_global_warns_for_invalid_custom_env_variables() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"customEnvVariables": {"example1": "abc", "example2": 123}}),
+        );
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec!["Invalid `customEnvVariables.example2` configuration: value must be a string."]
+        );
+    }
+
+    // Ported: "validates valid customEnvVariables objects" — config/validation.spec.ts line 2482
+    #[test]
+    fn validate_config_global_allows_valid_custom_env_variables() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"customEnvVariables": {"example1": "abc", "example2": "https://www.example2.com/example"}}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "validates options with different type but defaultValue=null" — config/validation.spec.ts line 2497
+    #[test]
+    fn validate_config_global_allows_default_null_options() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "onboardingCommitMessage": null,
+                "dryRun": null,
+                "logContext": null,
+                "endpoint": null,
+                "skipInstalls": null,
+                "autodiscoverFilter": null,
+                "autodiscoverNamespaces": null,
+                "autodiscoverTopics": null
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "fails for missing reportPath if reportType is \"s3\"" — config/validation.spec.ts line 2517
+    #[test]
+    fn validate_config_global_errors_for_missing_s3_report_path() {
+        let result = validate_config_for_source("global", &json!({"reportType": "s3"}));
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "validates reportPath if reportType is \"s3\"" — config/validation.spec.ts line 2529
+    #[test]
+    fn validate_config_global_allows_s3_report_path() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"reportType": "s3", "reportPath": "s3://bucket-name/key-name"}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "fails for missing reportPath if reportType is \"file\"" — config/validation.spec.ts line 2542
+    #[test]
+    fn validate_config_global_errors_for_missing_file_report_path() {
+        let result = validate_config_for_source("global", &json!({"reportType": "file"}));
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "validates reportPath if reportType is \"file\"" — config/validation.spec.ts line 2554
+    #[test]
+    fn validate_config_global_allows_file_report_path() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"reportType": "file", "reportPath": "./report.json"}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "warns when registryUrls is set at the top level of global config" — config/validation.spec.ts line 2567
+    #[test]
+    fn validate_config_global_warns_for_top_level_registry_urls() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"registryUrls": ["https://registry.npmjs.org"]}),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "warns when defaultRegistryUrls is set at the top level of global config" — config/validation.spec.ts line 2582
+    #[test]
+    fn validate_config_global_warns_for_top_level_default_registry_urls() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"defaultRegistryUrls": ["https://registry.npmjs.org"]}),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "validates postUpgradeTasks.installTools tool names" — config/validation.spec.ts line 2597
+    #[test]
+    fn validate_config_global_validates_post_upgrade_install_tools() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"postUpgradeTasks": {"executionMode": "update", "installTools": {"npm": {}, "node": {}}}}),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "rejects invalid postUpgradeTasks.installTools tool names" — config/validation.spec.ts line 2615
+    #[test]
+    fn validate_config_global_rejects_invalid_post_upgrade_install_tools() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({"postUpgradeTasks": {"installTools": {"npm": {}, "unknownTool": {}}}}),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Invalid `postUpgradeTasks.installTools.unknownTool` configuration: not a valid tool name."
+            ]
+        );
+    }
+
+    // Ported: "catches when * or ** is combined with others patterns in a regexOrGlob option" — config/validation.spec.ts line 2639
+    #[test]
+    fn validate_config_global_catches_match_all_combined_with_other_patterns() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "packageRules": [{"matchRepositories": ["*", "repo"], "enabled": false}],
+                "allowedHeaders": ["*", "**"],
+                "autodiscoverProjects": ["**", "project"],
+                "allowedEnv": ["env_var"]
+            }),
+        );
+        assert_eq!(result.errors.len(), 1);
+        assert_eq!(result.warnings.len(), 2);
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
