@@ -154,6 +154,70 @@ fn migrate_config(input: &Value) -> Value {
                 Value::String(additional_branch_prefix),
             );
         }
+        if let Some(recreate_closed) = map.remove("recreateClosed")
+            && let Some(value) = recreate_closed.as_bool()
+        {
+            set_safely(
+                map,
+                "recreateWhen",
+                Value::String(if value { "always" } else { "auto" }.to_owned()),
+            );
+        }
+        if matches!(map.get("requireConfig"), Some(Value::String(value)) if value == "true")
+            || matches!(map.get("requireConfig"), Some(Value::Bool(true)))
+        {
+            map.insert(
+                "requireConfig".to_owned(),
+                Value::String("required".to_owned()),
+            );
+        } else if matches!(map.get("requireConfig"), Some(Value::String(value)) if value == "false")
+            || matches!(map.get("requireConfig"), Some(Value::Bool(false)))
+        {
+            map.insert(
+                "requireConfig".to_owned(),
+                Value::String("optional".to_owned()),
+            );
+        }
+        if let Some(rebase_stale_prs) = map.remove("rebaseStalePrs")
+            && !matches!(map.get("rebaseConflictedPrs"), Some(Value::Bool(false)))
+        {
+            if let Some(value) = rebase_stale_prs.as_bool() {
+                set_safely(
+                    map,
+                    "rebaseWhen",
+                    Value::String(
+                        if value {
+                            "behind-base-branch"
+                        } else {
+                            "conflicted"
+                        }
+                        .to_owned(),
+                    ),
+                );
+            } else if rebase_stale_prs.is_null() {
+                set_safely(map, "rebaseWhen", Value::String("auto".to_owned()));
+            }
+        }
+        if let Some(rebase_conflicted_prs) = map.remove("rebaseConflictedPrs")
+            && matches!(rebase_conflicted_prs, Value::Bool(false))
+        {
+            set_safely(map, "rebaseWhen", Value::String("never".to_owned()));
+        }
+        if let Some(update_lock_files) = map.remove("updateLockFiles")
+            && matches!(update_lock_files, Value::Bool(false))
+        {
+            set_safely(map, "skipArtifactsUpdate", Value::Bool(true));
+        }
+        if let Some(upgrade_in_range) = map.remove("upgradeInRange")
+            && matches!(upgrade_in_range, Value::Bool(true))
+        {
+            set_safely(map, "rangeStrategy", Value::String("bump".to_owned()));
+        }
+        if let Some(version_strategy) = map.remove("versionStrategy")
+            && matches!(version_strategy, Value::String(value) if value == "widen")
+        {
+            set_safely(map, "rangeStrategy", Value::String("widen".to_owned()));
+        }
         if matches!(map.get("platformCommit"), Some(Value::Bool(true))) {
             map.insert(
                 "platformCommit".to_owned(),
@@ -171,6 +235,10 @@ fn migrate_config(input: &Value) -> Value {
         }
     }
     migrated
+}
+
+fn set_safely(map: &mut Map<String, Value>, key: &str, value: Value) {
+    map.entry(key.to_owned()).or_insert(value);
 }
 
 fn validate_config(config: &Value) -> Vec<Value> {
@@ -3699,6 +3767,135 @@ mod tests {
         assert_eq!(
             migrate_config(&json!({"branchPrefix": true})),
             json!({"branchPrefix": true})
+        );
+    }
+
+    // Ported: "should migrate true" — config/migrations/custom/recreate-closed-migration.spec.ts line 4
+    #[test]
+    fn recreate_closed_true_migrates_to_always() {
+        assert_eq!(
+            migrate_config(&json!({"recreateClosed": true})),
+            json!({"recreateWhen": "always"})
+        );
+    }
+
+    // Ported: "should migrate false" — config/migrations/custom/recreate-closed-migration.spec.ts line 14
+    #[test]
+    fn recreate_closed_false_migrates_to_auto() {
+        assert_eq!(
+            migrate_config(&json!({"recreateClosed": false})),
+            json!({"recreateWhen": "auto"})
+        );
+    }
+
+    // Ported: "should migrate requireConfig=true to requireConfig=required" — config/migrations/custom/require-config-migration.spec.ts line 4
+    #[test]
+    fn require_config_true_string_migrates_to_required() {
+        assert_eq!(
+            migrate_config(&json!({"requireConfig": "true"})),
+            json!({"requireConfig": "required"})
+        );
+    }
+
+    // Ported: "should migrate requireConfig=false to requireConfig=optional" — config/migrations/custom/require-config-migration.spec.ts line 14
+    #[test]
+    fn require_config_false_string_migrates_to_optional() {
+        assert_eq!(
+            migrate_config(&json!({"requireConfig": "false"})),
+            json!({"requireConfig": "optional"})
+        );
+    }
+
+    // Ported: "should migrate true" — config/migrations/custom/rebase-stale-prs-migration.spec.ts line 4
+    #[test]
+    fn rebase_stale_prs_true_migrates_to_behind_base_branch() {
+        assert_eq!(
+            migrate_config(&json!({"rebaseStalePrs": true})),
+            json!({"rebaseWhen": "behind-base-branch"})
+        );
+    }
+
+    // Ported: "should migrate false" — config/migrations/custom/rebase-stale-prs-migration.spec.ts line 14
+    #[test]
+    fn rebase_stale_prs_false_migrates_to_conflicted() {
+        assert_eq!(
+            migrate_config(&json!({"rebaseStalePrs": false})),
+            json!({"rebaseWhen": "conflicted"})
+        );
+    }
+
+    // Ported: "should migrate null" — config/migrations/custom/rebase-stale-prs-migration.spec.ts line 24
+    #[test]
+    fn rebase_stale_prs_null_migrates_to_auto() {
+        assert_eq!(
+            migrate_config(&json!({"rebaseStalePrs": null})),
+            json!({"rebaseWhen": "auto"})
+        );
+    }
+
+    // Ported: "should migrate false" — config/migrations/custom/rebase-conflicted-prs-migration.spec.ts line 4
+    #[test]
+    fn rebase_conflicted_prs_false_migrates_to_never() {
+        assert_eq!(
+            migrate_config(&json!({"rebaseConflictedPrs": false})),
+            json!({"rebaseWhen": "never"})
+        );
+    }
+
+    // Ported: "should replace false value" — config/migrations/custom/update-lock-files-migration.spec.ts line 4
+    #[test]
+    fn update_lock_files_false_migrates_to_skip_artifacts_update() {
+        assert_eq!(
+            migrate_config(&json!({"updateLockFiles": false})),
+            json!({"skipArtifactsUpdate": true})
+        );
+    }
+
+    // Ported: "should not replace true value" — config/migrations/custom/update-lock-files-migration.spec.ts line 14
+    #[test]
+    fn update_lock_files_true_is_removed() {
+        assert_eq!(migrate_config(&json!({"updateLockFiles": true})), json!({}));
+    }
+
+    // Ported: "should not replace skipArtifactsUpdate" — config/migrations/custom/update-lock-files-migration.spec.ts line 24
+    #[test]
+    fn update_lock_files_false_preserves_existing_skip_artifacts_update() {
+        assert_eq!(
+            migrate_config(&json!({"updateLockFiles": false, "skipArtifactsUpdate": false})),
+            json!({"skipArtifactsUpdate": false})
+        );
+    }
+
+    // Ported: "should migrate upgradeInRange=true to rangeStrategy=\"bump\"" — config/migrations/custom/upgrade-in-range-migration.spec.ts line 4
+    #[test]
+    fn upgrade_in_range_true_migrates_to_range_strategy_bump() {
+        assert_eq!(
+            migrate_config(&json!({"upgradeInRange": true})),
+            json!({"rangeStrategy": "bump"})
+        );
+    }
+
+    // Ported: "should just remove property when upgradeInRange not equals to true" — config/migrations/custom/upgrade-in-range-migration.spec.ts line 14
+    #[test]
+    fn upgrade_in_range_false_is_removed() {
+        assert_eq!(migrate_config(&json!({"upgradeInRange": false})), json!({}));
+    }
+
+    // Ported: "should migrate versionStrategy=\"widen\" to rangeStrategy=\"widen\"" — config/migrations/custom/version-strategy-migration.spec.ts line 4
+    #[test]
+    fn version_strategy_widen_migrates_to_range_strategy_widen() {
+        assert_eq!(
+            migrate_config(&json!({"versionStrategy": "widen"})),
+            json!({"rangeStrategy": "widen"})
+        );
+    }
+
+    // Ported: "should just remove property when versionStrategy not equals to \"widen\"" — config/migrations/custom/version-strategy-migration.spec.ts line 14
+    #[test]
+    fn version_strategy_other_is_removed() {
+        assert_eq!(
+            migrate_config(&json!({"versionStrategy": "test"})),
+            json!({})
         );
     }
 

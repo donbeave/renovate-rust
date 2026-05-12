@@ -3692,6 +3692,105 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/migrations/custom/recreate-closed-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/recreate-closed-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/recreate-closed-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true | 4 | ported | `migrate_validate.rs` | `recreate_closed_true_migrates_to_always` | — |
+| should migrate false | 14 | ported | `migrate_validate.rs` | `recreate_closed_false_migrates_to_auto` | — |
+
+---
+
+## `lib/config/migrations/custom/require-config-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/require-config-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/require-config-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate requireConfig=true to requireConfig=required | 4 | ported | `migrate_validate.rs` | `require_config_true_string_migrates_to_required` | — |
+| should migrate requireConfig=false to requireConfig=optional | 14 | ported | `migrate_validate.rs` | `require_config_false_string_migrates_to_optional` | — |
+
+---
+
+## `lib/config/migrations/custom/rebase-stale-prs-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/rebase-stale-prs-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/rebase-stale-prs-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate true | 4 | ported | `migrate_validate.rs` | `rebase_stale_prs_true_migrates_to_behind_base_branch` | — |
+| should migrate false | 14 | ported | `migrate_validate.rs` | `rebase_stale_prs_false_migrates_to_conflicted` | — |
+| should migrate null | 24 | ported | `migrate_validate.rs` | `rebase_stale_prs_null_migrates_to_auto` | — |
+
+---
+
+## `lib/config/migrations/custom/rebase-conflicted-prs-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/rebase-conflicted-prs-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/rebase-conflicted-prs-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate false | 4 | ported | `migrate_validate.rs` | `rebase_conflicted_prs_false_migrates_to_never` | — |
+
+---
+
+## `lib/config/migrations/custom/update-lock-files-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/update-lock-files-migration.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `config/migrations/custom/update-lock-files-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should replace false value | 4 | ported | `migrate_validate.rs` | `update_lock_files_false_migrates_to_skip_artifacts_update` | — |
+| should not replace true value | 14 | ported | `migrate_validate.rs` | `update_lock_files_true_is_removed` | — |
+| should not replace skipArtifactsUpdate | 24 | ported | `migrate_validate.rs` | `update_lock_files_false_preserves_existing_skip_artifacts_update` | — |
+
+---
+
+## `lib/config/migrations/custom/upgrade-in-range-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/upgrade-in-range-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/upgrade-in-range-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate upgradeInRange=true to rangeStrategy="bump" | 4 | ported | `migrate_validate.rs` | `upgrade_in_range_true_migrates_to_range_strategy_bump` | — |
+| should just remove property when upgradeInRange not equals to true | 14 | ported | `migrate_validate.rs` | `upgrade_in_range_false_is_removed` | — |
+
+---
+
+## `lib/config/migrations/custom/version-strategy-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/version-strategy-migration.spec.ts
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
+
+### `config/migrations/custom/version-strategy-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate versionStrategy="widen" to rangeStrategy="widen" | 4 | ported | `migrate_validate.rs` | `version_strategy_widen_migrates_to_range_strategy_widen` | — |
+| should just remove property when versionStrategy not equals to "widen" | 14 | ported | `migrate_validate.rs` | `version_strategy_other_is_removed` | — |
+
+---
+
 ## `lib/config/migrations/custom/platform-commit-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/platform-commit-migration.spec.ts
