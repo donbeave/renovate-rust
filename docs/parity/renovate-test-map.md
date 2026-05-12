@@ -4108,6 +4108,39 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/cpan/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/cpan/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/cpan/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty result | 11 | not-applicable | — | — | Renovate's CPAN file-search `getReleases` response mapping is not implemented in Rust; Rust uses a latest-only MetaCPAN module endpoint. |
+| returns null for 404 | 27 | not-applicable | — | — | Renovate's CPAN file-search `getReleases` response mapping is not implemented in Rust; Rust uses a latest-only MetaCPAN module endpoint. |
+| throws for 5xx | 37 | not-applicable | — | — | Renovate's CPAN file-search `getReleases` response mapping is not implemented in Rust; Rust uses a latest-only MetaCPAN module endpoint. |
+| returns null for unknown error | 47 | not-applicable | — | — | Renovate's CPAN file-search `getReleases` response mapping is not implemented in Rust; Rust uses a latest-only MetaCPAN module endpoint. |
+| processes real data | 57 | not-applicable | — | — | Renovate's CPAN file-search `getReleases` response mapping is not implemented in Rust; Rust uses a latest-only MetaCPAN module endpoint. |
+
+---
+
+## `lib/modules/datasource/gradle-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/gradle-version/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/gradle-version/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| processes real data | 26 | not-applicable | — | — | Renovate's Gradle version datasource releases-list mapping and configurable registry URLs are not implemented in Rust; Rust only returns latest stable. |
+| calls configured registryUrls | 40 | not-applicable | — | — | Renovate's Gradle version datasource releases-list mapping and configurable registry URLs are not implemented in Rust; Rust only returns latest stable. |
+| handles empty releases | 59 | not-applicable | — | — | Renovate's Gradle version datasource releases-list mapping and configurable registry URLs are not implemented in Rust; Rust only returns latest stable. |
+| handles errors | 69 | not-applicable | — | — | Renovate's Gradle version datasource releases-list mapping and configurable registry URLs are not implemented in Rust; Rust only returns latest stable. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
