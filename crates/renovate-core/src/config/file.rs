@@ -141,7 +141,11 @@ pub fn load(path: &Path) -> Result<GlobalConfig, ConfigFileError> {
         source,
     })?;
 
-    // .renovaterc (no extension) and .json → standard JSON via serde_json.
+    if ext.is_empty() && basename != ".renovaterc" {
+        return Err(ConfigFileError::UnsupportedFormat("".to_owned()));
+    }
+
+    // .renovaterc (no extension) and .json -> standard JSON via serde_json.
     // .json5 → JSON5 via json5 crate.
     let config: GlobalConfig = match ext.as_str() {
         "json5" => json5::from_str(&contents).map_err(|e| ConfigFileError::Parse {
@@ -411,6 +415,15 @@ mod tests {
     }
 
     #[test]
+    fn load_renovaterc_without_extension_succeeds() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join(".renovaterc");
+        std::fs::write(&path, r#"{"token":"mytoken"}"#).unwrap();
+        let config = load(&path).unwrap();
+        assert_eq!(config.token.as_deref(), Some("mytoken"));
+    }
+
+    #[test]
     fn load_require_config_from_file() {
         let (_f, path) = write_temp(r#"{"requireConfig":"optional"}"#, ".json");
         assert_eq!(load(&path).unwrap().require_config, RequireConfig::Optional);
@@ -420,6 +433,20 @@ mod tests {
     fn load_rejects_js_extension() {
         let (_f, path) = write_temp("module.exports = {}", ".js");
         let err = load(&path).unwrap_err();
+        assert!(matches!(err, ConfigFileError::UnsupportedFormat(_)));
+    }
+
+    // Ported: "fatal error and exit if %s" — workers/global/config/parse/file.spec.ts line 147
+    #[test]
+    fn load_rejects_unsupported_or_missing_extension() {
+        let (_f, txt_path) = write_temp(r#"{"token":"abc"}"#, ".txt");
+        let err = load(&txt_path).unwrap_err();
+        assert!(matches!(err, ConfigFileError::UnsupportedFormat(_)));
+
+        let dir = tempfile::tempdir().unwrap();
+        let no_extension_path = dir.path().join("file");
+        std::fs::write(&no_extension_path, r#"{"token":"abc"}"#).unwrap();
+        let err = load(&no_extension_path).unwrap_err();
         assert!(matches!(err, ConfigFileError::UnsupportedFormat(_)));
     }
 
