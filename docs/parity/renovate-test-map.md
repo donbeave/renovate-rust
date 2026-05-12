@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2110 / 2110 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2111 / 2111 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1580,6 +1580,19 @@ Status key: `ported` · `pending` · `not-applicable`
 | detects custom repository definitions | 43 | ported | `kotlin_script.rs` | `extracts_custom_repositories` | — |
 | no dependencies | 71 | ported | `kotlin_script.rs` | `no_annotations_returns_empty` | — |
 | skips dependencies with missing parts | 81 | ported | `kotlin_script.rs` | `skips_missing_parts` | — |
+
+---
+
+## `lib/modules/manager/mise/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/index.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `modules/manager/mise/index › managerFilePatterns`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matchRegexOrGlobList("$path") === $expected | 43 | ported | `managers.rs` | `mise_file_patterns_match_spec` | — |
 
 ---
 

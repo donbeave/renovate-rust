@@ -950,9 +950,9 @@ mod tests {
         }
     }
 
+    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/mise/index.spec.ts line 43
     #[test]
     fn mise_file_patterns_match_spec() {
-        // Ported: "managerFilePatterns" from mise/index.spec.ts
         let should_match = &[
             "mise.toml",
             ".mise.toml",
