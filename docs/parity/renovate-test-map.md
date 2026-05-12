@@ -3910,6 +3910,91 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/deb/checksum.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/checksum.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/deb/checksum`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses the checksum for the specified package | 27 | not-applicable | — | — | Debian datasource package-index checksum parsing and validation are not implemented in Rust. |
+| computes the checksum of a file | 47 | not-applicable | — | — | Debian datasource package-index checksum parsing and validation are not implemented in Rust. |
+| should fail if there is an error in the stream | 56 | not-applicable | — | — | Debian datasource package-index checksum parsing and validation are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/deb/utils.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/utils.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/deb/utils`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should throw error for unsupported compression | 29 | not-applicable | — | — | Debian datasource package-index decompression utilities are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/deb/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/index.spec.ts
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/deb/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns a valid version for the package `album` and does not require redownload | 72 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns null when registry url misses components | 101 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns null when registry url misses binaryArch | 109 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns null when registry url misses suite or release | 117 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns a valid version for the package `album` | 138 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns a valid version for the package `album` if release is used in the registryUrl | 152 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns null for an unknown package | 169 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns two releases for `album` which is the same across the components | 199 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns two releases for `album` which has different metadata across the components | 216 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| returns null for the package | 244 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| supports specifying a custom binary arch | 251 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| should not lead to a race condition on parallel lookups | 281 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+| should parse the extracted package | 317 | not-applicable | — | — | Debian datasource Release/InRelease package index lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/deb/packages.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/packages.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/deb/packages`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should ignore error when fetching the InRelease content fails | 67 | not-applicable | — | — | Debian datasource package-list fetching and checksum validation are not implemented in Rust. |
+| should throw error when checksum validation fails | 93 | not-applicable | — | — | Debian datasource package-list fetching and checksum validation are not implemented in Rust. |
+| should throw error for when extracting fails | 108 | not-applicable | — | — | Debian datasource package-list fetching and checksum validation are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/deb/url.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/url.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/deb/url`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| constructs URLs correctly from registry URL with suite | 11 | not-applicable | — | — | Debian datasource registry URL construction and cache freshness checks are not implemented in Rust. |
+| constructs URLs correctly from registry URL with deprecated release | 22 | not-applicable | — | — | Debian datasource registry URL construction and cache freshness checks are not implemented in Rust. |
+| throws an error if required parameters are missing | 33 | not-applicable | — | — | Debian datasource registry URL construction and cache freshness checks are not implemented in Rust. |
+| should return true for different status code | 45 | not-applicable | — | — | Debian datasource registry URL construction and cache freshness checks are not implemented in Rust. |
+| should return true if request failed | 60 | not-applicable | — | — | Debian datasource registry URL construction and cache freshness checks are not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
