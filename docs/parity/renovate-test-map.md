@@ -3519,6 +3519,92 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/config/presets/github/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/github/index.spec.ts
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/github/index › fetchJSONFile()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns JSON | 17 | not-applicable | — | — | GitHub remote preset fetching via JavaScript contents API is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws external host error | 34 | not-applicable | — | — | GitHub remote preset fetching and host-rule error handling are not implemented in Rust. |
+
+### `config/presets/github/index › getPreset()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| tries default then renovate | 54 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws if invalid content | 65 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws if fails to parse | 76 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should return default.json | 89 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query preset within the file | 101 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query preset within the file when .json extension provided | 115 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query preset within the file when .json5 extension provided | 129 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query subpreset | 143 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should return custom.json | 160 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query custom paths | 174 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should throws not-found | 189 | not-applicable | — | — | GitHub remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+
+### `config/presets/github/index › getPresetFromEndpoint()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses default endpoint | 206 | not-applicable | — | — | GitHub remote preset endpoint/tag resolution is not implemented in Rust. |
+| uses custom endpoint | 218 | not-applicable | — | — | GitHub remote preset endpoint/tag resolution is not implemented in Rust. |
+| uses default endpoint with a tag | 238 | not-applicable | — | — | GitHub remote preset endpoint/tag resolution is not implemented in Rust. |
+| uses custom endpoint with a tag | 256 | not-applicable | — | — | GitHub remote preset endpoint/tag resolution is not implemented in Rust. |
+
+---
+
+## `lib/config/presets/gitlab/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/gitlab/index.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/gitlab/index › getPreset()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws EXTERNAL_HOST_ERROR | 12 | not-applicable | — | — | GitLab remote preset fetching and host-rule error handling are not implemented in Rust. |
+| throws if project could not be found | 22 | not-applicable | — | — | GitLab remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws if missing | 32 | not-applicable | — | — | GitLab remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should return the preset | 47 | not-applicable | — | — | GitLab remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should return the preset with a tag | 61 | not-applicable | — | — | GitLab remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query custom paths | 74 | not-applicable | — | — | GitLab remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query custom paths with .json extension | 92 | not-applicable | — | — | GitLab remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should query custom paths with .json5 extension | 110 | not-applicable | — | — | GitLab remote preset resolution is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+
+### `config/presets/gitlab/index › getPresetFromEndpoint()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| uses default endpoint | 130 | not-applicable | — | — | GitLab remote preset endpoint/tag resolution is not implemented in Rust. |
+| uses custom endpoint | 148 | not-applicable | — | — | GitLab remote preset endpoint/tag resolution is not implemented in Rust. |
+| uses default endpoint with a tag | 167 | not-applicable | — | — | GitLab remote preset endpoint/tag resolution is not implemented in Rust. |
+| uses custom endpoint with a tag | 183 | not-applicable | — | — | GitLab remote preset endpoint/tag resolution is not implemented in Rust. |
+
+---
+
+## `lib/config/presets/http/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/http/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/http/index › getPreset()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return parsed JSON | 13 | not-applicable | — | — | Generic HTTP remote preset fetching is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| should return parsed JSON5 | 19 | not-applicable | — | — | Generic HTTP remote preset fetching is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws if fails to parse | 30 | not-applicable | — | — | Generic HTTP remote preset fetching is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws if file not found | 38 | not-applicable | — | — | Generic HTTP remote preset fetching is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws on malformed URL | 46 | not-applicable | — | — | Generic HTTP remote preset fetching is not implemented in Rust; Rust only handles built-in preset expansion and tracks unresolved remote presets. |
+| throws external host error | 51 | not-applicable | — | — | Generic HTTP remote preset fetching and host-rule error handling are not implemented in Rust. |
+
+---
+
 ## `lib/config/parse.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/parse.spec.ts
