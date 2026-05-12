@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1577 / 1657 actionable tests ported (95%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1586 / 1657 actionable tests ported (96%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 53 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 62 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3626,15 +3626,15 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| validates object with ignored children | 1281 | pending | — | — | — |
-| validates valid registryAlias objects | 1294 | pending | — | — | — |
-| errors if registryAliases depth is more than 1 | 1309 | pending | — | — | — |
-| errors if registryAliases have invalid value | 1331 | pending | — | — | — |
-| errors if managerFilePatterns has wrong parent | 1352 | pending | — | — | — |
-| errors if manager objects are nested | 1395 | pending | — | — | — |
-| warns if hostType has the wrong parent | 1415 | pending | — | — | — |
-| validates preset values | 1429 | pending | — | — | — |
-| errors on invalid preset syntax | 1442 | pending | — | — | — |
+| validates object with ignored children | 1281 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_object_with_ignored_children` | — |
+| validates valid registryAlias objects | 1294 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_valid_registry_aliases` | — |
+| errors if registryAliases depth is more than 1 | 1309 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_nested_registry_aliases` | — |
+| errors if registryAliases have invalid value | 1331 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_registry_alias_value` | — |
+| errors if managerFilePatterns has wrong parent | 1352 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_wrong_manager_file_patterns_parent` | — |
+| errors if manager objects are nested | 1395 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_nested_manager_objects` | — |
+| warns if hostType has the wrong parent | 1415 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_host_type_wrong_parent` | — |
+| validates preset values | 1429 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_non_string_preset_values` | — |
+| errors on invalid preset syntax | 1442 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_preset_syntax` | — |
 | warns if only selectors in packageRules | 1459 | pending | — | — | — |
 | errors if invalid combinations in packageRules | 1473 | pending | — | — | — |
 | warns when registryUrls is set at the top level of repo config | 1492 | pending | — | — | — |

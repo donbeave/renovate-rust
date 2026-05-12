@@ -71,6 +71,11 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_base_branch_patterns(map, &mut errors);
     validate_enabled_managers(map, &mut errors);
     validate_manager_file_patterns(map, &mut errors);
+    validate_manager_file_pattern_parents(map, &mut warnings);
+    validate_manager_object_nesting(map, &mut errors);
+    validate_registry_aliases(map, &mut errors);
+    validate_host_type_parent(map, &mut warnings);
+    validate_extends(map, &mut errors);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
     validate_constraints_versioning(map, &mut errors);
@@ -304,7 +309,14 @@ fn validate_custom_datasources(map: &Map<String, Value>, errors: &mut Vec<Value>
 fn is_supported_manager(manager: &str) -> bool {
     matches!(
         manager,
-        "cargo" | "custom.regex" | "gradle" | "maven" | "npm" | "pip-compile"
+        "cargo"
+            | "custom.regex"
+            | "dockerfile"
+            | "gradle"
+            | "maven"
+            | "npm"
+            | "pip-compile"
+            | "pyenv"
     )
 }
 
@@ -384,6 +396,98 @@ fn validate_manager_file_patterns(map: &Map<String, Value>, errors: &mut Vec<Val
                 }));
             }
         }
+    }
+}
+
+fn validate_manager_file_pattern_parents(map: &Map<String, Value>, warnings: &mut Vec<Value>) {
+    if map.get("managerFilePatterns").is_some() {
+        warnings.push(json!({
+            "topic": "managerFilePatterns",
+            "message": "\"managerFilePatterns\" can't be used in \".\". Allowed objects: manager config and customManagers"
+        }));
+    }
+
+    for (manager, config) in map {
+        let Some(config) = config.as_object() else {
+            continue;
+        };
+        for (child, child_config) in config {
+            if child_config
+                .as_object()
+                .is_some_and(|child| child.get("managerFilePatterns").is_some())
+            {
+                warnings.push(json!({
+                    "topic": format!("{manager}.{child}.managerFilePatterns"),
+                    "message": format!("\"managerFilePatterns\" can't be used in \"{child}\". Allowed objects: manager config and customManagers")
+                }));
+            }
+        }
+    }
+}
+
+fn validate_manager_object_nesting(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    for (manager, config) in map {
+        if !is_supported_manager(manager) {
+            continue;
+        }
+        let Some(config) = config.as_object() else {
+            continue;
+        };
+        for child in config.keys() {
+            if is_supported_manager(child) {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Manager `{child}` cannot be nested inside manager `{manager}`")
+                }));
+            }
+        }
+    }
+}
+
+fn validate_registry_aliases(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Object(registry_aliases)) = map.get("registryAliases") else {
+        return;
+    };
+
+    for (alias, value) in registry_aliases {
+        if !value.is_string() {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid `registryAliases.registryAliases.{alias}` configuration: value is not a string")
+            }));
+        }
+    }
+}
+
+fn validate_host_type_parent(map: &Map<String, Value>, warnings: &mut Vec<Value>) {
+    if map.get("hostType").is_some() {
+        warnings.push(json!({
+            "topic": "hostType",
+            "message": "\"hostType\" should be configured inside hostRules"
+        }));
+    }
+}
+
+fn validate_extends(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Array(extends)) = map.get("extends") else {
+        return;
+    };
+
+    if extends.iter().any(|value| !value.is_string()) {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid `extends` configuration: presets must be strings"
+        }));
+        return;
+    }
+
+    if extends.iter().filter_map(Value::as_str).any(|preset| {
+        preset.starts_with("github>") && (preset.contains("//") && preset.contains(['@', '#']))
+    }) {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid preset syntax"
+        }));
     }
 }
 
@@ -1622,6 +1726,124 @@ mod tests {
                 "message": "Configuration option `constraintsVersioning` should be a json object"
             })]
         );
+    }
+
+    // Ported: "validates object with ignored children" — config/validation.spec.ts line 1281
+    #[test]
+    fn validate_config_allows_object_with_ignored_children() {
+        let result = validate_config_for_source("repo", &json!({"prBodyDefinitions": {}}));
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "validates valid registryAlias objects" — config/validation.spec.ts line 1294
+    #[test]
+    fn validate_config_allows_valid_registry_aliases() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "registryAliases": {
+                    "example1": "http://www.example.com",
+                    "example2": "https://www.example2.com/example"
+                }
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "errors if registryAliases depth is more than 1" — config/validation.spec.ts line 1309
+    #[test]
+    fn validate_config_errors_for_nested_registry_aliases() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"registryAliases": {"sample": {"example1": "http://www.example.com"}}}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "Invalid `registryAliases.registryAliases.sample` configuration: value is not a string"
+            ]
+        );
+    }
+
+    // Ported: "errors if registryAliases have invalid value" — config/validation.spec.ts line 1331
+    #[test]
+    fn validate_config_errors_for_invalid_registry_alias_value() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"registryAliases": {"example1": 123, "example2": "http://www.example.com"}}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "Invalid `registryAliases.registryAliases.example1` configuration: value is not a string"
+            ]
+        );
+    }
+
+    // Ported: "errors if managerFilePatterns has wrong parent" — config/validation.spec.ts line 1352
+    #[test]
+    fn validate_config_warns_for_wrong_manager_file_patterns_parent() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "managerFilePatterns": ["foo"],
+                "npm": {
+                    "managerFilePatterns": ["package\\.json"],
+                    "minor": {"managerFilePatterns": ["bar"]}
+                },
+                "customManagers": [{
+                    "customType": "regex",
+                    "managerFilePatterns": ["build.gradle"],
+                    "matchStrings": ["^(?<depName>foo)(?<currentValue>bar)$"],
+                    "datasourceTemplate": "maven",
+                    "versioningTemplate": "gradle"
+                }]
+            }),
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 2);
+    }
+
+    // Ported: "errors if manager objects are nested" — config/validation.spec.ts line 1395
+    #[test]
+    fn validate_config_errors_for_nested_manager_objects() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"pyenv": {"enabled": false}, "maven": {"gradle": {"enabled": false}}}),
+        );
+        assert_eq!(result.errors.len(), 1);
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "warns if hostType has the wrong parent" — config/validation.spec.ts line 1415
+    #[test]
+    fn validate_config_warns_for_host_type_wrong_parent() {
+        let result = validate_config_for_source("repo", &json!({"hostType": "npm"}));
+        assert!(result.errors.is_empty());
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "validates preset values" — config/validation.spec.ts line 1429
+    #[test]
+    fn validate_config_errors_for_non_string_preset_values() {
+        let result = validate_config_for_source("repo", &json!({"extends": ["foo", "bar", 42]}));
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
+    }
+
+    // Ported: "errors on invalid preset syntax" — config/validation.spec.ts line 1442
+    #[test]
+    fn validate_config_errors_for_invalid_preset_syntax() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"extends": ["github>owner/repo//path@commitHash", "github>owner/repo//path#commitHash"]}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(result.errors.len(), 1);
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
