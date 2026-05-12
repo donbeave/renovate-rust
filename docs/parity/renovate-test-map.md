@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2128 / 8606 actionable tests ported (25%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2129 / 8606 actionable tests ported (25%) — updated 2026-05-12
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -28575,13 +28575,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/updates/flatten.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/flatten.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 1 | **Actionable:** 6 | **Status:** partial
 
 ### `workers/repository/updates/flatten › sanitizeDepName()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| sanitizes urls | 20 | pending | — | — | — |
+| sanitizes urls | 20 | ported | `branch.rs` | `sanitize_url_style_dep` | — |
 
 ### `workers/repository/updates/flatten › flattenUpdates()`
 

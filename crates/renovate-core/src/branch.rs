@@ -498,6 +498,7 @@ mod tests {
         assert_eq!(sanitize_dep_name("@types/react"), "react");
     }
 
+    // Ported: "sanitizes urls" — workers/repository/updates/flatten.spec.ts line 20
     #[test]
     fn sanitize_url_style_dep() {
         // https:// → replace "/" with "-" (×2) and ":" with "-", then collapse:
