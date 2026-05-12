@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2075 / 2075 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2078 / 2078 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -12566,6 +12566,21 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | isSingleVersion("$version") === $expected | 247 | not-applicable | - | - | Renovate's RubyGems single-version/range discriminator is not implemented as a Rust versioning API. |
 | returns a pinned value | 276 | not-applicable | - | - | Renovate's RubyGems pinned-value normalizer is not implemented as a Rust versioning API. |
 | getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 281 | not-applicable | - | - | Renovate's RubyGems range strategy rewrite engine is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/git/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/git/index.spec.ts
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
+
+### `modules/versioning/git/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$input") === $expected | 4 | ported | `git.rs` | `is_valid_matches_renovate_git_spec` | — |
+| isCompatible("$version") === $expected | 20 | ported | `git.rs` | `is_compatible_matches_renovate_git_spec` | — |
+| isGreaterThan("$a", "$b") === $expected | 32 | ported | `git.rs` | `is_greater_than_matches_renovate_git_spec` | — |
 
 ---
 

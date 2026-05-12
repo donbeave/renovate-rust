@@ -6,6 +6,7 @@
 pub mod aws_machine_image;
 pub mod cargo;
 pub mod exact;
+pub mod git;
 pub mod hashicorp;
 pub mod helm;
 pub mod maven;
