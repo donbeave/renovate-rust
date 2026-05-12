@@ -5002,6 +5002,47 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/rubygems/metadata-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rubygems/metadata-cache.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/rubygems/metadata-cache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| fetches data | 26 | not-applicable | — | — | Renovate's RubyGems metadata persistent cache, fallback, and stale-key reconciliation layer is not implemented in Rust; Rust RubyGems support uses direct latest-version summaries. |
+| handles inconsistent data between versions and endpoint | 100 | not-applicable | — | — | Renovate's RubyGems metadata persistent cache, fallback, and stale-key reconciliation layer is not implemented in Rust; Rust RubyGems support uses direct latest-version summaries. |
+| handles inconsistent data between cache and endpoint | 137 | not-applicable | — | — | Renovate's RubyGems metadata persistent cache, fallback, and stale-key reconciliation layer is not implemented in Rust; Rust RubyGems support uses direct latest-version summaries. |
+| returns cached data | 204 | not-applicable | — | — | Renovate's RubyGems metadata persistent cache, fallback, and stale-key reconciliation layer is not implemented in Rust; Rust RubyGems support uses direct latest-version summaries. |
+| fetches for stale key | 240 | not-applicable | — | — | Renovate's RubyGems metadata persistent cache, fallback, and stale-key reconciliation layer is not implemented in Rust; Rust RubyGems support uses direct latest-version summaries. |
+| returns fallback results on 404 | 288 | not-applicable | — | — | Renovate's RubyGems metadata persistent cache, fallback, and stale-key reconciliation layer is not implemented in Rust; Rust RubyGems support uses direct latest-version summaries. |
+| returns fallback result on unknown error | 308 | not-applicable | — | — | Renovate's RubyGems metadata persistent cache, fallback, and stale-key reconciliation layer is not implemented in Rust; Rust RubyGems support uses direct latest-version summaries. |
+
+---
+
+## `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/rubygems/versions-endpoint-cache › versionsEndpointCache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| supports sequential access | 25 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| supports concurrent access | 43 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| handles 404 | 57 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| handles unknown error | 69 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| refreshes after 15 minutes | 91 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| handles tail-head mismatch | 117 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| handles full body response | 154 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| handles 404 | 186 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| handles 416 | 196 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+| handles unknown errors | 216 | not-applicable | — | — | Renovate's RubyGems versions endpoint persistent cache, concurrency coalescing, range requests, and freshness handling are not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
