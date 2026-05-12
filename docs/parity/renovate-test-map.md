@@ -4565,6 +4565,126 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/rpm/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rpm/index.spec.ts
+**Total tests:** 22 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/rpm/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns the correct primary.xml URL | 11 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns the correct primary.xml URL when repomd.xml omits xml declaration | 33 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if repomd.xml is missing | 55 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if http.getText fails | 65 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if repomdXml is not in XML format | 76 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if no primary data is found | 94 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if no location element is found | 116 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if location href is missing | 138 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns the correct releases | 167 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if somesha256-primary.xml.gz is not found | 223 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if response.body is empty | 236 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns null if no element package is found in primary.xml | 249 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns null if the specific packageName is not found in primary.xml | 275 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns an empty array if version is not found in a version element | 302 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns an array of releases without duplicate versionWithRel | 329 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| handles parser error event in getReleasesByPackageName | 368 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns null if registryUrl is not provided | 397 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns null if primaryXmlUrl is empty | 405 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns null if packageName is not provided | 414 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| returns the correct releases | 422 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if getPrimaryGzipUrl fails | 466 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws an error if getReleasesByPackageName fails | 479 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/golang-version/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/golang-version/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/golang-version/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| parses real data | 19 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| supports custom registry URL | 36 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| throws ExternalHostError for invalid release with no versions | 56 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| throws ExternalHostError for invalid release with wrong termination | 69 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| throws ExternalHostError for empty result | 82 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| throws ExternalHostError for zero releases extracted | 92 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| throws ExternalHostError for invalid release semver | 102 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| returns null for error 404 | 112 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| throws ExternalHostError for invalid release format beginning | 122 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+| throws ExternalHostError for invalid release format | 132 | not-applicable | — | — | Go toolchain version datasource lookup and release-feed validation are not implemented in Rust; Rust's Go module datasource is separate. |
+
+---
+
+## `lib/modules/datasource/git-tags/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/git-tags/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/git-tags/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns nil if response is wrong | 38 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns nil if remote call throws exception | 45 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns versions filtered from tags | 52 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns null if not found | 64 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns digest for tag | 74 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns digest for HEAD | 84 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns digest for HEAD with authentication environment variables | 94 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+| returns digest for HEAD with authentication environment variables for datasource type git-tags | 121 | not-applicable | — | — | Generic git-tags simple-git remote ref lookup, digest lookup, and host-rule environment handling are not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/github-tags/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-tags/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/github-tags/index › getDigest`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns commit digest | 25 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| returns null for missing commit | 36 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| returns untagged commit digest | 45 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| returns tagged commit digest | 54 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| returns null for missing hash | 73 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| returns null for missing tagged commit digest | 91 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| returns null for error | 110 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+
+### `modules/datasource/github-tags/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns tags | 120 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+
+---
+
+## `lib/modules/datasource/orb/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/orb/index.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/orb/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for empty result | 32 | not-applicable | — | — | Renovate's Orb `getReleases` release-list, homepage, registry URL, and null-on-error contract are not implemented in Rust; Rust only exposes latest-version update summaries. |
+| returns null for missing orb | 42 | not-applicable | — | — | Renovate's Orb `getReleases` release-list, homepage, registry URL, and null-on-error contract are not implemented in Rust; Rust only exposes latest-version update summaries. |
+| returns null for 404 | 55 | not-applicable | — | — | Renovate's Orb `getReleases` release-list, homepage, registry URL, and null-on-error contract are not implemented in Rust; Rust only exposes latest-version update summaries. |
+| returns null for unknown error | 65 | not-applicable | — | — | Renovate's Orb `getReleases` release-list, homepage, registry URL, and null-on-error contract are not implemented in Rust; Rust only exposes latest-version update summaries. |
+| processes real data | 75 | not-applicable | — | — | Renovate's Orb `getReleases` release-list, homepage, registry URL, and null-on-error contract are not implemented in Rust; Rust only exposes latest-version update summaries. |
+| processes homeUrl | 85 | not-applicable | — | — | Renovate's Orb `getReleases` release-list, homepage, registry URL, and null-on-error contract are not implemented in Rust; Rust only exposes latest-version update summaries. |
+| supports other registries | 96 | not-applicable | — | — | Renovate's Orb `getReleases` release-list, homepage, registry URL, and null-on-error contract are not implemented in Rust; Rust only exposes latest-version update summaries. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
