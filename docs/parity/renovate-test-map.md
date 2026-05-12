@@ -11127,6 +11127,86 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/versioning/loose/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/loose/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/loose/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isVersion("$version") === $expected | 4 | not-applicable | — | — | Renovate's loose versioning scheme is not implemented as a Rust versioning API. |
+| isValid("$version") === $expected | 13 | not-applicable | — | — | Renovate's loose versioning scheme is not implemented as a Rust versioning API. |
+| equals("$a", "$b") === $expected | 41 | not-applicable | — | — | Renovate's loose versioning comparator is not implemented as a Rust versioning API. |
+| isGreaterThan("$a", "$b") === $expected | 52 | not-applicable | — | — | Renovate's loose versioning comparator is not implemented as a Rust versioning API. |
+| isCompatible("$version") === $expected | 72 | not-applicable | — | — | Renovate's loose versioning compatibility helper is not implemented as a Rust versioning API. |
+| isSingleVersion("$version") === $expected | 79 | not-applicable | — | — | Renovate's loose versioning single-version classifier is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/same-major/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/same-major/index.spec.ts
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/same-major/index › isCompatible`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true | 5 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+| should return false | 9 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+
+### `modules/versioning/same-major/index › matches`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true when version has same major | 18 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+| should return false when version has different major | 23 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+| should return false when version is out of range | 27 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+| should return false when version is invalid | 33 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+
+### `modules/versioning/same-major/index › getSatisfyingVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return max satisfying version in range | 39 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+
+### `modules/versioning/same-major/index › minSatisfyingVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return min satisfying version in range | 50 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+
+### `modules/versioning/same-major/index › isVersion`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return true | 61 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+| should return false | 65 | not-applicable | — | — | Renovate's same-major versioning wrapper is not implemented as a Rust versioning API. |
+
+---
+
+## `lib/modules/versioning/hex/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/hex/index.spec.ts
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/hex/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches("$version", "$range") === $expected | 4 | not-applicable | — | — | Renovate's Hex versioning scheme is not implemented as a Rust versioning API; Rust Hex support is datasource/extractor oriented. |
+| getSatisfyingVersion($versions, "$range") === $expected | 19 | not-applicable | — | — | Renovate's Hex range satisfying-version helper is not implemented as a Rust versioning API. |
+| isValid("$input") === $expected | 30 | not-applicable | — | — | Renovate's Hex versioning validation is not implemented as a Rust versioning API. |
+| isSingleVersion("$version") === $expected | 41 | not-applicable | — | — | Renovate's Hex single-version classifier is not implemented as a Rust versioning API. |
+| getPinnedValue returns == prefixed version | 52 | not-applicable | — | — | Renovate's Hex pinned-value helper is not implemented as a Rust versioning API. |
+| isLessThanRange($version, $range) === $expected | 56 | not-applicable | — | — | Renovate's Hex range comparison helper is not implemented as a Rust versioning API. |
+| minSatisfyingVersion($versions, "$range") === $expected | 69 | not-applicable | — | — | Renovate's Hex range satisfying-version helper is not implemented as a Rust versioning API. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 80 | not-applicable | — | — | Renovate's Hex update-value helper is not implemented as a Rust versioning API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
