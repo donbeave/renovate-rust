@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1716 / 1790 actionable tests ported (96%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1716 / 1788 actionable tests ported (96%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4081,7 +4081,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/file.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts
-**Total tests:** 15 | **Ported:** 8 | **Actionable:** 15 | **Status:** partial
+**Total tests:** 15 | **Ported:** 8 | **Actionable:** 13 | **Status:** partial
 
 ### `workers/global/config/parse/file › .getConfig()`
 
@@ -4095,8 +4095,8 @@ resolver) and the inner `extractPackageFile()` adapter.
 | fatal error and exit if custom config file does not exist | 112 | ported | `file.rs` | `resolve_errors_when_explicit_file_missing` | — |
 | fatal error and exit if config.js contains unresolved env var | 126 | pending | — | — | — |
 | fatal error and exit if %s | 147 | ported | `file.rs` | `load_rejects_unsupported_or_missing_extension` | — |
-| exports env variables to environment from processEnv object | 161 | pending | — | — | — |
-| does not export env variables to environment from processEnv object if key/value is invalid | 184 | pending | — | — | — |
+| exports env variables to environment from processEnv object | 161 | not-applicable | — | — | Rust crate denies unsafe code; Rust 2024 process environment mutation requires unsafe global state writes |
+| does not export env variables to environment from processEnv object if key/value is invalid | 184 | not-applicable | — | — | Rust crate denies unsafe code; Rust 2024 process environment mutation requires unsafe global state writes |
 
 ### `workers/global/config/parse/file › deleteConfigFile()`
 
