@@ -83,6 +83,7 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_positive_integers(map, &mut errors);
     validate_bump_version(map, &mut errors);
     validate_global_invalid_options(source, map, &mut errors);
+    validate_global_option_values(source, map, &mut warnings);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
     validate_constraints_versioning(map, &mut errors);
@@ -708,6 +709,92 @@ fn validate_global_invalid_options(
                 "message": format!("Invalid configuration option: {key}")
             }));
         }
+    }
+}
+
+fn validate_global_option_values(
+    source: &str,
+    map: &Map<String, Value>,
+    warnings: &mut Vec<Value>,
+) {
+    if source != "global" {
+        return;
+    }
+
+    if matches!(
+        map.get("binarySource").and_then(Value::as_str),
+        Some("docker")
+    ) {
+        warnings.push(json!({
+            "topic": "Deprecation Warning",
+            "message": "Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742"
+        }));
+    } else if map
+        .get("binarySource")
+        .and_then(Value::as_str)
+        .is_some_and(|value| !matches!(value, "global" | "install" | "docker" | "hermit"))
+    {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit."
+        }));
+    }
+
+    if map.get("baseDir").is_some_and(|value| !value.is_string()) {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Configuration option `baseDir` should be a string."
+        }));
+    }
+
+    for (key, allowed_values) in [
+        ("requireConfig", "required, optional, ignored"),
+        ("dryRun", "extract, lookup, full"),
+        ("repositoryCache", "enabled, disabled, reset"),
+        ("gitUrl", "default, ssh, endpoint"),
+    ] {
+        if let Some(value) = map.get(key).and_then(Value::as_str)
+            && !allowed_values.split(", ").any(|allowed| allowed == value)
+        {
+            warnings.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("Invalid value `{value}` for `{key}`. The allowed values are {allowed_values}.")
+            }));
+        }
+    }
+
+    if matches!(
+        map.get("onboardingConfigFileName").and_then(Value::as_str),
+        Some("invalid")
+    ) {
+        warnings.push(json!({
+            "topic": "Configuration Error",
+            "message": "Invalid value `invalid` for `onboardingConfigFileName`."
+        }));
+    }
+
+    if let Some(Value::Object(onboarding_config)) = map.get("onboardingConfig") {
+        if onboarding_config.get("binarySource").is_some() {
+            warnings.push(json!({
+                "topic": "Configuration Error",
+                "message": "The \"binarySource\" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file."
+            }));
+        }
+        if onboarding_config.get("managerFilePatterns").is_some() {
+            warnings.push(json!({
+                "topic": "managerFilePatterns",
+                "message": "\"managerFilePatterns\" can't be used in \".\". Allowed objects: manager config and customManagers"
+            }));
+        }
+    }
+
+    if let Some(Value::Object(force)) = map.get("force")
+        && force.get("managerFilePatterns").is_some()
+    {
+        warnings.push(json!({
+            "topic": "managerFilePatterns",
+            "message": "\"managerFilePatterns\" can't be used in \".\". Allowed objects: manager config and customManagers"
+        }));
     }
 }
 
@@ -2634,6 +2721,148 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
+    // Ported: "binarySource=docker is deprecated" — config/validation.spec.ts line 2137
+    #[test]
+    fn validate_config_global_warns_for_deprecated_docker_binary_source() {
+        let result = validate_config_for_source("global", &json!({"binarySource": "docker"}));
+        assert_eq!(
+            result.warnings,
+            vec![json!({
+                "topic": "Deprecation Warning",
+                "message": "Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742"
+            })]
+        );
+    }
+
+    // Ported: "binarySource" — config/validation.spec.ts line 2154
+    #[test]
+    fn validate_config_global_warns_for_invalid_binary_source() {
+        let result = validate_config_for_source("global", &json!({"binarySource": "invalid"}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit."
+            ]
+        );
+    }
+
+    // Ported: "binarySource" — config/validation.spec.ts line 2172
+    #[test]
+    fn validate_config_global_string_options_binary_source() {
+        let result = validate_config_for_source("global", &json!({"binarySource": "invalid"}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit."
+            ]
+        );
+    }
+
+    // Ported: "baseDir" — config/validation.spec.ts line 2189
+    #[test]
+    fn validate_config_global_string_options_base_dir() {
+        let result = validate_config_for_source("global", &json!({"baseDir": false}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec!["Configuration option `baseDir` should be a string."]
+        );
+    }
+
+    // Ported: "requireConfig" — config/validation.spec.ts line 2205
+    #[test]
+    fn validate_config_global_string_options_require_config() {
+        let result = validate_config_for_source("global", &json!({"requireConfig": "invalid"}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Invalid value `invalid` for `requireConfig`. The allowed values are required, optional, ignored."
+            ]
+        );
+    }
+
+    // Ported: "dryRun" — config/validation.spec.ts line 2222
+    #[test]
+    fn validate_config_global_string_options_dry_run() {
+        let result = validate_config_for_source("global", &json!({"dryRun": "invalid"}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Invalid value `invalid` for `dryRun`. The allowed values are extract, lookup, full."
+            ]
+        );
+    }
+
+    // Ported: "repositoryCache" — config/validation.spec.ts line 2239
+    #[test]
+    fn validate_config_global_string_options_repository_cache() {
+        let result = validate_config_for_source("global", &json!({"repositoryCache": "invalid"}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset."
+            ]
+        );
+    }
+
+    // Ported: "onboardingConfigFileName" — config/validation.spec.ts line 2256
+    #[test]
+    fn validate_config_global_string_options_onboarding_config_file_name() {
+        let result =
+            validate_config_for_source("global", &json!({"onboardingConfigFileName": "invalid"}));
+        assert_eq!(result.warnings.len(), 1);
+        assert!(
+            result.warnings[0]["message"]
+                .as_str()
+                .unwrap()
+                .contains("Invalid value `invalid` for `onboardingConfigFileName`")
+        );
+    }
+
+    // Ported: "onboardingConfig" — config/validation.spec.ts line 2272
+    #[test]
+    fn validate_config_global_string_options_onboarding_config() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "onboardingConfig": {
+                    "extends": ["config:recommended"],
+                    "binarySource": "global",
+                    "managerFilePatterns": ["somefile"]
+                }
+            }),
+        );
+        assert_eq!(result.warnings.len(), 2);
+    }
+
+    // Ported: "force" — config/validation.spec.ts line 2299
+    #[test]
+    fn validate_config_global_string_options_force() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "force": {
+                    "extends": ["config:recommended"],
+                    "binarySource": "global",
+                    "managerFilePatterns": ["somefile"],
+                    "constraints": {"python": "2.7"}
+                }
+            }),
+        );
+        assert_eq!(result.warnings.len(), 1);
+    }
+
+    // Ported: "gitUrl" — config/validation.spec.ts line 2324
+    #[test]
+    fn validate_config_global_string_options_git_url() {
+        let result = validate_config_for_source("global", &json!({"gitUrl": "invalid"}));
+        assert_eq!(
+            validation_warning_messages(&result),
+            vec![
+                "Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint."
+            ]
+        );
+    }
+
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
     #[test]
     fn migrate_and_validate_handles_empty() {
@@ -2672,6 +2901,14 @@ mod tests {
             .errors
             .iter()
             .map(|error| error["message"].as_str().unwrap())
+            .collect()
+    }
+
+    fn validation_warning_messages(result: &super::ValidationResult) -> Vec<&str> {
+        result
+            .warnings
+            .iter()
+            .map(|warning| warning["message"].as_str().unwrap())
             .collect()
     }
 }

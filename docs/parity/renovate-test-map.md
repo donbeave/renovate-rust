@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1617 / 1657 actionable tests ported (98%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1628 / 1657 actionable tests ported (98%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 93 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 104 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3677,22 +3677,22 @@ resolver) and the inner `extractPackageFile()` adapter.
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| binarySource=docker is deprecated | 2137 | pending | — | — | — |
-| binarySource | 2154 | pending | — | — | — |
+| binarySource=docker is deprecated | 2137 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_warns_for_deprecated_docker_binary_source` | — |
+| binarySource | 2154 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_warns_for_invalid_binary_source` | — |
 
 ### `config/validation › validate globalOptions() › validates string type options`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| binarySource | 2172 | pending | — | — | — |
-| baseDir | 2189 | pending | — | — | — |
-| requireConfig | 2205 | pending | — | — | — |
-| dryRun | 2222 | pending | — | — | — |
-| repositoryCache | 2239 | pending | — | — | — |
-| onboardingConfigFileName | 2256 | pending | — | — | — |
-| onboardingConfig | 2272 | pending | — | — | — |
-| force | 2299 | pending | — | — | — |
-| gitUrl | 2324 | pending | — | — | — |
+| binarySource | 2172 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_binary_source` | — |
+| baseDir | 2189 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_base_dir` | — |
+| requireConfig | 2205 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_require_config` | — |
+| dryRun | 2222 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_dry_run` | — |
+| repositoryCache | 2239 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_repository_cache` | — |
+| onboardingConfigFileName | 2256 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_onboarding_config_file_name` | — |
+| onboardingConfig | 2272 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_onboarding_config` | — |
+| force | 2299 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_force` | — |
+| gitUrl | 2324 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_global_string_options_git_url` | — |
 
 ### `config/validation › validate globalOptions()`
 
