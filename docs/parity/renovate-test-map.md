@@ -4231,6 +4231,82 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/typst/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/typst/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/typst/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| processes real data | 7 | not-applicable | — | — | Renovate's Typst release-list metadata, namespace validation, timestamps, and source URL mapping are not implemented in Rust; Rust only returns latest version availability. |
+| returns null for unsupported namespace | 74 | not-applicable | — | — | Renovate's Typst release-list metadata, namespace validation, timestamps, and source URL mapping are not implemented in Rust; Rust only returns latest version availability. |
+| returns null when package not found in registry | 83 | not-applicable | — | — | Renovate's Typst release-list metadata, namespace validation, timestamps, and source URL mapping are not implemented in Rust; Rust only returns latest version availability. |
+| handles multiple versions of the same package | 111 | not-applicable | — | — | Renovate's Typst release-list metadata, namespace validation, timestamps, and source URL mapping are not implemented in Rust; Rust only returns latest version availability. |
+| handles registry fetch errors | 163 | not-applicable | — | — | Renovate's Typst release-list metadata, namespace validation, timestamps, and source URL mapping are not implemented in Rust; Rust only returns latest version availability. |
+| handles empty registry response | 179 | not-applicable | — | — | Renovate's Typst release-list metadata, namespace validation, timestamps, and source URL mapping are not implemented in Rust; Rust only returns latest version availability. |
+
+---
+
+## `lib/modules/datasource/jsr/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/jsr/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/jsr/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should return null for invalid package name | 24 | not-applicable | — | — | Renovate's JSR `getReleases` response mapping with timestamps, latest markers, and yanked/deprecated releases is not implemented in Rust. |
+| should return null for no versions | 32 | not-applicable | — | — | Renovate's JSR `getReleases` response mapping with timestamps, latest markers, and yanked/deprecated releases is not implemented in Rust. |
+| should fetch package info from jsr | 46 | not-applicable | — | — | Renovate's JSR `getReleases` response mapping with timestamps, latest markers, and yanked/deprecated releases is not implemented in Rust. |
+| contains yanked versions | 74 | not-applicable | — | — | Renovate's JSR `getReleases` response mapping with timestamps, latest markers, and yanked/deprecated releases is not implemented in Rust. |
+| should return null if lookup fails | 102 | not-applicable | — | — | Renovate's JSR `getReleases` response mapping with timestamps, latest markers, and yanked/deprecated releases is not implemented in Rust. |
+| should throw error for unparseable | 115 | not-applicable | — | — | Renovate's JSR `getReleases` response mapping with timestamps, latest markers, and yanked/deprecated releases is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/jsr/util.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/jsr/util.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/jsr/util`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should extract package name | 4 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for invalid name | 12 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for below scope min length | 17 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for exceed scope max length | 22 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for invalid scope name | 27 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for invalid package name starting with @ | 32 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for exceed package max length | 37 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for invalid package name | 42 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+| should return null for invalid package name starting with - | 47 | not-applicable | — | — | Renovate's JSR package-name parser with length and character validation is not exposed as a Rust datasource utility API. |
+
+---
+
+## `lib/modules/datasource/glasskube-packages/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/glasskube-packages/index.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/glasskube-packages/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should handle error response on versions request | 26 | not-applicable | — | — | Renovate's Glasskube package datasource release-list and package manifest reference mapping are not implemented in Rust; Rust only fetches latest version from versions.yaml. |
+| should handle empty response on versions request | 40 | not-applicable | — | — | Renovate's Glasskube package datasource release-list and package manifest reference mapping are not implemented in Rust; Rust only fetches latest version from versions.yaml. |
+| should handle error response on manifest request | 53 | not-applicable | — | — | Renovate's Glasskube package datasource release-list and package manifest reference mapping are not implemented in Rust; Rust only fetches latest version from versions.yaml. |
+| should handle empty response on manifest request | 71 | not-applicable | — | — | Renovate's Glasskube package datasource release-list and package manifest reference mapping are not implemented in Rust; Rust only fetches latest version from versions.yaml. |
+| should handle package manifest without references | 88 | not-applicable | — | — | Renovate's Glasskube package datasource release-list and package manifest reference mapping are not implemented in Rust; Rust only fetches latest version from versions.yaml. |
+| should handle package manifest with references and default url | 109 | not-applicable | — | — | Renovate's Glasskube package datasource release-list and package manifest reference mapping are not implemented in Rust; Rust only fetches latest version from versions.yaml. |
+| should handle package manifest with references and custom url | 131 | not-applicable | — | — | Renovate's Glasskube package datasource release-list and package manifest reference mapping are not implemented in Rust; Rust only fetches latest version from versions.yaml. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
