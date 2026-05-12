@@ -139,12 +139,12 @@ static RUNNERS: &[(&str, &[RunnerVersion])] = &[
                 deprecated: false,
             },
             RunnerVersion {
-                version: "12-large",
+                version: "12",
                 stable: true,
                 deprecated: true,
             },
             RunnerVersion {
-                version: "12",
+                version: "12-large",
                 stable: true,
                 deprecated: true,
             },
@@ -254,6 +254,81 @@ pub fn update_summary(name: &str, current_version: &str) -> RunnerUpdateSummary 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn release_rows(name: &str) -> Option<Vec<(&'static str, bool, bool)>> {
+        RUNNERS
+            .iter()
+            .find(|(runner_name, _)| *runner_name == name)
+            .map(|(_, versions)| {
+                versions
+                    .iter()
+                    .rev()
+                    .map(|version| (version.version, version.stable, version.deprecated))
+                    .collect()
+            })
+    }
+
+    // Ported: "returns releases for Ubuntu" — datasource/github-runners/index.spec.ts line 6
+    #[test]
+    fn github_runners_returns_releases_for_ubuntu() {
+        assert_eq!(
+            release_rows("ubuntu").unwrap(),
+            vec![
+                ("16.04", true, true),
+                ("18.04", true, true),
+                ("20.04", true, true),
+                ("22.04-arm", false, false),
+                ("22.04", true, false),
+                ("24.04-arm", false, false),
+                ("24.04", true, false),
+            ]
+        );
+    }
+
+    // Ported: "returns releases for macOS" — datasource/github-runners/index.spec.ts line 26
+    #[test]
+    fn github_runners_returns_releases_for_macos() {
+        assert_eq!(
+            release_rows("macos").unwrap(),
+            vec![
+                ("10.15", true, true),
+                ("11", true, true),
+                ("12-large", true, true),
+                ("12", true, true),
+                ("13-xlarge", true, false),
+                ("13-large", true, false),
+                ("13", true, false),
+                ("14-xlarge", true, false),
+                ("14-large", true, false),
+                ("14", true, false),
+                ("15-xlarge", true, false),
+                ("15-large", true, false),
+                ("15", true, false),
+                ("26-xlarge", false, false),
+                ("26", false, false),
+            ]
+        );
+    }
+
+    // Ported: "returns releases for Windows" — datasource/github-runners/index.spec.ts line 54
+    #[test]
+    fn github_runners_returns_releases_for_windows() {
+        assert_eq!(
+            release_rows("windows").unwrap(),
+            vec![
+                ("2016", true, true),
+                ("2019", true, true),
+                ("2022", true, false),
+                ("2025", true, false),
+            ]
+        );
+    }
+
+    // Ported: "returns null if package is unknown" — datasource/github-runners/index.spec.ts line 71
+    #[test]
+    fn github_runners_returns_none_for_unknown_package() {
+        assert!(release_rows("unknown").is_none());
+    }
 
     #[test]
     fn variant_suffix_empty_for_plain_version() {

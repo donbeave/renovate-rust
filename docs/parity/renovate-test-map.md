@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1903 / 1903 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1907 / 1907 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4169,6 +4169,22 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | should return null when package is a function | 32 | not-applicable | — | — | Renovate's Azure Bicep resource `getReleases` release-list and changelog URL mapping are not implemented in Rust; Rust only returns the latest API version. |
 | should return versions when package is a resource | 67 | not-applicable | — | — | Renovate's Azure Bicep resource `getReleases` release-list and changelog URL mapping are not implemented in Rust; Rust only returns the latest API version. |
 | should return versions when package is a resource and a function | 109 | not-applicable | — | — | Renovate's Azure Bicep resource `getReleases` release-list and changelog URL mapping are not implemented in Rust; Rust only returns the latest API version. |
+
+---
+
+## `lib/modules/datasource/github-runners/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-runners/index.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `modules/datasource/github-runners/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns releases for Ubuntu | 6 | ported | `github_runners.rs` | `github_runners_returns_releases_for_ubuntu` | — |
+| returns releases for macOS | 26 | ported | `github_runners.rs` | `github_runners_returns_releases_for_macos` | — |
+| returns releases for Windows | 54 | ported | `github_runners.rs` | `github_runners_returns_releases_for_windows` | — |
+| returns null if package is unknown | 71 | ported | `github_runners.rs` | `github_runners_returns_none_for_unknown_package` | — |
 
 ---
 
