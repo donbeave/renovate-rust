@@ -303,6 +303,9 @@ pub struct GlobalConfig {
     /// Default: `ForkProcessing::Auto`.
     pub fork_processing: ForkProcessing,
 
+    /// Whether Renovate should migrate config files when possible.
+    pub config_migration: bool,
+
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Whether to use platform-native auto-merge. Default: `true`.
     pub platform_automerge: bool,
@@ -316,6 +319,9 @@ pub struct GlobalConfig {
 
     /// Whether command templating is allowed in post-upgrade tasks.
     pub allow_command_templating: bool,
+
+    /// Labels to apply to created PRs.
+    pub labels: Vec<String>,
 
     /// Repositories to process. Empty means "nothing to do" unless autodiscover
     /// is enabled (future slice).
@@ -331,10 +337,12 @@ impl Default for GlobalConfig {
             dry_run: None,
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,
+            config_migration: false,
             platform_automerge: true,
             recreate_when: RecreateWhen::Auto,
             allowed_commands: Vec::new(),
             allow_command_templating: false,
+            labels: Vec::new(),
             repositories: Vec::new(),
         }
     }

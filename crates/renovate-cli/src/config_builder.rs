@@ -51,6 +51,9 @@ pub(crate) fn build(cli: &Cli, base: GlobalConfig) -> GlobalConfig {
     if let Some(fp) = cli.fork_processing {
         config.fork_processing = map_fork_processing(fp);
     }
+    if let Some(config_migration) = cli.config_migration {
+        config.config_migration = config_migration;
+    }
     if let Some(pa) = cli.platform_automerge {
         config.platform_automerge = pa;
     }
@@ -65,6 +68,9 @@ pub(crate) fn build(cli: &Cli, base: GlobalConfig) -> GlobalConfig {
     }
     if let Some(act) = cli.allow_command_templating {
         config.allow_command_templating = act;
+    }
+    if !cli.labels.is_empty() {
+        config.labels = cli.labels.clone();
     }
 
     if !cli.repositories.is_empty() {
@@ -138,6 +144,7 @@ fn map_recreate_when(rw: CliRecreateWhen) -> RecreateWhen {
 
 #[cfg(test)]
 mod tests {
+    use clap::Parser as _;
     use renovate_core::config::{DryRun, GlobalConfig, Platform, RequireConfig};
 
     use super::build;
@@ -152,10 +159,12 @@ mod tests {
             dry_run: None,
             require_config: None,
             fork_processing: None,
+            config_migration: None,
             platform_automerge: None,
             recreate_when: None,
             allowed_commands: None,
             allow_command_templating: None,
+            labels: Vec::new(),
             host_rules: None,
             registry_aliases: None,
             quiet: false,
@@ -164,6 +173,12 @@ mod tests {
         };
         mutate(&mut cli);
         cli
+    }
+
+    fn parse_and_build(args: &[&str]) -> GlobalConfig {
+        let argv = std::iter::once("renovate").chain(args.iter().copied());
+        let cli = Cli::try_parse_from(argv).expect("CLI args should parse");
+        build(&cli, GlobalConfig::default())
     }
 
     // Ported: "returns empty argv" — workers/global/config/parse/cli.spec.ts line 32
@@ -213,6 +228,59 @@ mod tests {
         assert_eq!(
             build(&cli, GlobalConfig::default()).repositories,
             vec!["foo".to_owned(), "bar".to_owned()]
+        );
+    }
+
+    // Ported: "supports boolean no value" — workers/global/config/parse/cli.spec.ts line 36
+    #[test]
+    fn config_migration_bare_sets_true() {
+        assert!(parse_and_build(&["--config-migration"]).config_migration);
+    }
+
+    // Ported: "supports boolean space true" — workers/global/config/parse/cli.spec.ts line 42
+    #[test]
+    fn config_migration_space_true_sets_true() {
+        assert!(parse_and_build(&["--config-migration", "true"]).config_migration);
+    }
+
+    // Ported: "throws exception for invalid boolean value" — workers/global/config/parse/cli.spec.ts line 48
+    #[test]
+    fn config_migration_invalid_boolean_is_rejected() {
+        let err = Cli::try_parse_from(["renovate", "--config-migration", "badvalue"])
+            .expect_err("bad boolean should be rejected");
+        assert!(err.to_string().contains("badvalue"));
+    }
+
+    // Ported: "supports boolean space false" — workers/global/config/parse/cli.spec.ts line 58
+    #[test]
+    fn config_migration_space_false_sets_false() {
+        assert!(!parse_and_build(&["--config-migration", "false"]).config_migration);
+    }
+
+    // Ported: "supports boolean equals true" — workers/global/config/parse/cli.spec.ts line 64
+    #[test]
+    fn config_migration_equals_true_sets_true() {
+        assert!(parse_and_build(&["--config-migration=true"]).config_migration);
+    }
+
+    // Ported: "supports boolean equals false" — workers/global/config/parse/cli.spec.ts line 69
+    #[test]
+    fn config_migration_equals_false_sets_false() {
+        assert!(!parse_and_build(&["--config-migration=false"]).config_migration);
+    }
+
+    // Ported: "supports list single" — workers/global/config/parse/cli.spec.ts line 74
+    #[test]
+    fn labels_single_value_is_set() {
+        assert_eq!(parse_and_build(&["--labels=a"]).labels, vec!["a"]);
+    }
+
+    // Ported: "supports list multiple" — workers/global/config/parse/cli.spec.ts line 79
+    #[test]
+    fn labels_comma_separated_values_are_set() {
+        assert_eq!(
+            parse_and_build(&["--labels=a,b,c"]).labels,
+            vec!["a", "b", "c"]
         );
     }
 

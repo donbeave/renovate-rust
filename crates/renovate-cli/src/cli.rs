@@ -12,8 +12,8 @@
 //! - `DryRunArg::LegacyFalse` / `LegacyNull` accept the "disable" forms
 //! - `RequireConfigArg::LegacyTrue` / `LegacyFalse` for `--require-config=true`
 //!
-//! Callers convert these to canonical values via [`DryRunArg::canonical`] /
-//! [`RequireConfigArg::canonical`] before passing to the config layer.
+//! Callers convert these to canonical values in `config_builder` before
+//! passing them to the core config layer.
 
 use clap::{ArgAction, Parser, ValueEnum};
 
@@ -160,6 +160,16 @@ pub(crate) struct Cli {
     #[arg(long, value_enum, env = "RENOVATE_FORK_PROCESSING")]
     pub(crate) fork_processing: Option<ForkProcessing>,
 
+    /// Enable config migration.
+    /// Env: RENOVATE_CONFIG_MIGRATION.
+    #[arg(
+        long,
+        env = "RENOVATE_CONFIG_MIGRATION",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) config_migration: Option<bool>,
+
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Controls if platform-native auto-merge is used.
     /// Env: RENOVATE_PLATFORM_AUTOMERGE.
@@ -181,6 +191,11 @@ pub(crate) struct Cli {
     /// Env: RENOVATE_ALLOW_COMMAND_TEMPLATING.
     #[arg(long, env = "RENOVATE_ALLOW_COMMAND_TEMPLATING")]
     pub(crate) allow_command_templating: Option<bool>,
+
+    /// Labels to apply to created PRs.
+    /// Env: RENOVATE_LABELS.
+    #[arg(long, env = "RENOVATE_LABELS", value_delimiter = ',')]
+    pub(crate) labels: Vec<String>,
 
     // ── Registry / host rules ─────────────────────────────────────────────────
     // Accepted as raw strings; full JSON5 parsing is a separate slice.

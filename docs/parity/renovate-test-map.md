@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1652 / 1657 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1660 / 1794 actionable tests ported (93%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3992,7 +3992,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/workers/global/config/parse/cli.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/cli.spec.ts
-**Total tests:** 30 | **Ported:** 12 | **Actionable:** 28 | **Status:** partial
+**Total tests:** 30 | **Ported:** 20 | **Actionable:** 28 | **Status:** partial
 
 ### `workers/global/config/parse/cli › .getCliName(definition)`
 
@@ -4006,14 +4006,14 @@ resolver) and the inner `extractPackageFile()` adapter.
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns empty argv | 32 | ported | `config_builder.rs` | `default_cli_produces_default_config` | — |
-| supports boolean no value | 36 | pending | — | — | — |
-| supports boolean space true | 42 | pending | — | — | — |
-| throws exception for invalid boolean value | 48 | pending | — | — | — |
-| supports boolean space false | 58 | pending | — | — | — |
-| supports boolean equals true | 64 | pending | — | — | — |
-| supports boolean equals false | 69 | pending | — | — | — |
-| supports list single | 74 | pending | — | — | — |
-| supports list multiple | 79 | pending | — | — | — |
+| supports boolean no value | 36 | ported | `config_builder.rs` | `config_migration_bare_sets_true` | — |
+| supports boolean space true | 42 | ported | `config_builder.rs` | `config_migration_space_true_sets_true` | — |
+| throws exception for invalid boolean value | 48 | ported | `config_builder.rs` | `config_migration_invalid_boolean_is_rejected` | — |
+| supports boolean space false | 58 | ported | `config_builder.rs` | `config_migration_space_false_sets_false` | — |
+| supports boolean equals true | 64 | ported | `config_builder.rs` | `config_migration_equals_true_sets_true` | — |
+| supports boolean equals false | 69 | ported | `config_builder.rs` | `config_migration_equals_false_sets_false` | — |
+| supports list single | 74 | ported | `config_builder.rs` | `labels_single_value_is_set` | — |
+| supports list multiple | 79 | ported | `config_builder.rs` | `labels_comma_separated_values_are_set` | — |
 | supports string | 84 | ported | `config_builder.rs` | `token_is_set` | — |
 | supports repositories | 89 | ported | `config_builder.rs` | `repositories_are_set` | — |
 | parses json lists correctly | 95 | pending | — | — | — |

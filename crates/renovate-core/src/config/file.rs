@@ -180,6 +180,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         platform: file_config.platform,
         require_config: file_config.require_config,
         fork_processing: file_config.fork_processing,
+        config_migration: file_config.config_migration,
         platform_automerge: file_config.platform_automerge,
         recreate_when: file_config.recreate_when,
         allowed_commands: if file_config.allowed_commands.is_empty() {
@@ -188,6 +189,11 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             file_config.allowed_commands
         },
         allow_command_templating: file_config.allow_command_templating,
+        labels: if file_config.labels.is_empty() {
+            base.labels
+        } else {
+            file_config.labels
+        },
         // repositories are CLI-only; the file config never sets them.
         repositories: base.repositories,
     }
