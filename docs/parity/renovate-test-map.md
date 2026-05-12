@@ -3464,6 +3464,38 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/kubernetes-api/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/kubernetes-api/index.spec.ts
+**Total tests:** 3 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/kubernetes-api/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null for an unknown Kubernetes API type | 8 | not-applicable | — | — | Kubernetes API version datasource lookup is not implemented in Rust. |
+| returns for a known Kubernetes API type | 13 | not-applicable | — | — | Kubernetes API version datasource lookup is not implemented in Rust. |
+| is case sensitive | 27 | not-applicable | — | — | Kubernetes API version datasource lookup is not implemented in Rust. |
+
+---
+
+## `lib/modules/datasource/nextcloud/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/nextcloud/index.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/nextcloud/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| no registryUrl | 6 | not-applicable | — | — | Nextcloud app datasource lookup and release metadata mapping are not implemented in Rust. |
+| no package | 16 | not-applicable | — | — | Nextcloud app datasource lookup and release metadata mapping are not implemented in Rust. |
+| package with no versions | 30 | not-applicable | — | — | Nextcloud app datasource lookup and release metadata mapping are not implemented in Rust. |
+| package with website %s returns %s | 56 | not-applicable | — | — | Nextcloud app datasource lookup and release metadata mapping are not implemented in Rust. |
+| package with changelog content and url | 102 | not-applicable | — | — | Nextcloud app datasource lookup and release metadata mapping are not implemented in Rust. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
