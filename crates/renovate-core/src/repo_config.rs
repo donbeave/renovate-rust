@@ -12301,6 +12301,253 @@ mod rule_effects_tests {
         );
     }
 
+    fn workaround_rule(preset: &str, index: usize) -> PackageRule {
+        let c = RepoConfig::parse(&format!(r#"{{"extends": ["{preset}"]}}"#));
+        c.package_rules
+            .get(index)
+            .unwrap_or_else(|| panic!("{preset} must include rule index {index}"))
+            .clone()
+    }
+
+    fn assert_regex_versioning_cases(rule: &PackageRule, cases: &[(&str, bool)]) {
+        let versioning = rule
+            .versioning
+            .as_deref()
+            .expect("workaround rule must set versioning");
+        let regex = versioning
+            .strip_prefix("regex:")
+            .expect("workaround rule must use regex versioning");
+        let re = regex::Regex::new(regex).expect("workaround regex versioning must compile");
+        for (input, expected) in cases {
+            assert_eq!(re.is_match(input), *expected, "versioning({input})");
+        }
+    }
+
+    fn assert_match_current_value_cases(rule: &PackageRule, cases: &[(&str, bool)]) {
+        for (input, expected) in cases {
+            assert_eq!(
+                rule.current_value_matches(input),
+                *expected,
+                "matchCurrentValue({input})"
+            );
+        }
+    }
+
+    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 13
+    #[test]
+    fn workaround_bitnami_docker_image_versioning_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:bitnamiDockerImageVersioning", 0);
+        assert_regex_versioning_cases(
+            &rule,
+            &[
+                ("latest", false),
+                ("20", true),
+                ("20-debian", false),
+                ("20-debian-12", true),
+                ("1.24", true),
+                ("1.24-debian-12", true),
+                ("1.24.0", true),
+                ("1.24.0-debian-12", true),
+                ("1.24.0-debian-12-r24", true),
+            ],
+        );
+    }
+
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 28
+    #[test]
+    fn workaround_bitnami_docker_image_match_current_value_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:bitnamiDockerImageVersioning", 0);
+        assert_match_current_value_cases(
+            &rule,
+            &[
+                ("latest", false),
+                ("20", false),
+                ("20-debian", false),
+                ("20-debian-12", true),
+                ("1.24", false),
+                ("1.24-debian-12", true),
+                ("1.24.0", false),
+                ("1.24.0-debian-12", true),
+                ("1.24.0-debian-12-r24", true),
+            ],
+        );
+    }
+
+    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 49
+    #[test]
+    fn workaround_clamav_docker_image_versioning_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:clamavDockerImageVersioning", 0);
+        assert_regex_versioning_cases(
+            &rule,
+            &[
+                ("latest", false),
+                ("latest_base", false),
+                ("stable", false),
+                ("stable_base", false),
+                ("unstable", false),
+                ("unstable_base", false),
+                ("20", false),
+                ("20_base", false),
+                ("1.24", true),
+                ("1.24_base", true),
+                ("1.24.0", true),
+                ("1.24.0_base", true),
+                ("1.5.1-17", true),
+                ("1.5.1-17_base", true),
+            ],
+        );
+    }
+
+    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 80
+    #[test]
+    fn workaround_liberica_jdk_lite_versioning_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 0);
+        assert_regex_versioning_cases(
+            &rule,
+            &[
+                ("jdk-17-glibc", true),
+                ("jdk-all-17-glibc", false),
+                ("jre-17-glibc", false),
+                ("jdk-21-crac-slim-glibc", true),
+                ("jdk-all-21-crac-slim-glibc", false),
+                ("jre-21-crac-slim-glibc", false),
+                ("jdk-11-slim-musl", true),
+                ("jdk-all-11-slim-musl", false),
+                ("jre-11-slim-musl", false),
+            ],
+        );
+    }
+
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 95
+    #[test]
+    fn workaround_liberica_jdk_lite_match_current_value_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 0);
+        assert_match_current_value_cases(
+            &rule,
+            &[
+                ("jdk-17-glibc", true),
+                ("jdk-all-17-glibc", false),
+                ("jre-17-glibc", false),
+                ("jdk-21-crac-slim-glibc", true),
+                ("jdk-all-21-crac-slim-glibc", false),
+                ("jre-21-crac-slim-glibc", false),
+                ("jdk-11-slim-musl", true),
+                ("jdk-all-11-slim-musl", false),
+                ("jre-11-slim-musl", false),
+            ],
+        );
+    }
+
+    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 118
+    #[test]
+    fn workaround_liberica_jdk_versioning_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 1);
+        assert_regex_versioning_cases(
+            &rule,
+            &[
+                ("jdk-17-glibc", false),
+                ("jdk-all-17-glibc", true),
+                ("jre-17-glibc", false),
+                ("jdk-21-crac-slim-glibc", false),
+                ("jdk-all-21-crac-slim-glibc", true),
+                ("jre-21-crac-slim-glibc", false),
+                ("jdk-11-slim-musl", false),
+                ("jdk-all-11-slim-musl", true),
+                ("jre-11-slim-musl", false),
+            ],
+        );
+    }
+
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 133
+    #[test]
+    fn workaround_liberica_jdk_match_current_value_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 1);
+        assert_match_current_value_cases(
+            &rule,
+            &[
+                ("jdk-17-glibc", false),
+                ("jdk-all-17-glibc", true),
+                ("jre-17-glibc", false),
+                ("jdk-21-crac-slim-glibc", false),
+                ("jdk-all-21-crac-slim-glibc", true),
+                ("jre-21-crac-slim-glibc", false),
+                ("jdk-11-slim-musl", false),
+                ("jdk-all-11-slim-musl", true),
+                ("jre-11-slim-musl", false),
+            ],
+        );
+    }
+
+    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 156
+    #[test]
+    fn workaround_liberica_jre_versioning_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 2);
+        assert_regex_versioning_cases(
+            &rule,
+            &[
+                ("jdk-17-glibc", false),
+                ("jdk-all-17-glibc", false),
+                ("jre-17-glibc", true),
+                ("jdk-21-crac-slim-glibc", false),
+                ("jdk-all-21-crac-slim-glibc", false),
+                ("jre-21-crac-slim-glibc", true),
+                ("jdk-11-slim-musl", false),
+                ("jdk-all-11-slim-musl", false),
+                ("jre-11-slim-musl", true),
+            ],
+        );
+    }
+
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 171
+    #[test]
+    fn workaround_liberica_jre_match_current_value_matches_upstream_cases() {
+        let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 2);
+        assert_match_current_value_cases(
+            &rule,
+            &[
+                ("jdk-17-glibc", false),
+                ("jdk-all-17-glibc", false),
+                ("jre-17-glibc", true),
+                ("jdk-21-crac-slim-glibc", false),
+                ("jdk-all-21-crac-slim-glibc", false),
+                ("jre-21-crac-slim-glibc", true),
+                ("jdk-11-slim-musl", false),
+                ("jdk-all-11-slim-musl", false),
+                ("jre-11-slim-musl", true),
+            ],
+        );
+    }
+
+    // Ported: "allowedVersisons(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 196
+    #[test]
+    fn workaround_java_lts_liberica_runtime_allowed_versions_match_upstream_cases() {
+        let rule = workaround_rule("workarounds:javaLTSVersions", 2);
+        let allowed_versions = rule
+            .allowed_versions
+            .as_deref()
+            .expect("javaLTSVersions runtime rule must set allowedVersions");
+        for (input, expected) in [
+            ("jdk-11-slim-musl", true),
+            ("jdk-all-11-slim-musl", true),
+            ("jre-11-slim-musl", true),
+            ("jdk-17-glibc", true),
+            ("jdk-all-17-glibc", true),
+            ("jre-17-glibc", true),
+            ("jdk-21-crac-slim-glibc", true),
+            ("jdk-all-21-crac-slim-glibc", true),
+            ("jre-21-crac-slim-glibc", true),
+            ("jdk-22-crac-slim-glibc", false),
+            ("jdk-all-22-crac-slim-glibc", false),
+            ("jre-22-crac-slim-glibc", false),
+        ] {
+            assert_eq!(
+                crate::string_match::match_regex_or_glob(input, allowed_versions),
+                expected,
+                "allowedVersions({input})"
+            );
+        }
+    }
+
     // ── replacements:* preset integration tests ───────────────────────────────
 
     #[test]
