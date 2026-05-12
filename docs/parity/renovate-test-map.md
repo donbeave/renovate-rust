@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1940 / 1940 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1944 / 1944 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -12157,6 +12157,22 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | equals("$version", "$other") === $expected | 88 | not-applicable | — | — | Renovate's Azure REST API equality helper is not implemented in Rust. |
 | isGreaterThan("$version", "$other") === $expected | 104 | not-applicable | — | — | Renovate's Azure REST API ordering comparator is not implemented in Rust. |
 | sortVersions("$version", "$other") === $expected | 124 | not-applicable | — | — | Renovate's Azure REST API sort comparator is not implemented in Rust. |
+
+---
+
+## `lib/modules/versioning/unity3d/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/unity3d/index.spec.ts
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+
+### `modules/versioning/unity3d/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isValid("$input") === $expected | 4 | ported | `unity3d.rs` | `is_valid_matches_renovate_unity3d_spec` | — |
+| isStable("$input") === $expected | 23 | ported | `unity3d.rs` | `is_stable_matches_renovate_unity3d_spec` | — |
+| equals($a, $b) === $expected | 33 | ported | `unity3d.rs` | `equals_matches_renovate_unity3d_spec` | — |
+| isGreaterThan($a, $b) === $expected | 44 | ported | `unity3d.rs` | `is_greater_than_matches_renovate_unity3d_spec` | — |
 
 ---
 
