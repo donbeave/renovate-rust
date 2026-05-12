@@ -4925,6 +4925,83 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/datasource/helm/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/helm/schema.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/helm/schema › sourceUrl`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 7 | not-applicable | — | — | Renovate's Helm Zod schema normalization for homepage/sourceUrl fields is not exposed as a Rust datasource API. |
+
+---
+
+## `lib/modules/datasource/npm/schema.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/npm/schema.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/npm/schema`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| strips fields outside the cached packument shape | 4 | not-applicable | — | — | Renovate's cached packument Zod schema projection is not implemented as a Rust API; Rust npm support uses typed latest/versions summaries. |
+
+---
+
+## `lib/modules/datasource/nuget/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/nuget/common.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/nuget/common`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| sortNugetVersions("$version", "$other") === $result | 4 | not-applicable | — | — | Renovate's NuGet datasource comparator helper is not exposed as a Rust API; Rust NuGet update summaries compare versions internally. |
+
+---
+
+## `lib/modules/datasource/maven/cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/cache.spec.ts
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/maven/cache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| persists trimmed metadata and pom bodies | 41 | not-applicable | — | — | Renovate's Maven persistent HTTP cache trimming, ETag revalidation, and POM body cache layer are not implemented in Rust; Rust has only in-memory latest-version batch summaries. |
+| serves cached trimmed XML without refetching | 87 | not-applicable | — | — | Renovate's Maven persistent HTTP cache trimming, ETag revalidation, and POM body cache layer are not implemented in Rust; Rust has only in-memory latest-version batch summaries. |
+| preserves empty relocation markers on cache hits | 125 | not-applicable | — | — | Renovate's Maven persistent HTTP cache trimming, ETag revalidation, and POM body cache layer are not implemented in Rust; Rust has only in-memory latest-version batch summaries. |
+| revalidates trimmed cached XML after 304 responses | 166 | not-applicable | — | — | Renovate's Maven persistent HTTP cache trimming, ETag revalidation, and POM body cache layer are not implemented in Rust; Rust has only in-memory latest-version batch summaries. |
+| serves cached trimmed snapshot XML without refetching | 217 | not-applicable | — | — | Renovate's Maven persistent HTTP cache trimming, ETag revalidation, and POM body cache layer are not implemented in Rust; Rust has only in-memory latest-version batch summaries. |
+
+---
+
+## `lib/modules/datasource/docker/dockerhub-cache.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/docker/dockerhub-cache.spec.ts
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/datasource/docker/dockerhub-cache`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| initializes empty cache | 74 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| initializes cache with data | 90 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| reconciles new items | 104 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| reconciles existing items | 134 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| asks for the next page if the expected count does not match cached items | 158 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| reconciles deleted items | 182 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| returns cached digest for a known tag | 200 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| returns cached arch-specific digest | 208 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+| reconciles from empty cache | 218 | not-applicable | — | — | Renovate's Docker Hub persistent tags/digest cache reconciliation layer is not implemented in Rust; Rust Docker support does not expose this cache contract. |
+
+---
+
 ## `lib/config/migrate-validate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrate-validate.spec.ts
