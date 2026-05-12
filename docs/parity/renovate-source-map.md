@@ -381,7 +381,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/dockerfile/extract.ts` | `crates/renovate-core/src/extractors/dockerfile.rs` | partial | Core extraction ported |
+| `lib/modules/manager/dockerfile/extract.ts` | `crates/renovate-core/src/extractors/dockerfile.rs` | partial | Core extraction ported, including longest-prefix and variable-backed registry aliases; TypeScript-only helper API tests remain not-applicable. |
 | `lib/modules/manager/dockerfile/index.ts` | `crates/renovate-core/src/extractors/dockerfile.rs` | partial | Manager metadata |
 | `lib/modules/manager/dockerfile/dep-types.ts` | — | not-started | Type definitions only |
 

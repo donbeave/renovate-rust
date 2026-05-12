@@ -168,8 +168,22 @@ pub fn extract_with_registry_aliases(
 ) -> Result<Vec<DockerfileResolvedDep>, DockerfileExtractError> {
     Ok(extract(content)?
         .into_iter()
-        .filter(|dep| dep.skip_reason.is_none())
-        .map(|dep| dockerfile_resolved_dep(dep, registry_aliases))
+        .filter_map(|dep| {
+            if dep.skip_reason.is_none() {
+                return Some(dockerfile_resolved_dep(dep, registry_aliases));
+            }
+
+            if dep.skip_reason == Some(DockerfileSkipReason::ArgVariable)
+                && registry_alias_matches_image_ref(&dep.image, registry_aliases)
+            {
+                return Some(dockerfile_resolved_dep(
+                    parse_image_ref_without_variable_skip(&dep.image),
+                    registry_aliases,
+                ));
+            }
+
+            None
+        })
         .collect())
 }
 
@@ -628,19 +642,57 @@ fn dockerfile_resolved_dep(
 }
 
 fn apply_registry_alias(image: &str, registry_aliases: &[(&str, &str)]) -> String {
-    let Some((registry, rest)) = image.split_once('/') else {
-        return image.to_owned();
-    };
     registry_aliases
         .iter()
-        .find_map(|(from, to)| {
-            if *from == registry {
-                Some(format!("{to}/{rest}"))
+        .filter_map(|(from, to)| {
+            if image == *from {
+                Some((from.len(), (*to).to_owned()))
             } else {
-                None
+                image
+                    .strip_prefix(&format!("{from}/"))
+                    .map(|rest| (from.len(), format!("{to}/{rest}")))
             }
         })
+        .max_by_key(|(prefix_len, _)| *prefix_len)
+        .map(|(_, image)| image)
         .unwrap_or_else(|| image.to_owned())
+}
+
+fn registry_alias_matches_image_ref(image_ref: &str, registry_aliases: &[(&str, &str)]) -> bool {
+    let (ref_no_digest, _) = split_digest(image_ref);
+    let (image, _) = split_tag(ref_no_digest);
+    apply_registry_alias(image, registry_aliases) != image
+}
+
+fn parse_image_ref_without_variable_skip(image_ref: &str) -> DockerfileExtractedDep {
+    let (ref_no_digest, digest) = split_digest(image_ref);
+    let (image, tag) = split_tag(ref_no_digest);
+    DockerfileExtractedDep {
+        image: image.to_owned(),
+        tag: tag.map(str::to_owned),
+        digest: digest.map(str::to_owned),
+        package_name: None,
+        skip_reason: None,
+    }
+}
+
+fn split_digest(image_ref: &str) -> (&str, Option<&str>) {
+    if let Some(at) = image_ref.find('@') {
+        (&image_ref[..at], Some(&image_ref[at + 1..]))
+    } else {
+        (image_ref, None)
+    }
+}
+
+fn split_tag(ref_no_digest: &str) -> (&str, Option<&str>) {
+    if let Some(colon) = ref_no_digest.rfind(':') {
+        let slash_pos = ref_no_digest.rfind('/').unwrap_or(0);
+        if colon > slash_pos {
+            return (&ref_no_digest[..colon], Some(&ref_no_digest[colon + 1..]));
+        }
+    }
+
+    (ref_no_digest, None)
 }
 
 fn docker_versioning(dep_name: &str, current_value: Option<&str>) -> Option<&'static str> {
@@ -1432,6 +1484,95 @@ FROM $nginx_version as stage2
             deps[0].auto_replace_string_template,
             "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"
         );
+    }
+
+    // Ported: "supports registry aliases - $name" — dockerfile/extract.spec.ts line 1623
+    #[test]
+    fn supports_get_dep_registry_alias_table() {
+        let cases = [
+            (
+                "simple aliases",
+                vec![("foo.com/some", "foo.registry.com")],
+                "foo.com/some/image:1.0",
+                Some((
+                    "foo.com/some/image",
+                    "foo.registry.com/image",
+                    "1.0",
+                    "foo.com/some/image:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                )),
+            ),
+            (
+                "multiple aliases",
+                vec![("foo", "foo.registry.com"), ("bar", "bar.registry.com")],
+                "foo/image:1.0",
+                Some((
+                    "foo/image",
+                    "foo.registry.com/image",
+                    "1.0",
+                    "foo/image:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                )),
+            ),
+            (
+                "aliased variable",
+                vec![("$CI_REGISTRY", "registry.com")],
+                "$CI_REGISTRY/image:1.0",
+                Some((
+                    "$CI_REGISTRY/image",
+                    "registry.com/image",
+                    "1.0",
+                    "$CI_REGISTRY/image:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                )),
+            ),
+            (
+                "variables with brackets",
+                vec![("${CI_REGISTRY}", "registry.com")],
+                "${CI_REGISTRY}/image:1.0",
+                Some((
+                    "${CI_REGISTRY}/image",
+                    "registry.com/image",
+                    "1.0",
+                    "${CI_REGISTRY}/image:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                )),
+            ),
+            (
+                "not aliased variable",
+                vec![],
+                "$CI_REGISTRY/image:1.0",
+                None,
+            ),
+            (
+                "plain image",
+                vec![],
+                "registry.com/image:1.0",
+                Some((
+                    "registry.com/image",
+                    "registry.com/image",
+                    "1.0",
+                    "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+                )),
+            ),
+        ];
+
+        for (name, aliases, image_name, expected) in cases {
+            let content = format!("FROM {image_name}\n");
+            let deps = extract_with_registry_aliases(&content, &aliases).unwrap();
+
+            let Some((dep_name, package_name, current_value, template)) = expected else {
+                assert!(deps.is_empty(), "{name}");
+                continue;
+            };
+
+            assert_eq!(deps.len(), 1, "{name}");
+            assert_eq!(deps[0].dep_name, dep_name, "{name}");
+            assert_eq!(deps[0].package_name, package_name, "{name}");
+            assert_eq!(
+                deps[0].current_value.as_deref(),
+                Some(current_value),
+                "{name}"
+            );
+            assert_eq!(deps[0].replace_string, image_name, "{name}");
+            assert_eq!(deps[0].auto_replace_string_template, template, "{name}");
+        }
     }
 
     // Ported: "handles empty registry" — dockerfile/extract.spec.ts line 1407

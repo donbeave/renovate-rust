@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2127 / 8606 actionable tests ported (25%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2128 / 8606 actionable tests ported (25%) — updated 2026-05-12
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1022,7 +1022,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 76 | **Ported:** 66 | **Actionable:** 67 | **Status:** partial
+**Total tests:** 76 | **Ported:** 67 | **Actionable:** 67 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -1101,7 +1101,7 @@ Status key: `ported` · `pending` · `not-applicable`
 | skips depName containing a non default variable with brackets at start | 1585 | ported | `dockerfile.rs` | `arg_braces_variable_is_skipped` | — |
 | skips depName containing a non default variable | 1596 | ported | `dockerfile.rs` | `variable_in_image_path_is_skipped` | — |
 | skips depName containing a non default variable with brackets | 1607 | ported | `dockerfile.rs` | `braced_variable_in_image_path_is_skipped` | — |
-| supports registry aliases - $name | 1623 | pending | — | — | Dockerfile `getDep` registry-alias table includes multi-segment aliases and variable-backed aliases that are not fully implemented in Rust yet. |
+| supports registry aliases - $name | 1623 | ported | `dockerfile.rs` | `supports_get_dep_registry_alias_table` | — |
 
 ### `extractVariables()`
 
