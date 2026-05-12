@@ -275,6 +275,13 @@ mod tests {
     }
 
     #[test]
+    // Ported: "returns null if index.yaml in response is empty" — datasource/helm/index.spec.ts line 107
+    fn parse_comment_only_index_returns_none() {
+        assert_eq!(parse_latest_version("# A comment", "redis"), None);
+    }
+
+    #[test]
+    // Ported: "returns null if packageName is not in index.yaml" — datasource/helm/index.spec.ts line 139
     fn parse_returns_none_for_unknown_chart() {
         let yaml = index_yaml(&[("redis", &["17.0.0"])]);
         assert_eq!(parse_latest_version(&yaml, "postgresql"), None);
@@ -310,6 +317,23 @@ mod tests {
     }
 
     #[tokio::test]
+    // Ported: "returns null for empty response" — datasource/helm/index.spec.ts line 37
+    // Ported: "returns null for missing response body" — datasource/helm/index.spec.ts line 51
+    async fn fetch_latest_empty_body_returns_none() {
+        let server = MockServer::start().await;
+
+        Mock::given(method("GET"))
+            .and(path("/index.yaml"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_latest("redis", &server.uri(), &http).await.unwrap();
+        assert_eq!(result, None);
+    }
+
+    #[tokio::test]
     async fn fetch_latest_from_mock_server() {
         let server = MockServer::start().await;
         let yaml = index_yaml(&[("redis", &["17.5.0", "17.0.0"])]);
@@ -322,6 +346,24 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         let result = fetch_latest("redis", &server.uri(), &http).await.unwrap();
+        assert_eq!(result.map(|(v, _)| v), Some("17.5.0".to_owned()));
+    }
+
+    #[tokio::test]
+    // Ported: "adds trailing slash to subdirectories" — datasource/helm/index.spec.ts line 184
+    async fn fetch_latest_from_subdirectory_repository() {
+        let server = MockServer::start().await;
+        let yaml = index_yaml(&[("redis", &["17.5.0"])]);
+
+        Mock::given(method("GET"))
+            .and(path("/subdir/index.yaml"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(yaml))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let repository_url = format!("{}/subdir", server.uri());
+        let result = fetch_latest("redis", &repository_url, &http).await.unwrap();
         assert_eq!(result.map(|(v, _)| v), Some("17.5.0".to_owned()));
     }
 

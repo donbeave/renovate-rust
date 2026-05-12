@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1913 / 1913 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1918 / 1918 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -4841,6 +4841,32 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | should fetch package info from custom registry | 137 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
 | load all possible null values | 182 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
 | no releases available -> return null | 208 | not-applicable | — | — | Renovate's Puppet Forge `getReleases` release-list, deprecation, and null-on-error contract are not implemented in Rust; Rust only exposes a latest-version update summary. |
+
+---
+
+## `lib/modules/datasource/helm/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/helm/index.spec.ts
+**Total tests:** 14 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+
+### `modules/datasource/helm/index › getReleases`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if packageName was not provided | 12 | not-applicable | — | — | Renovate's optional packageName request validation is not represented in Rust; Rust `fetch_latest` requires an explicit chart name. |
+| returns null if repository was not provided | 22 | not-applicable | — | — | Renovate's fallback/default registry request path is not represented in Rust; Rust `fetch_latest` requires an explicit repository URL. |
+| returns null for empty response | 37 | ported | `helm.rs` | `fetch_latest_empty_body_returns_none` | — |
+| returns null for missing response body | 51 | ported | `helm.rs` | `fetch_latest_empty_body_returns_none` | — |
+| returns null for 404 | 65 | not-applicable | — | — | Renovate's Helm 404-as-null `getReleases` contract differs from Rust, which returns an index fetch error for non-success responses. |
+| throws for 5xx | 79 | not-applicable | — | — | Renovate's Helm external-host-error contract is not implemented in Rust; Rust returns a generic index fetch error for non-success responses. |
+| returns null for unknown error | 93 | not-applicable | — | — | Renovate's Helm null-on-network-error `getReleases` contract is not implemented in Rust; Rust propagates HTTP client errors. |
+| returns null if index.yaml in response is empty | 107 | ported | `helm.rs` | `parse_comment_only_index_returns_none` | — |
+| returns null if index.yaml in response is invalid | 120 | not-applicable | — | — | Renovate's YAML parser validation and invalid-YAML null contract are not implemented in Rust; Rust uses a line scanner for latest-version extraction. |
+| returns null if packageName is not in index.yaml | 139 | ported | `helm.rs` | `parse_returns_none_for_unknown_chart` | — |
+| returns list of versions for normal response | 152 | not-applicable | — | — | Renovate's Helm full release-list, homepage, sourceUrl, digest, and timestamp mapping are not implemented in Rust; Rust only returns the latest version and optional timestamp. |
+| returns list of versions for other packages if one packages has no versions | 166 | not-applicable | — | — | Renovate's Helm release-list handling across charts with empty version arrays is not implemented in Rust; Rust only scans the target chart's first version. |
+| adds trailing slash to subdirectories | 184 | ported | `helm.rs` | `fetch_latest_from_subdirectory_repository` | — |
+| uses undefined as the newDigest when no digest is provided | 203 | not-applicable | — | — | Renovate's Helm digest field mapping is not implemented in Rust; Rust only returns latest version and optional timestamp. |
 
 ---
 
