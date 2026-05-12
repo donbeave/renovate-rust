@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1505 / 1657 actionable tests ported (91%) — updated 2026-05-11
+**Overall progress (per-test sections only):** 1509 / 1657 actionable tests ported (91%) — updated 2026-05-11
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -1939,7 +1939,7 @@ Status key: `ported` · `pending` · `not-applicable`
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 30 | **Ported:** 23 | **Actionable:** 30 | **Status:** partial
+**Total tests:** 30 | **Ported:** 27 | **Actionable:** 30 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -1971,10 +1971,10 @@ Status key: `ported` · `pending` · `not-applicable`
 | complete mise.toml example | 855 | pending | — | — | Requires fixture round-trip with full mise.toml |
 | complete example with skip | 878 | pending | — | — | Requires fixture round-trip with skip-reason mix |
 | core java plugin function | 911 | ported | `mise.rs` | `java_core_plugin_jdk` | — |
-| resolves tools from the mise registry data file via aqua backend | 1086 | pending | — | — | Requires mise registry data file resolver |
-| resolves tools from the mise registry data file via cargo backend | 1104 | pending | — | — | Requires mise registry data file resolver |
-| resolves tools from the mise registry data file via github backend | 1122 | pending | — | — | Requires mise registry data file resolver |
-| resolves a tool from the mise registry, prioritising the github backend over others | 1140 | pending | — | — | Requires mise registry data file resolver |
+| resolves tools from the mise registry data file via aqua backend | 1086 | ported | `mise.rs` | `resolves_mise_registry_aqua_backend_tool` | — |
+| resolves tools from the mise registry data file via cargo backend | 1104 | ported | `mise.rs` | `resolves_mise_registry_cargo_backend_tool` | — |
+| resolves tools from the mise registry data file via github backend | 1122 | ported | `mise.rs` | `resolves_mise_registry_github_backend_tool` | — |
+| resolves a tool from the mise registry, prioritising the github backend over others | 1140 | ported | `mise.rs` | `resolves_mise_registry_prefers_github_backend_tool` | — |
 
 ---
 

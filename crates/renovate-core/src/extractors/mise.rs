@@ -138,6 +138,49 @@ static MISE_CORE_TABLE: &[(&str, AsdfToolDef)] = &[
     ),
 ];
 
+static MISE_REGISTRY_TABLE: &[(&str, AsdfToolDef)] = &[
+    (
+        "zola",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_TAGS,
+            package_name: Some("getzola/zola"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "magika",
+        AsdfToolDef {
+            datasource: "crate",
+            package_name: Some("magika-cli"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "allurectl",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("allure-framework/allurectl"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+    (
+        "bitwarden-secrets-manager",
+        AsdfToolDef {
+            datasource: datasource_id::GITHUB_RELEASES,
+            package_name: Some("bitwarden/sdk"),
+            dep_name: None,
+            extract_version: None,
+            versioning: None,
+        },
+    ),
+];
+
 fn make_dep_from_def(tool_name: &str, version: &str, def: &AsdfToolDef) -> AsdfDep {
     let dep_name = def.dep_name.unwrap_or(tool_name).to_owned();
     let pkg = def.package_name;
@@ -242,6 +285,11 @@ pub fn extract(content: &str) -> Vec<AsdfDep> {
 
         // Fall back to asdf TOOL_TABLE (same tool names work in both).
         if let Some((_, def)) = asdf::TOOL_TABLE.iter().find(|(k, _)| *k == tool_name) {
+            out.push(make_dep_from_def(tool_name, version, def));
+            continue;
+        }
+
+        if let Some((_, def)) = MISE_REGISTRY_TABLE.iter().find(|(k, _)| *k == tool_name) {
             out.push(make_dep_from_def(tool_name, version, def));
             continue;
         }
@@ -947,5 +995,52 @@ mod tests {
         assert_eq!(gh.current_value, "v2.64.0");
         assert_eq!(gh.package_name.as_deref(), Some("cli/cli"));
         assert_eq!(gh.datasource_id, Some("github-releases"));
+    }
+
+    // Ported: "resolves tools from the mise registry data file via aqua backend" — mise/extract.spec.ts line 1086
+    #[test]
+    fn resolves_mise_registry_aqua_backend_tool() {
+        let deps = extract("[tools]\nzola = \"0.19.2\"\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "zola");
+        assert_eq!(deps[0].current_value, "0.19.2");
+        assert_eq!(deps[0].datasource_id, Some("github-tags"));
+        assert_eq!(deps[0].package_name.as_deref(), Some("getzola/zola"));
+    }
+
+    // Ported: "resolves tools from the mise registry data file via cargo backend" — mise/extract.spec.ts line 1104
+    #[test]
+    fn resolves_mise_registry_cargo_backend_tool() {
+        let deps = extract("[tools]\nmagika = \"0.3.1\"\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "magika");
+        assert_eq!(deps[0].current_value, "0.3.1");
+        assert_eq!(deps[0].datasource_id, Some("crate"));
+        assert_eq!(deps[0].package_name.as_deref(), Some("magika-cli"));
+    }
+
+    // Ported: "resolves tools from the mise registry data file via github backend" — mise/extract.spec.ts line 1122
+    #[test]
+    fn resolves_mise_registry_github_backend_tool() {
+        let deps = extract("[tools]\nallurectl = \"2.14.0\"\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "allurectl");
+        assert_eq!(deps[0].current_value, "2.14.0");
+        assert_eq!(deps[0].datasource_id, Some("github-releases"));
+        assert_eq!(
+            deps[0].package_name.as_deref(),
+            Some("allure-framework/allurectl")
+        );
+    }
+
+    // Ported: "resolves a tool from the mise registry, prioritising the github backend over others" — mise/extract.spec.ts line 1140
+    #[test]
+    fn resolves_mise_registry_prefers_github_backend_tool() {
+        let deps = extract("[tools]\nbitwarden-secrets-manager = \"1.2.3\"\n");
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "bitwarden-secrets-manager");
+        assert_eq!(deps[0].current_value, "1.2.3");
+        assert_eq!(deps[0].datasource_id, Some("github-releases"));
+        assert_eq!(deps[0].package_name.as_deref(), Some("bitwarden/sdk"));
     }
 }
