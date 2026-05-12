@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1728 / 1728 actionable tests ported (100%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1729 / 1729 actionable tests ported (100%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3541,6 +3541,19 @@ does not implement Renovate's generated-lockfile reverse resolver.
 | migrates dryRun | 820 | ported | `config_builder.rs` | `dry_run_legacy_true_maps_to_full` (+ dry_run_legacy_false_disables_dry_run) | — |
 | migrates baseBranches and baseBranch | 835 | ported | `repo_config.rs` | `base_branches_and_base_branch_migrated_to_patterns` | — |
 | logs errors | 844 | not-applicable | — | — | TypeScript-specific MigrationsService/logger failure path; Rust parser has no migration service abstraction to mock |
+
+---
+
+## `lib/config/migrations/custom/binary-source-migration.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/binary-source-migration.spec.ts
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+
+### `config/migrations/custom/binary-source-migration`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| should migrate "auto" to "global" | 4 | ported | `migrate_validate.rs` | `binary_source_auto_migrates_to_global` | — |
 
 ---
 

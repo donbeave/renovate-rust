@@ -123,6 +123,14 @@ fn migrate_config(input: &Value) -> Value {
     {
         map.insert("automerge".to_owned(), Value::Bool(false));
     }
+    if let Value::Object(map) = &mut migrated
+        && matches!(map.get("binarySource"), Some(Value::String(value)) if value == "auto")
+    {
+        map.insert(
+            "binarySource".to_owned(),
+            Value::String("global".to_owned()),
+        );
+    }
     migrated
 }
 
@@ -1596,7 +1604,7 @@ fn has_template_or_query_field(
 mod tests {
     use serde_json::json;
 
-    use super::{migrate_and_validate, validate_config_for_source};
+    use super::{migrate_and_validate, migrate_config, validate_config_for_source};
 
     // Ported: "returns custom deprecation warnings for %s" — config/validation.spec.ts line 10
     #[test]
@@ -3562,6 +3570,15 @@ mod tests {
         assert_eq!(
             migrate_and_validate(&json!({}), &json!({"automerge": "none"})),
             json!({"automerge": false, "errors": [], "warnings": []})
+        );
+    }
+
+    // Ported: "should migrate \"auto\" to \"global\"" — config/migrations/custom/binary-source-migration.spec.ts line 4
+    #[test]
+    fn binary_source_auto_migrates_to_global() {
+        assert_eq!(
+            migrate_config(&json!({"binarySource": "auto"})),
+            json!({"binarySource": "global"})
         );
     }
 
