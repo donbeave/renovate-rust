@@ -1075,6 +1075,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
 | `lib/workers/repository/init/merge.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Repo config merge partially ported |
+| `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch topic/name generation helpers partially ported. |
+| `lib/workers/repository/updates/flatten.ts` | `crates/renovate-core/src/branch.rs` | partial | `sanitizeDepName` URL/name normalization behavior partially ported; full update flattening is not ported. |
 | `lib/workers/global/config/parse/cli.ts` | `crates/renovate-cli/src/cli.rs` | partial | CLI arg parsing ported |
 | `lib/workers/global/config/parse/env.ts` | `crates/renovate-cli/src/config_env.rs` | partial | Env config parsing partially ported |
 | `lib/util/string-match.ts` | `crates/renovate-core/src/string_match.rs` | partial | String matching partially ported |

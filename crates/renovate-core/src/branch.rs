@@ -557,6 +557,16 @@ mod tests {
         );
     }
 
+    // Ported: "separates patches when separateMinorPatch=true" — workers/repository/updates/branch-name.spec.ts line 229
+    #[test]
+    fn branch_name_separates_patches_when_separate_minor_patch_true() {
+        let topic = branch_topic("lodash", 4, 17, true, false, true, false);
+        assert_eq!(
+            branch_name("renovate/", "", &topic),
+            "renovate/lodash-4.17.x"
+        );
+    }
+
     #[test]
     fn branch_topic_separate_minor_patch_for_minor_not_applied() {
         // separateMinorPatch only adds minor component for patch updates.
@@ -564,6 +574,13 @@ mod tests {
             branch_topic("lodash", 4, 17, false, true, true, false),
             "lodash-4.x"
         );
+    }
+
+    // Ported: "does not separate patches when separateMinorPatch=false" — workers/repository/updates/branch-name.spec.ts line 249
+    #[test]
+    fn branch_name_does_not_separate_patches_when_separate_minor_patch_false() {
+        let topic = branch_topic("lodash", 4, 17, true, false, false, false);
+        assert_eq!(branch_name("renovate/", "", &topic), "renovate/lodash-4.x");
     }
 
     #[test]

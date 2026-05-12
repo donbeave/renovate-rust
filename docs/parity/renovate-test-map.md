@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2129 / 8606 actionable tests ported (25%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2131 / 8606 actionable tests ported (25%) — updated 2026-05-12
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -28518,7 +28518,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/updates/branch-name.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branch-name.spec.ts
-**Total tests:** 27 | **Ported:** 0 | **Actionable:** 27 | **Status:** pending
+**Total tests:** 27 | **Ported:** 2 | **Actionable:** 27 | **Status:** partial
 
 ### `workers/repository/updates/branch-name › getBranchName()`
 
@@ -28538,8 +28538,8 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | uses single major with groups | 183 | pending | — | — | — |
 | separates patch groups and uses update topic | 200 | pending | — | — | — |
 | compiles multiple times | 218 | pending | — | — | — |
-| separates patches when separateMinorPatch=true | 229 | pending | — | — | — |
-| does not separate patches when separateMinorPatch=false | 249 | pending | — | — | — |
+| separates patches when separateMinorPatch=true | 229 | ported | `branch.rs` | `branch_name_separates_patches_when_separate_minor_patch_true` | — |
+| does not separate patches when separateMinorPatch=false | 249 | ported | `branch.rs` | `branch_name_does_not_separate_patches_when_separate_minor_patch_false` | — |
 | realistic defaults | 269 | pending | — | — | — |
 | realistic defaults with strict branch name enabled | 284 | pending | — | — | — |
 | removes slashes from the non-suffix part | 300 | pending | — | — | — |
