@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1545 / 1657 actionable tests ported (93%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1548 / 1657 actionable tests ported (93%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 21 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 24 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3575,9 +3575,9 @@ resolver) and the inner `extractPackageFile()` adapter.
 | catches invalid customDatasources record type | 408 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_custom_datasources_record_type` | — |
 | catches invalid baseBranchPatterns regex | 423 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_base_branch_patterns_regex` | — |
 | returns nested errors | 436 | pending | — | — | — |
-| included managers of the wrong type | 466 | pending | — | — | — |
-| empty configuration | 484 | pending | — | — | — |
-| single not supported manager | 503 | pending | — | — | — |
+| included managers of the wrong type | 466 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_match_managers_wrong_type` | — |
+| empty configuration | 484 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_allows_empty_configuration` | — |
+| single not supported manager | 503 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_unsupported_enabled_managers` | — |
 | errors for all types | 523 | pending | — | — | — |
 | selectors outside packageRules array trigger errors | 558 | pending | — | — | — |
 | ignore packageRule nesting validation for presets | 588 | pending | — | — | — |

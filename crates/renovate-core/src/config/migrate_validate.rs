@@ -69,6 +69,7 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_custom_datasources(map, &mut errors);
     validate_status_check_names(map, &mut errors);
     validate_base_branch_patterns(map, &mut errors);
+    validate_enabled_managers(map, &mut errors);
     validate_package_rules(map, &mut errors, &mut warnings);
 
     ValidationResult { errors, warnings }
@@ -179,6 +180,16 @@ fn validate_package_rules(
             }));
         }
 
+        if rule_map
+            .get("matchManagers")
+            .is_some_and(|value| !value.is_array())
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": "Invalid `packageRules.matchManagers` configuration: is not an array"
+            }));
+        }
+
         for key in [
             "allowedVersions",
             "matchCurrentValue",
@@ -205,6 +216,25 @@ fn validate_package_rules(
                 }
             }
         }
+    }
+}
+
+fn validate_enabled_managers(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Array(enabled_managers)) = map.get("enabledManagers") else {
+        return;
+    };
+
+    let unsupported: Vec<_> = enabled_managers
+        .iter()
+        .filter_map(Value::as_str)
+        .filter(|manager| !is_supported_manager(manager))
+        .collect();
+
+    if !unsupported.is_empty() {
+        errors.push(json!({
+            "topic": "Configuration Error",
+            "message": format!("Unsupported enabledManagers: {}", unsupported.join(", "))
+        }));
     }
 }
 
@@ -265,6 +295,13 @@ fn validate_custom_datasources(map: &Map<String, Value>, errors: &mut Vec<Value>
             }));
         }
     }
+}
+
+fn is_supported_manager(manager: &str) -> bool {
+    matches!(
+        manager,
+        "cargo" | "custom.regex" | "gradle" | "maven" | "npm" | "pip-compile"
+    )
 }
 
 fn validate_status_check_names(map: &Map<String, Value>, errors: &mut Vec<Value>) {
@@ -684,6 +721,42 @@ mod tests {
                 "message": "Invalid regExp for baseBranchPatterns: `/***$}{]][/`"
             })]
         );
+    }
+
+    // Ported: "included managers of the wrong type" — config/validation.spec.ts line 466
+    #[test]
+    fn validate_config_errors_for_match_managers_wrong_type() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"packageRules": [{"matchManagers": "string not an array", "enabled": true}]}),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Invalid `packageRules.matchManagers` configuration: is not an array"]
+        );
+    }
+
+    // Ported: "empty configuration" — config/validation.spec.ts line 484
+    #[test]
+    fn validate_config_allows_empty_configuration() {
+        let result = validate_config_for_source("repo", &json!({}));
+        assert!(result.errors.is_empty());
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "single not supported manager" — config/validation.spec.ts line 503
+    #[test]
+    fn validate_config_errors_for_unsupported_enabled_managers() {
+        for config in [
+            json!({"enabledManagers": ["foo"]}),
+            json!({"enabledManagers": ["foo", "bar"]}),
+            json!({"enabledManagers": ["foo", "npm", "gradle", "maven"]}),
+        ] {
+            let result = validate_config_for_source("repo", &config);
+            assert!(result.warnings.is_empty());
+            assert_eq!(result.errors.len(), 1);
+        }
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
