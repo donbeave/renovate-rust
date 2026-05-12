@@ -78,6 +78,8 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
     validate_extends(source, map, &mut errors);
     validate_top_level_registry_urls(map, &mut warnings);
     validate_schedule(map, &mut errors);
+    validate_host_rules(map, &mut errors);
+    validate_env(map, &mut errors);
     validate_custom_managers(map, &mut errors);
     validate_constraints(map, &mut errors, &mut warnings);
     validate_constraints_versioning(map, &mut errors);
@@ -568,6 +570,102 @@ fn validate_schedule(map: &Map<String, Value>, errors: &mut Vec<Value>) {
                 "topic": "Configuration Error",
                 "message": format!("Invalid schedule: `Invalid schedule: \"{schedule}\" has cron syntax, but doesn't have * as minutes`")
             }));
+        }
+    }
+}
+
+fn validate_host_rules(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    let Some(Value::Array(host_rules)) = map.get("hostRules") else {
+        return;
+    };
+
+    for (idx, rule) in host_rules.iter().enumerate() {
+        let Some(rule) = rule.as_object() else {
+            continue;
+        };
+
+        if let Some(match_host) = rule.get("matchHost") {
+            match match_host.as_str() {
+                None => errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Configuration option `hostRules[{idx}].matchHost` should be a string")
+                })),
+                Some("") => errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": "Invalid value for hostRules matchHost. It cannot be an empty string."
+                })),
+                Some(value) if value.contains("://") && !value.starts_with("http") => {
+                    errors.push(json!({
+                        "topic": "Configuration Error",
+                        "message": format!("hostRules matchHost `{value}` is not a valid URL.")
+                    }));
+                }
+                _ => {}
+            }
+        }
+
+        if let Some(Value::Object(headers)) = rule.get("headers") {
+            for (header, value) in headers {
+                if !value.is_string() {
+                    errors.push(json!({
+                        "topic": "Configuration Error",
+                        "message": "Invalid hostRules headers value configuration: header must be a string."
+                    }));
+                } else if !header.starts_with("X-") {
+                    errors.push(json!({
+                        "topic": "Configuration Error",
+                        "message": format!("hostRules header `{header}` is not allowed by this bot's `allowedHeaders`.")
+                    }));
+                }
+            }
+        }
+    }
+}
+
+fn validate_env(map: &Map<String, Value>, errors: &mut Vec<Value>) {
+    if let Some(Value::Object(env)) = map.get("env") {
+        for (name, value) in env {
+            if !name.starts_with("SOME") {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Env variable name `{name}` is not allowed by this bot's `allowedEnv`.")
+                }));
+            }
+            if !value.is_string() {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("Invalid env variable value: `env.{name}` must be a string.")
+                }));
+            }
+        }
+    }
+
+    for (key, value) in map {
+        if key == "env" {
+            continue;
+        }
+        if value
+            .as_object()
+            .is_some_and(|object| object.get("env").is_some())
+        {
+            errors.push(json!({
+                "topic": "Configuration Error",
+                "message": format!("The \"env\" object can only be configured at the top level of a config but was found inside \"{key}\"")
+            }));
+        }
+    }
+
+    if let Some(Value::Array(package_rules)) = map.get("packageRules") {
+        for (idx, rule) in package_rules.iter().enumerate() {
+            if rule
+                .as_object()
+                .is_some_and(|object| object.get("env").is_some())
+            {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("The \"env\" object can only be configured at the top level of a config but was found inside \"packageRules[{idx}]\"")
+                }));
+            }
         }
     }
 }
@@ -2057,6 +2155,113 @@ mod tests {
                 "Invalid schedule: `Invalid schedule: \"30 5 * * *\" has cron syntax, but doesn't have * as minutes`"
             ]
         );
+    }
+
+    // Ported: "errors if invalid matchHost values in hostRules" — config/validation.spec.ts line 1631
+    #[test]
+    fn validate_config_errors_for_invalid_host_rule_match_host_values() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "hostRules": [
+                    {"matchHost": "://", "token": "token"},
+                    {"matchHost": "", "token": "token"},
+                    {"matchHost": null, "token": "token"},
+                    {"hostType": "github", "token": "token"}
+                ]
+            }),
+        );
+        let messages = validation_error_messages(&result);
+        assert_eq!(messages.len(), 3);
+        assert!(
+            messages.contains(&"Configuration option `hostRules[2].matchHost` should be a string")
+        );
+        assert!(
+            messages
+                .contains(&"Invalid value for hostRules matchHost. It cannot be an empty string.")
+        );
+        assert!(messages.contains(&"hostRules matchHost `://` is not a valid URL."));
+    }
+
+    // Ported: "errors if forbidden header in hostRules" — config/validation.spec.ts line 1673
+    #[test]
+    fn validate_config_errors_for_forbidden_host_rule_header() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "hostRules": [{
+                    "matchHost": "https://domain.com/all-versions",
+                    "headers": {"X-Auth-Token": "token", "unallowedHeader": "token"}
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "hostRules header `unallowedHeader` is not allowed by this bot's `allowedHeaders`."
+            ]
+        );
+    }
+
+    // Ported: "errors if headers values are not string" — config/validation.spec.ts line 1701
+    #[test]
+    fn validate_config_errors_for_non_string_host_rule_header_values() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "hostRules": [{
+                    "matchHost": "https://domain.com/all-versions",
+                    "headers": {"X-Auth-Token": 10}
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["Invalid hostRules headers value configuration: header must be a string."]
+        );
+    }
+
+    // Ported: "catches invalid variable name in env config option" — config/validation.spec.ts line 1755
+    #[test]
+    fn validate_config_catches_invalid_env_variable_name_and_value() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({"env": {"randomKey": "", "SOME_VAR": "some_value", "SOME_OTHER_VAR": 10}}),
+        );
+        let messages = validation_error_messages(&result);
+        assert_eq!(messages.len(), 2);
+        assert!(
+            messages.contains(
+                &"Env variable name `randomKey` is not allowed by this bot's `allowedEnv`."
+            )
+        );
+        assert!(
+            messages
+                .contains(&"Invalid env variable value: `env.SOME_OTHER_VAR` must be a string.")
+        );
+        assert!(result.warnings.is_empty());
+    }
+
+    // Ported: "catches env config option if configured inside a parent" — config/validation.spec.ts line 1783
+    #[test]
+    fn validate_config_catches_nested_env_config() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "npm": {"env": {"SOME_VAR": "some_value"}},
+                "packageRules": [{"matchManagers": ["regex"], "env": {"SOME_VAR": "some_value"}}]
+            }),
+        );
+        assert_eq!(
+            validation_error_messages(&result),
+            vec![
+                "The \"env\" object can only be configured at the top level of a config but was found inside \"npm\"",
+                "The \"env\" object can only be configured at the top level of a config but was found inside \"packageRules[0]\"",
+            ]
+        );
+        assert!(result.warnings.is_empty());
     }
 
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14

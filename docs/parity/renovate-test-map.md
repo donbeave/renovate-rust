@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 1597 / 1657 actionable tests ported (96%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 1602 / 1657 actionable tests ported (97%) — updated 2026-05-12
 
 All previously tracked legacy summary rows have been converted to per-test format. Remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -3547,7 +3547,7 @@ resolver) and the inner `extractPackageFile()` adapter.
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 73 | **Actionable:** 127 | **Status:** partial
+**Total tests:** 127 | **Ported:** 78 | **Actionable:** 127 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -3646,12 +3646,12 @@ resolver) and the inner `extractPackageFile()` adapter.
 | errors on use of `global:` presets in repo `extends` | 1580 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_global_presets_in_repo_extends` | — |
 | warns if customEnvVariables are found in repo config | 1594 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_warns_for_custom_env_variables_in_repo_config` | — |
 | errors if schedule is cron and has no * minutes | 1613 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_cron_schedule_without_wildcard_minutes` | — |
-| errors if invalid matchHost values in hostRules | 1631 | pending | — | — | — |
-| errors if forbidden header in hostRules | 1673 | pending | — | — | — |
-| errors if headers values are not string | 1701 | pending | — | — | — |
+| errors if invalid matchHost values in hostRules | 1631 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_invalid_host_rule_match_host_values` | — |
+| errors if forbidden header in hostRules | 1673 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_forbidden_host_rule_header` | — |
+| errors if headers values are not string | 1701 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_errors_for_non_string_host_rule_header_values` | — |
 | errors if allowedHeaders is empty or not defined | 1728 | pending | — | — | — |
-| catches invalid variable name in env config option | 1755 | pending | — | — | — |
-| catches env config option if configured inside a parent | 1783 | pending | — | — | — |
+| catches invalid variable name in env config option | 1755 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_invalid_env_variable_name_and_value` | — |
+| catches env config option if configured inside a parent | 1783 | ported | `crates/renovate-core/src/config/migrate_validate.rs` | `validate_config_catches_nested_env_config` | — |
 | catches when * or ** is combined with others patterns in a regexOrGlob option | 1820 | pending | — | — | — |
 | catches when negative number is used for integer type | 1848 | pending | — | — | — |
 | validates prPriority | 1862 | pending | — | — | — |
