@@ -11320,6 +11320,113 @@ does not implement Renovate's generated-lockfile reverse resolver.
 
 ---
 
+## `lib/modules/versioning/hashicorp/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/hashicorp/index.spec.ts
+**Total tests:** 6 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/hashicorp/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| matches("$version", "$range") === $expected | 4 | not-applicable | — | — | Renovate's full HashiCorp `VersioningApi` range matcher is not implemented as a Rust API; Rust currently exposes a narrower update-summary helper. |
+| getSatisfyingVersion($versions, "$range") === $expected | 17 | not-applicable | — | — | Renovate's full HashiCorp `VersioningApi` satisfying-version helper is not implemented as a Rust API; Rust currently exposes a narrower update-summary helper. |
+| isValid("$input") === $expected | 29 | not-applicable | — | — | Renovate's full HashiCorp `VersioningApi` validation contract is not implemented as a Rust API; Rust currently exposes a narrower update-summary helper. |
+| isLessThanRange($version, $range) === $expected | 48 | not-applicable | — | — | Renovate's full HashiCorp `VersioningApi` range comparison helper is not implemented as a Rust API; Rust currently exposes a narrower update-summary helper. |
+| minSatisfyingVersion($versions, "$range") === $expected | 59 | not-applicable | — | — | Renovate's full HashiCorp `VersioningApi` satisfying-version helper is not implemented as a Rust API; Rust currently exposes a narrower update-summary helper. |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 72 | not-applicable | — | — | Renovate's full HashiCorp update-value helper is not implemented as a Rust API; Rust currently exposes a narrower update-summary helper. |
+
+---
+
+## `lib/modules/versioning/hashicorp/convertor.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/hashicorp/convertor.spec.ts
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/hashicorp/convertor`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| hashicorp2npm("$hashicorp") === $npm && npm2hashicorp("$npm") === $hashicorp | 4 | not-applicable | — | — | Renovate's HashiCorp-to-npm range convertor helpers are not implemented as a Rust API. |
+| hashicorp2npm("$version") === $version && npm2hashicorp("$version") === $version | 32 | not-applicable | — | — | Renovate's HashiCorp-to-npm range convertor helpers are not implemented as a Rust API. |
+| hashicorp2npm("$hashicorp") === $npm | 57 | not-applicable | — | — | Renovate's HashiCorp-to-npm range convertor helper is not implemented as a Rust API. |
+| npm2hashicorp("$npm") === $hashicorp | 71 | not-applicable | — | — | Renovate's npm-to-HashiCorp range convertor helper is not implemented as a Rust API. |
+| hashicorp2npm doesnt support != | 85 | not-applicable | — | — | Renovate's HashiCorp-to-npm range convertor error contract is not implemented as a Rust API. |
+| hashicorp2npm throws on invalid | 89 | not-applicable | — | — | Renovate's HashiCorp-to-npm range convertor error contract is not implemented as a Rust API. |
+| npm2hashicorp throws on unsupported | 93 | not-applicable | — | — | Renovate's npm-to-HashiCorp range convertor error contract is not implemented as a Rust API. |
+
+---
+
+## `lib/modules/versioning/glasskube/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/glasskube/index.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/glasskube/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| isStable("$version") === $expected | 6 | not-applicable | — | — | Renovate's Glasskube versioning scheme is not implemented as a Rust versioning API; Rust Glasskube support is extractor/datasource oriented. |
+| isValid("$version") === $expected | 16 | not-applicable | — | — | Renovate's Glasskube versioning validation is not implemented as a Rust versioning API; Rust Glasskube support is extractor/datasource oriented. |
+| getMajor, getMinor, getPatch for "$version" | 30 | not-applicable | — | — | Renovate's Glasskube version component parser is not implemented as a Rust versioning API; Rust Glasskube support is extractor/datasource oriented. |
+| getMajor, getMinor, getPatch for "$version" | 44 | not-applicable | — | — | Renovate's Glasskube comparator is not implemented as a Rust versioning API; Rust Glasskube support is extractor/datasource oriented. |
+
+---
+
+## `lib/modules/versioning/bazel-module/index.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/bazel-module/index.spec.ts
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/bazel-module/index`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| getMajor() | 5 | not-applicable | — | — | Renovate's Bazel module version component parser is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| getMinor() | 9 | not-applicable | — | — | Renovate's Bazel module version component parser is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| getPatch() | 13 | not-applicable | — | — | Renovate's Bazel module version component parser is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| equals($a, $b) | 17 | not-applicable | — | — | Renovate's Bazel module version comparator is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| isGreaterThan($a, $b) | 27 | not-applicable | — | — | Renovate's Bazel module version comparator is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| isLessThanRange($a, $b) | 36 | not-applicable | — | — | Renovate's Bazel module range comparator is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| getSatisfyingVersion(vers, rng) | 45 | not-applicable | — | — | Renovate's Bazel module satisfying-version helper is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| sortVersions($a, $b) | 56 | not-applicable | — | — | Renovate's Bazel module sorting comparator is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| isStable | 65 | not-applicable | — | — | Renovate's Bazel module stability classifier is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| isValid($a) | 74 | not-applicable | — | — | Renovate's Bazel module version validation is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| isVersion($a) | 90 | not-applicable | — | — | Renovate's Bazel module version classifier is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+| getNewValue() | 100 | not-applicable | — | — | Renovate's Bazel module update-value helper is not implemented as a Rust versioning API; Rust Bazel module support is extractor/parser oriented. |
+
+---
+
+## `lib/modules/versioning/bazel-module/bzlmod-version.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/bazel-module/bzlmod-version.spec.ts
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `modules/versioning/bazel-module/bzlmod-version`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| when all digits | 5 | not-applicable | — | — | Renovate's Bazel module identifier parser is not implemented as a Rust versioning API. |
+| when not all digits | 12 | not-applicable | — | — | Renovate's Bazel module identifier parser is not implemented as a Rust versioning API. |
+| $a equals $b | 19 | not-applicable | — | — | Renovate's Bazel module identifier comparator is not implemented as a Rust versioning API. |
+| $a is isLessThan $b | 32 | not-applicable | — | — | Renovate's Bazel module identifier comparator is not implemented as a Rust versioning API. |
+| VersionPart.create(...$a} | 49 | not-applicable | — | — | Renovate's Bazel module version-part parser is not implemented as a Rust versioning API. |
+| .asString | 59 | not-applicable | — | — | Renovate's Bazel module version-part formatter is not implemented as a Rust versioning API. |
+| .major | 68 | not-applicable | — | — | Renovate's Bazel module version-part component parser is not implemented as a Rust versioning API. |
+| .minor | 78 | not-applicable | — | — | Renovate's Bazel module version-part component parser is not implemented as a Rust versioning API. |
+| .patch | 87 | not-applicable | — | — | Renovate's Bazel module version-part component parser is not implemented as a Rust versioning API. |
+| $a equals $b | 96 | not-applicable | — | — | Renovate's Bazel module version-part comparator is not implemented as a Rust versioning API. |
+| $a is isLessThan $b | 107 | not-applicable | — | — | Renovate's Bazel module version-part comparator is not implemented as a Rust versioning API. |
+| .isEmpty | 125 | not-applicable | — | — | Renovate's Bazel module version-part empty-state helper is not implemented as a Rust versioning API. |
+| constructor($v) | 137 | not-applicable | — | — | Renovate's Bazel module BzlmodVersion parser is not implemented as a Rust versioning API. |
+| bad versions $a | 153 | not-applicable | — | — | Renovate's Bazel module BzlmodVersion validation error contract is not implemented as a Rust versioning API. |
+| $a equals $b | 168 | not-applicable | — | — | Renovate's Bazel module BzlmodVersion comparator is not implemented as a Rust versioning API. |
+| $a is isLessThan $b | 188 | not-applicable | — | — | Renovate's Bazel module BzlmodVersion comparator is not implemented as a Rust versioning API. |
+| $a isGreaterThan $b | 208 | not-applicable | — | — | Renovate's Bazel module BzlmodVersion comparator is not implemented as a Rust versioning API. |
+| defaultCompare($a, $b) | 221 | not-applicable | — | — | Renovate's Bazel module BzlmodVersion comparator is not implemented as a Rust versioning API. |
+
+---
+
 ## Utility specs (`lib/util/`)
 
 | Renovate spec file | Renovate tests | Rust file | Rust tests | Status |
