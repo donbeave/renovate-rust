@@ -724,6 +724,22 @@ mod tests {
         assert_eq!(group_branch_topic("lodash"), "lodash");
     }
 
+    // Ported: "separates major with groups" — workers/repository/updates/branch-name.spec.ts line 129
+    #[test]
+    fn branch_name_separates_major_with_groups() {
+        let group_slug = group_branch_topic("some group slug");
+        let group_slug = major_group_slug(&group_slug, true, true, true, 2);
+        assert_eq!(branch_name("", "", &format!("{group_slug}-grouptopic")), "major-2-some-group-slug-grouptopic");
+    }
+
+    // Ported: "uses single major with groups" — workers/repository/updates/branch-name.spec.ts line 183
+    #[test]
+    fn branch_name_uses_single_major_with_groups() {
+        let group_slug = group_branch_topic("some group slug");
+        let group_slug = major_group_slug(&group_slug, true, false, true, 2);
+        assert_eq!(branch_name("", "", &format!("{group_slug}-grouptopic")), "major-some-group-slug-grouptopic");
+    }
+
     // ── branch_name ──────────────────────────────────────────────────────────
 
     #[test]

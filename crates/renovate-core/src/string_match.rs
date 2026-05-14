@@ -237,24 +237,27 @@ mod tests {
         assert!(!match_regex_or_glob_list("npm", &[]));
     }
 
+    // Ported: "returns false if empty patterns" — util/string-match.spec.ts line 10
     #[test]
     fn string_match_spec_empty_patterns_returns_false() {
-        // Ported from string-match.spec.ts: returns false if empty patterns
         assert!(!match_regex_or_glob_list("test", &[]));
     }
 
+    // Ported: "returns false if no match" — util/string-match.spec.ts line 14
     #[test]
     fn string_match_spec_no_match_returns_false() {
         let pats: Vec<String> = vec!["/test2/".into()];
         assert!(!match_regex_or_glob_list("test", &pats));
     }
 
+    // Ported: "returns true if star" — util/string-match.spec.ts line 18
     #[test]
     fn string_match_spec_star_returns_true() {
         let pats: Vec<String> = vec!["*".into()];
         assert!(match_regex_or_glob_list("&&&", &pats));
     }
 
+    // Ported: "returns true if any match" — util/string-match.spec.ts line 22
     #[test]
     fn string_match_spec_any_positive_match_returns_true() {
         let pats: Vec<String> = vec!["test".into(), "/test2/".into()];
@@ -284,12 +287,14 @@ mod tests {
         assert!(!match_regex_or_glob_list("cargo", &pats));
     }
 
+    // Ported: "returns true if one match with negative patterns" — util/string-match.spec.ts line 26
     #[test]
     fn string_match_spec_one_negative_pattern_returns_true() {
         let pats: Vec<String> = vec!["!/test2/".into()];
         assert!(match_regex_or_glob_list("test", &pats));
     }
 
+    // Ported: "returns true if every match with negative patterns" — util/string-match.spec.ts line 30
     #[test]
     fn string_match_spec_every_negative_regex_returns_true() {
         let pats: Vec<String> = vec!["!/test2/".into(), "!/test3/".into()];
@@ -396,6 +401,7 @@ mod tests {
 
     // ── Ported from Renovate string-match.spec.ts ─────────────────────────────
 
+    // Ported: "returns true case insensitive for glob" — util/string-match.spec.ts line 38
     #[test]
     fn glob_is_case_insensitive_matching_renovate_nocase() {
         // Renovate uses minimatch({nocase: true}) for all glob matching.
@@ -404,6 +410,7 @@ mod tests {
         assert!(match_regex_or_glob_list("TEST", &pats));
     }
 
+    // Ported: "returns false if not matching every negative pattern (regex)" — util/string-match.spec.ts line 48
     #[test]
     fn all_negative_patterns_both_must_not_match() {
         // returns false if not matching every negative pattern (regex)
@@ -411,6 +418,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("test", &pats));
     }
 
+    // Ported: "returns false if not matching every negative pattern (glob)" — util/string-match.spec.ts line 58
     #[test]
     fn all_negative_patterns_both_must_not_match_glob() {
         // returns false if not matching every negative pattern (glob)
@@ -418,6 +426,7 @@ mod tests {
         assert!(!match_regex_or_glob_list("test", &pats));
     }
 
+    // Ported: "returns true if matching positive and negative patterns" — util/string-match.spec.ts line 34
     #[test]
     fn negative_regex_positive_pattern_returns_true() {
         // returns true if matching positive and negative patterns
@@ -425,6 +434,7 @@ mod tests {
         assert!(match_regex_or_glob_list("test", &pats));
     }
 
+    // Ported: "returns true if matching every negative pattern (glob)" — util/string-match.spec.ts line 52
     #[test]
     fn negative_glob_positive_pattern_returns_true() {
         // returns true if matching every negative pattern (glob)
@@ -432,6 +442,7 @@ mod tests {
         assert!(match_regex_or_glob_list("test", &pats));
     }
 
+    // Ported: "returns true if matching every negative pattern (regex)" — util/string-match.spec.ts line 42
     #[test]
     fn negative_regex_positive_pattern_allows_all_non_matches() {
         // returns true if matching every negative pattern (regex)
@@ -441,28 +452,33 @@ mod tests {
 
     // ── any_match_regex_or_glob_list ──────────────────────────────────────────
 
+    // Ported: "returns false if empty patterns" — util/string-match.spec.ts line 64
     #[test]
     fn any_match_empty_patterns_returns_false() {
         assert!(!any_match_regex_or_glob_list(&["test"], &[]));
     }
 
+    // Ported: "returns false if empty inputs" — util/string-match.spec.ts line 68
     #[test]
     fn any_match_empty_inputs_returns_false() {
         let pats: Vec<String> = vec!["/test2/".into()];
         assert!(!any_match_regex_or_glob_list(&[], &pats));
     }
 
+    // Ported: "returns true if both empty" — util/string-match.spec.ts line 72
     #[test]
     fn any_match_both_empty_returns_false() {
         assert!(!any_match_regex_or_glob_list(&[], &[]));
     }
 
+    // Ported: "returns true if any match with positive" — util/string-match.spec.ts line 76
     #[test]
     fn any_match_positive_list_matches() {
         let pats: Vec<String> = vec!["b".into()];
         assert!(any_match_regex_or_glob_list(&["a", "b"], &pats));
     }
 
+    // Ported: "returns true if any match with negative" — util/string-match.spec.ts line 80
     #[test]
     fn any_match_negative_list_matches_non_excluded() {
         // any_match with negative pattern: if any input passes the negative filter, returns true
@@ -472,21 +488,25 @@ mod tests {
 
     // ── get_regex_predicate ──────────────────────────────────────────────────
 
+    // Ported: "allows valid regex pattern" — util/string-match.spec.ts line 86
     #[test]
     fn get_regex_predicate_allows_valid_regex_pattern() {
         assert!(get_regex_predicate("/hello/").is_some());
     }
 
+    // Ported: "invalidates invalid regex pattern" — util/string-match.spec.ts line 90
     #[test]
     fn get_regex_predicate_invalidates_invalid_regex_pattern() {
         assert!(get_regex_predicate(r"/^test\d+$/m").is_none());
     }
 
+    // Ported: "allows the i flag in regex pattern" — util/string-match.spec.ts line 94
     #[test]
     fn get_regex_predicate_allows_i_flag() {
         assert!(get_regex_predicate(r"/^test\d+$/i").is_some());
     }
 
+    // Ported: "allows negative regex pattern" — util/string-match.spec.ts line 98
     #[test]
     fn get_regex_predicate_allows_negative_regex_pattern() {
         let predicate = get_regex_predicate(r"!/^test\d+$/i").expect("valid regex");
@@ -494,21 +514,25 @@ mod tests {
         assert!(predicate.is_match("other"));
     }
 
+    // Ported: "does not allow non-regex input" — util/string-match.spec.ts line 102
     #[test]
     fn get_regex_predicate_rejects_non_regex_input() {
         assert!(get_regex_predicate("hello").is_none());
     }
 
+    // Ported: "returns true if positive regex pattern matched" — util/string-match.spec.ts line 108
     #[test]
     fn match_regex_or_glob_positive_regex_pattern_matched() {
         assert!(match_regex_or_glob("test", "/test/"));
     }
 
+    // Ported: "returns true if negative regex is not matched" — util/string-match.spec.ts line 112
     #[test]
     fn match_regex_or_glob_negative_regex_not_matched_returns_true() {
         assert!(match_regex_or_glob("test", "!/test3/"));
     }
 
+    // Ported: "returns false if negative pattern is matched" — util/string-match.spec.ts line 116
     #[test]
     fn match_regex_or_glob_negative_pattern_matched_returns_false() {
         assert!(!match_regex_or_glob("test", "!/te/"));
