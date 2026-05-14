@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2142 / 8606 actionable tests ported (25%) — updated 2026-05-12
+**Overall progress (per-test sections only):** 2156 / 8606 actionable tests ported (25%) — updated 2026-05-14
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -28518,26 +28518,26 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/updates/branch-name.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/updates/branch-name.spec.ts
-**Total tests:** 27 | **Ported:** 13 | **Actionable:** 27 | **Status:** partial
+**Total tests:** 27 | **Ported:** 27 | **Actionable:** 27 | **Status:** ported
 
 ### `workers/repository/updates/branch-name › getBranchName()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| falls back to sharedVariableName if no groupName | 7 | pending | — | — | — |
-| ignores grouping of replacement update | 19 | pending | — | — | — |
-| applies grouping for lockfile maintenance update | 36 | pending | — | — | — |
-| uses default branch name for lockfile maintenance without groupName | 52 | pending | — | — | — |
-| separates lockFileMaintenance from non-lockFileMaintenance with same groupName | 63 | pending | — | — | — |
-| uses groupName if no slug defined, ignores sharedVariableName | 89 | pending | — | — | — |
-| compile groupName before slugging | 102 | pending | — | — | — |
-| uses groupSlug if defined | 115 | pending | — | — | — |
-| separates major with groups | 129 | pending | — | — | — |
-| separates minor with groups | 146 | pending | — | — | — |
-| separates minor when separateMultipleMinor=true | 163 | pending | — | — | — |
-| uses single major with groups | 183 | pending | — | — | — |
-| separates patch groups and uses update topic | 200 | pending | — | — | — |
-| compiles multiple times | 218 | pending | — | — | — |
+| falls back to sharedVariableName if no groupName | 7 | ported | `branch.rs` | `branch_name_falls_back_to_shared_variable_name` | — |
+| ignores grouping of replacement update | 19 | ported | `branch.rs` | `branch_name_ignores_grouping_for_replacement_update` | — |
+| applies grouping for lockfile maintenance update | 36 | ported | `branch.rs` | `branch_name_applies_grouping_for_lockfile_maintenance` | — |
+| uses default branch name for lockfile maintenance without groupName | 52 | ported | `branch.rs` | `branch_name_lockfile_maintenance_without_group_name` | — |
+| separates lockFileMaintenance from non-lockFileMaintenance with same groupName | 63 | ported | `branch.rs` | `branch_name_separates_lockfile_from_non_lockfile_same_group` | — |
+| uses groupName if no slug defined, ignores sharedVariableName | 89 | ported | `branch.rs` | `branch_name_uses_group_name_ignores_shared_variable_name` | — |
+| compile groupName before slugging | 102 | ported | `branch.rs` | `branch_name_compiles_group_name_before_slugging` | — |
+| uses groupSlug if defined | 115 | ported | `branch.rs` | `branch_name_uses_group_slug_if_defined` | — |
+| separates major with groups | 129 | ported | `branch.rs` | `branch_name_separates_major_with_groups` | — |
+| separates minor with groups | 146 | ported | `branch.rs` | `branch_name_separates_minor_with_groups` | — |
+| separates minor when separateMultipleMinor=true | 163 | ported | `branch.rs` | `branch_name_separates_minor_separate_multiple_minor_true` | — |
+| uses single major with groups | 183 | ported | `branch.rs` | `branch_name_uses_single_major_with_groups` | — |
+| separates patch groups and uses update topic | 200 | ported | `branch.rs` | `branch_name_separates_patch_groups_uses_update_topic` | — |
+| compiles multiple times | 218 | ported | `branch.rs` | `branch_name_compiles_multiple_times` | — |
 | separates patches when separateMinorPatch=true | 229 | ported | `branch.rs` | `branch_name_separates_patches_when_separate_minor_patch_true` | — |
 | does not separate patches when separateMinorPatch=false | 249 | ported | `branch.rs` | `branch_name_does_not_separate_patches_when_separate_minor_patch_false` | — |
 | realistic defaults | 269 | ported | `branch.rs` | `branch_name_realistic_defaults` | — |

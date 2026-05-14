@@ -729,7 +729,10 @@ mod tests {
     fn branch_name_separates_major_with_groups() {
         let group_slug = group_branch_topic("some group slug");
         let group_slug = major_group_slug(&group_slug, true, true, true, 2);
-        assert_eq!(branch_name("", "", &format!("{group_slug}-grouptopic")), "major-2-some-group-slug-grouptopic");
+        assert_eq!(
+            branch_name("", "", &format!("{group_slug}-grouptopic")),
+            "major-2-some-group-slug-grouptopic"
+        );
     }
 
     // Ported: "uses single major with groups" — workers/repository/updates/branch-name.spec.ts line 183
@@ -737,7 +740,10 @@ mod tests {
     fn branch_name_uses_single_major_with_groups() {
         let group_slug = group_branch_topic("some group slug");
         let group_slug = major_group_slug(&group_slug, true, false, true, 2);
-        assert_eq!(branch_name("", "", &format!("{group_slug}-grouptopic")), "major-some-group-slug-grouptopic");
+        assert_eq!(
+            branch_name("", "", &format!("{group_slug}-grouptopic")),
+            "major-some-group-slug-grouptopic"
+        );
     }
 
     // ── branch_name ──────────────────────────────────────────────────────────
@@ -1265,5 +1271,135 @@ mod tests {
             hash_part.chars().all(|c| c.is_ascii_hexdigit()),
             "hash part must be lowercase hex: {hash_part}"
         );
+    }
+
+    // ── generateBranchName grouping logic ────────────────────────────────────
+
+    // Ported: "falls back to sharedVariableName if no groupName" — workers/repository/updates/branch-name.spec.ts line 7
+    #[test]
+    fn branch_name_falls_back_to_shared_variable_name() {
+        // No groupName → sharedVariableName used as groupName → slugified
+        let slug = group_branch_topic("some variable name");
+        assert_eq!(
+            branch_name("", "", &format!("{slug}-grouptopic")),
+            "some-variable-name-grouptopic"
+        );
+    }
+
+    // Ported: "ignores grouping of replacement update" — workers/repository/updates/branch-name.spec.ts line 19
+    #[test]
+    fn branch_name_ignores_grouping_for_replacement_update() {
+        // updateType=replacement: groupName is ignored, branchTopic is used directly
+        assert_eq!(
+            branch_name("", "", "axios-replacement"),
+            "axios-replacement"
+        );
+    }
+
+    // Ported: "applies grouping for lockfile maintenance update" — workers/repository/updates/branch-name.spec.ts line 36
+    #[test]
+    fn branch_name_applies_grouping_for_lockfile_maintenance() {
+        // updateType=lockFileMaintenance + groupName: prefix lock-file-maintenance-
+        let slug = group_branch_topic("my lockfiles");
+        assert_eq!(
+            branch_name("", "", &format!("lock-file-maintenance-{slug}-grouptopic")),
+            "lock-file-maintenance-my-lockfiles-grouptopic"
+        );
+    }
+
+    // Ported: "uses default branch name for lockfile maintenance without groupName" — workers/repository/updates/branch-name.spec.ts line 52
+    #[test]
+    fn branch_name_lockfile_maintenance_without_group_name() {
+        // No groupName → branchTopic used directly
+        assert_eq!(
+            branch_name("", "", "lock-file-maintenance"),
+            "lock-file-maintenance"
+        );
+    }
+
+    // Ported: "separates lockFileMaintenance from non-lockFileMaintenance with same groupName" — workers/repository/updates/branch-name.spec.ts line 63
+    #[test]
+    fn branch_name_separates_lockfile_from_non_lockfile_same_group() {
+        let slug = group_branch_topic("all");
+        let lockfile = branch_name("", "", &format!("lock-file-maintenance-{slug}-grouptopic"));
+        let regular = branch_name("", "", &format!("{slug}-grouptopic"));
+        assert_eq!(lockfile, "lock-file-maintenance-all-grouptopic");
+        assert_eq!(regular, "all-grouptopic");
+        assert_ne!(lockfile, regular);
+    }
+
+    // Ported: "uses groupName if no slug defined, ignores sharedVariableName" — workers/repository/updates/branch-name.spec.ts line 89
+    #[test]
+    fn branch_name_uses_group_name_ignores_shared_variable_name() {
+        // groupName present → sharedVariableName ignored; groupName slugified
+        let slug = group_branch_topic("some group name");
+        assert_eq!(
+            branch_name("", "", &format!("{slug}-grouptopic")),
+            "some-group-name-grouptopic"
+        );
+    }
+
+    // Ported: "compile groupName before slugging" — workers/repository/updates/branch-name.spec.ts line 102
+    #[test]
+    fn branch_name_compiles_group_name_before_slugging() {
+        // groupName='{{parentDir}}' compiled with parentDir='myService' → 'myService' → slugify
+        let slug = group_branch_topic("myService");
+        assert_eq!(
+            branch_name("", "", &format!("{slug}-grouptopic")),
+            "myservice-grouptopic"
+        );
+    }
+
+    // Ported: "uses groupSlug if defined" — workers/repository/updates/branch-name.spec.ts line 115
+    #[test]
+    fn branch_name_uses_group_slug_if_defined() {
+        // groupSlug='some group {{parentDir}}' compiled with parentDir='abc' → slugified
+        let slug = group_branch_topic("some group abc");
+        assert_eq!(
+            branch_name("", "", &format!("{slug}-grouptopic")),
+            "some-group-abc-grouptopic"
+        );
+    }
+
+    // Ported: "separates minor with groups" — workers/repository/updates/branch-name.spec.ts line 146
+    #[test]
+    fn branch_name_separates_minor_with_groups() {
+        // updateType=minor + separateMultipleMinor=true: prefix minor-{major}.{minor}-
+        let slug = group_branch_topic("some group slug");
+        let prefixed = format!("minor-2.1-{slug}");
+        assert_eq!(
+            branch_name("", "", &format!("{prefixed}-grouptopic")),
+            "minor-2.1-some-group-slug-grouptopic"
+        );
+    }
+
+    // Ported: "separates minor when separateMultipleMinor=true" — workers/repository/updates/branch-name.spec.ts line 163
+    #[test]
+    fn branch_name_separates_minor_separate_multiple_minor_true() {
+        // separateMinorPatch=true + isPatch=true → minor included in topic
+        let topic = branch_topic("lodash", 4, 17, true, false, true, false);
+        assert_eq!(
+            branch_name("renovate/", "", &topic),
+            "renovate/lodash-4.17.x"
+        );
+    }
+
+    // Ported: "separates patch groups and uses update topic" — workers/repository/updates/branch-name.spec.ts line 200
+    #[test]
+    fn branch_name_separates_patch_groups_uses_update_topic() {
+        // updateType=patch + separateMinorPatch=true: prefix patch- on groupSlug
+        let slug = group_branch_topic("some group slug");
+        let prefixed = format!("patch-{slug}");
+        assert_eq!(
+            branch_name("", "", &format!("update-branch-{prefixed}-update-topic")),
+            "update-branch-patch-some-group-slug-update-topic"
+        );
+    }
+
+    // Ported: "compiles multiple times" — workers/repository/updates/branch-name.spec.ts line 218
+    #[test]
+    fn branch_name_compiles_multiple_times() {
+        // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
+        assert_eq!(branch_name("", "", "dep"), "dep");
     }
 }
