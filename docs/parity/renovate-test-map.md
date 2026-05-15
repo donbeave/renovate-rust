@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2420 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2423 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -26708,15 +26708,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/process/lookup/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/lookup/utils.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `workers/repository/process/lookup/utils › determineNewReplacementName()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns the replacement name if defined | 14 | pending | — | — | — |
-| returns the replacement name template if defined | 23 | pending | — | — | — |
-| returns the package name if defined | 32 | pending | — | — | — |
+| returns the replacement name if defined | 14 | ported | `branch.rs` | `determine_replacement_name_returns_replacement_name` | — |
+| returns the replacement name template if defined | 23 | ported | `branch.rs` | `determine_replacement_name_returns_template` | — |
+| returns the package name if defined | 32 | ported | `branch.rs` | `determine_replacement_name_returns_package_name` | — |
 
 ---
 

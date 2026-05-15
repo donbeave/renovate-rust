@@ -559,6 +559,28 @@ fn replace_strict_special_chars(input: &str) -> String {
         .collect()
 }
 
+/// Determine the replacement package name for a dependency update.
+///
+/// Mirrors `lib/workers/repository/process/lookup/utils.ts`
+/// `determineNewReplacementName()`.
+pub fn determine_new_replacement_name(
+    replacement_name: Option<&str>,
+    replacement_name_template: Option<&str>,
+    package_name: &str,
+) -> String {
+    if let Some(name) = replacement_name {
+        if !name.is_empty() {
+            return name.to_owned();
+        }
+    }
+    if let Some(tmpl) = replacement_name_template {
+        if !tmpl.is_empty() {
+            return tmpl.to_owned();
+        }
+    }
+    package_name.to_owned()
+}
+
 /// Sort order for branch update types.
 const UPDATE_TYPE_ORDER: &[&str] =
     &["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"];
@@ -1477,6 +1499,33 @@ mod tests {
     fn branch_name_compiles_multiple_times() {
         // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
         assert_eq!(branch_name("", "", "dep"), "dep");
+    }
+
+    // Ported: "returns the replacement name if defined" — workers/repository/process/lookup/utils.spec.ts line 14
+    #[test]
+    fn determine_replacement_name_returns_replacement_name() {
+        assert_eq!(
+            determine_new_replacement_name(Some("foo"), None, "b"),
+            "foo"
+        );
+    }
+
+    // Ported: "returns the replacement name template if defined" — workers/repository/process/lookup/utils.spec.ts line 23
+    #[test]
+    fn determine_replacement_name_returns_template() {
+        assert_eq!(
+            determine_new_replacement_name(None, Some("foo"), "b"),
+            "foo"
+        );
+    }
+
+    // Ported: "returns the package name if defined" — workers/repository/process/lookup/utils.spec.ts line 32
+    #[test]
+    fn determine_replacement_name_returns_package_name() {
+        assert_eq!(
+            determine_new_replacement_name(None, None, "b"),
+            "b"
+        );
     }
 
     fn branch(update_type: &str, pr_title: &str) -> BranchSortEntry {
