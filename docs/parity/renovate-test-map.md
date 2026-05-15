@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2372 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2384 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13577,29 +13577,29 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bundler/locked-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/locked-version.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+**Total tests:** 12 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| Parse Rails Gem Lock File | 13 | pending | — | — | — |
-| Parse WebPacker Gem Lock File | 19 | pending | — | — | — |
-| Parse Mastodon Gem Lock File | 25 | pending | — | — | — |
-| Parse Ruby CI Gem Lock File | 31 | pending | — | — | — |
-| Parse Gitlab Foss Gem Lock File | 37 | pending | — | — | — |
-| returns empty map for empty string | 43 | pending | — | — | — |
-| returns empty map when errors occur | 48 | pending | — | — | — |
-| strips platform suffixes from dependencies | 54 | pending | — | — | — |
+| Parse Rails Gem Lock File | 13 | ported | `bundler.rs` | `bundler_locked_version_parse_rails` | — |
+| Parse WebPacker Gem Lock File | 19 | ported | `bundler.rs` | `bundler_locked_version_parse_webpacker` | — |
+| Parse Mastodon Gem Lock File | 25 | ported | `bundler.rs` | `bundler_locked_version_parse_mastodon` | — |
+| Parse Ruby CI Gem Lock File | 31 | ported | `bundler.rs` | `bundler_locked_version_parse_rubyci` | — |
+| Parse Gitlab Foss Gem Lock File | 37 | ported | `bundler.rs` | `bundler_locked_version_parse_gitlab_foss` | — |
+| returns empty map for empty string | 43 | ported | `bundler.rs` | `bundler_locked_version_empty_string` | — |
+| returns empty map when errors occur | 48 | ported | `bundler.rs` | `bundler_locked_version_invalid_input_empty` | Rust has no undefined; tests garbage input |
+| strips platform suffixes from dependencies | 54 | ported | `bundler.rs` | `bundler_locked_version_strips_platform_suffix` | — |
 
 ### `version extraction regex`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts simple versions from parentheses | 84 | pending | — | — | — |
-| extracts complex version formats from parentheses | 98 | pending | — | — | — |
-| correctly extracts gem names when versions contain special characters | 114 | pending | — | — | — |
-| handles gems with platform-specific versions | 130 | pending | — | — | — |
+| extracts simple versions from parentheses | 84 | ported | `bundler.rs` | `bundler_locked_version_simple_versions` | — |
+| extracts complex version formats from parentheses | 98 | ported | `bundler.rs` | `bundler_locked_version_complex_versions` | — |
+| correctly extracts gem names when versions contain special characters | 114 | ported | `bundler.rs` | `bundler_locked_version_gem_names_with_special_chars` | — |
+| handles gems with platform-specific versions | 130 | ported | `bundler.rs` | `bundler_locked_version_platform_specific_versions` | — |
 
 ---
 

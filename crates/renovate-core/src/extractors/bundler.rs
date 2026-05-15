@@ -221,31 +221,72 @@ fn collect_version_constraints(tail: &str) -> String {
 ///
 /// Mirrors `lib/modules/manager/bundler/locked-version.ts` `extractLockFileEntries()`.
 pub fn extract_lock_file_entries(content: &str) -> std::collections::HashMap<String, String> {
-    use std::sync::LazyLock;
-    static GEM_RE: LazyLock<regex::Regex> =
-        LazyLock::new(|| regex::Regex::new(r"^    ([a-zA-Z0-9_-]+) \(([^)]+)\)$").unwrap());
-
     let mut map = std::collections::HashMap::new();
-    let mut in_specs = false;
+    if content.is_empty() {
+        return map;
+    }
+
+    let platforms = extract_platforms(content);
+    let mut in_gem_section = false;
 
     for line in content.lines() {
-        if line.trim() == "specs:" {
-            in_specs = true;
-            continue;
-        }
-        if in_specs {
-            // End of specs section on blank line or non-indented content
-            if !line.starts_with(' ') && !line.is_empty() {
-                in_specs = false;
-                continue;
-            }
-            // Package lines have exactly 4-space indent
-            if let Some(cap) = GEM_RE.captures(line) {
-                map.insert(cap[1].to_owned(), cap[2].to_owned());
+        let trimmed = line.trim();
+        let indent = line.len() - line.trim_start().len();
+
+        if indent == 0 && trimmed == "GEM" {
+            in_gem_section = true;
+        } else if indent == 0 && !trimmed.is_empty() && in_gem_section {
+            in_gem_section = false;
+        } else if indent == 4 && in_gem_section {
+            if let (Some(open), Some(close)) = (line.rfind('('), line.rfind(')')) {
+                if open < close {
+                    let version = &line[open + 1..close];
+                    let name = line[..open].trim();
+                    let cleaned = strip_platform_suffix(version, &platforms);
+                    if !name.is_empty()
+                        && version_looks_valid(&cleaned)
+                        && !map.contains_key(name)
+                    {
+                        map.insert(name.to_owned(), cleaned);
+                    }
+                }
             }
         }
     }
     map
+}
+
+fn extract_platforms(content: &str) -> Vec<String> {
+    let mut platforms = Vec::new();
+    let mut in_platforms = false;
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        let indent = line.len() - line.trim_start().len();
+
+        if indent == 0 && trimmed == "PLATFORMS" {
+            in_platforms = true;
+        } else if indent == 0 && !trimmed.is_empty() && in_platforms {
+            break;
+        } else if indent == 2 && in_platforms && !trimmed.is_empty() {
+            platforms.push(trimmed.to_owned());
+        }
+    }
+    platforms
+}
+
+fn strip_platform_suffix(version: &str, platforms: &[String]) -> String {
+    for platform in platforms {
+        let suffix = format!("-{platform}");
+        if version.ends_with(suffix.as_str()) {
+            return version[..version.len() - platform.len() - 1].to_owned();
+        }
+    }
+    version.to_owned()
+}
+
+fn version_looks_valid(v: &str) -> bool {
+    v.chars().next().is_some_and(|c| c.is_ascii_digit())
 }
 
 /// Status result for `update_locked_bundler_dependency`.
@@ -526,5 +567,126 @@ end
             result,
             BundlerUpdateLockedStatus::Unsupported | BundlerUpdateLockedStatus::UpdateFailed
         ));
+    }
+
+    const RAILS_LOCK: &str = include_str!("../../tests/fixtures/bundler/Gemfile.rails.lock");
+    const WEBPACKER_LOCK: &str =
+        include_str!("../../tests/fixtures/bundler/Gemfile.webpacker.lock");
+    const MASTODON_LOCK: &str = include_str!("../../tests/fixtures/bundler/Gemfile.mastodon.lock");
+    const GITLAB_FOSS_LOCK: &str =
+        include_str!("../../tests/fixtures/bundler/Gemfile.gitlab-foss.lock");
+
+    // Ported: "Parse Rails Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 13
+    #[test]
+    fn bundler_locked_version_parse_rails() {
+        let entries = extract_lock_file_entries(RAILS_LOCK);
+        assert_eq!(entries.len(), 185);
+    }
+
+    // Ported: "Parse WebPacker Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 19
+    #[test]
+    fn bundler_locked_version_parse_webpacker() {
+        let entries = extract_lock_file_entries(WEBPACKER_LOCK);
+        assert_eq!(entries.len(), 53);
+    }
+
+    // Ported: "Parse Mastodon Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 25
+    #[test]
+    fn bundler_locked_version_parse_mastodon() {
+        let entries = extract_lock_file_entries(MASTODON_LOCK);
+        assert_eq!(entries.len(), 266);
+    }
+
+    // Ported: "Parse Ruby CI Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 31
+    #[test]
+    fn bundler_locked_version_parse_rubyci() {
+        let entries = extract_lock_file_entries(GEMFILE_LOCK);
+        assert_eq!(entries.len(), 64);
+    }
+
+    // Ported: "Parse Gitlab Foss Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 37
+    #[test]
+    fn bundler_locked_version_parse_gitlab_foss() {
+        let entries = extract_lock_file_entries(GITLAB_FOSS_LOCK);
+        assert_eq!(entries.len(), 478);
+    }
+
+    // Ported: "returns empty map for empty string" — modules/manager/bundler/locked-version.spec.ts line 43
+    #[test]
+    fn bundler_locked_version_empty_string() {
+        assert!(extract_lock_file_entries("").is_empty());
+    }
+
+    // Ported: "returns empty map when errors occur" — modules/manager/bundler/locked-version.spec.ts line 47
+    #[test]
+    fn bundler_locked_version_invalid_input_empty() {
+        // TS passes undefined, Rust has no undefined — test with garbage content
+        assert!(extract_lock_file_entries("not a gemfile lock").is_empty());
+    }
+
+    // Ported: "strips platform suffixes from dependencies" — modules/manager/bundler/locked-version.spec.ts line 53
+    #[test]
+    fn bundler_locked_version_strips_platform_suffix() {
+        let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    sqlite3 (2.7.4-aarch64-linux-gnu)\n    sqlite3 (2.7.4-arm64-darwin)\n    sqlite3 (2.7.4-x86_64-darwin)\n    nokogiri (1.18.10-aarch64-linux-gnu)\n      racc (~> 1.4)\n    nokogiri (1.18.10-x86_64-darwin)\n      racc (~> 1.4)\n    regular_gem (1.0.0)\n\nPLATFORMS\n  aarch64-linux-gnu\n  arm64-darwin\n  x86_64-darwin\n\nDEPENDENCIES\n  sqlite3 (>= 2.1)\n";
+        let entries = extract_lock_file_entries(content);
+        assert_eq!(entries.get("sqlite3"), Some(&"2.7.4".to_owned()));
+        assert_eq!(entries.get("nokogiri"), Some(&"1.18.10".to_owned()));
+        assert_eq!(entries.get("regular_gem"), Some(&"1.0.0".to_owned()));
+    }
+
+    // Ported: "extracts simple versions from parentheses" — modules/manager/bundler/locked-version.spec.ts line 84
+    #[test]
+    fn bundler_locked_version_simple_versions() {
+        let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    simple_gem (1.0.0)\n    another_gem (2.3.4)\n";
+        let entries = extract_lock_file_entries(content);
+        assert_eq!(entries.get("simple_gem"), Some(&"1.0.0".to_owned()));
+        assert_eq!(entries.get("another_gem"), Some(&"2.3.4".to_owned()));
+    }
+
+    // Ported: "extracts complex version formats from parentheses" — modules/manager/bundler/locked-version.spec.ts line 98
+    #[test]
+    fn bundler_locked_version_complex_versions() {
+        let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    gem_with_prerelease (1.0.0.beta1)\n    gem_with_patch (1.2.3.4)\n    gem_with_alpha (2.0.0.alpha)\n";
+        let entries = extract_lock_file_entries(content);
+        assert_eq!(
+            entries.get("gem_with_prerelease"),
+            Some(&"1.0.0.beta1".to_owned())
+        );
+        assert_eq!(
+            entries.get("gem_with_patch"),
+            Some(&"1.2.3.4".to_owned())
+        );
+        assert_eq!(
+            entries.get("gem_with_alpha"),
+            Some(&"2.0.0.alpha".to_owned())
+        );
+    }
+
+    // Ported: "correctly extracts gem names when versions contain special characters" — modules/manager/bundler/locked-version.spec.ts line 114
+    #[test]
+    fn bundler_locked_version_gem_names_with_special_chars() {
+        let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    gem-with-dashes (1.0.0)\n    gem_with_underscores (2.0.0)\n    gem.with.dots (3.0.0)\n";
+        let entries = extract_lock_file_entries(content);
+        assert_eq!(
+            entries.get("gem-with-dashes"),
+            Some(&"1.0.0".to_owned())
+        );
+        assert_eq!(
+            entries.get("gem_with_underscores"),
+            Some(&"2.0.0".to_owned())
+        );
+        assert_eq!(entries.get("gem.with.dots"), Some(&"3.0.0".to_owned()));
+    }
+
+    // Ported: "handles gems with platform-specific versions" — modules/manager/bundler/locked-version.spec.ts line 130
+    #[test]
+    fn bundler_locked_version_platform_specific_versions() {
+        let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    platform_gem (1.5.0-x86_64-linux)\n    another_platform_gem (2.1.0-arm64-darwin)\n\nPLATFORMS\n  x86_64-linux\n  arm64-darwin\n";
+        let entries = extract_lock_file_entries(content);
+        assert_eq!(entries.get("platform_gem"), Some(&"1.5.0".to_owned()));
+        assert_eq!(
+            entries.get("another_platform_gem"),
+            Some(&"2.1.0".to_owned())
+        );
     }
 }
