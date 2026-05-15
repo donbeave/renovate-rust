@@ -151,6 +151,81 @@ fn parse_pep508(raw: &str) -> Pep723Dep {
     }
 }
 
+/// A PEP 723 dependency with full metadata (for `extract_pep723`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Pep723FullDep {
+    pub dep_name: String,
+    pub current_value: String,
+    /// Extracted version number (for `==X.Y.Z` specifiers only).
+    pub current_version: Option<String>,
+}
+
+/// Full result of `extract_pep723`, analogous to TypeScript's `PackageFileContent`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Pep723Result {
+    pub deps: Vec<Pep723FullDep>,
+    /// From `requires-python` in the metadata block.
+    pub python_constraint: Option<String>,
+}
+
+/// Extract PEP 723 metadata including `requires-python` and deps.
+///
+/// Mirrors `lib/modules/manager/pep723/utils.ts` `extractPep723()`.
+/// Returns `None` when no metadata block is found, TOML is invalid,
+/// or no valid dependencies are present.
+pub fn extract_pep723(content: &str) -> Option<Pep723Result> {
+    let block = BLOCK_RE.captures(content)?;
+    let raw_block = &block[1];
+
+    let toml_text: String = raw_block
+        .lines()
+        .map(|line| {
+            if let Some(rest) = line.strip_prefix("# ") {
+                rest
+            } else if let Some(rest) = line.strip_prefix('#') {
+                rest
+            } else {
+                line
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let parsed: Value = toml::from_str(&toml_text).ok()?;
+
+    let python_constraint = parsed
+        .get("requires-python")
+        .and_then(|v| v.as_str())
+        .map(str::to_owned);
+
+    let deps_array = parsed.get("dependencies")?.as_array()?;
+
+    let deps: Vec<Pep723FullDep> = deps_array
+        .iter()
+        .filter_map(|v| v.as_str())
+        .map(parse_pep508)
+        .filter(|d| !d.name.is_empty() && d.skip_reason.is_none())
+        .map(|d| {
+            let current_version = if d.current_value.starts_with("==") {
+                Some(d.current_value.trim_start_matches("==").to_owned())
+            } else {
+                None
+            };
+            Pep723FullDep {
+                dep_name: d.name,
+                current_value: d.current_value,
+                current_version,
+            }
+        })
+        .collect();
+
+    if deps.is_empty() {
+        return None;
+    }
+
+    Some(Pep723Result { deps, python_constraint })
+}
+
 /// Normalize a Python package name per PEP 503.
 fn normalize_name(name: &str) -> String {
     let lower = name.to_lowercase();
@@ -248,5 +323,51 @@ import requests
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "numpy");
         assert_eq!(deps[0].current_value, "==1.26.0");
+    }
+
+    // Ported: "should extract dependencies" — modules/manager/pep723/utils.spec.ts line 6
+    #[test]
+    fn pep723_extract_should_extract_dependencies() {
+        let content = "# /// script\n# requires-python = \">=3.11\"\n# dependencies = [\n#   \"requests==2.32.3\",\n#   \"rich>=13.8.0\",\n# ]\n# ///\n";
+        let result = extract_pep723(content).unwrap();
+        assert_eq!(result.python_constraint.as_deref(), Some(">=3.11"));
+        assert_eq!(result.deps.len(), 2);
+        assert_eq!(result.deps[0].dep_name, "requests");
+        assert_eq!(result.deps[0].current_value, "==2.32.3");
+        assert_eq!(result.deps[0].current_version.as_deref(), Some("2.32.3"));
+        assert_eq!(result.deps[1].dep_name, "rich");
+        assert_eq!(result.deps[1].current_value, ">=13.8.0");
+        assert!(result.deps[1].current_version.is_none());
+    }
+
+    // Ported: "should skip invalid dependencies" — modules/manager/pep723/utils.spec.ts line 36
+    #[test]
+    fn pep723_extract_should_skip_invalid_dependencies() {
+        let content = "# /// script\n# requires-python = \"==3.11\"\n# dependencies = [\n#   \"requests==2.32.3\",\n#   \"==1.2.3\",\n# ]\n# ///\n";
+        let result = extract_pep723(content).unwrap();
+        assert_eq!(result.python_constraint.as_deref(), Some("==3.11"));
+        assert_eq!(result.deps.len(), 1);
+        assert_eq!(result.deps[0].dep_name, "requests");
+    }
+
+    // Ported: "should return null on missing dependencies" — modules/manager/pep723/utils.spec.ts line 66
+    #[test]
+    fn pep723_extract_returns_none_on_missing_dependencies() {
+        let content = "# /// script\n# requires-python = \">=3.11\"\n# ///\n";
+        assert!(extract_pep723(content).is_none());
+    }
+
+    // Ported: "should return null on invalid TOML" — modules/manager/pep723/utils.spec.ts line 81
+    #[test]
+    fn pep723_extract_returns_none_on_invalid_toml() {
+        let content = "# /// script\n# requires-python\n# dependencies = [\n#   \"requests==2.32.3\",\n# ]\n# ///\n";
+        assert!(extract_pep723(content).is_none());
+    }
+
+    // Ported: "should return null if there is no PEP 723 metadata" — modules/manager/pep723/utils.spec.ts line 96
+    #[test]
+    fn pep723_extract_returns_none_if_no_metadata_block() {
+        let content = "if True:\n    print(\"requires-python>=3.11\")\n";
+        assert!(extract_pep723(content).is_none());
     }
 }

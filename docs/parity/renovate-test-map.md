@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2273 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2278 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17107,17 +17107,17 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/pep723/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep723/utils.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `parsePep723()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should extract dependencies | 6 | pending | — | — | — |
-| should skip invalid dependencies | 42 | pending | — | — | — |
-| should return null on missing dependencies | 71 | pending | — | — | — |
-| should return null on invalid TOML | 84 | pending | — | — | — |
-| should return null if there is no PEP 723 metadata | 101 | pending | — | — | — |
+| should extract dependencies | 6 | ported | `pep723.rs` | `pep723_extract_should_extract_dependencies` | — |
+| should skip invalid dependencies | 42 | ported | `pep723.rs` | `pep723_extract_should_skip_invalid_dependencies` | — |
+| should return null on missing dependencies | 71 | ported | `pep723.rs` | `pep723_extract_returns_none_on_missing_dependencies` | — |
+| should return null on invalid TOML | 84 | ported | `pep723.rs` | `pep723_extract_returns_none_on_invalid_toml` | — |
+| should return null if there is no PEP 723 metadata | 101 | ported | `pep723.rs` | `pep723_extract_returns_none_if_no_metadata_block` | — |
 
 ---
 
