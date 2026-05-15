@@ -25,12 +25,12 @@ pub fn get_git_status_context_from_combined_name(
     if context.is_empty() {
         return None;
     }
-    if let Some(last_slash) = context.rfind('/') {
-        if last_slash > 0 {
-            let genre = &context[..last_slash];
-            let name = &context[last_slash + 1..];
-            return Some((Some(genre.to_owned()), name.to_owned()));
-        }
+    if let Some(last_slash) = context.rfind('/')
+        && last_slash > 0
+    {
+        let genre = &context[..last_slash];
+        let name = &context[last_slash + 1..];
+        return Some((Some(genre.to_owned()), name.to_owned()));
     }
     Some((None, context.to_owned()))
 }

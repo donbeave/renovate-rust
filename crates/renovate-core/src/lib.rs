@@ -6,6 +6,7 @@ pub mod datasources;
 pub mod extractors;
 pub mod http;
 pub mod json_writer;
+pub mod limits;
 pub mod managers;
 pub mod merge_confidence;
 pub mod monorepos;

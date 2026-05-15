@@ -1017,7 +1017,7 @@ fn glob_matches(pattern: &str, path: &str) -> bool {
         .case_insensitive(true)
         .build()
         .ok()
-        .and_then(|g| Some(g.compile_matcher().is_match(path)))
+        .map(|g| g.compile_matcher().is_match(path))
         .unwrap_or(false)
 }
 
