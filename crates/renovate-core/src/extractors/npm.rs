@@ -1123,6 +1123,44 @@ fn skip_reason_for(value: &str) -> Option<NpmSkipReason> {
     None
 }
 
+/// A catalog entry from `pnpm-workspace.yaml` or yarn catalogs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Catalog {
+    pub name: String,
+    pub dependencies: Vec<(String, String)>,
+}
+
+/// A single extracted catalog dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CatalogDep {
+    pub dep_type: String,
+    pub dep_name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub pretty_dep_type: String,
+}
+
+/// Extract dependencies from catalog entries.
+///
+/// Mirrors `lib/modules/manager/npm/extract/common/catalogs.ts` `extractCatalogDeps()`.
+pub fn extract_catalog_deps(catalogs: &[Catalog], npm_manager: &str) -> Vec<CatalogDep> {
+    let prefix = if npm_manager == "yarn" { "yarn.catalog" } else { "pnpm.catalog" };
+    let mut deps = Vec::new();
+    for catalog in catalogs {
+        let dep_type = format!("{prefix}.{}", catalog.name);
+        for (pkg_name, version) in &catalog.dependencies {
+            deps.push(CatalogDep {
+                dep_name: pkg_name.clone(),
+                dep_type: dep_type.clone(),
+                current_value: version.clone(),
+                datasource: "npm",
+                pretty_dep_type: dep_type.clone(),
+            });
+        }
+    }
+    deps
+}
+
 /// Return `true` if `val` matches any of the given glob `patterns`.
 ///
 /// Mirrors `lib/modules/manager/npm/extract/utils.ts` `matchesAnyPattern()`.
@@ -2651,5 +2689,57 @@ chalk@^2.4.1:
             result,
             vec!["/project/foo/package.json", "/project/bar/package.json"]
         );
+    }
+
+    fn sample_catalogs() -> Vec<Catalog> {
+        vec![
+            Catalog {
+                name: "default".to_string(),
+                dependencies: vec![("react".to_string(), "17.0.2".to_string())],
+            },
+            Catalog {
+                name: "custom".to_string(),
+                dependencies: vec![("lodash".to_string(), "4.17.21".to_string())],
+            },
+        ]
+    }
+
+    // Ported: "returns correct dependencies for pnpm" — modules/manager/npm/extract/common/catalogs.spec.ts line 5
+    #[test]
+    fn catalog_deps_for_pnpm() {
+        let result = extract_catalog_deps(&sample_catalogs(), "pnpm");
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].dep_type, "pnpm.catalog.default");
+        assert_eq!(result[0].dep_name, "react");
+        assert_eq!(result[0].current_value, "17.0.2");
+        assert_eq!(result[0].datasource, "npm");
+        assert_eq!(result[1].dep_type, "pnpm.catalog.custom");
+        assert_eq!(result[1].dep_name, "lodash");
+    }
+
+    // Ported: "returns correct dependencies for yarn" — modules/manager/npm/extract/common/catalogs.spec.ts line 37
+    #[test]
+    fn catalog_deps_for_yarn() {
+        let result = extract_catalog_deps(&sample_catalogs(), "yarn");
+        assert_eq!(result[0].dep_type, "yarn.catalog.default");
+        assert_eq!(result[1].dep_type, "yarn.catalog.custom");
+    }
+
+    // Ported: "handles empty catalogs list" — modules/manager/npm/extract/common/catalogs.spec.ts line 69
+    #[test]
+    fn catalog_deps_empty_list() {
+        assert!(extract_catalog_deps(&[], "pnpm").is_empty());
+        assert!(extract_catalog_deps(&[], "yarn").is_empty());
+    }
+
+    // Ported: "handles catalog with no dependencies" — modules/manager/npm/extract/common/catalogs.spec.ts line 76
+    #[test]
+    fn catalog_deps_empty_dependencies() {
+        let catalogs = vec![Catalog {
+            name: "empty".to_string(),
+            dependencies: vec![],
+        }];
+        assert!(extract_catalog_deps(&catalogs, "pnpm").is_empty());
+        assert!(extract_catalog_deps(&catalogs, "yarn").is_empty());
     }
 }

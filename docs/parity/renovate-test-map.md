@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2343 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2347 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16107,16 +16107,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/npm/extract/common/catalogs.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/common/catalogs.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns correct dependencies for pnpm | 5 | pending | — | — | — |
-| returns correct dependencies for yarn | 39 | pending | — | — | — |
-| handles empty catalogs list | 73 | pending | — | — | — |
-| handles catalog with no dependencies | 80 | pending | — | — | — |
+| returns correct dependencies for pnpm | 5 | ported | `npm.rs` | `catalog_deps_for_pnpm` | — |
+| returns correct dependencies for yarn | 39 | ported | `npm.rs` | `catalog_deps_for_yarn` | — |
+| handles empty catalogs list | 73 | ported | `npm.rs` | `catalog_deps_empty_list` | — |
+| handles catalog with no dependencies | 80 | ported | `npm.rs` | `catalog_deps_empty_dependencies` | — |
 
 ---
 
