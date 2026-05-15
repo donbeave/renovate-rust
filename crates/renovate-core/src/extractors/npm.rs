@@ -1406,6 +1406,54 @@ fn detect_json_indent(content: &str) -> String {
     }
 }
 
+/// Replace the version of a locked dependency in a yarn v1 lock file.
+///
+/// For yarn 2+ (starts with `__metadata:`), the original content is returned unchanged.
+///
+/// Mirrors `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.ts`
+/// `replaceConstraintVersion()`.
+pub fn replace_constraint_version(
+    lock_file_content: &str,
+    dep_name: &str,
+    constraint: &str,
+    new_version: &str,
+    new_constraint: Option<&str>,
+) -> String {
+    if lock_file_content.starts_with("__metadata:") {
+        return lock_file_content.to_owned();
+    }
+
+    let dep_name_constraint = format!("{dep_name}@{constraint}");
+    // Escape: @, ^, ., \, |
+    let mut escaped = String::with_capacity(dep_name_constraint.len() * 2);
+    for c in dep_name_constraint.chars() {
+        if matches!(c, '@' | '^' | '.' | '\\' | '|') {
+            escaped.push('\\');
+        }
+        escaped.push(c);
+    }
+
+    let pattern = format!(
+        r#"({escaped}(("|\",|,)[^\n:]*)?:\n)(.*\n)*?(\s+dependencies|\n[@a-z])"#
+    );
+
+    let Ok(re) = regex::Regex::new(&pattern) else {
+        return lock_file_content.to_owned();
+    };
+
+    let result = re.replace(lock_file_content, |caps: &regex::Captures<'_>| {
+        let mut constraint_line = caps[1].to_owned();
+        if let Some(nc) = new_constraint {
+            let new_dep_constraint = format!("{dep_name}@{nc}");
+            constraint_line = constraint_line.replace(&dep_name_constraint, &new_dep_constraint);
+        }
+        let group5 = caps[5].to_owned();
+        format!("{constraint_line}  version \"{new_version}\"\n{group5}")
+    });
+
+    result.into_owned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3027,5 +3075,70 @@ chalk@^2.4.1:
         let result = parse_npm_lock_file(NPM_PACKAGE_LOCK);
         let composed = compose_npm_lock_file(result.lock_file_parsed.as_ref().unwrap(), &result.detected_indent);
         assert_eq!(composed, NPM_PACKAGE_LOCK);
+    }
+
+    // ── yarn-lock replace tests ─────────────────────────────────────────────
+
+    static YARN_LOCK1: &str = include_str!("../../tests/fixtures/yarn-lock/express.yarn.lock");
+    static YARN_LOCK2: &str = include_str!("../../tests/fixtures/yarn-lock/2.yarn.lock");
+    static YARN2_LOCK: &str = include_str!("../../tests/fixtures/yarn-lock/yarn2.lock");
+
+    // Ported: "returns same if Yarn 2+" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 11
+    #[test]
+    fn yarn_replace_returns_same_for_yarn2() {
+        let res = replace_constraint_version(YARN2_LOCK, "chalk", "^2.4.1", "2.5.0", None);
+        assert_eq!(res, YARN2_LOCK);
+    }
+
+    // Ported: "replaces without dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 18
+    #[test]
+    fn yarn_replace_without_dependencies() {
+        let res = replace_constraint_version(YARN_LOCK1, "fresh", "~0.2.1", "0.2.5", None);
+        assert_ne!(res, YARN_LOCK1);
+        assert!(res.contains("  version \"0.2.5\""), "expected new version in result");
+        assert!(!res.contains("  version \"0.2.4\""), "old version should be gone");
+        assert!(!res.contains("resolved \"https://registry.yarnpkg.com/fresh/-/fresh-0.2.4"), "old resolved line should be gone");
+        // constraint line preserved
+        assert!(res.contains("fresh@~0.2.1:\n  version \"0.2.5\""), "constraint line must be preserved");
+    }
+
+    // Ported: "replaces with dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 34
+    #[test]
+    fn yarn_replace_with_dependencies() {
+        let res = replace_constraint_version(YARN_LOCK1, "express", "4.0.0", "4.4.0", None);
+        assert_ne!(res, YARN_LOCK1);
+        assert!(res.contains("  version \"4.4.0\""), "expected new version");
+        assert!(!res.contains("  version \"4.0.0\""), "old version should be gone");
+        assert!(!res.contains("resolved \"https://registry.yarnpkg.com/express/-/express-4.0.0"), "old resolved line should be gone");
+        // dependencies section preserved
+        assert!(res.contains("express@4.0.0:\n  version \"4.4.0\"\n  dependencies:"), "dependencies must follow new version");
+    }
+
+    // Ported: "replaces constraint too" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 51
+    #[test]
+    fn yarn_replace_constraint_too() {
+        let res = replace_constraint_version(YARN_LOCK1, "express", "4.0.0", "4.4.0", Some("4.4.0"));
+        assert_ne!(res, YARN_LOCK1);
+        assert!(res.contains("express@4.4.0:\n  version \"4.4.0\""), "constraint + version must be updated");
+        assert!(!res.contains("express@4.0.0:"), "old constraint must be gone");
+    }
+
+    // Ported: "handles escaped constraints" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 70
+    #[test]
+    fn yarn_replace_handles_escaped_constraints() {
+        let res = replace_constraint_version(YARN_LOCK2, "string-width", "^1.0.1 || ^2.0.0", "2.2.0", None);
+        assert_ne!(res, YARN_LOCK2);
+        assert!(res.contains("  version \"2.2.0\""), "expected new version");
+        assert!(!res.contains("  version \"2.0.0\""), "old version should be gone");
+        assert!(!res.contains("resolved \"https://registry.yarnpkg.com/string-width/-/string-width-2.1.1"), "old resolved should be gone");
+    }
+
+    // Ported: "handles quoted" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 94
+    #[test]
+    fn yarn_replace_handles_quoted() {
+        let res = replace_constraint_version(YARN_LOCK2, "@embroider/addon-shim", "^0.48.0", "0.48.1", None);
+        assert_ne!(res, YARN_LOCK2);
+        assert!(res.contains("  version \"0.48.1\""), "expected new version");
+        assert!(!res.contains("  version \"0.48.0\""), "old version should be gone");
     }
 }

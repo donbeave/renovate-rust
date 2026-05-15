@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2487 / 8612 actionable tests ported (28%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2493 / 8612 actionable tests ported (28%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16787,18 +16787,18 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `replaceConstraintVersion()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if Yarn 2+ | 11 | pending | — | — | — |
-| replaces without dependencies | 21 | pending | — | — | — |
-| replaces with dependencies | 46 | pending | — | — | — |
-| replaces constraint too | 71 | pending | — | — | — |
-| handles escaped constraints | 99 | pending | — | — | — |
-| handles quoted | 124 | pending | — | — | — |
+| returns same if Yarn 2+ | 11 | ported | `npm.rs` | `yarn_replace_returns_same_for_yarn2` | — |
+| replaces without dependencies | 21 | ported | `npm.rs` | `yarn_replace_without_dependencies` | — |
+| replaces with dependencies | 46 | ported | `npm.rs` | `yarn_replace_with_dependencies` | — |
+| replaces constraint too | 71 | ported | `npm.rs` | `yarn_replace_constraint_too` | — |
+| handles escaped constraints | 99 | ported | `npm.rs` | `yarn_replace_handles_escaped_constraints` | — |
+| handles quoted | 124 | ported | `npm.rs` | `yarn_replace_handles_quoted` | — |
 
 ---
 
