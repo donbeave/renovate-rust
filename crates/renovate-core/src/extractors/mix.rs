@@ -218,6 +218,30 @@ fn parse_mix_lock(content: &str) -> BTreeMap<String, String> {
     out
 }
 
+/// Return `true` when `value` is a complex range (multiple clauses).
+///
+/// Matches "and", "or", "||" separators as used by Mix/Hex version constraints.
+fn is_complex_mix_range(value: &str) -> bool {
+    value.contains(" and ") || value.contains(" or ") || value.contains("||")
+}
+
+/// Determine the effective Mix range strategy.
+///
+/// Mirrors `lib/modules/manager/mix/range.ts` `getRangeStrategy()`.
+pub fn get_range_strategy<'a>(range_strategy: &'a str, current_value: Option<&str>) -> &'a str {
+    let is_complex = current_value.is_some_and(is_complex_mix_range);
+    if range_strategy == "bump" && is_complex {
+        return "widen";
+    }
+    if range_strategy != "auto" {
+        return range_strategy;
+    }
+    if is_complex {
+        return "widen";
+    }
+    "update-lockfile"
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -409,5 +433,40 @@ end
         let deps = extract(content);
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].name, "cowboy");
+    }
+
+    // Ported: "returns same if not auto" — modules/manager/mix/range.spec.ts line 4
+    #[test]
+    fn mix_range_returns_same_if_not_auto() {
+        assert_eq!(get_range_strategy("pin", None), "pin");
+        assert_eq!(get_range_strategy("widen", None), "widen");
+    }
+
+    // Ported: "widens complex bump" — modules/manager/mix/range.spec.ts line 11
+    #[test]
+    fn mix_range_widens_complex_bump() {
+        let result = get_range_strategy("bump", Some(">= 1.6.0 and < 2.0.0"));
+        assert_eq!(result, "widen");
+    }
+
+    // Ported: "bumps non-complex bump" — modules/manager/mix/range.spec.ts line 20
+    #[test]
+    fn mix_range_bumps_non_complex() {
+        let result = get_range_strategy("bump", Some("~>1.0.0"));
+        assert_eq!(result, "bump");
+    }
+
+    // Ported: "widens complex auto" — modules/manager/mix/range.spec.ts line 29
+    #[test]
+    fn mix_range_widens_complex_auto() {
+        let result = get_range_strategy("auto", Some("<1.7.0 or ~>1.7.1"));
+        assert_eq!(result, "widen");
+    }
+
+    // Ported: "defaults to update-lockfile" — modules/manager/mix/range.spec.ts line 37
+    #[test]
+    fn mix_range_defaults_to_update_lockfile() {
+        let result = get_range_strategy("auto", None);
+        assert_eq!(result, "update-lockfile");
     }
 }

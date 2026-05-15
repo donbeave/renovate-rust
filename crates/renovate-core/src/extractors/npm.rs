@@ -1123,6 +1123,35 @@ fn skip_reason_for(value: &str) -> Option<NpmSkipReason> {
     None
 }
 
+/// Return `true` when `value` is a complex npm range (contains `||`).
+fn is_complex_npm_range(value: &str) -> bool {
+    value.contains("||")
+}
+
+/// Determine the effective npm range strategy.
+///
+/// Mirrors `lib/modules/manager/npm/range.ts` `getRangeStrategy()`.
+pub fn get_range_strategy<'a>(
+    range_strategy: &'a str,
+    dep_type: Option<&str>,
+    current_value: Option<&str>,
+) -> &'a str {
+    let is_complex = current_value.is_some_and(is_complex_npm_range);
+    if range_strategy == "bump" && is_complex {
+        return "widen";
+    }
+    if !range_strategy.is_empty() && range_strategy != "auto" {
+        return range_strategy;
+    }
+    if dep_type == Some("peerDependencies") {
+        return "widen";
+    }
+    if is_complex {
+        return "widen";
+    }
+    "update-lockfile"
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2483,5 +2512,39 @@ chalk@^2.4.1:
                 dep.name == name && dep.current_value == current_value && dep.skip_reason.is_none()
             }));
         }
+    }
+
+    // Ported: "returns same if not auto" — modules/manager/npm/range.spec.ts line 4
+    #[test]
+    fn npm_range_returns_same_if_not_auto() {
+        assert_eq!(get_range_strategy("widen", None, None), "widen");
+    }
+
+    // Ported: "widens peerDependencies" — modules/manager/npm/range.spec.ts line 8
+    #[test]
+    fn npm_range_widens_peer_dependencies() {
+        let result = get_range_strategy("auto", Some("peerDependencies"), None);
+        assert_eq!(result, "widen");
+    }
+
+    // Ported: "widens complex ranges" — modules/manager/npm/range.spec.ts line 16
+    #[test]
+    fn npm_range_widens_complex_ranges() {
+        let result = get_range_strategy("auto", Some("dependencies"), Some("^1.6.0 || ^2.0.0"));
+        assert_eq!(result, "widen");
+    }
+
+    // Ported: "widens complex bump" — modules/manager/npm/range.spec.ts line 24
+    #[test]
+    fn npm_range_widens_complex_bump() {
+        let result = get_range_strategy("bump", Some("dependencies"), Some("^1.6.0 || ^2.0.0"));
+        assert_eq!(result, "widen");
+    }
+
+    // Ported: "defaults to update-lockfile" — modules/manager/npm/range.spec.ts line 32
+    #[test]
+    fn npm_range_defaults_to_update_lockfile() {
+        let result = get_range_strategy("auto", Some("dependencies"), None);
+        assert_eq!(result, "update-lockfile");
     }
 }

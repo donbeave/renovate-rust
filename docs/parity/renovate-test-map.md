@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2243 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2253 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15985,17 +15985,17 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/mix/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mix/range.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 5 | pending | — | — | — |
-| widens complex bump | 13 | pending | — | — | — |
-| bumps non-complex bump | 22 | pending | — | — | — |
-| widens complex auto | 31 | pending | — | — | — |
-| defaults to update-lockfile | 40 | pending | — | — | — |
+| returns same if not auto | 5 | ported | `mix.rs` | `mix_range_returns_same_if_not_auto` | — |
+| widens complex bump | 13 | ported | `mix.rs` | `mix_range_widens_complex_bump` | — |
+| bumps non-complex bump | 22 | ported | `mix.rs` | `mix_range_bumps_non_complex` | — |
+| widens complex auto | 31 | ported | `mix.rs` | `mix_range_widens_complex_auto` | — |
+| defaults to update-lockfile | 40 | ported | `mix.rs` | `mix_range_defaults_to_update_lockfile` | — |
 
 ---
 
@@ -16540,17 +16540,17 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/npm/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/range.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 5 | pending | — | — | — |
-| widens peerDependencies | 10 | pending | — | — | — |
-| widens complex ranges | 18 | pending | — | — | — |
-| widens complex bump | 27 | pending | — | — | — |
-| defaults to update-lockfile | 36 | pending | — | — | — |
+| returns same if not auto | 5 | ported | `npm.rs` | `npm_range_returns_same_if_not_auto` | — |
+| widens peerDependencies | 10 | ported | `npm.rs` | `npm_range_widens_peer_dependencies` | — |
+| widens complex ranges | 18 | ported | `npm.rs` | `npm_range_widens_complex_ranges` | — |
+| widens complex bump | 27 | ported | `npm.rs` | `npm_range_widens_complex_bump` | — |
+| defaults to update-lockfile | 36 | ported | `npm.rs` | `npm_range_defaults_to_update_lockfile` | — |
 
 ---
 
