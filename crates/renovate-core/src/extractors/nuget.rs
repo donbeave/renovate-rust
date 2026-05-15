@@ -768,6 +768,65 @@ fn normalize_version(v: &str) -> (String, Option<NuGetSkipReason>) {
     (trimmed.to_owned(), Some(NuGetSkipReason::VersionRange))
 }
 
+// ── .csproj version bumping ───────────────────────────────────────────────────
+
+/// Bump the `<Version>` or `<VersionPrefix>` element in a .csproj XML file.
+///
+/// Returns the updated content. If bumping fails (invalid semver, version not
+/// found, unknown bump type), the original content is returned unchanged.
+///
+/// Mirrors `lib/modules/manager/nuget/update.ts` `bumpPackageVersion()`.
+pub fn bump_package_version(content: &str, current_value: &str, bump_version: &str) -> String {
+    let Ok(current) = semver::Version::parse(current_value) else {
+        return content.to_owned();
+    };
+    let Some(new_version) = bump_csproj_semver(&current, bump_version) else {
+        return content.to_owned();
+    };
+
+    for tag in &["Version", "VersionPrefix"] {
+        let old_tag = format!("<{tag}>{current_value}</{tag}>");
+        let new_tag = format!("<{tag}>{new_version}</{tag}>");
+        if content.contains(&old_tag) {
+            return content.replacen(&old_tag, &new_tag, 1);
+        }
+    }
+    content.to_owned()
+}
+
+fn bump_csproj_semver(version: &semver::Version, bump_type: &str) -> Option<String> {
+    let mut new = version.clone();
+    match bump_type {
+        "patch" => {
+            new.patch += 1;
+            new.pre = semver::Prerelease::EMPTY;
+        }
+        "minor" => {
+            new.minor += 1;
+            new.patch = 0;
+            new.pre = semver::Prerelease::EMPTY;
+        }
+        "major" => {
+            new.major += 1;
+            new.minor = 0;
+            new.patch = 0;
+            new.pre = semver::Prerelease::EMPTY;
+        }
+        "prerelease" => {
+            let pre_str = new.pre.as_str();
+            if pre_str.is_empty() {
+                new.pre = semver::Prerelease::new("1").ok()?;
+            } else if let Ok(n) = pre_str.parse::<u64>() {
+                new.pre = semver::Prerelease::new(&(n + 1).to_string()).ok()?;
+            } else {
+                return None;
+            }
+        }
+        _ => return None,
+    }
+    Some(new.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1614,5 +1673,81 @@ Console.WriteLine("Hello World!");
     #[test]
     fn global_json_without_nuget_content_returns_none() {
         assert!(extract_global_json(r#"{"sdk": {"rollForward": "latestMajor"}}"#).is_none());
+    }
+
+    // ── nuget bump_package_version tests ─────────────────────────────────────
+
+    const SIMPLE_CONTENT: &str = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>0.0.1</Version></PropertyGroup></Project>"#;
+    const MINIMUM_CONTENT: &str = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1</Version></PropertyGroup></Project>"#;
+    const PRERELEASE_CONTENT: &str = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>1.0.0-1</Version></PropertyGroup></Project>"#;
+    const ISSUE23526_INITIAL: &str = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>4.9.0</Version></PropertyGroup></Project>"#;
+    const ISSUE23526_EXPECTED: &str = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>4.10.0</Version></PropertyGroup></Project>"#;
+
+    // Ported: "bumps csproj version" — modules/manager/nuget/update.spec.ts line 17
+    #[test]
+    fn nuget_bumps_csproj_version() {
+        let result = bump_package_version(SIMPLE_CONTENT, "0.0.1", "patch");
+        assert!(result.contains("<Version>0.0.2</Version>"));
+    }
+
+    // Ported: "does not bump version twice" — modules/manager/nuget/update.spec.ts line 29
+    #[test]
+    fn nuget_does_not_bump_twice() {
+        let bumped = bump_package_version(SIMPLE_CONTENT, "0.0.1", "patch");
+        let bumped2 = bump_package_version(&bumped, "0.0.1", "patch");
+        assert_eq!(bumped, bumped2);
+    }
+
+    // Ported: "issue 23526 does not bump version incorrectly" — modules/manager/nuget/update.spec.ts line 41
+    #[test]
+    fn nuget_issue_23526_minor_bump() {
+        let bumped = bump_package_version(ISSUE23526_INITIAL, "4.9.0", "minor");
+        let bumped2 = bump_package_version(&bumped, "4.9.0", "minor");
+        assert_eq!(bumped2, ISSUE23526_EXPECTED);
+    }
+
+    // Ported: "does not bump version if version is not a semantic version" — modules/manager/nuget/update.spec.ts line 57
+    #[test]
+    fn nuget_does_not_bump_non_semver() {
+        let result = bump_package_version(MINIMUM_CONTENT, "1", "patch");
+        assert!(result.contains("<Version>1</Version>"));
+        assert!(!result.contains("<Version>2</Version>"));
+    }
+
+    // Ported: "does not bump version if extract found no version" — modules/manager/nuget/update.spec.ts line 68
+    #[test]
+    fn nuget_does_not_bump_empty_current_value() {
+        let result = bump_package_version(MINIMUM_CONTENT, "", "patch");
+        assert_eq!(result, MINIMUM_CONTENT);
+    }
+
+    // Ported: "does not bump version if csproj has no version" — modules/manager/nuget/update.spec.ts line 73
+    #[test]
+    fn nuget_does_not_bump_when_no_version_tag() {
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#;
+        let result = bump_package_version(content, "0.0.1", "patch");
+        assert_eq!(result, content);
+    }
+
+    // Ported: "returns content if bumping errors" — modules/manager/nuget/update.spec.ts line 83
+    #[test]
+    fn nuget_returns_content_on_invalid_bump_type() {
+        let result = bump_package_version(SIMPLE_CONTENT, "0.0.1", "not_a_bump_type");
+        assert_eq!(result, SIMPLE_CONTENT);
+    }
+
+    // Ported: "bumps csproj version with prerelease semver level" — modules/manager/nuget/update.spec.ts line 92
+    #[test]
+    fn nuget_bumps_prerelease_version() {
+        let result = bump_package_version(PRERELEASE_CONTENT, "1.0.0-1", "prerelease");
+        assert!(result.contains("<Version>1.0.0-2</Version>"));
+    }
+
+    // Ported: "bumps csproj version prefix" — modules/manager/nuget/update.spec.ts line 104
+    #[test]
+    fn nuget_bumps_version_prefix() {
+        let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>"#;
+        let result = bump_package_version(content, "1.0.0", "patch");
+        assert!(result.contains("<VersionPrefix>1.0.1</VersionPrefix>"));
     }
 }

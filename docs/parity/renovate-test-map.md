@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2515 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2524 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16919,21 +16919,21 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/nuget/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nuget/update.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `bumpPackageVersion`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| bumps csproj version | 17 | pending | — | — | — |
-| does not bump version twice | 28 | pending | — | — | — |
-| issue 23526 does not bump version incorrectly | 43 | pending | — | — | — |
-| does not bump version if version is not a semantic version | 58 | pending | — | — | — |
-| does not bump version if extract found no version | 69 | pending | — | — | — |
-| does not bump version if csproj has no version | 75 | pending | — | — | — |
-| returns content if bumping errors | 87 | pending | — | — | — |
-| bumps csproj version with prerelease semver level | 96 | pending | — | — | — |
-| bumps csproj version prefix | 107 | pending | — | — | — |
+| bumps csproj version | 17 | ported | `nuget.rs` | `nuget_bumps_csproj_version` | — |
+| does not bump version twice | 28 | ported | `nuget.rs` | `nuget_does_not_bump_twice` | — |
+| issue 23526 does not bump version incorrectly | 43 | ported | `nuget.rs` | `nuget_issue_23526_minor_bump` | — |
+| does not bump version if version is not a semantic version | 58 | ported | `nuget.rs` | `nuget_does_not_bump_non_semver` | — |
+| does not bump version if extract found no version | 69 | ported | `nuget.rs` | `nuget_does_not_bump_empty_current_value` | — |
+| does not bump version if csproj has no version | 75 | ported | `nuget.rs` | `nuget_does_not_bump_when_no_version_tag` | — |
+| returns content if bumping errors | 87 | ported | `nuget.rs` | `nuget_returns_content_on_invalid_bump_type` | — |
+| bumps csproj version with prerelease semver level | 96 | ported | `nuget.rs` | `nuget_bumps_prerelease_version` | — |
+| bumps csproj version prefix | 107 | ported | `nuget.rs` | `nuget_bumps_version_prefix` | — |
 
 ---
 
