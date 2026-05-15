@@ -359,6 +359,39 @@ fn git_dep_name(url: &str) -> Option<&str> {
     url.rsplit('/').next().filter(|s| !s.is_empty())
 }
 
+/// Flag-only extraction result for `extract_package_file_flags`.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PipFlagsResult {
+    /// From `-i` / `--index-url`.
+    pub registry_urls: Vec<String>,
+    /// From `--extra-index-url`.
+    pub additional_registry_urls: Vec<String>,
+    /// From `-r <file>`.
+    pub requirements_files: Vec<String>,
+    /// From `-c <file>`.
+    pub constraints_files: Vec<String>,
+}
+
+/// Extract registry URL flags and file references from a requirements.txt, without parsing deps.
+///
+/// Mirrors `lib/modules/manager/pip_requirements/common.ts` `extractPackageFileFlags()`.
+pub fn extract_package_file_flags(content: &str) -> PipFlagsResult {
+    let mut result = PipFlagsResult::default();
+    for line in content.lines() {
+        let line = line.trim();
+        if let Some(url) = directive_value(line, &["-i", "--index-url"]) {
+            result.registry_urls = vec![url.to_owned()];
+        } else if let Some(url) = directive_value(line, &["--extra-index-url"]) {
+            result.additional_registry_urls.push(url.to_owned());
+        } else if let Some(file) = directive_value(line, &["-r"]) {
+            result.requirements_files.push(file.to_owned());
+        } else if let Some(file) = directive_value(line, &["-c"]) {
+            result.constraints_files.push(file.to_owned());
+        }
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -737,5 +770,48 @@ mod tests {
         let content = "Django==1\ndistribute==0.6.27\ndj-database-url==0.2\npsycopg2==2.4.5\nwsgiref==0.1.2\n";
         let deps = extract_ok(content);
         assert_eq!(deps.len(), 5);
+    }
+
+    // Ported: "extracts --index-url flag" — modules/manager/pip_requirements/common.spec.ts line 5
+    #[test]
+    fn pip_flags_extracts_index_url() {
+        let result = extract_package_file_flags("--index-url https://example.com/pypi");
+        assert_eq!(result.registry_urls, vec!["https://example.com/pypi"]);
+        assert!(result.additional_registry_urls.is_empty());
+    }
+
+    // Ported: "extracts --index-url short code" — modules/manager/pip_requirements/common.spec.ts line 12
+    #[test]
+    fn pip_flags_extracts_index_url_short_code() {
+        let content = "-i http://example.com/private-pypi/\nsome-package==0.3.1";
+        let result = extract_package_file_flags(content);
+        assert_eq!(result.registry_urls, vec!["http://example.com/private-pypi/"]);
+    }
+
+    // Ported: "extracts --extra-index-url flag" — modules/manager/pip_requirements/common.spec.ts line 22
+    #[test]
+    fn pip_flags_extracts_extra_index_url() {
+        let result = extract_package_file_flags("--extra-index-url https://example.com/pypi");
+        assert_eq!(
+            result.additional_registry_urls,
+            vec!["https://example.com/pypi"]
+        );
+        assert!(result.registry_urls.is_empty());
+    }
+
+    // Ported: "extracts --requirement short code option" — modules/manager/pip_requirements/common.spec.ts line 31
+    #[test]
+    fn pip_flags_extracts_requirements_file() {
+        let content = "-r base.txt\nsome-package==0.3.1";
+        let result = extract_package_file_flags(content);
+        assert_eq!(result.requirements_files, vec!["base.txt"]);
+    }
+
+    // Ported: "extracts --constraints short code option" — modules/manager/pip_requirements/common.spec.ts line 42
+    #[test]
+    fn pip_flags_extracts_constraints_file() {
+        let content = "-c constrain.txt\nsome-package==0.3.1";
+        let result = extract_package_file_flags(content);
+        assert_eq!(result.constraints_files, vec!["constrain.txt"]);
     }
 }

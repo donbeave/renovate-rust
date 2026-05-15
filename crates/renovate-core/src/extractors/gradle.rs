@@ -322,6 +322,52 @@ fn classify_version(version: &str) -> Option<GradleSkipReason> {
     None
 }
 
+/// Extract a version-like substring from the beginning of `input`.
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `versionLikeSubstring()`.
+fn version_like_substring(input: &str) -> Option<&str> {
+    use std::sync::LazyLock;
+    static RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r"^(?P<version>[-_.\[\](),a-zA-Z0-9+! ]+)").unwrap());
+    let cap = RE.captures(input)?;
+    let version = cap.name("version")?.as_str().trim();
+    if version.is_empty() || !version.chars().any(|c| c.is_ascii_digit()) {
+        return None;
+    }
+    Some(version)
+}
+
+/// Update a Gradle dependency in file content.
+///
+/// Mirrors `lib/modules/manager/gradle/update.ts` `updateDependency()`.
+/// Returns `None` when the file cannot be updated (wrong position, unknown version).
+pub fn update_dependency(
+    file_content: &str,
+    offset: usize,
+    current_value: &str,
+    new_value: &str,
+    shared_variable_name: Option<&str>,
+    update_type: Option<&str>,
+) -> Option<String> {
+    if update_type == Some("replacement") {
+        return None;
+    }
+    if offset > file_content.len() {
+        return None;
+    }
+    let left_part = &file_content[..offset];
+    let right_part = &file_content[offset..];
+    let version = version_like_substring(right_part)?;
+    let rest_part = &right_part[version.len()..];
+    if version == new_value {
+        return Some(file_content.to_owned());
+    }
+    if version == current_value || shared_variable_name.is_some() {
+        return Some(format!("{left_part}{new_value}{rest_part}"));
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -617,5 +663,44 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     fn empty_returns_empty() {
         assert!(extract_build_file("").is_empty());
         assert!(extract_version_catalog("").is_empty());
+    }
+
+    // Ported: "replaces" — modules/manager/gradle/update.spec.ts line 4
+    #[test]
+    fn gradle_update_replaces_version() {
+        let result = update_dependency("###1.2.3###", 3, "1.2.3", "1.2.4", None, None);
+        assert_eq!(result.as_deref(), Some("###1.2.4###"));
+    }
+
+    // Ported: "groups" — modules/manager/gradle/update.spec.ts line 18
+    #[test]
+    fn gradle_update_groups_shared_variable() {
+        let result = update_dependency("###1.2.4###", 3, "1.2.3", "1.2.5", Some("group"), None);
+        assert_eq!(result.as_deref(), Some("###1.2.5###"));
+    }
+
+    // Ported: "returns same content" — modules/manager/gradle/update.spec.ts line 32
+    #[test]
+    fn gradle_update_returns_same_when_already_updated() {
+        let result = update_dependency("###1.2.4###", 3, "1.2.3", "1.2.4", None, None);
+        assert_eq!(result.as_deref(), Some("###1.2.4###"));
+    }
+
+    // Ported: "returns null" — modules/manager/gradle/update.spec.ts line 46
+    #[test]
+    fn gradle_update_returns_null_for_wrong_position() {
+        // Version at offset doesn't match current_value or new_value
+        let r1 = update_dependency("###1.3.0###", 3, "1.2.3", "1.2.4", None, None);
+        assert!(r1.is_none());
+        // Empty content
+        let r2 = update_dependency("", 3, "1.2.3", "1.2.4", None, None);
+        assert!(r2.is_none());
+    }
+
+    // Ported: "should return null for replacement" — modules/manager/gradle/update.spec.ts line 62
+    #[test]
+    fn gradle_update_returns_null_for_replacement() {
+        let result = update_dependency("", 0, "", "", None, Some("replacement"));
+        assert!(result.is_none());
     }
 }
