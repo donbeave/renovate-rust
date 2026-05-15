@@ -87,6 +87,19 @@ pub fn extract_from_file_list(files: &[String]) -> Vec<HermitDep> {
     deps
 }
 
+const HERMIT_UPDATED_MARKER: &str = "#hermit updated";
+
+/// Append `#hermit updated` marker to trigger artifact update.
+///
+/// Mirrors `lib/modules/manager/hermit/update.ts` `updateDependency()`.
+/// Adds the marker if not already present; otherwise returns content unchanged.
+pub fn update_hermit_dependency(file_content: &str) -> String {
+    if file_content.lines().any(|l| l.trim() == HERMIT_UPDATED_MARKER) {
+        return file_content.to_owned();
+    }
+    format!("{file_content}\n{HERMIT_UPDATED_MARKER}")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -150,5 +163,21 @@ mod tests {
     #[test]
     fn handles_empty_file_list() {
         assert!(extract_from_file_list(&[]).is_empty());
+    }
+
+    // Ported: "should append a new marking line at the end to trigger the artifact update" — modules/manager/hermit/update.spec.ts line 5
+    #[test]
+    fn hermit_update_appends_marker() {
+        let content = "#!/bin/bash\n#some hermit content";
+        let result = update_hermit_dependency(content);
+        assert_eq!(result, format!("{content}\n#hermit updated"));
+    }
+
+    // Ported: "should not update again if the new line has been appended" — modules/manager/hermit/update.spec.ts line 18
+    #[test]
+    fn hermit_update_no_op_if_already_marked() {
+        let content = "#!/bin/bash\n#some hermit content\n#hermit updated";
+        let result = update_hermit_dependency(content);
+        assert_eq!(result, content);
     }
 }

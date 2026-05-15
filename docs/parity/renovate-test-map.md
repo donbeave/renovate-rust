@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2331 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2335 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13899,14 +13899,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/composer/update-locked.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/update-locked.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects already updated | 10 | pending | — | — | — |
-| returns unsupported | 22 | pending | — | — | — |
+| detects already updated | 10 | ported | `composer.rs` | `composer_update_locked_detects_already_updated` | — |
+| returns unsupported | 22 | ported | `composer.rs` | `composer_update_locked_returns_unsupported` | — |
 
 ---
 
@@ -15559,14 +15559,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/hermit/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/hermit/update.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `updateDependency`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should append a new marking line at the end to trigger the artifact update | 6 | pending | — | — | — |
-| should not update again if the new line has been appended | 19 | pending | — | — | — |
+| should append a new marking line at the end to trigger the artifact update | 6 | ported | `hermit.rs` | `hermit_update_appends_marker` | — |
+| should not update again if the new line has been appended | 19 | ported | `hermit.rs` | `hermit_update_no_op_if_already_marked` | — |
 
 ---
 

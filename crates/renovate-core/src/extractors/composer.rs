@@ -458,6 +458,45 @@ fn is_dev_branch(version: &str) -> bool {
     version.starts_with("dev-") || version.ends_with("-dev")
 }
 
+/// Status result for `update_locked_composer_dependency`.
+#[derive(Debug)]
+pub enum ComposerUpdateLockedStatus {
+    AlreadyUpdated,
+    Unsupported,
+}
+
+impl ComposerUpdateLockedStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            ComposerUpdateLockedStatus::AlreadyUpdated => "already-updated",
+            ComposerUpdateLockedStatus::Unsupported => "unsupported",
+        }
+    }
+}
+
+/// Check if a composer lock file has a dependency at the target version.
+///
+/// Mirrors `lib/modules/manager/composer/update-locked.ts` `updateLockedDependency()`.
+pub fn update_locked_composer_dependency(
+    dep_name: Option<&str>,
+    new_version: Option<&str>,
+    lock_file_content: Option<&str>,
+) -> ComposerUpdateLockedStatus {
+    let (Some(dep_name), Some(new_version), Some(lock_file_content)) =
+        (dep_name, new_version, lock_file_content)
+    else {
+        return ComposerUpdateLockedStatus::Unsupported;
+    };
+    let Ok(locked) = collect_locked_versions(lock_file_content) else {
+        return ComposerUpdateLockedStatus::Unsupported;
+    };
+    if locked.get(dep_name).is_some_and(|v| v == new_version) {
+        ComposerUpdateLockedStatus::AlreadyUpdated
+    } else {
+        ComposerUpdateLockedStatus::Unsupported
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -873,5 +912,29 @@ mod tests {
     #[test]
     fn invalid_json_returns_error() {
         assert!(extract("nothing here").is_err());
+    }
+
+    const LOCK_CONTENT: &str = include_str!("../../tests/fixtures/composer/composer5.lock");
+
+    // Ported: "detects already updated" — modules/manager/composer/update-locked.spec.ts line 9
+    #[test]
+    fn composer_update_locked_detects_already_updated() {
+        let result = update_locked_composer_dependency(
+            Some("awesome/git"),
+            Some("1.2.0"),
+            Some(LOCK_CONTENT),
+        );
+        assert_eq!(result.as_str(), "already-updated");
+    }
+
+    // Ported: "returns unsupported" — modules/manager/composer/update-locked.spec.ts line 21
+    #[test]
+    fn composer_update_locked_returns_unsupported() {
+        let result = update_locked_composer_dependency(
+            Some("awesome/git"),
+            Some("1.0.0"),
+            Some(LOCK_CONTENT),
+        );
+        assert_eq!(result.as_str(), "unsupported");
     }
 }
