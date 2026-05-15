@@ -86,6 +86,7 @@ pub mod pipfile;
 pub mod pixi;
 pub mod poetry;
 pub mod pre_commit;
+pub mod proto;
 pub mod pubspec;
 pub mod puppet;
 pub mod pyenv;
