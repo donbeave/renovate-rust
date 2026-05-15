@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2559 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2565 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13417,18 +13417,18 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bun-version/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bun-version/index.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns a result | 5 | pending | — | — | — |
-| handles empty files | 17 | pending | — | — | — |
-| handles no newline at the end | 22 | pending | — | — | — |
-| handles multiple lines | 27 | pending | — | — | — |
-| handles invalid versions | 32 | pending | — | — | — |
-| handles ranges | 45 | pending | — | — | — |
+| returns a result | 5 | ported | `bun_version.rs` | `returns_a_result` | — |
+| handles empty files | 17 | ported | `bun_version.rs` | `handles_empty_files` | — |
+| handles no newline at the end | 22 | ported | `bun_version.rs` | `handles_no_newline_at_end` | — |
+| handles multiple lines | 27 | ported | `bun_version.rs` | `handles_multiple_lines` | — |
+| handles invalid versions | 32 | ported | `bun_version.rs` | `handles_invalid_versions` | — |
+| handles ranges | 45 | ported | `bun_version.rs` | `handles_ranges` | — |
 
 ---
 

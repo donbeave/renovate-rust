@@ -19,6 +19,7 @@ pub mod bitrise;
 pub mod buildkite;
 pub mod buildpacks;
 pub mod bundler;
+pub mod bun_version;
 pub mod cabal;
 pub mod cake;
 pub mod cargo;
