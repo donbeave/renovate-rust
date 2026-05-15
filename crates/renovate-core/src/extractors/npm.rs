@@ -1312,6 +1312,17 @@ pub fn get_range_strategy<'a>(
     "update-lockfile"
 }
 
+/// Find the new version for the `node` dep in a list of upgrades.
+///
+/// Mirrors `lib/modules/manager/npm/post-update/node-version.ts`
+/// `getNodeUpdate()`.
+pub fn get_node_update<'a>(upgrades: &[(&str, &'a str)]) -> Option<&'a str> {
+    upgrades
+        .iter()
+        .find(|(dep_name, _)| *dep_name == "node")
+        .map(|(_, new_value)| *new_value)
+}
+
 /// Result of parsing an npm lock file.
 #[derive(Debug)]
 pub struct NpmParseLockResult {
@@ -2947,6 +2958,20 @@ chalk@^2.4.1:
     fn npm_bump_returns_content_on_invalid_bump_type() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "invalid_type");
         assert_eq!(result, NPM_PKG_CONTENT);
+    }
+
+    // Ported: "returns version" — modules/manager/npm/post-update/node-version.spec.ts line 101
+    #[test]
+    fn npm_get_node_update_returns_version() {
+        let upgrades = [("node", "16.15.0")];
+        assert_eq!(get_node_update(&upgrades), Some("16.15.0"));
+    }
+
+    // Ported: "returns undefined" — modules/manager/npm/post-update/node-version.spec.ts line 107
+    #[test]
+    fn npm_get_node_update_returns_none_for_empty() {
+        let upgrades: &[(&str, &str)] = &[];
+        assert!(get_node_update(upgrades).is_none());
     }
 
     const NPM_PACKAGE_LOCK: &str =
