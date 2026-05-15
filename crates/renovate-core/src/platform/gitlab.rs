@@ -235,6 +235,64 @@ fn encode_project(owner: &str, repo: &str) -> String {
     format!("{owner}%2F{repo}")
 }
 
+// ── code-owners (mirrors lib/modules/platform/gitlab/code-owners.ts) ─────────
+
+/// A parsed CODEOWNERS file rule.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FileOwnerRule {
+    /// The glob pattern for this rule.
+    pub pattern: String,
+    /// The owner usernames assigned to this pattern.
+    pub usernames: Vec<String>,
+    /// Score = pattern length (longer patterns win).
+    pub score: usize,
+}
+
+/// Parse CODEOWNERS file lines into owner rules.
+///
+/// Mirrors `extractRulesFromCodeOwnersLines` from
+/// `lib/modules/platform/gitlab/code-owners.ts`.
+pub fn extract_rules_from_code_owners_lines(lines: &[&str]) -> Vec<FileOwnerRule> {
+    let mut default_users: Vec<String> = Vec::new();
+    let mut rules = Vec::new();
+
+    for &line in lines {
+        if line.starts_with('[') || line.starts_with("^[") {
+            // Section header: find last `]` to handle approval counts like `[Team][2]`
+            let last_close = line.rfind(']').unwrap_or(0);
+            let after_header = line[last_close + 1..].trim();
+            default_users = if after_header.is_empty() {
+                Vec::new()
+            } else {
+                after_header
+                    .split_whitespace()
+                    .map(|s| s.to_owned())
+                    .collect()
+            };
+        } else {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            let (pattern, usernames) = match parts.split_first() {
+                Some((p, rest)) => (
+                    *p,
+                    if rest.is_empty() {
+                        default_users.clone()
+                    } else {
+                        rest.iter().map(|s| (*s).to_owned()).collect()
+                    },
+                ),
+                None => continue,
+            };
+            rules.push(FileOwnerRule {
+                score: pattern.len(),
+                pattern: pattern.to_owned(),
+                usernames,
+            });
+        }
+    }
+
+    rules
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{method, path, query_param};
@@ -419,5 +477,97 @@ mod tests {
         // 100 from page 1 + 2 blobs from page 2 (docs/tree is excluded)
         assert_eq!(files.len(), 102);
         assert!(files.contains(&"README.md".to_owned()));
+    }
+
+    // ── code-owners ───────────────────────────────────────────────────────────
+
+    // Ported: "should extract an owner rule from a line" — modules/platform/gitlab/code-owners.spec.ts line 5
+    #[test]
+    fn code_owners_parses_pattern_with_usernames() {
+        let rules = extract_rules_from_code_owners_lines(&["pattern username1 username2"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "pattern");
+        assert_eq!(rules[0].usernames, vec!["username1", "username2"]);
+        assert_eq!(rules[0].score, 7);
+    }
+
+    // Ported: "should extract an owner rule from a line with no usernames" — modules/platform/gitlab/code-owners.spec.ts line 20
+    #[test]
+    fn code_owners_parses_pattern_without_usernames() {
+        let rules = extract_rules_from_code_owners_lines(&["pattern"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "pattern");
+        assert_eq!(rules[0].usernames, Vec::<String>::new());
+        assert_eq!(rules[0].score, 7);
+    }
+
+    // Ported: "should extract an owner rule from a line after a section header" — modules/platform/gitlab/code-owners.spec.ts line 33
+    #[test]
+    fn code_owners_section_header_default_users() {
+        let rules = extract_rules_from_code_owners_lines(&["[team] username1 username2", "filename"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "filename");
+        assert_eq!(rules[0].usernames, vec!["username1", "username2"]);
+        assert_eq!(rules[0].score, 8);
+    }
+
+    // Ported: "should extract an owner rule from a line after a section header with no usernames" — modules/platform/gitlab/code-owners.spec.ts line 47
+    #[test]
+    fn code_owners_section_header_no_users() {
+        let rules = extract_rules_from_code_owners_lines(&["[team]", "filename"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "filename");
+        assert_eq!(rules[0].usernames, Vec::<String>::new());
+        assert_eq!(rules[0].score, 8);
+    }
+
+    // Ported: "should extract an owner rule from a line after a section header with spaces" — modules/platform/gitlab/code-owners.spec.ts line 61
+    #[test]
+    fn code_owners_section_header_with_spaces() {
+        let rules = extract_rules_from_code_owners_lines(&["[Backend Team] @backend-team", "filename"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "filename");
+        assert_eq!(rules[0].usernames, vec!["@backend-team"]);
+        assert_eq!(rules[0].score, 8);
+    }
+
+    // Ported: "should extract an owner rule from a line after a section header with spaces and no usernames" — modules/platform/gitlab/code-owners.spec.ts line 75
+    #[test]
+    fn code_owners_section_header_with_spaces_no_users() {
+        let rules = extract_rules_from_code_owners_lines(&["[Backend Team]", "filename"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "filename");
+        assert_eq!(rules[0].usernames, Vec::<String>::new());
+        assert_eq!(rules[0].score, 8);
+    }
+
+    // Ported: "should extract an owner rule from a line after a section header with spaces and multiple usernames" — modules/platform/gitlab/code-owners.spec.ts line 89
+    #[test]
+    fn code_owners_section_header_multiple_users() {
+        let rules = extract_rules_from_code_owners_lines(&["[Backend Team] @backend-team @backend-lead", "filename"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "filename");
+        assert_eq!(rules[0].usernames, vec!["@backend-team", "@backend-lead"]);
+        assert_eq!(rules[0].score, 8);
+    }
+
+    // Ported: "should extract an owner rule from a line after an optional section header with spaces" — modules/platform/gitlab/code-owners.spec.ts line 103
+    #[test]
+    fn code_owners_optional_section_header() {
+        let rules = extract_rules_from_code_owners_lines(&["^[Backend Team] @backend-team", "filename"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "filename");
+        assert_eq!(rules[0].usernames, vec!["@backend-team"]);
+        assert_eq!(rules[0].score, 8);
+    }
+
+    // Ported: "should extract an owner rule from a line after a section header with approval count and spaces" — modules/platform/gitlab/code-owners.spec.ts line 117
+    #[test]
+    fn code_owners_section_header_with_approval_count() {
+        let rules = extract_rules_from_code_owners_lines(&["[Backend Team][2] @backend-team", "filename"]);
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].pattern, "filename");
+        assert_eq!(rules[0].usernames, vec!["@backend-team"]);
+        assert_eq!(rules[0].score, 8);
     }
 }
