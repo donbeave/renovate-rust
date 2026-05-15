@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2570 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2571 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17094,13 +17094,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/pep621/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/utils.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `parsePEP508()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| (parse $value" | 6 | pending | — | — | — |
+| (parse $value" | 6 | ported | `pep621.rs` | `parse_pep508_*` (11 cases) | it.each with 13 rows; null/undefined → not-applicable in Rust |
 
 ---
 

@@ -29,7 +29,8 @@
 //! the registry lookup.  Entries that cannot be parsed as PEP 508 strings
 //! (e.g., PEP 735 `{include-group = "…"}` tables) are silently skipped.
 
-use std::{borrow::Cow, collections::BTreeMap};
+use std::{borrow::Cow, collections::BTreeMap, sync::LazyLock};
+use regex::Regex;
 use thiserror::Error;
 use toml::Value;
 
@@ -123,6 +124,75 @@ pub struct Pep621Extract {
 pub enum Pep621ExtractError {
     #[error("TOML parse error: {0}")]
     Toml(#[from] toml::de::Error),
+}
+
+/// Parsed result from [`parse_pep508_str`].
+///
+/// Mirrors TypeScript `Pep508ParseResult` from `pep621/types.ts`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Pep508ParseResult {
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub extras: Option<Vec<String>>,
+    pub marker: Option<String>,
+}
+
+/// PEP 508 dependency specifier regex (case-insensitive).
+static PEP508_PARSE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?i)^(?P<packageName>[A-Z0-9._-]+)\s*(?:\[(?P<extras>[A-Z0-9\s,._-]+)\])?\s*(?P<currentValue>[^;]+)?(;\s*(?P<marker>.*))?",
+    )
+    .unwrap()
+});
+
+/// Parse a PEP 508 dependency string.
+///
+/// Returns `None` for empty strings or strings that do not match the PEP 508
+/// package-name grammar.  This mirrors TypeScript `parsePEP508` in
+/// `lib/modules/manager/pep621/utils.ts`.
+pub fn parse_pep508_str(value: &str) -> Option<Pep508ParseResult> {
+    if value.is_empty() {
+        return None;
+    }
+    let cap = PEP508_PARSE_RE.captures(value)?;
+    let package_name = cap["packageName"].to_owned();
+
+    let current_value = cap.name("currentValue").and_then(|m| {
+        let v = m.as_str().trim();
+        if v.is_empty() {
+            None
+        } else if v.starts_with('(') && v.ends_with(')') {
+            let inner = v[1..v.len() - 1].trim();
+            if inner.is_empty() {
+                None
+            } else {
+                Some(inner.to_owned())
+            }
+        } else {
+            Some(v.to_owned())
+        }
+    });
+
+    let extras = cap.name("extras").and_then(|m| {
+        let s = m.as_str().trim();
+        if s.is_empty() {
+            None
+        } else {
+            Some(s.split(',').map(|e| e.trim().to_owned()).collect::<Vec<_>>())
+        }
+    });
+
+    let marker = cap.name("marker").and_then(|m| {
+        let s = m.as_str().trim();
+        if s.is_empty() { None } else { Some(s.to_owned()) }
+    });
+
+    Some(Pep508ParseResult {
+        package_name,
+        current_value,
+        extras,
+        marker,
+    })
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -1242,5 +1312,104 @@ readme = "README.md"
     fn pep621_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.2", "not_valid");
         assert_eq!(result, PEP621_CONTENT);
+    }
+
+    // --- parse_pep508_str tests ---
+
+    // Ported: "(parse $value" — pep621/utils.spec.ts line 6
+    #[test]
+    fn parse_pep508_empty_returns_none() {
+        assert!(parse_pep508_str("").is_none());
+    }
+
+    #[test]
+    fn parse_pep508_blinker() {
+        let r = parse_pep508_str("blinker").unwrap();
+        assert_eq!(r.package_name, "blinker");
+        assert!(r.current_value.is_none());
+        assert!(r.extras.is_none());
+        assert!(r.marker.is_none());
+    }
+
+    #[test]
+    fn parse_pep508_packaging_exact() {
+        let r = parse_pep508_str("packaging==20.0.0").unwrap();
+        assert_eq!(r.package_name, "packaging");
+        assert_eq!(r.current_value.as_deref(), Some("==20.0.0"));
+        assert!(r.extras.is_none());
+        assert!(r.marker.is_none());
+    }
+
+    #[test]
+    fn parse_pep508_packaging_parens() {
+        let r = parse_pep508_str("packaging (==20.0.0)").unwrap();
+        assert_eq!(r.package_name, "packaging");
+        assert_eq!(r.current_value.as_deref(), Some("==20.0.0"));
+        assert!(r.extras.is_none());
+        assert!(r.marker.is_none());
+    }
+
+    #[test]
+    fn parse_pep508_packaging_parens_with_marker() {
+        let r = parse_pep508_str("packaging (==20.0.0); python_version < \"3.8\"").unwrap();
+        assert_eq!(r.package_name, "packaging");
+        assert_eq!(r.current_value.as_deref(), Some("==20.0.0"));
+        assert!(r.extras.is_none());
+        assert_eq!(r.marker.as_deref(), Some("python_version < \"3.8\""));
+    }
+
+    #[test]
+    fn parse_pep508_packaging_range() {
+        let r = parse_pep508_str("packaging>=20.9,!=22.0").unwrap();
+        assert_eq!(r.package_name, "packaging");
+        assert_eq!(r.current_value.as_deref(), Some(">=20.9,!=22.0"));
+        assert!(r.extras.is_none());
+        assert!(r.marker.is_none());
+    }
+
+    #[test]
+    fn parse_pep508_with_extras_one() {
+        let r = parse_pep508_str("cachecontrol[filecache]>=0.12.11").unwrap();
+        assert_eq!(r.package_name, "cachecontrol");
+        assert_eq!(r.current_value.as_deref(), Some(">=0.12.11"));
+        assert_eq!(r.extras, Some(vec!["filecache".to_owned()]));
+        assert!(r.marker.is_none());
+    }
+
+    #[test]
+    fn parse_pep508_with_extras_multiple() {
+        let r = parse_pep508_str("private-depB[extra1, extra2]~=2.4").unwrap();
+        assert_eq!(r.package_name, "private-depB");
+        assert_eq!(r.current_value.as_deref(), Some("~=2.4"));
+        assert_eq!(r.extras, Some(vec!["extra1".to_owned(), "extra2".to_owned()]));
+        assert!(r.marker.is_none());
+    }
+
+    #[test]
+    fn parse_pep508_with_version_and_marker() {
+        let r = parse_pep508_str("tomli>=1.1.0; python_version < \"3.11\"").unwrap();
+        assert_eq!(r.package_name, "tomli");
+        assert_eq!(r.current_value.as_deref(), Some(">=1.1.0"));
+        assert!(r.extras.is_none());
+        assert_eq!(r.marker.as_deref(), Some("python_version < \"3.11\""));
+    }
+
+    #[test]
+    fn parse_pep508_no_version_with_marker() {
+        let r = parse_pep508_str("typing-extensions; python_version < \"3.8\"").unwrap();
+        assert_eq!(r.package_name, "typing-extensions");
+        assert!(r.current_value.is_none());
+        assert!(r.extras.is_none());
+        assert_eq!(r.marker.as_deref(), Some("python_version < \"3.8\""));
+    }
+
+    #[test]
+    fn parse_pep508_extras_no_version_with_marker() {
+        let r =
+            parse_pep508_str("typing-extensions[test-feature]; python_version < \"3.8\"").unwrap();
+        assert_eq!(r.package_name, "typing-extensions");
+        assert!(r.current_value.is_none());
+        assert_eq!(r.extras, Some(vec!["test-feature".to_owned()]));
+        assert_eq!(r.marker.as_deref(), Some("python_version < \"3.8\""));
     }
 }
