@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2284 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2287 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16038,15 +16038,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/nodenv/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nodenv/extract.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns a result | 5 | pending | — | — | — |
-| supports ranges | 16 | pending | — | — | — |
-| skips non ranges | 27 | pending | — | — | — |
+| returns a result | 5 | ported | `version_file.rs` | `nodenv_returns_dep_for_version` | — |
+| supports ranges | 16 | ported | `version_file.rs` | `nodenv_supports_partial_version` | — |
+| skips non ranges | 27 | ported | `version_file.rs` | `nodenv_passes_through_non_version_string` | — |
 
 ---
 

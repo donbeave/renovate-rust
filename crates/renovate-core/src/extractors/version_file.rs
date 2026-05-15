@@ -155,6 +155,25 @@ pub fn extract(content: &str, manager_name: &str) -> Option<VersionFileDep> {
     })
 }
 
+/// A nodenv (`.node-version`) dependency extracted by the nodenv manager.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NodeenvDep {
+    pub dep_name: &'static str,
+    pub current_value: String,
+    pub datasource: &'static str,
+}
+
+/// Extract the node version from `.node-version` file content.
+///
+/// Mirrors `lib/modules/manager/nodenv/extract.ts` `extractPackageFile()`.
+pub fn extract_nodenv(content: &str) -> NodeenvDep {
+    NodeenvDep {
+        dep_name: "node",
+        current_value: content.trim().to_owned(),
+        datasource: "node-version",
+    }
+}
+
 /// Returns the manager name for a given filename, if it is a known version file.
 pub fn manager_for_file(filename: &str) -> Option<&'static str> {
     // Strip path prefix — compare basename only.
@@ -382,5 +401,32 @@ mod tests {
         let dep = extract("latestn", "ruby-version").unwrap();
         assert_eq!(dep.tool, "ruby");
         assert_eq!(dep.current_value, "latestn");
+    }
+
+    // Ported: "returns a result" — modules/manager/nodenv/extract.spec.ts line 5
+    #[test]
+    fn nodenv_returns_dep_for_version() {
+        let dep = extract_nodenv("8.4.0\n");
+        assert_eq!(dep.dep_name, "node");
+        assert_eq!(dep.current_value, "8.4.0");
+        assert_eq!(dep.datasource, "node-version");
+    }
+
+    // Ported: "supports ranges" — modules/manager/nodenv/extract.spec.ts line 14
+    #[test]
+    fn nodenv_supports_partial_version() {
+        let dep = extract_nodenv("8.4\n");
+        assert_eq!(dep.dep_name, "node");
+        assert_eq!(dep.current_value, "8.4");
+        assert_eq!(dep.datasource, "node-version");
+    }
+
+    // Ported: "skips non ranges" — modules/manager/nodenv/extract.spec.ts line 23
+    #[test]
+    fn nodenv_passes_through_non_version_string() {
+        let dep = extract_nodenv("latestn");
+        assert_eq!(dep.dep_name, "node");
+        assert_eq!(dep.current_value, "latestn");
+        assert_eq!(dep.datasource, "node-version");
     }
 }
