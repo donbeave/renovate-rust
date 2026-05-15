@@ -137,6 +137,50 @@ struct ModuleSource {
     skip_reason: Option<TerraformSkipReason>,
 }
 
+// ── Module source URL regexes (mirrors TypeScript exports in modules.ts) ─────
+
+/// Matches `github.com/<org>/<repo>?ref=<tag>` (case-insensitive).
+/// Named captures: `project`, `tag`.
+pub static GITHUB_REF_MATCH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?i)github\.com([/:])(?P<project>[^/]+/[a-z0-9\-_.]+).*\?(depth=\d+&)?ref=(?P<tag>.*?)(&depth=\d+)?$",
+    )
+    .unwrap()
+});
+
+/// Matches Bitbucket URLs.
+/// Named captures: `url`, `path`, `workspace`, `project`, `subfolder`, `tag`.
+pub static BITBUCKET_REF_MATCH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?:git::)?(?P<url>(?:http|https|ssh)?(?:://)?(?:.*@)?(?P<path>bitbucket\.org/(?P<workspace>.*)/(?P<project>.*)\.git/?(?P<subfolder>.*)))\?(depth=\d+&)?ref=(?P<tag>.*?)(&depth=\d+)?$",
+    )
+    .unwrap()
+});
+
+/// Matches generic git-hosted module sources (http/https/ssh/bare git@).
+/// Named captures: `url`, `path`, `project`, `subfolder`, `tag`.
+pub static GIT_TAGS_REF_MATCH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?:git::)?(?P<url>(?:(?:http|https|ssh)://)?(?:.*@)?(?P<path>[^:/]+[:/](?P<project>[^/]+(?:/[^/]+)*))(?:\.git)?)((//)?(?P<subfolder>[^?]*))?\?(depth=\d+&)?ref=(?P<tag>.*?)(&depth=\d+)?$",
+    )
+    .unwrap()
+});
+
+/// Matches Azure DevOps SSH module sources.
+/// Named captures: `url`, `organization`, `project`, `repository`, `modulepath`, `tag`.
+pub static AZURE_DEVOPS_SSH_REF_MATCH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?:git::)?(?P<url>git@ssh\.dev\.azure\.com:v3/(?P<organization>[^/]*)/(?P<project>[^/]*)/(?P<repository>[^/]*))(?P<modulepath>.*)?\?(depth=\d+&)?ref=(?P<tag>.*?)(&depth=\d+)?$",
+    )
+    .unwrap()
+});
+
+/// Matches the hostname at the start of a module source URL.
+/// Named capture: `hostname`.
+pub static HOSTNAME_MATCH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?P<hostname>[a-zA-Z\d]([a-zA-Z\d\-]*\.)+[a-zA-Z\d]+)").unwrap()
+});
+
 // ── Compiled regexes ──────────────────────────────────────────────────────────
 
 /// `key = "value"` or `key = value` — captures key and value.
@@ -2466,5 +2510,227 @@ provider "registry.terraform.io/hashicorp/random" {
         let content = "terraform {\n}\n";
         let deps = extract(content);
         assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Provider));
+    }
+
+    // ── terraform/extractors/others/modules.spec.ts ───────────────────────────
+
+    // Ported: "return empty array if no module is found" — terraform/extractors/others/modules.spec.ts line 13
+    #[test]
+    fn modules_extract_empty_content_returns_no_module_deps() {
+        let deps = extract("");
+        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Module));
+    }
+
+    // Ported: "should split project and tag from source" — terraform/extractors/others/modules.spec.ts line 19
+    #[test]
+    fn github_ref_match_re_splits_project_and_tag() {
+        let m1 = GITHUB_REF_MATCH_RE.captures("github.com/hashicorp/example?ref=v1.0.0").unwrap();
+        assert_eq!(&m1["project"], "hashicorp/example");
+        assert_eq!(&m1["tag"], "v1.0.0");
+
+        let m2 = GITHUB_REF_MATCH_RE
+            .captures("github.com/hashicorp/example?depth=1&ref=v1.0.0")
+            .unwrap();
+        assert_eq!(&m2["project"], "hashicorp/example");
+        assert_eq!(&m2["tag"], "v1.0.0");
+
+        let m3 = GITHUB_REF_MATCH_RE
+            .captures("github.com/hashicorp/example?ref=v1.0.0&depth=1")
+            .unwrap();
+        assert_eq!(&m3["project"], "hashicorp/example");
+        assert_eq!(&m3["tag"], "v1.0.0");
+    }
+
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 43
+    #[test]
+    fn github_ref_match_re_parses_alphanumeric_repo_names() {
+        let m = GITHUB_REF_MATCH_RE
+            .captures("github.com/hashicorp/example.repo-123?ref=v1.0.0")
+            .unwrap();
+        assert_eq!(&m["project"], "hashicorp/example.repo-123");
+        assert_eq!(&m["tag"], "v1.0.0");
+    }
+
+    // Ported: "should split project and tag from source" — terraform/extractors/others/modules.spec.ts line 55
+    #[test]
+    fn git_tags_ref_match_re_splits_project_and_tag() {
+        let cases = [
+            "http://github.com/hashicorp/example?ref=v1.0.0",
+            "https://github.com/hashicorp/example?ref=v1.0.0",
+            "ssh://github.com/hashicorp/example?ref=v1.0.0",
+            "ssh://github.com/hashicorp/example?depth=1&ref=v1.0.0",
+            "ssh://github.com/hashicorp/example?ref=v1.0.0&depth=1",
+        ];
+        for s in &cases {
+            let m = GIT_TAGS_REF_MATCH_RE.captures(s).unwrap();
+            assert_eq!(&m["project"], "hashicorp/example", "failed for {s}");
+            assert_eq!(&m["tag"], "v1.0.0", "failed for {s}");
+        }
+
+        let folder = GIT_TAGS_REF_MATCH_RE
+            .captures("git::ssh://git@git.example.com/modules/foo-module.git//bar?depth=1&ref=v1.0.0")
+            .unwrap();
+        assert_eq!(&folder["project"], "modules/foo-module.git");
+        assert_eq!(&folder["tag"], "v1.0.0");
+
+        let colon = GIT_TAGS_REF_MATCH_RE
+            .captures("git::ssh://git@git.example.com:modules/foo-module.git//bar?depth=1&ref=v1.0.0")
+            .unwrap();
+        assert_eq!(&colon["project"], "modules/foo-module.git");
+        assert_eq!(&colon["tag"], "v1.0.0");
+    }
+
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 108
+    #[test]
+    fn git_tags_ref_match_re_parses_alphanumeric_repo_names() {
+        let cases_project = [
+            (
+                "http://github.com/hashicorp/example.repo-123?ref=v1.0.0",
+                "hashicorp/example.repo-123",
+            ),
+            (
+                "https://github.com/hashicorp/example.repo-123?ref=v1.0.0",
+                "hashicorp/example.repo-123",
+            ),
+            (
+                "ssh://github.com/hashicorp/example.repo-123?ref=v1.0.0",
+                "hashicorp/example.repo-123",
+            ),
+            (
+                "git@my-gitlab-instance.local:devops/terraform/instance.git?ref=v5.0.0",
+                "devops/terraform/instance.git",
+            ),
+            (
+                "git@my-gitlab-instance.local/devops/terraform/instance.git//submodule?ref=v5.0.0",
+                "devops/terraform/instance.git",
+            ),
+            (
+                "git@my-gitlab-instance.local:devops/terraform/instance.git//submodule?ref=v5.0.0",
+                "devops/terraform/instance.git",
+            ),
+        ];
+        for (s, expected_project) in &cases_project {
+            let m = GIT_TAGS_REF_MATCH_RE.captures(s).unwrap();
+            assert_eq!(&m["project"], *expected_project, "failed for {s}");
+            // v1.0.0 for http/https/ssh cases; v5.0.0 for git@ cases
+            let expected_tag = if s.contains("gitlab-instance") { "v5.0.0" } else { "v1.0.0" };
+            assert_eq!(&m["tag"], expected_tag, "failed for {s}");
+        }
+    }
+
+    // Ported: "should split workspace, project and tag from source" — terraform/extractors/others/modules.spec.ts line 156
+    #[test]
+    fn bitbucket_ref_match_re_splits_workspace_project_and_tag() {
+        let cases = [
+            "git::ssh://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0",
+            "git::https://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0",
+            "bitbucket.org/hashicorp/example.git?ref=v1.0.0",
+            "bitbucket.org/hashicorp/example.git/terraform?ref=v1.0.0",
+            "bitbucket.org/hashicorp/example.git//terraform?ref=v1.0.0",
+            "bitbucket.org/hashicorp/example.git//terraform-git?ref=v1.0.0",
+            "git::https://git@bitbucket.org/hashicorp/example.git?depth=1&ref=v1.0.0",
+            "git::https://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0&depth=1",
+        ];
+        for s in &cases {
+            let m = BITBUCKET_REF_MATCH_RE.captures(s).unwrap();
+            assert_eq!(&m["workspace"], "hashicorp", "failed for {s}");
+            assert_eq!(&m["project"], "example", "failed for {s}");
+            assert_eq!(&m["tag"], "v1.0.0", "failed for {s}");
+        }
+    }
+
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 224
+    #[test]
+    fn bitbucket_ref_match_re_parses_alphanumeric_repo_names() {
+        let m = BITBUCKET_REF_MATCH_RE
+            .captures("bitbucket.org/hashicorp/example.repo-123.git?ref=v1.0.0")
+            .unwrap();
+        assert_eq!(&m["workspace"], "hashicorp");
+        assert_eq!(&m["project"], "example.repo-123");
+        assert_eq!(&m["tag"], "v1.0.0");
+    }
+
+    // Ported: "should split organization, project, repository and tag from source url" — terraform/extractors/others/modules.spec.ts line 238
+    #[test]
+    fn azure_devops_ssh_ref_match_re_splits_fields() {
+        let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
+            .captures("git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0")
+            .unwrap();
+        assert_eq!(&m["url"], "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository");
+        assert_eq!(&m["organization"], "MyOrg");
+        assert_eq!(&m["project"], "MyProject");
+        assert_eq!(&m["repository"], "MyRepository");
+        assert_eq!(m.name("modulepath").map(|m| m.as_str()).unwrap_or(""), "");
+        assert_eq!(&m["tag"], "1.0.0");
+    }
+
+    // Ported: "should split organization, project, repository and tag from source url with git prefix" — terraform/extractors/others/modules.spec.ts line 253
+    #[test]
+    fn azure_devops_ssh_ref_match_re_with_git_prefix() {
+        let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
+            .captures("git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0")
+            .unwrap();
+        assert_eq!(&m["url"], "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository");
+        assert_eq!(&m["organization"], "MyOrg");
+        assert_eq!(&m["project"], "MyProject");
+        assert_eq!(&m["repository"], "MyRepository");
+        assert_eq!(m.name("modulepath").map(|m| m.as_str()).unwrap_or(""), "");
+        assert_eq!(&m["tag"], "1.0.0");
+    }
+
+    // Ported: "should split organization, project, repository and tag from source url with subfolder" — terraform/extractors/others/modules.spec.ts
+    #[test]
+    fn azure_devops_ssh_ref_match_re_with_subfolder() {
+        let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
+            .captures("git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0")
+            .unwrap();
+        assert_eq!(&m["modulepath"], "//some-module/path");
+        assert_eq!(&m["organization"], "MyOrg");
+        assert_eq!(&m["project"], "MyProject");
+        assert_eq!(&m["repository"], "MyRepository");
+        assert_eq!(&m["tag"], "1.0.0");
+    }
+
+    // Ported: "should split organization, project, repository and tag from source url with depth argument" — terraform/extractors/others/modules.spec.ts
+    #[test]
+    fn azure_devops_ssh_ref_match_re_with_depth() {
+        let depth = AZURE_DEVOPS_SSH_REF_MATCH_RE
+            .captures("git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?depth=1&ref=1.0.0")
+            .unwrap();
+        assert_eq!(&depth["modulepath"], "//some-module/path");
+        assert_eq!(&depth["tag"], "1.0.0");
+
+        let depth2 = AZURE_DEVOPS_SSH_REF_MATCH_RE
+            .captures("git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0&depth=1")
+            .unwrap();
+        assert_eq!(&depth2["modulepath"], "//some-module/path");
+        assert_eq!(&depth2["tag"], "1.0.0");
+    }
+
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts
+    #[test]
+    fn azure_devops_ssh_ref_match_re_parses_alphanumeric_names() {
+        let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
+            .captures("git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=v1.0.0")
+            .unwrap();
+        assert_eq!(&m["modulepath"], "//some-module/path");
+        assert_eq!(&m["organization"], "MyOrg");
+        assert_eq!(&m["project"], "MyProject");
+        assert_eq!(&m["repository"], "MyRepository");
+        assert_eq!(&m["tag"], "v1.0.0");
+    }
+
+    // Ported: "should extract hostname from source url" — terraform/extractors/others/modules.spec.ts line 331
+    #[test]
+    fn hostname_match_re_extracts_hostname() {
+        let m1 = HOSTNAME_MATCH_RE
+            .captures("git-lab.git-server.com/my/terraform/module")
+            .unwrap();
+        assert_eq!(&m1["hostname"], "git-lab.git-server.com");
+
+        let m2 = HOSTNAME_MATCH_RE
+            .captures("example.com/my/terraform/module")
+            .unwrap();
+        assert_eq!(&m2["hostname"], "example.com");
     }
 }
