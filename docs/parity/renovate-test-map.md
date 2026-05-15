@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2314 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2320 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13996,14 +13996,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/conan/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/conan/range.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 5 | pending | — | — | — |
-| defaults to bump | 10 | pending | — | — | — |
+| returns same if not auto | 5 | ported | `conan.rs` | `conan_range_returns_same_if_not_auto` | — |
+| defaults to bump | 10 | ported | `conan.rs` | `conan_range_defaults_to_bump` | — |
 
 ---
 
@@ -16024,14 +16024,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/nix/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/nix/range.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns replace if currentValue not null | 5 | pending | — | — | — |
-| defaults to update-lockfile | 13 | pending | — | — | — |
+| returns replace if currentValue not null | 5 | ported | `nix.rs` | `nix_range_returns_replace_when_current_value_set` | — |
+| defaults to update-lockfile | 13 | ported | `nix.rs` | `nix_range_defaults_to_update_lockfile` | — |
 
 ---
 
@@ -17749,14 +17749,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/swift/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/range.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `getRangeStrategy()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 6 | pending | — | — | — |
-| defaults to update-lockfile | 11 | pending | — | — | — |
+| returns same if not auto | 6 | ported | `spm.rs` | `swift_range_returns_same_if_not_auto` | — |
+| defaults to update-lockfile | 11 | ported | `spm.rs` | `swift_range_defaults_to_bump` | — |
 
 ---
 

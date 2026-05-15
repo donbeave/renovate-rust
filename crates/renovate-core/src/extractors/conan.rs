@@ -160,6 +160,13 @@ fn parse_dep_line(line: &str, dep_type: ConanDepType, out: &mut Vec<ConanDep>) {
     }
 }
 
+/// Determine the effective Conan range strategy.
+///
+/// Mirrors `lib/modules/manager/conan/range.ts` `getRangeStrategy()`.
+pub fn get_range_strategy(range_strategy: &str) -> &str {
+    if range_strategy == "auto" { "bump" } else { range_strategy }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -321,5 +328,17 @@ class MyConan(ConanFile):
         let content = "[generators]\nxcode\ncmake\n\n[options]\npoco:shared=True\n";
         let deps = extract_txt(content);
         assert!(deps.is_empty());
+    }
+
+    // Ported: "returns same if not auto" — modules/manager/conan/range.spec.ts line 4
+    #[test]
+    fn conan_range_returns_same_if_not_auto() {
+        assert_eq!(get_range_strategy("widen"), "widen");
+    }
+
+    // Ported: "defaults to bump" — modules/manager/conan/range.spec.ts line 8
+    #[test]
+    fn conan_range_defaults_to_bump() {
+        assert_eq!(get_range_strategy("auto"), "bump");
     }
 }

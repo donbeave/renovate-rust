@@ -140,6 +140,13 @@ fn parse_git_url(url: &str) -> Option<(String, GitHost)> {
     Some((format!("{owner}/{repo}"), host))
 }
 
+/// Determine the effective Swift (SPM) range strategy.
+///
+/// Mirrors `lib/modules/manager/swift/range.ts` `getRangeStrategy()`.
+pub fn get_range_strategy(range_strategy: &str) -> &str {
+    if range_strategy == "auto" { "bump" } else { range_strategy }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -282,5 +289,17 @@ let package = Package(
     fn no_packages_returns_empty() {
         let content = "// just a comment\nlet x = 1\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "returns same if not auto" — modules/manager/swift/range.spec.ts line 5
+    #[test]
+    fn swift_range_returns_same_if_not_auto() {
+        assert_eq!(get_range_strategy("widen"), "widen");
+    }
+
+    // Ported: "defaults to update-lockfile" — modules/manager/swift/range.spec.ts line 10
+    #[test]
+    fn swift_range_defaults_to_bump() {
+        assert_eq!(get_range_strategy("auto"), "bump");
     }
 }

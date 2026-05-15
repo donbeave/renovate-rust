@@ -161,6 +161,17 @@ pub fn extract(flake_lock_content: &str) -> Vec<NixFlakeDep> {
 }
 
 /// Parse `flake.lock` content with optional `flake.nix` replacement context.
+/// Determine the effective Nix range strategy.
+///
+/// Mirrors `lib/modules/manager/nix/range.ts` `getRangeStrategy()`.
+pub fn get_range_strategy(current_value: Option<&str>) -> &'static str {
+    if current_value.is_some_and(|v| !v.is_empty()) {
+        "replace"
+    } else {
+        "update-lockfile"
+    }
+}
+
 pub fn extract_with_config(
     flake_lock_content: &str,
     config: NixExtractConfig<'_>,
@@ -1776,5 +1787,17 @@ mod tests {
             deps[0].package_name.as_deref(),
             Some("https://github.com/NixOS/nixpkgs")
         );
+    }
+
+    // Ported: "returns replace if currentValue not null" — modules/manager/nix/range.spec.ts line 3
+    #[test]
+    fn nix_range_returns_replace_when_current_value_set() {
+        assert_eq!(get_range_strategy(Some("1.0.0")), "replace");
+    }
+
+    // Ported: "defaults to update-lockfile" — modules/manager/nix/range.spec.ts line 10
+    #[test]
+    fn nix_range_defaults_to_update_lockfile() {
+        assert_eq!(get_range_strategy(None), "update-lockfile");
     }
 }
