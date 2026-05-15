@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2366 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2372 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16805,18 +16805,18 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/npm/update/package-version/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/update/package-version/index.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `.bumpPackageVersion()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| mirrors | 11 | pending | — | — | — |
-| aborts mirror | 21 | pending | — | — | — |
-| increments | 30 | pending | — | — | — |
-| no ops | 40 | pending | — | — | — |
-| updates | 49 | pending | — | — | — |
-| returns content if bumping errors | 59 | pending | — | — | — |
+| mirrors | 11 | ported | `npm.rs` | `npm_bump_mirrors_dependency_version` | — |
+| aborts mirror | 21 | ported | `npm.rs` | `npm_bump_aborts_mirror_when_dep_not_found` | — |
+| increments | 30 | ported | `npm.rs` | `npm_bump_increments_patch` | — |
+| no ops | 40 | ported | `npm.rs` | `npm_bump_no_op_when_bumped_version_matches_content` | — |
+| updates | 49 | ported | `npm.rs` | `npm_bump_updates_minor` | — |
+| returns content if bumping errors | 59 | ported | `npm.rs` | `npm_bump_returns_content_on_invalid_bump_type` | — |
 
 ---
 

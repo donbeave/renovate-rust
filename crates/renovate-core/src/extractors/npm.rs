@@ -1208,6 +1208,81 @@ pub fn files_matching_workspaces<'a>(
         .collect()
 }
 
+/// Bump the `"version"` field in `package.json` content.
+///
+/// Mirrors `lib/modules/manager/npm/update/package-version/index.ts` `bumpPackageVersion()`.
+/// Supports `mirror:<dep>` to mirror a dependency version, or standard semver
+/// bump types (`patch`, `minor`, `major`). Returns unchanged content on error.
+pub fn bump_npm_package_version(
+    content: &str,
+    current_value: &str,
+    bump_version: &str,
+) -> String {
+    use std::sync::LazyLock;
+    static VERSION_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r#"(?P<prefix>"version":\s*")[^"]*"#).unwrap()
+    });
+
+    let new_version = if let Some(mirror_pkg) = bump_version.strip_prefix("mirror:") {
+        let parsed: serde_json::Value = match serde_json::from_str(content) {
+            Ok(v) => v,
+            Err(_) => return content.to_owned(),
+        };
+        let mirror_version = parsed
+            .get("dependencies")
+            .and_then(|d| d.get(mirror_pkg))
+            .or_else(|| {
+                parsed
+                    .get("devDependencies")
+                    .and_then(|d| d.get(mirror_pkg))
+            })
+            .or_else(|| {
+                parsed
+                    .get("optionalDependencies")
+                    .and_then(|d| d.get(mirror_pkg))
+            })
+            .or_else(|| {
+                parsed
+                    .get("peerDependencies")
+                    .and_then(|d| d.get(mirror_pkg))
+            })
+            .and_then(|v| v.as_str())
+            .map(str::to_owned);
+        match mirror_version {
+            Some(v) => v,
+            None => return content.to_owned(),
+        }
+    } else {
+        let new_ver = (|| -> Option<String> {
+            let mut parsed = semver::Version::parse(current_value).ok()?;
+            match bump_version {
+                "patch" => parsed.patch += 1,
+                "minor" => {
+                    parsed.minor += 1;
+                    parsed.patch = 0;
+                }
+                "major" => {
+                    parsed.major += 1;
+                    parsed.minor = 0;
+                    parsed.patch = 0;
+                }
+                _ => return None,
+            }
+            Some(parsed.to_string())
+        })();
+        match new_ver {
+            Some(v) => v,
+            None => return content.to_owned(),
+        }
+    };
+
+    VERSION_RE
+        .replace(content, |caps: &regex::Captures| {
+            format!("{}{}", &caps["prefix"], new_version)
+        })
+        .into_owned()
+}
+
 /// Return `true` when `value` is a complex npm range (contains `||`).
 fn is_complex_npm_range(value: &str) -> bool {
     value.contains("||")
@@ -2741,5 +2816,53 @@ chalk@^2.4.1:
         }];
         assert!(extract_catalog_deps(&catalogs, "pnpm").is_empty());
         assert!(extract_catalog_deps(&catalogs, "yarn").is_empty());
+    }
+
+    const NPM_PKG_CONTENT: &str =
+        r#"{"name":"some-package","version":"0.0.2","dependencies":{"chalk":"2.4.2"}}"#;
+
+    // Ported: "mirrors" — modules/manager/npm/update/package-version/index.spec.ts line 16
+    #[test]
+    fn npm_bump_mirrors_dependency_version() {
+        let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "mirror:chalk");
+        assert!(result.contains("\"version\":\"2.4.2\"") || result.contains("\"version\": \"2.4.2\""));
+        assert_ne!(result, NPM_PKG_CONTENT);
+    }
+
+    // Ported: "aborts mirror" — modules/manager/npm/update/package-version/index.spec.ts line 24
+    #[test]
+    fn npm_bump_aborts_mirror_when_dep_not_found() {
+        let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "mirror:a");
+        assert_eq!(result, NPM_PKG_CONTENT);
+    }
+
+    // Ported: "increments" — modules/manager/npm/update/package-version/index.spec.ts line 31
+    #[test]
+    fn npm_bump_increments_patch() {
+        let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "patch");
+        assert!(result.contains("\"version\":\"0.0.3\"") || result.contains("\"version\": \"0.0.3\""));
+        assert_ne!(result, NPM_PKG_CONTENT);
+    }
+
+    // Ported: "no ops" — modules/manager/npm/update/package-version/index.spec.ts line 38
+    #[test]
+    fn npm_bump_no_op_when_bumped_version_matches_content() {
+        let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.1", "patch");
+        assert_eq!(result, NPM_PKG_CONTENT);
+    }
+
+    // Ported: "updates" — modules/manager/npm/update/package-version/index.spec.ts line 44
+    #[test]
+    fn npm_bump_updates_minor() {
+        let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.1", "minor");
+        assert!(result.contains("\"version\":\"0.1.0\"") || result.contains("\"version\": \"0.1.0\""));
+        assert_ne!(result, NPM_PKG_CONTENT);
+    }
+
+    // Ported: "returns content if bumping errors" — modules/manager/npm/update/package-version/index.spec.ts line 51
+    #[test]
+    fn npm_bump_returns_content_on_invalid_bump_type() {
+        let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "invalid_type");
+        assert_eq!(result, NPM_PKG_CONTENT);
     }
 }
