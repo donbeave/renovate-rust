@@ -980,9 +980,9 @@ mod tests {
         assert!(!pip.matched_files.contains(&"src/setup.py".to_owned()));
     }
 
+    // Ported: "default config file pattern" — pip_requirements/index.spec.ts line 5
     #[test]
     fn pip_requirements_file_patterns_match_spec() {
-        // Ported: "default config file pattern" — pip_requirements/index.spec.ts
         // Verifies our managerFilePatterns regex matches the same files as Renovate.
         let all_files = files(&[
             "requirements.txt",

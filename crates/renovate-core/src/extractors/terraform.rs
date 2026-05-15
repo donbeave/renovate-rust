@@ -2424,4 +2424,47 @@ provider "registry.terraform.io/hashicorp/random" {
             TerraformUpdateLockedStatus::Unsupported | TerraformUpdateLockedStatus::UpdateFailed
         ));
     }
+
+    // Ported: "return null if no provider returned" — terraform/extractors/others/providers.spec.ts line 6
+    #[test]
+    fn providers_extract_empty_content_returns_no_deps() {
+        let deps = extract("");
+        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Provider));
+    }
+
+    // Ported: "return empty array if no resource is found" — terraform/extractors/resources/helm-release.spec.ts line 6
+    #[test]
+    fn helm_release_extract_empty_content_returns_no_deps() {
+        let deps = extract("");
+        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::HelmRelease));
+    }
+
+    // Ported: "return empty array if no resource is found" — terraform/extractors/resources/terraform-workspaces.spec.ts line 6
+    #[test]
+    fn terraform_workspace_extract_empty_content_returns_no_deps() {
+        let deps = extract("");
+        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::TfeWorkspace));
+    }
+
+    // Ported: "return empty array if no terraform block is found" — terraform/extractors/terraform-block/terraform-version.spec.ts line 6
+    #[test]
+    fn terraform_version_extract_empty_content_returns_no_deps() {
+        let deps = extract("");
+        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::RequiredVersion));
+    }
+
+    // Ported: "return empty array if no terraform block is found" — terraform/extractors/terraform-block/required-provider.spec.ts line 8
+    #[test]
+    fn required_provider_extract_empty_content_returns_no_deps() {
+        let deps = extract("");
+        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Provider));
+    }
+
+    // Ported: "return empty array if no required_providers block is found" — terraform/extractors/terraform-block/required-provider.spec.ts line 13
+    #[test]
+    fn required_provider_extract_terraform_block_without_required_providers_returns_empty() {
+        let content = "terraform {\n}\n";
+        let deps = extract(content);
+        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Provider));
+    }
 }

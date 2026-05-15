@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2665 / 8612 actionable tests ported (30%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2672 / 8612 actionable tests ported (31%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17277,13 +17277,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/pip_requirements/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip_requirements/index.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| default config file pattern | 5 | pending | — | — | — |
+| default config file pattern | 5 | ported | `managers.rs` | `pip_requirements_file_patterns_match_spec` | — |
 
 ---
 
@@ -17813,13 +17813,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/terraform/extractors/others/providers.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/others/providers.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return null if no provider returned | 6 | pending | — | — | — |
+| return null if no provider returned | 6 | ported | `terraform.rs` | `providers_extract_empty_content_returns_no_deps` | — |
 
 ---
 
@@ -17840,40 +17840,40 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return empty array if no resource is found | 6 | pending | — | — | — |
+| return empty array if no resource is found | 6 | ported | `terraform.rs` | `helm_release_extract_empty_content_returns_no_deps` | — |
 
 ---
 
 ## `lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return empty array if no resource is found | 6 | pending | — | — | — |
+| return empty array if no resource is found | 6 | ported | `terraform.rs` | `terraform_workspace_extract_empty_content_returns_no_deps` | — |
 
 ---
 
 ## `lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 2 | **Actionable:** 3 | **Status:** partial
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return empty array if no terraform block is found | 8 | pending | — | — | — |
-| return empty array if no required_providers block is found | 13 | pending | — | — | — |
+| return empty array if no terraform block is found | 8 | ported | `terraform.rs` | `required_provider_extract_empty_content_returns_no_deps` | — |
+| return empty array if no required_providers block is found | 13 | ported | `terraform.rs` | `required_provider_extract_terraform_block_without_required_providers_returns_empty` | — |
 | extract provider with version and registry url | 18 | pending | — | — | — |
 
 ---
@@ -17881,13 +17881,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return empty array if no terraform block is found | 6 | pending | — | — | — |
+| return empty array if no terraform block is found | 6 | ported | `terraform.rs` | `terraform_version_extract_empty_content_returns_no_deps` | — |
 
 ---
 
