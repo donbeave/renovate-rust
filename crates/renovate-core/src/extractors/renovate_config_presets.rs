@@ -335,7 +335,16 @@ const INTERNAL_PRESET_PACKAGES: &[&str] = &[
 pub struct ParsedPreset {
     pub preset_source: String,
     pub repo: String,
+    /// The preset name inside the repo (e.g. `"default"`, `"base"`, `"webapp"`).
+    /// Empty string for http sources (matching TypeScript behaviour).
+    pub preset_name: String,
+    /// Subdirectory path used with the `//` syntax, e.g. `"somepath/somesubpath"`.
+    pub preset_path: Option<String>,
     pub tag: Option<String>,
+    /// Positional parameters extracted from `(...)` in the input.
+    pub params: Option<Vec<String>>,
+    /// The raw string inside `(...)`, before splitting on commas.
+    pub raw_params: Option<String>,
 }
 
 /// Regex for non-scoped preset with a subdirectory (`//`).
@@ -386,11 +395,15 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
 
     let preset_source = preset_source.unwrap_or_else(|| "npm".into());
 
-    // strip params `(...)` from s
-    let s = if let Some(paren_pos) = s.find('(') {
-        s[..paren_pos].to_owned()
+    // extract params `(...)` from s
+    let (raw_params, params) = if let Some(paren_pos) = s.find('(') {
+        // rawParams is the content between '(' and the last char (closing ')')
+        let raw = s[paren_pos + 1..s.len() - 1].to_owned();
+        let parsed: Vec<String> = raw.split(',').map(|e| e.trim().to_owned()).collect();
+        s = s[..paren_pos].to_owned();
+        (Some(raw), Some(parsed))
     } else {
-        s
+        (None, None)
     };
 
     // http source: return early
@@ -398,25 +411,39 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
         return ParsedPreset {
             preset_source,
             repo: s,
+            preset_name: String::new(),
+            preset_path: None,
             tag: None,
+            params,
+            raw_params,
         };
     }
 
     // internal: starts with `packageName:` or `:`
     for pkg in INTERNAL_PRESET_PACKAGES {
         if s.starts_with(&format!("{pkg}:")) {
+            let preset_name = s[pkg.len() + 1..].to_owned();
             return ParsedPreset {
                 preset_source: "internal".into(),
                 repo: pkg.to_string(),
+                preset_name,
+                preset_path: None,
                 tag: None,
+                params,
+                raw_params,
             };
         }
     }
-    if s.starts_with(':') {
+    if let Some(stripped) = s.strip_prefix(':') {
+        let preset_name = stripped.to_owned();
         return ParsedPreset {
             preset_source: "internal".into(),
             repo: "default".into(),
+            preset_name,
+            preset_path: None,
             tag: None,
+            params,
+            raw_params,
         };
     }
 
@@ -427,30 +454,59 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
         let mut repo = if let Some(caps) = at_re.captures(&s) {
             caps.get(1).map(|m| m.as_str().to_owned()).unwrap_or_default()
         } else {
-            s
+            s.clone()
         };
+        let rest = s[repo.len()..].to_owned();
         if !repo.contains('/') {
             repo.push_str("/renovate-config");
         }
+        let preset_name = if rest.is_empty() {
+            "default".to_owned()
+        } else {
+            // rest starts with ':', skip it
+            rest[1..].to_owned()
+        };
         return ParsedPreset {
             preset_source: "npm".into(),
             repo,
+            preset_name,
+            preset_path: None,
             tag: None,
+            params,
+            raw_params,
         };
     }
 
     // non-scoped with subdirectory `//`
-    if s.contains("//") && let Some(caps) = NON_SCOPED_WITH_SUBDIR_RE.captures(&s) {
+    if s.contains("//")
+        && let Some(caps) = NON_SCOPED_WITH_SUBDIR_RE.captures(&s)
+    {
+        let repo = caps.name("repo").map(|m| m.as_str().to_owned()).unwrap_or_default();
+        let preset_path = caps.name("preset_path").map(|m| m.as_str().to_owned());
+        let preset_name = caps
+            .name("preset_name")
+            .map(|m| m.as_str().to_owned())
+            .unwrap_or_else(|| "default".to_owned());
+        let tag = caps.name("tag").map(|m| m.as_str().to_owned());
         return ParsedPreset {
             preset_source,
-            repo: caps.name("repo").map(|m| m.as_str().to_owned()).unwrap_or_default(),
-            tag: caps.name("tag").map(|m| m.as_str().to_owned()),
+            repo,
+            preset_name,
+            preset_path,
+            tag,
+            params,
+            raw_params,
         };
     }
 
     // standard git preset form
     if let Some(caps) = GIT_PRESET_RE.captures(&s) {
         let mut repo = caps.name("repo").map(|m| m.as_str().to_owned()).unwrap_or_default();
+        let preset_name = caps
+            .name("preset_name")
+            .map(|m| m.as_str().to_owned())
+            .filter(|n| !n.is_empty())
+            .unwrap_or_else(|| "default".to_owned());
         let tag = caps.name("tag").map(|m| m.as_str().to_owned());
 
         if preset_source == "npm" && !repo.starts_with("renovate-config-") {
@@ -460,7 +516,11 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
         return ParsedPreset {
             preset_source,
             repo,
+            preset_name,
+            preset_path: None,
             tag,
+            params,
+            raw_params,
         };
     }
 
@@ -468,7 +528,11 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
     ParsedPreset {
         preset_source,
         repo: s,
+        preset_name: "default".to_owned(),
+        preset_path: None,
         tag: None,
+        params,
+        raw_params,
     }
 }
 
@@ -1040,5 +1104,594 @@ mod tests {
         assert_eq!(deps[4].datasource, Some("github-releases"));
         assert_eq!(deps[5].dep_name, "maven");
         assert_eq!(deps[5].datasource, Some("github-releases"));
+    }
+
+    // ── Ported parse_preset() tests from config/presets/parse.spec.ts ──────────
+
+    // Ported: "returns default package name" — config/presets/parse.spec.ts line 6
+    #[test]
+    fn pp_returns_default_package_name() {
+        let p = parse_preset(":base");
+        assert_eq!(p.preset_source, "internal");
+        assert_eq!(p.repo, "default");
+        assert_eq!(p.preset_name, "base");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github" — config/presets/parse.spec.ts line 17
+    #[test]
+    fn pp_parses_github() {
+        let p = parse_preset("github>some/repo");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "handles special chars" — config/presets/parse.spec.ts line 28
+    #[test]
+    fn pp_handles_special_chars() {
+        let p = parse_preset("github>some/repo:foo+bar");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "foo+bar");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github subfiles" — config/presets/parse.spec.ts line 39
+    #[test]
+    fn pp_parses_github_subfiles() {
+        let p = parse_preset("github>some/repo:somefile");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github subfiles with preset name" — config/presets/parse.spec.ts line 50
+    #[test]
+    fn pp_parses_github_subfiles_with_preset_name() {
+        let p = parse_preset("github>some/repo:somefile/somepreset");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile/somepreset");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github file with preset name with .json extension" — config/presets/parse.spec.ts line 61
+    #[test]
+    fn pp_parses_github_file_with_json_extension() {
+        let p = parse_preset("github>some/repo:somefile.json");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile.json");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github file with preset name with .json5 extension" — config/presets/parse.spec.ts line 73
+    #[test]
+    fn pp_parses_github_file_with_json5_extension() {
+        let p = parse_preset("github>some/repo:somefile.json5");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile.json5");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github subfiles with preset name with .json extension" — config/presets/parse.spec.ts line 85
+    #[test]
+    fn pp_parses_github_subfiles_with_json_extension() {
+        let p = parse_preset("github>some/repo:somefile.json/somepreset");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile.json/somepreset");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github subfiles with preset name with .json5 extension" — config/presets/parse.spec.ts line 97
+    #[test]
+    fn pp_parses_github_subfiles_with_json5_extension() {
+        let p = parse_preset("github>some/repo:somefile.json5/somepreset");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile.json5/somepreset");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github subfiles with preset and sub-preset name" — config/presets/parse.spec.ts line 111
+    #[test]
+    fn pp_parses_github_subfiles_with_sub_preset_name() {
+        let p = parse_preset("github>some/repo:somefile/somepreset/somesubpreset");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile/somepreset/somesubpreset");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github subdirectories" — config/presets/parse.spec.ts line 124
+    #[test]
+    fn pp_parses_github_subdirectories() {
+        let p = parse_preset("github>some/repo//somepath/somesubpath/somefile");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile");
+        assert_eq!(p.preset_path, Some("somepath/somesubpath".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses github toplevel file using subdirectory syntax" — config/presets/parse.spec.ts line 137
+    #[test]
+    fn pp_parses_github_toplevel_file_subdirectory_syntax() {
+        let p = parse_preset("github>some/repo//somefile");
+        assert_eq!(p.preset_source, "github");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "somefile");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses gitlab" — config/presets/parse.spec.ts line 148
+    #[test]
+    fn pp_parses_gitlab() {
+        let p = parse_preset("gitlab>some/repo");
+        assert_eq!(p.preset_source, "gitlab");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses gitea" — config/presets/parse.spec.ts line 159
+    #[test]
+    fn pp_parses_gitea() {
+        let p = parse_preset("gitea>some/repo");
+        assert_eq!(p.preset_source, "gitea");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses forgejo" — config/presets/parse.spec.ts line 170
+    #[test]
+    fn pp_parses_forgejo() {
+        let p = parse_preset("forgejo>some/repo");
+        assert_eq!(p.preset_source, "forgejo");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local" — config/presets/parse.spec.ts line 181
+    #[test]
+    fn pp_parses_local() {
+        let p = parse_preset("local>some/repo");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local with spaces" — config/presets/parse.spec.ts line 192
+    #[test]
+    fn pp_parses_local_with_spaces() {
+        let p = parse_preset("local>A2B CD/A2B_Renovate");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "A2B CD/A2B_Renovate");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local with subdirectory" — config/presets/parse.spec.ts line 203
+    #[test]
+    fn pp_parses_local_with_subdirectory() {
+        let p = parse_preset("local>some-group/some-repo//some-dir/some-file");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "some-group/some-repo");
+        assert_eq!(p.preset_name, "some-file");
+        assert_eq!(p.preset_path, Some("some-dir".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local with spaces and subdirectory" — config/presets/parse.spec.ts line 216
+    #[test]
+    fn pp_parses_local_with_spaces_and_subdirectory() {
+        let p = parse_preset("local>A2B CD/A2B_Renovate//some-dir/some-file");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "A2B CD/A2B_Renovate");
+        assert_eq!(p.preset_name, "some-file");
+        assert_eq!(p.preset_path, Some("some-dir".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local with sub preset and tag" — config/presets/parse.spec.ts line 229
+    #[test]
+    fn pp_parses_local_with_sub_preset_and_tag() {
+        let p = parse_preset("local>some-group/some-repo:some-file/subpreset#1.2.3");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "some-group/some-repo");
+        assert_eq!(p.preset_name, "some-file/subpreset");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, Some("1.2.3".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local with subdirectory and tag" — config/presets/parse.spec.ts line 243
+    #[test]
+    fn pp_parses_local_with_subdirectory_and_tag() {
+        let p = parse_preset("local>some-group/some-repo//some-dir/some-file#1.2.3");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "some-group/some-repo");
+        assert_eq!(p.preset_name, "some-file");
+        assert_eq!(p.preset_path, Some("some-dir".to_owned()));
+        assert_eq!(p.tag, Some("1.2.3".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local with subdirectory and branch/tag with a slash" — config/presets/parse.spec.ts line 257
+    #[test]
+    fn pp_parses_local_with_subdirectory_and_slash_tag() {
+        let p = parse_preset("local>PROJECT/repository//path/to/preset#feature/branch");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "PROJECT/repository");
+        assert_eq!(p.preset_name, "preset");
+        assert_eq!(p.preset_path, Some("path/to".to_owned()));
+        assert_eq!(p.tag, Some("feature/branch".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local with sub preset and branch/tag with a slash" — config/presets/parse.spec.ts line 271
+    #[test]
+    fn pp_parses_local_with_sub_preset_and_slash_tag() {
+        let p = parse_preset("local>PROJECT/repository:preset/subpreset#feature/branch");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "PROJECT/repository");
+        assert_eq!(p.preset_name, "preset/subpreset");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.tag, Some("feature/branch".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local repo with presetPath with URL-encoded characters" — config/presets/parse.spec.ts line 285
+    #[test]
+    fn pp_parses_local_url_encoded_with_preset_path() {
+        let p = parse_preset("local>some%20group/some%20repo//some-dir/some-file");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "some%20group/some%20repo");
+        assert_eq!(p.preset_name, "some-file");
+        assert_eq!(p.preset_path, Some("some-dir".to_owned()));
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local repo with URL-encoded characters" — config/presets/parse.spec.ts line 298
+    #[test]
+    fn pp_parses_local_url_encoded() {
+        let p = parse_preset("local>some%20group/some%20repo//some-file");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "some%20group/some%20repo");
+        assert_eq!(p.preset_name, "some-file");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses no prefix as local" — config/presets/parse.spec.ts line 309
+    #[test]
+    fn pp_parses_no_prefix_as_local() {
+        let p = parse_preset("some/repo");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "some/repo");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local Bitbucket user repo with preset name" — config/presets/parse.spec.ts line 320
+    #[test]
+    fn pp_parses_local_bitbucket_user_repo_with_preset_name() {
+        let p = parse_preset("local>~john_doe/repo//somefile");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "~john_doe/repo");
+        assert_eq!(p.preset_name, "somefile");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses local Bitbucket user repo" — config/presets/parse.spec.ts line 331
+    #[test]
+    fn pp_parses_local_bitbucket_user_repo() {
+        let p = parse_preset("local>~john_doe/renovate-config");
+        assert_eq!(p.preset_source, "local");
+        assert_eq!(p.repo, "~john_doe/renovate-config");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns default package name with params" — config/presets/parse.spec.ts line 342
+    #[test]
+    fn pp_returns_default_package_name_with_params() {
+        let p = parse_preset(":group(packages/eslint, eslint)");
+        assert_eq!(p.preset_source, "internal");
+        assert_eq!(p.repo, "default");
+        assert_eq!(p.preset_name, "group");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["packages/eslint".to_owned(), "eslint".to_owned()]));
+        assert_eq!(p.raw_params, Some("packages/eslint, eslint".to_owned()));
+    }
+
+    // Ported: "returns simple scope" — config/presets/parse.spec.ts line 354
+    #[test]
+    fn pp_returns_simple_scope() {
+        let p = parse_preset("@somescope");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/renovate-config");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns simple scope and params" — config/presets/parse.spec.ts line 365
+    #[test]
+    fn pp_returns_simple_scope_and_params() {
+        let p = parse_preset("@somescope(param1)");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/renovate-config");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["param1".to_owned()]));
+        assert_eq!(p.raw_params, Some("param1".to_owned()));
+    }
+
+    // Ported: "returns scope with repo and default" — config/presets/parse.spec.ts line 376
+    #[test]
+    fn pp_returns_scope_with_repo_and_default() {
+        let p = parse_preset("@somescope/somepackagename");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/somepackagename");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns scope with repo and params and default" — config/presets/parse.spec.ts line 387
+    #[test]
+    fn pp_returns_scope_with_repo_and_params_and_default() {
+        let p = parse_preset("@somescope/somepackagename(param1, param2, param3)");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/somepackagename");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["param1".to_owned(), "param2".to_owned(), "param3".to_owned()]));
+        assert_eq!(p.raw_params, Some("param1, param2, param3".to_owned()));
+    }
+
+    // Ported: "returns scope with presetName" — config/presets/parse.spec.ts line 400
+    #[test]
+    fn pp_returns_scope_with_preset_name() {
+        let p = parse_preset("@somescope:somePresetName");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/renovate-config");
+        assert_eq!(p.preset_name, "somePresetName");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns scope with presetName and params" — config/presets/parse.spec.ts line 411
+    #[test]
+    fn pp_returns_scope_with_preset_name_and_params() {
+        let p = parse_preset("@somescope:somePresetName(param1)");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/renovate-config");
+        assert_eq!(p.preset_name, "somePresetName");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["param1".to_owned()]));
+        assert_eq!(p.raw_params, Some("param1".to_owned()));
+    }
+
+    // Ported: "returns scope with repo and presetName" — config/presets/parse.spec.ts line 422
+    #[test]
+    fn pp_returns_scope_with_repo_and_preset_name() {
+        let p = parse_preset("@somescope/somepackagename:somePresetName");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/somepackagename");
+        assert_eq!(p.preset_name, "somePresetName");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns scope with repo and presetName and params" — config/presets/parse.spec.ts line 433
+    #[test]
+    fn pp_returns_scope_with_repo_and_preset_name_and_params() {
+        let p = parse_preset("@somescope/somepackagename:somePresetName(param1, param2)");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "@somescope/somepackagename");
+        assert_eq!(p.preset_name, "somePresetName");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["param1".to_owned(), "param2".to_owned()]));
+        assert_eq!(p.raw_params, Some("param1, param2".to_owned()));
+    }
+
+    // Ported: "returns non-scoped default" — config/presets/parse.spec.ts line 449
+    #[test]
+    fn pp_returns_non_scoped_default() {
+        let p = parse_preset("somepackage");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "renovate-config-somepackage");
+        assert_eq!(p.preset_name, "default");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns non-scoped package name" — config/presets/parse.spec.ts line 460
+    #[test]
+    fn pp_returns_non_scoped_package_name() {
+        let p = parse_preset("somepackage:webapp");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "renovate-config-somepackage");
+        assert_eq!(p.preset_name, "webapp");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns non-scoped package name full" — config/presets/parse.spec.ts line 471
+    #[test]
+    fn pp_returns_non_scoped_package_name_full() {
+        let p = parse_preset("renovate-config-somepackage:webapp");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "renovate-config-somepackage");
+        assert_eq!(p.preset_name, "webapp");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "returns non-scoped package name with params" — config/presets/parse.spec.ts line 482
+    #[test]
+    fn pp_returns_non_scoped_package_name_with_params() {
+        let p = parse_preset("somepackage:webapp(param1)");
+        assert_eq!(p.preset_source, "npm");
+        assert_eq!(p.repo, "renovate-config-somepackage");
+        assert_eq!(p.preset_name, "webapp");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["param1".to_owned()]));
+        assert_eq!(p.raw_params, Some("param1".to_owned()));
+    }
+
+    // Ported: "parses HTTPS URLs for gitea" — config/presets/parse.spec.ts line 493
+    #[test]
+    fn pp_parses_https_urls_for_gitea() {
+        let p = parse_preset(
+            "https://my.server/gitea/renovate-config/raw/branch/main/default.json",
+        );
+        assert_eq!(p.preset_source, "http");
+        assert_eq!(
+            p.repo,
+            "https://my.server/gitea/renovate-config/raw/branch/main/default.json"
+        );
+        assert_eq!(p.preset_name, "");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses HTTPS URLs for forgejo" — config/presets/parse.spec.ts line 508
+    #[test]
+    fn pp_parses_https_urls_for_forgejo() {
+        let p = parse_preset(
+            "https://my.server/forgejo/renovate-config/raw/branch/main/default.json",
+        );
+        assert_eq!(p.preset_source, "http");
+        assert_eq!(
+            p.repo,
+            "https://my.server/forgejo/renovate-config/raw/branch/main/default.json"
+        );
+        assert_eq!(p.preset_name, "");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses HTTP URLs" — config/presets/parse.spec.ts line 523
+    #[test]
+    fn pp_parses_http_urls() {
+        let p = parse_preset(
+            "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain",
+        );
+        assert_eq!(p.preset_source, "http");
+        assert_eq!(
+            p.repo,
+            "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain"
+        );
+        assert_eq!(p.preset_name, "");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, None);
+        assert_eq!(p.raw_params, None);
+    }
+
+    // Ported: "parses HTTPS URLs with parameters for gitea" — config/presets/parse.spec.ts line 538
+    #[test]
+    fn pp_parses_https_urls_with_params_for_gitea() {
+        let p = parse_preset(
+            "https://my.server/gitea/renovate-config/raw/branch/main/default.json(param1)",
+        );
+        assert_eq!(p.preset_source, "http");
+        assert_eq!(
+            p.repo,
+            "https://my.server/gitea/renovate-config/raw/branch/main/default.json"
+        );
+        assert_eq!(p.preset_name, "");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["param1".to_owned()]));
+        assert_eq!(p.raw_params, Some("param1".to_owned()));
+    }
+
+    // Ported: "parses HTTPS URLs with parameters for forgejo" — config/presets/parse.spec.ts line 553
+    #[test]
+    fn pp_parses_https_urls_with_params_for_forgejo() {
+        let p = parse_preset(
+            "https://my.server/forgejo/renovate-config/raw/branch/main/default.json(param1)",
+        );
+        assert_eq!(p.preset_source, "http");
+        assert_eq!(
+            p.repo,
+            "https://my.server/forgejo/renovate-config/raw/branch/main/default.json"
+        );
+        assert_eq!(p.preset_name, "");
+        assert_eq!(p.preset_path, None);
+        assert_eq!(p.params, Some(vec!["param1".to_owned()]));
+        assert_eq!(p.raw_params, Some("param1".to_owned()));
     }
 }
