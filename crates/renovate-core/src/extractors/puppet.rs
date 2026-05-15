@@ -292,6 +292,35 @@ pub fn extract(content: &str) -> Vec<PuppetDep> {
     deps
 }
 
+/// Regex matching `git@host:repository` SSH git format.
+///
+/// Mirrors `lib/modules/manager/puppet/common.ts` `RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT`.
+pub static GIT_SSH_RE: std::sync::LazyLock<regex::Regex> =
+    std::sync::LazyLock::new(|| regex::Regex::new(r"^git@[^:]*:(?P<repository>.+)$").unwrap());
+
+/// Parse `git` URL to `owner/repo` format.
+///
+/// Mirrors `lib/modules/manager/puppet/common.ts` `parseGitOwnerRepo()`.
+/// Returns `None` for unrecognised URLs.
+pub fn parse_git_owner_repo(git: &str, _github_url: bool) -> Option<String> {
+    if let Some(cap) = GIT_SSH_RE.captures(git) {
+        let repo = cap["repository"].trim_end_matches(".git");
+        return Some(repo.to_owned());
+    }
+    // Try as HTTP(S) URL: strip scheme and host, extract path
+    let after_scheme = git
+        .strip_prefix("https://")
+        .or_else(|| git.strip_prefix("http://"))
+        .or_else(|| git.strip_prefix("ssh://"))?;
+    // Skip host (up to first `/`)
+    let path = after_scheme.split_once('/')?.1;
+    let path = path.trim_end_matches(".git").trim_end_matches('/');
+    if path.is_empty() {
+        return None;
+    }
+    Some(path.to_owned())
+}
+
 /// Whether `url` looks like one of the git-URL schemes Puppet's r10k
 /// supports for `:git =>` references (https://, http://, ssh://, git@host:).
 fn is_recognised_git_url(url: &str) -> bool {
@@ -482,5 +511,36 @@ mod 'invalid_url',
         // `invalid_url` lacks a recognised URL scheme — InvalidUrl.
         let invalid = deps.iter().find(|d| d.name == "invalid_url").unwrap();
         assert_eq!(invalid.skip_reason, Some(PuppetSkipReason::InvalidUrl));
+    }
+
+    // Ported: "access by index" — modules/manager/puppet/common.spec.ts line 10
+    #[test]
+    fn puppet_git_ssh_regex_captures_repository() {
+        let cap = GIT_SSH_RE
+            .captures("git@gitlab.com:dir1/dir2/project.git")
+            .unwrap();
+        assert_eq!(&cap["repository"], "dir1/dir2/project.git");
+    }
+
+    // Ported: "access by named group" — modules/manager/puppet/common.spec.ts line 21
+    #[test]
+    fn puppet_git_ssh_regex_captures_named_group() {
+        let cap = GIT_SSH_RE
+            .captures("git@gitlab.com:dir1/dir2/project.git")
+            .unwrap();
+        assert_eq!(&cap["repository"], "dir1/dir2/project.git");
+    }
+
+    // Ported: "unable to parse url" — modules/manager/puppet/common.spec.ts line 34
+    #[test]
+    fn puppet_parse_git_owner_repo_returns_none_for_invalid() {
+        assert!(parse_git_owner_repo("invalid-url-example", false).is_none());
+    }
+
+    // Ported: "parseable url" — modules/manager/puppet/common.spec.ts line 38
+    #[test]
+    fn puppet_parse_git_owner_repo_parses_https_url() {
+        let result = parse_git_owner_repo("https://gitlab.com/example/example", false);
+        assert_eq!(result.as_deref(), Some("example/example"));
     }
 }

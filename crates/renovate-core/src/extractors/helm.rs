@@ -250,6 +250,43 @@ fn emit_dep(name: &str, version: &str, repository: &str, deps: &mut Vec<HelmExtr
     });
 }
 
+/// Bump the `version:` field in Chart.yaml content.
+///
+/// Mirrors `lib/modules/manager/helmv3/update.ts` `bumpPackageVersion()`.
+pub fn bump_package_version(content: &str, current_value: &str, bump_version: &str) -> String {
+    use std::sync::LazyLock;
+    static VERSION_RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r"(?m)^(?P<prefix>version:\s*).*$").unwrap());
+
+    let new_ver = (|| -> Option<String> {
+        let mut parsed = semver::Version::parse(current_value).ok()?;
+        match bump_version {
+            "patch" => parsed.patch += 1,
+            "minor" => {
+                parsed.minor += 1;
+                parsed.patch = 0;
+            }
+            "major" => {
+                parsed.major += 1;
+                parsed.minor = 0;
+                parsed.patch = 0;
+            }
+            _ => return None,
+        }
+        Some(parsed.to_string())
+    })();
+
+    let Some(new_str) = new_ver else {
+        return content.to_owned();
+    };
+
+    VERSION_RE
+        .replace(content, |caps: &regex::Captures| {
+            format!("{}{}", &caps["prefix"], new_str)
+        })
+        .into_owned()
+}
+
 /// Resolve a repository string to a canonical URL or a skip reason.
 fn classify_repository(repo: &str) -> (String, Option<HelmSkipReason>) {
     if repo.is_empty() {
@@ -555,5 +592,35 @@ dependencies:
         assert_eq!(valid.current_value, "0.0.1");
         assert_eq!(valid.repository, "https://charts.helm.sh/stable/");
         assert!(valid.skip_reason.is_none());
+    }
+
+    const CHART_YAML: &str = "apiVersion: v2\nname: test\nversion: 0.0.2\n";
+
+    // Ported: "increments" — modules/manager/helmv3/update.spec.ts line 14
+    #[test]
+    fn helm_bump_increments_patch() {
+        let result = bump_package_version(CHART_YAML, "0.0.2", "patch");
+        assert_eq!(result, CHART_YAML.replace("0.0.2", "0.0.3"));
+    }
+
+    // Ported: "no ops" — modules/manager/helmv3/update.spec.ts line 22
+    #[test]
+    fn helm_bump_no_op_when_version_mismatch() {
+        let result = bump_package_version(CHART_YAML, "0.0.1", "patch");
+        assert_eq!(result, CHART_YAML);
+    }
+
+    // Ported: "updates" — modules/manager/helmv3/update.spec.ts line 30
+    #[test]
+    fn helm_bump_updates_minor() {
+        let result = bump_package_version(CHART_YAML, "0.0.1", "minor");
+        assert_eq!(result, CHART_YAML.replace("0.0.2", "0.1.0"));
+    }
+
+    // Ported: "returns content if bumping errors" — modules/manager/helmv3/update.spec.ts line 38
+    #[test]
+    fn helm_bump_returns_content_on_invalid_bump_type() {
+        let result = bump_package_version(CHART_YAML, "0.0.2", "not_valid");
+        assert_eq!(result, CHART_YAML);
     }
 }

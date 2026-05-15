@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2306 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2314 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15471,16 +15471,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/helmv3/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/update.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `.bumpPackageVersion()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| increments | 12 | pending | — | — | — |
-| no ops | 22 | pending | — | — | — |
-| updates | 31 | pending | — | — | — |
-| returns content if bumping errors | 41 | pending | — | — | — |
+| increments | 12 | ported | `helm.rs` | `helm_bump_increments_patch` | — |
+| no ops | 22 | ported | `helm.rs` | `helm_bump_no_op_when_version_mismatch` | — |
+| updates | 31 | ported | `helm.rs` | `helm_bump_updates_minor` | — |
+| returns content if bumping errors | 41 | ported | `helm.rs` | `helm_bump_returns_content_on_invalid_bump_type` | — |
 
 ---
 
@@ -17540,21 +17540,21 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/puppet/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/puppet/common.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| access by index | 8 | pending | — | — | — |
-| access by named group | 18 | pending | — | — | — |
+| access by index | 8 | ported | `puppet.rs` | `puppet_git_ssh_regex_captures_repository` | — |
+| access by named group | 18 | ported | `puppet.rs` | `puppet_git_ssh_regex_captures_named_group` | — |
 
 ### `parseGitOwnerRepo`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| unable to parse url | 32 | pending | — | — | — |
-| parseable url | 36 | pending | — | — | — |
+| unable to parse url | 32 | ported | `puppet.rs` | `puppet_parse_git_owner_repo_returns_none_for_invalid` | — |
+| parseable url | 36 | ported | `puppet.rs` | `puppet_parse_git_owner_repo_parses_https_url` | — |
 
 ---
 
