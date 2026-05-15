@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2441 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2442 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -25377,7 +25377,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/config-migration/branch/rebase.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/rebase.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 1 | **Actionable:** 5 | **Status:** partial
 
 ### `workers/repository/config-migration/branch/rebase › rebaseMigrationBranch()`
 
@@ -25392,7 +25392,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should strip white spaces from json | 140 | pending | — | — | — |
+| should strip white spaces from json | 140 | ported | `json_writer.rs` | `json_strip_whitespaces_removes_formatting` | — |
 
 ---
 

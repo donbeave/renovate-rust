@@ -53,6 +53,20 @@ pub fn write_json<T: Serialize>(
     result
 }
 
+/// Strip whitespace from a JSON string by parsing and re-serializing compactly.
+///
+/// Returns `None` if the input is empty or cannot be parsed.
+///
+/// Mirrors `lib/workers/repository/config-migration/branch/rebase.ts`
+/// `jsonStripWhitespaces()`.
+pub fn json_strip_whitespaces(json: &str) -> Option<String> {
+    if json.is_empty() {
+        return None;
+    }
+    let value: serde_json::Value = serde_json::from_str(json).ok()?;
+    serde_json::to_string(&value).ok()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -100,5 +114,14 @@ mod tests {
         };
         let result = write_json(&data, &config, false);
         assert_eq!(result, "{\n          \"value\": 1\n}");
+    }
+
+    // Ported: "should strip white spaces from json" — workers/repository/config-migration/branch/rebase.spec.ts line 140
+    #[test]
+    fn json_strip_whitespaces_removes_formatting() {
+        let data = json!({ "name": "renovate", "enabled": true, "count": 3 });
+        let formatted = serde_json::to_string_pretty(&data).unwrap();
+        let stripped = json_strip_whitespaces(&formatted).unwrap();
+        assert_eq!(stripped, serde_json::to_string(&data).unwrap());
     }
 }
