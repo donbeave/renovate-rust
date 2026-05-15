@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2281 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2284 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13297,15 +13297,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bitrise/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bitrise/utils.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `parseStep()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null on an empty string | 6 | pending | — | — | — |
-| returns dependency for step | 10 | pending | — | — | — |
-| parses missing version | 19 | pending | — | — | — |
+| returns null on an empty string | 6 | ported | `bitrise.rs` | `parse_step_returns_none_for_empty` | — |
+| returns dependency for step | 10 | ported | `bitrise.rs` | `parse_step_returns_dep_with_version` | — |
+| parses missing version | 19 | ported | `bitrise.rs` | `parse_step_returns_unspecified_version_when_no_at` | — |
 
 ---
 

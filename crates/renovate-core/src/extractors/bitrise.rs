@@ -62,6 +62,44 @@ pub struct BitriseDep {
     pub skip_reason: Option<BitriseSkipReason>,
 }
 
+/// Result of `parse_step`, analogous to the TypeScript `PackageDependency`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParsedStep {
+    pub package_name: String,
+    pub current_value: Option<String>,
+    pub replace_string: String,
+    /// `Some("unspecified-version")` when no version given.
+    pub skip_reason: Option<&'static str>,
+}
+
+/// Parse a Bitrise step reference string (simplified public API).
+///
+/// Mirrors `lib/modules/manager/bitrise/utils.ts` `parseStep()`.
+/// Returns `None` for an empty string.
+pub fn parse_step(step_ref: &str) -> Option<ParsedStep> {
+    if step_ref.is_empty() {
+        return None;
+    }
+    let replace_string = step_ref.to_owned();
+    let mut parts = step_ref.splitn(2, '@');
+    let name = parts.next().unwrap_or(step_ref).to_owned();
+    let current_value = parts.next().map(str::to_owned);
+    if current_value.is_none() {
+        return Some(ParsedStep {
+            package_name: name,
+            current_value: None,
+            replace_string,
+            skip_reason: Some("unspecified-version"),
+        });
+    }
+    Some(ParsedStep {
+        package_name: name,
+        current_value,
+        replace_string,
+        skip_reason: None,
+    })
+}
+
 // ── Regexes ───────────────────────────────────────────────────────────────────
 
 /// `default_step_lib_source: <url>`
@@ -406,5 +444,31 @@ mod tests {
         assert_eq!(deps.len(), 2);
         assert_eq!(deps[0].dep_name, "script");
         assert_eq!(deps[1].dep_name, "restore-cache");
+    }
+
+    // Ported: "returns null on an empty string" — modules/manager/bitrise/utils.spec.ts line 8
+    #[test]
+    fn parse_step_returns_none_for_empty() {
+        assert!(parse_step("").is_none());
+    }
+
+    // Ported: "returns dependency for step" — modules/manager/bitrise/utils.spec.ts line 12
+    #[test]
+    fn parse_step_returns_dep_with_version() {
+        let result = parse_step("restore-gradle-cache@1.1.2").unwrap();
+        assert_eq!(result.package_name, "restore-gradle-cache");
+        assert_eq!(result.current_value.as_deref(), Some("1.1.2"));
+        assert_eq!(result.replace_string, "restore-gradle-cache@1.1.2");
+        assert!(result.skip_reason.is_none());
+    }
+
+    // Ported: "parses missing version" — modules/manager/bitrise/utils.spec.ts line 20
+    #[test]
+    fn parse_step_returns_unspecified_version_when_no_at() {
+        let result = parse_step("share-pipeline-variable").unwrap();
+        assert_eq!(result.package_name, "share-pipeline-variable");
+        assert!(result.current_value.is_none());
+        assert_eq!(result.replace_string, "share-pipeline-variable");
+        assert_eq!(result.skip_reason, Some("unspecified-version"));
     }
 }
