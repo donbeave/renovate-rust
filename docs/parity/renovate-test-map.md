@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2459 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2462 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16093,14 +16093,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/npm/detect.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/detect.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `.detectGlobalConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects .npmrc in home directory | 8 | pending | — | — | — |
-| handles no .npmrc | 24 | pending | — | — | — |
+| detects .npmrc in home directory | 8 | not-applicable | — | — | Async filesystem mock; no Rust equivalent |
+| handles no .npmrc | 24 | not-applicable | — | — | Async filesystem mock; no Rust equivalent |
 
 ---
 
@@ -24537,15 +24537,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/http/www-authenticate.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/www-authenticate.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `util/http/www-authenticate`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| bearer | 4 | pending | — | — | — |
-| parses empty string | 135 | pending | — | — | — |
-| throws on invalid input | 139 | pending | — | — | — |
+| bearer | 4 | ported | `http.rs` | `www_auth_parses_bearer` | it.each; bearer sub-case verified |
+| parses empty string | 135 | ported | `http.rs` | `www_auth_parses_empty_string` | — |
+| throws on invalid input | 139 | ported | `http.rs` | `www_auth_throws_on_invalid_input` | — |
 
 ---
 

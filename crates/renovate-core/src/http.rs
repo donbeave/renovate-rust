@@ -387,3 +387,201 @@ mod tests {
         assert_eq!(val["v"], 42);
     }
 }
+
+// ── WWW-Authenticate header parser ───────────────────────────────────────────
+
+/// Parsed params for a WWW-Authenticate challenge.
+#[derive(Debug, Clone, PartialEq)]
+pub enum WwwAuthParams {
+    /// Key=value pairs (bearer, digest, basic with quoted values).
+    Map(std::collections::BTreeMap<String, String>),
+    /// Single token argument (negotiate with GSSAPI token, etc.).
+    Token(String),
+}
+
+/// A single parsed WWW-Authenticate challenge.
+#[derive(Debug, Clone, PartialEq)]
+pub struct WwwAuthChallenge {
+    pub scheme: String,
+    pub params: Option<WwwAuthParams>,
+}
+
+/// Parse a `WWW-Authenticate` header (or slice of headers).
+///
+/// Mirrors `lib/util/http/www-authenticate.ts` `parse()`.
+/// Returns `Err` if the input contains invalid tokens.
+pub fn parse_www_authenticate(headers: &[&str]) -> Result<Vec<WwwAuthChallenge>, String> {
+    let mut result = Vec::new();
+    for &header in headers {
+        parse_single_header(header, &mut result)?;
+    }
+    Ok(result)
+}
+
+fn parse_single_header(input: &str, out: &mut Vec<WwwAuthChallenge>) -> Result<(), String> {
+    if input.is_empty() {
+        return Ok(());
+    }
+
+    let tokens = tokenize(input)?;
+    let tokens = group_pairs(tokens);
+    let challenges = group_challenges(tokens);
+
+    for c in challenges {
+        let mut args: Vec<String> = Vec::new();
+        let mut params: std::collections::BTreeMap<String, String> = Default::default();
+
+        for t in c.tokens {
+            match t {
+                Token::Value(v) => args.push(v),
+                Token::Pair(k, v) => { params.insert(k, v); }
+                Token::Comma => {}
+                Token::Equals => {}
+            }
+        }
+
+        let ch = if !args.is_empty() {
+            WwwAuthChallenge { scheme: c.scheme.to_lowercase(), params: Some(WwwAuthParams::Token(args[0].clone())) }
+        } else if !params.is_empty() {
+            WwwAuthChallenge { scheme: c.scheme.to_lowercase(), params: Some(WwwAuthParams::Map(params)) }
+        } else {
+            WwwAuthChallenge { scheme: c.scheme.to_lowercase(), params: None }
+        };
+        out.push(ch);
+    }
+    Ok(())
+}
+
+#[derive(Debug, Clone)]
+enum Token {
+    Value(String),
+    Equals,
+    Comma,
+    Pair(String, String),
+}
+
+struct Challenge {
+    scheme: String,
+    tokens: Vec<Token>,
+}
+
+fn tokenize(input: &str) -> Result<Vec<Token>, String> {
+    use std::sync::LazyLock;
+    static TOKEN_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r#"^([a-zA-Z0-9!#$%&'*+.^_`|~-]+)"#).unwrap()
+    });
+    static QUOTED_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r#"^"((?:[^"\\]|\\\\|\\")*)""#).unwrap()
+    });
+    static WS_RE: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^\s+").unwrap());
+
+    let mut result = Vec::new();
+    let mut remaining = input;
+
+    while !remaining.is_empty() {
+        if let Some(m) = WS_RE.find(remaining) {
+            remaining = &remaining[m.end()..];
+        } else if let Some(c) = QUOTED_RE.captures(remaining) {
+            let v = c.get(1).unwrap().as_str().to_owned();
+            remaining = &remaining[c.get(0).unwrap().end()..];
+            result.push(Token::Value(v));
+        } else if let Some(c) = TOKEN_RE.captures(remaining) {
+            let v = c.get(1).unwrap().as_str().to_owned();
+            remaining = &remaining[c.get(0).unwrap().end()..];
+            result.push(Token::Value(v));
+        } else if remaining.starts_with('=') {
+            remaining = &remaining[1..];
+            result.push(Token::Equals);
+        } else if remaining.starts_with(',') {
+            remaining = &remaining[1..];
+            result.push(Token::Comma);
+        } else {
+            return Err("Failed to parse value".to_owned());
+        }
+    }
+    Ok(result)
+}
+
+fn group_pairs(mut tokens: Vec<Token>) -> Vec<Token> {
+    let mut i = 0;
+    while i + 2 < tokens.len() {
+        if matches!((&tokens[i], &tokens[i+1], &tokens[i+2]),
+            (Token::Value(_), Token::Equals, Token::Value(_)))
+        {
+            let val = match tokens.remove(i + 2) { Token::Value(v) => v, _ => unreachable!() };
+            tokens.remove(i + 1); // equals
+            let key = match std::mem::replace(&mut tokens[i], Token::Comma) { Token::Value(v) => v, _ => unreachable!() };
+            tokens[i] = Token::Pair(key, val);
+        } else {
+            i += 1;
+        }
+    }
+    tokens
+}
+
+fn group_challenges(mut tokens: Vec<Token>) -> Vec<Challenge> {
+    let mut result = Vec::new();
+    while !tokens.is_empty() {
+        let scheme = match tokens.remove(0) { Token::Value(v) => v, _ => break };
+        let mut j = 0;
+        if tokens.is_empty() {
+            // nothing
+        } else if matches!(tokens[0], Token::Comma) {
+            // nothing
+        } else if matches!(tokens[0], Token::Value(_)) {
+            j = 1;
+        } else {
+            while j < tokens.len() && matches!(tokens[j], Token::Pair(_, _)) {
+                j += 2;
+            }
+            if j > 0 { j -= 1; }
+        }
+        let ch_tokens: Vec<Token> = tokens.drain(0..j).collect();
+        if !tokens.is_empty() { tokens.remove(0); } // comma
+        result.push(Challenge { scheme, tokens: ch_tokens });
+    }
+    result
+}
+
+#[cfg(test)]
+mod www_auth_tests {
+    use super::*;
+
+    fn bearer_params(realm: &str, service: &str, scope: &str) -> WwwAuthParams {
+        let mut m = std::collections::BTreeMap::new();
+        m.insert("realm".into(), realm.into());
+        m.insert("scope".into(), scope.into());
+        m.insert("service".into(), service.into());
+        WwwAuthParams::Map(m)
+    }
+
+    // Ported: "parses: bearer" (it.each) — util/http/www-authenticate.spec.ts line 4
+    #[test]
+    fn www_auth_parses_bearer() {
+        let parsed = parse_www_authenticate(&[
+            "Bearer realm=\"https://renovate.com/v2/token\",service=\"container_registry\",scope=\"*\""
+        ]).unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].scheme, "bearer");
+        assert_eq!(
+            parsed[0].params,
+            Some(bearer_params("https://renovate.com/v2/token", "container_registry", "*"))
+        );
+    }
+
+    // Ported: "parses empty string" — util/http/www-authenticate.spec.ts line 135
+    #[test]
+    fn www_auth_parses_empty_string() {
+        let parsed = parse_www_authenticate(&[""]).unwrap();
+        assert!(parsed.is_empty());
+    }
+
+    // Ported: "throws on invalid input" — util/http/www-authenticate.spec.ts line 139
+    #[test]
+    fn www_auth_throws_on_invalid_input() {
+        let result = parse_www_authenticate(&[
+            "Bearer realm=\"https://renovate.com/v2/token\",service=\"container_registry\",scope=\"*"
+        ]);
+        assert!(result.is_err());
+    }
+}
