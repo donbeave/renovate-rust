@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2268 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2273 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -14620,23 +14620,23 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/gleam/locked-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gleam/locked-version.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 5 | **Actionable:** 5 | **Status:** partial
 
 ### `extractLockFileVersions()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for missing lock file | 19 | pending | — | — | — |
-| returns null for invalid lock file | 23 | pending | — | — | — |
-| returns empty map for lock file without packages | 28 | pending | — | — | — |
-| returns a map of package versions | 33 | pending | — | — | — |
+| returns null for missing lock file | 19 | not-applicable | — | — | TypeScript reads from filesystem (async); Rust tests inline content |
+| returns null for invalid lock file | 23 | ported | `gleam.rs` | `gleam_lock_returns_none_for_invalid` | — |
+| returns empty map for lock file without packages | 28 | ported | `gleam.rs` | `gleam_lock_returns_empty_map_for_no_packages` | — |
+| returns a map of package versions | 33 | ported | `gleam.rs` | `gleam_lock_returns_map_of_package_versions` | — |
 
 ### `parseLockFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses lockfile string into an object | 45 | pending | — | — | — |
-| can deal with invalid lockfiles | 63 | pending | — | — | — |
+| parses lockfile string into an object | 45 | ported | `gleam.rs` | `gleam_lock_parses_into_object` | — |
+| can deal with invalid lockfiles | 63 | ported | `gleam.rs` | `gleam_lock_handles_invalid_lockfile` | — |
 
 ---
 

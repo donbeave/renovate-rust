@@ -18,6 +18,8 @@
 //! gleeunit = "~> 1.0"
 //! ```
 
+use std::collections::HashMap;
+
 /// A single extracted Gleam dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GleamDep {
@@ -66,6 +68,65 @@ pub fn extract(content: &str) -> Vec<GleamDep> {
     }
 
     out
+}
+
+/// A package entry from Gleam's `manifest.toml`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GleamLockPackage {
+    pub name: String,
+    pub version: String,
+    pub requirements: Vec<String>,
+}
+
+/// Parsed Gleam `manifest.toml`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GleamLock {
+    pub packages: Vec<GleamLockPackage>,
+}
+
+/// Parse a Gleam `manifest.toml` string.
+///
+/// Mirrors `lib/modules/manager/gleam/locked-version.ts` `parseLockFile()`.
+pub fn parse_gleam_lock_file(content: &str) -> Option<GleamLock> {
+    let table = content.parse::<toml::Table>().ok()?;
+    let packages_val = table.get("packages");
+    let packages = match packages_val {
+        None => vec![],
+        Some(v) => {
+            let arr = v.as_array()?;
+            let mut out = Vec::with_capacity(arr.len());
+            for item in arr {
+                let t = item.as_table()?;
+                let name = t.get("name")?.as_str()?.to_owned();
+                let version = t.get("version")?.as_str()?.to_owned();
+                let requirements = t
+                    .get("requirements")
+                    .and_then(|r| r.as_array())
+                    .map(|arr| {
+                        arr.iter()
+                            .filter_map(|v| v.as_str())
+                            .map(str::to_owned)
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                out.push(GleamLockPackage { name, version, requirements });
+            }
+            out
+        }
+    };
+    Some(GleamLock { packages })
+}
+
+/// Extract a map of package name → [versions] from a Gleam `manifest.toml` string.
+///
+/// Mirrors `lib/modules/manager/gleam/locked-version.ts` `extractLockFileVersions()`.
+pub fn extract_gleam_lock_file_versions(content: &str) -> Option<HashMap<String, Vec<String>>> {
+    let lock = parse_gleam_lock_file(content)?;
+    let mut map: HashMap<String, Vec<String>> = HashMap::new();
+    for pkg in lock.packages {
+        map.entry(pkg.name).or_default().push(pkg.version);
+    }
+    Some(map)
 }
 
 /// Determine the effective Gleam range strategy.
@@ -165,5 +226,54 @@ gleeunit = "~> 1.0"
     fn gleam_range_defaults_to_widen() {
         let result = get_range_strategy("auto", None);
         assert_eq!(result, "widen");
+    }
+
+    const LOCK_FILE: &str = r#"packages = [
+  { name = "foo", version = "1.0.4", build_tools = ["gleam"], requirements = ["bar"], otp_app = "foo", source = "hex", outer_checksum = "ABC" },
+  { name = "bar", version = "2.1.0", build_tools = ["rebar3"], requirements = [], otp_app = "bar", source = "hex", outer_checksum = "DEF" },
+]
+
+[requirements]
+foo = { version = ">= 1.0.0 and < 2.0.0" }
+"#;
+
+    // Ported: "returns null for invalid lock file" — modules/manager/gleam/locked-version.spec.ts line 26
+    #[test]
+    fn gleam_lock_returns_none_for_invalid() {
+        assert!(parse_gleam_lock_file("foo").is_none());
+    }
+
+    // Ported: "returns empty map for lock file without packages" — modules/manager/gleam/locked-version.spec.ts line 31
+    #[test]
+    fn gleam_lock_returns_empty_map_for_no_packages() {
+        let result = extract_gleam_lock_file_versions("[requirements]").unwrap();
+        assert!(result.is_empty());
+    }
+
+    // Ported: "returns a map of package versions" — modules/manager/gleam/locked-version.spec.ts line 36
+    #[test]
+    fn gleam_lock_returns_map_of_package_versions() {
+        let result = extract_gleam_lock_file_versions(LOCK_FILE).unwrap();
+        assert_eq!(result.get("foo"), Some(&vec!["1.0.4".to_string()]));
+        assert_eq!(result.get("bar"), Some(&vec!["2.1.0".to_string()]));
+    }
+
+    // Ported: "parses lockfile string into an object" — modules/manager/gleam/locked-version.spec.ts line 47
+    #[test]
+    fn gleam_lock_parses_into_object() {
+        let result = parse_gleam_lock_file(LOCK_FILE).unwrap();
+        assert_eq!(result.packages.len(), 2);
+        assert_eq!(result.packages[0].name, "foo");
+        assert_eq!(result.packages[0].version, "1.0.4");
+        assert_eq!(result.packages[0].requirements, vec!["bar"]);
+        assert_eq!(result.packages[1].name, "bar");
+        assert_eq!(result.packages[1].version, "2.1.0");
+        assert!(result.packages[1].requirements.is_empty());
+    }
+
+    // Ported: "can deal with invalid lockfiles" — modules/manager/gleam/locked-version.spec.ts line 65
+    #[test]
+    fn gleam_lock_handles_invalid_lockfile() {
+        assert!(parse_gleam_lock_file("foo").is_none());
     }
 }
