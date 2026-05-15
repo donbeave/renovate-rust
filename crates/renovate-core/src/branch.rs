@@ -559,6 +559,82 @@ fn replace_strict_special_chars(input: &str) -> String {
         .collect()
 }
 
+/// Sort order for branch update types.
+const UPDATE_TYPE_ORDER: &[&str] =
+    &["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"];
+
+/// A branch to sort — mirrors the fields used by `sortBranches()`.
+#[derive(Debug, Clone)]
+pub struct BranchSortEntry {
+    pub update_type: Option<String>,
+    pub pr_title: Option<String>,
+    pub pr_priority: Option<i32>,
+    pub is_vulnerability_alert: Option<bool>,
+}
+
+/// Sort branches in-place.
+///
+/// Sort order:
+/// 1. Vulnerability alerts first (true < false)
+/// 2. `prPriority` descending (higher value first)
+/// 3. Update type in fixed order (pin < digest < patch < minor < major < lockFileMaintenance)
+/// 4. `prTitle` alphabetically with numeric comparison
+///
+/// Mirrors `lib/workers/repository/process/sort.ts` `sortBranches()`.
+pub fn sort_branches(branches: &mut [BranchSortEntry]) {
+    branches.sort_by(|a, b| {
+        let a_vuln = a.is_vulnerability_alert.unwrap_or(false);
+        let b_vuln = b.is_vulnerability_alert.unwrap_or(false);
+        if a_vuln != b_vuln {
+            return b_vuln.cmp(&a_vuln); // true first
+        }
+
+        let a_prio = a.pr_priority.unwrap_or(0);
+        let b_prio = b.pr_priority.unwrap_or(0);
+        if a_prio != b_prio {
+            return b_prio.cmp(&a_prio); // higher first
+        }
+
+        let a_idx = a.update_type.as_deref()
+            .and_then(|t| UPDATE_TYPE_ORDER.iter().position(|&s| s == t))
+            .unwrap_or(UPDATE_TYPE_ORDER.len());
+        let b_idx = b.update_type.as_deref()
+            .and_then(|t| UPDATE_TYPE_ORDER.iter().position(|&s| s == t))
+            .unwrap_or(UPDATE_TYPE_ORDER.len());
+        if a_idx != b_idx {
+            return a_idx.cmp(&b_idx);
+        }
+
+        let a_title = a.pr_title.as_deref().unwrap_or("");
+        let b_title = b.pr_title.as_deref().unwrap_or("");
+        numeric_locale_compare(a_title, b_title)
+    });
+}
+
+/// String comparison with numeric ordering for embedded numbers.
+fn numeric_locale_compare(a: &str, b: &str) -> std::cmp::Ordering {
+    let mut ai = a.chars().peekable();
+    let mut bi = b.chars().peekable();
+    loop {
+        match (ai.peek(), bi.peek()) {
+            (None, None) => return std::cmp::Ordering::Equal,
+            (None, _) => return std::cmp::Ordering::Less,
+            (_, None) => return std::cmp::Ordering::Greater,
+            (Some(ac), Some(bc)) if ac.is_ascii_digit() && bc.is_ascii_digit() => {
+                let an: u64 = ai.by_ref().take_while(|c| c.is_ascii_digit()).collect::<String>().parse().unwrap_or(0);
+                let bn: u64 = bi.by_ref().take_while(|c| c.is_ascii_digit()).collect::<String>().parse().unwrap_or(0);
+                let ord = an.cmp(&bn);
+                if ord != std::cmp::Ordering::Equal { return ord; }
+            }
+            (Some(ac), Some(bc)) => {
+                let ord = ac.cmp(bc);
+                ai.next(); bi.next();
+                if ord != std::cmp::Ordering::Equal { return ord; }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1402,4 +1478,78 @@ mod tests {
         // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
         assert_eq!(branch_name("", "", "dep"), "dep");
     }
+
+    fn branch(update_type: &str, pr_title: &str) -> BranchSortEntry {
+        BranchSortEntry {
+            update_type: Some(update_type.to_owned()),
+            pr_title: Some(pr_title.to_owned()),
+            pr_priority: None,
+            is_vulnerability_alert: None,
+        }
+    }
+
+    // Ported: "sorts based on updateType and prTitle" — workers/repository/process/sort.spec.ts line 6
+    #[test]
+    fn sort_branches_by_update_type_and_pr_title() {
+        let mut branches = vec![
+            branch("major", "some major update"),
+            branch("pin", "some pin"),
+            branch("minor", "a minor update 1.10"),
+            branch("minor", "a minor update 1.2"),
+            branch("minor", "a minor update 1.1"),
+            branch("pin", "some other other pin"),
+            branch("pin", "some other pin"),
+        ];
+        sort_branches(&mut branches);
+        let titles: Vec<_> = branches.iter().map(|b| b.pr_title.as_deref().unwrap()).collect();
+        assert_eq!(titles, [
+            "some other other pin",
+            "some other pin",
+            "some pin",
+            "a minor update 1.1",
+            "a minor update 1.2",
+            "a minor update 1.10",
+            "some major update",
+        ]);
+    }
+
+    // Ported: "sorts based on prPriority" — workers/repository/process/sort.spec.ts line 49
+    #[test]
+    fn sort_branches_by_pr_priority() {
+        let mut branches = vec![
+            BranchSortEntry { update_type: Some("major".into()), pr_title: Some("some major update".into()), pr_priority: Some(1), is_vulnerability_alert: None },
+            BranchSortEntry { update_type: Some("pin".into()), pr_title: Some("some pin".into()), pr_priority: Some(-1), is_vulnerability_alert: None },
+            BranchSortEntry { update_type: Some("patch".into()), pr_title: Some("some patch".into()), pr_priority: None, is_vulnerability_alert: None },
+        ];
+        sort_branches(&mut branches);
+        let titles: Vec<_> = branches.iter().map(|b| b.pr_title.as_deref().unwrap()).collect();
+        assert_eq!(titles[0], "some major update"); // highest priority first
+    }
+
+    // Ported: "sorts based on isVulnerabilityAlert" — workers/repository/process/sort.spec.ts line 86
+    #[test]
+    fn sort_branches_vulnerability_alert_first() {
+        let mut branches = vec![
+            branch("major", "some major update"),
+            BranchSortEntry { update_type: Some("pin".into()), pr_title: Some("some pin".into()), pr_priority: None, is_vulnerability_alert: Some(true) },
+        ];
+        sort_branches(&mut branches);
+        assert_eq!(branches[0].pr_title.as_deref(), Some("some pin")); // vulnerability first
+    }
+
+    // Ported: "sorts based on isVulnerabilityAlert symmetric" — workers/repository/process/sort.spec.ts line 124
+    #[test]
+    fn sort_branches_vulnerability_alert_symmetric() {
+        let mut branches = vec![
+            BranchSortEntry { update_type: Some("pin".into()), pr_title: Some("vuln pin".into()), pr_priority: None, is_vulnerability_alert: Some(true) },
+            BranchSortEntry { update_type: Some("major".into()), pr_title: Some("non-vuln major".into()), pr_priority: None, is_vulnerability_alert: None },
+            BranchSortEntry { update_type: Some("patch".into()), pr_title: Some("vuln patch".into()), pr_priority: None, is_vulnerability_alert: Some(true) },
+        ];
+        sort_branches(&mut branches);
+        // Both vulnerability alerts first, then non-vuln
+        assert!(branches[0].is_vulnerability_alert.unwrap_or(false));
+        assert!(branches[1].is_vulnerability_alert.unwrap_or(false));
+        assert!(!branches[2].is_vulnerability_alert.unwrap_or(false));
+    }
 }
+

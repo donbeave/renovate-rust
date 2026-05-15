@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2416 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2420 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -26723,16 +26723,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/process/sort.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/sort.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `workers/repository/process/sort › sortBranches()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| sorts based on updateType and prTitle | 6 | pending | — | — | — |
-| sorts based on prPriority | 49 | pending | — | — | — |
-| sorts based on isVulnerabilityAlert | 86 | pending | — | — | — |
-| sorts based on isVulnerabilityAlert symmetric | 124 | pending | — | — | — |
+| sorts based on updateType and prTitle | 6 | ported | `branch.rs` | `sort_branches_by_update_type_and_pr_title` | — |
+| sorts based on prPriority | 49 | ported | `branch.rs` | `sort_branches_by_pr_priority` | — |
+| sorts based on isVulnerabilityAlert | 86 | ported | `branch.rs` | `sort_branches_vulnerability_alert_first` | — |
+| sorts based on isVulnerabilityAlert symmetric | 124 | ported | `branch.rs` | `sort_branches_vulnerability_alert_symmetric` | — |
 
 ---
 
