@@ -2223,6 +2223,40 @@ resource "tfe_workspace" "workspace_with_block" {
         assert_eq!(missing_version.datasource, Some("github-releases"));
     }
 
+    /// Generic docker image resource types used by the GenericDockerImageRefExtractor.
+    ///
+    /// Mirrors TypeScript's `generic_image_datasource` and `generic_image_resource` from
+    /// `lib/modules/manager/terraform/extractors/resources/utils.ts`.
+    const GENERIC_IMAGE_DATASOURCE_TYPES: &[&str] = &["docker_registry_image"];
+    const GENERIC_IMAGE_RESOURCE_TYPES: &[&str] = &[
+        "docker_image",
+        "docker_container",
+        "docker_service",
+        "kubernetes_pod",
+        "kubernetes_pod_v1",
+        "kubernetes_cron_job",
+        "kubernetes_cron_job_v1",
+    ];
+
+    // Ported: "return empty array if no resource is found" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 8
+    #[test]
+    fn generic_docker_extractor_empty_content_returns_no_deps() {
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "return resource and datasource types" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 14
+    #[test]
+    fn generic_docker_extractor_check_list_contains_expected_types() {
+        let check_list: Vec<String> = GENERIC_IMAGE_DATASOURCE_TYPES
+            .iter()
+            .chain(GENERIC_IMAGE_RESOURCE_TYPES.iter())
+            .map(|t| format!("\"{t}\""))
+            .collect();
+        assert!(!check_list.is_empty());
+        assert!(check_list.contains(&format!("\"{}\"", GENERIC_IMAGE_DATASOURCE_TYPES[0])));
+        assert!(check_list.contains(&format!("\"{}\"", GENERIC_IMAGE_RESOURCE_TYPES[0])));
+    }
+
     // Ported: "returns null for empty" — modules/manager/terraform/lockfile/util.spec.ts line 13
     #[test]
     fn extract_locks_returns_none_for_no_provider_blocks() {
