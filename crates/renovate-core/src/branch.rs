@@ -678,6 +678,33 @@ fn upper_first(s: &str) -> String {
     }
 }
 
+/// Format a documentation table cell.
+///
+/// Mirrors `tools/docs/utils.ts` `formatCell()`.
+pub fn format_cell(row: &[&str], col_index: usize) -> String {
+    let col = row.get(col_index).copied().unwrap_or("");
+    let first_col = row.first().copied().unwrap_or("").to_lowercase();
+    let first_col = first_col.trim();
+
+    if first_col == "parents" && col_index == 1 {
+        let mut items: Vec<&str> = col.split(',').map(str::trim).collect();
+        items.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        let spans: String = items
+            .into_iter()
+            .map(|s| {
+                if s == "." {
+                    "<span><code>(the root document)</code></span>".to_owned()
+                } else {
+                    format!("<span><code>{s}</code></span>")
+                }
+            })
+            .collect();
+        return format!("<td class=\"parents\">{spans}</td>");
+    }
+
+    format!("<td>{col}</td>")
+}
+
 /// Detect if a list of commit messages follows Angular conventional commit format.
 ///
 /// Returns `true` ("enabled") if the score is positive (more semantic than non-semantic),
@@ -1663,6 +1690,35 @@ mod tests {
     fn branch_name_compiles_multiple_times() {
         // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
         assert_eq!(branch_name("", "", "dep"), "dep");
+    }
+
+    // Ported: "parents row header should be a td block" — tools/docs/test/utils.spec.ts line 4
+    #[test]
+    fn format_cell_header_returns_td() {
+        assert_eq!(
+            format_cell(&["parents", ".,package,test,ansible"], 0),
+            "<td>parents</td>"
+        );
+    }
+
+    // Ported: "parents content should be multiple code blocks, and . be display with '(the root document)'" — tools/docs/test/utils.spec.ts line 12
+    #[test]
+    fn format_cell_parents_sorted_and_root_replaced() {
+        let result = format_cell(&["parents", ".,packageRules,argocd,ansible"], 1);
+        assert_eq!(
+            result,
+            "<td class=\"parents\"><span><code>(the root document)</code></span><span><code>ansible</code></span><span><code>argocd</code></span><span><code>packageRules</code></span></td>"
+        );
+    }
+
+    // Ported: "parent named '.foo' should be not display with '.foo (the root document)'" — tools/docs/test/utils.spec.ts line 19
+    #[test]
+    fn format_cell_dotfoo_not_replaced() {
+        let result = format_cell(&["parents", ".foo,packageRules,argocd,ansible"], 1);
+        assert_eq!(
+            result,
+            "<td class=\"parents\"><span><code>.foo</code></span><span><code>ansible</code></span><span><code>argocd</code></span><span><code>packageRules</code></span></td>"
+        );
     }
 
     // Ported: "should format message without prefix" — workers/repository/model/semantic-commit-message.spec.ts line 1

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2456 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2459 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -28768,12 +28768,12 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `tools/docs/test/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/tools/docs/test/utils.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `tools/docs/test/utils`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parents row header should be a td block | 4 | pending | — | — | — |
-| parents content should be multiple code blocks, and . be display with "(the root document)" | 12 | pending | — | — | — |
-| parent named ".foo" should be not display with ".foo (the root document)" | 19 | pending | — | — | — |
+| parents row header should be a td block | 4 | ported | `branch.rs` | `format_cell_header_returns_td` | — |
+| parents content should be multiple code blocks, and . be display with "(the root document)" | 12 | ported | `branch.rs` | `format_cell_parents_sorted_and_root_replaced` | — |
+| parent named ".foo" should be not display with ".foo (the root document)" | 19 | ported | `branch.rs` | `format_cell_dotfoo_not_replaced` | — |
