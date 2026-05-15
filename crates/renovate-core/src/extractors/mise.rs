@@ -21,6 +21,298 @@ use crate::extractors::asdf::{
     self, AsdfDep, AsdfSkipReason, AsdfToolDef, datasource_id, tag_strip_from_extract_version,
 };
 
+// ── Backend tooling config API ────────────────────────────────────────────────
+
+/// Tooling config returned by the `create*ToolConfig` backend functions.
+///
+/// Mirrors TypeScript `BackendToolingConfig` in `lib/modules/manager/mise/backends.ts`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BackendToolingConfig {
+    pub package_name: String,
+    pub datasource: Option<&'static str>,
+    pub current_value: Option<String>,
+    pub extract_version: Option<String>,
+    pub skip_reason: Option<&'static str>,
+}
+
+fn escape_regexp(input: &str) -> String {
+    let mut out = String::with_capacity(input.len() * 2);
+    for c in input.chars() {
+        if r".*+-?^${}()|[\]".contains(c) {
+            out.push('\\');
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// Strip a leading `v` or `v?` from a tag-regex fragment.
+fn strip_leading_v_opt(s: &str) -> &str {
+    if let Some(rest) = s.strip_prefix("v?") {
+        rest
+    } else if let Some(rest) = s.strip_prefix('v') {
+        rest
+    } else {
+        s
+    }
+}
+
+/// `aqua:` backend config.
+pub fn create_aqua_tool_config(name: &str, version: &str) -> BackendToolingConfig {
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("github-tags"),
+        current_value: Some(version.strip_prefix('v').unwrap_or(version).to_owned()),
+        extract_version: Some("^v?(?<version>.+)".to_owned()),
+        skip_reason: None,
+    }
+}
+
+fn is_url(s: &str) -> bool {
+    s.starts_with("https://") || s.starts_with("http://")
+}
+
+/// `cargo:` backend config.
+pub fn create_cargo_tool_config(name: &str, version: &str) -> BackendToolingConfig {
+    if !is_url(name) {
+        return BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: Some("crate"),
+            current_value: None,
+            extract_version: None,
+            skip_reason: None,
+        };
+    }
+    if let Some(v) = version.strip_prefix("tag:") {
+        BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: Some("git-tags"),
+            current_value: Some(v.to_owned()),
+            extract_version: None,
+            skip_reason: None,
+        }
+    } else if let Some(v) = version.strip_prefix("branch:") {
+        BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: Some("git-refs"),
+            current_value: Some(v.to_owned()),
+            extract_version: None,
+            skip_reason: None,
+        }
+    } else if let Some(v) = version.strip_prefix("rev:") {
+        BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: Some("git-refs"),
+            current_value: Some(v.to_owned()),
+            extract_version: None,
+            skip_reason: None,
+        }
+    } else {
+        BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: None,
+            current_value: None,
+            extract_version: None,
+            skip_reason: Some("invalid-version"),
+        }
+    }
+}
+
+/// `dotnet:` backend config.
+pub fn create_dotnet_tool_config(name: &str) -> BackendToolingConfig {
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("nuget"),
+        current_value: None,
+        extract_version: None,
+        skip_reason: None,
+    }
+}
+
+/// `gem:` backend config.
+pub fn create_gem_tool_config(name: &str) -> BackendToolingConfig {
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("rubygems"),
+        current_value: None,
+        extract_version: None,
+        skip_reason: None,
+    }
+}
+
+/// `github:` backend config.
+pub fn create_github_tool_config(
+    name: &str,
+    version: &str,
+    version_prefix: Option<&str>,
+) -> BackendToolingConfig {
+    let extract_version = version_prefix
+        .filter(|p| !p.is_empty())
+        .map(|p| format!("^{}(?<version>.+)", escape_regexp(p)));
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("github-releases"),
+        current_value: Some(version.to_owned()),
+        extract_version,
+        skip_reason: None,
+    }
+}
+
+/// `go:` backend config.
+pub fn create_go_tool_config(name: &str) -> BackendToolingConfig {
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("go"),
+        current_value: None,
+        extract_version: None,
+        skip_reason: None,
+    }
+}
+
+/// `npm:` backend config.
+pub fn create_npm_tool_config(name: &str) -> BackendToolingConfig {
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("npm"),
+        current_value: None,
+        extract_version: None,
+        skip_reason: None,
+    }
+}
+
+static PIPX_GITHUB_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+    regex::Regex::new(r"^git\+https://github\.com/(?P<repo>.+)\.git$").unwrap()
+});
+
+/// `pipx:` backend config.
+pub fn create_pipx_tool_config(name: &str) -> BackendToolingConfig {
+    let is_git_syntax = name.starts_with("git+");
+    if !is_git_syntax && is_url(name) {
+        return BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: None,
+            current_value: None,
+            extract_version: None,
+            skip_reason: Some("unsupported-url"),
+        };
+    }
+    if is_git_syntax || name.contains('/') {
+        if is_git_syntax {
+            if let Some(cap) = PIPX_GITHUB_RE.captures(name) {
+                let repo = cap["repo"].to_owned();
+                return BackendToolingConfig {
+                    package_name: repo,
+                    datasource: Some("github-tags"),
+                    current_value: None,
+                    extract_version: None,
+                    skip_reason: None,
+                };
+            }
+            // non-github git URL
+            let package_name = name
+                .strip_prefix("git+")
+                .unwrap_or(name)
+                .trim_end_matches(".git")
+                .to_owned();
+            return BackendToolingConfig {
+                package_name,
+                datasource: Some("git-refs"),
+                current_value: None,
+                extract_version: None,
+                skip_reason: None,
+            };
+        }
+        // shorthand like "psf/black"
+        return BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: Some("github-tags"),
+            current_value: None,
+            extract_version: None,
+            skip_reason: None,
+        };
+    }
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("pypi"),
+        current_value: None,
+        extract_version: None,
+        skip_reason: None,
+    }
+}
+
+static SPM_GITHUB_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+    regex::Regex::new(r"^https://github\.com/(?P<repo>.+)\.git$").unwrap()
+});
+
+/// `spm:` backend config.
+pub fn create_spm_tool_config(name: &str) -> BackendToolingConfig {
+    if is_url(name) {
+        if let Some(cap) = SPM_GITHUB_RE.captures(name) {
+            let repo = cap["repo"].to_owned();
+            return BackendToolingConfig {
+                package_name: repo,
+                datasource: Some("github-releases"),
+                current_value: None,
+                extract_version: None,
+                skip_reason: None,
+            };
+        }
+        return BackendToolingConfig {
+            package_name: name.to_owned(),
+            datasource: None,
+            current_value: None,
+            extract_version: None,
+            skip_reason: Some("unsupported-url"),
+        };
+    }
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("github-releases"),
+        current_value: None,
+        extract_version: None,
+        skip_reason: None,
+    }
+}
+
+/// `ubi:` backend config.
+pub fn create_ubi_tool_config(
+    name: &str,
+    version: &str,
+    tag_regex: Option<&str>,
+) -> BackendToolingConfig {
+    let has_v_prefix = version.starts_with('v');
+    let sets_tag_regex = !has_v_prefix || tag_regex.is_some();
+
+    let extract_version = if sets_tag_regex {
+        let tag = match tag_regex {
+            None => ".+".to_owned(),
+            Some(tr) => {
+                let stripped = tr.strip_prefix('^').unwrap_or(tr);
+                if !has_v_prefix {
+                    strip_leading_v_opt(stripped).to_owned()
+                } else {
+                    stripped.to_owned()
+                }
+            }
+        };
+        Some(format!(
+            "^{}(?<version>{})",
+            if has_v_prefix { "" } else { "v?" },
+            tag
+        ))
+    } else {
+        None
+    };
+
+    BackendToolingConfig {
+        package_name: name.to_owned(),
+        datasource: Some("github-releases"),
+        current_value: Some(version.to_owned()),
+        extract_version,
+        skip_reason: None,
+    }
+}
+
 /// Parse a mise TOML file and validate the minimal schema Renovate requires.
 pub fn parse_toml_file(content: &str) -> Option<toml::Value> {
     let root = toml::from_str::<toml::Value>(content).ok()?;
@@ -1915,5 +2207,347 @@ fake-tool = '1.6.2'
         assert_eq!(deps[0].current_value, "1.2.3");
         assert_eq!(deps[0].datasource_id, Some("github-releases"));
         assert_eq!(deps[0].package_name.as_deref(), Some("bitwarden/sdk"));
+    }
+
+    // --- backend tooling config tests ---
+
+    // Ported: "should create a tooling config" — mise/backends.spec.ts line 16
+    #[test]
+    fn aqua_create_tooling_config() {
+        let r = create_aqua_tool_config("BurntSushi/ripgrep", "14.1.1");
+        assert_eq!(r.package_name, "BurntSushi/ripgrep");
+        assert_eq!(r.datasource, Some("github-tags"));
+        assert_eq!(r.current_value.as_deref(), Some("14.1.1"));
+        assert_eq!(r.extract_version.as_deref(), Some("^v?(?<version>.+)"));
+    }
+
+    // Ported: "should trim the leading v from version" — mise/backends.spec.ts line 27
+    #[test]
+    fn aqua_trim_leading_v() {
+        let r = create_aqua_tool_config("BurntSushi/ripgrep", "v14.1.1");
+        assert_eq!(r.current_value.as_deref(), Some("14.1.1"));
+    }
+
+    // Ported: "should create a tooling config for crate" — mise/backends.spec.ts line 40
+    #[test]
+    fn cargo_create_crate_config() {
+        let r = create_cargo_tool_config("eza", "");
+        assert_eq!(r.package_name, "eza");
+        assert_eq!(r.datasource, Some("crate"));
+        assert!(r.current_value.is_none());
+    }
+
+    // Ported: "should create a tooling config for git tag" — mise/backends.spec.ts line 47
+    #[test]
+    fn cargo_create_git_tag_config() {
+        let r = create_cargo_tool_config("https://github.com/username/demo", "tag:v0.1.0");
+        assert_eq!(r.package_name, "https://github.com/username/demo");
+        assert_eq!(r.current_value.as_deref(), Some("v0.1.0"));
+        assert_eq!(r.datasource, Some("git-tags"));
+    }
+
+    // Ported: "should provide skipReason for git branch" — mise/backends.spec.ts line 57
+    #[test]
+    fn cargo_create_git_branch_config() {
+        let r = create_cargo_tool_config("https://github.com/username/demo", "branch:main");
+        assert_eq!(r.current_value.as_deref(), Some("main"));
+        assert_eq!(r.datasource, Some("git-refs"));
+    }
+
+    // Ported: "should create a tooling config for git rev" — mise/backends.spec.ts line 70
+    #[test]
+    fn cargo_create_git_rev_config() {
+        let r = create_cargo_tool_config("https://github.com/username/demo", "rev:abcdef");
+        assert_eq!(r.current_value.as_deref(), Some("abcdef"));
+        assert_eq!(r.datasource, Some("git-refs"));
+    }
+
+    // Ported: "should provide skipReason for invalid version" — mise/backends.spec.ts line 80
+    #[test]
+    fn cargo_invalid_version_skip_reason() {
+        let r = create_cargo_tool_config("https://github.com/username/demo", "v0.1.0");
+        assert_eq!(r.skip_reason, Some("invalid-version"));
+        assert!(r.datasource.is_none());
+    }
+
+    // Ported: "should create a tooling config" — mise/backends.spec.ts line 91
+    #[test]
+    fn dotnet_create_tooling_config() {
+        let r = create_dotnet_tool_config("GitVersion.Tool");
+        assert_eq!(r.package_name, "GitVersion.Tool");
+        assert_eq!(r.datasource, Some("nuget"));
+    }
+
+    // Ported: "should create a tooling config" — mise/backends.spec.ts line 100
+    #[test]
+    fn gem_create_tooling_config() {
+        let r = create_gem_tool_config("rubocop");
+        assert_eq!(r.package_name, "rubocop");
+        assert_eq!(r.datasource, Some("rubygems"));
+    }
+
+    // Ported: "should create a tooling config with empty options" — mise/backends.spec.ts line 109
+    #[test]
+    fn github_create_empty_options() {
+        let r = create_github_tool_config("BurntSushi/ripgrep", "14.1.1", None);
+        assert_eq!(r.package_name, "BurntSushi/ripgrep");
+        assert_eq!(r.datasource, Some("github-releases"));
+        assert_eq!(r.current_value.as_deref(), Some("14.1.1"));
+        assert!(r.extract_version.is_none());
+    }
+
+    // Ported: "should not set extractVersion if the version has leading v" — mise/backends.spec.ts line 119
+    #[test]
+    fn github_no_extract_version_with_v_prefix() {
+        let r = create_github_tool_config("cli/cli", "v2.64.0", None);
+        assert_eq!(r.current_value.as_deref(), Some("v2.64.0"));
+        assert!(r.extract_version.is_none());
+    }
+
+    // Ported: "should set extractVersion with custom version_prefix" — mise/backends.spec.ts line 127
+    #[test]
+    fn github_set_extract_version_with_prefix() {
+        let r = create_github_tool_config("some/repo", "1.0.0", Some("release-"));
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some("^release\\-(?<version>.+)")
+        );
+    }
+
+    // Ported: "should set extractVersion with version_prefix even if version has leading v" — mise/backends.spec.ts line 140
+    #[test]
+    fn github_extract_version_with_prefix_and_v_version() {
+        let r = create_github_tool_config("some/repo", "v1.0.0", Some("version-"));
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some("^version\\-(?<version>.+)")
+        );
+    }
+
+    // Ported: "should handle empty version_prefix with version not having v" — mise/backends.spec.ts line 153
+    #[test]
+    fn github_empty_prefix_no_v() {
+        let r = create_github_tool_config("some/repo", "1.0.0", Some(""));
+        assert!(r.extract_version.is_none());
+    }
+
+    // Ported: "should handle empty version_prefix with version having v" — mise/backends.spec.ts line 163
+    #[test]
+    fn github_empty_prefix_with_v() {
+        let r = create_github_tool_config("some/repo", "v1.0.0", Some(""));
+        assert!(r.extract_version.is_none());
+    }
+
+    // Ported: "should escape special regex characters in version_prefix" — mise/backends.spec.ts line 173
+    #[test]
+    fn github_escape_special_chars_in_prefix() {
+        let r = create_github_tool_config("some/repo", "1.0.0", Some("v1.0+"));
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some("^v1\\.0\\+(?<version>.+)")
+        );
+    }
+
+    // Ported: "should escape brackets and parentheses in version_prefix" — mise/backends.spec.ts line 186
+    #[test]
+    fn github_escape_brackets_in_prefix() {
+        let r = create_github_tool_config("some/repo", "1.0.0", Some("prefix[test](v)"));
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some("^prefix\\[test\\]\\(v\\)(?<version>.+)")
+        );
+    }
+
+    // Ported: "should create a tooling config" — mise/backends.spec.ts line 201
+    #[test]
+    fn go_create_tooling_config() {
+        let r = create_go_tool_config("github.com/DarthSim/hivemind");
+        assert_eq!(r.package_name, "github.com/DarthSim/hivemind");
+        assert_eq!(r.datasource, Some("go"));
+    }
+
+    // Ported: "should create a tooling config" — mise/backends.spec.ts line 209
+    #[test]
+    fn npm_create_tooling_config() {
+        let r = create_npm_tool_config("prettier");
+        assert_eq!(r.package_name, "prettier");
+        assert_eq!(r.datasource, Some("npm"));
+    }
+
+    // Ported: "should create a tooling config for pypi package" — mise/backends.spec.ts line 218
+    #[test]
+    fn pipx_create_pypi_config() {
+        let r = create_pipx_tool_config("yamllint");
+        assert_eq!(r.package_name, "yamllint");
+        assert_eq!(r.datasource, Some("pypi"));
+    }
+
+    // Ported: "should create a tooling config for github shorthand" — mise/backends.spec.ts line 225
+    #[test]
+    fn pipx_create_github_shorthand_config() {
+        let r = create_pipx_tool_config("psf/black");
+        assert_eq!(r.package_name, "psf/black");
+        assert_eq!(r.datasource, Some("github-tags"));
+    }
+
+    // Ported: "should create a tooling config for github url" — mise/backends.spec.ts line 232
+    #[test]
+    fn pipx_create_github_url_config() {
+        let r = create_pipx_tool_config("git+https://github.com/psf/black.git");
+        assert_eq!(r.package_name, "psf/black");
+        assert_eq!(r.datasource, Some("github-tags"));
+    }
+
+    // Ported: "should create a tooling config for git url" — mise/backends.spec.ts line 240
+    #[test]
+    fn pipx_create_git_url_config() {
+        let r = create_pipx_tool_config("git+https://gitlab.com/user/repo.git");
+        assert_eq!(r.package_name, "https://gitlab.com/user/repo");
+        assert_eq!(r.datasource, Some("git-refs"));
+    }
+
+    // Ported: "provides skipReason for zip file url" — mise/backends.spec.ts line 248
+    #[test]
+    fn pipx_zip_url_skip_reason() {
+        let r = create_pipx_tool_config("https://github.com/psf/black/archive/18.9b0.zip");
+        assert_eq!(r.skip_reason, Some("unsupported-url"));
+    }
+
+    // Ported: "should create a tooling config for github shorthand" — mise/backends.spec.ts line 261
+    #[test]
+    fn spm_create_github_shorthand_config() {
+        let r = create_spm_tool_config("tuist/tuist");
+        assert_eq!(r.package_name, "tuist/tuist");
+        assert_eq!(r.datasource, Some("github-releases"));
+    }
+
+    // Ported: "should create a tooling config for github url" — mise/backends.spec.ts line 268
+    #[test]
+    fn spm_create_github_url_config() {
+        let r = create_spm_tool_config("https://github.com/tuist/tuist.git");
+        assert_eq!(r.package_name, "tuist/tuist");
+        assert_eq!(r.datasource, Some("github-releases"));
+    }
+
+    // Ported: "provides skipReason for other url" — mise/backends.spec.ts line 276
+    #[test]
+    fn spm_non_github_url_skip_reason() {
+        let r = create_spm_tool_config("https://gitlab.com/user/repo.git");
+        assert_eq!(r.skip_reason, Some("unsupported-url"));
+    }
+
+    // Ported: "should create a tooling config with empty options" — mise/backends.spec.ts line 289
+    #[test]
+    fn ubi_create_empty_options() {
+        let r = create_ubi_tool_config("nekto/act", "0.2.70", None);
+        assert_eq!(r.package_name, "nekto/act");
+        assert_eq!(r.datasource, Some("github-releases"));
+        assert_eq!(r.current_value.as_deref(), Some("0.2.70"));
+        assert_eq!(r.extract_version.as_deref(), Some("^v?(?<version>.+)"));
+    }
+
+    // Ported: "should set extractVersion if the version does not have leading v" — mise/backends.spec.ts line 298
+    #[test]
+    fn ubi_no_v_prefix_sets_extract_version() {
+        let r = create_ubi_tool_config("cli/cli", "2.64.0", None);
+        assert_eq!(r.extract_version.as_deref(), Some("^v?(?<version>.+)"));
+    }
+
+    // Ported: "should not set extractVersion if the version has leading v" — mise/backends.spec.ts line 306
+    #[test]
+    fn ubi_v_prefix_no_extract_version() {
+        let r = create_ubi_tool_config("cli/cli", "v2.64.0", None);
+        assert!(r.extract_version.is_none());
+    }
+
+    // Ported: "should ignore options unless tag_regex is provided" — mise/backends.spec.ts line 313
+    #[test]
+    fn ubi_ignore_options_without_tag_regex() {
+        let r = create_ubi_tool_config("cli/cli", "2.64.0", None);
+        assert_eq!(r.extract_version.as_deref(), Some("^v?(?<version>.+)"));
+    }
+
+    // Ported: "should set extractVersion if tag_regex is provided" — mise/backends.spec.ts line 322
+    #[test]
+    fn ubi_set_extract_version_with_tag_regex() {
+        let r = create_ubi_tool_config(
+            "cargo-bins/cargo-binstall",
+            "1.10.17",
+            Some(r"^\d+\.\d+\."),
+        );
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some(r"^v?(?<version>\d+\.\d+\.)")
+        );
+    }
+
+    // Ported: "should set extractVersion without v? when tag_regex is provided and version starts with v" — mise/backends.spec.ts line 334
+    #[test]
+    fn ubi_no_v_opt_with_tag_regex_and_v_version() {
+        let r = create_ubi_tool_config(
+            "cargo-bins/cargo-binstall",
+            "v1.10.17",
+            Some(r"^\d+\.\d+\."),
+        );
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some(r"^(?<version>\d+\.\d+\.)")
+        );
+    }
+
+    // Ported: "should trim the leading ^ from tag_regex" — mise/backends.spec.ts line 346
+    #[test]
+    fn ubi_trim_caret_from_tag_regex() {
+        let r = create_ubi_tool_config(
+            "cargo-bins/cargo-binstall",
+            "v1.10.17",
+            Some(r"^\d+\.\d+\."),
+        );
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some(r"^(?<version>\d+\.\d+\.)")
+        );
+    }
+
+    // Ported: "should only trim the leading ^ from tag_regex when version starts with v" — mise/backends.spec.ts line 358
+    #[test]
+    fn ubi_trim_caret_v_prefix_keeps_v_in_regex() {
+        let r = create_ubi_tool_config(
+            "cargo-bins/cargo-binstall",
+            "v1.10.17",
+            Some(r"^v\d+\.\d+\."),
+        );
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some(r"^(?<version>v\d+\.\d+\.)")
+        );
+    }
+
+    // Ported: "should trim the leading ^v from tag_regex" — mise/backends.spec.ts line 370
+    #[test]
+    fn ubi_trim_caret_v_from_tag_regex_no_v_version() {
+        let r = create_ubi_tool_config(
+            "cargo-bins/cargo-binstall",
+            "1.10.17",
+            Some(r"^v\d+\.\d+\."),
+        );
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some(r"^v?(?<version>\d+\.\d+\.)")
+        );
+    }
+
+    // Ported: "should trim the leading ^v? from tag_regex" — mise/backends.spec.ts line 382
+    #[test]
+    fn ubi_trim_caret_v_opt_from_tag_regex() {
+        let r = create_ubi_tool_config(
+            "cargo-bins/cargo-binstall",
+            "1.10.17",
+            Some(r"^v?\d+\.\d+\."),
+        );
+        assert_eq!(
+            r.extract_version.as_deref(),
+            Some(r"^v?(?<version>\d+\.\d+\.)")
+        );
     }
 }
