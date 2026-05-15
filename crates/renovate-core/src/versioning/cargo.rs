@@ -690,6 +690,52 @@ pub fn extract_lock_file_content_versions(content: &str) -> Option<HashMap<Strin
     Some(map)
 }
 
+/// Status result for `update_locked_dependency`.
+#[derive(Debug)]
+pub enum UpdateLockedStatus {
+    AlreadyUpdated,
+    Unsupported,
+    UpdateFailed,
+}
+
+impl UpdateLockedStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            UpdateLockedStatus::AlreadyUpdated => "already-updated",
+            UpdateLockedStatus::Unsupported => "unsupported",
+            UpdateLockedStatus::UpdateFailed => "update-failed",
+        }
+    }
+}
+
+/// Config for `update_locked_dependency`.
+#[derive(Debug)]
+pub struct UpdateLockedConfig {
+    pub dep_name: Option<String>,
+    pub new_version: Option<String>,
+    pub lock_file_content: Option<String>,
+}
+
+/// Mirrors `lib/modules/manager/cargo/update-locked.ts` `updateLockedDependency()`.
+pub fn update_locked_dependency(config: &UpdateLockedConfig) -> UpdateLockedStatus {
+    let (Some(dep_name), Some(lock_file_content)) =
+        (config.dep_name.as_deref(), config.lock_file_content.as_deref())
+    else {
+        return UpdateLockedStatus::Unsupported;
+    };
+    let new_version = config.new_version.as_deref().unwrap_or("");
+    let Some(locked) = extract_lock_file_content_versions(lock_file_content) else {
+        return UpdateLockedStatus::UpdateFailed;
+    };
+    if locked
+        .get(dep_name)
+        .is_some_and(|versions| versions.iter().any(|v| v == new_version))
+    {
+        return UpdateLockedStatus::AlreadyUpdated;
+    }
+    UpdateLockedStatus::Unsupported
+}
+
 /// Determine the effective Cargo range strategy.
 ///
 /// Mirrors `lib/modules/manager/cargo/range.ts` `getRangeStrategy()`.
@@ -1306,5 +1352,66 @@ mod renovate_compat_tests {
         assert!(syn.contains(&"1.0.1".to_string()));
         assert!(syn.contains(&"2.0.1".to_string()));
         assert_eq!(syn.len(), 2);
+    }
+
+    // Ported: "detects already updated" — modules/manager/cargo/update-locked.spec.ts line 9
+    #[test]
+    fn update_locked_detects_already_updated() {
+        let lock_file_content =
+            include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
+        let config = UpdateLockedConfig {
+            dep_name: Some("foo".to_string()),
+            new_version: Some("1.0.4".to_string()),
+            lock_file_content: Some(lock_file_content.to_string()),
+        };
+        assert_eq!(update_locked_dependency(&config).as_str(), "already-updated");
+    }
+
+    // Ported: "returns unsupported for empty lockfile" — modules/manager/cargo/update-locked.spec.ts line 21
+    #[test]
+    fn update_locked_unsupported_no_lock_file_content() {
+        let config = UpdateLockedConfig {
+            dep_name: Some("foo".to_string()),
+            new_version: Some("1.0.4".to_string()),
+            lock_file_content: None,
+        };
+        assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
+    }
+
+    // Ported: "returns unsupported for empty depName" — modules/manager/cargo/update-locked.spec.ts line 32
+    #[test]
+    fn update_locked_unsupported_no_dep_name() {
+        let lock_file_content =
+            include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
+        let config = UpdateLockedConfig {
+            dep_name: None,
+            new_version: Some("1.0.4".to_string()),
+            lock_file_content: Some(lock_file_content.to_string()),
+        };
+        assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
+    }
+
+    // Ported: "returns unsupported" — modules/manager/cargo/update-locked.spec.ts line 44
+    #[test]
+    fn update_locked_unsupported_version_not_in_lock() {
+        let lock_file_content =
+            include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
+        let config = UpdateLockedConfig {
+            dep_name: Some("foo".to_string()),
+            new_version: Some("1.0.3".to_string()),
+            lock_file_content: Some(lock_file_content.to_string()),
+        };
+        assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
+    }
+
+    // Ported: "returns update-failed in case of errors" — modules/manager/cargo/update-locked.spec.ts line 56
+    #[test]
+    fn update_locked_update_failed_on_invalid_content() {
+        let config = UpdateLockedConfig {
+            dep_name: Some("foo".to_string()),
+            new_version: Some("1.0.3".to_string()),
+            lock_file_content: Some("not valid toml {{{".to_string()),
+        };
+        assert_eq!(update_locked_dependency(&config).as_str(), "update-failed");
     }
 }
