@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2219 / 8606 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2223 / 8606 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -27473,7 +27473,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 50 | **Actionable:** 68 | **Status:** partial
+**Total tests:** 68 | **Ported:** 60 | **Actionable:** 68 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -27556,7 +27556,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $sched, $tz, $datetime | 319 | pending | — | — | — |
+| $sched, $tz, $datetime | 319 | ported | `schedule.rs` | `spec_timezone_text_after_4pm_singapore, spec_timezone_text_before_4am_monday_tokyo, spec_timezone_cron_16_23_singapore, spec_timezone_cron_0_3_monday_tokyo` | — |
 | reject if day mismatch | 337 | ported | `schedule.rs` | `spec_cron_dom_mismatch_false` | — |
 | reject if month mismatch | 343 | ported | `schedule.rs` | `spec_cron_month_mismatch_false` | — |
 | reject if no schedule available | 349 | ported | `schedule.rs` | `spec_cron_no_schedule_available_false` | — |
@@ -27566,7 +27566,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | supports every weekday | 373 | ported | `schedule.rs` | `spec_every_weekday_matches_friday` | — |
 | supports every weekend | 379 | ported | `schedule.rs` | `spec_every_weekend_rejects_friday` | — |
 | supports every weekday with time | 385 | ported | `schedule.rs` | `spec_before_11am_every_weekday_matches` | — |
-| supports o every weekday | 391 | pending | — | — | — |
+| supports o every weekday | 391 | ported | `schedule.rs` | `spec_supports_o_every_weekday` | — |
 | rejects first day of the month | 397 | ported | `schedule.rs` | `spec_first_day_of_month_rejects_non_first` | — |
 | approves first day of the month | 403 | ported | `schedule.rs` | `spec_first_day_of_month_approves_first` | — |
 | approves valid weeks of year | 410 | pending | — | — | — |
@@ -27575,8 +27575,8 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | rejects on months of year | 431 | ported | `schedule.rs` | `spec_months_of_year_rejects_february` | — |
 | approves schedule longer than 1 month | 438 | ported | `schedule.rs` | `spec_every_3_months_approves_july` | — |
 | rejects schedule longer than 1 month | 445 | ported | `schedule.rs` | `spec_every_6_months_rejects_february` | — |
-| approves schedule longer than 1 month with day of month | 452 | pending | — | — | — |
-| rejects schedule longer than 1 month with day of month | 459 | pending | — | — | — |
+| approves schedule longer than 1 month with day of month | 452 | ported | `schedule.rs` | `spec_every_3_months_first_day_approves_july_1` | — |
+| rejects schedule longer than 1 month with day of month | 459 | ported | `schedule.rs` | `spec_every_3_months_first_day_rejects_february` | — |
 | supports weekday instances | 466 | pending | — | — | — |
 
 ### `workers/repository/update/branch/schedule › log cron schedules`

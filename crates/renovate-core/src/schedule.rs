@@ -1522,6 +1522,109 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "supports o every weekday" — workers/repository/update/branch/schedule.spec.ts line 391
+    #[test]
+    fn spec_supports_o_every_weekday() {
+        // typo "on inevery weekday" still matches because "every weekday" is a substring
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["before 11:00am on inevery weekday".to_owned()];
+        assert!(is_within_schedule_at(&sched, friday_10am));
+    }
+
+    // Ported: "approves schedule longer than 1 month with day of month" — workers/repository/update/branch/schedule.spec.ts line 452
+    #[test]
+    fn spec_every_3_months_first_day_approves_july_1() {
+        let jul_1_6am = utc(2017, 7, 1, 6);
+        let sched = vec!["every 3 months on the first day of the month".to_owned()];
+        assert!(is_within_schedule_at(&sched, jul_1_6am));
+    }
+
+    // Ported: "rejects schedule longer than 1 month with day of month" — workers/repository/update/branch/schedule.spec.ts line 459
+    #[test]
+    fn spec_every_3_months_first_day_rejects_february() {
+        let feb_1_6am = utc(2017, 2, 1, 6);
+        let sched = vec!["every 3 months on the first day of the month".to_owned()];
+        assert!(!is_within_schedule_at(&sched, feb_1_6am));
+    }
+
+    // Ported: "$sched, $tz, $datetime" — workers/repository/update/branch/schedule.spec.ts line 319
+    #[test]
+    fn spec_timezone_text_after_4pm_singapore() {
+        // 2017-06-30T15:59:00+0800 (local Singapore 15:59) → false (not yet after 4pm)
+        // UTC equivalent: 2017-06-30T07:59:00Z → with SGT (+8) local = 15:00
+        let sched = schedule(&["after 4pm"]);
+        assert!(!is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Singapore"),
+            utc(2017, 6, 30, 7)
+        ));
+        // 2017-06-30T16:01:00+0800 (local Singapore 16:01) → true (after 4pm)
+        // UTC: 2017-06-30T08:01:00Z → local SGT 16:00
+        assert!(is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Singapore"),
+            utc(2017, 6, 30, 8)
+        ));
+    }
+
+    // Ported: "$sched, $tz, $datetime" — workers/repository/update/branch/schedule.spec.ts line 319
+    #[test]
+    fn spec_timezone_text_before_4am_monday_tokyo() {
+        // 2017-06-26T03:59:00+0900 (local Tokyo 03:59 Monday) → true
+        // UTC: 2017-06-25T18:59:00Z → local JST 03:59 next day (Monday June 26)
+        let sched = schedule(&["before 4am on Monday"]);
+        assert!(is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Tokyo"),
+            utc(2017, 6, 25, 18)
+        ));
+        // 2017-06-26T04:01:00+0900 (local Tokyo 04:01 Monday) → false (not before 4am)
+        // UTC: 2017-06-25T19:01:00Z → local JST 04:01 Monday
+        assert!(!is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Tokyo"),
+            utc(2017, 6, 25, 19)
+        ));
+    }
+
+    // Ported: "$sched, $tz, $datetime" — workers/repository/update/branch/schedule.spec.ts line 319
+    #[test]
+    fn spec_timezone_cron_16_23_singapore() {
+        // "* 16-23 * * *" with Singapore: local hours 16-23 → UTC 08-15
+        let sched = schedule(&["* 16-23 * * *"]);
+        // 2017-06-30T07:59:00Z → local SGT 15:59 → hour=15 NOT in 16-23 → false
+        assert!(!is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Singapore"),
+            utc(2017, 6, 30, 7)
+        ));
+        // 2017-06-30T08:00:00Z → local SGT 16:00 → hour=16 IN 16-23 → true
+        assert!(is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Singapore"),
+            utc(2017, 6, 30, 8)
+        ));
+    }
+
+    // Ported: "$sched, $tz, $datetime" — workers/repository/update/branch/schedule.spec.ts line 319
+    #[test]
+    fn spec_timezone_cron_0_3_monday_tokyo() {
+        // "* 0-3 * * 1" with Tokyo: Monday hours 0-3 local → UTC Sunday 15-18
+        let sched = schedule(&["* 0-3 * * 1"]);
+        // 2017-06-25T18:58:00Z → local JST 03:58 Monday → hour=3 IN 0-3 AND weekday=1 → true
+        assert!(is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Tokyo"),
+            utc(2017, 6, 25, 18)
+        ));
+        // 2017-06-25T19:01:00Z → local JST 04:01 Monday → hour=4 NOT in 0-3 → false
+        assert!(!is_within_schedule_tz_at(
+            &sched,
+            Some("Asia/Tokyo"),
+            utc(2017, 6, 25, 19)
+        ));
+    }
+
     // ── is_valid_schedule (hasValidSchedule) ─────────────────────────────────
 
     fn sched(entries: &[&str]) -> Vec<String> {
