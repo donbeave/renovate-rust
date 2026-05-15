@@ -1123,6 +1123,41 @@ fn skip_reason_for(value: &str) -> Option<NpmSkipReason> {
     None
 }
 
+/// Return `true` if `file_name` is under `pwd` and its relative path (without
+/// the trailing `/package.json`) matches any workspace glob in `workspaces`.
+///
+/// Mirrors `lib/modules/manager/bun/utils.ts` `fileMatchesWorkspaces()`.
+pub fn file_matches_workspaces(pwd: &str, file_name: &str, workspaces: &[&str]) -> bool {
+    let Some(rel_full) = file_name.strip_prefix(pwd) else {
+        return false;
+    };
+    let rel_full = rel_full.trim_start_matches('/');
+    let rel = rel_full
+        .strip_suffix("/package.json")
+        .unwrap_or(rel_full.strip_suffix("package.json").unwrap_or(rel_full));
+
+    workspaces.iter().any(|pattern| {
+        globset::Glob::new(pattern)
+            .map(|g| g.compile_matcher())
+            .is_ok_and(|m| m.is_match(rel))
+    })
+}
+
+/// Filter `files` to those under `pwd` that match any workspace glob.
+///
+/// Mirrors `lib/modules/manager/bun/utils.ts` `filesMatchingWorkspaces()`.
+pub fn files_matching_workspaces<'a>(
+    pwd: &str,
+    files: &[&'a str],
+    workspaces: &[&str],
+) -> Vec<&'a str> {
+    files
+        .iter()
+        .copied()
+        .filter(|f| file_matches_workspaces(pwd, f, workspaces))
+        .collect()
+}
+
 /// Return `true` when `value` is a complex npm range (contains `||`).
 fn is_complex_npm_range(value: &str) -> bool {
     value.contains("||")
@@ -2546,5 +2581,36 @@ chalk@^2.4.1:
     fn npm_range_defaults_to_update_lockfile() {
         let result = get_range_strategy("auto", Some("dependencies"), None);
         assert_eq!(result, "update-lockfile");
+    }
+
+    // Ported: "should return false when fileName does not start with pwd" — modules/manager/bun/utils.spec.ts line 7
+    #[test]
+    fn bun_file_matches_workspaces_false_when_different_pwd() {
+        let result = file_matches_workspaces("/project", "/another-path/package.json", &["**"]);
+        assert!(!result);
+    }
+
+    // Ported: "should correctly evaluate fileName when it starts with pwd" — modules/manager/bun/utils.spec.ts line 13
+    #[test]
+    fn bun_file_matches_workspaces_true_when_starts_with_pwd() {
+        let result = file_matches_workspaces("/project", "/project/foo/package.json", &["foo"]);
+        assert!(result);
+    }
+
+    // Ported: "should filter files matching workspaces and pwd" — modules/manager/bun/utils.spec.ts line 26
+    #[test]
+    fn bun_files_matching_workspaces_filters_correctly() {
+        let pwd = "/project";
+        let files = vec![
+            "/project/foo/package.json",
+            "/project/bar/package.json",
+            "/other/baz/package.json",
+        ];
+        let workspaces = ["foo", "bar"];
+        let result = files_matching_workspaces(pwd, &files, &workspaces);
+        assert_eq!(
+            result,
+            vec!["/project/foo/package.json", "/project/bar/package.json"]
+        );
     }
 }

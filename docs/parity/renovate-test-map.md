@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2278 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2281 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13397,20 +13397,20 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bun/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bun/utils.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `fileMatchesWorkspaces`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return false when fileName does not start with pwd | 7 | pending | — | — | — |
-| should correctly evaluate fileName when it starts with pwd | 14 | pending | — | — | — |
+| should return false when fileName does not start with pwd | 7 | ported | `npm.rs` | `bun_file_matches_workspaces_false_when_different_pwd` | — |
+| should correctly evaluate fileName when it starts with pwd | 14 | ported | `npm.rs` | `bun_file_matches_workspaces_true_when_starts_with_pwd` | — |
 
 ### `filesMatchingWorkspaces`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should filter files matching workspaces and pwd | 30 | pending | — | — | — |
+| should filter files matching workspaces and pwd | 30 | ported | `npm.rs` | `bun_files_matching_workspaces_filters_correctly` | — |
 
 ---
 
