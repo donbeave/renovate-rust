@@ -21,6 +21,7 @@ pub mod buildpacks;
 pub mod bundler;
 pub mod bun_version;
 pub mod cabal;
+pub mod cdnurl;
 pub mod cake;
 pub mod cargo;
 pub mod circleci;
