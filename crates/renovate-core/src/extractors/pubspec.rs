@@ -25,6 +25,52 @@
 //! | `mypkg:\n  path: …` | Skipped — `LocalPath` |
 //! | `mypkg:\n  hosted: …` | Actionable — uses `version` if present |
 
+use serde::Deserialize;
+
+/// Parsed pubspec.yaml contents (schema-validated).
+///
+/// Mirrors `lib/modules/manager/pub/schema.ts` `Pubspec`.
+#[derive(Debug, Deserialize)]
+pub struct ParsedPubspec {
+    pub environment: PubspecEnvironment,
+    pub dependencies: Option<std::collections::HashMap<String, serde_yaml::Value>>,
+    pub dev_dependencies: Option<std::collections::HashMap<String, serde_yaml::Value>>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PubspecEnvironment {
+    pub sdk: String,
+    pub flutter: Option<String>,
+}
+
+/// Parsed pubspec.lock contents (schema-validated).
+///
+/// Mirrors `lib/modules/manager/pub/schema.ts` `PubspecLock`.
+#[derive(Debug, Deserialize)]
+pub struct ParsedPubspecLock {
+    pub sdks: PubspecLockSdks,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PubspecLockSdks {
+    pub dart: String,
+    pub flutter: Option<String>,
+}
+
+/// Parse and schema-validate a pubspec.yaml string.
+///
+/// Mirrors `lib/modules/manager/pub/utils.ts` `parsePubspec()`.
+pub fn parse_pubspec(_file_name: &str, content: &str) -> Option<ParsedPubspec> {
+    serde_yaml::from_str(content).ok()
+}
+
+/// Parse and schema-validate a pubspec.lock string.
+///
+/// Mirrors `lib/modules/manager/pub/utils.ts` `parsePubspecLock()`.
+pub fn parse_pubspec_lock(_file_name: &str, content: &str) -> Option<ParsedPubspecLock> {
+    serde_yaml::from_str(content).ok()
+}
+
 /// Which `pubspec.yaml` section the dep came from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PubspecDepType {
@@ -384,5 +430,53 @@ dev_dependencies:
     fn empty_pubspec_returns_empty() {
         let content = "name: myapp\nversion: 1.0.0\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "load and parse successfully" — modules/manager/pub/utils.spec.ts line 14
+    #[test]
+    fn parse_pubspec_loads_valid_yaml() {
+        let content = "environment:\n  sdk: \">=3.0.0 <4.0.0\"\n  flutter: \">=3.10.0\"\ndependencies:\n  dep1: 1.0.0\ndev_dependencies:\n  dep2: 1.0.1\n";
+        let result = parse_pubspec("pubspec.yaml", content).unwrap();
+        assert_eq!(result.environment.sdk, ">=3.0.0 <4.0.0");
+        assert_eq!(result.environment.flutter.as_deref(), Some(">=3.10.0"));
+        assert!(result.dependencies.as_ref().unwrap().contains_key("dep1"));
+        assert!(result.dev_dependencies.as_ref().unwrap().contains_key("dep2"));
+    }
+
+    // Ported: "invalid yaml" — modules/manager/pub/utils.spec.ts line 32
+    #[test]
+    fn parse_pubspec_invalid_yaml_returns_none() {
+        let content = "clearly: \"invalid\" \"yaml\"\n";
+        assert!(parse_pubspec("pubspec.yaml", content).is_none());
+    }
+
+    // Ported: "invalid schema" — modules/manager/pub/utils.spec.ts line 37
+    #[test]
+    fn parse_pubspec_invalid_schema_returns_none() {
+        let content = "clearly: invalid\n";
+        assert!(parse_pubspec("pubspec.yaml", content).is_none());
+    }
+
+    // Ported: "load and parse successfully" — modules/manager/pub/utils.spec.ts line 42 (parsePubspeckLock)
+    #[test]
+    fn parse_pubspec_lock_loads_valid_yaml() {
+        let content = "sdks:\n  dart: \">=3.0.0 <4.0.0\"\n  flutter: \">=3.10.0\"\n";
+        let result = parse_pubspec_lock("pubspec.lock", content).unwrap();
+        assert_eq!(result.sdks.dart, ">=3.0.0 <4.0.0");
+        assert_eq!(result.sdks.flutter.as_deref(), Some(">=3.10.0"));
+    }
+
+    // Ported: "invalid yaml" — modules/manager/pub/utils.spec.ts line 59 (parsePubspeckLock)
+    #[test]
+    fn parse_pubspec_lock_invalid_yaml_returns_none() {
+        let content = "clearly: \"invalid\" \"yaml\"\n";
+        assert!(parse_pubspec_lock("pubspec.lock", content).is_none());
+    }
+
+    // Ported: "invalid schema" — modules/manager/pub/utils.spec.ts line 64 (parsePubspeckLock)
+    #[test]
+    fn parse_pubspec_lock_invalid_schema_returns_none() {
+        let content = "clearly: invalid\n";
+        assert!(parse_pubspec_lock("pubspec.lock", content).is_none());
     }
 }

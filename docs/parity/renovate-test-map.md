@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2410 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2416 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17517,23 +17517,23 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/pub/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pub/utils.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `parsePubspec`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| load and parse successfully | 14 | pending | — | — | — |
-| invalid yaml | 32 | pending | — | — | — |
-| invalid schema | 37 | pending | — | — | — |
+| load and parse successfully | 14 | ported | `pubspec.rs` | `parse_pubspec_loads_valid_yaml` | — |
+| invalid yaml | 32 | ported | `pubspec.rs` | `parse_pubspec_invalid_yaml_returns_none` | — |
+| invalid schema | 37 | ported | `pubspec.rs` | `parse_pubspec_invalid_schema_returns_none` | — |
 
 ### `parsePubspeckLock`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| load and parse successfully | 44 | pending | — | — | — |
-| invalid yaml | 56 | pending | — | — | — |
-| invalid schema | 61 | pending | — | — | — |
+| load and parse successfully | 44 | ported | `pubspec.rs` | `parse_pubspec_lock_loads_valid_yaml` | — |
+| invalid yaml | 56 | ported | `pubspec.rs` | `parse_pubspec_lock_invalid_yaml_returns_none` | — |
+| invalid schema | 61 | ported | `pubspec.rs` | `parse_pubspec_lock_invalid_schema_returns_none` | — |
 
 ---
 
