@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2194 / 8606 actionable tests ported (25%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2197 / 8606 actionable tests ported (25%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13697,15 +13697,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/cargo/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/range.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 5 | pending | — | — | — |
-| returns widen if current value includes < | 10 | pending | — | — | — |
-| defaults to update-lockfile | 18 | pending | — | — | — |
+| returns same if not auto | 5 | ported | `cargo.rs` | `range_strategy_returns_same_if_not_auto` | — |
+| returns widen if current value includes < | 10 | ported | `cargo.rs` | `range_strategy_returns_widen_if_current_value_has_lt` | — |
+| defaults to update-lockfile | 18 | ported | `cargo.rs` | `range_strategy_defaults_to_update_lockfile` | — |
 
 ---
 

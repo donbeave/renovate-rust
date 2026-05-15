@@ -608,10 +608,10 @@ fn get_new_single(
 /// Determine whether upgrading from `current` to `new` is a breaking change.
 ///
 /// Cargo semver breaking-change rules (matches Renovate cargo `isBreaking`):
-/// - Either version is unstable (pre-release) → breaking.
+/// - Either version is unstable (pre-release) — breaking.
 /// - `0.0.x`: breaking unless the version is identical.
 /// - `0.y.z` (y > 0): breaking if the minor component changes.
-/// - `≥1.0.0`: breaking only if the major component changes.
+/// - `>=1.0.0`: breaking only if the major component changes.
 pub fn is_breaking(current: &str, new: &str) -> bool {
     let (Ok(cur), Ok(nw)) = (Version::parse(current), Version::parse(new)) else {
         return true;
@@ -626,6 +626,21 @@ pub fn is_breaking(current: &str, new: &str) -> bool {
         return cur.minor != nw.minor;
     }
     cur.major != nw.major
+}
+
+/// Determine the effective Cargo range strategy.
+///
+/// Mirrors `lib/modules/manager/cargo/range.ts` `getRangeStrategy()`.
+/// Non-`"auto"` strategies are returned unchanged. `"auto"` maps to `"widen"`
+/// when `current_value` contains `<`, otherwise to `"update-lockfile"`.
+pub fn get_range_strategy<'a>(range_strategy: &'a str, current_value: Option<&str>) -> &'a str {
+    if range_strategy != "auto" {
+        return range_strategy;
+    }
+    if current_value.is_some_and(|cv| cv.contains('<')) {
+        return "widen";
+    }
+    "update-lockfile"
 }
 
 #[cfg(test)]
@@ -1122,5 +1137,25 @@ mod renovate_compat_tests {
             get_new_value("", RangeStrategy::Bump, "1.0.0", "1.1.0"),
             Some("".to_owned())
         );
+    }
+
+    // ── get_range_strategy ───────────────────────────────────────────────────
+
+    // Ported: "returns same if not auto" — modules/manager/cargo/range.spec.ts line 5
+    #[test]
+    fn range_strategy_returns_same_if_not_auto() {
+        assert_eq!(get_range_strategy("widen", None), "widen");
+    }
+
+    // Ported: "returns widen if current value includes <" — modules/manager/cargo/range.spec.ts line 10
+    #[test]
+    fn range_strategy_returns_widen_if_current_value_has_lt() {
+        assert_eq!(get_range_strategy("auto", Some("<1.0.0")), "widen");
+    }
+
+    // Ported: "defaults to update-lockfile" — modules/manager/cargo/range.spec.ts line 18
+    #[test]
+    fn range_strategy_defaults_to_update_lockfile() {
+        assert_eq!(get_range_strategy("auto", Some("1.0.0")), "update-lockfile");
     }
 }
