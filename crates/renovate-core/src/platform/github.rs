@@ -154,6 +154,37 @@ fn decode_github_content(c: GithubContent) -> Result<String, PlatformError> {
     }
 }
 
+// ── GitHub URL utilities ──────────────────────────────────────────────────────
+
+const DEFAULT_SOURCE_URL_BASE: &str = "https://github.com/";
+const DEFAULT_API_BASE_URL: &str = "https://api.github.com/";
+
+/// Return the source URL base for the given registry URL, ensuring a trailing slash.
+///
+/// Mirrors `lib/util/github/url.ts` `getSourceUrlBase()`.
+pub fn get_source_url_base(registry_url: Option<&str>) -> String {
+    let base = registry_url.unwrap_or(DEFAULT_SOURCE_URL_BASE);
+    if base.ends_with('/') {
+        base.to_owned()
+    } else {
+        format!("{base}/")
+    }
+}
+
+/// Return the GitHub REST API v3 base URL for the given registry URL.
+///
+/// Mirrors `lib/util/github/url.ts` `getApiBaseUrl()`.
+pub fn get_api_base_url(registry_url: Option<&str>) -> String {
+    let source_base = get_source_url_base(registry_url);
+    if source_base == DEFAULT_SOURCE_URL_BASE || source_base == DEFAULT_API_BASE_URL {
+        return DEFAULT_API_BASE_URL.to_owned();
+    }
+    if source_base.ends_with("/api/v3/") {
+        return source_base;
+    }
+    format!("{source_base}api/v3/")
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{header, header_exists, method, path};
@@ -249,6 +280,43 @@ mod tests {
             .unwrap();
         assert_eq!(file.path, "renovate.json");
         assert!(file.content.contains("config:recommended"));
+    }
+
+    // Ported: "ensures trailing slash" — util/github/url.spec.ts line 6
+    #[test]
+    fn github_get_source_url_base_trailing_slash() {
+        assert_eq!(
+            get_source_url_base(Some("https://gh.my-company.com")),
+            "https://gh.my-company.com/"
+        );
+    }
+
+    // Ported: "defaults to github.com" — util/github/url.spec.ts line 11
+    #[test]
+    fn github_get_source_url_base_default() {
+        assert_eq!(get_source_url_base(None), "https://github.com/");
+    }
+
+    // Ported: "maps to api.github.com" — util/github/url.spec.ts line 17
+    #[test]
+    fn github_get_api_base_url_maps_to_api() {
+        assert_eq!(
+            get_api_base_url(Some("https://github.com/")),
+            "https://api.github.com/"
+        );
+    }
+
+    // Ported: "supports local github installations" — util/github/url.spec.ts line 21
+    #[test]
+    fn github_get_api_base_url_local_install() {
+        assert_eq!(
+            get_api_base_url(Some("https://gh.my-company.com/")),
+            "https://gh.my-company.com/api/v3/"
+        );
+        assert_eq!(
+            get_api_base_url(Some("https://gh.my-company.com/api/v3/")),
+            "https://gh.my-company.com/api/v3/"
+        );
     }
 
     #[tokio::test]

@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2493 / 8612 actionable tests ported (28%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2497 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -23913,21 +23913,21 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/github/url.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/url.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `util/github/url › getSourceUrlBase`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| ensures trailing slash | 5 | pending | — | — | — |
-| defaults to github.com | 10 | pending | — | — | — |
+| ensures trailing slash | 5 | ported | `platform/github.rs` | `github_get_source_url_base_trailing_slash` | — |
+| defaults to github.com | 10 | ported | `platform/github.rs` | `github_get_source_url_base_default` | — |
 
 ### `util/github/url › getApiBaseUrl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| maps to api.github.com | 17 | pending | — | — | — |
-| supports local github installations | 22 | pending | — | — | — |
+| maps to api.github.com | 17 | ported | `platform/github.rs` | `github_get_api_base_url_maps_to_api` | — |
+| supports local github installations | 22 | ported | `platform/github.rs` | `github_get_api_base_url_local_install` | — |
 
 ---
 
