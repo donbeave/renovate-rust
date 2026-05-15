@@ -912,6 +912,77 @@ pub fn extract_rules_img_pull_deps(content: &str) -> Vec<BazelRulesImgPullDep> {
         .collect()
 }
 
+/// Transform pre-parsed fragment objects for `rules_img` pull calls into dep objects.
+///
+/// Mirrors `lib/modules/manager/bazel-module/rules-img.ts` `transformRulesImgCalls()`.
+/// Input fragments are JSON objects with `type`, `variableName`/`functionName`, etc.
+pub fn transform_rules_img_calls(fragments: &[serde_json::Value]) -> Vec<BazelRulesImgPullDep> {
+    let mut repo_rule_vars: std::collections::HashMap<String, String> = Default::default();
+    for frag in fragments {
+        if frag.get("type").and_then(|t| t.as_str()) == Some("useRepoRule")
+            && let (Some(var), Some(bzl)) = (
+                frag.get("variableName").and_then(|v| v.as_str()),
+                frag.get("bzlFile").and_then(|v| v.as_str()),
+            )
+        {
+            repo_rule_vars.insert(var.to_owned(), bzl.to_owned());
+        }
+    }
+
+    let mut deps = Vec::new();
+    for frag in fragments {
+        if frag.get("type").and_then(|t| t.as_str()) != Some("repoRuleCall") {
+            continue;
+        }
+        let Some(func_name) = frag.get("functionName").and_then(|v| v.as_str()) else {
+            continue;
+        };
+        let Some(bzl_file) = repo_rule_vars.get(func_name) else {
+            continue;
+        };
+        if !bzl_file.contains("@rules_img//img:pull.bzl") {
+            continue;
+        }
+        let Some(children) = frag.get("children") else {
+            continue;
+        };
+        let str_val = |key: &str| -> Option<String> {
+            children.get(key)?.get("value")?.as_str().map(str::to_owned)
+        };
+        let Some(name) = str_val("name") else { continue };
+        let Some(repository) = str_val("repository") else { continue };
+        let registry = str_val("registry");
+        let tag = str_val("tag");
+        let digest = str_val("digest");
+        let raw_string = frag
+            .get("rawString")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_owned();
+
+        let package_name = registry
+            .as_deref()
+            .map(|r| format!("{r}/{repository}"))
+            .unwrap_or(repository);
+        let registry_urls = registry
+            .as_deref()
+            .map(|r| vec![format!("https://{r}")])
+            .unwrap_or_default();
+
+        deps.push(BazelRulesImgPullDep {
+            dep_name: name,
+            package_name,
+            registry_urls,
+            current_value: tag,
+            current_digest: digest,
+            dep_type: "rules_img_pull",
+            datasource: "docker",
+        });
+        let _ = raw_string; // used for replaceString in TS but not in our struct
+    }
+    deps
+}
+
 /// Extract unconfigured Bazel registry URLs from a workspace `.bazelrc` file set.
 pub fn extract_bazelrc_registry_urls(files: &[(&str, &str)]) -> Vec<String> {
     let mut read_files = std::collections::BTreeSet::new();
@@ -2794,6 +2865,111 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("module(name = \"mymodule\", version = \"1.0.0\")\n").is_empty());
+    }
+
+    // Ported: "ignores repo rule calls that are not rules_img" — modules/manager/bazel-module/rules-img.spec.ts line 5
+    #[test]
+    fn rules_img_ignores_non_rules_img() {
+        let frags = vec![
+            serde_json::json!({
+                "type": "useRepoRule",
+                "variableName": "other_rule",
+                "bzlFile": "@other_rules//some:rule.bzl",
+                "ruleName": "other",
+                "isComplete": true
+            }),
+            serde_json::json!({
+                "type": "repoRuleCall",
+                "functionName": "other_rule",
+                "children": {
+                    "name": {"type": "string", "value": "test", "isComplete": true},
+                    "value": {"type": "string", "value": "something", "isComplete": true}
+                },
+                "isComplete": true,
+                "offset": 0,
+                "rawString": "other_rule(name = \"test\", value = \"something\")"
+            }),
+        ];
+        let result = transform_rules_img_calls(&frags);
+        assert!(result.is_empty());
+    }
+
+    // Ported: "handles valid rules_img pull call" — modules/manager/bazel-module/rules-img.spec.ts line 37
+    #[test]
+    fn rules_img_handles_valid_pull_call() {
+        let frags = vec![
+            serde_json::json!({
+                "type": "useRepoRule",
+                "variableName": "pull",
+                "bzlFile": "@rules_img//img:pull.bzl",
+                "ruleName": "pull",
+                "isComplete": true
+            }),
+            serde_json::json!({
+                "type": "repoRuleCall",
+                "functionName": "pull",
+                "children": {
+                    "name": {"type": "string", "value": "ubuntu", "isComplete": true},
+                    "repository": {"type": "string", "value": "library/ubuntu", "isComplete": true},
+                    "tag": {"type": "string", "value": "24.04", "isComplete": true}
+                },
+                "isComplete": true,
+                "offset": 0,
+                "rawString": "pull(name = \"ubuntu\", repository = \"library/ubuntu\", tag = \"24.04\")"
+            }),
+        ];
+        let result = transform_rules_img_calls(&frags);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].dep_name, "ubuntu");
+        assert_eq!(result[0].package_name, "library/ubuntu");
+        assert_eq!(result[0].current_value.as_deref(), Some("24.04"));
+        assert_eq!(result[0].datasource, "docker");
+        assert_eq!(result[0].dep_type, "rules_img_pull");
+    }
+
+    // Ported: "skips repo rule calls without corresponding use_repo_rule" — modules/manager/bazel-module/rules-img.spec.ts line 74
+    #[test]
+    fn rules_img_skips_unknown_function() {
+        let frags = vec![
+            serde_json::json!({
+                "type": "repoRuleCall",
+                "functionName": "unknown_function",
+                "children": {
+                    "name": {"type": "string", "value": "test", "isComplete": true}
+                },
+                "isComplete": true,
+                "offset": 0,
+                "rawString": "unknown_function(name = \"test\")"
+            }),
+        ];
+        let result = transform_rules_img_calls(&frags);
+        assert!(result.is_empty());
+    }
+
+    // Ported: "skips malformed repo rule calls" — modules/manager/bazel-module/rules-img.spec.ts line 92
+    #[test]
+    fn rules_img_skips_malformed_call() {
+        let frags = vec![
+            serde_json::json!({
+                "type": "useRepoRule",
+                "variableName": "pull",
+                "bzlFile": "@rules_img//img:pull.bzl",
+                "ruleName": "pull",
+                "isComplete": true
+            }),
+            serde_json::json!({
+                "type": "repoRuleCall",
+                "functionName": "pull",
+                "children": {
+                    "tag": {"type": "string", "value": "24.04", "isComplete": true}
+                },
+                "isComplete": true,
+                "offset": 0,
+                "rawString": "pull(tag = \"24.04\")"
+            }),
+        ];
+        let result = transform_rules_img_calls(&frags);
+        assert!(result.is_empty());
     }
 
     // Ported: ".asBoolean($a)" (it.each True/False) — modules/manager/bazel-module/parser/starlark.spec.ts line 4

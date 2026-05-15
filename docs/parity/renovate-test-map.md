@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2503 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2507 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13215,16 +13215,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bazel-module/rules-img.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/rules-img.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `transformRulesImgCalls()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| ignores repo rule calls that are not rules_img | 5 | pending | — | — | — |
-| handles valid rules_img pull call | 32 | pending | — | — | — |
-| skips repo rule calls without corresponding use_repo_rule | 72 | pending | — | — | — |
-| skips malformed repo rule calls | 91 | pending | — | — | — |
+| ignores repo rule calls that are not rules_img | 5 | ported | `bazel_module.rs` | `rules_img_ignores_non_rules_img` | — |
+| handles valid rules_img pull call | 32 | ported | `bazel_module.rs` | `rules_img_handles_valid_pull_call` | — |
+| skips repo rule calls without corresponding use_repo_rule | 72 | ported | `bazel_module.rs` | `rules_img_skips_unknown_function` | — |
+| skips malformed repo rule calls | 91 | ported | `bazel_module.rs` | `rules_img_skips_malformed_call` | — |
 
 ---
 
