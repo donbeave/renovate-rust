@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2223 / 8606 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2226 / 8606 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -27473,7 +27473,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 60 | **Actionable:** 68 | **Status:** partial
+**Total tests:** 68 | **Ported:** 63 | **Actionable:** 68 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -27537,14 +27537,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| supports last day of month | 277 | pending | — | — | — |
-| supports last day of week | 283 | pending | — | — | — |
+| supports last day of month | 277 | ported | `schedule.rs` | `spec_cron_l_syntax_last_day_of_month` | — |
+| supports last day of week | 283 | ported | `schedule.rs` | `spec_cron_l_syntax_last_day_of_week` | — |
 
 ### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports # syntax in cron schedules`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| supports first Monday of month | 293 | pending | — | — | — |
+| supports first Monday of month | 293 | ported | `schedule.rs` | `spec_cron_hash_syntax_first_monday_of_month` | — |
 
 ### `workers/repository/update/branch/schedule › isScheduledNow(config) › handles schedule with Day Of Month and Day Of Week using AND logic`
 

@@ -262,7 +262,7 @@ pub fn is_within_schedule_tz_at(
         return true;
     }
 
-    let (hour, dom, month, weekday) = match timezone.and_then(|tz| tz.parse::<Tz>().ok()) {
+    let (hour, dom, month, weekday, year) = match timezone.and_then(|tz| tz.parse::<Tz>().ok()) {
         Some(tz) => {
             let local = tz.from_utc_datetime(&now.naive_utc());
             (
@@ -270,6 +270,7 @@ pub fn is_within_schedule_tz_at(
                 local.day() as u8,
                 local.month() as u8,
                 weekday_to_unix(local.weekday()),
+                local.year(),
             )
         }
         None => (
@@ -277,12 +278,13 @@ pub fn is_within_schedule_tz_at(
             now.day() as u8,
             now.month() as u8,
             weekday_to_unix(now.weekday()),
+            now.year(),
         ),
     };
 
     schedule.iter().any(|entry| {
         if looks_like_cron(entry) {
-            cron_matches(entry, hour, dom, month, weekday)
+            cron_matches_year(entry, hour, dom, month, weekday, year)
         } else {
             text_schedule_matches_month(entry, hour, dom, weekday, month)
         }
@@ -301,21 +303,78 @@ fn weekday_to_unix(w: Weekday) -> u8 {
     }
 }
 
+/// Number of days in a month (approximate: uses 28 for February without leap check).
+fn days_in_month(month: u8, year: i32) -> u8 {
+    match month {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+        4 | 6 | 9 | 11 => 30,
+        2 => {
+            let leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+            if leap { 29 } else { 28 }
+        }
+        _ => 30,
+    }
+}
+
 /// Return `true` if `cron_expr` matches the given time components.
 ///
 /// The minute field (first field) is accepted but ignored — Renovate schedule
 /// presets always use `*` for minutes and check at any-minute granularity.
+/// Extended Croner syntax (`L` for last day, `4L` for last weekday, `1#2` for
+/// Nth weekday) is supported when `year` is provided.
 pub fn cron_matches(cron_expr: &str, hour: u8, dom: u8, month: u8, weekday: u8) -> bool {
+    cron_matches_year(cron_expr, hour, dom, month, weekday, 0)
+}
+
+fn cron_matches_year(
+    cron_expr: &str,
+    hour: u8,
+    dom: u8,
+    month: u8,
+    weekday: u8,
+    year: i32,
+) -> bool {
     let fields: Vec<&str> = cron_expr.split_whitespace().collect();
-    if fields.len() != 5 {
+    let n = fields.len();
+    if n != 5 && n != 6 {
         return false;
     }
-    // fields: [minute, hour, dom, month, weekday]
-    // minute (fields[0]) is intentionally ignored.
-    cron_field_matches(fields[1], hour, 0, 23)
-        && cron_field_matches(fields[2], dom, 1, 31)
-        && cron_field_matches(fields[3], month, 1, 12)
-        && cron_field_matches_weekday(fields[4], weekday)
+    // For 6-field extended cron, treat fields as [sec, min, hour, dom, month, weekday]
+    // but we ignore seconds and minutes.
+    let (hour_f, dom_f, month_f, weekday_f) = if n == 6 {
+        (fields[2], fields[3], fields[4], fields[5])
+    } else {
+        // fields: [minute, hour, dom, month, weekday]
+        (fields[1], fields[2], fields[3], fields[4])
+    };
+
+    if !cron_field_matches(hour_f, hour, 0, 23) {
+        return false;
+    }
+    // Month field: handle 'L' (Croner interprets "* * * L *" as "last day of month"
+    // even though L appears in the 4th/month field position in the 5-field format).
+    if month_f == "L" {
+        let last = days_in_month(month, year);
+        if dom != last {
+            return false;
+        }
+    } else if !cron_field_matches(month_f, month, 1, 12) {
+        return false;
+    }
+    // DOM field: handle 'L' (last day of month)
+    if dom_f == "L" {
+        let last = days_in_month(month, year);
+        if dom != last {
+            return false;
+        }
+    } else if !cron_field_matches(dom_f, dom, 1, 31) {
+        return false;
+    }
+    // Weekday field: handle `NL` (last Nth weekday) and `N#M` (Mth Nth weekday)
+    if !cron_field_matches_weekday_ext(weekday_f, weekday, dom, month, year) {
+        return false;
+    }
+    true
 }
 
 /// Parse and evaluate a single cron field against `value`.
@@ -374,11 +433,40 @@ fn cron_field_matches_weekday(field: &str, weekday: u8) -> bool {
     cron_field_matches(&normalised, weekday, 0, 6)
 }
 
-/// Heuristic: does `entry` look like a 5-field cron expression?
-/// Cron entries start with `*` or a digit and contain at least 4 spaces.
+/// Extended weekday field matching: handles plain values AND `NL` (last Nth weekday of month)
+/// and `N#M` (Mth occurrence of weekday N in month).
+fn cron_field_matches_weekday_ext(field: &str, weekday: u8, dom: u8, month: u8, year: i32) -> bool {
+    // `NL` — last occurrence of weekday N in the month
+    if let Some(wd_str) = field.strip_suffix('L') {
+        let wd_num: u8 = wd_str.parse().unwrap_or(255);
+        let target_wd = if wd_num == 7 { 0 } else { wd_num };
+        if weekday != target_wd {
+            return false;
+        }
+        // Last occurrence: dom + 7 > days_in_month
+        let last = days_in_month(month, year);
+        return dom + 7 > last;
+    }
+    // `N#M` — Mth occurrence of weekday N
+    if let Some((wd_str, occurrence_str)) = field.split_once('#') {
+        let wd_num: u8 = wd_str.parse().unwrap_or(255);
+        let occurrence: u8 = occurrence_str.parse().unwrap_or(0);
+        let target_wd = if wd_num == 7 { 0 } else { wd_num };
+        if weekday != target_wd {
+            return false;
+        }
+        // Mth occurrence: (dom - 1) / 7 + 1 == M (for dom ≥ 1)
+        return (dom.saturating_sub(1)) / 7 + 1 == occurrence;
+    }
+    cron_field_matches_weekday(field, weekday)
+}
+
+/// Heuristic: does `entry` look like a cron expression (5 or 6 fields)?
+/// Cron entries start with `*` or a digit.
 fn looks_like_cron(entry: &str) -> bool {
     let first = entry.chars().next().unwrap_or(' ');
-    (first == '*' || first.is_ascii_digit()) && entry.split_whitespace().count() == 5
+    let count = entry.split_whitespace().count();
+    (first == '*' || first.is_ascii_digit()) && (count == 5 || count == 6)
 }
 
 /// Parse an AM/PM time token like `"5am"`, `"4pm"`, `"4:00am"`, `"11:00pm"`.
@@ -1791,5 +1879,51 @@ mod tests {
     #[test]
     fn has_valid_timezone_valid_returns_true() {
         assert!(has_valid_timezone("Asia/Singapore"));
+    }
+
+    // ── L and # cron syntax ──────────────────────────────────────────────────
+
+    // Ported: "supports last day of month" — workers/repository/update/branch/schedule.spec.ts line 277
+    #[test]
+    fn spec_cron_l_syntax_last_day_of_month() {
+        // 2024-10-31T10:50:00 → October 31 (last day of October)
+        // "* * * L *" should match
+        let oct_31 = utc(2024, 10, 31, 10);
+        let sched = schedule(&["* * * L *"]);
+        assert!(is_within_schedule_at(&sched, oct_31));
+    }
+
+    // Ported: "supports last day of week" — workers/repository/update/branch/schedule.spec.ts line 283
+    #[test]
+    fn spec_cron_l_syntax_last_day_of_week() {
+        // 2024-10-31 is a Thursday (weekday=4). Last Thursday of October 2024.
+        let oct_31_thu = utc(2024, 10, 31, 10);
+        // "* * * * 4L" → last Thursday → should match
+        assert!(is_within_schedule_at(
+            &schedule(&["* * * * 4L"]),
+            oct_31_thu
+        ));
+        // "* * * * 5L" → last Friday → Oct 31 is Thursday, not Friday → false
+        assert!(!is_within_schedule_at(
+            &schedule(&["* * * * 5L"]),
+            oct_31_thu
+        ));
+    }
+
+    // Ported: "supports first Monday of month" — workers/repository/update/branch/schedule.spec.ts line 293
+    #[test]
+    fn spec_cron_hash_syntax_first_monday_of_month() {
+        // 2024-10-07T10:50:00 → October 7, 2024 is the first Monday of October
+        let oct_7_mon = utc(2024, 10, 7, 10);
+        // "* * * * 1#1" → first Monday → should match
+        assert!(is_within_schedule_at(
+            &schedule(&["* * * * 1#1"]),
+            oct_7_mon
+        ));
+        // "* * * * 1#2" → second Monday → Oct 7 is first, not second → false
+        assert!(!is_within_schedule_at(
+            &schedule(&["* * * * 1#2"]),
+            oct_7_mon
+        ));
     }
 }
