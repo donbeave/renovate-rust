@@ -1180,6 +1180,7 @@ mod tests {
 
     // ── Ported from schedule.spec.ts (isScheduledNow at 2017-06-30 10:50am, a Friday) ──
 
+    // Ported: "supports before hours true" — workers/repository/update/branch/schedule.spec.ts line 184
     #[test]
     fn spec_supports_before_hours_true() {
         // "returns true if before hours" — at 10am, "before 4:00pm" is true
@@ -1191,6 +1192,7 @@ mod tests {
         );
     }
 
+    // Ported: "supports before hours false" — workers/repository/update/branch/schedule.spec.ts line 190
     #[test]
     fn spec_supports_before_hours_false() {
         // "returns false if before hours" — at 10am, "before 4:00am" is false
@@ -1202,6 +1204,7 @@ mod tests {
         );
     }
 
+    // Ported: "supports outside hours" — workers/repository/update/branch/schedule.spec.ts line 202
     #[test]
     fn spec_supports_outside_hours() {
         // "returns false for outside hours" — at 10am, "after 4:00pm" is false
@@ -1213,6 +1216,7 @@ mod tests {
         );
     }
 
+    // Ported: "supports cron syntax with hours" — workers/repository/update/branch/schedule.spec.ts line 208
     #[test]
     fn spec_cron_with_hours_match() {
         // "supports cron syntax with hours" — * 10 * * * at hour=10 matches
@@ -1223,6 +1227,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
     }
 
+    // Ported: "supports cron syntax with days" — workers/repository/update/branch/schedule.spec.ts line 218
     #[test]
     fn spec_cron_with_days_match() {
         // "supports cron syntax with days" — * * 30 * * on day=30 matches
@@ -1233,6 +1238,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
     }
 
+    // Ported: "supports cron syntax with months" — workers/repository/update/branch/schedule.spec.ts line 228
     #[test]
     fn spec_cron_with_months_match() {
         // "supports cron syntax with months" — * * * 6 * on month=6 (June) matches
@@ -1243,6 +1249,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
     }
 
+    // Ported: "supports cron syntax with weekdays" — workers/repository/update/branch/schedule.spec.ts line 238
     #[test]
     fn spec_cron_with_weekdays_match() {
         // "supports cron syntax with weekdays" — * * * * 5 on weekday=5 (Friday) matches
@@ -1253,6 +1260,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched_no_match, friday_10am));
     }
 
+    // Ported: "returns true if no schedule" — workers/repository/update/branch/schedule.spec.ts line 154
     #[test]
     fn spec_returns_true_if_no_schedule() {
         // "returns true if no schedule" — empty schedule means always scheduled
@@ -1260,6 +1268,7 @@ mod tests {
         assert!(is_within_schedule_at(&[], friday_10am));
     }
 
+    // Ported: "returns true if at any time" — workers/repository/update/branch/schedule.spec.ts line 159
     #[test]
     fn spec_returns_true_for_at_any_time() {
         // "returns true if at any time"
@@ -1268,6 +1277,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "approves if the weekday is 0" — workers/repository/update/branch/schedule.spec.ts line 259
     #[test]
     fn spec_cron_on_sunday_weekday_0() {
         // "approves if the weekday is 0" — Sunday matches weekday 0
@@ -1276,6 +1286,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, sunday_10am));
     }
 
+    // Ported: "rejects if the weekday is 1" — workers/repository/update/branch/schedule.spec.ts line 265
     #[test]
     fn spec_cron_on_sunday_rejects_weekday_1() {
         // "rejects if the weekday is 1" — Sunday does NOT match Monday
@@ -1284,6 +1295,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, sunday_10am));
     }
 
+    // Ported: "supports multiple schedules" — workers/repository/update/branch/schedule.spec.ts line 355
     #[test]
     fn spec_supports_multiple_schedules() {
         // "supports multiple schedules" — any one matching is sufficient
@@ -1293,6 +1305,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "supports day match" — workers/repository/update/branch/schedule.spec.ts line 361
     #[test]
     fn spec_supports_day_match_friday() {
         // "supports day match" — on friday and saturday matches at Friday
@@ -1301,6 +1314,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "supports day mismatch" — workers/repository/update/branch/schedule.spec.ts line 367
     #[test]
     fn spec_supports_day_mismatch() {
         // "supports day mismatch" — on monday and tuesday does NOT match Friday
@@ -1309,6 +1323,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "supports every weekday" — workers/repository/update/branch/schedule.spec.ts line 373
     #[test]
     fn spec_every_weekday_matches_friday() {
         // "supports every weekday" — Friday is a weekday → matches
@@ -1317,6 +1332,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "supports every weekend" — workers/repository/update/branch/schedule.spec.ts line 379
     #[test]
     fn spec_every_weekend_rejects_friday() {
         // "supports every weekend" — Friday is not a weekend → false
@@ -1325,6 +1341,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "supports every weekday with time" — workers/repository/update/branch/schedule.spec.ts line 385
     #[test]
     fn spec_before_11am_every_weekday_matches() {
         // "supports every weekday with time" — before 11am on a weekday, at 10am → true
@@ -1333,6 +1350,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "reject if day mismatch" — workers/repository/update/branch/schedule.spec.ts line 337
     #[test]
     fn spec_cron_dom_mismatch_false() {
         // "reject if day mismatch" — * 10 21 * * on dom=30 → false
@@ -1341,6 +1359,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "reject if month mismatch" — workers/repository/update/branch/schedule.spec.ts line 343
     #[test]
     fn spec_cron_month_mismatch_false() {
         // "reject if month mismatch" — * 10 30 1 * on month=6 → false
@@ -1349,6 +1368,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "rejects first day of the month" — workers/repository/update/branch/schedule.spec.ts line 397
     #[test]
     fn spec_first_day_of_month_rejects_non_first() {
         // "rejects first day of the month" — June 30 is not the first day
@@ -1357,6 +1377,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, friday_10am));
     }
 
+    // Ported: "approves first day of the month" — workers/repository/update/branch/schedule.spec.ts line 403
     #[test]
     fn spec_first_day_of_month_approves_first() {
         // "approves first day of the month" — October 1, 2017 05:26am
@@ -1365,6 +1386,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, oct_1_5am));
     }
 
+    // Ported: "approves on months of year" — workers/repository/update/branch/schedule.spec.ts line 424
     #[test]
     fn spec_months_of_year_approves_january() {
         // "approves on months of year" — "of January" in January
@@ -1373,6 +1395,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, jan_2_6am));
     }
 
+    // Ported: "rejects on months of year" — workers/repository/update/branch/schedule.spec.ts line 431
     #[test]
     fn spec_months_of_year_rejects_february() {
         // "rejects on months of year" — "of January" in February → false
@@ -1381,6 +1404,7 @@ mod tests {
         assert!(!is_within_schedule_at(&sched, feb_2_6am));
     }
 
+    // Ported: "approves schedule longer than 1 month" — workers/repository/update/branch/schedule.spec.ts line 438
     #[test]
     fn spec_every_3_months_approves_july() {
         // "approves schedule longer than 1 month" — "every 3 months" in July 2017
@@ -1390,6 +1414,7 @@ mod tests {
         assert!(is_within_schedule_at(&sched, jul_1_6am));
     }
 
+    // Ported: "rejects schedule longer than 1 month" — workers/repository/update/branch/schedule.spec.ts line 445
     #[test]
     fn spec_every_6_months_rejects_february() {
         // "rejects schedule longer than 1 month" — "every 6 months" in Feb (not a 6-month boundary)

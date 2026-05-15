@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2156 / 8606 actionable tests ported (25%) — updated 2026-05-14
+**Overall progress (per-test sections only):** 2181 / 8606 actionable tests ported (25%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -27473,7 +27473,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 0 | **Actionable:** 68 | **Status:** pending
+**Total tests:** 68 | **Ported:** 25 | **Actionable:** 68 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -27511,27 +27511,27 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true if no schedule | 154 | pending | — | — | — |
-| returns true if at any time | 159 | pending | — | — | — |
+| returns true if no schedule | 154 | ported | `schedule.rs` | `spec_returns_true_if_no_schedule` | — |
+| returns true if at any time | 159 | ported | `schedule.rs` | `spec_returns_true_for_at_any_time` | — |
 | returns true if at any time array | 165 | pending | — | — | — |
 | returns true if invalid schedule | 171 | pending | — | — | — |
 | returns true if invalid timezone | 177 | pending | — | — | — |
-| supports before hours true | 184 | pending | — | — | — |
-| supports before hours false | 190 | pending | — | — | — |
+| supports before hours true | 184 | ported | `schedule.rs` | `spec_supports_before_hours_true` | — |
+| supports before hours false | 190 | ported | `schedule.rs` | `spec_supports_before_hours_false` | — |
 | massages string | 196 | pending | — | — | — |
-| supports outside hours | 202 | pending | — | — | — |
-| supports cron syntax with hours | 208 | pending | — | — | — |
-| supports cron syntax with days | 218 | pending | — | — | — |
-| supports cron syntax with months | 228 | pending | — | — | — |
-| supports cron syntax with weekdays | 238 | pending | — | — | — |
+| supports outside hours | 202 | ported | `schedule.rs` | `spec_supports_outside_hours` | — |
+| supports cron syntax with hours | 208 | ported | `schedule.rs` | `spec_cron_with_hours_match` | — |
+| supports cron syntax with days | 218 | ported | `schedule.rs` | `spec_cron_with_days_match` | — |
+| supports cron syntax with months | 228 | ported | `schedule.rs` | `spec_cron_with_months_match` | — |
+| supports cron syntax with weekdays | 238 | ported | `schedule.rs` | `spec_cron_with_weekdays_match` | — |
 
 ### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports cron syntax on Sundays`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | approves if the weekday is * | 253 | pending | — | — | — |
-| approves if the weekday is 0 | 259 | pending | — | — | — |
-| rejects if the weekday is 1 | 265 | pending | — | — | — |
+| approves if the weekday is 0 | 259 | ported | `schedule.rs` | `spec_cron_on_sunday_weekday_0` | — |
+| rejects if the weekday is 1 | 265 | ported | `schedule.rs` | `spec_cron_on_sunday_rejects_weekday_1` | — |
 
 ### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports L syntax in cron schedules`
 
@@ -27557,24 +27557,24 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | $sched, $tz, $datetime | 319 | pending | — | — | — |
-| reject if day mismatch | 337 | pending | — | — | — |
-| reject if month mismatch | 343 | pending | — | — | — |
+| reject if day mismatch | 337 | ported | `schedule.rs` | `spec_cron_dom_mismatch_false` | — |
+| reject if month mismatch | 343 | ported | `schedule.rs` | `spec_cron_month_mismatch_false` | — |
 | reject if no schedule available | 349 | pending | — | — | — |
-| supports multiple schedules | 355 | pending | — | — | — |
-| supports day match | 361 | pending | — | — | — |
-| supports day mismatch | 367 | pending | — | — | — |
-| supports every weekday | 373 | pending | — | — | — |
-| supports every weekend | 379 | pending | — | — | — |
-| supports every weekday with time | 385 | pending | — | — | — |
+| supports multiple schedules | 355 | ported | `schedule.rs` | `spec_supports_multiple_schedules` | — |
+| supports day match | 361 | ported | `schedule.rs` | `spec_supports_day_match_friday` | — |
+| supports day mismatch | 367 | ported | `schedule.rs` | `spec_supports_day_mismatch` | — |
+| supports every weekday | 373 | ported | `schedule.rs` | `spec_every_weekday_matches_friday` | — |
+| supports every weekend | 379 | ported | `schedule.rs` | `spec_every_weekend_rejects_friday` | — |
+| supports every weekday with time | 385 | ported | `schedule.rs` | `spec_before_11am_every_weekday_matches` | — |
 | supports o every weekday | 391 | pending | — | — | — |
-| rejects first day of the month | 397 | pending | — | — | — |
-| approves first day of the month | 403 | pending | — | — | — |
+| rejects first day of the month | 397 | ported | `schedule.rs` | `spec_first_day_of_month_rejects_non_first` | — |
+| approves first day of the month | 403 | ported | `schedule.rs` | `spec_first_day_of_month_approves_first` | — |
 | approves valid weeks of year | 410 | pending | — | — | — |
 | rejects on weeks of year | 417 | pending | — | — | — |
-| approves on months of year | 424 | pending | — | — | — |
-| rejects on months of year | 431 | pending | — | — | — |
-| approves schedule longer than 1 month | 438 | pending | — | — | — |
-| rejects schedule longer than 1 month | 445 | pending | — | — | — |
+| approves on months of year | 424 | ported | `schedule.rs` | `spec_months_of_year_approves_january` | — |
+| rejects on months of year | 431 | ported | `schedule.rs` | `spec_months_of_year_rejects_february` | — |
+| approves schedule longer than 1 month | 438 | ported | `schedule.rs` | `spec_every_3_months_approves_july` | — |
+| rejects schedule longer than 1 month | 445 | ported | `schedule.rs` | `spec_every_6_months_rejects_february` | — |
 | approves schedule longer than 1 month with day of month | 452 | pending | — | — | — |
 | rejects schedule longer than 1 month with day of month | 459 | pending | — | — | — |
 | supports weekday instances | 466 | pending | — | — | — |

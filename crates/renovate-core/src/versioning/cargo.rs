@@ -11,7 +11,10 @@
 //! This module wraps the `semver` crate to provide the decision functions
 //! Renovate uses in its update planner.
 
-use semver::{Version, VersionReq};
+use std::sync::LazyLock;
+
+use regex::Regex;
+use semver::{Comparator, Version, VersionReq};
 
 /// Parse a Cargo version constraint string.
 ///
@@ -157,6 +160,474 @@ pub fn update_summary(constraint: &str, available_versions: &[String]) -> Update
     }
 }
 
+// ──────────────────────── Renovate-compatible versioning API ────────────────
+
+/// Strategy for updating a version range.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RangeStrategy {
+    Bump,
+    Replace,
+}
+
+/// Normalise a Cargo range string for the `semver` crate.
+///
+/// Two normalisations are applied:
+/// 1. Wildcards in non-terminal position are stripped: `4.*.0` → `4.*`.
+/// 2. Space-separated comparators get commas inserted so the `semver` crate
+///    can parse them: `>= 1.0.0 <= 2.0.0` → `>= 1.0.0, <= 2.0.0`.
+fn normalise_cargo_range(s: &str) -> String {
+    static SPACE_SEP: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"([\d.*])\s+(>=|<=|>|<|\^|~|=)").unwrap());
+
+    // 1. Strip non-terminal wildcard components.
+    let normalised: String = s
+        .split(',')
+        .map(|part| {
+            let t = part.trim();
+            let (op, ver, _) = parse_comparator(t);
+            if op.is_empty() {
+                // Bare version/wildcard: trim parts after the first wildcard.
+                let parts: Vec<&str> = ver.split('.').collect();
+                if let Some(wi) = parts.iter().position(|&p| matches!(p, "*" | "x" | "X")) {
+                    return parts[..=wi].join(".");
+                }
+            }
+            t.to_owned()
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    // 2. Insert commas before operators that follow a version character.
+    SPACE_SEP
+        .replace_all(normalised.trim(), "$1, $2")
+        .into_owned()
+}
+
+/// Parse a Cargo range into a `VersionReq`, applying normalisation if needed.
+fn parse_cargo_req(range: &str) -> Option<VersionReq> {
+    let t = range.trim();
+    VersionReq::parse(t)
+        .ok()
+        .or_else(|| VersionReq::parse(&normalise_cargo_range(t)).ok())
+}
+
+/// Split a comparator string into `(operator, version_part, space_after_op)`.
+fn parse_comparator(s: &str) -> (&str, &str, bool) {
+    let s = s.trim();
+    for op in &[">=", "<=", ">", "<", "^", "~", "="] {
+        if let Some(rest) = s.strip_prefix(op) {
+            let has_space = rest.starts_with(' ');
+            return (op, rest.trim_start(), has_space);
+        }
+    }
+    ("", s, false)
+}
+
+struct PartialVer {
+    #[allow(dead_code)]
+    major: u64,
+    minor: Option<u64>,
+    patch: Option<u64>,
+}
+
+fn parse_partial_ver(s: &str) -> Option<PartialVer> {
+    let ver = s.split('-').next().unwrap_or(s);
+    let parts: Vec<&str> = ver.split('.').collect();
+    let major = parts.first()?.parse::<u64>().ok()?;
+    let minor = parts.get(1).and_then(|&p| {
+        if matches!(p, "*" | "x" | "X") {
+            None
+        } else {
+            p.parse::<u64>().ok()
+        }
+    });
+    let patch = parts.get(2).and_then(|&p| {
+        if matches!(p, "*" | "x" | "X") {
+            None
+        } else {
+            p.parse::<u64>().ok()
+        }
+    });
+    Some(PartialVer {
+        major,
+        minor,
+        patch,
+    })
+}
+
+/// Expand a short version like `"1.0"` to a full three-part `"1.0.0"`.
+fn expand_to_full(ver: &str) -> String {
+    let n = ver.matches('.').count();
+    match n {
+        0 => format!("{ver}.0.0"),
+        1 => format!("{ver}.0"),
+        _ => ver.to_owned(),
+    }
+}
+
+/// True when `s` is a pure digits-and-dots string (`/^\d+(\.\d+)*$/`).
+fn is_bare_digits(s: &str) -> bool {
+    !s.is_empty()
+        && s.starts_with(|c: char| c.is_ascii_digit())
+        && s.chars().all(|c| c.is_ascii_digit() || c == '.')
+}
+
+fn is_wildcard_ver(ver: &str) -> bool {
+    ver.contains('*') || ver.contains('x') || ver.contains('X')
+}
+
+/// Update the fixed components of a wildcard pattern with the new version.
+fn update_wildcard(ver: &str, maj: u64, min: u64, _patch: u64) -> String {
+    let parts: Vec<&str> = ver.split('.').collect();
+    let wi = parts.iter().position(|&p| matches!(p, "*" | "x" | "X"));
+    match wi {
+        Some(1) => format!("{maj}.{}", parts[1]),
+        Some(2) => format!("{maj}.{min}.{}", parts[2]),
+        _ => ver.to_owned(),
+    }
+}
+
+/// Port of Renovate's `replaceCaretValue` from `npm/range.ts`.
+fn replace_caret_value(old: &Version, new: &Version) -> String {
+    let old_parts = [old.major, old.minor, old.patch];
+    let new_parts = [new.major, new.minor, new.patch];
+    let mut leading_zero = true;
+    let mut need_replace = false;
+    let mut result = [0u64; 3];
+
+    for i in 0..3 {
+        let (ov, nv) = (old_parts[i], new_parts[i]);
+        let leading_digit = if ov != 0 || nv != 0 {
+            std::mem::take(&mut leading_zero)
+        } else {
+            false
+        };
+        if leading_digit && nv > ov {
+            need_replace = true;
+        }
+        if !need_replace && nv < ov {
+            // New version regressed on this component: use full new version.
+            return format!("{}.{}.{}", new.major, new.minor, new.patch);
+        }
+        result[i] = if leading_digit { nv } else { 0 };
+    }
+    if need_replace {
+        format!("{}.{}.{}", result[0], result[1], result[2])
+    } else {
+        format!("{}.{}.{}", old.major, old.minor, old.patch)
+    }
+}
+
+/// Prefix a version string and truncate to `precision` dot-separated parts.
+fn apply_precision(prefix: &str, ver: &str, precision: usize) -> String {
+    let parts: Vec<&str> = ver.split('.').collect();
+    format!(
+        "{}{}",
+        prefix,
+        parts[..precision.min(parts.len())].join(".")
+    )
+}
+
+/// True if `version` is an exact 3-component semver (including pre-release).
+/// Equivalent to Renovate cargo `isVersion`.
+pub fn is_version(input: &str) -> bool {
+    Version::parse(input.trim()).is_ok()
+}
+
+/// True if `input` is a valid Cargo version requirement or version.
+/// Equivalent to Renovate cargo `isValid`.
+pub fn is_valid(input: &str) -> bool {
+    parse_cargo_req(input).is_some()
+}
+
+/// True if `version` satisfies `range`.
+/// Equivalent to Renovate cargo `matches`.
+pub fn matches_range(version: &str, range: &str) -> bool {
+    let Ok(v) = Version::parse(version.trim()) else {
+        return false;
+    };
+    parse_cargo_req(range).is_some_and(|req| req.matches(&v))
+}
+
+/// True if `version` is strictly below every version that satisfies `range`.
+/// Equivalent to Renovate cargo `isLessThanRange`.
+pub fn is_less_than_range(version: &str, range: &str) -> bool {
+    let Ok(v) = Version::parse(version.trim()) else {
+        return false;
+    };
+    let Some(req) = parse_cargo_req(range) else {
+        return false;
+    };
+    if req.matches(&v) {
+        return false;
+    }
+    // Version is outside range. Determine whether it's below or above.
+    // If any upper-bound comparator has a bound ≤ v, the version is above range.
+    for comp in &req.comparators {
+        let bound = bound_version(comp);
+        let is_above = match comp.op {
+            semver::Op::Less => v >= bound,
+            semver::Op::LessEq => v > bound,
+            _ => false,
+        };
+        if is_above {
+            return false;
+        }
+    }
+    true
+}
+
+fn bound_version(c: &Comparator) -> Version {
+    Version::new(c.major, c.minor.unwrap_or(0), c.patch.unwrap_or(0))
+}
+
+/// Highest version in `versions` satisfying `range`.
+/// Equivalent to Renovate cargo `getSatisfyingVersion`.
+pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
+    let req = parse_cargo_req(range)?;
+    versions
+        .iter()
+        .filter_map(|&v| Version::parse(v).ok().map(|p| (v, p)))
+        .filter(|(_, p)| req.matches(p))
+        .max_by(|(_, a), (_, b)| a.cmp(b))
+        .map(|(v, _)| v)
+}
+
+/// Lowest version in `versions` satisfying `range`.
+/// Equivalent to Renovate cargo `minSatisfyingVersion`.
+pub fn min_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
+    let req = parse_cargo_req(range)?;
+    versions
+        .iter()
+        .filter_map(|&v| Version::parse(v).ok().map(|p| (v, p)))
+        .filter(|(_, p)| req.matches(p))
+        .min_by(|(_, a), (_, b)| a.cmp(b))
+        .map(|(v, _)| v)
+}
+
+/// True if `constraint` is a single pinned version (`=` prefix + exact version).
+/// Equivalent to Renovate cargo `isSingleVersion`.
+pub fn is_single_version(constraint: &str) -> bool {
+    let t = constraint.trim();
+    t.starts_with('=') && Version::parse(t[1..].trim()).is_ok()
+}
+
+/// Return the pinned form of `version` (`=version`).
+/// Equivalent to Renovate cargo `getPinnedValue`.
+pub fn get_pinned_value(version: &str) -> String {
+    format!("={version}")
+}
+
+/// Compute an updated constraint string for a new version.
+/// Equivalent to Renovate cargo `getNewValue`.
+pub fn get_new_value(
+    current_value: &str,
+    strategy: RangeStrategy,
+    current_version: &str,
+    new_version: &str,
+) -> Option<String> {
+    if current_value.is_empty() || current_value == "*" {
+        return Some(current_value.to_owned());
+    }
+    // bump + bare digits: always return the new version directly.
+    if strategy == RangeStrategy::Bump && is_bare_digits(current_value) {
+        return Some(new_version.to_owned());
+    }
+    // Single pinned (= prefix): preserve `= ` spacing only when there are no
+    // leading spaces before the `=` (leading spaces → canonical `=version`).
+    if is_single_version(current_value) {
+        let t = current_value.trim();
+        let has_leading_space = current_value.starts_with(|c: char| c.is_whitespace());
+        return Some(if !has_leading_space && t.starts_with("= ") {
+            format!("= {new_version}")
+        } else {
+            format!("={new_version}")
+        });
+    }
+    // replace + already matches: keep current constraint.
+    if strategy == RangeStrategy::Replace && matches_range(new_version, current_value) {
+        return Some(current_value.to_owned());
+    }
+
+    let components: Vec<&str> = current_value.split(',').map(str::trim).collect();
+    if components.len() == 1 {
+        get_new_single(current_value.trim(), strategy, current_version, new_version)
+    } else {
+        let new_ver = Version::parse(new_version).ok()?;
+        let parts: Vec<String> = components
+            .iter()
+            .filter_map(|comp| {
+                get_new_multi_component(comp, strategy, current_version, new_version, &new_ver)
+            })
+            .filter(|s| !s.is_empty())
+            .collect();
+        if parts.is_empty() {
+            None
+        } else {
+            Some(parts.join(", "))
+        }
+    }
+}
+
+fn get_new_multi_component(
+    comp: &str,
+    _strategy: RangeStrategy,
+    current_version: &str,
+    new_version: &str,
+    new_ver: &Version,
+) -> Option<String> {
+    // Try bump first; if new_version satisfies the bumped constraint, use it.
+    // Otherwise fall back to replace — mirrors the npm multi-range bump logic.
+    let bumped = get_new_single(comp, RangeStrategy::Bump, current_version, new_version)?;
+    if parse_cargo_req(&bumped).is_some_and(|req| req.matches(new_ver)) {
+        return Some(bumped);
+    }
+    get_new_single(comp, RangeStrategy::Replace, current_version, new_version)
+}
+
+fn get_new_single(
+    comp: &str,
+    strategy: RangeStrategy,
+    _current_version: &str,
+    new_version: &str,
+) -> Option<String> {
+    let (op, ver, has_op_space) = parse_comparator(comp);
+    let new_ver = Version::parse(new_version).ok()?;
+    let (nmaj, nmin, npatch) = (new_ver.major, new_ver.minor, new_ver.patch);
+
+    // Pre-release suffix: only the first dot-separated identifier (e.g. "rc" from "rc.2").
+    let pre_suffix = if new_ver.pre.is_empty() {
+        String::new()
+    } else {
+        let first = new_ver.pre.as_str().split('.').next().unwrap_or("");
+        format!("-{first}")
+    };
+
+    match strategy {
+        RangeStrategy::Bump => match op {
+            "^" => Some(format!("^{new_version}")),
+            "~" => Some(format!("~{new_version}")),
+            "=" => Some(format!("={new_version}")),
+            ">=" => Some(if has_op_space {
+                format!(">= {new_version}")
+            } else {
+                format!(">={new_version}")
+            }),
+            "<" | "<=" => Some(comp.to_owned()),
+            "" => {
+                if is_wildcard_ver(ver) {
+                    Some(update_wildcard(ver, nmaj, nmin, npatch))
+                } else {
+                    Some(new_version.to_owned())
+                }
+            }
+            _ => Some(comp.to_owned()),
+        },
+
+        RangeStrategy::Replace => match op {
+            "^" => {
+                let old_ver = Version::parse(&expand_to_full(ver)).ok()?;
+                let replaced = replace_caret_value(&old_ver, &new_ver);
+                let precision = ver.split('.').count();
+                Some(apply_precision("^", &replaced, precision))
+            }
+            "~" => {
+                let raw = if pre_suffix.is_empty() {
+                    format!("~{nmaj}.{nmin}.0")
+                } else {
+                    format!("~{nmaj}.{nmin}.{npatch}{pre_suffix}")
+                };
+                let orig_parts = comp.split('.').count();
+                let raw_parts = raw.split('.').count();
+                Some(if raw_parts > orig_parts {
+                    raw.split('.')
+                        .take(orig_parts)
+                        .collect::<Vec<_>>()
+                        .join(".")
+                } else {
+                    raw
+                })
+            }
+            "<=" => {
+                let pv = parse_partial_ver(ver)?;
+                let res = if pv.patch.is_some() || !pre_suffix.is_empty() {
+                    format!("<={new_version}")
+                } else if pv.minor.is_some() {
+                    format!("<={nmaj}.{nmin}")
+                } else {
+                    format!("<={nmaj}")
+                };
+                Some(if comp.contains("<= ") {
+                    res.replace("<=", "<= ")
+                } else {
+                    res
+                })
+            }
+            "<" => {
+                let pv = parse_partial_ver(ver)?;
+                let has_patch = pv.patch.is_some();
+                let has_minor = pv.minor.is_some();
+                let res = if comp.ends_with(".0.0") {
+                    format!("<{}.0.0", nmaj + 1)
+                } else if comp.ends_with(".0") && has_minor {
+                    format!("<{nmaj}.{}{}", nmin + 1, if has_patch { ".0" } else { "" })
+                } else if has_patch {
+                    format!("<{nmaj}.{nmin}.{}", npatch + 1)
+                } else if has_minor {
+                    format!("<{nmaj}.{}", nmin + 1)
+                } else {
+                    format!("<{}", nmaj + 1)
+                };
+                Some(if comp.contains("< ") {
+                    res.replace('<', "< ")
+                } else {
+                    res
+                })
+            }
+            "" => {
+                if is_wildcard_ver(ver) {
+                    Some(update_wildcard(ver, nmaj, nmin, npatch))
+                } else {
+                    let old_ver = Version::parse(&expand_to_full(ver)).ok()?;
+                    let replaced = replace_caret_value(&old_ver, &new_ver);
+                    let precision = ver.split('.').count();
+                    Some(
+                        replaced
+                            .split('.')
+                            .take(precision)
+                            .collect::<Vec<_>>()
+                            .join("."),
+                    )
+                }
+            }
+            _ => Some(comp.to_owned()),
+        },
+    }
+}
+
+/// Determine whether upgrading from `current` to `new` is a breaking change.
+///
+/// Cargo semver breaking-change rules (matches Renovate cargo `isBreaking`):
+/// - Either version is unstable (pre-release) → breaking.
+/// - `0.0.x`: breaking unless the version is identical.
+/// - `0.y.z` (y > 0): breaking if the minor component changes.
+/// - `≥1.0.0`: breaking only if the major component changes.
+pub fn is_breaking(current: &str, new: &str) -> bool {
+    let (Ok(cur), Ok(nw)) = (Version::parse(current), Version::parse(new)) else {
+        return true;
+    };
+    if !cur.pre.is_empty() || !nw.pre.is_empty() {
+        return true;
+    }
+    if cur.major == 0 {
+        if cur.minor == 0 {
+            return current != new;
+        }
+        return cur.minor != nw.minor;
+    }
+    cur.major != nw.major
+}
+
 #[cfg(test)]
 mod update_summary_tests {
     use super::*;
@@ -292,6 +763,364 @@ mod tests {
         assert_eq!(
             check_update("^2.0", &avail),
             UpdateDecision::NoCompatibleVersions
+        );
+    }
+}
+
+// ─────────────────── Tests ported from the Renovate TypeScript spec ──────────
+// Reference: lib/modules/versioning/cargo/index.spec.ts
+
+#[cfg(test)]
+mod renovate_compat_tests {
+    use super::*;
+
+    // Ported: "matches("$version", "$range") === "$expected"" — cargo/index.spec.ts line 4
+    #[test]
+    fn matches_cases() {
+        let cases: &[(&str, &str, bool)] = &[
+            ("4.2.0", "4.2, >= 3.0, < 5.0.0", true),
+            ("4.2.0", "2.0, >= 3.0, < 5.0.0", false),
+            ("4.2.0", "4.2.0, < 4.2.4", true),
+            ("4.2.0", "4.1", true),
+            ("4.2.0", "4", true),
+            ("4.2.0", "4.3", false),
+            ("4.2.0", "5", false),
+            ("0.4.2", "0.4", true),
+            ("0.4.2", "0", true),
+            ("0.4.2", "0.3", false),
+            ("0.4.2", "1", false),
+            ("4.2.0", "4.3.0, 3.0.0", false),
+            ("4.2.0", "> 5.0.0, <= 6.0.0", false),
+        ];
+        for &(version, range, expected) in cases {
+            assert_eq!(
+                matches_range(version, range),
+                expected,
+                "matches({version:?}, {range:?})"
+            );
+        }
+    }
+
+    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 27
+    #[test]
+    fn get_satisfying_version_cases() {
+        let v1: Vec<&str> = vec!["4.2.1", "0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"];
+        assert_eq!(get_satisfying_version(&v1, "4.*.0, < 4.2.5"), Some("4.2.1"));
+        let v2: Vec<&str> = vec!["0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0", "5.0.3"];
+        assert_eq!(get_satisfying_version(&v2, "5.0, > 5.0.0"), Some("5.0.3"));
+    }
+
+    // Ported: "isValid("$version") === $expected" — cargo/index.spec.ts line 40
+    #[test]
+    fn is_valid_cases() {
+        assert!(is_valid("1"));
+        assert!(is_valid("1.2"));
+        assert!(is_valid("1.2.3"));
+        assert!(is_valid("^1.2.3"));
+        assert!(is_valid("~1.2.3"));
+        assert!(is_valid("1.2.*"));
+        assert!(is_valid("< 3.0, >= 1.0.0 <= 2.0.0"));
+        assert!(is_valid("< 3.0, >= 1.0.0 <= 2.0.0, = 5.1.2"));
+    }
+
+    // Ported: "isVersion("$version") === $expected" — cargo/index.spec.ts line 53
+    #[test]
+    fn is_version_cases() {
+        assert!(!is_version("1"));
+        assert!(!is_version("1.2"));
+        assert!(is_version("1.2.3"));
+    }
+
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — cargo/index.spec.ts line 61
+    #[test]
+    fn is_less_than_range_cases() {
+        assert!(is_less_than_range("0.9.0", ">= 1.0.0 <= 2.0.0"));
+        assert!(!is_less_than_range("1.9.0", ">= 1.0.0 <= 2.0.0"));
+    }
+
+    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 74
+    #[test]
+    fn min_satisfying_version_cases() {
+        let v1: Vec<&str> = vec!["0.4.0", "0.5.0", "4.2.0", "4.3.0", "5.0.0"];
+        assert_eq!(min_satisfying_version(&v1, "4.*, > 4.2"), Some("4.3.0"));
+
+        let v2: Vec<&str> = vec!["0.4.0", "0.5.0", "4.2.0", "5.0.0"];
+        assert_eq!(min_satisfying_version(&v2, "4.0.0"), Some("4.2.0"));
+        assert_eq!(min_satisfying_version(&v2, "4.0.0, = 0.5.0"), None);
+        assert_eq!(
+            min_satisfying_version(&v2, "4.0.0, > 4.1.0, <= 4.3.5"),
+            Some("4.2.0")
+        );
+        assert_eq!(min_satisfying_version(&v2, "6.2.0, 3.*"), None);
+    }
+
+    // Ported: "isSingleVersion("$version") === $expected" — cargo/index.spec.ts line 92
+    #[test]
+    fn is_single_version_cases() {
+        assert!(!is_single_version("1.2.3"));
+        assert!(!is_single_version("1.2.3-alpha.1"));
+        assert!(is_single_version("=1.2.3"));
+        assert!(is_single_version("= 1.2.3"));
+        assert!(is_single_version("  = 1.2.3"));
+        assert!(!is_single_version("1"));
+        assert!(!is_single_version("1.2"));
+        assert!(!is_single_version("*"));
+        assert!(!is_single_version("1.*"));
+        assert!(!is_single_version("1.2.*"));
+    }
+
+    // Ported: "returns a pinned value" — cargo/index.spec.ts line 107
+    #[test]
+    fn get_pinned_value_case() {
+        assert_eq!(get_pinned_value("1.2.3"), "=1.2.3");
+    }
+
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 111
+    #[test]
+    fn get_new_value_cases() {
+        let cases: &[(&str, RangeStrategy, &str, &str, Option<&str>)] = &[
+            (
+                "~0.7",
+                RangeStrategy::Replace,
+                "0.7.3",
+                "0.8.5",
+                Some("~0.8"),
+            ),
+            ("*", RangeStrategy::Bump, "1.0.0", "1.1.0", Some("*")),
+            (
+                "=1.0.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.1.0",
+                Some("=1.1.0"),
+            ),
+            (
+                "   =1.0.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.1.0",
+                Some("=1.1.0"),
+            ),
+            (
+                "= 1.0.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.1.0",
+                Some("= 1.1.0"),
+            ),
+            (
+                "  = 1.0.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.1.0",
+                Some("=1.1.0"),
+            ),
+            (
+                "  =   1.0.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.1.0",
+                Some("=1.1.0"),
+            ),
+            (
+                "=    1.0.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.1.0",
+                Some("= 1.1.0"),
+            ),
+            (
+                "1.0.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.1.0",
+                Some("1.1.0"),
+            ),
+            (
+                "^1.0",
+                RangeStrategy::Bump,
+                "1.0.0",
+                "1.0.7",
+                Some("^1.0.7"),
+            ),
+            (
+                "^1.0.0",
+                RangeStrategy::Replace,
+                "1.0.0",
+                "2.0.7",
+                Some("^2.0.0"),
+            ),
+            (
+                "1.0.0",
+                RangeStrategy::Replace,
+                "1.0.0",
+                "2.0.7",
+                Some("2.0.0"),
+            ),
+            ("^1", RangeStrategy::Bump, "1.0.0", "2.1.7", Some("^2.1.7")),
+            ("~1", RangeStrategy::Bump, "1.0.0", "1.1.7", Some("~1.1.7")),
+            ("5", RangeStrategy::Bump, "5.0.0", "5.1.7", Some("5.1.7")),
+            ("5", RangeStrategy::Bump, "5.0.0", "6.1.7", Some("6.1.7")),
+            ("5.0", RangeStrategy::Bump, "5.0.0", "5.0.7", Some("5.0.7")),
+            ("5.0", RangeStrategy::Bump, "5.0.0", "5.1.7", Some("5.1.7")),
+            ("5.0", RangeStrategy::Bump, "5.0.0", "6.1.7", Some("6.1.7")),
+            ("0.5", RangeStrategy::Bump, "0.5.0", "0.5.1", Some("0.5.1")),
+            ("0.5", RangeStrategy::Bump, "0.5.0", "0.6.1", Some("0.6.1")),
+            ("1.2", RangeStrategy::Replace, "1.2.3", "1.3.0", Some("1.2")),
+            ("5.0", RangeStrategy::Replace, "5.0.0", "5.1.7", Some("5.0")),
+            ("5.0", RangeStrategy::Replace, "5.0.0", "6.1.7", Some("6.0")),
+            ("0.5", RangeStrategy::Replace, "0.5.0", "0.6.1", Some("0.6")),
+            (
+                "=1.0.0",
+                RangeStrategy::Replace,
+                "1.0.0",
+                "1.1.0",
+                Some("=1.1.0"),
+            ),
+            (
+                "1.0.*",
+                RangeStrategy::Replace,
+                "1.0.0",
+                "1.1.0",
+                Some("1.1.*"),
+            ),
+            ("1.*", RangeStrategy::Replace, "1.0.0", "2.1.0", Some("2.*")),
+            (
+                "~0.6.1",
+                RangeStrategy::Replace,
+                "0.6.8",
+                "0.7.0-rc.2",
+                Some("~0.7.0-rc"),
+            ),
+            (
+                "<1.3.4",
+                RangeStrategy::Replace,
+                "1.2.3",
+                "1.5.0",
+                Some("<1.5.1"),
+            ),
+            (
+                "< 1.3.4",
+                RangeStrategy::Replace,
+                "1.2.3",
+                "1.5.0",
+                Some("< 1.5.1"),
+            ),
+            (
+                "<   1.3.4",
+                RangeStrategy::Replace,
+                "1.2.3",
+                "1.5.0",
+                Some("< 1.5.1"),
+            ),
+            (
+                "<=1.3.4",
+                RangeStrategy::Replace,
+                "1.2.3",
+                "1.5.0",
+                Some("<=1.5.0"),
+            ),
+            (
+                "<= 1.3.4",
+                RangeStrategy::Replace,
+                "1.2.3",
+                "1.5.0",
+                Some("<= 1.5.0"),
+            ),
+            (
+                "<=   1.3.4",
+                RangeStrategy::Replace,
+                "1.2.3",
+                "1.5.0",
+                Some("<= 1.5.0"),
+            ),
+            (
+                ">= 0.1.21, < 0.2.0",
+                RangeStrategy::Bump,
+                "0.1.21",
+                "0.1.24",
+                Some(">= 0.1.24, < 0.2.0"),
+            ),
+            (
+                ">= 0.1.21, <= 0.2.0",
+                RangeStrategy::Bump,
+                "0.1.21",
+                "0.1.24",
+                Some(">= 0.1.24, <= 0.2.0"),
+            ),
+            (
+                ">= 0.0.1, <= 0.1",
+                RangeStrategy::Bump,
+                "0.0.1",
+                "0.0.2",
+                Some(">= 0.0.2, <= 0.1"),
+            ),
+            (
+                ">= 1.2.3, <= 1",
+                RangeStrategy::Bump,
+                "1.2.3",
+                "1.2.4",
+                Some(">= 1.2.4, <= 1"),
+            ),
+            (
+                ">= 1.2.3, <= 1.0",
+                RangeStrategy::Bump,
+                "1.2.3",
+                "1.2.4",
+                Some(">= 1.2.4, <= 1.2"),
+            ),
+            (
+                ">= 0.0.1, < 0.1",
+                RangeStrategy::Bump,
+                "0.1.0",
+                "0.2.1",
+                Some(">= 0.2.1, < 0.3"),
+            ),
+        ];
+        for &(cv, strategy, cur, nv, expected) in cases {
+            assert_eq!(
+                get_new_value(cv, strategy, cur, nv).as_deref(),
+                expected,
+                "getNewValue({cv:?}, {:?}, {cur:?}, {nv:?})",
+                strategy
+            );
+        }
+    }
+
+    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — cargo/index.spec.ts line 176
+    #[test]
+    fn is_breaking_cases() {
+        let cases: &[(&str, &str, bool)] = &[
+            ("0.0.1", "0.0.1", false),
+            ("0.0.1", "0.0.2", true),
+            ("0.0.1", "0.2.0", true),
+            ("0.0.1", "1.0.0", true),
+            ("0.1.0", "0.1.1", false),
+            ("0.1.0", "0.2.0", true),
+            ("1.0.0-alpha.1", "1.0.0", true),
+            ("1.0.0-alpha.1", "1.0.0-alpha.2", true),
+            ("1.0.0", "2.0.0-alpha.1", true),
+            ("1.0.0", "1.0.0", false),
+            ("1.0.0", "2.0.0", true),
+            ("2.0.0", "2.0.1", false),
+            ("2.0.0", "2.1.0", false),
+        ];
+        for &(cur, nv, expected) in cases {
+            assert_eq!(
+                is_breaking(cur, nv),
+                expected,
+                "isBreaking({cur:?}, {nv:?})"
+            );
+        }
+    }
+
+    // null currentValue case from spec
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 113
+    #[test]
+    fn get_new_value_null_returns_none() {
+        assert_eq!(
+            get_new_value("", RangeStrategy::Bump, "1.0.0", "1.1.0"),
+            Some("".to_owned())
         );
     }
 }
