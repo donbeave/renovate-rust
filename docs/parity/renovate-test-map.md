@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2181 / 8606 actionable tests ported (25%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2194 / 8606 actionable tests ported (25%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -11492,22 +11492,22 @@ does not implement Renovate's generated-lockfile reverse resolver.
 ## `lib/modules/versioning/cargo/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/cargo/index.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 10 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
 
 ### `modules/versioning/cargo/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches("$version", "$range") === "$expected" | 4 | not-applicable | — | — | Renovate's full Cargo `VersioningApi` range matcher is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| getSatisfyingVersion($versions, "$range") === "$expected" | 27 | not-applicable | — | — | Renovate's full Cargo satisfying-version helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| isValid("$version") === $expected | 40 | not-applicable | — | — | Renovate's full Cargo validation contract is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| isVersion("$version") === $expected | 53 | not-applicable | — | — | Renovate's full Cargo version classifier is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| isLessThanRange("$version", "$range") === "$expected" | 61 | not-applicable | — | — | Renovate's full Cargo range comparison helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| minSatisfyingVersion($versions, "$range") === "$expected" | 74 | not-applicable | — | — | Renovate's full Cargo satisfying-version helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| isSingleVersion("$version") === $expected | 92 | not-applicable | — | — | Renovate's full Cargo single-version classifier is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| returns a pinned value | 107 | not-applicable | — | — | Renovate's Cargo pinned-value helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 111 | not-applicable | — | — | Renovate's full Cargo update-value helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
-| isBreaking("$currentVersion", "$newVersion") === $expected | 176 | not-applicable | — | — | Renovate's Cargo breaking-change helper is not implemented as a Rust API; Rust currently exposes narrower constraint parsing and update-summary helpers. |
+| matches("$version", "$range") === "$expected" | 4 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::matches_cases | — |
+| getSatisfyingVersion($versions, "$range") === "$expected" | 27 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::get_satisfying_version_cases | — |
+| isValid("$version") === $expected | 40 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::is_valid_cases | — |
+| isVersion("$version") === $expected | 53 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::is_version_cases | — |
+| isLessThanRange("$version", "$range") === "$expected" | 61 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::is_less_than_range_cases | — |
+| minSatisfyingVersion($versions, "$range") === "$expected" | 74 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::min_satisfying_version_cases | — |
+| isSingleVersion("$version") === $expected | 92 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::is_single_version_cases | — |
+| returns a pinned value | 107 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::get_pinned_value_case | — |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 111 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::get_new_value_cases | — |
+| isBreaking("$currentVersion", "$newVersion") === $expected | 176 | ported | crates/renovate-core/src/versioning/cargo.rs | renovate_compat_tests::is_breaking_cases | — |
 
 ---
 
@@ -27473,7 +27473,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 25 | **Actionable:** 68 | **Status:** partial
+**Total tests:** 68 | **Ported:** 28 | **Actionable:** 68 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -27513,7 +27513,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 |---|---|---|---|---|---|
 | returns true if no schedule | 154 | ported | `schedule.rs` | `spec_returns_true_if_no_schedule` | — |
 | returns true if at any time | 159 | ported | `schedule.rs` | `spec_returns_true_for_at_any_time` | — |
-| returns true if at any time array | 165 | pending | — | — | — |
+| returns true if at any time array | 165 | ported | `schedule.rs` | `at_any_time_always_matches` | — |
 | returns true if invalid schedule | 171 | pending | — | — | — |
 | returns true if invalid timezone | 177 | pending | — | — | — |
 | supports before hours true | 184 | ported | `schedule.rs` | `spec_supports_before_hours_true` | — |
@@ -27529,7 +27529,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| approves if the weekday is * | 253 | pending | — | — | — |
+| approves if the weekday is * | 253 | ported | `schedule.rs` | `spec_cron_on_sunday_wildcard_matches` | — |
 | approves if the weekday is 0 | 259 | ported | `schedule.rs` | `spec_cron_on_sunday_weekday_0` | — |
 | rejects if the weekday is 1 | 265 | ported | `schedule.rs` | `spec_cron_on_sunday_rejects_weekday_1` | — |
 
@@ -27559,7 +27559,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | $sched, $tz, $datetime | 319 | pending | — | — | — |
 | reject if day mismatch | 337 | ported | `schedule.rs` | `spec_cron_dom_mismatch_false` | — |
 | reject if month mismatch | 343 | ported | `schedule.rs` | `spec_cron_month_mismatch_false` | — |
-| reject if no schedule available | 349 | pending | — | — | — |
+| reject if no schedule available | 349 | ported | `schedule.rs` | `spec_cron_no_schedule_available_false` | — |
 | supports multiple schedules | 355 | ported | `schedule.rs` | `spec_supports_multiple_schedules` | — |
 | supports day match | 361 | ported | `schedule.rs` | `spec_supports_day_match_friday` | — |
 | supports day mismatch | 367 | ported | `schedule.rs` | `spec_supports_day_mismatch` | — |

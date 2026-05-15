@@ -687,6 +687,7 @@ mod tests {
         assert!(is_within_schedule_at(&[], utc(2024, 4, 15, 10)));
     }
 
+    // Ported: "returns true if at any time array" — workers/repository/update/branch/schedule.spec.ts line 165
     #[test]
     fn at_any_time_always_matches() {
         let sched = vec!["at any time".to_owned()];
@@ -1421,5 +1422,23 @@ mod tests {
         let feb_1_6am = utc(2017, 2, 1, 6);
         let sched = vec!["every 6 months".to_owned()];
         assert!(!is_within_schedule_at(&sched, feb_1_6am));
+    }
+
+    // Ported: "approves if the weekday is *" — workers/repository/update/branch/schedule.spec.ts line 253
+    #[test]
+    fn spec_cron_on_sunday_wildcard_matches() {
+        // "* * * * *" on Sunday (2023-01-08) at 10:50am → true
+        let sunday_10am = utc(2023, 1, 8, 10);
+        let sched = vec!["* * * * *".to_owned()];
+        assert!(is_within_schedule_at(&sched, sunday_10am));
+    }
+
+    // Ported: "reject if no schedule available" — workers/repository/update/branch/schedule.spec.ts line 349
+    #[test]
+    fn spec_cron_no_schedule_available_false() {
+        // "* * * 1 *" (January only) on June 30, 2017 (month=6) → false
+        let friday_10am = utc(2017, 6, 30, 10);
+        let sched = vec!["* * * 1 *".to_owned()];
+        assert!(!is_within_schedule_at(&sched, friday_10am));
     }
 }

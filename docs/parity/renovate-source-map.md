@@ -1083,3 +1083,9 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/util/package-rules/index.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Package rule matching partially ported |
 | `lib/util/package-rules/managers.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |
 | `lib/util/package-rules/dep-names.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |
+
+## Versioning (`lib/modules/versioning/`)
+
+| TypeScript source | Rust file | Status | Notes |
+|---|---|---|---|
+| `lib/modules/versioning/cargo/index.ts` | `crates/renovate-core/src/versioning/cargo.rs` | full | Full VersioningApi: matches, isValid, isVersion, isLessThanRange, getSatisfyingVersion, minSatisfyingVersion, isSingleVersion, getPinnedValue, getNewValue, isBreaking |
