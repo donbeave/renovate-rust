@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2535 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2559 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15573,89 +15573,89 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/homebrew/handlers/github.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/github.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 8 | **Status:** ported
 
 ### `parseUrl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for empty string | 8 | pending | — | — | — |
-| returns null for non-string input: %s | 12 | pending | — | — | — |
-| parses valid releases URL | 19 | pending | — | — | — |
-| parses valid archive URL | 33 | pending | — | — | — |
+| returns null for empty string | 8 | ported | `homebrew.rs` | `github_parse_url_empty_string_returns_none` | — |
+| returns null for non-string input: %s | 12 | not-applicable | — | — | TypeScript null/undefined has no Rust equivalent |
+| parses valid releases URL | 19 | ported | `homebrew.rs` | `github_parse_url_releases` | — |
+| parses valid archive URL | 33 | ported | `homebrew.rs` | `github_parse_url_archive` | — |
 
 ### `buildArchiveUrls`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| uses original version when semver.coerce fails | 49 | pending | — | — | — |
-| uses coerced version for filename when semver succeeds | 66 | pending | — | — | — |
+| uses original version when semver.coerce fails | 49 | ported | `homebrew.rs` | `github_build_archive_urls_non_semver` | — |
+| uses coerced version for filename when semver succeeds | 66 | ported | `homebrew.rs` | `github_build_archive_urls_semver_coerce` | — |
 
 ### `createDependency`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| creates dependency with github-releases datasource for releases URL | 85 | pending | — | — | — |
-| creates dependency with github-tags datasource for archive URL | 107 | pending | — | — | — |
+| creates dependency with github-releases datasource for releases URL | 85 | ported | `homebrew.rs` | `github_create_dependency_releases` | — |
+| creates dependency with github-tags datasource for archive URL | 107 | ported | `homebrew.rs` | `github_create_dependency_archive` | — |
 
 ---
 
 ## `lib/modules/manager/homebrew/handlers/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/index.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `findHandlerByType`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz | 5 | pending | — | — | — |
-| returns github handler for github type | 9 | pending | — | — | — |
+| returns null for handler type "%s" (unknown, "") | 5 | ported | `homebrew.rs` | `find_handler_by_type_unknown_returns_none`, `find_handler_by_type_empty_returns_none` | — |
+| returns github handler for github type | 9 | ported | `homebrew.rs` | `find_handler_by_type_github` | — |
 
 ### `findHandler`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for null URL | 16 | pending | — | — | — |
-| returns null for unsupported URL | 20 | pending | — | — | — |
-| returns handler and parsed result for GitHub URL | 24 | pending | — | — | — |
+| returns null for null URL | 16 | ported | `homebrew.rs` | `find_handler_none_url_returns_none` | — |
+| returns null for unsupported URL | 20 | ported | `homebrew.rs` | `find_handler_unsupported_url_returns_none` | — |
+| returns handler and parsed result for GitHub URL | 24 | ported | `homebrew.rs` | `find_handler_github_url` | — |
 
 ---
 
 ## `lib/modules/manager/homebrew/handlers/npm.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/homebrew/handlers/npm.spec.ts
-**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
+**Total tests:** 15 | **Ported:** 13 | **Actionable:** 15 | **Status:** ported
 
 ### `parseUrl`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for empty string | 8 | pending | — | — | — |
-| returns null for non-string input: %s | 12 | pending | — | — | — |
-| returns null for non-npm registry URL | 19 | pending | — | — | — |
-| returns null for custom npm registry | 25 | pending | — | — | — |
-| parses scoped package URL | 33 | pending | — | — | — |
-| parses unscoped package URL | 45 | pending | — | — | — |
-| parses version with prerelease | 57 | pending | — | — | — |
-| parses version with build metadata | 69 | pending | — | — | — |
-| returns null for malformed URL | 81 | pending | — | — | — |
+| returns null for empty string | 8 | ported | `homebrew.rs` | `npm_parse_url_empty_string_returns_none` | — |
+| returns null for non-string input: %s | 12 | not-applicable | — | — | TypeScript null/undefined has no Rust equivalent |
+| returns null for non-npm registry URL | 19 | ported | `homebrew.rs` | `npm_parse_url_non_npm_registry_returns_none` | — |
+| returns null for custom npm registry | 25 | ported | `homebrew.rs` | `npm_parse_url_custom_registry_returns_none` | — |
+| parses scoped package URL | 33 | ported | `homebrew.rs` | `npm_parse_url_scoped_package` | — |
+| parses unscoped package URL | 45 | ported | `homebrew.rs` | `npm_parse_url_unscoped_package` | — |
+| parses version with prerelease | 57 | ported | `homebrew.rs` | `npm_parse_url_prerelease_version` | — |
+| parses version with build metadata | 69 | ported | `homebrew.rs` | `npm_parse_url_build_metadata_version` | — |
+| returns null for malformed URL | 81 | ported | `homebrew.rs` | `npm_parse_url_malformed_returns_none` | — |
 
 ### `createDependency`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| creates dependency with npm datasource for scoped package | 89 | pending | — | — | — |
-| creates dependency with npm datasource for unscoped package | 116 | pending | — | — | — |
+| creates dependency with npm datasource for scoped package | 89 | ported | `homebrew.rs` | `npm_create_dependency_scoped` | — |
+| creates dependency with npm datasource for unscoped package | 116 | ported | `homebrew.rs` | `npm_create_dependency_unscoped` | — |
 
 ### `buildArchiveUrls`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| builds URL for scoped package | 145 | pending | — | — | — |
-| builds URL for unscoped package | 160 | pending | — | — | — |
-| builds URL with prerelease version | 175 | pending | — | — | — |
-| builds URL for deeply scoped package | 190 | pending | — | — | — |
+| builds URL for scoped package | 145 | ported | `homebrew.rs` | `npm_build_archive_urls_scoped` | — |
+| builds URL for unscoped package | 160 | ported | `homebrew.rs` | `npm_build_archive_urls_unscoped` | — |
+| builds URL with prerelease version | 175 | ported | `homebrew.rs` | `npm_build_archive_urls_prerelease` | — |
+| builds URL for deeply scoped package | 190 | ported | `homebrew.rs` | `npm_build_archive_urls_deeply_scoped` | — |
 
 ---
 

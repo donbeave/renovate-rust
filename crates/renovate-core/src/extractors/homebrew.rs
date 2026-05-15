@@ -28,6 +28,7 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
+use semver::Version;
 
 /// Source type for the Homebrew formula.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -196,6 +197,276 @@ pub fn extract(content: &str) -> Option<HomebrewDep> {
         sha256,
         skip_reason: Some(HomebrewSkipReason::UnsupportedUrl),
     })
+}
+
+// ---------------------------------------------------------------------------
+// Internal URL parsing helper
+// ---------------------------------------------------------------------------
+
+fn parse_url_host_and_path(url_str: &str) -> Option<(String, String)> {
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^https?://([^/?#]+)(/[^?#]*)?").unwrap());
+    let cap = RE.captures(url_str)?;
+    let hostname = cap[1].to_owned();
+    let pathname = cap
+        .get(2)
+        .map(|m| m.as_str().to_owned())
+        .unwrap_or_else(|| "/".to_owned());
+    Some((hostname, pathname))
+}
+
+// ---------------------------------------------------------------------------
+// GitHub handler
+// ---------------------------------------------------------------------------
+
+/// Parsed result from a GitHub formula URL.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GitHubParsedResult {
+    pub current_value: String,
+    pub owner_name: String,
+    pub repo_name: String,
+    pub url_type: GitHubUrlType,
+}
+
+/// Manager data for a GitHub-sourced Homebrew dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GitHubManagerData {
+    pub owner_name: String,
+    pub repo_name: String,
+    pub sha256: Option<String>,
+    pub url: Option<String>,
+}
+
+/// Dependency result from [`github_create_dependency`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GitHubDepResult {
+    pub dep_name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub manager_data: GitHubManagerData,
+}
+
+/// Parse a GitHub URL from a Homebrew formula.
+pub fn github_parse_url(url_str: &str) -> Option<GitHubParsedResult> {
+    if url_str.is_empty() {
+        return None;
+    }
+    let (hostname, pathname) = parse_url_host_and_path(url_str)?;
+    if hostname != "github.com" {
+        return None;
+    }
+    let segs: Vec<&str> = pathname.split('/').filter(|s| !s.is_empty()).collect();
+    if segs.len() < 3 {
+        return None;
+    }
+    let owner_name = segs[0].to_owned();
+    let repo_name = segs[1].to_owned();
+
+    let (current_value, url_type) = if segs[2] == "archive" {
+        let raw = if segs.get(3).copied() == Some("refs") {
+            segs.get(5).copied()?
+        } else {
+            segs.get(3).copied()?
+        };
+        let cv = raw.strip_suffix(".tar.gz").unwrap_or(raw).to_owned();
+        (cv, GitHubUrlType::Archive)
+    } else if segs.get(2).copied() == Some("releases")
+        && segs.get(3).copied() == Some("download")
+    {
+        (segs.get(4).copied()?.to_owned(), GitHubUrlType::Release)
+    } else {
+        return None;
+    };
+
+    Some(GitHubParsedResult {
+        current_value,
+        owner_name,
+        repo_name,
+        url_type,
+    })
+}
+
+/// Create a dependency record from a parsed GitHub result.
+pub fn github_create_dependency(
+    parsed: &GitHubParsedResult,
+    sha256: Option<String>,
+    url: String,
+) -> GitHubDepResult {
+    let datasource = match parsed.url_type {
+        GitHubUrlType::Release => "github-releases",
+        GitHubUrlType::Archive => "github-tags",
+    };
+    GitHubDepResult {
+        dep_name: format!("{}/{}", parsed.owner_name, parsed.repo_name),
+        current_value: parsed.current_value.clone(),
+        datasource,
+        manager_data: GitHubManagerData {
+            owner_name: parsed.owner_name.clone(),
+            repo_name: parsed.repo_name.clone(),
+            sha256,
+            url: Some(url),
+        },
+    }
+}
+
+/// Build candidate archive URLs for a new GitHub version.
+pub fn github_build_archive_urls(
+    manager_data: &GitHubManagerData,
+    new_version: &str,
+) -> Vec<String> {
+    let owner = &manager_data.owner_name;
+    let repo = &manager_data.repo_name;
+    let coerced = new_version.strip_prefix('v').unwrap_or(new_version);
+    let ver_for_filename = Version::parse(coerced)
+        .map(|v| v.to_string())
+        .unwrap_or_else(|_| new_version.to_owned());
+    vec![
+        format!("https://github.com/{owner}/{repo}/releases/download/{new_version}/{repo}-{ver_for_filename}.tar.gz"),
+        format!("https://github.com/{owner}/{repo}/archive/refs/tags/{new_version}.tar.gz"),
+    ]
+}
+
+// ---------------------------------------------------------------------------
+// NPM handler
+// ---------------------------------------------------------------------------
+
+/// Parsed result from an NPM registry formula URL.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NpmParsedResult {
+    pub current_value: String,
+    pub package_name: String,
+}
+
+/// Manager data for an NPM-sourced Homebrew dependency.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NpmManagerData {
+    pub package_name: String,
+    pub sha256: Option<String>,
+    pub url: Option<String>,
+}
+
+/// Dependency result from [`npm_create_dependency`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NpmDepResult {
+    pub dep_name: String,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub manager_data: NpmManagerData,
+}
+
+static NPM_PATH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^/(?P<pkg>(?:@[^/]+/)?[^/]+)/-/[^/]+-(?P<ver>[\d.]+(?:-[a-zA-Z0-9.-]*)?)\.tgz$",
+    )
+    .unwrap()
+});
+
+/// Parse an NPM registry URL from a Homebrew formula.
+pub fn npm_parse_url(url_str: &str) -> Option<NpmParsedResult> {
+    if url_str.is_empty() {
+        return None;
+    }
+    let (hostname, pathname) = parse_url_host_and_path(url_str)?;
+    if hostname != "registry.npmjs.org" {
+        return None;
+    }
+    let cap = NPM_PATH_RE.captures(&pathname)?;
+    Some(NpmParsedResult {
+        package_name: cap["pkg"].to_owned(),
+        current_value: cap["ver"].to_owned(),
+    })
+}
+
+/// Create a dependency record from a parsed NPM result.
+pub fn npm_create_dependency(
+    parsed: &NpmParsedResult,
+    sha256: Option<String>,
+    url: String,
+) -> NpmDepResult {
+    NpmDepResult {
+        dep_name: parsed.package_name.clone(),
+        current_value: parsed.current_value.clone(),
+        datasource: "npm",
+        manager_data: NpmManagerData {
+            package_name: parsed.package_name.clone(),
+            sha256,
+            url: Some(url),
+        },
+    }
+}
+
+/// Build the archive URL for a new NPM version.
+pub fn npm_build_archive_urls(manager_data: &NpmManagerData, new_version: &str) -> Vec<String> {
+    let pkg = &manager_data.package_name;
+    let filename = if pkg.contains('/') {
+        pkg.split('/').nth(1).unwrap_or(pkg)
+    } else {
+        pkg
+    };
+    vec![format!(
+        "https://registry.npmjs.org/{pkg}/-/{filename}-{new_version}.tgz"
+    )]
+}
+
+// ---------------------------------------------------------------------------
+// Handler dispatch
+// ---------------------------------------------------------------------------
+
+/// Identifies which handler type was matched.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HomebrewHandlerType {
+    GitHub,
+    Npm,
+}
+
+impl HomebrewHandlerType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::GitHub => "github",
+            Self::Npm => "npm",
+        }
+    }
+}
+
+/// Parsed result from any handler, tagged by type.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HomebrewHandlerParsed {
+    GitHub(GitHubParsedResult),
+    Npm(NpmParsedResult),
+}
+
+/// Result of [`find_handler`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FindHandlerResult {
+    pub handler_type: HomebrewHandlerType,
+    pub parsed: HomebrewHandlerParsed,
+}
+
+/// Find the appropriate handler for a URL (GitHub before NPM).
+pub fn find_handler(url: Option<&str>) -> Option<FindHandlerResult> {
+    let url = url?;
+    if let Some(p) = github_parse_url(url) {
+        return Some(FindHandlerResult {
+            handler_type: HomebrewHandlerType::GitHub,
+            parsed: HomebrewHandlerParsed::GitHub(p),
+        });
+    }
+    if let Some(p) = npm_parse_url(url) {
+        return Some(FindHandlerResult {
+            handler_type: HomebrewHandlerType::Npm,
+            parsed: HomebrewHandlerParsed::Npm(p),
+        });
+    }
+    None
+}
+
+/// Find a handler by its type string (`"github"` or `"npm"`).
+pub fn find_handler_by_type(handler_type: &str) -> Option<HomebrewHandlerType> {
+    match handler_type {
+        "github" => Some(HomebrewHandlerType::GitHub),
+        "npm" => Some(HomebrewHandlerType::Npm),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -439,5 +710,342 @@ end"#;
 end"#;
         let dep = extract(content).unwrap();
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
+    }
+
+    // --- github handler tests ---
+
+    // Ported: "returns null for empty string" — homebrew/handlers/github.spec.ts line 8
+    #[test]
+    fn github_parse_url_empty_string_returns_none() {
+        assert!(github_parse_url("").is_none());
+    }
+
+    // Ported: "parses valid releases URL" — homebrew/handlers/github.spec.ts line 19
+    #[test]
+    fn github_parse_url_releases() {
+        let result = github_parse_url(
+            "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz",
+        )
+        .unwrap();
+        assert_eq!(result.current_value, "v0.16.1");
+        assert_eq!(result.owner_name, "aide");
+        assert_eq!(result.repo_name, "aide");
+        assert_eq!(result.url_type, GitHubUrlType::Release);
+    }
+
+    // Ported: "parses valid archive URL" — homebrew/handlers/github.spec.ts line 33
+    #[test]
+    fn github_parse_url_archive() {
+        let result = github_parse_url(
+            "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz",
+        )
+        .unwrap();
+        assert_eq!(result.current_value, "v0.8.2");
+        assert_eq!(result.owner_name, "bazelbuild");
+        assert_eq!(result.repo_name, "bazel-watcher");
+        assert_eq!(result.url_type, GitHubUrlType::Archive);
+    }
+
+    // Ported: "uses original version when semver.coerce fails" — homebrew/handlers/github.spec.ts line 49
+    #[test]
+    fn github_build_archive_urls_non_semver() {
+        let data = GitHubManagerData {
+            owner_name: "owner".to_owned(),
+            repo_name: "repo".to_owned(),
+            sha256: Some("abc123".to_owned()),
+            url: Some(
+                "https://github.com/owner/repo/archive/refs/tags/not-a-semver.tar.gz".to_owned(),
+            ),
+        };
+        let urls = github_build_archive_urls(&data, "also-not-semver");
+        assert_eq!(
+            urls,
+            vec![
+                "https://github.com/owner/repo/releases/download/also-not-semver/repo-also-not-semver.tar.gz",
+                "https://github.com/owner/repo/archive/refs/tags/also-not-semver.tar.gz",
+            ]
+        );
+    }
+
+    // Ported: "uses coerced version for filename when semver succeeds" — homebrew/handlers/github.spec.ts line 66
+    #[test]
+    fn github_build_archive_urls_semver_coerce() {
+        let data = GitHubManagerData {
+            owner_name: "owner".to_owned(),
+            repo_name: "repo".to_owned(),
+            sha256: Some("abc123".to_owned()),
+            url: Some(
+                "https://github.com/owner/repo/archive/refs/tags/v1.2.3.tar.gz".to_owned(),
+            ),
+        };
+        let urls = github_build_archive_urls(&data, "v1.2.4");
+        assert_eq!(
+            urls,
+            vec![
+                "https://github.com/owner/repo/releases/download/v1.2.4/repo-1.2.4.tar.gz",
+                "https://github.com/owner/repo/archive/refs/tags/v1.2.4.tar.gz",
+            ]
+        );
+    }
+
+    // Ported: "creates dependency with github-releases datasource for releases URL" — homebrew/handlers/github.spec.ts line 85
+    #[test]
+    fn github_create_dependency_releases() {
+        let parsed = GitHubParsedResult {
+            current_value: "v0.16.1".to_owned(),
+            owner_name: "aide".to_owned(),
+            repo_name: "aide".to_owned(),
+            url_type: GitHubUrlType::Release,
+        };
+        let dep = github_create_dependency(
+            &parsed,
+            Some("0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7".to_owned()),
+            "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+                .to_owned(),
+        );
+        assert_eq!(dep.dep_name, "aide/aide");
+        assert_eq!(dep.current_value, "v0.16.1");
+        assert_eq!(dep.datasource, "github-releases");
+    }
+
+    // Ported: "creates dependency with github-tags datasource for archive URL" — homebrew/handlers/github.spec.ts line 107
+    #[test]
+    fn github_create_dependency_archive() {
+        let parsed = GitHubParsedResult {
+            current_value: "v0.8.2".to_owned(),
+            owner_name: "bazelbuild".to_owned(),
+            repo_name: "bazel-watcher".to_owned(),
+            url_type: GitHubUrlType::Archive,
+        };
+        let dep = github_create_dependency(
+            &parsed,
+            Some("26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4".to_owned()),
+            "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
+                .to_owned(),
+        );
+        assert_eq!(dep.dep_name, "bazelbuild/bazel-watcher");
+        assert_eq!(dep.current_value, "v0.8.2");
+        assert_eq!(dep.datasource, "github-tags");
+    }
+
+    // --- npm handler tests ---
+
+    // Ported: "returns null for empty string" — homebrew/handlers/npm.spec.ts line 8
+    #[test]
+    fn npm_parse_url_empty_string_returns_none() {
+        assert!(npm_parse_url("").is_none());
+    }
+
+    // Ported: "returns null for non-npm registry URL" — homebrew/handlers/npm.spec.ts line 19
+    #[test]
+    fn npm_parse_url_non_npm_registry_returns_none() {
+        assert!(npm_parse_url("https://example.com/package/-/package-1.0.0.tgz").is_none());
+    }
+
+    // Ported: "returns null for custom npm registry" — homebrew/handlers/npm.spec.ts line 25
+    #[test]
+    fn npm_parse_url_custom_registry_returns_none() {
+        assert!(
+            npm_parse_url("https://registry.company.com/package/-/package-1.0.0.tgz").is_none()
+        );
+    }
+
+    // Ported: "parses scoped package URL" — homebrew/handlers/npm.spec.ts line 33
+    #[test]
+    fn npm_parse_url_scoped_package() {
+        let result = npm_parse_url(
+            "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz",
+        )
+        .unwrap();
+        assert_eq!(result.current_value, "0.1.0");
+        assert_eq!(result.package_name, "@anthropic-ai/claude-code");
+    }
+
+    // Ported: "parses unscoped package URL" — homebrew/handlers/npm.spec.ts line 45
+    #[test]
+    fn npm_parse_url_unscoped_package() {
+        let result =
+            npm_parse_url("https://registry.npmjs.org/express/-/express-4.18.2.tgz").unwrap();
+        assert_eq!(result.current_value, "4.18.2");
+        assert_eq!(result.package_name, "express");
+    }
+
+    // Ported: "parses version with prerelease" — homebrew/handlers/npm.spec.ts line 57
+    #[test]
+    fn npm_parse_url_prerelease_version() {
+        let result = npm_parse_url(
+            "https://registry.npmjs.org/package/-/package-1.0.0-beta.1.tgz",
+        )
+        .unwrap();
+        assert_eq!(result.current_value, "1.0.0-beta.1");
+        assert_eq!(result.package_name, "package");
+    }
+
+    // Ported: "parses version with build metadata" — homebrew/handlers/npm.spec.ts line 69
+    #[test]
+    fn npm_parse_url_build_metadata_version() {
+        let result = npm_parse_url(
+            "https://registry.npmjs.org/package/-/package-1.0.0-alpha.2.tgz",
+        )
+        .unwrap();
+        assert_eq!(result.current_value, "1.0.0-alpha.2");
+        assert_eq!(result.package_name, "package");
+    }
+
+    // Ported: "returns null for malformed URL" — homebrew/handlers/npm.spec.ts line 81
+    #[test]
+    fn npm_parse_url_malformed_returns_none() {
+        assert!(npm_parse_url("https://registry.npmjs.org/invalid-url").is_none());
+    }
+
+    // Ported: "creates dependency with npm datasource for scoped package" — homebrew/handlers/npm.spec.ts line 89
+    #[test]
+    fn npm_create_dependency_scoped() {
+        let parsed = NpmParsedResult {
+            current_value: "0.1.0".to_owned(),
+            package_name: "@anthropic-ai/claude-code".to_owned(),
+        };
+        let dep = npm_create_dependency(
+            &parsed,
+            Some("345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601".to_owned()),
+            "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz"
+                .to_owned(),
+        );
+        assert_eq!(dep.dep_name, "@anthropic-ai/claude-code");
+        assert_eq!(dep.current_value, "0.1.0");
+        assert_eq!(dep.datasource, "npm");
+        assert_eq!(dep.manager_data.package_name, "@anthropic-ai/claude-code");
+        assert_eq!(
+            dep.manager_data.sha256.as_deref(),
+            Some("345eae3fe4c682df3d8876141f32035bb2898263ce5a406e76e1d74ccb13f601")
+        );
+    }
+
+    // Ported: "creates dependency with npm datasource for unscoped package" — homebrew/handlers/npm.spec.ts line 116
+    #[test]
+    fn npm_create_dependency_unscoped() {
+        let parsed = NpmParsedResult {
+            current_value: "4.18.2".to_owned(),
+            package_name: "express".to_owned(),
+        };
+        let dep = npm_create_dependency(
+            &parsed,
+            Some("abcd1234567890abcd1234567890abcd1234567890abcd1234567890abcd1234".to_owned()),
+            "https://registry.npmjs.org/express/-/express-4.18.2.tgz".to_owned(),
+        );
+        assert_eq!(dep.dep_name, "express");
+        assert_eq!(dep.current_value, "4.18.2");
+        assert_eq!(dep.datasource, "npm");
+    }
+
+    // Ported: "builds URL for scoped package" — homebrew/handlers/npm.spec.ts line 145
+    #[test]
+    fn npm_build_archive_urls_scoped() {
+        let data = NpmManagerData {
+            package_name: "@anthropic-ai/claude-code".to_owned(),
+            sha256: Some("abc123".to_owned()),
+            url: Some("https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz".to_owned()),
+        };
+        let urls = npm_build_archive_urls(&data, "0.2.0");
+        assert_eq!(
+            urls,
+            vec!["https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.2.0.tgz"]
+        );
+    }
+
+    // Ported: "builds URL for unscoped package" — homebrew/handlers/npm.spec.ts line 160
+    #[test]
+    fn npm_build_archive_urls_unscoped() {
+        let data = NpmManagerData {
+            package_name: "express".to_owned(),
+            sha256: Some("abc123".to_owned()),
+            url: Some("https://registry.npmjs.org/express/-/express-4.18.2.tgz".to_owned()),
+        };
+        let urls = npm_build_archive_urls(&data, "4.18.3");
+        assert_eq!(
+            urls,
+            vec!["https://registry.npmjs.org/express/-/express-4.18.3.tgz"]
+        );
+    }
+
+    // Ported: "builds URL with prerelease version" — homebrew/handlers/npm.spec.ts line 175
+    #[test]
+    fn npm_build_archive_urls_prerelease() {
+        let data = NpmManagerData {
+            package_name: "package".to_owned(),
+            sha256: Some("abc123".to_owned()),
+            url: Some("https://registry.npmjs.org/package/-/package-1.0.0.tgz".to_owned()),
+        };
+        let urls = npm_build_archive_urls(&data, "2.0.0-beta.1");
+        assert_eq!(
+            urls,
+            vec!["https://registry.npmjs.org/package/-/package-2.0.0-beta.1.tgz"]
+        );
+    }
+
+    // Ported: "builds URL for deeply scoped package" — homebrew/handlers/npm.spec.ts line 190
+    #[test]
+    fn npm_build_archive_urls_deeply_scoped() {
+        let data = NpmManagerData {
+            package_name: "@scope/package-name".to_owned(),
+            sha256: Some("abc123".to_owned()),
+            url: Some("https://registry.npmjs.org/@scope/package-name/-/package-name-1.0.0.tgz".to_owned()),
+        };
+        let urls = npm_build_archive_urls(&data, "1.1.0");
+        assert_eq!(
+            urls,
+            vec!["https://registry.npmjs.org/@scope/package-name/-/package-name-1.1.0.tgz"]
+        );
+    }
+
+    // --- handler dispatch tests ---
+
+    // Ported: "returns null for handler type \"unknown\"" — homebrew/handlers/index.spec.ts line 5
+    #[test]
+    fn find_handler_by_type_unknown_returns_none() {
+        assert!(find_handler_by_type("unknown").is_none());
+    }
+
+    // Ported: "returns null for handler type \"\"" — homebrew/handlers/index.spec.ts line 5
+    #[test]
+    fn find_handler_by_type_empty_returns_none() {
+        assert!(find_handler_by_type("").is_none());
+    }
+
+    // Ported: "returns github handler for github type" — homebrew/handlers/index.spec.ts line 9
+    #[test]
+    fn find_handler_by_type_github() {
+        let h = find_handler_by_type("github").unwrap();
+        assert_eq!(h, HomebrewHandlerType::GitHub);
+        assert_eq!(h.as_str(), "github");
+    }
+
+    // Ported: "returns null for null URL" — homebrew/handlers/index.spec.ts line 16
+    #[test]
+    fn find_handler_none_url_returns_none() {
+        assert!(find_handler(None).is_none());
+    }
+
+    // Ported: "returns null for unsupported URL" — homebrew/handlers/index.spec.ts line 20
+    #[test]
+    fn find_handler_unsupported_url_returns_none() {
+        assert!(find_handler(Some("https://example.com/file.tar.gz")).is_none());
+    }
+
+    // Ported: "returns handler and parsed result for GitHub URL" — homebrew/handlers/index.spec.ts line 24
+    #[test]
+    fn find_handler_github_url() {
+        let result = find_handler(Some(
+            "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz",
+        ))
+        .unwrap();
+        assert_eq!(result.handler_type, HomebrewHandlerType::GitHub);
+        let HomebrewHandlerParsed::GitHub(parsed) = result.parsed else {
+            panic!("expected GitHub parsed result");
+        };
+        assert_eq!(parsed.current_value, "v0.16.1");
+        assert_eq!(parsed.owner_name, "aide");
+        assert_eq!(parsed.repo_name, "aide");
+        assert_eq!(parsed.url_type, GitHubUrlType::Release);
     }
 }
