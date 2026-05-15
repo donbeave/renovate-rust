@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2497 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2503 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15328,43 +15328,43 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/haskell-cabal/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/haskell-cabal/extract.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `countPackageNameLength`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches $input | 20 | pending | — | — | — |
+| matches $input | 20 | ported | `cabal.rs` | `cabal_count_package_name_length` | it.each; all 17 cases covered |
 
 ### `countPrecedingIndentation()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| countPrecedingIndentation($content, $index) | 45 | pending | — | — | — |
+| countPrecedingIndentation($content, $index) | 45 | ported | `cabal.rs` | `cabal_count_preceding_indentation` | it.each; 6 cases covered |
 
 ### `findExtents()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| findExtents($indent, $content) | 62 | pending | — | — | — |
+| findExtents($indent, $content) | 62 | ported | `cabal.rs` | `cabal_find_extents` | it.each; 5 cases covered |
 
 ### `splitSingleDependency()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| splitSingleDependency($depLine) | 75 | pending | — | — | — |
+| splitSingleDependency($depLine) | 75 | ported | `cabal.rs` | `cabal_split_single_dependency` | it.each + 1 inline case |
 
 ### `extractNamesAndRanges()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| trims replaceString | 95 | pending | — | — | — |
+| trims replaceString | 95 | ported | `cabal.rs` | `cabal_extract_names_and_ranges` | — |
 
 ### `findDepends()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| strips comments | 105 | pending | — | — | — |
+| strips comments | 105 | ported | `cabal.rs` | `cabal_find_depends_strips_comments` | — |
 
 ---
 
