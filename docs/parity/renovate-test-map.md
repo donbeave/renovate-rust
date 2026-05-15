@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2571 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2578 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17197,8 +17197,8 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts Python version from valid header | 217 | pending | — | — | — |
-| returns undefined if version cannot be extracted | 226 | pending | — | — | — |
+| extracts Python version from valid header | 217 | ported | `pip_compile.rs` | `extract_python_version_valid_header` | — |
+| returns undefined if version cannot be extracted | 226 | ported | `pip_compile.rs` | `extract_python_version_empty_content` | — |
 
 ### `getRegistryCredVarsFromPackageFiles()`
 
@@ -17215,11 +17215,11 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches pip_setup setup.py | 370 | pending | — | — | — |
-| matches setup-cfg setup.cfg | 374 | pending | — | — | — |
-| matches pep621 pyproject.toml | 378 | pending | — | — | — |
-| matches pip_requirements any .in file | 382 | pending | — | — | — |
-| matches pip_requirements any .txt file | 387 | pending | — | — | — |
+| matches pip_setup setup.py | 370 | ported | `pip_compile.rs` | `match_manager_setup_py` | — |
+| matches setup-cfg setup.cfg | 374 | ported | `pip_compile.rs` | `match_manager_setup_cfg` | — |
+| matches pep621 pyproject.toml | 378 | ported | `pip_compile.rs` | `match_manager_pyproject_toml` | — |
+| matches pip_requirements any .in file | 382 | ported | `pip_compile.rs` | `match_manager_in_file` | — |
+| matches pip_requirements any .txt file | 387 | ported | `pip_compile.rs` | `match_manager_txt_file` | — |
 
 ---
 
