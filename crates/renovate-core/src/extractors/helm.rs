@@ -309,6 +309,46 @@ fn classify_repository(repo: &str) -> (String, Option<HelmSkipReason>) {
     (String::new(), Some(HelmSkipReason::UnresolvableAlias))
 }
 
+// ── Helm v3 utils (mirrors lib/modules/manager/helmv3/utils.ts + oci.ts) ─────
+
+/// Check if `repository` is an alias (`alias:name` or `@name`).
+///
+/// Mirrors `lib/modules/manager/helmv3/utils.ts` `isAlias()`.
+pub fn is_alias(repository: Option<&str>) -> bool {
+    match repository {
+        Some(r) if !r.is_empty() => r.starts_with('@') || r.starts_with("alias:"),
+        _ => false,
+    }
+}
+
+/// Resolve an alias (`alias:name` or `@name`) from `registry_aliases`.
+///
+/// Returns the original value if not an alias, or `None` if the alias is
+/// undefined in the map. `None` input → `None` output.
+///
+/// Mirrors `lib/modules/manager/helmv3/utils.ts` `resolveAlias()`.
+pub fn resolve_alias(
+    repository: Option<&str>,
+    registry_aliases: &std::collections::HashMap<String, String>,
+) -> Option<String> {
+    let repo = repository?;
+    if !is_alias(Some(repo)) {
+        return Some(repo.to_owned());
+    }
+    let key = repo
+        .strip_prefix('@')
+        .or_else(|| repo.strip_prefix("alias:"))
+        .unwrap_or(repo);
+    registry_aliases.get(key).cloned()
+}
+
+/// Check if `repository` references an OCI registry (`oci://...`).
+///
+/// Mirrors `lib/modules/manager/helmv3/oci.ts` `isOCIRegistry()`.
+pub fn is_oci_registry(repository: Option<&str>) -> bool {
+    repository.map(|r| r.starts_with("oci://")).unwrap_or(false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -622,5 +662,91 @@ dependencies:
     fn helm_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(CHART_YAML, "0.0.2", "not_valid");
         assert_eq!(result, CHART_YAML);
+    }
+
+    // ── helmv3/utils.spec.ts tests ──────────────────────────────────────────
+
+    fn aliases() -> std::collections::HashMap<String, String> {
+        let mut m = std::collections::HashMap::new();
+        m.insert("testRepo".into(), "https://charts.helm.sh/stable".into());
+        m.insert("artifactory".into(), "oci://artifactory.example.com".into());
+        m
+    }
+
+    // Ported: "return alias with \"alias:\"" — modules/manager/helmv3/utils.spec.ts line 5
+    #[test]
+    fn helm_resolve_alias_with_alias_prefix() {
+        let result = resolve_alias(Some("alias:testRepo"), &aliases());
+        assert_eq!(result.as_deref(), Some("https://charts.helm.sh/stable"));
+    }
+
+    // Ported: "return alias with \"@\"" — modules/manager/helmv3/utils.spec.ts line 13
+    #[test]
+    fn helm_resolve_alias_with_at_prefix() {
+        let result = resolve_alias(Some("@testRepo"), &aliases());
+        assert_eq!(result.as_deref(), Some("https://charts.helm.sh/stable"));
+    }
+
+    // Ported: "return null if alias repo is not defined" — modules/manager/helmv3/utils.spec.ts line 21
+    #[test]
+    fn helm_resolve_alias_undefined_returns_none() {
+        let result = resolve_alias(Some("alias:testRepo"), &{
+            let mut m = std::collections::HashMap::new();
+            m.insert("anotherRepository".into(), "https://charts.helm.sh/stable".into());
+            m
+        });
+        assert!(result.is_none());
+    }
+
+    // Ported: "return resolved repository on OCI registries" — modules/manager/helmv3/utils.spec.ts line 29
+    #[test]
+    fn helm_resolve_alias_oci_registry() {
+        let result = resolve_alias(Some("alias:artifactory"), &aliases());
+        assert_eq!(result.as_deref(), Some("oci://artifactory.example.com"));
+    }
+
+    // Ported: "return repository parameter if it is not an alias" — modules/manager/helmv3/utils.spec.ts line 37
+    #[test]
+    fn helm_resolve_alias_non_alias_passthrough() {
+        let url = "https://registry.example.com";
+        let result = resolve_alias(Some(url), &aliases());
+        assert_eq!(result.as_deref(), Some(url));
+    }
+
+    // Ported: "return repository parameter if repository is null" — modules/manager/helmv3/utils.spec.ts line 47
+    #[test]
+    fn helm_resolve_alias_null_returns_none() {
+        let result = resolve_alias(None, &aliases());
+        assert!(result.is_none());
+    }
+
+    // Ported: "return repository parameter if repository is undefined" — modules/manager/helmv3/utils.spec.ts line 54
+    #[test]
+    fn helm_resolve_alias_undefined_input_returns_none() {
+        assert!(resolve_alias(None, &std::collections::HashMap::new()).is_none());
+    }
+
+    // Ported: "return false if repository is null" (isAlias) — modules/manager/helmv3/utils.spec.ts line 63
+    #[test]
+    fn helm_is_alias_null_returns_false() {
+        assert!(!is_alias(None));
+    }
+
+    // Ported: "return false if repository is undefined" (isAlias) — modules/manager/helmv3/utils.spec.ts line 69
+    #[test]
+    fn helm_is_alias_undefined_returns_false() {
+        assert!(!is_alias(None));
+    }
+
+    // Ported: "return false if repository is null" (isOCIRegistry) — modules/manager/helmv3/utils.spec.ts line 76
+    #[test]
+    fn helm_is_oci_registry_null_returns_false() {
+        assert!(!is_oci_registry(None));
+    }
+
+    // Ported: "return false if repository is undefined" (isOCIRegistry) — modules/manager/helmv3/utils.spec.ts line 82
+    #[test]
+    fn helm_is_oci_registry_undefined_returns_false() {
+        assert!(!is_oci_registry(None));
     }
 }

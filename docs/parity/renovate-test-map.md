@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2524 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2535 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15487,33 +15487,33 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/helmv3/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmv3/utils.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+**Total tests:** 11 | **Ported:** 11 | **Actionable:** 11 | **Status:** ported
 
 ### `.resolveAlias()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return alias with "alias:" | 6 | pending | — | — | — |
-| return alias with "@" | 14 | pending | — | — | — |
-| return null if alias repo is not defined | 22 | pending | — | — | — |
-| return resolved repository on OCI registries | 29 | pending | — | — | — |
-| return repository parameter if it is not an alias | 36 | pending | — | — | — |
-| return repository parameter if repository is null | 44 | pending | — | — | — |
-| return repository parameter if repository is undefined | 52 | pending | — | — | — |
+| return alias with "alias:" | 6 | ported | `helm.rs` | `helm_resolve_alias_with_alias_prefix` | — |
+| return alias with "@" | 14 | ported | `helm.rs` | `helm_resolve_alias_with_at_prefix` | — |
+| return null if alias repo is not defined | 22 | ported | `helm.rs` | `helm_resolve_alias_undefined_returns_none` | — |
+| return resolved repository on OCI registries | 29 | ported | `helm.rs` | `helm_resolve_alias_oci_registry` | — |
+| return repository parameter if it is not an alias | 36 | ported | `helm.rs` | `helm_resolve_alias_non_alias_passthrough` | — |
+| return repository parameter if repository is null | 44 | ported | `helm.rs` | `helm_resolve_alias_null_returns_none` | — |
+| return repository parameter if repository is undefined | 52 | ported | `helm.rs` | `helm_resolve_alias_undefined_input_returns_none` | — |
 
 ### `.isAlias()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return false if repository is null | 62 | pending | — | — | — |
-| return false if repository is undefined | 68 | pending | — | — | — |
+| return false if repository is null | 62 | ported | `helm.rs` | `helm_is_alias_null_returns_false` | — |
+| return false if repository is undefined | 68 | ported | `helm.rs` | `helm_is_alias_undefined_returns_false` | — |
 
 ### `.isOCIRegistry()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| return false if repository is null | 76 | pending | — | — | — |
-| return false if repository is undefined | 81 | pending | — | — | — |
+| return false if repository is null | 76 | ported | `helm.rs` | `helm_is_oci_registry_null_returns_false` | — |
+| return false if repository is undefined | 81 | ported | `helm.rs` | `helm_is_oci_registry_undefined_returns_false` | — |
 
 ---
 
