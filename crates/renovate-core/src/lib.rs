@@ -16,6 +16,7 @@ pub mod repo_config;
 pub mod schedule;
 pub mod string_match;
 pub mod versioning;
+pub mod vulnerability;
 
 /// Library version string, sourced from the workspace package version.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

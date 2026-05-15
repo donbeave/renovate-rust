@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2773 / 8612 actionable tests ported (32%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2798 / 8612 actionable tests ported (32%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -24907,64 +24907,64 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/vulnerability/ecosystem.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/vulnerability/ecosystem.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+**Total tests:** 12 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
 
 ### `util/vulnerability/ecosystem › datasourceToOsvEcosystem`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| maps crate datasource to crates.io ecosystem | 8 | pending | — | — | — |
-| maps clojure datasource to Maven ecosystem | 12 | pending | — | — | — |
-| maps go datasource to Go ecosystem | 16 | pending | — | — | — |
-| maps npm datasource to npm ecosystem | 20 | pending | — | — | — |
-| maps pypi datasource to PyPI ecosystem | 24 | pending | — | — | — |
-| returns undefined for unknown datasource | 28 | pending | — | — | — |
+| maps crate datasource to crates.io ecosystem | 8 | ported | `vulnerability.rs` | `maps_crate_datasource_to_crates_io` | — |
+| maps clojure datasource to Maven ecosystem | 12 | ported | `vulnerability.rs` | `maps_clojure_datasource_to_maven` | — |
+| maps go datasource to Go ecosystem | 16 | ported | `vulnerability.rs` | `maps_go_datasource_to_go` | — |
+| maps npm datasource to npm ecosystem | 20 | ported | `vulnerability.rs` | `maps_npm_datasource_to_npm` | — |
+| maps pypi datasource to PyPI ecosystem | 24 | ported | `vulnerability.rs` | `maps_pypi_datasource_to_pypi` | — |
+| returns undefined for unknown datasource | 28 | ported | `vulnerability.rs` | `returns_none_for_unknown_datasource` | — |
 
 ### `util/vulnerability/ecosystem › githubEcosystemToDatasource`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| maps actions to github-tags datasource | 34 | pending | — | — | — |
-| maps pip to pypi datasource | 38 | pending | — | — | — |
-| maps rust to crate datasource | 42 | pending | — | — | — |
-| maps npm to npm datasource | 46 | pending | — | — | — |
-| maps composer to packagist datasource | 50 | pending | — | — | — |
-| maps maven to both maven and clojure datasources | 54 | pending | — | — | — |
+| maps actions to github-tags datasource | 34 | ported | `vulnerability.rs` | `maps_actions_to_github_tags` | — |
+| maps pip to pypi datasource | 38 | ported | `vulnerability.rs` | `maps_pip_to_pypi` | — |
+| maps rust to crate datasource | 42 | ported | `vulnerability.rs` | `maps_rust_to_crate` | — |
+| maps npm to npm datasource | 46 | ported | `vulnerability.rs` | `maps_npm_to_npm` | — |
+| maps composer to packagist datasource | 50 | ported | `vulnerability.rs` | `maps_composer_to_packagist` | — |
+| maps maven to both maven and clojure datasources | 54 | ported | `vulnerability.rs` | `maps_maven_to_maven_and_clojure` | — |
 
 ---
 
 ## `lib/util/vulnerability/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/vulnerability/utils.spec.ts
-**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+**Total tests:** 13 | **Ported:** 13 | **Actionable:** 13 | **Status:** ported
 
 ### `util/vulnerability/utils › getHighestVulnerabilitySeverity`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parent CRITICAL vulnerability severity rating is maintained | 9 | pending | — | — | — |
-| child CRITICAL vulnerability severity rating is maintained | 26 | pending | — | — | — |
-| parent HIGH vulnerability severity rating is maintained | 43 | pending | — | — | — |
-| child HIGH vulnerability severity rating is maintained | 60 | pending | — | — | — |
-| parent MODERATE vulnerability severity rating is maintained | 77 | pending | — | — | — |
-| child MODERATE vulnerability severity rating is maintained | 94 | pending | — | — | — |
-| child MEDIUM vulnerability severity rating is maintained | 111 | pending | — | — | — |
-| parent LOW vulnerability severity rating is maintained | 128 | pending | — | — | — |
-| child LOW vulnerability severity rating is maintained | 145 | pending | — | — | — |
-| child UNKNOWN vulnerability severity rating is maintained | 162 | pending | — | — | — |
-| handled undefined parent and child vulnerability severity | 179 | pending | — | — | — |
+| parent CRITICAL vulnerability severity rating is maintained | 9 | ported | `vulnerability.rs` | `parent_critical_maintained` | — |
+| child CRITICAL vulnerability severity rating is maintained | 26 | ported | `vulnerability.rs` | `child_critical_maintained` | — |
+| parent HIGH vulnerability severity rating is maintained | 43 | ported | `vulnerability.rs` | `parent_high_maintained` | — |
+| child HIGH vulnerability severity rating is maintained | 60 | ported | `vulnerability.rs` | `child_high_maintained` | — |
+| parent MODERATE vulnerability severity rating is maintained | 77 | ported | `vulnerability.rs` | `parent_moderate_maintained` | — |
+| child MODERATE vulnerability severity rating is maintained | 94 | ported | `vulnerability.rs` | `child_moderate_maintained` | — |
+| child MEDIUM vulnerability severity rating is maintained | 111 | ported | `vulnerability.rs` | `child_medium_maintained` | — |
+| parent LOW vulnerability severity rating is maintained | 128 | ported | `vulnerability.rs` | `parent_low_maintained_when_child_undefined` | — |
+| child LOW vulnerability severity rating is maintained | 145 | ported | `vulnerability.rs` | `child_low_maintained_when_parent_undefined` | — |
+| child UNKNOWN vulnerability severity rating is maintained | 162 | ported | `vulnerability.rs` | `child_unknown_overrides_critical` | — |
+| handled undefined parent and child vulnerability severity | 179 | ported | `vulnerability.rs` | `undefined_parent_and_child_returns_none` | — |
 
 ### `util/vulnerability/utils › getFixedVersionConstraint()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns correct range for %s | 198 | pending | — | — | — |
+| returns correct range for %s | 198 | ported | `vulnerability.rs` | `get_fixed_version_constraint_cases` | — |
 
 ### `util/vulnerability/utils › getLastAffectedVersionConstraint()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns correct range for %s | 215 | pending | — | — | — |
+| returns correct range for %s | 215 | ported | `vulnerability.rs` | `get_last_affected_version_constraint_cases` | — |
 
 ---
 
