@@ -267,6 +267,174 @@ fn parse_retry_after(resp: &Response) -> Option<Duration> {
     parse_retry_after_value(value, now).map(Duration::from_secs)
 }
 
+// ── apply_authorization (mirrors lib/util/http/auth.ts) ───────────────────────
+
+const GITHUB_API_HOST_TYPES: &[&str] = &[
+    "github",
+    "github-releases",
+    "github-release-attachments",
+    "github-tags",
+    "pod",
+    "hermit",
+    "github-changelog",
+    "conan",
+];
+
+const GITEA_API_HOST_TYPES: &[&str] =
+    &["gitea", "gitea-changelog", "gitea-releases", "gitea-tags"];
+
+const FORGEJO_API_HOST_TYPES: &[&str] =
+    &["forgejo", "forgejo-changelog", "forgejo-releases", "forgejo-tags"];
+
+const GITLAB_API_HOST_TYPES: &[&str] = &[
+    "gitlab",
+    "gitlab-releases",
+    "gitlab-tags",
+    "gitlab-packages",
+    "gitlab-changelog",
+    "pypi",
+];
+
+/// Result of `apply_authorization`: which headers to set.
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct AppliedAuth {
+    /// Value for the `Authorization` header, if any.
+    pub authorization: Option<String>,
+    /// Value for the `Private-token` header (GitLab PAT), if any.
+    pub private_token: Option<String>,
+}
+
+/// Input to `apply_authorization`.
+#[derive(Debug, Default)]
+pub struct AuthOptions<'a> {
+    /// Platform or datasource host type (e.g. "github", "gitlab").
+    pub host_type: Option<&'a str>,
+    /// Bearer/platform token.
+    pub token: Option<&'a str>,
+    /// Basic-auth username.
+    pub username: Option<&'a str>,
+    /// Basic-auth password.
+    pub password: Option<&'a str>,
+    /// `context.authType` from the request options.
+    pub auth_type: Option<&'a str>,
+    /// Existing `Authorization` header value.
+    pub existing_auth: Option<&'a str>,
+    /// If true, skip auth injection.
+    pub no_auth: bool,
+}
+
+/// Compute the auth header(s) to apply for a request.
+///
+/// Mirrors `applyAuthorization` from `lib/util/http/auth.ts`.
+pub fn apply_authorization(opts: &AuthOptions<'_>) -> AppliedAuth {
+    // If there is already an Authorization header or noAuth=true, do nothing.
+    if opts
+        .existing_auth
+        .map(|a| !a.is_empty())
+        .unwrap_or(false)
+        || opts.no_auth
+    {
+        return AppliedAuth::default();
+    }
+
+    if let Some(token) = opts.token {
+        // If auth_type is set in context, use it directly.
+        if let Some(auth_type) = opts.auth_type {
+            let authorization = if auth_type == "Token-Only" {
+                token.to_owned()
+            } else {
+                format!("{auth_type} {token}")
+            };
+            return AppliedAuth {
+                authorization: Some(authorization),
+                ..Default::default()
+            };
+        }
+
+        // GitHub App installation token (x-access-token: prefix).
+        if let Some(app_token) = token.strip_prefix("x-access-token:") {
+            return AppliedAuth {
+                authorization: Some(format!("Bearer {app_token}")),
+                ..Default::default()
+            };
+        }
+
+        // Forgejo → Bearer.
+        if opts
+            .host_type
+            .map(|h| FORGEJO_API_HOST_TYPES.contains(&h))
+            .unwrap_or(false)
+        {
+            return AppliedAuth {
+                authorization: Some(format!("Bearer {token}")),
+                ..Default::default()
+            };
+        }
+
+        // Gitea → Bearer.
+        if opts
+            .host_type
+            .map(|h| GITEA_API_HOST_TYPES.contains(&h))
+            .unwrap_or(false)
+        {
+            return AppliedAuth {
+                authorization: Some(format!("Bearer {token}")),
+                ..Default::default()
+            };
+        }
+
+        // GitHub → token prefix.
+        if opts
+            .host_type
+            .map(|h| GITHUB_API_HOST_TYPES.contains(&h))
+            .unwrap_or(false)
+        {
+            return AppliedAuth {
+                authorization: Some(format!("token {token}")),
+                ..Default::default()
+            };
+        }
+
+        // GitLab → Personal Access Token (20 chars) or Bearer.
+        if opts
+            .host_type
+            .map(|h| GITLAB_API_HOST_TYPES.contains(&h))
+            .unwrap_or(false)
+        {
+            if token.len() == 20 {
+                return AppliedAuth {
+                    private_token: Some(token.to_owned()),
+                    ..Default::default()
+                };
+            } else {
+                return AppliedAuth {
+                    authorization: Some(format!("Bearer {token}")),
+                    ..Default::default()
+                };
+            }
+        }
+
+        // Default: Bearer.
+        return AppliedAuth {
+            authorization: Some(format!("Bearer {token}")),
+            ..Default::default()
+        };
+    }
+
+    // Basic auth from password.
+    if let Some(password) = opts.password {
+        use base64::Engine as _;
+        let user = opts.username.unwrap_or("");
+        let credentials = base64::engine::general_purpose::STANDARD.encode(format!("{user}:{password}"));
+        return AppliedAuth {
+            authorization: Some(format!("Basic {credentials}")),
+            ..Default::default()
+        };
+    }
+
+    AppliedAuth::default()
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{method, path};
@@ -606,6 +774,142 @@ mod www_auth_tests {
             "Bearer realm=\"https://renovate.com/v2/token\",service=\"container_registry\",scope=\"*"
         ]);
         assert!(result.is_err());
+    }
+
+    // ── apply_authorization ───────────────────────────────────────────────────
+
+    // Ported: "does nothing" — util/http/auth.spec.ts line 3
+    #[test]
+    fn auth_does_nothing_with_existing_header() {
+        let opts = AuthOptions { existing_auth: Some("token"), ..Default::default() };
+        assert_eq!(apply_authorization(&opts), AppliedAuth::default());
+    }
+
+    // Ported: "gitea password" — util/http/auth.spec.ts line 15
+    #[test]
+    fn auth_gitea_password_basic() {
+        let opts = AuthOptions {
+            host_type: Some("gitea"),
+            password: Some("XXXX"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("Basic OlhYWFg="));
+    }
+
+    // Ported: "gittea token" — util/http/auth.spec.ts line 28
+    #[test]
+    fn auth_gitea_token_bearer() {
+        let opts = AuthOptions {
+            host_type: Some("gitea"),
+            token: Some("XXXX"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("Bearer XXXX"));
+    }
+
+    // Ported: "github token" — util/http/auth.spec.ts line 41
+    #[test]
+    fn auth_github_token_prefix() {
+        let opts = AuthOptions {
+            host_type: Some("github"),
+            token: Some("XXX"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("token XXX"));
+    }
+
+    // Ported: "github token for datasource using github api" — util/http/auth.spec.ts line 56
+    #[test]
+    fn auth_github_releases_token_prefix() {
+        let opts = AuthOptions {
+            host_type: Some("github-releases"),
+            token: Some("ZZZZ"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("token ZZZZ"));
+    }
+
+    // Ported: "github app token with hostType not in GITHUB_API_USING_HOST_TYPES" — util/http/auth.spec.ts line 71
+    #[test]
+    fn auth_github_app_token_bearer() {
+        let opts = AuthOptions {
+            host_type: Some("github-digest"),
+            token: Some("x-access-token:ghs_123test"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("Bearer ghs_123test"));
+    }
+
+    // Ported: "gitlab personal access token" — util/http/auth.spec.ts line 85
+    #[test]
+    fn auth_gitlab_personal_access_token() {
+        let opts = AuthOptions {
+            host_type: Some("gitlab"),
+            token: Some("0123456789012345test"),  // 20 chars
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert!(result.authorization.is_none());
+        assert_eq!(result.private_token.as_deref(), Some("0123456789012345test"));
+    }
+
+    // Ported: "gitlab oauth token" — util/http/auth.spec.ts line 101
+    #[test]
+    fn auth_gitlab_oauth_token_bearer() {
+        let token = "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test";
+        let opts = AuthOptions {
+            host_type: Some("gitlab"),
+            token: Some(token),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(
+            result.authorization.as_deref(),
+            Some(format!("Bearer {token}").as_str())
+        );
+    }
+
+    // Ported: "npm basic token" — util/http/auth.spec.ts line 117
+    #[test]
+    fn auth_npm_basic_auth_type() {
+        let opts = AuthOptions {
+            host_type: Some("npm"),
+            token: Some("test"),
+            auth_type: Some("Basic"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("Basic test"));
+    }
+
+    // Ported: "bare token" — util/http/auth.spec.ts line 132
+    #[test]
+    fn auth_token_only_auth_type() {
+        let opts = AuthOptions {
+            token: Some("test"),
+            auth_type: Some("Token-Only"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("test"));
+    }
+
+    // Ported: "honors authType" — util/http/auth.spec.ts line 146
+    #[test]
+    fn auth_honors_auth_type() {
+        let opts = AuthOptions {
+            host_type: Some("custom"),
+            token: Some("test"),
+            auth_type: Some("Bearer"),
+            ..Default::default()
+        };
+        let result = apply_authorization(&opts);
+        assert_eq!(result.authorization.as_deref(), Some("Bearer test"));
     }
 
     // ── parse_retry_after_value ───────────────────────────────────────────────
