@@ -15,8 +15,7 @@ struct LimitEntry {
 static LIMITS: LazyLock<Mutex<HashMap<String, LimitEntry>>> =
     LazyLock::new(|| Mutex::new(HashMap::new()));
 
-static COUNTS: LazyLock<Mutex<HashMap<String, i64>>> =
-    LazyLock::new(|| Mutex::new(HashMap::new()));
+static COUNTS: LazyLock<Mutex<HashMap<String, i64>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 /// Clear all limit and count state.
 ///
@@ -32,7 +31,10 @@ pub fn reset_all_limits() {
 /// Mirrors `setMaxLimit` from `lib/workers/global/limits.ts`.
 pub fn set_max_limit(key: &str, val: Option<i64>) {
     let max = val.map(|v| v.max(0) as u32);
-    LIMITS.lock().unwrap().insert(key.to_owned(), LimitEntry { max, current: 0 });
+    LIMITS
+        .lock()
+        .unwrap()
+        .insert(key.to_owned(), LimitEntry { max, current: 0 });
 }
 
 /// Increment the current count for the named limit.
@@ -40,7 +42,10 @@ pub fn set_max_limit(key: &str, val: Option<i64>) {
 /// Mirrors `incLimitedValue` from `lib/workers/global/limits.ts`.
 pub fn inc_limited_value(key: &str, inc_by: u32) {
     let mut m = LIMITS.lock().unwrap();
-    let e = m.entry(key.to_owned()).or_insert(LimitEntry { max: None, current: 0 });
+    let e = m.entry(key.to_owned()).or_insert(LimitEntry {
+        max: None,
+        current: 0,
+    });
     e.current += inc_by;
 }
 
@@ -87,9 +92,9 @@ pub fn is_commits_limit_reached() -> bool {
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub enum BranchConcurrentLimit {
     #[default]
-    Unset,        // undefined → use i64::MAX in calc_limit
-    Null,         // null → inherit from upgrade's pr_concurrent_limit
-    Value(i64),   // explicit number (0 = no limit)
+    Unset, // undefined → use i64::MAX in calc_limit
+    Null,       // null → inherit from upgrade's pr_concurrent_limit
+    Value(i64), // explicit number (0 = no limit)
 }
 
 /// Per-upgrade configuration fields used for limit calculations.
@@ -168,7 +173,9 @@ pub fn has_multiple_limits(upgrades: &[UpgradeConfig], name: LimitName) -> bool 
     }
     let mut distinct: Vec<i64> = Vec::new();
     for u in upgrades {
-        let Some(val) = upgrade_limit(u, name) else { continue };
+        let Some(val) = upgrade_limit(u, name) else {
+            continue;
+        };
         if !distinct.contains(&val) {
             distinct.push(val);
         }
@@ -306,11 +313,7 @@ mod tests {
     // Ported: "handles single upgrade" — workers/global/limits.spec.ts line 71
     #[test]
     fn calc_limit_handles_single_upgrade() {
-        let upgrades = single_upgrade(
-            Some(10),
-            BranchConcurrentLimit::Value(11),
-            Some(12),
-        );
+        let upgrades = single_upgrade(Some(10), BranchConcurrentLimit::Value(11), Some(12));
         assert_eq!(calc_limit(&upgrades, LimitName::PrHourlyLimit), 10);
         assert_eq!(calc_limit(&upgrades, LimitName::BranchConcurrentLimit), 11);
         assert_eq!(calc_limit(&upgrades, LimitName::PrConcurrentLimit), 12);
@@ -431,8 +434,14 @@ mod tests {
     fn has_multiple_limits_single_upgrade() {
         let upgrades = single_upgrade(Some(10), BranchConcurrentLimit::Value(11), Some(12));
         assert!(!has_multiple_limits(&upgrades, LimitName::PrHourlyLimit));
-        assert!(!has_multiple_limits(&upgrades, LimitName::BranchConcurrentLimit));
-        assert!(!has_multiple_limits(&upgrades, LimitName::PrConcurrentLimit));
+        assert!(!has_multiple_limits(
+            &upgrades,
+            LimitName::BranchConcurrentLimit
+        ));
+        assert!(!has_multiple_limits(
+            &upgrades,
+            LimitName::PrConcurrentLimit
+        ));
     }
 
     // Ported: "returns false if there are multiple limits with value" — workers/global/limits.spec.ts line 208
@@ -446,8 +455,14 @@ mod tests {
         };
         let upgrades = vec![row.clone(), row];
         assert!(!has_multiple_limits(&upgrades, LimitName::PrHourlyLimit));
-        assert!(!has_multiple_limits(&upgrades, LimitName::BranchConcurrentLimit));
-        assert!(!has_multiple_limits(&upgrades, LimitName::PrConcurrentLimit));
+        assert!(!has_multiple_limits(
+            &upgrades,
+            LimitName::BranchConcurrentLimit
+        ));
+        assert!(!has_multiple_limits(
+            &upgrades,
+            LimitName::PrConcurrentLimit
+        ));
     }
 
     // Ported: "handles multiple limits" — workers/global/limits.spec.ts line 226
@@ -474,7 +489,10 @@ mod tests {
             },
         ];
         assert!(has_multiple_limits(&upgrades, LimitName::PrHourlyLimit));
-        assert!(has_multiple_limits(&upgrades, LimitName::BranchConcurrentLimit));
+        assert!(has_multiple_limits(
+            &upgrades,
+            LimitName::BranchConcurrentLimit
+        ));
         assert!(has_multiple_limits(&upgrades, LimitName::PrConcurrentLimit));
     }
 
@@ -593,7 +611,9 @@ mod tests {
                 commit_hourly_limit: Some(3),
                 ..Default::default()
             }];
-            let config = BranchConfig { upgrades: upgrades.clone() };
+            let config = BranchConfig {
+                upgrades: upgrades.clone(),
+            };
             assert!(is_count_limit_reached("HourlyCommits", &config));
 
             set_count("HourlyCommits", 2);

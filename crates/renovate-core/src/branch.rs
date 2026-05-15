@@ -573,7 +573,12 @@ pub fn config_migration_commit_message(semantic_commits: &str, config_file: &str
 /// Mirrors `lib/workers/repository/config-migration/branch/commit-message.ts`
 /// `ConfigMigrationCommitMessageFactory.getPrTitle()`.
 pub fn config_migration_pr_title(semantic_commits: &str) -> String {
-    format_semantic_commit_message(semantic_commits, "Migrate Renovate config", "chore", "config")
+    format_semantic_commit_message(
+        semantic_commits,
+        "Migrate Renovate config",
+        "chore",
+        "config",
+    )
 }
 
 fn format_semantic_commit_message(semantic: &str, topic: &str, typ: &str, scope: &str) -> String {
@@ -634,9 +639,18 @@ pub fn parse_semantic_commit_message(s: &str) -> Option<SemanticCommitParsed> {
 
     let caps = RE.captures(s)?;
     Some(SemanticCommitParsed {
-        r#type: caps.name("type").map(|m| m.as_str().to_owned()).unwrap_or_default(),
-        scope: caps.name("scope").map(|m| m.as_str().to_owned()).unwrap_or_default(),
-        subject: caps.name("description").map(|m| m.as_str().to_owned()).unwrap_or_default(),
+        r#type: caps
+            .name("type")
+            .map(|m| m.as_str().to_owned())
+            .unwrap_or_default(),
+        scope: caps
+            .name("scope")
+            .map(|m| m.as_str().to_owned())
+            .unwrap_or_default(),
+        subject: caps
+            .name("description")
+            .map(|m| m.as_str().to_owned())
+            .unwrap_or_default(),
     })
 }
 
@@ -649,9 +663,7 @@ pub fn custom_commit_message_title(prefix: &str, subject: &str) -> String {
         std::sync::LazyLock::new(|| Regex::new(r"\s+").unwrap());
 
     let prefix = prefix.trim().trim_end_matches(':');
-    let subject_normalized = EXTRA_WS
-        .replace_all(subject.trim(), " ")
-        .into_owned();
+    let subject_normalized = EXTRA_WS.replace_all(subject.trim(), " ").into_owned();
 
     if prefix.is_empty() {
         upper_first(&subject_normalized)
@@ -724,7 +736,11 @@ fn detect_semantic_commit_score(commit_messages: &[&str]) -> i32 {
         LazyLock::new(|| Regex::new(r"^(\w*)(?:\(.*\))?!?: .+$").unwrap());
 
     commit_messages.iter().fold(0i32, |acc, msg| {
-        if ANGULAR_RE.is_match(msg) { acc + 1 } else { acc - 1 }
+        if ANGULAR_RE.is_match(msg) {
+            acc + 1
+        } else {
+            acc - 1
+        }
     })
 }
 
@@ -745,7 +761,9 @@ pub fn get_base_branch_desc(base_branch_patterns: &[&str]) -> String {
                 .map(|b| format!("`{b}`"))
                 .collect::<Vec<_>>()
                 .join(", ");
-            format!("You have configured Renovate to use the following baseBranchPatterns: {branches}.")
+            format!(
+                "You have configured Renovate to use the following baseBranchPatterns: {branches}."
+            )
         }
     }
 }
@@ -773,8 +791,14 @@ pub fn determine_new_replacement_name(
 }
 
 /// Sort order for branch update types.
-const UPDATE_TYPE_ORDER: &[&str] =
-    &["pin", "digest", "patch", "minor", "major", "lockFileMaintenance"];
+const UPDATE_TYPE_ORDER: &[&str] = &[
+    "pin",
+    "digest",
+    "patch",
+    "minor",
+    "major",
+    "lockFileMaintenance",
+];
 
 /// A branch to sort — mirrors the fields used by `sortBranches()`.
 #[derive(Debug, Clone)]
@@ -808,10 +832,14 @@ pub fn sort_branches(branches: &mut [BranchSortEntry]) {
             return b_prio.cmp(&a_prio); // higher first
         }
 
-        let a_idx = a.update_type.as_deref()
+        let a_idx = a
+            .update_type
+            .as_deref()
             .and_then(|t| UPDATE_TYPE_ORDER.iter().position(|&s| s == t))
             .unwrap_or(UPDATE_TYPE_ORDER.len());
-        let b_idx = b.update_type.as_deref()
+        let b_idx = b
+            .update_type
+            .as_deref()
             .and_then(|t| UPDATE_TYPE_ORDER.iter().position(|&s| s == t))
             .unwrap_or(UPDATE_TYPE_ORDER.len());
         if a_idx != b_idx {
@@ -887,15 +915,30 @@ fn numeric_locale_compare(a: &str, b: &str) -> std::cmp::Ordering {
             (None, _) => return std::cmp::Ordering::Less,
             (_, None) => return std::cmp::Ordering::Greater,
             (Some(ac), Some(bc)) if ac.is_ascii_digit() && bc.is_ascii_digit() => {
-                let an: u64 = ai.by_ref().take_while(|c| c.is_ascii_digit()).collect::<String>().parse().unwrap_or(0);
-                let bn: u64 = bi.by_ref().take_while(|c| c.is_ascii_digit()).collect::<String>().parse().unwrap_or(0);
+                let an: u64 = ai
+                    .by_ref()
+                    .take_while(|c| c.is_ascii_digit())
+                    .collect::<String>()
+                    .parse()
+                    .unwrap_or(0);
+                let bn: u64 = bi
+                    .by_ref()
+                    .take_while(|c| c.is_ascii_digit())
+                    .collect::<String>()
+                    .parse()
+                    .unwrap_or(0);
                 let ord = an.cmp(&bn);
-                if ord != std::cmp::Ordering::Equal { return ord; }
+                if ord != std::cmp::Ordering::Equal {
+                    return ord;
+                }
             }
             (Some(ac), Some(bc)) => {
                 let ord = ac.cmp(bc);
-                ai.next(); bi.next();
-                if ord != std::cmp::Ordering::Equal { return ord; }
+                ai.next();
+                bi.next();
+                if ord != std::cmp::Ordering::Equal {
+                    return ord;
+                }
             }
         }
     }
@@ -1783,13 +1826,19 @@ mod tests {
     // Ported: "should format sematic type" — workers/repository/model/semantic-commit-message.spec.ts line 8
     #[test]
     fn semantic_commit_type_only() {
-        assert_eq!(semantic_commit_message_title(" fix ", "", "test"), "fix: test");
+        assert_eq!(
+            semantic_commit_message_title(" fix ", "", "test"),
+            "fix: test"
+        );
     }
 
     // Ported: "should format sematic prefix with scope" — workers/repository/model/semantic-commit-message.spec.ts line 16
     #[test]
     fn semantic_commit_type_and_scope() {
-        assert_eq!(semantic_commit_message_title(" fix ", " scope ", "test"), "fix(scope): test");
+        assert_eq!(
+            semantic_commit_message_title(" fix ", " scope ", "test"),
+            "fix(scope): test"
+        );
     }
 
     // Ported: "should transform to lowercase only first letter" — workers/repository/model/semantic-commit-message.spec.ts line 25
@@ -1891,14 +1940,20 @@ mod tests {
     // Ported: "creates non-semantic pr title" — workers/repository/config-migration/branch/commit-message.spec.ts line 41
     #[test]
     fn config_migration_non_semantic_pr_title() {
-        assert_eq!(config_migration_pr_title("disabled"), "Migrate Renovate config");
+        assert_eq!(
+            config_migration_pr_title("disabled"),
+            "Migrate Renovate config"
+        );
     }
 
     // Ported: "returns default values when commitMessage template string is empty" — workers/repository/config-migration/branch/commit-message.spec.ts line 50
     #[test]
     fn config_migration_pr_title_with_empty_commit_message() {
         // TS test: commitMessage='', semanticCommits=disabled → getPrTitle() returns 'Migrate Renovate config'
-        assert_eq!(config_migration_pr_title("disabled"), "Migrate Renovate config");
+        assert_eq!(
+            config_migration_pr_title("disabled"),
+            "Migrate Renovate config"
+        );
     }
 
     // Ported: "detects false if unknown" — util/git/semantic.spec.ts line 18
@@ -1918,7 +1973,11 @@ mod tests {
     // Ported: "detects false on malformed commits" — util/git/semantic.spec.ts line 38
     #[test]
     fn semantic_commits_disabled_for_malformed() {
-        assert!(!detect_semantic_commits(&["fix(): foo", "fix:", "some:invalid"]));
+        assert!(!detect_semantic_commits(&[
+            "fix(): foo",
+            "fix:",
+            "some:invalid"
+        ]));
     }
 
     // Ported: "detects true on breaking changes" — util/git/semantic.spec.ts line 49
@@ -1980,10 +2039,7 @@ mod tests {
     // Ported: "returns the package name if defined" — workers/repository/process/lookup/utils.spec.ts line 32
     #[test]
     fn determine_replacement_name_returns_package_name() {
-        assert_eq!(
-            determine_new_replacement_name(None, None, "b"),
-            "b"
-        );
+        assert_eq!(determine_new_replacement_name(None, None, "b"), "b");
     }
 
     fn branch(update_type: &str, pr_title: &str) -> BranchSortEntry {
@@ -2008,28 +2064,52 @@ mod tests {
             branch("pin", "some other pin"),
         ];
         sort_branches(&mut branches);
-        let titles: Vec<_> = branches.iter().map(|b| b.pr_title.as_deref().unwrap()).collect();
-        assert_eq!(titles, [
-            "some other other pin",
-            "some other pin",
-            "some pin",
-            "a minor update 1.1",
-            "a minor update 1.2",
-            "a minor update 1.10",
-            "some major update",
-        ]);
+        let titles: Vec<_> = branches
+            .iter()
+            .map(|b| b.pr_title.as_deref().unwrap())
+            .collect();
+        assert_eq!(
+            titles,
+            [
+                "some other other pin",
+                "some other pin",
+                "some pin",
+                "a minor update 1.1",
+                "a minor update 1.2",
+                "a minor update 1.10",
+                "some major update",
+            ]
+        );
     }
 
     // Ported: "sorts based on prPriority" — workers/repository/process/sort.spec.ts line 49
     #[test]
     fn sort_branches_by_pr_priority() {
         let mut branches = vec![
-            BranchSortEntry { update_type: Some("major".into()), pr_title: Some("some major update".into()), pr_priority: Some(1), is_vulnerability_alert: None },
-            BranchSortEntry { update_type: Some("pin".into()), pr_title: Some("some pin".into()), pr_priority: Some(-1), is_vulnerability_alert: None },
-            BranchSortEntry { update_type: Some("patch".into()), pr_title: Some("some patch".into()), pr_priority: None, is_vulnerability_alert: None },
+            BranchSortEntry {
+                update_type: Some("major".into()),
+                pr_title: Some("some major update".into()),
+                pr_priority: Some(1),
+                is_vulnerability_alert: None,
+            },
+            BranchSortEntry {
+                update_type: Some("pin".into()),
+                pr_title: Some("some pin".into()),
+                pr_priority: Some(-1),
+                is_vulnerability_alert: None,
+            },
+            BranchSortEntry {
+                update_type: Some("patch".into()),
+                pr_title: Some("some patch".into()),
+                pr_priority: None,
+                is_vulnerability_alert: None,
+            },
         ];
         sort_branches(&mut branches);
-        let titles: Vec<_> = branches.iter().map(|b| b.pr_title.as_deref().unwrap()).collect();
+        let titles: Vec<_> = branches
+            .iter()
+            .map(|b| b.pr_title.as_deref().unwrap())
+            .collect();
         assert_eq!(titles[0], "some major update"); // highest priority first
     }
 
@@ -2038,7 +2118,12 @@ mod tests {
     fn sort_branches_vulnerability_alert_first() {
         let mut branches = vec![
             branch("major", "some major update"),
-            BranchSortEntry { update_type: Some("pin".into()), pr_title: Some("some pin".into()), pr_priority: None, is_vulnerability_alert: Some(true) },
+            BranchSortEntry {
+                update_type: Some("pin".into()),
+                pr_title: Some("some pin".into()),
+                pr_priority: None,
+                is_vulnerability_alert: Some(true),
+            },
         ];
         sort_branches(&mut branches);
         assert_eq!(branches[0].pr_title.as_deref(), Some("some pin")); // vulnerability first
@@ -2048,9 +2133,24 @@ mod tests {
     #[test]
     fn sort_branches_vulnerability_alert_symmetric() {
         let mut branches = vec![
-            BranchSortEntry { update_type: Some("pin".into()), pr_title: Some("vuln pin".into()), pr_priority: None, is_vulnerability_alert: Some(true) },
-            BranchSortEntry { update_type: Some("major".into()), pr_title: Some("non-vuln major".into()), pr_priority: None, is_vulnerability_alert: None },
-            BranchSortEntry { update_type: Some("patch".into()), pr_title: Some("vuln patch".into()), pr_priority: None, is_vulnerability_alert: Some(true) },
+            BranchSortEntry {
+                update_type: Some("pin".into()),
+                pr_title: Some("vuln pin".into()),
+                pr_priority: None,
+                is_vulnerability_alert: Some(true),
+            },
+            BranchSortEntry {
+                update_type: Some("major".into()),
+                pr_title: Some("non-vuln major".into()),
+                pr_priority: None,
+                is_vulnerability_alert: None,
+            },
+            BranchSortEntry {
+                update_type: Some("patch".into()),
+                pr_title: Some("vuln patch".into()),
+                pr_priority: None,
+                is_vulnerability_alert: Some(true),
+            },
         ];
         sort_branches(&mut branches);
         // Both vulnerability alerts first, then non-vuln
@@ -2062,9 +2162,22 @@ mod tests {
     // Ported: "sorts $files to $expected" — workers/repository/update/pr/changelog/common.spec.ts line 18
     #[test]
     fn compare_changelog_file_path_sorts_by_type_preference() {
-        let mut files = vec!["CHANGELOG", "CHANGELOG.md", "CHANGELOG.json", "CHANGELOG.txt"];
+        let mut files = vec![
+            "CHANGELOG",
+            "CHANGELOG.md",
+            "CHANGELOG.json",
+            "CHANGELOG.txt",
+        ];
         files.sort_by(|a, b| compare_changelog_file_path(a, b));
-        assert_eq!(files, vec!["CHANGELOG.md", "CHANGELOG.txt", "CHANGELOG", "CHANGELOG.json"]);
+        assert_eq!(
+            files,
+            vec![
+                "CHANGELOG.md",
+                "CHANGELOG.txt",
+                "CHANGELOG",
+                "CHANGELOG.json"
+            ]
+        );
     }
 
     // Ported: "should match the expected error" — util/git/errors.spec.ts line 17
@@ -2099,4 +2212,3 @@ mod tests {
         assert_eq!(format_problem_level(60), "💀 FATAL");
     }
 }
-

@@ -76,8 +76,7 @@ pub struct GoModParsedLine {
 // ── parseLine regexes ─────────────────────────────────────────────────────────
 
 /// `go <version>` — any non-whitespace version string.
-static PL_GO: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\s*go\s+(\S+)\s*$").unwrap());
+static PL_GO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*go\s+(\S+)\s*$").unwrap());
 
 /// `toolchain go<version>`.
 static PL_TOOLCHAIN: LazyLock<Regex> =
@@ -105,8 +104,7 @@ static PL_TOOL: LazyLock<Regex> =
 
 /// Pseudo-version digest extractor.
 static PL_PSEUDO: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?P<digest>[a-f0-9]{12})")
-        .unwrap()
+    Regex::new(r"v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?P<digest>[a-f0-9]{12})").unwrap()
 });
 
 const PLACEHOLDER_PSEUDO_VERSION: &str = "v0.0.0-00010101000000-000000000000";
@@ -160,8 +158,8 @@ pub fn parse_line(input: &str) -> Option<GoModParsedLine> {
     // toolchain directive
     if let Some(cap) = PL_TOOLCHAIN.captures(input) {
         let current_value = cap[1].to_owned();
-        let skip_reason = (!is_semver_version(&current_value))
-            .then_some(GoModLineSkipReason::InvalidVersion);
+        let skip_reason =
+            (!is_semver_version(&current_value)).then_some(GoModLineSkipReason::InvalidVersion);
         return Some(GoModParsedLine {
             current_value: Some(current_value),
             current_digest: None,
@@ -186,9 +184,7 @@ pub fn parse_line(input: &str) -> Option<GoModParsedLine> {
             let keyword = cap.name("kw").map(|m| m.as_str());
             let module = trim_quotes(&cap["module"]).to_owned();
             let current_value = cap["version"].to_owned();
-            let comment = cap
-                .name("comment")
-                .map(|m| m.as_str());
+            let comment = cap.name("comment").map(|m| m.as_str());
             let multi_line = keyword.is_none();
             let indirect = comment == Some("indirect");
 
@@ -196,8 +192,7 @@ pub fn parse_line(input: &str) -> Option<GoModParsedLine> {
                 if is_semver_version(&current_value) {
                     if let Some(digest) = extract_pseudo_digest(&current_value) {
                         let is_placeholder = current_value == PLACEHOLDER_PSEUDO_VERSION;
-                        let sr = is_placeholder
-                            .then_some(GoModLineSkipReason::InvalidVersion);
+                        let sr = is_placeholder.then_some(GoModLineSkipReason::InvalidVersion);
                         (sr, Some(digest), true, Some("loose"))
                     } else {
                         (None, None, false, None)
@@ -268,8 +263,7 @@ pub fn parse_line(input: &str) -> Option<GoModParsedLine> {
                     if is_semver_version(&cv) {
                         if let Some(digest) = extract_pseudo_digest(&cv) {
                             let is_placeholder = cv == PLACEHOLDER_PSEUDO_VERSION;
-                            let sr = is_placeholder
-                                .then_some(GoModLineSkipReason::InvalidVersion);
+                            let sr = is_placeholder.then_some(GoModLineSkipReason::InvalidVersion);
                             (sr, Some(cv), Some(digest), true, Some("loose"))
                         } else {
                             (None, Some(cv), None, false, None)
@@ -714,8 +708,12 @@ pub fn get_extra_deps(before: &str, after: &str, exclude_deps: &[&str]) -> Vec<E
         if !removed_set.contains(line) {
             continue;
         }
-        let Some(parsed) = parse_line(line) else { continue };
-        let Some(current_value) = parsed.current_value else { continue };
+        let Some(parsed) = parse_line(line) else {
+            continue;
+        };
+        let Some(current_value) = parsed.current_value else {
+            continue;
+        };
         let expanded = if parsed.dep_type == GoModLineDepType::Toolchain {
             format!("{} (toolchain)", parsed.dep_name)
         } else {
@@ -730,8 +728,12 @@ pub fn get_extra_deps(before: &str, after: &str, exclude_deps: &[&str]) -> Vec<E
     // Parse added lines → build map: expanded_dep_name → new_version.
     let mut add_deps: HashMap<String, String> = HashMap::new();
     for line in added_set {
-        let Some(parsed) = parse_line(line) else { continue };
-        let Some(current_value) = parsed.current_value else { continue };
+        let Some(parsed) = parse_line(line) else {
+            continue;
+        };
+        let Some(current_value) = parsed.current_value else {
+            continue;
+        };
         let expanded = if parsed.dep_type == GoModLineDepType::Toolchain {
             format!("{} (toolchain)", parsed.dep_name)
         } else {
@@ -833,8 +835,7 @@ pub fn get_extra_deps_notice(
 
     let go_updated = extra_deps.iter().any(|d| d.dep_name == "go");
     let toolchain_updated = extra_deps.iter().any(|d| d.dep_name == "go (toolchain)");
-    let other_count =
-        extra_deps.len() - usize::from(go_updated) - usize::from(toolchain_updated);
+    let other_count = extra_deps.len() - usize::from(go_updated) - usize::from(toolchain_updated);
 
     let mut lines = Vec::new();
     lines.push(
@@ -848,7 +849,9 @@ pub fn get_extra_deps_notice(
     if other_count == 1 {
         lines.push("- 1 additional dependency was updated".to_owned());
     } else if other_count > 1 {
-        lines.push(format!("- {other_count} additional dependencies were updated"));
+        lines.push(format!(
+            "- {other_count} additional dependencies were updated"
+        ));
     }
 
     if go_updated {
@@ -1550,7 +1553,10 @@ require (
         assert_eq!(r.datasource, "go");
         assert_eq!(r.dep_name, "foo/foo");
         assert_eq!(r.dep_type, GoModLineDepType::Tool);
-        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::UnversionedReference));
+        assert_eq!(
+            r.skip_reason,
+            Some(GoModLineSkipReason::UnversionedReference)
+        );
         assert!(!r.multi_line);
     }
 

@@ -478,9 +478,15 @@ pub fn normalize_scala_version(version: &str) -> String {
     if parts.len() != 3 {
         return version.to_owned();
     }
-    let Ok(major) = parts[0].parse::<u64>() else { return version.to_owned() };
-    let Ok(minor) = parts[1].parse::<u64>() else { return version.to_owned() };
-    let Ok(patch) = parts[2].parse::<u64>() else { return version.to_owned() };
+    let Ok(major) = parts[0].parse::<u64>() else {
+        return version.to_owned();
+    };
+    let Ok(minor) = parts[1].parse::<u64>() else {
+        return version.to_owned();
+    };
+    let Ok(patch) = parts[2].parse::<u64>() else {
+        return version.to_owned();
+    };
 
     let gt_2_10 = (major, minor, patch) > (2, 10, 0);
     if !gt_2_10 {
@@ -499,9 +505,8 @@ pub fn normalize_scala_version(version: &str) -> String {
 /// Mirrors `lib/modules/manager/sbt/update.ts` `bumpPackageVersion()`.
 pub fn bump_package_version(content: &str, current_value: &str, bump_version: &str) -> String {
     use std::sync::LazyLock;
-    static VERSION_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
-        regex::Regex::new(r#"(?m)^(version\s*:=\s*).*$"#).unwrap()
-    });
+    static VERSION_RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r#"(?m)^(version\s*:=\s*).*$"#).unwrap());
 
     let new_ver = (|| -> Option<semver::Version> {
         let parsed = semver::Version::parse(current_value).ok()?;
@@ -1235,11 +1240,14 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
             "project/Dependencies.scala",
             "build.sbt",
         ]);
-        assert_eq!(result, vec![
-            "build.sbt",
-            "project/build.properties",
-            "project/Dependencies.scala",
-        ]);
+        assert_eq!(
+            result,
+            vec![
+                "build.sbt",
+                "project/build.properties",
+                "project/Dependencies.scala",
+            ]
+        );
     }
 
     // Ported: "does not normalize prior to 2.10" — modules/manager/sbt/util.spec.ts line 17

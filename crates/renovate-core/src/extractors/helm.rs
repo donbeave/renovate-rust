@@ -692,7 +692,10 @@ dependencies:
     fn helm_resolve_alias_undefined_returns_none() {
         let result = resolve_alias(Some("alias:testRepo"), &{
             let mut m = std::collections::HashMap::new();
-            m.insert("anotherRepository".into(), "https://charts.helm.sh/stable".into());
+            m.insert(
+                "anotherRepository".into(),
+                "https://charts.helm.sh/stable".into(),
+            );
             m
         });
         assert!(result.is_none());

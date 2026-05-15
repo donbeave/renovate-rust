@@ -1034,17 +1034,13 @@ pub struct TerraformProviderLock {
 pub fn extract_terraform_locks(content: &str) -> Option<Vec<TerraformProviderLock>> {
     use std::sync::LazyLock;
     static PROVIDER_START: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(
-            r#"^provider "(?P<registryUrl>[^/]*)/(?P<namespace>[^/]*)/(?P<depName>[^/"]*)"#,
-        )
-        .unwrap()
+        Regex::new(r#"^provider "(?P<registryUrl>[^/]*)/(?P<namespace>[^/]*)/(?P<depName>[^/"]*)"#)
+            .unwrap()
     });
-    static VERSION_LINE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r#"^\s*version\s*=\s*"(?P<version>[^"']+)"#).unwrap()
-    });
-    static CONSTRAINT_LINE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r#"^\s*constraints\s*=\s*"(?P<constraint>[^"']+)"#).unwrap()
-    });
+    static VERSION_LINE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#"^\s*version\s*=\s*"(?P<version>[^"']+)"#).unwrap());
+    static CONSTRAINT_LINE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#"^\s*constraints\s*=\s*"(?P<constraint>[^"']+)"#).unwrap());
     static HASH_LINE: LazyLock<Regex> =
         LazyLock::new(|| Regex::new(r#"^\s*"(?P<hash>[^"]+)",$"#).unwrap());
 
@@ -2425,19 +2421,15 @@ provider "registry.terraform.io/hashicorp/random" {
     // Ported: "returns unsupported if dependency is undefined" — modules/manager/terraform/lockfile/update-locked.spec.ts line 47
     #[test]
     fn terraform_update_locked_unsupported_no_dep_name() {
-        let result =
-            update_locked_terraform_dependency(None, Some("3.1.0"), Some(TERRAFORM_LOCK));
+        let result = update_locked_terraform_dependency(None, Some("3.1.0"), Some(TERRAFORM_LOCK));
         assert_eq!(result.as_str(), "unsupported");
     }
 
     // Ported: "returns unsupported if lockfileContent is undefined" — modules/manager/terraform/lockfile/update-locked.spec.ts line 59
     #[test]
     fn terraform_update_locked_unsupported_no_lock_content() {
-        let result = update_locked_terraform_dependency(
-            Some("hashicorp/not-there"),
-            Some("3.1.0"),
-            None,
-        );
+        let result =
+            update_locked_terraform_dependency(Some("hashicorp/not-there"), Some("3.1.0"), None);
         assert_eq!(result.as_str(), "unsupported");
     }
 
@@ -2473,35 +2465,55 @@ provider "registry.terraform.io/hashicorp/random" {
     #[test]
     fn providers_extract_empty_content_returns_no_deps() {
         let deps = extract("");
-        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Provider));
+        assert!(
+            !deps
+                .iter()
+                .any(|d| d.dep_type == TerraformDepType::Provider)
+        );
     }
 
     // Ported: "return empty array if no resource is found" — terraform/extractors/resources/helm-release.spec.ts line 6
     #[test]
     fn helm_release_extract_empty_content_returns_no_deps() {
         let deps = extract("");
-        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::HelmRelease));
+        assert!(
+            !deps
+                .iter()
+                .any(|d| d.dep_type == TerraformDepType::HelmRelease)
+        );
     }
 
     // Ported: "return empty array if no resource is found" — terraform/extractors/resources/terraform-workspaces.spec.ts line 6
     #[test]
     fn terraform_workspace_extract_empty_content_returns_no_deps() {
         let deps = extract("");
-        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::TfeWorkspace));
+        assert!(
+            !deps
+                .iter()
+                .any(|d| d.dep_type == TerraformDepType::TfeWorkspace)
+        );
     }
 
     // Ported: "return empty array if no terraform block is found" — terraform/extractors/terraform-block/terraform-version.spec.ts line 6
     #[test]
     fn terraform_version_extract_empty_content_returns_no_deps() {
         let deps = extract("");
-        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::RequiredVersion));
+        assert!(
+            !deps
+                .iter()
+                .any(|d| d.dep_type == TerraformDepType::RequiredVersion)
+        );
     }
 
     // Ported: "return empty array if no terraform block is found" — terraform/extractors/terraform-block/required-provider.spec.ts line 8
     #[test]
     fn required_provider_extract_empty_content_returns_no_deps() {
         let deps = extract("");
-        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Provider));
+        assert!(
+            !deps
+                .iter()
+                .any(|d| d.dep_type == TerraformDepType::Provider)
+        );
     }
 
     // Ported: "return empty array if no required_providers block is found" — terraform/extractors/terraform-block/required-provider.spec.ts line 13
@@ -2509,7 +2521,11 @@ provider "registry.terraform.io/hashicorp/random" {
     fn required_provider_extract_terraform_block_without_required_providers_returns_empty() {
         let content = "terraform {\n}\n";
         let deps = extract(content);
-        assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Provider));
+        assert!(
+            !deps
+                .iter()
+                .any(|d| d.dep_type == TerraformDepType::Provider)
+        );
     }
 
     // ── terraform/extractors/others/modules.spec.ts ───────────────────────────
@@ -2524,7 +2540,9 @@ provider "registry.terraform.io/hashicorp/random" {
     // Ported: "should split project and tag from source" — terraform/extractors/others/modules.spec.ts line 19
     #[test]
     fn github_ref_match_re_splits_project_and_tag() {
-        let m1 = GITHUB_REF_MATCH_RE.captures("github.com/hashicorp/example?ref=v1.0.0").unwrap();
+        let m1 = GITHUB_REF_MATCH_RE
+            .captures("github.com/hashicorp/example?ref=v1.0.0")
+            .unwrap();
         assert_eq!(&m1["project"], "hashicorp/example");
         assert_eq!(&m1["tag"], "v1.0.0");
 
@@ -2568,13 +2586,17 @@ provider "registry.terraform.io/hashicorp/random" {
         }
 
         let folder = GIT_TAGS_REF_MATCH_RE
-            .captures("git::ssh://git@git.example.com/modules/foo-module.git//bar?depth=1&ref=v1.0.0")
+            .captures(
+                "git::ssh://git@git.example.com/modules/foo-module.git//bar?depth=1&ref=v1.0.0",
+            )
             .unwrap();
         assert_eq!(&folder["project"], "modules/foo-module.git");
         assert_eq!(&folder["tag"], "v1.0.0");
 
         let colon = GIT_TAGS_REF_MATCH_RE
-            .captures("git::ssh://git@git.example.com:modules/foo-module.git//bar?depth=1&ref=v1.0.0")
+            .captures(
+                "git::ssh://git@git.example.com:modules/foo-module.git//bar?depth=1&ref=v1.0.0",
+            )
             .unwrap();
         assert_eq!(&colon["project"], "modules/foo-module.git");
         assert_eq!(&colon["tag"], "v1.0.0");
@@ -2613,7 +2635,11 @@ provider "registry.terraform.io/hashicorp/random" {
             let m = GIT_TAGS_REF_MATCH_RE.captures(s).unwrap();
             assert_eq!(&m["project"], *expected_project, "failed for {s}");
             // v1.0.0 for http/https/ssh cases; v5.0.0 for git@ cases
-            let expected_tag = if s.contains("gitlab-instance") { "v5.0.0" } else { "v1.0.0" };
+            let expected_tag = if s.contains("gitlab-instance") {
+                "v5.0.0"
+            } else {
+                "v1.0.0"
+            };
             assert_eq!(&m["tag"], expected_tag, "failed for {s}");
         }
     }
@@ -2656,7 +2682,10 @@ provider "registry.terraform.io/hashicorp/random" {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
             .captures("git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0")
             .unwrap();
-        assert_eq!(&m["url"], "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository");
+        assert_eq!(
+            &m["url"],
+            "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository"
+        );
         assert_eq!(&m["organization"], "MyOrg");
         assert_eq!(&m["project"], "MyProject");
         assert_eq!(&m["repository"], "MyRepository");
@@ -2670,7 +2699,10 @@ provider "registry.terraform.io/hashicorp/random" {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
             .captures("git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository?ref=1.0.0")
             .unwrap();
-        assert_eq!(&m["url"], "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository");
+        assert_eq!(
+            &m["url"],
+            "git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository"
+        );
         assert_eq!(&m["organization"], "MyOrg");
         assert_eq!(&m["project"], "MyProject");
         assert_eq!(&m["repository"], "MyRepository");

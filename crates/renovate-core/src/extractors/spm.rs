@@ -24,9 +24,8 @@ pub struct SpmDep {
 
 // ── Token regexes (mirror the TypeScript regExps map) ─────────────────────────
 
-static RE_SPACE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?s)(\s+|//[^\n]*|/\*.*?\*/)+").unwrap()
-});
+static RE_SPACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?s)(\s+|//[^\n]*|/\*.*?\*/)+").unwrap());
 static RE_DEPS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"dependencies").unwrap());
 static RE_COLON: LazyLock<Regex> = LazyLock::new(|| Regex::new(r":").unwrap());
 static RE_BEGIN_SECTION: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\[").unwrap());
@@ -34,8 +33,7 @@ static RE_END_SECTION: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"],?").unw
 static RE_PACKAGE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\s*.\s*package\s*\(\s*").unwrap());
 static RE_URL_KEY: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"url").unwrap());
-static RE_STRING_LITERAL: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#""[^"]+""#).unwrap());
+static RE_STRING_LITERAL: LazyLock<Regex> = LazyLock::new(|| Regex::new(r#""[^"]+""#).unwrap());
 static RE_COMMA: LazyLock<Regex> = LazyLock::new(|| Regex::new(r",").unwrap());
 static RE_FROM: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"from").unwrap());
 static RE_RANGE_OP: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\.\.[.<]").unwrap());
@@ -43,8 +41,7 @@ static RE_EXACT_VERSION: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\.\s*exact\s*\(\s*").unwrap());
 static RE_EXACT_VERSION_LABEL: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\s*exact:").unwrap());
-static RE_TRAITS_LABEL: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"\s*traits\s*:").unwrap());
+static RE_TRAITS_LABEL: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s*traits\s*:").unwrap());
 // Line-scoped greedy consume: matches up to (and including) the next `.package(` on the SAME line.
 // Mirrors TypeScript: `regEx(/.*\.\s*package\s*\(\s*/)` — NO dotAll flag, so `.*` stops at newlines.
 static RE_TRAITS_CONSUME: LazyLock<Regex> =
@@ -108,10 +105,20 @@ fn get_match<'a>(s: &'a str, candidates: &[(Token, &LazyLock<Regex>)]) -> Option
             let idx = m.start();
             let len = m.end() - m.start();
             if idx == 0 {
-                return Some(Match { idx, len, token, substr: &s[..len] });
+                return Some(Match {
+                    idx,
+                    len,
+                    token,
+                    substr: &s[..len],
+                });
             }
             if best.as_ref().is_none_or(|b| idx < b.idx) {
-                best = Some(Match { idx, len, token, substr: &s[idx..idx + len] });
+                best = Some(Match {
+                    idx,
+                    len,
+                    token,
+                    substr: &s[idx..idx + len],
+                });
             }
         }
     }
@@ -121,10 +128,7 @@ fn get_match<'a>(s: &'a str, candidates: &[(Token, &LazyLock<Regex>)]) -> Option
 fn candidates_for(state: &State) -> Vec<(Token, &'static LazyLock<Regex>)> {
     match state {
         State::Scan => vec![(Token::Deps, &RE_DEPS)],
-        State::Dependencies => vec![
-            (Token::Space, &RE_SPACE),
-            (Token::Colon, &RE_COLON),
-        ],
+        State::Dependencies => vec![(Token::Space, &RE_SPACE), (Token::Colon, &RE_COLON)],
         State::DependenciesColon => vec![
             (Token::Space, &RE_SPACE),
             (Token::BeginSection, &RE_BEGIN_SECTION),
@@ -263,11 +267,22 @@ fn parse_url(url: &str) -> Option<ParsedUrl> {
     }
 
     let dep_name = format!("{owner}/{repo}");
-    let datasource = if platform == "github" { "github-tags" } else { "gitlab-tags" };
-    let registry_urls =
-        if !is_public { Some(vec![format!("{scheme}://{host}")]) } else { None };
+    let datasource = if platform == "github" {
+        "github-tags"
+    } else {
+        "gitlab-tags"
+    };
+    let registry_urls = if !is_public {
+        Some(vec![format!("{scheme}://{host}")])
+    } else {
+        None
+    };
 
-    Some(ParsedUrl { dep_name, datasource, registry_urls })
+    Some(ParsedUrl {
+        dep_name,
+        datasource,
+        registry_urls,
+    })
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -668,7 +683,11 @@ pub fn extract_package_file(content: &str) -> Option<Vec<SpmDep>> {
 
 /// Mirrors `lib/modules/manager/swift/range.ts` `getRangeStrategy()`.
 pub fn get_range_strategy(range_strategy: &str) -> &str {
-    if range_strategy == "auto" { "bump" } else { range_strategy }
+    if range_strategy == "auto" {
+        "bump"
+    } else {
+        range_strategy
+    }
 }
 
 // ── Legacy API (kept for existing non-ported tests) ───────────────────────────
@@ -795,7 +814,10 @@ mod tests {
         let deps = extract_package_file(content).unwrap();
         assert_eq!(deps[0].datasource, "github-tags");
         assert_eq!(deps[0].dep_name, "org/repo");
-        assert_eq!(deps[0].registry_urls, Some(vec!["https://github.example.com".to_owned()]));
+        assert_eq!(
+            deps[0].registry_urls,
+            Some(vec!["https://github.example.com".to_owned()])
+        );
     }
 
     // Ported: "extracts self-hosted GitLab dependencies with registryUrls" — swift/extract.spec.ts line 95
@@ -890,8 +912,10 @@ mod tests {
         let content = include_str!("../../tests/fixtures/spm/SamplePackage.swift");
         let deps = extract_package_file(content).unwrap();
 
-        let github_deps: Vec<_> =
-            deps.iter().filter(|d| d.datasource == "github-tags").collect();
+        let github_deps: Vec<_> = deps
+            .iter()
+            .filter(|d| d.datasource == "github-tags")
+            .collect();
         assert_eq!(github_deps.len(), 10);
         assert_eq!(deps.len(), 10);
 
@@ -900,13 +924,15 @@ mod tests {
             .iter()
             .any(|d| d.dep_name == "0x7fs/CountedSet" && d.current_value.trim() == "\"master\""));
 
-        assert!(deps
-            .iter()
-            .any(|d| d.dep_name == "avito-tech/GraphiteClient" && d.current_value == "0.1.0"));
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "avito-tech/GraphiteClient" && d.current_value == "0.1.0")
+        );
 
-        assert!(deps
-            .iter()
-            .any(|d| d.dep_name == "apple/swift-argument-parser" && d.current_value == "1.2.1"));
+        assert!(
+            deps.iter()
+                .any(|d| d.dep_name == "apple/swift-argument-parser" && d.current_value == "1.2.1")
+        );
 
         // ZIPFoundation uses `from : "0.9.6"` with space and block comment
         assert!(deps.iter().any(|d| d.dep_name == "weichsel/ZIPFoundation"
@@ -1120,34 +1146,48 @@ let package = Package(
         assert!(extract_package_file("dependencies:[.package(url:]").is_none());
         assert!(extract_package_file(r#"dependencies:[.package(url:"fo"#).is_none());
         assert!(extract_package_file(r#"dependencies:[.package(url:"fo]"#).is_none());
-        assert!(extract_package_file(
-            r#"dependencies:[.package(url:"https://example.com/something.git"]"#
-        )
-        .is_none());
-        assert!(extract_package_file(
-            r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git"]"#
-        )
-        .is_none());
-        assert!(extract_package_file(
-            r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git".package(]"#
-        )
-        .is_none());
-        assert!(extract_package_file(
-            r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", ]"#
-        )
-        .is_none());
-        assert!(extract_package_file(
-            r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", .package(]"#
-        )
-        .is_none());
-        assert!(extract_package_file(
-            r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", .exact(]"#
-        )
-        .is_none());
-        assert!(extract_package_file(
-            r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:]"#
-        )
-        .is_none());
+        assert!(
+            extract_package_file(
+                r#"dependencies:[.package(url:"https://example.com/something.git"]"#
+            )
+            .is_none()
+        );
+        assert!(
+            extract_package_file(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git"]"#
+            )
+            .is_none()
+        );
+        assert!(
+            extract_package_file(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git".package(]"#
+            )
+            .is_none()
+        );
+        assert!(
+            extract_package_file(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", ]"#
+            )
+            .is_none()
+        );
+        assert!(
+            extract_package_file(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", .package(]"#
+            )
+            .is_none()
+        );
+        assert!(
+            extract_package_file(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", .exact(]"#
+            )
+            .is_none()
+        );
+        assert!(
+            extract_package_file(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:]"#
+            )
+            .is_none()
+        );
         assert!(extract_package_file(
             r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:.package()]"#
         )
@@ -1162,10 +1202,12 @@ let package = Package(
         assert!(extract_package_file(&format!("{base}from.package(")).is_some());
         assert!(extract_package_file(&format!("{base}from:]")).is_some());
         assert!(extract_package_file(&format!("{base}from:.package(")).is_some());
-        assert!(extract_package_file(&format!(
-            r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]"#
-        ))
-        .is_some());
+        assert!(
+            extract_package_file(&format!(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]"#
+            ))
+            .is_some()
+        );
     }
 
     // Ported: "parses package descriptions" — swift/index.spec.ts line 109
@@ -1173,51 +1215,41 @@ let package = Package(
     fn index_parses_package_descriptions() {
         let base = r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git","#;
         assert_eq!(
-            extract_package_file(&format!(r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]"#))
-                .unwrap()[0]
+            extract_package_file(&format!(
+                r#"dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]"#
+            ))
+            .unwrap()[0]
                 .current_value,
             r#"from:"1.2.3""#
         );
         assert_eq!(
-            extract_package_file(&format!(r#"{base}"1.2.3"...)]"#))
-                .unwrap()[0]
-                .current_value,
+            extract_package_file(&format!(r#"{base}"1.2.3"...)]"#)).unwrap()[0].current_value,
             r#""1.2.3"..."#
         );
         assert_eq!(
-            extract_package_file(&format!(r#"{base}"1.2.3"..."1.2.4")]"#))
-                .unwrap()[0]
+            extract_package_file(&format!(r#"{base}"1.2.3"..."1.2.4")]"#)).unwrap()[0]
                 .current_value,
             r#""1.2.3"..."1.2.4""#
         );
         assert_eq!(
-            extract_package_file(&format!(r#"{base}"1.2.3"..<"1.2.4")]"#))
-                .unwrap()[0]
+            extract_package_file(&format!(r#"{base}"1.2.3"..<"1.2.4")]"#)).unwrap()[0]
                 .current_value,
             r#""1.2.3"..<"1.2.4""#
         );
         assert_eq!(
-            extract_package_file(&format!(r#"{base}..."1.2.3")]"#))
-                .unwrap()[0]
-                .current_value,
+            extract_package_file(&format!(r#"{base}..."1.2.3")]"#)).unwrap()[0].current_value,
             r#"..."1.2.3""#
         );
         assert_eq!(
-            extract_package_file(&format!(r#"{base}..<"1.2.3")]"#))
-                .unwrap()[0]
-                .current_value,
+            extract_package_file(&format!(r#"{base}..<"1.2.3")]"#)).unwrap()[0].current_value,
             r#"..<"1.2.3""#
         );
         assert_eq!(
-            extract_package_file(&format!(r#"{base}.exact("1.2.3"))]"#))
-                .unwrap()[0]
-                .current_value,
+            extract_package_file(&format!(r#"{base}.exact("1.2.3"))]"#)).unwrap()[0].current_value,
             "1.2.3"
         );
         assert_eq!(
-            extract_package_file(&format!(r#"{base}exact:"1.2.3"))]"#))
-                .unwrap()[0]
-                .current_value,
+            extract_package_file(&format!(r#"{base}exact:"1.2.3"))]"#)).unwrap()[0].current_value,
             "1.2.3"
         );
     }

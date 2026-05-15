@@ -115,7 +115,10 @@ const HERMIT_UPDATED_MARKER: &str = "#hermit updated";
 /// Mirrors `lib/modules/manager/hermit/update.ts` `updateDependency()`.
 /// Adds the marker if not already present; otherwise returns content unchanged.
 pub fn update_hermit_dependency(file_content: &str) -> String {
-    if file_content.lines().any(|l| l.trim() == HERMIT_UPDATED_MARKER) {
+    if file_content
+        .lines()
+        .any(|l| l.trim() == HERMIT_UPDATED_MARKER)
+    {
         return file_content.to_owned();
     }
     format!("{file_content}\n{HERMIT_UPDATED_MARKER}")
@@ -205,7 +208,11 @@ mod tests {
     // Ported: 'minimatches("$path") === $expected' — modules/manager/hermit/default-config.spec.ts line 13
     #[test]
     fn hermit_exclude_commit_paths_glob() {
-        let should_match = ["bin/hermit", "gradle/bin/hermit", "nested/module/bin/hermit"];
+        let should_match = [
+            "bin/hermit",
+            "gradle/bin/hermit",
+            "nested/module/bin/hermit",
+        ];
         let should_not_match = [
             "nested/testbin/hermit",
             "other",
@@ -223,7 +230,11 @@ mod tests {
     // Ported: 'matchRegexOrGlobList("$path") === $expected' — modules/manager/hermit/default-config.spec.ts line 30
     #[test]
     fn hermit_file_pattern_matches_expected() {
-        let should_match = ["bin/hermit", "gradle/bin/hermit", "nested/module/bin/hermit"];
+        let should_match = [
+            "bin/hermit",
+            "gradle/bin/hermit",
+            "nested/module/bin/hermit",
+        ];
         let should_not_match = [
             "nested/testbin/hermit",
             "other",

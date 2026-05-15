@@ -89,7 +89,10 @@ const COPIER_UPDATED_MARKER: &str = "#copier updated";
 ///
 /// Mirrors `lib/modules/manager/copier/update.ts` `updateDependency()`.
 pub fn update_copier_dependency(file_content: &str) -> String {
-    if file_content.lines().any(|l| l.trim() == COPIER_UPDATED_MARKER) {
+    if file_content
+        .lines()
+        .any(|l| l.trim() == COPIER_UPDATED_MARKER)
+    {
         return file_content.to_owned();
     }
     format!("{file_content}\n{COPIER_UPDATED_MARKER}")

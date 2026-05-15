@@ -2470,11 +2470,8 @@ fake-tool = '1.6.2'
     // Ported: "should set extractVersion if tag_regex is provided" — mise/backends.spec.ts line 322
     #[test]
     fn ubi_set_extract_version_with_tag_regex() {
-        let r = create_ubi_tool_config(
-            "cargo-bins/cargo-binstall",
-            "1.10.17",
-            Some(r"^\d+\.\d+\."),
-        );
+        let r =
+            create_ubi_tool_config("cargo-bins/cargo-binstall", "1.10.17", Some(r"^\d+\.\d+\."));
         assert_eq!(
             r.extract_version.as_deref(),
             Some(r"^v?(?<version>\d+\.\d+\.)")

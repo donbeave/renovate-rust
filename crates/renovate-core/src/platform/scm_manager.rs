@@ -85,8 +85,14 @@ mod tests {
     fn get_scm_merge_method_all_cases() {
         assert_eq!(get_scm_merge_method(None), None);
         assert_eq!(get_scm_merge_method(Some("auto")), None);
-        assert_eq!(get_scm_merge_method(Some("fast-forward")), Some("FAST_FORWARD_ONLY"));
-        assert_eq!(get_scm_merge_method(Some("merge-commit")), Some("MERGE_COMMIT"));
+        assert_eq!(
+            get_scm_merge_method(Some("fast-forward")),
+            Some("FAST_FORWARD_ONLY")
+        );
+        assert_eq!(
+            get_scm_merge_method(Some("merge-commit")),
+            Some("MERGE_COMMIT")
+        );
         assert_eq!(get_scm_merge_method(Some("rebase")), Some("REBASE"));
         assert_eq!(get_scm_merge_method(Some("squash")), Some("SQUASH"));
     }

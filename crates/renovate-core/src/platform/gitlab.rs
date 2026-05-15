@@ -504,7 +504,8 @@ mod tests {
     // Ported: "should extract an owner rule from a line after a section header" — modules/platform/gitlab/code-owners.spec.ts line 33
     #[test]
     fn code_owners_section_header_default_users() {
-        let rules = extract_rules_from_code_owners_lines(&["[team] username1 username2", "filename"]);
+        let rules =
+            extract_rules_from_code_owners_lines(&["[team] username1 username2", "filename"]);
         assert_eq!(rules.len(), 1);
         assert_eq!(rules[0].pattern, "filename");
         assert_eq!(rules[0].usernames, vec!["username1", "username2"]);
@@ -524,7 +525,8 @@ mod tests {
     // Ported: "should extract an owner rule from a line after a section header with spaces" — modules/platform/gitlab/code-owners.spec.ts line 61
     #[test]
     fn code_owners_section_header_with_spaces() {
-        let rules = extract_rules_from_code_owners_lines(&["[Backend Team] @backend-team", "filename"]);
+        let rules =
+            extract_rules_from_code_owners_lines(&["[Backend Team] @backend-team", "filename"]);
         assert_eq!(rules.len(), 1);
         assert_eq!(rules[0].pattern, "filename");
         assert_eq!(rules[0].usernames, vec!["@backend-team"]);
@@ -544,7 +546,10 @@ mod tests {
     // Ported: "should extract an owner rule from a line after a section header with spaces and multiple usernames" — modules/platform/gitlab/code-owners.spec.ts line 89
     #[test]
     fn code_owners_section_header_multiple_users() {
-        let rules = extract_rules_from_code_owners_lines(&["[Backend Team] @backend-team @backend-lead", "filename"]);
+        let rules = extract_rules_from_code_owners_lines(&[
+            "[Backend Team] @backend-team @backend-lead",
+            "filename",
+        ]);
         assert_eq!(rules.len(), 1);
         assert_eq!(rules[0].pattern, "filename");
         assert_eq!(rules[0].usernames, vec!["@backend-team", "@backend-lead"]);
@@ -554,7 +559,8 @@ mod tests {
     // Ported: "should extract an owner rule from a line after an optional section header with spaces" — modules/platform/gitlab/code-owners.spec.ts line 103
     #[test]
     fn code_owners_optional_section_header() {
-        let rules = extract_rules_from_code_owners_lines(&["^[Backend Team] @backend-team", "filename"]);
+        let rules =
+            extract_rules_from_code_owners_lines(&["^[Backend Team] @backend-team", "filename"]);
         assert_eq!(rules.len(), 1);
         assert_eq!(rules[0].pattern, "filename");
         assert_eq!(rules[0].usernames, vec!["@backend-team"]);
@@ -564,7 +570,8 @@ mod tests {
     // Ported: "should extract an owner rule from a line after a section header with approval count and spaces" — modules/platform/gitlab/code-owners.spec.ts line 117
     #[test]
     fn code_owners_section_header_with_approval_count() {
-        let rules = extract_rules_from_code_owners_lines(&["[Backend Team][2] @backend-team", "filename"]);
+        let rules =
+            extract_rules_from_code_owners_lines(&["[Backend Team][2] @backend-team", "filename"]);
         assert_eq!(rules.len(), 1);
         assert_eq!(rules[0].pattern, "filename");
         assert_eq!(rules[0].usernames, vec!["@backend-team"]);

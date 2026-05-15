@@ -493,10 +493,7 @@ fn get_auto_replace_template(
 /// - CI Dependency Proxy prefixes (`$CI_DEPENDENCY_PROXY_*_IMAGE_PREFIX/`)
 /// - Registry aliases (alias_name → alias_value)
 /// - Plain image references
-pub fn get_gitlab_dep(
-    image_name: &str,
-    registry_aliases: &[(&str, &str)],
-) -> GitlabCiDockerDep {
+pub fn get_gitlab_dep(image_name: &str, registry_aliases: &[(&str, &str)]) -> GitlabCiDockerDep {
     // Check for CI_DEPENDENCY_PROXY prefix
     if let Some(prefix_end) = dep_proxy_prefix_end(image_name) {
         let prefix = &image_name[..prefix_end];
@@ -926,7 +923,10 @@ services:
         assert_eq!(dep.dep_name, "mariadb");
         assert_eq!(dep.current_value.as_deref(), Some("10.4.11"));
         assert_eq!(dep.replace_string, "mariadb:10.4.11");
-        assert_eq!(dep.auto_replace_string_template, DEFAULT_AUTO_REPLACE_TEMPLATE);
+        assert_eq!(
+            dep.auto_replace_string_template,
+            DEFAULT_AUTO_REPLACE_TEMPLATE
+        );
     }
 
     #[test]
@@ -961,7 +961,9 @@ services:
         assert_eq!(dep.dep_name, "mariadb");
         assert_eq!(
             dep.auto_replace_string_template,
-            format!("$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/{DEFAULT_AUTO_REPLACE_TEMPLATE}")
+            format!(
+                "$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/{DEFAULT_AUTO_REPLACE_TEMPLATE}"
+            )
         );
     }
 
@@ -972,7 +974,10 @@ services:
         assert_eq!(dep.dep_name, "renovate/renovate");
         assert_eq!(dep.current_value.as_deref(), Some("19.70.8-slim"));
         assert_eq!(dep.replace_string, "renovate/renovate:19.70.8-slim");
-        assert_eq!(dep.auto_replace_string_template, DEFAULT_AUTO_REPLACE_TEMPLATE);
+        assert_eq!(
+            dep.auto_replace_string_template,
+            DEFAULT_AUTO_REPLACE_TEMPLATE
+        );
     }
 
     #[test]
@@ -991,7 +996,10 @@ services:
     // Ported: "supports registry aliases - $name" — gitlabci/utils.spec.ts line 48
     #[test]
     fn get_gitlab_dep_registry_alias_multiple() {
-        let dep = get_gitlab_dep("foo/image:1.0", &[("foo", "foo.registry.com"), ("bar", "bar.registry.com")]);
+        let dep = get_gitlab_dep(
+            "foo/image:1.0",
+            &[("foo", "foo.registry.com"), ("bar", "bar.registry.com")],
+        );
         assert_eq!(dep.dep_name, "foo/image");
         assert_eq!(dep.package_name, "foo.registry.com/image");
         assert_eq!(dep.current_value.as_deref(), Some("1.0"));
@@ -1003,7 +1011,10 @@ services:
 
     #[test]
     fn get_gitlab_dep_registry_alias_variable() {
-        let dep = get_gitlab_dep("$CI_REGISTRY/image:1.0", &[("$CI_REGISTRY", "registry.com")]);
+        let dep = get_gitlab_dep(
+            "$CI_REGISTRY/image:1.0",
+            &[("$CI_REGISTRY", "registry.com")],
+        );
         assert_eq!(dep.dep_name, "$CI_REGISTRY/image");
         assert_eq!(dep.package_name, "registry.com/image");
         assert_eq!(dep.current_value.as_deref(), Some("1.0"));
@@ -1015,7 +1026,10 @@ services:
 
     #[test]
     fn get_gitlab_dep_registry_alias_variable_brackets() {
-        let dep = get_gitlab_dep("${CI_REGISTRY}/image:1.0", &[("${CI_REGISTRY}", "registry.com")]);
+        let dep = get_gitlab_dep(
+            "${CI_REGISTRY}/image:1.0",
+            &[("${CI_REGISTRY}", "registry.com")],
+        );
         assert_eq!(dep.dep_name, "${CI_REGISTRY}/image");
         assert_eq!(dep.package_name, "registry.com/image");
         assert_eq!(
@@ -1028,7 +1042,10 @@ services:
     fn get_gitlab_dep_registry_alias_not_aliased_variable() {
         // $CI_REGISTRY/image:1.0 with empty alias list → treated as plain image
         let dep = get_gitlab_dep("$CI_REGISTRY/image:1.0", &[]);
-        assert_eq!(dep.auto_replace_string_template, DEFAULT_AUTO_REPLACE_TEMPLATE);
+        assert_eq!(
+            dep.auto_replace_string_template,
+            DEFAULT_AUTO_REPLACE_TEMPLATE
+        );
     }
 
     #[test]
@@ -1036,7 +1053,10 @@ services:
         let dep = get_gitlab_dep("registry.com/image:1.0", &[]);
         assert_eq!(dep.dep_name, "registry.com/image");
         assert_eq!(dep.current_value.as_deref(), Some("1.0"));
-        assert_eq!(dep.auto_replace_string_template, DEFAULT_AUTO_REPLACE_TEMPLATE);
+        assert_eq!(
+            dep.auto_replace_string_template,
+            DEFAULT_AUTO_REPLACE_TEMPLATE
+        );
     }
 
     // Ported: "no Docker hub" — gitlabci/utils.spec.ts line 73
@@ -1045,7 +1065,13 @@ services:
         let dep = get_gitlab_dep("quay.io/prometheus/node-exporter:v1.3.1", &[]);
         assert_eq!(dep.dep_name, "quay.io/prometheus/node-exporter");
         assert_eq!(dep.current_value.as_deref(), Some("v1.3.1"));
-        assert_eq!(dep.replace_string, "quay.io/prometheus/node-exporter:v1.3.1");
-        assert_eq!(dep.auto_replace_string_template, DEFAULT_AUTO_REPLACE_TEMPLATE);
+        assert_eq!(
+            dep.replace_string,
+            "quay.io/prometheus/node-exporter:v1.3.1"
+        );
+        assert_eq!(
+            dep.auto_replace_string_template,
+            DEFAULT_AUTO_REPLACE_TEMPLATE
+        );
     }
 }

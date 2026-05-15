@@ -541,8 +541,7 @@ end
         assert!(extract(content).is_empty());
     }
 
-    const GEMFILE_LOCK: &str =
-        include_str!("../../tests/fixtures/bundler/Gemfile.rubyci.lock");
+    const GEMFILE_LOCK: &str = include_str!("../../tests/fixtures/bundler/Gemfile.rubyci.lock");
 
     // Ported: "detects already updated" — modules/manager/bundler/update-locked.spec.ts line 9
     #[test]
@@ -555,8 +554,7 @@ end
     // Ported: "returns unsupported for empty lockfile" — modules/manager/bundler/update-locked.spec.ts line 20
     #[test]
     fn bundler_update_locked_unsupported_for_no_content() {
-        let result =
-            update_locked_bundler_dependency(Some("activejob"), Some("5.2.3"), None);
+        let result = update_locked_bundler_dependency(Some("activejob"), Some("5.2.3"), None);
         assert_eq!(result.as_str(), "unsupported");
     }
 
@@ -614,8 +612,7 @@ end
     // Ported: "escapes special characters in the username but not the password" — modules/manager/bundler/host-rules.spec.ts line 32
     #[test]
     fn bundler_auth_header_encodes_username_at_sign() {
-        let val =
-            get_authentication_header_value(Some("test@example.com"), Some("p@ssword"), None);
+        let val = get_authentication_header_value(Some("test@example.com"), Some("p@ssword"), None);
         assert_eq!(val, "test%40example.com:p@ssword");
     }
 
@@ -702,10 +699,7 @@ end
             entries.get("gem_with_prerelease"),
             Some(&"1.0.0.beta1".to_owned())
         );
-        assert_eq!(
-            entries.get("gem_with_patch"),
-            Some(&"1.2.3.4".to_owned())
-        );
+        assert_eq!(entries.get("gem_with_patch"), Some(&"1.2.3.4".to_owned()));
         assert_eq!(
             entries.get("gem_with_alpha"),
             Some(&"2.0.0.alpha".to_owned())
@@ -717,10 +711,7 @@ end
     fn bundler_locked_version_gem_names_with_special_chars() {
         let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    gem-with-dashes (1.0.0)\n    gem_with_underscores (2.0.0)\n    gem.with.dots (3.0.0)\n";
         let entries = extract_lock_file_entries(content);
-        assert_eq!(
-            entries.get("gem-with-dashes"),
-            Some(&"1.0.0".to_owned())
-        );
+        assert_eq!(entries.get("gem-with-dashes"), Some(&"1.0.0".to_owned()));
         assert_eq!(
             entries.get("gem_with_underscores"),
             Some(&"2.0.0".to_owned())

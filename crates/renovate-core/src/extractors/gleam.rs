@@ -109,7 +109,11 @@ pub fn parse_gleam_lock_file(content: &str) -> Option<GleamLock> {
                             .collect()
                     })
                     .unwrap_or_default();
-                out.push(GleamLockPackage { name, version, requirements });
+                out.push(GleamLockPackage {
+                    name,
+                    version,
+                    requirements,
+                });
             }
             out
         }

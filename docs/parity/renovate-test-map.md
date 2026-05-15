@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2798 / 8612 actionable tests ported (32%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2912 / 8595 actionable tests ported (34%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 

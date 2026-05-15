@@ -164,7 +164,11 @@ fn parse_dep_line(line: &str, dep_type: ConanDepType, out: &mut Vec<ConanDep>) {
 ///
 /// Mirrors `lib/modules/manager/conan/range.ts` `getRangeStrategy()`.
 pub fn get_range_strategy(range_strategy: &str) -> &str {
-    if range_strategy == "auto" { "bump" } else { range_strategy }
+    if range_strategy == "auto" {
+        "bump"
+    } else {
+        range_strategy
+    }
 }
 
 #[cfg(test)]

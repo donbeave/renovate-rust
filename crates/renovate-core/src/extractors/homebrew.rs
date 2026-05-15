@@ -270,9 +270,7 @@ pub fn github_parse_url(url_str: &str) -> Option<GitHubParsedResult> {
         };
         let cv = raw.strip_suffix(".tar.gz").unwrap_or(raw).to_owned();
         (cv, GitHubUrlType::Archive)
-    } else if segs.get(2).copied() == Some("releases")
-        && segs.get(3).copied() == Some("download")
-    {
+    } else if segs.get(2).copied() == Some("releases") && segs.get(3).copied() == Some("download") {
         (segs.get(4).copied()?.to_owned(), GitHubUrlType::Release)
     } else {
         return None;
@@ -321,7 +319,9 @@ pub fn github_build_archive_urls(
         .map(|v| v.to_string())
         .unwrap_or_else(|_| new_version.to_owned());
     vec![
-        format!("https://github.com/{owner}/{repo}/releases/download/{new_version}/{repo}-{ver_for_filename}.tar.gz"),
+        format!(
+            "https://github.com/{owner}/{repo}/releases/download/{new_version}/{repo}-{ver_for_filename}.tar.gz"
+        ),
         format!("https://github.com/{owner}/{repo}/archive/refs/tags/{new_version}.tar.gz"),
     ]
 }
@@ -355,10 +355,8 @@ pub struct NpmDepResult {
 }
 
 static NPM_PATH_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"^/(?P<pkg>(?:@[^/]+/)?[^/]+)/-/[^/]+-(?P<ver>[\d.]+(?:-[a-zA-Z0-9.-]*)?)\.tgz$",
-    )
-    .unwrap()
+    Regex::new(r"^/(?P<pkg>(?:@[^/]+/)?[^/]+)/-/[^/]+-(?P<ver>[\d.]+(?:-[a-zA-Z0-9.-]*)?)\.tgz$")
+        .unwrap()
 });
 
 /// Parse an NPM registry URL from a Homebrew formula.
@@ -774,9 +772,7 @@ end"#;
             owner_name: "owner".to_owned(),
             repo_name: "repo".to_owned(),
             sha256: Some("abc123".to_owned()),
-            url: Some(
-                "https://github.com/owner/repo/archive/refs/tags/v1.2.3.tar.gz".to_owned(),
-            ),
+            url: Some("https://github.com/owner/repo/archive/refs/tags/v1.2.3.tar.gz".to_owned()),
         };
         let urls = github_build_archive_urls(&data, "v1.2.4");
         assert_eq!(
@@ -800,8 +796,7 @@ end"#;
         let dep = github_create_dependency(
             &parsed,
             Some("0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7".to_owned()),
-            "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
-                .to_owned(),
+            "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz".to_owned(),
         );
         assert_eq!(dep.dep_name, "aide/aide");
         assert_eq!(dep.current_value, "v0.16.1");
@@ -873,10 +868,8 @@ end"#;
     // Ported: "parses version with prerelease" — homebrew/handlers/npm.spec.ts line 57
     #[test]
     fn npm_parse_url_prerelease_version() {
-        let result = npm_parse_url(
-            "https://registry.npmjs.org/package/-/package-1.0.0-beta.1.tgz",
-        )
-        .unwrap();
+        let result =
+            npm_parse_url("https://registry.npmjs.org/package/-/package-1.0.0-beta.1.tgz").unwrap();
         assert_eq!(result.current_value, "1.0.0-beta.1");
         assert_eq!(result.package_name, "package");
     }
@@ -884,10 +877,9 @@ end"#;
     // Ported: "parses version with build metadata" — homebrew/handlers/npm.spec.ts line 69
     #[test]
     fn npm_parse_url_build_metadata_version() {
-        let result = npm_parse_url(
-            "https://registry.npmjs.org/package/-/package-1.0.0-alpha.2.tgz",
-        )
-        .unwrap();
+        let result =
+            npm_parse_url("https://registry.npmjs.org/package/-/package-1.0.0-alpha.2.tgz")
+                .unwrap();
         assert_eq!(result.current_value, "1.0.0-alpha.2");
         assert_eq!(result.package_name, "package");
     }
@@ -944,7 +936,10 @@ end"#;
         let data = NpmManagerData {
             package_name: "@anthropic-ai/claude-code".to_owned(),
             sha256: Some("abc123".to_owned()),
-            url: Some("https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz".to_owned()),
+            url: Some(
+                "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-0.1.0.tgz"
+                    .to_owned(),
+            ),
         };
         let urls = npm_build_archive_urls(&data, "0.2.0");
         assert_eq!(
@@ -989,7 +984,10 @@ end"#;
         let data = NpmManagerData {
             package_name: "@scope/package-name".to_owned(),
             sha256: Some("abc123".to_owned()),
-            url: Some("https://registry.npmjs.org/@scope/package-name/-/package-name-1.0.0.tgz".to_owned()),
+            url: Some(
+                "https://registry.npmjs.org/@scope/package-name/-/package-name-1.0.0.tgz"
+                    .to_owned(),
+            ),
         };
         let urls = npm_build_archive_urls(&data, "1.1.0");
         assert_eq!(

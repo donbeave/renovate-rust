@@ -358,7 +358,10 @@ static NON_SCOPED_WITH_SUBDIR_RE: LazyLock<Regex> = LazyLock::new(|| {
 
 /// Regex for git preset (standard form): `repo[:presetName][#tag]`
 static GIT_PRESET_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^(?P<repo>[~\w\-. /%]+?)(?::(?P<preset_name>[\w\-.+/]+))?(?:#(?P<tag>[\w\-./ ]+?))?$").unwrap()
+    Regex::new(
+        r"^(?P<repo>[~\w\-. /%]+?)(?::(?P<preset_name>[\w\-.+/]+))?(?:#(?P<tag>[\w\-./ ]+?))?$",
+    )
+    .unwrap()
 });
 
 /// Parse a preset string into its components.
@@ -452,7 +455,9 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
         // repo = @scope or @scope/name up to first `:` or end
         let at_re = Regex::new(r"(@.*?)(:|$)").unwrap();
         let mut repo = if let Some(caps) = at_re.captures(&s) {
-            caps.get(1).map(|m| m.as_str().to_owned()).unwrap_or_default()
+            caps.get(1)
+                .map(|m| m.as_str().to_owned())
+                .unwrap_or_default()
         } else {
             s.clone()
         };
@@ -481,7 +486,10 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
     if s.contains("//")
         && let Some(caps) = NON_SCOPED_WITH_SUBDIR_RE.captures(&s)
     {
-        let repo = caps.name("repo").map(|m| m.as_str().to_owned()).unwrap_or_default();
+        let repo = caps
+            .name("repo")
+            .map(|m| m.as_str().to_owned())
+            .unwrap_or_default();
         let preset_path = caps.name("preset_path").map(|m| m.as_str().to_owned());
         let preset_name = caps
             .name("preset_name")
@@ -501,7 +509,10 @@ pub fn parse_preset(input: &str) -> ParsedPreset {
 
     // standard git preset form
     if let Some(caps) = GIT_PRESET_RE.captures(&s) {
-        let mut repo = caps.name("repo").map(|m| m.as_str().to_owned()).unwrap_or_default();
+        let mut repo = caps
+            .name("repo")
+            .map(|m| m.as_str().to_owned())
+            .unwrap_or_default();
         let preset_name = caps
             .name("preset_name")
             .map(|m| m.as_str().to_owned())
@@ -607,9 +618,8 @@ pub fn extract_package_file(content: &str) -> Option<Vec<RenovateConfigDep>> {
     if let Some(rules_arr) = obj.get("packageRules").and_then(|v| v.as_array()) {
         for rule in rules_arr {
             if let Some(rule_obj) = rule.as_object()
-                && let Some(constraints_obj) = rule_obj
-                    .get("constraints")
-                    .and_then(|v| v.as_object())
+                && let Some(constraints_obj) =
+                    rule_obj.get("constraints").and_then(|v| v.as_object())
             {
                 for (tool_name, version_val) in constraints_obj {
                     if let Some(version_str) = version_val.as_str() {
@@ -620,11 +630,7 @@ pub fn extract_package_file(content: &str) -> Option<Vec<RenovateConfigDep>> {
         }
     }
 
-    if deps.is_empty() {
-        None
-    } else {
-        Some(deps)
-    }
+    if deps.is_empty() { None } else { Some(deps) }
 }
 
 /// Push a constraint dep (tool or unknown) into the deps vec.
@@ -777,10 +783,7 @@ mod tests {
     // Ported: "returns null for a config file without presets" — renovate-config/extract.spec.ts line 18
     #[test]
     fn epf_returns_null_without_presets() {
-        assert_eq!(
-            extract_package_file(r#"{ "draftPR": true }"#),
-            None
-        );
+        assert_eq!(extract_package_file(r#"{ "draftPR": true }"#), None);
     }
 
     // Ported: "returns null for a config file only contains built-in presets" — renovate-config/extract.spec.ts line 34
@@ -963,8 +966,7 @@ mod tests {
     // Ported: "extracts known `ToolName`s with ranges versions" — renovate-config/extract.spec.ts line 332
     #[test]
     fn epf_extracts_known_toolnames_range_versions() {
-        let content =
-            r#"{ "constraints": { "bazelisk": ">= 1.2.3", "maven": "< 4.0.0" } }"#;
+        let content = r#"{ "constraints": { "bazelisk": ">= 1.2.3", "maven": "< 4.0.0" } }"#;
         let deps = extract_package_file(content).expect("should return deps");
         assert_eq!(deps.len(), 2);
         assert_eq!(deps[0].current_value.as_deref(), Some(">= 1.2.3"));
@@ -1044,8 +1046,7 @@ mod tests {
     // Ported: "extracts known `ToolName`s with ranges versions" (second) — renovate-config/extract.spec.ts line 476
     #[test]
     fn epf_extracts_toolnames_range_versions_476() {
-        let content =
-            r#"{ "constraints": { "bazelisk": ">= 1.2.3", "maven": "< 4.0.0" } }"#;
+        let content = r#"{ "constraints": { "bazelisk": ">= 1.2.3", "maven": "< 4.0.0" } }"#;
         let deps = extract_package_file(content).expect("should return deps");
         assert_eq!(deps.len(), 2);
         assert_eq!(deps[0].dep_name, "bazelisk");
@@ -1462,7 +1463,10 @@ mod tests {
         assert_eq!(p.repo, "default");
         assert_eq!(p.preset_name, "group");
         assert_eq!(p.preset_path, None);
-        assert_eq!(p.params, Some(vec!["packages/eslint".to_owned(), "eslint".to_owned()]));
+        assert_eq!(
+            p.params,
+            Some(vec!["packages/eslint".to_owned(), "eslint".to_owned()])
+        );
         assert_eq!(p.raw_params, Some("packages/eslint, eslint".to_owned()));
     }
 
@@ -1510,7 +1514,14 @@ mod tests {
         assert_eq!(p.repo, "@somescope/somepackagename");
         assert_eq!(p.preset_name, "default");
         assert_eq!(p.preset_path, None);
-        assert_eq!(p.params, Some(vec!["param1".to_owned(), "param2".to_owned(), "param3".to_owned()]));
+        assert_eq!(
+            p.params,
+            Some(vec![
+                "param1".to_owned(),
+                "param2".to_owned(),
+                "param3".to_owned()
+            ])
+        );
         assert_eq!(p.raw_params, Some("param1, param2, param3".to_owned()));
     }
 
@@ -1558,7 +1569,10 @@ mod tests {
         assert_eq!(p.repo, "@somescope/somepackagename");
         assert_eq!(p.preset_name, "somePresetName");
         assert_eq!(p.preset_path, None);
-        assert_eq!(p.params, Some(vec!["param1".to_owned(), "param2".to_owned()]));
+        assert_eq!(
+            p.params,
+            Some(vec!["param1".to_owned(), "param2".to_owned()])
+        );
         assert_eq!(p.raw_params, Some("param1, param2".to_owned()));
     }
 
@@ -1613,9 +1627,8 @@ mod tests {
     // Ported: "parses HTTPS URLs for gitea" — config/presets/parse.spec.ts line 493
     #[test]
     fn pp_parses_https_urls_for_gitea() {
-        let p = parse_preset(
-            "https://my.server/gitea/renovate-config/raw/branch/main/default.json",
-        );
+        let p =
+            parse_preset("https://my.server/gitea/renovate-config/raw/branch/main/default.json");
         assert_eq!(p.preset_source, "http");
         assert_eq!(
             p.repo,
@@ -1630,9 +1643,8 @@ mod tests {
     // Ported: "parses HTTPS URLs for forgejo" — config/presets/parse.spec.ts line 508
     #[test]
     fn pp_parses_https_urls_for_forgejo() {
-        let p = parse_preset(
-            "https://my.server/forgejo/renovate-config/raw/branch/main/default.json",
-        );
+        let p =
+            parse_preset("https://my.server/forgejo/renovate-config/raw/branch/main/default.json");
         assert_eq!(p.preset_source, "http");
         assert_eq!(
             p.repo,

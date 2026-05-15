@@ -9,8 +9,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-static TRAILING_API_PATH_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"api/v1/?$").unwrap());
+static TRAILING_API_PATH_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"api/v1/?$").unwrap());
 
 /// Strip the `/api/v1[/]` suffix from a Gitea/Forgejo API endpoint URL.
 ///
@@ -98,9 +97,7 @@ mod tests {
             "https://forgejo.renovatebot.com"
         );
         assert_eq!(
-            trim_trailing_api_path(
-                "https://forgejo.renovatebot.com/api/forgejo/api/v1"
-            ),
+            trim_trailing_api_path("https://forgejo.renovatebot.com/api/forgejo/api/v1"),
             "https://forgejo.renovatebot.com/api/forgejo/"
         );
     }
@@ -125,7 +122,10 @@ mod tests {
     }
 
     fn full_permissions() -> RepoPermissions {
-        RepoPermissions { pull: true, push: true }
+        RepoPermissions {
+            pull: true,
+            push: true,
+        }
     }
 
     // Ported: "should return true when repo is usable" — modules/platform/forgejo/utils.spec.ts line 66
@@ -138,9 +138,23 @@ mod tests {
     #[test]
     fn usable_repo_returns_false_without_permissions() {
         // no pull AND push (admin only)
-        assert!(!usable_repo(false, &RepoPermissions { pull: false, push: false }, true));
+        assert!(!usable_repo(
+            false,
+            &RepoPermissions {
+                pull: false,
+                push: false
+            },
+            true
+        ));
         // pull but no push
-        assert!(!usable_repo(false, &RepoPermissions { pull: true, push: false }, true));
+        assert!(!usable_repo(
+            false,
+            &RepoPermissions {
+                pull: true,
+                push: false
+            },
+            true
+        ));
     }
 
     // Ported: "should return false when repo has disabled pull requests" — modules/platform/forgejo/utils.spec.ts line 85

@@ -223,7 +223,10 @@ pub fn extract_pep723(content: &str) -> Option<Pep723Result> {
         return None;
     }
 
-    Some(Pep723Result { deps, python_constraint })
+    Some(Pep723Result {
+        deps,
+        python_constraint,
+    })
 }
 
 /// Normalize a Python package name per PEP 503.

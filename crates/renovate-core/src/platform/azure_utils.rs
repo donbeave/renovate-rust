@@ -5,10 +5,7 @@
 /// Combines a git status context's genre and name into a single slash-separated string.
 ///
 /// Mirrors `getGitStatusContextCombinedName` from `lib/modules/platform/azure/util.ts`.
-pub fn get_git_status_context_combined_name(
-    genre: Option<&str>,
-    name: &str,
-) -> String {
+pub fn get_git_status_context_combined_name(genre: Option<&str>, name: &str) -> String {
     match genre {
         Some(g) if !g.is_empty() => format!("{g}/{name}"),
         _ => name.to_owned(),
@@ -43,18 +40,18 @@ pub fn get_branch_name_without_refs_heads_prefix(branch_path: &str) -> Option<&s
     if branch_path.is_empty() {
         return None;
     }
-    Some(branch_path.strip_prefix("refs/heads/").unwrap_or(branch_path))
+    Some(
+        branch_path
+            .strip_prefix("refs/heads/")
+            .unwrap_or(branch_path),
+    )
 }
 
 /// Truncates a string to at most 3999 characters.
 ///
 /// Mirrors `max4000Chars` from `lib/modules/platform/azure/util.ts`.
 pub fn max4000_chars(s: &str) -> &str {
-    if s.len() >= 4000 {
-        &s[..3999]
-    } else {
-        s
-    }
+    if s.len() >= 4000 { &s[..3999] } else { s }
 }
 
 /// Splits an Azure repository path into `(project, repo)`.
@@ -140,7 +137,10 @@ mod tests {
     #[test]
     fn git_status_context_from_combined_name_slash() {
         let result = get_git_status_context_from_combined_name("my-genre/status-name");
-        assert_eq!(result, Some((Some("my-genre".to_owned()), "status-name".to_owned())));
+        assert_eq!(
+            result,
+            Some((Some("my-genre".to_owned()), "status-name".to_owned()))
+        );
     }
 
     // Ported: "should parse valid genre and name with multiple slashes"
@@ -150,7 +150,10 @@ mod tests {
         let result = get_git_status_context_from_combined_name("my-genre/sub-genre/status-name");
         assert_eq!(
             result,
-            Some((Some("my-genre/sub-genre".to_owned()), "status-name".to_owned()))
+            Some((
+                Some("my-genre/sub-genre".to_owned()),
+                "status-name".to_owned()
+            ))
         );
     }
 
@@ -240,10 +243,26 @@ mod tests {
     #[test]
     fn get_repo_by_name_finds_first_match() {
         let repos = vec![
-            AzureGitRepo { id: Some("1".to_owned()), name: "baz".to_owned(), project_name: Some("qux".to_owned()) },
-            AzureGitRepo { id: Some("2".to_owned()), name: "bar".to_owned(), project_name: None },
-            AzureGitRepo { id: Some("3".to_owned()), name: "bar".to_owned(), project_name: Some("foo".to_owned()) },
-            AzureGitRepo { id: Some("4".to_owned()), name: "bar".to_owned(), project_name: Some("foo".to_owned()) },
+            AzureGitRepo {
+                id: Some("1".to_owned()),
+                name: "baz".to_owned(),
+                project_name: Some("qux".to_owned()),
+            },
+            AzureGitRepo {
+                id: Some("2".to_owned()),
+                name: "bar".to_owned(),
+                project_name: None,
+            },
+            AzureGitRepo {
+                id: Some("3".to_owned()),
+                name: "bar".to_owned(),
+                project_name: Some("foo".to_owned()),
+            },
+            AzureGitRepo {
+                id: Some("4".to_owned()),
+                name: "bar".to_owned(),
+                project_name: Some("foo".to_owned()),
+            },
         ];
         let result = get_repo_by_name("foo/bar", &repos).unwrap();
         assert_eq!(result.id.as_deref(), Some("3"));
@@ -253,8 +272,16 @@ mod tests {
     #[test]
     fn get_repo_by_name_shorthand() {
         let repos = vec![
-            AzureGitRepo { id: Some("1".to_owned()), name: "bar".to_owned(), project_name: Some("bar".to_owned()) },
-            AzureGitRepo { id: Some("2".to_owned()), name: "foo".to_owned(), project_name: Some("foo".to_owned()) },
+            AzureGitRepo {
+                id: Some("1".to_owned()),
+                name: "bar".to_owned(),
+                project_name: Some("bar".to_owned()),
+            },
+            AzureGitRepo {
+                id: Some("2".to_owned()),
+                name: "foo".to_owned(),
+                project_name: Some("foo".to_owned()),
+            },
         ];
         let result = get_repo_by_name("foo", &repos).unwrap();
         assert_eq!(result.id.as_deref(), Some("2"));
@@ -264,12 +291,29 @@ mod tests {
     #[test]
     fn get_repo_by_name_case_insensitive() {
         let repos = vec![
-            AzureGitRepo { id: Some("1".to_owned()), name: "FOO".to_owned(), project_name: Some("FOO".to_owned()) },
-            AzureGitRepo { id: Some("2".to_owned()), name: "foo".to_owned(), project_name: Some("foo".to_owned()) },
+            AzureGitRepo {
+                id: Some("1".to_owned()),
+                name: "FOO".to_owned(),
+                project_name: Some("FOO".to_owned()),
+            },
+            AzureGitRepo {
+                id: Some("2".to_owned()),
+                name: "foo".to_owned(),
+                project_name: Some("foo".to_owned()),
+            },
         ];
         // All variations should find id=1 (first match)
-        assert_eq!(get_repo_by_name("FOO/foo", &repos).unwrap().id.as_deref(), Some("1"));
-        assert_eq!(get_repo_by_name("foo/FOO", &repos).unwrap().id.as_deref(), Some("1"));
-        assert_eq!(get_repo_by_name("foo/foo", &repos).unwrap().id.as_deref(), Some("1"));
+        assert_eq!(
+            get_repo_by_name("FOO/foo", &repos).unwrap().id.as_deref(),
+            Some("1")
+        );
+        assert_eq!(
+            get_repo_by_name("foo/FOO", &repos).unwrap().id.as_deref(),
+            Some("1")
+        );
+        assert_eq!(
+            get_repo_by_name("foo/foo", &repos).unwrap().id.as_deref(),
+            Some("1")
+        );
     }
 }

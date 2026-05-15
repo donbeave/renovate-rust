@@ -223,7 +223,8 @@ mod tests {
     // Ported: "skips non-version sections" — proto/extract.spec.ts line 76
     #[test]
     fn skips_non_version_sections() {
-        let content = "node = \"22.14.0\"\n\n[settings]\nauto-install = true\n\n[env]\nDEBUG = \"*\"\n";
+        let content =
+            "node = \"22.14.0\"\n\n[settings]\nauto-install = true\n\n[env]\nDEBUG = \"*\"\n";
         let deps = extract_package_file(content).unwrap();
         assert_eq!(deps.len(), 1);
         assert_eq!(deps[0].dep_name, "node");
@@ -313,7 +314,11 @@ mod tests {
         let deps = extract_package_file(content).unwrap();
         assert_eq!(deps.len(), 15);
         for dep in &deps {
-            assert!(dep.skip_reason.is_none(), "dep {} has skip_reason", dep.dep_name);
+            assert!(
+                dep.skip_reason.is_none(),
+                "dep {} has skip_reason",
+                dep.dep_name
+            );
         }
     }
 }

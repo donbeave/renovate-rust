@@ -949,8 +949,12 @@ pub fn transform_rules_img_calls(fragments: &[serde_json::Value]) -> Vec<BazelRu
         let str_val = |key: &str| -> Option<String> {
             children.get(key)?.get("value")?.as_str().map(str::to_owned)
         };
-        let Some(name) = str_val("name") else { continue };
-        let Some(repository) = str_val("repository") else { continue };
+        let Some(name) = str_val("name") else {
+            continue;
+        };
+        let Some(repository) = str_val("repository") else {
+            continue;
+        };
         let registry = str_val("registry");
         let tag = str_val("tag");
         let digest = str_val("digest");
@@ -2930,18 +2934,16 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
     // Ported: "skips repo rule calls without corresponding use_repo_rule" — modules/manager/bazel-module/rules-img.spec.ts line 74
     #[test]
     fn rules_img_skips_unknown_function() {
-        let frags = vec![
-            serde_json::json!({
-                "type": "repoRuleCall",
-                "functionName": "unknown_function",
-                "children": {
-                    "name": {"type": "string", "value": "test", "isComplete": true}
-                },
-                "isComplete": true,
-                "offset": 0,
-                "rawString": "unknown_function(name = \"test\")"
-            }),
-        ];
+        let frags = vec![serde_json::json!({
+            "type": "repoRuleCall",
+            "functionName": "unknown_function",
+            "children": {
+                "name": {"type": "string", "value": "test", "isComplete": true}
+            },
+            "isComplete": true,
+            "offset": 0,
+            "rawString": "unknown_function(name = \"test\")"
+        })];
         let result = transform_rules_img_calls(&frags);
         assert!(result.is_empty());
     }
@@ -2984,6 +2986,10 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
     fn starlark_boolean_invalid_throws() {
         let result = starlark_as_boolean("bad");
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Invalid Starlark boolean string: bad"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Invalid Starlark boolean string: bad")
+        );
     }
 }

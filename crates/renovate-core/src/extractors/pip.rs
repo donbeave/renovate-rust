@@ -785,7 +785,10 @@ mod tests {
     fn pip_flags_extracts_index_url_short_code() {
         let content = "-i http://example.com/private-pypi/\nsome-package==0.3.1";
         let result = extract_package_file_flags(content);
-        assert_eq!(result.registry_urls, vec!["http://example.com/private-pypi/"]);
+        assert_eq!(
+            result.registry_urls,
+            vec!["http://example.com/private-pypi/"]
+        );
     }
 
     // Ported: "extracts --extra-index-url flag" — modules/manager/pip_requirements/common.spec.ts line 22

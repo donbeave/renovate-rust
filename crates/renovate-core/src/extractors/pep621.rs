@@ -29,8 +29,8 @@
 //! the registry lookup.  Entries that cannot be parsed as PEP 508 strings
 //! (e.g., PEP 735 `{include-group = "…"}` tables) are silently skipped.
 
-use std::{borrow::Cow, collections::BTreeMap, sync::LazyLock};
 use regex::Regex;
+use std::{borrow::Cow, collections::BTreeMap, sync::LazyLock};
 use thiserror::Error;
 use toml::Value;
 
@@ -178,13 +178,21 @@ pub fn parse_pep508_str(value: &str) -> Option<Pep508ParseResult> {
         if s.is_empty() {
             None
         } else {
-            Some(s.split(',').map(|e| e.trim().to_owned()).collect::<Vec<_>>())
+            Some(
+                s.split(',')
+                    .map(|e| e.trim().to_owned())
+                    .collect::<Vec<_>>(),
+            )
         }
     });
 
     let marker = cap.name("marker").and_then(|m| {
         let s = m.as_str().trim();
-        if s.is_empty() { None } else { Some(s.to_owned()) }
+        if s.is_empty() {
+            None
+        } else {
+            Some(s.to_owned())
+        }
     });
 
     Some(Pep508ParseResult {
@@ -1381,7 +1389,10 @@ readme = "README.md"
         let r = parse_pep508_str("private-depB[extra1, extra2]~=2.4").unwrap();
         assert_eq!(r.package_name, "private-depB");
         assert_eq!(r.current_value.as_deref(), Some("~=2.4"));
-        assert_eq!(r.extras, Some(vec!["extra1".to_owned(), "extra2".to_owned()]));
+        assert_eq!(
+            r.extras,
+            Some(vec!["extra1".to_owned(), "extra2".to_owned()])
+        );
         assert!(r.marker.is_none());
     }
 

@@ -157,7 +157,10 @@ pub fn extract_package_file(content: &str, _package_file: &str) -> Option<PubExt
 
     let env = root.get("environment")?.as_mapping()?;
     let sdk = env.get("sdk")?.as_str()?.to_owned();
-    let flutter = env.get("flutter").and_then(|v| v.as_str()).map(str::to_owned);
+    let flutter = env
+        .get("flutter")
+        .and_then(|v| v.as_str())
+        .map(str::to_owned);
 
     const SKIPPED: &[&str] = &[
         "flutter_driver",
@@ -627,7 +630,13 @@ dev_dependencies:
         assert_eq!(result.environment.sdk, ">=3.0.0 <4.0.0");
         assert_eq!(result.environment.flutter.as_deref(), Some(">=3.10.0"));
         assert!(result.dependencies.as_ref().unwrap().contains_key("dep1"));
-        assert!(result.dev_dependencies.as_ref().unwrap().contains_key("dep2"));
+        assert!(
+            result
+                .dev_dependencies
+                .as_ref()
+                .unwrap()
+                .contains_key("dep2")
+        );
     }
 
     // Ported: "invalid yaml" — modules/manager/pub/utils.spec.ts line 32
@@ -736,20 +745,174 @@ dev_dependencies:
         let deps = &result.deps;
 
         // Check ordering and values match expected output
-        assert_eq!(deps[0], FullPubDep { dep_name: "foo".into(), dep_type: Some("dependencies".into()), current_value: "1.0.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
-        assert_eq!(deps[1], FullPubDep { dep_name: "transmogrify".into(), dep_type: Some("dependencies".into()), current_value: "^1.4.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: Some(vec!["https://some-package-server.com".into()]), package_name: None });
-        assert_eq!(deps[2], FullPubDep { dep_name: "bar".into(), dep_type: Some("dependencies".into()), current_value: "1.1.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: Some(vec!["some-url".into()]), package_name: None });
-        assert_eq!(deps[3], FullPubDep { dep_name: "baz".into(), dep_type: Some("dependencies".into()), current_value: "".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
-        assert_eq!(deps[4], FullPubDep { dep_name: "path_dep".into(), dep_type: Some("dependencies".into()), current_value: "".into(), datasource: datasource::DART, skip_reason: Some("path-dependency"), registry_urls: None, package_name: None });
-        assert_eq!(deps[5], FullPubDep { dep_name: "git_package".into(), dep_type: Some("dependencies".into()), current_value: "".into(), datasource: datasource::GIT_REFS, skip_reason: Some("unspecified-version"), registry_urls: None, package_name: Some("https://github.com/some-url/some-package".into()) });
-        assert_eq!(deps[6], FullPubDep { dep_name: "git_package_ref".into(), dep_type: Some("dependencies".into()), current_value: "v1.0.0".into(), datasource: datasource::GIT_REFS, skip_reason: None, registry_urls: None, package_name: Some("https://github.com/some-url/some-package-ref".into()) });
-        assert_eq!(deps[7], FullPubDep { dep_name: "git_package_version".into(), dep_type: Some("dependencies".into()), current_value: "^1.1.0".into(), datasource: datasource::GIT_REFS, skip_reason: None, registry_urls: None, package_name: Some("https://github.com/some-url/some-package-version".into()) });
-        assert_eq!(deps[8], FullPubDep { dep_name: "git_package_version_git_url".into(), dep_type: Some("dependencies".into()), current_value: "^1.1.0".into(), datasource: datasource::GIT_REFS, skip_reason: None, registry_urls: None, package_name: Some("https://github.com/some-url/some-package-version-url".into()) });
-        assert_eq!(deps[9], FullPubDep { dep_name: "test".into(), dep_type: Some("dev_dependencies".into()), current_value: "^0.1.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
-        assert_eq!(deps[10], FullPubDep { dep_name: "build".into(), dep_type: Some("dev_dependencies".into()), current_value: "0.0.1".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
-        assert_eq!(deps[11], FullPubDep { dep_name: "path_dev_dep".into(), dep_type: Some("dev_dependencies".into()), current_value: "".into(), datasource: datasource::DART, skip_reason: Some("path-dependency"), registry_urls: None, package_name: None });
-        assert_eq!(deps[12], FullPubDep { dep_name: "dart".into(), dep_type: None, current_value: "^3.0.0".into(), datasource: datasource::DART_VERSION, skip_reason: None, registry_urls: None, package_name: None });
-        assert_eq!(deps[13], FullPubDep { dep_name: "flutter".into(), dep_type: None, current_value: "2.0.0".into(), datasource: datasource::FLUTTER_VERSION, skip_reason: None, registry_urls: None, package_name: None });
+        assert_eq!(
+            deps[0],
+            FullPubDep {
+                dep_name: "foo".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "1.0.0".into(),
+                datasource: datasource::DART,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[1],
+            FullPubDep {
+                dep_name: "transmogrify".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "^1.4.0".into(),
+                datasource: datasource::DART,
+                skip_reason: None,
+                registry_urls: Some(vec!["https://some-package-server.com".into()]),
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[2],
+            FullPubDep {
+                dep_name: "bar".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "1.1.0".into(),
+                datasource: datasource::DART,
+                skip_reason: None,
+                registry_urls: Some(vec!["some-url".into()]),
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[3],
+            FullPubDep {
+                dep_name: "baz".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "".into(),
+                datasource: datasource::DART,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[4],
+            FullPubDep {
+                dep_name: "path_dep".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "".into(),
+                datasource: datasource::DART,
+                skip_reason: Some("path-dependency"),
+                registry_urls: None,
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[5],
+            FullPubDep {
+                dep_name: "git_package".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "".into(),
+                datasource: datasource::GIT_REFS,
+                skip_reason: Some("unspecified-version"),
+                registry_urls: None,
+                package_name: Some("https://github.com/some-url/some-package".into())
+            }
+        );
+        assert_eq!(
+            deps[6],
+            FullPubDep {
+                dep_name: "git_package_ref".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "v1.0.0".into(),
+                datasource: datasource::GIT_REFS,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: Some("https://github.com/some-url/some-package-ref".into())
+            }
+        );
+        assert_eq!(
+            deps[7],
+            FullPubDep {
+                dep_name: "git_package_version".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "^1.1.0".into(),
+                datasource: datasource::GIT_REFS,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: Some("https://github.com/some-url/some-package-version".into())
+            }
+        );
+        assert_eq!(
+            deps[8],
+            FullPubDep {
+                dep_name: "git_package_version_git_url".into(),
+                dep_type: Some("dependencies".into()),
+                current_value: "^1.1.0".into(),
+                datasource: datasource::GIT_REFS,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: Some("https://github.com/some-url/some-package-version-url".into())
+            }
+        );
+        assert_eq!(
+            deps[9],
+            FullPubDep {
+                dep_name: "test".into(),
+                dep_type: Some("dev_dependencies".into()),
+                current_value: "^0.1.0".into(),
+                datasource: datasource::DART,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[10],
+            FullPubDep {
+                dep_name: "build".into(),
+                dep_type: Some("dev_dependencies".into()),
+                current_value: "0.0.1".into(),
+                datasource: datasource::DART,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[11],
+            FullPubDep {
+                dep_name: "path_dev_dep".into(),
+                dep_type: Some("dev_dependencies".into()),
+                current_value: "".into(),
+                datasource: datasource::DART,
+                skip_reason: Some("path-dependency"),
+                registry_urls: None,
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[12],
+            FullPubDep {
+                dep_name: "dart".into(),
+                dep_type: None,
+                current_value: "^3.0.0".into(),
+                datasource: datasource::DART_VERSION,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: None
+            }
+        );
+        assert_eq!(
+            deps[13],
+            FullPubDep {
+                dep_name: "flutter".into(),
+                dep_type: None,
+                current_value: "2.0.0".into(),
+                datasource: datasource::FLUTTER_VERSION,
+                skip_reason: None,
+                registry_urls: None,
+                package_name: None
+            }
+        );
         assert_eq!(deps.len(), 14);
     }
 }

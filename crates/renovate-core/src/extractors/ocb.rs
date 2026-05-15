@@ -70,9 +70,8 @@ static GOMOD_RE: LazyLock<Regex> =
 // ── Regex ─────────────────────────────────────────────────────────────────────
 
 /// Matches `version: ['"']?<version>` in an OCB YAML file.
-static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"\bversion:\s+["']?(?P<ver>[^'"\s]+)"#).unwrap()
-});
+static VERSION_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"\bversion:\s+["']?(?P<ver>[^'"\s]+)"#).unwrap());
 
 // ── Public API ────────────────────────────────────────────────────────────────
 

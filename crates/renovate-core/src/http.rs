@@ -280,11 +280,14 @@ const GITHUB_API_HOST_TYPES: &[&str] = &[
     "conan",
 ];
 
-const GITEA_API_HOST_TYPES: &[&str] =
-    &["gitea", "gitea-changelog", "gitea-releases", "gitea-tags"];
+const GITEA_API_HOST_TYPES: &[&str] = &["gitea", "gitea-changelog", "gitea-releases", "gitea-tags"];
 
-const FORGEJO_API_HOST_TYPES: &[&str] =
-    &["forgejo", "forgejo-changelog", "forgejo-releases", "forgejo-tags"];
+const FORGEJO_API_HOST_TYPES: &[&str] = &[
+    "forgejo",
+    "forgejo-changelog",
+    "forgejo-releases",
+    "forgejo-tags",
+];
 
 const GITLAB_API_HOST_TYPES: &[&str] = &[
     "gitlab",
@@ -328,12 +331,7 @@ pub struct AuthOptions<'a> {
 /// Mirrors `applyAuthorization` from `lib/util/http/auth.ts`.
 pub fn apply_authorization(opts: &AuthOptions<'_>) -> AppliedAuth {
     // If there is already an Authorization header or noAuth=true, do nothing.
-    if opts
-        .existing_auth
-        .map(|a| !a.is_empty())
-        .unwrap_or(false)
-        || opts.no_auth
-    {
+    if opts.existing_auth.map(|a| !a.is_empty()).unwrap_or(false) || opts.no_auth {
         return AppliedAuth::default();
     }
 
@@ -425,7 +423,8 @@ pub fn apply_authorization(opts: &AuthOptions<'_>) -> AppliedAuth {
     if let Some(password) = opts.password {
         use base64::Engine as _;
         let user = opts.username.unwrap_or("");
-        let credentials = base64::engine::general_purpose::STANDARD.encode(format!("{user}:{password}"));
+        let credentials =
+            base64::engine::general_purpose::STANDARD.encode(format!("{user}:{password}"));
         return AppliedAuth {
             authorization: Some(format!("Basic {credentials}")),
             ..Default::default()
@@ -627,18 +626,29 @@ fn parse_single_header(input: &str, out: &mut Vec<WwwAuthChallenge>) -> Result<(
         for t in c.tokens {
             match t {
                 Token::Value(v) => args.push(v),
-                Token::Pair(k, v) => { params.insert(k, v); }
+                Token::Pair(k, v) => {
+                    params.insert(k, v);
+                }
                 Token::Comma => {}
                 Token::Equals => {}
             }
         }
 
         let ch = if !args.is_empty() {
-            WwwAuthChallenge { scheme: c.scheme.to_lowercase(), params: Some(WwwAuthParams::Token(args[0].clone())) }
+            WwwAuthChallenge {
+                scheme: c.scheme.to_lowercase(),
+                params: Some(WwwAuthParams::Token(args[0].clone())),
+            }
         } else if !params.is_empty() {
-            WwwAuthChallenge { scheme: c.scheme.to_lowercase(), params: Some(WwwAuthParams::Map(params)) }
+            WwwAuthChallenge {
+                scheme: c.scheme.to_lowercase(),
+                params: Some(WwwAuthParams::Map(params)),
+            }
         } else {
-            WwwAuthChallenge { scheme: c.scheme.to_lowercase(), params: None }
+            WwwAuthChallenge {
+                scheme: c.scheme.to_lowercase(),
+                params: None,
+            }
         };
         out.push(ch);
     }
@@ -660,12 +670,10 @@ struct Challenge {
 
 fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     use std::sync::LazyLock;
-    static TOKEN_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
-        regex::Regex::new(r#"^([a-zA-Z0-9!#$%&'*+.^_`|~-]+)"#).unwrap()
-    });
-    static QUOTED_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
-        regex::Regex::new(r#"^"((?:[^"\\]|\\\\|\\")*)""#).unwrap()
-    });
+    static TOKEN_RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r#"^([a-zA-Z0-9!#$%&'*+.^_`|~-]+)"#).unwrap());
+    static QUOTED_RE: LazyLock<regex::Regex> =
+        LazyLock::new(|| regex::Regex::new(r#"^"((?:[^"\\]|\\\\|\\")*)""#).unwrap());
     static WS_RE: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"^\s+").unwrap());
 
     let mut result = Vec::new();
@@ -698,12 +706,17 @@ fn tokenize(input: &str) -> Result<Vec<Token>, String> {
 fn group_pairs(mut tokens: Vec<Token>) -> Vec<Token> {
     let mut i = 0;
     while i + 2 < tokens.len() {
-        if matches!((&tokens[i], &tokens[i+1], &tokens[i+2]),
-            (Token::Value(_), Token::Equals, Token::Value(_)))
-        {
-            let Token::Value(val) = tokens.remove(i + 2) else { unreachable!() };
+        if matches!(
+            (&tokens[i], &tokens[i + 1], &tokens[i + 2]),
+            (Token::Value(_), Token::Equals, Token::Value(_))
+        ) {
+            let Token::Value(val) = tokens.remove(i + 2) else {
+                unreachable!()
+            };
             tokens.remove(i + 1); // equals
-            let Token::Value(key) = std::mem::replace(&mut tokens[i], Token::Comma) else { unreachable!() };
+            let Token::Value(key) = std::mem::replace(&mut tokens[i], Token::Comma) else {
+                unreachable!()
+            };
             tokens[i] = Token::Pair(key, val);
         } else {
             i += 1;
@@ -715,7 +728,9 @@ fn group_pairs(mut tokens: Vec<Token>) -> Vec<Token> {
 fn group_challenges(mut tokens: Vec<Token>) -> Vec<Challenge> {
     let mut result = Vec::new();
     while !tokens.is_empty() {
-        let Token::Value(scheme) = tokens.remove(0) else { break };
+        let Token::Value(scheme) = tokens.remove(0) else {
+            break;
+        };
         let mut j = 0;
         if tokens.is_empty() || matches!(tokens[0], Token::Comma) {
             // nothing
@@ -728,8 +743,13 @@ fn group_challenges(mut tokens: Vec<Token>) -> Vec<Challenge> {
             j = j.saturating_sub(1);
         }
         let ch_tokens: Vec<Token> = tokens.drain(0..j).collect();
-        if !tokens.is_empty() { tokens.remove(0); } // comma
-        result.push(Challenge { scheme, tokens: ch_tokens });
+        if !tokens.is_empty() {
+            tokens.remove(0);
+        } // comma
+        result.push(Challenge {
+            scheme,
+            tokens: ch_tokens,
+        });
     }
     result
 }
@@ -756,7 +776,11 @@ mod www_auth_tests {
         assert_eq!(parsed[0].scheme, "bearer");
         assert_eq!(
             parsed[0].params,
-            Some(bearer_params("https://renovate.com/v2/token", "container_registry", "*"))
+            Some(bearer_params(
+                "https://renovate.com/v2/token",
+                "container_registry",
+                "*"
+            ))
         );
     }
 
@@ -771,7 +795,7 @@ mod www_auth_tests {
     #[test]
     fn www_auth_throws_on_invalid_input() {
         let result = parse_www_authenticate(&[
-            "Bearer realm=\"https://renovate.com/v2/token\",service=\"container_registry\",scope=\"*"
+            "Bearer realm=\"https://renovate.com/v2/token\",service=\"container_registry\",scope=\"*",
         ]);
         assert!(result.is_err());
     }
@@ -781,7 +805,10 @@ mod www_auth_tests {
     // Ported: "does nothing" — util/http/auth.spec.ts line 3
     #[test]
     fn auth_does_nothing_with_existing_header() {
-        let opts = AuthOptions { existing_auth: Some("token"), ..Default::default() };
+        let opts = AuthOptions {
+            existing_auth: Some("token"),
+            ..Default::default()
+        };
         assert_eq!(apply_authorization(&opts), AppliedAuth::default());
     }
 
@@ -850,12 +877,15 @@ mod www_auth_tests {
     fn auth_gitlab_personal_access_token() {
         let opts = AuthOptions {
             host_type: Some("gitlab"),
-            token: Some("0123456789012345test"),  // 20 chars
+            token: Some("0123456789012345test"), // 20 chars
             ..Default::default()
         };
         let result = apply_authorization(&opts);
         assert!(result.authorization.is_none());
-        assert_eq!(result.private_token.as_deref(), Some("0123456789012345test"));
+        assert_eq!(
+            result.private_token.as_deref(),
+            Some("0123456789012345test")
+        );
     }
 
     // Ported: "gitlab oauth token" — util/http/auth.spec.ts line 101

@@ -873,9 +873,7 @@ pub fn process_supersedes_managers(extracts: &mut [ExtractResult]) {
             .collect();
 
         for &secondary_manager in secondary_managers {
-            let secondary_idx = extracts
-                .iter()
-                .position(|e| e.manager == secondary_manager);
+            let secondary_idx = extracts.iter().position(|e| e.manager == secondary_manager);
             let Some(sidx) = secondary_idx else { continue };
 
             let Some(ref secondary_files) = extracts[sidx].package_files.clone() else {
@@ -945,9 +943,9 @@ pub fn get_included_files<'a>(file_list: &'a [String], include_paths: &[&str]) -
     file_list
         .iter()
         .filter(|file| {
-            include_paths.iter().any(|pattern| {
-                file.as_str() == *pattern || glob_matches(pattern, file)
-            })
+            include_paths
+                .iter()
+                .any(|pattern| file.as_str() == *pattern || glob_matches(pattern, file))
         })
         .map(|s| s.as_str())
         .collect()
@@ -964,9 +962,9 @@ pub fn filter_ignored_files<'a>(file_list: &'a [String], ignore_paths: &[&str]) 
     file_list
         .iter()
         .filter(|file| {
-            !ignore_paths.iter().any(|pattern| {
-                file.contains(pattern) || glob_matches(pattern, file)
-            })
+            !ignore_paths
+                .iter()
+                .any(|pattern| file.contains(pattern) || glob_matches(pattern, file))
         })
         .map(|s| s.as_str())
         .collect()
@@ -983,15 +981,22 @@ pub fn get_matching_files(
     ignore_paths: &[&str],
     manager_patterns: &[&str],
 ) -> Vec<String> {
-    let filtered: Vec<&str> = file_list.iter()
+    let filtered: Vec<&str> = file_list
+        .iter()
         .filter(|f| {
             let included = if include_paths.is_empty() {
                 true
             } else {
-                include_paths.iter().any(|p| f.as_str() == *p || glob_matches(p, f))
+                include_paths
+                    .iter()
+                    .any(|p| f.as_str() == *p || glob_matches(p, f))
             };
-            if !included { return false; }
-            !ignore_paths.iter().any(|p| f.contains(p) || glob_matches(p, f))
+            if !included {
+                return false;
+            }
+            !ignore_paths
+                .iter()
+                .any(|p| f.contains(p) || glob_matches(p, f))
         })
         .map(|s| s.as_str())
         .collect();
@@ -1382,16 +1387,28 @@ mod tests {
     }
 
     fn pkg(file: &str) -> PackageFileEntry {
-        PackageFileEntry { package_file: file.to_owned(), lock_files: vec![] }
+        PackageFileEntry {
+            package_file: file.to_owned(),
+            lock_files: vec![],
+        }
     }
     fn pkg_locked(file: &str, lock: &str) -> PackageFileEntry {
-        PackageFileEntry { package_file: file.to_owned(), lock_files: vec![lock.to_owned()] }
+        PackageFileEntry {
+            package_file: file.to_owned(),
+            lock_files: vec![lock.to_owned()],
+        }
     }
     fn extract(manager: &str, files: &[PackageFileEntry]) -> ExtractResult {
-        ExtractResult { manager: manager.to_owned(), package_files: Some(files.to_vec()) }
+        ExtractResult {
+            manager: manager.to_owned(),
+            package_files: Some(files.to_vec()),
+        }
     }
     fn extract_none(manager: &str) -> ExtractResult {
-        ExtractResult { manager: manager.to_owned(), package_files: None }
+        ExtractResult {
+            manager: manager.to_owned(),
+            package_files: None,
+        }
     }
 
     // Ported: "handles empty input" — workers/repository/extract/supersedes.spec.ts line 6
@@ -1445,16 +1462,16 @@ mod tests {
         process_supersedes_managers(&mut results);
         assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
         assert_eq!(results[1].package_files.as_ref().unwrap().len(), 1);
-        assert_eq!(results[1].package_files.as_ref().unwrap()[0].package_file, "other/package.json");
+        assert_eq!(
+            results[1].package_files.as_ref().unwrap()[0].package_file,
+            "other/package.json"
+        );
     }
 
     // Ported: "handles primary extract with undefined packageFiles" — workers/repository/extract/supersedes.spec.ts line 115
     #[test]
     fn supersedes_handles_primary_with_no_package_files() {
-        let mut results = vec![
-            extract_none("bun"),
-            extract("npm", &[pkg("package.json")]),
-        ];
+        let mut results = vec![extract_none("bun"), extract("npm", &[pkg("package.json")])];
         process_supersedes_managers(&mut results);
         assert!(results[0].package_files.is_none());
         assert_eq!(results[1].package_files.as_ref().unwrap().len(), 1);
@@ -1471,10 +1488,7 @@ mod tests {
     // Ported: "handles secondary extract with undefined packageFiles" — workers/repository/extract/supersedes.spec.ts line 153
     #[test]
     fn supersedes_handles_secondary_with_no_package_files() {
-        let mut results = vec![
-            extract("bun", &[pkg("package.json")]),
-            extract_none("npm"),
-        ];
+        let mut results = vec![extract("bun", &[pkg("package.json")]), extract_none("npm")];
         process_supersedes_managers(&mut results);
         assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
         assert!(results[1].package_files.is_none());
@@ -1484,8 +1498,7 @@ mod tests {
     #[test]
     fn regex_match_all_does_not_crash_for_lazy_regex() {
         let re = regex::Regex::new(r"(?P<currentDigest>.*?)").unwrap();
-        let results =
-            regex_match_all(&re, "1f699d2bfc99bbbe4c1ed5bb8fc21e6911d69c6e\n");
+        let results = regex_match_all(&re, "1f699d2bfc99bbbe4c1ed5bb8fc21e6911d69c6e\n");
         // Should not panic and return a Vec (capped at 10_000)
         assert!(results.len() <= 10_000);
     }
@@ -1493,7 +1506,10 @@ mod tests {
     // ── file-match tests ──────────────────────────────────────────────────────
 
     fn file_list() -> Vec<String> {
-        vec!["package.json".to_owned(), "frontend/package.json".to_owned()]
+        vec![
+            "package.json".to_owned(),
+            "frontend/package.json".to_owned(),
+        ]
     }
 
     // Ported: "returns fileList if no includePaths" — workers/repository/extract/file-match.spec.ts line 8

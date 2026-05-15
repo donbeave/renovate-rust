@@ -577,7 +577,12 @@ pub fn reorder_files(package_files: &[&str]) -> Vec<String> {
                 current_dir
             };
             let rank = get_file_rank(&abs_path);
-            Entry { path, abs_path, dir, rank }
+            Entry {
+                path,
+                abs_path,
+                dir,
+                rank,
+            }
         })
         .collect();
 
@@ -591,7 +596,9 @@ pub fn reorder_files(package_files: &[&str]) -> Vec<String> {
             }
             return a.dir.cmp(&b.dir);
         }
-        a.rank.cmp(&b.rank).then_with(|| a.abs_path.cmp(&b.abs_path))
+        a.rank
+            .cmp(&b.rank)
+            .then_with(|| a.abs_path.cmp(&b.abs_path))
     });
 
     entries.into_iter().map(|e| e.path.to_owned()).collect()
@@ -1059,7 +1066,14 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     // Ported: "extracts the actual version" — modules/manager/gradle/utils.spec.ts line 23
     #[test]
     fn gradle_version_like_substring_valid_versions() {
-        let inputs = ["1.2.3", "[1.0,2.0]", "(,2.0[", "2.1.1.RELEASE", "1.0.+", "2022-05-10_55"];
+        let inputs = [
+            "1.2.3",
+            "[1.0,2.0]",
+            "(,2.0[",
+            "2.1.1.RELEASE",
+            "1.0.+",
+            "2022-05-10_55",
+        ];
         let suffixes = ["", "'", "\"", "\n", "  ", "$"];
         for input in &inputs {
             for suffix in &suffixes {
@@ -1076,7 +1090,10 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         let invalid = ["", "foobar", "latest", "[1.6.0, ]  ,  abc"];
         for input in &invalid {
             let result = version_like_substring(input);
-            assert!(result.is_none(), "expected None for {input:?}, got {result:?}");
+            assert!(
+                result.is_none(),
+                "expected None for {input:?}, got {result:?}"
+            );
         }
     }
 
@@ -1087,7 +1104,9 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         assert!(is_gradle_dependency_string("foo:bar:1.2.3"));
         assert!(is_gradle_dependency_string("foo.foo:bar.bar:1.2.3"));
         assert!(is_gradle_dependency_string("foo.bar:baz:1.2.3"));
-        assert!(is_gradle_dependency_string("foo.bar:baz:1.2.3:linux-cpu-x86_64"));
+        assert!(is_gradle_dependency_string(
+            "foo.bar:baz:1.2.3:linux-cpu-x86_64"
+        ));
         assert!(is_gradle_dependency_string("foo.bar:baz:1.2.3:sources@zip"));
         assert!(is_gradle_dependency_string("foo:bar:1.2.3@zip"));
         assert!(is_gradle_dependency_string("foo:bar:x86@x86"));
@@ -1103,7 +1122,9 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         assert!(!is_gradle_dependency_string("-Xep:ParameterName:OFF"));
         assert!(!is_gradle_dependency_string("foo$bar:baz:1.2.+"));
         assert!(!is_gradle_dependency_string("scm:git:https://some.git"));
-        assert!(!is_gradle_dependency_string("foo.bar:baz:1.2.3:linux-cpu$-x86_64"));
+        assert!(!is_gradle_dependency_string(
+            "foo.bar:baz:1.2.3:linux-cpu$-x86_64"
+        ));
         assert!(!is_gradle_dependency_string("foo:bar:1.2.3@zip@foo"));
     }
 
@@ -1111,12 +1132,54 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     #[test]
     fn gradle_parse_dependency_string() {
         let p = |i: &str| parse_gradle_dependency_string(i);
-        assert_eq!(p("foo:bar:1.2.3"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: None }));
-        assert_eq!(p("foo.foo:bar.bar:1.2.3"), Some(GradleParsedDep { dep_name: "foo.foo:bar.bar".into(), current_value: "1.2.3".into(), data_type: None }));
-        assert_eq!(p("foo:bar:1.2.+"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.+".into(), data_type: None }));
-        assert_eq!(p("foo:bar:1.2.3@zip"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: Some("zip".into()) }));
-        assert_eq!(p("foo:bar:1.2.3:docs"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: None }));
-        assert_eq!(p("foo:bar:1.2.3:docs@jar"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: Some("jar".into()) }));
+        assert_eq!(
+            p("foo:bar:1.2.3"),
+            Some(GradleParsedDep {
+                dep_name: "foo:bar".into(),
+                current_value: "1.2.3".into(),
+                data_type: None
+            })
+        );
+        assert_eq!(
+            p("foo.foo:bar.bar:1.2.3"),
+            Some(GradleParsedDep {
+                dep_name: "foo.foo:bar.bar".into(),
+                current_value: "1.2.3".into(),
+                data_type: None
+            })
+        );
+        assert_eq!(
+            p("foo:bar:1.2.+"),
+            Some(GradleParsedDep {
+                dep_name: "foo:bar".into(),
+                current_value: "1.2.+".into(),
+                data_type: None
+            })
+        );
+        assert_eq!(
+            p("foo:bar:1.2.3@zip"),
+            Some(GradleParsedDep {
+                dep_name: "foo:bar".into(),
+                current_value: "1.2.3".into(),
+                data_type: Some("zip".into())
+            })
+        );
+        assert_eq!(
+            p("foo:bar:1.2.3:docs"),
+            Some(GradleParsedDep {
+                dep_name: "foo:bar".into(),
+                current_value: "1.2.3".into(),
+                data_type: None
+            })
+        );
+        assert_eq!(
+            p("foo:bar:1.2.3:docs@jar"),
+            Some(GradleParsedDep {
+                dep_name: "foo:bar".into(),
+                current_value: "1.2.3".into(),
+                data_type: Some("jar".into())
+            })
+        );
         assert_eq!(p("foo:bar:baz:qux"), None);
         assert_eq!(p("foo:bar:baz:qux:quux"), None);
         assert_eq!(p("foo:bar:1.2.3'"), None);
@@ -1131,7 +1194,9 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         assert!(is_gradle_versions_file("/a/versions.gradle.kts"));
         assert!(is_gradle_settings_file("/a/settings.gradle"));
         assert!(is_gradle_settings_file("/a/settings.gradle.kts"));
-        assert!(is_gradle_default_catalog_file("/a/gradle/libs.versions.toml"));
+        assert!(is_gradle_default_catalog_file(
+            "/a/gradle/libs.versions.toml"
+        ));
         assert!(is_gradle_build_file("/a/build.gradle"));
         assert!(is_props_file("/a/gradle.properties"));
         assert!(is_kotlin_source_file("/a/Somefile.kt"));
@@ -1142,8 +1207,20 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     #[test]
     fn gradle_reorder_files_basic() {
         assert_eq!(
-            reorder_files(&["build.gradle", "a.gradle", "b.gradle", "a.gradle", "versions.gradle"]),
-            vec!["versions.gradle", "a.gradle", "a.gradle", "b.gradle", "build.gradle"]
+            reorder_files(&[
+                "build.gradle",
+                "a.gradle",
+                "b.gradle",
+                "a.gradle",
+                "versions.gradle"
+            ]),
+            vec![
+                "versions.gradle",
+                "a.gradle",
+                "a.gradle",
+                "b.gradle",
+                "build.gradle"
+            ]
         );
     }
 
@@ -1284,24 +1361,84 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         registry.insert(
             to_absolute_path("/foo"),
             [
-                ("foo".into(), PackageVariable { key: "foo".into(), value: "FOO".into(), file_replace_position: None, package_file: None }),
-                ("bar".into(), PackageVariable { key: "bar".into(), value: "BAR".into(), file_replace_position: None, package_file: None }),
-                ("baz".into(), PackageVariable { key: "baz".into(), value: "BAZ".into(), file_replace_position: None, package_file: None }),
-                ("qux".into(), PackageVariable { key: "qux".into(), value: "QUX".into(), file_replace_position: None, package_file: None }),
-            ].into_iter().collect(),
+                (
+                    "foo".into(),
+                    PackageVariable {
+                        key: "foo".into(),
+                        value: "FOO".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+                (
+                    "bar".into(),
+                    PackageVariable {
+                        key: "bar".into(),
+                        value: "BAR".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+                (
+                    "baz".into(),
+                    PackageVariable {
+                        key: "baz".into(),
+                        value: "BAZ".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+                (
+                    "qux".into(),
+                    PackageVariable {
+                        key: "qux".into(),
+                        value: "QUX".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
         );
         registry.insert(
             to_absolute_path("/foo/bar"),
-            [
-                ("foo".into(), PackageVariable { key: "foo".into(), value: "foo".into(), file_replace_position: None, package_file: None }),
-            ].into_iter().collect(),
+            [(
+                "foo".into(),
+                PackageVariable {
+                    key: "foo".into(),
+                    value: "foo".into(),
+                    file_replace_position: None,
+                    package_file: None,
+                },
+            )]
+            .into_iter()
+            .collect(),
         );
         registry.insert(
             to_absolute_path("/foo/bar/baz"),
             [
-                ("bar".into(), PackageVariable { key: "bar".into(), value: "bar".into(), file_replace_position: None, package_file: None }),
-                ("baz".into(), PackageVariable { key: "baz".into(), value: "baz".into(), file_replace_position: None, package_file: None }),
-            ].into_iter().collect(),
+                (
+                    "bar".into(),
+                    PackageVariable {
+                        key: "bar".into(),
+                        value: "bar".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+                (
+                    "baz".into(),
+                    PackageVariable {
+                        key: "baz".into(),
+                        value: "baz".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
         );
         let res = get_vars(&registry, "/foo/bar/baz/build.gradle");
         assert_eq!(res.get("foo").map(|v| v.value.as_str()), Some("foo"));
@@ -1315,9 +1452,17 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     #[test]
     fn gradle_update_vars_empty_registry() {
         let mut registry: VariableRegistry = HashMap::new();
-        let new_vars: PackageVariables = [
-            ("qux".into(), PackageVariable { key: "qux".into(), value: "qux".into(), file_replace_position: None, package_file: None }),
-        ].into_iter().collect();
+        let new_vars: PackageVariables = [(
+            "qux".into(),
+            PackageVariable {
+                key: "qux".into(),
+                value: "qux".into(),
+                file_replace_position: None,
+                package_file: None,
+            },
+        )]
+        .into_iter()
+        .collect();
         update_vars(&mut registry, "/foo/bar/baz", new_vars);
         assert!(registry.contains_key("/foo/bar/baz"));
         assert_eq!(registry["/foo/bar/baz"]["qux"].value, "qux");
@@ -1330,14 +1475,42 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         registry.insert(
             to_absolute_path("/foo/bar/baz"),
             [
-                ("bar".into(), PackageVariable { key: "bar".into(), value: "bar".into(), file_replace_position: None, package_file: None }),
-                ("baz".into(), PackageVariable { key: "baz".into(), value: "baz".into(), file_replace_position: None, package_file: None }),
-            ].into_iter().collect(),
+                (
+                    "bar".into(),
+                    PackageVariable {
+                        key: "bar".into(),
+                        value: "bar".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+                (
+                    "baz".into(),
+                    PackageVariable {
+                        key: "baz".into(),
+                        value: "baz".into(),
+                        file_replace_position: None,
+                        package_file: None,
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
         );
         update_vars(
             &mut registry,
             "/foo/bar/baz",
-            [("qux".into(), PackageVariable { key: "qux".into(), value: "qux".into(), file_replace_position: None, package_file: None })].into_iter().collect(),
+            [(
+                "qux".into(),
+                PackageVariable {
+                    key: "qux".into(),
+                    value: "qux".into(),
+                    file_replace_position: None,
+                    package_file: None,
+                },
+            )]
+            .into_iter()
+            .collect(),
         );
         let res = get_vars(&registry, "/foo/bar/baz/build.gradle");
         assert_eq!(res.get("bar").map(|v| v.value.as_str()), Some("bar"));
@@ -1349,7 +1522,12 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     #[test]
     fn gradle_update_vars_from_default_catalog_no_catalog() {
         let mut registry: VariableRegistry = HashMap::new();
-        update_vars_from_default_catalog(&mut registry, "/a/gradle", "/a/gradle/other-catalog.toml", HashMap::new());
+        update_vars_from_default_catalog(
+            &mut registry,
+            "/a/gradle",
+            "/a/gradle/other-catalog.toml",
+            HashMap::new(),
+        );
         assert!(registry.is_empty());
     }
 
@@ -1358,21 +1536,43 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     fn gradle_update_vars_from_default_catalog_default_prefix() {
         let mut registry: VariableRegistry = HashMap::new();
         let new_vars: PackageVariables = [
-            ("kotlin".into(), PackageVariable {
-                key: "kotlin".into(), value: "1.5.21".into(),
-                file_replace_position: Some(10),
-                package_file: Some("/project/gradle/libs.versions.toml".into()),
-            }),
-            ("coroutines".into(), PackageVariable {
-                key: "coroutines".into(), value: "1.5.0".into(),
-                file_replace_position: Some(40),
-                package_file: Some("/project/gradle/libs.versions.toml".into()),
-            }),
-        ].into_iter().collect();
-        update_vars_from_default_catalog(&mut registry, "/project/gradle", "/project/gradle/libs.versions.toml", new_vars);
+            (
+                "kotlin".into(),
+                PackageVariable {
+                    key: "kotlin".into(),
+                    value: "1.5.21".into(),
+                    file_replace_position: Some(10),
+                    package_file: Some("/project/gradle/libs.versions.toml".into()),
+                },
+            ),
+            (
+                "coroutines".into(),
+                PackageVariable {
+                    key: "coroutines".into(),
+                    value: "1.5.0".into(),
+                    file_replace_position: Some(40),
+                    package_file: Some("/project/gradle/libs.versions.toml".into()),
+                },
+            ),
+        ]
+        .into_iter()
+        .collect();
+        update_vars_from_default_catalog(
+            &mut registry,
+            "/project/gradle",
+            "/project/gradle/libs.versions.toml",
+            new_vars,
+        );
         let res = get_vars(&registry, "/project/build.gradle");
-        assert_eq!(res.get("libs.versions.kotlin").map(|v| v.value.as_str()), Some("1.5.21"));
-        assert_eq!(res.get("libs.versions.coroutines").map(|v| v.value.as_str()), Some("1.5.0"));
+        assert_eq!(
+            res.get("libs.versions.kotlin").map(|v| v.value.as_str()),
+            Some("1.5.21")
+        );
+        assert_eq!(
+            res.get("libs.versions.coroutines")
+                .map(|v| v.value.as_str()),
+            Some("1.5.0")
+        );
         assert_eq!(res.len(), 2);
     }
 
@@ -1383,30 +1583,61 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         update_vars(
             &mut registry,
             "/project",
-            [("defaultLibrariesExtensionName".into(), PackageVariable {
-                key: "defaultLibrariesExtensionName".into(),
-                value: "myLibs".into(),
-                file_replace_position: Some(50),
-                package_file: Some("/project/settings.gradle".into()),
-            })].into_iter().collect(),
+            [(
+                "defaultLibrariesExtensionName".into(),
+                PackageVariable {
+                    key: "defaultLibrariesExtensionName".into(),
+                    value: "myLibs".into(),
+                    file_replace_position: Some(50),
+                    package_file: Some("/project/settings.gradle".into()),
+                },
+            )]
+            .into_iter()
+            .collect(),
         );
         let new_vars: PackageVariables = [
-            ("kotlin".into(), PackageVariable {
-                key: "kotlin".into(), value: "1.5.21".into(),
-                file_replace_position: Some(10),
-                package_file: Some("/project/gradle/libs.versions.toml".into()),
-            }),
-            ("coroutines".into(), PackageVariable {
-                key: "coroutines".into(), value: "1.5.0".into(),
-                file_replace_position: Some(40),
-                package_file: Some("/project/gradle/libs.versions.toml".into()),
-            }),
-        ].into_iter().collect();
-        update_vars_from_default_catalog(&mut registry, "/project/gradle", "/project/gradle/libs.versions.toml", new_vars);
+            (
+                "kotlin".into(),
+                PackageVariable {
+                    key: "kotlin".into(),
+                    value: "1.5.21".into(),
+                    file_replace_position: Some(10),
+                    package_file: Some("/project/gradle/libs.versions.toml".into()),
+                },
+            ),
+            (
+                "coroutines".into(),
+                PackageVariable {
+                    key: "coroutines".into(),
+                    value: "1.5.0".into(),
+                    file_replace_position: Some(40),
+                    package_file: Some("/project/gradle/libs.versions.toml".into()),
+                },
+            ),
+        ]
+        .into_iter()
+        .collect();
+        update_vars_from_default_catalog(
+            &mut registry,
+            "/project/gradle",
+            "/project/gradle/libs.versions.toml",
+            new_vars,
+        );
         let res = get_vars(&registry, "/project/build.gradle");
-        assert_eq!(res.get("defaultLibrariesExtensionName").map(|v| v.value.as_str()), Some("myLibs"));
-        assert_eq!(res.get("myLibs.versions.kotlin").map(|v| v.value.as_str()), Some("1.5.21"));
-        assert_eq!(res.get("myLibs.versions.coroutines").map(|v| v.value.as_str()), Some("1.5.0"));
+        assert_eq!(
+            res.get("defaultLibrariesExtensionName")
+                .map(|v| v.value.as_str()),
+            Some("myLibs")
+        );
+        assert_eq!(
+            res.get("myLibs.versions.kotlin").map(|v| v.value.as_str()),
+            Some("1.5.21")
+        );
+        assert_eq!(
+            res.get("myLibs.versions.coroutines")
+                .map(|v| v.value.as_str()),
+            Some("1.5.0")
+        );
         assert_eq!(res.len(), 3);
     }
 }

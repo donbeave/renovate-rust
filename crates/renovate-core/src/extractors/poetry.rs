@@ -1633,28 +1633,21 @@ werkzeug = ">=0.14"
         assert_eq!(flask.skip_reason, Some(PoetrySkipReason::LocalPath));
     }
 
-    const LOCK_CONTENT: &str =
-        include_str!("../../tests/fixtures/poetry/pyproject.11.toml.lock");
+    const LOCK_CONTENT: &str = include_str!("../../tests/fixtures/poetry/pyproject.11.toml.lock");
 
     // Ported: "detects already updated" — modules/manager/poetry/update-locked.spec.ts line 12
     #[test]
     fn poetry_update_locked_detects_already_updated() {
-        let result = update_locked_poetry_dependency(
-            Some("urllib3"),
-            Some("1.26.3"),
-            Some(LOCK_CONTENT),
-        );
+        let result =
+            update_locked_poetry_dependency(Some("urllib3"), Some("1.26.3"), Some(LOCK_CONTENT));
         assert_eq!(result.as_str(), "already-updated");
     }
 
     // Ported: "returns unsupported" — modules/manager/poetry/update-locked.spec.ts line 22
     #[test]
     fn poetry_update_locked_returns_unsupported() {
-        let result = update_locked_poetry_dependency(
-            Some("urllib3"),
-            Some("1.26.4"),
-            Some(LOCK_CONTENT),
-        );
+        let result =
+            update_locked_poetry_dependency(Some("urllib3"), Some("1.26.4"), Some(LOCK_CONTENT));
         assert_eq!(result.as_str(), "unsupported");
     }
 

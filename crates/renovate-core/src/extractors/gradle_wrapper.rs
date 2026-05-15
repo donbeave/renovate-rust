@@ -246,7 +246,10 @@ zipStorePath=wrapper/dists
     fn extract_gradle_version_returns_url_and_version() {
         let properties = "distributionSha256Sum=038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip\nzipStoreBase=GRADLE_USER_HOME\n";
         let r = extract_gradle_version(properties).unwrap();
-        assert_eq!(r.url, "https\\://services.gradle.org/distributions/gradle-6.3-bin.zip");
+        assert_eq!(
+            r.url,
+            "https\\://services.gradle.org/distributions/gradle-6.3-bin.zip"
+        );
         assert_eq!(r.version, "6.3");
     }
 

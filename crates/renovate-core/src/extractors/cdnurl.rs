@@ -52,9 +52,7 @@ mod tests {
     // Ported: "extractPackageFile" — cdnurl/extract.spec.ts line 5
     #[test]
     fn extract_package_file_sample() {
-        let content = include_str!(
-            "../../tests/fixtures/cdnurl/sample.txt"
-        );
+        let content = include_str!("../../tests/fixtures/cdnurl/sample.txt");
         let deps = extract_package_file(content);
         assert_eq!(deps.len(), 10);
         assert_eq!(deps[0].dep_name, "prop-types");

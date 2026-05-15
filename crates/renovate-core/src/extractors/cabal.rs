@@ -125,7 +125,11 @@ fn leading_spaces(s: &str) -> usize {
 ///
 /// Mirrors `lib/modules/manager/haskell-cabal/index.ts` `getRangeStrategy()`.
 pub fn get_range_strategy(range_strategy: &str) -> &str {
-    if range_strategy == "auto" { "widen" } else { range_strategy }
+    if range_strategy == "auto" {
+        "widen"
+    } else {
+        range_strategy
+    }
 }
 
 // ── Parse-helper functions (mirrors lib/modules/manager/haskell-cabal/extract.ts) ──
@@ -290,7 +294,11 @@ pub fn extract_names_and_ranges(content: &str) -> Vec<CabalDepRange> {
         .filter_map(|s| {
             let replace_string = s.trim().to_owned();
             let (package_name, current_value) = split_single_dependency(&replace_string)?;
-            Some(CabalDepRange { current_value, package_name, replace_string })
+            Some(CabalDepRange {
+                current_value,
+                package_name,
+                replace_string,
+            })
         })
         .collect()
 }
@@ -443,7 +451,10 @@ executable my-exe
     // Ported: "countPrecedingIndentation($content, $index)" (it.each) — modules/manager/haskell-cabal/extract.spec.ts line 47
     #[test]
     fn cabal_count_preceding_indentation() {
-        assert_eq!(count_preceding_indentation("\tbuild-depends: base\n\tother-field: hi", 1), 1);
+        assert_eq!(
+            count_preceding_indentation("\tbuild-depends: base\n\tother-field: hi", 1),
+            1
+        );
         assert_eq!(count_preceding_indentation(" build-depends: base", 1), 1);
         assert_eq!(count_preceding_indentation("a\tb", 0), 0);
         assert_eq!(count_preceding_indentation("a\tb", 2), 1);
@@ -464,10 +475,22 @@ executable my-exe
     // Ported: "splitSingleDependency($depLine)" (it.each) — modules/manager/haskell-cabal/extract.spec.ts line 75
     #[test]
     fn cabal_split_single_dependency() {
-        assert_eq!(split_single_dependency("base >=2 && <3"), Some(("base".into(), ">=2 && <3".into())));
-        assert_eq!(split_single_dependency("base >=2 && <3 "), Some(("base".into(), ">=2 && <3".into())));
-        assert_eq!(split_single_dependency("base>=2&&<3"), Some(("base".into(), ">=2&&<3".into())));
-        assert_eq!(split_single_dependency("base"), Some(("base".into(), "".into())));
+        assert_eq!(
+            split_single_dependency("base >=2 && <3"),
+            Some(("base".into(), ">=2 && <3".into()))
+        );
+        assert_eq!(
+            split_single_dependency("base >=2 && <3 "),
+            Some(("base".into(), ">=2 && <3".into()))
+        );
+        assert_eq!(
+            split_single_dependency("base>=2&&<3"),
+            Some(("base".into(), ">=2&&<3".into()))
+        );
+        assert_eq!(
+            split_single_dependency("base"),
+            Some(("base".into(), "".into()))
+        );
         assert_eq!(split_single_dependency("-invalid-package-name"), None);
     }
 
@@ -476,14 +499,29 @@ executable my-exe
     fn cabal_extract_names_and_ranges() {
         let res = extract_names_and_ranges(" a , b ");
         assert_eq!(res.len(), 2);
-        assert_eq!(res[0], CabalDepRange { current_value: "".into(), package_name: "a".into(), replace_string: "a".into() });
-        assert_eq!(res[1], CabalDepRange { current_value: "".into(), package_name: "b".into(), replace_string: "b".into() });
+        assert_eq!(
+            res[0],
+            CabalDepRange {
+                current_value: "".into(),
+                package_name: "a".into(),
+                replace_string: "a".into()
+            }
+        );
+        assert_eq!(
+            res[1],
+            CabalDepRange {
+                current_value: "".into(),
+                package_name: "b".into(),
+                replace_string: "b".into()
+            }
+        );
     }
 
     // Ported: "strips comments" — modules/manager/haskell-cabal/extract.spec.ts line 103
     #[test]
     fn cabal_find_depends_strips_comments() {
-        let comment_cabal_file = "build-depends:\n  -- leading\n base,\n-- middle\n other,\n -- trailing\n other2";
+        let comment_cabal_file =
+            "build-depends:\n  -- leading\n base,\n-- middle\n other,\n -- trailing\n other2";
         let res = find_depends(&format!("{comment_cabal_file}\na: b")).unwrap();
         assert_eq!(res.build_depends_content, "\n base,\n other,\n other2");
         assert_eq!(res.length_processed, comment_cabal_file.len());

@@ -280,7 +280,11 @@ fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
 ///
 /// Mirrors `lib/modules/manager/circleci/range.ts` `getRangeStrategy()`.
 pub fn get_range_strategy(range_strategy: &str) -> &str {
-    if range_strategy == "auto" { "pin" } else { range_strategy }
+    if range_strategy == "auto" {
+        "pin"
+    } else {
+        range_strategy
+    }
 }
 
 /// CircleCI manager file pattern.

@@ -718,9 +718,10 @@ pub struct UpdateLockedConfig {
 
 /// Mirrors `lib/modules/manager/cargo/update-locked.ts` `updateLockedDependency()`.
 pub fn update_locked_dependency(config: &UpdateLockedConfig) -> UpdateLockedStatus {
-    let (Some(dep_name), Some(lock_file_content)) =
-        (config.dep_name.as_deref(), config.lock_file_content.as_deref())
-    else {
+    let (Some(dep_name), Some(lock_file_content)) = (
+        config.dep_name.as_deref(),
+        config.lock_file_content.as_deref(),
+    ) else {
         return UpdateLockedStatus::Unsupported;
     };
     let new_version = config.new_version.as_deref().unwrap_or("");
@@ -753,9 +754,8 @@ pub fn bump_package_version(
     current_value: &str,
     bump_version: &str,
 ) -> BumpPackageVersionResult {
-    static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r#"(?m)^(?P<prefix>version[ \t]*=[ \t]*['"])[^'"]*"#).unwrap()
-    });
+    static VERSION_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#"(?m)^(?P<prefix>version[ \t]*=[ \t]*['"])[^'"]*"#).unwrap());
 
     let bumped_content = (|| -> Option<String> {
         let mut new_ver = Version::parse(current_value).ok()?;
@@ -1389,13 +1389,15 @@ mod renovate_compat_tests {
     // Ported: "returns a map of package versions" — modules/manager/cargo/locked-version.spec.ts line 33
     #[test]
     fn extract_versions_returns_map_of_package_versions() {
-        let content =
-            include_str!("../../tests/fixtures/cargo/lockfile-update/Cargo.1.lock");
+        let content = include_str!("../../tests/fixtures/cargo/lockfile-update/Cargo.1.lock");
         let result = extract_lock_file_content_versions(content).unwrap();
         assert_eq!(result.get("proc-macro2"), Some(&vec!["1.0.66".to_string()]));
         assert_eq!(result.get("quote"), Some(&vec!["1.0.33".to_string()]));
         assert_eq!(result.get("test"), Some(&vec!["0.1.0".to_string()]));
-        assert_eq!(result.get("unicode-ident"), Some(&vec!["1.0.11".to_string()]));
+        assert_eq!(
+            result.get("unicode-ident"),
+            Some(&vec!["1.0.11".to_string()])
+        );
         assert_eq!(result.get("unicode-xid"), Some(&vec!["0.2.4".to_string()]));
         let syn = result.get("syn").unwrap();
         assert!(syn.contains(&"1.0.1".to_string()));
@@ -1413,7 +1415,10 @@ mod renovate_compat_tests {
             new_version: Some("1.0.4".to_string()),
             lock_file_content: Some(lock_file_content.to_string()),
         };
-        assert_eq!(update_locked_dependency(&config).as_str(), "already-updated");
+        assert_eq!(
+            update_locked_dependency(&config).as_str(),
+            "already-updated"
+        );
     }
 
     // Ported: "returns unsupported for empty lockfile" — modules/manager/cargo/update-locked.spec.ts line 21
