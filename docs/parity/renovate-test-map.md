@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2399 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2404 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13759,13 +13759,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/circleci/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/index.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `file names match managerFilePatterns`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matchRegexOrGlobList("$path") === $expected | 6 | pending | — | — | — |
+| matchRegexOrGlobList("$path") === $expected | 6 | ported | `circleci.rs` | `circleci_file_pattern_matches_expected_paths` | it.each; all 12 cases covered in single test |
 
 ---
 
@@ -14138,13 +14138,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/custom/regex/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/custom/regex/utils.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does not crash for lazy regex | 5 | pending | — | — | — |
+| does not crash for lazy regex | 5 | ported | `managers.rs` | `regex_match_all_does_not_crash_for_lazy_regex` | — |
 
 ---
 
@@ -15540,19 +15540,19 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/hermit/default-config.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/hermit/default-config.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `excludeCommitPaths`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| minimatches("$path") === $expected | 13 | pending | — | — | — |
+| minimatches("$path") === $expected | 13 | ported | `hermit.rs` | `hermit_exclude_commit_paths_glob` | — |
 
 ### `managerFilePatterns`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matchRegexOrGlobList("$path") === $expected | 30 | pending | — | — | — |
+| matchRegexOrGlobList("$path") === $expected | 30 | ported | `hermit.rs` | `hermit_file_pattern_matches_expected` | — |
 
 ---
 

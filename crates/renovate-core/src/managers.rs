@@ -806,6 +806,17 @@ pub fn is_custom_manager(manager: &str) -> bool {
     CUSTOM_MANAGER_LIST.contains(&manager)
 }
 
+/// Apply a regex repeatedly to content, collecting all non-overlapping matches.
+///
+/// Mirrors `lib/modules/manager/custom/regex/utils.ts` `regexMatchAll()`.
+/// Capped at 10 000 results to guard against runaway lazy patterns.
+pub fn regex_match_all(re: &regex::Regex, content: &str) -> Vec<String> {
+    re.find_iter(content)
+        .take(10_000)
+        .map(|m| m.as_str().to_owned())
+        .collect()
+}
+
 /// Uses pre-compiled regex patterns (compiled once via [`COMPILED`]).
 /// Managers with at least one matching file are included in the result.
 pub fn detect(files: &[String]) -> Vec<DetectedManager> {
@@ -1187,5 +1198,15 @@ mod tests {
         assert!(!is_custom_manager("custom.regex"));
         assert!(is_custom_manager("jsonata"));
         assert!(!is_custom_manager("custom.jsonata"));
+    }
+
+    // Ported: "does not crash for lazy regex" — modules/manager/custom/regex/utils.spec.ts line 5
+    #[test]
+    fn regex_match_all_does_not_crash_for_lazy_regex() {
+        let re = regex::Regex::new(r"(?P<currentDigest>.*?)").unwrap();
+        let results =
+            regex_match_all(&re, "1f699d2bfc99bbbe4c1ed5bb8fc21e6911d69c6e\n");
+        // Should not panic and return a Vec (capped at 10_000)
+        assert!(results.len() <= 10_000);
     }
 }

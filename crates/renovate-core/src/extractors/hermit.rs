@@ -49,6 +49,27 @@ static PKG_CHANNEL_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\.([A-Za-z][A-Za-z0-9_-]*)@([A-Za-z][A-Za-z0-9_-]*)\.pkg$").expect("valid regex")
 });
 
+/// Manager file pattern: `/(^|/)bin/hermit$/`
+static MANAGER_FILE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(^|/)bin/hermit$").unwrap());
+
+/// Glob pattern for `excludeCommitPaths`: `**/bin/hermit`
+static EXCLUDE_COMMIT_GLOB: LazyLock<globset::GlobMatcher> = LazyLock::new(|| {
+    globset::Glob::new("**/bin/hermit")
+        .unwrap()
+        .compile_matcher()
+});
+
+/// Returns true if the path matches Hermit's `managerFilePatterns`.
+pub fn matches_file_pattern(path: &str) -> bool {
+    MANAGER_FILE_RE.is_match(path)
+}
+
+/// Returns true if the path matches Hermit's `excludeCommitPaths` glob `**/bin/hermit`.
+pub fn matches_exclude_commit_path(path: &str) -> bool {
+    EXCLUDE_COMMIT_GLOB.is_match(path)
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /// Extract Hermit package deps from the repository file list.
@@ -179,5 +200,41 @@ mod tests {
         let content = "#!/bin/bash\n#some hermit content\n#hermit updated";
         let result = update_hermit_dependency(content);
         assert_eq!(result, content);
+    }
+
+    // Ported: 'minimatches("$path") === $expected' — modules/manager/hermit/default-config.spec.ts line 13
+    #[test]
+    fn hermit_exclude_commit_paths_glob() {
+        let should_match = ["bin/hermit", "gradle/bin/hermit", "nested/module/bin/hermit"];
+        let should_not_match = [
+            "nested/testbin/hermit",
+            "other",
+            "nested/other",
+            "nested/module/other",
+        ];
+        for p in &should_match {
+            assert!(matches_exclude_commit_path(p), "expected match: {p}");
+        }
+        for p in &should_not_match {
+            assert!(!matches_exclude_commit_path(p), "expected no match: {p}");
+        }
+    }
+
+    // Ported: 'matchRegexOrGlobList("$path") === $expected' — modules/manager/hermit/default-config.spec.ts line 30
+    #[test]
+    fn hermit_file_pattern_matches_expected() {
+        let should_match = ["bin/hermit", "gradle/bin/hermit", "nested/module/bin/hermit"];
+        let should_not_match = [
+            "nested/testbin/hermit",
+            "other",
+            "nested/other",
+            "nested/module/other",
+        ];
+        for p in &should_match {
+            assert!(matches_file_pattern(p), "expected match: {p}");
+        }
+        for p in &should_not_match {
+            assert!(!matches_file_pattern(p), "expected no match: {p}");
+        }
     }
 }

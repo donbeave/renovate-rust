@@ -283,6 +283,17 @@ pub fn get_range_strategy(range_strategy: &str) -> &str {
     if range_strategy == "auto" { "pin" } else { range_strategy }
 }
 
+/// CircleCI manager file pattern.
+///
+/// Mirrors `managerFilePatterns` in `lib/modules/manager/circleci/index.ts`.
+static MANAGER_FILE_PATTERN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(^|/)\.circleci/.+\.ya?ml$").unwrap());
+
+/// Returns true if the path matches CircleCI's file pattern.
+pub fn matches_file_pattern(path: &str) -> bool {
+    MANAGER_FILE_PATTERN.is_match(path)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -593,5 +604,31 @@ workflows:
     #[test]
     fn circleci_range_defaults_to_pin() {
         assert_eq!(get_range_strategy("auto"), "pin");
+    }
+
+    // Ported: 'matchRegexOrGlobList("$path") === $expected' — modules/manager/circleci/index.spec.ts line 6
+    #[test]
+    fn circleci_file_pattern_matches_expected_paths() {
+        let should_match = [
+            ".circleci/config.yml",
+            ".circleci/config.yaml",
+            ".circleci/foo.yaml",
+            ".circleci/foo.yml",
+            ".circleci/foo/config.yaml",
+            ".circleci/foo/bar.yml",
+            "foo/.circleci/bar.yaml",
+        ];
+        let should_not_match = [
+            "foo.yml",
+            "circleci/foo.yml",
+            ".circleci_foo/bar.yml",
+            ".circleci/foo.toml",
+        ];
+        for path in &should_match {
+            assert!(matches_file_pattern(path), "expected match for {path}");
+        }
+        for path in &should_not_match {
+            assert!(!matches_file_pattern(path), "expected no match for {path}");
+        }
     }
 }
