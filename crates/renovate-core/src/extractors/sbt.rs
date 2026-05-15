@@ -454,6 +454,46 @@ fn scala_library_artifact(version: &str) -> String {
     }
 }
 
+/// Sort sbt package files so that `build.sbt` comes first.
+///
+/// Mirrors `lib/modules/manager/sbt/util.ts` `sortPackageFiles()`.
+pub fn sort_package_files(package_files: &[&str]) -> Vec<String> {
+    let mut sorted: Vec<String> = package_files.iter().map(|s| (*s).to_owned()).collect();
+    if let Some(idx) = sorted.iter().position(|f| f.ends_with("build.sbt")) {
+        let build_sbt = sorted.remove(idx);
+        sorted.insert(0, build_sbt);
+    }
+    sorted
+}
+
+/// Normalize a Scala version string for sbt cross-building.
+///
+/// - Versions ≤ 2.10.0: returned as-is.
+/// - Versions 2.10.x and above (but not Scala 3): returns `major.minor`.
+/// - Scala 3 versions (> 3.0.0): returns just `major`.
+///
+/// Mirrors `lib/modules/manager/sbt/util.ts` `normalizeScalaVersion()`.
+pub fn normalize_scala_version(version: &str) -> String {
+    let parts: Vec<&str> = version.split('.').collect();
+    if parts.len() != 3 {
+        return version.to_owned();
+    }
+    let Ok(major) = parts[0].parse::<u64>() else { return version.to_owned() };
+    let Ok(minor) = parts[1].parse::<u64>() else { return version.to_owned() };
+    let Ok(patch) = parts[2].parse::<u64>() else { return version.to_owned() };
+
+    let gt_2_10 = (major, minor, patch) > (2, 10, 0);
+    if !gt_2_10 {
+        return version.to_owned();
+    }
+    let is_scala3 = (major, minor, patch) > (3, 0, 0);
+    if is_scala3 {
+        parts[0].to_owned()
+    } else {
+        format!("{}.{}", parts[0], parts[1])
+    }
+}
+
 /// Bump the `version := "..."` field in build.sbt content.
 ///
 /// Mirrors `lib/modules/manager/sbt/update.ts` `bumpPackageVersion()`.
@@ -1185,5 +1225,62 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
     fn sbt_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(SBT_CONTENT, "0.0.2", "not_a_bump");
         assert_eq!(result, SBT_CONTENT);
+    }
+
+    // Ported: "places build.sbt first" — modules/manager/sbt/util.spec.ts line 5
+    #[test]
+    fn sbt_sort_package_files_build_sbt_first() {
+        let result = sort_package_files(&[
+            "project/build.properties",
+            "project/Dependencies.scala",
+            "build.sbt",
+        ]);
+        assert_eq!(result, vec![
+            "build.sbt",
+            "project/build.properties",
+            "project/Dependencies.scala",
+        ]);
+    }
+
+    // Ported: "does not normalize prior to 2.10" — modules/manager/sbt/util.spec.ts line 17
+    #[test]
+    fn sbt_normalize_scala_version_prior_to_2_10() {
+        assert_eq!(normalize_scala_version("2.9.3"), "2.9.3");
+    }
+
+    // Ported: "normalizes a Scala 2.10 version number" — modules/manager/sbt/util.spec.ts line 22
+    #[test]
+    fn sbt_normalize_scala_2_10() {
+        assert_eq!(normalize_scala_version("2.10.7"), "2.10");
+    }
+
+    // Ported: "normalizes a Scala 2.11 version number" — modules/manager/sbt/util.spec.ts line 27
+    #[test]
+    fn sbt_normalize_scala_2_11() {
+        assert_eq!(normalize_scala_version("2.11.12"), "2.11");
+    }
+
+    // Ported: "normalizes a Scala 2.12 version number" — modules/manager/sbt/util.spec.ts line 32
+    #[test]
+    fn sbt_normalize_scala_2_12() {
+        assert_eq!(normalize_scala_version("2.12.19"), "2.12");
+    }
+
+    // Ported: "normalizes a Scala 2.13 version number" — modules/manager/sbt/util.spec.ts line 37
+    #[test]
+    fn sbt_normalize_scala_2_13() {
+        assert_eq!(normalize_scala_version("2.13.14"), "2.13");
+    }
+
+    // Ported: "normalizes a Scala 3 LTS version number" — modules/manager/sbt/util.spec.ts line 42
+    #[test]
+    fn sbt_normalize_scala_3_lts() {
+        assert_eq!(normalize_scala_version("3.3.3"), "3");
+    }
+
+    // Ported: "normalizes a Scala 3 current version number" — modules/manager/sbt/util.spec.ts line 47
+    #[test]
+    fn sbt_normalize_scala_3_current() {
+        assert_eq!(normalize_scala_version("3.4.2"), "3");
     }
 }
