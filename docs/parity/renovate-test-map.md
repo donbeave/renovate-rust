@@ -13672,25 +13672,25 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/cargo/locked-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/locked-version.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+**Total tests:** 8 | **Ported:** 6 | **Actionable:** 6 | **Status:** partial
 
 ### `extractLockFileVersions()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for missing lock file | 19 | pending | — | — | — |
-| returns null for invalid lock file | 23 | pending | — | — | — |
-| returns empty map for lock file without packages | 28 | pending | — | — | — |
+| returns null for missing lock file | 19 | not-applicable | — | — | TypeScript reads from filesystem (async); Rust tests inline content |
+| returns null for invalid lock file | 23 | ported | `cargo.rs` | `extract_versions_invalid_content_returns_none` | — |
+| returns empty map for lock file without packages | 28 | ported | `cargo.rs` | `extract_versions_no_packages_returns_empty` | — |
 | returns a map of package versions | 33 | pending | — | — | — |
 
 ### `parseLockFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses v1 lockfile string into an object | 51 | pending | — | — | — |
-| parses v2 lockfile string into an object | 70 | pending | — | — | — |
-| parses v3 lockfile string into an object | 88 | pending | — | — | — |
-| can deal with invalid lockfiles | 106 | pending | — | — | — |
+| parses v1 lockfile string into an object | 51 | ported | `cargo.rs` | `parse_lock_file_v1` | — |
+| parses v2 lockfile string into an object | 70 | ported | `cargo.rs` | `parse_lock_file_v2` | — |
+| parses v3 lockfile string into an object | 88 | ported | `cargo.rs` | `parse_lock_file_v3` | — |
+| can deal with invalid lockfiles | 106 | ported | `cargo.rs` | `parse_lock_file_invalid` | — |
 
 ---
 

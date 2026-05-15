@@ -628,6 +628,68 @@ pub fn is_breaking(current: &str, new: &str) -> bool {
     cur.major != nw.major
 }
 
+// ──────────────────────────── Cargo.lock parsing ────────────────────────────
+
+use std::collections::HashMap;
+
+/// A single package entry from a Cargo.lock file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CargoLockPackage {
+    pub name: String,
+    pub version: String,
+    pub source: Option<String>,
+}
+
+/// Parsed representation of a Cargo.lock file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CargoLock {
+    pub package: Vec<CargoLockPackage>,
+}
+
+/// Parse a Cargo.lock file string into a [`CargoLock`].
+///
+/// Mirrors `lib/modules/manager/cargo/locked-version.ts` `parseLockFile()`.
+/// Returns `None` when the input is not parseable as a Cargo.lock file.
+pub fn parse_lock_file(content: &str) -> Option<CargoLock> {
+    let table = content.parse::<toml::Table>().ok()?;
+    let Some(packages_val) = table.get("package") else {
+        // No [[package]] section → valid lockfile with zero packages
+        return Some(CargoLock { package: vec![] });
+    };
+    let packages_arr = packages_val.as_array()?;
+    let mut packages = Vec::new();
+    for item in packages_arr {
+        let pkg = item.as_table()?;
+        let name = pkg.get("name")?.as_str()?.to_owned();
+        let version = pkg.get("version")?.as_str()?.to_owned();
+        let source = pkg
+            .get("source")
+            .and_then(|v| v.as_str())
+            .map(str::to_owned);
+        packages.push(CargoLockPackage {
+            name,
+            version,
+            source,
+        });
+    }
+    Some(CargoLock { package: packages })
+}
+
+/// Extract a map of `package_name → [versions]` from Cargo.lock content.
+///
+/// Mirrors `lib/modules/manager/cargo/locked-version.ts`
+/// `extractLockFileContentVersions()`.
+/// Returns `None` when the content is unparseable. Returns an empty map
+/// when there are no `[[package]]` entries.
+pub fn extract_lock_file_content_versions(content: &str) -> Option<HashMap<String, Vec<String>>> {
+    let lock = parse_lock_file(content)?;
+    let mut map: HashMap<String, Vec<String>> = HashMap::new();
+    for pkg in lock.package {
+        map.entry(pkg.name).or_default().push(pkg.version);
+    }
+    Some(map)
+}
+
 /// Determine the effective Cargo range strategy.
 ///
 /// Mirrors `lib/modules/manager/cargo/range.ts` `getRangeStrategy()`.
@@ -1157,5 +1219,75 @@ mod renovate_compat_tests {
     #[test]
     fn range_strategy_defaults_to_update_lockfile() {
         assert_eq!(get_range_strategy("auto", Some("1.0.0")), "update-lockfile");
+    }
+
+    // ── parseLockFile tests ──────────────────────────────────────────────────
+
+    // Ported: "parses v1 lockfile string into an object" — modules/manager/cargo/locked-version.spec.ts line 51
+    #[test]
+    fn parse_lock_file_v1() {
+        let content = include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
+        let result = parse_lock_file(content).unwrap();
+        assert_eq!(result.package.len(), 2);
+        assert_eq!(result.package[0].name, "foo");
+        assert_eq!(result.package[0].version, "1.0.4");
+        assert_eq!(
+            result.package[0].source.as_deref(),
+            Some("registry+https://github.com/rust-lang/crates.io-index")
+        );
+        assert_eq!(result.package[1].name, "bar");
+        assert_eq!(result.package[1].version, "0.7.6");
+        assert_eq!(
+            result.package[1].source.as_deref(),
+            Some("registry+https://github.com/rust-lang/crates.io-index")
+        );
+    }
+
+    // Ported: "parses v2 lockfile string into an object" — modules/manager/cargo/locked-version.spec.ts line 70
+    #[test]
+    fn parse_lock_file_v2() {
+        let content = include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v2.lock");
+        let result = parse_lock_file(content).unwrap();
+        assert_eq!(result.package.len(), 2);
+        assert_eq!(result.package[0].name, "foo");
+        assert_eq!(result.package[0].version, "1.1.0");
+        assert_eq!(
+            result.package[0].source.as_deref(),
+            Some("registry+https://github.com/rust-lang/crates.io-index")
+        );
+        assert_eq!(result.package[1].name, "bar");
+        assert_eq!(result.package[1].version, "7.0.1");
+        assert!(result.package[1].source.is_none());
+    }
+
+    // Ported: "parses v3 lockfile string into an object" — modules/manager/cargo/locked-version.spec.ts line 88
+    #[test]
+    fn parse_lock_file_v3() {
+        let content = include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v3.lock");
+        let result = parse_lock_file(content).unwrap();
+        assert_eq!(result.package.len(), 2);
+        assert_eq!(result.package[0].name, "foo");
+        assert_eq!(result.package[0].version, "1.1.0");
+        assert_eq!(result.package[1].name, "bar");
+        assert_eq!(result.package[1].version, "7.0.1");
+    }
+
+    // Ported: "can deal with invalid lockfiles" — modules/manager/cargo/locked-version.spec.ts line 106
+    #[test]
+    fn parse_lock_file_invalid() {
+        assert!(parse_lock_file("foo").is_none());
+    }
+
+    // Ported: "returns null for invalid lock file" — modules/manager/cargo/locked-version.spec.ts line 23
+    #[test]
+    fn extract_versions_invalid_content_returns_none() {
+        assert!(extract_lock_file_content_versions("foo").is_none());
+    }
+
+    // Ported: "returns empty map for lock file without packages" — modules/manager/cargo/locked-version.spec.ts line 28
+    #[test]
+    fn extract_versions_no_packages_returns_empty() {
+        let result = extract_lock_file_content_versions("[metadata]").unwrap();
+        assert!(result.is_empty());
     }
 }
