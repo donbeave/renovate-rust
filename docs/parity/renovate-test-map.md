@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2566 / 8612 actionable tests ported (29%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2570 / 8612 actionable tests ported (29%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -14580,16 +14580,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/gitlabci/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/utils.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `getGitlabDep`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| offical image - $name | 11 | pending | — | — | — |
-| image with organization - $name | 28 | pending | — | — | — |
-| supports registry aliases - $name | 48 | pending | — | — | — |
-| no Docker hub | 73 | pending | — | — | — |
+| offical image - $name | 11 | ported | `gitlabci.rs` | `get_gitlab_dep_official_image_*` (4 variants) | — |
+| image with organization - $name | 28 | ported | `gitlabci.rs` | `get_gitlab_dep_image_with_org_*` (4 variants) | — |
+| supports registry aliases - $name | 48 | ported | `gitlabci.rs` | `get_gitlab_dep_registry_alias_*` (5 variants) | — |
+| no Docker hub | 73 | ported | `gitlabci.rs` | `get_gitlab_dep_no_docker_hub` | — |
 
 ---
 
