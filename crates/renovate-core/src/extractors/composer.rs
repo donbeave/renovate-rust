@@ -477,6 +477,27 @@ impl ComposerUpdateLockedStatus {
 /// Check if a composer lock file has a dependency at the target version.
 ///
 /// Mirrors `lib/modules/manager/composer/update-locked.ts` `updateLockedDependency()`.
+/// Determine the effective Composer range strategy.
+///
+/// Mirrors `lib/modules/manager/composer/range.ts` `getRangeStrategy()`.
+pub fn get_composer_range_strategy<'a>(
+    range_strategy: &'a str,
+    composer_json_type: Option<&str>,
+    current_value: Option<&str>,
+) -> &'a str {
+    let is_complex = current_value.is_some_and(|v| v.contains(" || "));
+    if range_strategy == "bump" && is_complex {
+        return "widen";
+    }
+    if range_strategy != "auto" {
+        return range_strategy;
+    }
+    if is_complex || composer_json_type == Some("typo3-cms-extension") {
+        return "widen";
+    }
+    "update-lockfile"
+}
+
 pub fn update_locked_composer_dependency(
     dep_name: Option<&str>,
     new_version: Option<&str>,
@@ -936,5 +957,65 @@ mod tests {
             Some(LOCK_CONTENT),
         );
         assert_eq!(result.as_str(), "unsupported");
+    }
+
+    // Ported: "returns same if not auto" — modules/manager/composer/range.spec.ts line 5
+    #[test]
+    fn composer_range_returns_same_if_not_auto() {
+        assert_eq!(get_composer_range_strategy("widen", None, None), "widen");
+    }
+
+    // Ported: "replaces require-dev" — modules/manager/composer/range.spec.ts line 10
+    #[test]
+    fn composer_range_auto_require_dev_returns_update_lockfile() {
+        assert_eq!(
+            get_composer_range_strategy("auto", None, None),
+            "update-lockfile"
+        );
+    }
+
+    // Ported: "replaces project require" — modules/manager/composer/range.spec.ts line 18
+    #[test]
+    fn composer_range_auto_project_returns_update_lockfile() {
+        assert_eq!(
+            get_composer_range_strategy("auto", Some("project"), None),
+            "update-lockfile"
+        );
+    }
+
+    // Ported: "widens complex ranges" — modules/manager/composer/range.spec.ts line 27
+    #[test]
+    fn composer_range_auto_complex_returns_widen() {
+        assert_eq!(
+            get_composer_range_strategy("auto", None, Some("^1.6.0 || ^2.0.0")),
+            "widen"
+        );
+    }
+
+    // Ported: "widens complex bump" — modules/manager/composer/range.spec.ts line 36
+    #[test]
+    fn composer_range_bump_complex_returns_widen() {
+        assert_eq!(
+            get_composer_range_strategy("bump", None, Some("^1.6.0 || ^2.0.0")),
+            "widen"
+        );
+    }
+
+    // Ported: "defaults to update-lockfile" — modules/manager/composer/range.spec.ts line 45
+    #[test]
+    fn composer_range_auto_defaults_to_update_lockfile() {
+        assert_eq!(
+            get_composer_range_strategy("auto", None, Some("^1.6.0")),
+            "update-lockfile"
+        );
+    }
+
+    // Ported: "defaults to widen for TYPO3 extensions" — modules/manager/composer/range.spec.ts line 50
+    #[test]
+    fn composer_range_auto_typo3_returns_widen() {
+        assert_eq!(
+            get_composer_range_strategy("auto", Some("typo3-cms-extension"), None),
+            "widen"
+        );
     }
 }

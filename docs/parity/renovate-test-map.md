@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2388 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2396 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13537,13 +13537,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bundler/gemfile.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/gemfile.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches the expected output | 7 | pending | — | — | — |
+| matches the expected output | 7 | ported | `bundler.rs` | `bundler_locked_version_parse_rails` | Same extractLockFileEntries test (185 entries) |
 
 ---
 
@@ -13851,19 +13851,19 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/composer/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/composer/range.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+**Total tests:** 7 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 5 | pending | — | — | — |
-| replaces require-dev | 10 | pending | — | — | — |
-| replaces project require | 18 | pending | — | — | — |
-| widens complex ranges | 27 | pending | — | — | — |
-| widens complex bump | 36 | pending | — | — | — |
-| defaults to update-lockfile | 45 | pending | — | — | — |
-| defaults to widen for TYPO3 extensions | 50 | pending | — | — | — |
+| returns same if not auto | 5 | ported | `composer.rs` | `composer_range_returns_same_if_not_auto` | — |
+| replaces require-dev | 10 | ported | `composer.rs` | `composer_range_auto_require_dev_returns_update_lockfile` | — |
+| replaces project require | 18 | ported | `composer.rs` | `composer_range_auto_project_returns_update_lockfile` | — |
+| widens complex ranges | 27 | ported | `composer.rs` | `composer_range_auto_complex_returns_widen` | — |
+| widens complex bump | 36 | ported | `composer.rs` | `composer_range_bump_complex_returns_widen` | — |
+| defaults to update-lockfile | 45 | ported | `composer.rs` | `composer_range_auto_defaults_to_update_lockfile` | — |
+| defaults to widen for TYPO3 extensions | 50 | ported | `composer.rs` | `composer_range_auto_typo3_returns_widen` | — |
 
 ---
 
