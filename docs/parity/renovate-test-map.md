@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2253 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2258 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13772,14 +13772,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/circleci/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/circleci/range.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 5 | pending | — | — | — |
-| defaults to bump | 10 | pending | — | — | — |
+| returns same if not auto | 5 | ported | `circleci.rs` | `circleci_range_returns_same_if_not_auto` | — |
+| defaults to bump | 10 | ported | `circleci.rs` | `circleci_range_defaults_to_pin` | — |
 
 ---
 
@@ -14643,15 +14643,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/gleam/range.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gleam/range.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns same if not auto | 5 | pending | — | — | — |
-| widens complex bump | 10 | pending | — | — | — |
-| defaults to widen | 19 | pending | — | — | — |
+| returns same if not auto | 5 | ported | `gleam.rs` | `gleam_range_returns_same_if_not_auto` | — |
+| widens complex bump | 10 | ported | `gleam.rs` | `gleam_range_widens_complex_bump` | — |
+| defaults to widen | 19 | ported | `gleam.rs` | `gleam_range_defaults_to_widen` | — |
 
 ---
 

@@ -276,6 +276,13 @@ fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
     value
 }
 
+/// Determine the effective CircleCI range strategy.
+///
+/// Mirrors `lib/modules/manager/circleci/range.ts` `getRangeStrategy()`.
+pub fn get_range_strategy(range_strategy: &str) -> &str {
+    if range_strategy == "auto" { "pin" } else { range_strategy }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -574,5 +581,17 @@ workflows:
                 .iter()
                 .any(|d| d.dep.image == "cimg/python" && d.dep.tag.as_deref() == Some("3.7"))
         );
+    }
+
+    // Ported: "returns same if not auto" — modules/manager/circleci/range.spec.ts line 5
+    #[test]
+    fn circleci_range_returns_same_if_not_auto() {
+        assert_eq!(get_range_strategy("widen"), "widen");
+    }
+
+    // Ported: "defaults to bump" — modules/manager/circleci/range.spec.ts line 10
+    #[test]
+    fn circleci_range_defaults_to_pin() {
+        assert_eq!(get_range_strategy("auto"), "pin");
     }
 }

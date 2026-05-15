@@ -68,6 +68,21 @@ pub fn extract(content: &str) -> Vec<GleamDep> {
     out
 }
 
+/// Determine the effective Gleam range strategy.
+///
+/// Mirrors `lib/modules/manager/gleam/range.ts` `getRangeStrategy()`.
+pub fn get_range_strategy<'a>(range_strategy: &'a str, current_value: Option<&str>) -> &'a str {
+    let is_complex = current_value
+        .is_some_and(|v| v.contains(" and ") || v.contains(" or ") || v.contains("||"));
+    if range_strategy == "bump" && is_complex {
+        return "widen";
+    }
+    if range_strategy != "auto" {
+        return range_strategy;
+    }
+    "widen"
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -130,5 +145,25 @@ gleeunit = "~> 1.0"
     #[test]
     fn invalid_toml_returns_empty() {
         assert!(extract("foo").is_empty());
+    }
+
+    // Ported: "returns same if not auto" — modules/manager/gleam/range.spec.ts line 4
+    #[test]
+    fn gleam_range_returns_same_if_not_auto() {
+        assert_eq!(get_range_strategy("pin", None), "pin");
+    }
+
+    // Ported: "widens complex bump" — modules/manager/gleam/range.spec.ts line 9
+    #[test]
+    fn gleam_range_widens_complex_bump() {
+        let result = get_range_strategy("bump", Some(">= 1.6.0 and < 2.0.0"));
+        assert_eq!(result, "widen");
+    }
+
+    // Ported: "defaults to widen" — modules/manager/gleam/range.spec.ts line 18
+    #[test]
+    fn gleam_range_defaults_to_widen() {
+        let result = get_range_strategy("auto", None);
+        assert_eq!(result, "widen");
     }
 }
