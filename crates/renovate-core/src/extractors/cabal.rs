@@ -121,6 +121,13 @@ fn leading_spaces(s: &str) -> usize {
     s.len() - s.trim_start_matches([' ', '\t']).len()
 }
 
+/// Determine the effective Haskell Cabal range strategy.
+///
+/// Mirrors `lib/modules/manager/haskell-cabal/index.ts` `getRangeStrategy()`.
+pub fn get_range_strategy(range_strategy: &str) -> &str {
+    if range_strategy == "auto" { "widen" } else { range_strategy }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -181,5 +188,31 @@ executable my-exe
     fn no_build_depends_returns_empty() {
         let content = "cabal-version: 2.4\nname: foo\nversion: 1.0.0\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "extractPackageFile($content).deps.map(x => x.packageName)" (it.each) — modules/manager/haskell-cabal/index.spec.ts line 14
+    #[test]
+    fn cabal_extract_package_names() {
+        let cases: &[(&str, &[&str])] = &[
+            ("build-depends: base,", &["base"]),
+            ("build-depends:,other,other2", &["other", "other2"]),
+            ("build-depends : base", &["base"]),
+            ("Build-Depends: base", &["base"]),
+            ("build-depends: a\nbuild-depends: b", &["a", "b"]),
+            ("dependencies: base", &[]),
+        ];
+        for (content, expected) in cases {
+            let deps = extract(content);
+            let names: Vec<&str> = deps.iter().map(|d| d.package_name.as_str()).collect();
+            assert_eq!(names, *expected, "failed for content: {content}");
+        }
+    }
+
+    // Ported: "getRangeStrategy({ rangeStrategy: $input })" (it.each) — modules/manager/haskell-cabal/index.spec.ts line 47
+    #[test]
+    fn cabal_get_range_strategy() {
+        assert_eq!(get_range_strategy("auto"), "widen");
+        assert_eq!(get_range_strategy("widen"), "widen");
+        assert_eq!(get_range_strategy("replace"), "replace");
     }
 }

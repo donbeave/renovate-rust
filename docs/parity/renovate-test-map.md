@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2347 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2351 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13201,14 +13201,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bazel-module/parser/starlark.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/parser/starlark.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| .asBoolean($a) | 4 | pending | — | — | — |
-| asBoolean | 12 | pending | — | — | — |
+| .asBoolean($a) | 4 | ported | `bazel_module.rs` | `starlark_boolean_parsing` | — |
+| asBoolean | 12 | ported | `bazel_module.rs` | `starlark_boolean_invalid_throws` | — |
 
 ---
 
@@ -15371,19 +15371,19 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/haskell-cabal/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/haskell-cabal/index.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extractPackageFile($content).deps.map(x => x.packageName) | 15 | pending | — | — | — |
+| extractPackageFile($content).deps.map(x => x.packageName) | 15 | ported | `cabal.rs` | `cabal_extract_package_names` | — |
 
 ### `getRangeStrategy()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| getRangeStrategy({ rangeStrategy: $input }) | 46 | pending | — | — | — |
+| getRangeStrategy({ rangeStrategy: $input }) | 46 | ported | `cabal.rs` | `cabal_get_range_strategy` | — |
 
 ---
 

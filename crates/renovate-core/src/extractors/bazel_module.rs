@@ -1352,6 +1352,17 @@ fn strip_comments(content: &str) -> String {
         .join("\n")
 }
 
+/// Parse a Starlark boolean string.
+///
+/// Mirrors `lib/modules/manager/bazel-module/parser/starlark.ts` `asBoolean()`.
+pub fn starlark_as_boolean(value: &str) -> Result<bool, String> {
+    match value {
+        "True" => Ok(true),
+        "False" => Ok(false),
+        _ => Err(format!("Invalid Starlark boolean string: {value}")),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2783,5 +2794,20 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("module(name = \"mymodule\", version = \"1.0.0\")\n").is_empty());
+    }
+
+    // Ported: ".asBoolean($a)" (it.each True/False) — modules/manager/bazel-module/parser/starlark.spec.ts line 4
+    #[test]
+    fn starlark_boolean_parsing() {
+        assert_eq!(starlark_as_boolean("True"), Ok(true));
+        assert_eq!(starlark_as_boolean("False"), Ok(false));
+    }
+
+    // Ported: "asBoolean" (throws) — modules/manager/bazel-module/parser/starlark.spec.ts line 10
+    #[test]
+    fn starlark_boolean_invalid_throws() {
+        let result = starlark_as_boolean("bad");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Invalid Starlark boolean string: bad"));
     }
 }
