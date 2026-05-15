@@ -559,6 +559,53 @@ fn replace_strict_special_chars(input: &str) -> String {
         .collect()
 }
 
+/// Generate a config-migration commit message.
+///
+/// Mirrors `lib/workers/repository/config-migration/branch/commit-message.ts`
+/// `ConfigMigrationCommitMessageFactory.getCommitMessage()`.
+pub fn config_migration_commit_message(semantic_commits: &str, config_file: &str) -> String {
+    let topic = format!("Migrate config {config_file}");
+    format_semantic_commit_message(semantic_commits, &topic, "chore", "config")
+}
+
+/// Generate a config-migration PR title.
+///
+/// Mirrors `lib/workers/repository/config-migration/branch/commit-message.ts`
+/// `ConfigMigrationCommitMessageFactory.getPrTitle()`.
+pub fn config_migration_pr_title(semantic_commits: &str) -> String {
+    format_semantic_commit_message(semantic_commits, "Migrate Renovate config", "chore", "config")
+}
+
+fn format_semantic_commit_message(semantic: &str, topic: &str, typ: &str, scope: &str) -> String {
+    if semantic == "enabled" {
+        let prefix = if scope.is_empty() {
+            typ.to_owned()
+        } else {
+            format!("{typ}({scope})")
+        };
+        let subject = lower_first(topic);
+        format!("{prefix}: {subject}")
+    } else {
+        upper_first(topic)
+    }
+}
+
+fn lower_first(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(c) => c.to_lowercase().to_string() + chars.as_str(),
+    }
+}
+
+fn upper_first(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(c) => c.to_uppercase().to_string() + chars.as_str(),
+    }
+}
+
 /// Detect if a list of commit messages follows Angular conventional commit format.
 ///
 /// Returns `true` ("enabled") if the score is positive (more semantic than non-semantic),
@@ -1544,6 +1591,46 @@ mod tests {
     fn branch_name_compiles_multiple_times() {
         // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
         assert_eq!(branch_name("", "", "dep"), "dep");
+    }
+
+    // Ported: "creates semantic commit message" — workers/repository/config-migration/branch/commit-message.spec.ts line 8
+    #[test]
+    fn config_migration_semantic_commit_message() {
+        assert_eq!(
+            config_migration_commit_message("enabled", "renovate.json"),
+            "chore(config): migrate config renovate.json"
+        );
+    }
+
+    // Ported: "creates semantic pr title" — workers/repository/config-migration/branch/commit-message.spec.ts line 19
+    #[test]
+    fn config_migration_semantic_pr_title() {
+        assert_eq!(
+            config_migration_pr_title("enabled"),
+            "chore(config): migrate Renovate config"
+        );
+    }
+
+    // Ported: "creates non-semantic commit message" — workers/repository/config-migration/branch/commit-message.spec.ts line 30
+    #[test]
+    fn config_migration_non_semantic_commit_message() {
+        assert_eq!(
+            config_migration_commit_message("disabled", "renovate.json"),
+            "Migrate config renovate.json"
+        );
+    }
+
+    // Ported: "creates non-semantic pr title" — workers/repository/config-migration/branch/commit-message.spec.ts line 41
+    #[test]
+    fn config_migration_non_semantic_pr_title() {
+        assert_eq!(config_migration_pr_title("disabled"), "Migrate Renovate config");
+    }
+
+    // Ported: "returns default values when commitMessage template string is empty" — workers/repository/config-migration/branch/commit-message.spec.ts line 50
+    #[test]
+    fn config_migration_pr_title_with_empty_commit_message() {
+        // TS test: commitMessage='', semanticCommits=disabled → getPrTitle() returns 'Migrate Renovate config'
+        assert_eq!(config_migration_pr_title("disabled"), "Migrate Renovate config");
     }
 
     // Ported: "detects false if unknown" — util/git/semantic.spec.ts line 18

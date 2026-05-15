@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2436 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2441 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -25262,17 +25262,17 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/config-migration/branch/commit-message.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/config-migration/branch/commit-message.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `workers/repository/config-migration/branch/commit-message`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| creates semantic commit message | 8 | pending | — | — | — |
-| creates semantic pr title | 19 | pending | — | — | — |
-| creates non-semantic commit message | 30 | pending | — | — | — |
-| creates non-semantic pr title | 41 | pending | — | — | — |
-| returns default values when commitMessage template string is empty | 50 | pending | — | — | — |
+| creates semantic commit message | 8 | ported | `branch.rs` | `config_migration_semantic_commit_message` | — |
+| creates semantic pr title | 19 | ported | `branch.rs` | `config_migration_semantic_pr_title` | — |
+| creates non-semantic commit message | 30 | ported | `branch.rs` | `config_migration_non_semantic_commit_message` | — |
+| creates non-semantic pr title | 41 | ported | `branch.rs` | `config_migration_non_semantic_pr_title` | — |
+| returns default values when commitMessage template string is empty | 50 | ported | `branch.rs` | `config_migration_pr_title_with_empty_commit_message` | commitMessage='' falls back to default title |
 
 ---
 
