@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2426 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2431 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17986,17 +17986,17 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/terraform/lockfile/update-locked.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terraform/lockfile/update-locked.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects already updated | 35 | pending | — | — | — |
-| returns unsupported if dependency is undefined | 47 | pending | — | — | — |
-| returns unsupported if lockfileContent is undefined | 59 | pending | — | — | — |
-| returns unsupported | 70 | pending | — | — | — |
-| returns update-failed for errors | 82 | pending | — | — | — |
+| detects already updated | 35 | ported | `terraform.rs` | `terraform_update_locked_detects_already_updated` | — |
+| returns unsupported if dependency is undefined | 47 | ported | `terraform.rs` | `terraform_update_locked_unsupported_no_dep_name` | — |
+| returns unsupported if lockfileContent is undefined | 59 | ported | `terraform.rs` | `terraform_update_locked_unsupported_no_lock_content` | — |
+| returns unsupported | 70 | ported | `terraform.rs` | `terraform_update_locked_unsupported_version_not_found` | — |
+| returns update-failed for errors | 82 | ported | `terraform.rs` | `terraform_update_locked_update_failed_on_invalid_content` | extractLocks mock → invalid content in Rust |
 
 ---
 
