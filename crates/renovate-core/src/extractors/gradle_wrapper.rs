@@ -33,6 +33,71 @@ pub struct GradleWrapperDep {
     pub version: String,
 }
 
+/// Result of [`extract_gradle_version`]: the full URL and the parsed version.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GradleVersionExtract {
+    pub url: String,
+    pub version: String,
+}
+
+// Matches `distributionUrl = <url>` where url ends with `-{version}-{bin|all}.zip`.
+static DISTRIBUTION_URL_FULL_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?m)^(?:distributionUrl\s*=\s*)(?P<url>\S*-(?P<version>\d+\.\d+(?:\.\d+)?(?:-\w+)*)-(?:bin|all)\.zip)\s*$",
+    )
+    .unwrap()
+});
+
+/// Extract the Gradle distribution URL and version from properties file content.
+///
+/// Mirrors TypeScript `extractGradleVersion` in
+/// `lib/modules/manager/gradle-wrapper/utils.ts`.
+pub fn extract_gradle_version(content: &str) -> Option<GradleVersionExtract> {
+    let cap = DISTRIBUTION_URL_FULL_RE.captures(content)?;
+    Some(GradleVersionExtract {
+        url: cap["url"].to_owned(),
+        version: cap["version"].to_owned(),
+    })
+}
+
+/// Compute the Java constraint for a given Gradle version string.
+///
+/// This is the pure (no I/O) part of `getJavaConstraint` from
+/// `lib/modules/manager/gradle-wrapper/utils.ts`. When the gradlewFile is
+/// empty (as in the test suite's `it.each` cases), file reads return null and
+/// the result is determined solely by the Gradle major/minor version.
+pub fn java_constraint_from_gradle_version(gradle_version: &str) -> &'static str {
+    if gradle_version.is_empty() {
+        return "^11.0.0";
+    }
+    let mut parts = gradle_version.split('.');
+    let Some(major) = parts.next().and_then(|s| s.parse::<u64>().ok()) else {
+        return "^11.0.0";
+    };
+    // TypeScript treats `0` as falsy for minor version comparison, so we map 0 → None.
+    let minor: Option<u64> = parts.next().and_then(|s| {
+        let n: u64 = s.parse().ok()?;
+        if n > 0 { Some(n) } else { None }
+    });
+
+    if major > 9 || (major == 9 && minor.is_some_and(|m| m >= 1)) {
+        return "^25.0.0";
+    }
+    if major > 8 || (major == 8 && minor.is_some_and(|m| m >= 5)) {
+        return "^21.0.0";
+    }
+    if major > 7 || (major == 7 && minor.is_some_and(|m| m >= 3)) {
+        return "^17.0.0";
+    }
+    if major == 7 {
+        return "^16.0.0";
+    }
+    if major > 0 && major < 5 {
+        return "^8.0.0";
+    }
+    "^11.0.0"
+}
+
 /// Parse `gradle-wrapper.properties` and extract the Gradle version.
 ///
 /// Returns `None` if no `distributionUrl` with a recognizable version is found.
@@ -165,5 +230,50 @@ zipStorePath=wrapper/dists
 ";
         let dep = extract(content).unwrap();
         assert_eq!(dep.version, "6.6.6");
+    }
+
+    // --- extractGradleVersion tests ---
+
+    // Ported: "returns null" — gradle-wrapper/util.spec.ts line 113
+    #[test]
+    fn extract_gradle_version_returns_none_without_distribution_url() {
+        let properties = "distributionSha256Sum=038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768\nzipStoreBase=GRADLE_USER_HOME\n";
+        assert!(extract_gradle_version(properties).is_none());
+    }
+
+    // Ported: "returns gradle version" — gradle-wrapper/util.spec.ts line 121
+    #[test]
+    fn extract_gradle_version_returns_url_and_version() {
+        let properties = "distributionSha256Sum=038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip\nzipStoreBase=GRADLE_USER_HOME\n";
+        let r = extract_gradle_version(properties).unwrap();
+        assert_eq!(r.url, "https\\://services.gradle.org/distributions/gradle-6.3-bin.zip");
+        assert_eq!(r.version, "6.3");
+    }
+
+    // --- getJavaConstraint pure tests ---
+
+    // Ported: "$gradleVersion | $javaConstraint" — gradle-wrapper/util.spec.ts line 20
+    #[test]
+    fn java_constraint_from_gradle_version_cases() {
+        let cases = [
+            ("", "^11.0.0"),
+            ("4", "^8.0.0"),
+            ("4.9", "^8.0.0"),
+            ("6.0", "^11.0.0"),
+            ("7.0.1", "^16.0.0"),
+            ("7.3.0", "^17.0.0"),
+            ("8.0.1", "^17.0.0"),
+            ("8.5.0", "^21.0.0"),
+            ("9.0.1", "^21.0.0"),
+            ("9.1.0", "^25.0.0"),
+            ("10.0.1", "^25.0.0"),
+        ];
+        for (gradle, expected) in cases {
+            assert_eq!(
+                java_constraint_from_gradle_version(gradle),
+                expected,
+                "gradle version: {gradle}"
+            );
+        }
     }
 }

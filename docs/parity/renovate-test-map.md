@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2647 / 8612 actionable tests ported (30%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2650 / 8612 actionable tests ported (30%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15277,13 +15277,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/gradle-wrapper/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle-wrapper/util.spec.ts
-**Total tests:** 14 | **Ported:** 0 | **Actionable:** 14 | **Status:** pending
+**Total tests:** 14 | **Ported:** 3 | **Actionable:** 14 | **Status:** partial
 
 ### `getJavaConstraint() › returns Java constraint based on gradle support`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $gradleVersion \| $javaConstraint | 20 | pending | — | — | — |
+| $gradleVersion \| $javaConstraint | 20 | ported | `gradle_wrapper.rs` | `java_constraint_from_gradle_version_cases` (11 cases) | — |
 | returns toolChainVersion constraint if daemon JVM configured | 43 | pending | — | — | — |
 | returns languageVersion constraint if found | 52 | pending | — | — | — |
 
@@ -15306,8 +15306,8 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null | 113 | pending | — | — | — |
-| returns gradle version | 121 | pending | — | — | — |
+| returns null | 113 | ported | `gradle_wrapper.rs` | `extract_gradle_version_returns_none_without_distribution_url` | — |
+| returns gradle version | 121 | ported | `gradle_wrapper.rs` | `extract_gradle_version_returns_url_and_version` | — |
 
 ### `gradleWrapperFileName()`
 
