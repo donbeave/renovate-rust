@@ -10,6 +10,7 @@
 //! runtime dispatch — it delegates to each concrete client with zero
 //! allocation overhead.
 
+pub mod azure_utils;
 pub mod github;
 pub mod gitlab;
 pub mod local;
