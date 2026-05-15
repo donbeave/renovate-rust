@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2328 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2331 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17423,15 +17423,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/poetry/update-locked.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/poetry/update-locked.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects already updated | 11 | pending | — | — | — |
-| returns unsupported | 23 | pending | — | — | — |
-| returns unsupported for mising locked content | 35 | pending | — | — | — |
+| detects already updated | 11 | ported | `poetry.rs` | `poetry_update_locked_detects_already_updated` | — |
+| returns unsupported | 23 | ported | `poetry.rs` | `poetry_update_locked_returns_unsupported` | — |
+| returns unsupported for mising locked content | 35 | ported | `poetry.rs` | `poetry_update_locked_unsupported_for_missing_content` | — |
 
 ---
 

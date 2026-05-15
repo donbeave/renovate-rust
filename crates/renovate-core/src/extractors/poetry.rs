@@ -715,6 +715,44 @@ fn normalize_name(name: &str) -> String {
     result
 }
 
+/// Status result for `update_locked_poetry_dependency`.
+#[derive(Debug)]
+pub enum PoetryUpdateLockedStatus {
+    AlreadyUpdated,
+    Unsupported,
+}
+
+impl PoetryUpdateLockedStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PoetryUpdateLockedStatus::AlreadyUpdated => "already-updated",
+            PoetryUpdateLockedStatus::Unsupported => "unsupported",
+        }
+    }
+}
+
+/// Check if a poetry lock file already has a dependency at the target version.
+///
+/// Mirrors `lib/modules/manager/poetry/update-locked.ts` `updateLockedDependency()`.
+pub fn update_locked_poetry_dependency(
+    dep_name: Option<&str>,
+    new_version: Option<&str>,
+    lock_file_content: Option<&str>,
+) -> PoetryUpdateLockedStatus {
+    let (Some(dep_name), Some(new_version), Some(lock_file_content)) =
+        (dep_name, new_version, lock_file_content)
+    else {
+        return PoetryUpdateLockedStatus::Unsupported;
+    };
+    let locked = parse_lockfile_versions(lock_file_content);
+    let normalized = normalize_name(dep_name);
+    if locked.get(&normalized).is_some_and(|v| v == new_version) {
+        PoetryUpdateLockedStatus::AlreadyUpdated
+    } else {
+        PoetryUpdateLockedStatus::Unsupported
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1593,5 +1631,37 @@ werkzeug = ">=0.14"
         let flask = deps.iter().find(|d| d.name == "flask").unwrap();
         assert_eq!(flask.current_value, "1.2.3");
         assert_eq!(flask.skip_reason, Some(PoetrySkipReason::LocalPath));
+    }
+
+    const LOCK_CONTENT: &str =
+        include_str!("../../tests/fixtures/poetry/pyproject.11.toml.lock");
+
+    // Ported: "detects already updated" — modules/manager/poetry/update-locked.spec.ts line 12
+    #[test]
+    fn poetry_update_locked_detects_already_updated() {
+        let result = update_locked_poetry_dependency(
+            Some("urllib3"),
+            Some("1.26.3"),
+            Some(LOCK_CONTENT),
+        );
+        assert_eq!(result.as_str(), "already-updated");
+    }
+
+    // Ported: "returns unsupported" — modules/manager/poetry/update-locked.spec.ts line 22
+    #[test]
+    fn poetry_update_locked_returns_unsupported() {
+        let result = update_locked_poetry_dependency(
+            Some("urllib3"),
+            Some("1.26.4"),
+            Some(LOCK_CONTENT),
+        );
+        assert_eq!(result.as_str(), "unsupported");
+    }
+
+    // Ported: "returns unsupported for mising locked content" — modules/manager/poetry/update-locked.spec.ts line 32
+    #[test]
+    fn poetry_update_locked_unsupported_for_missing_content() {
+        let result = update_locked_poetry_dependency(Some("urllib3"), Some("1.26.4"), None);
+        assert_eq!(result.as_str(), "unsupported");
     }
 }
