@@ -559,6 +559,28 @@ fn replace_strict_special_chars(input: &str) -> String {
         .collect()
 }
 
+/// Generate a description of the configured base branch(es) for onboarding PR.
+///
+/// Mirrors `lib/workers/repository/onboarding/pr/base-branch.ts`
+/// `getBaseBranchDesc()`.
+pub fn get_base_branch_desc(base_branch_patterns: &[&str]) -> String {
+    match base_branch_patterns.len() {
+        0 => String::new(),
+        1 => format!(
+            "You have configured Renovate to use branch `{}` as base branch.\n\n",
+            base_branch_patterns[0]
+        ),
+        _ => {
+            let branches = base_branch_patterns
+                .iter()
+                .map(|b| format!("`{b}`"))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("You have configured Renovate to use the following baseBranchPatterns: {branches}.")
+        }
+    }
+}
+
 /// Determine the replacement package name for a dependency update.
 ///
 /// Mirrors `lib/workers/repository/process/lookup/utils.ts`
@@ -1499,6 +1521,32 @@ mod tests {
     fn branch_name_compiles_multiple_times() {
         // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
         assert_eq!(branch_name("", "", "dep"), "dep");
+    }
+
+    // Ported: "returns empty if no baseBranch" — workers/repository/onboarding/pr/base-branch.spec.ts line 13
+    #[test]
+    fn base_branch_desc_empty_when_no_branch() {
+        assert!(get_base_branch_desc(&[]).is_empty());
+    }
+
+    // Ported: "describes baseBranch" — workers/repository/onboarding/pr/base-branch.spec.ts line 18
+    #[test]
+    fn base_branch_desc_single_branch() {
+        let result = get_base_branch_desc(&["some-branch"]);
+        assert_eq!(
+            result.trim(),
+            "You have configured Renovate to use branch `some-branch` as base branch."
+        );
+    }
+
+    // Ported: "describes baseBranchPatterns" — workers/repository/onboarding/pr/base-branch.spec.ts line 26
+    #[test]
+    fn base_branch_desc_multiple_branches() {
+        let result = get_base_branch_desc(&["some-branch", "some-other-branch"]);
+        assert_eq!(
+            result.trim(),
+            "You have configured Renovate to use the following baseBranchPatterns: `some-branch`, `some-other-branch`."
+        );
     }
 
     // Ported: "returns the replacement name if defined" — workers/repository/process/lookup/utils.spec.ts line 14
