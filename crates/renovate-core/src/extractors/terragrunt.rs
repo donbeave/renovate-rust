@@ -84,6 +84,16 @@ static TFR_RE: LazyLock<Regex> = LazyLock::new(|| {
 static KV_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"^\s*(\w+)\s*=\s*"([^"]+)""#).unwrap());
 
+/// Return the Terragrunt dependency type for a given string.
+///
+/// Mirrors `lib/modules/manager/terragrunt/util.ts` `getTerragruntDependencyType()`.
+pub fn get_terragrunt_dependency_type(value: &str) -> &'static str {
+    match value {
+        "terraform" => "terraform",
+        _ => "unknown",
+    }
+}
+
 /// Extract terragrunt module deps from a `terragrunt.hcl` file.
 pub fn extract(content: &str) -> Vec<TerragruntDep> {
     let mut deps = Vec::new();
@@ -431,5 +441,72 @@ terraform {
     fn include_block_only_returns_empty() {
         let content = "include \"root\" {\n  path = find_in_parent_folders(\"root.hcl\")\n}\n";
         assert!(extract(content).is_empty());
+    }
+
+    // Ported: "should split project and tag from source" — modules/manager/terragrunt/modules.spec.ts line 5
+    #[test]
+    fn github_ref_regex_splits_project_and_tag() {
+        let source = "github.com/hashicorp/example?ref=v1.0.0";
+        let cap = GITHUB_REF_RE.captures(source).unwrap();
+        assert_eq!(&cap["project"], "hashicorp/example");
+        assert_eq!(&cap["tag"], "v1.0.0");
+    }
+
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 14
+    #[test]
+    fn github_ref_regex_parses_complex_repo_names() {
+        let source = "github.com/hashicorp/example.repo-123?ref=v1.0.0";
+        let cap = GITHUB_REF_RE.captures(source).unwrap();
+        assert_eq!(&cap["project"], "hashicorp/example.repo-123");
+        assert_eq!(&cap["tag"], "v1.0.0");
+    }
+
+    // Ported: "should split host, path and tag from source" — modules/manager/terragrunt/modules.spec.ts line 26
+    #[test]
+    fn git_ref_regex_splits_host_path_and_tag() {
+        for prefix in &["http://", "https://", "ssh://"] {
+            let source = format!("{prefix}github.com/hashicorp/example?ref=v1.0.0");
+            let cap = GIT_REF_RE.captures(&source).unwrap();
+            assert_eq!(&cap["tag"], "v1.0.0");
+            assert!(cap["url"].contains("github.com/hashicorp/example"));
+        }
+    }
+
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 48
+    #[test]
+    fn git_ref_regex_parses_complex_repo_path() {
+        for prefix in &["http://", "https://", "ssh://"] {
+            let source = format!("{prefix}github.com/hashicorp/example.repo-123?ref=v1.0.0");
+            let cap = GIT_REF_RE.captures(&source).unwrap();
+            assert_eq!(&cap["tag"], "v1.0.0");
+            assert!(cap["url"].contains("example.repo-123"));
+        }
+    }
+
+    // Ported: "returns terraform" — modules/manager/terragrunt/util.spec.ts line 5
+    #[test]
+    fn get_dependency_type_returns_terraform() {
+        assert_eq!(get_terragrunt_dependency_type("terraform"), "terraform");
+    }
+
+    // Ported: "returns unknown" — modules/manager/terragrunt/util.spec.ts line 9
+    #[test]
+    fn get_dependency_type_returns_unknown() {
+        assert_eq!(get_terragrunt_dependency_type("unknown"), "unknown");
+    }
+
+    // Ported: "returns unknown on empty string" — modules/manager/terragrunt/util.spec.ts line 13
+    #[test]
+    fn get_dependency_type_returns_unknown_for_empty() {
+        assert_eq!(get_terragrunt_dependency_type(""), "unknown");
+    }
+
+    // Ported: "returns unknown on string with random chars" — modules/manager/terragrunt/util.spec.ts line 17
+    #[test]
+    fn get_dependency_type_returns_unknown_for_random() {
+        assert_eq!(
+            get_terragrunt_dependency_type("sdfsgdsfadfhfghfhgdfsdf"),
+            "unknown"
+        );
     }
 }

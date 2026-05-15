@@ -531,6 +531,44 @@ fn normalize_name(name: &str) -> String {
     result
 }
 
+/// Bump the `version = "..."` field in pyproject.toml content.
+///
+/// Mirrors `lib/modules/manager/pep621/update.ts` `bumpPackageVersion()`.
+pub fn bump_package_version(content: &str, current_value: &str, bump_version: &str) -> String {
+    use std::sync::LazyLock;
+    static VERSION_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r#"(?m)^(?P<prefix>version[ \t]*=[ \t]*['"])[^'"]*"#).unwrap()
+    });
+
+    let new_ver = (|| -> Option<String> {
+        let mut parsed = semver::Version::parse(current_value).ok()?;
+        match bump_version {
+            "patch" => parsed.patch += 1,
+            "minor" => {
+                parsed.minor += 1;
+                parsed.patch = 0;
+            }
+            "major" => {
+                parsed.major += 1;
+                parsed.minor = 0;
+                parsed.patch = 0;
+            }
+            _ => return None,
+        }
+        Some(parsed.to_string())
+    })();
+
+    let Some(new_str) = new_ver else {
+        return content.to_owned();
+    };
+
+    VERSION_RE
+        .replace(content, |caps: &regex::Captures| {
+            format!("{}{}", &caps["prefix"], new_str)
+        })
+        .into_owned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1173,5 +1211,36 @@ readme = "README.md"
         let packaging = deps.iter().find(|d| d.name == "packaging").unwrap();
         assert_eq!(packaging.dep_type, Pep621DepType::Regular);
         assert_eq!(packaging.current_value, ">=20.9,!=22.0");
+    }
+
+    const PEP621_CONTENT: &str =
+        "[project]\nname = \"test\"\nversion = \"0.0.2\"\ndescription = \"test\"\n";
+
+    // Ported: "increments" — modules/manager/pep621/update.spec.ts line 14
+    #[test]
+    fn pep621_bump_increments_patch() {
+        let result = bump_package_version(PEP621_CONTENT, "0.0.2", "patch");
+        assert_eq!(result, PEP621_CONTENT.replace("0.0.2", "0.0.3"));
+    }
+
+    // Ported: "no ops" — modules/manager/pep621/update.spec.ts line 22
+    #[test]
+    fn pep621_bump_no_op_when_version_mismatch() {
+        let result = bump_package_version(PEP621_CONTENT, "0.0.1", "patch");
+        assert_eq!(result, PEP621_CONTENT);
+    }
+
+    // Ported: "updates" — modules/manager/pep621/update.spec.ts line 30
+    #[test]
+    fn pep621_bump_updates_minor() {
+        let result = bump_package_version(PEP621_CONTENT, "0.0.1", "minor");
+        assert_eq!(result, PEP621_CONTENT.replace("0.0.2", "0.1.0"));
+    }
+
+    // Ported: "returns content if bumping errors" — modules/manager/pep621/update.spec.ts line 38
+    #[test]
+    fn pep621_bump_returns_content_on_invalid_bump_type() {
+        let result = bump_package_version(PEP621_CONTENT, "0.0.2", "not_valid");
+        assert_eq!(result, PEP621_CONTENT);
     }
 }

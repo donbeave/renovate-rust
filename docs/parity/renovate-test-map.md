@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2294 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2306 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17078,16 +17078,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/pep621/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pep621/update.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `bumpPackageVersion()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| increments | 13 | pending | — | — | — |
-| no ops | 23 | pending | — | — | — |
-| updates | 32 | pending | — | — | — |
-| returns content if bumping errors | 42 | pending | — | — | — |
+| increments | 13 | ported | `pep621.rs` | `pep621_bump_increments_patch` | — |
+| no ops | 23 | ported | `pep621.rs` | `pep621_bump_no_op_when_version_mismatch` | — |
+| updates | 32 | ported | `pep621.rs` | `pep621_bump_updates_minor` | — |
+| returns content if bumping errors | 42 | ported | `pep621.rs` | `pep621_bump_returns_content_on_invalid_bump_type` | — |
 
 ---
 
@@ -18031,37 +18031,37 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/terragrunt/modules.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/modules.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `githubRefMatchRegex`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should split project and tag from source | 5 | pending | — | — | — |
-| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 15 | pending | — | — | — |
+| should split project and tag from source | 5 | ported | `terragrunt.rs` | `github_ref_regex_splits_project_and_tag` | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 15 | ported | `terragrunt.rs` | `github_ref_regex_parses_complex_repo_names` | — |
 
 ### `gitTagsRefMatchRegex`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should split host, path and tag from source | 27 | pending | — | — | — |
-| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 55 | pending | — | — | — |
+| should split host, path and tag from source | 27 | ported | `terragrunt.rs` | `git_ref_regex_splits_host_path_and_tag` | — |
+| should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | 55 | ported | `terragrunt.rs` | `git_ref_regex_parses_complex_repo_path` | — |
 
 ---
 
 ## `lib/modules/manager/terragrunt/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/terragrunt/util.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `getTerragruntDependencyType()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns terraform | 5 | pending | — | — | — |
-| returns unknown | 9 | pending | — | — | — |
-| returns unknown on empty string | 13 | pending | — | — | — |
-| returns unknown on string with random chars | 17 | pending | — | — | — |
+| returns terraform | 5 | ported | `terragrunt.rs` | `get_dependency_type_returns_terraform` | — |
+| returns unknown | 9 | ported | `terragrunt.rs` | `get_dependency_type_returns_unknown` | — |
+| returns unknown on empty string | 13 | ported | `terragrunt.rs` | `get_dependency_type_returns_unknown_for_empty` | — |
+| returns unknown on string with random chars | 17 | ported | `terragrunt.rs` | `get_dependency_type_returns_unknown_for_random` | — |
 
 ---
 
