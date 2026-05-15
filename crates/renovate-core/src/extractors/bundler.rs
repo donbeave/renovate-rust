@@ -307,6 +307,37 @@ impl BundlerUpdateLockedStatus {
     }
 }
 
+/// Build an HTTP Basic-Auth header value for Bundler registry authentication.
+///
+/// Mirrors `lib/modules/manager/bundler/host-rules.ts` `getAuthenticationHeaderValue()`.
+pub fn get_authentication_header_value(
+    username: Option<&str>,
+    password: Option<&str>,
+    token: Option<&str>,
+) -> String {
+    if let Some(u) = username {
+        let encoded = percent_encode_username(u);
+        let pw = password.unwrap_or("");
+        return format!("{encoded}:{pw}");
+    }
+    token.unwrap_or("").to_owned()
+}
+
+fn percent_encode_username(username: &str) -> String {
+    username
+        .chars()
+        .flat_map(|c| {
+            if c.is_alphanumeric() || matches!(c, '-' | '_' | '.' | '~') {
+                vec![c.to_string()]
+            } else {
+                let mut buf = [0u8; 4];
+                let s = c.encode_utf8(&mut buf);
+                s.bytes().map(|b| format!("%{b:02X}")).collect()
+            }
+        })
+        .collect()
+}
+
 /// Check if a Gemfile.lock already has a gem at the target version.
 ///
 /// Mirrors `lib/modules/manager/bundler/update-locked.ts` `updateLockedDependency()`.
@@ -567,6 +598,28 @@ end
             result,
             BundlerUpdateLockedStatus::Unsupported | BundlerUpdateLockedStatus::UpdateFailed
         ));
+    }
+
+    // Ported: "returns the authentication header with the password" — modules/manager/bundler/host-rules.spec.ts line 15
+    #[test]
+    fn bundler_auth_header_with_password() {
+        let val = get_authentication_header_value(Some("test"), Some("password"), None);
+        assert_eq!(val, "test:password");
+    }
+
+    // Ported: "returns the authentication header with the token" — modules/manager/bundler/host-rules.spec.ts line 24
+    #[test]
+    fn bundler_auth_header_with_token() {
+        let val = get_authentication_header_value(None, None, Some("token"));
+        assert_eq!(val, "token");
+    }
+
+    // Ported: "escapes special characters in the username but not the password" — modules/manager/bundler/host-rules.spec.ts line 32
+    #[test]
+    fn bundler_auth_header_encodes_username_at_sign() {
+        let val =
+            get_authentication_header_value(Some("test@example.com"), Some("p@ssword"), None);
+        assert_eq!(val, "test%40example.com:p@ssword");
     }
 
     const RAILS_LOCK: &str = include_str!("../../tests/fixtures/bundler/Gemfile.rails.lock");

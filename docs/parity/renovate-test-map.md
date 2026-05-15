@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2396 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2399 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13550,15 +13550,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bundler/host-rules.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/host-rules.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+**Total tests:** 10 | **Ported:** 3 | **Actionable:** 10 | **Status:** partial
 
 ### `getAuthenticationHeaderValue()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns the authentication header with the password | 15 | pending | — | — | — |
-| returns the authentication header with the token | 24 | pending | — | — | — |
-| escapes special characters in the username but not the password | 32 | pending | — | — | — |
+| returns the authentication header with the password | 15 | ported | `bundler.rs` | `bundler_auth_header_with_password` | — |
+| returns the authentication header with the token | 24 | ported | `bundler.rs` | `bundler_auth_header_with_token` | — |
+| escapes special characters in the username but not the password | 32 | ported | `bundler.rs` | `bundler_auth_header_encodes_username_at_sign` | — |
 
 ### `findAllAuthenticatable()`
 
