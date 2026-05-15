@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2226 / 8606 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2227 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -27473,7 +27473,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 63 | **Actionable:** 68 | **Status:** partial
+**Total tests:** 68 | **Ported:** 64 | **Actionable:** 64 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -27577,16 +27577,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | rejects schedule longer than 1 month | 445 | ported | `schedule.rs` | `spec_every_6_months_rejects_february` | — |
 | approves schedule longer than 1 month with day of month | 452 | ported | `schedule.rs` | `spec_every_3_months_first_day_approves_july_1` | — |
 | rejects schedule longer than 1 month with day of month | 459 | ported | `schedule.rs` | `spec_every_3_months_first_day_rejects_february` | — |
-| supports weekday instances | 466 | pending | — | — | — |
+| supports weekday instances | 466 | ported | `schedule.rs` | `spec_weekday_instances_first_monday` | — |
 
 ### `workers/repository/update/branch/schedule › log cron schedules`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should correctly convert "* 22 4 * *" to human-readable format | 483 | pending | — | — | — |
-| should correctly convert "* */2 * * *" to human-readable format | 490 | pending | — | — | — |
-| should correctly convert "* 23 * * *" to human-readable format | 495 | pending | — | — | — |
-| should not throw an error for an invalid cron expression "* * */2 6#1" | 500 | pending | — | — | — |
+| should correctly convert "* 22 4 * *" to human-readable format | 483 | not-applicable | — | — | cronstrue JS library converts cron to human-readable text; Rust has no equivalent |
+| should correctly convert "* */2 * * *" to human-readable format | 490 | not-applicable | — | — | cronstrue JS library; Rust has no equivalent |
+| should correctly convert "* 23 * * *" to human-readable format | 495 | not-applicable | — | — | cronstrue JS library; Rust has no equivalent |
+| should not throw an error for an invalid cron expression "* * */2 6#1" | 500 | not-applicable | — | — | cronstrue JS library error-handling; Rust has no equivalent |
 
 ---
 

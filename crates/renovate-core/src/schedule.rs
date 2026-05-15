@@ -492,6 +492,24 @@ fn parse_ampm_hour(tok: &str) -> Option<u8> {
     }
 }
 
+/// Extract weekday values from a text schedule string that contains a day name.
+fn extract_weekday_from_text(s: &str) -> Option<Vec<u8>> {
+    for (name, val) in &[
+        ("sunday", 0u8),
+        ("monday", 1),
+        ("tuesday", 2),
+        ("wednesday", 3),
+        ("thursday", 4),
+        ("friday", 5),
+        ("saturday", 6),
+    ] {
+        if s.contains(name) {
+            return Some(vec![*val]);
+        }
+    }
+    None
+}
+
 /// Return the bitmask of weekday values (0=Sun .. 6=Sat) described by `name`.
 /// Handles individual day names and "weekday"/"weekend" keywords.
 fn parse_day_names(text: &str) -> Option<Vec<u8>> {
@@ -539,6 +557,32 @@ pub fn text_schedule_matches_month(entry: &str, hour: u8, dom: u8, weekday: u8, 
     // "at any time" / "" — always match
     if s.is_empty() || s == "at any time" {
         return true;
+    }
+
+    // "on [weekday] on the [N]th day instance" — Nth occurrence of weekday in the month
+    if s.contains("day instance") {
+        let occurrence: u8 = if s.contains("first") {
+            1
+        } else if s.contains("second") {
+            2
+        } else if s.contains("third") {
+            3
+        } else if s.contains("fourth") {
+            4
+        } else {
+            return true; // unknown instance, fail-open
+        };
+        // Find the weekday name in the schedule
+        let day_ok = if let Some(days) = extract_weekday_from_text(&s) {
+            days.contains(&weekday)
+        } else {
+            true
+        };
+        if !day_ok {
+            return false;
+        }
+        // Check that this is the Nth occurrence: (dom - 1) / 7 + 1 == occurrence
+        return (dom.saturating_sub(1)) / 7 + 1 == occurrence;
     }
 
     // "on the first day of the month"
@@ -1925,5 +1969,18 @@ mod tests {
             &schedule(&["* * * * 1#2"]),
             oct_7_mon
         ));
+    }
+
+    // Ported: "supports weekday instances" — workers/repository/update/branch/schedule.spec.ts line 466
+    #[test]
+    fn spec_weekday_instances_first_monday() {
+        // "on Monday on the first day instance" = first Monday of the month
+        let sched = schedule(&["on Monday on the first day instance"]);
+        // 2017-02-01 is a Thursday → not Monday → false
+        assert!(!is_within_schedule_at(&sched, utc(2017, 2, 1, 6)));
+        // 2017-02-06 is the first Monday of February → true
+        assert!(is_within_schedule_at(&sched, utc(2017, 2, 6, 6)));
+        // 2017-02-13 is the second Monday of February → false
+        assert!(!is_within_schedule_at(&sched, utc(2017, 2, 13, 6)));
     }
 }
