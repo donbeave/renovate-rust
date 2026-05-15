@@ -1312,6 +1312,89 @@ pub fn get_range_strategy<'a>(
     "update-lockfile"
 }
 
+/// Result of parsing an npm lock file.
+#[derive(Debug)]
+pub struct NpmParseLockResult {
+    /// Detected or default indentation string.
+    pub detected_indent: String,
+    /// Parsed JSON value, or `None` if the content is invalid JSON.
+    pub lock_file_parsed: Option<serde_json::Value>,
+}
+
+/// Parse an npm lock file string.
+///
+/// Mirrors `lib/modules/manager/npm/utils.ts` `parseLockFile()`.
+pub fn parse_npm_lock_file(content: &str) -> NpmParseLockResult {
+    let detected_indent = detect_json_indent(content);
+    let lock_file_parsed = serde_json::from_str(content).ok();
+    NpmParseLockResult { detected_indent, lock_file_parsed }
+}
+
+/// Serialize an npm lock file value back to a string.
+///
+/// Mirrors `lib/modules/manager/npm/utils.ts` `composeLockFile()`.
+pub fn compose_npm_lock_file(parsed: &serde_json::Value, indent: &str) -> String {
+    let formatted = if indent.is_empty() {
+        serde_json::to_string(parsed).unwrap_or_default()
+    } else {
+        let spaces = indent.len();
+        serde_json::to_string_pretty(parsed)
+            .map(|s| {
+                if spaces != 2 {
+                    // serde_json::to_string_pretty uses 2-space indent; re-indent if needed
+                    s.lines()
+                        .map(|l| {
+                            let leading = l.len() - l.trim_start().len();
+                            let factor = leading / 2;
+                            format!("{}{}", indent.repeat(factor), l.trim_start())
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                } else {
+                    s
+                }
+            })
+            .unwrap_or_default()
+    };
+    formatted + "\n"
+}
+
+/// Detect the indentation string used in a JSON document.
+///
+/// Mirrors `detect-indent` npm package behavior: finds the smallest
+/// indentation unit used in the file; defaults to two spaces.
+fn detect_json_indent(content: &str) -> String {
+    let mut min_indent: Option<usize> = None;
+    let mut uses_tabs = false;
+
+    for line in content.lines() {
+        if line.is_empty() {
+            continue;
+        }
+        let indent_count = line.len() - line.trim_start().len();
+        if indent_count == 0 {
+            continue;
+        }
+        if line.starts_with('\t') {
+            uses_tabs = true;
+            break;
+        }
+        match min_indent {
+            None => min_indent = Some(indent_count),
+            Some(m) if indent_count < m => min_indent = Some(indent_count),
+            _ => {}
+        }
+    }
+
+    if uses_tabs {
+        return "\t".to_owned();
+    }
+    match min_indent {
+        Some(n) => " ".repeat(n),
+        None => "  ".to_owned(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2864,5 +2947,60 @@ chalk@^2.4.1:
     fn npm_bump_returns_content_on_invalid_bump_type() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "invalid_type");
         assert_eq!(result, NPM_PKG_CONTENT);
+    }
+
+    const NPM_PACKAGE_LOCK: &str =
+        include_str!("../../tests/fixtures/npm/lockfile-parsing/package-lock.json");
+
+    // Ported: "parses lockfile string into an object" — modules/manager/npm/utils.spec.ts line 18
+    #[test]
+    fn npm_parse_lock_file_parses_into_object() {
+        let result = parse_npm_lock_file(NPM_PACKAGE_LOCK);
+        assert_eq!(result.detected_indent, "  ");
+        let parsed = result.lock_file_parsed.unwrap();
+        assert_eq!(parsed["lockfileVersion"], 2);
+        assert_eq!(parsed["name"], "lockfile-parsing");
+        assert_eq!(parsed["version"], "1.0.0");
+        assert_eq!(parsed["requires"], true);
+        assert_eq!(parsed["packages"][""]["license"], "ISC");
+    }
+
+    // Ported: "can deal with invalid lockfiles" — modules/manager/npm/utils.spec.ts line 32
+    #[test]
+    fn npm_parse_lock_file_invalid_returns_none() {
+        let result = parse_npm_lock_file("");
+        assert_eq!(result.detected_indent, "  ");
+        assert!(result.lock_file_parsed.is_none());
+    }
+
+    // Ported: "composes lockfile string out of an object" — modules/manager/npm/utils.spec.ts line 39
+    #[test]
+    fn npm_compose_lock_file_serializes_with_indent() {
+        let val = serde_json::json!({
+            "lockfileVersion": 2,
+            "name": "lockfile-parsing",
+            "packages": {
+                "": {
+                    "license": "ISC",
+                    "name": "lockfile-parsing",
+                    "version": "1.0.0"
+                }
+            },
+            "requires": true,
+            "version": "1.0.0"
+        });
+        let composed = compose_npm_lock_file(&val, "  ");
+        assert!(composed.ends_with('\n'));
+        let reparsed: serde_json::Value = serde_json::from_str(&composed).unwrap();
+        assert_eq!(reparsed["name"], "lockfile-parsing");
+        assert_eq!(reparsed["lockfileVersion"], 2);
+    }
+
+    // Ported: "adds trailing newline to match npms behavior and avoid diffs" — modules/manager/npm/utils.spec.ts line 49
+    #[test]
+    fn npm_compose_lock_file_round_trips_fixture() {
+        let result = parse_npm_lock_file(NPM_PACKAGE_LOCK);
+        let composed = compose_npm_lock_file(result.lock_file_parsed.as_ref().unwrap(), &result.detected_indent);
+        assert_eq!(composed, NPM_PACKAGE_LOCK);
     }
 }

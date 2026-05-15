@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2384 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2388 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16823,29 +16823,29 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/npm/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/utils.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+**Total tests:** 7 | **Ported:** 4 | **Actionable:** 7 | **Status:** partial
 
 ### `parseLockFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| parses lockfile string into an object | 16 | pending | — | — | — |
-| can deal with invalid lockfiles | 37 | pending | — | — | — |
+| parses lockfile string into an object | 16 | ported | `npm.rs` | `npm_parse_lock_file_parses_into_object` | — |
+| can deal with invalid lockfiles | 37 | ported | `npm.rs` | `npm_parse_lock_file_invalid_returns_none` | — |
 
 ### `composeLockFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| composes lockfile string out of an object | 48 | pending | — | — | — |
-| adds trailing newline to match npms behavior and avoid diffs | 66 | pending | — | — | — |
+| composes lockfile string out of an object | 48 | ported | `npm.rs` | `npm_compose_lock_file_serializes_with_indent` | — |
+| adds trailing newline to match npms behavior and avoid diffs | 66 | ported | `npm.rs` | `npm_compose_lock_file_round_trips_fixture` | — |
 
 ### `loadPackageJson`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| loads and parses package.json correctly | 81 | pending | — | — | — |
-| returns empty object when package.json is missing | 100 | pending | — | — | — |
-| returns empty object when package.json is invalid | 105 | pending | — | — | — |
+| loads and parses package.json correctly | 81 | not-applicable | — | — | Async filesystem operation with mock; no Rust equivalent |
+| returns empty object when package.json is missing | 100 | not-applicable | — | — | Async filesystem operation with mock; no Rust equivalent |
+| returns empty object when package.json is invalid | 105 | not-applicable | — | — | Async filesystem operation with mock; no Rust equivalent |
 
 ---
 
