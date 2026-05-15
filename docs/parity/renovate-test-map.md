@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2287 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2294 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16197,15 +16197,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/npm/extract/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/npm/extract/utils.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `.matchesAnyPattern()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches package in nested directory | 5 | pending | — | — | — |
-| matches package in non-nested directory | 17 | pending | — | — | — |
-| matches package in explicitly defined directory | 29 | pending | — | — | — |
+| matches package in nested directory | 5 | ported | `npm.rs` | `matches_any_pattern_nested_directory` | — |
+| matches package in non-nested directory | 17 | ported | `npm.rs` | `matches_any_pattern_non_nested_directory` | — |
+| matches package in explicitly defined directory | 29 | ported | `npm.rs` | `matches_any_pattern_explicit_directory` | — |
 
 ---
 
@@ -17623,16 +17623,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/sbt/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sbt/update.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `.bumpPackageVersion()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| increments | 10 | pending | — | — | — |
-| no ops | 21 | pending | — | — | — |
-| updates | 31 | pending | — | — | — |
-| returns content if bumping errors | 41 | pending | — | — | — |
+| increments | 10 | ported | `sbt.rs` | `sbt_bump_increments_patch` | — |
+| no ops | 21 | ported | `sbt.rs` | `sbt_bump_no_op_when_version_mismatch` | — |
+| updates | 31 | ported | `sbt.rs` | `sbt_bump_updates_minor` | — |
+| returns content if bumping errors | 41 | ported | `sbt.rs` | `sbt_bump_returns_content_on_invalid_bump_type` | — |
 
 ---
 

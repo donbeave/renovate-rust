@@ -454,6 +454,46 @@ fn scala_library_artifact(version: &str) -> String {
     }
 }
 
+/// Bump the `version := "..."` field in build.sbt content.
+///
+/// Mirrors `lib/modules/manager/sbt/update.ts` `bumpPackageVersion()`.
+pub fn bump_package_version(content: &str, current_value: &str, bump_version: &str) -> String {
+    use std::sync::LazyLock;
+    static VERSION_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r#"(?m)^(version\s*:=\s*).*$"#).unwrap()
+    });
+
+    let new_ver = (|| -> Option<semver::Version> {
+        let parsed = semver::Version::parse(current_value).ok()?;
+        let mut new = parsed;
+        match bump_version {
+            "patch" => new.patch += 1,
+            "minor" => {
+                new.minor += 1;
+                new.patch = 0;
+            }
+            "major" => {
+                new.major += 1;
+                new.minor = 0;
+                new.patch = 0;
+            }
+            _ => return None,
+        }
+        Some(new)
+    })();
+
+    let Some(new_ver) = new_ver else {
+        return content.to_owned();
+    };
+
+    let new_str = new_ver.to_string();
+    VERSION_RE
+        .replace(content, |caps: &regex::Captures| {
+            format!("{}\"{}\"", &caps[1], new_str)
+        })
+        .into_owned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1112,5 +1152,38 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
                 "https://example.com/repos/3/".to_owned(),
             ]
         );
+    }
+
+    const SBT_CONTENT: &str =
+        "name := \"test\"\norganization := \"test-org\"\nversion := \"0.0.2\"\n";
+
+    // Ported: "increments" — modules/manager/sbt/update.spec.ts line 12
+    #[test]
+    fn sbt_bump_increments_patch() {
+        let result = bump_package_version(SBT_CONTENT, "0.0.2", "patch");
+        assert_eq!(result, SBT_CONTENT.replace("0.0.2", "0.0.3"));
+        assert_ne!(result, SBT_CONTENT);
+    }
+
+    // Ported: "no ops" — modules/manager/sbt/update.spec.ts line 20
+    #[test]
+    fn sbt_bump_no_op_when_version_mismatch() {
+        let result = bump_package_version(SBT_CONTENT, "0.0.1", "patch");
+        assert_eq!(result, SBT_CONTENT);
+    }
+
+    // Ported: "updates" — modules/manager/sbt/update.spec.ts line 28
+    #[test]
+    fn sbt_bump_updates_minor() {
+        let result = bump_package_version(SBT_CONTENT, "0.0.1", "minor");
+        assert_eq!(result, SBT_CONTENT.replace("0.0.2", "0.1.0"));
+        assert_ne!(result, SBT_CONTENT);
+    }
+
+    // Ported: "returns content if bumping errors" — modules/manager/sbt/update.spec.ts line 37
+    #[test]
+    fn sbt_bump_returns_content_on_invalid_bump_type() {
+        let result = bump_package_version(SBT_CONTENT, "0.0.2", "not_a_bump");
+        assert_eq!(result, SBT_CONTENT);
     }
 }

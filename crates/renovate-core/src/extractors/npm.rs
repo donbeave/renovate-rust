@@ -1123,6 +1123,18 @@ fn skip_reason_for(value: &str) -> Option<NpmSkipReason> {
     None
 }
 
+/// Return `true` if `val` matches any of the given glob `patterns`.
+///
+/// Mirrors `lib/modules/manager/npm/extract/utils.ts` `matchesAnyPattern()`.
+pub fn matches_any_pattern(val: &str, patterns: &[&str]) -> bool {
+    patterns.iter().any(|pattern| {
+        *pattern == format!("{val}/")
+            || globset::Glob::new(pattern)
+                .map(|g| g.compile_matcher())
+                .is_ok_and(|m| m.is_match(val))
+    })
+}
+
 /// Return `true` if `file_name` is under `pwd` and its relative path (without
 /// the trailing `/package.json`) matches any workspace glob in `workspaces`.
 ///
@@ -2581,6 +2593,33 @@ chalk@^2.4.1:
     fn npm_range_defaults_to_update_lockfile() {
         let result = get_range_strategy("auto", Some("dependencies"), None);
         assert_eq!(result, "update-lockfile");
+    }
+
+    // Ported: "matches package in nested directory" — modules/manager/npm/extract/utils.spec.ts line 5
+    #[test]
+    fn matches_any_pattern_nested_directory() {
+        assert!(matches_any_pattern(
+            "packages/group/a/package.json",
+            &["packages/**"]
+        ));
+    }
+
+    // Ported: "matches package in non-nested directory" — modules/manager/npm/extract/utils.spec.ts line 14
+    #[test]
+    fn matches_any_pattern_non_nested_directory() {
+        assert!(matches_any_pattern(
+            "non-nested-packages/a/package.json",
+            &["non-nested-packages/*/*"]
+        ));
+    }
+
+    // Ported: "matches package in explicitly defined directory" — modules/manager/npm/extract/utils.spec.ts line 23
+    #[test]
+    fn matches_any_pattern_explicit_directory() {
+        assert!(matches_any_pattern(
+            "solo-package/package.json",
+            &["solo-package/*"]
+        ));
     }
 
     // Ported: "should return false when fileName does not start with pwd" — modules/manager/bun/utils.spec.ts line 7
