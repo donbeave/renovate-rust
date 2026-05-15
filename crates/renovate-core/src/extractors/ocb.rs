@@ -67,7 +67,43 @@ static OTELCOL_VERSION_RE: LazyLock<Regex> =
 static GOMOD_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\s+-\s+gomod:\s+(\S+)(?:\s+(\S+))?").unwrap());
 
+// ── Regex ─────────────────────────────────────────────────────────────────────
+
+/// Matches `version: ['"']?<version>` in an OCB YAML file.
+static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"\bversion:\s+["']?(?P<ver>[^'"\s]+)"#).unwrap()
+});
+
 // ── Public API ────────────────────────────────────────────────────────────────
+
+/// Bump the `dist.version` field in an OCB YAML file.
+///
+/// Mirrors `lib/modules/manager/ocb/update.ts` `bumpPackageVersion()`.
+pub fn bump_package_version(content: &str, current_value: &str, bump_version: &str) -> String {
+    let new_version = match semver_bump(current_value, bump_version) {
+        Some(v) => v,
+        None => return content.to_owned(),
+    };
+
+    let result = VERSION_RE.replace(content, |caps: &regex::Captures<'_>| {
+        let full = &caps[0];
+        let ver_match = caps.name("ver").unwrap();
+        let prefix = &full[..ver_match.start() - caps.get(0).unwrap().start()];
+        format!("{prefix}{new_version}")
+    });
+    result.into_owned()
+}
+
+fn semver_bump(version: &str, bump: &str) -> Option<String> {
+    let v = semver::Version::parse(version).ok()?;
+    let new = match bump {
+        "patch" => semver::Version::new(v.major, v.minor, v.patch + 1),
+        "minor" => semver::Version::new(v.major, v.minor + 1, 0),
+        "major" => semver::Version::new(v.major + 1, 0, 0),
+        _ => return None,
+    };
+    Some(new.to_string())
+}
 
 /// Extract OCB Go module deps from a builder YAML config.
 pub fn extract(content: &str) -> Vec<OcbDep> {
@@ -189,6 +225,55 @@ providers:
         assert!(types.contains(&"receivers"));
         assert!(types.contains(&"processors"));
         assert!(types.contains(&"providers"));
+    }
+
+    // Ported: "increments with all fields" — modules/manager/ocb/update.spec.ts line 6
+    #[test]
+    fn ocb_bump_increments_all_fields() {
+        let content = "dist:\n  name: otelcol-custom\n  description: Local OpenTelemetry Collector binary\n  module: github.com/open-telemetry/opentelemetry-collector\n  otelcol_version: 0.40.0\n  version: 1.0.0\n  output_path: /tmp/dist\n";
+        let bumped = bump_package_version(content, "1.0.0", "patch");
+        assert_eq!(bumped, content.replace("version: 1.0.0", "version: 1.0.1"));
+    }
+
+    // Ported: "increments with double quotes" — modules/manager/ocb/update.spec.ts line 22
+    #[test]
+    fn ocb_bump_increments_double_quotes() {
+        let content = "dist:\n  version: \"1.0.0\"\n";
+        let bumped = bump_package_version(content, "1.0.0", "patch");
+        assert!(bumped.contains("1.0.1"), "bumped: {bumped}");
+    }
+
+    // Ported: "increments with single quotes" — modules/manager/ocb/update.spec.ts line 33
+    #[test]
+    fn ocb_bump_increments_single_quotes() {
+        let content = "dist:\n  version: '1.0.0'\n";
+        let bumped = bump_package_version(content, "1.0.0", "patch");
+        assert!(bumped.contains("1.0.1"), "bumped: {bumped}");
+    }
+
+    // Ported: "no ops" — modules/manager/ocb/update.spec.ts line 44
+    #[test]
+    fn ocb_bump_no_op_when_bumped_matches_content() {
+        let content = "dist:\n  version: '0.0.2'\n";
+        // inc('0.0.1', 'patch') = '0.0.2' which already is in content → no visible change
+        let bumped = bump_package_version(content, "0.0.1", "patch");
+        assert_eq!(bumped, content);
+    }
+
+    // Ported: "updates" — modules/manager/ocb/update.spec.ts line 53
+    #[test]
+    fn ocb_bump_updates_minor() {
+        let content = "dist:\n  version: '0.0.2'\n";
+        let bumped = bump_package_version(content, "0.0.1", "minor");
+        assert!(bumped.contains("0.1.0"), "bumped: {bumped}");
+    }
+
+    // Ported: "returns content if bumping errors" — modules/manager/ocb/update.spec.ts line 63
+    #[test]
+    fn ocb_bump_returns_content_on_error() {
+        let content = "dist:\n  version: '1.0.0'\n";
+        let bumped = bump_package_version(content, "0.0.2", "invalid_type");
+        assert_eq!(bumped, content);
     }
 
     // Ported: "return null for unknown content" — ocb/extract.spec.ts line 81

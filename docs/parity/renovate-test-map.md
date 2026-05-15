@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2404 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2410 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -16985,18 +16985,18 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/ocb/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ocb/update.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `bumpPackageVersion()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| increments with all fields | 6 | pending | — | — | — |
-| increments with double quotes | 22 | pending | — | — | — |
-| increments with single quotes | 33 | pending | — | — | — |
-| no ops | 44 | pending | — | — | — |
-| updates | 53 | pending | — | — | — |
-| returns content if bumping errors | 63 | pending | — | — | — |
+| increments with all fields | 6 | ported | `ocb.rs` | `ocb_bump_increments_all_fields` | — |
+| increments with double quotes | 22 | ported | `ocb.rs` | `ocb_bump_increments_double_quotes` | — |
+| increments with single quotes | 33 | ported | `ocb.rs` | `ocb_bump_increments_single_quotes` | — |
+| no ops | 44 | ported | `ocb.rs` | `ocb_bump_no_op_when_bumped_matches_content` | — |
+| updates | 53 | ported | `ocb.rs` | `ocb_bump_updates_minor` | — |
+| returns content if bumping errors | 63 | ported | `ocb.rs` | `ocb_bump_returns_content_on_error` | — |
 
 ---
 
