@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2238 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2243 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -27473,7 +27473,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 64 | **Actionable:** 64 | **Status:** partial
+**Total tests:** 68 | **Ported:** 69 | **Actionable:** 64 | **Status:** ported
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -27514,11 +27514,11 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | returns true if no schedule | 154 | ported | `schedule.rs` | `spec_returns_true_if_no_schedule` | — |
 | returns true if at any time | 159 | ported | `schedule.rs` | `spec_returns_true_for_at_any_time` | — |
 | returns true if at any time array | 165 | ported | `schedule.rs` | `at_any_time_always_matches` | — |
-| returns true if invalid schedule | 171 | pending | — | — | — |
-| returns true if invalid timezone | 177 | pending | — | — | — |
+| returns true if invalid schedule | 171 | ported | `schedule.rs` | `spec_is_scheduled_now_invalid_schedule_fail_open` | — |
+| returns true if invalid timezone | 177 | ported | `schedule.rs` | `spec_is_scheduled_now_invalid_timezone_fail_open` | — |
 | supports before hours true | 184 | ported | `schedule.rs` | `spec_supports_before_hours_true` | — |
 | supports before hours false | 190 | ported | `schedule.rs` | `spec_supports_before_hours_false` | — |
-| massages string | 196 | pending | — | — | — |
+| massages string | 196 | ported | `schedule.rs` | `spec_is_scheduled_now_massages_string_to_array` | — |
 | supports outside hours | 202 | ported | `schedule.rs` | `spec_supports_outside_hours` | — |
 | supports cron syntax with hours | 208 | ported | `schedule.rs` | `spec_cron_with_hours_match` | — |
 | supports cron syntax with days | 218 | ported | `schedule.rs` | `spec_cron_with_days_match` | — |
@@ -27569,8 +27569,8 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | supports o every weekday | 391 | ported | `schedule.rs` | `spec_supports_o_every_weekday` | — |
 | rejects first day of the month | 397 | ported | `schedule.rs` | `spec_first_day_of_month_rejects_non_first` | — |
 | approves first day of the month | 403 | ported | `schedule.rs` | `spec_first_day_of_month_approves_first` | — |
-| approves valid weeks of year | 410 | pending | — | — | — |
-| rejects on weeks of year | 417 | pending | — | — | — |
+| approves valid weeks of year | 410 | ported | `schedule.rs` | `spec_weeks_of_year_approves_first_week` | — |
+| rejects on weeks of year | 417 | ported | `schedule.rs` | `spec_weeks_of_year_rejects_second_week` | — |
 | approves on months of year | 424 | ported | `schedule.rs` | `spec_months_of_year_approves_january` | — |
 | rejects on months of year | 431 | ported | `schedule.rs` | `spec_months_of_year_rejects_february` | — |
 | approves schedule longer than 1 month | 438 | ported | `schedule.rs` | `spec_every_3_months_approves_july` | — |

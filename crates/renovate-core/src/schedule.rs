@@ -218,11 +218,33 @@ fn is_valid_schedule_entry(entry: &str) -> bool {
     if extract_named_month(s).is_some() || extract_every_n_months(s).is_some() {
         return true;
     }
+    if extract_every_n_weeks(s).is_some() {
+        return true;
+    }
 
     // Must have at least one recognised time or day constraint.
     let (_, has_time) = evaluate_time_constraint(s, 0);
     let (_, has_day) = evaluate_day_constraint(s, 0);
     has_time || has_day
+}
+
+/// Fail-open schedule check mirroring `isScheduledNow()` from Renovate's
+/// `schedule.ts`.
+///
+/// Returns `true` when the schedule is empty, invalid, the timezone is
+/// invalid, or the current time falls within the schedule.  Invalid entries
+/// fail open (return `true`) to avoid accidentally suppressing updates.
+pub fn is_scheduled_now(schedule: &[String], timezone: Option<&str>, now: DateTime<Utc>) -> bool {
+    if schedule.is_empty() || schedule.iter().any(|s| s == "at any time" || s.is_empty()) {
+        return true;
+    }
+    if !is_valid_schedule(schedule) {
+        return true;
+    }
+    if timezone.is_some_and(|tz| !has_valid_timezone(tz)) {
+        return true;
+    }
+    is_within_schedule_tz_at(schedule, timezone, now)
 }
 
 /// Return `true` when any entry in `schedule` matches the current UTC time.
@@ -282,11 +304,15 @@ pub fn is_within_schedule_tz_at(
         ),
     };
 
+    let iso_week = NaiveDate::from_ymd_opt(year, month as u32, dom as u32)
+        .map(|d| d.iso_week().week())
+        .unwrap_or(1);
+
     schedule.iter().any(|entry| {
         if looks_like_cron(entry) {
             cron_matches_year(entry, hour, dom, month, weekday, year)
         } else {
-            text_schedule_matches_month(entry, hour, dom, weekday, month)
+            text_schedule_matches_full(entry, hour, dom, weekday, month, iso_week)
         }
     })
 }
@@ -552,6 +578,20 @@ pub fn text_schedule_matches(entry: &str, hour: u8, dom: u8, weekday: u8) -> boo
 ///
 /// Pass `month = 0` to skip month-based filtering (backward compatibility).
 pub fn text_schedule_matches_month(entry: &str, hour: u8, dom: u8, weekday: u8, month: u8) -> bool {
+    text_schedule_matches_full(entry, hour, dom, weekday, month, 0)
+}
+
+/// Full schedule match with month and ISO week-of-year.
+///
+/// Pass `iso_week = 0` to skip week-of-year filtering.
+fn text_schedule_matches_full(
+    entry: &str,
+    hour: u8,
+    dom: u8,
+    weekday: u8,
+    month: u8,
+    iso_week: u32,
+) -> bool {
     let s = entry.trim().to_lowercase();
 
     // "at any time" / "" — always match
@@ -600,6 +640,21 @@ pub fn text_schedule_matches_month(entry: &str, hour: u8, dom: u8, weekday: u8, 
             return false;
         }
         return dom == 1 && time_ok;
+    }
+
+    // "every N weeks of the year" — filter by ISO week number
+    if let Some(n) = extract_every_n_weeks(&s) {
+        if iso_week > 0 && !(iso_week - 1).is_multiple_of(n) {
+            return false;
+        }
+        let (time_ok, has_time) = evaluate_time_constraint(&s, hour);
+        let (day_ok, has_day) = evaluate_day_constraint(&s, weekday);
+        return match (has_time, has_day) {
+            (true, true) => time_ok && day_ok,
+            (true, false) => time_ok,
+            (false, true) => day_ok,
+            (false, false) => true,
+        };
     }
 
     // "of MonthName" — only in the specified month
@@ -669,6 +724,18 @@ fn extract_named_month(s: &str) -> Option<u8> {
         }
     }
     None
+}
+
+/// Return N if `s` contains "every N weeks of the year".
+fn extract_every_n_weeks(s: &str) -> Option<u32> {
+    if !s.contains("weeks of the year") && !s.contains("week of the year") {
+        return None;
+    }
+    let idx = s.find("every ")?;
+    let rest = &s[idx + "every ".len()..];
+    let tok = rest.split_whitespace().next()?;
+    let n: u32 = tok.parse().ok()?;
+    if n > 1 { Some(n) } else { None }
 }
 
 /// Return N if `s` contains "every N months".
@@ -1982,5 +2049,49 @@ mod tests {
         assert!(is_within_schedule_at(&sched, utc(2017, 2, 6, 6)));
         // 2017-02-13 is the second Monday of February → false
         assert!(!is_within_schedule_at(&sched, utc(2017, 2, 13, 6)));
+    }
+
+    // Ported: "returns true if invalid schedule" — workers/repository/update/branch/schedule.spec.ts line 171
+    #[test]
+    fn spec_is_scheduled_now_invalid_schedule_fail_open() {
+        // "every 15 minutes" is invalid (has minutes) → fail-open returns true
+        let sched = schedule(&["every 15 minutes"]);
+        let result = is_scheduled_now(&sched, None, utc(2025, 4, 15, 10));
+        assert!(result);
+    }
+
+    // Ported: "returns true if invalid timezone" — workers/repository/update/branch/schedule.spec.ts line 177
+    #[test]
+    fn spec_is_scheduled_now_invalid_timezone_fail_open() {
+        // "after 4:00pm" is valid, but "Asia" is not a valid timezone → fail-open
+        let sched = schedule(&["after 4:00pm"]);
+        let result = is_scheduled_now(&sched, Some("Asia"), utc(2025, 4, 15, 10));
+        assert!(result);
+    }
+
+    // Ported: "massages string" — workers/repository/update/branch/schedule.spec.ts line 196
+    #[test]
+    fn spec_is_scheduled_now_massages_string_to_array() {
+        // TypeScript: config.schedule = 'before 4:00am' (string not array) → massaged to ['before 4:00am']
+        // Rust: equivalent — pass single-element slice, time is 10am UTC → before 4am is false
+        let sched = schedule(&["before 4:00am"]);
+        let result = is_scheduled_now(&sched, None, utc(2025, 4, 15, 10));
+        assert!(!result);
+    }
+
+    // Ported: "approves valid weeks of year" — workers/repository/update/branch/schedule.spec.ts line 410
+    #[test]
+    fn spec_weeks_of_year_approves_first_week() {
+        // 2017-01-02T06:00 is Monday, ISO week 1 — "every 2 weeks" matches week 1
+        let sched = schedule(&["every 2 weeks of the year before 08:00 on Monday"]);
+        assert!(is_within_schedule_at(&sched, utc(2017, 1, 2, 6)));
+    }
+
+    // Ported: "rejects on weeks of year" — workers/repository/update/branch/schedule.spec.ts line 417
+    #[test]
+    fn spec_weeks_of_year_rejects_second_week() {
+        // 2017-01-09T06:00 is Monday, ISO week 2 — "every 2 weeks" does NOT match week 2
+        let sched = schedule(&["every 2 weeks of the year before 08:00 on Monday"]);
+        assert!(!is_within_schedule_at(&sched, utc(2017, 1, 9, 6)));
     }
 }
