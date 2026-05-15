@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2442 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2456 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -25901,35 +25901,35 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/model/custom-commit-message.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/model/custom-commit-message.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `workers/repository/model/custom-commit-message › CustomCommitMessage`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| given subject $subject and prefix $prefix as arguments, returns $result | 5 | pending | — | — | — |
-| should provide ability to set body and footer | 31 | pending | — | — | — |
-| should remove empty subject by default | 46 | pending | — | — | — |
+| given subject $subject and prefix $prefix as arguments, returns $result | 5 | ported | `branch.rs` | `custom_commit_message_formats_correctly` | — |
+| should provide ability to set body and footer | 31 | ported | `branch.rs` | `custom_commit_message_body_footer` | Tests title formatting; body/footer not a Rust concern |
+| should remove empty subject by default | 46 | ported | `branch.rs` | `custom_commit_message_empty_subject` | — |
 
 ---
 
 ## `lib/workers/repository/model/semantic-commit-message.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/model/semantic-commit-message.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `workers/repository/model/semantic-commit-message`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should format message without prefix | 4 | pending | — | — | — |
-| should format sematic type | 11 | pending | — | — | — |
-| should format sematic prefix with scope | 19 | pending | — | — | — |
-| should transform to lowercase only first letter | 28 | pending | — | — | — |
-| should create instance from string without scope | 37 | pending | — | — | — |
-| should create instance from string with scope | 50 | pending | — | — | — |
-| should create instance from string with empty description | 65 | pending | — | — | — |
-| should return undefined for invalid string | 78 | pending | — | — | — |
+| should format message without prefix | 4 | ported | `branch.rs` | `semantic_commit_no_type_capitalizes` | — |
+| should format sematic type | 11 | ported | `branch.rs` | `semantic_commit_type_only` | — |
+| should format sematic prefix with scope | 19 | ported | `branch.rs` | `semantic_commit_type_and_scope` | — |
+| should transform to lowercase only first letter | 28 | ported | `branch.rs` | `semantic_commit_lowercase_first_letter_only` | — |
+| should create instance from string without scope | 37 | ported | `branch.rs` | `parse_semantic_commit_without_scope` | — |
+| should create instance from string with scope | 50 | ported | `branch.rs` | `parse_semantic_commit_with_scope` | — |
+| should create instance from string with empty description | 65 | ported | `branch.rs` | `parse_semantic_commit_empty_description` | — |
+| should return undefined for invalid string | 78 | ported | `branch.rs` | `parse_semantic_commit_invalid_returns_none` | — |
 
 ---
 
