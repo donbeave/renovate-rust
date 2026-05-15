@@ -21952,25 +21952,25 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/platform/scm-manager/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm-manager/utils.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+**Total tests:** 12 | **Ported:** 3 | **Actionable:** 12 | **Status:** partial
 
 ### `getMergeMethod`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| map merge strategy $strategy on PR merge method $method | 16 | pending | — | — | — |
+| map merge strategy $strategy on PR merge method $method | 16 | ported | `scm_manager.rs` | `get_scm_merge_method_all_cases` | — |
 
 ### `smartLinks`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| adjust $body to smart link $result | 39 | pending | — | — | — |
+| adjust $body to smart link $result | 39 | ported | `scm_manager.rs` | `smart_links_replaces_pull_links` | — |
 
 ### `matchPrState`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| match scm pr state $pr.state to renovate pr state $state | 61 | pending | — | — | — |
+| match scm pr state $pr.state to renovate pr state $state | 61 | ported | `scm_manager.rs` | `match_pr_state_all_cases` | — |
 
 ### `getRepoUrl`
 
