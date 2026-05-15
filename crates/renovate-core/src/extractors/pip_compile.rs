@@ -64,6 +64,68 @@ pub fn extract_package_file(content: &str, package_file: &str) -> Option<PipComp
     Some(PipCompileExtract { deps })
 }
 
+/// Infer the directory from which pip-compile should be executed.
+///
+/// Mirrors `lib/modules/manager/pip-compile/utils.ts` `inferCommandExecDir()`.
+/// Returns an error string when the output file argument has a basename
+/// that does not match the output file path's basename.
+pub fn infer_command_exec_dir(
+    output_file_path: &str,
+    output_file_arg: Option<&str>,
+) -> Result<String, String> {
+    let file_basename = std::path::Path::new(output_file_path)
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("");
+    let file_dir = std::path::Path::new(output_file_path)
+        .parent()
+        .and_then(|p| p.to_str())
+        .map(|s| if s.is_empty() { "." } else { s })
+        .unwrap_or(".");
+
+    let Some(arg) = output_file_arg else {
+        return Ok(file_dir.to_owned());
+    };
+
+    let arg_basename = std::path::Path::new(arg)
+        .file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or("");
+    let arg_dir = std::path::Path::new(arg)
+        .parent()
+        .and_then(|p| p.to_str())
+        .map(|s| if s.is_empty() { "." } else { s })
+        .unwrap_or(".");
+
+    if arg_basename != file_basename {
+        return Err(format!(
+            "Output file name mismatch: {arg_basename} vs {file_basename}"
+        ));
+    }
+
+    // If the output arg has no directory component, command runs from file_dir
+    if arg_dir == "." && file_dir != "." {
+        return Ok(file_dir.to_owned());
+    }
+
+    // Strip common suffix components
+    let mut exec_dir = file_dir.to_owned();
+    for component in arg_dir.split('/').rev() {
+        if component != "." && exec_dir.ends_with(component) {
+            exec_dir.truncate(exec_dir.len() - component.len());
+            // Clean up trailing slashes
+            exec_dir = exec_dir.trim_end_matches('/').to_owned();
+            if exec_dir.is_empty() {
+                exec_dir = ".".to_owned();
+            }
+        } else {
+            break;
+        }
+    }
+
+    Ok(exec_dir)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,5 +200,28 @@ dev = [
         for package_file in ["random.py", "app.cfg", "already_locked.txt", "setup.cfg"] {
             assert!(extract_package_file("some content", package_file).is_none());
         }
+    }
+
+    // Ported: "returns object on correct options" (case 1) — modules/manager/pip-compile/utils.spec.ts line 6
+    #[test]
+    fn infer_exec_dir_same_subdir() {
+        let result = infer_command_exec_dir("subdir/reqs.txt", Some("subdir/reqs.txt")).unwrap();
+        assert_eq!(result, ".");
+    }
+
+    // Ported: "returns object on correct options" (case 2) — modules/manager/pip-compile/utils.spec.ts line 12
+    #[test]
+    fn infer_exec_dir_output_in_parent() {
+        let result = infer_command_exec_dir("subdir/reqs.txt", Some("reqs.txt")).unwrap();
+        assert_eq!(result, "subdir");
+    }
+
+    // Ported: "throw if --output-file basename differs from path" — modules/manager/pip-compile/utils.spec.ts line 20
+    #[test]
+    fn infer_exec_dir_throws_on_basename_mismatch() {
+        let result =
+            infer_command_exec_dir("subdir/requirements.txt", Some("hey.txt"));
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("mismatch"));
     }
 }

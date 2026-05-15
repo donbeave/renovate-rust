@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2320 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2328 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17226,14 +17226,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/pip-compile/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/utils.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `inferCommandExecDir()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns object on correct options | 5 | pending | — | — | — |
-| throw if --output-file basename differs from path | 23 | pending | — | — | — |
+| returns object on correct options | 5 | ported | `pip_compile.rs` | `infer_exec_dir_same_subdir` + `infer_exec_dir_output_in_parent` | — |
+| throw if --output-file basename differs from path | 23 | ported | `pip_compile.rs` | `infer_exec_dir_throws_on_basename_mismatch` | — |
 
 ---
 
