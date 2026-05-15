@@ -736,6 +736,55 @@ pub fn update_locked_dependency(config: &UpdateLockedConfig) -> UpdateLockedStat
     UpdateLockedStatus::Unsupported
 }
 
+/// Result of `bump_package_version`.
+#[derive(Debug)]
+pub struct BumpPackageVersionResult {
+    pub bumped_content: String,
+}
+
+/// Bump the `version` field in Cargo.toml content.
+///
+/// Mirrors `lib/modules/manager/cargo/update.ts` `bumpPackageVersion()`.
+/// Returns unchanged content when `current_value` is not valid semver, when
+/// `bump_version` is not a recognised release type, or when semver increment
+/// fails.
+pub fn bump_package_version(
+    content: &str,
+    current_value: &str,
+    bump_version: &str,
+) -> BumpPackageVersionResult {
+    static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r#"(?m)^(?P<prefix>version[ \t]*=[ \t]*['"])[^'"]*"#).unwrap()
+    });
+
+    let bumped_content = (|| -> Option<String> {
+        let mut new_ver = Version::parse(current_value).ok()?;
+        match bump_version {
+            "patch" => new_ver.patch += 1,
+            "minor" => {
+                new_ver.minor += 1;
+                new_ver.patch = 0;
+            }
+            "major" => {
+                new_ver.major += 1;
+                new_ver.minor = 0;
+                new_ver.patch = 0;
+            }
+            _ => return None,
+        }
+        let new_str = new_ver.to_string();
+        let result = VERSION_RE
+            .replace(content, |caps: &regex::Captures| {
+                format!("{}{}", &caps["prefix"], new_str)
+            })
+            .into_owned();
+        Some(result)
+    })()
+    .unwrap_or_else(|| content.to_owned());
+
+    BumpPackageVersionResult { bumped_content }
+}
+
 /// Determine the effective Cargo range strategy.
 ///
 /// Mirrors `lib/modules/manager/cargo/range.ts` `getRangeStrategy()`.
@@ -1413,5 +1462,50 @@ mod renovate_compat_tests {
             lock_file_content: Some("not valid toml {{{".to_string()),
         };
         assert_eq!(update_locked_dependency(&config).as_str(), "update-failed");
+    }
+
+    fn cargo_toml_content() -> &'static str {
+        "[package]\nname = \"test\"\nversion = \"0.0.2\"\n"
+    }
+
+    // Ported: "increments" — modules/manager/cargo/update.spec.ts line 16
+    #[test]
+    fn bump_package_version_increments_patch() {
+        let content = cargo_toml_content();
+        let result = bump_package_version(content, "0.0.2", "patch");
+        assert_eq!(result.bumped_content, content.replace("0.0.2", "0.0.3"));
+    }
+
+    // Ported: "no ops" — modules/manager/cargo/update.spec.ts line 24
+    #[test]
+    fn bump_package_version_no_ops_when_current_value_mismatch() {
+        let content = cargo_toml_content();
+        let result = bump_package_version(content, "0.0.1", "patch");
+        assert_eq!(result.bumped_content, content);
+    }
+
+    // Ported: "updates" — modules/manager/cargo/update.spec.ts line 31
+    #[test]
+    fn bump_package_version_updates_minor() {
+        let content = cargo_toml_content();
+        let result = bump_package_version(content, "0.0.1", "minor");
+        let expected = content.replace("0.0.2", "0.1.0");
+        assert_eq!(result.bumped_content, expected);
+    }
+
+    // Ported: "returns content if bumping errors" — modules/manager/cargo/update.spec.ts line 38
+    #[test]
+    fn bump_package_version_returns_content_on_invalid_bump_type() {
+        let content = cargo_toml_content();
+        let result = bump_package_version(content, "0.0.2", "invalid_bump_type");
+        assert_eq!(result.bumped_content, content);
+    }
+
+    // Ported: "does not bump version if version is not a semantic version" — modules/manager/cargo/update.spec.ts line 47
+    #[test]
+    fn bump_package_version_no_bump_if_not_semver() {
+        let content = cargo_toml_content();
+        let result = bump_package_version(content, "1", "patch");
+        assert_eq!(result.bumped_content, content);
     }
 }
