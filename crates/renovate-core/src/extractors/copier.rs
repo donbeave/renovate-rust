@@ -83,6 +83,18 @@ pub fn extract(content: &str) -> Option<CopierDep> {
     })
 }
 
+const COPIER_UPDATED_MARKER: &str = "#copier updated";
+
+/// Append `#copier updated` marker to trigger artifact update.
+///
+/// Mirrors `lib/modules/manager/copier/update.ts` `updateDependency()`.
+pub fn update_copier_dependency(file_content: &str) -> String {
+    if file_content.lines().any(|l| l.trim() == COPIER_UPDATED_MARKER) {
+        return file_content.to_owned();
+    }
+    format!("{file_content}\n{COPIER_UPDATED_MARKER}")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -186,5 +198,21 @@ mod tests {
         let dep = extract(content).unwrap();
         assert_eq!(dep.src_path, "notaurl");
         assert_eq!(dep.github_repo, "");
+    }
+
+    // Ported: "should append a new marking line at the end to trigger the artifact update" — modules/manager/copier/update.spec.ts line 5
+    #[test]
+    fn copier_update_appends_marker() {
+        let content = "_src_path: https://foo.bar/baz/quux\n_commit: 1.0.0";
+        let result = update_copier_dependency(content);
+        assert_eq!(result, format!("{content}\n#copier updated"));
+    }
+
+    // Ported: "should not update again if the new line has been appended" — modules/manager/copier/update.spec.ts line 18
+    #[test]
+    fn copier_update_no_op_if_already_marked() {
+        let content = "_src_path: https://foo.bar/baz/quux\n_commit: 1.0.0\n#copier updated";
+        let result = update_copier_dependency(content);
+        assert_eq!(result, content);
     }
 }

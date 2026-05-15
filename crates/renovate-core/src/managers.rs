@@ -794,6 +794,18 @@ const MANAGER_DEFS: &[ManagerDef] = &[
 
 /// Detect which package managers are present in the repository.
 ///
+/// List of custom manager identifiers.
+///
+/// Mirrors `lib/modules/manager/custom/api.ts`.
+pub const CUSTOM_MANAGER_LIST: &[&str] = &["regex", "jsonata"];
+
+/// Return `true` if `manager` is a custom manager name.
+///
+/// Mirrors `lib/modules/manager/custom/index.ts` `isCustomManager()`.
+pub fn is_custom_manager(manager: &str) -> bool {
+    CUSTOM_MANAGER_LIST.contains(&manager)
+}
+
 /// Uses pre-compiled regex patterns (compiled once via [`COMPILED`]).
 /// Managers with at least one matching file are included in the result.
 pub fn detect(files: &[String]) -> Vec<DetectedManager> {
@@ -1158,5 +1170,22 @@ mod tests {
     fn manager_default_datasource_unknown_returns_none() {
         assert_eq!(manager_default_datasource("unknown-manager"), None);
         assert_eq!(manager_default_datasource("hermit"), None);
+    }
+
+    // Ported: "getCustomManagerList" — modules/manager/custom/index.spec.ts line 5
+    #[test]
+    fn custom_manager_list_contains_strings() {
+        assert!(!CUSTOM_MANAGER_LIST.is_empty());
+        assert!(CUSTOM_MANAGER_LIST.iter().all(|s| !s.is_empty()));
+    }
+
+    // Ported: "works" — modules/manager/custom/index.spec.ts line 10
+    #[test]
+    fn is_custom_manager_returns_correct_values() {
+        assert!(!is_custom_manager("npm"));
+        assert!(is_custom_manager("regex"));
+        assert!(!is_custom_manager("custom.regex"));
+        assert!(is_custom_manager("jsonata"));
+        assert!(!is_custom_manager("custom.jsonata"));
     }
 }

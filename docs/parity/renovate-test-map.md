@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2335 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2339 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -14036,33 +14036,33 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/copier/update.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/copier/update.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `updateDependency`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should append a new marking line at the end to trigger the artifact update | 6 | pending | — | — | — |
-| should not update again if the new line has been appended | 19 | pending | — | — | — |
+| should append a new marking line at the end to trigger the artifact update | 6 | ported | `copier.rs` | `copier_update_appends_marker` | — |
+| should not update again if the new line has been appended | 19 | ported | `copier.rs` | `copier_update_no_op_if_already_marked` | — |
 
 ---
 
 ## `lib/modules/manager/custom/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/custom/index.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 2 | **Actionable:** 2 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| getCustomManagerList | 4 | pending | — | — | — |
+| getCustomManagerList | 4 | ported | `managers.rs` | `custom_manager_list_contains_strings` | — |
 
 ### `isCustomManager()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 9 | pending | — | — | — |
+| works | 9 | ported | `managers.rs` | `is_custom_manager_returns_correct_values` | — |
 
 ---
 
