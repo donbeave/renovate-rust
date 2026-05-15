@@ -7,6 +7,7 @@ pub mod extractors;
 pub mod http;
 pub mod json_writer;
 pub mod managers;
+pub mod merge_confidence;
 pub mod monorepos;
 pub mod package_rule;
 pub mod platform;

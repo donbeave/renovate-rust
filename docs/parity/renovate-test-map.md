@@ -24585,24 +24585,24 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/merge-confidence/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/merge-confidence/index.spec.ts
-**Total tests:** 28 | **Ported:** 0 | **Actionable:** 28 | **Status:** pending
+**Total tests:** 28 | **Ported:** 7 | **Actionable:** 28 | **Status:** partial
 
 ### `util/merge-confidence/index › isActiveConfidenceLevel()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false if null | 22 | pending | — | — | — |
-| returns false if low | 26 | pending | — | — | — |
-| returns false if nonsense | 30 | pending | — | — | — |
-| returns true if valid value (high) | 34 | pending | — | — | — |
+| returns false if null | 22 | ported | `merge_confidence.rs` | `is_active_confidence_level_null_returns_false` | — |
+| returns false if low | 26 | ported | `merge_confidence.rs` | `is_active_confidence_level_low_returns_false` | — |
+| returns false if nonsense | 30 | ported | `merge_confidence.rs` | `is_active_confidence_level_nonsense_returns_false` | — |
+| returns true if valid value (high) | 34 | ported | `merge_confidence.rs` | `is_active_confidence_level_high_returns_true` | — |
 
 ### `util/merge-confidence/index › satisfiesConfidenceLevel()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false if less | 40 | pending | — | — | — |
-| returns true if equal | 44 | pending | — | — | — |
-| returns true if more | 48 | pending | — | — | — |
+| returns false if less | 40 | ported | `merge_confidence.rs` | `satisfies_confidence_level_less_returns_false` | — |
+| returns true if equal | 44 | ported | `merge_confidence.rs` | `satisfies_confidence_level_equal_returns_true` | — |
+| returns true if more | 48 | ported | `merge_confidence.rs` | `satisfies_confidence_level_more_returns_true` | — |
 
 ### `util/merge-confidence/index › API calling functions › getMergeConfidenceLevel()`
 
