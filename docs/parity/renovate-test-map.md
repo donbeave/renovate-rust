@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2217 / 8606 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2219 / 8606 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -27473,14 +27473,14 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 48 | **Actionable:** 68 | **Status:** partial
+**Total tests:** 68 | **Ported:** 50 | **Actionable:** 68 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false for invalid timezone | 7 | pending | — | — | — |
-| returns true for valid timezone | 11 | pending | — | — | — |
+| returns false for invalid timezone | 7 | ported | `schedule.rs` | `has_valid_timezone_invalid_returns_false` | — |
+| returns true for valid timezone | 11 | ported | `schedule.rs` | `has_valid_timezone_valid_returns_true` | — |
 
 ### `workers/repository/update/branch/schedule › hasValidSchedule(schedule)`
 

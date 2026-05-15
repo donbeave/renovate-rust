@@ -145,6 +145,14 @@ pub fn satisfies_date_range(timestamp: &str, range: &str) -> bool {
     }
 }
 
+/// Validate an IANA timezone name, mirroring Renovate's `hasValidTimezone()`.
+///
+/// Returns `true` if `timezone` is a valid IANA timezone name recognised by
+/// `chrono-tz`, `false` otherwise.
+pub fn has_valid_timezone(timezone: &str) -> bool {
+    timezone.parse::<chrono_tz::Tz>().is_ok()
+}
+
 /// Validate a schedule list, mirroring Renovate's `hasValidSchedule()`.
 ///
 /// Returns `true` when the schedule is usable:
@@ -1666,5 +1674,19 @@ mod tests {
             "every weekend",
         ]);
         assert!(is_valid_schedule(&schedules));
+    }
+
+    // ── has_valid_timezone (hasValidTimezone) ────────────────────────────────
+
+    // Ported: "returns false for invalid timezone" — workers/repository/update/branch/schedule.spec.ts line 7
+    #[test]
+    fn has_valid_timezone_invalid_returns_false() {
+        assert!(!has_valid_timezone("Asia"));
+    }
+
+    // Ported: "returns true for valid timezone" — workers/repository/update/branch/schedule.spec.ts line 11
+    #[test]
+    fn has_valid_timezone_valid_returns_true() {
+        assert!(has_valid_timezone("Asia/Singapore"));
     }
 }
