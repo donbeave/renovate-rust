@@ -559,6 +559,29 @@ fn replace_strict_special_chars(input: &str) -> String {
         .collect()
 }
 
+/// Detect if a list of commit messages follows Angular conventional commit format.
+///
+/// Returns `true` ("enabled") if the score is positive (more semantic than non-semantic),
+/// `false` ("disabled") otherwise.
+///
+/// Mirrors the inner logic of `lib/util/git/semantic.ts` `detectSemanticCommits()`.
+pub fn detect_semantic_commits(commit_messages: &[&str]) -> bool {
+    detect_semantic_commit_score(commit_messages) > 0
+}
+
+/// Count how many messages match Angular convention minus how many don't.
+///
+/// `^(\w*)(?:\((.*)\))?!?: (.*)$`
+fn detect_semantic_commit_score(commit_messages: &[&str]) -> i32 {
+    use std::sync::LazyLock;
+    static ANGULAR_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^(\w*)(?:\(.*\))?!?: .+$").unwrap());
+
+    commit_messages.iter().fold(0i32, |acc, msg| {
+        if ANGULAR_RE.is_match(msg) { acc + 1 } else { acc - 1 }
+    })
+}
+
 /// Generate a description of the configured base branch(es) for onboarding PR.
 ///
 /// Mirrors `lib/workers/repository/onboarding/pr/base-branch.ts`
@@ -1521,6 +1544,38 @@ mod tests {
     fn branch_name_compiles_multiple_times() {
         // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
         assert_eq!(branch_name("", "", "dep"), "dep");
+    }
+
+    // Ported: "detects false if unknown" — util/git/semantic.spec.ts line 18
+    #[test]
+    fn semantic_commits_disabled_for_non_semantic() {
+        // Both calls: first set has no semantic, second set does but cache returns first
+        // In Rust we test the pure score function with the first set of messages
+        assert!(!detect_semantic_commits(&["foo", "bar"]));
+    }
+
+    // Ported: "detects true if known" — util/git/semantic.spec.ts line 31
+    #[test]
+    fn semantic_commits_enabled_for_semantic() {
+        assert!(detect_semantic_commits(&["fix: foo", "refactor: bar"]));
+    }
+
+    // Ported: "detects false on malformed commits" — util/git/semantic.spec.ts line 38
+    #[test]
+    fn semantic_commits_disabled_for_malformed() {
+        assert!(!detect_semantic_commits(&["fix(): foo", "fix:", "some:invalid"]));
+    }
+
+    // Ported: "detects true on breaking changes" — util/git/semantic.spec.ts line 49
+    #[test]
+    fn semantic_commits_enabled_for_breaking_changes() {
+        assert!(detect_semantic_commits(&["fix!: foo"]));
+    }
+
+    // Ported: "detects true on breaking changes with scope" — util/git/semantic.spec.ts line 56
+    #[test]
+    fn semantic_commits_enabled_for_breaking_changes_with_scope() {
+        assert!(detect_semantic_commits(&["fix(scope)!: foo"]));
     }
 
     // Ported: "returns empty if no baseBranch" — workers/repository/onboarding/pr/base-branch.spec.ts line 13

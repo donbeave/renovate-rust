@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2431 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2436 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -23632,17 +23632,17 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/git/semantic.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/semantic.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `util/git/semantic › detectSemanticCommits()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| detects false if unknown | 18 | pending | — | — | — |
-| detects true if known | 31 | pending | — | — | — |
-| detects false on malformed commits | 38 | pending | — | — | — |
-| detects true on breaking changes | 49 | pending | — | — | — |
-| detects true on breaking changes with scope | 56 | pending | — | — | — |
+| detects false if unknown | 18 | ported | `branch.rs` | `semantic_commits_disabled_for_non_semantic` | Tests inner score logic; git/cache mocking not applicable |
+| detects true if known | 31 | ported | `branch.rs` | `semantic_commits_enabled_for_semantic` | — |
+| detects false on malformed commits | 38 | ported | `branch.rs` | `semantic_commits_disabled_for_malformed` | — |
+| detects true on breaking changes | 49 | ported | `branch.rs` | `semantic_commits_enabled_for_breaking_changes` | — |
+| detects true on breaking changes with scope | 56 | ported | `branch.rs` | `semantic_commits_enabled_for_breaking_changes_with_scope` | — |
 
 ---
 
