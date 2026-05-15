@@ -325,7 +325,7 @@ fn classify_version(version: &str) -> Option<GradleSkipReason> {
 /// Extract a version-like substring from the beginning of `input`.
 ///
 /// Mirrors `lib/modules/manager/gradle/utils.ts` `versionLikeSubstring()`.
-fn version_like_substring(input: &str) -> Option<&str> {
+pub fn version_like_substring(input: &str) -> Option<String> {
     use std::sync::LazyLock;
     static RE: LazyLock<regex::Regex> =
         LazyLock::new(|| regex::Regex::new(r"^(?P<version>[-_.\[\](),a-zA-Z0-9+! ]+)").unwrap());
@@ -334,7 +334,106 @@ fn version_like_substring(input: &str) -> Option<&str> {
     if version.is_empty() || !version.chars().any(|c| c.is_ascii_digit()) {
         return None;
     }
-    Some(version)
+    if !is_gradle_version_like_valid(version) {
+        return None;
+    }
+    Some(version.to_owned())
+}
+
+/// Check whether a version-like string is valid by Gradle's versioning rules.
+///
+/// Simplified version of `gradleVersioning.isValid()`: rejects strings with
+/// commas outside brackets that are followed by non-version content.
+fn is_gradle_version_like_valid(v: &str) -> bool {
+    let mut depth: i32 = 0;
+    let mut last_close = v.len();
+    for (i, c) in v.char_indices() {
+        match c {
+            '[' | '(' => depth += 1,
+            ']' | ')' => {
+                depth -= 1;
+                if depth <= 0 {
+                    last_close = i + c.len_utf8();
+                }
+            }
+            _ => {}
+        }
+    }
+    // If there's content after the last bracket that contains alphabetic letters
+    // (not just digits/separators), reject — e.g. "[1.6.0, ]  ,  abc"
+    if last_close < v.len() {
+        let tail = v[last_close..].trim();
+        if !tail.is_empty() && tail.chars().any(|c| c.is_ascii_alphabetic()) {
+            return false;
+        }
+    }
+    true
+}
+
+/// Return `true` if `input` is a valid Gradle dependency notation string
+/// (`group:artifact:version[:classifier][@dataType]`).
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isDependencyString()`.
+pub fn is_gradle_dependency_string(input: &str) -> bool {
+    use std::sync::LazyLock;
+    static ARTIFACT_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+        regex::Regex::new(r"^[a-zA-Z][-_a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$").unwrap()
+    });
+
+    let parts: Vec<&str> = input.splitn(2, '@').collect();
+    if parts.len() > 2 {
+        return false;
+    }
+    if input.matches('@').count() > 1 {
+        return false;
+    }
+    let dep_notation = parts[0];
+    let colon_parts: Vec<&str> = dep_notation.split(':').collect();
+    if colon_parts.len() != 3 && colon_parts.len() != 4 {
+        return false;
+    }
+    let group_id = colon_parts[0];
+    let artifact_id = colon_parts[1];
+    let version = colon_parts[2];
+    let classifier = colon_parts.get(3).copied().unwrap_or("");
+
+    if !ARTIFACT_RE.is_match(group_id) || !ARTIFACT_RE.is_match(artifact_id) {
+        return false;
+    }
+    if !classifier.is_empty() && !ARTIFACT_RE.is_match(classifier) {
+        return false;
+    }
+    version_like_substring(version).as_deref() == Some(version)
+}
+
+/// Parsed Gradle dependency string.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GradleParsedDep {
+    pub dep_name: String,
+    pub current_value: String,
+    pub data_type: Option<String>,
+}
+
+/// Parse a Gradle dependency notation string.
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `parseDependencyString()`.
+pub fn parse_gradle_dependency_string(input: &str) -> Option<GradleParsedDep> {
+    if !is_gradle_dependency_string(input) {
+        return None;
+    }
+    let (dep_notation, data_type) = input
+        .split_once('@')
+        .map(|(d, t)| (d, Some(t.to_owned())))
+        .unwrap_or((input, None));
+    let parts: Vec<&str> = dep_notation.split(':').collect();
+    let group_id = parts[0];
+    let artifact_id = parts[1];
+    let current_value = parts[2].to_owned();
+    Some(GradleParsedDep {
+        dep_name: format!("{group_id}:{artifact_id}"),
+        current_value,
+        data_type,
+    })
 }
 
 /// Update a Gradle dependency in file content.
@@ -702,5 +801,72 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
     fn gradle_update_returns_null_for_replacement() {
         let result = update_dependency("", 0, "", "", None, Some("replacement"));
         assert!(result.is_none());
+    }
+
+    // Ported: "extracts the actual version" — modules/manager/gradle/utils.spec.ts line 23
+    #[test]
+    fn gradle_version_like_substring_valid_versions() {
+        let inputs = ["1.2.3", "[1.0,2.0]", "(,2.0[", "2.1.1.RELEASE", "1.0.+", "2022-05-10_55"];
+        let suffixes = ["", "'", "\"", "\n", "  ", "$"];
+        for input in &inputs {
+            for suffix in &suffixes {
+                let combined = format!("{input}{suffix}");
+                let result = version_like_substring(&combined);
+                assert_eq!(result.as_deref(), Some(*input), "failed for {combined:?}");
+            }
+        }
+    }
+
+    // Ported: "returns null for invalid inputs" — modules/manager/gradle/utils.spec.ts line 41
+    #[test]
+    fn gradle_version_like_substring_invalid_inputs() {
+        let invalid = ["", "foobar", "latest", "[1.6.0, ]  ,  abc"];
+        for input in &invalid {
+            let result = version_like_substring(input);
+            assert!(result.is_none(), "expected None for {input:?}, got {result:?}");
+        }
+    }
+
+    // Ported: "$input" (isDependencyString it.each) — modules/manager/gradle/utils.spec.ts line 57
+    #[test]
+    fn gradle_is_dependency_string() {
+        // Valid
+        assert!(is_gradle_dependency_string("foo:bar:1.2.3"));
+        assert!(is_gradle_dependency_string("foo.foo:bar.bar:1.2.3"));
+        assert!(is_gradle_dependency_string("foo.bar:baz:1.2.3"));
+        assert!(is_gradle_dependency_string("foo.bar:baz:1.2.3:linux-cpu-x86_64"));
+        assert!(is_gradle_dependency_string("foo.bar:baz:1.2.3:sources@zip"));
+        assert!(is_gradle_dependency_string("foo:bar:1.2.3@zip"));
+        assert!(is_gradle_dependency_string("foo:bar:x86@x86"));
+        assert!(is_gradle_dependency_string("foo.bar:baz:1.2.+"));
+        assert!(is_gradle_dependency_string("foo.bar:baz:[1.6.0, ]"));
+        assert!(is_gradle_dependency_string("foo.bar:baz:[, 1.6.0)"));
+        assert!(is_gradle_dependency_string("foo.bar:baz:]1.6.0,]"));
+        // Invalid
+        assert!(!is_gradle_dependency_string("foo:bar:baz:qux"));
+        assert!(!is_gradle_dependency_string("foo:bar:baz:qux:quux"));
+        assert!(!is_gradle_dependency_string("foo:bar:1.2.3'"));
+        assert!(!is_gradle_dependency_string("foo:bar:1.2.3\""));
+        assert!(!is_gradle_dependency_string("-Xep:ParameterName:OFF"));
+        assert!(!is_gradle_dependency_string("foo$bar:baz:1.2.+"));
+        assert!(!is_gradle_dependency_string("scm:git:https://some.git"));
+        assert!(!is_gradle_dependency_string("foo.bar:baz:1.2.3:linux-cpu$-x86_64"));
+        assert!(!is_gradle_dependency_string("foo:bar:1.2.3@zip@foo"));
+    }
+
+    // Ported: "$input" (parseDependencyString it.each) — modules/manager/gradle/utils.spec.ts line 85
+    #[test]
+    fn gradle_parse_dependency_string() {
+        let p = |i: &str| parse_gradle_dependency_string(i);
+        assert_eq!(p("foo:bar:1.2.3"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: None }));
+        assert_eq!(p("foo.foo:bar.bar:1.2.3"), Some(GradleParsedDep { dep_name: "foo.foo:bar.bar".into(), current_value: "1.2.3".into(), data_type: None }));
+        assert_eq!(p("foo:bar:1.2.+"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.+".into(), data_type: None }));
+        assert_eq!(p("foo:bar:1.2.3@zip"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: Some("zip".into()) }));
+        assert_eq!(p("foo:bar:1.2.3:docs"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: None }));
+        assert_eq!(p("foo:bar:1.2.3:docs@jar"), Some(GradleParsedDep { dep_name: "foo:bar".into(), current_value: "1.2.3".into(), data_type: Some("jar".into()) }));
+        assert_eq!(p("foo:bar:baz:qux"), None);
+        assert_eq!(p("foo:bar:baz:qux:quux"), None);
+        assert_eq!(p("foo:bar:1.2.3'"), None);
+        assert_eq!(p("-Xep:ParameterName:OFF"), None);
     }
 }

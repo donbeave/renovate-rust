@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2472 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2476 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15197,26 +15197,26 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/gradle/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/utils.spec.ts
-**Total tests:** 12 | **Ported:** 0 | **Actionable:** 12 | **Status:** pending
+**Total tests:** 12 | **Ported:** 4 | **Actionable:** 12 | **Status:** partial
 
 ### `versionLikeSubstring`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| extracts the actual version | 23 | pending | — | — | — |
-| returns null for invalid inputs | 41 | pending | — | — | — |
+| extracts the actual version | 23 | ported | `gradle.rs` | `gradle_version_like_substring_valid_versions` | — |
+| returns null for invalid inputs | 41 | ported | `gradle.rs` | `gradle_version_like_substring_invalid_inputs` | — |
 
 ### `isDependencyString`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $input | 57 | pending | — | — | — |
+| $input | 57 | ported | `gradle.rs` | `gradle_is_dependency_string` | it.each; all 20 cases covered |
 
 ### `parseDependencyString`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $input | 85 | pending | — | — | — |
+| $input | 85 | ported | `gradle.rs` | `gradle_parse_dependency_string` | it.each; 10 cases covered |
 | filetype checks | 105 | pending | — | — | — |
 | reorderFiles | 120 | pending | — | — | — |
 | getVars | 250 | pending | — | — | — |
