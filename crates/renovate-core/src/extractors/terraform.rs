@@ -973,6 +973,89 @@ fn kubernetes_dep_type(resource_type: &str) -> Option<TerraformDepType> {
     }
 }
 
+/// A parsed entry from `.terraform.lock.hcl`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TerraformProviderLock {
+    pub package_name: String,
+    pub registry_url: String,
+    pub version: String,
+    pub constraints: String,
+    pub hashes: Vec<String>,
+}
+
+/// Parse `.terraform.lock.hcl` content into provider lock entries.
+///
+/// Mirrors `lib/modules/manager/terraform/lockfile/util.ts` `extractLocks()`.
+/// Returns `None` when no provider blocks are found.
+pub fn extract_terraform_locks(content: &str) -> Option<Vec<TerraformProviderLock>> {
+    use std::sync::LazyLock;
+    static PROVIDER_START: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(
+            r#"^provider "(?P<registryUrl>[^/]*)/(?P<namespace>[^/]*)/(?P<depName>[^/"]*)"#,
+        )
+        .unwrap()
+    });
+    static VERSION_LINE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r#"^\s*version\s*=\s*"(?P<version>[^"']+)"#).unwrap()
+    });
+    static CONSTRAINT_LINE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r#"^\s*constraints\s*=\s*"(?P<constraint>[^"']+)"#).unwrap()
+    });
+    static HASH_LINE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r#"^\s*"(?P<hash>[^"]+)",$"#).unwrap());
+
+    let lines: Vec<&str> = content.lines().collect();
+    let block_starts: Vec<usize> = lines
+        .iter()
+        .enumerate()
+        .filter(|(_, l)| l.starts_with("provider \""))
+        .map(|(i, _)| i)
+        .collect();
+
+    if block_starts.is_empty() {
+        return None;
+    }
+
+    let mut locks = Vec::new();
+
+    for (idx, &start) in block_starts.iter().enumerate() {
+        let end = if idx + 1 < block_starts.len() {
+            block_starts[idx + 1]
+        } else {
+            lines.len()
+        };
+
+        let mut package_name = String::new();
+        let mut registry_url = String::new();
+        let mut version = String::new();
+        let mut constraints = String::new();
+        let mut hashes = Vec::new();
+
+        for line in &lines[start..end] {
+            if let Some(cap) = PROVIDER_START.captures(line) {
+                package_name = format!("{}/{}", &cap["namespace"], &cap["depName"]);
+                registry_url = format!("https://{}", &cap["registryUrl"]);
+            } else if let Some(cap) = VERSION_LINE.captures(line) {
+                version = cap["version"].to_owned();
+            } else if let Some(cap) = CONSTRAINT_LINE.captures(line) {
+                constraints = cap["constraint"].to_owned();
+            } else if let Some(cap) = HASH_LINE.captures(line) {
+                hashes.push(cap["hash"].to_owned());
+            }
+        }
+
+        locks.push(TerraformProviderLock {
+            package_name,
+            registry_url,
+            version,
+            constraints,
+            hashes,
+        });
+    }
+
+    Some(locks)
+}
+
 fn parse_provider_lockfile(lockfile: &str) -> BTreeMap<String, String> {
     let mut locked_versions = BTreeMap::new();
     let mut current_provider: Option<String> = None;
@@ -2138,5 +2221,44 @@ resource "tfe_workspace" "workspace_with_block" {
         assert_eq!(missing_version.current_value, "");
         assert_eq!(missing_version.dep_type, TerraformDepType::TfeWorkspace);
         assert_eq!(missing_version.datasource, Some("github-releases"));
+    }
+
+    // Ported: "returns null for empty" — modules/manager/terraform/lockfile/util.spec.ts line 13
+    #[test]
+    fn extract_locks_returns_none_for_no_provider_blocks() {
+        assert!(extract_terraform_locks("nothing here").is_none());
+    }
+
+    // Ported: "extracts" — modules/manager/terraform/lockfile/util.spec.ts line 19
+    #[test]
+    fn extract_locks_extracts_providers() {
+        let content = r#"provider "registry.terraform.io/hashicorp/aws" {
+  version     = "3.0.0"
+  constraints = "3.0.0"
+  hashes = [
+    "h1:ULKfwySvQ4pDhy027ryRhLxDhg640wsojYc+7NHMFBU=",
+    "zh:25294510ae9c250502f2e37ac32b01017439735f098f82a1728772427626a2fd",
+  ]
+}
+
+provider "registry.terraform.io/hashicorp/azurerm" {
+  version     = "2.50.0"
+  constraints = "~> 2.50"
+  hashes = [
+    "h1:Vr6WUm88s9hXGkyVjHtHsP2Jmc2ypQXn6ww7dXtvk1M=",
+  ]
+}
+"#;
+        let locks = extract_terraform_locks(content).unwrap();
+        assert_eq!(locks.len(), 2);
+        assert_eq!(locks[0].package_name, "hashicorp/aws");
+        assert_eq!(locks[0].registry_url, "https://registry.terraform.io");
+        assert_eq!(locks[0].version, "3.0.0");
+        assert_eq!(locks[0].constraints, "3.0.0");
+        assert_eq!(locks[0].hashes.len(), 2);
+        assert!(locks[0].hashes[0].starts_with("h1:"));
+        assert_eq!(locks[1].package_name, "hashicorp/azurerm");
+        assert_eq!(locks[1].version, "2.50.0");
+        assert_eq!(locks[1].constraints, "~> 2.50");
     }
 }
