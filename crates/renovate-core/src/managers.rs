@@ -932,6 +932,95 @@ pub fn detect(files: &[String]) -> Vec<DetectedManager> {
     results
 }
 
+// ── file-match (mirrors lib/workers/repository/extract/file-match.ts) ────────
+
+/// Return only files that match any of the `include_paths` (exact or glob).
+///
+/// Returns all files if `include_paths` is empty.
+/// Mirrors `getIncludedFiles` from `lib/workers/repository/extract/file-match.ts`.
+pub fn get_included_files<'a>(file_list: &'a [String], include_paths: &[&str]) -> Vec<&'a str> {
+    if include_paths.is_empty() {
+        return file_list.iter().map(|s| s.as_str()).collect();
+    }
+    file_list
+        .iter()
+        .filter(|file| {
+            include_paths.iter().any(|pattern| {
+                file.as_str() == *pattern || glob_matches(pattern, file)
+            })
+        })
+        .map(|s| s.as_str())
+        .collect()
+}
+
+/// Return files that do NOT match any of the `ignore_paths` (substring or glob).
+///
+/// Returns all files if `ignore_paths` is empty.
+/// Mirrors `filterIgnoredFiles` from `lib/workers/repository/extract/file-match.ts`.
+pub fn filter_ignored_files<'a>(file_list: &'a [String], ignore_paths: &[&str]) -> Vec<&'a str> {
+    if ignore_paths.is_empty() {
+        return file_list.iter().map(|s| s.as_str()).collect();
+    }
+    file_list
+        .iter()
+        .filter(|file| {
+            !ignore_paths.iter().any(|pattern| {
+                file.contains(pattern) || glob_matches(pattern, file)
+            })
+        })
+        .map(|s| s.as_str())
+        .collect()
+}
+
+/// Return files matching any of the `manager_patterns` (regex or glob), with
+/// include/ignore filtering applied first.
+///
+/// Results are deduped and sorted.
+/// Mirrors `getMatchingFiles` from `lib/workers/repository/extract/file-match.ts`.
+pub fn get_matching_files(
+    file_list: &[String],
+    include_paths: &[&str],
+    ignore_paths: &[&str],
+    manager_patterns: &[&str],
+) -> Vec<String> {
+    let filtered: Vec<&str> = file_list.iter()
+        .filter(|f| {
+            let included = if include_paths.is_empty() {
+                true
+            } else {
+                include_paths.iter().any(|p| f.as_str() == *p || glob_matches(p, f))
+            };
+            if !included { return false; }
+            !ignore_paths.iter().any(|p| f.contains(p) || glob_matches(p, f))
+        })
+        .map(|s| s.as_str())
+        .collect();
+
+    use crate::string_match::match_regex_or_glob;
+    let mut matched: Vec<String> = Vec::new();
+    for pattern in manager_patterns {
+        for file in &filtered {
+            if match_regex_or_glob(file, pattern) {
+                matched.push((*file).to_owned());
+            }
+        }
+    }
+    // Dedup and sort.
+    matched.sort();
+    matched.dedup();
+    matched
+}
+
+/// Case-insensitive glob match using the `globset` crate.
+fn glob_matches(pattern: &str, path: &str) -> bool {
+    globset::GlobBuilder::new(pattern)
+        .case_insensitive(true)
+        .build()
+        .ok()
+        .and_then(|g| Some(g.compile_matcher().is_match(path)))
+        .unwrap_or(false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1399,5 +1488,84 @@ mod tests {
             regex_match_all(&re, "1f699d2bfc99bbbe4c1ed5bb8fc21e6911d69c6e\n");
         // Should not panic and return a Vec (capped at 10_000)
         assert!(results.len() <= 10_000);
+    }
+
+    // ── file-match tests ──────────────────────────────────────────────────────
+
+    fn file_list() -> Vec<String> {
+        vec!["package.json".to_owned(), "frontend/package.json".to_owned()]
+    }
+
+    // Ported: "returns fileList if no includePaths" — workers/repository/extract/file-match.spec.ts line 8
+    #[test]
+    fn get_included_files_returns_all_when_no_include_paths() {
+        let fl = file_list();
+        let res = get_included_files(&fl, &[]);
+        assert_eq!(res, vec!["package.json", "frontend/package.json"]);
+    }
+
+    // Ported: "returns exact matches" — workers/repository/extract/file-match.spec.ts line 13
+    #[test]
+    fn get_included_files_exact_match() {
+        let fl = file_list();
+        let res = get_included_files(&fl, &["frontend/package.json"]);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], "frontend/package.json");
+    }
+
+    // Ported: "returns minimatch matches" — workers/repository/extract/file-match.spec.ts line 20
+    #[test]
+    fn get_included_files_glob_match() {
+        let fl = file_list();
+        let res = get_included_files(&fl, &["frontend/**"]);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], "frontend/package.json");
+    }
+
+    // Ported: "returns fileList if no ignoredPaths" — workers/repository/extract/file-match.spec.ts line 29
+    #[test]
+    fn filter_ignored_files_returns_all_when_no_ignore_paths() {
+        let fl = file_list();
+        let res = filter_ignored_files(&fl, &[]);
+        assert_eq!(res, vec!["package.json", "frontend/package.json"]);
+    }
+
+    // Ported: "ignores partial matches" — workers/repository/extract/file-match.spec.ts line 34
+    #[test]
+    fn filter_ignored_files_ignores_substring_matches() {
+        let fl = file_list();
+        let res = filter_ignored_files(&fl, &["frontend"]);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], "package.json");
+    }
+
+    // Ported: "returns minimatch matches" — workers/repository/extract/file-match.spec.ts line 41
+    #[test]
+    fn filter_ignored_files_glob_match() {
+        let fl = file_list();
+        let res = filter_ignored_files(&fl, &["frontend/**"]);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], "package.json");
+    }
+
+    // Ported: "returns npm files" — workers/repository/extract/file-match.spec.ts line 57
+    #[test]
+    fn get_matching_files_npm_pattern() {
+        let mut fl = file_list();
+        fl.push("Dockerfile".to_owned());
+        let res = get_matching_files(&fl, &[], &[], &["/(^|/)package\\.json$/"]);
+        assert_eq!(res.len(), 2);
+        assert!(res.contains(&"package.json".to_owned()));
+        assert!(res.contains(&"frontend/package.json".to_owned()));
+    }
+
+    // Ported: "deduplicates" — workers/repository/extract/file-match.spec.ts line 64
+    #[test]
+    fn get_matching_files_deduplicates() {
+        let mut fl = file_list();
+        fl.push("Dockerfile".to_owned());
+        // Two patterns both matching package.json should not duplicate
+        let res = get_matching_files(&fl, &[], &[], &["/(^|/)package\\.json$/", "package.json"]);
+        assert_eq!(res.len(), 2);
     }
 }
