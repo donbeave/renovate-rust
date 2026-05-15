@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2484 / 8612 actionable tests ported (28%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2487 / 8612 actionable tests ported (28%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17502,15 +17502,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/pub/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pub/extract.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `extractPackageFile`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for invalid pubspec file | 8 | pending | — | — | — |
-| returns dart sdk only | 16 | pending | — | — | — |
-| returns valid dependencies | 33 | pending | — | — | — |
+| returns null for invalid pubspec file | 8 | ported | `pubspec.rs` | `pub_extract_returns_none_for_invalid_yaml` | — |
+| returns dart sdk only | 16 | ported | `pubspec.rs` | `pub_extract_returns_dart_sdk_only` | — |
+| returns valid dependencies | 33 | ported | `pubspec.rs` | `pub_extract_returns_valid_dependencies` | — |
 
 ---
 

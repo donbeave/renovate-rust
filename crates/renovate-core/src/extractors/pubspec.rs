@@ -114,7 +114,194 @@ pub struct PubspecExtractedDep {
     pub skip_reason: Option<PubspecSkipReason>,
 }
 
-// ── Public API ─────────────────────────────────────────────────────────────
+// ── Full extraction (mirrors pub/extract.ts) ─────────────────────────────────
+
+/// Datasource IDs used when producing `FullPubDep`.
+pub mod datasource {
+    pub const DART: &str = "dart";
+    pub const DART_VERSION: &str = "dart-version";
+    pub const FLUTTER_VERSION: &str = "flutter-version";
+    pub const GIT_REFS: &str = "git-refs";
+}
+
+/// A fully extracted pub dependency with the fields expected by the Renovate engine.
+///
+/// Mirrors the `PackageDependency` shape returned by
+/// `lib/modules/manager/pub/extract.ts` `extractPackageFile()`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FullPubDep {
+    pub dep_name: String,
+    pub dep_type: Option<String>,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub skip_reason: Option<&'static str>,
+    pub registry_urls: Option<Vec<String>>,
+    pub package_name: Option<String>,
+}
+
+/// Return value of `extract_package_file`.
+#[derive(Debug)]
+pub struct PubExtractResult {
+    pub deps: Vec<FullPubDep>,
+}
+
+/// Parse a `pubspec.yaml` file and return all actionable + SDK dependencies.
+///
+/// Returns `None` when the file is not valid YAML or does not contain a
+/// required `environment.sdk` field.
+///
+/// Mirrors `lib/modules/manager/pub/extract.ts` `extractPackageFile()`.
+pub fn extract_package_file(content: &str, _package_file: &str) -> Option<PubExtractResult> {
+    let root_val: serde_yaml::Value = serde_yaml::from_str(content).ok()?;
+    let root = root_val.as_mapping()?;
+
+    let env = root.get("environment")?.as_mapping()?;
+    let sdk = env.get("sdk")?.as_str()?.to_owned();
+    let flutter = env.get("flutter").and_then(|v| v.as_str()).map(str::to_owned);
+
+    const SKIPPED: &[&str] = &[
+        "flutter_driver",
+        "flutter_localizations",
+        "flutter_test",
+        "flutter_web_plugins",
+        "meta",
+    ];
+
+    let mut deps: Vec<FullPubDep> = Vec::new();
+
+    for section_key in &["dependencies", "dev_dependencies"] {
+        if let Some(section) = root.get(*section_key).and_then(|v| v.as_mapping()) {
+            for (k, v) in section {
+                let Some(dep_name) = k.as_str() else {
+                    continue;
+                };
+                if SKIPPED.contains(&dep_name) {
+                    continue;
+                }
+                if let Some(dep) = pub_process_dep(dep_name, section_key, v) {
+                    deps.push(dep);
+                }
+            }
+        }
+    }
+
+    deps.push(FullPubDep {
+        dep_name: "dart".into(),
+        dep_type: None,
+        current_value: sdk,
+        datasource: datasource::DART_VERSION,
+        skip_reason: None,
+        registry_urls: None,
+        package_name: None,
+    });
+
+    if let Some(flutter_val) = flutter {
+        deps.push(FullPubDep {
+            dep_name: "flutter".into(),
+            dep_type: None,
+            current_value: flutter_val,
+            datasource: datasource::FLUTTER_VERSION,
+            skip_reason: None,
+            registry_urls: None,
+            package_name: None,
+        });
+    }
+
+    Some(PubExtractResult { deps })
+}
+
+fn pub_process_dep(
+    dep_name: &str,
+    section_key: &str,
+    value: &serde_yaml::Value,
+) -> Option<FullPubDep> {
+    use serde_yaml::Value;
+
+    let dep_type = Some(section_key.to_owned());
+
+    match value {
+        Value::String(v) => Some(FullPubDep {
+            dep_name: dep_name.to_owned(),
+            dep_type,
+            current_value: v.clone(),
+            datasource: datasource::DART,
+            skip_reason: None,
+            registry_urls: None,
+            package_name: None,
+        }),
+
+        Value::Mapping(m) => {
+            let version = m.get("version").and_then(|v| v.as_str());
+            let path = m.get("path").and_then(|v| v.as_str());
+            let git = m.get("git");
+            let hosted = m.get("hosted");
+
+            let git_url: Option<String> = match git {
+                Some(Value::String(s)) => Some(s.clone()),
+                Some(Value::Mapping(gm)) => {
+                    gm.get("url").and_then(|v| v.as_str()).map(str::to_owned)
+                }
+                _ => None,
+            };
+
+            let registry_urls: Option<Vec<String>> = match hosted {
+                Some(Value::String(s)) => Some(vec![s.clone()]),
+                Some(Value::Mapping(hm)) => hm
+                    .get("url")
+                    .and_then(|v| v.as_str())
+                    .map(|s| vec![s.to_owned()]),
+                _ => None,
+            };
+
+            let (current_value, skip_reason): (String, Option<&'static str>) =
+                if let Some(v) = version {
+                    (v.to_owned(), None)
+                } else if path.is_some() {
+                    (String::new(), Some("path-dependency"))
+                } else {
+                    match git {
+                        Some(Value::Mapping(gm)) => {
+                            let git_ref = gm.get("ref").and_then(|v| v.as_str());
+                            if let Some(r) = git_ref {
+                                (r.to_owned(), None)
+                            } else {
+                                (String::new(), Some("unspecified-version"))
+                            }
+                        }
+                        Some(Value::String(_)) => (String::new(), Some("unspecified-version")),
+                        _ => (String::new(), None),
+                    }
+                };
+
+            if let Some(url) = git_url {
+                Some(FullPubDep {
+                    dep_name: dep_name.to_owned(),
+                    dep_type,
+                    current_value,
+                    datasource: datasource::GIT_REFS,
+                    skip_reason,
+                    registry_urls: None,
+                    package_name: Some(url),
+                })
+            } else {
+                Some(FullPubDep {
+                    dep_name: dep_name.to_owned(),
+                    dep_type,
+                    current_value,
+                    datasource: datasource::DART,
+                    skip_reason,
+                    registry_urls,
+                    package_name: None,
+                })
+            }
+        }
+
+        // Boolean, number, null, sequence → skip this dep entirely.
+        _ => None,
+    }
+}
+
+// ── Legacy line-scanner API ───────────────────────────────────────────────────
 
 /// Parse a `pubspec.yaml` file and extract all package dependencies.
 pub fn extract(content: &str) -> Vec<PubspecExtractedDep> {
@@ -478,5 +665,91 @@ dev_dependencies:
     fn parse_pubspec_lock_invalid_schema_returns_none() {
         let content = "clearly: invalid\n";
         assert!(parse_pubspec_lock("pubspec.lock", content).is_none());
+    }
+
+    // Ported: "returns null for invalid pubspec file" — modules/manager/pub/extract.spec.ts line 9
+    #[test]
+    fn pub_extract_returns_none_for_invalid_yaml() {
+        let content = "clarly: \"invalid\" \"yaml\"\n";
+        assert!(extract_package_file(content, "pubspec.yaml").is_none());
+    }
+
+    // Ported: "returns dart sdk only" — modules/manager/pub/extract.spec.ts line 18
+    #[test]
+    fn pub_extract_returns_dart_sdk_only() {
+        let content = "environment:\n  sdk: ^3.0.0\n";
+        let result = extract_package_file(content, "pubspec.yaml").unwrap();
+        assert_eq!(result.deps.len(), 1);
+        assert_eq!(result.deps[0].dep_name, "dart");
+        assert_eq!(result.deps[0].current_value, "^3.0.0");
+        assert_eq!(result.deps[0].datasource, datasource::DART_VERSION);
+        assert!(result.deps[0].dep_type.is_none());
+    }
+
+    // Ported: "returns valid dependencies" — modules/manager/pub/extract.spec.ts line 31
+    #[test]
+    fn pub_extract_returns_valid_dependencies() {
+        let content = r#"
+environment:
+  sdk: ^3.0.0
+  flutter: 2.0.0
+dependencies:
+  meta: 'something'
+  foo: 1.0.0
+  transmogrify:
+    hosted:
+      name: transmogrify
+      url: https://some-package-server.com
+    version: ^1.4.0
+  bar:
+    hosted: 'some-url'
+    version: 1.1.0
+  baz:
+    non-sense: true
+  qux: false
+  path_dep:
+    path: path1
+  git_package:
+    git:
+      url: https://github.com/some-url/some-package
+  git_package_ref:
+    git:
+      url: https://github.com/some-url/some-package-ref
+      ref: v1.0.0
+  git_package_version:
+    git:
+      url: https://github.com/some-url/some-package-version
+    version: ^1.1.0
+  git_package_version_git_url:
+    git: https://github.com/some-url/some-package-version-url
+    version: ^1.1.0
+dev_dependencies:
+  test: ^0.1.0
+  build:
+    version: 0.0.1
+  flutter_test:
+    sdk: flutter
+  path_dev_dep:
+    path: path2
+"#;
+        let result = extract_package_file(content, "pubspec.yaml").unwrap();
+        let deps = &result.deps;
+
+        // Check ordering and values match expected output
+        assert_eq!(deps[0], FullPubDep { dep_name: "foo".into(), dep_type: Some("dependencies".into()), current_value: "1.0.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
+        assert_eq!(deps[1], FullPubDep { dep_name: "transmogrify".into(), dep_type: Some("dependencies".into()), current_value: "^1.4.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: Some(vec!["https://some-package-server.com".into()]), package_name: None });
+        assert_eq!(deps[2], FullPubDep { dep_name: "bar".into(), dep_type: Some("dependencies".into()), current_value: "1.1.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: Some(vec!["some-url".into()]), package_name: None });
+        assert_eq!(deps[3], FullPubDep { dep_name: "baz".into(), dep_type: Some("dependencies".into()), current_value: "".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
+        assert_eq!(deps[4], FullPubDep { dep_name: "path_dep".into(), dep_type: Some("dependencies".into()), current_value: "".into(), datasource: datasource::DART, skip_reason: Some("path-dependency"), registry_urls: None, package_name: None });
+        assert_eq!(deps[5], FullPubDep { dep_name: "git_package".into(), dep_type: Some("dependencies".into()), current_value: "".into(), datasource: datasource::GIT_REFS, skip_reason: Some("unspecified-version"), registry_urls: None, package_name: Some("https://github.com/some-url/some-package".into()) });
+        assert_eq!(deps[6], FullPubDep { dep_name: "git_package_ref".into(), dep_type: Some("dependencies".into()), current_value: "v1.0.0".into(), datasource: datasource::GIT_REFS, skip_reason: None, registry_urls: None, package_name: Some("https://github.com/some-url/some-package-ref".into()) });
+        assert_eq!(deps[7], FullPubDep { dep_name: "git_package_version".into(), dep_type: Some("dependencies".into()), current_value: "^1.1.0".into(), datasource: datasource::GIT_REFS, skip_reason: None, registry_urls: None, package_name: Some("https://github.com/some-url/some-package-version".into()) });
+        assert_eq!(deps[8], FullPubDep { dep_name: "git_package_version_git_url".into(), dep_type: Some("dependencies".into()), current_value: "^1.1.0".into(), datasource: datasource::GIT_REFS, skip_reason: None, registry_urls: None, package_name: Some("https://github.com/some-url/some-package-version-url".into()) });
+        assert_eq!(deps[9], FullPubDep { dep_name: "test".into(), dep_type: Some("dev_dependencies".into()), current_value: "^0.1.0".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
+        assert_eq!(deps[10], FullPubDep { dep_name: "build".into(), dep_type: Some("dev_dependencies".into()), current_value: "0.0.1".into(), datasource: datasource::DART, skip_reason: None, registry_urls: None, package_name: None });
+        assert_eq!(deps[11], FullPubDep { dep_name: "path_dev_dep".into(), dep_type: Some("dev_dependencies".into()), current_value: "".into(), datasource: datasource::DART, skip_reason: Some("path-dependency"), registry_urls: None, package_name: None });
+        assert_eq!(deps[12], FullPubDep { dep_name: "dart".into(), dep_type: None, current_value: "^3.0.0".into(), datasource: datasource::DART_VERSION, skip_reason: None, registry_urls: None, package_name: None });
+        assert_eq!(deps[13], FullPubDep { dep_name: "flutter".into(), dep_type: None, current_value: "2.0.0".into(), datasource: datasource::FLUTTER_VERSION, skip_reason: None, registry_urls: None, package_name: None });
+        assert_eq!(deps.len(), 14);
     }
 }
