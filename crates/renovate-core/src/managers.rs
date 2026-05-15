@@ -817,6 +817,99 @@ pub fn regex_match_all(re: &regex::Regex, content: &str) -> Vec<String> {
         .collect()
 }
 
+/// Managers that supersede other managers.
+///
+/// Mirrors `supersedesManagers` from various `lib/modules/manager/*/index.ts`.
+const SUPERSEDES_MANAGERS: &[(&str, &[&str])] = &[
+    ("bun", &["npm"]),
+    ("deno", &["npm"]),
+    ("poetry", &["pep621"]),
+];
+
+/// Returns the list of managers that the given manager supersedes.
+pub fn supersedes_managers(manager: &str) -> &'static [&'static str] {
+    SUPERSEDES_MANAGERS
+        .iter()
+        .find(|(m, _)| *m == manager)
+        .map(|(_, s)| *s)
+        .unwrap_or(&[])
+}
+
+/// A package file entry for `process_supersedes_managers`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PackageFileEntry {
+    pub package_file: String,
+    pub lock_files: Vec<String>,
+}
+
+/// An extraction result for `process_supersedes_managers`.
+/// `package_files` is `None` to represent "undefined" in TypeScript semantics.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExtractResult {
+    pub manager: String,
+    pub package_files: Option<Vec<PackageFileEntry>>,
+}
+
+/// Remove package files superseded by a higher-priority manager.
+///
+/// Mirrors `lib/workers/repository/extract/supersedes.ts`
+/// `processSupersedesManagers()`.
+pub fn process_supersedes_managers(extracts: &mut Vec<ExtractResult>) {
+    let mut rejected: std::collections::HashMap<String, Vec<String>> = Default::default();
+
+    for i in 0..extracts.len() {
+        let primary_manager = extracts[i].manager.clone();
+        let secondary_managers = supersedes_managers(&primary_manager);
+        if secondary_managers.is_empty() {
+            continue;
+        }
+
+        let Some(ref primary_pkg_files) = extracts[i].package_files else {
+            continue;
+        };
+        let primary_files: Vec<String> = primary_pkg_files
+            .iter()
+            .map(|f| f.package_file.clone())
+            .collect();
+
+        for &secondary_manager in secondary_managers {
+            let secondary_idx = extracts
+                .iter()
+                .position(|e| e.manager == secondary_manager);
+            let Some(sidx) = secondary_idx else { continue };
+
+            let Some(ref secondary_files) = extracts[sidx].package_files.clone() else {
+                continue;
+            };
+            for entry in secondary_files {
+                if !entry.lock_files.is_empty() {
+                    rejected
+                        .entry(primary_manager.clone())
+                        .or_default()
+                        .push(entry.package_file.clone());
+                    continue;
+                }
+                if primary_files.contains(&entry.package_file) {
+                    rejected
+                        .entry(secondary_manager.to_owned())
+                        .or_default()
+                        .push(entry.package_file.clone());
+                }
+            }
+        }
+    }
+
+    for extract in extracts.iter_mut() {
+        if let Some(ref rejected_files) = rejected.get(&extract.manager) {
+            if !rejected_files.is_empty() {
+                if let Some(ref mut files) = extract.package_files {
+                    files.retain(|f| !rejected_files.contains(&f.package_file));
+                }
+            }
+        }
+    }
+}
+
 /// Uses pre-compiled regex patterns (compiled once via [`COMPILED`]).
 /// Managers with at least one matching file are included in the result.
 pub fn detect(files: &[String]) -> Vec<DetectedManager> {
@@ -1198,6 +1291,105 @@ mod tests {
         assert!(!is_custom_manager("custom.regex"));
         assert!(is_custom_manager("jsonata"));
         assert!(!is_custom_manager("custom.jsonata"));
+    }
+
+    fn pkg(file: &str) -> PackageFileEntry {
+        PackageFileEntry { package_file: file.to_owned(), lock_files: vec![] }
+    }
+    fn pkg_locked(file: &str, lock: &str) -> PackageFileEntry {
+        PackageFileEntry { package_file: file.to_owned(), lock_files: vec![lock.to_owned()] }
+    }
+    fn extract(manager: &str, files: &[PackageFileEntry]) -> ExtractResult {
+        ExtractResult { manager: manager.to_owned(), package_files: Some(files.to_vec()) }
+    }
+    fn extract_none(manager: &str) -> ExtractResult {
+        ExtractResult { manager: manager.to_owned(), package_files: None }
+    }
+
+    // Ported: "handles empty input" — workers/repository/extract/supersedes.spec.ts line 6
+    #[test]
+    fn supersedes_handles_empty_input() {
+        let mut results: Vec<ExtractResult> = vec![];
+        process_supersedes_managers(&mut results);
+        assert!(results.is_empty());
+    }
+
+    // Ported: "ignores extracts without superseding managers" — workers/repository/extract/supersedes.spec.ts line 12
+    #[test]
+    fn supersedes_ignores_non_superseding_managers() {
+        let mut results = vec![extract("ansible", &[pkg("test.yml")])];
+        process_supersedes_managers(&mut results);
+        assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
+    }
+
+    // Ported: "removes superseded package files without lock files" — workers/repository/extract/supersedes.spec.ts line 28
+    #[test]
+    fn supersedes_removes_superseded_files_without_lock() {
+        let mut results = vec![
+            extract("bun", &[pkg("package.json")]),
+            extract("npm", &[pkg("package.json")]),
+        ];
+        process_supersedes_managers(&mut results);
+        assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
+        assert!(results[1].package_files.as_ref().unwrap().is_empty());
+    }
+
+    // Ported: "keeps superseded package files with lock files" — workers/repository/extract/supersedes.spec.ts line 52
+    #[test]
+    fn supersedes_keeps_files_with_lock_files() {
+        let mut results = vec![
+            extract("bun", &[pkg("package.json")]),
+            extract("npm", &[pkg_locked("package.json", "package-lock.json")]),
+        ];
+        process_supersedes_managers(&mut results);
+        // bun loses package.json (npm has lock, so npm is not superseded, bun is)
+        assert!(results[0].package_files.as_ref().unwrap().is_empty());
+        assert_eq!(results[1].package_files.as_ref().unwrap().len(), 1);
+    }
+
+    // Ported: "keeps non-superseded package files" — workers/repository/extract/supersedes.spec.ts line 88
+    #[test]
+    fn supersedes_keeps_non_superseded_files() {
+        let mut results = vec![
+            extract("bun", &[pkg("package.json")]),
+            extract("npm", &[pkg("package.json"), pkg("other/package.json")]),
+        ];
+        process_supersedes_managers(&mut results);
+        assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
+        assert_eq!(results[1].package_files.as_ref().unwrap().len(), 1);
+        assert_eq!(results[1].package_files.as_ref().unwrap()[0].package_file, "other/package.json");
+    }
+
+    // Ported: "handles primary extract with undefined packageFiles" — workers/repository/extract/supersedes.spec.ts line 115
+    #[test]
+    fn supersedes_handles_primary_with_no_package_files() {
+        let mut results = vec![
+            extract_none("bun"),
+            extract("npm", &[pkg("package.json")]),
+        ];
+        process_supersedes_managers(&mut results);
+        assert!(results[0].package_files.is_none());
+        assert_eq!(results[1].package_files.as_ref().unwrap().len(), 1);
+    }
+
+    // Ported: "handles missing secondary extract manager" — workers/repository/extract/supersedes.spec.ts line 137
+    #[test]
+    fn supersedes_handles_missing_secondary_manager() {
+        let mut results = vec![extract("bun", &[pkg("package.json")])];
+        process_supersedes_managers(&mut results);
+        assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
+    }
+
+    // Ported: "handles secondary extract with undefined packageFiles" — workers/repository/extract/supersedes.spec.ts line 153
+    #[test]
+    fn supersedes_handles_secondary_with_no_package_files() {
+        let mut results = vec![
+            extract("bun", &[pkg("package.json")]),
+            extract_none("npm"),
+        ];
+        process_supersedes_managers(&mut results);
+        assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
+        assert!(results[1].package_files.is_none());
     }
 
     // Ported: "does not crash for lazy regex" — modules/manager/custom/regex/utils.spec.ts line 5
