@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2339 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2343 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13281,16 +13281,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/bazelisk/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazelisk/extract.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns a result | 5 | pending | — | — | — |
-| supports ranges | 17 | pending | — | — | — |
-| skips non ranges | 29 | pending | — | — | — |
-| ignores comments past the first line | 41 | pending | — | — | — |
+| returns a result | 5 | ported | `version_file.rs` | `bazelisk_returns_dep_for_version` | — |
+| supports ranges | 17 | ported | `version_file.rs` | `bazelisk_supports_partial_version` | — |
+| skips non ranges | 29 | ported | `version_file.rs` | `bazelisk_passes_through_non_version_string` | — |
+| ignores comments past the first line | 41 | ported | `version_file.rs` | `bazelisk_ignores_comments_past_first_line` | — |
 
 ---
 

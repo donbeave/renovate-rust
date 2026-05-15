@@ -155,6 +155,27 @@ pub fn extract(content: &str, manager_name: &str) -> Option<VersionFileDep> {
     })
 }
 
+/// A bazelisk (`.bazelversion`) dependency extracted by the bazelisk manager.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BazeliskDep {
+    pub dep_name: &'static str,
+    pub current_value: String,
+    pub datasource: &'static str,
+    pub package_name: &'static str,
+}
+
+/// Extract the bazel version from `.bazelversion` file content.
+///
+/// Mirrors `lib/modules/manager/bazelisk/extract.ts` `extractPackageFile()`.
+pub fn extract_bazelisk(content: &str) -> BazeliskDep {
+    BazeliskDep {
+        dep_name: "bazel",
+        current_value: content.lines().next().unwrap_or("").trim().to_owned(),
+        datasource: "github-releases",
+        package_name: "bazelbuild/bazel",
+    }
+}
+
 /// A nodenv (`.node-version`) dependency extracted by the nodenv manager.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NodeenvDep {
@@ -428,5 +449,36 @@ mod tests {
         assert_eq!(dep.dep_name, "node");
         assert_eq!(dep.current_value, "latestn");
         assert_eq!(dep.datasource, "node-version");
+    }
+
+    // Ported: "returns a result" — modules/manager/bazelisk/extract.spec.ts line 5
+    #[test]
+    fn bazelisk_returns_dep_for_version() {
+        let dep = extract_bazelisk("5.2.0\n");
+        assert_eq!(dep.dep_name, "bazel");
+        assert_eq!(dep.current_value, "5.2.0");
+        assert_eq!(dep.datasource, "github-releases");
+        assert_eq!(dep.package_name, "bazelbuild/bazel");
+    }
+
+    // Ported: "supports ranges" — modules/manager/bazelisk/extract.spec.ts line 14
+    #[test]
+    fn bazelisk_supports_partial_version() {
+        let dep = extract_bazelisk("5.2");
+        assert_eq!(dep.current_value, "5.2");
+    }
+
+    // Ported: "skips non ranges" — modules/manager/bazelisk/extract.spec.ts line 23
+    #[test]
+    fn bazelisk_passes_through_non_version_string() {
+        let dep = extract_bazelisk("latestn");
+        assert_eq!(dep.current_value, "latestn");
+    }
+
+    // Ported: "ignores comments past the first line" — modules/manager/bazelisk/extract.spec.ts line 32
+    #[test]
+    fn bazelisk_ignores_comments_past_first_line() {
+        let dep = extract_bazelisk("5.2.0\n# comment1\n\n# comment2");
+        assert_eq!(dep.current_value, "5.2.0");
     }
 }
