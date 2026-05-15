@@ -5,6 +5,7 @@ pub mod config;
 pub mod datasources;
 pub mod extractors;
 pub mod http;
+pub mod json_writer;
 pub mod managers;
 pub mod monorepos;
 pub mod package_rule;

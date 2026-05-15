@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2355 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2359 / 8612 actionable tests ported (27%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -24569,16 +24569,16 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/json-writer/json-writer.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/json-writer/json-writer.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `util/json-writer/json-writer`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should apply 2 spaces indentation by default | 8 | pending | — | — | — |
-| should apply indentation size | 14 | pending | — | — | — |
-| should apply indentation type | 23 | pending | — | — | — |
-| new line at the end should be optional | 31 | pending | — | — | — |
+| should apply 2 spaces indentation by default | 8 | ported | `json_writer.rs` | `json_writer_default_2_space_indent` | — |
+| should apply indentation size | 14 | ported | `json_writer.rs` | `json_writer_custom_indent_size` | — |
+| should apply indentation type | 23 | ported | `json_writer.rs` | `json_writer_tab_indent` | — |
+| new line at the end should be optional | 31 | ported | `json_writer.rs` | `json_writer_optional_trailing_newline` | — |
 
 ---
 
