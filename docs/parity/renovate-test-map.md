@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2672 / 8612 actionable tests ported (31%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2694 / 8612 actionable tests ported (31%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -17703,46 +17703,46 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/swift/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/extract.spec.ts
-**Total tests:** 17 | **Ported:** 0 | **Actionable:** 17 | **Status:** pending
+**Total tests:** 17 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for empty content | 7 | pending | — | — | — |
-| returns null for content without dependencies | 11 | pending | — | — | — |
-| extracts GitHub dependencies with github-tags datasource | 31 | pending | — | — | — |
-| extracts GitLab dependencies with gitlab-tags datasource | 52 | pending | — | — | — |
-| extracts self-hosted GitHub dependencies with registryUrls | 73 | pending | — | — | — |
-| extracts self-hosted GitLab dependencies with registryUrls | 95 | pending | — | — | — |
-| extracts other dependencies with git-tags datasource | 117 | pending | — | — | — |
-| extracts exact version dependencies | 138 | pending | — | — | — |
-| extracts exact version with label syntax | 159 | pending | — | — | — |
-| extracts range version dependencies | 180 | pending | — | — | — |
-| extracts dependencies from sample package file | 201 | pending | — | — | — |
-| handles malformed URLs gracefully | 236 | pending | — | — | — |
-| handles dependencies without version | 249 | pending | — | — | — |
-| handles dependencies with local package | 262 | pending | — | — | — |
-| handles dependencies with name (deprecated args) | 275 | pending | — | — | — |
-| extracts multiple dependencies with different datasources | 290 | pending | — | — | — |
-| extracts multiple dependencies with traits arguments | 308 | pending | — | — | — |
+| returns null for empty content | 7 | ported | `spm.rs` | `returns_null_for_empty_content` | — |
+| returns null for content without dependencies | 11 | ported | `spm.rs` | `returns_null_for_content_without_dependencies` | — |
+| extracts GitHub dependencies with github-tags datasource | 31 | ported | `spm.rs` | `extracts_github_dependencies_with_github_tags_datasource` | — |
+| extracts GitLab dependencies with gitlab-tags datasource | 52 | ported | `spm.rs` | `extracts_gitlab_dependencies_with_gitlab_tags_datasource` | — |
+| extracts self-hosted GitHub dependencies with registryUrls | 73 | ported | `spm.rs` | `extracts_self_hosted_github_with_registry_urls` | — |
+| extracts self-hosted GitLab dependencies with registryUrls | 95 | ported | `spm.rs` | `extracts_self_hosted_gitlab_with_registry_urls` | — |
+| extracts other dependencies with git-tags datasource | 117 | ported | `spm.rs` | `extracts_other_dependencies_with_git_tags_datasource` | — |
+| extracts exact version dependencies | 138 | ported | `spm.rs` | `extracts_exact_version_dependencies` | — |
+| extracts exact version with label syntax | 159 | ported | `spm.rs` | `extracts_exact_version_with_label_syntax` | — |
+| extracts range version dependencies | 180 | ported | `spm.rs` | `extracts_range_version_dependencies` | — |
+| extracts dependencies from sample package file | 201 | ported | `spm.rs` | `extracts_dependencies_from_sample_package_file` | — |
+| handles malformed URLs gracefully | 236 | ported | `spm.rs` | `handles_malformed_urls_gracefully` | — |
+| handles dependencies without version | 249 | ported | `spm.rs` | `handles_dependencies_without_version` | — |
+| handles dependencies with local package | 262 | ported | `spm.rs` | `handles_dependencies_with_local_package` | — |
+| handles dependencies with name (deprecated args) | 275 | ported | `spm.rs` | `handles_dependencies_with_name_deprecated_args` | — |
+| extracts multiple dependencies with different datasources | 290 | ported | `spm.rs` | `extracts_multiple_dependencies_with_different_datasources` | — |
+| extracts multiple dependencies with traits arguments | 308 | ported | `spm.rs` | `extracts_multiple_dependencies_with_traits_arguments` | — |
 
 ---
 
 ## `lib/modules/manager/swift/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/index.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
+**Total tests:** 5 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for empty content | 6 | pending | — | — | — |
-| returns null for invalid content | 12 | pending | — | — | — |
-| parses packages with invalid versions | 81 | pending | — | — | — |
-| parses package descriptions | 109 | pending | — | — | — |
-| parses multiple packages | 152 | pending | — | — | — |
+| returns null for empty content | 6 | ported | `spm.rs` | `index_returns_null_for_empty_and_no_package_calls` | — |
+| returns null for invalid content | 12 | ported | `spm.rs` | `index_returns_null_for_invalid_content` | — |
+| parses packages with invalid versions | 81 | ported | `spm.rs` | `index_parses_packages_with_invalid_versions` | — |
+| parses package descriptions | 109 | ported | `spm.rs` | `index_parses_package_descriptions` | — |
+| parses multiple packages | 152 | ported | `spm.rs` | `index_parses_multiple_packages` | Snapshot test adapted to invariant checks |
 
 ---
 
