@@ -145,6 +145,78 @@ pub fn satisfies_date_range(timestamp: &str, range: &str) -> bool {
     }
 }
 
+/// Validate a schedule list, mirroring Renovate's `hasValidSchedule()`.
+///
+/// Returns `true` when the schedule is usable:
+/// - Empty schedule or `["at any time"]` → always valid.
+/// - Each entry must be either valid cron syntax (5–6 fields, first field is
+///   `*`) or a recognisable text schedule (has a time-of-day range and/or a
+///   day-of-week/month constraint, and does not specify minutes).
+///
+/// Returns `false` when any entry fails validation.
+pub fn is_valid_schedule(schedule: &[String]) -> bool {
+    if schedule.is_empty()
+        || schedule
+            .iter()
+            .any(|s| s.as_str() == "at any time" || s.is_empty())
+    {
+        return true;
+    }
+    schedule.iter().all(|entry| is_valid_schedule_entry(entry))
+}
+
+/// Validate a single schedule entry.
+fn is_valid_schedule_entry(entry: &str) -> bool {
+    let fields: Vec<&str> = entry.split_whitespace().collect();
+    let n = fields.len();
+    // 5-field cron or 6-field extended cron (Croner syntax: "* * * * * 6L")
+    if n == 5 || n == 6 {
+        let first = fields.first().copied().unwrap_or("");
+        if first == "*" {
+            return true;
+        }
+        // Non-wildcard minute in cron → invalid
+        if first.chars().next().is_some_and(|c| c.is_ascii_digit()) {
+            return false;
+        }
+    }
+    // 4 fields or fewer that look like cron → invalid
+    if n <= 4
+        && entry.split_whitespace().all(|f| {
+            f.chars()
+                .all(|c| c.is_ascii_digit() || c == '*' || c == '/' || c == '-' || c == ',')
+        })
+    {
+        return false;
+    }
+
+    let raw = entry.trim().to_lowercase();
+    // Apply Renovate schedule mappings (scheduleMappings in TypeScript).
+    let s: String = match raw.as_str() {
+        "every month" | "monthly" => "before 5am on the first day of the month".to_owned(),
+        _ => raw.clone(),
+    };
+    let s = s.as_str();
+
+    // Uses minute keywords → invalid
+    if s.contains(" mins") || s.contains(" minutes") || s.contains(" min ") {
+        return false;
+    }
+
+    // Special recognised text forms that lack explicit time/day but are valid.
+    if s.contains("first day of the month") {
+        return true;
+    }
+    if extract_named_month(s).is_some() || extract_every_n_months(s).is_some() {
+        return true;
+    }
+
+    // Must have at least one recognised time or day constraint.
+    let (_, has_time) = evaluate_time_constraint(s, 0);
+    let (_, has_day) = evaluate_day_constraint(s, 0);
+    has_time || has_day
+}
+
 /// Return `true` when any entry in `schedule` matches the current UTC time.
 ///
 /// An empty schedule (or `["at any time"]`) always returns `true`.
@@ -1440,5 +1512,159 @@ mod tests {
         let friday_10am = utc(2017, 6, 30, 10);
         let sched = vec!["* * * 1 *".to_owned()];
         assert!(!is_within_schedule_at(&sched, friday_10am));
+    }
+
+    // ── is_valid_schedule (hasValidSchedule) ─────────────────────────────────
+
+    fn sched(entries: &[&str]) -> Vec<String> {
+        entries.iter().map(|s| s.to_string()).collect()
+    }
+
+    // Ported: "returns true for null" — workers/repository/update/branch/schedule.spec.ts line 17
+    #[test]
+    fn has_valid_schedule_null_returns_true() {
+        assert!(is_valid_schedule(&[]));
+    }
+
+    // Ported: "returns true for at any time" — workers/repository/update/branch/schedule.spec.ts line 21
+    #[test]
+    fn has_valid_schedule_at_any_time_returns_true() {
+        assert!(is_valid_schedule(&sched(&["at any time"])));
+    }
+
+    // Ported: "returns false for invalid schedule" — workers/repository/update/branch/schedule.spec.ts line 25
+    #[test]
+    fn has_valid_schedule_invalid_returns_false() {
+        assert!(!is_valid_schedule(&sched(&["foo"])));
+    }
+
+    // Ported: "returns false if any schedule fails to parse" — workers/repository/update/branch/schedule.spec.ts line 29
+    #[test]
+    fn has_valid_schedule_any_failure_returns_false() {
+        assert!(!is_valid_schedule(&sched(&["after 5:00pm", "foo"])));
+    }
+
+    // Ported: "returns false if using minutes" — workers/repository/update/branch/schedule.spec.ts line 33
+    #[test]
+    fn has_valid_schedule_minutes_returns_false() {
+        assert!(!is_valid_schedule(&sched(&["every 15 mins every weekday"])));
+    }
+
+    // Ported: "returns false for wildcard minutes" — workers/repository/update/branch/schedule.spec.ts line 39
+    #[test]
+    fn has_valid_schedule_non_wildcard_cron_minute_returns_false() {
+        let res = is_valid_schedule(&sched(&["1 * * * *"]));
+        assert!(!res);
+    }
+
+    // Ported: "returns false if schedules have no days or time range" — workers/repository/update/branch/schedule.spec.ts line 47
+    #[test]
+    fn has_valid_schedule_no_days_or_time_returns_false() {
+        assert!(!is_valid_schedule(&sched(&["at 5:00pm"])));
+    }
+
+    // Ported: "returns false if any schedule has no days or time range" — workers/repository/update/branch/schedule.spec.ts line 51
+    #[test]
+    fn has_valid_schedule_combined_any_failure_returns_false() {
+        assert!(!is_valid_schedule(&sched(&["at 5:00pm", "on saturday"])));
+    }
+
+    // Ported: "returns false for every xday" — workers/repository/update/branch/schedule.spec.ts line 57
+    #[test]
+    fn has_valid_schedule_bare_weekday_returns_false() {
+        assert!(!is_valid_schedule(&sched(&["every friday"])));
+    }
+
+    // Ported: "returns true if schedule has days of week" — workers/repository/update/branch/schedule.spec.ts line 61
+    #[test]
+    fn has_valid_schedule_days_of_week_returns_true() {
+        assert!(is_valid_schedule(&sched(&["on friday and saturday"])));
+    }
+
+    // Ported: "returns true for multi day schedules" — workers/repository/update/branch/schedule.spec.ts line 67
+    #[test]
+    fn has_valid_schedule_multi_day_with_time_returns_true() {
+        assert!(is_valid_schedule(&sched(&[
+            "after 5:00pm on wednesday and thursday"
+        ])));
+    }
+
+    // Ported: "returns true if schedule has a start time" — workers/repository/update/branch/schedule.spec.ts line 75
+    #[test]
+    fn has_valid_schedule_start_time_returns_true() {
+        assert!(is_valid_schedule(&sched(&["after 8:00pm"])));
+    }
+
+    // Ported: "returns true for first day of the month" — workers/repository/update/branch/schedule.spec.ts line 79
+    #[test]
+    fn has_valid_schedule_first_day_of_month_returns_true() {
+        assert!(is_valid_schedule(&sched(&[
+            "on the first day of the month"
+        ])));
+    }
+
+    // Ported: "returns true for schedules longer than 1 month" — workers/repository/update/branch/schedule.spec.ts line 85
+    #[test]
+    fn has_valid_schedule_multi_month_returns_true() {
+        assert!(is_valid_schedule(&sched(&["every 3 months"])));
+        assert!(is_valid_schedule(&sched(&["every 6 months"])));
+        assert!(is_valid_schedule(&sched(&["every 12 months"])));
+    }
+
+    // Ported: "returns true if schedule has an end time" — workers/repository/update/branch/schedule.spec.ts line 91
+    #[test]
+    fn has_valid_schedule_end_time_returns_true() {
+        assert!(is_valid_schedule(&sched(&["before 6:00am"])));
+    }
+
+    // Ported: "returns true if schedule has a start and end time" — workers/repository/update/branch/schedule.spec.ts line 95
+    #[test]
+    fn has_valid_schedule_start_and_end_time_returns_true() {
+        assert!(is_valid_schedule(&sched(&[
+            "after 11:00pm and before 6:00am"
+        ])));
+    }
+
+    // Ported: "returns true if schedule has days and a start and end time" — workers/repository/update/branch/schedule.spec.ts line 101
+    #[test]
+    fn has_valid_schedule_days_with_start_and_end_time_returns_true() {
+        assert!(is_valid_schedule(&sched(&[
+            "after 11:00pm and before 6:00am every weekday"
+        ])));
+    }
+
+    // Ported: "returns true if schedule uses cron syntax" — workers/repository/update/branch/schedule.spec.ts line 109
+    #[test]
+    fn has_valid_schedule_valid_cron_returns_true() {
+        assert!(is_valid_schedule(&sched(&["* 5 * * *"])));
+        assert!(is_valid_schedule(&sched(&["* * * * * 6L"])));
+        assert!(is_valid_schedule(&sched(&["* * * */2 6#1"])));
+        assert!(!is_valid_schedule(&sched(&["2 3 5 11 *"])));
+        assert!(!is_valid_schedule(&sched(&["2 3 5 11"])));
+    }
+
+    // Ported: "massages schedules" — workers/repository/update/branch/schedule.spec.ts line 117
+    #[test]
+    fn has_valid_schedule_massaged_forms_return_true() {
+        assert!(is_valid_schedule(&sched(&[
+            "before 5am on the first day of the month"
+        ])));
+        assert!(is_valid_schedule(&sched(&["every month"])));
+    }
+
+    // Ported: "supports hours shorthand" — workers/repository/update/branch/schedule.spec.ts line 126
+    #[test]
+    fn has_valid_schedule_hours_shorthand_returns_true() {
+        let schedules = sched(&[
+            "after 11pm and before 6am every weekend",
+            "after 11pm",
+            "after 10pm and before 5:00am",
+            "after 10pm and before 5am every weekday",
+            "after 11pm and before 6am",
+            "after 9pm on friday and saturday",
+            "before 5am every weekday",
+            "every weekend",
+        ]);
+        assert!(is_valid_schedule(&schedules));
     }
 }

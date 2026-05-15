@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2197 / 8606 actionable tests ported (25%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2217 / 8606 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -27473,7 +27473,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/branch/schedule.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/branch/schedule.spec.ts
-**Total tests:** 68 | **Ported:** 28 | **Actionable:** 68 | **Status:** partial
+**Total tests:** 68 | **Ported:** 48 | **Actionable:** 68 | **Status:** partial
 
 ### `workers/repository/update/branch/schedule › hasValidTimezone(schedule)`
 
@@ -27486,26 +27486,26 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns true for null | 17 | pending | — | — | — |
-| returns true for at any time | 21 | pending | — | — | — |
-| returns false for invalid schedule | 25 | pending | — | — | — |
-| returns false if any schedule fails to parse | 29 | pending | — | — | — |
-| returns false if using minutes | 33 | pending | — | — | — |
-| returns false for wildcard minutes | 39 | pending | — | — | — |
-| returns false if schedules have no days or time range | 47 | pending | — | — | — |
-| returns false if any schedule has no days or time range | 51 | pending | — | — | — |
-| returns false for every xday | 57 | pending | — | — | — |
-| returns true if schedule has days of week | 61 | pending | — | — | — |
-| returns true for multi day schedules | 67 | pending | — | — | — |
-| returns true if schedule has a start time | 75 | pending | — | — | — |
-| returns true for first day of the month | 79 | pending | — | — | — |
-| returns true for schedules longer than 1 month | 85 | pending | — | — | — |
-| returns true if schedule has an end time | 91 | pending | — | — | — |
-| returns true if schedule has a start and end time | 95 | pending | — | — | — |
-| returns true if schedule has days and a start and end time | 101 | pending | — | — | — |
-| returns true if schedule uses cron syntax | 109 | pending | — | — | — |
-| massages schedules | 117 | pending | — | — | — |
-| supports hours shorthand | 126 | pending | — | — | — |
+| returns true for null | 17 | ported | `schedule.rs` | `has_valid_schedule_null_returns_true` | — |
+| returns true for at any time | 21 | ported | `schedule.rs` | `has_valid_schedule_at_any_time_returns_true` | — |
+| returns false for invalid schedule | 25 | ported | `schedule.rs` | `has_valid_schedule_invalid_returns_false` | — |
+| returns false if any schedule fails to parse | 29 | ported | `schedule.rs` | `has_valid_schedule_any_failure_returns_false` | — |
+| returns false if using minutes | 33 | ported | `schedule.rs` | `has_valid_schedule_minutes_returns_false` | — |
+| returns false for wildcard minutes | 39 | ported | `schedule.rs` | `has_valid_schedule_non_wildcard_cron_minute_returns_false` | — |
+| returns false if schedules have no days or time range | 47 | ported | `schedule.rs` | `has_valid_schedule_no_days_or_time_returns_false` | — |
+| returns false if any schedule has no days or time range | 51 | ported | `schedule.rs` | `has_valid_schedule_combined_any_failure_returns_false` | — |
+| returns false for every xday | 57 | ported | `schedule.rs` | `has_valid_schedule_bare_weekday_returns_false` | — |
+| returns true if schedule has days of week | 61 | ported | `schedule.rs` | `has_valid_schedule_days_of_week_returns_true` | — |
+| returns true for multi day schedules | 67 | ported | `schedule.rs` | `has_valid_schedule_multi_day_with_time_returns_true` | — |
+| returns true if schedule has a start time | 75 | ported | `schedule.rs` | `has_valid_schedule_start_time_returns_true` | — |
+| returns true for first day of the month | 79 | ported | `schedule.rs` | `has_valid_schedule_first_day_of_month_returns_true` | — |
+| returns true for schedules longer than 1 month | 85 | ported | `schedule.rs` | `has_valid_schedule_multi_month_returns_true` | — |
+| returns true if schedule has an end time | 91 | ported | `schedule.rs` | `has_valid_schedule_end_time_returns_true` | — |
+| returns true if schedule has a start and end time | 95 | ported | `schedule.rs` | `has_valid_schedule_start_and_end_time_returns_true` | — |
+| returns true if schedule has days and a start and end time | 101 | ported | `schedule.rs` | `has_valid_schedule_days_with_start_and_end_time_returns_true` | — |
+| returns true if schedule uses cron syntax | 109 | ported | `schedule.rs` | `has_valid_schedule_valid_cron_returns_true` | — |
+| massages schedules | 117 | ported | `schedule.rs` | `has_valid_schedule_massaged_forms_return_true` | — |
+| supports hours shorthand | 126 | ported | `schedule.rs` | `has_valid_schedule_hours_shorthand_returns_true` | — |
 
 ### `workers/repository/update/branch/schedule › isScheduledNow(config)`
 
