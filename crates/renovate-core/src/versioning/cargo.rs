@@ -1290,4 +1290,21 @@ mod renovate_compat_tests {
         let result = extract_lock_file_content_versions("[metadata]").unwrap();
         assert!(result.is_empty());
     }
+
+    // Ported: "returns a map of package versions" — modules/manager/cargo/locked-version.spec.ts line 33
+    #[test]
+    fn extract_versions_returns_map_of_package_versions() {
+        let content =
+            include_str!("../../tests/fixtures/cargo/lockfile-update/Cargo.1.lock");
+        let result = extract_lock_file_content_versions(content).unwrap();
+        assert_eq!(result.get("proc-macro2"), Some(&vec!["1.0.66".to_string()]));
+        assert_eq!(result.get("quote"), Some(&vec!["1.0.33".to_string()]));
+        assert_eq!(result.get("test"), Some(&vec!["0.1.0".to_string()]));
+        assert_eq!(result.get("unicode-ident"), Some(&vec!["1.0.11".to_string()]));
+        assert_eq!(result.get("unicode-xid"), Some(&vec!["0.2.4".to_string()]));
+        let syn = result.get("syn").unwrap();
+        assert!(syn.contains(&"1.0.1".to_string()));
+        assert!(syn.contains(&"2.0.1".to_string()));
+        assert_eq!(syn.len(), 2);
+    }
 }

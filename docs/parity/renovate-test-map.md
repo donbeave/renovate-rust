@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2227 / 8612 actionable tests ported (26%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2228 / 8612 actionable tests ported (26%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -13672,7 +13672,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/cargo/locked-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/locked-version.spec.ts
-**Total tests:** 8 | **Ported:** 6 | **Actionable:** 6 | **Status:** partial
+**Total tests:** 8 | **Ported:** 7 | **Actionable:** 7 | **Status:** partial
 
 ### `extractLockFileVersions()`
 
@@ -13681,7 +13681,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | returns null for missing lock file | 19 | not-applicable | — | — | TypeScript reads from filesystem (async); Rust tests inline content |
 | returns null for invalid lock file | 23 | ported | `cargo.rs` | `extract_versions_invalid_content_returns_none` | — |
 | returns empty map for lock file without packages | 28 | ported | `cargo.rs` | `extract_versions_no_packages_returns_empty` | — |
-| returns a map of package versions | 33 | pending | — | — | — |
+| returns a map of package versions | 33 | ported | `cargo.rs` | `extract_versions_returns_map_of_package_versions` | — |
 
 ### `parseLockFile`
 
