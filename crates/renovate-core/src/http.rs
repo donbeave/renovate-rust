@@ -17,6 +17,7 @@
 //!
 //! Renovate reference: `lib/util/http/retry-after.ts` — `wrapWithRetry`.
 
+use chrono::{DateTime, Utc};
 use reqwest::{Client, RequestBuilder, Response, StatusCode};
 use thiserror::Error;
 use tokio::time::Duration;
@@ -225,21 +226,45 @@ fn retry_delay(resp: &Response, attempt: u32) -> Duration {
     Duration::from_millis(ms.min(30_000))
 }
 
+/// Parse a `Retry-After` header value string into seconds from `now`.
+///
+/// Supports both the numeric (delay-seconds) and HTTP-date forms per
+/// [RFC 7231 §7.1.3](https://datatracker.ietf.org/doc/html/rfc7231#section-7.1.3).
+///
+/// Returns `None` for missing/invalid values or dates in the past.
+pub fn parse_retry_after_value(value: &str, now: DateTime<Utc>) -> Option<u64> {
+    let value = value.trim();
+
+    // Numeric form: `Retry-After: 30`
+    if let Ok(secs) = value.parse::<u64>() {
+        return Some(secs);
+    }
+
+    // HTTP-date form: `Retry-After: Wed, 01 Jan 2020 00:00:42 GMT`
+    // Strip the " GMT" suffix (always UTC for HTTP dates) and parse as NaiveDateTime.
+    let http_date_str = value.strip_suffix(" GMT").unwrap_or(value);
+    if let Ok(naive_dt) =
+        chrono::NaiveDateTime::parse_from_str(http_date_str, "%a, %d %b %Y %H:%M:%S")
+    {
+        let date_utc = naive_dt.and_utc();
+        let diff = date_utc.signed_duration_since(now).num_seconds();
+        if diff >= 0 {
+            return Some(diff as u64);
+        }
+        return None;
+    }
+
+    None
+}
+
 /// Parse the `Retry-After` response header as a `Duration`.
 ///
 /// Supports both the numeric (delay-seconds) and HTTP-date forms per
 /// [RFC 7231 §7.1.3](https://datatracker.ietf.org/doc/html/rfc7231#section-7.1.3).
 fn parse_retry_after(resp: &Response) -> Option<Duration> {
     let value = resp.headers().get("Retry-After")?.to_str().ok()?;
-
-    // Numeric form: `Retry-After: 30`
-    if let Ok(secs) = value.trim().parse::<u64>() {
-        return Some(Duration::from_secs(secs));
-    }
-
-    // HTTP-date form: `Retry-After: Wed, 21 Oct 2015 07:28:00 GMT`
-    // Use httpdate crate if available; for now skip unsupported date form.
-    None
+    let now = Utc::now();
+    parse_retry_after_value(value, now).map(Duration::from_secs)
 }
 
 #[cfg(test)]
@@ -581,5 +606,40 @@ mod www_auth_tests {
             "Bearer realm=\"https://renovate.com/v2/token\",service=\"container_registry\",scope=\"*"
         ]);
         assert!(result.is_err());
+    }
+
+    // ── parse_retry_after_value ───────────────────────────────────────────────
+
+    // Ported: "returns null for non-integer \"retry-after\" header" — util/http/retry-after.spec.ts line 109
+    #[test]
+    fn retry_after_value_past_date_returns_none() {
+        // "Wed, 21 Oct 2015 07:28:00 GMT" is in the past relative to 2026 → None
+        let now = Utc::now();
+        assert!(parse_retry_after_value("Wed, 21 Oct 2015 07:28:00 GMT", now).is_none());
+    }
+
+    // Ported: "returns delay in seconds from date" — util/http/retry-after.spec.ts line 122
+    #[test]
+    fn retry_after_value_future_date_returns_seconds() {
+        // Mock: now = 2020-01-01T00:00:00Z, retry-after = 2020-01-01T00:00:42Z → 42
+        let now = DateTime::parse_from_rfc3339("2020-01-01T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let result = parse_retry_after_value("Wed, 01 Jan 2020 00:00:42 GMT", now);
+        assert_eq!(result, Some(42));
+    }
+
+    // Ported: "returns delay in seconds from number" — util/http/retry-after.spec.ts line 136
+    #[test]
+    fn retry_after_value_numeric_returns_seconds() {
+        let now = Utc::now();
+        assert_eq!(parse_retry_after_value("42", now), Some(42));
+    }
+
+    // Ported: "returns null for invalid header value" — util/http/retry-after.spec.ts line 149
+    #[test]
+    fn retry_after_value_invalid_returns_none() {
+        let now = Utc::now();
+        assert!(parse_retry_after_value("invalid", now).is_none());
     }
 }

@@ -24480,30 +24480,30 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/http/retry-after.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/retry-after.spec.ts
-**Total tests:** 13 | **Ported:** 0 | **Actionable:** 13 | **Status:** pending
+**Total tests:** 13 | **Ported:** 7 | **Actionable:** 13 | **Status:** partial
 
 ### `util/http/retry-after › wrapWithRetry`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| works | 27 | pending | — | — | — |
-| throws | 34 | pending | — | — | — |
-| retries | 44 | pending | — | — | — |
-| gives up after max retries | 59 | pending | — | — | — |
+| works | 27 | ported | `http.rs` | `retries_on_429_then_succeeds` (success path) | — |
+| throws | 34 | ported | `http.rs` | `does_not_retry_on_404` | — |
+| retries | 44 | ported | `http.rs` | `retries_on_429_then_succeeds` | — |
+| gives up after max retries | 59 | ported | `http.rs` | `stops_retrying_after_max_attempts` | — |
 | gives up when delay exceeds maxRetryAfter | 76 | pending | — | — | — |
 
 ### `util/http/retry-after › getRetryAfter`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for non-RequestError | 89 | pending | — | — | — |
-| returns null for RequestError without response | 93 | pending | — | — | — |
-| returns null for status other than 429 | 97 | pending | — | — | — |
-| returns null missing "retry-after" header | 103 | pending | — | — | — |
-| returns null for non-integer "retry-after" header | 109 | pending | — | — | — |
-| returns delay in seconds from date | 122 | pending | — | — | — |
-| returns delay in seconds from number | 136 | pending | — | — | — |
-| returns null for invalid header value | 149 | pending | — | — | — |
+| returns null for non-RequestError | 89 | not-applicable | — | — | TypeScript `got` RequestError type; Rust uses reqwest Response directly |
+| returns null for RequestError without response | 93 | not-applicable | — | — | TypeScript `got` RequestError type; Rust uses reqwest Response directly |
+| returns null for status other than 429 | 97 | not-applicable | — | — | Rust `parse_retry_after` only called for retryable status codes |
+| returns null missing "retry-after" header | 103 | not-applicable | — | — | Rust `parse_retry_after` returns None via Option chain for missing header |
+| returns null for non-integer "retry-after" header | 109 | ported | `http.rs` | `retry_after_value_past_date_returns_none` | — |
+| returns delay in seconds from date | 122 | ported | `http.rs` | `retry_after_value_future_date_returns_seconds` | — |
+| returns delay in seconds from number | 136 | ported | `http.rs` | `retry_after_value_numeric_returns_seconds` | — |
+| returns null for invalid header value | 149 | ported | `http.rs` | `retry_after_value_invalid_returns_none` | — |
 
 ---
 
@@ -27550,7 +27550,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $sched, $tz, $datetime | 303 | pending | — | — | — |
+| $sched, $tz, $datetime | 303 | ported | `schedule.rs` | `spec_dom_and_dow_and_logic` | — |
 
 ### `workers/repository/update/branch/schedule › isScheduledNow(config) › supports timezone`
 

@@ -2094,4 +2094,28 @@ mod tests {
         let sched = schedule(&["every 2 weeks of the year before 08:00 on Monday"]);
         assert!(!is_within_schedule_at(&sched, utc(2017, 1, 9, 6)));
     }
+
+    // Ported: "$sched, $tz, $datetime" — workers/repository/update/branch/schedule.spec.ts line 303
+    #[test]
+    fn spec_dom_and_dow_and_logic() {
+        // schedule "* 0-5 1-7,15-22 * 4": hour 0-5, dom 1-7 or 15-22, Thursday only
+        // DOM and DOW both must match (AND logic, not POSIX OR logic)
+        assert_schedule_cases(
+            &["* 0-5 1-7,15-22 * 4"],
+            &[
+                // 2017-06-01 01:00 UTC: Thursday, dom=1 ∈ [1-7], hour=1 ∈ [0-5] → true
+                (utc(2017, 6, 1, 1), true),
+                // 2017-06-15 01:00 UTC: Thursday, dom=15 ∈ [15-22], hour=1 ∈ [0-5] → true
+                (utc(2017, 6, 15, 1), true),
+                // 2017-06-16 03:00 UTC: Friday (weekday=5 ≠ 4) → false
+                (utc(2017, 6, 16, 3), false),
+                // 2017-06-04 04:00 UTC: Sunday (weekday=0 ≠ 4) → false
+                (utc(2017, 6, 4, 4), false),
+                // 2017-06-08 04:00 UTC: Thursday but dom=8 ∉ [1-7,15-22] → false (AND logic)
+                (utc(2017, 6, 8, 4), false),
+                // 2017-06-29 04:00 UTC: Thursday but dom=29 ∉ [1-7,15-22] → false (AND logic)
+                (utc(2017, 6, 29, 4), false),
+            ],
+        );
+    }
 }
