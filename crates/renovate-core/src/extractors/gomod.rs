@@ -680,6 +680,191 @@ fn strip_comment(line: &str) -> &str {
     }
 }
 
+// ── artifacts-extra (mirrors lib/modules/manager/gomod/artifacts-extra.ts) ──
+
+/// A single dependency change detected between two go.mod files.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ExtraDep {
+    pub dep_name: String,
+    pub current_value: String,
+    pub new_value: String,
+}
+
+/// Compare two go.mod file contents and return the dependencies that changed,
+/// excluding any in `exclude_deps`.
+///
+/// Mirrors `getExtraDeps` from `lib/modules/manager/gomod/artifacts-extra.ts`.
+pub fn get_extra_deps(before: &str, after: &str, exclude_deps: &[&str]) -> Vec<ExtraDep> {
+    use std::collections::HashMap;
+
+    // Build sets of lines for set-difference diff.
+    let before_lines: HashSet<&str> = before.lines().collect();
+    let after_lines: HashSet<&str> = after.lines().collect();
+
+    // Removed lines = in before but not in after.
+    // Added lines = in after but not in before.
+    let removed_set: HashSet<&str> = before_lines.difference(&after_lines).copied().collect();
+    let added_set: HashSet<&str> = after_lines.difference(&before_lines).copied().collect();
+
+    // Parse removed lines → build map: expanded_dep_name → old_version.
+    // Use Vec to maintain before-file line order.
+    let mut rm_deps: Vec<(String, String)> = Vec::new();
+    let mut rm_seen: HashSet<String> = HashSet::new();
+    for line in before.lines() {
+        if !removed_set.contains(line) {
+            continue;
+        }
+        let Some(parsed) = parse_line(line) else { continue };
+        let Some(current_value) = parsed.current_value else { continue };
+        let expanded = if parsed.dep_type == GoModLineDepType::Toolchain {
+            format!("{} (toolchain)", parsed.dep_name)
+        } else {
+            parsed.dep_name.clone()
+        };
+        if !rm_seen.contains(&expanded) {
+            rm_deps.push((expanded.clone(), current_value));
+            rm_seen.insert(expanded);
+        }
+    }
+
+    // Parse added lines → build map: expanded_dep_name → new_version.
+    let mut add_deps: HashMap<String, String> = HashMap::new();
+    for line in added_set {
+        let Some(parsed) = parse_line(line) else { continue };
+        let Some(current_value) = parsed.current_value else { continue };
+        let expanded = if parsed.dep_type == GoModLineDepType::Toolchain {
+            format!("{} (toolchain)", parsed.dep_name)
+        } else {
+            parsed.dep_name.clone()
+        };
+        add_deps.entry(expanded).or_insert(current_value);
+    }
+
+    // Combine: for each removed dep, if there's a matching added dep and it's not excluded,
+    // record the change.
+    let mut result = Vec::new();
+    for (dep_name, old_val) in rm_deps {
+        if exclude_deps.contains(&dep_name.as_str()) {
+            continue;
+        }
+        if let Some(new_val) = add_deps.get(&dep_name) {
+            result.push(ExtraDep {
+                dep_name,
+                current_value: old_val,
+                new_value: new_val.clone(),
+            });
+        }
+    }
+    result
+}
+
+/// Generate a markdown table of dependency changes.
+///
+/// Mirrors `extraDepsTable` from `lib/modules/manager/gomod/artifacts-extra.ts`.
+pub fn extra_deps_table(deps: &[ExtraDep]) -> String {
+    let headers = ["**Package**", "**Change**"];
+
+    let rows: Vec<[String; 2]> = deps
+        .iter()
+        .map(|dep| {
+            [
+                format!("`{}`", dep.dep_name),
+                format!("`{}` -> `{}`", dep.current_value, dep.new_value),
+            ]
+        })
+        .collect();
+
+    // Compute column widths.
+    let col_widths: [usize; 2] = std::array::from_fn(|col| {
+        let header_len = headers[col].len();
+        let data_max = rows.iter().map(|row| row[col].len()).max().unwrap_or(0);
+        header_len.max(data_max)
+    });
+
+    // Format a row: ` cell  ` padded to column width, joined by `|`.
+    let fmt_row = |cells: &[&str; 2]| -> String {
+        cells
+            .iter()
+            .zip(&col_widths)
+            .map(|(cell, &w)| format!(" {:<w$} ", cell, w = w))
+            .collect::<Vec<_>>()
+            .join("|")
+    };
+
+    let mut lines = Vec::new();
+    lines.push(format!("|{}|", fmt_row(&[headers[0], headers[1]])));
+
+    // Separator: `:` + dashes.
+    let sep = [
+        format!(":{}", "-".repeat(col_widths[0] - 1)),
+        format!(":{}", "-".repeat(col_widths[1] - 1)),
+    ];
+    lines.push(format!(
+        "|{}|",
+        fmt_row(&[sep[0].as_str(), sep[1].as_str()])
+    ));
+
+    for row in &rows {
+        lines.push(format!(
+            "|{}|",
+            fmt_row(&[row[0].as_str(), row[1].as_str()])
+        ));
+    }
+
+    lines.join("\n")
+}
+
+/// Generate a full notice for extra dependency changes in a go.mod file.
+///
+/// Returns `None` if either file is missing or no extra deps are found.
+/// Mirrors `getExtraDepsNotice` from `lib/modules/manager/gomod/artifacts-extra.ts`.
+pub fn get_extra_deps_notice(
+    go_mod_before: Option<&str>,
+    go_mod_after: Option<&str>,
+    exclude_deps: &[&str],
+) -> Option<String> {
+    let before = go_mod_before?;
+    let after = go_mod_after?;
+
+    let extra_deps = get_extra_deps(before, after, exclude_deps);
+    if extra_deps.is_empty() {
+        return None;
+    }
+
+    let go_updated = extra_deps.iter().any(|d| d.dep_name == "go");
+    let toolchain_updated = extra_deps.iter().any(|d| d.dep_name == "go (toolchain)");
+    let other_count =
+        extra_deps.len() - usize::from(go_updated) - usize::from(toolchain_updated);
+
+    let mut lines = Vec::new();
+    lines.push(
+        "In order to perform the update(s) described in the table above, \
+        Renovate ran the `go get` command, which resulted in the following additional change(s):"
+            .to_owned(),
+    );
+    lines.push(String::new());
+    lines.push(String::new());
+
+    if other_count == 1 {
+        lines.push("- 1 additional dependency was updated".to_owned());
+    } else if other_count > 1 {
+        lines.push(format!("- {other_count} additional dependencies were updated"));
+    }
+
+    if go_updated {
+        lines.push("- The `go` directive was updated for compatibility reasons".to_owned());
+    }
+
+    lines.push(String::new());
+    lines.push(String::new());
+    lines.push("Details:".to_owned());
+    lines.push(String::new());
+    lines.push(String::new());
+    lines.push(extra_deps_table(&extra_deps));
+
+    Some(lines.join("\n"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1410,6 +1595,288 @@ require (
         assert_eq!(r.dep_name, "foo/foo");
         assert_eq!(r.dep_type, GoModLineDepType::Tool);
         assert!(r.multi_line);
+    }
+
+    // ── artifacts-extra tests ──────────────────────────────────────────────────
+
+    const GO_MOD_BEFORE: &str = concat!(
+        "go 1.22.0\n",
+        "\n",
+        "require (\n",
+        "  github.com/foo/foo v1.0.0\n",
+        "  github.com/bar/bar v2.0.0\n",
+        ")\n",
+        "\n",
+        "replace baz/baz => qux/qux\n",
+    );
+
+    const GO_MOD_AFTER: &str = concat!(
+        "go 1.22.2\n",
+        "\n",
+        "// Note the order change\n",
+        "require (\n",
+        "  github.com/bar/bar v2.2.2\n",
+        "  github.com/foo/foo v1.1.1\n",
+        ")\n",
+        "\n",
+        "replace baz/baz => quux/quux\n",
+    );
+
+    // Ported: "detects extra dependencies" — modules/manager/gomod/artifacts-extra.spec.ts line 34
+    #[test]
+    fn get_extra_deps_detects_changes() {
+        let exclude = ["github.com/foo/foo"];
+        let deps = get_extra_deps(GO_MOD_BEFORE, GO_MOD_AFTER, &exclude);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(deps[0].dep_name, "go");
+        assert_eq!(deps[0].current_value, "1.22.0");
+        assert_eq!(deps[0].new_value, "1.22.2");
+        assert_eq!(deps[1].dep_name, "github.com/bar/bar");
+        assert_eq!(deps[1].current_value, "v2.0.0");
+        assert_eq!(deps[1].new_value, "v2.2.2");
+    }
+
+    // Ported: "generates a table" — modules/manager/gomod/artifacts-extra.spec.ts line 55
+    #[test]
+    fn extra_deps_table_generates_aligned_markdown() {
+        let deps = vec![
+            ExtraDep {
+                dep_name: "github.com/foo/foo".to_owned(),
+                current_value: "v1.0.0".to_owned(),
+                new_value: "v1.1.1".to_owned(),
+            },
+            ExtraDep {
+                dep_name: "github.com/bar/bar".to_owned(),
+                current_value: "v2.0.0".to_owned(),
+                new_value: "v2.2.2".to_owned(),
+            },
+        ];
+        let table = extra_deps_table(&deps);
+        let expected = vec![
+            "| **Package**          | **Change**           |",
+            "| :------------------- | :------------------- |",
+            "| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |",
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ]
+        .join("\n");
+        assert_eq!(table, expected);
+    }
+
+    // Ported: "returns null when one of files is missing" — modules/manager/gomod/artifacts-extra.spec.ts line 83
+    #[test]
+    fn get_extra_deps_notice_returns_none_for_missing_files() {
+        assert!(get_extra_deps_notice(None, Some(GO_MOD_AFTER), &[]).is_none());
+        assert!(get_extra_deps_notice(Some(GO_MOD_BEFORE), None, &[]).is_none());
+    }
+
+    // Ported: "returns null when all dependencies are excluded" — modules/manager/gomod/artifacts-extra.spec.ts line 88
+    #[test]
+    fn get_extra_deps_notice_returns_none_when_all_excluded() {
+        let exclude = ["go", "github.com/foo/foo", "github.com/bar/bar"];
+        let res = get_extra_deps_notice(Some(GO_MOD_BEFORE), Some(GO_MOD_AFTER), &exclude);
+        assert!(res.is_none());
+    }
+
+    // Ported: "returns a notice when there is an extra dependency" — modules/manager/gomod/artifacts-extra.spec.ts line 94
+    #[test]
+    fn get_extra_deps_notice_single_dep() {
+        let exclude = ["go", "github.com/foo/foo"];
+        let res = get_extra_deps_notice(Some(GO_MOD_BEFORE), Some(GO_MOD_AFTER), &exclude).unwrap();
+        let expected = vec![
+            "In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
+            "",
+            "",
+            "- 1 additional dependency was updated",
+            "",
+            "",
+            "Details:",
+            "",
+            "",
+            "| **Package**          | **Change**           |",
+            "| :------------------- | :------------------- |",
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ].join("\n");
+        assert_eq!(res, expected);
+    }
+
+    // Ported: "returns a notice when there are extra dependencies" — modules/manager/gomod/artifacts-extra.spec.ts line 117
+    #[test]
+    fn get_extra_deps_notice_multiple_deps() {
+        let exclude = ["go"];
+        let res = get_extra_deps_notice(Some(GO_MOD_BEFORE), Some(GO_MOD_AFTER), &exclude).unwrap();
+        let expected = vec![
+            "In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
+            "",
+            "",
+            "- 2 additional dependencies were updated",
+            "",
+            "",
+            "Details:",
+            "",
+            "",
+            "| **Package**          | **Change**           |",
+            "| :------------------- | :------------------- |",
+            "| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |",
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ].join("\n");
+        assert_eq!(res, expected);
+    }
+
+    // Ported: "adds special notice for updated `go` version" — modules/manager/gomod/artifacts-extra.spec.ts line 141
+    #[test]
+    fn get_extra_deps_notice_go_version_updated() {
+        let exclude = ["github.com/foo/foo"];
+        let res = get_extra_deps_notice(Some(GO_MOD_BEFORE), Some(GO_MOD_AFTER), &exclude).unwrap();
+        let expected = vec![
+            "In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
+            "",
+            "",
+            "- 1 additional dependency was updated",
+            "- The `go` directive was updated for compatibility reasons",
+            "",
+            "",
+            "Details:",
+            "",
+            "",
+            "| **Package**          | **Change**           |",
+            "| :------------------- | :------------------- |",
+            "| `go`                 | `1.22.0` -> `1.22.2` |",
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ].join("\n");
+        assert_eq!(res, expected);
+    }
+
+    // Ported: "correctly identifies toolchain updates vs go version updates" — modules/manager/gomod/artifacts-extra.spec.ts line 166
+    #[test]
+    fn get_extra_deps_notice_toolchain_update() {
+        let before = concat!(
+            "go 1.22.0\n",
+            "\n",
+            "toolchain go1.23.0\n",
+            "\n",
+            "require (\n",
+            "  github.com/foo/foo v1.0.0\n",
+            "  github.com/bar/bar v2.0.0\n",
+            ")\n",
+        );
+        let after = concat!(
+            "go 1.22.0\n",
+            "\n",
+            "toolchain go1.24.0\n",
+            "\n",
+            "// Note the order change\n",
+            "require (\n",
+            "  github.com/bar/bar v2.2.2\n",
+            "  github.com/foo/foo v1.1.1\n",
+            ")\n",
+        );
+        let res = get_extra_deps_notice(Some(before), Some(after), &[]).unwrap();
+        let expected = vec![
+            "In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
+            "",
+            "",
+            "- 2 additional dependencies were updated",
+            "",
+            "",
+            "Details:",
+            "",
+            "",
+            "| **Package**          | **Change**           |",
+            "| :------------------- | :------------------- |",
+            "| `go (toolchain)`     | `1.23.0` -> `1.24.0` |",
+            "| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |",
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ].join("\n");
+        assert_eq!(res, expected);
+    }
+
+    // Ported: "correctly identifies and distinguishes toolchain updates vs go version updates when both are present"
+    //         — modules/manager/gomod/artifacts-extra.spec.ts line 215
+    #[test]
+    fn get_extra_deps_notice_both_go_and_toolchain() {
+        let before = concat!(
+            "go 1.22.0\n",
+            "\n",
+            "toolchain go1.23.0\n",
+            "\n",
+            "require (\n",
+            "  github.com/foo/foo v1.0.0\n",
+            "  github.com/bar/bar v2.0.0\n",
+            ")\n",
+        );
+        let after = concat!(
+            "go 1.22.2\n",
+            "\n",
+            "toolchain go1.24.0\n",
+            "\n",
+            "// Note the order change\n",
+            "require (\n",
+            "  github.com/bar/bar v2.2.2\n",
+            "  github.com/foo/foo v1.1.1\n",
+            ")\n",
+        );
+        let res = get_extra_deps_notice(Some(before), Some(after), &[]).unwrap();
+        let expected = vec![
+            "In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
+            "",
+            "",
+            "- 2 additional dependencies were updated",
+            "- The `go` directive was updated for compatibility reasons",
+            "",
+            "",
+            "Details:",
+            "",
+            "",
+            "| **Package**          | **Change**           |",
+            "| :------------------- | :------------------- |",
+            "| `go`                 | `1.22.0` -> `1.22.2` |",
+            "| `go (toolchain)`     | `1.23.0` -> `1.24.0` |",
+            "| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |",
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ].join("\n");
+        assert_eq!(res, expected);
+    }
+
+    // Ported: "correctly handles the introduction of a toolchain directive by not indicating a change"
+    //         — modules/manager/gomod/artifacts-extra.spec.ts line 266
+    #[test]
+    fn get_extra_deps_notice_new_toolchain_directive() {
+        let before = concat!(
+            "go 1.22.0\n",
+            "\n",
+            "require (\n",
+            "  github.com/foo/foo v1.0.0\n",
+            "  github.com/bar/bar v2.0.0\n",
+            ")\n",
+        );
+        let after = concat!(
+            "go 1.22.0\n",
+            "\n",
+            "toolchain go1.24.0\n",
+            "\n",
+            "// Note the order change\n",
+            "require (\n",
+            "  github.com/bar/bar v2.2.2\n",
+            "  github.com/foo/foo v1.1.1\n",
+            ")\n",
+        );
+        let res = get_extra_deps_notice(Some(before), Some(after), &[]).unwrap();
+        let expected = vec![
+            "In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):",
+            "",
+            "",
+            "- 2 additional dependencies were updated",
+            "",
+            "",
+            "Details:",
+            "",
+            "",
+            "| **Package**          | **Change**           |",
+            "| :------------------- | :------------------- |",
+            "| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |",
+            "| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |",
+        ].join("\n");
+        assert_eq!(res, expected);
     }
 
     // Ported: "extracts replace directives from non-public module path" — gomod/extract.spec.ts line 136
