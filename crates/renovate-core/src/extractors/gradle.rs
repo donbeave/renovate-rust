@@ -16,6 +16,7 @@
 //! - `lib/modules/manager/gradle/extract/catalog.ts` — TOML catalog parsing
 
 use std::collections::HashMap;
+use std::path::Path;
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -435,6 +436,258 @@ pub fn parse_gradle_dependency_string(input: &str) -> Option<GradleParsedDep> {
         data_type,
     })
 }
+
+// ── Filetype classification ───────────────────────────────────────────────────
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isGradleScriptFile()`.
+pub fn is_gradle_script_file(path: &str) -> bool {
+    let filename = Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    filename.ends_with(".gradle.kts") || filename.ends_with(".gradle")
+}
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isGradleVersionsFile()`.
+pub fn is_gradle_versions_file(path: &str) -> bool {
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?i)^versions\.gradle(?:\.kts)?$").unwrap());
+    let filename = Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("");
+    RE.is_match(filename)
+}
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isGradleBuildFile()`.
+pub fn is_gradle_build_file(path: &str) -> bool {
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?i)^build\.gradle(?:\.kts)?$").unwrap());
+    let filename = Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("");
+    RE.is_match(filename)
+}
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isGradleSettingsFile()`.
+pub fn is_gradle_settings_file(path: &str) -> bool {
+    static RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?i)^settings\.gradle(?:\.kts)?$").unwrap());
+    let filename = Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("");
+    RE.is_match(filename)
+}
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isGradleDefaultCatalogFile()`.
+pub fn is_gradle_default_catalog_file(path: &str) -> bool {
+    path.ends_with("/gradle/libs.versions.toml")
+}
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isPropsFile()`.
+pub fn is_props_file(path: &str) -> bool {
+    let filename = Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    filename == "gradle.properties"
+}
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isKotlinSourceFile()`.
+pub fn is_kotlin_source_file(path: &str) -> bool {
+    let filename = Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    filename.ends_with(".kt")
+}
+
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `isTOMLFile()`.
+pub fn is_toml_file(path: &str) -> bool {
+    let filename = Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    filename.ends_with(".toml")
+}
+
+/// Ensure `package_file` starts with exactly one `/`.
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `toAbsolutePath()`.
+pub fn to_absolute_path(package_file: &str) -> String {
+    let stripped = package_file.trim_start_matches(['/', '\\']);
+    if stripped.is_empty() {
+        return "/".to_owned();
+    }
+    format!("/{stripped}")
+}
+
+fn gradle_parent_dir(path: &str) -> String {
+    if path == "/" {
+        return "/".to_owned();
+    }
+    match path.rfind('/') {
+        Some(0) => "/".to_owned(),
+        Some(i) => path[..i].to_owned(),
+        None => "/".to_owned(),
+    }
+}
+
+fn get_file_rank(abs_path: &str) -> u8 {
+    if is_props_file(abs_path) {
+        0
+    } else if is_gradle_settings_file(abs_path) {
+        1
+    } else if is_gradle_default_catalog_file(abs_path) {
+        2
+    } else if is_gradle_versions_file(abs_path) {
+        3
+    } else if is_gradle_build_file(abs_path) {
+        5
+    } else {
+        4
+    }
+}
+
+/// Sort Gradle package files in dependency order.
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `reorderFiles()`.
+pub fn reorder_files(package_files: &[&str]) -> Vec<String> {
+    struct Entry<'a> {
+        path: &'a str,
+        abs_path: String,
+        dir: String,
+        rank: u8,
+    }
+
+    let mut entries: Vec<Entry<'_>> = package_files
+        .iter()
+        .map(|&path| {
+            let abs_path = to_absolute_path(path);
+            let current_dir = gradle_parent_dir(&abs_path);
+            let dir = if is_gradle_default_catalog_file(&abs_path) {
+                gradle_parent_dir(&current_dir)
+            } else {
+                current_dir
+            };
+            let rank = get_file_rank(&abs_path);
+            Entry { path, abs_path, dir, rank }
+        })
+        .collect();
+
+    entries.sort_by(|a, b| {
+        if a.dir != b.dir {
+            if a.dir.starts_with(&format!("{}/", b.dir)) {
+                return std::cmp::Ordering::Greater;
+            }
+            if b.dir.starts_with(&format!("{}/", a.dir)) {
+                return std::cmp::Ordering::Less;
+            }
+            return a.dir.cmp(&b.dir);
+        }
+        a.rank.cmp(&b.rank).then_with(|| a.abs_path.cmp(&b.abs_path))
+    });
+
+    entries.into_iter().map(|e| e.path.to_owned()).collect()
+}
+
+// ── Variable registry ─────────────────────────────────────────────────────────
+
+/// A single Gradle build variable (version reference in a properties/catalog file).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PackageVariable {
+    pub key: String,
+    pub value: String,
+    pub file_replace_position: Option<u64>,
+    pub package_file: Option<String>,
+}
+
+pub type PackageVariables = HashMap<String, PackageVariable>;
+pub type VariableRegistry = HashMap<String, PackageVariables>;
+
+/// Collect variables visible from `dir` by walking up to the root.
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `getVars()`.
+pub fn get_vars(registry: &VariableRegistry, dir: &str) -> PackageVariables {
+    let abs_dir = to_absolute_path(dir);
+    let mut paths: Vec<String> = Vec::new();
+    let mut current = abs_dir;
+    loop {
+        paths.push(current.clone());
+        let parent = gradle_parent_dir(&current);
+        if parent == current {
+            break;
+        }
+        current = parent;
+    }
+    // Merge from root → dir so child overrides parent.
+    let mut merged: PackageVariables = HashMap::new();
+    for path in paths.iter().rev() {
+        if let Some(vars) = registry.get(path.as_str()) {
+            merged.extend(vars.iter().map(|(k, v)| (k.clone(), v.clone())));
+        }
+    }
+    merged
+}
+
+/// Merge `new_vars` into the registry at `dir`.
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `updateVars()`.
+pub fn update_vars(registry: &mut VariableRegistry, dir: &str, new_vars: PackageVariables) {
+    let entry = registry.entry(dir.to_owned()).or_default();
+    entry.extend(new_vars);
+}
+
+/// Register version-catalog variables under the project root with the correct
+/// prefix (default `libs`, or the value of `defaultLibrariesExtensionName`).
+///
+/// Mirrors `lib/modules/manager/gradle/utils.ts` `updateVarsFromDefaultCatalog()`.
+pub fn update_vars_from_default_catalog(
+    registry: &mut VariableRegistry,
+    dir: &str,
+    package_file: &str,
+    new_vars: PackageVariables,
+) {
+    let abs_pkg = to_absolute_path(package_file);
+    if !is_gradle_default_catalog_file(&abs_pkg) {
+        return;
+    }
+    let root_dir = gradle_parent_dir(&to_absolute_path(dir));
+    let default_libs_ext_name = registry
+        .get(&root_dir)
+        .and_then(|vars| vars.get("defaultLibrariesExtensionName"))
+        .and_then(|v| {
+            if v.package_file
+                .as_deref()
+                .map(is_gradle_settings_file)
+                .unwrap_or(false)
+            {
+                Some(v.value.clone())
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| "libs".to_owned());
+
+    let remapped: PackageVariables = new_vars
+        .into_iter()
+        .map(|(old_key, var)| {
+            let key = format!("{default_libs_ext_name}.versions.{old_key}");
+            (key.clone(), PackageVariable { key, ..var })
+        })
+        .collect();
+
+    let entry = registry.entry(root_dir).or_default();
+    entry.extend(remapped);
+}
+
+// ── Dependency update ─────────────────────────────────────────────────────────
 
 /// Update a Gradle dependency in file content.
 ///
@@ -868,5 +1121,292 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         assert_eq!(p("foo:bar:baz:qux:quux"), None);
         assert_eq!(p("foo:bar:1.2.3'"), None);
         assert_eq!(p("-Xep:ParameterName:OFF"), None);
+    }
+
+    // Ported: "filetype checks" — modules/manager/gradle/utils.spec.ts line 105
+    #[test]
+    fn gradle_filetype_checks() {
+        assert!(is_gradle_script_file("/a/Somefile.gradle.kts"));
+        assert!(is_gradle_script_file("/a/Somefile.gradle"));
+        assert!(is_gradle_versions_file("/a/versions.gradle.kts"));
+        assert!(is_gradle_settings_file("/a/settings.gradle"));
+        assert!(is_gradle_settings_file("/a/settings.gradle.kts"));
+        assert!(is_gradle_default_catalog_file("/a/gradle/libs.versions.toml"));
+        assert!(is_gradle_build_file("/a/build.gradle"));
+        assert!(is_props_file("/a/gradle.properties"));
+        assert!(is_kotlin_source_file("/a/Somefile.kt"));
+        assert!(is_toml_file("/a/Somefile.toml"));
+    }
+
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
+    #[test]
+    fn gradle_reorder_files_basic() {
+        assert_eq!(
+            reorder_files(&["build.gradle", "a.gradle", "b.gradle", "a.gradle", "versions.gradle"]),
+            vec!["versions.gradle", "a.gradle", "a.gradle", "b.gradle", "build.gradle"]
+        );
+    }
+
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 127
+    #[test]
+    fn gradle_reorder_files_nested() {
+        assert_eq!(
+            reorder_files(&[
+                "a/b/c/build.gradle",
+                "a/b/versions.gradle",
+                "a/build.gradle",
+                "versions.gradle",
+                "a/b/build.gradle",
+                "a/versions.gradle",
+                "build.gradle",
+                "a/b/c/versions.gradle",
+            ]),
+            vec![
+                "versions.gradle",
+                "build.gradle",
+                "a/versions.gradle",
+                "a/build.gradle",
+                "a/b/versions.gradle",
+                "a/b/build.gradle",
+                "a/b/c/versions.gradle",
+                "a/b/c/build.gradle",
+            ]
+        );
+    }
+
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 148
+    #[test]
+    fn gradle_reorder_files_alphabetical() {
+        assert_eq!(
+            reorder_files(&["b.gradle", "c.gradle", "a.gradle"]),
+            vec!["a.gradle", "b.gradle", "c.gradle"]
+        );
+        assert_eq!(
+            reorder_files(&["b.gradle", "c.gradle", "a.gradle", "gradle.properties"]),
+            vec!["gradle.properties", "a.gradle", "b.gradle", "c.gradle"]
+        );
+        assert_eq!(
+            reorder_files(&[
+                "b.gradle",
+                "settings.gradle",
+                "gradle/libs.versions.toml",
+                "gradle.properties",
+            ]),
+            vec![
+                "gradle.properties",
+                "settings.gradle",
+                "gradle/libs.versions.toml",
+                "b.gradle",
+            ]
+        );
+    }
+
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 182
+    #[test]
+    fn gradle_reorder_files_independent_subfolders() {
+        assert_eq!(
+            reorder_files(&[
+                "independent-project-in-subfolder/some.gradle",
+                "build.gradle",
+                "independent-project-in-subfolder/gradle/libs.versions.toml",
+                "settings.gradle",
+                "gradle/libs.versions.toml",
+                "independent-project-in-subfolder/gradle.properties",
+                "gradle.properties",
+                "gradle/commonLibs.versions.toml",
+                "b/another.gradle",
+                "independent-project-in-subfolder/settings.gradle",
+                "someothergradle.gradle",
+                "z/some.gradle",
+                "gradle/whatever.gradle",
+                "o/build.gradle",
+                "a/some.gradle",
+                "o/settings.gradle",
+            ]),
+            vec![
+                "gradle.properties",
+                "settings.gradle",
+                "gradle/libs.versions.toml",
+                "someothergradle.gradle",
+                "build.gradle",
+                "a/some.gradle",
+                "b/another.gradle",
+                "gradle/commonLibs.versions.toml",
+                "gradle/whatever.gradle",
+                "independent-project-in-subfolder/gradle.properties",
+                "independent-project-in-subfolder/settings.gradle",
+                "independent-project-in-subfolder/gradle/libs.versions.toml",
+                "independent-project-in-subfolder/some.gradle",
+                "o/settings.gradle",
+                "o/build.gradle",
+                "z/some.gradle",
+            ]
+        );
+    }
+
+    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 221
+    #[test]
+    fn gradle_reorder_files_nested_props_and_build() {
+        assert_eq!(
+            reorder_files(&[
+                "a/b/c/gradle.properties",
+                "a/b/c/build.gradle",
+                "a/build.gradle",
+                "a/gradle.properties",
+                "a/b/build.gradle",
+                "a/b/gradle.properties",
+                "build.gradle",
+                "gradle.properties",
+                "b.gradle",
+                "c.gradle",
+                "a.gradle",
+            ]),
+            vec![
+                "gradle.properties",
+                "a.gradle",
+                "b.gradle",
+                "c.gradle",
+                "build.gradle",
+                "a/gradle.properties",
+                "a/build.gradle",
+                "a/b/gradle.properties",
+                "a/b/build.gradle",
+                "a/b/c/gradle.properties",
+                "a/b/c/build.gradle",
+            ]
+        );
+    }
+
+    // Ported: "getVars" — modules/manager/gradle/utils.spec.ts line 250
+    #[test]
+    fn gradle_get_vars() {
+        let mut registry: VariableRegistry = HashMap::new();
+        registry.insert(
+            to_absolute_path("/foo"),
+            [
+                ("foo".into(), PackageVariable { key: "foo".into(), value: "FOO".into(), file_replace_position: None, package_file: None }),
+                ("bar".into(), PackageVariable { key: "bar".into(), value: "BAR".into(), file_replace_position: None, package_file: None }),
+                ("baz".into(), PackageVariable { key: "baz".into(), value: "BAZ".into(), file_replace_position: None, package_file: None }),
+                ("qux".into(), PackageVariable { key: "qux".into(), value: "QUX".into(), file_replace_position: None, package_file: None }),
+            ].into_iter().collect(),
+        );
+        registry.insert(
+            to_absolute_path("/foo/bar"),
+            [
+                ("foo".into(), PackageVariable { key: "foo".into(), value: "foo".into(), file_replace_position: None, package_file: None }),
+            ].into_iter().collect(),
+        );
+        registry.insert(
+            to_absolute_path("/foo/bar/baz"),
+            [
+                ("bar".into(), PackageVariable { key: "bar".into(), value: "bar".into(), file_replace_position: None, package_file: None }),
+                ("baz".into(), PackageVariable { key: "baz".into(), value: "baz".into(), file_replace_position: None, package_file: None }),
+            ].into_iter().collect(),
+        );
+        let res = get_vars(&registry, "/foo/bar/baz/build.gradle");
+        assert_eq!(res.get("foo").map(|v| v.value.as_str()), Some("foo"));
+        assert_eq!(res.get("bar").map(|v| v.value.as_str()), Some("bar"));
+        assert_eq!(res.get("baz").map(|v| v.value.as_str()), Some("baz"));
+        assert_eq!(res.get("qux").map(|v| v.value.as_str()), Some("QUX"));
+        assert_eq!(res.len(), 4);
+    }
+
+    // Ported: "empty registry" — modules/manager/gradle/utils.spec.ts line 276
+    #[test]
+    fn gradle_update_vars_empty_registry() {
+        let mut registry: VariableRegistry = HashMap::new();
+        let new_vars: PackageVariables = [
+            ("qux".into(), PackageVariable { key: "qux".into(), value: "qux".into(), file_replace_position: None, package_file: None }),
+        ].into_iter().collect();
+        update_vars(&mut registry, "/foo/bar/baz", new_vars);
+        assert!(registry.contains_key("/foo/bar/baz"));
+        assert_eq!(registry["/foo/bar/baz"]["qux"].value, "qux");
+    }
+
+    // Ported: "updates the registry" — modules/manager/gradle/utils.spec.ts line 285
+    #[test]
+    fn gradle_update_vars_merges() {
+        let mut registry: VariableRegistry = HashMap::new();
+        registry.insert(
+            to_absolute_path("/foo/bar/baz"),
+            [
+                ("bar".into(), PackageVariable { key: "bar".into(), value: "bar".into(), file_replace_position: None, package_file: None }),
+                ("baz".into(), PackageVariable { key: "baz".into(), value: "baz".into(), file_replace_position: None, package_file: None }),
+            ].into_iter().collect(),
+        );
+        update_vars(
+            &mut registry,
+            "/foo/bar/baz",
+            [("qux".into(), PackageVariable { key: "qux".into(), value: "qux".into(), file_replace_position: None, package_file: None })].into_iter().collect(),
+        );
+        let res = get_vars(&registry, "/foo/bar/baz/build.gradle");
+        assert_eq!(res.get("bar").map(|v| v.value.as_str()), Some("bar"));
+        assert_eq!(res.get("baz").map(|v| v.value.as_str()), Some("baz"));
+        assert_eq!(res.get("qux").map(|v| v.value.as_str()), Some("qux"));
+    }
+
+    // Ported: "no default catalog file" — modules/manager/gradle/utils.spec.ts line 306
+    #[test]
+    fn gradle_update_vars_from_default_catalog_no_catalog() {
+        let mut registry: VariableRegistry = HashMap::new();
+        update_vars_from_default_catalog(&mut registry, "/a/gradle", "/a/gradle/other-catalog.toml", HashMap::new());
+        assert!(registry.is_empty());
+    }
+
+    // Ported: "adds variables with default \"libs\" prefix" — modules/manager/gradle/utils.spec.ts line 317
+    #[test]
+    fn gradle_update_vars_from_default_catalog_default_prefix() {
+        let mut registry: VariableRegistry = HashMap::new();
+        let new_vars: PackageVariables = [
+            ("kotlin".into(), PackageVariable {
+                key: "kotlin".into(), value: "1.5.21".into(),
+                file_replace_position: Some(10),
+                package_file: Some("/project/gradle/libs.versions.toml".into()),
+            }),
+            ("coroutines".into(), PackageVariable {
+                key: "coroutines".into(), value: "1.5.0".into(),
+                file_replace_position: Some(40),
+                package_file: Some("/project/gradle/libs.versions.toml".into()),
+            }),
+        ].into_iter().collect();
+        update_vars_from_default_catalog(&mut registry, "/project/gradle", "/project/gradle/libs.versions.toml", new_vars);
+        let res = get_vars(&registry, "/project/build.gradle");
+        assert_eq!(res.get("libs.versions.kotlin").map(|v| v.value.as_str()), Some("1.5.21"));
+        assert_eq!(res.get("libs.versions.coroutines").map(|v| v.value.as_str()), Some("1.5.0"));
+        assert_eq!(res.len(), 2);
+    }
+
+    // Ported: "adds variables with custom libraries extension name" — modules/manager/gradle/utils.spec.ts line 357
+    #[test]
+    fn gradle_update_vars_from_default_catalog_custom_prefix() {
+        let mut registry: VariableRegistry = HashMap::new();
+        update_vars(
+            &mut registry,
+            "/project",
+            [("defaultLibrariesExtensionName".into(), PackageVariable {
+                key: "defaultLibrariesExtensionName".into(),
+                value: "myLibs".into(),
+                file_replace_position: Some(50),
+                package_file: Some("/project/settings.gradle".into()),
+            })].into_iter().collect(),
+        );
+        let new_vars: PackageVariables = [
+            ("kotlin".into(), PackageVariable {
+                key: "kotlin".into(), value: "1.5.21".into(),
+                file_replace_position: Some(10),
+                package_file: Some("/project/gradle/libs.versions.toml".into()),
+            }),
+            ("coroutines".into(), PackageVariable {
+                key: "coroutines".into(), value: "1.5.0".into(),
+                file_replace_position: Some(40),
+                package_file: Some("/project/gradle/libs.versions.toml".into()),
+            }),
+        ].into_iter().collect();
+        update_vars_from_default_catalog(&mut registry, "/project/gradle", "/project/gradle/libs.versions.toml", new_vars);
+        let res = get_vars(&registry, "/project/build.gradle");
+        assert_eq!(res.get("defaultLibrariesExtensionName").map(|v| v.value.as_str()), Some("myLibs"));
+        assert_eq!(res.get("myLibs.versions.kotlin").map(|v| v.value.as_str()), Some("1.5.21"));
+        assert_eq!(res.get("myLibs.versions.coroutines").map(|v| v.value.as_str()), Some("1.5.0"));
+        assert_eq!(res.len(), 3);
     }
 }

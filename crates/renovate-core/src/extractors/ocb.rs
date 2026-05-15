@@ -80,9 +80,8 @@ static VERSION_RE: LazyLock<Regex> = LazyLock::new(|| {
 ///
 /// Mirrors `lib/modules/manager/ocb/update.ts` `bumpPackageVersion()`.
 pub fn bump_package_version(content: &str, current_value: &str, bump_version: &str) -> String {
-    let new_version = match semver_bump(current_value, bump_version) {
-        Some(v) => v,
-        None => return content.to_owned(),
+    let Some(new_version) = semver_bump(current_value, bump_version) else {
+        return content.to_owned();
     };
 
     let result = VERSION_RE.replace(content, |caps: &regex::Captures<'_>| {

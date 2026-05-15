@@ -688,7 +688,7 @@ pub fn format_cell(row: &[&str], col_index: usize) -> String {
 
     if first_col == "parents" && col_index == 1 {
         let mut items: Vec<&str> = col.split(',').map(str::trim).collect();
-        items.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        items.sort_by_key(|s| s.to_lowercase());
         let spans: String = items
             .into_iter()
             .map(|s| {
@@ -759,15 +759,15 @@ pub fn determine_new_replacement_name(
     replacement_name_template: Option<&str>,
     package_name: &str,
 ) -> String {
-    if let Some(name) = replacement_name {
-        if !name.is_empty() {
-            return name.to_owned();
-        }
+    if let Some(name) = replacement_name
+        && !name.is_empty()
+    {
+        return name.to_owned();
     }
-    if let Some(tmpl) = replacement_name_template {
-        if !tmpl.is_empty() {
-            return tmpl.to_owned();
-        }
+    if let Some(tmpl) = replacement_name_template
+        && !tmpl.is_empty()
+    {
+        return tmpl.to_owned();
     }
     package_name.to_owned()
 }

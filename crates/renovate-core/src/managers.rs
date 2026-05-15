@@ -854,7 +854,7 @@ pub struct ExtractResult {
 ///
 /// Mirrors `lib/workers/repository/extract/supersedes.ts`
 /// `processSupersedesManagers()`.
-pub fn process_supersedes_managers(extracts: &mut Vec<ExtractResult>) {
+pub fn process_supersedes_managers(extracts: &mut [ExtractResult]) {
     let mut rejected: std::collections::HashMap<String, Vec<String>> = Default::default();
 
     for i in 0..extracts.len() {
@@ -900,12 +900,11 @@ pub fn process_supersedes_managers(extracts: &mut Vec<ExtractResult>) {
     }
 
     for extract in extracts.iter_mut() {
-        if let Some(ref rejected_files) = rejected.get(&extract.manager) {
-            if !rejected_files.is_empty() {
-                if let Some(ref mut files) = extract.package_files {
-                    files.retain(|f| !rejected_files.contains(&f.package_file));
-                }
-            }
+        if let Some(rejected_files) = rejected.get(&extract.manager)
+            && !rejected_files.is_empty()
+            && let Some(ref mut files) = extract.package_files
+        {
+            files.retain(|f| !rejected_files.contains(&f.package_file));
         }
     }
 }

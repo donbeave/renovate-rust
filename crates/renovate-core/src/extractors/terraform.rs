@@ -1157,9 +1157,8 @@ pub fn update_locked_terraform_dependency(
     if content.is_empty() {
         return TerraformUpdateLockedStatus::Unsupported;
     }
-    let locked = match extract_terraform_locks(content) {
-        Some(v) => v,
-        None => return TerraformUpdateLockedStatus::Unsupported,
+    let Some(locked) = extract_terraform_locks(content) else {
+        return TerraformUpdateLockedStatus::Unsupported;
     };
     let found = locked.iter().find(|l| l.package_name == dep_name);
     if found.is_some_and(|l| l.version == new_version) {

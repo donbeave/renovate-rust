@@ -508,9 +508,9 @@ fn group_pairs(mut tokens: Vec<Token>) -> Vec<Token> {
         if matches!((&tokens[i], &tokens[i+1], &tokens[i+2]),
             (Token::Value(_), Token::Equals, Token::Value(_)))
         {
-            let val = match tokens.remove(i + 2) { Token::Value(v) => v, _ => unreachable!() };
+            let Token::Value(val) = tokens.remove(i + 2) else { unreachable!() };
             tokens.remove(i + 1); // equals
-            let key = match std::mem::replace(&mut tokens[i], Token::Comma) { Token::Value(v) => v, _ => unreachable!() };
+            let Token::Value(key) = std::mem::replace(&mut tokens[i], Token::Comma) else { unreachable!() };
             tokens[i] = Token::Pair(key, val);
         } else {
             i += 1;
@@ -522,11 +522,9 @@ fn group_pairs(mut tokens: Vec<Token>) -> Vec<Token> {
 fn group_challenges(mut tokens: Vec<Token>) -> Vec<Challenge> {
     let mut result = Vec::new();
     while !tokens.is_empty() {
-        let scheme = match tokens.remove(0) { Token::Value(v) => v, _ => break };
+        let Token::Value(scheme) = tokens.remove(0) else { break };
         let mut j = 0;
-        if tokens.is_empty() {
-            // nothing
-        } else if matches!(tokens[0], Token::Comma) {
+        if tokens.is_empty() || matches!(tokens[0], Token::Comma) {
             // nothing
         } else if matches!(tokens[0], Token::Value(_)) {
             j = 1;
@@ -534,7 +532,7 @@ fn group_challenges(mut tokens: Vec<Token>) -> Vec<Challenge> {
             while j < tokens.len() && matches!(tokens[j], Token::Pair(_, _)) {
                 j += 2;
             }
-            if j > 0 { j -= 1; }
+            j = j.saturating_sub(1);
         }
         let ch_tokens: Vec<Token> = tokens.drain(0..j).collect();
         if !tokens.is_empty() { tokens.remove(0); } // comma

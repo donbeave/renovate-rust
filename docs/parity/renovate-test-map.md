@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress (per-test sections only):** 2476 / 8612 actionable tests ported (27%) — updated 2026-05-15
+**Overall progress (per-test sections only):** 2484 / 8612 actionable tests ported (28%) — updated 2026-05-15
 
 All upstream `.spec.ts` files have been scanned from `../renovate`; remaining gaps are tracked as `pending` rows in the per-test sections below.
 
@@ -15197,7 +15197,7 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/manager/gradle/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/utils.spec.ts
-**Total tests:** 12 | **Ported:** 4 | **Actionable:** 12 | **Status:** partial
+**Total tests:** 12 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
 
 ### `versionLikeSubstring`
 
@@ -15217,24 +15217,24 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | $input | 85 | ported | `gradle.rs` | `gradle_parse_dependency_string` | it.each; 10 cases covered |
-| filetype checks | 105 | pending | — | — | — |
-| reorderFiles | 120 | pending | — | — | — |
-| getVars | 250 | pending | — | — | — |
+| filetype checks | 105 | ported | `gradle.rs` | `gradle_filetype_checks` | — |
+| reorderFiles | 120 | ported | `gradle.rs` | `gradle_reorder_files_basic`, `gradle_reorder_files_nested`, `gradle_reorder_files_alphabetical`, `gradle_reorder_files_independent_subfolders`, `gradle_reorder_files_nested_props_and_build` | split into 5 sub-tests |
+| getVars | 250 | ported | `gradle.rs` | `gradle_get_vars` | — |
 
 ### `updateVars`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| empty registry | 276 | pending | — | — | — |
-| updates the registry | 285 | pending | — | — | — |
+| empty registry | 276 | ported | `gradle.rs` | `gradle_update_vars_empty_registry` | — |
+| updates the registry | 285 | ported | `gradle.rs` | `gradle_update_vars_merges` | — |
 
 ### `updateVarsFromDefaultCatalog`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| no default catalog file | 306 | pending | — | — | — |
-| adds variables with default "libs" prefix | 317 | pending | — | — | — |
-| adds variables with custom libraries extension name | 357 | pending | — | — | — |
+| no default catalog file | 306 | ported | `gradle.rs` | `gradle_update_vars_from_default_catalog_no_catalog` | — |
+| adds variables with default "libs" prefix | 317 | ported | `gradle.rs` | `gradle_update_vars_from_default_catalog_default_prefix` | — |
+| adds variables with custom libraries extension name | 357 | ported | `gradle.rs` | `gradle_update_vars_from_default_catalog_custom_prefix` | — |
 
 ---
 

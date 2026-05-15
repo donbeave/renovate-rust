@@ -237,19 +237,16 @@ pub fn extract_lock_file_entries(content: &str) -> std::collections::HashMap<Str
             in_gem_section = true;
         } else if indent == 0 && !trimmed.is_empty() && in_gem_section {
             in_gem_section = false;
-        } else if indent == 4 && in_gem_section {
-            if let (Some(open), Some(close)) = (line.rfind('('), line.rfind(')')) {
-                if open < close {
-                    let version = &line[open + 1..close];
-                    let name = line[..open].trim();
-                    let cleaned = strip_platform_suffix(version, &platforms);
-                    if !name.is_empty()
-                        && version_looks_valid(&cleaned)
-                        && !map.contains_key(name)
-                    {
-                        map.insert(name.to_owned(), cleaned);
-                    }
-                }
+        } else if indent == 4
+            && in_gem_section
+            && let (Some(open), Some(close)) = (line.rfind('('), line.rfind(')'))
+            && open < close
+        {
+            let version = &line[open + 1..close];
+            let name = line[..open].trim();
+            let cleaned = strip_platform_suffix(version, &platforms);
+            if !name.is_empty() && version_looks_valid(&cleaned) && !map.contains_key(name) {
+                map.insert(name.to_owned(), cleaned);
             }
         }
     }
