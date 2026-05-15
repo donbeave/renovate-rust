@@ -29,6 +29,307 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
+// ── parseLine types ───────────────────────────────────────────────────────────
+
+/// Dependency type returned by [`parse_line`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GoModLineDepType {
+    /// `go X.Y` directive.
+    Golang,
+    /// `toolchain goX.Y.Z` directive.
+    Toolchain,
+    /// `require` dependency.
+    Require,
+    /// `replace` dependency.
+    Replace,
+    /// `require` or `replace` dependency marked `// indirect`.
+    Indirect,
+    /// `tool` directive.
+    Tool,
+}
+
+/// Skip reason returned by [`parse_line`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GoModLineSkipReason {
+    InvalidVersion,
+    UnspecifiedVersion,
+    UnversionedReference,
+    LocalDependency,
+}
+
+/// A single go.mod line parsed by [`parse_line`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GoModParsedLine {
+    pub current_value: Option<String>,
+    pub current_digest: Option<String>,
+    pub datasource: &'static str,
+    pub dep_name: String,
+    pub dep_type: GoModLineDepType,
+    pub enabled: Option<bool>,
+    pub skip_reason: Option<GoModLineSkipReason>,
+    pub versioning: Option<&'static str>,
+    pub commit_message_topic: Option<&'static str>,
+    pub multi_line: bool,
+    pub digest_one_and_only: bool,
+}
+
+// ── parseLine regexes ─────────────────────────────────────────────────────────
+
+/// `go <version>` — any non-whitespace version string.
+static PL_GO: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*go\s+(\S+)\s*$").unwrap());
+
+/// `toolchain go<version>`.
+static PL_TOOLCHAIN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*toolchain\s+go(\S+)\s*$").unwrap());
+
+/// `[require] <module> <version> [// <comment>]`
+static PL_REQUIRE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r#"^(?P<kw>require)?\s+(?P<module>\S+)\s+(?P<version>\S+)(?:\s*//\s*(?P<comment>\S+)\s*)?$"#,
+    )
+    .unwrap()
+});
+
+/// `[replace] <from> => <to> [<version>] [// <comment>]`
+static PL_REPLACE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r#"^(?P<kw>replace)?\s+\S+\s*=>\s*(?P<to>\S+)(?:\s+(?P<version>\S+))?(?:\s*//\s*(?P<comment>\S+)\s*)?$"#,
+    )
+    .unwrap()
+});
+
+/// `[tool] <module>` — no trailing version.
+static PL_TOOL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?P<kw>tool)?\s+(?P<module>\S+)\s*$").unwrap());
+
+/// Pseudo-version digest extractor.
+static PL_PSEUDO: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?P<digest>[a-f0-9]{12})")
+        .unwrap()
+});
+
+const PLACEHOLDER_PSEUDO_VERSION: &str = "v0.0.0-00010101000000-000000000000";
+
+fn trim_quotes(s: &str) -> &str {
+    if s.len() >= 2 && s.starts_with('"') && s.ends_with('"') {
+        &s[1..s.len() - 1]
+    } else {
+        s
+    }
+}
+
+fn is_semver_version(v: &str) -> bool {
+    let bare = v.strip_prefix('v').unwrap_or(v);
+    semver::Version::parse(bare).is_ok()
+}
+
+fn extract_pseudo_digest(v: &str) -> Option<String> {
+    PL_PSEUDO
+        .captures(v)
+        .and_then(|cap| cap.name("digest"))
+        .map(|m| m.as_str().to_owned())
+}
+
+/// Parse one line from a `go.mod` file.
+///
+/// Mirrors TypeScript `parseLine` in `lib/modules/manager/gomod/line-parser.ts`.
+/// Returns `None` if the line does not match any known directive.
+pub fn parse_line(input: &str) -> Option<GoModParsedLine> {
+    // go directive
+    if let Some(cap) = PL_GO.captures(input) {
+        let current_value = cap[1].to_owned();
+        let skip_reason = semver::VersionReq::parse(&current_value)
+            .is_err()
+            .then_some(GoModLineSkipReason::InvalidVersion);
+        return Some(GoModParsedLine {
+            current_value: Some(current_value),
+            current_digest: None,
+            datasource: "golang-version",
+            dep_name: "go".to_owned(),
+            dep_type: GoModLineDepType::Golang,
+            enabled: None,
+            skip_reason,
+            versioning: Some("go-mod-directive"),
+            commit_message_topic: Some("go module directive"),
+            multi_line: false,
+            digest_one_and_only: false,
+        });
+    }
+
+    // toolchain directive
+    if let Some(cap) = PL_TOOLCHAIN.captures(input) {
+        let current_value = cap[1].to_owned();
+        let skip_reason = (!is_semver_version(&current_value))
+            .then_some(GoModLineSkipReason::InvalidVersion);
+        return Some(GoModParsedLine {
+            current_value: Some(current_value),
+            current_digest: None,
+            datasource: "golang-version",
+            dep_name: "go".to_owned(),
+            dep_type: GoModLineDepType::Toolchain,
+            enabled: None,
+            skip_reason,
+            versioning: None,
+            commit_message_topic: Some("go toolchain directive"),
+            multi_line: false,
+            digest_one_and_only: false,
+        });
+    }
+
+    // require directive
+    if let Some(cap) = PL_REQUIRE.captures(input) {
+        // must not contain "=>" (that would be a replace)
+        if input.contains("=>") {
+            // fall through to replace
+        } else {
+            let keyword = cap.name("kw").map(|m| m.as_str());
+            let module = trim_quotes(&cap["module"]).to_owned();
+            let current_value = cap["version"].to_owned();
+            let comment = cap
+                .name("comment")
+                .map(|m| m.as_str());
+            let multi_line = keyword.is_none();
+            let indirect = comment == Some("indirect");
+
+            let (skip_reason, current_digest, digest_one_and_only, versioning) =
+                if is_semver_version(&current_value) {
+                    if let Some(digest) = extract_pseudo_digest(&current_value) {
+                        let is_placeholder = current_value == PLACEHOLDER_PSEUDO_VERSION;
+                        let sr = is_placeholder
+                            .then_some(GoModLineSkipReason::InvalidVersion);
+                        (sr, Some(digest), true, Some("loose"))
+                    } else {
+                        (None, None, false, None)
+                    }
+                } else {
+                    (Some(GoModLineSkipReason::InvalidVersion), None, false, None)
+                };
+
+            let dep_type = if indirect {
+                GoModLineDepType::Indirect
+            } else {
+                GoModLineDepType::Require
+            };
+
+            return Some(GoModParsedLine {
+                current_value: Some(current_value),
+                current_digest,
+                datasource: "go",
+                dep_name: module,
+                dep_type,
+                enabled: indirect.then_some(false),
+                skip_reason,
+                versioning,
+                commit_message_topic: None,
+                multi_line,
+                digest_one_and_only,
+            });
+        }
+    }
+
+    // replace directive
+    if let Some(cap) = PL_REPLACE.captures(input) {
+        let keyword = cap.name("kw").map(|m| m.as_str());
+        let to_raw = &cap["to"];
+        let dep_name = trim_quotes(to_raw).to_owned();
+        let current_value_raw = cap.name("version").map(|m| m.as_str().to_owned());
+        let comment = cap.name("comment").map(|m| m.as_str());
+        let multi_line = keyword.is_none();
+        let indirect = comment == Some("indirect");
+
+        // Local path replacement
+        if dep_name.starts_with('/') || dep_name.starts_with('.') {
+            return Some(GoModParsedLine {
+                current_value: None,
+                current_digest: None,
+                datasource: "go",
+                dep_name,
+                dep_type: GoModLineDepType::Replace,
+                enabled: None,
+                skip_reason: Some(GoModLineSkipReason::LocalDependency),
+                versioning: None,
+                commit_message_topic: None,
+                multi_line,
+                digest_one_and_only: false,
+            });
+        }
+
+        let (skip_reason, current_value, current_digest, digest_one_and_only, versioning) =
+            match current_value_raw {
+                None => (
+                    Some(GoModLineSkipReason::UnspecifiedVersion),
+                    None,
+                    None,
+                    false,
+                    None,
+                ),
+                Some(cv) => {
+                    if is_semver_version(&cv) {
+                        if let Some(digest) = extract_pseudo_digest(&cv) {
+                            let is_placeholder = cv == PLACEHOLDER_PSEUDO_VERSION;
+                            let sr = is_placeholder
+                                .then_some(GoModLineSkipReason::InvalidVersion);
+                            (sr, Some(cv), Some(digest), true, Some("loose"))
+                        } else {
+                            (None, Some(cv), None, false, None)
+                        }
+                    } else {
+                        (
+                            Some(GoModLineSkipReason::InvalidVersion),
+                            Some(cv),
+                            None,
+                            false,
+                            None,
+                        )
+                    }
+                }
+            };
+
+        let dep_type = if indirect {
+            GoModLineDepType::Indirect
+        } else {
+            GoModLineDepType::Replace
+        };
+
+        return Some(GoModParsedLine {
+            current_value,
+            current_digest,
+            datasource: "go",
+            dep_name,
+            dep_type,
+            enabled: indirect.then_some(false),
+            skip_reason,
+            versioning,
+            commit_message_topic: None,
+            multi_line,
+            digest_one_and_only,
+        });
+    }
+
+    // tool directive
+    if let Some(cap) = PL_TOOL.captures(input) {
+        let keyword = cap.name("kw").map(|m| m.as_str());
+        let module = trim_quotes(&cap["module"]).to_owned();
+        let multi_line = keyword.is_none();
+        return Some(GoModParsedLine {
+            current_value: None,
+            current_digest: None,
+            datasource: "go",
+            dep_name: module,
+            dep_type: GoModLineDepType::Tool,
+            enabled: None,
+            skip_reason: Some(GoModLineSkipReason::UnversionedReference),
+            versioning: None,
+            commit_message_topic: None,
+            multi_line,
+            digest_one_and_only: false,
+        });
+    }
+
+    None
+}
+
 /// Why a go.mod dependency is being skipped.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GoModSkipReason {
@@ -793,6 +1094,322 @@ require (
 
         let monorepo = deps.iter().find(|d| d.module_path == "monorepo").unwrap();
         assert_eq!(monorepo.skip_reason, Some(GoModSkipReason::PseudoVersion));
+    }
+
+    // --- parse_line tests ---
+
+    // Ported: "should return null for invalid input" — gomod/line-parser.spec.ts line 4
+    #[test]
+    fn parse_line_invalid_returns_none() {
+        assert!(parse_line("invalid").is_none());
+    }
+
+    // Ported: "should parse go version" — gomod/line-parser.spec.ts line 8
+    #[test]
+    fn parse_line_go_version() {
+        let r = parse_line("go 1.23").unwrap();
+        assert_eq!(r.current_value.as_deref(), Some("1.23"));
+        assert_eq!(r.datasource, "golang-version");
+        assert_eq!(r.dep_name, "go");
+        assert_eq!(r.dep_type, GoModLineDepType::Golang);
+        assert_eq!(r.versioning, Some("go-mod-directive"));
+        assert_eq!(r.commit_message_topic, Some("go module directive"));
+        assert!(r.skip_reason.is_none());
+    }
+
+    // Ported: "should skip invalid go version" — gomod/line-parser.spec.ts line 21
+    #[test]
+    fn parse_line_go_version_invalid() {
+        let r = parse_line("go invalid").unwrap();
+        assert_eq!(r.current_value.as_deref(), Some("invalid"));
+        assert_eq!(r.dep_type, GoModLineDepType::Golang);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+    }
+
+    // Ported: "should parse toolchain version" — gomod/line-parser.spec.ts line 35
+    #[test]
+    fn parse_line_toolchain_version() {
+        let r = parse_line("toolchain go1.23").unwrap();
+        assert_eq!(r.current_value.as_deref(), Some("1.23"));
+        assert_eq!(r.datasource, "golang-version");
+        assert_eq!(r.dep_name, "go");
+        assert_eq!(r.dep_type, GoModLineDepType::Toolchain);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+        assert_eq!(r.commit_message_topic, Some("go toolchain directive"));
+    }
+
+    // Ported: "should skip invalid toolchain version" — gomod/line-parser.spec.ts line 48
+    #[test]
+    fn parse_line_toolchain_version_invalid() {
+        let r = parse_line("toolchain go-invalid").unwrap();
+        assert_eq!(r.current_value.as_deref(), Some("-invalid"));
+        assert_eq!(r.dep_type, GoModLineDepType::Toolchain);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+    }
+
+    // Ported: "should parse require definition" — gomod/line-parser.spec.ts line 61
+    #[test]
+    fn parse_line_require_definition() {
+        let r = parse_line("require foo/foo v1.2").unwrap();
+        assert_eq!(r.current_value.as_deref(), Some("v1.2"));
+        assert_eq!(r.datasource, "go");
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.dep_type, GoModLineDepType::Require);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+        assert!(!r.multi_line);
+    }
+
+    // Ported: "should parse require definition with pseudo-version" — gomod/line-parser.spec.ts line 73
+    #[test]
+    fn parse_line_require_pseudo_version() {
+        let r = parse_line("require foo/foo v0.0.0-20210101000000-000000000000").unwrap();
+        assert_eq!(
+            r.current_value.as_deref(),
+            Some("v0.0.0-20210101000000-000000000000")
+        );
+        assert_eq!(r.current_digest.as_deref(), Some("000000000000"));
+        assert_eq!(r.dep_type, GoModLineDepType::Require);
+        assert!(r.digest_one_and_only);
+        assert_eq!(r.versioning, Some("loose"));
+        assert!(r.skip_reason.is_none());
+    }
+
+    // Ported: "should parse require definition with placeholder pseudo-version" — gomod/line-parser.spec.ts line 87
+    #[test]
+    fn parse_line_require_placeholder_pseudo_version() {
+        let r = parse_line("require foo/foo v0.0.0-00010101000000-000000000000").unwrap();
+        assert_eq!(r.current_digest.as_deref(), Some("000000000000"));
+        assert_eq!(r.dep_type, GoModLineDepType::Require);
+        assert!(r.digest_one_and_only);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+        assert_eq!(r.versioning, Some("loose"));
+    }
+
+    // Ported: "should parse require multi-line" — gomod/line-parser.spec.ts line 102
+    #[test]
+    fn parse_line_require_multiline() {
+        let r = parse_line("        foo/foo v1.2").unwrap();
+        assert_eq!(r.dep_type, GoModLineDepType::Require);
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+        assert!(r.multi_line);
+    }
+
+    // Ported: "should parse require definition with quotes" — gomod/line-parser.spec.ts line 117
+    #[test]
+    fn parse_line_require_with_quotes() {
+        let r = parse_line(r#"require "foo/foo" v1.2"#).unwrap();
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.dep_type, GoModLineDepType::Require);
+        assert!(!r.multi_line);
+    }
+
+    // Ported: "should parse go modules without paths - 1" — gomod/line-parser.spec.ts line 129
+    #[test]
+    fn parse_line_require_without_path_1() {
+        let r = parse_line("require tailscale.com v1.72.0").unwrap();
+        assert_eq!(r.dep_name, "tailscale.com");
+        assert_eq!(r.current_value.as_deref(), Some("v1.72.0"));
+        assert_eq!(r.dep_type, GoModLineDepType::Require);
+        assert!(r.skip_reason.is_none());
+    }
+
+    // Ported: "should parse go modules without paths - 2" — gomod/line-parser.spec.ts line 140
+    #[test]
+    fn parse_line_require_without_path_2() {
+        let r = parse_line("require foo.tailscale.com v1.72.0").unwrap();
+        assert_eq!(r.dep_name, "foo.tailscale.com");
+        assert_eq!(r.current_value.as_deref(), Some("v1.72.0"));
+        assert!(r.skip_reason.is_none());
+    }
+
+    // Ported: "should parse require multi-line definition with quotes" — gomod/line-parser.spec.ts line 151
+    #[test]
+    fn parse_line_require_multiline_with_quotes() {
+        let r = parse_line(r#"        "foo/foo" v1.2"#).unwrap();
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.dep_type, GoModLineDepType::Require);
+        assert!(r.multi_line);
+    }
+
+    // Ported: "should parse require definition with indirect dependency" — gomod/line-parser.spec.ts line 166
+    #[test]
+    fn parse_line_require_indirect() {
+        let r = parse_line("require foo/foo v1.2 // indirect").unwrap();
+        assert_eq!(r.dep_type, GoModLineDepType::Indirect);
+        assert_eq!(r.enabled, Some(false));
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+        assert!(!r.multi_line);
+    }
+
+    // Ported: "should parse require multi-line definition with indirect dependency" — gomod/line-parser.spec.ts line 179
+    #[test]
+    fn parse_line_require_multiline_indirect() {
+        let r = parse_line("        foo/foo v1.2 // indirect").unwrap();
+        assert_eq!(r.dep_type, GoModLineDepType::Indirect);
+        assert_eq!(r.enabled, Some(false));
+        assert!(r.multi_line);
+    }
+
+    // Ported: "should parse replace definition" — gomod/line-parser.spec.ts line 195
+    #[test]
+    fn parse_line_replace_no_version() {
+        let r = parse_line("replace foo/foo => bar/bar").unwrap();
+        assert_eq!(r.datasource, "go");
+        assert_eq!(r.dep_name, "bar/bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::UnspecifiedVersion));
+    }
+
+    // Ported: "should parse replace multi-line definition" — gomod/line-parser.spec.ts line 206
+    #[test]
+    fn parse_line_replace_multiline() {
+        let r = parse_line("        foo/foo => bar/bar").unwrap();
+        assert_eq!(r.dep_name, "bar/bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert!(r.multi_line);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::UnspecifiedVersion));
+    }
+
+    // Ported: "should parse replace definition with quotes" — gomod/line-parser.spec.ts line 220
+    #[test]
+    fn parse_line_replace_with_quotes() {
+        let r = parse_line(r#"replace "foo/foo" => "bar/bar""#).unwrap();
+        assert_eq!(r.dep_name, "bar/bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert!(!r.multi_line);
+    }
+
+    // Ported: "should parse replace multi-line definition with quotes" — gomod/line-parser.spec.ts line 231
+    #[test]
+    fn parse_line_replace_multiline_with_quotes() {
+        let r = parse_line(r#"        "foo/foo" => "bar/bar""#).unwrap();
+        assert_eq!(r.dep_name, "bar/bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert!(r.multi_line);
+    }
+
+    // Ported: "should parse replace definition with version" — gomod/line-parser.spec.ts line 245
+    #[test]
+    fn parse_line_replace_with_version() {
+        let r = parse_line("replace foo/foo => bar/bar v1.2").unwrap();
+        assert_eq!(r.current_value.as_deref(), Some("v1.2"));
+        assert_eq!(r.dep_name, "bar/bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+    }
+
+    // Ported: "should parse replace definition with pseudo-version" — gomod/line-parser.spec.ts line 257
+    #[test]
+    fn parse_line_replace_pseudo_version() {
+        let r =
+            parse_line("replace foo/foo => bar/bar v0.0.0-20210101000000-000000000000").unwrap();
+        assert_eq!(r.current_digest.as_deref(), Some("000000000000"));
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert!(r.digest_one_and_only);
+        assert_eq!(r.versioning, Some("loose"));
+        assert!(r.skip_reason.is_none());
+    }
+
+    // Ported: "should parse replace definition with placeholder pseudo-version" — gomod/line-parser.spec.ts line 272
+    #[test]
+    fn parse_line_replace_placeholder_pseudo_version() {
+        let r =
+            parse_line("replace foo/foo => bar/bar v0.0.0-00010101000000-000000000000").unwrap();
+        assert_eq!(r.current_digest.as_deref(), Some("000000000000"));
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+        assert_eq!(r.versioning, Some("loose"));
+    }
+
+    // Ported: "should parse replace indirect definition" — gomod/line-parser.spec.ts line 288
+    #[test]
+    fn parse_line_replace_indirect() {
+        let r = parse_line("replace foo/foo => bar/bar v1.2 // indirect").unwrap();
+        assert_eq!(r.dep_type, GoModLineDepType::Indirect);
+        assert_eq!(r.enabled, Some(false));
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+    }
+
+    // Ported: "should parse replace multi-line definition with version" — gomod/line-parser.spec.ts line 301
+    #[test]
+    fn parse_line_replace_multiline_with_version() {
+        let r = parse_line("        foo/foo => bar/bar v1.2").unwrap();
+        assert_eq!(r.dep_name, "bar/bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert!(r.multi_line);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::InvalidVersion));
+    }
+
+    // Ported: "should parse replace definition pointing to relative local path" — gomod/line-parser.spec.ts line 316
+    #[test]
+    fn parse_line_replace_local_relative() {
+        let r = parse_line("replace foo/foo => ../bar").unwrap();
+        assert_eq!(r.dep_name, "../bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::LocalDependency));
+    }
+
+    // Ported: "should parse replace definition pointing to absolute local path" — gomod/line-parser.spec.ts line 327
+    #[test]
+    fn parse_line_replace_local_absolute() {
+        let r = parse_line("replace foo/foo => /bar").unwrap();
+        assert_eq!(r.dep_name, "/bar");
+        assert_eq!(r.dep_type, GoModLineDepType::Replace);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::LocalDependency));
+    }
+
+    // Ported: "should parse tool definition" — gomod/line-parser.spec.ts line 338
+    #[test]
+    fn parse_line_tool_definition() {
+        let r = parse_line("tool foo/foo").unwrap();
+        assert_eq!(r.datasource, "go");
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.dep_type, GoModLineDepType::Tool);
+        assert_eq!(r.skip_reason, Some(GoModLineSkipReason::UnversionedReference));
+        assert!(!r.multi_line);
+    }
+
+    // Ported: "should parse tool multi-line" — gomod/line-parser.spec.ts line 349
+    #[test]
+    fn parse_line_tool_multiline() {
+        let r = parse_line("        foo/foo").unwrap();
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.dep_type, GoModLineDepType::Tool);
+        assert!(r.multi_line);
+    }
+
+    // Ported: "should parse tool definition with quotes" — gomod/line-parser.spec.ts line 363
+    #[test]
+    fn parse_line_tool_with_quotes() {
+        let r = parse_line(r#"tool "foo/foo""#).unwrap();
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.dep_type, GoModLineDepType::Tool);
+        assert!(!r.multi_line);
+    }
+
+    // Ported: "should parse go tool without paths - 1" — gomod/line-parser.spec.ts line 374
+    #[test]
+    fn parse_line_tool_without_path_1() {
+        let r = parse_line("tool tailscale.com").unwrap();
+        assert_eq!(r.dep_name, "tailscale.com");
+        assert_eq!(r.dep_type, GoModLineDepType::Tool);
+    }
+
+    // Ported: "should parse go tool without paths - 2" — gomod/line-parser.spec.ts line 385
+    #[test]
+    fn parse_line_tool_without_path_2() {
+        let r = parse_line("tool foo.tailscale.com").unwrap();
+        assert_eq!(r.dep_name, "foo.tailscale.com");
+        assert_eq!(r.dep_type, GoModLineDepType::Tool);
+    }
+
+    // Ported: "should parse tool multi-line definition with quotes" — gomod/line-parser.spec.ts line 396
+    #[test]
+    fn parse_line_tool_multiline_with_quotes() {
+        let r = parse_line(r#"        "foo/foo""#).unwrap();
+        assert_eq!(r.dep_name, "foo/foo");
+        assert_eq!(r.dep_type, GoModLineDepType::Tool);
+        assert!(r.multi_line);
     }
 
     // Ported: "extracts replace directives from non-public module path" — gomod/extract.spec.ts line 136
