@@ -21875,13 +21875,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/modules/platform/scm-manager/mapper.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm-manager/mapper.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should correctly map the scm-manager type of a PR with the $scmPrState to the Renovate PR type | 5 | pending | — | — | — |
+| should correctly map the scm-manager type of a PR with the $scmPrState to the Renovate PR type | 5 | ported | `platform/scm_manager.rs` | `map_pr_state_all_cases` | — |
 
 ---
 
@@ -23246,13 +23246,13 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/git/errors.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/errors.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
+**Total tests:** 1 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `util/git/errors › bulkChangesDisallowed`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should match the expected error | 17 | pending | — | — | — |
+| should match the expected error | 17 | ported | `branch.rs` | `bulk_changes_disallowed_matches_azure_policy_error` | — |
 
 ---
 
@@ -23882,15 +23882,15 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/util/github/graphql/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/util.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 1 | **Actionable:** 3 | **Status:** partial
 
 ### `util/github/graphql/util › prepareQuery`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns valid query for valid payload query | 10 | pending | — | — | — |
-| returns invalid query for invalid payload query | 28 | pending | — | — | — |
-| isDateExpired($currentTime, $initialTimestamp, $duration) === $expected | 35 | pending | — | — | — |
+| returns valid query for valid payload query | 10 | not-applicable | — | — | Requires a GraphQL parser; Rust has no equivalent |
+| returns invalid query for invalid payload query | 28 | not-applicable | — | — | Requires a GraphQL parser; Rust has no equivalent |
+| isDateExpired($currentTime, $initialTimestamp, $duration) === $expected | 35 | ported | `github.rs` | `is_date_expired_hourly_cases`, `is_date_expired_daily_cases` | — |
 
 ---
 
@@ -25244,18 +25244,18 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/common.spec.ts
-**Total tests:** 6 | **Ported:** 0 | **Actionable:** 6 | **Status:** pending
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
 
 ### `workers/repository/common › formatProblemLevel()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles trace level | 6 | pending | — | — | — |
-| handles debug level | 10 | pending | — | — | — |
-| handles info level | 14 | pending | — | — | — |
-| handles warn level | 18 | pending | — | — | — |
-| handles error level | 22 | pending | — | — | — |
-| handles fatal level | 26 | pending | — | — | — |
+| handles trace level | 6 | ported | `branch.rs` | `format_problem_level_all_bunyan_levels` | — |
+| handles debug level | 10 | ported | `branch.rs` | `format_problem_level_all_bunyan_levels` | — |
+| handles info level | 14 | ported | `branch.rs` | `format_problem_level_all_bunyan_levels` | — |
+| handles warn level | 18 | ported | `branch.rs` | `format_problem_level_all_bunyan_levels` | — |
+| handles error level | 22 | ported | `branch.rs` | `format_problem_level_all_bunyan_levels` | — |
+| handles fatal level | 26 | ported | `branch.rs` | `format_problem_level_all_bunyan_levels` | — |
 
 ---
 
@@ -27865,19 +27865,19 @@ The sections below were generated from a full `../renovate/**/*.spec.ts` scan on
 ## `lib/workers/repository/update/pr/changelog/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/common.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
+**Total tests:** 2 | **Ported:** 1 | **Actionable:** 2 | **Status:** partial
 
 ### `workers/repository/update/pr/changelog/common › slugifyUrl()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| slugifyUrl("$url") === $expected | 5 | pending | — | — | — |
+| slugifyUrl("$url") === $expected | 5 | pending | — | — | Requires Unicode slugification library not yet available in Rust codebase |
 
 ### `workers/repository/update/pr/changelog/common › compareChangelogFilePath()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| sorts $files to $expected | 18 | pending | — | — | — |
+| sorts $files to $expected | 18 | ported | `branch.rs` | `compare_changelog_file_path_sorts_by_type_preference` | — |
 
 ---
 

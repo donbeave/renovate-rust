@@ -825,6 +825,59 @@ pub fn sort_branches(branches: &mut [BranchSortEntry]) {
 }
 
 /// String comparison with numeric ordering for embedded numbers.
+/// Returns `true` if the error message indicates a bulk-changes-disallowed git push error.
+///
+/// Detects Azure DevOps / similar policy errors that prevent pushing more than N branches.
+/// Mirrors `bulkChangesDisallowed` from `lib/util/git/error.ts`.
+pub fn bulk_changes_disallowed(message: &str) -> bool {
+    message.contains("update more than")
+}
+
+/// Format a Bunyan log level number as an emoji-prefixed level name.
+///
+/// Mirrors `formatProblemLevel` from `lib/workers/repository/common.ts`.
+pub fn format_problem_level(level: u8) -> String {
+    match level {
+        10 => "🔬 TRACE".to_owned(),
+        20 => "🔍 DEBUG".to_owned(),
+        30 => "ℹ️ INFO".to_owned(),
+        40 => "⚠️ WARN".to_owned(),
+        50 => "❌ ERROR".to_owned(),
+        60 => "💀 FATAL".to_owned(),
+        _ => format!("❓ LEVEL{level}"),
+    }
+}
+
+/// Comparator for sorting changelog file paths by preference.
+///
+/// Priority order: `.md/.markdown/.mkd` first, then `.txt/.text`, then alphabetical.
+///
+/// Mirrors `compareChangelogFilePath` from
+/// `lib/workers/repository/update/pr/changelog/common.ts`.
+pub fn compare_changelog_file_path(a: &str, b: &str) -> std::cmp::Ordering {
+    fn pref_index(path: &str) -> i32 {
+        let lower = path.to_lowercase();
+        if lower.ends_with(".md") || lower.ends_with(".markdown") || lower.ends_with(".mkd") {
+            0
+        } else if lower.ends_with(".txt") || lower.ends_with(".text") {
+            1
+        } else {
+            -1
+        }
+    }
+    let ai = pref_index(a);
+    let bi = pref_index(b);
+    if ai == bi {
+        a.cmp(b)
+    } else if ai >= 0 && bi >= 0 {
+        ai.cmp(&bi)
+    } else if ai >= 0 {
+        std::cmp::Ordering::Less
+    } else {
+        std::cmp::Ordering::Greater
+    }
+}
+
 fn numeric_locale_compare(a: &str, b: &str) -> std::cmp::Ordering {
     let mut ai = a.chars().peekable();
     let mut bi = b.chars().peekable();
@@ -2004,6 +2057,46 @@ mod tests {
         assert!(branches[0].is_vulnerability_alert.unwrap_or(false));
         assert!(branches[1].is_vulnerability_alert.unwrap_or(false));
         assert!(!branches[2].is_vulnerability_alert.unwrap_or(false));
+    }
+
+    // Ported: "sorts $files to $expected" — workers/repository/update/pr/changelog/common.spec.ts line 18
+    #[test]
+    fn compare_changelog_file_path_sorts_by_type_preference() {
+        let mut files = vec!["CHANGELOG", "CHANGELOG.md", "CHANGELOG.json", "CHANGELOG.txt"];
+        files.sort_by(|a, b| compare_changelog_file_path(a, b));
+        assert_eq!(files, vec!["CHANGELOG.md", "CHANGELOG.txt", "CHANGELOG", "CHANGELOG.json"]);
+    }
+
+    // Ported: "should match the expected error" — util/git/errors.spec.ts line 17
+    #[test]
+    fn bulk_changes_disallowed_matches_azure_policy_error() {
+        let error_msg = concat!(
+            "To https://github.com/the-org/st-mono.git\n",
+            "!\t:refs/renovate/branches/renovate/foo\t[remote failure] (remote failed to report status)\n",
+            "!\t:refs/renovate/branches/renovate/bar\t[remote failure] (remote failed to report status)\n",
+            "Done\n",
+            "Pushing to https://github.com/foo/bar.git\n",
+            "POST git-receive-pack (1234 bytes)\n",
+            "remote: Repository policies do not allow pushes that update more than 2 branches or tags.\n",
+            "error: failed to push some refs to 'https://github.com/foo/bar.git'",
+        );
+        assert!(bulk_changes_disallowed(error_msg));
+    }
+
+    // Ported: "handles trace level" — workers/repository/common.spec.ts line 5
+    // Ported: "handles debug level" — workers/repository/common.spec.ts line 9
+    // Ported: "handles info level" — workers/repository/common.spec.ts line 13
+    // Ported: "handles warn level" — workers/repository/common.spec.ts line 17
+    // Ported: "handles error level" — workers/repository/common.spec.ts line 21
+    // Ported: "handles fatal level" — workers/repository/common.spec.ts line 25
+    #[test]
+    fn format_problem_level_all_bunyan_levels() {
+        assert_eq!(format_problem_level(10), "🔬 TRACE");
+        assert_eq!(format_problem_level(20), "🔍 DEBUG");
+        assert_eq!(format_problem_level(30), "ℹ️ INFO");
+        assert_eq!(format_problem_level(40), "⚠️ WARN");
+        assert_eq!(format_problem_level(50), "❌ ERROR");
+        assert_eq!(format_problem_level(60), "💀 FATAL");
     }
 }
 

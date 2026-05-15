@@ -5,6 +5,7 @@
 //! Renovate reference: `lib/modules/platform/github/index.ts`.
 
 use base64::Engine as _;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 
 use crate::http::{HttpClient, HttpError};
@@ -185,6 +186,21 @@ pub fn get_api_base_url(registry_url: Option<&str>) -> String {
     format!("{source_base}api/v3/")
 }
 
+/// Tells whether `duration` has elapsed since `initial_timestamp` (ISO 8601) as of `current_time`.
+///
+/// Mirrors `isDateExpired` from `lib/util/github/graphql/util.ts`.
+pub fn is_date_expired(
+    current_time: DateTime<Utc>,
+    initial_timestamp: &str,
+    duration: chrono::Duration,
+) -> bool {
+    let Ok(initial) = DateTime::parse_from_rfc3339(initial_timestamp) else {
+        return false;
+    };
+    let expiry = initial.with_timezone(&Utc) + duration;
+    current_time >= expiry
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{header, header_exists, method, path};
@@ -334,5 +350,53 @@ mod tests {
             .await
             .unwrap();
         assert!(result.is_none());
+    }
+
+    // ── is_date_expired ───────────────────────────────────────────────────────
+
+    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected"
+    //         — util/github/graphql/util.spec.ts line 35
+    #[test]
+    fn is_date_expired_hourly_cases() {
+        let initial = "2022-11-25T15:00:00Z";
+        let one_hour = chrono::Duration::hours(1);
+
+        // 15:58 < 16:00 (expiry) → false
+        let t1: DateTime<Utc> = "2022-11-25T15:58:00Z".parse().unwrap();
+        assert!(!is_date_expired(t1, initial, one_hour));
+
+        // 15:59 < 16:00 → false
+        let t2: DateTime<Utc> = "2022-11-25T15:59:00Z".parse().unwrap();
+        assert!(!is_date_expired(t2, initial, one_hour));
+
+        // 16:00 >= 16:00 → true
+        let t3: DateTime<Utc> = "2022-11-25T16:00:00Z".parse().unwrap();
+        assert!(is_date_expired(t3, initial, one_hour));
+
+        // 16:01 >= 16:00 → true
+        let t4: DateTime<Utc> = "2022-11-25T16:01:00Z".parse().unwrap();
+        assert!(is_date_expired(t4, initial, one_hour));
+    }
+
+    #[test]
+    fn is_date_expired_daily_cases() {
+        let initial = "2022-11-24T15:00:00Z";
+        let one_day = chrono::Duration::days(1);
+
+        // 2022-11-25 14:58 < 2022-11-25 15:00 (expiry) → false
+        let t1: DateTime<Utc> = "2022-11-25T14:58:00Z".parse().unwrap();
+        assert!(!is_date_expired(t1, initial, one_day));
+
+        // 2022-11-25 14:59 < expiry → false
+        let t2: DateTime<Utc> = "2022-11-25T14:59:00Z".parse().unwrap();
+        assert!(!is_date_expired(t2, initial, one_day));
+
+        // 2022-11-25 15:00 == expiry → true
+        let t3: DateTime<Utc> = "2022-11-25T15:00:00Z".parse().unwrap();
+        assert!(is_date_expired(t3, initial, one_day));
+
+        // 2022-11-25 15:01 > expiry → true
+        let t4: DateTime<Utc> = "2022-11-25T15:01:00Z".parse().unwrap();
+        assert!(is_date_expired(t4, initial, one_day));
     }
 }

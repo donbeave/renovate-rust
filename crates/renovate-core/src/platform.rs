@@ -13,6 +13,7 @@
 pub mod github;
 pub mod gitlab;
 pub mod local;
+pub mod scm_manager;
 
 use thiserror::Error;
 
