@@ -73,6 +73,15 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(fp) = cli.fork_processing {
         config.fork_processing = map_fork_processing(fp);
     }
+    if let Some(fork_creation) = cli.fork_creation {
+        config.fork_creation = Some(fork_creation);
+    }
+    if let Some(ref fork_token) = cli.fork_token {
+        config.fork_token = Some(fork_token.clone());
+    }
+    if let Some(ref fork_org) = cli.fork_org {
+        config.fork_org = Some(fork_org.clone());
+    }
     if let Some(binary_source) = cli.binary_source {
         config.binary_source = Some(map_binary_source(binary_source));
     }
@@ -506,6 +515,9 @@ mod tests {
             mode: None,
             require_config: None,
             fork_processing: None,
+            fork_creation: None,
+            fork_token: None,
+            fork_org: None,
             binary_source: None,
             config_migration: None,
             print_config: None,
@@ -740,6 +752,18 @@ mod tests {
             parse_and_build(&["--binary-source=auto"]).binary_source,
             Some(BinarySource::Global)
         );
+    }
+
+    #[test]
+    fn fork_mode_flags_are_parsed() {
+        let config = parse_and_build(&[
+            "--fork-creation=false",
+            "--fork-token=fork-token",
+            "--fork-org=renovate-forks",
+        ]);
+        assert_eq!(config.fork_creation, Some(false));
+        assert_eq!(config.fork_token.as_deref(), Some("fork-token"));
+        assert_eq!(config.fork_org.as_deref(), Some("renovate-forks"));
     }
 
     #[test]

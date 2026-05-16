@@ -57,6 +57,9 @@ pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
     "endpoint",
     "executionTimeout",
     "exposeAllEnv",
+    "forkCreation",
+    "forkOrg",
+    "forkToken",
     "gitPrivateKey",
     "gitPrivateKeyPassphrase",
     "gitTimeout",
@@ -394,6 +397,15 @@ pub struct GlobalConfig {
     /// Default: `ForkProcessing::Auto`.
     pub fork_processing: ForkProcessing,
 
+    /// Whether to create forks at runtime when using fork mode.
+    pub fork_creation: Option<bool>,
+
+    /// Token used for GitHub fork mode.
+    pub fork_token: Option<String>,
+
+    /// Preferred organization for forked repositories.
+    pub fork_org: Option<String>,
+
     /// Whether Renovate should migrate config files when possible.
     pub config_migration: bool,
 
@@ -680,6 +692,9 @@ impl Default for GlobalConfig {
             binary_source: None,
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,
+            fork_creation: Some(true),
+            fork_token: None,
+            fork_org: None,
             config_migration: false,
             print_config: None,
             onboarding: None,

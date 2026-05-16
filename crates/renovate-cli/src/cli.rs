@@ -203,6 +203,26 @@ pub(crate) struct Cli {
     #[arg(long, value_enum, env = "RENOVATE_FORK_PROCESSING")]
     pub(crate) fork_processing: Option<ForkProcessing>,
 
+    /// Create forks as needed at runtime when running in fork mode.
+    /// Env: RENOVATE_FORK_CREATION.
+    #[arg(
+        long,
+        env = "RENOVATE_FORK_CREATION",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) fork_creation: Option<bool>,
+
+    /// Personal access token used for GitHub fork mode.
+    /// Env: RENOVATE_FORK_TOKEN.
+    #[arg(long, env = "RENOVATE_FORK_TOKEN")]
+    pub(crate) fork_token: Option<String>,
+
+    /// Preferred organization for forked repositories.
+    /// Env: RENOVATE_FORK_ORG.
+    #[arg(long, env = "RENOVATE_FORK_ORG")]
+    pub(crate) fork_org: Option<String>,
+
     /// Controls how third-party tools are invoked.
     /// Env: RENOVATE_BINARY_SOURCE.
     #[arg(long, value_enum, env = "RENOVATE_BINARY_SOURCE")]

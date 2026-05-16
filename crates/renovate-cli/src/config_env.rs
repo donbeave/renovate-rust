@@ -164,6 +164,15 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "FORK_PROCESSING") {
         config.fork_processing = parse_fork_processing(value)?;
     }
+    if let Some(value) = env_value(env, prefix, "FORK_CREATION") {
+        config.fork_creation = Some(parse_bool("RENOVATE_FORK_CREATION", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "FORK_TOKEN") {
+        config.fork_token = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "FORK_ORG") {
+        config.fork_org = Some(value.to_owned());
+    }
     if let Some(value) = env_value(env, prefix, "BINARY_SOURCE") {
         config.binary_source = Some(parse_binary_source(value)?);
     }
@@ -1568,6 +1577,19 @@ mod tests {
     fn fork_processing_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_FORK_PROCESSING", "enabled")])).unwrap();
         assert_eq!(config.fork_processing, ForkProcessing::Enabled);
+    }
+
+    #[test]
+    fn fork_mode_env_options_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_FORK_CREATION", "false"),
+            ("RENOVATE_FORK_TOKEN", "fork-token"),
+            ("RENOVATE_FORK_ORG", "renovate-forks"),
+        ]))
+        .unwrap();
+        assert_eq!(config.fork_creation, Some(false));
+        assert_eq!(config.fork_token.as_deref(), Some("fork-token"));
+        assert_eq!(config.fork_org.as_deref(), Some("renovate-forks"));
     }
 
     #[test]
