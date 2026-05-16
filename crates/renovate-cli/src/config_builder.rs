@@ -75,6 +75,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(config_migration) = cli.config_migration {
         config.config_migration = config_migration;
     }
+    if let Some(print_config) = cli.print_config {
+        config.print_config = Some(print_config);
+    }
     if let Some(onboarding) = cli.onboarding {
         config.onboarding = Some(onboarding);
     }
@@ -434,6 +437,7 @@ mod tests {
             fork_processing: None,
             binary_source: None,
             config_migration: None,
+            print_config: None,
             onboarding: None,
             config_file_names: None,
             migrate_presets: None,
@@ -746,6 +750,15 @@ mod tests {
     #[test]
     fn config_migration_bare_sets_true() {
         assert!(parse_and_build(&["--config-migration"]).config_migration);
+    }
+
+    #[test]
+    fn print_config_flag_is_parsed() {
+        assert_eq!(parse_and_build(&["--print-config"]).print_config, Some(true));
+        assert_eq!(
+            parse_and_build(&["--print-config=false"]).print_config,
+            Some(false)
+        );
     }
 
     #[test]

@@ -213,6 +213,11 @@ pub(crate) struct Cli {
     )]
     pub(crate) config_migration: Option<bool>,
 
+    /// Print fully resolved repository config.
+    /// Env: RENOVATE_PRINT_CONFIG.
+    #[arg(long, env = "RENOVATE_PRINT_CONFIG", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) print_config: Option<bool>,
+
     /// Require an onboarding Configuration PR first.
     /// Env: RENOVATE_ONBOARDING.
     #[arg(long, env = "RENOVATE_ONBOARDING", num_args = 0..=1, default_missing_value = "true")]

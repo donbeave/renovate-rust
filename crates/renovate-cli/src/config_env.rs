@@ -31,6 +31,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "CONFIG_MIGRATION") {
         config.config_migration = parse_bool("RENOVATE_CONFIG_MIGRATION", value)?;
     }
+    if let Some(value) = env_value(env, prefix, "PRINT_CONFIG") {
+        config.print_config = Some(parse_bool("RENOVATE_PRINT_CONFIG", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "ONBOARDING") {
         config.onboarding = Some(parse_bool("RENOVATE_ONBOARDING", value)?);
     }
@@ -595,6 +598,12 @@ mod tests {
     fn config_migration_false_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_CONFIG_MIGRATION", "false")])).unwrap();
         assert!(!config.config_migration);
+    }
+
+    #[test]
+    fn print_config_env_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_PRINT_CONFIG", "true")])).unwrap();
+        assert_eq!(config.print_config, Some(true));
     }
 
     #[test]

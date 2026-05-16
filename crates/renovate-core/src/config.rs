@@ -353,6 +353,9 @@ pub struct GlobalConfig {
     /// Whether Renovate should migrate config files when possible.
     pub config_migration: bool,
 
+    /// Whether to log fully resolved repository configuration.
+    pub print_config: Option<bool>,
+
     /// Whether onboarding is required before normal repository processing.
     pub onboarding: Option<bool>,
 
@@ -580,6 +583,7 @@ impl Default for GlobalConfig {
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,
             config_migration: false,
+            print_config: None,
             onboarding: None,
             onboarding_branch: None,
             onboarding_auto_close_age: None,

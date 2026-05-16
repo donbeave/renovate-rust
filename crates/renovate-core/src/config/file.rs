@@ -230,6 +230,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         require_config: file_config.require_config,
         fork_processing: file_config.fork_processing,
         config_migration: file_config.config_migration,
+        print_config: file_config.print_config.or(base.print_config),
         onboarding: file_config.onboarding.or(base.onboarding),
         onboarding_branch: file_config.onboarding_branch.or(base.onboarding_branch),
         onboarding_auto_close_age: file_config
