@@ -84,7 +84,7 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
         config.allow_command_templating = act;
     }
     if !cli.labels.is_empty() {
-        config.labels = cli.labels.clone();
+        config.labels = trim_list(&cli.labels);
     }
     if let Some(ref raw) = cli.host_rules {
         config.host_rules = parse_json_array(raw)?;
@@ -195,6 +195,15 @@ fn map_recreate_when(rw: CliRecreateWhen) -> RecreateWhen {
         CliRecreateWhen::Always => RecreateWhen::Always,
         CliRecreateWhen::Never => RecreateWhen::Never,
     }
+}
+
+fn trim_list(values: &[String]) -> Vec<String> {
+    values
+        .iter()
+        .map(|value| value.trim())
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned)
+        .collect()
 }
 
 #[cfg(test)]
@@ -358,7 +367,7 @@ mod tests {
     #[test]
     fn labels_comma_separated_values_are_set() {
         assert_eq!(
-            parse_and_build(&["--labels=a,b,c"]).labels,
+            parse_and_build(&["--labels=a, b,c,"]).labels,
             vec!["a", "b", "c"]
         );
     }
