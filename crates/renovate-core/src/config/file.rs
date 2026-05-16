@@ -212,6 +212,12 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         base_dir: file_config.base_dir.or(base.base_dir),
         cache_dir: file_config.cache_dir.or(base.cache_dir),
         containerbase_dir: file_config.containerbase_dir.or(base.containerbase_dir),
+        docker_child_prefix: file_config.docker_child_prefix.or(base.docker_child_prefix),
+        docker_cli_options: file_config.docker_cli_options.or(base.docker_cli_options),
+        docker_sidecar_image: file_config
+            .docker_sidecar_image
+            .or(base.docker_sidecar_image),
+        docker_user: file_config.docker_user.or(base.docker_user),
         enabled: file_config.enabled.or(base.enabled),
         automerge: file_config.automerge.or(base.automerge),
         dry_run: file_config.dry_run.or(base.dry_run),

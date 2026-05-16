@@ -381,6 +381,26 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_CONTAINERBASE_DIR")]
     pub(crate) containerbase_dir: Option<String>,
 
+    /// Docker sidecar child container prefix.
+    /// Env: RENOVATE_DOCKER_CHILD_PREFIX.
+    #[arg(long, env = "RENOVATE_DOCKER_CHILD_PREFIX")]
+    pub(crate) docker_child_prefix: Option<String>,
+
+    /// Extra Docker CLI options for sidecar execution.
+    /// Env: RENOVATE_DOCKER_CLI_OPTIONS.
+    #[arg(long, env = "RENOVATE_DOCKER_CLI_OPTIONS")]
+    pub(crate) docker_cli_options: Option<String>,
+
+    /// Docker sidecar image override.
+    /// Env: RENOVATE_DOCKER_SIDECAR_IMAGE.
+    #[arg(long, env = "RENOVATE_DOCKER_SIDECAR_IMAGE")]
+    pub(crate) docker_sidecar_image: Option<String>,
+
+    /// Docker user override for sidecar execution.
+    /// Env: RENOVATE_DOCKER_USER.
+    #[arg(long, env = "RENOVATE_DOCKER_USER")]
+    pub(crate) docker_user: Option<String>,
+
     /// Default child process execution timeout in minutes.
     /// Env: RENOVATE_EXECUTION_TIMEOUT.
     #[arg(long, env = "RENOVATE_EXECUTION_TIMEOUT")]

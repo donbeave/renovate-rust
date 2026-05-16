@@ -312,6 +312,18 @@ pub struct GlobalConfig {
     /// Containerbase cache directory.
     pub containerbase_dir: Option<String>,
 
+    /// Docker sidecar child container prefix.
+    pub docker_child_prefix: Option<String>,
+
+    /// Extra Docker CLI options for sidecar execution.
+    pub docker_cli_options: Option<String>,
+
+    /// Docker sidecar image override.
+    pub docker_sidecar_image: Option<String>,
+
+    /// Docker user override for sidecar execution.
+    pub docker_user: Option<String>,
+
     /// Global enabled flag.
     pub enabled: Option<bool>,
 
@@ -469,6 +481,10 @@ impl Default for GlobalConfig {
             base_dir: None,
             cache_dir: None,
             containerbase_dir: None,
+            docker_child_prefix: None,
+            docker_cli_options: None,
+            docker_sidecar_image: None,
+            docker_user: None,
             enabled: None,
             automerge: None,
             dry_run: None,

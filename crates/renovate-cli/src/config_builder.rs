@@ -151,6 +151,18 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref containerbase_dir) = cli.containerbase_dir {
         config.containerbase_dir = Some(containerbase_dir.clone());
     }
+    if let Some(ref prefix) = cli.docker_child_prefix {
+        config.docker_child_prefix = Some(prefix.clone());
+    }
+    if let Some(ref options) = cli.docker_cli_options {
+        config.docker_cli_options = Some(options.clone());
+    }
+    if let Some(ref image) = cli.docker_sidecar_image {
+        config.docker_sidecar_image = Some(image.clone());
+    }
+    if let Some(ref user) = cli.docker_user {
+        config.docker_user = Some(user.clone());
+    }
     if let Some(timeout) = cli.execution_timeout {
         config.execution_timeout = Some(timeout);
     }
@@ -378,6 +390,10 @@ mod tests {
             base_dir: None,
             cache_dir: None,
             containerbase_dir: None,
+            docker_child_prefix: None,
+            docker_cli_options: None,
+            docker_sidecar_image: None,
+            docker_user: None,
             execution_timeout: None,
             git_timeout: None,
             http_cache_ttl_days: None,
@@ -474,6 +490,10 @@ mod tests {
             "--base-dir=/tmp/renovate",
             "--cache-dir=/tmp/renovate/cache",
             "--containerbase-dir=/tmp/renovate/containerbase",
+            "--docker-child-prefix=rr_",
+            "--docker-cli-options=--network=host",
+            "--docker-sidecar-image=example/sidecar:1",
+            "--docker-user=1000:1000",
             "--execution-timeout=20",
             "--git-timeout=10000",
             "--http-cache-ttl-days=45",
@@ -486,6 +506,16 @@ mod tests {
             config.containerbase_dir.as_deref(),
             Some("/tmp/renovate/containerbase")
         );
+        assert_eq!(config.docker_child_prefix.as_deref(), Some("rr_"));
+        assert_eq!(
+            config.docker_cli_options.as_deref(),
+            Some("--network=host")
+        );
+        assert_eq!(
+            config.docker_sidecar_image.as_deref(),
+            Some("example/sidecar:1")
+        );
+        assert_eq!(config.docker_user.as_deref(), Some("1000:1000"));
         assert_eq!(config.execution_timeout, Some(20));
         assert_eq!(config.git_timeout, Some(10000));
         assert_eq!(config.http_cache_ttl_days, Some(45));

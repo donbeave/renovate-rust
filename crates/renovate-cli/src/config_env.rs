@@ -240,6 +240,18 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "CONTAINERBASE_DIR") {
         config.containerbase_dir = Some(value.to_owned());
     }
+    if let Some(value) = env_value(env, prefix, "DOCKER_CHILD_PREFIX") {
+        config.docker_child_prefix = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "DOCKER_CLI_OPTIONS") {
+        config.docker_cli_options = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "DOCKER_SIDECAR_IMAGE") {
+        config.docker_sidecar_image = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "DOCKER_USER") {
+        config.docker_user = Some(value.to_owned());
+    }
     if let Some(value) = env_value(env, prefix, "EXECUTION_TIMEOUT") {
         config.execution_timeout =
             Some(parse_u32("RENOVATE_EXECUTION_TIMEOUT", value)?);
@@ -577,6 +589,10 @@ mod tests {
             ("RENOVATE_BASE_DIR", "/tmp/renovate"),
             ("RENOVATE_CACHE_DIR", "/tmp/renovate/cache"),
             ("RENOVATE_CONTAINERBASE_DIR", "/tmp/renovate/containerbase"),
+            ("RENOVATE_DOCKER_CHILD_PREFIX", "rr_"),
+            ("RENOVATE_DOCKER_CLI_OPTIONS", "--network=host"),
+            ("RENOVATE_DOCKER_SIDECAR_IMAGE", "example/sidecar:1"),
+            ("RENOVATE_DOCKER_USER", "1000:1000"),
             ("RENOVATE_EXECUTION_TIMEOUT", "20"),
             ("RENOVATE_GIT_TIMEOUT", "10000"),
             ("RENOVATE_HTTP_CACHE_TTL_DAYS", "45"),
@@ -590,6 +606,16 @@ mod tests {
             config.containerbase_dir.as_deref(),
             Some("/tmp/renovate/containerbase")
         );
+        assert_eq!(config.docker_child_prefix.as_deref(), Some("rr_"));
+        assert_eq!(
+            config.docker_cli_options.as_deref(),
+            Some("--network=host")
+        );
+        assert_eq!(
+            config.docker_sidecar_image.as_deref(),
+            Some("example/sidecar:1")
+        );
+        assert_eq!(config.docker_user.as_deref(), Some("1000:1000"));
         assert_eq!(config.execution_timeout, Some(20));
         assert_eq!(config.git_timeout, Some(10000));
         assert_eq!(config.http_cache_ttl_days, Some(45));
