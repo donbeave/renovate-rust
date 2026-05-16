@@ -2,8 +2,9 @@
 //!
 //! Renovate reference:
 //! - `lib/config/app-strings.ts` `getConfigFileNames()`
-//! - `lib/config/options/index.ts` — `enabled`, `ignoreDeps`, `ignorePaths`,
-//!   `packageRules`, `matchDepNames`, `matchDatasources`
+//! - `lib/config/options/index.ts` — `enabled`, `ignoreDeps`,
+//!   `updateInternalDeps`, `ignorePaths`, `packageRules`, `matchDepNames`,
+//!   `matchDatasources`
 //!
 //! Renovate searches a fixed ordered list of paths inside the repository;
 //! the first one found wins. This module ports that list, wires it to the
@@ -102,6 +103,10 @@ pub struct RepoConfig {
     pub enabled: bool,
     /// Dependency names to skip during update lookups.  Exact string match.
     pub ignore_deps: Vec<String>,
+    /// Whether to update internal dependency versions in monorepos.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `updateInternalDeps`.
+    pub update_internal_deps: bool,
     /// File path patterns to exclude from scanning.  Patterns follow
     /// minimatch/globset syntax (`**/test/**`, `**/*.spec.ts`, etc.).  Plain
     /// paths (no glob characters) are treated as prefix matches.
@@ -3940,6 +3945,8 @@ impl RepoConfig {
             enabled: bool,
             #[serde(rename = "ignoreDeps", default)]
             ignore_deps: Vec<String>,
+            #[serde(rename = "updateInternalDeps", default)]
+            update_internal_deps: bool,
             #[serde(rename = "ignorePaths", default)]
             ignore_paths: Vec<String>,
             /// Deprecated: ignoreNodeModules: true → adds "node_modules/" to ignorePaths.
@@ -4732,6 +4739,7 @@ impl RepoConfig {
         Self {
             enabled: preset_enabled.unwrap_or(raw.enabled),
             ignore_deps: raw.ignore_deps,
+            update_internal_deps: raw.update_internal_deps,
             package_rules,
             enabled_managers,
             disabled_managers,
@@ -5524,6 +5532,7 @@ impl Default for RepoConfig {
         Self {
             enabled: true,
             ignore_deps: Vec::new(),
+            update_internal_deps: false,
             ignore_paths: Vec::new(),
             include_paths: Vec::new(),
             exclude_commit_paths: Vec::new(),
@@ -6170,6 +6179,12 @@ mod tests {
     fn ignore_deps_parsed() {
         let c = RepoConfig::parse(r#"{"ignoreDeps": ["lodash", "react"]}"#);
         assert_eq!(c.ignore_deps, vec!["lodash", "react"]);
+    }
+
+    #[test]
+    fn update_internal_deps_parsed() {
+        let c = RepoConfig::parse(r#"{"updateInternalDeps": true}"#);
+        assert!(c.update_internal_deps);
     }
 
     #[test]
