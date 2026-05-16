@@ -126,7 +126,7 @@ pub(crate) fn apply_to_base(
         "MERGE_CONFIDENCE_ENDPOINT",
         "MERGE_CONFIDENCE_API_BASE_URL",
     )
-    .or_else(|| env.get("RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL").map(String::as_str))
+    .or_else(|| env_value(env, prefix, "X_MERGE_CONFIDENCE_API_BASE_URL"))
     {
         config.merge_confidence_endpoint = Some(value.to_owned());
     }
@@ -137,34 +137,57 @@ pub(crate) fn apply_to_base(
         "MERGE_CONFIDENCE_SUPPORTED_DATASOURCES",
     )
     .or_else(|| {
-        env.get("RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES")
-            .map(String::as_str)
+        env_value(env, prefix, "X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES")
     }) {
         config.merge_confidence_datasources = parse_string_array(value).unwrap_or_default();
     }
-    if let Some(value) = env.get("RENOVATE_X_AUTODISCOVER_REPO_SORT") {
+    if let Some(value) = env_converted_experimental_value(
+        env,
+        prefix,
+        "AUTODISCOVER_REPO_SORT",
+        "X_AUTODISCOVER_REPO_SORT",
+    ) {
         config.autodiscover_repo_sort = Some(value.to_owned());
     }
-    if let Some(value) = env.get("RENOVATE_AUTODISCOVER_REPO_ORDER") {
+    if let Some(value) = env_converted_experimental_value(
+        env,
+        prefix,
+        "AUTODISCOVER_REPO_ORDER",
+        "X_AUTODISCOVER_REPO_ORDER",
+    ) {
         config.autodiscover_repo_order = Some(value.to_owned());
     }
-    if let Some(value) = env.get("RENOVATE_X_DOCKER_MAX_PAGES")
+    if let Some(value) =
+        env_converted_experimental_value(env, prefix, "DOCKER_MAX_PAGES", "X_DOCKER_MAX_PAGES")
         && let Ok(pages) = value.parse()
     {
         config.docker_max_pages = Some(pages);
     }
-    if let Some(value) = env.get("RENOVATE_X_DELETE_CONFIG_FILE") {
-        config.delete_config_file = parse_bool("RENOVATE_X_DELETE_CONFIG_FILE", value)?;
+    if let Some(value) = env_converted_experimental_value(
+        env,
+        prefix,
+        "DELETE_CONFIG_FILE",
+        "X_DELETE_CONFIG_FILE",
+    ) {
+        config.delete_config_file = parse_bool("RENOVATE_DELETE_CONFIG_FILE", value)?;
     }
-    if let Some(value) = env.get("RENOVATE_X_S3_ENDPOINT") {
+    if let Some(value) =
+        env_converted_experimental_value(env, prefix, "S3_ENDPOINT", "X_S3_ENDPOINT")
+    {
         config.s3_endpoint = Some(value.to_owned());
     }
-    if let Some(value) = env.get("RENOVATE_X_S3_PATH_STYLE") {
-        config.s3_path_style = parse_bool("RENOVATE_X_S3_PATH_STYLE", value)?;
+    if let Some(value) =
+        env_converted_experimental_value(env, prefix, "S3_PATH_STYLE", "X_S3_PATH_STYLE")
+    {
+        config.s3_path_style = parse_bool("RENOVATE_S3_PATH_STYLE", value)?;
     }
-    if let Some(value) = env.get("RENOVATE_X_REPO_CACHE_FORCE_LOCAL")
+    if let Some(value) = env_value(env, prefix, "REPOSITORY_CACHE_FORCE_LOCAL") {
+        config.repository_cache_force_local =
+            Some(parse_bool("RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL", value)?);
+    } else if let Some(value) = env_value(env, prefix, "X_REPO_CACHE_FORCE_LOCAL")
         && !value.is_empty()
     {
+        // Renovate's migration maps any non-empty legacy value to boolean true.
         config.repository_cache_force_local = Some(true);
     }
 
@@ -189,6 +212,15 @@ fn env_renamed_value<'a>(
     legacy_suffix: &str,
 ) -> Option<&'a str> {
     env_value(env, prefix, current_suffix).or_else(|| env_value(env, prefix, legacy_suffix))
+}
+
+fn env_converted_experimental_value<'a>(
+    env: &'a BTreeMap<String, String>,
+    prefix: &str,
+    current_suffix: &str,
+    legacy_suffix: &str,
+) -> Option<&'a str> {
+    env_renamed_value(env, prefix, current_suffix, legacy_suffix)
 }
 
 fn platform_automerge_env_value<'a>(
@@ -609,6 +641,28 @@ mod tests {
         assert_eq!(config.s3_endpoint.as_deref(), Some("endpoint"));
         assert!(config.s3_path_style);
         assert_eq!(config.repository_cache_force_local, Some(true));
+    }
+
+    #[test]
+    fn converted_experimental_env_current_names_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_AUTODISCOVER_REPO_SORT", "alpha"),
+            ("RENOVATE_X_AUTODISCOVER_REPO_ORDER", "desc"),
+            ("RENOVATE_DOCKER_MAX_PAGES", "10"),
+            ("RENOVATE_DELETE_CONFIG_FILE", "true"),
+            ("RENOVATE_S3_ENDPOINT", "endpoint"),
+            ("RENOVATE_S3_PATH_STYLE", "true"),
+            ("RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL", "false"),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.autodiscover_repo_sort.as_deref(), Some("alpha"));
+        assert_eq!(config.autodiscover_repo_order.as_deref(), Some("desc"));
+        assert_eq!(config.docker_max_pages, Some(10));
+        assert!(config.delete_config_file);
+        assert_eq!(config.s3_endpoint.as_deref(), Some("endpoint"));
+        assert!(config.s3_path_style);
+        assert_eq!(config.repository_cache_force_local, Some(false));
     }
 
     // Ported: "does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL" — workers/global/config/parse/env.spec.ts line 336

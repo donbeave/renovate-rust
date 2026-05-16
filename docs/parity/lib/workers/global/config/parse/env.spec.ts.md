@@ -39,7 +39,7 @@
 | supports Bitbucket token | 268 | ported | `config_env.rs` | `bitbucket_token_config_is_parsed` | — |
 | supports Bitbucket username/password | 283 | ported | `config_env.rs` | `bitbucket_username_password_config_is_parsed` | — |
 | merges full config from env | 299 | ported | `config_env.rs` | `renovate_config_merges_with_explicit_env` | — |
-| massages converted experimental env vars | 309 | ported | `config_env.rs` | `experimental_env_vars_are_massaged` | — |
+| massages converted experimental env vars | 309 | ported | `config_env.rs` | `experimental_env_vars_are_massaged` (+ `converted_experimental_env_current_names_are_parsed`) | — |
 | does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL | 336 | ported | `config_env.rs` | `empty_repo_cache_force_local_is_not_migrated` | — |
 
 ### `workers/global/config/parse/env › .getConfig(env) › RENOVATE_CONFIG tests`
