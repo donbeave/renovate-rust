@@ -360,6 +360,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             .or(base.repository_cache_type),
         execution_timeout: file_config.execution_timeout.or(base.execution_timeout),
         git_timeout: file_config.git_timeout.or(base.git_timeout),
+        git_url: file_config.git_url,
         http_cache_ttl_days: file_config
             .http_cache_ttl_days
             .or(base.http_cache_ttl_days),

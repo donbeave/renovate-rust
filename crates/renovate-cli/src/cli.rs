@@ -576,6 +576,11 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_GIT_TIMEOUT")]
     pub(crate) git_timeout: Option<u32>,
 
+    /// Git remote URL resolution strategy.
+    /// Env: RENOVATE_GIT_URL.
+    #[arg(long, env = "RENOVATE_GIT_URL", value_parser = ["default", "ssh", "endpoint"])]
+    pub(crate) git_url: Option<String>,
+
     /// HTTP cache TTL in days.
     /// Env: RENOVATE_HTTP_CACHE_TTL_DAYS.
     #[arg(long, env = "RENOVATE_HTTP_CACHE_TTL_DAYS")]

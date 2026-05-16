@@ -374,6 +374,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "GIT_TIMEOUT") {
         config.git_timeout = Some(parse_u32("RENOVATE_GIT_TIMEOUT", value)?);
     }
+    if let Some(value) = env_value(env, prefix, "GIT_URL") {
+        config.git_url = parse_git_url(value)?.to_owned();
+    }
     if let Some(value) = env_value(env, prefix, "HTTP_CACHE_TTL_DAYS") {
         config.http_cache_ttl_days =
             Some(parse_u32("RENOVATE_HTTP_CACHE_TTL_DAYS", value)?);
@@ -541,6 +544,17 @@ fn parse_platform_commit(value: &str) -> Result<&'static str, String> {
         "enabled" | "true" => Ok("enabled"),
         "disabled" | "false" => Ok("disabled"),
         _ => Err(format!("RENOVATE_PLATFORM_COMMIT was invalid: {value}")),
+    }
+}
+
+fn parse_git_url(value: &str) -> Result<&'static str, String> {
+    match value {
+        "default" => Ok("default"),
+        "ssh" => Ok("ssh"),
+        "endpoint" => Ok("endpoint"),
+        _ => Err(format!(
+            "RENOVATE_GIT_URL was invalid: {value} (expected default, ssh, or endpoint)"
+        )),
     }
 }
 
@@ -763,6 +777,7 @@ mod tests {
             ("RENOVATE_DOCKER_USER", "1000:1000"),
             ("RENOVATE_EXECUTION_TIMEOUT", "20"),
             ("RENOVATE_GIT_TIMEOUT", "10000"),
+            ("RENOVATE_GIT_URL", "ssh"),
             ("RENOVATE_HTTP_CACHE_TTL_DAYS", "45"),
         ]))
         .unwrap();
@@ -791,6 +806,7 @@ mod tests {
         assert_eq!(config.docker_user.as_deref(), Some("1000:1000"));
         assert_eq!(config.execution_timeout, Some(20));
         assert_eq!(config.git_timeout, Some(10000));
+        assert_eq!(config.git_url, "ssh");
         assert_eq!(config.http_cache_ttl_days, Some(45));
     }
 

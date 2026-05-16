@@ -883,6 +883,7 @@ fn is_global_only_key(key: &str) -> bool {
         key,
         "binarySource"
             | "customEnvVariables"
+            | "gitUrl"
             | "ignorePrAuthor"
             | "optimizeForDisabled"
             | "username"

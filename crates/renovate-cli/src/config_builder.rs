@@ -254,6 +254,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(timeout) = cli.git_timeout {
         config.git_timeout = Some(timeout);
     }
+    if let Some(ref git_url) = cli.git_url {
+        config.git_url = git_url.clone();
+    }
     if let Some(days) = cli.http_cache_ttl_days {
         config.http_cache_ttl_days = Some(days);
     }
@@ -539,6 +542,7 @@ mod tests {
             docker_user: None,
             execution_timeout: None,
             git_timeout: None,
+            git_url: None,
             http_cache_ttl_days: None,
             cache_hard_ttl_minutes: None,
             cache_private_packages: None,
@@ -650,6 +654,7 @@ mod tests {
             "--docker-user=1000:1000",
             "--execution-timeout=20",
             "--git-timeout=10000",
+            "--git-url=ssh",
             "--http-cache-ttl-days=45",
         ]);
 
@@ -673,6 +678,7 @@ mod tests {
         assert_eq!(config.docker_user.as_deref(), Some("1000:1000"));
         assert_eq!(config.execution_timeout, Some(20));
         assert_eq!(config.git_timeout, Some(10000));
+        assert_eq!(config.git_url, "ssh");
         assert_eq!(config.http_cache_ttl_days, Some(45));
     }
 

@@ -60,6 +60,7 @@ pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
     "gitPrivateKey",
     "gitPrivateKeyPassphrase",
     "gitTimeout",
+    "gitUrl",
     "githubTokenWarn",
     "httpCacheTtlDays",
     "ignorePrAuthor",
@@ -534,6 +535,9 @@ pub struct GlobalConfig {
     /// Git task timeout in milliseconds.
     pub git_timeout: Option<u32>,
 
+    /// Git remote URL resolution strategy.
+    pub git_url: String,
+
     /// HTTP cache TTL in days.
     pub http_cache_ttl_days: Option<u32>,
 
@@ -695,6 +699,7 @@ impl Default for GlobalConfig {
             repository_cache_type: None,
             execution_timeout: None,
             git_timeout: None,
+            git_url: "default".to_owned(),
             http_cache_ttl_days: None,
             cache_hard_ttl_minutes: None,
             cache_private_packages: None,
