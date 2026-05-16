@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 use renovate_core::config::{
     DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
 };
-use serde_json::json;
+use serde_json::{json, Value};
 
 use crate::config_builder::{parse_json_array, parse_json_object};
 use renovate_core::config::file as config_file;
@@ -94,7 +94,7 @@ pub(crate) fn apply_to_base(
             parse_bool("RENOVATE_ALLOW_COMMAND_TEMPLATING", value)?;
     }
     if let Some(value) = env_value(env, prefix, "HOST_RULES") {
-        config.host_rules = parse_json_array(value).unwrap_or_default();
+        config.host_rules = parse_env_json_array(value).unwrap_or_default();
     }
     if let Some(value) = env_renamed_value(env, prefix, "REGISTRY_ALIASES", "ALIASES") {
         config.registry_aliases = parse_string_map(value).unwrap_or_default();
@@ -309,6 +309,13 @@ fn parse_string_array(raw: &str) -> Result<Vec<String>, String> {
     }
 }
 
+fn parse_env_json_array(raw: &str) -> Result<Vec<Value>, String> {
+    match json5::from_str(raw) {
+        Ok(Value::Array(values)) => Ok(values),
+        _ => Err(format!("Invalid JSON value: '{raw}'")),
+    }
+}
+
 fn parse_string_map(raw: &str) -> Result<BTreeMap<String, String>, String> {
     let object = parse_json_object(raw)?;
     object
@@ -516,6 +523,14 @@ mod tests {
     #[test]
     fn host_rules_string_value_is_skipped() {
         let config = build_from_env(&env(&[("RENOVATE_HOST_RULES", r#""foobar""#)])).unwrap();
+        assert!(config.host_rules.is_empty());
+    }
+
+    #[test]
+    fn host_rules_object_value_is_skipped() {
+        let config =
+            build_from_env(&env(&[("RENOVATE_HOST_RULES", r#"{"matchHost":"github.com"}"#)]))
+                .unwrap();
         assert!(config.host_rules.is_empty());
     }
 
