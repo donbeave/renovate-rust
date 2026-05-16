@@ -97,13 +97,14 @@ pub(crate) fn apply_to_base(
         config.host_rules = parse_env_json_array(value).unwrap_or_default();
     }
     if let Some(value) = env_renamed_value(env, prefix, "REGISTRY_ALIASES", "ALIASES") {
-        config.registry_aliases = parse_string_map(value).unwrap_or_default();
+        config.registry_aliases = parse_env_string_map("RENOVATE_REGISTRY_ALIASES", value)?;
     }
     if let Some(value) = env_value(env, prefix, "LOCK_FILE_MAINTENANCE") {
-        config.lock_file_maintenance = parse_json_object(value).unwrap_or_default();
+        config.lock_file_maintenance =
+            parse_env_json_object("RENOVATE_LOCK_FILE_MAINTENANCE", value)?;
     }
     if let Some(value) = env_value(env, prefix, "ONBOARDING_CONFIG") {
-        config.onboarding_config = parse_json_object(value).unwrap_or_default();
+        config.onboarding_config = parse_env_json_object("RENOVATE_ONBOARDING_CONFIG", value)?;
     }
     if let Some(token) = env
         .get("GITHUB_COM_TOKEN")
@@ -325,6 +326,17 @@ fn parse_string_map(raw: &str) -> Result<BTreeMap<String, String>, String> {
             _ => Err(format!("Invalid JSON value: '{raw}'")),
         })
         .collect()
+}
+
+fn parse_env_json_object(
+    env_name: &str,
+    raw: &str,
+) -> Result<serde_json::Map<String, Value>, String> {
+    parse_json_object(raw).map_err(|err| format!("{env_name} was invalid: Error: {err}"))
+}
+
+fn parse_env_string_map(env_name: &str, raw: &str) -> Result<BTreeMap<String, String>, String> {
+    parse_string_map(raw).map_err(|err| format!("{env_name} was invalid: Error: {err}"))
 }
 
 fn parse_renovate_config(raw: &str) -> Result<GlobalConfig, String> {
@@ -887,6 +899,29 @@ mod tests {
         assert_eq!(
             config.onboarding_config["extends"][0].as_str(),
             Some("config:recommended")
+        );
+    }
+
+    #[test]
+    fn invalid_object_env_values_are_rejected() {
+        let err =
+            build_from_env(&env(&[("RENOVATE_LOCK_FILE_MAINTENANCE", "not-json")])).unwrap_err();
+        assert_eq!(
+            err,
+            "RENOVATE_LOCK_FILE_MAINTENANCE was invalid: Error: Invalid JSON value: 'not-json'"
+        );
+    }
+
+    #[test]
+    fn invalid_registry_alias_env_values_are_rejected() {
+        let err = build_from_env(&env(&[(
+            "RENOVATE_REGISTRY_ALIASES",
+            r#"{"docker.io":123}"#,
+        )]))
+        .unwrap_err();
+        assert_eq!(
+            err,
+            r#"RENOVATE_REGISTRY_ALIASES was invalid: Error: Invalid JSON value: '{"docker.io":123}'"#
         );
     }
 
