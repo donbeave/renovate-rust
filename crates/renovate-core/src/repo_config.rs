@@ -109,6 +109,11 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `includePaths`.
     pub include_paths: Vec<String>,
+    /// File path patterns to exclude from commits even after updates are
+    /// generated.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `excludeCommitPaths`.
+    pub exclude_commit_paths: Vec<String>,
     /// Compiled package rules (from `packageRules` in `renovate.json`).
     pub package_rules: Vec<PackageRule>,
     /// When non-empty, only these manager names are active.
@@ -3925,6 +3930,8 @@ impl RepoConfig {
             ignore_node_modules: Option<bool>,
             #[serde(rename = "includePaths", default)]
             include_paths: Vec<String>,
+            #[serde(rename = "excludeCommitPaths", default)]
+            exclude_commit_paths: Vec<String>,
             #[serde(rename = "packageRules", default)]
             package_rules: Vec<RawPackageRule>,
             /// Deprecated: `packages` was the old name for `packageRules`.
@@ -4879,6 +4886,7 @@ impl RepoConfig {
                 preset_paths
             },
             include_paths: raw.include_paths,
+            exclude_commit_paths: raw.exclude_commit_paths,
             extends: raw.extends,
             ignore_presets: raw.ignore_presets,
             minimum_release_age: raw.minimum_release_age.or_else(|| {
@@ -5492,6 +5500,7 @@ impl Default for RepoConfig {
             ignore_deps: Vec::new(),
             ignore_paths: Vec::new(),
             include_paths: Vec::new(),
+            exclude_commit_paths: Vec::new(),
             package_rules: Vec::new(),
             enabled_managers: Vec::new(),
             disabled_managers: Vec::new(),
@@ -6199,6 +6208,12 @@ mod tests {
     fn ignore_paths_parsed() {
         let c = RepoConfig::parse(r#"{"ignorePaths": ["test/**", "vendor"]}"#);
         assert_eq!(c.ignore_paths, vec!["test/**", "vendor"]);
+    }
+
+    #[test]
+    fn exclude_commit_paths_parsed() {
+        let c = RepoConfig::parse(r#"{"excludeCommitPaths": ["docs/**", "generated"]}"#);
+        assert_eq!(c.exclude_commit_paths, vec!["docs/**", "generated"]);
     }
 
     #[test]
