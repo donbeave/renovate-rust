@@ -15,7 +15,7 @@ Repository rules:
 - Follow `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, and `COMMITS.md`.
 - Keep agent-only rules in `AGENTS.md` and shared human/agent rules in topic-specific files.
 - Commit messages must follow the repository commit conventions.
-- Never modify `prompts/claude-loop-renovate-rust.md` while executing this loop. Treat this prompt as operator-owned configuration. If you identify an improvement, record it as a suggestion in project docs instead of editing the prompt.
+- Never modify `prompts/claude-loop-renovate-rust.md` while executing this loop unless the operator explicitly asks you to update prompt guidance. Treat this prompt as operator-owned configuration during ordinary implementation work. If you identify an improvement during ordinary loop execution, record it as a suggestion in project docs instead of editing the prompt.
 
 Reference repository:
 - Treat renovatebot/renovate as the behavioral reference.
@@ -212,11 +212,12 @@ They are the primary tool for understanding what is done and what remains.
 - `docs/parity/compatibility-decisions.md` — documents explicit decisions where
   the Rust implementation intentionally diverges from Renovate and why.
 
-Updating prompt file:
+Updating this prompt file:
 
-When you update `prompts/claude-loop-renovate-rust.md`, always commit it as a
-**separate standalone commit** with no other file changes, so the change is
-easy to review and revert independently.  Use a commit message like:
+Only update `prompts/claude-loop-renovate-rust.md` when the operator explicitly
+asks for prompt changes. When you update it, always commit it as a **separate
+standalone commit** with no other file changes, so the change is easy to review
+and revert independently. Use a commit message like:
   `docs(prompt): add parity tracking file maintenance rules`
 
 Parity workflow:
