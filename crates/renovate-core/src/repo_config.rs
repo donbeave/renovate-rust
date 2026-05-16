@@ -658,6 +658,21 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `prBodyNotes`.
     pub pr_body_notes: Vec<String>,
 
+    /// Notification categories Renovate should suppress.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `suppressNotifications`.
+    pub suppress_notifications: Vec<String>,
+
+    /// Whether stale Renovate branches should be pruned.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `pruneStaleBranches`.
+    pub prune_stale_branches: bool,
+
+    /// Whether GitLab approval rules should be ignored for Renovate MRs.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `gitLabIgnoreApprovals`.
+    pub git_lab_ignore_approvals: bool,
+
     /// Deprecated direct PR title template override.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `prTitle`.
@@ -4488,6 +4503,16 @@ impl RepoConfig {
                 deserialize_with = "deserialize_string_or_vec"
             )]
             pr_body_notes: Vec<String>,
+            #[serde(
+                rename = "suppressNotifications",
+                default,
+                deserialize_with = "deserialize_string_or_vec"
+            )]
+            suppress_notifications: Vec<String>,
+            #[serde(rename = "pruneStaleBranches", default = "default_true")]
+            prune_stale_branches: bool,
+            #[serde(rename = "gitLabIgnoreApprovals", default)]
+            git_lab_ignore_approvals: bool,
             #[serde(rename = "prTitle")]
             pr_title: Option<String>,
             #[serde(rename = "prTitleStrict", default)]
@@ -5569,6 +5594,9 @@ impl RepoConfig {
             },
             pr_body_columns: raw.pr_body_columns,
             pr_body_notes: raw.pr_body_notes,
+            suppress_notifications: raw.suppress_notifications,
+            prune_stale_branches: raw.prune_stale_branches,
+            git_lab_ignore_approvals: raw.git_lab_ignore_approvals,
             pr_title: raw.pr_title,
             pr_title_strict: raw.pr_title_strict,
             pr_header: raw.pr_header,
@@ -6321,6 +6349,9 @@ impl Default for RepoConfig {
                 "Pending".to_owned(),
             ],
             pr_body_notes: Vec::new(),
+            suppress_notifications: Vec::new(),
+            prune_stale_branches: true,
+            git_lab_ignore_approvals: false,
             pr_title: None,
             pr_title_strict: false,
             pr_header: None,
@@ -9490,6 +9521,20 @@ mod tests {
             Some("[Age](https://docs.renovatebot.com/merge-confidence/)")
         );
         assert!(c.pr_body_notes.is_empty());
+    }
+
+    #[test]
+    fn notification_and_platform_pr_options_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "suppressNotifications": "artifactErrors",
+                "pruneStaleBranches": false,
+                "gitLabIgnoreApprovals": true
+            }"#,
+        );
+        assert_eq!(c.suppress_notifications, vec!["artifactErrors".to_owned()]);
+        assert!(!c.prune_stale_branches);
+        assert!(c.git_lab_ignore_approvals);
     }
 
     #[test]
