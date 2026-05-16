@@ -211,6 +211,11 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `baseBranches`.
     pub base_branches: Vec<String>,
+    /// Whether to read config from base branches.
+    /// Values: `"merge"` or `"none"` (default).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `useBaseBranchConfig`.
+    pub use_base_branch_config: String,
     /// When to rebase an existing PR branch.
     /// Values: `"auto"` (default), `"never"`, `"conflicted"`, `"behind-base-branch"`.
     ///
@@ -3984,6 +3989,11 @@ impl RepoConfig {
             /// Deprecated: singular baseBranch → baseBranches[0].
             #[serde(rename = "baseBranch")]
             base_branch: Option<String>,
+            #[serde(
+                rename = "useBaseBranchConfig",
+                default = "default_use_base_branch_config"
+            )]
+            use_base_branch_config: String,
             #[serde(rename = "rebaseWhen")]
             rebase_when: Option<String>,
             /// Deprecated: rebaseStalePrs: true → rebaseWhen: "behind-base-branch".
@@ -4134,6 +4144,10 @@ impl RepoConfig {
 
         fn default_branch_prefix() -> String {
             "renovate/".to_owned()
+        }
+
+        fn default_use_base_branch_config() -> String {
+            "none".to_owned()
         }
 
         fn default_commit_action() -> String {
@@ -4768,6 +4782,7 @@ impl RepoConfig {
                 }
                 branches
             },
+            use_base_branch_config: raw.use_base_branch_config,
             rebase_when: raw.rebase_when.or_else(|| {
                 // Deprecated rebaseConflictedPrs: false → rebaseWhen: "never".
                 // Renovate reference: lib/config/migrations/custom/rebase-conflicted-prs-migration.ts
@@ -5497,6 +5512,7 @@ impl Default for RepoConfig {
             branch_prefix: "renovate/".to_owned(),
             additional_branch_prefix: String::new(),
             base_branches: Vec::new(),
+            use_base_branch_config: "none".to_owned(),
             rebase_when: None,
             pr_concurrent_limit: 0,
             pr_creation: None,
@@ -8538,6 +8554,12 @@ mod tests {
         assert!(c.base_branches.contains(&"main".to_owned()));
         assert!(c.base_branches.contains(&"dev".to_owned()));
         assert_eq!(c.base_branches.len(), 2);
+    }
+
+    #[test]
+    fn use_base_branch_config_parsed() {
+        let c = RepoConfig::parse(r#"{"useBaseBranchConfig": "merge"}"#);
+        assert_eq!(c.use_base_branch_config, "merge");
     }
 
     #[test]
