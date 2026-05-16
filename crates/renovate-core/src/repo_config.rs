@@ -648,6 +648,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `osvVulnerabilityAlerts`.
     pub osv_vulnerability_alerts: bool,
 
+    /// Config applied when a PR is needed because the current package version is vulnerable.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `vulnerabilityAlerts`.
+    pub vulnerability_alerts: VulnerabilityAlertsConfig,
+
     // ── Scheduling behavior ───────────────────────────────────────────────────
     /// When `false`, Renovate will not update branches that are outside the
     /// configured schedule window.  Default: `true` (updates happen even when
@@ -857,6 +862,68 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `customManagers`,
     /// `lib/modules/manager/custom/regex/` — regex strategy implementation.
     pub custom_managers: Vec<CustomManager>,
+}
+
+fn default_vulnerability_range_strategy() -> String {
+    "update-lockfile".to_owned()
+}
+
+fn default_vulnerability_commit_message_suffix() -> String {
+    "[SECURITY]".to_owned()
+}
+
+fn default_vulnerability_branch_topic() -> String {
+    "{{{datasource}}}-{{{depNameSanitized}}}-vulnerability".to_owned()
+}
+
+fn default_vulnerability_pr_creation() -> String {
+    "immediate".to_owned()
+}
+
+fn default_vulnerability_fix_strategy() -> String {
+    "lowest".to_owned()
+}
+
+/// Nested `vulnerabilityAlerts` configuration.
+///
+/// Renovate reference: `lib/config/options/index.ts` — `vulnerabilityAlerts`.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VulnerabilityAlertsConfig {
+    #[serde(default)]
+    pub group_name: Option<String>,
+    #[serde(default)]
+    pub schedule: Vec<String>,
+    #[serde(default)]
+    pub dependency_dashboard_approval: bool,
+    #[serde(default)]
+    pub minimum_release_age: Option<String>,
+    #[serde(default = "default_vulnerability_range_strategy")]
+    pub range_strategy: String,
+    #[serde(default = "default_vulnerability_commit_message_suffix")]
+    pub commit_message_suffix: String,
+    #[serde(default = "default_vulnerability_branch_topic")]
+    pub branch_topic: String,
+    #[serde(default = "default_vulnerability_pr_creation")]
+    pub pr_creation: String,
+    #[serde(default = "default_vulnerability_fix_strategy")]
+    pub vulnerability_fix_strategy: String,
+}
+
+impl Default for VulnerabilityAlertsConfig {
+    fn default() -> Self {
+        Self {
+            group_name: None,
+            schedule: Vec::new(),
+            dependency_dashboard_approval: false,
+            minimum_release_age: None,
+            range_strategy: default_vulnerability_range_strategy(),
+            commit_message_suffix: default_vulnerability_commit_message_suffix(),
+            branch_topic: default_vulnerability_branch_topic(),
+            pr_creation: default_vulnerability_pr_creation(),
+            vulnerability_fix_strategy: default_vulnerability_fix_strategy(),
+        }
+    }
 }
 
 // ── CustomManager ─────────────────────────────────────────────────────────────
@@ -4624,6 +4691,8 @@ impl RepoConfig {
             config_migration: bool,
             #[serde(rename = "osvVulnerabilityAlerts", default)]
             osv_vulnerability_alerts: bool,
+            #[serde(rename = "vulnerabilityAlerts", default)]
+            vulnerability_alerts: VulnerabilityAlertsConfig,
             #[serde(rename = "updateNotScheduled", default = "default_true")]
             update_not_scheduled: bool,
             #[serde(rename = "commitMessage", default = "default_commit_message")]
@@ -5786,6 +5855,7 @@ impl RepoConfig {
                     .iter()
                     .any(|p| p == ":configMigration" || p == "configMigration"),
             osv_vulnerability_alerts: raw.osv_vulnerability_alerts,
+            vulnerability_alerts: raw.vulnerability_alerts,
             update_not_scheduled: preset_update_not_scheduled.unwrap_or(raw.update_not_scheduled),
             commit_message: raw.commit_message,
             commit_message_action: raw.commit_message_action,
@@ -6532,6 +6602,7 @@ impl Default for RepoConfig {
             config_warning_reuse_issue: false,
             config_migration: false,
             osv_vulnerability_alerts: false,
+            vulnerability_alerts: VulnerabilityAlertsConfig::default(),
             update_not_scheduled: true,
             commit_message: "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}".to_owned(),
             commit_message_action: "Update".to_owned(),
@@ -10044,6 +10115,42 @@ mod tests {
         assert_eq!(c.dependency_dashboard_osv_vulnerability_summary, "all");
         assert!(c.osv_vulnerability_alerts);
         assert!(!c.prune_branch_after_automerge);
+    }
+
+    #[test]
+    fn vulnerability_alerts_config_parsed_with_defaults() {
+        let c = RepoConfig::parse(
+            r#"{
+                "vulnerabilityAlerts": {
+                    "groupName": "security updates",
+                    "schedule": ["before 5am on monday"],
+                    "dependencyDashboardApproval": true,
+                    "minimumReleaseAge": "3 days",
+                    "vulnerabilityFixStrategy": "highest"
+                }
+            }"#,
+        );
+        assert_eq!(
+            c.vulnerability_alerts.group_name.as_deref(),
+            Some("security updates")
+        );
+        assert_eq!(
+            c.vulnerability_alerts.schedule,
+            vec!["before 5am on monday"]
+        );
+        assert!(c.vulnerability_alerts.dependency_dashboard_approval);
+        assert_eq!(
+            c.vulnerability_alerts.minimum_release_age.as_deref(),
+            Some("3 days")
+        );
+        assert_eq!(c.vulnerability_alerts.range_strategy, "update-lockfile");
+        assert_eq!(c.vulnerability_alerts.commit_message_suffix, "[SECURITY]");
+        assert_eq!(
+            c.vulnerability_alerts.branch_topic,
+            "{{{datasource}}}-{{{depNameSanitized}}}-vulnerability"
+        );
+        assert_eq!(c.vulnerability_alerts.pr_creation, "immediate");
+        assert_eq!(c.vulnerability_alerts.vulnerability_fix_strategy, "highest");
     }
 
     #[test]
