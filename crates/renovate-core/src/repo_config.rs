@@ -578,6 +578,42 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `dependencyDashboard`.
     pub dependency_dashboard: bool,
 
+    /// Whether Renovate should close the dashboard when no updates remain.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardAutoclose`.
+    pub dependency_dashboard_autoclose: bool,
+
+    /// Dependency Dashboard issue title.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardTitle`.
+    pub dependency_dashboard_title: String,
+
+    /// Dependency Dashboard category grouping.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardCategory`.
+    pub dependency_dashboard_category: Option<String>,
+
+    /// Text inserted at the beginning of the Dependency Dashboard body.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardHeader`.
+    pub dependency_dashboard_header: String,
+
+    /// Text inserted at the end of the Dependency Dashboard body.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardFooter`.
+    pub dependency_dashboard_footer: Option<String>,
+
+    /// Labels that should always be applied to the Dependency Dashboard issue.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardLabels`.
+    pub dependency_dashboard_labels: Vec<String>,
+
     /// Whether the Dependency Dashboard lists OSV vulnerability summaries.
     ///
     /// Renovate reference: `lib/config/options/index.ts` —
@@ -589,6 +625,12 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `dependencyDashboardApproval`.
     pub dependency_dashboard_approval: bool,
+
+    /// Whether closed Config Warning issues should be reused/reopened.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `configWarningReuseIssue`.
+    pub config_warning_reuse_issue: bool,
 
     /// When `true`, Renovate creates a PR to migrate stale config options to
     /// their modern equivalents.  Default: `false`.
@@ -4508,6 +4550,24 @@ impl RepoConfig {
             host_rules: Vec<serde_json::Value>,
             #[serde(rename = "dependencyDashboard", default)]
             dependency_dashboard: bool,
+            #[serde(rename = "dependencyDashboardAutoclose", default)]
+            dependency_dashboard_autoclose: bool,
+            #[serde(
+                rename = "dependencyDashboardTitle",
+                default = "default_dependency_dashboard_title"
+            )]
+            dependency_dashboard_title: String,
+            #[serde(rename = "dependencyDashboardCategory", default)]
+            dependency_dashboard_category: Option<String>,
+            #[serde(
+                rename = "dependencyDashboardHeader",
+                default = "default_dependency_dashboard_header"
+            )]
+            dependency_dashboard_header: String,
+            #[serde(rename = "dependencyDashboardFooter", default)]
+            dependency_dashboard_footer: Option<String>,
+            #[serde(rename = "dependencyDashboardLabels", default)]
+            dependency_dashboard_labels: Vec<String>,
             #[serde(
                 rename = "dependencyDashboardOSVVulnerabilitySummary",
                 default = "default_none_string"
@@ -4515,6 +4575,8 @@ impl RepoConfig {
             dependency_dashboard_osv_vulnerability_summary: String,
             #[serde(rename = "dependencyDashboardApproval", default)]
             dependency_dashboard_approval: bool,
+            #[serde(rename = "configWarningReuseIssue", default)]
+            config_warning_reuse_issue: bool,
             #[serde(rename = "configMigration", default)]
             config_migration: bool,
             #[serde(rename = "osvVulnerabilityAlerts", default)]
@@ -4640,6 +4702,14 @@ impl RepoConfig {
 
         fn default_none_string() -> String {
             "none".to_owned()
+        }
+
+        fn default_dependency_dashboard_title() -> String {
+            "Dependency Dashboard".to_owned()
+        }
+
+        fn default_dependency_dashboard_header() -> String {
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.".to_owned()
         }
 
         fn default_true() -> bool {
@@ -5643,12 +5713,19 @@ impl RepoConfig {
                     && !effective_extends.iter().any(|p| {
                         p == ":disableDependencyDashboard" || p == "disableDependencyDashboard"
                     }),
+            dependency_dashboard_autoclose: raw.dependency_dashboard_autoclose,
+            dependency_dashboard_title: raw.dependency_dashboard_title,
+            dependency_dashboard_category: raw.dependency_dashboard_category,
+            dependency_dashboard_header: raw.dependency_dashboard_header,
+            dependency_dashboard_footer: raw.dependency_dashboard_footer,
+            dependency_dashboard_labels: raw.dependency_dashboard_labels,
             dependency_dashboard_osv_vulnerability_summary: raw
                 .dependency_dashboard_osv_vulnerability_summary,
             dependency_dashboard_approval: raw.dependency_dashboard_approval
                 || effective_extends.iter().any(|p| {
                     p == ":dependencyDashboardApproval" || p == "dependencyDashboardApproval"
                 }),
+            config_warning_reuse_issue: raw.config_warning_reuse_issue,
             config_migration: raw.config_migration
                 || effective_extends
                     .iter()
@@ -6347,8 +6424,15 @@ impl Default for RepoConfig {
             constraints: BTreeMap::new(),
             host_rules: Vec::new(),
             dependency_dashboard: false,
+            dependency_dashboard_autoclose: false,
+            dependency_dashboard_title: "Dependency Dashboard".to_owned(),
+            dependency_dashboard_category: None,
+            dependency_dashboard_header: "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.".to_owned(),
+            dependency_dashboard_footer: None,
+            dependency_dashboard_labels: Vec::new(),
             dependency_dashboard_osv_vulnerability_summary: "none".to_owned(),
             dependency_dashboard_approval: false,
+            config_warning_reuse_issue: false,
             config_migration: false,
             osv_vulnerability_alerts: false,
             update_not_scheduled: true,
@@ -9843,11 +9927,13 @@ mod tests {
     fn security_cleanup_options_parsed() {
         let c = RepoConfig::parse(
             r#"{
+                "configWarningReuseIssue": true,
                 "dependencyDashboardOSVVulnerabilitySummary": "all",
                 "osvVulnerabilityAlerts": true,
                 "pruneBranchAfterAutomerge": false
             }"#,
         );
+        assert!(c.config_warning_reuse_issue);
         assert_eq!(c.dependency_dashboard_osv_vulnerability_summary, "all");
         assert!(c.osv_vulnerability_alerts);
         assert!(!c.prune_branch_after_automerge);
@@ -14524,10 +14610,29 @@ mod rule_effects_tests {
 
     #[test]
     fn raw_dependency_dashboard_parsed() {
-        let c = RepoConfig::parse(r#"{"dependencyDashboard": true}"#);
+        let c = RepoConfig::parse(
+            r#"{
+                "dependencyDashboard": true,
+                "dependencyDashboardAutoclose": true,
+                "dependencyDashboardTitle": "Updates",
+                "dependencyDashboardCategory": "security",
+                "dependencyDashboardHeader": "Header",
+                "dependencyDashboardFooter": "Footer",
+                "dependencyDashboardLabels": ["renovate", "dependencies"]
+            }"#,
+        );
         assert!(
             c.dependency_dashboard,
             "raw dependencyDashboard: true must be parsed"
+        );
+        assert!(c.dependency_dashboard_autoclose);
+        assert_eq!(c.dependency_dashboard_title, "Updates");
+        assert_eq!(c.dependency_dashboard_category.as_deref(), Some("security"));
+        assert_eq!(c.dependency_dashboard_header, "Header");
+        assert_eq!(c.dependency_dashboard_footer.as_deref(), Some("Footer"));
+        assert_eq!(
+            c.dependency_dashboard_labels,
+            vec!["renovate".to_owned(), "dependencies".to_owned()]
         );
     }
 
