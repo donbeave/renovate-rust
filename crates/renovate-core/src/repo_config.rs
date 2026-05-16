@@ -391,6 +391,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `commitBody`.
     pub commit_body: Option<String>,
 
+    /// Author used for Git commits.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `gitAuthor`.
+    pub git_author: Option<String>,
+
     // ── Range / version strategy ──────────────────────────────────────────────
     /// Range update strategy. Controls how existing version ranges are modified.
     /// Accepted: `"auto"`, `"pin"`, `"bump"`, `"replace"`, `"widen"`,
@@ -4073,6 +4078,8 @@ impl RepoConfig {
             commit_message_suffix: Option<String>,
             #[serde(rename = "commitBody")]
             commit_body: Option<String>,
+            #[serde(rename = "gitAuthor")]
+            git_author: Option<String>,
             #[serde(rename = "rangeStrategy", default = "default_range_strategy")]
             range_strategy: String,
             #[serde(rename = "hashedBranchLength")]
@@ -4911,6 +4918,7 @@ impl RepoConfig {
                     None
                 }
             }),
+            git_author: raw.git_author,
             range_strategy: {
                 // Deprecated upgradeInRange: true → rangeStrategy: "bump".
                 // Deprecated versionStrategy: "widen" → rangeStrategy: "widen".
@@ -5517,6 +5525,7 @@ impl Default for RepoConfig {
             commit_message_extra: None,
             commit_message_suffix: None,
             commit_body: None,
+            git_author: None,
             range_strategy: "auto".to_owned(),
             hashed_branch_length: None,
             major_config: None,
@@ -8555,6 +8564,15 @@ mod tests {
         assert_eq!(
             c.commit_body.as_deref(),
             Some("Signed-off-by: Bot <bot@example.com>")
+        );
+    }
+
+    #[test]
+    fn git_author_parsed_from_config() {
+        let c = RepoConfig::parse(r#"{"gitAuthor": "Renovate Bot <bot@renovateapp.com>"}"#);
+        assert_eq!(
+            c.git_author.as_deref(),
+            Some("Renovate Bot <bot@renovateapp.com>")
         );
     }
 
