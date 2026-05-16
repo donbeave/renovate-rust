@@ -1078,7 +1078,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch topic/name generation helpers partially ported. |
 | `lib/workers/repository/updates/flatten.ts` | `crates/renovate-core/src/branch.rs` | partial | `sanitizeDepName` URL/name normalization behavior partially ported; full update flattening is not ported. |
 | `lib/workers/global/config/parse/cli.ts` | `crates/renovate-cli/src/cli.rs` | partial | CLI arg parsing ported, including enabled/automerge booleans and JSON5 structured values |
-| `lib/workers/global/config/parse/env.ts` | `crates/renovate-cli/src/config_env.rs` | partial | Env config parsing partially ported, including JSON5 structured values, renamed env vars, converted experimental vars, repositories, string-array env coercion, enabled/automerge booleans, onboardingConfig, allowCommandTemplating, and forkProcessing |
+| `lib/workers/global/config/parse/env.ts` | `crates/renovate-cli/src/config_env.rs` | partial | Env config parsing partially ported, including JSON5 structured values, renamed env vars, converted experimental vars, empty-value filtering, repositories, string-array env coercion, enabled/automerge booleans, onboardingConfig, allowCommandTemplating, and forkProcessing |
 | `lib/util/string-match.ts` | `crates/renovate-core/src/string_match.rs` | partial | String matching partially ported |
 | `lib/util/package-rules/index.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Package rule matching partially ported |
 | `lib/util/package-rules/managers.ts` | `crates/renovate-core/src/package_rule.rs` | partial | Inlined |

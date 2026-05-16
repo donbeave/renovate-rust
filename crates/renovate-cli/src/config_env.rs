@@ -107,7 +107,11 @@ pub(crate) fn apply_to_base(
     }
     if let Some(token) = env
         .get("GITHUB_COM_TOKEN")
-        .or_else(|| env.get("RENOVATE_GITHUB_COM_TOKEN"))
+        .filter(|value| !value.is_empty())
+        .or_else(|| {
+            env.get("RENOVATE_GITHUB_COM_TOKEN")
+                .filter(|value| !value.is_empty())
+        })
     {
         config.host_rules.push(json!({
             "hostType": "github",
@@ -216,7 +220,9 @@ pub(crate) fn build_from_env(env: &BTreeMap<String, String>) -> Result<GlobalCon
 
 fn env_value<'a>(env: &'a BTreeMap<String, String>, prefix: &str, suffix: &str) -> Option<&'a str> {
     let key = format!("{prefix}{suffix}");
-    env.get(&key).map(String::as_str)
+    env.get(&key)
+        .map(String::as_str)
+        .filter(|value| !value.is_empty())
 }
 
 fn env_renamed_value<'a>(
@@ -390,6 +396,21 @@ mod tests {
     fn automerge_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_AUTOMERGE", "true")])).unwrap();
         assert_eq!(config.automerge, Some(true));
+    }
+
+    #[test]
+    fn empty_env_values_are_ignored() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_ENABLED", ""),
+            ("RENOVATE_TOKEN", ""),
+            ("GITHUB_COM_TOKEN", ""),
+            ("RENOVATE_GITHUB_COM_TOKEN", ""),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.enabled, None);
+        assert_eq!(config.token, None);
+        assert!(config.host_rules.is_empty());
     }
 
     // Ported: "throws exception for invalid boolean value" — workers/global/config/parse/env.spec.ts line 27
