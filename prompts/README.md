@@ -46,17 +46,35 @@ most predictable behavior.
 ## Test Parity /loop Prompt
 
 Use [claude-loop-test-parity.md](claude-loop-test-parity.md) to rebuild and
-maintain `docs/parity/renovate-test-map.md` with **per-test-case granularity**.
+maintain the split test parity tracker.
 
-This prompt replaces the old file-level table format with a three-phase
-workflow:
+`docs/parity/renovate-test-map.md` is now a compact root index with one row per
+upstream `.spec.ts` file. The root row has only two statuses:
+
+- `Done`
+- `Not done`
+
+Per-test-case details live in one Markdown file per original Renovate spec path,
+for example:
+
+```text
+docs/parity/lib/modules/manager/ansible-galaxy/extract.spec.ts.md
+```
+
+The detail file tracks `ported`, `pending`, and `not-applicable` rows, Rust test
+links, counts, and reasons. Only update the root row to `Done` once the linked
+detail file has no remaining `pending` rows.
+
+The prompt uses a three-phase workflow:
 
 1. **Inventory** — parse each `.spec.ts` and write every `describe`/`it()` call
-   into the tracking file with `pending` status.
+   into the matching detail file with `pending` status, then add or update the
+   root index row.
 2. **Mapping** — grep the Rust codebase to find existing coverage and link each
-   ported test.
+   ported test in the detail file.
 3. **Porting** — write any test that has no Rust equivalent yet, then mark it
-   `ported`.
+   `ported` in the detail file and update the root index row if the spec is now
+   complete.
 
 Start Claude Code in `~/Projects/renovate-rust-experiement`, then run:
 

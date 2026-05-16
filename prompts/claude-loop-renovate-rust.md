@@ -169,15 +169,26 @@ discovered but have not yet ported.**
 The following Markdown files track port coverage and must be kept current.
 They are the primary tool for understanding what is done and what remains.
 
-- `docs/parity/renovate-test-map.md` — maps Renovate TypeScript **spec** test
-  files to their Rust test coverage.  **CRITICAL: this file MUST contain ONLY
+- `docs/parity/renovate-test-map.md` — compact root index for Renovate
+  TypeScript **spec** test parity. **CRITICAL: this file MUST contain ONLY
   `.spec.ts` file references — NEVER plain `.ts` source files.**
-  - One row per spec file. Track: how many `it()` tests total, how many ported.
-  - When you port tests from a spec file, update the Rust test count and status.
-  - Use status values: `ported` (all tests done) · `partial` (some done) ·
-    `pending` (none done yet) · `not-applicable` (out-of-scope feature).
-  - **Enforcement:** Before committing, verify no row references a plain `.ts`
-    (non-spec) file. If you find one, move it to `renovate-source-map.md`.
+  - The root index has one row per spec file with only two statuses:
+    `Done` and `Not done`.
+  - `Done` means the linked detail file has no `pending` rows. All actionable
+    tests are ported, and any out-of-scope rows are documented as
+    `not-applicable` in the detail file.
+  - `Not done` means the linked detail file still has at least one `pending`
+    row. It may be partially ported or not started.
+  - Per-test details live in one Markdown file per upstream spec path under
+    `docs/parity/`, e.g.
+    `docs/parity/lib/modules/manager/ansible-galaxy/extract.spec.ts.md`.
+  - Detail files track counts, file-level detail status, and per-test rows with
+    statuses: `ported` · `pending` · `not-applicable`.
+  - When you port tests from a spec file, update the matching detail file first,
+    then update the root index row to `Done` only if no `pending` rows remain.
+  - **Enforcement:** Before committing, verify the root index and detail files
+    reference only `.spec.ts` files. If you find a plain `.ts` source file,
+    move it to `renovate-source-map.md`.
 
 - `docs/parity/renovate-source-map.md` — maps Renovate TypeScript **source**
   files (not test files) to their Rust counterparts.  **CRITICAL: this file
@@ -204,14 +215,16 @@ Parity workflow:
 1. Inspect the current repo state and the latest commits.
 2. **Scan the Renovate reference for any new source or test files you will
    reference this iteration; add them to `renovate-source-map.md` and
-   `renovate-test-map.md` before writing any Rust code.**
+   the `renovate-test-map.md` root index and matching detail file before
+   writing any Rust code.**
 3. Inspect Renovate reference docs/tests/source for one missing behavior slice.
 4. Choose the highest-value slice that can be completed in this loop without breaking existing work.
 5. Add or update parity tracking docs before or during implementation:
    - `docs/parity/renovate-source-map.md` — update status for any TypeScript
      source files you read or implement from.
-   - `docs/parity/renovate-test-map.md` — add rows for every new Rust test
-     that corresponds to a Renovate test case.
+   - `docs/parity/renovate-test-map.md` — keep the compact root index current.
+   - `docs/parity/<spec path>.md` — add rows for every new Rust test that
+     corresponds to a Renovate test case.
    - `docs/parity/compatibility-decisions.md` — record any intentional divergence.
    Create any file that does not yet exist.
 6. Write Rust tests that encode Renovate-compatible behavior. When practical, translate Renovate test cases into Rust tests using original Rust test code and local fixtures.

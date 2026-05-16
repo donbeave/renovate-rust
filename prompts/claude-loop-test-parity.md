@@ -13,8 +13,9 @@ cases, Rust-specific invariants, performance assertions — but extras do not
 substitute for parity with the TypeScript baseline.
 
 Your goal is to drive the Rust test suite toward that minimum bar by maintaining
-`docs/parity/renovate-test-map.md` as a precise per-test audit trail and by
-writing or annotating Rust tests to close the gaps.
+the compact `docs/parity/renovate-test-map.md` root index plus the linked
+per-spec detail files as a precise per-test audit trail, and by writing or
+annotating Rust tests to close the gaps.
 
 Run autonomously. Do not ask questions. Make the best engineering decision from
 local evidence. Never stop because of a missing credential or external service —
@@ -45,20 +46,46 @@ Document the missing checkout in the commit message.
 
 ---
 
-## The target file
+## The target files
 
-`docs/parity/renovate-test-map.md`
+`docs/parity/renovate-test-map.md` is the compact root index.
+Per-test detail rows live in one Markdown file per upstream spec path:
 
-Read it at the start of every iteration. The file must begin with a summary
-block updated on every commit:
+```text
+docs/parity/<original Renovate spec path>.md
+```
+
+Example:
+
+```text
+docs/parity/lib/modules/manager/ansible-galaxy/extract.spec.ts.md
+```
+
+Read the root index at the start of every iteration, then open the linked
+detail file for the spec you will work on. The root index must stay small and
+must begin with a summary block updated on every commit:
 
 ```markdown
 # Renovate Test Map
 
 **Overall progress:** 340 / 1,100 actionable tests ported (31%) — updated 2026-04-29
 
-Status key: `ported` · `pending` · `not-applicable`
+This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
+
+- `Done` means the detail file has no `pending` rows; all actionable tests are ported, and any out-of-scope rows are documented as `not-applicable` in the detail file.
+- `Not done` means the detail file still has at least one `pending` row. Open the linked detail file for per-test progress and reasons.
 ```
+
+The root index table has only these columns:
+
+```markdown
+| Spec file | Status | Details |
+|---|---|---|
+| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | Done | [details](lib/modules/manager/ansible-galaxy/extract.spec.ts.md) |
+```
+
+The root index must not contain per-test rows, partial counts, or statuses other
+than `Done` and `Not done`.
 
 ### Count definitions
 
@@ -75,24 +102,30 @@ Status key: `ported` · `pending` · `not-applicable`
 
 ```sh
 # Run from the renovate-rust project root
-grep -c "| ported |" docs/parity/renovate-test-map.md
-grep -c "| pending |" docs/parity/renovate-test-map.md
-grep -c "| not-applicable |" docs/parity/renovate-test-map.md
+rg -o "\| ported \|" docs/parity --glob "*.spec.ts.md" | wc -l
+rg -o "\| pending \|" docs/parity --glob "*.spec.ts.md" | wc -l
+rg -o "\| not-applicable \|" docs/parity --glob "*.spec.ts.md" | wc -l
 ```
 
 ---
 
 ## Per-test format
 
-Sections appear in this fixed order: **Managers** (alphabetical by manager
-name) → **Config** → **Workers** → **Util**. Do not reorder existing sections;
-append new ones at the end of their category. This keeps diffs readable and the
-file navigable.
+The root index preserves the existing spec order. Do not reorder root rows
+unless you are doing a deliberate full re-sort.
 
-Every section follows this template. The table **always has six columns** —
+Each detail file contains exactly one upstream `.spec.ts` file's tracking
+section. If a spec path is `lib/modules/manager/foo/extract.spec.ts`, its detail
+file is `docs/parity/lib/modules/manager/foo/extract.spec.ts.md`.
+
+Every detail file follows this template. The table **always has six columns** —
 the Reason column is `—` for `ported` and `pending` rows.
 
 ```markdown
+# Renovate Test Detail
+
+[Back to test map](../../../../renovate-test-map.md)
+
 ## `lib/modules/manager/ansible-galaxy/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible-galaxy/extract.spec.ts
@@ -122,6 +155,10 @@ the Reason column is `—` for `ported` and `pending` rows.
   - `partial` — some actionable tests ported (Ported > 0, pending > 0)
   - `pending` — no actionable tests ported yet (Ported = 0)
   - `not-applicable` — entire spec file is out of scope
+- Root index status:
+  - `Done` — the detail file has zero `pending` rows, including files whose
+    remaining rows are documented as `not-applicable`
+  - `Not done` — the detail file has one or more `pending` rows
 - `###` heading = full `describe()` nesting path joined with ` › `:
   - Top-level only: `### \`extractPackageFile()\``
   - Nested: `### \`extractPackageFile() › git deps\``
@@ -224,7 +261,10 @@ For each unattributed test:
    - Add `// Ported: "<it() description>" — <manager>/<spec>.spec.ts line <N>`
      on the line immediately above the `#[test]` / `#[tokio::test]` /
      `#[rstest]` attribute.
-   - Update or create the corresponding row in `renovate-test-map.md`.
+   - Update or create the corresponding row in the matching
+     `docs/parity/<spec path>.md` detail file.
+   - Update the root `docs/parity/renovate-test-map.md` row to `Done` only
+     when the detail file has no `pending` rows; otherwise keep it `Not done`.
 5. **If no confident match is found after inspecting the most likely spec file,
    classify the test as Rust-specific and move on.** Do not spend more than a
    few minutes on any one test. Leave it uncommented; it does not belong in the
@@ -236,7 +276,7 @@ Process one Rust file (or a small batch) per iteration, commit, then continue.
 
 ### Phase 1 — Inventory a spec file
 
-When a `.spec.ts` file has no section in the per-test format yet:
+When a `.spec.ts` file has no detail file in the per-test format yet:
 
 1. Verify the Renovate reference checkout exists (see Workspace layout).
 
@@ -259,10 +299,10 @@ When a `.spec.ts` file has no section in the per-test format yet:
      path/to/spec.spec.ts
    ```
 
-4. Build the section with one row per call site, tracking `describe` nesting to
-   assign the right `###` subsection. For deeply nested files, parse nesting
-   level by scanning for `describe(` opening lines and their matching `})`
-   closings in sequence.
+4. Build the detail file with one row per call site, tracking `describe`
+   nesting to assign the right `###` subsection. For deeply nested files, parse
+   nesting level by scanning for `describe(` opening lines and their matching
+   `})` closings in sequence.
 
 5. Initial Status for each row:
    - `it(` / `test(` / `it.each(` / `test.each(` → `pending`
@@ -274,11 +314,14 @@ When a `.spec.ts` file has no section in the per-test format yet:
    each batch of rows. Note how many remain in the commit message:
    `docs(parity): inventory dockerfile extract spec (40 / 75 rows)`
 
+7. Add the spec to the root index with status `Not done` unless the newly
+   created detail file has zero `pending` rows, in which case use `Done`.
+
 ---
 
 ### Phase 2 — Map existing Rust coverage
 
-When a section exists and one or more rows are `pending`:
+When a detail file exists and one or more rows are `pending`:
 
 **Phase 2 is complete for a file when:** you have run all searches below for
 every `pending` row and either found a confident match or concluded no match
@@ -318,7 +361,8 @@ rows are genuinely unported and ready for Phase 3.
 
 ### Phase 3 — Port missing tests
 
-When a section has `pending` rows and Phase 2 mapping is complete for that file:
+When a detail file has `pending` rows and Phase 2 mapping is complete for that
+file:
 
 1. Read `prompts/claude-loop-renovate-rust.md` before writing any Rust code.
    It is the canonical reference for Rust standards, crate conventions, scope
@@ -369,6 +413,10 @@ When a section has `pending` rows and Phase 2 mapping is complete for that file:
 
 8. After the test passes, update the row: Status → `ported`, fill in Rust file
    and Rust test name.
+
+   Also update the root index row:
+   - `Done` if the detail file has no remaining `pending` rows.
+   - `Not done` if any `pending` row remains.
 
 9. **For large spec files (many pending rows):** port a batch per iteration,
    commit, and continue. Do not attempt to port an entire large file in one
@@ -424,9 +472,9 @@ a Phase 2 or Phase 3 task), each committed separately:
 Within each step, prefer spec files where the Rust module already exists — they
 are most likely to have matchable or portable tests.
 
-If a spec file has no Rust counterpart yet, still create the Phase 1 section.
-Use `—` for Rust file and Rust test name. The section documents the gap so
-Phase 3 can implement it later.
+If a spec file has no Rust counterpart yet, still create the Phase 1 detail
+file and root index row. Use `—` for Rust file and Rust test name. The detail
+file documents the gap so Phase 3 can implement it later.
 
 ---
 
@@ -460,9 +508,10 @@ in the commit message and skip only that test, not the gate.
   ```
 - Multiple commits per session are expected and correct — one per coherent unit
   of work (one Phase 0 batch, one spec file mapped, one batch of tests ported).
-- Always commit `renovate-test-map.md` together with any Rust source files
-  changed in the same unit. Exception: if Phase 0 backfill finds no test-map
-  match for a Rust file, commit the comment-only change without a map update.
+- Always commit the matching detail file and `renovate-test-map.md` root index
+  together with any Rust source files changed in the same unit. Exception: if
+  Phase 0 backfill finds no test-map match for a Rust file, commit the
+  comment-only change without a map update.
 - Update the summary block counts on every commit.
 - Example commit messages:
   - `docs(parity): inventory ansible-galaxy extract spec (14 tests)`
@@ -476,7 +525,8 @@ in the commit message and skip only that test, not the gate.
 ## Start now
 
 1. Run the Phase 0 audit to get a count of unattributed tests.
-2. Read `docs/parity/renovate-test-map.md` to understand current state.
+2. Read `docs/parity/renovate-test-map.md` to understand current state, then
+   open the linked detail file for the spec you will work on.
 3. Recount the summary block and update it if stale.
 4. Work through the Iteration order until the loop budget runs out, committing
    after each unit of work.
@@ -486,3 +536,5 @@ At every commit:
 - Every Rust test you touched or wrote has `// Ported:` if it maps to a
   TypeScript spec test.
 - `renovate-test-map.md` summary block reflects accurate current counts.
+- The root index row for every touched spec is `Done` only when its detail file
+  has no `pending` rows; otherwise it is `Not done`.
