@@ -108,6 +108,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "GIT_PRIVATE_KEY") {
         config.git_private_key = Some(value.replace("\\n", "\n"));
     }
+    if let Some(value) = env_value(env, prefix, "GIT_PRIVATE_KEY_PASSPHRASE") {
+        config.git_private_key_passphrase = Some(value.to_owned());
+    }
     if let Some(value) = env_value(env, prefix, "USER_AGENT") {
         config.user_agent = Some(value.to_owned());
     }
@@ -728,6 +731,7 @@ mod tests {
         let config = build_from_env(&env(&[
             ("RENOVATE_USER_AGENT", "renovate-rust-test"),
             ("RENOVATE_MODE", "silent"),
+            ("RENOVATE_GIT_PRIVATE_KEY_PASSPHRASE", "secret-passphrase"),
             ("RENOVATE_BASE_DIR", "/tmp/renovate"),
             ("RENOVATE_CACHE_DIR", "/tmp/renovate/cache"),
             ("RENOVATE_CONTAINERBASE_DIR", "/tmp/renovate/containerbase"),
@@ -743,6 +747,10 @@ mod tests {
 
         assert_eq!(config.user_agent.as_deref(), Some("renovate-rust-test"));
         assert_eq!(config.mode.as_deref(), Some("silent"));
+        assert_eq!(
+            config.git_private_key_passphrase.as_deref(),
+            Some("secret-passphrase")
+        );
         assert_eq!(config.base_dir.as_deref(), Some("/tmp/renovate"));
         assert_eq!(config.cache_dir.as_deref(), Some("/tmp/renovate/cache"));
         assert_eq!(

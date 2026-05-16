@@ -208,6 +208,9 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         username: file_config.username.or(base.username),
         password: file_config.password.or(base.password),
         git_private_key: file_config.git_private_key.or(base.git_private_key),
+        git_private_key_passphrase: file_config
+            .git_private_key_passphrase
+            .or(base.git_private_key_passphrase),
         user_agent: file_config.user_agent.or(base.user_agent),
         base_dir: file_config.base_dir.or(base.base_dir),
         local_dir: file_config.local_dir.or(base.local_dir),

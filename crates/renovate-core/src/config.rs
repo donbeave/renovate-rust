@@ -57,6 +57,8 @@ pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
     "endpoint",
     "executionTimeout",
     "exposeAllEnv",
+    "gitPrivateKey",
+    "gitPrivateKeyPassphrase",
     "gitTimeout",
     "githubTokenWarn",
     "httpCacheTtlDays",
@@ -305,6 +307,9 @@ pub struct GlobalConfig {
 
     /// Private key string, with escaped newlines normalized by env parsing.
     pub git_private_key: Option<String>,
+
+    /// Passphrase for the private key used for signing commits.
+    pub git_private_key_passphrase: Option<String>,
 
     /// HTTP user-agent override.
     pub user_agent: Option<String>,
@@ -596,6 +601,7 @@ impl Default for GlobalConfig {
             username: None,
             password: None,
             git_private_key: None,
+            git_private_key_passphrase: None,
             user_agent: None,
             base_dir: None,
             local_dir: None,
