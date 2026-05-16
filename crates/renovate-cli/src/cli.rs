@@ -143,6 +143,14 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_ENDPOINT")]
     pub(crate) endpoint: Option<String>,
 
+    /// Username for platform authentication. Env: RENOVATE_USERNAME.
+    #[arg(long, env = "RENOVATE_USERNAME")]
+    pub(crate) username: Option<String>,
+
+    /// Password for platform authentication. Env: RENOVATE_PASSWORD.
+    #[arg(long, env = "RENOVATE_PASSWORD")]
+    pub(crate) password: Option<String>,
+
     // ── Run behavior ─────────────────────────────────────────────────────────
     /// Perform a dry run. Values: extract, lookup, full.
     /// Bare --dry-run is rewritten to --dry-run=true by migrateArgs, which

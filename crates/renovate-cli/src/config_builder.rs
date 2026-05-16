@@ -44,6 +44,12 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref e) = cli.endpoint {
         config.endpoint = Some(e.clone());
     }
+    if let Some(ref username) = cli.username {
+        config.username = Some(username.clone());
+    }
+    if let Some(ref password) = cli.password {
+        config.password = Some(password.clone());
+    }
 
     if let Some(dry) = map_dry_run(cli.dry_run) {
         config.dry_run = Some(dry);
@@ -241,6 +247,8 @@ mod tests {
             platform: None,
             token: None,
             endpoint: None,
+            username: None,
+            password: None,
             dry_run: None,
             require_config: None,
             fork_processing: None,
@@ -315,6 +323,24 @@ mod tests {
             build(&cli, GlobalConfig::default()).token.as_deref(),
             Some("mytoken")
         );
+    }
+
+    #[test]
+    fn username_and_password_are_set() {
+        let cli = cli_with(|c| {
+            c.username = Some("some-user".to_owned());
+            c.password = Some("app-password".to_owned());
+        });
+        let config = build(&cli, GlobalConfig::default());
+        assert_eq!(config.username.as_deref(), Some("some-user"));
+        assert_eq!(config.password.as_deref(), Some("app-password"));
+    }
+
+    #[test]
+    fn username_and_password_flags_are_parsed() {
+        let config = parse_and_build(&["--username", "some-user", "--password=app-password"]);
+        assert_eq!(config.username.as_deref(), Some("some-user"));
+        assert_eq!(config.password.as_deref(), Some("app-password"));
     }
 
     // Ported: "supports repositories" — workers/global/config/parse/cli.spec.ts line 89
