@@ -224,6 +224,33 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         docker_user: file_config.docker_user.or(base.docker_user),
         enabled: file_config.enabled.or(base.enabled),
         automerge: file_config.automerge.or(base.automerge),
+        dependency_dashboard: file_config
+            .dependency_dashboard
+            .or(base.dependency_dashboard),
+        dependency_dashboard_approval: file_config
+            .dependency_dashboard_approval
+            .or(base.dependency_dashboard_approval),
+        dependency_dashboard_autoclose: file_config
+            .dependency_dashboard_autoclose
+            .or(base.dependency_dashboard_autoclose),
+        dependency_dashboard_title: file_config
+            .dependency_dashboard_title
+            .or(base.dependency_dashboard_title),
+        dependency_dashboard_category: file_config
+            .dependency_dashboard_category
+            .or(base.dependency_dashboard_category),
+        dependency_dashboard_header: file_config
+            .dependency_dashboard_header
+            .or(base.dependency_dashboard_header),
+        dependency_dashboard_footer: file_config
+            .dependency_dashboard_footer
+            .or(base.dependency_dashboard_footer),
+        dependency_dashboard_labels: file_config
+            .dependency_dashboard_labels
+            .or(base.dependency_dashboard_labels),
+        config_warning_reuse_issue: file_config
+            .config_warning_reuse_issue
+            .or(base.config_warning_reuse_issue),
         dry_run: file_config.dry_run.or(base.dry_run),
         mode: file_config.mode.or(base.mode),
         binary_source: file_config.binary_source.or(base.binary_source),

@@ -87,6 +87,37 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "AUTOMERGE") {
         config.automerge = Some(parse_bool("RENOVATE_AUTOMERGE", value)?);
     }
+    if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD") {
+        config.dependency_dashboard = Some(parse_bool("RENOVATE_DEPENDENCY_DASHBOARD", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_APPROVAL") {
+        config.dependency_dashboard_approval = Some(parse_bool(
+            "RENOVATE_DEPENDENCY_DASHBOARD_APPROVAL",
+            value,
+        )?);
+    }
+    if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_AUTOCLOSE") {
+        config.dependency_dashboard_autoclose = Some(parse_bool(
+            "RENOVATE_DEPENDENCY_DASHBOARD_AUTOCLOSE",
+            value,
+        )?);
+    }
+    if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_TITLE") {
+        config.dependency_dashboard_title = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_HEADER") {
+        config.dependency_dashboard_header = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_FOOTER") {
+        config.dependency_dashboard_footer = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "DEPENDENCY_DASHBOARD_LABELS") {
+        config.dependency_dashboard_labels = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "CONFIG_WARNING_REUSE_ISSUE") {
+        config.config_warning_reuse_issue =
+            Some(parse_bool("RENOVATE_CONFIG_WARNING_REUSE_ISSUE", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "LABELS") {
         config.labels = split_list(value);
     }
@@ -687,6 +718,36 @@ mod tests {
     fn automerge_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_AUTOMERGE", "true")])).unwrap();
         assert_eq!(config.automerge, Some(true));
+    }
+
+    #[test]
+    fn dependency_dashboard_env_options_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_DEPENDENCY_DASHBOARD", "true"),
+            ("RENOVATE_DEPENDENCY_DASHBOARD_APPROVAL", "true"),
+            ("RENOVATE_DEPENDENCY_DASHBOARD_AUTOCLOSE", "true"),
+            ("RENOVATE_DEPENDENCY_DASHBOARD_TITLE", "Updates"),
+            ("RENOVATE_DEPENDENCY_DASHBOARD_HEADER", "Header"),
+            ("RENOVATE_DEPENDENCY_DASHBOARD_FOOTER", "Footer"),
+            (
+                "RENOVATE_DEPENDENCY_DASHBOARD_LABELS",
+                "renovate,dependencies",
+            ),
+            ("RENOVATE_CONFIG_WARNING_REUSE_ISSUE", "true"),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.dependency_dashboard, Some(true));
+        assert_eq!(config.dependency_dashboard_approval, Some(true));
+        assert_eq!(config.dependency_dashboard_autoclose, Some(true));
+        assert_eq!(config.dependency_dashboard_title.as_deref(), Some("Updates"));
+        assert_eq!(config.dependency_dashboard_header.as_deref(), Some("Header"));
+        assert_eq!(config.dependency_dashboard_footer.as_deref(), Some("Footer"));
+        assert_eq!(
+            config.dependency_dashboard_labels,
+            Some(vec!["renovate".to_owned(), "dependencies".to_owned()])
+        );
+        assert_eq!(config.config_warning_reuse_issue, Some(true));
     }
 
     #[test]

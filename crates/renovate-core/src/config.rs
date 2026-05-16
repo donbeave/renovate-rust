@@ -346,6 +346,33 @@ pub struct GlobalConfig {
     /// Global automerge flag.
     pub automerge: Option<bool>,
 
+    /// Whether to create a Dependency Dashboard issue.
+    pub dependency_dashboard: Option<bool>,
+
+    /// Whether updates require approval from the Dependency Dashboard.
+    pub dependency_dashboard_approval: Option<bool>,
+
+    /// Whether to close the Dependency Dashboard when there are no updates.
+    pub dependency_dashboard_autoclose: Option<bool>,
+
+    /// Dependency Dashboard issue title.
+    pub dependency_dashboard_title: Option<String>,
+
+    /// Dependency Dashboard category grouping.
+    pub dependency_dashboard_category: Option<String>,
+
+    /// Text inserted at the beginning of the Dependency Dashboard body.
+    pub dependency_dashboard_header: Option<String>,
+
+    /// Text inserted at the end of the Dependency Dashboard body.
+    pub dependency_dashboard_footer: Option<String>,
+
+    /// Labels to always apply to the Dependency Dashboard issue.
+    pub dependency_dashboard_labels: Option<Vec<String>>,
+
+    /// Whether closed Config Warning issues should be reused/reopened.
+    pub config_warning_reuse_issue: Option<bool>,
+
     // ── Run behavior ─────────────────────────────────────────────────────────
     /// Dry-run mode. `None` means dry-run is disabled (full updates).
     pub dry_run: Option<DryRun>,
@@ -639,6 +666,15 @@ impl Default for GlobalConfig {
             docker_user: None,
             enabled: None,
             automerge: None,
+            dependency_dashboard: None,
+            dependency_dashboard_approval: None,
+            dependency_dashboard_autoclose: None,
+            dependency_dashboard_title: None,
+            dependency_dashboard_category: None,
+            dependency_dashboard_header: None,
+            dependency_dashboard_footer: None,
+            dependency_dashboard_labels: None,
+            config_warning_reuse_issue: None,
             dry_run: None,
             mode: None,
             binary_source: None,

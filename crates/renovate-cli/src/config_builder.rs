@@ -112,6 +112,30 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(automerge) = cli.automerge {
         config.automerge = Some(automerge);
     }
+    if let Some(dependency_dashboard) = cli.dependency_dashboard {
+        config.dependency_dashboard = Some(dependency_dashboard);
+    }
+    if let Some(approval) = cli.dependency_dashboard_approval {
+        config.dependency_dashboard_approval = Some(approval);
+    }
+    if let Some(autoclose) = cli.dependency_dashboard_autoclose {
+        config.dependency_dashboard_autoclose = Some(autoclose);
+    }
+    if let Some(ref title) = cli.dependency_dashboard_title {
+        config.dependency_dashboard_title = Some(title.clone());
+    }
+    if let Some(ref header) = cli.dependency_dashboard_header {
+        config.dependency_dashboard_header = Some(header.clone());
+    }
+    if let Some(ref footer) = cli.dependency_dashboard_footer {
+        config.dependency_dashboard_footer = Some(footer.clone());
+    }
+    if let Some(ref labels) = cli.dependency_dashboard_labels {
+        config.dependency_dashboard_labels = Some(parse_string_list(labels)?);
+    }
+    if let Some(reuse) = cli.config_warning_reuse_issue {
+        config.config_warning_reuse_issue = Some(reuse);
+    }
     if let Some(pa) = cli.platform_automerge {
         config.platform_automerge = pa;
     }
@@ -495,6 +519,14 @@ mod tests {
             pr_commits_per_run_limit: None,
             enabled: None,
             automerge: None,
+            dependency_dashboard: None,
+            dependency_dashboard_approval: None,
+            dependency_dashboard_autoclose: None,
+            dependency_dashboard_title: None,
+            dependency_dashboard_header: None,
+            dependency_dashboard_footer: None,
+            dependency_dashboard_labels: None,
+            config_warning_reuse_issue: None,
             platform_automerge: None,
             platform_commit: None,
             recreate_when: None,
@@ -950,6 +982,32 @@ mod tests {
     #[test]
     fn automerge_flag_sets_automerge_config() {
         assert_eq!(parse_and_build(&["--automerge"]).automerge, Some(true));
+    }
+
+    #[test]
+    fn dependency_dashboard_flags_are_parsed() {
+        let config = parse_and_build(&[
+            "--dependency-dashboard",
+            "--dependency-dashboard-approval",
+            "--dependency-dashboard-autoclose",
+            "--dependency-dashboard-title=Updates",
+            "--dependency-dashboard-header=Header",
+            "--dependency-dashboard-footer=Footer",
+            "--dependency-dashboard-labels=renovate,dependencies",
+            "--config-warning-reuse-issue",
+        ]);
+
+        assert_eq!(config.dependency_dashboard, Some(true));
+        assert_eq!(config.dependency_dashboard_approval, Some(true));
+        assert_eq!(config.dependency_dashboard_autoclose, Some(true));
+        assert_eq!(config.dependency_dashboard_title.as_deref(), Some("Updates"));
+        assert_eq!(config.dependency_dashboard_header.as_deref(), Some("Header"));
+        assert_eq!(config.dependency_dashboard_footer.as_deref(), Some("Footer"));
+        assert_eq!(
+            config.dependency_dashboard_labels,
+            Some(vec!["renovate".to_owned(), "dependencies".to_owned()])
+        );
+        assert_eq!(config.config_warning_reuse_issue, Some(true));
     }
 
     // Ported: "supports list single" — workers/global/config/parse/cli.spec.ts line 74

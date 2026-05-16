@@ -284,6 +284,66 @@ pub(crate) struct Cli {
     )]
     pub(crate) automerge: Option<bool>,
 
+    /// Create a Dependency Dashboard issue.
+    /// Env: RENOVATE_DEPENDENCY_DASHBOARD.
+    #[arg(
+        long,
+        env = "RENOVATE_DEPENDENCY_DASHBOARD",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) dependency_dashboard: Option<bool>,
+
+    /// Require Dependency Dashboard approval before creating PRs.
+    /// Env: RENOVATE_DEPENDENCY_DASHBOARD_APPROVAL.
+    #[arg(
+        long,
+        env = "RENOVATE_DEPENDENCY_DASHBOARD_APPROVAL",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) dependency_dashboard_approval: Option<bool>,
+
+    /// Close the Dependency Dashboard when no updates remain.
+    /// Env: RENOVATE_DEPENDENCY_DASHBOARD_AUTOCLOSE.
+    #[arg(
+        long,
+        env = "RENOVATE_DEPENDENCY_DASHBOARD_AUTOCLOSE",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) dependency_dashboard_autoclose: Option<bool>,
+
+    /// Dependency Dashboard issue title.
+    /// Env: RENOVATE_DEPENDENCY_DASHBOARD_TITLE.
+    #[arg(long, env = "RENOVATE_DEPENDENCY_DASHBOARD_TITLE")]
+    pub(crate) dependency_dashboard_title: Option<String>,
+
+    /// Dependency Dashboard body header.
+    /// Env: RENOVATE_DEPENDENCY_DASHBOARD_HEADER.
+    #[arg(long, env = "RENOVATE_DEPENDENCY_DASHBOARD_HEADER")]
+    pub(crate) dependency_dashboard_header: Option<String>,
+
+    /// Dependency Dashboard body footer.
+    /// Env: RENOVATE_DEPENDENCY_DASHBOARD_FOOTER.
+    #[arg(long, env = "RENOVATE_DEPENDENCY_DASHBOARD_FOOTER")]
+    pub(crate) dependency_dashboard_footer: Option<String>,
+
+    /// Dependency Dashboard labels.
+    /// Env: RENOVATE_DEPENDENCY_DASHBOARD_LABELS.
+    #[arg(long, env = "RENOVATE_DEPENDENCY_DASHBOARD_LABELS")]
+    pub(crate) dependency_dashboard_labels: Option<String>,
+
+    /// Reuse/reopen existing Config Warning issues.
+    /// Env: RENOVATE_CONFIG_WARNING_REUSE_ISSUE.
+    #[arg(
+        long,
+        env = "RENOVATE_CONFIG_WARNING_REUSE_ISSUE",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) config_warning_reuse_issue: Option<bool>,
+
     /// Controls if platform-native auto-merge is used.
     /// Env: RENOVATE_PLATFORM_AUTOMERGE.
     #[arg(
