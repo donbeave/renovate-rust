@@ -1,0 +1,25 @@
+# Renovate Test Detail
+
+[Back to test map](../../../../renovate-test-map.md)
+
+## `lib/config/presets/local/common.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/local/common.spec.ts
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `config/presets/local/common › fetchJSONFile`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| throws for null | 8 | not-applicable | — | — | Platform-backed local preset file fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
+| throws for ExternalHostError | 16 | not-applicable | — | — | Platform-backed local preset file fetching and external-host error propagation are not implemented in Rust. |
+| throws for Error | 26 | not-applicable | — | — | Platform-backed local preset file fetching and fetch error mapping are not implemented in Rust. |
+
+### `config/presets/local/common › getPresetFromEndpoint`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| works | 36 | not-applicable | — | — | Platform-backed local preset endpoint fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
+
+---
+

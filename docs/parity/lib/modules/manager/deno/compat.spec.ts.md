@@ -1,0 +1,27 @@
+# Renovate Test Detail
+
+[Back to test map](../../../../renovate-test-map.md)
+
+## `lib/modules/manager/deno/compat.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/deno/compat.spec.ts
+**Total tests:** 6 | **Ported:** 6 | **Actionable:** 6 | **Status:** ported
+
+### `extractDenoCompatiblePackageJson()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| returns null if invalid package.json | 17 | pending | — | — | — |
+| handles null response | 24 | pending | — | — | — |
+
+### `collectPackageJson()`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| node-compat package.json | 44 | pending | — | — | — |
+| handles workspaces with valid workspace member | 77 | pending | — | — | — |
+| returns empty array when rootPackageFile is null | 141 | pending | — | — | — |
+| handles null packageFile in workspace members | 148 | pending | — | — | — |
+
+---
+

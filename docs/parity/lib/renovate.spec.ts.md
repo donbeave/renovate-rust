@@ -1,0 +1,17 @@
+# Renovate Test Detail
+
+[Back to test map](../renovate-test-map.md)
+
+## `lib/renovate.spec.ts`
+
+**Reference:** https://github.com/renovatebot/renovate/blob/main/lib/renovate.spec.ts
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+
+### `renovate`
+
+| Original test name | Line | Status | Rust file | Rust test name | Reason |
+|---|---|---|---|---|---|
+| starts | 10 | not-applicable | — | — | Renovate's TypeScript module-import bootstrap, instrumentation wrapper, and global worker mock interaction are not implemented in Rust. |
+
+---
+
