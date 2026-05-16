@@ -209,9 +209,59 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `assignees`.
     pub assignees: Vec<String>,
 
+    /// Whether assignees should be read from CODEOWNERS.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `assigneesFromCodeOwners`.
+    pub assignees_from_code_owners: bool,
+
+    /// Whether code-owner group entries should be expanded on supported platforms.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `expandCodeOwnersGroups`.
+    pub expand_code_owners_groups: bool,
+
+    /// Maximum number of configured assignees to sample.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `assigneesSampleSize`.
+    pub assignees_sample_size: Option<u32>,
+
     /// GitHub usernames/team slugs to add as PR reviewers.
     /// Renovate reference: `lib/config/options/index.ts` — `reviewers`.
     pub reviewers: Vec<String>,
+
+    /// Reviewers to exclude from assignment.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `ignoreReviewers`.
+    pub ignore_reviewers: Vec<String>,
+
+    /// Whether reviewers should be read from CODEOWNERS.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `reviewersFromCodeOwners`.
+    pub reviewers_from_code_owners: bool,
+
+    /// Whether unavailable users should be filtered on supported platforms.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `filterUnavailableUsers`.
+    pub filter_unavailable_users: bool,
+
+    /// Whether maintainer edits should be disabled for fork-mode PRs.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `forkModeDisallowMaintainerEdits`.
+    pub fork_mode_disallow_maintainer_edits: bool,
+
+    /// Whether PRs should be confidential on supported platforms.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `confidential`.
+    pub confidential: bool,
+
+    /// Maximum number of configured reviewers to sample.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `reviewersSampleSize`.
+    pub reviewers_sample_size: Option<u32>,
+
+    /// Additional reviewers merged into the configured reviewer set.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `additionalReviewers`.
+    pub additional_reviewers: Vec<String>,
 
     /// Whether Bitbucket PR tasks should be completed after PR creation.
     ///
@@ -4178,8 +4228,28 @@ impl RepoConfig {
             add_labels: Vec<String>,
             #[serde(default)]
             assignees: Vec<String>,
+            #[serde(rename = "assigneesFromCodeOwners", default)]
+            assignees_from_code_owners: bool,
+            #[serde(rename = "expandCodeOwnersGroups", default)]
+            expand_code_owners_groups: bool,
+            #[serde(rename = "assigneesSampleSize")]
+            assignees_sample_size: Option<u32>,
             #[serde(default)]
             reviewers: Vec<String>,
+            #[serde(rename = "ignoreReviewers", default)]
+            ignore_reviewers: Vec<String>,
+            #[serde(rename = "reviewersFromCodeOwners", default)]
+            reviewers_from_code_owners: bool,
+            #[serde(rename = "filterUnavailableUsers", default)]
+            filter_unavailable_users: bool,
+            #[serde(rename = "forkModeDisallowMaintainerEdits", default)]
+            fork_mode_disallow_maintainer_edits: bool,
+            #[serde(default)]
+            confidential: bool,
+            #[serde(rename = "reviewersSampleSize")]
+            reviewers_sample_size: Option<u32>,
+            #[serde(rename = "additionalReviewers", default)]
+            additional_reviewers: Vec<String>,
             #[serde(rename = "bbAutoResolvePrTasks", default)]
             bb_auto_resolve_pr_tasks: bool,
             #[serde(rename = "bbUseDefaultReviewers", default = "default_true")]
@@ -5113,6 +5183,9 @@ impl RepoConfig {
                 }
                 a
             },
+            assignees_from_code_owners: raw.assignees_from_code_owners,
+            expand_code_owners_groups: raw.expand_code_owners_groups,
+            assignees_sample_size: raw.assignees_sample_size,
             reviewers: {
                 let mut r = raw.reviewers;
                 for pr in param_reviewers {
@@ -5122,6 +5195,13 @@ impl RepoConfig {
                 }
                 r
             },
+            ignore_reviewers: raw.ignore_reviewers,
+            reviewers_from_code_owners: raw.reviewers_from_code_owners,
+            filter_unavailable_users: raw.filter_unavailable_users,
+            fork_mode_disallow_maintainer_edits: raw.fork_mode_disallow_maintainer_edits,
+            confidential: raw.confidential,
+            reviewers_sample_size: raw.reviewers_sample_size,
+            additional_reviewers: raw.additional_reviewers,
             bb_auto_resolve_pr_tasks: raw.bb_auto_resolve_pr_tasks,
             bb_use_default_reviewers: raw.bb_use_default_reviewers,
             draft_pr: raw.draft_pr,
@@ -5912,7 +5992,17 @@ impl Default for RepoConfig {
             labels: Vec::new(),
             add_labels: Vec::new(),
             assignees: Vec::new(),
+            assignees_from_code_owners: false,
+            expand_code_owners_groups: false,
+            assignees_sample_size: None,
             reviewers: Vec::new(),
+            ignore_reviewers: Vec::new(),
+            reviewers_from_code_owners: false,
+            filter_unavailable_users: false,
+            fork_mode_disallow_maintainer_edits: false,
+            confidential: false,
+            reviewers_sample_size: None,
+            additional_reviewers: Vec::new(),
             bb_auto_resolve_pr_tasks: false,
             bb_use_default_reviewers: true,
             draft_pr: false,
@@ -9183,6 +9273,34 @@ mod tests {
     fn assign_automerge_config() {
         let c = RepoConfig::parse(r#"{"assignAutomerge": true}"#);
         assert!(c.assign_automerge);
+    }
+
+    #[test]
+    fn pr_participant_options_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "assigneesFromCodeOwners": true,
+                "expandCodeOwnersGroups": true,
+                "assigneesSampleSize": 2,
+                "ignoreReviewers": ["renovate-bot"],
+                "reviewersFromCodeOwners": true,
+                "filterUnavailableUsers": true,
+                "forkModeDisallowMaintainerEdits": true,
+                "confidential": true,
+                "reviewersSampleSize": 3,
+                "additionalReviewers": ["team-a"]
+            }"#,
+        );
+        assert!(c.assignees_from_code_owners);
+        assert!(c.expand_code_owners_groups);
+        assert_eq!(c.assignees_sample_size, Some(2));
+        assert_eq!(c.ignore_reviewers, vec!["renovate-bot"]);
+        assert!(c.reviewers_from_code_owners);
+        assert!(c.filter_unavailable_users);
+        assert!(c.fork_mode_disallow_maintainer_edits);
+        assert!(c.confidential);
+        assert_eq!(c.reviewers_sample_size, Some(3));
+        assert_eq!(c.additional_reviewers, vec!["team-a"]);
     }
 
     #[test]
