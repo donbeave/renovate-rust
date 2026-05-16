@@ -193,6 +193,16 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `draftPR`.
     pub draft_pr: bool,
 
+    /// Existing Azure Boards work item to link to each PR. Default `0`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `azureWorkItemId`.
+    pub azure_work_item_id: u32,
+
+    /// Whether Renovate should auto-approve PRs when the platform supports it.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `autoApprove`.
+    pub auto_approve: bool,
+
     /// When `true`, assign reviewers/assignees even if the PR is auto-mergeable.
     /// Default: `false`.
     ///
@@ -3982,6 +3992,10 @@ impl RepoConfig {
             reviewers: Vec<String>,
             #[serde(rename = "draftPR", default)]
             draft_pr: bool,
+            #[serde(rename = "azureWorkItemId", default)]
+            azure_work_item_id: u32,
+            #[serde(rename = "autoApprove", default)]
+            auto_approve: bool,
             #[serde(rename = "assignAutomerge", default)]
             assign_automerge: bool,
             /// Use platform-native automerge (e.g. GitHub's merge queue, Azure's auto-complete).
@@ -4774,6 +4788,8 @@ impl RepoConfig {
                 r
             },
             draft_pr: raw.draft_pr,
+            azure_work_item_id: raw.azure_work_item_id,
+            auto_approve: raw.auto_approve,
             assign_automerge: raw.assign_automerge,
             platform_automerge: raw
                 .platform_automerge
@@ -5527,6 +5543,8 @@ impl Default for RepoConfig {
             assignees: Vec::new(),
             reviewers: Vec::new(),
             draft_pr: false,
+            azure_work_item_id: 0,
+            auto_approve: false,
             assign_automerge: false,
             platform_automerge: true,
             branch_prefix: "renovate/".to_owned(),
@@ -8692,6 +8710,18 @@ mod tests {
     fn draft_pr_config() {
         let c = RepoConfig::parse(r#"{"draftPR": true}"#);
         assert!(c.draft_pr);
+    }
+
+    #[test]
+    fn azure_work_item_id_config() {
+        let c = RepoConfig::parse(r#"{"azureWorkItemId": 12345}"#);
+        assert_eq!(c.azure_work_item_id, 12345);
+    }
+
+    #[test]
+    fn auto_approve_config() {
+        let c = RepoConfig::parse(r#"{"autoApprove": true}"#);
+        assert!(c.auto_approve);
     }
 
     #[test]
