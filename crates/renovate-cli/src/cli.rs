@@ -260,6 +260,67 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_ALLOW_COMMAND_TEMPLATING")]
     pub(crate) allow_command_templating: Option<bool>,
 
+    // ── Self-hosted global options ───────────────────────────────────────────
+    /// Merge Confidence API endpoint.
+    /// Env: RENOVATE_MERGE_CONFIDENCE_ENDPOINT.
+    #[arg(long, env = "RENOVATE_MERGE_CONFIDENCE_ENDPOINT")]
+    pub(crate) merge_confidence_endpoint: Option<String>,
+
+    /// Merge Confidence datasources (comma-separated or JSON array).
+    /// Env: RENOVATE_MERGE_CONFIDENCE_DATASOURCES.
+    #[arg(long, env = "RENOVATE_MERGE_CONFIDENCE_DATASOURCES")]
+    pub(crate) merge_confidence_datasources: Option<String>,
+
+    /// Autodiscover repository sort key.
+    /// Env: RENOVATE_AUTODISCOVER_REPO_SORT.
+    #[arg(long, env = "RENOVATE_AUTODISCOVER_REPO_SORT")]
+    pub(crate) autodiscover_repo_sort: Option<String>,
+
+    /// Autodiscover repository order.
+    /// Env: RENOVATE_AUTODISCOVER_REPO_ORDER.
+    #[arg(long, env = "RENOVATE_AUTODISCOVER_REPO_ORDER")]
+    pub(crate) autodiscover_repo_order: Option<String>,
+
+    /// Maximum number of Docker tag pages to fetch.
+    /// Env: RENOVATE_DOCKER_MAX_PAGES.
+    #[arg(long, env = "RENOVATE_DOCKER_MAX_PAGES")]
+    pub(crate) docker_max_pages: Option<u32>,
+
+    /// Delete the self-hosted config file after reading it.
+    /// Env: RENOVATE_DELETE_CONFIG_FILE.
+    #[arg(
+        long,
+        env = "RENOVATE_DELETE_CONFIG_FILE",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) delete_config_file: Option<bool>,
+
+    /// S3 endpoint for cache/storage.
+    /// Env: RENOVATE_S3_ENDPOINT.
+    #[arg(long, env = "RENOVATE_S3_ENDPOINT")]
+    pub(crate) s3_endpoint: Option<String>,
+
+    /// Use S3 path-style access.
+    /// Env: RENOVATE_S3_PATH_STYLE.
+    #[arg(
+        long,
+        env = "RENOVATE_S3_PATH_STYLE",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) s3_path_style: Option<bool>,
+
+    /// Force local repository cache behavior.
+    /// Env: RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL.
+    #[arg(
+        long,
+        env = "RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) repository_cache_force_local: Option<bool>,
+
     /// Labels to apply to created PRs.
     /// Env: RENOVATE_LABELS.
     #[arg(long, env = "RENOVATE_LABELS", value_delimiter = ',')]

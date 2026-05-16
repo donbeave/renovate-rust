@@ -94,6 +94,33 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(act) = cli.allow_command_templating {
         config.allow_command_templating = act;
     }
+    if let Some(ref endpoint) = cli.merge_confidence_endpoint {
+        config.merge_confidence_endpoint = Some(endpoint.clone());
+    }
+    if let Some(ref datasources) = cli.merge_confidence_datasources {
+        config.merge_confidence_datasources = parse_string_list(datasources)?;
+    }
+    if let Some(ref sort) = cli.autodiscover_repo_sort {
+        config.autodiscover_repo_sort = Some(sort.clone());
+    }
+    if let Some(ref order) = cli.autodiscover_repo_order {
+        config.autodiscover_repo_order = Some(order.clone());
+    }
+    if let Some(max_pages) = cli.docker_max_pages {
+        config.docker_max_pages = Some(max_pages);
+    }
+    if let Some(delete_config_file) = cli.delete_config_file {
+        config.delete_config_file = delete_config_file;
+    }
+    if let Some(ref endpoint) = cli.s3_endpoint {
+        config.s3_endpoint = Some(endpoint.clone());
+    }
+    if let Some(path_style) = cli.s3_path_style {
+        config.s3_path_style = path_style;
+    }
+    if let Some(force_local) = cli.repository_cache_force_local {
+        config.repository_cache_force_local = Some(force_local);
+    }
     if !cli.labels.is_empty() {
         config.labels = trim_list(&cli.labels);
     }
@@ -287,6 +314,15 @@ mod tests {
             recreate_when: None,
             allowed_commands: None,
             allow_command_templating: None,
+            merge_confidence_endpoint: None,
+            merge_confidence_datasources: None,
+            autodiscover_repo_sort: None,
+            autodiscover_repo_order: None,
+            docker_max_pages: None,
+            delete_config_file: None,
+            s3_endpoint: None,
+            s3_path_style: None,
+            repository_cache_force_local: None,
             labels: Vec::new(),
             host_rules: None,
             registry_aliases: None,
@@ -407,6 +443,34 @@ mod tests {
                 .as_deref(),
             Some("enabled")
         );
+    }
+
+    #[test]
+    fn self_hosted_global_flags_are_parsed() {
+        let config = parse_and_build(&[
+            "--merge-confidence-endpoint=https://mc.example",
+            "--merge-confidence-datasources=docker,npm",
+            "--autodiscover-repo-sort=updated",
+            "--autodiscover-repo-order=desc",
+            "--docker-max-pages=7",
+            "--delete-config-file",
+            "--s3-endpoint=https://s3.example",
+            "--s3-path-style=true",
+            "--repository-cache-force-local=false",
+        ]);
+
+        assert_eq!(
+            config.merge_confidence_endpoint.as_deref(),
+            Some("https://mc.example")
+        );
+        assert_eq!(config.merge_confidence_datasources, vec!["docker", "npm"]);
+        assert_eq!(config.autodiscover_repo_sort.as_deref(), Some("updated"));
+        assert_eq!(config.autodiscover_repo_order.as_deref(), Some("desc"));
+        assert_eq!(config.docker_max_pages, Some(7));
+        assert!(config.delete_config_file);
+        assert_eq!(config.s3_endpoint.as_deref(), Some("https://s3.example"));
+        assert!(config.s3_path_style);
+        assert_eq!(config.repository_cache_force_local, Some(false));
     }
 
     // Ported: "supports boolean no value" — workers/global/config/parse/cli.spec.ts line 36
