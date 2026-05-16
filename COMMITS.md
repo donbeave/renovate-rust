@@ -54,15 +54,9 @@ one agent `Co-authored-by` trailer.
 
 ## Pre-commit Verification
 
-Do not run Cargo verification commands automatically before or after every
-commit. Run Cargo checks only when the operator explicitly asks for them, or
-when a task instruction names a specific Cargo command.
-
-For documentation-only and parity-tracking changes, inspect the diff and run:
-
-```sh
-git diff --check
-```
+Do not run verification commands automatically before or after every commit.
+Run checks only when the operator explicitly asks for them, or when a task
+instruction names a specific command.
 
 When the operator requests Rust verification, use the strongest applicable
 checks for the change:

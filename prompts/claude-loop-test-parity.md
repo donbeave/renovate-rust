@@ -480,15 +480,9 @@ file documents the gap so Phase 3 can implement it later.
 
 ## Verification before every commit
 
-Do not run Cargo verification commands automatically before or after every
-commit. Run Cargo checks only when the operator explicitly asks for them, or
-when a task instruction names a specific Cargo command.
-
-For documentation-only and parity-tracking changes, inspect the diff and run:
-
-```sh
-git diff --check
-```
+Do not run verification commands automatically before or after every commit.
+Run checks only when the operator explicitly asks for them, or when a task
+instruction names a specific command.
 
 When the operator requests Rust verification, use the strongest applicable
 checks for the change:
@@ -545,8 +539,7 @@ your changes, note it in the commit message or final progress notes.
    after each unit of work.
 
 At every commit:
-- `git diff --check` passes for documentation/parity-only changes.
-- Operator-requested Cargo checks pass, or pre-existing/blocking failures are
+- Operator-requested checks pass, or pre-existing/blocking failures are
   documented.
 - Every Rust test you touched or wrote has `// Ported:` if it maps to a
   TypeScript spec test.

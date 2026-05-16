@@ -149,11 +149,9 @@ Rust best-practice rules:
 - Do not claim performance wins without measurement unless the change removes an obvious allocation, clone, or blocking operation from ordinary execution.
 
 Verification:
-- Do not run Cargo verification commands automatically before or after every
-  commit. Run Cargo checks only when the operator explicitly asks for them, or
-  when a task instruction names a specific Cargo command.
-- For documentation-only and parity-tracking changes, inspect the diff and run
-  `git diff --check`.
+- Do not run verification commands automatically before or after every commit.
+  Run checks only when the operator explicitly asks for them, or when a task
+  instruction names a specific command.
 - When the operator requests Rust verification, use the strongest applicable
   local checks that fit the iteration:
   - `cargo build --workspace --all-features`
