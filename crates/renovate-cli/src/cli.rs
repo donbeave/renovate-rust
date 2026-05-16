@@ -213,6 +213,26 @@ pub(crate) struct Cli {
     )]
     pub(crate) config_migration: Option<bool>,
 
+    /// Require an onboarding Configuration PR first.
+    /// Env: RENOVATE_ONBOARDING.
+    #[arg(long, env = "RENOVATE_ONBOARDING", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) onboarding: Option<bool>,
+
+    /// Repository config filenames to discover or create.
+    /// Env: RENOVATE_CONFIG_FILE_NAMES.
+    #[arg(long, env = "RENOVATE_CONFIG_FILE_NAMES")]
+    pub(crate) config_file_names: Option<String>,
+
+    /// Onboard repositories even when no dependencies are found.
+    /// Env: RENOVATE_ONBOARDING_NO_DEPS.
+    #[arg(long, env = "RENOVATE_ONBOARDING_NO_DEPS")]
+    pub(crate) onboarding_no_deps: Option<String>,
+
+    /// Add a rebase/retry checkbox to onboarding PRs.
+    /// Env: RENOVATE_ONBOARDING_REBASE_CHECKBOX.
+    #[arg(long, env = "RENOVATE_ONBOARDING_REBASE_CHECKBOX", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) onboarding_rebase_checkbox: Option<bool>,
+
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Enable or disable Renovate processing.
     /// Env: RENOVATE_ENABLED.

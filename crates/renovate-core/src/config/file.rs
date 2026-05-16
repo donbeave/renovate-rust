@@ -229,6 +229,25 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         require_config: file_config.require_config,
         fork_processing: file_config.fork_processing,
         config_migration: file_config.config_migration,
+        onboarding: file_config.onboarding.or(base.onboarding),
+        onboarding_branch: file_config.onboarding_branch.or(base.onboarding_branch),
+        onboarding_auto_close_age: file_config
+            .onboarding_auto_close_age
+            .or(base.onboarding_auto_close_age),
+        onboarding_commit_message: file_config
+            .onboarding_commit_message
+            .or(base.onboarding_commit_message),
+        config_file_names: file_config.config_file_names.or(base.config_file_names),
+        onboarding_config_file_name: file_config
+            .onboarding_config_file_name
+            .or(base.onboarding_config_file_name),
+        onboarding_no_deps: file_config.onboarding_no_deps.or(base.onboarding_no_deps),
+        onboarding_pr_title: file_config
+            .onboarding_pr_title
+            .or(base.onboarding_pr_title),
+        onboarding_rebase_checkbox: file_config
+            .onboarding_rebase_checkbox
+            .or(base.onboarding_rebase_checkbox),
         platform_automerge: file_config.platform_automerge,
         platform_commit: file_config.platform_commit.or(base.platform_commit),
         recreate_when: file_config.recreate_when,

@@ -75,6 +75,18 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(config_migration) = cli.config_migration {
         config.config_migration = config_migration;
     }
+    if let Some(onboarding) = cli.onboarding {
+        config.onboarding = Some(onboarding);
+    }
+    if let Some(ref names) = cli.config_file_names {
+        config.config_file_names = Some(parse_string_list(names)?);
+    }
+    if let Some(ref no_deps) = cli.onboarding_no_deps {
+        config.onboarding_no_deps = Some(no_deps.clone());
+    }
+    if let Some(rebase) = cli.onboarding_rebase_checkbox {
+        config.onboarding_rebase_checkbox = Some(rebase);
+    }
     if let Some(enabled) = cli.enabled {
         config.enabled = Some(enabled);
     }
@@ -401,6 +413,10 @@ mod tests {
             fork_processing: None,
             binary_source: None,
             config_migration: None,
+            onboarding: None,
+            config_file_names: None,
+            onboarding_no_deps: None,
+            onboarding_rebase_checkbox: None,
             enabled: None,
             automerge: None,
             platform_automerge: None,
@@ -691,6 +707,27 @@ mod tests {
     #[test]
     fn config_migration_bare_sets_true() {
         assert!(parse_and_build(&["--config-migration"]).config_migration);
+    }
+
+    #[test]
+    fn onboarding_flags_are_parsed() {
+        let config = parse_and_build(&[
+            "--onboarding=false",
+            "--config-file-names=renovate.json,.github/renovate.json5",
+            "--onboarding-no-deps=enabled",
+            "--onboarding-rebase-checkbox",
+        ]);
+
+        assert_eq!(config.onboarding, Some(false));
+        assert_eq!(
+            config.config_file_names,
+            Some(vec![
+                "renovate.json".to_owned(),
+                ".github/renovate.json5".to_owned()
+            ])
+        );
+        assert_eq!(config.onboarding_no_deps.as_deref(), Some("enabled"));
+        assert_eq!(config.onboarding_rebase_checkbox, Some(true));
     }
 
     // Ported: "supports boolean space true" — workers/global/config/parse/cli.spec.ts line 42

@@ -31,6 +31,35 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "CONFIG_MIGRATION") {
         config.config_migration = parse_bool("RENOVATE_CONFIG_MIGRATION", value)?;
     }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING") {
+        config.onboarding = Some(parse_bool("RENOVATE_ONBOARDING", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_BRANCH") {
+        config.onboarding_branch = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_AUTO_CLOSE_AGE") {
+        config.onboarding_auto_close_age =
+            Some(parse_u32("RENOVATE_ONBOARDING_AUTO_CLOSE_AGE", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_COMMIT_MESSAGE") {
+        config.onboarding_commit_message = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "CONFIG_FILE_NAMES") {
+        config.config_file_names = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_CONFIG_FILE_NAME") {
+        config.onboarding_config_file_name = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_NO_DEPS") {
+        config.onboarding_no_deps = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_PR_TITLE") {
+        config.onboarding_pr_title = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_REBASE_CHECKBOX") {
+        config.onboarding_rebase_checkbox =
+            Some(parse_bool("RENOVATE_ONBOARDING_REBASE_CHECKBOX", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "ENABLED") {
         config.enabled = Some(parse_bool("RENOVATE_ENABLED", value)?);
     }
@@ -1144,6 +1173,50 @@ mod tests {
         assert_eq!(config.report_type.as_deref(), Some("file"));
         assert_eq!(config.report_path.as_deref(), Some("./report.json"));
         assert_eq!(config.report_formatting, Some(true));
+    }
+
+    #[test]
+    fn onboarding_env_options_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_ONBOARDING", "false"),
+            ("RENOVATE_ONBOARDING_BRANCH", "renovate/setup"),
+            ("RENOVATE_ONBOARDING_AUTO_CLOSE_AGE", "14"),
+            ("RENOVATE_ONBOARDING_COMMIT_MESSAGE", "Configure Renovate"),
+            (
+                "RENOVATE_CONFIG_FILE_NAMES",
+                "renovate.json,.github/renovate.json5",
+            ),
+            ("RENOVATE_ONBOARDING_CONFIG_FILE_NAME", ".github/renovate.json5"),
+            ("RENOVATE_ONBOARDING_NO_DEPS", "enabled"),
+            ("RENOVATE_ONBOARDING_PR_TITLE", "Configure Renovate"),
+            ("RENOVATE_ONBOARDING_REBASE_CHECKBOX", "true"),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.onboarding, Some(false));
+        assert_eq!(config.onboarding_branch.as_deref(), Some("renovate/setup"));
+        assert_eq!(config.onboarding_auto_close_age, Some(14));
+        assert_eq!(
+            config.onboarding_commit_message.as_deref(),
+            Some("Configure Renovate")
+        );
+        assert_eq!(
+            config.config_file_names,
+            Some(vec![
+                "renovate.json".to_owned(),
+                ".github/renovate.json5".to_owned()
+            ])
+        );
+        assert_eq!(
+            config.onboarding_config_file_name.as_deref(),
+            Some(".github/renovate.json5")
+        );
+        assert_eq!(config.onboarding_no_deps.as_deref(), Some("enabled"));
+        assert_eq!(
+            config.onboarding_pr_title.as_deref(),
+            Some("Configure Renovate")
+        );
+        assert_eq!(config.onboarding_rebase_checkbox, Some(true));
     }
 
     #[test]

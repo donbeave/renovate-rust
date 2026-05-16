@@ -350,6 +350,33 @@ pub struct GlobalConfig {
     /// Whether Renovate should migrate config files when possible.
     pub config_migration: bool,
 
+    /// Whether onboarding is required before normal repository processing.
+    pub onboarding: Option<bool>,
+
+    /// Branch used for onboarding PRs.
+    pub onboarding_branch: Option<String>,
+
+    /// Maximum onboarding PR age before auto-close.
+    pub onboarding_auto_close_age: Option<u32>,
+
+    /// Commit message used for onboarding PRs.
+    pub onboarding_commit_message: Option<String>,
+
+    /// Repository config filenames to discover or create.
+    pub config_file_names: Option<Vec<String>>,
+
+    /// Config filename used in onboarding PRs.
+    pub onboarding_config_file_name: Option<String>,
+
+    /// Whether to onboard repositories with no discovered dependencies.
+    pub onboarding_no_deps: Option<String>,
+
+    /// Pull request title used for onboarding PRs.
+    pub onboarding_pr_title: Option<String>,
+
+    /// Whether to include the rebase/retry checkbox in onboarding PRs.
+    pub onboarding_rebase_checkbox: Option<bool>,
+
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Whether to use platform-native auto-merge. Default: `true`.
     pub platform_automerge: bool,
@@ -528,6 +555,15 @@ impl Default for GlobalConfig {
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,
             config_migration: false,
+            onboarding: None,
+            onboarding_branch: None,
+            onboarding_auto_close_age: None,
+            onboarding_commit_message: None,
+            config_file_names: None,
+            onboarding_config_file_name: None,
+            onboarding_no_deps: None,
+            onboarding_pr_title: None,
+            onboarding_rebase_checkbox: None,
             platform_automerge: true,
             platform_commit: None,
             recreate_when: RecreateWhen::Auto,
