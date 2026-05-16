@@ -373,6 +373,12 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `pinDigests`.
     pub pin_digests: bool,
 
+    /// When `true`, Renovate creates PRs to roll back versions missing from the
+    /// registry.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `rollbackPrs`.
+    pub rollback_prs: bool,
+
     /// When `true`, Renovate creates a Dependency Dashboard issue in the repo.
     /// Default: `false`.
     ///
@@ -4114,6 +4120,8 @@ impl RepoConfig {
             respect_latest: bool,
             #[serde(rename = "pinDigests", default)]
             pin_digests: bool,
+            #[serde(rename = "rollbackPrs", default)]
+            rollback_prs: bool,
             #[serde(rename = "dependencyDashboard", default)]
             dependency_dashboard: bool,
             #[serde(rename = "dependencyDashboardApproval", default)]
@@ -4956,6 +4964,7 @@ impl RepoConfig {
                     && !effective_extends
                         .iter()
                         .any(|p| p == ":pinDigestsDisabled" || p == "pinDigestsDisabled")),
+            rollback_prs: raw.rollback_prs,
             dependency_dashboard: raw.dependency_dashboard
                 || effective_extends
                     .iter()
@@ -5592,6 +5601,7 @@ impl Default for RepoConfig {
             ignore_unstable: false,
             respect_latest: false,
             pin_digests: false,
+            rollback_prs: false,
             dependency_dashboard: false,
             dependency_dashboard_approval: false,
             config_migration: false,
@@ -13396,6 +13406,12 @@ mod rule_effects_tests {
             c.dependency_dashboard,
             "raw dependencyDashboard: true must be parsed"
         );
+    }
+
+    #[test]
+    fn raw_rollback_prs_parsed() {
+        let c = RepoConfig::parse(r#"{"rollbackPrs": true}"#);
+        assert!(c.rollback_prs, "raw rollbackPrs: true must be parsed");
     }
 
     #[test]
