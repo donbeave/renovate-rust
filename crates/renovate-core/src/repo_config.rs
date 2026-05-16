@@ -4312,6 +4312,12 @@ impl RepoConfig {
             extends: Vec<String>,
             #[serde(rename = "dependencyDashboardApproval")]
             dependency_dashboard_approval: Option<bool>,
+            #[serde(rename = "overrideDatasource")]
+            override_datasource: Option<String>,
+            #[serde(rename = "overrideDepName")]
+            override_dep_name: Option<String>,
+            #[serde(rename = "overridePackageName")]
+            override_package_name: Option<String>,
             /// `force: { enabled: bool }` — force-override for the enabled state.
             /// Mirrors Renovate's `force` property in packageRules (used by vulnerability alerts).
             force: Option<ForceConfig>,
@@ -5421,6 +5427,9 @@ impl RepoConfig {
                     source_url: r.source_url,
                     fetch_change_logs: r.fetch_change_logs,
                     dependency_dashboard_approval: r.dependency_dashboard_approval,
+                    override_datasource: r.override_datasource,
+                    override_dep_name: r.override_dep_name,
+                    override_package_name: r.override_package_name,
                     force_enabled: r.force.and_then(|f| f.enabled),
                 }
             })
@@ -6322,6 +6331,19 @@ impl RepoConfig {
             }
             if rule.dependency_dashboard_approval.is_some() {
                 effects.dependency_dashboard_approval = rule.dependency_dashboard_approval;
+            }
+            if rule.override_datasource.is_some() {
+                effects
+                    .override_datasource
+                    .clone_from(&rule.override_datasource);
+            }
+            if let Some(override_dep_name) = &rule.override_dep_name {
+                effects.override_dep_name =
+                    Some(render_package_rule_template(override_dep_name, ctx));
+            }
+            if let Some(override_package_name) = &rule.override_package_name {
+                effects.override_package_name =
+                    Some(render_package_rule_template(override_package_name, ctx));
             }
             // `assignees`/`reviewers` are NOT mergeable → replace.
             if !rule.assignees.is_empty() {
@@ -14291,6 +14313,43 @@ mod rule_effects_tests {
         assert!(
             effects.changelog_url.is_some(),
             "changelogUrl must be collected from packageRules"
+        );
+    }
+
+    #[test]
+    fn package_rule_identity_overrides_are_collected() {
+        let c = RepoConfig::parse(
+            r#"{"packageRules": [
+                {
+                    "matchPackageNames": ["left-pad"],
+                    "overrideDatasource": "npm",
+                    "overrideDepName": "@scope/{{depName}}",
+                    "overridePackageName": "{{replace \"left\" \"right\" packageName}}"
+                },
+                {
+                    "matchPackageNames": ["left-pad"],
+                    "overrideDatasource": "github-releases",
+                    "overrideDepName": "{{depName}}-renamed"
+                }
+            ]}"#,
+        );
+        let ctx = DepContext {
+            dep_name: "left-pad",
+            package_name: Some("left-pad"),
+            ..Default::default()
+        };
+        let effects = c.collect_rule_effects(&ctx);
+        assert_eq!(
+            effects.override_datasource.as_deref(),
+            Some("github-releases")
+        );
+        assert_eq!(
+            effects.override_dep_name.as_deref(),
+            Some("left-pad-renamed")
+        );
+        assert_eq!(
+            effects.override_package_name.as_deref(),
+            Some("right-pad")
         );
     }
 

@@ -298,6 +298,18 @@ pub struct PackageRule {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `dependencyDashboardApproval`.
     pub dependency_dashboard_approval: Option<bool>,
+    /// Override the datasource value for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `overrideDatasource`.
+    pub override_datasource: Option<String>,
+    /// Override the dep name for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `overrideDepName`.
+    pub override_dep_name: Option<String>,
+    /// Override the lookup package name for matching deps.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `overridePackageName`.
+    pub override_package_name: Option<String>,
 }
 
 // ── impl PackageRule ──────────────────────────────────────────────────────────
@@ -943,6 +955,12 @@ pub struct RuleEffects {
     pub fetch_change_logs: Option<String>,
     /// Whether Dependency Dashboard approval is required before creating a PR.
     pub dependency_dashboard_approval: Option<bool>,
+    /// Effective `overrideDatasource` from matching package rules.
+    pub override_datasource: Option<String>,
+    /// Rendered effective `overrideDepName` from matching package rules.
+    pub override_dep_name: Option<String>,
+    /// Rendered effective `overridePackageName` from matching package rules.
+    pub override_package_name: Option<String>,
     /// Whether this dep is force-disabled (skipReason should be set).
     /// Computed from `force.enabled` in packageRules.
     /// `true` = force-enabled (overrides any `enabled: false`).
