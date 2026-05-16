@@ -388,6 +388,15 @@ pub struct GlobalConfig {
     /// Repository cache storage type.
     pub repository_cache_type: Option<String>,
 
+    /// Report output type.
+    pub report_type: Option<String>,
+
+    /// Report output path.
+    pub report_path: Option<String>,
+
+    /// Whether report JSON should be formatted.
+    pub report_formatting: Option<bool>,
+
     /// Labels to apply to created PRs.
     pub labels: Vec<String>,
 
@@ -462,6 +471,9 @@ impl Default for GlobalConfig {
             repository_cache_force_local: None,
             repository_cache: None,
             repository_cache_type: None,
+            report_type: None,
+            report_path: None,
+            report_formatting: None,
             labels: Vec::new(),
             host_rules: Vec::new(),
             registry_aliases: std::collections::BTreeMap::new(),

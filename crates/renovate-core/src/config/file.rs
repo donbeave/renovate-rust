@@ -261,6 +261,9 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         repository_cache_type: file_config
             .repository_cache_type
             .or(base.repository_cache_type),
+        report_type: file_config.report_type.or(base.report_type),
+        report_path: file_config.report_path.or(base.report_path),
+        report_formatting: file_config.report_formatting.or(base.report_formatting),
         labels: if file_config.labels.is_empty() {
             base.labels
         } else {

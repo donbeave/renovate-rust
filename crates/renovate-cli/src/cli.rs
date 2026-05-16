@@ -361,6 +361,16 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_REPOSITORY_CACHE_TYPE")]
     pub(crate) repository_cache_type: Option<String>,
 
+    /// Report output type.
+    /// Env: RENOVATE_REPORT_TYPE.
+    #[arg(long, env = "RENOVATE_REPORT_TYPE")]
+    pub(crate) report_type: Option<String>,
+
+    /// Report output path.
+    /// Env: RENOVATE_REPORT_PATH.
+    #[arg(long, env = "RENOVATE_REPORT_PATH")]
+    pub(crate) report_path: Option<String>,
+
     /// Labels to apply to created PRs.
     /// Env: RENOVATE_LABELS.
     #[arg(long, env = "RENOVATE_LABELS", value_delimiter = ',')]

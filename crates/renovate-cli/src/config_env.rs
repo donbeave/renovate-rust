@@ -228,6 +228,15 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "REPOSITORY_CACHE_TYPE") {
         config.repository_cache_type = Some(value.to_owned());
     }
+    if let Some(value) = env_value(env, prefix, "REPORT_TYPE") {
+        config.report_type = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "REPORT_PATH") {
+        config.report_path = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "REPORT_FORMATTING") {
+        config.report_formatting = Some(parse_bool("RENOVATE_REPORT_FORMATTING", value)?);
+    }
 
     Ok(config)
 }
@@ -962,6 +971,20 @@ mod tests {
 
         assert_eq!(config.repository_cache.as_deref(), Some("enabled"));
         assert_eq!(config.repository_cache_type.as_deref(), Some("s3"));
+    }
+
+    #[test]
+    fn report_env_options_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_REPORT_TYPE", "file"),
+            ("RENOVATE_REPORT_PATH", "./report.json"),
+            ("RENOVATE_REPORT_FORMATTING", "true"),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.report_type.as_deref(), Some("file"));
+        assert_eq!(config.report_path.as_deref(), Some("./report.json"));
+        assert_eq!(config.report_formatting, Some(true));
     }
 
     #[test]

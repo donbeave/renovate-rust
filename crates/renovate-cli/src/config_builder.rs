@@ -139,6 +139,12 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref cache_type) = cli.repository_cache_type {
         config.repository_cache_type = Some(cache_type.clone());
     }
+    if let Some(ref report_type) = cli.report_type {
+        config.report_type = Some(report_type.clone());
+    }
+    if let Some(ref report_path) = cli.report_path {
+        config.report_path = Some(report_path.clone());
+    }
     if !cli.labels.is_empty() {
         config.labels = trim_list(&cli.labels);
     }
@@ -347,6 +353,8 @@ mod tests {
             repository_cache_force_local: None,
             repository_cache: None,
             repository_cache_type: None,
+            report_type: None,
+            report_path: None,
             labels: Vec::new(),
             host_rules: None,
             registry_aliases: None,
@@ -487,6 +495,8 @@ mod tests {
             "--repository-cache-force-local=false",
             "--repository-cache=enabled",
             "--repository-cache-type=s3",
+            "--report-type=file",
+            "--report-path=./report.json",
         ]);
 
         assert_eq!(
@@ -513,6 +523,8 @@ mod tests {
         assert_eq!(config.repository_cache_force_local, Some(false));
         assert_eq!(config.repository_cache.as_deref(), Some("enabled"));
         assert_eq!(config.repository_cache_type.as_deref(), Some("s3"));
+        assert_eq!(config.report_type.as_deref(), Some("file"));
+        assert_eq!(config.report_path.as_deref(), Some("./report.json"));
     }
 
     // Ported: "supports boolean no value" — workers/global/config/parse/cli.spec.ts line 36
