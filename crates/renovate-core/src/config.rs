@@ -494,6 +494,21 @@ pub struct GlobalConfig {
     /// Delete config file after loading.
     pub delete_config_file: bool,
 
+    /// Delete additional config file after loading.
+    pub delete_additional_config_file: bool,
+
+    /// Whether config validation errors should fail the run.
+    pub config_validation_error: bool,
+
+    /// Branches selected from Dependency Dashboard controls.
+    pub checked_branches: Vec<String>,
+
+    /// Git commands that should run with `--no-verify`.
+    pub git_no_verify: Vec<String>,
+
+    /// File path used to write discovered repositories before exiting.
+    pub write_discovered_repos: Option<String>,
+
     /// S3 endpoint for cache/storage.
     pub s3_endpoint: Option<String>,
 
@@ -663,6 +678,11 @@ impl Default for GlobalConfig {
             autodiscover_topics: None,
             docker_max_pages: None,
             delete_config_file: false,
+            delete_additional_config_file: false,
+            config_validation_error: false,
+            checked_branches: Vec::new(),
+            git_no_verify: vec!["commit".to_owned(), "push".to_owned()],
+            write_discovered_repos: None,
             s3_endpoint: None,
             s3_path_style: false,
             repository_cache_force_local: None,

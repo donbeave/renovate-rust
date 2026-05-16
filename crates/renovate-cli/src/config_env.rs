@@ -299,6 +299,22 @@ pub(crate) fn apply_to_base(
     ) {
         config.delete_config_file = parse_bool("RENOVATE_DELETE_CONFIG_FILE", value)?;
     }
+    if let Some(value) = env_value(env, prefix, "DELETE_ADDITIONAL_CONFIG_FILE") {
+        config.delete_additional_config_file =
+            parse_bool("RENOVATE_DELETE_ADDITIONAL_CONFIG_FILE", value)?;
+    }
+    if let Some(value) = env_value(env, prefix, "CONFIG_VALIDATION_ERROR") {
+        config.config_validation_error = parse_bool("RENOVATE_CONFIG_VALIDATION_ERROR", value)?;
+    }
+    if let Some(value) = env_value(env, prefix, "CHECKED_BRANCHES") {
+        config.checked_branches = parse_string_list(value);
+    }
+    if let Some(value) = env_value(env, prefix, "GIT_NO_VERIFY") {
+        config.git_no_verify = parse_string_list(value);
+    }
+    if let Some(value) = env_value(env, prefix, "WRITE_DISCOVERED_REPOS") {
+        config.write_discovered_repos = Some(value.to_owned());
+    }
     if let Some(value) =
         env_converted_experimental_value(env, prefix, "S3_ENDPOINT", "X_S3_ENDPOINT")
     {
@@ -1033,6 +1049,11 @@ mod tests {
             ("RENOVATE_AUTODISCOVER_PROJECTS", "[\"api\",\"web\"]"),
             ("RENOVATE_AUTODISCOVER_TOPICS", "renovate,dependencies"),
             ("RENOVATE_X_DELETE_CONFIG_FILE", "true"),
+            ("RENOVATE_DELETE_ADDITIONAL_CONFIG_FILE", "true"),
+            ("RENOVATE_CONFIG_VALIDATION_ERROR", "true"),
+            ("RENOVATE_CHECKED_BRANCHES", "renovate/a,renovate/b"),
+            ("RENOVATE_GIT_NO_VERIFY", "[\"commit\"]"),
+            ("RENOVATE_WRITE_DISCOVERED_REPOS", "./repos.json"),
             ("RENOVATE_X_S3_ENDPOINT", "endpoint"),
             ("RENOVATE_X_S3_PATH_STYLE", "true"),
             ("RENOVATE_X_REPO_CACHE_FORCE_LOCAL", "enabled"),
@@ -1064,6 +1085,14 @@ mod tests {
         );
         assert_eq!(config.docker_max_pages, Some(10));
         assert!(config.delete_config_file);
+        assert!(config.delete_additional_config_file);
+        assert!(config.config_validation_error);
+        assert_eq!(
+            config.checked_branches,
+            vec!["renovate/a".to_owned(), "renovate/b".to_owned()]
+        );
+        assert_eq!(config.git_no_verify, vec!["commit".to_owned()]);
+        assert_eq!(config.write_discovered_repos.as_deref(), Some("./repos.json"));
         assert_eq!(config.s3_endpoint.as_deref(), Some("endpoint"));
         assert!(config.s3_path_style);
         assert_eq!(config.repository_cache_force_local, Some(true));

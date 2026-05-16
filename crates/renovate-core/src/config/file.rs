@@ -333,6 +333,21 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             .or(base.autodiscover_topics),
         docker_max_pages: file_config.docker_max_pages.or(base.docker_max_pages),
         delete_config_file: file_config.delete_config_file,
+        delete_additional_config_file: file_config.delete_additional_config_file,
+        config_validation_error: file_config.config_validation_error,
+        checked_branches: if file_config.checked_branches.is_empty() {
+            base.checked_branches
+        } else {
+            file_config.checked_branches
+        },
+        git_no_verify: if file_config.git_no_verify.is_empty() {
+            base.git_no_verify
+        } else {
+            file_config.git_no_verify
+        },
+        write_discovered_repos: file_config
+            .write_discovered_repos
+            .or(base.write_discovered_repos),
         s3_endpoint: file_config.s3_endpoint.or(base.s3_endpoint),
         s3_path_style: file_config.s3_path_style,
         repository_cache_force_local: file_config

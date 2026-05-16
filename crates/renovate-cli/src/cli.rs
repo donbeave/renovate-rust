@@ -446,6 +446,41 @@ pub(crate) struct Cli {
     )]
     pub(crate) delete_config_file: Option<bool>,
 
+    /// Delete the additional self-hosted config file after reading it.
+    /// Env: RENOVATE_DELETE_ADDITIONAL_CONFIG_FILE.
+    #[arg(
+        long,
+        env = "RENOVATE_DELETE_ADDITIONAL_CONFIG_FILE",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) delete_additional_config_file: Option<bool>,
+
+    /// Treat config validation errors as run-failing errors.
+    /// Env: RENOVATE_CONFIG_VALIDATION_ERROR.
+    #[arg(
+        long,
+        env = "RENOVATE_CONFIG_VALIDATION_ERROR",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) config_validation_error: Option<bool>,
+
+    /// Branches selected from Dependency Dashboard controls.
+    /// Env: RENOVATE_CHECKED_BRANCHES.
+    #[arg(long, env = "RENOVATE_CHECKED_BRANCHES")]
+    pub(crate) checked_branches: Option<String>,
+
+    /// Git commands to run with --no-verify.
+    /// Env: RENOVATE_GIT_NO_VERIFY.
+    #[arg(long, env = "RENOVATE_GIT_NO_VERIFY")]
+    pub(crate) git_no_verify: Option<String>,
+
+    /// Write discovered repositories to this JSON file and exit.
+    /// Env: RENOVATE_WRITE_DISCOVERED_REPOS.
+    #[arg(long, env = "RENOVATE_WRITE_DISCOVERED_REPOS")]
+    pub(crate) write_discovered_repos: Option<String>,
+
     /// S3 endpoint for cache/storage.
     /// Env: RENOVATE_S3_ENDPOINT.
     #[arg(long, env = "RENOVATE_S3_ENDPOINT")]

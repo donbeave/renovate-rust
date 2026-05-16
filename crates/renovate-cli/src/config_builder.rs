@@ -191,6 +191,21 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(delete_config_file) = cli.delete_config_file {
         config.delete_config_file = delete_config_file;
     }
+    if let Some(delete_additional_config_file) = cli.delete_additional_config_file {
+        config.delete_additional_config_file = delete_additional_config_file;
+    }
+    if let Some(config_validation_error) = cli.config_validation_error {
+        config.config_validation_error = config_validation_error;
+    }
+    if let Some(ref branches) = cli.checked_branches {
+        config.checked_branches = parse_string_list(branches)?;
+    }
+    if let Some(ref git_no_verify) = cli.git_no_verify {
+        config.git_no_verify = parse_string_list(git_no_verify)?;
+    }
+    if let Some(ref write_discovered_repos) = cli.write_discovered_repos {
+        config.write_discovered_repos = Some(write_discovered_repos.clone());
+    }
     if let Some(ref endpoint) = cli.s3_endpoint {
         config.s3_endpoint = Some(endpoint.clone());
     }
@@ -500,6 +515,11 @@ mod tests {
             autodiscover_topics: None,
             docker_max_pages: None,
             delete_config_file: None,
+            delete_additional_config_file: None,
+            config_validation_error: None,
+            checked_branches: None,
+            git_no_verify: None,
+            write_discovered_repos: None,
             s3_endpoint: None,
             s3_path_style: None,
             repository_cache_force_local: None,
@@ -714,6 +734,11 @@ mod tests {
             "--autodiscover-topics=renovate,dependencies",
             "--docker-max-pages=7",
             "--delete-config-file",
+            "--delete-additional-config-file",
+            "--config-validation-error",
+            "--checked-branches=renovate/a,renovate/b",
+            "--git-no-verify=commit",
+            "--write-discovered-repos=./repos.json",
             "--s3-endpoint=https://s3.example",
             "--s3-path-style=true",
             "--repository-cache-force-local=false",
@@ -782,6 +807,14 @@ mod tests {
         );
         assert_eq!(config.docker_max_pages, Some(7));
         assert!(config.delete_config_file);
+        assert!(config.delete_additional_config_file);
+        assert!(config.config_validation_error);
+        assert_eq!(
+            config.checked_branches,
+            vec!["renovate/a".to_owned(), "renovate/b".to_owned()]
+        );
+        assert_eq!(config.git_no_verify, vec!["commit".to_owned()]);
+        assert_eq!(config.write_discovered_repos.as_deref(), Some("./repos.json"));
         assert_eq!(config.s3_endpoint.as_deref(), Some("https://s3.example"));
         assert!(config.s3_path_style);
         assert_eq!(config.repository_cache_force_local, Some(false));
