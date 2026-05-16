@@ -2,23 +2,85 @@
 
 This directory contains reusable prompts for long-running agent work.
 
-## Renovate Rust /loop Prompt
+## Choosing `/goal` or `/loop`
 
-Use [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md) with Claude
-Code's native `/loop` command from the parent workdir that contains both
-checkouts.
+Use `/goal` for finite work with a verifiable end state. This is the best fit
+for most substantial implementation or parity work because Claude Code keeps
+starting another turn until the goal evaluator says the condition is met.
 
-The prompt file intentionally contains only the prompt body. Keep usage notes,
-command examples, and operator documentation in this README.
+Use `/loop` for recurring checks on a timer, such as polling CI, watching a PR,
+or doing periodic maintenance while a session stays open. A fixed interval like
+`/loop 15m ...` runs until you stop it or it expires. Omitting the interval lets
+Claude self-pace between iterations.
 
-Claude Code scheduled tasks require Claude Code v2.1.72 or later. Check with:
+Current Claude Code requirements:
+
+- `/loop` scheduled tasks require Claude Code v2.1.72 or later.
+- `/goal` requires Claude Code v2.1.139 or later.
+
+Check with:
 
 ```sh
 claude --version
 ```
 
-Start Claude Code in `~/Projects/renovate-rust-experiement`, then schedule the prompt every
-15 minutes:
+Good default command for focused parity work:
+
+```text
+/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, `git diff --check` passes, touched parity detail/root rows are consistent, and `git status --short` is clean; stop after 10 turns if blocked.
+```
+
+Good default command for broad implementation work:
+
+```text
+/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed, applicable checks pass or pre-existing failures are documented, and `git status --short` is clean; stop after 10 turns if blocked.
+```
+
+Use a timed loop only when repetition is the point:
+
+```text
+/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small parity unit. Commit only if checks pass, then report what changed.
+```
+
+For Codex goal mode, use the same condition text without the Claude Code slash
+command wrapper. Example objective:
+
+```text
+Continue following prompts/claude-loop-test-parity.md until one coherent parity unit is committed, git diff --check passes, touched parity detail/root rows are consistent, and git status --short is clean; stop after 10 turns if blocked.
+```
+
+Notes for reliable operation:
+
+- Start Claude Code from `~/Projects/renovate-rust-experiement` when using the
+  `@renovate-rust/...` references below. If already inside `renovate-rust/`,
+  use `@prompts/...` instead.
+- `/goal` conditions should name the proof of completion, such as a clean
+  `git status`, a passing command, or a specific committed slice.
+- Include a turn or time bound in long goals so the agent stops cleanly if the
+  work is blocked.
+- `/loop` tasks are session-scoped. They fire only while Claude Code is running
+  and idle, are restored on `--resume` or `--continue` only while unexpired, and
+  recurring tasks expire after seven days.
+- The prompt files here intentionally contain prompt bodies only. Keep command
+  examples and operator guidance in this README.
+
+## Renovate Rust Prompt
+
+Use [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md) with Claude
+Code's `/goal` or `/loop` command from the parent workdir that contains both
+checkouts.
+
+The prompt file intentionally contains only the prompt body. Keep usage notes,
+command examples, and operator documentation in this README.
+
+Start Claude Code in `~/Projects/renovate-rust-experiement`, then run a bounded
+goal for one implementation slice:
+
+```text
+/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed, applicable checks pass or pre-existing failures are documented, and `git status --short` is clean; stop after 10 turns if blocked.
+```
+
+For periodic maintenance instead, schedule the prompt every 15 minutes:
 
 ```text
 /loop 15m Follow @renovate-rust/prompts/claude-loop-renovate-rust.md
@@ -29,21 +91,20 @@ Claude Code to read the prompt file as part of the loop instruction. If you
 start Claude Code from inside `~/Projects/renovate-rust-experiement/renovate-rust`, use
 `@prompts/claude-loop-renovate-rust.md` instead. If file references are not
 available in your Claude Code build, open the prompt file and paste its prompt
-body after `/loop 15m`.
+body after `/goal` or `/loop 15m`.
 
-The loop prompt is operator-owned configuration. Agents running the loop must
+The prompt is operator-owned configuration. Agents running it must
 not edit [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md). If an
 agent finds an improvement to the prompt, it should record the suggestion in
 project docs instead.
 
-The loop is session-scoped. Keep the Claude Code session open, or resume it with
-Claude Code's resume/continue flow before the scheduled task expires. If you
-edit the prompt while a loop is running, cancel and recreate the loop for the
-most predictable behavior.
+If you edit a prompt file while a fixed `/loop` is running, cancel and recreate
+the loop for the most predictable behavior. A `/goal` reads the file through the
+conversation context for its active run, so restart the goal after prompt edits.
 
 ---
 
-## Test Parity /loop Prompt
+## Test Parity Prompt
 
 Use [claude-loop-test-parity.md](claude-loop-test-parity.md) to rebuild and
 maintain the split test parity tracker.
@@ -76,7 +137,14 @@ The prompt uses a three-phase workflow:
    `ported` in the detail file and update the root index row if the spec is now
    complete.
 
-Start Claude Code in `~/Projects/renovate-rust-experiement`, then run:
+Start Claude Code in `~/Projects/renovate-rust-experiement`, then run a bounded
+goal for one parity unit:
+
+```text
+/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, `git diff --check` passes, touched parity detail/root rows are consistent, and `git status --short` is clean; stop after 10 turns if blocked.
+```
+
+For periodic maintenance instead, run:
 
 ```text
 /loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md

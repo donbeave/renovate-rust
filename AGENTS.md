@@ -127,8 +127,11 @@ original Renovate TypeScript repository**. Every `it()` test case in every
   `pending` until ported or reclassified as `not-applicable`.
 - Additional Rust tests beyond the TypeScript baseline are welcome and
   encouraged, but they do not count toward closing parity gaps.
-- Track coverage in `docs/parity/renovate-test-map.md` using the per-test
-  format. The file is the source of truth for parity status.
+- Track root coverage in `docs/parity/renovate-test-map.md` and per-test
+  coverage in the linked `docs/parity/<upstream spec path>.md` detail files.
+  The root file is intentionally compact and uses only `Done` / `Not done`;
+  detail files are the source of truth for `ported`, `pending`, and
+  `not-applicable` rows.
 
 ## Ported Test Attribution (agent-only)
 
