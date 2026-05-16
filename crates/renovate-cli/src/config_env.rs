@@ -31,6 +31,12 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "CONFIG_MIGRATION") {
         config.config_migration = parse_bool("RENOVATE_CONFIG_MIGRATION", value)?;
     }
+    if let Some(value) = env_value(env, prefix, "ENABLED") {
+        config.enabled = Some(parse_bool("RENOVATE_ENABLED", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "AUTOMERGE") {
+        config.automerge = Some(parse_bool("RENOVATE_AUTOMERGE", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "LABELS") {
         config.labels = split_list(value);
     }
@@ -327,7 +333,7 @@ fn split_list(value: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::build_from_env;
-    use renovate_core::config::{DryRun, Platform, RecreateWhen, RequireConfig};
+    use renovate_core::config::{DryRun, ForkProcessing, Platform, RecreateWhen, RequireConfig};
     use std::collections::BTreeMap;
 
     fn env(pairs: &[(&str, &str)]) -> BTreeMap<String, String> {
@@ -357,6 +363,18 @@ mod tests {
     fn config_migration_false_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_CONFIG_MIGRATION", "false")])).unwrap();
         assert!(!config.config_migration);
+    }
+
+    #[test]
+    fn enabled_env_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_ENABLED", "false")])).unwrap();
+        assert_eq!(config.enabled, Some(false));
+    }
+
+    #[test]
+    fn automerge_env_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_AUTOMERGE", "true")])).unwrap();
+        assert_eq!(config.automerge, Some(true));
     }
 
     // Ported: "throws exception for invalid boolean value" — workers/global/config/parse/env.spec.ts line 27
