@@ -446,6 +446,11 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_BASE_DIR")]
     pub(crate) base_dir: Option<String>,
 
+    /// Local repository checkout directory.
+    /// Env: RENOVATE_LOCAL_DIR.
+    #[arg(long, env = "RENOVATE_LOCAL_DIR")]
+    pub(crate) local_dir: Option<String>,
+
     /// Cache directory.
     /// Env: RENOVATE_CACHE_DIR.
     #[arg(long, env = "RENOVATE_CACHE_DIR")]
@@ -520,6 +525,21 @@ pub(crate) struct Cli {
     /// Env: RENOVATE_IGNORE_PR_AUTHOR.
     #[arg(long, env = "RENOVATE_IGNORE_PR_AUTHOR", num_args = 0..=1, default_missing_value = "true")]
     pub(crate) ignore_pr_author: Option<bool>,
+
+    /// Warning text to use if encrypted config is found.
+    /// Env: RENOVATE_ENCRYPTED_WARNING.
+    #[arg(long, env = "RENOVATE_ENCRYPTED_WARNING")]
+    pub(crate) encrypted_warning: Option<String>,
+
+    /// Use Bitbucket's development branch as the default branch.
+    /// Env: RENOVATE_BB_USE_DEVELOPMENT_BRANCH.
+    #[arg(long, env = "RENOVATE_BB_USE_DEVELOPMENT_BRANCH", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) bb_use_development_branch: Option<bool>,
+
+    /// Maximum pages to fetch when syncing the PR cache.
+    /// Env: RENOVATE_PR_CACHE_SYNC_MAX_PAGES.
+    #[arg(long, env = "RENOVATE_PR_CACHE_SYNC_MAX_PAGES")]
+    pub(crate) pr_cache_sync_max_pages: Option<u32>,
 
     /// Report output type.
     /// Env: RENOVATE_REPORT_TYPE.

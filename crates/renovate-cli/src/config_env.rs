@@ -299,6 +299,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "BASE_DIR") {
         config.base_dir = Some(value.to_owned());
     }
+    if let Some(value) = env_value(env, prefix, "LOCAL_DIR") {
+        config.local_dir = Some(value.to_owned());
+    }
     if let Some(value) = env_value(env, prefix, "CACHE_DIR") {
         config.cache_dir = Some(value.to_owned());
     }
@@ -346,8 +349,19 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "GITHUB_TOKEN_WARN") {
         config.github_token_warn = Some(parse_bool("RENOVATE_GITHUB_TOKEN_WARN", value)?);
     }
+    if let Some(value) = env_value(env, prefix, "ENCRYPTED_WARNING") {
+        config.encrypted_warning = Some(value.to_owned());
+    }
     if let Some(value) = env_value(env, prefix, "IGNORE_PR_AUTHOR") {
         config.ignore_pr_author = Some(parse_bool("RENOVATE_IGNORE_PR_AUTHOR", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "BB_USE_DEVELOPMENT_BRANCH") {
+        config.bb_use_development_branch =
+            Some(parse_bool("RENOVATE_BB_USE_DEVELOPMENT_BRANCH", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "PR_CACHE_SYNC_MAX_PAGES") {
+        config.pr_cache_sync_max_pages =
+            Some(parse_u32("RENOVATE_PR_CACHE_SYNC_MAX_PAGES", value)?);
     }
     if let Some(value) = env_value(env, prefix, "REPORT_TYPE") {
         config.report_type = Some(value.to_owned());
@@ -1156,23 +1170,34 @@ mod tests {
         let config = build_from_env(&env(&[
             ("RENOVATE_REPOSITORY_CACHE", "enabled"),
             ("RENOVATE_REPOSITORY_CACHE_TYPE", "s3"),
+            ("RENOVATE_LOCAL_DIR", "/tmp/renovate/repo"),
             ("RENOVATE_CACHE_HARD_TTL_MINUTES", "1440"),
             ("RENOVATE_CACHE_PRIVATE_PACKAGES", "true"),
             ("RENOVATE_PRESET_CACHE_PERSISTENCE", "true"),
             ("RENOVATE_INCLUDE_MIRRORS", "true"),
             ("RENOVATE_GITHUB_TOKEN_WARN", "false"),
+            ("RENOVATE_ENCRYPTED_WARNING", "encrypted config ignored"),
             ("RENOVATE_IGNORE_PR_AUTHOR", "true"),
+            ("RENOVATE_BB_USE_DEVELOPMENT_BRANCH", "true"),
+            ("RENOVATE_PR_CACHE_SYNC_MAX_PAGES", "5"),
         ]))
         .unwrap();
 
         assert_eq!(config.repository_cache.as_deref(), Some("enabled"));
         assert_eq!(config.repository_cache_type.as_deref(), Some("s3"));
+        assert_eq!(config.local_dir.as_deref(), Some("/tmp/renovate/repo"));
         assert_eq!(config.cache_hard_ttl_minutes, Some(1440));
         assert_eq!(config.cache_private_packages, Some(true));
         assert_eq!(config.preset_cache_persistence, Some(true));
         assert_eq!(config.include_mirrors, Some(true));
         assert_eq!(config.github_token_warn, Some(false));
+        assert_eq!(
+            config.encrypted_warning.as_deref(),
+            Some("encrypted config ignored")
+        );
         assert_eq!(config.ignore_pr_author, Some(true));
+        assert_eq!(config.bb_use_development_branch, Some(true));
+        assert_eq!(config.pr_cache_sync_max_pages, Some(5));
     }
 
     #[test]

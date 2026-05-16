@@ -184,6 +184,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref base_dir) = cli.base_dir {
         config.base_dir = Some(base_dir.clone());
     }
+    if let Some(ref local_dir) = cli.local_dir {
+        config.local_dir = Some(local_dir.clone());
+    }
     if let Some(ref cache_dir) = cli.cache_dir {
         config.cache_dir = Some(cache_dir.clone());
     }
@@ -228,6 +231,15 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     }
     if let Some(ignore) = cli.ignore_pr_author {
         config.ignore_pr_author = Some(ignore);
+    }
+    if let Some(ref warning) = cli.encrypted_warning {
+        config.encrypted_warning = Some(warning.clone());
+    }
+    if let Some(use_development_branch) = cli.bb_use_development_branch {
+        config.bb_use_development_branch = Some(use_development_branch);
+    }
+    if let Some(max_pages) = cli.pr_cache_sync_max_pages {
+        config.pr_cache_sync_max_pages = Some(max_pages);
     }
     if let Some(ref report_type) = cli.report_type {
         config.report_type = Some(report_type.clone());
@@ -458,6 +470,7 @@ mod tests {
             repository_cache: None,
             repository_cache_type: None,
             base_dir: None,
+            local_dir: None,
             cache_dir: None,
             containerbase_dir: None,
             docker_child_prefix: None,
@@ -473,6 +486,9 @@ mod tests {
             include_mirrors: None,
             github_token_warn: None,
             ignore_pr_author: None,
+            encrypted_warning: None,
+            bb_use_development_branch: None,
+            pr_cache_sync_max_pages: None,
             report_type: None,
             report_path: None,
             labels: Vec::new(),
@@ -667,6 +683,10 @@ mod tests {
             "--ignore-pr-author",
             "--report-type=file",
             "--report-path=./report.json",
+            "--local-dir=/tmp/renovate/repo",
+            "--encrypted-warning=encrypted config ignored",
+            "--bb-use-development-branch",
+            "--pr-cache-sync-max-pages=5",
         ]);
 
         assert_eq!(config.allow_plugins, Some(true));
@@ -711,6 +731,13 @@ mod tests {
         assert_eq!(config.include_mirrors, Some(true));
         assert_eq!(config.github_token_warn, Some(false));
         assert_eq!(config.ignore_pr_author, Some(true));
+        assert_eq!(config.local_dir.as_deref(), Some("/tmp/renovate/repo"));
+        assert_eq!(
+            config.encrypted_warning.as_deref(),
+            Some("encrypted config ignored")
+        );
+        assert_eq!(config.bb_use_development_branch, Some(true));
+        assert_eq!(config.pr_cache_sync_max_pages, Some(5));
         assert_eq!(config.report_type.as_deref(), Some("file"));
         assert_eq!(config.report_path.as_deref(), Some("./report.json"));
     }

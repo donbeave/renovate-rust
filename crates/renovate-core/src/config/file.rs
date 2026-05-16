@@ -210,6 +210,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         git_private_key: file_config.git_private_key.or(base.git_private_key),
         user_agent: file_config.user_agent.or(base.user_agent),
         base_dir: file_config.base_dir.or(base.base_dir),
+        local_dir: file_config.local_dir.or(base.local_dir),
         cache_dir: file_config.cache_dir.or(base.cache_dir),
         containerbase_dir: file_config.containerbase_dir.or(base.containerbase_dir),
         docker_child_prefix: file_config.docker_child_prefix.or(base.docker_child_prefix),
@@ -338,7 +339,14 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             .or(base.preset_cache_persistence),
         include_mirrors: file_config.include_mirrors.or(base.include_mirrors),
         github_token_warn: file_config.github_token_warn.or(base.github_token_warn),
+        encrypted_warning: file_config.encrypted_warning.or(base.encrypted_warning),
         ignore_pr_author: file_config.ignore_pr_author.or(base.ignore_pr_author),
+        bb_use_development_branch: file_config
+            .bb_use_development_branch
+            .or(base.bb_use_development_branch),
+        pr_cache_sync_max_pages: file_config
+            .pr_cache_sync_max_pages
+            .or(base.pr_cache_sync_max_pages),
         report_type: file_config.report_type.or(base.report_type),
         report_path: file_config.report_path.or(base.report_path),
         report_formatting: file_config.report_formatting.or(base.report_formatting),

@@ -306,6 +306,9 @@ pub struct GlobalConfig {
     /// Base directory for local Renovate files.
     pub base_dir: Option<String>,
 
+    /// Local repository checkout directory.
+    pub local_dir: Option<String>,
+
     /// Cache directory.
     pub cache_dir: Option<String>,
 
@@ -493,8 +496,17 @@ pub struct GlobalConfig {
     /// Whether to warn about missing GitHub token.
     pub github_token_warn: Option<bool>,
 
+    /// Warning text shown when encrypted config is found.
+    pub encrypted_warning: Option<String>,
+
     /// Whether to ignore PR author filtering.
     pub ignore_pr_author: Option<bool>,
+
+    /// Whether Bitbucket should use the development branch as default.
+    pub bb_use_development_branch: Option<bool>,
+
+    /// Maximum pages to fetch when syncing the PR cache.
+    pub pr_cache_sync_max_pages: Option<u32>,
 
     /// Report output type.
     pub report_type: Option<String>,
@@ -554,6 +566,7 @@ impl Default for GlobalConfig {
             git_private_key: None,
             user_agent: None,
             base_dir: None,
+            local_dir: None,
             cache_dir: None,
             containerbase_dir: None,
             docker_child_prefix: None,
@@ -614,7 +627,10 @@ impl Default for GlobalConfig {
             preset_cache_persistence: None,
             include_mirrors: None,
             github_token_warn: None,
+            encrypted_warning: None,
             ignore_pr_author: None,
+            bb_use_development_branch: None,
+            pr_cache_sync_max_pages: None,
             report_type: None,
             report_path: None,
             report_formatting: None,
