@@ -328,6 +328,7 @@ fn parse_renovate_config(raw: &str) -> Result<GlobalConfig, String> {
 fn split_list(value: &str) -> Vec<String> {
     value
         .split(',')
+        .map(str::trim)
         .filter(|item| !item.is_empty())
         .map(str::to_owned)
         .collect()
@@ -418,7 +419,7 @@ mod tests {
     // Ported: "supports list multiple without blank items" — workers/global/config/parse/env.spec.ts line 50
     #[test]
     fn labels_ignore_blank_items() {
-        let config = build_from_env(&env(&[("RENOVATE_LABELS", "a,b,c,")])).unwrap();
+        let config = build_from_env(&env(&[("RENOVATE_LABELS", "a, b, c,")])).unwrap();
         assert_eq!(config.labels, vec!["a", "b", "c"]);
     }
 
