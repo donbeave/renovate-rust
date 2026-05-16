@@ -62,6 +62,12 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(config_migration) = cli.config_migration {
         config.config_migration = config_migration;
     }
+    if let Some(enabled) = cli.enabled {
+        config.enabled = Some(enabled);
+    }
+    if let Some(automerge) = cli.automerge {
+        config.automerge = Some(automerge);
+    }
     if let Some(pa) = cli.platform_automerge {
         config.platform_automerge = pa;
     }
@@ -210,6 +216,8 @@ mod tests {
             require_config: None,
             fork_processing: None,
             config_migration: None,
+            enabled: None,
+            automerge: None,
             platform_automerge: None,
             recreate_when: None,
             allowed_commands: None,
@@ -328,6 +336,16 @@ mod tests {
     #[test]
     fn config_migration_equals_false_sets_false() {
         assert!(!parse_and_build(&["--config-migration=false"]).config_migration);
+    }
+
+    #[test]
+    fn enabled_flag_sets_enabled_config() {
+        assert_eq!(parse_and_build(&["--enabled=false"]).enabled, Some(false));
+    }
+
+    #[test]
+    fn automerge_flag_sets_automerge_config() {
+        assert_eq!(parse_and_build(&["--automerge"]).automerge, Some(true));
     }
 
     // Ported: "supports list single" — workers/global/config/parse/cli.spec.ts line 74

@@ -171,6 +171,26 @@ pub(crate) struct Cli {
     pub(crate) config_migration: Option<bool>,
 
     // ── PR behavior ──────────────────────────────────────────────────────────
+    /// Enable or disable Renovate processing.
+    /// Env: RENOVATE_ENABLED.
+    #[arg(
+        long,
+        env = "RENOVATE_ENABLED",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) enabled: Option<bool>,
+
+    /// Whether to automerge branches or PRs automatically.
+    /// Env: RENOVATE_AUTOMERGE.
+    #[arg(
+        long,
+        env = "RENOVATE_AUTOMERGE",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) automerge: Option<bool>,
+
     /// Controls if platform-native auto-merge is used.
     /// Env: RENOVATE_PLATFORM_AUTOMERGE.
     #[arg(
