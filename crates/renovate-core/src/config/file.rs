@@ -313,6 +313,17 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         autodiscover_repo_order: file_config
             .autodiscover_repo_order
             .or(base.autodiscover_repo_order),
+        autodiscover: file_config.autodiscover.or(base.autodiscover),
+        autodiscover_filter: file_config.autodiscover_filter.or(base.autodiscover_filter),
+        autodiscover_namespaces: file_config
+            .autodiscover_namespaces
+            .or(base.autodiscover_namespaces),
+        autodiscover_projects: file_config
+            .autodiscover_projects
+            .or(base.autodiscover_projects),
+        autodiscover_topics: file_config
+            .autodiscover_topics
+            .or(base.autodiscover_topics),
         docker_max_pages: file_config.docker_max_pages.or(base.docker_max_pages),
         delete_config_file: file_config.delete_config_file,
         s3_endpoint: file_config.s3_endpoint.or(base.s3_endpoint),

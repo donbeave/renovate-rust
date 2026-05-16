@@ -31,8 +31,13 @@ pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
     "allowedEnv",
     "allowedHeaders",
     "allowedUnsafeExecutions",
+    "autodiscover",
+    "autodiscoverFilter",
+    "autodiscoverNamespaces",
+    "autodiscoverProjects",
     "autodiscoverRepoOrder",
     "autodiscoverRepoSort",
+    "autodiscoverTopics",
     "bbUseDevelopmentBranch",
     "binarySource",
     "cacheDir",
@@ -454,6 +459,21 @@ pub struct GlobalConfig {
     /// Autodiscover repository ordering.
     pub autodiscover_repo_order: Option<String>,
 
+    /// Whether to autodiscover repositories from the configured platform.
+    pub autodiscover: Option<bool>,
+
+    /// Client-side filters for autodiscovered repositories.
+    pub autodiscover_filter: Option<Vec<String>>,
+
+    /// Namespace filters for autodiscovered repositories.
+    pub autodiscover_namespaces: Option<Vec<String>>,
+
+    /// Project filters for autodiscovered repositories.
+    pub autodiscover_projects: Option<Vec<String>>,
+
+    /// Topic filters for autodiscovered repositories.
+    pub autodiscover_topics: Option<Vec<String>>,
+
     /// Maximum Docker datasource pages.
     pub docker_max_pages: Option<u32>,
 
@@ -616,6 +636,11 @@ impl Default for GlobalConfig {
             merge_confidence_datasources: Vec::new(),
             autodiscover_repo_sort: None,
             autodiscover_repo_order: None,
+            autodiscover: None,
+            autodiscover_filter: None,
+            autodiscover_namespaces: None,
+            autodiscover_projects: None,
+            autodiscover_topics: None,
             docker_max_pages: None,
             delete_config_file: false,
             s3_endpoint: None,

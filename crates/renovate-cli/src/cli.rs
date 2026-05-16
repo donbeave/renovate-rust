@@ -396,6 +396,31 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_AUTODISCOVER_REPO_ORDER")]
     pub(crate) autodiscover_repo_order: Option<String>,
 
+    /// Autodiscover all repositories.
+    /// Env: RENOVATE_AUTODISCOVER.
+    #[arg(long, env = "RENOVATE_AUTODISCOVER", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) autodiscover: Option<bool>,
+
+    /// Filter autodiscovered repositories.
+    /// Env: RENOVATE_AUTODISCOVER_FILTER.
+    #[arg(long, env = "RENOVATE_AUTODISCOVER_FILTER")]
+    pub(crate) autodiscover_filter: Option<String>,
+
+    /// Filter autodiscovered repositories by namespace.
+    /// Env: RENOVATE_AUTODISCOVER_NAMESPACES.
+    #[arg(long, env = "RENOVATE_AUTODISCOVER_NAMESPACES")]
+    pub(crate) autodiscover_namespaces: Option<String>,
+
+    /// Filter autodiscovered repositories by project.
+    /// Env: RENOVATE_AUTODISCOVER_PROJECTS.
+    #[arg(long, env = "RENOVATE_AUTODISCOVER_PROJECTS")]
+    pub(crate) autodiscover_projects: Option<String>,
+
+    /// Filter autodiscovered repositories by topic.
+    /// Env: RENOVATE_AUTODISCOVER_TOPICS.
+    #[arg(long, env = "RENOVATE_AUTODISCOVER_TOPICS")]
+    pub(crate) autodiscover_topics: Option<String>,
+
     /// Maximum number of Docker tag pages to fetch.
     /// Env: RENOVATE_DOCKER_MAX_PAGES.
     #[arg(long, env = "RENOVATE_DOCKER_MAX_PAGES")]

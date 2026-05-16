@@ -260,6 +260,21 @@ pub(crate) fn apply_to_base(
     ) {
         config.autodiscover_repo_order = Some(value.to_owned());
     }
+    if let Some(value) = env_value(env, prefix, "AUTODISCOVER") {
+        config.autodiscover = Some(parse_bool("RENOVATE_AUTODISCOVER", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "AUTODISCOVER_FILTER") {
+        config.autodiscover_filter = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "AUTODISCOVER_NAMESPACES") {
+        config.autodiscover_namespaces = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "AUTODISCOVER_PROJECTS") {
+        config.autodiscover_projects = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "AUTODISCOVER_TOPICS") {
+        config.autodiscover_topics = Some(parse_string_list(value));
+    }
     if let Some(value) =
         env_converted_experimental_value(env, prefix, "DOCKER_MAX_PAGES", "X_DOCKER_MAX_PAGES")
         && let Ok(pages) = value.parse()
@@ -982,6 +997,11 @@ mod tests {
             ("RENOVATE_X_AUTODISCOVER_REPO_SORT", "alpha"),
             ("RENOVATE_X_DOCKER_MAX_PAGES", "10"),
             ("RENOVATE_AUTODISCOVER_REPO_ORDER", "desc"),
+            ("RENOVATE_AUTODISCOVER", "true"),
+            ("RENOVATE_AUTODISCOVER_FILTER", "org/*,!org/archived"),
+            ("RENOVATE_AUTODISCOVER_NAMESPACES", "backend,frontend"),
+            ("RENOVATE_AUTODISCOVER_PROJECTS", "[\"api\",\"web\"]"),
+            ("RENOVATE_AUTODISCOVER_TOPICS", "renovate,dependencies"),
             ("RENOVATE_X_DELETE_CONFIG_FILE", "true"),
             ("RENOVATE_X_S3_ENDPOINT", "endpoint"),
             ("RENOVATE_X_S3_PATH_STYLE", "true"),
@@ -995,6 +1015,23 @@ mod tests {
         assert_eq!(config.merge_confidence_datasources, vec!["docker"]);
         assert_eq!(config.autodiscover_repo_sort.as_deref(), Some("alpha"));
         assert_eq!(config.autodiscover_repo_order.as_deref(), Some("desc"));
+        assert_eq!(config.autodiscover, Some(true));
+        assert_eq!(
+            config.autodiscover_filter,
+            Some(vec!["org/*".to_owned(), "!org/archived".to_owned()])
+        );
+        assert_eq!(
+            config.autodiscover_namespaces,
+            Some(vec!["backend".to_owned(), "frontend".to_owned()])
+        );
+        assert_eq!(
+            config.autodiscover_projects,
+            Some(vec!["api".to_owned(), "web".to_owned()])
+        );
+        assert_eq!(
+            config.autodiscover_topics,
+            Some(vec!["renovate".to_owned(), "dependencies".to_owned()])
+        );
         assert_eq!(config.docker_max_pages, Some(10));
         assert!(config.delete_config_file);
         assert_eq!(config.s3_endpoint.as_deref(), Some("endpoint"));

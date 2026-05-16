@@ -163,6 +163,21 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref order) = cli.autodiscover_repo_order {
         config.autodiscover_repo_order = Some(order.clone());
     }
+    if let Some(autodiscover) = cli.autodiscover {
+        config.autodiscover = Some(autodiscover);
+    }
+    if let Some(ref filters) = cli.autodiscover_filter {
+        config.autodiscover_filter = Some(parse_string_list(filters)?);
+    }
+    if let Some(ref namespaces) = cli.autodiscover_namespaces {
+        config.autodiscover_namespaces = Some(parse_string_list(namespaces)?);
+    }
+    if let Some(ref projects) = cli.autodiscover_projects {
+        config.autodiscover_projects = Some(parse_string_list(projects)?);
+    }
+    if let Some(ref topics) = cli.autodiscover_topics {
+        config.autodiscover_topics = Some(parse_string_list(topics)?);
+    }
     if let Some(max_pages) = cli.docker_max_pages {
         config.docker_max_pages = Some(max_pages);
     }
@@ -466,6 +481,11 @@ mod tests {
             merge_confidence_datasources: None,
             autodiscover_repo_sort: None,
             autodiscover_repo_order: None,
+            autodiscover: None,
+            autodiscover_filter: None,
+            autodiscover_namespaces: None,
+            autodiscover_projects: None,
+            autodiscover_topics: None,
             docker_max_pages: None,
             delete_config_file: None,
             s3_endpoint: None,
@@ -672,6 +692,11 @@ mod tests {
             "--merge-confidence-datasources=docker,npm",
             "--autodiscover-repo-sort=updated",
             "--autodiscover-repo-order=desc",
+            "--autodiscover",
+            "--autodiscover-filter=org/*,!org/archived",
+            "--autodiscover-namespaces=backend,frontend",
+            r#"--autodiscover-projects=["api","web"]"#,
+            "--autodiscover-topics=renovate,dependencies",
             "--docker-max-pages=7",
             "--delete-config-file",
             "--s3-endpoint=https://s3.example",
@@ -722,6 +747,23 @@ mod tests {
         assert_eq!(config.merge_confidence_datasources, vec!["docker", "npm"]);
         assert_eq!(config.autodiscover_repo_sort.as_deref(), Some("updated"));
         assert_eq!(config.autodiscover_repo_order.as_deref(), Some("desc"));
+        assert_eq!(config.autodiscover, Some(true));
+        assert_eq!(
+            config.autodiscover_filter,
+            Some(vec!["org/*".to_owned(), "!org/archived".to_owned()])
+        );
+        assert_eq!(
+            config.autodiscover_namespaces,
+            Some(vec!["backend".to_owned(), "frontend".to_owned()])
+        );
+        assert_eq!(
+            config.autodiscover_projects,
+            Some(vec!["api".to_owned(), "web".to_owned()])
+        );
+        assert_eq!(
+            config.autodiscover_topics,
+            Some(vec!["renovate".to_owned(), "dependencies".to_owned()])
+        );
         assert_eq!(config.docker_max_pages, Some(7));
         assert!(config.delete_config_file);
         assert_eq!(config.s3_endpoint.as_deref(), Some("https://s3.example"));
