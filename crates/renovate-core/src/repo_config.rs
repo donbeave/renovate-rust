@@ -282,10 +282,25 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `prCreation`.
     pub pr_creation: Option<String>,
 
+    /// Timeout in hours for `prCreation = "not-pending"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prNotPendingHours`.
+    pub pr_not_pending_hours: u32,
+
+    /// Maximum commits to create per hour. `0` = unlimited.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitHourlyLimit`.
+    pub commit_hourly_limit: u32,
+
     /// Maximum number of Renovate PRs to create per hour.  `0` = unlimited.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `prHourlyLimit`.
     pub pr_hourly_limit: u32,
+
+    /// Maximum number of concurrent branches. `None` inherits `prConcurrentLimit`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `branchConcurrentLimit`.
+    pub branch_concurrent_limit: Option<u32>,
 
     /// Minimum number of updates required before a grouped branch is created.
     ///
@@ -4113,10 +4128,16 @@ impl RepoConfig {
             rebase_conflicted_prs: Option<bool>,
             #[serde(rename = "prCreation")]
             pr_creation: Option<String>,
+            #[serde(rename = "prNotPendingHours", default = "default_pr_not_pending_hours")]
+            pr_not_pending_hours: u32,
+            #[serde(rename = "commitHourlyLimit", default)]
+            commit_hourly_limit: u32,
             #[serde(rename = "prConcurrentLimit", default)]
             pr_concurrent_limit: u32,
             #[serde(rename = "prHourlyLimit", default = "default_pr_hourly_limit")]
             pr_hourly_limit: u32,
+            #[serde(rename = "branchConcurrentLimit")]
+            branch_concurrent_limit: Option<u32>,
             #[serde(rename = "minimumGroupSize", default = "default_minimum_group_size")]
             minimum_group_size: u32,
             #[serde(rename = "groupName")]
@@ -4412,6 +4433,10 @@ impl RepoConfig {
 
         fn default_pr_hourly_limit() -> u32 {
             2
+        }
+
+        fn default_pr_not_pending_hours() -> u32 {
+            25
         }
 
         fn default_minimum_group_size() -> u32 {
@@ -4974,7 +4999,10 @@ impl RepoConfig {
             }),
             recreate_when: raw.recreate_when,
             pr_concurrent_limit: scalar_pr_concurrent.unwrap_or(raw.pr_concurrent_limit),
+            pr_not_pending_hours: raw.pr_not_pending_hours,
+            commit_hourly_limit: raw.commit_hourly_limit,
             pr_hourly_limit: scalar_pr_hourly.unwrap_or(raw.pr_hourly_limit),
+            branch_concurrent_limit: raw.branch_concurrent_limit,
             minimum_group_size: raw.minimum_group_size,
             pr_creation: raw.pr_creation.or_else(|| {
                 // :prImmediately and :prNotPending presets set prCreation.
@@ -5697,7 +5725,10 @@ impl Default for RepoConfig {
             recreate_when: "auto".to_owned(),
             pr_concurrent_limit: 0,
             pr_creation: None,
+            pr_not_pending_hours: 25,
+            commit_hourly_limit: 0,
             pr_hourly_limit: 2,
+            branch_concurrent_limit: None,
             minimum_group_size: 1,
             group_name: None,
             separate_major_minor: true,
@@ -8960,6 +8991,16 @@ mod tests {
     fn pr_hourly_limit_custom() {
         let c = RepoConfig::parse(r#"{"prHourlyLimit": 5}"#);
         assert_eq!(c.pr_hourly_limit, 5);
+    }
+
+    #[test]
+    fn pr_and_branch_limit_options_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"prNotPendingHours": 6, "commitHourlyLimit": 4, "branchConcurrentLimit": 2}"#,
+        );
+        assert_eq!(c.pr_not_pending_hours, 6);
+        assert_eq!(c.commit_hourly_limit, 4);
+        assert_eq!(c.branch_concurrent_limit, Some(2));
     }
 
     #[test]
