@@ -537,6 +537,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `postUpdateOptions`.
     pub post_update_options: Vec<String>,
 
+    /// Language or manager version constraints, keyed by tool name.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `constraints`.
+    pub constraints: BTreeMap<String, String>,
+
     /// When `true`, Renovate creates a Dependency Dashboard issue in the repo.
     /// Default: `false`.
     ///
@@ -4404,6 +4409,8 @@ impl RepoConfig {
             rollback_prs: bool,
             #[serde(rename = "postUpdateOptions", default)]
             post_update_options: Vec<String>,
+            #[serde(default)]
+            constraints: BTreeMap<String, String>,
             #[serde(rename = "dependencyDashboard", default)]
             dependency_dashboard: bool,
             #[serde(
@@ -5370,6 +5377,7 @@ impl RepoConfig {
                         .any(|p| p == ":pinDigestsDisabled" || p == "pinDigestsDisabled")),
             rollback_prs: raw.rollback_prs,
             post_update_options: raw.post_update_options,
+            constraints: raw.constraints,
             dependency_dashboard: raw.dependency_dashboard
                 || effective_extends
                     .iter()
@@ -6051,6 +6059,7 @@ impl Default for RepoConfig {
             pin_digests: false,
             rollback_prs: false,
             post_update_options: Vec::new(),
+            constraints: BTreeMap::new(),
             dependency_dashboard: false,
             dependency_dashboard_osv_vulnerability_summary: "none".to_owned(),
             dependency_dashboard_approval: false,
@@ -14023,6 +14032,16 @@ mod rule_effects_tests {
     fn post_update_options_parsed() {
         let c = RepoConfig::parse(r#"{"postUpdateOptions": ["gomodTidy", "npmDedupe"]}"#);
         assert_eq!(c.post_update_options, vec!["gomodTidy", "npmDedupe"]);
+    }
+
+    #[test]
+    fn constraints_parsed() {
+        let c = RepoConfig::parse(r#"{"constraints": {"node": ">=18", "npm": "^10.0.0"}}"#);
+        assert_eq!(c.constraints.get("node").map(String::as_str), Some(">=18"));
+        assert_eq!(
+            c.constraints.get("npm").map(String::as_str),
+            Some("^10.0.0")
+        );
     }
 
     #[test]
