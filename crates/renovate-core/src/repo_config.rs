@@ -638,6 +638,26 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `prBodyTemplate`.
     pub pr_body_template: String,
 
+    /// Template snippets used to render PR body table columns.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prBodyDefinitions`.
+    pub pr_body_definitions: serde_json::Map<String, serde_json::Value>,
+
+    /// Header labels used for PR body table columns.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prBodyHeadingDefinitions`.
+    pub pr_body_heading_definitions: serde_json::Map<String, serde_json::Value>,
+
+    /// Ordered list of columns rendered in PR body tables.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prBodyColumns`.
+    pub pr_body_columns: Vec<String>,
+
+    /// Extra notes or templates included in PR bodies.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `prBodyNotes`.
+    pub pr_body_notes: Vec<String>,
+
     /// Deprecated direct PR title template override.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `prTitle`.
@@ -4456,6 +4476,18 @@ impl RepoConfig {
             commit_body_table: bool,
             #[serde(rename = "prBodyTemplate", default = "default_pr_body_template")]
             pr_body_template: String,
+            #[serde(rename = "prBodyDefinitions", default)]
+            pr_body_definitions: Option<serde_json::Map<String, serde_json::Value>>,
+            #[serde(rename = "prBodyHeadingDefinitions", default)]
+            pr_body_heading_definitions: Option<serde_json::Map<String, serde_json::Value>>,
+            #[serde(rename = "prBodyColumns", default = "default_pr_body_columns")]
+            pr_body_columns: Vec<String>,
+            #[serde(
+                rename = "prBodyNotes",
+                default,
+                deserialize_with = "deserialize_string_or_vec"
+            )]
+            pr_body_notes: Vec<String>,
             #[serde(rename = "prTitle")]
             pr_title: Option<String>,
             #[serde(rename = "prTitleStrict", default)]
@@ -4584,6 +4616,102 @@ impl RepoConfig {
 
         fn default_pr_body_template() -> String {
             "{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}".to_owned()
+        }
+
+        fn default_pr_body_definitions() -> serde_json::Map<String, serde_json::Value> {
+            let mut map = serde_json::Map::new();
+            map.insert(
+                "Package".to_owned(),
+                serde_json::Value::String("{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}".to_owned()),
+            );
+            map.insert(
+                "Type".to_owned(),
+                serde_json::Value::String("{{{depType}}}".to_owned()),
+            );
+            map.insert(
+                "Update".to_owned(),
+                serde_json::Value::String("{{{updateType}}}".to_owned()),
+            );
+            map.insert(
+                "Current value".to_owned(),
+                serde_json::Value::String("{{{currentValue}}}".to_owned()),
+            );
+            map.insert(
+                "New value".to_owned(),
+                serde_json::Value::String("{{{newValue}}}".to_owned()),
+            );
+            map.insert(
+                "Change".to_owned(),
+                serde_json::Value::String("`{{{displayFrom}}}` → `{{{displayTo}}}`".to_owned()),
+            );
+            map.insert(
+                "Pending".to_owned(),
+                serde_json::Value::String("{{{displayPending}}}".to_owned()),
+            );
+            map.insert(
+                "References".to_owned(),
+                serde_json::Value::String("{{{references}}}".to_owned()),
+            );
+            map.insert(
+                "Package file".to_owned(),
+                serde_json::Value::String("{{{packageFile}}}".to_owned()),
+            );
+            map.insert(
+                "Age".to_owned(),
+                serde_json::Value::String("{{#if newVersion}}![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+            );
+            map.insert(
+                "Adoption".to_owned(),
+                serde_json::Value::String("{{#if newVersion}}![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+            );
+            map.insert(
+                "Passing".to_owned(),
+                serde_json::Value::String("{{#if newVersion}}![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+            );
+            map.insert(
+                "Confidence".to_owned(),
+                serde_json::Value::String("{{#if newVersion}}![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+            );
+            map
+        }
+
+        fn default_pr_body_heading_definitions() -> serde_json::Map<String, serde_json::Value> {
+            let mut map = serde_json::Map::new();
+            map.insert(
+                "Age".to_owned(),
+                serde_json::Value::String(
+                    "[Age](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                ),
+            );
+            map.insert(
+                "Adoption".to_owned(),
+                serde_json::Value::String(
+                    "[Adoption](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                ),
+            );
+            map.insert(
+                "Passing".to_owned(),
+                serde_json::Value::String(
+                    "[Passing](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                ),
+            );
+            map.insert(
+                "Confidence".to_owned(),
+                serde_json::Value::String(
+                    "[Confidence](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                ),
+            );
+            map
+        }
+
+        fn default_pr_body_columns() -> Vec<String> {
+            vec![
+                "Package".to_owned(),
+                "Type".to_owned(),
+                "Update".to_owned(),
+                "Change".to_owned(),
+                "Pending".to_owned(),
+            ]
         }
 
         fn default_pr_footer() -> String {
@@ -5425,6 +5553,22 @@ impl RepoConfig {
             }),
             commit_body_table: raw.commit_body_table,
             pr_body_template: raw.pr_body_template,
+            pr_body_definitions: {
+                let mut definitions = default_pr_body_definitions();
+                if let Some(raw_definitions) = raw.pr_body_definitions {
+                    definitions.extend(raw_definitions);
+                }
+                definitions
+            },
+            pr_body_heading_definitions: {
+                let mut definitions = default_pr_body_heading_definitions();
+                if let Some(raw_definitions) = raw.pr_body_heading_definitions {
+                    definitions.extend(raw_definitions);
+                }
+                definitions
+            },
+            pr_body_columns: raw.pr_body_columns,
+            pr_body_notes: raw.pr_body_notes,
             pr_title: raw.pr_title,
             pr_title_strict: raw.pr_title_strict,
             pr_header: raw.pr_header,
@@ -6085,6 +6229,98 @@ impl Default for RepoConfig {
             commit_body: None,
             commit_body_table: false,
             pr_body_template: "{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}".to_owned(),
+            pr_body_definitions: {
+                let mut map = serde_json::Map::new();
+                map.insert(
+                    "Package".to_owned(),
+                    serde_json::Value::String("{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}".to_owned()),
+                );
+                map.insert(
+                    "Type".to_owned(),
+                    serde_json::Value::String("{{{depType}}}".to_owned()),
+                );
+                map.insert(
+                    "Update".to_owned(),
+                    serde_json::Value::String("{{{updateType}}}".to_owned()),
+                );
+                map.insert(
+                    "Current value".to_owned(),
+                    serde_json::Value::String("{{{currentValue}}}".to_owned()),
+                );
+                map.insert(
+                    "New value".to_owned(),
+                    serde_json::Value::String("{{{newValue}}}".to_owned()),
+                );
+                map.insert(
+                    "Change".to_owned(),
+                    serde_json::Value::String("`{{{displayFrom}}}` → `{{{displayTo}}}`".to_owned()),
+                );
+                map.insert(
+                    "Pending".to_owned(),
+                    serde_json::Value::String("{{{displayPending}}}".to_owned()),
+                );
+                map.insert(
+                    "References".to_owned(),
+                    serde_json::Value::String("{{{references}}}".to_owned()),
+                );
+                map.insert(
+                    "Package file".to_owned(),
+                    serde_json::Value::String("{{{packageFile}}}".to_owned()),
+                );
+                map.insert(
+                    "Age".to_owned(),
+                    serde_json::Value::String("{{#if newVersion}}![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+                );
+                map.insert(
+                    "Adoption".to_owned(),
+                    serde_json::Value::String("{{#if newVersion}}![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+                );
+                map.insert(
+                    "Passing".to_owned(),
+                    serde_json::Value::String("{{#if newVersion}}![passing](https://developer.mend.io/api/mc/badges/compatibility/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+                );
+                map.insert(
+                    "Confidence".to_owned(),
+                    serde_json::Value::String("{{#if newVersion}}![confidence](https://developer.mend.io/api/mc/badges/confidence/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}?slim=true){{/if}}".to_owned()),
+                );
+                map
+            },
+            pr_body_heading_definitions: {
+                let mut map = serde_json::Map::new();
+                map.insert(
+                    "Age".to_owned(),
+                    serde_json::Value::String(
+                        "[Age](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                    ),
+                );
+                map.insert(
+                    "Adoption".to_owned(),
+                    serde_json::Value::String(
+                        "[Adoption](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                    ),
+                );
+                map.insert(
+                    "Passing".to_owned(),
+                    serde_json::Value::String(
+                        "[Passing](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                    ),
+                );
+                map.insert(
+                    "Confidence".to_owned(),
+                    serde_json::Value::String(
+                        "[Confidence](https://docs.renovatebot.com/merge-confidence/)".to_owned(),
+                    ),
+                );
+                map
+            },
+            pr_body_columns: vec![
+                "Package".to_owned(),
+                "Type".to_owned(),
+                "Update".to_owned(),
+                "Change".to_owned(),
+                "Pending".to_owned(),
+            ],
+            pr_body_notes: Vec::new(),
             pr_title: None,
             pr_title_strict: false,
             pr_header: None,
@@ -9185,6 +9421,10 @@ mod tests {
             r#"{
                 "commitBodyTable": true,
                 "prBodyTemplate": "{{{header}}}{{{footer}}}",
+                "prBodyDefinitions": {"Custom": "{{depName}}"},
+                "prBodyHeadingDefinitions": {"Custom": "Custom header"},
+                "prBodyColumns": ["Package", "Custom"],
+                "prBodyNotes": "Manual note",
                 "prTitle": "Custom PR title",
                 "prTitleStrict": true,
                 "prHeader": "Hello",
@@ -9193,10 +9433,63 @@ mod tests {
         );
         assert!(c.commit_body_table);
         assert_eq!(c.pr_body_template, "{{{header}}}{{{footer}}}");
+        assert_eq!(
+            c.pr_body_definitions
+                .get("Custom")
+                .and_then(serde_json::Value::as_str),
+            Some("{{depName}}")
+        );
+        assert!(
+            c.pr_body_definitions.contains_key("Package"),
+            "custom prBodyDefinitions must merge with Renovate defaults"
+        );
+        assert_eq!(
+            c.pr_body_heading_definitions
+                .get("Custom")
+                .and_then(serde_json::Value::as_str),
+            Some("Custom header")
+        );
+        assert!(
+            c.pr_body_heading_definitions.contains_key("Age"),
+            "custom prBodyHeadingDefinitions must merge with Renovate defaults"
+        );
+        assert_eq!(
+            c.pr_body_columns,
+            vec!["Package".to_owned(), "Custom".to_owned()]
+        );
+        assert_eq!(c.pr_body_notes, vec!["Manual note".to_owned()]);
         assert_eq!(c.pr_title.as_deref(), Some("Custom PR title"));
         assert!(c.pr_title_strict);
         assert_eq!(c.pr_header.as_deref(), Some("Hello"));
         assert_eq!(c.pr_footer, "Goodbye");
+    }
+
+    #[test]
+    fn pr_body_table_defaults_match_renovate() {
+        let c = RepoConfig::parse(r#"{}"#);
+        assert_eq!(
+            c.pr_body_columns,
+            vec![
+                "Package".to_owned(),
+                "Type".to_owned(),
+                "Update".to_owned(),
+                "Change".to_owned(),
+                "Pending".to_owned()
+            ]
+        );
+        assert_eq!(
+            c.pr_body_definitions
+                .get("Package")
+                .and_then(serde_json::Value::as_str),
+            Some("{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}")
+        );
+        assert_eq!(
+            c.pr_body_heading_definitions
+                .get("Age")
+                .and_then(serde_json::Value::as_str),
+            Some("[Age](https://docs.renovatebot.com/merge-confidence/)")
+        );
+        assert!(c.pr_body_notes.is_empty());
     }
 
     #[test]
