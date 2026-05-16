@@ -105,7 +105,7 @@ pub(crate) fn parse_json_array(raw: &str) -> Result<Vec<Value>, String> {
     if raw.is_empty() {
         return Ok(Vec::new());
     }
-    match serde_json::from_str::<Value>(raw) {
+    match json5::from_str::<Value>(raw) {
         Ok(Value::Array(values)) => Ok(values),
         Ok(Value::Object(object)) => Ok(vec![Value::Object(object)]),
         _ => Err(format!("Invalid JSON value: '{raw}'")),
@@ -116,7 +116,7 @@ pub(crate) fn parse_json_object(raw: &str) -> Result<Map<String, Value>, String>
     if raw.is_empty() {
         return Ok(Map::new());
     }
-    match serde_json::from_str::<Value>(raw) {
+    match json5::from_str::<Value>(raw) {
         Ok(Value::Object(object)) => Ok(object),
         _ => Err(format!("Invalid JSON value: '{raw}'")),
     }
@@ -137,7 +137,7 @@ fn parse_string_list(raw: &str) -> Result<Vec<String>, String> {
     if raw.is_empty() {
         return Ok(Vec::new());
     }
-    match serde_json::from_str::<Value>(raw) {
+    match json5::from_str::<Value>(raw) {
         Ok(Value::Array(values)) => values
             .into_iter()
             .map(|value| match value {
@@ -477,6 +477,14 @@ mod tests {
         assert_eq!(config.onboarding_config["extends"][0], "config:recommended");
     }
 
+    #[test]
+    fn onboarding_config_json5_object_is_parsed() {
+        let config = parse_and_build(&[
+            r#"--onboarding-config={extends:['config:recommended'],}"#,
+        ]);
+        assert_eq!(config.onboarding_config["extends"][0], "config:recommended");
+    }
+
     // Ported: "throws exception for invalid json object" — workers/global/config/parse/cli.spec.ts line 168
     #[test]
     fn onboarding_config_invalid_json_is_rejected() {
@@ -552,6 +560,16 @@ mod tests {
     #[test]
     fn allowed_commands_json_array_parsed() {
         let cli = cli_with(|c| c.allowed_commands = Some(r#"["foo","bar baz"]"#.to_owned()));
+        let config = build(&cli, GlobalConfig::default());
+        assert_eq!(
+            config.allowed_commands,
+            vec!["foo".to_owned(), "bar baz".to_owned()],
+        );
+    }
+
+    #[test]
+    fn allowed_commands_json5_array_parsed() {
+        let cli = cli_with(|c| c.allowed_commands = Some(r#"['foo','bar baz',]"#.to_owned()));
         let config = build(&cli, GlobalConfig::default());
         assert_eq!(
             config.allowed_commands,

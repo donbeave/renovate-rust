@@ -223,7 +223,6 @@ pub(crate) struct Cli {
     pub(crate) labels: Vec<String>,
 
     // ── Registry / host rules ─────────────────────────────────────────────────
-    // Accepted as raw strings; full JSON5 parsing is a separate slice.
     /// Host rules (JSON array or object). Env: RENOVATE_HOST_RULES.
     #[arg(long, env = "RENOVATE_HOST_RULES")]
     pub(crate) host_rules: Option<String>,

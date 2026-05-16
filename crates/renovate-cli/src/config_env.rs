@@ -294,7 +294,7 @@ fn parse_fork_processing(value: &str) -> Result<ForkProcessing, String> {
 }
 
 fn parse_string_array(raw: &str) -> Result<Vec<String>, String> {
-    match serde_json::from_str(raw) {
+    match json5::from_str(raw) {
         Ok(serde_json::Value::Array(values)) => Ok(values
             .into_iter()
             .filter_map(|value| value.as_str().map(str::to_owned))
@@ -316,7 +316,7 @@ fn parse_string_map(raw: &str) -> Result<BTreeMap<String, String>, String> {
 
 fn parse_renovate_config(raw: &str) -> Result<GlobalConfig, String> {
     let mut value: serde_json::Value =
-        serde_json::from_str(raw).map_err(|_| format!("Invalid RENOVATE_CONFIG: '{raw}'"))?;
+        json5::from_str(raw).map_err(|_| format!("Invalid RENOVATE_CONFIG: '{raw}'"))?;
     if let Some(object) = value.as_object_mut()
         && matches!(object.get("automerge"), Some(serde_json::Value::String(value)) if value == "any")
     {
@@ -671,6 +671,17 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("a"));
     }
 
+    #[test]
+    fn renovate_config_json5_is_parsed() {
+        let config = build_from_env(&env(&[(
+            "RENOVATE_CONFIG",
+            "{enabled:false, token:'foo',}",
+        )]))
+        .unwrap();
+        assert_eq!(config.enabled, Some(false));
+        assert_eq!(config.token.as_deref(), Some("foo"));
+    }
+
     // Ported: "massages converted experimental env vars" — workers/global/config/parse/env.spec.ts line 309
     #[test]
     fn experimental_env_vars_are_massaged() {
@@ -800,7 +811,7 @@ mod tests {
     fn onboarding_config_env_is_parsed() {
         let config = build_from_env(&env(&[(
             "RENOVATE_ONBOARDING_CONFIG",
-            r#"{"extends":["config:recommended"]}"#,
+            "{extends:['config:recommended'],}",
         )]))
         .unwrap();
 
