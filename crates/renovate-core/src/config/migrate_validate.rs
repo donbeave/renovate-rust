@@ -881,7 +881,11 @@ fn is_known_key(key: &str) -> bool {
 fn is_global_only_key(key: &str) -> bool {
     matches!(
         key,
-        "binarySource" | "customEnvVariables" | "ignorePrAuthor" | "username"
+        "binarySource"
+            | "customEnvVariables"
+            | "ignorePrAuthor"
+            | "optimizeForDisabled"
+            | "username"
     )
 }
 

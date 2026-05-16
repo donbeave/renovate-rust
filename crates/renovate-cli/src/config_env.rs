@@ -163,6 +163,9 @@ pub(crate) fn apply_to_base(
             value,
         )?);
     }
+    if let Some(value) = env_value(env, prefix, "OPTIMIZE_FOR_DISABLED") {
+        config.optimize_for_disabled = parse_bool("RENOVATE_OPTIMIZE_FOR_DISABLED", value)?;
+    }
     if let Some(value) = env_value(env, prefix, "ALLOW_CUSTOM_CRATE_REGISTRIES") {
         config.allow_custom_crate_registries =
             Some(parse_bool("RENOVATE_ALLOW_CUSTOM_CRATE_REGISTRIES", value)?);
@@ -1233,6 +1236,7 @@ mod tests {
                 "RENOVATE_ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS",
                 "true",
             ),
+            ("RENOVATE_OPTIMIZE_FOR_DISABLED", "true"),
             ("RENOVATE_ALLOW_CUSTOM_CRATE_REGISTRIES", "true"),
             ("RENOVATE_ALLOWED_HEADERS", "X-*,Authorization"),
             ("RENOVATE_ALLOWED_ENV", "['SOME_*','OTHER_*']"),
@@ -1252,6 +1256,7 @@ mod tests {
             config.allow_shell_executor_for_post_upgrade_commands,
             Some(true)
         );
+        assert!(config.optimize_for_disabled);
         assert_eq!(config.allow_custom_crate_registries, Some(true));
         assert_eq!(
             config.allowed_headers,

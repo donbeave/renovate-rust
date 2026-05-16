@@ -291,6 +291,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         allow_shell_executor_for_post_upgrade_commands: file_config
             .allow_shell_executor_for_post_upgrade_commands
             .or(base.allow_shell_executor_for_post_upgrade_commands),
+        optimize_for_disabled: file_config.optimize_for_disabled,
         allow_custom_crate_registries: file_config
             .allow_custom_crate_registries
             .or(base.allow_custom_crate_registries),

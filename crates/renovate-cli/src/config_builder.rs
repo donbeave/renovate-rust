@@ -137,6 +137,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(allow) = cli.allow_shell_executor_for_post_upgrade_commands {
         config.allow_shell_executor_for_post_upgrade_commands = Some(allow);
     }
+    if let Some(optimize_for_disabled) = cli.optimize_for_disabled {
+        config.optimize_for_disabled = optimize_for_disabled;
+    }
     if let Some(allow) = cli.allow_custom_crate_registries {
         config.allow_custom_crate_registries = Some(allow);
     }
@@ -497,6 +500,7 @@ mod tests {
             allow_plugins: None,
             allow_scripts: None,
             allow_shell_executor_for_post_upgrade_commands: None,
+            optimize_for_disabled: None,
             allow_custom_crate_registries: None,
             allowed_headers: None,
             allowed_env: None,
@@ -716,6 +720,7 @@ mod tests {
             "--allow-plugins",
             "--allow-scripts=false",
             "--allow-shell-executor-for-post-upgrade-commands",
+            "--optimize-for-disabled",
             "--allow-custom-crate-registries=true",
             "--allowed-headers=X-*,Authorization",
             "--allowed-env=['SOME_*','OTHER_*']",
@@ -765,6 +770,7 @@ mod tests {
             config.allow_shell_executor_for_post_upgrade_commands,
             Some(true)
         );
+        assert!(config.optimize_for_disabled);
         assert_eq!(config.allow_custom_crate_registries, Some(true));
         assert_eq!(
             config.allowed_headers,

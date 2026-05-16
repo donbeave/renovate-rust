@@ -74,6 +74,7 @@ pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
     "onboardingConfigFileName",
     "onboardingNoDeps",
     "onboardingPrTitle",
+    "optimizeForDisabled",
     "platform",
     "prCacheSyncMaxPages",
     "prCommitsPerRunLimit",
@@ -440,6 +441,9 @@ pub struct GlobalConfig {
     /// Whether post-upgrade commands may run inside a shell.
     pub allow_shell_executor_for_post_upgrade_commands: Option<bool>,
 
+    /// Whether to check disabled config before cloning repositories.
+    pub optimize_for_disabled: bool,
+
     /// Whether custom Cargo registries are allowed.
     pub allow_custom_crate_registries: Option<bool>,
 
@@ -660,6 +664,7 @@ impl Default for GlobalConfig {
             allow_plugins: None,
             allow_scripts: None,
             allow_shell_executor_for_post_upgrade_commands: None,
+            optimize_for_disabled: false,
             allow_custom_crate_registries: None,
             allowed_headers: None,
             allowed_env: None,

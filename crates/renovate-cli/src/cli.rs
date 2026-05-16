@@ -335,6 +335,16 @@ pub(crate) struct Cli {
     )]
     pub(crate) allow_shell_executor_for_post_upgrade_commands: Option<bool>,
 
+    /// Check disabled repository config before cloning.
+    /// Env: RENOVATE_OPTIMIZE_FOR_DISABLED.
+    #[arg(
+        long,
+        env = "RENOVATE_OPTIMIZE_FOR_DISABLED",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) optimize_for_disabled: Option<bool>,
+
     /// Allow custom Cargo registries.
     /// Env: RENOVATE_ALLOW_CUSTOM_CRATE_REGISTRIES.
     #[arg(
