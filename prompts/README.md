@@ -24,16 +24,16 @@ Check with:
 claude --version
 ```
 
-Good default command for focused parity work:
+Good Claude Code goal for focused parity work:
 
 ```text
 /goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
 ```
 
-Good default command for broad implementation work:
+Good Claude Code goal for the full Renovate Rust implementation:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed and `git status --short` is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until renovate-rust provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Preserve Renovate-compatible CLI flags, environment variables, config discovery/semantics, exit codes, dependency extraction, update planning, output modes, and parity tracking. Keep working through coherent implementation slices, committing and pushing after each slice. Do not stop merely because one slice is complete. Do not run verification commands unless the operator explicitly asks; if blocked, document the blocker, commit and push any coherent progress, then continue with another local/offline slice.
 ```
 
 Use a timed loop only when repetition is the point:
@@ -42,8 +42,17 @@ Use a timed loop only when repetition is the point:
 /loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small parity unit. Do not run verification commands unless the operator explicitly asks. Commit the completed unit, then report what changed.
 ```
 
-For Codex goal mode, use the same condition text without the Claude Code slash
-command wrapper. Example objective:
+For Codex goal mode, use [codex-goal-renovate-rust.md](codex-goal-renovate-rust.md)
+as the objective file for implementation work. It uses an explicit objective,
+definition of done, operating rules, and progress loop so the agent does not
+stop after a single slice. Example objective:
+
+```text
+Follow prompts/codex-goal-renovate-rust.md until renovate-rust is a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Keep committing and pushing coherent implementation slices until the definition of done in that file is satisfied. Do not run verification commands unless the operator explicitly asks.
+```
+
+For parity-only work, use the same condition text without the Claude Code slash
+command wrapper:
 
 ```text
 Continue following prompts/claude-loop-test-parity.md until one coherent parity unit is committed, touched parity detail/root rows are consistent, and git status --short is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
@@ -73,11 +82,11 @@ checkouts.
 The prompt file intentionally contains only the prompt body. Keep usage notes,
 command examples, and operator documentation in this README.
 
-Start Claude Code in `~/Projects/renovate-rust-experiement`, then run a bounded
-goal for one implementation slice:
+Start Claude Code in `~/Projects/renovate-rust-experiement`, then run the
+long-running implementation goal:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed and `git status --short` is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until renovate-rust provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Preserve Renovate-compatible CLI flags, environment variables, config discovery/semantics, exit codes, dependency extraction, update planning, output modes, and parity tracking. Keep working through coherent implementation slices, committing and pushing after each slice. Do not stop merely because one slice is complete. Do not run verification commands unless the operator explicitly asks; if blocked, document the blocker, commit and push any coherent progress, then continue with another local/offline slice.
 ```
 
 For periodic maintenance instead, schedule the prompt every 15 minutes:
