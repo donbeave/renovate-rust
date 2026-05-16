@@ -118,6 +118,10 @@ pub struct RepoConfig {
     /// when `enabled_managers` is empty.  Populated by presets like
     /// `docker:disable`.
     pub disabled_managers: Vec<String>,
+    /// Git commit authors Renovate should ignore when evaluating branch state.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `gitIgnoredAuthors`.
+    pub git_ignored_authors: Vec<String>,
     /// Global version ignore list.  If the proposed latest version matches any
     /// entry, the update is suppressed for all packages.
     /// Entries may be semver ranges (`"< 2.0"`) or `/regex/` patterns.
@@ -3925,6 +3929,8 @@ impl RepoConfig {
             enabled_managers: Vec<String>,
             #[serde(rename = "disabledManagers", default)]
             disabled_managers: Vec<String>,
+            #[serde(rename = "gitIgnoredAuthors", default)]
+            git_ignored_authors: Vec<String>,
             #[serde(rename = "ignoreVersions", default)]
             ignore_versions: Vec<String>,
             #[serde(default, deserialize_with = "deserialize_string_or_vec")]
@@ -4678,6 +4684,7 @@ impl RepoConfig {
             package_rules,
             enabled_managers,
             disabled_managers,
+            git_ignored_authors: raw.git_ignored_authors,
             ignore_versions: raw.ignore_versions,
             schedule: if raw.schedule.is_empty() {
                 // No explicit schedule → use schedule preset if any.
@@ -5465,6 +5472,7 @@ impl Default for RepoConfig {
             package_rules: Vec::new(),
             enabled_managers: Vec::new(),
             disabled_managers: Vec::new(),
+            git_ignored_authors: Vec::new(),
             ignore_versions: Vec::new(),
             schedule: Vec::new(),
             automerge_schedule: vec!["at any time".to_owned()],
@@ -6117,6 +6125,17 @@ mod tests {
         assert!(c.is_manager_enabled("cargo", false));
         assert!(c.is_manager_enabled("maven", false));
         assert!(c.is_manager_enabled("anything", false));
+    }
+
+    #[test]
+    fn git_ignored_authors_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"gitIgnoredAuthors": ["renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>"]}"#,
+        );
+        assert_eq!(
+            c.git_ignored_authors,
+            vec!["renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>"]
+        );
     }
 
     #[test]
