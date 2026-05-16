@@ -211,6 +211,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         enabled: file_config.enabled.or(base.enabled),
         automerge: file_config.automerge.or(base.automerge),
         dry_run: file_config.dry_run.or(base.dry_run),
+        binary_source: file_config.binary_source.or(base.binary_source),
         // For non-Option fields: file always wins (it was explicitly set in
         // the file or it carries the default — we cannot distinguish, so we
         // always take the file's value, then let CLI override afterwards).

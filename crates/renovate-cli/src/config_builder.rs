@@ -8,13 +8,13 @@
 //! Renovate reference: `lib/workers/global/config/parse/cli.ts` `getConfig`.
 
 use renovate_core::config::{
-    DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
+    BinarySource, DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
 };
 use serde_json::{Map, Value};
 
 use crate::cli::{
-    Cli, DryRunArg, ForkProcessing as CliForkProcessing, Platform as CliPlatform,
-    RecreateWhen as CliRecreateWhen, RequireConfigArg,
+    BinarySource as CliBinarySource, Cli, DryRunArg, ForkProcessing as CliForkProcessing,
+    Platform as CliPlatform, RecreateWhen as CliRecreateWhen, RequireConfigArg,
 };
 
 /// Apply CLI arguments on top of a `base` [`GlobalConfig`].
@@ -64,6 +64,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
 
     if let Some(fp) = cli.fork_processing {
         config.fork_processing = map_fork_processing(fp);
+    }
+    if let Some(binary_source) = cli.binary_source {
+        config.binary_source = Some(map_binary_source(binary_source));
     }
     if let Some(config_migration) = cli.config_migration {
         config.config_migration = config_migration;
@@ -215,6 +218,15 @@ fn map_fork_processing(fp: CliForkProcessing) -> ForkProcessing {
     }
 }
 
+fn map_binary_source(binary_source: CliBinarySource) -> BinarySource {
+    match binary_source {
+        CliBinarySource::Global | CliBinarySource::Auto => BinarySource::Global,
+        CliBinarySource::Docker => BinarySource::Docker,
+        CliBinarySource::Install => BinarySource::Install,
+        CliBinarySource::Hermit => BinarySource::Hermit,
+    }
+}
+
 fn map_recreate_when(rw: CliRecreateWhen) -> RecreateWhen {
     match rw {
         CliRecreateWhen::Auto => RecreateWhen::Auto,
@@ -235,7 +247,9 @@ fn trim_list(values: &[String]) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use clap::Parser as _;
-    use renovate_core::config::{DryRun, GlobalConfig, Platform, RecreateWhen, RequireConfig};
+    use renovate_core::config::{
+        BinarySource, DryRun, GlobalConfig, Platform, RecreateWhen, RequireConfig,
+    };
 
     use super::{build, try_build};
     use crate::cli::{Cli, DryRunArg, RequireConfigArg};
@@ -252,6 +266,7 @@ mod tests {
             dry_run: None,
             require_config: None,
             fork_processing: None,
+            binary_source: None,
             config_migration: None,
             enabled: None,
             automerge: None,
@@ -352,6 +367,22 @@ mod tests {
         assert_eq!(
             build(&cli, GlobalConfig::default()).repositories,
             vec!["foo".to_owned(), "bar".to_owned()]
+        );
+    }
+
+    #[test]
+    fn binary_source_flag_is_parsed() {
+        assert_eq!(
+            parse_and_build(&["--binary-source=hermit"]).binary_source,
+            Some(BinarySource::Hermit)
+        );
+    }
+
+    #[test]
+    fn binary_source_auto_maps_to_global() {
+        assert_eq!(
+            parse_and_build(&["--binary-source=auto"]).binary_source,
+            Some(BinarySource::Global)
         );
     }
 

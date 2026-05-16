@@ -5,7 +5,7 @@
 use std::collections::BTreeMap;
 
 use renovate_core::config::{
-    DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
+    BinarySource, DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
 };
 use serde_json::{json, Value};
 
@@ -73,6 +73,9 @@ pub(crate) fn apply_to_base(
     }
     if let Some(value) = env_value(env, prefix, "FORK_PROCESSING") {
         config.fork_processing = parse_fork_processing(value)?;
+    }
+    if let Some(value) = env_value(env, prefix, "BINARY_SOURCE") {
+        config.binary_source = Some(parse_binary_source(value)?);
     }
     if let Some(value) = env_value(env, prefix, "PLATFORM_COMMIT") {
         config.platform_commit = Some(if parse_bool("RENOVATE_PLATFORM_COMMIT", value)? {
@@ -300,6 +303,18 @@ fn parse_fork_processing(value: &str) -> Result<ForkProcessing, String> {
     }
 }
 
+fn parse_binary_source(value: &str) -> Result<BinarySource, String> {
+    match value {
+        "global" | "auto" => Ok(BinarySource::Global),
+        "docker" => Ok(BinarySource::Docker),
+        "install" => Ok(BinarySource::Install),
+        "hermit" => Ok(BinarySource::Hermit),
+        _ => Err(format!(
+            "RENOVATE_BINARY_SOURCE was invalid: Invalid value `{value}` for `binarySource`. The allowed values are docker, global, install, hermit."
+        )),
+    }
+}
+
 fn parse_string_array(raw: &str) -> Result<Vec<String>, String> {
     match json5::from_str(raw) {
         Ok(serde_json::Value::Array(values)) => Ok(values
@@ -373,7 +388,9 @@ fn parse_string_list(value: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::build_from_env;
-    use renovate_core::config::{DryRun, ForkProcessing, Platform, RecreateWhen, RequireConfig};
+    use renovate_core::config::{
+        BinarySource, DryRun, ForkProcessing, Platform, RecreateWhen, RequireConfig,
+    };
     use std::collections::BTreeMap;
 
     fn env(pairs: &[(&str, &str)]) -> BTreeMap<String, String> {
@@ -964,6 +981,27 @@ mod tests {
     fn fork_processing_env_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_FORK_PROCESSING", "enabled")])).unwrap();
         assert_eq!(config.fork_processing, ForkProcessing::Enabled);
+    }
+
+    #[test]
+    fn binary_source_env_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_BINARY_SOURCE", "hermit")])).unwrap();
+        assert_eq!(config.binary_source, Some(BinarySource::Hermit));
+    }
+
+    #[test]
+    fn binary_source_auto_env_maps_to_global() {
+        let config = build_from_env(&env(&[("RENOVATE_BINARY_SOURCE", "auto")])).unwrap();
+        assert_eq!(config.binary_source, Some(BinarySource::Global));
+    }
+
+    #[test]
+    fn invalid_binary_source_env_is_rejected() {
+        let err = build_from_env(&env(&[("RENOVATE_BINARY_SOURCE", "invalid")])).unwrap_err();
+        assert_eq!(
+            err,
+            "RENOVATE_BINARY_SOURCE was invalid: Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit."
+        );
     }
 
     // Ported: "platformCommit boolean true" — workers/global/config/parse/env.spec.ts line 481

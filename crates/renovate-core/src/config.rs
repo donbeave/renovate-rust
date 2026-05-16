@@ -16,7 +16,7 @@ pub mod migrate_validate;
 pub mod secrets;
 
 pub use platform::Platform;
-pub use run::{DryRun, ForkProcessing, RecreateWhen, RequireConfig};
+pub use run::{BinarySource, DryRun, ForkProcessing, RecreateWhen, RequireConfig};
 
 /// Renovate global-only option names.
 ///
@@ -310,6 +310,11 @@ pub struct GlobalConfig {
     /// Dry-run mode. `None` means dry-run is disabled (full updates).
     pub dry_run: Option<DryRun>,
 
+    /// Third-party tool execution source. `None` means Renovate's default
+    /// `install` unless an explicit global option sets it.
+    #[serde(default, deserialize_with = "deserialize_binary_source")]
+    pub binary_source: Option<BinarySource>,
+
     /// Controls behavior when no repository config file exists.
     /// Default: `RequireConfig::Required`.
     pub require_config: RequireConfig,
@@ -385,6 +390,24 @@ pub struct GlobalConfig {
     pub repositories: Vec<String>,
 }
 
+fn deserialize_binary_source<'de, D>(deserializer: D) -> Result<Option<BinarySource>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let Some(value) = <Option<String> as serde::Deserialize>::deserialize(deserializer)? else {
+        return Ok(None);
+    };
+    match value.as_str() {
+        "global" | "auto" => Ok(Some(BinarySource::Global)),
+        "docker" => Ok(Some(BinarySource::Docker)),
+        "install" => Ok(Some(BinarySource::Install)),
+        "hermit" => Ok(Some(BinarySource::Hermit)),
+        _ => Err(serde::de::Error::custom(format!(
+            "Invalid value `{value}` for `binarySource`. The allowed values are docker, global, install, hermit."
+        ))),
+    }
+}
+
 impl Default for GlobalConfig {
     fn default() -> Self {
         Self {
@@ -397,6 +420,7 @@ impl Default for GlobalConfig {
             enabled: None,
             automerge: None,
             dry_run: None,
+            binary_source: None,
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,
             config_migration: false,
@@ -429,9 +453,10 @@ mod tests {
     use serde_json::json;
 
     use super::{
-        ConfigDefaultValue, ConfigOptionType, GLOBAL_CONFIG_OPTIONS, INHERIT_CONFIG_OPTIONS,
-        InheritConfig, InheritedValue, default_repo_config, default_value_for_type, filter_config,
-        get_manager_config, merge_child_config, remove_global_config,
+        BinarySource, ConfigDefaultValue, ConfigOptionType, GLOBAL_CONFIG_OPTIONS,
+        GlobalConfig, INHERIT_CONFIG_OPTIONS, InheritConfig, InheritedValue, default_repo_config,
+        default_value_for_type, filter_config, get_manager_config, merge_child_config,
+        remove_global_config,
     };
 
     // Ported: "merges" — config/index.spec.ts line 16
@@ -632,6 +657,18 @@ mod tests {
                 ConfigDefaultValue::Null
             );
         }
+    }
+
+    #[test]
+    fn binary_source_deserializes_global_values() {
+        let config: GlobalConfig = serde_json::from_str(r#"{"binarySource":"hermit"}"#).unwrap();
+        assert_eq!(config.binary_source, Some(BinarySource::Hermit));
+    }
+
+    #[test]
+    fn binary_source_auto_deserializes_to_global() {
+        let config: GlobalConfig = serde_json::from_str(r#"{"binarySource":"auto"}"#).unwrap();
+        assert_eq!(config.binary_source, Some(BinarySource::Global));
     }
 
     // Ported: "all values in OPTIONS are sorted" — config/inherit.spec.ts line 4

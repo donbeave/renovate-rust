@@ -98,6 +98,20 @@ pub(crate) enum ForkProcessing {
     Disabled,
 }
 
+/// `--binary-source` values.
+///
+/// Renovate source: `binarySource` option.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+#[clap(rename_all = "kebab-case")]
+pub(crate) enum BinarySource {
+    Global,
+    Docker,
+    Install,
+    Hermit,
+    /// Deprecated value migrated by Renovate config migration to `global`.
+    Auto,
+}
+
 /// `--recreate-when` values.
 ///
 /// Renovate source: `recreateWhen` option.
@@ -167,6 +181,11 @@ pub(crate) struct Cli {
     /// Env: RENOVATE_FORK_PROCESSING.
     #[arg(long, value_enum, env = "RENOVATE_FORK_PROCESSING")]
     pub(crate) fork_processing: Option<ForkProcessing>,
+
+    /// Controls how third-party tools are invoked.
+    /// Env: RENOVATE_BINARY_SOURCE.
+    #[arg(long, value_enum, env = "RENOVATE_BINARY_SOURCE")]
+    pub(crate) binary_source: Option<BinarySource>,
 
     /// Enable config migration.
     /// Env: RENOVATE_CONFIG_MIGRATION.

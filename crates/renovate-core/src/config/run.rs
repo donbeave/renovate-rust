@@ -1,5 +1,33 @@
 //! Canonical run-behavior configuration types.
 
+/// Controls how Renovate invokes third-party tools.
+///
+/// Source: `binarySource` option in `lib/config/options/index.ts`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum BinarySource {
+    /// Use globally available tools.
+    Global,
+    /// Use Docker sidecar containers.
+    Docker,
+    /// Dynamically install tools.
+    Install,
+    /// Use Hermit-managed tools.
+    Hermit,
+}
+
+impl std::fmt::Display for BinarySource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Global => "global",
+            Self::Docker => "docker",
+            Self::Install => "install",
+            Self::Hermit => "hermit",
+        };
+        f.write_str(s)
+    }
+}
+
 /// Dry-run mode — controls how much work Renovate performs without persisting
 /// changes to the platform.
 ///
