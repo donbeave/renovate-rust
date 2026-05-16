@@ -698,6 +698,21 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `gitLabIgnoreApprovals`.
     pub git_lab_ignore_approvals: bool,
 
+    /// User-facing strings used in Renovate comments.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `userStrings`.
+    pub user_strings: serde_json::Map<String, serde_json::Value>,
+
+    /// Log-level remapping rules.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `logLevelRemap`.
+    pub log_level_remap: Vec<serde_json::Value>,
+
+    /// Platform milestone number assigned to created PRs on supported platforms.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `milestone`.
+    pub milestone: Option<u32>,
+
     /// Deprecated direct PR title template override.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `prTitle`.
@@ -4551,6 +4566,12 @@ impl RepoConfig {
             prune_stale_branches: bool,
             #[serde(rename = "gitLabIgnoreApprovals", default)]
             git_lab_ignore_approvals: bool,
+            #[serde(rename = "userStrings", default = "default_user_strings")]
+            user_strings: serde_json::Map<String, serde_json::Value>,
+            #[serde(rename = "logLevelRemap", default)]
+            log_level_remap: Vec<serde_json::Value>,
+            #[serde(default)]
+            milestone: Option<u32>,
             #[serde(rename = "prTitle")]
             pr_title: Option<String>,
             #[serde(rename = "prTitleStrict", default)]
@@ -4783,6 +4804,31 @@ impl RepoConfig {
                 "Change".to_owned(),
                 "Pending".to_owned(),
             ]
+        }
+
+        fn default_user_strings() -> serde_json::Map<String, serde_json::Value> {
+            let mut map = serde_json::Map::new();
+            map.insert(
+                "ignoreTopic".to_owned(),
+                serde_json::Value::String("Renovate Ignore Notification".to_owned()),
+            );
+            map.insert(
+                "ignoreMajor".to_owned(),
+                serde_json::Value::String("Because you closed this PR without merging, Renovate will ignore this update. You will not get PRs for *any* future `{{{newMajor}}}.x` releases. But if you manually upgrade to `{{{newMajor}}}.x` then Renovate will re-enable `minor` and `patch` updates automatically.".to_owned()),
+            );
+            map.insert(
+                "ignoreDigest".to_owned(),
+                serde_json::Value::String("Because you closed this PR without merging, Renovate will ignore this update. You will not get PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.".to_owned()),
+            );
+            map.insert(
+                "ignoreOther".to_owned(),
+                serde_json::Value::String("Because you closed this PR without merging, Renovate will ignore this update (`{{{newValue}}}`). You will get a PR once a newer version is released. To ignore this dependency forever, add it to the `ignoreDeps` array of your Renovate config.".to_owned()),
+            );
+            map.insert(
+                "artifactErrorWarning".to_owned(),
+                serde_json::Value::String("You probably do not want to merge this PR as-is.".to_owned()),
+            );
+            map
         }
 
         fn default_pr_footer() -> String {
@@ -5648,6 +5694,9 @@ impl RepoConfig {
             suppress_notifications: raw.suppress_notifications,
             prune_stale_branches: raw.prune_stale_branches,
             git_lab_ignore_approvals: raw.git_lab_ignore_approvals,
+            user_strings: raw.user_strings,
+            log_level_remap: raw.log_level_remap,
+            milestone: raw.milestone,
             pr_title: raw.pr_title,
             pr_title_strict: raw.pr_title_strict,
             pr_header: raw.pr_header,
@@ -6408,6 +6457,34 @@ impl Default for RepoConfig {
             suppress_notifications: Vec::new(),
             prune_stale_branches: true,
             git_lab_ignore_approvals: false,
+            user_strings: {
+                let mut map = serde_json::Map::new();
+                map.insert(
+                    "ignoreTopic".to_owned(),
+                    serde_json::Value::String("Renovate Ignore Notification".to_owned()),
+                );
+                map.insert(
+                    "ignoreMajor".to_owned(),
+                    serde_json::Value::String("Because you closed this PR without merging, Renovate will ignore this update. You will not get PRs for *any* future `{{{newMajor}}}.x` releases. But if you manually upgrade to `{{{newMajor}}}.x` then Renovate will re-enable `minor` and `patch` updates automatically.".to_owned()),
+                );
+                map.insert(
+                    "ignoreDigest".to_owned(),
+                    serde_json::Value::String("Because you closed this PR without merging, Renovate will ignore this update. You will not get PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.".to_owned()),
+                );
+                map.insert(
+                    "ignoreOther".to_owned(),
+                    serde_json::Value::String("Because you closed this PR without merging, Renovate will ignore this update (`{{{newValue}}}`). You will get a PR once a newer version is released. To ignore this dependency forever, add it to the `ignoreDeps` array of your Renovate config.".to_owned()),
+                );
+                map.insert(
+                    "artifactErrorWarning".to_owned(),
+                    serde_json::Value::String(
+                        "You probably do not want to merge this PR as-is.".to_owned(),
+                    ),
+                );
+                map
+            },
+            log_level_remap: Vec::new(),
+            milestone: None,
             pr_title: None,
             pr_title_strict: false,
             pr_header: None,
@@ -9593,6 +9670,33 @@ mod tests {
         assert_eq!(c.suppress_notifications, vec!["artifactErrors".to_owned()]);
         assert!(!c.prune_stale_branches);
         assert!(c.git_lab_ignore_approvals);
+    }
+
+    #[test]
+    fn user_strings_log_remap_and_milestone_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "userStrings": {"ignoreTopic": "Custom ignore"},
+                "logLevelRemap": [{"matchMessage": "timeout", "newLogLevel": "debug"}],
+                "milestone": 7
+            }"#,
+        );
+        assert_eq!(
+            c.user_strings
+                .get("ignoreTopic")
+                .and_then(serde_json::Value::as_str),
+            Some("Custom ignore")
+        );
+        assert_eq!(c.log_level_remap.len(), 1);
+        assert_eq!(
+            c.log_level_remap[0]["matchMessage"].as_str(),
+            Some("timeout")
+        );
+        assert_eq!(
+            c.log_level_remap[0]["newLogLevel"].as_str(),
+            Some("debug")
+        );
+        assert_eq!(c.milestone, Some(7));
     }
 
     #[test]
