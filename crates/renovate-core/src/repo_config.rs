@@ -323,6 +323,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `branchPrefix`.
     pub branch_prefix: String,
 
+    /// Previous branch prefix used to find existing Renovate PRs.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `branchPrefixOld`.
+    pub branch_prefix_old: String,
+
     /// Full update branch name template.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `branchName`.
@@ -4406,6 +4411,8 @@ impl RepoConfig {
             stop_updating_label: String,
             #[serde(rename = "branchPrefix", default = "default_branch_prefix")]
             branch_prefix: String,
+            #[serde(rename = "branchPrefixOld", default = "default_branch_prefix")]
+            branch_prefix_old: String,
             #[serde(rename = "branchName", default = "default_branch_name")]
             branch_name: String,
             #[serde(rename = "additionalBranchPrefix", default)]
@@ -5546,6 +5553,7 @@ impl RepoConfig {
             rebase_label: raw.rebase_label,
             stop_updating_label: raw.stop_updating_label,
             branch_prefix: raw.branch_prefix,
+            branch_prefix_old: raw.branch_prefix_old,
             branch_name: raw.branch_name,
             additional_branch_prefix: raw.additional_branch_prefix,
             branch_topic: raw.branch_topic,
@@ -6379,6 +6387,7 @@ impl Default for RepoConfig {
             rebase_label: "rebase".to_owned(),
             stop_updating_label: "stop-updating".to_owned(),
             branch_prefix: "renovate/".to_owned(),
+            branch_prefix_old: "renovate/".to_owned(),
             branch_name: "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}"
                 .to_owned(),
             additional_branch_prefix: String::new(),
@@ -9578,12 +9587,14 @@ mod tests {
     fn branch_prefix_default() {
         let c = RepoConfig::parse(r#"{}"#);
         assert_eq!(c.branch_prefix, "renovate/");
+        assert_eq!(c.branch_prefix_old, "renovate/");
     }
 
     #[test]
     fn branch_prefix_custom() {
-        let c = RepoConfig::parse(r#"{"branchPrefix": "deps/"}"#);
+        let c = RepoConfig::parse(r#"{"branchPrefix": "deps/", "branchPrefixOld": "old/"}"#);
         assert_eq!(c.branch_prefix, "deps/");
+        assert_eq!(c.branch_prefix_old, "old/");
     }
 
     #[test]
