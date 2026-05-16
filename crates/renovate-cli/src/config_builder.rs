@@ -75,10 +75,8 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
         config.recreate_when = map_recreate_when(rw);
     }
 
-    // --allowed-commands: Renovate accepts comma-separated or JSON array.
-    // For now pass the raw string through; full JSON5 parsing is a later slice.
     if let Some(ref raw) = cli.allowed_commands {
-        config.allowed_commands = raw.split(',').map(|s| s.trim().to_owned()).collect();
+        config.allowed_commands = parse_string_list(raw)?;
     }
     if let Some(act) = cli.allow_command_templating {
         config.allow_command_templating = act;
@@ -133,6 +131,28 @@ fn parse_string_map(raw: &str) -> Result<std::collections::BTreeMap<String, Stri
             _ => Err(format!("Invalid JSON value: '{raw}'")),
         })
         .collect()
+}
+
+fn parse_string_list(raw: &str) -> Result<Vec<String>, String> {
+    if raw.is_empty() {
+        return Ok(Vec::new());
+    }
+    match serde_json::from_str::<Value>(raw) {
+        Ok(Value::Array(values)) => values
+            .into_iter()
+            .map(|value| match value {
+                Value::String(value) => Ok(value),
+                _ => Err(format!("Invalid JSON value: '{raw}'")),
+            })
+            .collect(),
+        Ok(_) => Err(format!("Invalid JSON value: '{raw}'")),
+        Err(_) => Ok(raw
+            .split(',')
+            .map(str::trim)
+            .filter(|item| !item.is_empty())
+            .map(str::to_owned)
+            .collect()),
+    }
 }
 
 fn map_platform(p: CliPlatform) -> Platform {
@@ -521,11 +541,21 @@ mod tests {
 
     #[test]
     fn allowed_commands_comma_split() {
-        let cli = cli_with(|c| c.allowed_commands = Some("foo,bar, baz".to_owned()));
+        let cli = cli_with(|c| c.allowed_commands = Some("foo,bar, baz,".to_owned()));
         let config = build(&cli, GlobalConfig::default());
         assert_eq!(
             config.allowed_commands,
             vec!["foo".to_owned(), "bar".to_owned(), "baz".to_owned()],
+        );
+    }
+
+    #[test]
+    fn allowed_commands_json_array_parsed() {
+        let cli = cli_with(|c| c.allowed_commands = Some(r#"["foo","bar baz"]"#.to_owned()));
+        let config = build(&cli, GlobalConfig::default());
+        assert_eq!(
+            config.allowed_commands,
+            vec!["foo".to_owned(), "bar baz".to_owned()],
         );
     }
 }
