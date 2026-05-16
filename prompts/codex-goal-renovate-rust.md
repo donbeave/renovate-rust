@@ -15,11 +15,15 @@ When this file is used with Codex goal mode, treat it as the active goal file:
 prepare the working plan from the Objective and Definition Of Done, execute the
 Progress Loop, and keep going until the goal is actually achieved.
 
-Recommended command from the repository root:
+Recommended Codex goal from the repository root:
 
 ```text
-Use prompts/codex-goal-renovate-rust.md as the active Codex goal file. First prepare the goal from that file: read the Objective, Definition Of Done, Operating Rules, and Progress Loop, inspect the repository state, and create the current working plan from those sections. Use prompts/claude-loop-renovate-rust.md as the implementation playbook for repository rules, Renovate reference workflow, parity tracking, Rust standards, commit policy, and verification policy. Then execute the Progress Loop repeatedly until renovate-rust provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows, including compatible CLI flags, environment variables, config discovery and semantics, exit codes, dependency extraction, update planning, output modes, and parity tracking. Each turn must choose the next highest-value compatibility gap, implement a coherent slice, update parity docs, commit it, push it to main, and continue with the next slice. A committed slice, clean `git status --short`, or partial parity progress is not completion. The goal is complete only when this goal file's Definition Of Done is satisfied. Do not run verification commands unless the operator explicitly asks.
+Use prompts/codex-goal-renovate-rust.md as the active Codex goal file. Prepare the goal before implementation: read this file's Objective, Definition Of Done, Operating Rules, and Progress Loop; inspect the repository state; and create the current working plan from those sections. Use prompts/claude-loop-renovate-rust.md as the implementation playbook for repository rules, Renovate reference workflow, parity tracking, Rust standards, commit policy, and verification policy. Then execute this file's Progress Loop repeatedly until renovate-rust provides a production-quality Rust `renovate` binary that is a Renovate-compatible drop-in replacement for common self-hosted CLI workflows, including compatible CLI flags, environment variables, config discovery and semantics, exit codes, dependency extraction, datasource/versioning decisions, update planning, output modes, and parity tracking. Each turn must choose the next highest-value compatibility gap, implement a coherent slice, update parity docs, commit it, push it to main, and continue with the next slice. Do not stop after one implementation slice, after partial parity progress, or merely because `git status --short` is clean. The goal is complete only when this goal file's Definition Of Done is satisfied. Do not run verification commands unless the operator explicitly asks.
 ```
+
+Do not use `claude-loop-renovate-rust.md` by itself as the completion condition
+for the full implementation goal. That loop file explains how each iteration
+should work; this Codex goal file defines what completion means.
 
 ## Definition Of Done
 
