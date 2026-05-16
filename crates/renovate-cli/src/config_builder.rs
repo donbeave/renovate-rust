@@ -94,6 +94,18 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(act) = cli.allow_command_templating {
         config.allow_command_templating = act;
     }
+    if let Some(ref allowed_headers) = cli.allowed_headers {
+        config.allowed_headers = Some(parse_string_list(allowed_headers)?);
+    }
+    if let Some(ref allowed_env) = cli.allowed_env {
+        config.allowed_env = Some(parse_string_list(allowed_env)?);
+    }
+    if let Some(detect) = cli.detect_global_manager_config {
+        config.detect_global_manager_config = Some(detect);
+    }
+    if let Some(detect) = cli.detect_host_rules_from_env {
+        config.detect_host_rules_from_env = Some(detect);
+    }
     if let Some(ref endpoint) = cli.merge_confidence_endpoint {
         config.merge_confidence_endpoint = Some(endpoint.clone());
     }
@@ -120,6 +132,12 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     }
     if let Some(force_local) = cli.repository_cache_force_local {
         config.repository_cache_force_local = Some(force_local);
+    }
+    if let Some(ref cache) = cli.repository_cache {
+        config.repository_cache = Some(cache.clone());
+    }
+    if let Some(ref cache_type) = cli.repository_cache_type {
+        config.repository_cache_type = Some(cache_type.clone());
     }
     if !cli.labels.is_empty() {
         config.labels = trim_list(&cli.labels);
@@ -314,6 +332,10 @@ mod tests {
             recreate_when: None,
             allowed_commands: None,
             allow_command_templating: None,
+            allowed_headers: None,
+            allowed_env: None,
+            detect_global_manager_config: None,
+            detect_host_rules_from_env: None,
             merge_confidence_endpoint: None,
             merge_confidence_datasources: None,
             autodiscover_repo_sort: None,
@@ -323,6 +345,8 @@ mod tests {
             s3_endpoint: None,
             s3_path_style: None,
             repository_cache_force_local: None,
+            repository_cache: None,
+            repository_cache_type: None,
             labels: Vec::new(),
             host_rules: None,
             registry_aliases: None,
@@ -448,6 +472,10 @@ mod tests {
     #[test]
     fn self_hosted_global_flags_are_parsed() {
         let config = parse_and_build(&[
+            "--allowed-headers=X-*,Authorization",
+            "--allowed-env=['SOME_*','OTHER_*']",
+            "--detect-global-manager-config",
+            "--detect-host-rules-from-env=false",
             "--merge-confidence-endpoint=https://mc.example",
             "--merge-confidence-datasources=docker,npm",
             "--autodiscover-repo-sort=updated",
@@ -457,8 +485,20 @@ mod tests {
             "--s3-endpoint=https://s3.example",
             "--s3-path-style=true",
             "--repository-cache-force-local=false",
+            "--repository-cache=enabled",
+            "--repository-cache-type=s3",
         ]);
 
+        assert_eq!(
+            config.allowed_headers,
+            Some(vec!["X-*".to_owned(), "Authorization".to_owned()])
+        );
+        assert_eq!(
+            config.allowed_env,
+            Some(vec!["SOME_*".to_owned(), "OTHER_*".to_owned()])
+        );
+        assert_eq!(config.detect_global_manager_config, Some(true));
+        assert_eq!(config.detect_host_rules_from_env, Some(false));
         assert_eq!(
             config.merge_confidence_endpoint.as_deref(),
             Some("https://mc.example")
@@ -471,6 +511,8 @@ mod tests {
         assert_eq!(config.s3_endpoint.as_deref(), Some("https://s3.example"));
         assert!(config.s3_path_style);
         assert_eq!(config.repository_cache_force_local, Some(false));
+        assert_eq!(config.repository_cache.as_deref(), Some("enabled"));
+        assert_eq!(config.repository_cache_type.as_deref(), Some("s3"));
     }
 
     // Ported: "supports boolean no value" — workers/global/config/parse/cli.spec.ts line 36

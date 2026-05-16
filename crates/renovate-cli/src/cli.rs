@@ -260,6 +260,36 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_ALLOW_COMMAND_TEMPLATING")]
     pub(crate) allow_command_templating: Option<bool>,
 
+    /// Allowed host rule header patterns (comma-separated or JSON array).
+    /// Env: RENOVATE_ALLOWED_HEADERS.
+    #[arg(long, env = "RENOVATE_ALLOWED_HEADERS")]
+    pub(crate) allowed_headers: Option<String>,
+
+    /// Allowed post-upgrade environment variable patterns.
+    /// Env: RENOVATE_ALLOWED_ENV.
+    #[arg(long, env = "RENOVATE_ALLOWED_ENV")]
+    pub(crate) allowed_env: Option<String>,
+
+    /// Detect global manager config from the filesystem.
+    /// Env: RENOVATE_DETECT_GLOBAL_MANAGER_CONFIG.
+    #[arg(
+        long,
+        env = "RENOVATE_DETECT_GLOBAL_MANAGER_CONFIG",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) detect_global_manager_config: Option<bool>,
+
+    /// Detect host rules from environment variables.
+    /// Env: RENOVATE_DETECT_HOST_RULES_FROM_ENV.
+    #[arg(
+        long,
+        env = "RENOVATE_DETECT_HOST_RULES_FROM_ENV",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) detect_host_rules_from_env: Option<bool>,
+
     // ── Self-hosted global options ───────────────────────────────────────────
     /// Merge Confidence API endpoint.
     /// Env: RENOVATE_MERGE_CONFIDENCE_ENDPOINT.
@@ -320,6 +350,16 @@ pub(crate) struct Cli {
         default_missing_value = "true"
     )]
     pub(crate) repository_cache_force_local: Option<bool>,
+
+    /// Repository cache mode.
+    /// Env: RENOVATE_REPOSITORY_CACHE.
+    #[arg(long, env = "RENOVATE_REPOSITORY_CACHE")]
+    pub(crate) repository_cache: Option<String>,
+
+    /// Repository cache storage type.
+    /// Env: RENOVATE_REPOSITORY_CACHE_TYPE.
+    #[arg(long, env = "RENOVATE_REPOSITORY_CACHE_TYPE")]
+    pub(crate) repository_cache_type: Option<String>,
 
     /// Labels to apply to created PRs.
     /// Env: RENOVATE_LABELS.

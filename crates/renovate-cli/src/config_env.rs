@@ -92,6 +92,20 @@ pub(crate) fn apply_to_base(
         config.allow_command_templating =
             parse_bool("RENOVATE_ALLOW_COMMAND_TEMPLATING", value)?;
     }
+    if let Some(value) = env_value(env, prefix, "ALLOWED_HEADERS") {
+        config.allowed_headers = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "ALLOWED_ENV") {
+        config.allowed_env = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "DETECT_GLOBAL_MANAGER_CONFIG") {
+        config.detect_global_manager_config =
+            Some(parse_bool("RENOVATE_DETECT_GLOBAL_MANAGER_CONFIG", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "DETECT_HOST_RULES_FROM_ENV") {
+        config.detect_host_rules_from_env =
+            Some(parse_bool("RENOVATE_DETECT_HOST_RULES_FROM_ENV", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "HOST_RULES") {
         config.host_rules = parse_env_json_array(value).unwrap_or_default();
     }
@@ -207,6 +221,12 @@ pub(crate) fn apply_to_base(
     {
         // Renovate's migration maps any non-empty legacy value to boolean true.
         config.repository_cache_force_local = Some(true);
+    }
+    if let Some(value) = env_value(env, prefix, "REPOSITORY_CACHE") {
+        config.repository_cache = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "REPOSITORY_CACHE_TYPE") {
+        config.repository_cache_type = Some(value.to_owned());
     }
 
     Ok(config)
@@ -908,6 +928,40 @@ mod tests {
         let config =
             build_from_env(&env(&[("RENOVATE_ALLOW_COMMAND_TEMPLATING", "true")])).unwrap();
         assert!(config.allow_command_templating);
+    }
+
+    #[test]
+    fn global_security_env_options_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_ALLOWED_HEADERS", "X-*,Authorization"),
+            ("RENOVATE_ALLOWED_ENV", "['SOME_*','OTHER_*']"),
+            ("RENOVATE_DETECT_GLOBAL_MANAGER_CONFIG", "true"),
+            ("RENOVATE_DETECT_HOST_RULES_FROM_ENV", "false"),
+        ]))
+        .unwrap();
+
+        assert_eq!(
+            config.allowed_headers,
+            Some(vec!["X-*".to_owned(), "Authorization".to_owned()])
+        );
+        assert_eq!(
+            config.allowed_env,
+            Some(vec!["SOME_*".to_owned(), "OTHER_*".to_owned()])
+        );
+        assert_eq!(config.detect_global_manager_config, Some(true));
+        assert_eq!(config.detect_host_rules_from_env, Some(false));
+    }
+
+    #[test]
+    fn repository_cache_env_options_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_REPOSITORY_CACHE", "enabled"),
+            ("RENOVATE_REPOSITORY_CACHE_TYPE", "s3"),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.repository_cache.as_deref(), Some("enabled"));
+        assert_eq!(config.repository_cache_type.as_deref(), Some("s3"));
     }
 
     #[test]

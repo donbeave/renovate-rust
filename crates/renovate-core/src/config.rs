@@ -343,6 +343,18 @@ pub struct GlobalConfig {
     /// Whether command templating is allowed in post-upgrade tasks.
     pub allow_command_templating: bool,
 
+    /// Allowed host rule header patterns.
+    pub allowed_headers: Option<Vec<String>>,
+
+    /// Allowed post-upgrade environment variable patterns.
+    pub allowed_env: Option<Vec<String>>,
+
+    /// Whether to detect global manager config from the filesystem.
+    pub detect_global_manager_config: Option<bool>,
+
+    /// Whether to detect host rules from environment variables.
+    pub detect_host_rules_from_env: Option<bool>,
+
     /// Merge confidence API endpoint.
     pub merge_confidence_endpoint: Option<String>,
 
@@ -369,6 +381,12 @@ pub struct GlobalConfig {
 
     /// Force local repository cache behavior.
     pub repository_cache_force_local: Option<bool>,
+
+    /// Repository cache mode.
+    pub repository_cache: Option<String>,
+
+    /// Repository cache storage type.
+    pub repository_cache_type: Option<String>,
 
     /// Labels to apply to created PRs.
     pub labels: Vec<String>,
@@ -429,6 +447,10 @@ impl Default for GlobalConfig {
             recreate_when: RecreateWhen::Auto,
             allowed_commands: Vec::new(),
             allow_command_templating: false,
+            allowed_headers: None,
+            allowed_env: None,
+            detect_global_manager_config: None,
+            detect_host_rules_from_env: None,
             merge_confidence_endpoint: None,
             merge_confidence_datasources: Vec::new(),
             autodiscover_repo_sort: None,
@@ -438,6 +460,8 @@ impl Default for GlobalConfig {
             s3_endpoint: None,
             s3_path_style: false,
             repository_cache_force_local: None,
+            repository_cache: None,
+            repository_cache_type: None,
             labels: Vec::new(),
             host_rules: Vec::new(),
             registry_aliases: std::collections::BTreeMap::new(),

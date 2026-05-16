@@ -228,6 +228,14 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             file_config.allowed_commands
         },
         allow_command_templating: file_config.allow_command_templating,
+        allowed_headers: file_config.allowed_headers.or(base.allowed_headers),
+        allowed_env: file_config.allowed_env.or(base.allowed_env),
+        detect_global_manager_config: file_config
+            .detect_global_manager_config
+            .or(base.detect_global_manager_config),
+        detect_host_rules_from_env: file_config
+            .detect_host_rules_from_env
+            .or(base.detect_host_rules_from_env),
         merge_confidence_endpoint: file_config
             .merge_confidence_endpoint
             .or(base.merge_confidence_endpoint),
@@ -249,6 +257,10 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         repository_cache_force_local: file_config
             .repository_cache_force_local
             .or(base.repository_cache_force_local),
+        repository_cache: file_config.repository_cache.or(base.repository_cache),
+        repository_cache_type: file_config
+            .repository_cache_type
+            .or(base.repository_cache_type),
         labels: if file_config.labels.is_empty() {
             base.labels
         } else {
