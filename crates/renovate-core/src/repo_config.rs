@@ -177,6 +177,21 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `automergeType`.
     pub automerge_type: Option<String>,
 
+    /// Merge strategy used when `automergeType = "pr"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `automergeStrategy`.
+    pub automerge_strategy: String,
+
+    /// PR comment used to trigger automerge when `automergeType = "pr-comment"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `automergeComment`.
+    pub automerge_comment: String,
+
+    /// Whether automerge can ignore tests.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `ignoreTests`.
+    pub ignore_tests: bool,
+
     /// Labels to add to Renovate PRs (must exist in the repository).
     /// Renovate reference: `lib/config/options/index.ts` — `labels`.
     pub labels: Vec<String>,
@@ -192,6 +207,16 @@ pub struct RepoConfig {
     /// GitHub usernames/team slugs to add as PR reviewers.
     /// Renovate reference: `lib/config/options/index.ts` — `reviewers`.
     pub reviewers: Vec<String>,
+
+    /// Whether Bitbucket PR tasks should be completed after PR creation.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `bbAutoResolvePrTasks`.
+    pub bb_auto_resolve_pr_tasks: bool,
+
+    /// Whether Bitbucket default reviewers should be used.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `bbUseDefaultReviewers`.
+    pub bb_use_default_reviewers: bool,
 
     /// When `true`, Renovate PRs are created as draft PRs.  Default: `false`.
     ///
@@ -4098,6 +4123,12 @@ impl RepoConfig {
             automerge: bool,
             #[serde(rename = "automergeType")]
             automerge_type: Option<String>,
+            #[serde(rename = "automergeStrategy", default = "default_auto")]
+            automerge_strategy: String,
+            #[serde(rename = "automergeComment", default = "default_automerge_comment")]
+            automerge_comment: String,
+            #[serde(rename = "ignoreTests", default)]
+            ignore_tests: bool,
             #[serde(default)]
             labels: Vec<String>,
             #[serde(rename = "addLabels", default)]
@@ -4106,6 +4137,10 @@ impl RepoConfig {
             assignees: Vec<String>,
             #[serde(default)]
             reviewers: Vec<String>,
+            #[serde(rename = "bbAutoResolvePrTasks", default)]
+            bb_auto_resolve_pr_tasks: bool,
+            #[serde(rename = "bbUseDefaultReviewers", default = "default_true")]
+            bb_use_default_reviewers: bool,
             #[serde(rename = "draftPR", default)]
             draft_pr: bool,
             #[serde(rename = "azureWorkItemId", default)]
@@ -4330,6 +4365,14 @@ impl RepoConfig {
 
         fn default_any_strategy() -> String {
             "any".to_owned()
+        }
+
+        fn default_auto() -> String {
+            "auto".to_owned()
+        }
+
+        fn default_automerge_comment() -> String {
+            "automergeComment".to_owned()
         }
 
         fn default_true() -> bool {
@@ -4960,6 +5003,9 @@ impl RepoConfig {
                 resolve_extends_automerge(&effective_extends).unwrap_or(false)
             },
             automerge_type: raw.automerge_type.or(param_automerge_type),
+            automerge_strategy: raw.automerge_strategy,
+            automerge_comment: raw.automerge_comment,
+            ignore_tests: raw.ignore_tests,
             labels: {
                 let mut l = raw.labels;
                 for pl in param_labels {
@@ -4988,6 +5034,8 @@ impl RepoConfig {
                 }
                 r
             },
+            bb_auto_resolve_pr_tasks: raw.bb_auto_resolve_pr_tasks,
+            bb_use_default_reviewers: raw.bb_use_default_reviewers,
             draft_pr: raw.draft_pr,
             azure_work_item_id: raw.azure_work_item_id,
             auto_approve: raw.auto_approve,
@@ -5761,10 +5809,15 @@ impl Default for RepoConfig {
             timezone: None,
             automerge: false,
             automerge_type: None,
+            automerge_strategy: "auto".to_owned(),
+            automerge_comment: "automergeComment".to_owned(),
+            ignore_tests: false,
             labels: Vec::new(),
             add_labels: Vec::new(),
             assignees: Vec::new(),
             reviewers: Vec::new(),
+            bb_auto_resolve_pr_tasks: false,
+            bb_use_default_reviewers: true,
             draft_pr: false,
             azure_work_item_id: 0,
             auto_approve: false,
@@ -9004,6 +9057,24 @@ mod tests {
     fn assign_automerge_config() {
         let c = RepoConfig::parse(r#"{"assignAutomerge": true}"#);
         assert!(c.assign_automerge);
+    }
+
+    #[test]
+    fn automerge_platform_options_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "automergeStrategy": "squash",
+                "automergeComment": "merge-it",
+                "ignoreTests": true,
+                "bbAutoResolvePrTasks": true,
+                "bbUseDefaultReviewers": false
+            }"#,
+        );
+        assert_eq!(c.automerge_strategy, "squash");
+        assert_eq!(c.automerge_comment, "merge-it");
+        assert!(c.ignore_tests);
+        assert!(c.bb_auto_resolve_pr_tasks);
+        assert!(!c.bb_use_default_reviewers);
     }
 
     #[test]
