@@ -58,6 +58,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "GIT_PRIVATE_KEY") {
         config.git_private_key = Some(value.replace("\\n", "\n"));
     }
+    if let Some(value) = env_value(env, prefix, "USER_AGENT") {
+        config.user_agent = Some(value.to_owned());
+    }
     if let Some(value) = env_value(env, prefix, "PLATFORM") {
         config.platform = parse_platform(value)?;
     }
@@ -228,6 +231,26 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "REPOSITORY_CACHE_TYPE") {
         config.repository_cache_type = Some(value.to_owned());
     }
+    if let Some(value) = env_value(env, prefix, "BASE_DIR") {
+        config.base_dir = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "CACHE_DIR") {
+        config.cache_dir = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "CONTAINERBASE_DIR") {
+        config.containerbase_dir = Some(value.to_owned());
+    }
+    if let Some(value) = env_value(env, prefix, "EXECUTION_TIMEOUT") {
+        config.execution_timeout =
+            Some(parse_u32("RENOVATE_EXECUTION_TIMEOUT", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "GIT_TIMEOUT") {
+        config.git_timeout = Some(parse_u32("RENOVATE_GIT_TIMEOUT", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "HTTP_CACHE_TTL_DAYS") {
+        config.http_cache_ttl_days =
+            Some(parse_u32("RENOVATE_HTTP_CACHE_TTL_DAYS", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "REPORT_TYPE") {
         config.report_type = Some(value.to_owned());
     }
@@ -347,6 +370,12 @@ fn parse_platform_commit(value: &str) -> Result<&'static str, String> {
         "disabled" | "false" => Ok("disabled"),
         _ => Err(format!("RENOVATE_PLATFORM_COMMIT was invalid: {value}")),
     }
+}
+
+fn parse_u32(env_name: &str, value: &str) -> Result<u32, String> {
+    value
+        .parse::<u32>()
+        .map_err(|_| format!("{env_name} was invalid: {value}"))
 }
 
 fn parse_string_array(raw: &str) -> Result<Vec<String>, String> {
@@ -539,6 +568,31 @@ mod tests {
     fn string_newlines_are_coerced() {
         let config = build_from_env(&env(&[("RENOVATE_GIT_PRIVATE_KEY", r"abc\ndef")])).unwrap();
         assert_eq!(config.git_private_key.as_deref(), Some("abc\ndef"));
+    }
+
+    #[test]
+    fn runtime_global_env_options_are_parsed() {
+        let config = build_from_env(&env(&[
+            ("RENOVATE_USER_AGENT", "renovate-rust-test"),
+            ("RENOVATE_BASE_DIR", "/tmp/renovate"),
+            ("RENOVATE_CACHE_DIR", "/tmp/renovate/cache"),
+            ("RENOVATE_CONTAINERBASE_DIR", "/tmp/renovate/containerbase"),
+            ("RENOVATE_EXECUTION_TIMEOUT", "20"),
+            ("RENOVATE_GIT_TIMEOUT", "10000"),
+            ("RENOVATE_HTTP_CACHE_TTL_DAYS", "45"),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.user_agent.as_deref(), Some("renovate-rust-test"));
+        assert_eq!(config.base_dir.as_deref(), Some("/tmp/renovate"));
+        assert_eq!(config.cache_dir.as_deref(), Some("/tmp/renovate/cache"));
+        assert_eq!(
+            config.containerbase_dir.as_deref(),
+            Some("/tmp/renovate/containerbase")
+        );
+        assert_eq!(config.execution_timeout, Some(20));
+        assert_eq!(config.git_timeout, Some(10000));
+        assert_eq!(config.http_cache_ttl_days, Some(45));
     }
 
     // Ported: "supports custom prefixes" — workers/global/config/parse/env.spec.ts line 67

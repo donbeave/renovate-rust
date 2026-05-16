@@ -51,6 +51,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref password) = cli.password {
         config.password = Some(password.clone());
     }
+    if let Some(ref user_agent) = cli.user_agent {
+        config.user_agent = Some(user_agent.clone());
+    }
 
     if let Some(dry) = map_dry_run(cli.dry_run) {
         config.dry_run = Some(dry);
@@ -138,6 +141,24 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     }
     if let Some(ref cache_type) = cli.repository_cache_type {
         config.repository_cache_type = Some(cache_type.clone());
+    }
+    if let Some(ref base_dir) = cli.base_dir {
+        config.base_dir = Some(base_dir.clone());
+    }
+    if let Some(ref cache_dir) = cli.cache_dir {
+        config.cache_dir = Some(cache_dir.clone());
+    }
+    if let Some(ref containerbase_dir) = cli.containerbase_dir {
+        config.containerbase_dir = Some(containerbase_dir.clone());
+    }
+    if let Some(timeout) = cli.execution_timeout {
+        config.execution_timeout = Some(timeout);
+    }
+    if let Some(timeout) = cli.git_timeout {
+        config.git_timeout = Some(timeout);
+    }
+    if let Some(days) = cli.http_cache_ttl_days {
+        config.http_cache_ttl_days = Some(days);
     }
     if let Some(ref report_type) = cli.report_type {
         config.report_type = Some(report_type.clone());
@@ -326,6 +347,7 @@ mod tests {
             endpoint: None,
             username: None,
             password: None,
+            user_agent: None,
             dry_run: None,
             require_config: None,
             fork_processing: None,
@@ -353,6 +375,12 @@ mod tests {
             repository_cache_force_local: None,
             repository_cache: None,
             repository_cache_type: None,
+            base_dir: None,
+            cache_dir: None,
+            containerbase_dir: None,
+            execution_timeout: None,
+            git_timeout: None,
+            http_cache_ttl_days: None,
             report_type: None,
             report_path: None,
             labels: Vec::new(),
@@ -437,6 +465,30 @@ mod tests {
         let config = parse_and_build(&["--username", "some-user", "--password=app-password"]);
         assert_eq!(config.username.as_deref(), Some("some-user"));
         assert_eq!(config.password.as_deref(), Some("app-password"));
+    }
+
+    #[test]
+    fn runtime_global_flags_are_parsed() {
+        let config = parse_and_build(&[
+            "--user-agent=renovate-rust-test",
+            "--base-dir=/tmp/renovate",
+            "--cache-dir=/tmp/renovate/cache",
+            "--containerbase-dir=/tmp/renovate/containerbase",
+            "--execution-timeout=20",
+            "--git-timeout=10000",
+            "--http-cache-ttl-days=45",
+        ]);
+
+        assert_eq!(config.user_agent.as_deref(), Some("renovate-rust-test"));
+        assert_eq!(config.base_dir.as_deref(), Some("/tmp/renovate"));
+        assert_eq!(config.cache_dir.as_deref(), Some("/tmp/renovate/cache"));
+        assert_eq!(
+            config.containerbase_dir.as_deref(),
+            Some("/tmp/renovate/containerbase")
+        );
+        assert_eq!(config.execution_timeout, Some(20));
+        assert_eq!(config.git_timeout, Some(10000));
+        assert_eq!(config.http_cache_ttl_days, Some(45));
     }
 
     // Ported: "supports repositories" — workers/global/config/parse/cli.spec.ts line 89

@@ -176,6 +176,11 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_PASSWORD")]
     pub(crate) password: Option<String>,
 
+    /// HTTP user-agent override.
+    /// Env: RENOVATE_USER_AGENT.
+    #[arg(long, env = "RENOVATE_USER_AGENT")]
+    pub(crate) user_agent: Option<String>,
+
     // ── Run behavior ─────────────────────────────────────────────────────────
     /// Perform a dry run. Values: extract, lookup, full.
     /// Bare --dry-run is rewritten to --dry-run=true by migrateArgs, which
@@ -360,6 +365,36 @@ pub(crate) struct Cli {
     /// Env: RENOVATE_REPOSITORY_CACHE_TYPE.
     #[arg(long, env = "RENOVATE_REPOSITORY_CACHE_TYPE")]
     pub(crate) repository_cache_type: Option<String>,
+
+    /// Base directory for local Renovate files.
+    /// Env: RENOVATE_BASE_DIR.
+    #[arg(long, env = "RENOVATE_BASE_DIR")]
+    pub(crate) base_dir: Option<String>,
+
+    /// Cache directory.
+    /// Env: RENOVATE_CACHE_DIR.
+    #[arg(long, env = "RENOVATE_CACHE_DIR")]
+    pub(crate) cache_dir: Option<String>,
+
+    /// Containerbase cache directory.
+    /// Env: RENOVATE_CONTAINERBASE_DIR.
+    #[arg(long, env = "RENOVATE_CONTAINERBASE_DIR")]
+    pub(crate) containerbase_dir: Option<String>,
+
+    /// Default child process execution timeout in minutes.
+    /// Env: RENOVATE_EXECUTION_TIMEOUT.
+    #[arg(long, env = "RENOVATE_EXECUTION_TIMEOUT")]
+    pub(crate) execution_timeout: Option<u32>,
+
+    /// Git task timeout in milliseconds.
+    /// Env: RENOVATE_GIT_TIMEOUT.
+    #[arg(long, env = "RENOVATE_GIT_TIMEOUT")]
+    pub(crate) git_timeout: Option<u32>,
+
+    /// HTTP cache TTL in days.
+    /// Env: RENOVATE_HTTP_CACHE_TTL_DAYS.
+    #[arg(long, env = "RENOVATE_HTTP_CACHE_TTL_DAYS")]
+    pub(crate) http_cache_ttl_days: Option<u32>,
 
     /// Report output type.
     /// Env: RENOVATE_REPORT_TYPE.

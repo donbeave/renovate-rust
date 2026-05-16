@@ -300,6 +300,18 @@ pub struct GlobalConfig {
     /// Private key string, with escaped newlines normalized by env parsing.
     pub git_private_key: Option<String>,
 
+    /// HTTP user-agent override.
+    pub user_agent: Option<String>,
+
+    /// Base directory for local Renovate files.
+    pub base_dir: Option<String>,
+
+    /// Cache directory.
+    pub cache_dir: Option<String>,
+
+    /// Containerbase cache directory.
+    pub containerbase_dir: Option<String>,
+
     /// Global enabled flag.
     pub enabled: Option<bool>,
 
@@ -388,6 +400,15 @@ pub struct GlobalConfig {
     /// Repository cache storage type.
     pub repository_cache_type: Option<String>,
 
+    /// Default child process execution timeout in minutes.
+    pub execution_timeout: Option<u32>,
+
+    /// Git task timeout in milliseconds.
+    pub git_timeout: Option<u32>,
+
+    /// HTTP cache TTL in days.
+    pub http_cache_ttl_days: Option<u32>,
+
     /// Report output type.
     pub report_type: Option<String>,
 
@@ -444,6 +465,10 @@ impl Default for GlobalConfig {
             username: None,
             password: None,
             git_private_key: None,
+            user_agent: None,
+            base_dir: None,
+            cache_dir: None,
+            containerbase_dir: None,
             enabled: None,
             automerge: None,
             dry_run: None,
@@ -471,6 +496,9 @@ impl Default for GlobalConfig {
             repository_cache_force_local: None,
             repository_cache: None,
             repository_cache_type: None,
+            execution_timeout: None,
+            git_timeout: None,
+            http_cache_ttl_days: None,
             report_type: None,
             report_path: None,
             report_formatting: None,

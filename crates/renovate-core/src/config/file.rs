@@ -208,6 +208,10 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         username: file_config.username.or(base.username),
         password: file_config.password.or(base.password),
         git_private_key: file_config.git_private_key.or(base.git_private_key),
+        user_agent: file_config.user_agent.or(base.user_agent),
+        base_dir: file_config.base_dir.or(base.base_dir),
+        cache_dir: file_config.cache_dir.or(base.cache_dir),
+        containerbase_dir: file_config.containerbase_dir.or(base.containerbase_dir),
         enabled: file_config.enabled.or(base.enabled),
         automerge: file_config.automerge.or(base.automerge),
         dry_run: file_config.dry_run.or(base.dry_run),
@@ -261,6 +265,11 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         repository_cache_type: file_config
             .repository_cache_type
             .or(base.repository_cache_type),
+        execution_timeout: file_config.execution_timeout.or(base.execution_timeout),
+        git_timeout: file_config.git_timeout.or(base.git_timeout),
+        http_cache_ttl_days: file_config
+            .http_cache_ttl_days
+            .or(base.http_cache_ttl_days),
         report_type: file_config.report_type.or(base.report_type),
         report_path: file_config.report_path.or(base.report_path),
         report_formatting: file_config.report_formatting.or(base.report_formatting),
