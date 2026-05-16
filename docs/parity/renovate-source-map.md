@@ -1058,7 +1058,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 |----------------------|-----------|--------|-------|
 | `lib/config/defaults.ts` | `crates/renovate-core/src/config.rs` | partial | Core implicit default factories ported |
 | `lib/config/options/index.ts` | `crates/renovate-core/src/config.rs` | partial | Option metadata partially ported for global config retention and CLI/env option surface, including onboarding, object-valued, and scalar self-hosted global options |
-| `lib/config/app-strings.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Config filename expansion and platform filtering ported |
+| `lib/config/app-strings.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Config filename expansion, user `configFileNames`, and platform filtering ported |
 | `lib/config/parse.ts` | `crates/renovate-core/src/config/file.rs` | partial | JSON/JSON5 parse result handling ported |
 | `lib/config/global.ts` | `crates/renovate-core/src/config.rs` | partial | Global option list and config types partially ported, including onboarding/config-file, object-valued, and scalar self-hosted global option retention |
 | `lib/config/validation.ts` | — | not-started | Not ported |
@@ -1075,7 +1075,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/workers/repository/init/merge.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Repo config merge partially ported |
+| `lib/workers/repository/init/merge.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Repo config discovery and merge partially ported, including user `configFileNames` lookup |
 | `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch topic/name generation helpers partially ported. |
 | `lib/workers/repository/updates/flatten.ts` | `crates/renovate-core/src/branch.rs` | partial | `sanitizeDepName` URL/name normalization behavior partially ported; full update flattening is not ported. |
 | `lib/workers/global/config/parse/cli.ts` | `crates/renovate-cli/src/cli.rs` | partial | CLI arg parsing ported, including enabled/automerge booleans, username/password auth flags, runtime path/timeout flags, Docker sidecar flags, binarySource, platformCommit, report flags, expanded global security/cache flags, onboarding/config-file flags, object-valued global flags, scalar self-hosted global flags, and JSON5 structured values |

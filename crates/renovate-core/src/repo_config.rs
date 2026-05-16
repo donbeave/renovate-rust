@@ -5553,10 +5553,9 @@ pub enum RepoConfigResult {
 
 /// Try to find a Renovate config file in the repository.
 ///
-/// Tries each path in [`CONFIG_FILE_CANDIDATES`] in order and returns the
-/// first one found.  After exhausting the dedicated config paths, also checks
-/// `package.json` for a top-level `"renovate"` key (deprecated upstream but
-/// still supported for compatibility).
+/// Tries configured and default config filenames in order and returns the first
+/// one found. `package.json` is parsed only for a top-level `"renovate"` key
+/// (deprecated upstream but still supported for compatibility).
 ///
 /// Returns [`RepoConfigResult::NotFound`] or [`RepoConfigResult::NeedsOnboarding`]
 /// when no config exists anywhere.
@@ -5566,8 +5565,24 @@ pub async fn discover(
     repo: &str,
     global_config: &GlobalConfig,
 ) -> Result<RepoConfigResult, PlatformError> {
-    for path in CONFIG_FILE_CANDIDATES {
-        if let Some(file) = client.get_raw_file(owner, repo, path).await? {
+    let user_config_file_names = global_config.config_file_names.as_deref().unwrap_or(&[]);
+    for path in config_file_names(None, user_config_file_names) {
+        if let Some(file) = client.get_raw_file(owner, repo, &path).await? {
+            if path == "package.json" {
+                if let Some(config) = RepoConfig::parse_from_package_json(&file.content) {
+                    tracing::warn!(
+                        repo = %format!("{owner}/{repo}"),
+                        "Using package.json for Renovate config is deprecated — \
+                         please migrate to a dedicated config file such as renovate.json"
+                    );
+                    return Ok(RepoConfigResult::Found {
+                        path: "package.json".to_owned(),
+                        config: Box::new(config),
+                    });
+                }
+                continue;
+            }
+
             tracing::debug!(repo = %format!("{owner}/{repo}"), path = %path, "found renovate config");
             let config = RepoConfig::parse(&file.content);
             return Ok(RepoConfigResult::Found {
@@ -5575,21 +5590,6 @@ pub async fn discover(
                 config: Box::new(config),
             });
         }
-    }
-
-    // Fall back to package.json `"renovate"` key (deprecated; warn when used).
-    if let Some(file) = client.get_raw_file(owner, repo, "package.json").await?
-        && let Some(config) = RepoConfig::parse_from_package_json(&file.content)
-    {
-        tracing::warn!(
-            repo = %format!("{owner}/{repo}"),
-            "Using package.json for Renovate config is deprecated — \
-             please migrate to a dedicated config file such as renovate.json"
-        );
-        return Ok(RepoConfigResult::Found {
-            path: "package.json".to_owned(),
-            config: Box::new(config),
-        });
     }
 
     tracing::debug!(repo = %format!("{owner}/{repo}"), "no renovate config found");
@@ -5726,6 +5726,35 @@ mod tests {
         assert!(
             matches!(result, RepoConfigResult::Found { ref path, .. } if path == "renovate.json")
         );
+    }
+
+    #[tokio::test]
+    async fn discover_uses_user_config_file_names_first() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(wm_path("/repos/owner/repo/contents/custom-renovate.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "path": "custom-renovate.json",
+                "content": base64::engine::general_purpose::STANDARD
+                    .encode(r#"{"ignoreDeps":["lodash"]}"#),
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let config = GlobalConfig {
+            config_file_names: Some(vec!["custom-renovate.json".to_owned()]),
+            ..GlobalConfig::default()
+        };
+        let result = discover(&client, "owner", "repo", &config).await.unwrap();
+
+        let (path, config) = match result {
+            RepoConfigResult::Found { path, config } => (path, config),
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(path, "custom-renovate.json");
+        assert_eq!(config.ignore_deps, vec!["lodash"]);
     }
 
     async fn discover_with_config_file(path: &str, content: &str) -> RepoConfigResult {
