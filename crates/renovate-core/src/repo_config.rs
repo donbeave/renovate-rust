@@ -374,6 +374,33 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `minimumReleaseAge`.
     pub minimum_release_age: Option<String>,
 
+    /// Whether release timestamps are required when `minimumReleaseAge` is set.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `minimumReleaseAgeBehaviour`.
+    pub minimum_release_age_behaviour: String,
+
+    /// Time period after which packages are flagged as abandoned.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `abandonmentThreshold`.
+    pub abandonment_threshold: Option<String>,
+
+    /// Whether abandoned packages are reported in the dependency dashboard.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardReportAbandonment`.
+    pub dependency_dashboard_report_abandonment: bool,
+
+    /// Whether passing internal checks can satisfy branch status.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `internalChecksAsSuccess`.
+    pub internal_checks_as_success: bool,
+
+    /// How Renovate filters updates based on internal checks.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `internalChecksFilter`.
+    pub internal_checks_filter: String,
+
     /// When `true`, only upgrade to stable versions if the current version is
     /// stable.  If the current version is unstable, upgrades within the same
     /// major are still allowed.  Default: `false`.
@@ -4135,6 +4162,22 @@ impl RepoConfig {
             ignore_presets: Vec<String>,
             #[serde(rename = "minimumReleaseAge")]
             minimum_release_age: Option<String>,
+            #[serde(
+                rename = "minimumReleaseAgeBehaviour",
+                default = "default_minimum_release_age_behaviour"
+            )]
+            minimum_release_age_behaviour: String,
+            #[serde(rename = "abandonmentThreshold")]
+            abandonment_threshold: Option<String>,
+            #[serde(
+                rename = "dependencyDashboardReportAbandonment",
+                default = "default_true"
+            )]
+            dependency_dashboard_report_abandonment: bool,
+            #[serde(rename = "internalChecksAsSuccess", default)]
+            internal_checks_as_success: bool,
+            #[serde(rename = "internalChecksFilter", default = "default_internal_checks_filter")]
+            internal_checks_filter: String,
             /// Deprecated: Renovate migrates stabilityDays → minimumReleaseAge.
             /// Accepted here for backward-compat; values: 0 (unset), 1 ("1 day"), N ("N days").
             #[serde(rename = "stabilityDays")]
@@ -4248,6 +4291,14 @@ impl RepoConfig {
 
         fn default_stop_updating_label() -> String {
             "stop-updating".to_owned()
+        }
+
+        fn default_minimum_release_age_behaviour() -> String {
+            "timestamp-required".to_owned()
+        }
+
+        fn default_internal_checks_filter() -> String {
+            "strict".to_owned()
         }
 
         fn default_commit_action() -> String {
@@ -5004,6 +5055,11 @@ impl RepoConfig {
                     Some(n) => Some(format!("{n} days")),
                 }
             }),
+            minimum_release_age_behaviour: raw.minimum_release_age_behaviour,
+            abandonment_threshold: raw.abandonment_threshold,
+            dependency_dashboard_report_abandonment: raw.dependency_dashboard_report_abandonment,
+            internal_checks_as_success: raw.internal_checks_as_success,
+            internal_checks_filter: raw.internal_checks_filter,
             ignore_unstable: raw.ignore_unstable || preset_ignore_unstable,
             respect_latest: raw.respect_latest
                 || effective_extends
@@ -5655,6 +5711,11 @@ impl Default for RepoConfig {
             extends: Vec::new(),
             ignore_presets: Vec::new(),
             minimum_release_age: None,
+            minimum_release_age_behaviour: "timestamp-required".to_owned(),
+            abandonment_threshold: None,
+            dependency_dashboard_report_abandonment: true,
+            internal_checks_as_success: false,
+            internal_checks_filter: "strict".to_owned(),
             ignore_unstable: false,
             respect_latest: false,
             pin_digests: false,
@@ -11617,6 +11678,24 @@ mod rule_effects_tests {
             Some("7 days"),
             "explicit minimumReleaseAge must take precedence over stabilityDays migration"
         );
+    }
+
+    #[test]
+    fn release_age_internal_check_options_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "minimumReleaseAgeBehaviour": "timestamp-optional",
+                "abandonmentThreshold": "1 year",
+                "dependencyDashboardReportAbandonment": false,
+                "internalChecksAsSuccess": true,
+                "internalChecksFilter": "flexible"
+            }"#,
+        );
+        assert_eq!(c.minimum_release_age_behaviour, "timestamp-optional");
+        assert_eq!(c.abandonment_threshold.as_deref(), Some("1 year"));
+        assert!(!c.dependency_dashboard_report_abandonment);
+        assert!(c.internal_checks_as_success);
+        assert_eq!(c.internal_checks_filter, "flexible");
     }
 
     #[test]
