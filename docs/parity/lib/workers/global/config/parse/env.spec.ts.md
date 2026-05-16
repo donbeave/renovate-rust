@@ -54,7 +54,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| renames migrated variables | 386 | ported | `config_env.rs` | `git_lab_automerge_env_sets_platform_automerge` | — |
+| renames migrated variables | 386 | ported | `config_env.rs` | `git_lab_automerge_env_sets_platform_automerge` (+ `renamed_env_vars_map_to_current_options`) | — |
 
 ### `workers/global/config/parse/env`
 
@@ -78,4 +78,3 @@
 | platformCommit boolean false | 489 | ported | `config_env.rs` | `platform_commit_false_maps_to_disabled` | — |
 
 ---
-

@@ -75,6 +75,10 @@ pub(crate) fn apply_to_base(
     ) {
         config.allowed_commands = split_list(value);
     }
+    if let Some(value) = env_value(env, prefix, "ALLOW_COMMAND_TEMPLATING") {
+        config.allow_command_templating =
+            parse_bool("RENOVATE_ALLOW_COMMAND_TEMPLATING", value)?;
+    }
     if let Some(value) = env_value(env, prefix, "HOST_RULES") {
         config.host_rules = parse_json_array(value).unwrap_or_default();
     }
@@ -83,6 +87,9 @@ pub(crate) fn apply_to_base(
     }
     if let Some(value) = env_value(env, prefix, "LOCK_FILE_MAINTENANCE") {
         config.lock_file_maintenance = parse_json_object(value).unwrap_or_default();
+    }
+    if let Some(value) = env_value(env, prefix, "ONBOARDING_CONFIG") {
+        config.onboarding_config = parse_json_object(value).unwrap_or_default();
     }
     if let Some(token) = env
         .get("GITHUB_COM_TOKEN")
@@ -666,6 +673,27 @@ mod tests {
             Some("https://mc.example")
         );
         assert_eq!(config.merge_confidence_datasources, vec!["docker", "npm"]);
+    }
+
+    #[test]
+    fn command_templating_env_is_parsed() {
+        let config =
+            build_from_env(&env(&[("RENOVATE_ALLOW_COMMAND_TEMPLATING", "true")])).unwrap();
+        assert!(config.allow_command_templating);
+    }
+
+    #[test]
+    fn onboarding_config_env_is_parsed() {
+        let config = build_from_env(&env(&[(
+            "RENOVATE_ONBOARDING_CONFIG",
+            r#"{"extends":["config:recommended"]}"#,
+        )]))
+        .unwrap();
+
+        assert_eq!(
+            config.onboarding_config["extends"][0].as_str(),
+            Some("config:recommended")
+        );
     }
 
     // Ported: "dryRun boolean true" — workers/global/config/parse/env.spec.ts line 441
