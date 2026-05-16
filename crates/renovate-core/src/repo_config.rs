@@ -619,6 +619,11 @@ pub struct RepoConfig {
     /// `dependencyDashboardLabels`.
     pub dependency_dashboard_labels: Vec<String>,
 
+    /// Free-form Dependency Dashboard section customizations.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `customizeDashboard`.
+    pub customize_dashboard: serde_json::Map<String, serde_json::Value>,
+
     /// Whether the Dependency Dashboard lists OSV vulnerability summaries.
     ///
     /// Renovate reference: `lib/config/options/index.ts` —
@@ -4678,6 +4683,8 @@ impl RepoConfig {
             dependency_dashboard_footer: Option<String>,
             #[serde(rename = "dependencyDashboardLabels", default)]
             dependency_dashboard_labels: Vec<String>,
+            #[serde(rename = "customizeDashboard", default)]
+            customize_dashboard: serde_json::Map<String, serde_json::Value>,
             #[serde(
                 rename = "dependencyDashboardOSVVulnerabilitySummary",
                 default = "default_none_string"
@@ -5843,6 +5850,7 @@ impl RepoConfig {
             dependency_dashboard_header: raw.dependency_dashboard_header,
             dependency_dashboard_footer: raw.dependency_dashboard_footer,
             dependency_dashboard_labels: raw.dependency_dashboard_labels,
+            customize_dashboard: raw.customize_dashboard,
             dependency_dashboard_osv_vulnerability_summary: raw
                 .dependency_dashboard_osv_vulnerability_summary,
             dependency_dashboard_approval: raw.dependency_dashboard_approval
@@ -6597,6 +6605,7 @@ impl Default for RepoConfig {
             dependency_dashboard_header: "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.".to_owned(),
             dependency_dashboard_footer: None,
             dependency_dashboard_labels: Vec::new(),
+            customize_dashboard: serde_json::Map::new(),
             dependency_dashboard_osv_vulnerability_summary: "none".to_owned(),
             dependency_dashboard_approval: false,
             config_warning_reuse_issue: false,
@@ -10115,6 +10124,25 @@ mod tests {
         assert_eq!(c.dependency_dashboard_osv_vulnerability_summary, "all");
         assert!(c.osv_vulnerability_alerts);
         assert!(!c.prune_branch_after_automerge);
+    }
+
+    #[test]
+    fn customize_dashboard_object_is_retained() {
+        let c = RepoConfig::parse(
+            r#"{"customizeDashboard": {"security": "Security updates", "open": "Open updates"}}"#,
+        );
+        assert_eq!(
+            c.customize_dashboard
+                .get("security")
+                .and_then(serde_json::Value::as_str),
+            Some("Security updates")
+        );
+        assert_eq!(
+            c.customize_dashboard
+                .get("open")
+                .and_then(serde_json::Value::as_str),
+            Some("Open updates")
+        );
     }
 
     #[test]
