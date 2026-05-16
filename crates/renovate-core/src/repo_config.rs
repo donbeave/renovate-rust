@@ -248,6 +248,11 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `rebaseWhen`.
     pub rebase_when: Option<String>,
+    /// Whether Renovate should recreate PRs that were closed previously.
+    /// Values: `"auto"` (default), `"always"`, `"never"`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `recreateWhen`.
+    pub recreate_when: String,
 
     // ── Update grouping / limits ─────────────────────────────────────────────
     /// Maximum number of open Renovate PRs at any one time.  `0` = unlimited.
@@ -4049,6 +4054,8 @@ impl RepoConfig {
             use_base_branch_config: String,
             #[serde(rename = "rebaseWhen")]
             rebase_when: Option<String>,
+            #[serde(rename = "recreateWhen", default = "default_recreate_when")]
+            recreate_when: String,
             /// Deprecated: rebaseStalePrs: true → rebaseWhen: "behind-base-branch".
             #[serde(rename = "rebaseStalePrs")]
             rebase_stale_prs: Option<bool>,
@@ -4207,6 +4214,10 @@ impl RepoConfig {
 
         fn default_use_base_branch_config() -> String {
             "none".to_owned()
+        }
+
+        fn default_recreate_when() -> String {
+            "auto".to_owned()
         }
 
         fn default_commit_action() -> String {
@@ -4877,6 +4888,7 @@ impl RepoConfig {
                     None
                 }
             }),
+            recreate_when: raw.recreate_when,
             pr_concurrent_limit: scalar_pr_concurrent.unwrap_or(raw.pr_concurrent_limit),
             pr_hourly_limit: scalar_pr_hourly.unwrap_or(raw.pr_hourly_limit),
             minimum_group_size: raw.minimum_group_size,
@@ -5590,6 +5602,7 @@ impl Default for RepoConfig {
             base_branches: Vec::new(),
             use_base_branch_config: "none".to_owned(),
             rebase_when: None,
+            recreate_when: "auto".to_owned(),
             pr_concurrent_limit: 0,
             pr_creation: None,
             pr_hourly_limit: 2,
@@ -8828,6 +8841,12 @@ mod tests {
         // Explicit platformAutomerge overrides azureAutoComplete.
         let c = RepoConfig::parse(r#"{"platformAutomerge": false, "azureAutoComplete": true}"#);
         assert!(!c.platform_automerge, "explicit platformAutomerge wins");
+    }
+
+    #[test]
+    fn recreate_when_parsed() {
+        let c = RepoConfig::parse(r#"{"recreateWhen": "always"}"#);
+        assert_eq!(c.recreate_when, "always");
     }
 
     #[test]
