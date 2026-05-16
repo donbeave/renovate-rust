@@ -67,8 +67,19 @@ pub(crate) fn apply_to_base(
             "disabled".to_owned()
         });
     }
+    if let Some(value) = env_renamed_value(
+        env,
+        prefix,
+        "ALLOWED_COMMANDS",
+        "ALLOWED_POST_UPGRADE_COMMANDS",
+    ) {
+        config.allowed_commands = split_list(value);
+    }
     if let Some(value) = env_value(env, prefix, "HOST_RULES") {
         config.host_rules = parse_json_array(value).unwrap_or_default();
+    }
+    if let Some(value) = env_renamed_value(env, prefix, "REGISTRY_ALIASES", "ALIASES") {
+        config.registry_aliases = parse_string_map(value).unwrap_or_default();
     }
     if let Some(value) = env_value(env, prefix, "LOCK_FILE_MAINTENANCE") {
         config.lock_file_maintenance = parse_json_object(value).unwrap_or_default();
@@ -99,13 +110,29 @@ pub(crate) fn apply_to_base(
             _ => return Err(format!("RENOVATE_RECREATE_WHEN was invalid: {value}")),
         };
     }
-    if let Some(value) = env_value(env, prefix, "GIT_LAB_AUTOMERGE") {
-        config.platform_automerge = parse_bool("RENOVATE_GIT_LAB_AUTOMERGE", value)?;
+    if let Some(value) = platform_automerge_env_value(env, prefix) {
+        config.platform_automerge = parse_bool("RENOVATE_PLATFORM_AUTOMERGE", value)?;
     }
-    if let Some(value) = env.get("RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL") {
+    if let Some(value) = env_renamed_value(
+        env,
+        prefix,
+        "MERGE_CONFIDENCE_ENDPOINT",
+        "MERGE_CONFIDENCE_API_BASE_URL",
+    )
+    .or_else(|| env.get("RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL").map(String::as_str))
+    {
         config.merge_confidence_endpoint = Some(value.to_owned());
     }
-    if let Some(value) = env.get("RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES") {
+    if let Some(value) = env_renamed_value(
+        env,
+        prefix,
+        "MERGE_CONFIDENCE_DATASOURCES",
+        "MERGE_CONFIDENCE_SUPPORTED_DATASOURCES",
+    )
+    .or_else(|| {
+        env.get("RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES")
+            .map(String::as_str)
+    }) {
         config.merge_confidence_datasources = parse_string_array(value).unwrap_or_default();
     }
     if let Some(value) = env.get("RENOVATE_X_AUTODISCOVER_REPO_SORT") {
@@ -146,6 +173,24 @@ pub(crate) fn build_from_env(env: &BTreeMap<String, String>) -> Result<GlobalCon
 fn env_value<'a>(env: &'a BTreeMap<String, String>, prefix: &str, suffix: &str) -> Option<&'a str> {
     let key = format!("{prefix}{suffix}");
     env.get(&key).map(String::as_str)
+}
+
+fn env_renamed_value<'a>(
+    env: &'a BTreeMap<String, String>,
+    prefix: &str,
+    current_suffix: &str,
+    legacy_suffix: &str,
+) -> Option<&'a str> {
+    env_value(env, prefix, current_suffix).or_else(|| env_value(env, prefix, legacy_suffix))
+}
+
+fn platform_automerge_env_value<'a>(
+    env: &'a BTreeMap<String, String>,
+    prefix: &str,
+) -> Option<&'a str> {
+    env_value(env, prefix, "PLATFORM_AUTOMERGE")
+        .or_else(|| env_value(env, prefix, "GIT_LAB_AUTOMERGE"))
+        .or_else(|| env_value(env, prefix, "AZURE_AUTO_COMPLETE"))
 }
 
 fn parse_bool(env_name: &str, value: &str) -> Result<bool, String> {
@@ -194,6 +239,17 @@ fn parse_string_array(raw: &str) -> Result<Vec<String>, String> {
             .collect()),
         _ => Err(format!("Invalid JSON value: '{raw}'")),
     }
+}
+
+fn parse_string_map(raw: &str) -> Result<BTreeMap<String, String>, String> {
+    let object = parse_json_object(raw)?;
+    object
+        .into_iter()
+        .map(|(key, value)| match value {
+            serde_json::Value::String(value) => Ok((key, value)),
+            _ => Err(format!("Invalid JSON value: '{raw}'")),
+        })
+        .collect()
 }
 
 fn parse_renovate_config(raw: &str) -> Result<GlobalConfig, String> {
@@ -579,6 +635,37 @@ mod tests {
     fn git_lab_automerge_env_sets_platform_automerge() {
         let config = build_from_env(&env(&[("RENOVATE_GIT_LAB_AUTOMERGE", "true")])).unwrap();
         assert!(config.platform_automerge);
+    }
+
+    // Ported: "renames migrated variables" — workers/global/config/parse/env.spec.ts line 386
+    #[test]
+    fn renamed_env_vars_map_to_current_options() {
+        let config = build_from_env(&env(&[
+            (
+                "RENOVATE_ALLOWED_POST_UPGRADE_COMMANDS",
+                "npm install,cargo update",
+            ),
+            ("RENOVATE_ALIASES", r#"{"docker.io":"registry.example.com"}"#),
+            ("RENOVATE_AZURE_AUTO_COMPLETE", "false"),
+            ("RENOVATE_MERGE_CONFIDENCE_API_BASE_URL", "https://mc.example"),
+            (
+                "RENOVATE_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES",
+                r#"["docker","npm"]"#,
+            ),
+        ]))
+        .unwrap();
+
+        assert_eq!(config.allowed_commands, vec!["npm install", "cargo update"]);
+        assert_eq!(
+            config.registry_aliases.get("docker.io").map(String::as_str),
+            Some("registry.example.com")
+        );
+        assert!(!config.platform_automerge);
+        assert_eq!(
+            config.merge_confidence_endpoint.as_deref(),
+            Some("https://mc.example")
+        );
+        assert_eq!(config.merge_confidence_datasources, vec!["docker", "npm"]);
     }
 
     // Ported: "dryRun boolean true" — workers/global/config/parse/env.spec.ts line 441
