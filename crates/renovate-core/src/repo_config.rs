@@ -379,6 +379,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `rollbackPrs`.
     pub rollback_prs: bool,
 
+    /// Post-update actions to run after package or artifact updates.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `postUpdateOptions`.
+    pub post_update_options: Vec<String>,
+
     /// When `true`, Renovate creates a Dependency Dashboard issue in the repo.
     /// Default: `false`.
     ///
@@ -4122,6 +4127,8 @@ impl RepoConfig {
             pin_digests: bool,
             #[serde(rename = "rollbackPrs", default)]
             rollback_prs: bool,
+            #[serde(rename = "postUpdateOptions", default)]
+            post_update_options: Vec<String>,
             #[serde(rename = "dependencyDashboard", default)]
             dependency_dashboard: bool,
             #[serde(rename = "dependencyDashboardApproval", default)]
@@ -4965,6 +4972,7 @@ impl RepoConfig {
                         .iter()
                         .any(|p| p == ":pinDigestsDisabled" || p == "pinDigestsDisabled")),
             rollback_prs: raw.rollback_prs,
+            post_update_options: raw.post_update_options,
             dependency_dashboard: raw.dependency_dashboard
                 || effective_extends
                     .iter()
@@ -5602,6 +5610,7 @@ impl Default for RepoConfig {
             respect_latest: false,
             pin_digests: false,
             rollback_prs: false,
+            post_update_options: Vec::new(),
             dependency_dashboard: false,
             dependency_dashboard_approval: false,
             config_migration: false,
@@ -13412,6 +13421,12 @@ mod rule_effects_tests {
     fn raw_rollback_prs_parsed() {
         let c = RepoConfig::parse(r#"{"rollbackPrs": true}"#);
         assert!(c.rollback_prs, "raw rollbackPrs: true must be parsed");
+    }
+
+    #[test]
+    fn post_update_options_parsed() {
+        let c = RepoConfig::parse(r#"{"postUpdateOptions": ["gomodTidy", "npmDedupe"]}"#);
+        assert_eq!(c.post_update_options, vec!["gomodTidy", "npmDedupe"]);
     }
 
     #[test]
