@@ -103,6 +103,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(rebase) = cli.onboarding_rebase_checkbox {
         config.onboarding_rebase_checkbox = Some(rebase);
     }
+    if let Some(limit) = cli.pr_commits_per_run_limit {
+        config.pr_commits_per_run_limit = Some(limit);
+    }
     if let Some(enabled) = cli.enabled {
         config.enabled = Some(enabled);
     }
@@ -465,6 +468,7 @@ mod tests {
             cache_ttl_override: None,
             onboarding_no_deps: None,
             onboarding_rebase_checkbox: None,
+            pr_commits_per_run_limit: None,
             enabled: None,
             automerge: None,
             platform_automerge: None,
@@ -820,6 +824,7 @@ mod tests {
             r#"--cache-ttl-override={"datasource-npm":30}"#,
             "--onboarding-no-deps=enabled",
             "--onboarding-rebase-checkbox",
+            "--pr-commits-per-run-limit=4",
         ]);
 
         assert_eq!(config.onboarding, Some(false));
@@ -851,6 +856,7 @@ mod tests {
         );
         assert_eq!(config.onboarding_no_deps.as_deref(), Some("enabled"));
         assert_eq!(config.onboarding_rebase_checkbox, Some(true));
+        assert_eq!(config.pr_commits_per_run_limit, Some(4));
     }
 
     // Ported: "supports boolean space true" — workers/global/config/parse/cli.spec.ts line 42

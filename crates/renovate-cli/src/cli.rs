@@ -258,6 +258,11 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_ONBOARDING_REBASE_CHECKBOX", num_args = 0..=1, default_missing_value = "true")]
     pub(crate) onboarding_rebase_checkbox: Option<bool>,
 
+    /// Maximum commits to create per run.
+    /// Env: RENOVATE_PR_COMMITS_PER_RUN_LIMIT.
+    #[arg(long, env = "RENOVATE_PR_COMMITS_PER_RUN_LIMIT")]
+    pub(crate) pr_commits_per_run_limit: Option<u32>,
+
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Enable or disable Renovate processing.
     /// Env: RENOVATE_ENABLED.

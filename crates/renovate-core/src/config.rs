@@ -74,6 +74,7 @@ pub const GLOBAL_CONFIG_OPTIONS: &[&str] = &[
     "onboardingPrTitle",
     "platform",
     "prCacheSyncMaxPages",
+    "prCommitsPerRunLimit",
     "presetCachePersistence",
     "repositoryCacheForceLocal",
     "requireConfig",
@@ -404,6 +405,10 @@ pub struct GlobalConfig {
     /// Whether to include the rebase/retry checkbox in onboarding PRs.
     pub onboarding_rebase_checkbox: Option<bool>,
 
+    /// Maximum commits Renovate should create per run. `None` means upstream
+    /// default `0` (unlimited).
+    pub pr_commits_per_run_limit: Option<u32>,
+
     // ── PR behavior ──────────────────────────────────────────────────────────
     /// Whether to use platform-native auto-merge. Default: `true`.
     pub platform_automerge: bool,
@@ -622,6 +627,7 @@ impl Default for GlobalConfig {
             onboarding_no_deps: None,
             onboarding_pr_title: None,
             onboarding_rebase_checkbox: None,
+            pr_commits_per_run_limit: None,
             platform_automerge: true,
             platform_commit: None,
             recreate_when: RecreateWhen::Auto,

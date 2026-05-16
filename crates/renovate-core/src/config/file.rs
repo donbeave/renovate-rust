@@ -271,6 +271,9 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         onboarding_rebase_checkbox: file_config
             .onboarding_rebase_checkbox
             .or(base.onboarding_rebase_checkbox),
+        pr_commits_per_run_limit: file_config
+            .pr_commits_per_run_limit
+            .or(base.pr_commits_per_run_limit),
         platform_automerge: file_config.platform_automerge,
         platform_commit: file_config.platform_commit.or(base.platform_commit),
         recreate_when: file_config.recreate_when,

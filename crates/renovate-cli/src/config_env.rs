@@ -77,6 +77,10 @@ pub(crate) fn apply_to_base(
         config.onboarding_rebase_checkbox =
             Some(parse_bool("RENOVATE_ONBOARDING_REBASE_CHECKBOX", value)?);
     }
+    if let Some(value) = env_value(env, prefix, "PR_COMMITS_PER_RUN_LIMIT") {
+        config.pr_commits_per_run_limit =
+            Some(parse_u32("RENOVATE_PR_COMMITS_PER_RUN_LIMIT", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "ENABLED") {
         config.enabled = Some(parse_bool("RENOVATE_ENABLED", value)?);
     }
@@ -1300,6 +1304,7 @@ mod tests {
             ("RENOVATE_ONBOARDING_NO_DEPS", "enabled"),
             ("RENOVATE_ONBOARDING_PR_TITLE", "Configure Renovate"),
             ("RENOVATE_ONBOARDING_REBASE_CHECKBOX", "true"),
+            ("RENOVATE_PR_COMMITS_PER_RUN_LIMIT", "4"),
         ]))
         .unwrap();
 
@@ -1360,6 +1365,7 @@ mod tests {
             Some("Configure Renovate")
         );
         assert_eq!(config.onboarding_rebase_checkbox, Some(true));
+        assert_eq!(config.pr_commits_per_run_limit, Some(4));
     }
 
     #[test]
