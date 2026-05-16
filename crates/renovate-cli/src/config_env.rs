@@ -4,7 +4,9 @@
 
 use std::collections::BTreeMap;
 
-use renovate_core::config::{DryRun, GlobalConfig, Platform, RecreateWhen, RequireConfig};
+use renovate_core::config::{
+    DryRun, ForkProcessing, GlobalConfig, Platform, RecreateWhen, RequireConfig,
+};
 use serde_json::json;
 
 use crate::config_builder::{parse_json_array, parse_json_object};
@@ -59,6 +61,9 @@ pub(crate) fn apply_to_base(
         } else {
             RequireConfig::Optional
         };
+    }
+    if let Some(value) = env_value(env, prefix, "FORK_PROCESSING") {
+        config.fork_processing = parse_fork_processing(value)?;
     }
     if let Some(value) = env_value(env, prefix, "PLATFORM_COMMIT") {
         config.platform_commit = Some(if parse_bool("RENOVATE_PLATFORM_COMMIT", value)? {
@@ -267,6 +272,15 @@ fn parse_dry_run(value: &str) -> Result<Option<DryRun>, String> {
         "lookup" => Ok(Some(DryRun::Lookup)),
         "full" => Ok(Some(DryRun::Full)),
         _ => Err(format!("RENOVATE_DRY_RUN was invalid: {value}")),
+    }
+}
+
+fn parse_fork_processing(value: &str) -> Result<ForkProcessing, String> {
+    match value {
+        "auto" => Ok(ForkProcessing::Auto),
+        "enabled" => Ok(ForkProcessing::Enabled),
+        "disabled" => Ok(ForkProcessing::Disabled),
+        _ => Err(format!("RENOVATE_FORK_PROCESSING was invalid: {value}")),
     }
 }
 
@@ -783,6 +797,12 @@ mod tests {
     fn require_config_false_maps_to_optional() {
         let config = build_from_env(&env(&[("RENOVATE_REQUIRE_CONFIG", "false")])).unwrap();
         assert_eq!(config.require_config, RequireConfig::Optional);
+    }
+
+    #[test]
+    fn fork_processing_env_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_FORK_PROCESSING", "enabled")])).unwrap();
+        assert_eq!(config.fork_processing, ForkProcessing::Enabled);
     }
 
     // Ported: "platformCommit boolean true" — workers/global/config/parse/env.spec.ts line 481
