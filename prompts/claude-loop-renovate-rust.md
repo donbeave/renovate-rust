@@ -304,7 +304,7 @@ Autonomy rules:
 - Do not let short-term feature work pile up unmaintainable structure. If a
   small refactor is needed to keep the implementation reasonable, do it in the
   same loop before committing.
-- Do not push to remotes.
+- After every commit, push all committed local changes to the matching remote branch.
 - Do not rewrite unrelated user changes. If the worktree contains unrelated changes, leave them alone and commit only your own files.
 - If another agent or user changed files, inspect and integrate with those changes rather than reverting them.
 - If blocked, document the blocker in the commit message or a comment in the relevant parity file and choose another local slice.

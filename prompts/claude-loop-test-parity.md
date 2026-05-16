@@ -519,6 +519,8 @@ your changes, note it in the commit message or final progress notes.
   together with any Rust source files changed in the same unit. Exception: if
   Phase 0 backfill finds no test-map match for a Rust file, commit the
   comment-only change without a map update.
+- After every commit, push all committed local changes to the matching remote
+  branch.
 - Update the summary block counts on every commit.
 - Example commit messages:
   - `docs(parity): inventory ansible-galaxy extract spec (14 tests)`

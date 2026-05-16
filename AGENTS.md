@@ -5,8 +5,10 @@ home for rules and restrictions that apply only to AI agents. Rules that apply
 equally to human contributors and agents live in topic-specific files linked
 under **Shared conventions** below.
 
-Agents may commit requested work directly to `main`. Do not create feature
-branches or pull requests unless the operator explicitly asks for them.
+Agents may commit requested work directly to `main`. After every agent-created
+commit, push all committed local changes to the matching remote branch. Do not
+create feature branches or pull requests unless the operator explicitly asks for
+them.
 
 ## Pull Request Merging (agent-only)
 

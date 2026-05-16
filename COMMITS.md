@@ -3,6 +3,9 @@
 This file covers commit message format, agent attribution trailers, and
 pre-commit verification.
 
+After every agent-created commit, push all committed local changes to the
+matching remote branch.
+
 ## Commit Messages
 
 All commits in this repository should follow

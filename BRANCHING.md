@@ -7,7 +7,8 @@ Feature branches and pull requests are optional in this project. Use them only
 when the operator explicitly asks for a branch or PR workflow.
 
 - Keep `main` buildable, tested, and easy to review.
-- Make small, coherent commits directly on `main`.
+- Make small, coherent commits directly on `main`, then push all committed
+  local changes to `origin/main`.
 - Stage only files related to the current task.
 - If the operator asks for a branch, create it from `main` and keep its name
   short, lowercase, and hyphen-separated.
