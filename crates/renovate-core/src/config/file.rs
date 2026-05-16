@@ -238,8 +238,20 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             file_config.allowed_commands
         },
         allow_command_templating: file_config.allow_command_templating,
+        allow_plugins: file_config.allow_plugins.or(base.allow_plugins),
+        allow_scripts: file_config.allow_scripts.or(base.allow_scripts),
+        allow_shell_executor_for_post_upgrade_commands: file_config
+            .allow_shell_executor_for_post_upgrade_commands
+            .or(base.allow_shell_executor_for_post_upgrade_commands),
+        allow_custom_crate_registries: file_config
+            .allow_custom_crate_registries
+            .or(base.allow_custom_crate_registries),
         allowed_headers: file_config.allowed_headers.or(base.allowed_headers),
         allowed_env: file_config.allowed_env.or(base.allowed_env),
+        allowed_unsafe_executions: file_config
+            .allowed_unsafe_executions
+            .or(base.allowed_unsafe_executions),
+        expose_all_env: file_config.expose_all_env.or(base.expose_all_env),
         detect_global_manager_config: file_config
             .detect_global_manager_config
             .or(base.detect_global_manager_config),
@@ -276,6 +288,18 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         http_cache_ttl_days: file_config
             .http_cache_ttl_days
             .or(base.http_cache_ttl_days),
+        cache_hard_ttl_minutes: file_config
+            .cache_hard_ttl_minutes
+            .or(base.cache_hard_ttl_minutes),
+        cache_private_packages: file_config
+            .cache_private_packages
+            .or(base.cache_private_packages),
+        preset_cache_persistence: file_config
+            .preset_cache_persistence
+            .or(base.preset_cache_persistence),
+        include_mirrors: file_config.include_mirrors.or(base.include_mirrors),
+        github_token_warn: file_config.github_token_warn.or(base.github_token_warn),
+        ignore_pr_author: file_config.ignore_pr_author.or(base.ignore_pr_author),
         report_type: file_config.report_type.or(base.report_type),
         report_path: file_config.report_path.or(base.report_path),
         report_formatting: file_config.report_formatting.or(base.report_formatting),

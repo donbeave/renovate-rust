@@ -265,6 +265,36 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_ALLOW_COMMAND_TEMPLATING")]
     pub(crate) allow_command_templating: Option<bool>,
 
+    /// Allow repositories to run install plugins.
+    /// Env: RENOVATE_ALLOW_PLUGINS.
+    #[arg(long, env = "RENOVATE_ALLOW_PLUGINS", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) allow_plugins: Option<bool>,
+
+    /// Allow repositories to run install scripts.
+    /// Env: RENOVATE_ALLOW_SCRIPTS.
+    #[arg(long, env = "RENOVATE_ALLOW_SCRIPTS", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) allow_scripts: Option<bool>,
+
+    /// Allow post-upgrade commands to run inside a shell.
+    /// Env: RENOVATE_ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS.
+    #[arg(
+        long,
+        env = "RENOVATE_ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) allow_shell_executor_for_post_upgrade_commands: Option<bool>,
+
+    /// Allow custom Cargo registries.
+    /// Env: RENOVATE_ALLOW_CUSTOM_CRATE_REGISTRIES.
+    #[arg(
+        long,
+        env = "RENOVATE_ALLOW_CUSTOM_CRATE_REGISTRIES",
+        num_args = 0..=1,
+        default_missing_value = "true"
+    )]
+    pub(crate) allow_custom_crate_registries: Option<bool>,
+
     /// Allowed host rule header patterns (comma-separated or JSON array).
     /// Env: RENOVATE_ALLOWED_HEADERS.
     #[arg(long, env = "RENOVATE_ALLOWED_HEADERS")]
@@ -274,6 +304,16 @@ pub(crate) struct Cli {
     /// Env: RENOVATE_ALLOWED_ENV.
     #[arg(long, env = "RENOVATE_ALLOWED_ENV")]
     pub(crate) allowed_env: Option<String>,
+
+    /// Unsafe implicit executions that are allowed to run.
+    /// Env: RENOVATE_ALLOWED_UNSAFE_EXECUTIONS.
+    #[arg(long, env = "RENOVATE_ALLOWED_UNSAFE_EXECUTIONS")]
+    pub(crate) allowed_unsafe_executions: Option<String>,
+
+    /// Pass all environment variables to package managers.
+    /// Env: RENOVATE_EXPOSE_ALL_ENV.
+    #[arg(long, env = "RENOVATE_EXPOSE_ALL_ENV", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) expose_all_env: Option<bool>,
 
     /// Detect global manager config from the filesystem.
     /// Env: RENOVATE_DETECT_GLOBAL_MANAGER_CONFIG.
@@ -415,6 +455,36 @@ pub(crate) struct Cli {
     /// Env: RENOVATE_HTTP_CACHE_TTL_DAYS.
     #[arg(long, env = "RENOVATE_HTTP_CACHE_TTL_DAYS")]
     pub(crate) http_cache_ttl_days: Option<u32>,
+
+    /// Datasource cache hard TTL in minutes.
+    /// Env: RENOVATE_CACHE_HARD_TTL_MINUTES.
+    #[arg(long, env = "RENOVATE_CACHE_HARD_TTL_MINUTES")]
+    pub(crate) cache_hard_ttl_minutes: Option<u32>,
+
+    /// Cache private packages in the datasource cache.
+    /// Env: RENOVATE_CACHE_PRIVATE_PACKAGES.
+    #[arg(long, env = "RENOVATE_CACHE_PRIVATE_PACKAGES", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) cache_private_packages: Option<bool>,
+
+    /// Cache resolved presets in package cache.
+    /// Env: RENOVATE_PRESET_CACHE_PERSISTENCE.
+    #[arg(long, env = "RENOVATE_PRESET_CACHE_PERSISTENCE", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) preset_cache_persistence: Option<bool>,
+
+    /// Process mirrored repositories.
+    /// Env: RENOVATE_INCLUDE_MIRRORS.
+    #[arg(long, env = "RENOVATE_INCLUDE_MIRRORS", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) include_mirrors: Option<bool>,
+
+    /// Warn about missing GitHub token.
+    /// Env: RENOVATE_GITHUB_TOKEN_WARN.
+    #[arg(long, env = "RENOVATE_GITHUB_TOKEN_WARN", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) github_token_warn: Option<bool>,
+
+    /// Ignore PR author filtering.
+    /// Env: RENOVATE_IGNORE_PR_AUTHOR.
+    #[arg(long, env = "RENOVATE_IGNORE_PR_AUTHOR", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) ignore_pr_author: Option<bool>,
 
     /// Report output type.
     /// Env: RENOVATE_REPORT_TYPE.

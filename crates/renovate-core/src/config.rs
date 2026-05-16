@@ -367,11 +367,29 @@ pub struct GlobalConfig {
     /// Whether command templating is allowed in post-upgrade tasks.
     pub allow_command_templating: bool,
 
+    /// Whether repositories may run install plugins.
+    pub allow_plugins: Option<bool>,
+
+    /// Whether repositories may run install scripts.
+    pub allow_scripts: Option<bool>,
+
+    /// Whether post-upgrade commands may run inside a shell.
+    pub allow_shell_executor_for_post_upgrade_commands: Option<bool>,
+
+    /// Whether custom Cargo registries are allowed.
+    pub allow_custom_crate_registries: Option<bool>,
+
     /// Allowed host rule header patterns.
     pub allowed_headers: Option<Vec<String>>,
 
     /// Allowed post-upgrade environment variable patterns.
     pub allowed_env: Option<Vec<String>>,
+
+    /// Unsafe implicit executions that are allowed to run.
+    pub allowed_unsafe_executions: Option<Vec<String>>,
+
+    /// Whether to pass all environment variables to package managers.
+    pub expose_all_env: Option<bool>,
 
     /// Whether to detect global manager config from the filesystem.
     pub detect_global_manager_config: Option<bool>,
@@ -420,6 +438,24 @@ pub struct GlobalConfig {
 
     /// HTTP cache TTL in days.
     pub http_cache_ttl_days: Option<u32>,
+
+    /// Datasource cache hard TTL in minutes.
+    pub cache_hard_ttl_minutes: Option<u32>,
+
+    /// Whether to cache private packages.
+    pub cache_private_packages: Option<bool>,
+
+    /// Whether resolved presets persist in package cache.
+    pub preset_cache_persistence: Option<bool>,
+
+    /// Whether to process mirrored repositories.
+    pub include_mirrors: Option<bool>,
+
+    /// Whether to warn about missing GitHub token.
+    pub github_token_warn: Option<bool>,
+
+    /// Whether to ignore PR author filtering.
+    pub ignore_pr_author: Option<bool>,
 
     /// Report output type.
     pub report_type: Option<String>,
@@ -497,8 +533,14 @@ impl Default for GlobalConfig {
             recreate_when: RecreateWhen::Auto,
             allowed_commands: Vec::new(),
             allow_command_templating: false,
+            allow_plugins: None,
+            allow_scripts: None,
+            allow_shell_executor_for_post_upgrade_commands: None,
+            allow_custom_crate_registries: None,
             allowed_headers: None,
             allowed_env: None,
+            allowed_unsafe_executions: None,
+            expose_all_env: None,
             detect_global_manager_config: None,
             detect_host_rules_from_env: None,
             merge_confidence_endpoint: None,
@@ -515,6 +557,12 @@ impl Default for GlobalConfig {
             execution_timeout: None,
             git_timeout: None,
             http_cache_ttl_days: None,
+            cache_hard_ttl_minutes: None,
+            cache_private_packages: None,
+            preset_cache_persistence: None,
+            include_mirrors: None,
+            github_token_warn: None,
+            ignore_pr_author: None,
             report_type: None,
             report_path: None,
             report_formatting: None,

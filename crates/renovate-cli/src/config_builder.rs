@@ -97,11 +97,29 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(act) = cli.allow_command_templating {
         config.allow_command_templating = act;
     }
+    if let Some(allow) = cli.allow_plugins {
+        config.allow_plugins = Some(allow);
+    }
+    if let Some(allow) = cli.allow_scripts {
+        config.allow_scripts = Some(allow);
+    }
+    if let Some(allow) = cli.allow_shell_executor_for_post_upgrade_commands {
+        config.allow_shell_executor_for_post_upgrade_commands = Some(allow);
+    }
+    if let Some(allow) = cli.allow_custom_crate_registries {
+        config.allow_custom_crate_registries = Some(allow);
+    }
     if let Some(ref allowed_headers) = cli.allowed_headers {
         config.allowed_headers = Some(parse_string_list(allowed_headers)?);
     }
     if let Some(ref allowed_env) = cli.allowed_env {
         config.allowed_env = Some(parse_string_list(allowed_env)?);
+    }
+    if let Some(ref allowed) = cli.allowed_unsafe_executions {
+        config.allowed_unsafe_executions = Some(parse_string_list(allowed)?);
+    }
+    if let Some(expose) = cli.expose_all_env {
+        config.expose_all_env = Some(expose);
     }
     if let Some(detect) = cli.detect_global_manager_config {
         config.detect_global_manager_config = Some(detect);
@@ -171,6 +189,24 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     }
     if let Some(days) = cli.http_cache_ttl_days {
         config.http_cache_ttl_days = Some(days);
+    }
+    if let Some(minutes) = cli.cache_hard_ttl_minutes {
+        config.cache_hard_ttl_minutes = Some(minutes);
+    }
+    if let Some(cache) = cli.cache_private_packages {
+        config.cache_private_packages = Some(cache);
+    }
+    if let Some(persist) = cli.preset_cache_persistence {
+        config.preset_cache_persistence = Some(persist);
+    }
+    if let Some(include) = cli.include_mirrors {
+        config.include_mirrors = Some(include);
+    }
+    if let Some(warn) = cli.github_token_warn {
+        config.github_token_warn = Some(warn);
+    }
+    if let Some(ignore) = cli.ignore_pr_author {
+        config.ignore_pr_author = Some(ignore);
     }
     if let Some(ref report_type) = cli.report_type {
         config.report_type = Some(report_type.clone());
@@ -372,8 +408,14 @@ mod tests {
             recreate_when: None,
             allowed_commands: None,
             allow_command_templating: None,
+            allow_plugins: None,
+            allow_scripts: None,
+            allow_shell_executor_for_post_upgrade_commands: None,
+            allow_custom_crate_registries: None,
             allowed_headers: None,
             allowed_env: None,
+            allowed_unsafe_executions: None,
+            expose_all_env: None,
             detect_global_manager_config: None,
             detect_host_rules_from_env: None,
             merge_confidence_endpoint: None,
@@ -397,6 +439,12 @@ mod tests {
             execution_timeout: None,
             git_timeout: None,
             http_cache_ttl_days: None,
+            cache_hard_ttl_minutes: None,
+            cache_private_packages: None,
+            preset_cache_persistence: None,
+            include_mirrors: None,
+            github_token_warn: None,
+            ignore_pr_author: None,
             report_type: None,
             report_path: None,
             labels: Vec::new(),
@@ -562,8 +610,14 @@ mod tests {
     #[test]
     fn self_hosted_global_flags_are_parsed() {
         let config = parse_and_build(&[
+            "--allow-plugins",
+            "--allow-scripts=false",
+            "--allow-shell-executor-for-post-upgrade-commands",
+            "--allow-custom-crate-registries=true",
             "--allowed-headers=X-*,Authorization",
             "--allowed-env=['SOME_*','OTHER_*']",
+            "--allowed-unsafe-executions=bazelModDeps,goGenerate",
+            "--expose-all-env",
             "--detect-global-manager-config",
             "--detect-host-rules-from-env=false",
             "--merge-confidence-endpoint=https://mc.example",
@@ -577,10 +631,23 @@ mod tests {
             "--repository-cache-force-local=false",
             "--repository-cache=enabled",
             "--repository-cache-type=s3",
+            "--cache-hard-ttl-minutes=1440",
+            "--cache-private-packages=true",
+            "--preset-cache-persistence",
+            "--include-mirrors",
+            "--github-token-warn=false",
+            "--ignore-pr-author",
             "--report-type=file",
             "--report-path=./report.json",
         ]);
 
+        assert_eq!(config.allow_plugins, Some(true));
+        assert_eq!(config.allow_scripts, Some(false));
+        assert_eq!(
+            config.allow_shell_executor_for_post_upgrade_commands,
+            Some(true)
+        );
+        assert_eq!(config.allow_custom_crate_registries, Some(true));
         assert_eq!(
             config.allowed_headers,
             Some(vec!["X-*".to_owned(), "Authorization".to_owned()])
@@ -589,6 +656,11 @@ mod tests {
             config.allowed_env,
             Some(vec!["SOME_*".to_owned(), "OTHER_*".to_owned()])
         );
+        assert_eq!(
+            config.allowed_unsafe_executions,
+            Some(vec!["bazelModDeps".to_owned(), "goGenerate".to_owned()])
+        );
+        assert_eq!(config.expose_all_env, Some(true));
         assert_eq!(config.detect_global_manager_config, Some(true));
         assert_eq!(config.detect_host_rules_from_env, Some(false));
         assert_eq!(
@@ -605,6 +677,12 @@ mod tests {
         assert_eq!(config.repository_cache_force_local, Some(false));
         assert_eq!(config.repository_cache.as_deref(), Some("enabled"));
         assert_eq!(config.repository_cache_type.as_deref(), Some("s3"));
+        assert_eq!(config.cache_hard_ttl_minutes, Some(1440));
+        assert_eq!(config.cache_private_packages, Some(true));
+        assert_eq!(config.preset_cache_persistence, Some(true));
+        assert_eq!(config.include_mirrors, Some(true));
+        assert_eq!(config.github_token_warn, Some(false));
+        assert_eq!(config.ignore_pr_author, Some(true));
         assert_eq!(config.report_type.as_deref(), Some("file"));
         assert_eq!(config.report_path.as_deref(), Some("./report.json"));
     }

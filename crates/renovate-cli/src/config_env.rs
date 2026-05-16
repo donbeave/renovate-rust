@@ -95,11 +95,33 @@ pub(crate) fn apply_to_base(
         config.allow_command_templating =
             parse_bool("RENOVATE_ALLOW_COMMAND_TEMPLATING", value)?;
     }
+    if let Some(value) = env_value(env, prefix, "ALLOW_PLUGINS") {
+        config.allow_plugins = Some(parse_bool("RENOVATE_ALLOW_PLUGINS", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "ALLOW_SCRIPTS") {
+        config.allow_scripts = Some(parse_bool("RENOVATE_ALLOW_SCRIPTS", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS") {
+        config.allow_shell_executor_for_post_upgrade_commands = Some(parse_bool(
+            "RENOVATE_ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS",
+            value,
+        )?);
+    }
+    if let Some(value) = env_value(env, prefix, "ALLOW_CUSTOM_CRATE_REGISTRIES") {
+        config.allow_custom_crate_registries =
+            Some(parse_bool("RENOVATE_ALLOW_CUSTOM_CRATE_REGISTRIES", value)?);
+    }
     if let Some(value) = env_value(env, prefix, "ALLOWED_HEADERS") {
         config.allowed_headers = Some(parse_string_list(value));
     }
     if let Some(value) = env_value(env, prefix, "ALLOWED_ENV") {
         config.allowed_env = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "ALLOWED_UNSAFE_EXECUTIONS") {
+        config.allowed_unsafe_executions = Some(parse_string_list(value));
+    }
+    if let Some(value) = env_value(env, prefix, "EXPOSE_ALL_ENV") {
+        config.expose_all_env = Some(parse_bool("RENOVATE_EXPOSE_ALL_ENV", value)?);
     }
     if let Some(value) = env_value(env, prefix, "DETECT_GLOBAL_MANAGER_CONFIG") {
         config.detect_global_manager_config =
@@ -262,6 +284,27 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "HTTP_CACHE_TTL_DAYS") {
         config.http_cache_ttl_days =
             Some(parse_u32("RENOVATE_HTTP_CACHE_TTL_DAYS", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "CACHE_HARD_TTL_MINUTES") {
+        config.cache_hard_ttl_minutes =
+            Some(parse_u32("RENOVATE_CACHE_HARD_TTL_MINUTES", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "CACHE_PRIVATE_PACKAGES") {
+        config.cache_private_packages =
+            Some(parse_bool("RENOVATE_CACHE_PRIVATE_PACKAGES", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "PRESET_CACHE_PERSISTENCE") {
+        config.preset_cache_persistence =
+            Some(parse_bool("RENOVATE_PRESET_CACHE_PERSISTENCE", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "INCLUDE_MIRRORS") {
+        config.include_mirrors = Some(parse_bool("RENOVATE_INCLUDE_MIRRORS", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "GITHUB_TOKEN_WARN") {
+        config.github_token_warn = Some(parse_bool("RENOVATE_GITHUB_TOKEN_WARN", value)?);
+    }
+    if let Some(value) = env_value(env, prefix, "IGNORE_PR_AUTHOR") {
+        config.ignore_pr_author = Some(parse_bool("RENOVATE_IGNORE_PR_AUTHOR", value)?);
     }
     if let Some(value) = env_value(env, prefix, "REPORT_TYPE") {
         config.report_type = Some(value.to_owned());
@@ -1022,13 +1065,32 @@ mod tests {
     #[test]
     fn global_security_env_options_are_parsed() {
         let config = build_from_env(&env(&[
+            ("RENOVATE_ALLOW_PLUGINS", "true"),
+            ("RENOVATE_ALLOW_SCRIPTS", "false"),
+            (
+                "RENOVATE_ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS",
+                "true",
+            ),
+            ("RENOVATE_ALLOW_CUSTOM_CRATE_REGISTRIES", "true"),
             ("RENOVATE_ALLOWED_HEADERS", "X-*,Authorization"),
             ("RENOVATE_ALLOWED_ENV", "['SOME_*','OTHER_*']"),
+            (
+                "RENOVATE_ALLOWED_UNSAFE_EXECUTIONS",
+                "bazelModDeps,goGenerate",
+            ),
+            ("RENOVATE_EXPOSE_ALL_ENV", "true"),
             ("RENOVATE_DETECT_GLOBAL_MANAGER_CONFIG", "true"),
             ("RENOVATE_DETECT_HOST_RULES_FROM_ENV", "false"),
         ]))
         .unwrap();
 
+        assert_eq!(config.allow_plugins, Some(true));
+        assert_eq!(config.allow_scripts, Some(false));
+        assert_eq!(
+            config.allow_shell_executor_for_post_upgrade_commands,
+            Some(true)
+        );
+        assert_eq!(config.allow_custom_crate_registries, Some(true));
         assert_eq!(
             config.allowed_headers,
             Some(vec!["X-*".to_owned(), "Authorization".to_owned()])
@@ -1037,6 +1099,11 @@ mod tests {
             config.allowed_env,
             Some(vec!["SOME_*".to_owned(), "OTHER_*".to_owned()])
         );
+        assert_eq!(
+            config.allowed_unsafe_executions,
+            Some(vec!["bazelModDeps".to_owned(), "goGenerate".to_owned()])
+        );
+        assert_eq!(config.expose_all_env, Some(true));
         assert_eq!(config.detect_global_manager_config, Some(true));
         assert_eq!(config.detect_host_rules_from_env, Some(false));
     }
@@ -1046,11 +1113,23 @@ mod tests {
         let config = build_from_env(&env(&[
             ("RENOVATE_REPOSITORY_CACHE", "enabled"),
             ("RENOVATE_REPOSITORY_CACHE_TYPE", "s3"),
+            ("RENOVATE_CACHE_HARD_TTL_MINUTES", "1440"),
+            ("RENOVATE_CACHE_PRIVATE_PACKAGES", "true"),
+            ("RENOVATE_PRESET_CACHE_PERSISTENCE", "true"),
+            ("RENOVATE_INCLUDE_MIRRORS", "true"),
+            ("RENOVATE_GITHUB_TOKEN_WARN", "false"),
+            ("RENOVATE_IGNORE_PR_AUTHOR", "true"),
         ]))
         .unwrap();
 
         assert_eq!(config.repository_cache.as_deref(), Some("enabled"));
         assert_eq!(config.repository_cache_type.as_deref(), Some("s3"));
+        assert_eq!(config.cache_hard_ttl_minutes, Some(1440));
+        assert_eq!(config.cache_private_packages, Some(true));
+        assert_eq!(config.preset_cache_persistence, Some(true));
+        assert_eq!(config.include_mirrors, Some(true));
+        assert_eq!(config.github_token_warn, Some(false));
+        assert_eq!(config.ignore_pr_author, Some(true));
     }
 
     #[test]
