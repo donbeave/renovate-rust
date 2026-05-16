@@ -826,6 +826,31 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `patch`.
     pub patch_config: Option<crate::package_rule::UpdateTypeConfig>,
 
+    /// Config applied to pin updates (after packageRules).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `pin`.
+    pub pin_config: Option<crate::package_rule::UpdateTypeConfig>,
+
+    /// Config applied to digest updates (after packageRules).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `digest`.
+    pub digest_config: Option<crate::package_rule::UpdateTypeConfig>,
+
+    /// Config for pin-digest updates.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `pinDigest`.
+    pub pin_digest_config: Option<crate::package_rule::UpdateTypeConfig>,
+
+    /// Config for rollback updates.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `rollback`.
+    pub rollback_config: Option<crate::package_rule::UpdateTypeConfig>,
+
+    /// Config applied to replacement updates (after packageRules).
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `replacement`.
+    pub replacement_config: Option<crate::package_rule::UpdateTypeConfig>,
+
     /// Custom managers defined in `customManagers` config.
     /// Each entry can extract dependencies from arbitrary files using regex.
     ///
@@ -4665,6 +4690,12 @@ impl RepoConfig {
             major: Option<crate::package_rule::UpdateTypeConfig>,
             minor: Option<crate::package_rule::UpdateTypeConfig>,
             patch: Option<crate::package_rule::UpdateTypeConfig>,
+            pin: Option<crate::package_rule::UpdateTypeConfig>,
+            digest: Option<crate::package_rule::UpdateTypeConfig>,
+            #[serde(rename = "pinDigest")]
+            pin_digest: Option<crate::package_rule::UpdateTypeConfig>,
+            rollback: Option<crate::package_rule::UpdateTypeConfig>,
+            replacement: Option<crate::package_rule::UpdateTypeConfig>,
             #[serde(rename = "customManagers", default)]
             custom_managers: Vec<RawCustomManager>,
         }
@@ -5822,6 +5853,26 @@ impl RepoConfig {
                 c.schedule = migrate_schedule_list(c.schedule);
                 c
             }),
+            pin_config: raw.pin.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
+            digest_config: raw.digest.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
+            pin_digest_config: raw.pin_digest.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
+            rollback_config: raw.rollback.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
+            replacement_config: raw.replacement.map(|mut c| {
+                c.schedule = migrate_schedule_list(c.schedule);
+                c
+            }),
             custom_managers: {
                 // Preset managers come first (lower precedence); user-defined
                 // managers appended after so they can shadow preset ones.
@@ -6304,6 +6355,13 @@ impl RepoConfig {
             Some(crate::versioning::semver_generic::UpdateType::Patch) => {
                 self.patch_config.as_ref()
             }
+            Some(crate::versioning::semver_generic::UpdateType::Pin) => self.pin_config.as_ref(),
+            Some(crate::versioning::semver_generic::UpdateType::Digest) => {
+                self.digest_config.as_ref()
+            }
+            Some(crate::versioning::semver_generic::UpdateType::Replacement) => {
+                self.replacement_config.as_ref()
+            }
             _ => None,
         };
         if let Some(cfg) = update_type_cfg {
@@ -6597,6 +6655,11 @@ impl Default for RepoConfig {
             major_config: None,
             minor_config: None,
             patch_config: None,
+            pin_config: None,
+            digest_config: None,
+            pin_digest_config: None,
+            rollback_config: None,
+            replacement_config: None,
             custom_managers: Vec::new(),
         }
     }
@@ -13421,6 +13484,50 @@ mod rule_effects_tests {
             .expect("patch config should be present");
         assert_eq!(cfg.automerge, Some(true));
         assert_eq!(cfg.pr_priority, Some(5));
+    }
+
+    #[test]
+    fn extra_update_type_configs_are_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "pin": {"commitMessageAction": "Pin"},
+                "digest": {"commitMessageTopic": "{{{depName}}} digest"},
+                "pinDigest": {"groupName": "Pin Dependencies"},
+                "rollback": {"semanticCommitType": "fix"},
+                "replacement": {"commitMessageAction": "Replace"}
+            }"#,
+        );
+
+        assert_eq!(
+            c.pin_config
+                .as_ref()
+                .and_then(|cfg| cfg.commit_message_action.as_deref()),
+            Some("Pin")
+        );
+        assert_eq!(
+            c.digest_config
+                .as_ref()
+                .and_then(|cfg| cfg.commit_message_topic.as_deref()),
+            Some("{{{depName}}} digest")
+        );
+        assert_eq!(
+            c.pin_digest_config
+                .as_ref()
+                .and_then(|cfg| cfg.group_name.as_deref()),
+            Some("Pin Dependencies")
+        );
+        assert_eq!(
+            c.rollback_config
+                .as_ref()
+                .and_then(|cfg| cfg.semantic_commit_type.as_deref()),
+            Some("fix")
+        );
+        assert_eq!(
+            c.replacement_config
+                .as_ref()
+                .and_then(|cfg| cfg.commit_message_action.as_deref()),
+            Some("Replace")
+        );
     }
 
     #[test]
