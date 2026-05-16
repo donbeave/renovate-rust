@@ -273,11 +273,21 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `branchPrefix`.
     pub branch_prefix: String,
 
+    /// Full update branch name template.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `branchName`.
+    pub branch_name: String,
+
     /// Additional string appended after `branchPrefix` and before the
     /// branch topic.  Default: `""`.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `additionalBranchPrefix`.
     pub additional_branch_prefix: String,
+
+    /// Branch topic template appended to the branch prefix.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `branchTopic`.
+    pub branch_topic: String,
 
     /// Branches to process (alternative base branches).  Empty = default
     /// branch only.
@@ -515,6 +525,11 @@ pub struct RepoConfig {
     pub update_not_scheduled: bool,
 
     // ── Commit message customization ─────────────────────────────────────────
+    /// Full commit message template.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessage`.
+    pub commit_message: String,
+
     /// Action verb in PR titles and commit messages.  Default `"Update"`.
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `commitMessageAction`.
@@ -526,6 +541,16 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `commitMessagePrefix`.
     pub commit_message_prefix: Option<String>,
+
+    /// Upgrade topic/noun used in commit messages and PR titles.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageTopic`.
+    pub commit_message_topic: String,
+
+    /// Whether Renovate lowercases generated PR and commit titles.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `commitMessageLowerCase`.
+    pub commit_message_lower_case: String,
 
     /// Override for the extra segment of the commit message (default `"to {{newVersion}}"`).
     /// Supports `{{newVersion}}` and `{{depName}}` substitution.
@@ -4184,8 +4209,12 @@ impl RepoConfig {
             stop_updating_label: String,
             #[serde(rename = "branchPrefix", default = "default_branch_prefix")]
             branch_prefix: String,
+            #[serde(rename = "branchName", default = "default_branch_name")]
+            branch_name: String,
             #[serde(rename = "additionalBranchPrefix", default)]
             additional_branch_prefix: String,
+            #[serde(rename = "branchTopic", default = "default_branch_topic")]
+            branch_topic: String,
             #[serde(rename = "baseBranches", default)]
             base_branches: Vec<String>,
             /// New canonical field name for baseBranches (Renovate migrates baseBranches → baseBranchPatterns).
@@ -4320,10 +4349,19 @@ impl RepoConfig {
             osv_vulnerability_alerts: bool,
             #[serde(rename = "updateNotScheduled", default = "default_true")]
             update_not_scheduled: bool,
+            #[serde(rename = "commitMessage", default = "default_commit_message")]
+            commit_message: String,
             #[serde(rename = "commitMessageAction", default = "default_commit_action")]
             commit_message_action: String,
             #[serde(rename = "commitMessagePrefix")]
             commit_message_prefix: Option<String>,
+            #[serde(rename = "commitMessageTopic", default = "default_commit_message_topic")]
+            commit_message_topic: String,
+            #[serde(
+                rename = "commitMessageLowerCase",
+                default = "default_commit_message_lower_case"
+            )]
+            commit_message_lower_case: String,
             #[serde(rename = "commitMessageExtra")]
             commit_message_extra: Option<String>,
             #[serde(rename = "commitMessageSuffix")]
@@ -4412,6 +4450,14 @@ impl RepoConfig {
             "renovate/".to_owned()
         }
 
+        fn default_branch_name() -> String {
+            "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}".to_owned()
+        }
+
+        fn default_branch_topic() -> String {
+            "{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}".to_owned()
+        }
+
         fn default_use_base_branch_config() -> String {
             "none".to_owned()
         }
@@ -4438,6 +4484,18 @@ impl RepoConfig {
 
         fn default_commit_action() -> String {
             "Update".to_owned()
+        }
+
+        fn default_commit_message() -> String {
+            "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}".to_owned()
+        }
+
+        fn default_commit_message_topic() -> String {
+            "dependency {{depName}}".to_owned()
+        }
+
+        fn default_commit_message_lower_case() -> String {
+            "auto".to_owned()
         }
 
         fn default_pr_body_template() -> String {
@@ -5079,7 +5137,9 @@ impl RepoConfig {
             rebase_label: raw.rebase_label,
             stop_updating_label: raw.stop_updating_label,
             branch_prefix: raw.branch_prefix,
+            branch_name: raw.branch_name,
             additional_branch_prefix: raw.additional_branch_prefix,
+            branch_topic: raw.branch_topic,
             base_branches: {
                 // baseBranchPatterns is the new canonical name; merge with baseBranches.
                 let mut branches = raw.base_branches;
@@ -5249,8 +5309,11 @@ impl RepoConfig {
                     .any(|p| p == ":configMigration" || p == "configMigration"),
             osv_vulnerability_alerts: raw.osv_vulnerability_alerts,
             update_not_scheduled: preset_update_not_scheduled.unwrap_or(raw.update_not_scheduled),
+            commit_message: raw.commit_message,
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
+            commit_message_topic: raw.commit_message_topic,
+            commit_message_lower_case: raw.commit_message_lower_case,
             commit_message_extra: raw.commit_message_extra,
             commit_message_suffix: raw.commit_message_suffix,
             commit_body: raw.commit_body.or_else(|| {
@@ -5861,7 +5924,10 @@ impl Default for RepoConfig {
             rebase_label: "rebase".to_owned(),
             stop_updating_label: "stop-updating".to_owned(),
             branch_prefix: "renovate/".to_owned(),
+            branch_name: "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}"
+                .to_owned(),
             additional_branch_prefix: String::new(),
+            branch_topic: "{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}".to_owned(),
             base_branches: Vec::new(),
             use_base_branch_config: "none".to_owned(),
             rebase_when: None,
@@ -5901,8 +5967,11 @@ impl Default for RepoConfig {
             config_migration: false,
             osv_vulnerability_alerts: false,
             update_not_scheduled: true,
+            commit_message: "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}".to_owned(),
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
+            commit_message_topic: "dependency {{depName}}".to_owned(),
+            commit_message_lower_case: "auto".to_owned(),
             commit_message_extra: None,
             commit_message_suffix: None,
             commit_body: None,
@@ -8850,6 +8919,27 @@ mod tests {
             c.base_branches.contains(&"develop".to_owned()),
             "deprecated baseBranch must be added to baseBranches"
         );
+    }
+
+    #[test]
+    fn default_template_options_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "branchName": "deps/{{{branchTopic}}}",
+                "branchTopic": "{{{depNameSanitized}}}-custom",
+                "commitMessage": "{{{commitMessageAction}}} {{{commitMessageTopic}}}",
+                "commitMessageTopic": "package {{depName}}",
+                "commitMessageLowerCase": "never"
+            }"#,
+        );
+        assert_eq!(c.branch_name, "deps/{{{branchTopic}}}");
+        assert_eq!(c.branch_topic, "{{{depNameSanitized}}}-custom");
+        assert_eq!(
+            c.commit_message,
+            "{{{commitMessageAction}}} {{{commitMessageTopic}}}"
+        );
+        assert_eq!(c.commit_message_topic, "package {{depName}}");
+        assert_eq!(c.commit_message_lower_case, "never");
     }
 
     #[test]
