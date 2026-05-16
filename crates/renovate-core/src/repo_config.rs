@@ -221,6 +221,22 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `platformAutomerge`.
     pub platform_automerge: bool,
 
+    /// Label users can add to request that Renovate keep a PR updated with the
+    /// base branch.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `keepUpdatedLabel`.
+    pub keep_updated_label: Option<String>,
+
+    /// Label users can add to request a Renovate rebase.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `rebaseLabel`.
+    pub rebase_label: String,
+
+    /// Label users can add to stop Renovate from updating a PR.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `stopUpdatingLabel`.
+    pub stop_updating_label: String,
+
     // ── Branch behavior ──────────────���───────────────────────────────────────
     /// Branch name prefix for update branches.  Default: `"renovate/"`.
     ///
@@ -4035,6 +4051,12 @@ impl RepoConfig {
             /// Deprecated: gitLabAutomerge → platformAutomerge.
             #[serde(rename = "gitLabAutomerge")]
             git_lab_automerge: Option<bool>,
+            #[serde(rename = "keepUpdatedLabel")]
+            keep_updated_label: Option<String>,
+            #[serde(rename = "rebaseLabel", default = "default_rebase_label")]
+            rebase_label: String,
+            #[serde(rename = "stopUpdatingLabel", default = "default_stop_updating_label")]
+            stop_updating_label: String,
             #[serde(rename = "branchPrefix", default = "default_branch_prefix")]
             branch_prefix: String,
             #[serde(rename = "additionalBranchPrefix", default)]
@@ -4218,6 +4240,14 @@ impl RepoConfig {
 
         fn default_recreate_when() -> String {
             "auto".to_owned()
+        }
+
+        fn default_rebase_label() -> String {
+            "rebase".to_owned()
+        }
+
+        fn default_stop_updating_label() -> String {
+            "stop-updating".to_owned()
         }
 
         fn default_commit_action() -> String {
@@ -4841,6 +4871,9 @@ impl RepoConfig {
                 .or(raw.azure_auto_complete)
                 .or(raw.git_lab_automerge)
                 .unwrap_or(true),
+            keep_updated_label: raw.keep_updated_label,
+            rebase_label: raw.rebase_label,
+            stop_updating_label: raw.stop_updating_label,
             branch_prefix: raw.branch_prefix,
             additional_branch_prefix: raw.additional_branch_prefix,
             base_branches: {
@@ -5597,6 +5630,9 @@ impl Default for RepoConfig {
             auto_approve: false,
             assign_automerge: false,
             platform_automerge: true,
+            keep_updated_label: None,
+            rebase_label: "rebase".to_owned(),
+            stop_updating_label: "stop-updating".to_owned(),
             branch_prefix: "renovate/".to_owned(),
             additional_branch_prefix: String::new(),
             base_branches: Vec::new(),
@@ -8847,6 +8883,16 @@ mod tests {
     fn recreate_when_parsed() {
         let c = RepoConfig::parse(r#"{"recreateWhen": "always"}"#);
         assert_eq!(c.recreate_when, "always");
+    }
+
+    #[test]
+    fn pr_control_labels_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"keepUpdatedLabel": "keep-fresh", "rebaseLabel": "please-rebase", "stopUpdatingLabel": "freeze"}"#,
+        );
+        assert_eq!(c.keep_updated_label.as_deref(), Some("keep-fresh"));
+        assert_eq!(c.rebase_label, "please-rebase");
+        assert_eq!(c.stop_updating_label, "freeze");
     }
 
     #[test]
