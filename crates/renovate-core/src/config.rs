@@ -342,6 +342,10 @@ pub struct GlobalConfig {
     /// Dry-run mode. `None` means dry-run is disabled (full updates).
     pub dry_run: Option<DryRun>,
 
+    /// Renovate operation mode (`full` or `silent`). `None` means default
+    /// `full`.
+    pub mode: Option<String>,
+
     /// Third-party tool execution source. `None` means Renovate's default
     /// `install` unless an explicit global option sets it.
     #[serde(default, deserialize_with = "deserialize_binary_source")]
@@ -599,6 +603,7 @@ impl Default for GlobalConfig {
             enabled: None,
             automerge: None,
             dry_run: None,
+            mode: None,
             binary_source: None,
             require_config: RequireConfig::Required,
             fork_processing: ForkProcessing::Auto,

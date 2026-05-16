@@ -113,6 +113,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "DRY_RUN") {
         config.dry_run = parse_dry_run(value)?;
     }
+    if let Some(value) = env_value(env, prefix, "MODE") {
+        config.mode = Some(parse_mode(value)?.to_owned());
+    }
     if let Some(value) = env_value(env, prefix, "REQUIRE_CONFIG") {
         config.require_config = if parse_bool("RENOVATE_REQUIRE_CONFIG", value)? {
             RequireConfig::Required
@@ -461,6 +464,16 @@ fn parse_platform(value: &str) -> Result<Platform, String> {
     }
 }
 
+fn parse_mode(value: &str) -> Result<&'static str, String> {
+    match value {
+        "full" => Ok("full"),
+        "silent" => Ok("silent"),
+        other => Err(format!(
+            "invalid RENOVATE_MODE value `{other}` (expected `full` or `silent`)"
+        )),
+    }
+}
+
 fn parse_dry_run(value: &str) -> Result<Option<DryRun>, String> {
     match value {
         "true" => Ok(Some(DryRun::Full)),
@@ -710,6 +723,7 @@ mod tests {
     fn runtime_global_env_options_are_parsed() {
         let config = build_from_env(&env(&[
             ("RENOVATE_USER_AGENT", "renovate-rust-test"),
+            ("RENOVATE_MODE", "silent"),
             ("RENOVATE_BASE_DIR", "/tmp/renovate"),
             ("RENOVATE_CACHE_DIR", "/tmp/renovate/cache"),
             ("RENOVATE_CONTAINERBASE_DIR", "/tmp/renovate/containerbase"),
@@ -724,6 +738,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(config.user_agent.as_deref(), Some("renovate-rust-test"));
+        assert_eq!(config.mode.as_deref(), Some("silent"));
         assert_eq!(config.base_dir.as_deref(), Some("/tmp/renovate"));
         assert_eq!(config.cache_dir.as_deref(), Some("/tmp/renovate/cache"));
         assert_eq!(

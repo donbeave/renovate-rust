@@ -62,6 +62,10 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
         config.dry_run = None;
     }
 
+    if let Some(ref mode) = cli.mode {
+        config.mode = Some(mode.clone());
+    }
+
     if let Some(rc) = map_require_config_explicit(cli.require_config) {
         config.require_config = rc;
     }
@@ -448,6 +452,7 @@ mod tests {
             password: None,
             user_agent: None,
             dry_run: None,
+            mode: None,
             require_config: None,
             fork_processing: None,
             binary_source: None,
@@ -603,6 +608,7 @@ mod tests {
     fn runtime_global_flags_are_parsed() {
         let config = parse_and_build(&[
             "--user-agent=renovate-rust-test",
+            "--mode=silent",
             "--base-dir=/tmp/renovate",
             "--cache-dir=/tmp/renovate/cache",
             "--containerbase-dir=/tmp/renovate/containerbase",
@@ -616,6 +622,7 @@ mod tests {
         ]);
 
         assert_eq!(config.user_agent.as_deref(), Some("renovate-rust-test"));
+        assert_eq!(config.mode.as_deref(), Some("silent"));
         assert_eq!(config.base_dir.as_deref(), Some("/tmp/renovate"));
         assert_eq!(config.cache_dir.as_deref(), Some("/tmp/renovate/cache"));
         assert_eq!(

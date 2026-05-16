@@ -188,6 +188,11 @@ pub(crate) struct Cli {
     #[arg(long, value_enum, env = "RENOVATE_DRY_RUN")]
     pub(crate) dry_run: Option<DryRunArg>,
 
+    /// Mode of operation: full or silent.
+    /// Env: RENOVATE_MODE.
+    #[arg(long, env = "RENOVATE_MODE", value_parser = ["full", "silent"])]
+    pub(crate) mode: Option<String>,
+
     /// Control behavior for missing repository config files.
     /// Env: RENOVATE_REQUIRE_CONFIG.
     #[arg(long, value_enum, env = "RENOVATE_REQUIRE_CONFIG")]
