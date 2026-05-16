@@ -40,6 +40,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "LABELS") {
         config.labels = split_list(value);
     }
+    if let Some(value) = env_value(env, prefix, "REPOSITORIES") {
+        config.repositories = parse_string_list(value);
+    }
     if let Some(value) = env_value(env, prefix, "TOKEN") {
         config.token = Some(value.to_owned());
     }
@@ -330,6 +333,17 @@ fn split_list(value: &str) -> Vec<String> {
         .collect()
 }
 
+fn parse_string_list(value: &str) -> Vec<String> {
+    parse_string_array(value).unwrap_or_else(|_| {
+        value
+            .split(',')
+            .map(str::trim)
+            .filter(|item| !item.is_empty())
+            .map(str::to_owned)
+            .collect()
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::build_from_env;
@@ -406,6 +420,19 @@ mod tests {
     fn labels_ignore_blank_items() {
         let config = build_from_env(&env(&[("RENOVATE_LABELS", "a,b,c,")])).unwrap();
         assert_eq!(config.labels, vec!["a", "b", "c"]);
+    }
+
+    #[test]
+    fn repositories_env_is_parsed() {
+        let config = build_from_env(&env(&[("RENOVATE_REPOSITORIES", "foo, bar,")])).unwrap();
+        assert_eq!(config.repositories, vec!["foo", "bar"]);
+    }
+
+    #[test]
+    fn repositories_env_json_array_is_parsed() {
+        let config =
+            build_from_env(&env(&[("RENOVATE_REPOSITORIES", r#"["foo","bar"]"#)])).unwrap();
+        assert_eq!(config.repositories, vec!["foo", "bar"]);
     }
 
     // Ported: "supports string" — workers/global/config/parse/env.spec.ts line 55
