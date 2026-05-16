@@ -1075,7 +1075,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/workers/repository/init/merge.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Repo config discovery and merge partially ported, including user `configFileNames` lookup |
+| `lib/workers/repository/init/merge.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Repo config discovery and merge partially ported, including user `configFileNames` lookup and global `migratePresets` application |
 | `lib/workers/repository/updates/branch-name.ts` | `crates/renovate-core/src/branch.rs` | partial | Branch topic/name generation helpers partially ported. |
 | `lib/workers/repository/updates/flatten.ts` | `crates/renovate-core/src/branch.rs` | partial | `sanitizeDepName` URL/name normalization behavior partially ported; full update flattening is not ported. |
 | `lib/workers/global/config/parse/cli.ts` | `crates/renovate-cli/src/cli.rs` | partial | CLI arg parsing ported, including enabled/automerge booleans, username/password auth flags, runtime path/timeout flags, Docker sidecar flags, binarySource, platformCommit, report flags, expanded global security/cache flags, onboarding/config-file flags, object-valued global flags, scalar self-hosted global flags, and JSON5 structured values |

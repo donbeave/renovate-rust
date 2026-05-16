@@ -4973,17 +4973,32 @@ impl RepoConfig {
     ///
     /// Using `package.json` for Renovate config is deprecated upstream.
     pub fn parse_from_package_json(content: &str) -> Option<Self> {
+        Self::parse_from_package_json_with_migrate_presets(
+            content,
+            &std::collections::BTreeMap::new(),
+        )
+    }
+
+    /// Parse package.json Renovate config after applying migratePresets.
+    pub fn parse_from_package_json_with_migrate_presets(
+        content: &str,
+        migrate_presets: &std::collections::BTreeMap<String, String>,
+    ) -> Option<Self> {
         let pkg: serde_json::Value = serde_json::from_str(content).ok()?;
         let renovate_val = pkg.get("renovate")?;
         if let Some(preset) = renovate_val.as_str() {
-            return Some(Self::parse(
+            return Some(Self::parse_with_migrate_presets(
                 &serde_json::json!({ "extends": [preset] }).to_string(),
+                migrate_presets,
             ));
         }
 
         // Re-serialize the renovate sub-value and parse it as a RepoConfig.
         let renovate_str = serde_json::to_string(renovate_val).ok()?;
-        Some(Self::parse(&renovate_str))
+        Some(Self::parse_with_migrate_presets(
+            &renovate_str,
+            migrate_presets,
+        ))
     }
 
     /// Return `true` when `manager_name` should run for this repository.
@@ -5569,7 +5584,10 @@ pub async fn discover(
     for path in config_file_names(None, user_config_file_names) {
         if let Some(file) = client.get_raw_file(owner, repo, &path).await? {
             if path == "package.json" {
-                if let Some(config) = RepoConfig::parse_from_package_json(&file.content) {
+                if let Some(config) = RepoConfig::parse_from_package_json_with_migrate_presets(
+                    &file.content,
+                    &global_config.migrate_presets,
+                ) {
                     tracing::warn!(
                         repo = %format!("{owner}/{repo}"),
                         "Using package.json for Renovate config is deprecated — \
@@ -5584,7 +5602,10 @@ pub async fn discover(
             }
 
             tracing::debug!(repo = %format!("{owner}/{repo}"), path = %path, "found renovate config");
-            let config = RepoConfig::parse(&file.content);
+            let config = RepoConfig::parse_with_migrate_presets(
+                &file.content,
+                &global_config.migrate_presets,
+            );
             return Ok(RepoConfigResult::Found {
                 path: file.path,
                 config: Box::new(config),
@@ -5755,6 +5776,37 @@ mod tests {
         };
         assert_eq!(path, "custom-renovate.json");
         assert_eq!(config.ignore_deps, vec!["lodash"]);
+    }
+
+    #[tokio::test]
+    async fn discover_applies_migrate_presets() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(wm_path("/repos/owner/repo/contents/renovate.json"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "path": "renovate.json",
+                "content": base64::engine::general_purpose::STANDARD
+                    .encode(r#"{"extends":["config:old","config:removed"]}"#),
+                "encoding": "base64"
+            })))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let config = GlobalConfig {
+            migrate_presets: std::collections::BTreeMap::from([
+                ("config:old".to_owned(), "config:new".to_owned()),
+                ("config:removed".to_owned(), String::new()),
+            ]),
+            ..GlobalConfig::default()
+        };
+        let result = discover(&client, "owner", "repo", &config).await.unwrap();
+
+        let config = match result {
+            RepoConfigResult::Found { config, .. } => config,
+            other => panic!("expected Found, got {other:?}"),
+        };
+        assert_eq!(config.extends, vec!["config:new"]);
     }
 
     async fn discover_with_config_file(path: &str, content: &str) -> RepoConfigResult {
