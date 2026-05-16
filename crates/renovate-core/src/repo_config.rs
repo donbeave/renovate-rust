@@ -13,6 +13,8 @@
 //! Rule types, matchers, and the dependency context live in
 //! [`crate::package_rule`]; this module re-exports them for convenience.
 
+use std::collections::BTreeMap;
+
 use serde::Deserialize;
 
 // Re-export rule/context types so callers can keep using `repo_config::*`.
@@ -114,6 +116,11 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `excludeCommitPaths`.
     pub exclude_commit_paths: Vec<String>,
+    /// Repository-level registry aliases used by managers that rewrite
+    /// registry identifiers to URLs.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `registryAliases`.
+    pub registry_aliases: BTreeMap<String, String>,
     /// Compiled package rules (from `packageRules` in `renovate.json`).
     pub package_rules: Vec<PackageRule>,
     /// When non-empty, only these manager names are active.
@@ -3932,6 +3939,8 @@ impl RepoConfig {
             include_paths: Vec<String>,
             #[serde(rename = "excludeCommitPaths", default)]
             exclude_commit_paths: Vec<String>,
+            #[serde(rename = "registryAliases", default)]
+            registry_aliases: BTreeMap<String, String>,
             #[serde(rename = "packageRules", default)]
             package_rules: Vec<RawPackageRule>,
             /// Deprecated: `packages` was the old name for `packageRules`.
@@ -4887,6 +4896,7 @@ impl RepoConfig {
             },
             include_paths: raw.include_paths,
             exclude_commit_paths: raw.exclude_commit_paths,
+            registry_aliases: raw.registry_aliases,
             extends: raw.extends,
             ignore_presets: raw.ignore_presets,
             minimum_release_age: raw.minimum_release_age.or_else(|| {
@@ -5501,6 +5511,7 @@ impl Default for RepoConfig {
             ignore_paths: Vec::new(),
             include_paths: Vec::new(),
             exclude_commit_paths: Vec::new(),
+            registry_aliases: BTreeMap::new(),
             package_rules: Vec::new(),
             enabled_managers: Vec::new(),
             disabled_managers: Vec::new(),
@@ -6214,6 +6225,15 @@ mod tests {
     fn exclude_commit_paths_parsed() {
         let c = RepoConfig::parse(r#"{"excludeCommitPaths": ["docs/**", "generated"]}"#);
         assert_eq!(c.exclude_commit_paths, vec!["docs/**", "generated"]);
+    }
+
+    #[test]
+    fn registry_aliases_parsed() {
+        let c = RepoConfig::parse(r#"{"registryAliases": {"stable": "https://example.com"}}"#);
+        assert_eq!(
+            c.registry_aliases.get("stable").map(String::as_str),
+            Some("https://example.com")
+        );
     }
 
     #[test]
