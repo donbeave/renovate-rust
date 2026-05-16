@@ -542,6 +542,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `constraints`.
     pub constraints: BTreeMap<String, String>,
 
+    /// Host rules for registry, datasource, and platform request configuration.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `hostRules`.
+    pub host_rules: Vec<serde_json::Value>,
+
     /// When `true`, Renovate creates a Dependency Dashboard issue in the repo.
     /// Default: `false`.
     ///
@@ -4411,6 +4416,8 @@ impl RepoConfig {
             post_update_options: Vec<String>,
             #[serde(default)]
             constraints: BTreeMap<String, String>,
+            #[serde(rename = "hostRules", default)]
+            host_rules: Vec<serde_json::Value>,
             #[serde(rename = "dependencyDashboard", default)]
             dependency_dashboard: bool,
             #[serde(
@@ -5378,6 +5385,7 @@ impl RepoConfig {
             rollback_prs: raw.rollback_prs,
             post_update_options: raw.post_update_options,
             constraints: raw.constraints,
+            host_rules: raw.host_rules,
             dependency_dashboard: raw.dependency_dashboard
                 || effective_extends
                     .iter()
@@ -6060,6 +6068,7 @@ impl Default for RepoConfig {
             rollback_prs: false,
             post_update_options: Vec::new(),
             constraints: BTreeMap::new(),
+            host_rules: Vec::new(),
             dependency_dashboard: false,
             dependency_dashboard_osv_vulnerability_summary: "none".to_owned(),
             dependency_dashboard_approval: false,
@@ -14042,6 +14051,20 @@ mod rule_effects_tests {
             c.constraints.get("npm").map(String::as_str),
             Some("^10.0.0")
         );
+    }
+
+    #[test]
+    fn host_rules_parsed() {
+        let c = RepoConfig::parse(
+            r#"{"hostRules": [{"hostType": "npm", "matchHost": "registry.npmjs.org", "token": "abc"}]}"#,
+        );
+        assert_eq!(c.host_rules.len(), 1);
+        assert_eq!(c.host_rules[0]["hostType"].as_str(), Some("npm"));
+        assert_eq!(
+            c.host_rules[0]["matchHost"].as_str(),
+            Some("registry.npmjs.org")
+        );
+        assert_eq!(c.host_rules[0]["token"].as_str(), Some("abc"));
     }
 
     #[test]
