@@ -266,6 +266,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `prHourlyLimit`.
     pub pr_hourly_limit: u32,
 
+    /// Minimum number of updates required before a grouped branch is created.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `minimumGroupSize`.
+    pub minimum_group_size: u32,
+
     /// Group name for global dep grouping.  When non-empty, all updates are
     /// bundled into a single PR with this name.  Per-rule `groupName` in
     /// `packageRules` takes precedence.
@@ -4045,6 +4050,8 @@ impl RepoConfig {
             pr_concurrent_limit: u32,
             #[serde(rename = "prHourlyLimit", default = "default_pr_hourly_limit")]
             pr_hourly_limit: u32,
+            #[serde(rename = "minimumGroupSize", default = "default_minimum_group_size")]
+            minimum_group_size: u32,
             #[serde(rename = "groupName")]
             group_name: Option<String>,
             #[serde(rename = "separateMajorMinor", default = "default_true")]
@@ -4298,6 +4305,10 @@ impl RepoConfig {
 
         fn default_pr_hourly_limit() -> u32 {
             2
+        }
+
+        fn default_minimum_group_size() -> u32 {
+            1
         }
 
         let mut raw: Raw = match json5::from_str(content) {
@@ -4853,6 +4864,7 @@ impl RepoConfig {
             }),
             pr_concurrent_limit: scalar_pr_concurrent.unwrap_or(raw.pr_concurrent_limit),
             pr_hourly_limit: scalar_pr_hourly.unwrap_or(raw.pr_hourly_limit),
+            minimum_group_size: raw.minimum_group_size,
             pr_creation: raw.pr_creation.or_else(|| {
                 // :prImmediately and :prNotPending presets set prCreation.
                 if effective_extends
@@ -5564,6 +5576,7 @@ impl Default for RepoConfig {
             pr_concurrent_limit: 0,
             pr_creation: None,
             pr_hourly_limit: 2,
+            minimum_group_size: 1,
             group_name: None,
             separate_major_minor: true,
             separate_multiple_major: false,
@@ -8802,6 +8815,12 @@ mod tests {
     fn pr_hourly_limit_custom() {
         let c = RepoConfig::parse(r#"{"prHourlyLimit": 5}"#);
         assert_eq!(c.pr_hourly_limit, 5);
+    }
+
+    #[test]
+    fn minimum_group_size_parsed() {
+        let c = RepoConfig::parse(r#"{"minimumGroupSize": 3}"#);
+        assert_eq!(c.minimum_group_size, 3);
     }
 
     #[test]
