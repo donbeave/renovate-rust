@@ -14,7 +14,8 @@ use serde_json::{Map, Value};
 
 use crate::cli::{
     BinarySource as CliBinarySource, Cli, DryRunArg, ForkProcessing as CliForkProcessing,
-    Platform as CliPlatform, RecreateWhen as CliRecreateWhen, RequireConfigArg,
+    Platform as CliPlatform, PlatformCommit as CliPlatformCommit,
+    RecreateWhen as CliRecreateWhen, RequireConfigArg,
 };
 
 /// Apply CLI arguments on top of a `base` [`GlobalConfig`].
@@ -79,6 +80,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     }
     if let Some(pa) = cli.platform_automerge {
         config.platform_automerge = pa;
+    }
+    if let Some(platform_commit) = cli.platform_commit {
+        config.platform_commit = Some(map_platform_commit(platform_commit).to_owned());
     }
     if let Some(rw) = cli.recreate_when {
         config.recreate_when = map_recreate_when(rw);
@@ -227,6 +231,14 @@ fn map_binary_source(binary_source: CliBinarySource) -> BinarySource {
     }
 }
 
+fn map_platform_commit(platform_commit: CliPlatformCommit) -> &'static str {
+    match platform_commit {
+        CliPlatformCommit::Auto => "auto",
+        CliPlatformCommit::Disabled => "disabled",
+        CliPlatformCommit::Enabled => "enabled",
+    }
+}
+
 fn map_recreate_when(rw: CliRecreateWhen) -> RecreateWhen {
     match rw {
         CliRecreateWhen::Auto => RecreateWhen::Auto,
@@ -271,6 +283,7 @@ mod tests {
             enabled: None,
             automerge: None,
             platform_automerge: None,
+            platform_commit: None,
             recreate_when: None,
             allowed_commands: None,
             allow_command_templating: None,
@@ -383,6 +396,16 @@ mod tests {
         assert_eq!(
             parse_and_build(&["--binary-source=auto"]).binary_source,
             Some(BinarySource::Global)
+        );
+    }
+
+    #[test]
+    fn platform_commit_flag_is_parsed() {
+        assert_eq!(
+            parse_and_build(&["--platform-commit=enabled"])
+                .platform_commit
+                .as_deref(),
+            Some("enabled")
         );
     }
 

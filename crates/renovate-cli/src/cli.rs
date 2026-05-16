@@ -123,6 +123,17 @@ pub(crate) enum RecreateWhen {
     Never,
 }
 
+/// `--platform-commit` values.
+///
+/// Renovate source: `platformCommit` option.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+#[clap(rename_all = "kebab-case")]
+pub(crate) enum PlatformCommit {
+    Auto,
+    Disabled,
+    Enabled,
+}
+
 /// Renovate-compatible CLI.
 ///
 /// This struct holds only the flag definitions and their clap metadata. All
@@ -227,6 +238,11 @@ pub(crate) struct Cli {
         default_missing_value = "true"
     )]
     pub(crate) platform_automerge: Option<bool>,
+
+    /// Use platform API to perform commits instead of Git directly.
+    /// Env: RENOVATE_PLATFORM_COMMIT.
+    #[arg(long, value_enum, env = "RENOVATE_PLATFORM_COMMIT")]
+    pub(crate) platform_commit: Option<PlatformCommit>,
 
     /// When to recreate closed PRs.
     /// Env: RENOVATE_RECREATE_WHEN.

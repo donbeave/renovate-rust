@@ -78,11 +78,7 @@ pub(crate) fn apply_to_base(
         config.binary_source = Some(parse_binary_source(value)?);
     }
     if let Some(value) = env_value(env, prefix, "PLATFORM_COMMIT") {
-        config.platform_commit = Some(if parse_bool("RENOVATE_PLATFORM_COMMIT", value)? {
-            "enabled".to_owned()
-        } else {
-            "disabled".to_owned()
-        });
+        config.platform_commit = Some(parse_platform_commit(value)?.to_owned());
     }
     if let Some(value) = env_renamed_value(
         env,
@@ -312,6 +308,15 @@ fn parse_binary_source(value: &str) -> Result<BinarySource, String> {
         _ => Err(format!(
             "RENOVATE_BINARY_SOURCE was invalid: Invalid value `{value}` for `binarySource`. The allowed values are docker, global, install, hermit."
         )),
+    }
+}
+
+fn parse_platform_commit(value: &str) -> Result<&'static str, String> {
+    match value {
+        "auto" => Ok("auto"),
+        "enabled" | "true" => Ok("enabled"),
+        "disabled" | "false" => Ok("disabled"),
+        _ => Err(format!("RENOVATE_PLATFORM_COMMIT was invalid: {value}")),
     }
 }
 
@@ -1016,5 +1021,17 @@ mod tests {
     fn platform_commit_false_maps_to_disabled() {
         let config = build_from_env(&env(&[("RENOVATE_PLATFORM_COMMIT", "false")])).unwrap();
         assert_eq!(config.platform_commit.as_deref(), Some("disabled"));
+    }
+
+    #[test]
+    fn platform_commit_string_values_are_parsed() {
+        for (raw, expected) in [
+            ("auto", "auto"),
+            ("enabled", "enabled"),
+            ("disabled", "disabled"),
+        ] {
+            let config = build_from_env(&env(&[("RENOVATE_PLATFORM_COMMIT", raw)])).unwrap();
+            assert_eq!(config.platform_commit.as_deref(), Some(expected), "{raw}");
+        }
     }
 }
