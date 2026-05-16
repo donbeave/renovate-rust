@@ -272,6 +272,9 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref report_path) = cli.report_path {
         config.report_path = Some(report_path.clone());
     }
+    if let Some(unicode_emoji) = cli.unicode_emoji {
+        config.unicode_emoji = Some(unicode_emoji);
+    }
     if !cli.labels.is_empty() {
         config.labels = trim_list(&cli.labels);
     }
@@ -524,6 +527,7 @@ mod tests {
             pr_cache_sync_max_pages: None,
             report_type: None,
             report_path: None,
+            unicode_emoji: None,
             labels: Vec::new(),
             host_rules: None,
             registry_aliases: None,
@@ -723,6 +727,7 @@ mod tests {
             "--ignore-pr-author",
             "--report-type=file",
             "--report-path=./report.json",
+            "--unicode-emoji=false",
             "--local-dir=/tmp/renovate/repo",
             "--encrypted-warning=encrypted config ignored",
             "--bb-use-development-branch",
@@ -797,6 +802,7 @@ mod tests {
         assert_eq!(config.pr_cache_sync_max_pages, Some(5));
         assert_eq!(config.report_type.as_deref(), Some("file"));
         assert_eq!(config.report_path.as_deref(), Some("./report.json"));
+        assert_eq!(config.unicode_emoji, Some(false));
     }
 
     // Ported: "supports boolean no value" — workers/global/config/parse/cli.spec.ts line 36

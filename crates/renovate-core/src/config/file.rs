@@ -369,6 +369,7 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
         report_type: file_config.report_type.or(base.report_type),
         report_path: file_config.report_path.or(base.report_path),
         report_formatting: file_config.report_formatting.or(base.report_formatting),
+        unicode_emoji: file_config.unicode_emoji.or(base.unicode_emoji),
         labels: if file_config.labels.is_empty() {
             base.labels
         } else {

@@ -591,6 +591,11 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_REPORT_PATH")]
     pub(crate) report_path: Option<String>,
 
+    /// Enable Unicode emoji in output.
+    /// Env: RENOVATE_UNICODE_EMOJI.
+    #[arg(long, env = "RENOVATE_UNICODE_EMOJI", num_args = 0..=1, default_missing_value = "true")]
+    pub(crate) unicode_emoji: Option<bool>,
+
     /// Labels to apply to created PRs.
     /// Env: RENOVATE_LABELS.
     #[arg(long, env = "RENOVATE_LABELS", value_delimiter = ',')]

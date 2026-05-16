@@ -554,6 +554,9 @@ pub struct GlobalConfig {
     /// Whether report JSON should be formatted.
     pub report_formatting: Option<bool>,
 
+    /// Whether Unicode emoji can be used in output.
+    pub unicode_emoji: Option<bool>,
+
     /// Labels to apply to created PRs.
     pub labels: Vec<String>,
 
@@ -680,6 +683,7 @@ impl Default for GlobalConfig {
             report_type: None,
             report_path: None,
             report_formatting: None,
+            unicode_emoji: None,
             labels: Vec::new(),
             host_rules: Vec::new(),
             registry_aliases: std::collections::BTreeMap::new(),

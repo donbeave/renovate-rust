@@ -400,6 +400,9 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "REPORT_FORMATTING") {
         config.report_formatting = Some(parse_bool("RENOVATE_REPORT_FORMATTING", value)?);
     }
+    if let Some(value) = env_value(env, prefix, "UNICODE_EMOJI") {
+        config.unicode_emoji = Some(parse_bool("RENOVATE_UNICODE_EMOJI", value)?);
+    }
 
     Ok(config)
 }
@@ -1279,12 +1282,14 @@ mod tests {
             ("RENOVATE_REPORT_TYPE", "file"),
             ("RENOVATE_REPORT_PATH", "./report.json"),
             ("RENOVATE_REPORT_FORMATTING", "true"),
+            ("RENOVATE_UNICODE_EMOJI", "false"),
         ]))
         .unwrap();
 
         assert_eq!(config.report_type.as_deref(), Some("file"));
         assert_eq!(config.report_path.as_deref(), Some("./report.json"));
         assert_eq!(config.report_formatting, Some(true));
+        assert_eq!(config.unicode_emoji, Some(false));
     }
 
     #[test]
