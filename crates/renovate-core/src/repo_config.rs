@@ -658,6 +658,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `vulnerabilityAlerts`.
     pub vulnerability_alerts: VulnerabilityAlertsConfig,
 
+    /// Configuration for lock file maintenance updates.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `lockFileMaintenance`.
+    pub lock_file_maintenance: LockFileMaintenanceConfig,
+
     // ── Scheduling behavior ───────────────────────────────────────────────────
     /// When `false`, Renovate will not update branches that are outside the
     /// configured schedule window.  Default: `true` (updates happen even when
@@ -927,6 +932,80 @@ impl Default for VulnerabilityAlertsConfig {
             branch_topic: default_vulnerability_branch_topic(),
             pr_creation: default_vulnerability_pr_creation(),
             vulnerability_fix_strategy: default_vulnerability_fix_strategy(),
+        }
+    }
+}
+
+fn default_lock_file_recreate_when() -> String {
+    "always".to_owned()
+}
+
+fn default_lock_file_rebase_stale_prs() -> bool {
+    true
+}
+
+fn default_lock_file_branch_topic() -> String {
+    "lock-file-maintenance".to_owned()
+}
+
+fn default_lock_file_commit_message_action() -> String {
+    "Lock file maintenance".to_owned()
+}
+
+fn default_lock_file_schedule() -> Vec<String> {
+    vec!["before 4am on monday".to_owned()]
+}
+
+fn default_lock_file_pr_body_definitions() -> serde_json::Map<String, serde_json::Value> {
+    let mut map = serde_json::Map::new();
+    map.insert(
+        "Change".to_owned(),
+        serde_json::Value::String("All locks refreshed".to_owned()),
+    );
+    map
+}
+
+/// Nested `lockFileMaintenance` configuration.
+///
+/// Renovate reference: `lib/config/options/index.ts` — `lockFileMaintenance`.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LockFileMaintenanceConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default = "default_lock_file_recreate_when")]
+    pub recreate_when: String,
+    #[serde(default = "default_lock_file_rebase_stale_prs")]
+    pub rebase_stale_prs: bool,
+    #[serde(default = "default_lock_file_branch_topic")]
+    pub branch_topic: String,
+    #[serde(default = "default_lock_file_commit_message_action")]
+    pub commit_message_action: String,
+    #[serde(default)]
+    pub commit_message_topic: Option<String>,
+    #[serde(default)]
+    pub commit_message_extra: Option<String>,
+    #[serde(default = "default_lock_file_schedule")]
+    pub schedule: Vec<String>,
+    #[serde(default)]
+    pub group_name: Option<String>,
+    #[serde(default = "default_lock_file_pr_body_definitions")]
+    pub pr_body_definitions: serde_json::Map<String, serde_json::Value>,
+}
+
+impl Default for LockFileMaintenanceConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            recreate_when: default_lock_file_recreate_when(),
+            rebase_stale_prs: default_lock_file_rebase_stale_prs(),
+            branch_topic: default_lock_file_branch_topic(),
+            commit_message_action: default_lock_file_commit_message_action(),
+            commit_message_topic: None,
+            commit_message_extra: None,
+            schedule: default_lock_file_schedule(),
+            group_name: None,
+            pr_body_definitions: default_lock_file_pr_body_definitions(),
         }
     }
 }
@@ -4700,6 +4779,8 @@ impl RepoConfig {
             osv_vulnerability_alerts: bool,
             #[serde(rename = "vulnerabilityAlerts", default)]
             vulnerability_alerts: VulnerabilityAlertsConfig,
+            #[serde(rename = "lockFileMaintenance", default)]
+            lock_file_maintenance: LockFileMaintenanceConfig,
             #[serde(rename = "updateNotScheduled", default = "default_true")]
             update_not_scheduled: bool,
             #[serde(rename = "commitMessage", default = "default_commit_message")]
@@ -5864,6 +5945,7 @@ impl RepoConfig {
                     .any(|p| p == ":configMigration" || p == "configMigration"),
             osv_vulnerability_alerts: raw.osv_vulnerability_alerts,
             vulnerability_alerts: raw.vulnerability_alerts,
+            lock_file_maintenance: raw.lock_file_maintenance,
             update_not_scheduled: preset_update_not_scheduled.unwrap_or(raw.update_not_scheduled),
             commit_message: raw.commit_message,
             commit_message_action: raw.commit_message_action,
@@ -6612,6 +6694,7 @@ impl Default for RepoConfig {
             config_migration: false,
             osv_vulnerability_alerts: false,
             vulnerability_alerts: VulnerabilityAlertsConfig::default(),
+            lock_file_maintenance: LockFileMaintenanceConfig::default(),
             update_not_scheduled: true,
             commit_message: "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}".to_owned(),
             commit_message_action: "Update".to_owned(),
@@ -10179,6 +10262,47 @@ mod tests {
         );
         assert_eq!(c.vulnerability_alerts.pr_creation, "immediate");
         assert_eq!(c.vulnerability_alerts.vulnerability_fix_strategy, "highest");
+    }
+
+    #[test]
+    fn lock_file_maintenance_config_parsed_with_defaults() {
+        let c = RepoConfig::parse(
+            r#"{
+                "lockFileMaintenance": {
+                    "enabled": true,
+                    "schedule": ["after 10pm on sunday"],
+                    "groupName": "lock refresh"
+                }
+            }"#,
+        );
+        assert!(c.lock_file_maintenance.enabled);
+        assert_eq!(c.lock_file_maintenance.recreate_when, "always");
+        assert!(c.lock_file_maintenance.rebase_stale_prs);
+        assert_eq!(
+            c.lock_file_maintenance.branch_topic,
+            "lock-file-maintenance"
+        );
+        assert_eq!(
+            c.lock_file_maintenance.commit_message_action,
+            "Lock file maintenance"
+        );
+        assert!(c.lock_file_maintenance.commit_message_topic.is_none());
+        assert!(c.lock_file_maintenance.commit_message_extra.is_none());
+        assert_eq!(
+            c.lock_file_maintenance.schedule,
+            vec!["after 10pm on sunday"]
+        );
+        assert_eq!(
+            c.lock_file_maintenance.group_name.as_deref(),
+            Some("lock refresh")
+        );
+        assert_eq!(
+            c.lock_file_maintenance
+                .pr_body_definitions
+                .get("Change")
+                .and_then(serde_json::Value::as_str),
+            Some("All locks refreshed")
+        );
     }
 
     #[test]
