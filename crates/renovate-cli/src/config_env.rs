@@ -153,7 +153,7 @@ pub(crate) fn apply_to_base(
     .or_else(|| {
         env_value(env, prefix, "X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES")
     }) {
-        config.merge_confidence_datasources = parse_string_array(value).unwrap_or_default();
+        config.merge_confidence_datasources = parse_string_list(value);
     }
     if let Some(value) = env_converted_experimental_value(
         env,
@@ -818,6 +818,19 @@ mod tests {
         )]))
         .unwrap();
         assert_eq!(config.allowed_commands, vec!["npm install", "cargo update"]);
+    }
+
+    #[test]
+    fn merge_confidence_datasources_env_comma_list_is_parsed() {
+        let config = build_from_env(&env(&[(
+            "RENOVATE_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES",
+            "docker,npm, maven,",
+        )]))
+        .unwrap();
+        assert_eq!(
+            config.merge_confidence_datasources,
+            vec!["docker", "npm", "maven"]
+        );
     }
 
     #[test]
