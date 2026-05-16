@@ -87,7 +87,7 @@ pub(crate) fn apply_to_base(
         "ALLOWED_COMMANDS",
         "ALLOWED_POST_UPGRADE_COMMANDS",
     ) {
-        config.allowed_commands = split_list(value);
+        config.allowed_commands = parse_string_list(value);
     }
     if let Some(value) = env_value(env, prefix, "ALLOW_COMMAND_TEMPLATING") {
         config.allow_command_templating =
@@ -798,6 +798,26 @@ mod tests {
             Some("https://mc.example")
         );
         assert_eq!(config.merge_confidence_datasources, vec!["docker", "npm"]);
+    }
+
+    #[test]
+    fn allowed_commands_env_json5_array_is_parsed() {
+        let config = build_from_env(&env(&[(
+            "RENOVATE_ALLOWED_COMMANDS",
+            "['npm install','cargo update',]",
+        )]))
+        .unwrap();
+        assert_eq!(config.allowed_commands, vec!["npm install", "cargo update"]);
+    }
+
+    #[test]
+    fn renamed_allowed_commands_env_json5_array_is_parsed() {
+        let config = build_from_env(&env(&[(
+            "RENOVATE_ALLOWED_POST_UPGRADE_COMMANDS",
+            "['npm install','cargo update',]",
+        )]))
+        .unwrap();
+        assert_eq!(config.allowed_commands, vec!["npm install", "cargo update"]);
     }
 
     #[test]
