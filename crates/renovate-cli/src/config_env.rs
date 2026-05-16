@@ -47,6 +47,20 @@ pub(crate) fn apply_to_base(
     if let Some(value) = env_value(env, prefix, "CONFIG_FILE_NAMES") {
         config.config_file_names = Some(parse_string_list(value));
     }
+    if let Some(value) = env_value(env, prefix, "MIGRATE_PRESETS") {
+        config.migrate_presets = parse_env_string_map("RENOVATE_MIGRATE_PRESETS", value)?;
+    }
+    if let Some(value) = env_value(env, prefix, "CUSTOM_ENV_VARIABLES") {
+        config.custom_env_variables =
+            parse_env_string_map("RENOVATE_CUSTOM_ENV_VARIABLES", value)?;
+    }
+    if let Some(value) = env_value(env, prefix, "CACHE_TTL_OVERRIDE") {
+        config.cache_ttl_override =
+            parse_env_json_object("RENOVATE_CACHE_TTL_OVERRIDE", value)?;
+    }
+    if let Some(value) = env_value(env, prefix, "TOOL_SETTINGS") {
+        config.tool_settings = parse_env_json_object("RENOVATE_TOOL_SETTINGS", value)?;
+    }
     if let Some(value) = env_value(env, prefix, "ONBOARDING_CONFIG_FILE_NAME") {
         config.onboarding_config_file_name = Some(value.to_owned());
     }
@@ -1186,6 +1200,16 @@ mod tests {
                 "RENOVATE_CONFIG_FILE_NAMES",
                 "renovate.json,.github/renovate.json5",
             ),
+            (
+                "RENOVATE_MIGRATE_PRESETS",
+                "{'config:old':'config:new','config:removed':''}",
+            ),
+            ("RENOVATE_CUSTOM_ENV_VARIABLES", "{EXAMPLE:'value'}"),
+            ("RENOVATE_CACHE_TTL_OVERRIDE", "{'datasource-npm':30}"),
+            (
+                "RENOVATE_TOOL_SETTINGS",
+                "{jvmMaxMemory:1024,nodeMaxMemory:2048}",
+            ),
             ("RENOVATE_ONBOARDING_CONFIG_FILE_NAME", ".github/renovate.json5"),
             ("RENOVATE_ONBOARDING_NO_DEPS", "enabled"),
             ("RENOVATE_ONBOARDING_PR_TITLE", "Configure Renovate"),
@@ -1206,6 +1230,39 @@ mod tests {
                 "renovate.json".to_owned(),
                 ".github/renovate.json5".to_owned()
             ])
+        );
+        assert_eq!(
+            config.migrate_presets.get("config:old").map(String::as_str),
+            Some("config:new")
+        );
+        assert_eq!(
+            config.migrate_presets.get("config:removed").map(String::as_str),
+            Some("")
+        );
+        assert_eq!(
+            config.custom_env_variables.get("EXAMPLE").map(String::as_str),
+            Some("value")
+        );
+        assert_eq!(
+            config
+                .cache_ttl_override
+                .get("datasource-npm")
+                .and_then(serde_json::Value::as_u64),
+            Some(30)
+        );
+        assert_eq!(
+            config
+                .tool_settings
+                .get("jvmMaxMemory")
+                .and_then(serde_json::Value::as_u64),
+            Some(1024)
+        );
+        assert_eq!(
+            config
+                .tool_settings
+                .get("nodeMaxMemory")
+                .and_then(serde_json::Value::as_u64),
+            Some(2048)
         );
         assert_eq!(
             config.onboarding_config_file_name.as_deref(),

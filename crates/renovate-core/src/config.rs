@@ -365,6 +365,18 @@ pub struct GlobalConfig {
     /// Repository config filenames to discover or create.
     pub config_file_names: Option<Vec<String>>,
 
+    /// Preset rename/removal map applied while parsing repository config.
+    pub migrate_presets: std::collections::BTreeMap<String, String>,
+
+    /// Custom environment variables for child processes.
+    pub custom_env_variables: std::collections::BTreeMap<String, String>,
+
+    /// Cache namespace TTL overrides.
+    pub cache_ttl_override: serde_json::Map<String, serde_json::Value>,
+
+    /// Tool-specific global settings.
+    pub tool_settings: serde_json::Map<String, serde_json::Value>,
+
     /// Config filename used in onboarding PRs.
     pub onboarding_config_file_name: Option<String>,
 
@@ -560,6 +572,10 @@ impl Default for GlobalConfig {
             onboarding_auto_close_age: None,
             onboarding_commit_message: None,
             config_file_names: None,
+            migrate_presets: std::collections::BTreeMap::new(),
+            custom_env_variables: std::collections::BTreeMap::new(),
+            cache_ttl_override: serde_json::Map::new(),
+            tool_settings: serde_json::Map::new(),
             onboarding_config_file_name: None,
             onboarding_no_deps: None,
             onboarding_pr_title: None,

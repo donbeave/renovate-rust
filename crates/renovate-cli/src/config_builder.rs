@@ -81,6 +81,15 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref names) = cli.config_file_names {
         config.config_file_names = Some(parse_string_list(names)?);
     }
+    if let Some(ref raw) = cli.migrate_presets {
+        config.migrate_presets = parse_string_map(raw)?;
+    }
+    if let Some(ref raw) = cli.custom_env_variables {
+        config.custom_env_variables = parse_string_map(raw)?;
+    }
+    if let Some(ref raw) = cli.cache_ttl_override {
+        config.cache_ttl_override = parse_json_object(raw)?;
+    }
     if let Some(ref no_deps) = cli.onboarding_no_deps {
         config.onboarding_no_deps = Some(no_deps.clone());
     }
@@ -415,6 +424,9 @@ mod tests {
             config_migration: None,
             onboarding: None,
             config_file_names: None,
+            migrate_presets: None,
+            custom_env_variables: None,
+            cache_ttl_override: None,
             onboarding_no_deps: None,
             onboarding_rebase_checkbox: None,
             enabled: None,
@@ -714,6 +726,9 @@ mod tests {
         let config = parse_and_build(&[
             "--onboarding=false",
             "--config-file-names=renovate.json,.github/renovate.json5",
+            r#"--migrate-presets={"config:old":"config:new","config:removed":""}"#,
+            r#"--custom-env-variables={"EXAMPLE":"value"}"#,
+            r#"--cache-ttl-override={"datasource-npm":30}"#,
             "--onboarding-no-deps=enabled",
             "--onboarding-rebase-checkbox",
         ]);
@@ -725,6 +740,25 @@ mod tests {
                 "renovate.json".to_owned(),
                 ".github/renovate.json5".to_owned()
             ])
+        );
+        assert_eq!(
+            config.migrate_presets.get("config:old").map(String::as_str),
+            Some("config:new")
+        );
+        assert_eq!(
+            config.migrate_presets.get("config:removed").map(String::as_str),
+            Some("")
+        );
+        assert_eq!(
+            config.custom_env_variables.get("EXAMPLE").map(String::as_str),
+            Some("value")
+        );
+        assert_eq!(
+            config
+                .cache_ttl_override
+                .get("datasource-npm")
+                .and_then(serde_json::Value::as_u64),
+            Some(30)
         );
         assert_eq!(config.onboarding_no_deps.as_deref(), Some("enabled"));
         assert_eq!(config.onboarding_rebase_checkbox, Some(true));

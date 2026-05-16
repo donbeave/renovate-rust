@@ -223,6 +223,21 @@ pub(crate) struct Cli {
     #[arg(long, env = "RENOVATE_CONFIG_FILE_NAMES")]
     pub(crate) config_file_names: Option<String>,
 
+    /// Preset rename/removal map (JSON object).
+    /// Env: RENOVATE_MIGRATE_PRESETS.
+    #[arg(long, env = "RENOVATE_MIGRATE_PRESETS")]
+    pub(crate) migrate_presets: Option<String>,
+
+    /// Custom environment variables for child processes (JSON object).
+    /// Env: RENOVATE_CUSTOM_ENV_VARIABLES.
+    #[arg(long, env = "RENOVATE_CUSTOM_ENV_VARIABLES")]
+    pub(crate) custom_env_variables: Option<String>,
+
+    /// Cache namespace TTL overrides (JSON object).
+    /// Env: RENOVATE_CACHE_TTL_OVERRIDE.
+    #[arg(long, env = "RENOVATE_CACHE_TTL_OVERRIDE")]
+    pub(crate) cache_ttl_override: Option<String>,
+
     /// Onboard repositories even when no dependencies are found.
     /// Env: RENOVATE_ONBOARDING_NO_DEPS.
     #[arg(long, env = "RENOVATE_ONBOARDING_NO_DEPS")]

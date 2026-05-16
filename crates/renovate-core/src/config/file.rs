@@ -238,6 +238,26 @@ pub fn merge_over_base(base: GlobalConfig, file_config: GlobalConfig) -> GlobalC
             .onboarding_commit_message
             .or(base.onboarding_commit_message),
         config_file_names: file_config.config_file_names.or(base.config_file_names),
+        migrate_presets: if file_config.migrate_presets.is_empty() {
+            base.migrate_presets
+        } else {
+            file_config.migrate_presets
+        },
+        custom_env_variables: if file_config.custom_env_variables.is_empty() {
+            base.custom_env_variables
+        } else {
+            file_config.custom_env_variables
+        },
+        cache_ttl_override: if file_config.cache_ttl_override.is_empty() {
+            base.cache_ttl_override
+        } else {
+            file_config.cache_ttl_override
+        },
+        tool_settings: if file_config.tool_settings.is_empty() {
+            base.tool_settings
+        } else {
+            file_config.tool_settings
+        },
         onboarding_config_file_name: file_config
             .onboarding_config_file_name
             .or(base.onboarding_config_file_name),
