@@ -509,10 +509,9 @@ your changes, note it in the commit message or final progress notes.
 ## Commit rules
 
 - Follow `AGENTS.md`, `CLAUDE.md`, and `COMMITS.md`.
-- Every commit must include:
-  ```
-  Co-authored-by: Claude <noreply@anthropic.com>
-  ```
+- Every commit must include exactly one `Co-authored-by` trailer for the active
+  agent, as defined in `AGENTS.md`. Use the Claude trailer when Claude Code
+  creates the commit and the Codex trailer when Codex creates the commit.
 - Multiple commits per session are expected and correct — one per coherent unit
   of work (one Phase 0 batch, one spec file mapped, one batch of tests ported).
 - Always commit the matching detail file and `renovate-test-map.md` root index
