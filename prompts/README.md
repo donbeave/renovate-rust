@@ -33,7 +33,7 @@ Good Claude Code goal for focused parity work:
 Good Claude Code goal for the full Renovate Rust implementation:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until renovate-rust provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Preserve Renovate-compatible CLI flags, environment variables, config discovery/semantics, exit codes, dependency extraction, update planning, output modes, and parity tracking. Keep working through coherent implementation slices, committing and pushing after each slice. Do not stop merely because one slice is complete. Do not run verification commands unless the operator explicitly asks; if blocked, document the blocker, commit and push any coherent progress, then continue with another local/offline slice.
+/goal Use @renovate-rust/prompts/claude-loop-renovate-rust.md as the implementation playbook and keep working until renovate-rust provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Preserve Renovate-compatible CLI flags, environment variables, config discovery/semantics, exit codes, dependency extraction, update planning, output modes, and parity tracking. Each turn should choose the next highest-value compatibility gap, implement a coherent slice, update parity docs, commit it, push it to main, then continue. Do not treat a committed slice or a clean worktree as goal completion; the goal is complete only when the drop-in replacement definition is satisfied. Do not run verification commands unless the operator explicitly asks; if blocked, document the blocker, commit and push any coherent progress, then continue with another local/offline slice.
 ```
 
 Use a timed loop only when repetition is the point:
@@ -43,12 +43,16 @@ Use a timed loop only when repetition is the point:
 ```
 
 For Codex goal mode, use [codex-goal-renovate-rust.md](codex-goal-renovate-rust.md)
-as the objective file for implementation work. It uses an explicit objective,
-definition of done, operating rules, and progress loop so the agent does not
-stop after a single slice. Example objective:
+as the objective file for implementation work. The file is written in Codex goal
+format: it states the objective, definition of done, operating rules, and
+repeatable progress loop. The agent should first read that file, prepare its
+working plan from the objective and definition of done, then keep executing
+coherent implementation slices until the full drop-in replacement goal is
+actually satisfied. A committed slice is only progress, not completion. Example
+objective:
 
 ```text
-Follow prompts/codex-goal-renovate-rust.md until renovate-rust is a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Keep committing and pushing coherent implementation slices until the definition of done in that file is satisfied. Do not run verification commands unless the operator explicitly asks.
+Follow prompts/codex-goal-renovate-rust.md. Read it as the Codex goal file, prepare the working plan from its Objective and Definition Of Done, then implement renovate-rust until it provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Keep choosing the next highest-value compatibility gap, updating parity docs, committing each coherent slice, and pushing every commit to main until the Definition Of Done in that file is satisfied. Do not stop after one slice or merely because `git status --short` is clean. Do not run verification commands unless the operator explicitly asks.
 ```
 
 For parity-only work, use the same condition text without the Claude Code slash
@@ -63,8 +67,10 @@ Notes for reliable operation:
 - Start Claude Code from `~/Projects/renovate-rust-experiement` when using the
   `@renovate-rust/...` references below. If already inside `renovate-rust/`,
   use `@prompts/...` instead.
-- `/goal` conditions should name the proof of completion, such as a clean
-  `git status`, a passing command, or a specific committed slice.
+- `/goal` conditions should name the real proof of completion. For bounded
+  parity work, that can be a committed unit and a clean `git status`. For the
+  full Renovate Rust implementation, the proof is the drop-in replacement
+  definition of done, not a single committed slice.
 - Include a turn or time bound in long goals so the agent stops cleanly if the
   work is blocked.
 - `/loop` tasks are session-scoped. They fire only while Claude Code is running
@@ -86,7 +92,7 @@ Start Claude Code in `~/Projects/renovate-rust-experiement`, then run the
 long-running implementation goal:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until renovate-rust provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Preserve Renovate-compatible CLI flags, environment variables, config discovery/semantics, exit codes, dependency extraction, update planning, output modes, and parity tracking. Keep working through coherent implementation slices, committing and pushing after each slice. Do not stop merely because one slice is complete. Do not run verification commands unless the operator explicitly asks; if blocked, document the blocker, commit and push any coherent progress, then continue with another local/offline slice.
+/goal Use @renovate-rust/prompts/claude-loop-renovate-rust.md as the implementation playbook and keep working until renovate-rust provides a production-quality Rust `renovate` binary that is a drop-in replacement for common Renovate CLI workflows. Preserve Renovate-compatible CLI flags, environment variables, config discovery/semantics, exit codes, dependency extraction, update planning, output modes, and parity tracking. Each turn should choose the next highest-value compatibility gap, implement a coherent slice, update parity docs, commit it, push it to main, then continue. Do not treat a committed slice or a clean worktree as goal completion; the goal is complete only when the drop-in replacement definition is satisfied. Do not run verification commands unless the operator explicitly asks; if blocked, document the blocker, commit and push any coherent progress, then continue with another local/offline slice.
 ```
 
 For periodic maintenance instead, schedule the prompt every 15 minutes:

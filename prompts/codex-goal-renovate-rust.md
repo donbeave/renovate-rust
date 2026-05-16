@@ -11,6 +11,10 @@ implementation playbook. It defines the repository layout, reference checkout,
 compatibility rules, Rust design standards, parity tracking files, iteration
 workflow, commit rules, and verification policy.
 
+When this file is used with Codex goal mode, treat it as the active goal file:
+prepare the working plan from the Objective and Definition Of Done, execute the
+Progress Loop, and keep going until the goal is actually achieved.
+
 ## Definition Of Done
 
 The goal is complete only when the Rust CLI preserves Renovate-compatible
@@ -32,6 +36,10 @@ observable behavior for common CLI usage, including:
 
 Do not consider the goal complete just because one coherent slice is committed.
 One slice is progress, not completion.
+
+Do not consider the goal complete just because `git status --short` is clean.
+A clean worktree after a commit is required iteration hygiene, not proof that
+the Rust CLI is a drop-in replacement.
 
 ## Operating Rules
 
@@ -55,15 +63,17 @@ One slice is progress, not completion.
 
 Repeat until the Definition Of Done is satisfied:
 
-1. Inspect current repo state, recent commits, and parity docs.
-2. Inspect the Renovate reference source/tests/docs for the next missing
+1. Read this goal file and prepare the current turn's working plan from the
+   Objective, Definition Of Done, Operating Rules, and local repo state.
+2. Inspect current repo state, recent commits, and parity docs.
+3. Inspect the Renovate reference source/tests/docs for the next missing
    compatibility slice.
-3. Update parity tracking before or during implementation.
-4. Implement the smallest coherent piece that materially advances the drop-in
+4. Update parity tracking before or during implementation.
+5. Implement the smallest coherent piece that materially advances the drop-in
    replacement objective.
-5. Add or update tests when appropriate, with `// Ported:` comments for tests
+6. Add or update tests when appropriate, with `// Ported:` comments for tests
    that map to Renovate `.spec.ts` cases.
-6. Commit the coherent slice with the required Codex co-author trailer.
-7. Push all committed local changes to the matching remote branch.
-8. Continue with the next highest-value slice.
-
+7. Commit the coherent slice with the required Codex co-author trailer.
+8. Push all committed local changes to the matching remote branch.
+9. Continue with the next highest-value slice until the Definition Of Done is
+   fully achieved.
