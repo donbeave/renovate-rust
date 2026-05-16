@@ -339,6 +339,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `branchTopic`.
     pub branch_topic: String,
 
+    /// Whether strict branch-name character handling is enabled.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `branchNameStrict`.
+    pub branch_name_strict: bool,
+
     /// Branches to process (alternative base branches).  Empty = default
     /// branch only.
     ///
@@ -531,6 +536,26 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `rollbackPrs`.
     pub rollback_prs: bool,
+
+    /// Whether pinned single-version dependencies should be updated.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `updatePinnedDependencies`.
+    pub update_pinned_dependencies: bool,
+
+    /// Whether changelogs/release notes should be fetched.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `fetchChangeLogs`.
+    pub fetch_change_logs: String,
+
+    /// Whether repository submodules should be cloned.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `cloneSubmodules`.
+    pub clone_submodules: bool,
+
+    /// Submodule names or patterns to clone when submodule cloning is enabled.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `cloneSubmodulesFilter`.
+    pub clone_submodules_filter: Vec<String>,
 
     /// Post-update actions to run after package or artifact updates.
     ///
@@ -4330,6 +4355,8 @@ impl RepoConfig {
             additional_branch_prefix: String,
             #[serde(rename = "branchTopic", default = "default_branch_topic")]
             branch_topic: String,
+            #[serde(rename = "branchNameStrict", default)]
+            branch_name_strict: bool,
             #[serde(rename = "baseBranches", default)]
             base_branches: Vec<String>,
             /// New canonical field name for baseBranches (Renovate migrates baseBranches → baseBranchPatterns).
@@ -4447,6 +4474,17 @@ impl RepoConfig {
             pin_digests: bool,
             #[serde(rename = "rollbackPrs", default)]
             rollback_prs: bool,
+            #[serde(rename = "updatePinnedDependencies", default = "default_true")]
+            update_pinned_dependencies: bool,
+            #[serde(rename = "fetchChangeLogs", default = "default_fetch_change_logs")]
+            fetch_change_logs: String,
+            #[serde(rename = "cloneSubmodules", default)]
+            clone_submodules: bool,
+            #[serde(
+                rename = "cloneSubmodulesFilter",
+                default = "default_clone_submodules_filter"
+            )]
+            clone_submodules_filter: Vec<String>,
             #[serde(rename = "postUpdateOptions", default)]
             post_update_options: Vec<String>,
             #[serde(default)]
@@ -4585,6 +4623,14 @@ impl RepoConfig {
 
         fn default_true() -> bool {
             true
+        }
+
+        fn default_fetch_change_logs() -> String {
+            "pr".to_owned()
+        }
+
+        fn default_clone_submodules_filter() -> Vec<String> {
+            vec!["*".to_owned()]
         }
 
         fn default_branch_prefix() -> String {
@@ -5387,6 +5433,7 @@ impl RepoConfig {
             branch_name: raw.branch_name,
             additional_branch_prefix: raw.additional_branch_prefix,
             branch_topic: raw.branch_topic,
+            branch_name_strict: raw.branch_name_strict,
             base_branches: {
                 // baseBranchPatterns is the new canonical name; merge with baseBranches.
                 let mut branches = raw.base_branches;
@@ -5536,6 +5583,10 @@ impl RepoConfig {
                         .iter()
                         .any(|p| p == ":pinDigestsDisabled" || p == "pinDigestsDisabled")),
             rollback_prs: raw.rollback_prs,
+            update_pinned_dependencies: raw.update_pinned_dependencies,
+            fetch_change_logs: raw.fetch_change_logs,
+            clone_submodules: raw.clone_submodules,
+            clone_submodules_filter: raw.clone_submodules_filter,
             post_update_options: raw.post_update_options,
             constraints: raw.constraints,
             host_rules: raw.host_rules,
@@ -6206,6 +6257,7 @@ impl Default for RepoConfig {
                 .to_owned(),
             additional_branch_prefix: String::new(),
             branch_topic: "{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}".to_owned(),
+            branch_name_strict: false,
             base_branches: Vec::new(),
             use_base_branch_config: "none".to_owned(),
             rebase_when: None,
@@ -6238,6 +6290,10 @@ impl Default for RepoConfig {
             respect_latest: false,
             pin_digests: false,
             rollback_prs: false,
+            update_pinned_dependencies: true,
+            fetch_change_logs: "pr".to_owned(),
+            clone_submodules: false,
+            clone_submodules_filter: vec!["*".to_owned()],
             post_update_options: Vec::new(),
             constraints: BTreeMap::new(),
             host_rules: Vec::new(),
@@ -9302,6 +9358,7 @@ mod tests {
             r#"{
                 "branchName": "deps/{{{branchTopic}}}",
                 "branchTopic": "{{{depNameSanitized}}}-custom",
+                "branchNameStrict": true,
                 "commitMessage": "{{{commitMessageAction}}} {{{commitMessageTopic}}}",
                 "commitMessageTopic": "package {{depName}}",
                 "commitMessageLowerCase": "never"
@@ -9309,6 +9366,7 @@ mod tests {
         );
         assert_eq!(c.branch_name, "deps/{{{branchTopic}}}");
         assert_eq!(c.branch_topic, "{{{depNameSanitized}}}-custom");
+        assert!(c.branch_name_strict);
         assert_eq!(
             c.commit_message,
             "{{{commitMessageAction}}} {{{commitMessageTopic}}}"
@@ -14379,6 +14437,22 @@ mod rule_effects_tests {
     fn post_update_options_parsed() {
         let c = RepoConfig::parse(r#"{"postUpdateOptions": ["gomodTidy", "npmDedupe"]}"#);
         assert_eq!(c.post_update_options, vec!["gomodTidy", "npmDedupe"]);
+    }
+
+    #[test]
+    fn repository_update_controls_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "updatePinnedDependencies": false,
+                "fetchChangeLogs": "branch",
+                "cloneSubmodules": true,
+                "cloneSubmodulesFilter": ["libs/**"]
+            }"#,
+        );
+        assert!(!c.update_pinned_dependencies);
+        assert_eq!(c.fetch_change_logs, "branch");
+        assert!(c.clone_submodules);
+        assert_eq!(c.clone_submodules_filter, vec!["libs/**".to_owned()]);
     }
 
     #[test]
