@@ -54,7 +54,18 @@ one agent `Co-authored-by` trailer.
 
 ## Pre-commit Verification
 
-Before committing Rust-affecting changes, run the strongest applicable checks:
+Do not run Cargo verification commands automatically before or after every
+commit. Run Cargo checks only when the operator explicitly asks for them, or
+when a task instruction names a specific Cargo command.
+
+For documentation-only and parity-tracking changes, inspect the diff and run:
+
+```sh
+git diff --check
+```
+
+When the operator requests Rust verification, use the strongest applicable
+checks for the change:
 
 ```sh
 cargo build --workspace --all-features
@@ -63,15 +74,14 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo nextest run --workspace --all-features
 ```
 
-Also run doctests when public documentation examples exist or changed:
+Also run doctests only when requested and public documentation examples exist or
+changed:
 
 ```sh
 cargo test --doc --workspace --all-features
 ```
 
-If formatting fails, run `cargo fmt --all`, then re-run the verification
-commands. If `cargo nextest` is missing, install `cargo-nextest` or document the
-blocker before committing.
-
-For documentation-only changes before Rust scaffolding exists, inspect the diff
-and run `git diff --check`.
+If the operator requested Cargo checks and formatting fails, run `cargo fmt
+--all`, then re-run the requested verification command. If `cargo nextest` is
+missing during a requested check, document the blocker instead of installing
+tools unless the operator asked you to install them.

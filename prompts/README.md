@@ -27,26 +27,26 @@ claude --version
 Good default command for focused parity work:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, `git diff --check` passes, touched parity detail/root rows are consistent, and `git status --short` is clean; stop after 10 turns if blocked.
+/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, `git diff --check` passes, touched parity detail/root rows are consistent, and `git status --short` is clean. Do not run Cargo checks unless the operator explicitly asks; stop after 10 turns if blocked.
 ```
 
 Good default command for broad implementation work:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed, applicable checks pass or pre-existing failures are documented, and `git status --short` is clean; stop after 10 turns if blocked.
+/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed and `git status --short` is clean. Do not run Cargo checks unless the operator explicitly asks; stop after 10 turns if blocked.
 ```
 
 Use a timed loop only when repetition is the point:
 
 ```text
-/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small parity unit. Commit only if checks pass, then report what changed.
+/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small parity unit. Run `git diff --check`; do not run Cargo checks unless the operator explicitly asks. Commit the completed unit, then report what changed.
 ```
 
 For Codex goal mode, use the same condition text without the Claude Code slash
 command wrapper. Example objective:
 
 ```text
-Continue following prompts/claude-loop-test-parity.md until one coherent parity unit is committed, git diff --check passes, touched parity detail/root rows are consistent, and git status --short is clean; stop after 10 turns if blocked.
+Continue following prompts/claude-loop-test-parity.md until one coherent parity unit is committed, git diff --check passes, touched parity detail/root rows are consistent, and git status --short is clean. Do not run Cargo checks unless the operator explicitly asks; stop after 10 turns if blocked.
 ```
 
 Notes for reliable operation:
@@ -77,7 +77,7 @@ Start Claude Code in `~/Projects/renovate-rust-experiement`, then run a bounded
 goal for one implementation slice:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed, applicable checks pass or pre-existing failures are documented, and `git status --short` is clean; stop after 10 turns if blocked.
+/goal Continue following @renovate-rust/prompts/claude-loop-renovate-rust.md until one coherent implementation slice is committed and `git status --short` is clean. Do not run Cargo checks unless the operator explicitly asks; stop after 10 turns if blocked.
 ```
 
 For periodic maintenance instead, schedule the prompt every 15 minutes:
@@ -141,7 +141,7 @@ Start Claude Code in `~/Projects/renovate-rust-experiement`, then run a bounded
 goal for one parity unit:
 
 ```text
-/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, `git diff --check` passes, touched parity detail/root rows are consistent, and `git status --short` is clean; stop after 10 turns if blocked.
+/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, `git diff --check` passes, touched parity detail/root rows are consistent, and `git status --short` is clean. Do not run Cargo checks unless the operator explicitly asks; stop after 10 turns if blocked.
 ```
 
 For periodic maintenance instead, run:

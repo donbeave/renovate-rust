@@ -43,7 +43,7 @@ The behavioral reference is the upstream Renovate checkout, expected at
 Required toolchain: stable Rust 1.95.0 (managed via `rust-toolchain.toml`)
 and [`cargo-nextest`](https://nexte.st/).
 
-Quality gates (run before committing):
+Useful local checks, when requested by the operator:
 
 ```bash
 cargo build  --workspace --all-features

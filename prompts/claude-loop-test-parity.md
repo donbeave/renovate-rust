@@ -478,7 +478,20 @@ file documents the gap so Phase 3 can implement it later.
 
 ---
 
-## Quality gates before every commit
+## Verification before every commit
+
+Do not run Cargo verification commands automatically before or after every
+commit. Run Cargo checks only when the operator explicitly asks for them, or
+when a task instruction names a specific Cargo command.
+
+For documentation-only and parity-tracking changes, inspect the diff and run:
+
+```sh
+git diff --check
+```
+
+When the operator requests Rust verification, use the strongest applicable
+checks for the change:
 
 ```sh
 cargo build --workspace --all-features
@@ -494,8 +507,8 @@ Also run doctests when public documentation was changed:
 cargo test --doc --workspace --all-features
 ```
 
-Fix all failures before committing. If a failure predates your changes, note it
-in the commit message and skip only that test, not the gate.
+If requested checks fail, fix failures before committing. If a failure predates
+your changes, note it in the commit message or final progress notes.
 
 ---
 
@@ -532,7 +545,9 @@ in the commit message and skip only that test, not the gate.
    after each unit of work.
 
 At every commit:
-- Quality gates pass.
+- `git diff --check` passes for documentation/parity-only changes.
+- Operator-requested Cargo checks pass, or pre-existing/blocking failures are
+  documented.
 - Every Rust test you touched or wrote has `// Ported:` if it maps to a
   TypeScript spec test.
 - `renovate-test-map.md` summary block reflects accurate current counts.

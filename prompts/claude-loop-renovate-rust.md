@@ -148,17 +148,27 @@ Rust best-practice rules:
 - Do not enable broad Clippy `restriction`, `pedantic`, or `nursery` groups wholesale. Select strict lints intentionally.
 - Do not claim performance wins without measurement unless the change removes an obvious allocation, clone, or blocking operation from ordinary execution.
 
-Quality gates:
-- Before committing code changes, run the strongest applicable local checks that fit the iteration:
+Verification:
+- Do not run Cargo verification commands automatically before or after every
+  commit. Run Cargo checks only when the operator explicitly asks for them, or
+  when a task instruction names a specific Cargo command.
+- For documentation-only and parity-tracking changes, inspect the diff and run
+  `git diff --check`.
+- When the operator requests Rust verification, use the strongest applicable
+  local checks that fit the iteration:
   - `cargo build --workspace --all-features`
   - `cargo fmt --all --check`
   - `cargo clippy --workspace --all-targets --all-features -- -D warnings`
   - `cargo nextest run --workspace --all-features`
   - `cargo test --doc --workspace --all-features` when doctests exist or public docs changed
   - `cargo doc --workspace --all-features --no-deps` when public APIs changed
-- Use `cargo-nextest`, not `cargo test`, for unit and integration tests. If `cargo nextest` is missing, install it or document the blocker, then continue with another local task only if installation is impossible.
+- Use `cargo-nextest`, not `cargo test`, for requested unit and integration
+  tests. If `cargo nextest` is missing during a requested check, document the
+  blocker instead of installing tools unless the operator asked you to install
+  them.
 - If the project does not yet have the required Rust scaffolding, create it first, including `Cargo.toml`, a latest-stable Rust toolchain policy, rustfmt/clippy/nextest configuration where useful, and CI-ready commands.
-- Never commit failing formatting, Clippy, build, or tests unless the repo was already failing before your changes and the failure is documented in the commit message and progress notes.
+- Never claim formatting, Clippy, build, or tests passed unless you ran the
+  relevant command in this turn.
 
 Parity tracking files:
 
@@ -229,14 +239,14 @@ Parity workflow:
    Create any file that does not yet exist.
 6. Write Rust tests that encode Renovate-compatible behavior. When practical, translate Renovate test cases into Rust tests using original Rust test code and local fixtures.
 7. Implement the behavior in idiomatic Rust.
-8. Run checks, fix failures, and tighten the implementation.
+8. Run only operator-requested checks, fix failures, and tighten the implementation.
 9. Commit the completed slice with a concise message.
 10. After committing, verify that all parity tracking files reflect the new slice
     (source map status updated, test map rows added, ledger row added).
 
 Iteration sizing:
 - Each 15 minute loop should leave the repository better than it started.
-- Each loop must build something concrete, add or update tests for that behavior, run formatting, run Clippy, and fix any issues found before committing.
+- Each loop must build something concrete and add or update tests for that behavior when appropriate. Run formatting, Clippy, build, or test commands only when the operator explicitly asks for them.
 - Prefer a complete vertical slice over broad partial scaffolding, except for the initial loop where creating the Rust workspace, formatting, Clippy, and nextest foundation is the highest-value slice.
 - Good slices include:
   - CLI flag or config compatibility
@@ -302,7 +312,9 @@ Autonomy rules:
 - If blocked, document the blocker in the commit message or a comment in the relevant parity file and choose another local slice.
 
 Commit rules:
-- Commit at the end of each successful loop when there are meaningful changes and checks pass.
+- Commit at the end of each successful loop when there are meaningful changes.
+  If checks were requested, commit only after they pass or after documenting any
+  pre-existing/blocking failure.
 - Stage only files changed for this loop.
 - Use concise commit messages such as:
   - `build: add Rust workspace scaffolding`
