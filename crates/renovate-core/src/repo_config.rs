@@ -414,6 +414,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `groupName`.
     pub group_name: Option<String>,
 
+    /// Config used when `groupName` is enabled.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `group`.
+    pub group: GroupConfig,
+
     /// When `true`, major and minor/patch updates are split into separate PRs.
     /// Default: `true`.
     ///
@@ -1006,6 +1011,35 @@ impl Default for LockFileMaintenanceConfig {
             schedule: default_lock_file_schedule(),
             group_name: None,
             pr_body_definitions: default_lock_file_pr_body_definitions(),
+        }
+    }
+}
+
+fn default_group_branch_topic() -> String {
+    "{{{groupSlug}}}".to_owned()
+}
+
+fn default_group_commit_message_topic() -> String {
+    "{{{groupName}}}".to_owned()
+}
+
+/// Nested `group` configuration applied when grouped updates are enabled.
+///
+/// Renovate reference: `lib/config/options/index.ts` — `group`.
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GroupConfig {
+    #[serde(default = "default_group_branch_topic")]
+    pub branch_topic: String,
+    #[serde(default = "default_group_commit_message_topic")]
+    pub commit_message_topic: String,
+}
+
+impl Default for GroupConfig {
+    fn default() -> Self {
+        Self {
+            branch_topic: default_group_branch_topic(),
+            commit_message_topic: default_group_commit_message_topic(),
         }
     }
 }
@@ -4647,6 +4681,8 @@ impl RepoConfig {
             minimum_group_size: u32,
             #[serde(rename = "groupName")]
             group_name: Option<String>,
+            #[serde(default)]
+            group: GroupConfig,
             #[serde(rename = "separateMajorMinor", default = "default_true")]
             separate_major_minor: bool,
             /// Deprecated: separateMajorReleases is an alias for separateMajorMinor.
@@ -5831,6 +5867,7 @@ impl RepoConfig {
                 }
             }),
             group_name: raw.group_name,
+            group: raw.group,
             // group:all preset implies separateMajorMinor: false.
             // Deprecated separateMajorReleases is an alias for separateMajorMinor.
             // Explicit user config overrides the preset (but default true from serde means
@@ -6653,6 +6690,7 @@ impl Default for RepoConfig {
             branch_concurrent_limit: None,
             minimum_group_size: 1,
             group_name: None,
+            group: GroupConfig::default(),
             separate_major_minor: true,
             separate_multiple_major: false,
             max_major_increment: 500,
@@ -10394,6 +10432,13 @@ mod tests {
     fn group_name_parsed_at_repo_level() {
         let c = RepoConfig::parse(r#"{"groupName": "all-deps"}"#);
         assert_eq!(c.group_name.as_deref(), Some("all-deps"));
+    }
+
+    #[test]
+    fn group_config_parsed_with_defaults() {
+        let c = RepoConfig::parse(r#"{"group": {"commitMessageTopic": "all {{groupName}}"}}"#);
+        assert_eq!(c.group.branch_topic, "{{{groupSlug}}}");
+        assert_eq!(c.group.commit_message_topic, "all {{groupName}}");
     }
 
     #[test]
