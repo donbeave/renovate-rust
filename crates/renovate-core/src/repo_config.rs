@@ -192,6 +192,11 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `ignoreTests`.
     pub ignore_tests: bool,
 
+    /// Whether Renovate prunes update branches after automerge.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `pruneBranchAfterAutomerge`.
+    pub prune_branch_after_automerge: bool,
+
     /// Labels to add to Renovate PRs (must exist in the repository).
     /// Renovate reference: `lib/config/options/index.ts` — `labels`.
     pub labels: Vec<String>,
@@ -478,6 +483,12 @@ pub struct RepoConfig {
     /// Renovate reference: `lib/config/options/index.ts` — `dependencyDashboard`.
     pub dependency_dashboard: bool,
 
+    /// Whether the Dependency Dashboard lists OSV vulnerability summaries.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` —
+    /// `dependencyDashboardOSVVulnerabilitySummary`.
+    pub dependency_dashboard_osv_vulnerability_summary: String,
+
     /// When `true`, all updates require approval via the Dependency Dashboard
     /// before Renovate creates the PR.  Default: `false`.
     ///
@@ -489,6 +500,11 @@ pub struct RepoConfig {
     ///
     /// Renovate reference: `lib/config/options/index.ts` — `configMigration`.
     pub config_migration: bool,
+
+    /// Whether Renovate uses vulnerability alerts from `osv.dev`.
+    ///
+    /// Renovate reference: `lib/config/options/index.ts` — `osvVulnerabilityAlerts`.
+    pub osv_vulnerability_alerts: bool,
 
     // ── Scheduling behavior ───────────────────────────────────────────────────
     /// When `false`, Renovate will not update branches that are outside the
@@ -4129,6 +4145,8 @@ impl RepoConfig {
             automerge_comment: String,
             #[serde(rename = "ignoreTests", default)]
             ignore_tests: bool,
+            #[serde(rename = "pruneBranchAfterAutomerge", default = "default_true")]
+            prune_branch_after_automerge: bool,
             #[serde(default)]
             labels: Vec<String>,
             #[serde(rename = "addLabels", default)]
@@ -4289,10 +4307,17 @@ impl RepoConfig {
             post_update_options: Vec<String>,
             #[serde(rename = "dependencyDashboard", default)]
             dependency_dashboard: bool,
+            #[serde(
+                rename = "dependencyDashboardOSVVulnerabilitySummary",
+                default = "default_none_string"
+            )]
+            dependency_dashboard_osv_vulnerability_summary: String,
             #[serde(rename = "dependencyDashboardApproval", default)]
             dependency_dashboard_approval: bool,
             #[serde(rename = "configMigration", default)]
             config_migration: bool,
+            #[serde(rename = "osvVulnerabilityAlerts", default)]
+            osv_vulnerability_alerts: bool,
             #[serde(rename = "updateNotScheduled", default = "default_true")]
             update_not_scheduled: bool,
             #[serde(rename = "commitMessageAction", default = "default_commit_action")]
@@ -4373,6 +4398,10 @@ impl RepoConfig {
 
         fn default_automerge_comment() -> String {
             "automergeComment".to_owned()
+        }
+
+        fn default_none_string() -> String {
+            "none".to_owned()
         }
 
         fn default_true() -> bool {
@@ -5006,6 +5035,7 @@ impl RepoConfig {
             automerge_strategy: raw.automerge_strategy,
             automerge_comment: raw.automerge_comment,
             ignore_tests: raw.ignore_tests,
+            prune_branch_after_automerge: raw.prune_branch_after_automerge,
             labels: {
                 let mut l = raw.labels;
                 for pl in param_labels {
@@ -5207,6 +5237,8 @@ impl RepoConfig {
                     && !effective_extends.iter().any(|p| {
                         p == ":disableDependencyDashboard" || p == "disableDependencyDashboard"
                     }),
+            dependency_dashboard_osv_vulnerability_summary: raw
+                .dependency_dashboard_osv_vulnerability_summary,
             dependency_dashboard_approval: raw.dependency_dashboard_approval
                 || effective_extends.iter().any(|p| {
                     p == ":dependencyDashboardApproval" || p == "dependencyDashboardApproval"
@@ -5215,6 +5247,7 @@ impl RepoConfig {
                 || effective_extends
                     .iter()
                     .any(|p| p == ":configMigration" || p == "configMigration"),
+            osv_vulnerability_alerts: raw.osv_vulnerability_alerts,
             update_not_scheduled: preset_update_not_scheduled.unwrap_or(raw.update_not_scheduled),
             commit_message_action: raw.commit_message_action,
             commit_message_prefix: raw.commit_message_prefix,
@@ -5812,6 +5845,7 @@ impl Default for RepoConfig {
             automerge_strategy: "auto".to_owned(),
             automerge_comment: "automergeComment".to_owned(),
             ignore_tests: false,
+            prune_branch_after_automerge: true,
             labels: Vec::new(),
             add_labels: Vec::new(),
             assignees: Vec::new(),
@@ -5862,8 +5896,10 @@ impl Default for RepoConfig {
             rollback_prs: false,
             post_update_options: Vec::new(),
             dependency_dashboard: false,
+            dependency_dashboard_osv_vulnerability_summary: "none".to_owned(),
             dependency_dashboard_approval: false,
             config_migration: false,
+            osv_vulnerability_alerts: false,
             update_not_scheduled: true,
             commit_message_action: "Update".to_owned(),
             commit_message_prefix: None,
@@ -9075,6 +9111,20 @@ mod tests {
         assert!(c.ignore_tests);
         assert!(c.bb_auto_resolve_pr_tasks);
         assert!(!c.bb_use_default_reviewers);
+    }
+
+    #[test]
+    fn security_cleanup_options_parsed() {
+        let c = RepoConfig::parse(
+            r#"{
+                "dependencyDashboardOSVVulnerabilitySummary": "all",
+                "osvVulnerabilityAlerts": true,
+                "pruneBranchAfterAutomerge": false
+            }"#,
+        );
+        assert_eq!(c.dependency_dashboard_osv_vulnerability_summary, "all");
+        assert!(c.osv_vulnerability_alerts);
+        assert!(!c.prune_branch_after_automerge);
     }
 
     #[test]
