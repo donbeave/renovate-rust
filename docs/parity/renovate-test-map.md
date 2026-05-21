@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2962 / 7812 actionable tests ported (38%) — updated 2026-05-21
+**Overall progress:** 2962 / 7605 actionable tests ported (39%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -784,25 +784,25 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/github/tags.spec.ts` | Not done | [details](lib/util/github/tags.spec.ts.md) |
 | `lib/util/github/url.spec.ts` | Done | [details](lib/util/github/url.spec.ts.md) |
 | `lib/util/http/auth.spec.ts` | Done | [details](lib/util/http/auth.spec.ts.md) |
-| `lib/util/http/bitbucket-server.spec.ts` | Not done | [details](lib/util/http/bitbucket-server.spec.ts.md) |
-| `lib/util/http/bitbucket.spec.ts` | Not done | [details](lib/util/http/bitbucket.spec.ts.md) |
+| `lib/util/http/bitbucket-server.spec.ts` | Done | [details](lib/util/http/bitbucket-server.spec.ts.md) |
+| `lib/util/http/bitbucket.spec.ts` | Done | [details](lib/util/http/bitbucket.spec.ts.md) |
 | `lib/util/http/cache/memory-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/memory-http-cache-provider.spec.ts.md) |
-| `lib/util/http/cache/package-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/package-http-cache-provider.spec.ts.md) |
-| `lib/util/http/cache/repository-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/repository-http-cache-provider.spec.ts.md) |
-| `lib/util/http/forgejo.spec.ts` | Not done | [details](lib/util/http/forgejo.spec.ts.md) |
-| `lib/util/http/gerrit.spec.ts` | Not done | [details](lib/util/http/gerrit.spec.ts.md) |
-| `lib/util/http/gitea.spec.ts` | Not done | [details](lib/util/http/gitea.spec.ts.md) |
-| `lib/util/http/github.spec.ts` | Not done | [details](lib/util/http/github.spec.ts.md) |
-| `lib/util/http/gitlab.spec.ts` | Not done | [details](lib/util/http/gitlab.spec.ts.md) |
+| `lib/util/http/cache/package-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/package-http-cache-provider.spec.ts.md) |
+| `lib/util/http/cache/repository-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/repository-http-cache-provider.spec.ts.md) |
+| `lib/util/http/forgejo.spec.ts` | Done | [details](lib/util/http/forgejo.spec.ts.md) |
+| `lib/util/http/gerrit.spec.ts` | Done | [details](lib/util/http/gerrit.spec.ts.md) |
+| `lib/util/http/gitea.spec.ts` | Done | [details](lib/util/http/gitea.spec.ts.md) |
+| `lib/util/http/github.spec.ts` | Done | [details](lib/util/http/github.spec.ts.md) |
+| `lib/util/http/gitlab.spec.ts` | Done | [details](lib/util/http/gitlab.spec.ts.md) |
 | `lib/util/http/got.spec.ts` | Done | [details](lib/util/http/got.spec.ts.md) |
 | `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
-| `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
-| `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
+| `lib/util/http/host-rules.spec.ts` | Done | [details](lib/util/http/host-rules.spec.ts.md) |
+| `lib/util/http/index.spec.ts` | Done | [details](lib/util/http/index.spec.ts.md) |
 | `lib/util/http/jira.spec.ts` | Done | [details](lib/util/http/jira.spec.ts.md) |
 | `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
-| `lib/util/http/rate-limit.spec.ts` | Not done | [details](lib/util/http/rate-limit.spec.ts.md) |
+| `lib/util/http/rate-limit.spec.ts` | Done | [details](lib/util/http/rate-limit.spec.ts.md) |
 | `lib/util/http/retry-after.spec.ts` | Done | [details](lib/util/http/retry-after.spec.ts.md) |
-| `lib/util/http/scm-manager.spec.ts` | Not done | [details](lib/util/http/scm-manager.spec.ts.md) |
+| `lib/util/http/scm-manager.spec.ts` | Done | [details](lib/util/http/scm-manager.spec.ts.md) |
 | `lib/util/http/throttle.spec.ts` | Done | [details](lib/util/http/throttle.spec.ts.md) |
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
 | `lib/util/json-writer/editor-config.spec.ts` | Not done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
