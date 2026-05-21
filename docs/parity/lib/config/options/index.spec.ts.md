@@ -5,7 +5,7 @@
 ## `lib/config/options/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/options/index.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 9 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `config/options/index`
 
@@ -29,5 +29,7 @@
 | `${option.name}'s reference to ${prop.property} is valid` | 77 | not-applicable | — | — | TypeScript option metadata registry; Rust does not expose requiredIf sibling property metadata tables. |
 | `${option.name}'s value for ${prop.property} is valid, according to allowedValues` | 84 | not-applicable | — | — | TypeScript option metadata registry; Rust does not expose requiredIf sibling property metadata tables. |
 
+| ${option.name}: \ | 76 | not-applicable | — | — | Renovate's internal config option schema validation (managers list, platforms list, option types) is not exposed as a Rust API. |
+| ${option.name} should be of type string or array of strings | 93 | not-applicable | — | — | Renovate's internal config option schema validation (managers list, platforms list, option types) is not exposed as a Rust API. |
 ---
 

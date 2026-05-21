@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/rpm/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rpm/index.spec.ts
-**Total tests:** 22 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 28 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `modules/datasource/rpm/index`
 
@@ -34,5 +34,11 @@
 | throws an error if getPrimaryGzipUrl fails | 466 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
 | throws an error if getReleasesByPackageName fails | 479 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
 
+| rethrows non-Error fetch failures | 276 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| reuses the extracted primary.xml file across package lookups | 292 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| re-downloads primary.xml if the freshness check fails | 336 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| throws if extracting primary.xml fails without an existing cache file | 380 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| keeps the previous extracted primary.xml if a refresh extract fails | 414 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
+| replaces the extracted primary.xml after a successful refresh | 471 | not-applicable | — | — | RPM/YUM repository metadata datasource lookup, repomd.xml/primary.xml.gz parsing, and checksum handling are not implemented in Rust. |
 ---
 

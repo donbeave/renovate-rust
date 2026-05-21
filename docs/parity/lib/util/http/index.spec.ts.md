@@ -5,7 +5,7 @@
 ## `lib/util/http/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/index.spec.ts
-**Total tests:** 45 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 52 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/http/index`
 
@@ -107,5 +107,12 @@
 | throws on schema validation failure | 737 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
 | throws on invalid toml | 752 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
 
+| sets default user-agent | 36 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
+| uses userAgent when set as a plain string | 46 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
+| interpolates {{renovateVersion}} in a custom userAgent template | 55 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
+| renders unknown template variables as empty string | 68 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
+| supports Handlebars helpers in userAgent template | 77 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
+| supports conditional Handlebars syntax in userAgent template | 88 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
+| preserves existing headers | 100 | not-applicable | — | — | tests Http class (got-based) with httpMock; Rust uses reqwest |
 ---
 

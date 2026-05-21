@@ -5,7 +5,7 @@
 ## `lib/modules/manager/swift/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/artifacts.spec.ts
-**Total tests:** 27 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 31 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `tests`
 
@@ -39,5 +39,9 @@
 | if newValue is present, but newVersion is absent, no update is performed | 698 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 | newValue is used to look up digest | 728 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 
+| does not write | 202 | not-applicable | — | — | Swift Package Manager artifacts pinning and digest resolution are not implemented in Rust. |
+| matches pin when Package.resolved uses SSH URL | 437 | not-applicable | — | — | Swift Package Manager artifacts pinning and digest resolution are not implemented in Rust. |
+| matches pin with git-tags datasource using SSH URL as depName | 465 | not-applicable | — | — | Swift Package Manager artifacts pinning and digest resolution are not implemented in Rust. |
+| matches pin when Package.resolved uses ssh:// URL | 489 | not-applicable | — | — | Swift Package Manager artifacts pinning and digest resolution are not implemented in Rust. |
 ---
 

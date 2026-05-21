@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/sbt-package/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/sbt-package/index.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 13 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `modules/datasource/sbt-package/index`
 
@@ -23,5 +23,7 @@
 | falls back to Maven for orgarization root folder non-listable repositories | 243 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
 | extracts URL from Maven POM file | 287 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
 
+| continues when parseUrl returns null for packageRootUrl | 284 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
+| skips pkgUrl when parseUrl returns null for it | 322 | not-applicable | — | — | SBT package datasource repository traversal, Scala-version mapping, and Maven fallback lookup are not implemented in Rust. |
 ---
 

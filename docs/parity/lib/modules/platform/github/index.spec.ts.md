@@ -5,7 +5,7 @@
 ## `lib/modules/platform/github/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/github/index.spec.ts
-**Total tests:** 201 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 206 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `initPlatform()`
 
@@ -408,5 +408,10 @@
 | aborts if rebase fails due to non-422 | 5456 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 | aborts if commit SHA doesn't exist | 5485 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 
+| should throw if endpoint is invalid URL | 70 | not-applicable | — | — | GitHub platform API interactions are not implemented in Rust. |
+| should pass commit message as commitHeadline and commitBody for squash merge | 4144 | not-applicable | — | — | GitHub platform API interactions are not implemented in Rust. |
+| should pass commit message as commitHeadline and commitBody for merge commit | 4175 | not-applicable | — | — | GitHub platform API interactions are not implemented in Rust. |
+| should pass multi-line commit message body for squash merge | 4209 | not-applicable | — | — | GitHub platform API interactions are not implemented in Rust. |
+| should not pass commit message headline/body for rebase merge | 4242 | not-applicable | — | — | GitHub platform API interactions are not implemented in Rust. |
 ---
 

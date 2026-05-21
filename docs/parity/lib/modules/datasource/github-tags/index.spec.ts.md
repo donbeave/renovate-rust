@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/github-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/github-tags/index.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 12 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `modules/datasource/github-tags/index › getDigest`
 
@@ -25,5 +25,9 @@
 |---|---|---|---|---|---|
 | returns tags | 120 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
 
+| if it is newer than tag timestamp | 183 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| keeps tag timestamp when release timestamp is older | 212 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| keeps tag timestamp when release timestamp is equal | 241 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
+| keeps tag timestamp when no corresponding release exists | 270 | not-applicable | — | — | Renovate's GitHub tags release-list and digest APIs are not implemented in Rust; Rust only exposes latest tag lookup for update summaries. |
 ---
 

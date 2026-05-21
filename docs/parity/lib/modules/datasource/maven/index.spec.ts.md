@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/maven/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/maven/index.spec.ts
-**Total tests:** 40 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 46 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `modules/datasource/maven/index`
 
@@ -52,5 +52,11 @@
 | returns null for NoSuchKey response | 893 | not-applicable | — | — | Renovate's Maven S3 timestamp object handling is not implemented in Rust. |
 | returns original value for any other error | 911 | not-applicable | — | — | Renovate's Maven S3 timestamp object error fallback is not implemented in Rust. |
 
+| when using primary registry URL | 136 | not-applicable | — | — | Renovate's Maven datasource metadata fetching and scm/vcs enrichment are not exposed as a Rust API. |
+| when using mirror URL | 145 | not-applicable | — | — | Renovate's Maven datasource metadata fetching and scm/vcs enrichment are not exposed as a Rust API. |
+| when using primary registry URL | 156 | not-applicable | — | — | Renovate's Maven datasource metadata fetching and scm/vcs enrichment are not exposed as a Rust API. |
+| when using mirror URL | 165 | not-applicable | — | — | Renovate's Maven datasource metadata fetching and scm/vcs enrichment are not exposed as a Rust API. |
+| fetches Gradle plugins from non-Maven-Central registries | 176 | not-applicable | — | — | Renovate's Maven datasource metadata fetching and scm/vcs enrichment are not exposed as a Rust API. |
+| merges releases from multiple registries | 304 | not-applicable | — | — | Renovate's Maven datasource metadata fetching and scm/vcs enrichment are not exposed as a Rust API. |
 ---
 
