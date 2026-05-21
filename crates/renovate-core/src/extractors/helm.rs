@@ -25,14 +25,16 @@
 //! | Form | Treatment |
 //! |---|---|
 //! | `https://...` | Actionable — direct Helm repo URL |
-//! | `stable` | Actionable — resolved to `https://charts.helm.sh/stable` |
-//! | `oci://...` | Skipped — `OciRegistry` |
-//! | `@alias` | Skipped — `UnresolvableAlias` |
-//! | *(absent)* | Skipped — `NoRepository` |
+//! | `oci://...` | Docker datasource — OCI registry |
+//! | `@alias` / `alias:name` | Resolved from registryAliases or `placeholder-url` |
+//! | `file://...` | Skipped — `local-dependency` |
+//! | *(absent)* | Skipped — `no-repository` |
 
+use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
+use serde::Deserialize;
 
 /// Alias for the Helm stable repository.
 pub const STABLE_REPO: &str = "https://charts.helm.sh/stable";
@@ -54,6 +56,192 @@ pub enum HelmSkipReason {
     UnsupportedChartType,
     /// Registry URL is unknown.
     UnknownRegistry,
+}
+
+// ── YAML types for extract_package_file ──────────────────────────────────────
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ChartYaml {
+    api_version: Option<String>,
+    name: Option<String>,
+    version: Option<String>,
+    #[serde(default)]
+    dependencies: serde_yaml::Value,
+}
+
+#[derive(Debug, Deserialize)]
+struct ChartDep {
+    name: Option<String>,
+    version: Option<String>,
+    #[serde(default)]
+    repository: Option<String>,
+}
+
+/// Result of `extract_package_file` — mirrors `PackageFileContent` for helmv3.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HelmChartFile {
+    /// Extracted dependencies (all, including skipped).
+    pub deps: Vec<HelmExtractedDep>,
+    /// The chart's own `version:` field.
+    pub package_file_version: String,
+}
+
+/// Extract dependencies from a `Chart.yaml` file (Helm v3 only, apiVersion v2).
+///
+/// Mirrors `lib/modules/manager/helmv3/extract.ts` `extractPackageFile`.
+/// Returns `None` when the file is empty, unparseable, missing required fields,
+/// uses an unsupported apiVersion, or has no valid dependencies.
+pub fn extract_package_file(
+    content: &str,
+    _file_name: &str,
+    registry_aliases: &HashMap<String, String>,
+) -> Option<HelmChartFile> {
+    if content.trim().is_empty() {
+        return None;
+    }
+
+    let chart: ChartYaml = serde_yaml::from_str(content).ok()?;
+
+    if chart.api_version.as_deref() != Some("v2") {
+        return None;
+    }
+    if chart.name.as_deref().map(str::is_empty).unwrap_or(true)
+        || chart.version.as_deref().map(str::is_empty).unwrap_or(true)
+    {
+        return None;
+    }
+
+    let package_file_version = chart.version.unwrap();
+
+    let raw_deps: Vec<ChartDep> = match &chart.dependencies {
+        serde_yaml::Value::Sequence(seq) => {
+            serde_yaml::from_value(serde_yaml::Value::Sequence(seq.clone())).unwrap_or_default()
+        }
+        serde_yaml::Value::Null => return None,
+        _ => return None,
+    };
+
+    if raw_deps.is_empty() {
+        return None;
+    }
+
+    // Filter to deps that have both name and version.
+    let valid_raw: Vec<&ChartDep> = raw_deps
+        .iter()
+        .filter(|d| {
+            d.name.as_deref().map(|s| !s.is_empty()).unwrap_or(false)
+                && d.version.as_deref().map(|s| !s.is_empty()).unwrap_or(false)
+        })
+        .collect();
+
+    if valid_raw.is_empty() {
+        return None;
+    }
+
+    let deps: Vec<HelmExtractedDep> = valid_raw
+        .iter()
+        .map(|dep| {
+            let name = dep.name.clone().unwrap_or_default();
+            let current_value = dep.version.clone().unwrap_or_default();
+            let repo = dep.repository.as_deref().unwrap_or("");
+
+            if repo.is_empty() {
+                return HelmExtractedDep {
+                    name,
+                    current_value,
+                    repository: String::new(),
+                    skip_reason: Some(HelmSkipReason::NoRepository),
+                    datasource: None,
+                    package_name: None,
+                };
+            }
+
+            // Resolve aliases first.
+            let resolved = if is_alias(Some(repo)) {
+                resolve_alias(Some(repo), registry_aliases)
+            } else {
+                Some(repo.to_owned())
+            };
+
+            let Some(resolved_repo) = resolved else {
+                // Unresolvable alias → placeholder-url (Renovate uses 'placeholder-url').
+                return HelmExtractedDep {
+                    name,
+                    current_value,
+                    repository: String::new(),
+                    skip_reason: Some(HelmSkipReason::UnresolvableAlias),
+                    datasource: None,
+                    package_name: None,
+                };
+            };
+
+            parse_repository_dep(name, current_value, &resolved_repo)
+        })
+        .collect();
+
+    Some(HelmChartFile {
+        deps,
+        package_file_version,
+    })
+}
+
+/// Parse a resolved repository URL into a dep.
+///
+/// Mirrors `lib/modules/manager/helmv3/utils.ts` `parseRepository`.
+fn parse_repository_dep(
+    name: String,
+    current_value: String,
+    repository_url: &str,
+) -> HelmExtractedDep {
+    if repository_url.starts_with("oci://") {
+        let without_prefix = repository_url.trim_start_matches("oci://");
+        let package_name = format!("{without_prefix}/{name}");
+        return HelmExtractedDep {
+            name,
+            current_value,
+            repository: repository_url.to_owned(),
+            skip_reason: None,
+            datasource: Some("docker".to_owned()),
+            package_name: Some(package_name),
+        };
+    }
+
+    if repository_url.starts_with("file:") {
+        return HelmExtractedDep {
+            name,
+            current_value,
+            repository: repository_url.to_owned(),
+            skip_reason: Some(HelmSkipReason::LocalChart),
+            datasource: None,
+            package_name: None,
+        };
+    }
+
+    // Validate URL is parseable and has http/https scheme.
+    let is_valid_url = repository_url.starts_with("https://")
+        || repository_url.starts_with("http://");
+
+    if !is_valid_url {
+        // Non-parseable / unrecognized scheme → invalid-url.
+        return HelmExtractedDep {
+            name,
+            current_value,
+            repository: repository_url.to_owned(),
+            skip_reason: Some(HelmSkipReason::UnknownRegistry),
+            datasource: None,
+            package_name: None,
+        };
+    }
+
+    HelmExtractedDep {
+        name,
+        current_value,
+        repository: repository_url.to_owned(),
+        skip_reason: None,
+        datasource: None,
+        package_name: None,
+    }
 }
 
 /// A single extracted Helm chart dependency.
@@ -751,5 +939,114 @@ dependencies:
     #[test]
     fn helm_is_oci_registry_undefined_returns_false() {
         assert!(!is_oci_registry(None));
+    }
+
+    // ── helmv3/extract.spec.ts tests ───────────────────────────────────────────
+
+    fn stable_aliases() -> HashMap<String, String> {
+        let mut m = HashMap::new();
+        m.insert("stable".into(), "https://charts.helm.sh/stable".into());
+        m
+    }
+
+    // Ported: "skips invalid registry urls" — modules/manager/helmv3/extract.spec.ts line 16
+    #[test]
+    fn extract_skips_invalid_registry_urls() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: '@placeholder'\n  - name: postgresql\n    version: 0.8.1\n    repository: nope\n  - name: broken\n    version: 0.8.1\n";
+        let result = extract_package_file(content, "Chart.yaml", &stable_aliases()).unwrap();
+        assert!(result.deps.iter().all(|d| d.skip_reason.is_some()));
+    }
+
+    // Ported: "parses simple Chart.yaml correctly" — modules/manager/helmv3/extract.spec.ts line 40
+    #[test]
+    fn extract_parses_simple_chart_yaml() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: https://charts.helm.sh/stable\n  - name: postgresql\n    version: 0.8.1\n    repository: https://charts.helm.sh/stable\n";
+        let result = extract_package_file(content, "Chart.yaml", &stable_aliases()).unwrap();
+        assert_eq!(result.deps.len(), 2);
+        assert_eq!(result.deps[0].name, "redis");
+        assert_eq!(result.deps[0].current_value, "0.9.0");
+        assert!(result.deps[0].skip_reason.is_none());
+        assert_eq!(result.deps[1].name, "postgresql");
+        assert_eq!(result.deps[1].current_value, "0.8.1");
+    }
+
+    // Ported: "extract correctly oci references" — modules/manager/helmv3/extract.spec.ts line 67
+    #[test]
+    fn extract_oci_references() {
+        let content = "apiVersion: v2\nname: app2\nversion: 0.1.0\ndependencies:\n  - name: library\n    version: 0.1.0\n    repository: oci://ghcr.io/ankitabhopatkar13\n  - name: postgresql\n    version: 0.8.1\n    repository: https://charts.helm.sh/stable\n";
+        let result = extract_package_file(content, "Chart.yaml", &stable_aliases()).unwrap();
+        assert_eq!(result.deps[0].name, "library");
+        assert_eq!(result.deps[0].datasource.as_deref(), Some("docker"));
+        assert_eq!(result.deps[1].name, "postgresql");
+        assert!(result.deps[1].datasource.is_none());
+    }
+
+    // Ported: "resolves aliased registry urls" — modules/manager/helmv3/extract.spec.ts line 100
+    #[test]
+    fn extract_resolves_aliased_registry_urls() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: '@placeholder'\n  - name: example\n    version: 1.0.0\n    repository: alias:longalias\n  - name: oci-example\n    version: 2.2.0\n    repository: alias:ociRegistry\n";
+        let mut aliases = HashMap::new();
+        aliases.insert("placeholder".into(), "https://my-registry.gcr.io/".into());
+        aliases.insert("longalias".into(), "https://registry.example.com/".into());
+        aliases.insert("ociRegistry".into(), "oci://quay.example.com/organization".into());
+        let result = extract_package_file(content, "Chart.yaml", &aliases).unwrap();
+        assert!(result.deps.iter().all(|d| d.skip_reason.is_none()));
+    }
+
+    // Ported: "doesn't fail if Chart.yaml is invalid" — modules/manager/helmv3/extract.spec.ts line 131
+    #[test]
+    fn extract_returns_none_for_invalid_chart_yaml() {
+        let content = "Invalid Chart.yaml content.\narr:\n[\n";
+        assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
+    }
+
+    // Ported: "skips local dependencies" — modules/manager/helmv3/extract.spec.ts line 142
+    #[test]
+    fn extract_skips_local_dependencies() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: https://charts.helm.sh/stable\n  - name: postgresql\n    version: 0.8.1\n    repository: file:///some/local/path/\n";
+        let result = extract_package_file(content, "Chart.yaml", &stable_aliases()).unwrap();
+        assert!(result.deps[0].skip_reason.is_none());
+        assert_eq!(result.deps[1].skip_reason, Some(HelmSkipReason::LocalChart));
+    }
+
+    // Ported: "returns null if no dependencies key" — modules/manager/helmv3/extract.spec.ts line 167
+    #[test]
+    fn extract_returns_none_if_no_dependencies_key() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\nhello: world\n";
+        assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
+    }
+
+    // Ported: "returns null if dependencies are an empty list" — modules/manager/helmv3/extract.spec.ts line 183
+    #[test]
+    fn extract_returns_none_if_dependencies_empty_list() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies: []\n";
+        assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
+    }
+
+    // Ported: "returns null if dependencies key is invalid" — modules/manager/helmv3/extract.spec.ts line 199
+    #[test]
+    fn extract_returns_none_if_dependencies_invalid() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  Invalid dependencies content.\n  [\n";
+        assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
+    }
+
+    // Ported: "returns null if Chart.yaml is empty" — modules/manager/helmv3/extract.spec.ts line 215
+    #[test]
+    fn extract_returns_none_if_chart_yaml_empty() {
+        assert!(extract_package_file("", "Chart.yaml", &stable_aliases()).is_none());
+    }
+
+    // Ported: "returns null if Chart.yaml uses an unsupported apiVersion" — modules/manager/helmv3/extract.spec.ts line 222
+    #[test]
+    fn extract_returns_none_if_unsupported_api_version() {
+        let content = "apiVersion: v1\nname: example\nversion: 0.1.0\n";
+        assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
+    }
+
+    // Ported: "returns null if name and version are missing for all dependencies" — modules/manager/helmv3/extract.spec.ts line 235
+    #[test]
+    fn extract_returns_none_if_all_deps_missing_name_version() {
+        let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - repository: test\n  - repository: test\n    alias: test\n";
+        assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
     }
 }
