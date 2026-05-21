@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2933 / 7965 actionable tests ported (37%) — updated 2026-05-21
+**Overall progress:** 2941 / 7827 actionable tests ported (38%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -734,7 +734,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/scm-manager/mapper.spec.ts` | Done | [details](lib/modules/platform/scm-manager/mapper.spec.ts.md) |
 | `lib/modules/platform/scm-manager/scm-manager-helper.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/scm-manager-helper.spec.ts.md) |
 | `lib/modules/platform/scm-manager/utils.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/utils.spec.ts.md) |
-| `lib/modules/platform/utils/pr-body.spec.ts` | Not done | [details](lib/modules/platform/utils/pr-body.spec.ts.md) |
+| `lib/modules/platform/utils/pr-body.spec.ts` | Done | [details](lib/modules/platform/utils/pr-body.spec.ts.md) |
 | `lib/modules/platform/utils/read-only-issue-body.spec.ts` | Not done | [details](lib/modules/platform/utils/read-only-issue-body.spec.ts.md) |
 | `lib/util/cache/memory/index.spec.ts` | Not done | [details](lib/util/cache/memory/index.spec.ts.md) |
 | `lib/util/cache/package/backend.spec.ts` | Not done | [details](lib/util/cache/package/backend.spec.ts.md) |
@@ -749,13 +749,13 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/repository/impl/local.spec.ts` | Not done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
 | `lib/util/cache/repository/impl/s3.spec.ts` | Not done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
 | `lib/util/cache/repository/index.spec.ts` | Not done | [details](lib/util/cache/repository/index.spec.ts.md) |
-| `lib/util/exec/common.spec.ts` | Not done | [details](lib/util/exec/common.spec.ts.md) |
-| `lib/util/exec/containerbase.spec.ts` | Not done | [details](lib/util/exec/containerbase.spec.ts.md) |
-| `lib/util/exec/docker/index.spec.ts` | Not done | [details](lib/util/exec/docker/index.spec.ts.md) |
-| `lib/util/exec/env.spec.ts` | Not done | [details](lib/util/exec/env.spec.ts.md) |
-| `lib/util/exec/hermit.spec.ts` | Not done | [details](lib/util/exec/hermit.spec.ts.md) |
-| `lib/util/exec/index.spec.ts` | Not done | [details](lib/util/exec/index.spec.ts.md) |
-| `lib/util/exec/utils.spec.ts` | Not done | [details](lib/util/exec/utils.spec.ts.md) |
+| `lib/util/exec/common.spec.ts` | Done | [details](lib/util/exec/common.spec.ts.md) |
+| `lib/util/exec/containerbase.spec.ts` | Done | [details](lib/util/exec/containerbase.spec.ts.md) |
+| `lib/util/exec/docker/index.spec.ts` | Done | [details](lib/util/exec/docker/index.spec.ts.md) |
+| `lib/util/exec/env.spec.ts` | Done | [details](lib/util/exec/env.spec.ts.md) |
+| `lib/util/exec/hermit.spec.ts` | Done | [details](lib/util/exec/hermit.spec.ts.md) |
+| `lib/util/exec/index.spec.ts` | Done | [details](lib/util/exec/index.spec.ts.md) |
+| `lib/util/exec/utils.spec.ts` | Done | [details](lib/util/exec/utils.spec.ts.md) |
 | `lib/util/fs/index.spec.ts` | Not done | [details](lib/util/fs/index.spec.ts.md) |
 | `lib/util/fs/util.spec.ts` | Not done | [details](lib/util/fs/util.spec.ts.md) |
 | `lib/util/git/auth.spec.ts` | Not done | [details](lib/util/git/auth.spec.ts.md) |

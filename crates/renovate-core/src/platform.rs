@@ -15,6 +15,7 @@ pub mod gitea_forgejo_utils;
 pub mod github;
 pub mod gitlab;
 pub mod local;
+pub mod pr_body;
 pub mod scm_manager;
 
 use thiserror::Error;
