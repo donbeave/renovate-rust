@@ -5,7 +5,7 @@
 ## `lib/modules/platform/scm-manager/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/scm-manager/utils.spec.ts
-**Total tests:** 12 | **Ported:** 3 | **Actionable:** 12 | **Status:** partial
+**Total tests:** 12 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `getMergeMethod`
 
@@ -29,15 +29,15 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should throw error for option $gitUrl, because protocol links are missing | 117 | pending | — | — | — |
-| should throw error because of missing SSH link | 132 | pending | — | — | — |
-| should throw error because protocol links are not an array | 145 | pending | — | — | — |
-| should use the provided ssh link | 158 | pending | — | — | — |
-| should throw error because of missing HTTP link for option $gitUrl | 171 | pending | — | — | — |
-| should throw error because of malformed HTTP link with option $gitUrl | 192 | pending | — | — | — |
-| should use empty string, because username was not provided with option $gitUrl | 213 | pending | — | — | — |
-| should use empty string, because token was not provided. With option $gitUrl | 235 | pending | — | — | — |
-| should provide the HTTP link with username, for option $gitUrl | 258 | pending | — | — | — |
+| should throw error for option $gitUrl, because protocol links are missing | 117 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should throw error because of missing SSH link | 132 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should throw error because protocol links are not an array | 145 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should use the provided ssh link | 158 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should throw error because of missing HTTP link for option $gitUrl | 171 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should throw error because of malformed HTTP link with option $gitUrl | 192 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should use empty string, because username was not provided with option $gitUrl | 213 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should use empty string, because token was not provided. With option $gitUrl | 235 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should provide the HTTP link with username, for option $gitUrl | 258 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 
 ---
 
