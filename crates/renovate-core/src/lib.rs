@@ -7,6 +7,7 @@ pub mod fs;
 pub mod datasources;
 pub mod extractors;
 pub mod git;
+pub mod onboarding;
 pub mod http;
 pub mod json_writer;
 pub mod limits;

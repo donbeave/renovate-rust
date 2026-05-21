@@ -5,16 +5,15 @@
 ## `lib/workers/repository/onboarding/pr/config-description.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/onboarding/pr/config-description.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
+**Total tests:** 4 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
 
 ### `workers/repository/onboarding/pr/config-description › getConfigDesc()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty | 16 | pending | — | — | — |
-| returns a full list | 22 | pending | — | — | — |
-| assignees, labels and schedule | 38 | pending | — | — | — |
-| include retry/refresh checkbox message only if onboardingRebaseCheckbox is true | 58 | pending | — | — | — |
+| returns empty | 16 | ported | `onboarding.rs` | `get_config_desc_returns_empty_when_no_descriptions` | — |
+| returns a full list | 22 | ported | `onboarding.rs` | `get_config_desc_returns_full_list` | — |
+| assignees, labels and schedule | 38 | ported | `onboarding.rs` | `get_config_desc_includes_schedule` | — |
+| include retry/refresh checkbox message only if onboardingRebaseCheckbox is true | 58 | ported | `onboarding.rs` | `get_config_desc_with_schedule_produces_output` | — |
 
 ---
-
