@@ -5,19 +5,19 @@
 ## `lib/util/fs/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/fs/index.spec.ts
-**Total tests:** 56 | **Ported:** 0 | **Actionable:** 56 | **Status:** pending
+**Total tests:** 56 | **Ported:** 2 | **Actionable:** 56 | **Status:** pending
 
 ### `util/fs/index › getParentDir`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| ('$dir') -> '$expected' | 77 | pending | — | — | — |
+| ('$dir') -> '$expected' | 77 | ported | `fs.rs` | `get_parent_dir_cases` | — |
 
 ### `util/fs/index › getSiblingFileName`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| ('$file', '$sibling') -> '$expected' | 98 | pending | — | — | — |
+| ('$file', '$sibling') -> '$expected' | 98 | ported | `fs.rs` | `get_sibling_file_name_cases` | — |
 
 ### `util/fs/index › readLocalFile`
 

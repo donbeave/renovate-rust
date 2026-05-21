@@ -3,6 +3,7 @@
 pub mod branch;
 pub mod cache;
 pub mod config;
+pub mod fs;
 pub mod datasources;
 pub mod extractors;
 pub mod http;
