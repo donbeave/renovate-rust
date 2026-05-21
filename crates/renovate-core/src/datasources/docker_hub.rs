@@ -350,6 +350,7 @@ mod tests {
 
     // ── parse_image_name ──────────────────────────────────────────────────────
 
+    // Ported: "adds library/ prefix for Docker Hub (implicit)" — modules/datasource/docker/index.spec.ts line 2228
     #[test]
     fn official_image_maps_to_library() {
         let r = parse_image_name("ubuntu").unwrap();
@@ -532,6 +533,7 @@ mod tests {
         )
     }
 
+    // Ported: "Uses Docker Hub tags for registry-1.docker.io" — modules/datasource/docker/index.spec.ts line 2132
     #[tokio::test]
     async fn fetch_tags_returns_tag_names() {
         let server = MockServer::start().await;
@@ -551,6 +553,7 @@ mod tests {
         assert_eq!(tags, vec!["22.04", "22.04.1", "22.04.2"]);
     }
 
+    // Ported: "strips trailing slash from registry" — modules/datasource/docker/index.spec.ts line 2394
     #[tokio::test]
     async fn fetch_tags_trims_trailing_api_base_slash() {
         let server = MockServer::start().await;

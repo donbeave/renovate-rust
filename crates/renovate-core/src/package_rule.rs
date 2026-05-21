@@ -1669,6 +1669,7 @@ mod tests {
         assert!(!rule.repository_matches("org/repo-archived"));
     }
 
+    // Ported: "returns true for null versioning" — util/package-rules/current-version.spec.ts line 8
     #[test]
     fn current_version_matcher_returns_true_for_null_versioning_equivalent() {
         let rule = rule_with_current_version("1.2.3");
@@ -1676,6 +1677,7 @@ mod tests {
         assert!(rule.current_version_matches("1.2.3", None, None));
     }
 
+    // Ported: "return false if no version could be found" — util/package-rules/current-version.spec.ts line 52
     #[test]
     fn current_version_matcher_returns_false_if_no_version_found() {
         let rule = rule_with_current_version("bbbbbb");
@@ -1683,6 +1685,7 @@ mod tests {
         assert!(!rule.current_version_matches("aaaaaa", None, Some("bbbbbb")));
     }
 
+    // Ported: "case insensitive match" — util/package-rules/current-version.spec.ts line 66
     #[test]
     fn current_version_matcher_regex_is_case_insensitive() {
         let rule = rule_with_current_version("/BBB.*/i");
@@ -1690,6 +1693,7 @@ mod tests {
         assert!(rule.current_version_matches("bbbbbb", None, None));
     }
 
+    // Ported: "return false for regex version non match" — util/package-rules/current-version.spec.ts line 79
     #[test]
     fn current_version_matcher_returns_false_for_regex_version_non_match() {
         let rule = rule_with_current_version("/^v?[~ -]?0/");
@@ -1697,6 +1701,7 @@ mod tests {
         assert!(!rule.current_version_matches("\"~> 1.1.0\"", None, Some("1.1.4")));
     }
 
+    // Ported: "return true for regex version match" — util/package-rules/current-version.spec.ts line 93
     #[test]
     fn current_version_matcher_returns_true_for_regex_version_match() {
         let rule = rule_with_current_version("/^v?[~ -]?0/");
@@ -1704,6 +1709,7 @@ mod tests {
         assert!(rule.current_version_matches("\"~> 0.1.0\"", None, Some("0.1.0")));
     }
 
+    // Ported: "return false for regex value match" — util/package-rules/current-version.spec.ts line 107
     #[test]
     fn current_version_matcher_returns_false_for_regex_value_match_without_version() {
         let rule = rule_with_current_version("/^v?[~ -]?0/");

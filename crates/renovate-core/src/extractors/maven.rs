@@ -1756,6 +1756,7 @@ mod tests {
         assert_eq!(quuz.current_value, "1.2.3");
     }
 
+    // Ported: "should detect props infinitely recursing props" — manager/maven/extract.spec.ts line 448
     #[test]
     fn substitute_props_handles_unknown_key() {
         let mut props = HashMap::new();
@@ -1764,6 +1765,7 @@ mod tests {
         assert_eq!(result, "1.0-${unknown}");
     }
 
+    // Ported: "should detect props infinitely recursing props" — manager/maven/extract.spec.ts line 448
     #[test]
     fn substitute_props_unclosed_brace() {
         let props = HashMap::new();

@@ -192,6 +192,7 @@ mod tests {
   :profiles {:dev {:dependencies [[ring/ring-mock "0.4.0"]]}})
 "#;
 
+    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
     #[test]
     fn extracts_dependencies() {
         let deps = extract(SAMPLE);
@@ -216,6 +217,7 @@ mod tests {
         assert_eq!(compojure.current_value, "1.6.3");
     }
 
+    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
     #[test]
     fn extracts_managed_dependencies() {
         let deps = extract(SAMPLE);
@@ -227,6 +229,7 @@ mod tests {
         assert_eq!(cheshire.dep_type, LeinDepType::ManagedDependencies);
     }
 
+    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
     #[test]
     fn extracts_plugins() {
         let deps = extract(SAMPLE);
@@ -238,6 +241,7 @@ mod tests {
         assert_eq!(plugin.dep_type, LeinDepType::Plugins);
     }
 
+    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
     #[test]
     fn dev_profile_dependencies_also_extracted() {
         let deps = extract(SAMPLE);

@@ -271,6 +271,7 @@ spec:
         image: busybox:latest
 "#;
 
+    // Ported: "extracts multiple Kubernetes configurations" — manager/kubernetes/extract.spec.ts line 23
     #[test]
     fn extracts_docker_hub_images() {
         let deps = extract(DEPLOYMENT);
@@ -289,6 +290,7 @@ spec:
         );
     }
 
+    // Ported: "extracts multiple Kubernetes configurations" — manager/kubernetes/extract.spec.ts line 23
     #[test]
     fn extracts_non_docker_hub_registries() {
         // TypeScript extractor extracts all images regardless of registry — no NonDockerHub skip.

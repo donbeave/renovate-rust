@@ -504,6 +504,7 @@ mod tests {
         assert!(is_date_expired(t4, initial, one_hour));
     }
 
+    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — util/github/graphql/util.spec.ts line 35
     #[test]
     fn is_date_expired_daily_cases() {
         let initial = "2022-11-24T15:00:00Z";

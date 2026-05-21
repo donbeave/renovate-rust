@@ -287,6 +287,7 @@ black = "*"
 coverage = {version = ">=6.0"}
 "#;
 
+    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
     #[test]
     fn extracts_string_form() {
         let deps = extract(SAMPLE);
@@ -296,6 +297,7 @@ coverage = {version = ">=6.0"}
         assert!(req.skip_reason.is_none());
     }
 
+    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
     #[test]
     fn extracts_multi_constraint() {
         let deps = extract(SAMPLE);
@@ -303,6 +305,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(flask.current_value, ">=2.0,<3.0");
     }
 
+    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
     #[test]
     fn extracts_table_form() {
         let deps = extract(SAMPLE);
@@ -311,6 +314,7 @@ coverage = {version = ">=6.0"}
         assert!(django.skip_reason.is_none());
     }
 
+    // Ported: "ignores invalid versions" — manager/pipenv/extract.spec.ts line 223
     #[test]
     fn wildcard_skipped() {
         let deps = extract(SAMPLE);
@@ -318,6 +322,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(unver.skip_reason, Some(PipfileSkipReason::Wildcard));
     }
 
+    // Ported: "ignores git dependencies" — manager/pipenv/extract.spec.ts line 192
     #[test]
     fn git_dep_skipped() {
         let deps = extract(SAMPLE);
@@ -325,6 +330,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(mylib.skip_reason, Some(PipfileSkipReason::GitDependency));
     }
 
+    // Ported: "ignores relative path dependencies" — manager/pipenv/extract.spec.ts line 213
     #[test]
     fn local_dep_skipped() {
         let deps = extract(SAMPLE);
@@ -332,6 +338,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(local.skip_reason, Some(PipfileSkipReason::LocalDependency));
     }
 
+    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
     #[test]
     fn dev_packages_flagged() {
         let deps = extract(SAMPLE);
@@ -341,6 +348,7 @@ coverage = {version = ">=6.0"}
         assert!(pytest.skip_reason.is_none());
     }
 
+    // Ported: "ignores invalid versions" — manager/pipenv/extract.spec.ts line 223
     #[test]
     fn dev_wildcard_skipped() {
         let deps = extract(SAMPLE);

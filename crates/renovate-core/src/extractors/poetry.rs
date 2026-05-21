@@ -893,6 +893,7 @@ ruff = "^0.1.0"
 
     // ── Name normalization ────────────────────────────────────────────────────
 
+    // Ported: "extracts mixed versioning types" — manager/poetry/extract.spec.ts line 118
     #[test]
     fn name_normalized_per_pep503() {
         let content = r#"

@@ -246,6 +246,7 @@ pub fn get_range_strategy<'a>(range_strategy: &'a str, current_value: Option<&st
 mod tests {
     use super::*;
 
+    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
     #[test]
     fn simple_hex_dep() {
         let content = r#"
@@ -262,6 +263,7 @@ end
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
     #[test]
     fn dep_with_only_option() {
         let content = r#"
@@ -278,6 +280,7 @@ end
         assert!(deps[0].skip_reason.is_none());
     }
 
+    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
     #[test]
     fn git_dep_skipped() {
         let content = r#"
@@ -292,6 +295,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::GitSource));
     }
 
+    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
     #[test]
     fn github_dep_skipped() {
         let content = r#"
@@ -305,6 +309,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::GitSource));
     }
 
+    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
     #[test]
     fn path_dep_skipped() {
         let content = r#"
@@ -318,6 +323,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::LocalPath));
     }
 
+    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
     #[test]
     fn dep_without_version_skipped() {
         let content = r#"
@@ -331,6 +337,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::NoVersion));
     }
 
+    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
     #[test]
     fn real_world_mix_exs() {
         let content = r#"
@@ -417,12 +424,14 @@ end
         assert_eq!(phoenix.locked_version, None);
     }
 
+    // Ported: "returns empty for invalid dependency file" — manager/mix/extract.spec.ts line 11
     #[test]
     fn no_deps_function_returns_empty() {
         let content = "defmodule MyApp do\n  def hello, do: :world\nend\n";
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "returns empty for invalid dependency file" — manager/mix/extract.spec.ts line 11
     #[test]
     fn deps_without_do_end_block() {
         let content = r#"

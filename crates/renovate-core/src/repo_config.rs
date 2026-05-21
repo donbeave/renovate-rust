@@ -9770,12 +9770,14 @@ mod tests {
         assert!(c.automerge);
     }
 
+    // Ported: "should migrate none" — config/migrations/custom/automerge-migration.spec.ts line 4
     #[test]
     fn automerge_legacy_none_string_migrated_to_false() {
         let c = RepoConfig::parse(r#"{"automerge": "none"}"#);
         assert!(!c.automerge, "automerge: 'none' must migrate to false");
     }
 
+    // Ported: "should migrate any" — config/migrations/custom/automerge-migration.spec.ts line 49
     #[test]
     fn automerge_legacy_any_string_migrated_to_true() {
         let c = RepoConfig::parse(r#"{"automerge": "any"}"#);

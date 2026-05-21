@@ -524,6 +524,8 @@ mod tests {
 
     // ── get_retrying ──────────────────────────────────────────────────────────
 
+    // Ported: "works" — util/http/retry-after.spec.ts line 27
+    // Ported: "retries" — util/http/retry-after.spec.ts line 44
     #[tokio::test]
     async fn retries_on_429_then_succeeds() {
         let server = MockServer::start().await;
@@ -553,6 +555,7 @@ mod tests {
         assert_eq!(resp.text().await.unwrap(), "ok");
     }
 
+    // Ported: "gives up after max retries" — util/http/retry-after.spec.ts line 59
     #[tokio::test]
     async fn stops_retrying_after_max_attempts() {
         let server = MockServer::start().await;
@@ -596,6 +599,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
     }
 
+    // Ported: "throws" — util/http/retry-after.spec.ts line 34
     #[tokio::test]
     async fn does_not_retry_on_404() {
         let server = MockServer::start().await;

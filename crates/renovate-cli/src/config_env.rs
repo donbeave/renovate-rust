@@ -1187,6 +1187,7 @@ mod tests {
         assert_eq!(config.repository_cache_force_local, Some(true));
     }
 
+    // Ported: "massages converted experimental env vars" — workers/global/config/parse/env.spec.ts line 309
     #[test]
     fn converted_experimental_env_current_names_are_parsed() {
         let config = build_from_env(&env(&[

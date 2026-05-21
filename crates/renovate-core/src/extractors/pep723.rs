@@ -252,6 +252,7 @@ fn normalize_name(name: &str) -> String {
 mod tests {
     use super::*;
 
+    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
     #[test]
     fn extracts_script_block_with_version() {
         let content = r#"#!/usr/bin/env python3
@@ -294,6 +295,7 @@ import requests
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
     #[test]
     fn handles_direct_reference() {
         let content = r#"# /// script
@@ -305,6 +307,7 @@ import requests
         assert_eq!(deps[0].skip_reason, Some(Pep723SkipReason::DirectReference));
     }
 
+    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
     #[test]
     fn normalizes_package_name() {
         let content = r#"# /// script
@@ -316,6 +319,7 @@ import requests
         assert_eq!(deps[0].name, "flask-utils");
     }
 
+    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
     #[test]
     fn extracts_pinned_version() {
         let content = r#"# /// script

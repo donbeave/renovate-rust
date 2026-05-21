@@ -66,6 +66,7 @@ pub fn extract(content: &str) -> Vec<KotlinScriptDep> {
 mod tests {
     use super::*;
 
+    // Ported: "extracts dependencies in a generic case" — manager/kotlin-script/extract.spec.ts line 12
     #[test]
     fn extracts_single_dep() {
         let content = r#"@file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.22.0")"#;
@@ -76,6 +77,7 @@ mod tests {
         assert!(deps[0].registry_urls.is_empty());
     }
 
+    // Ported: "extracts dependencies in a generic case" — manager/kotlin-script/extract.spec.ts line 12
     #[test]
     fn extracts_multiple_deps() {
         let content = r#"

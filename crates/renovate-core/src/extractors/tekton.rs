@@ -145,6 +145,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
+    // Ported: "extracts deps from a file" — manager/tekton/extract.spec.ts line 6
     #[test]
     fn extracts_gcr_images_without_skip() {
         // TypeScript extractor does not skip non-Docker-Hub registries.

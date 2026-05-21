@@ -236,6 +236,7 @@ mod tests {
 
     use super::*;
 
+    // Ported: "encodeCase" — modules/datasource/go/releases-goproxy.spec.ts line 27
     #[test]
     fn encode_module_path_all_lowercase() {
         assert_eq!(
@@ -244,6 +245,7 @@ mod tests {
         );
     }
 
+    // Ported: "encodeCase" — modules/datasource/go/releases-goproxy.spec.ts line 27
     #[test]
     fn encode_module_path_capital_letters() {
         assert_eq!(
