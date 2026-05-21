@@ -1283,9 +1283,167 @@ fn ubi_extract_version(name: &str, parsed_value: &ParsedToolValue<'_>) -> Option
     None
 }
 
+// ── mise lockfile utilities ───────────────────────────────────────────────────
+
+/// Configuration type inferred from a mise config file path.
+/// Mirrors `MiseConfigType` in `lib/modules/manager/mise/lockfile.ts`.
+#[derive(Debug, PartialEq)]
+pub struct MiseConfigType {
+    pub is_local: bool,
+    pub env: Option<String>,
+}
+
+/// Parsed representation of a mise lock file.
+/// Tools maps short tool name → ordered list of locked versions.
+#[derive(Debug, Default)]
+pub struct MiseLockFile {
+    pub tools: std::collections::HashMap<String, Vec<String>>,
+}
+
+static CONFIG_TYPE_RE: std::sync::LazyLock<regex::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"^(?:\.?mise|config)\.(?<env>[^.]+)(?:\.local)?\.toml$").unwrap()
+    });
+
+/// Parses the config file name to determine its type (local, env-specific, or default).
+pub fn get_config_type(config_path: &str) -> MiseConfigType {
+    let filename = config_path.split('/').next_back().unwrap_or(config_path);
+    let is_local = filename.ends_with(".local.toml");
+    let env = CONFIG_TYPE_RE.captures(filename).and_then(|c| {
+        let e = c.name("env")?.as_str();
+        if e == "local" { None } else { Some(e.to_owned()) }
+    });
+    MiseConfigType { is_local, env }
+}
+
+/// Derives the lock file path from a mise config file path.
+pub fn get_lock_file_name(config_path: &str) -> String {
+    let (dir, _filename) = config_path.rsplit_once('/').unwrap_or((".", config_path));
+    let parent_base = dir.split('/').next_back().unwrap_or(dir);
+    let lock_dir = if parent_base == "conf.d" {
+        dir.rsplit_once('/').map_or(".", |(d, _)| d)
+    } else {
+        dir
+    };
+
+    let MiseConfigType { is_local, env } = get_config_type(config_path);
+    let lock_name = match (env.as_deref(), is_local) {
+        (Some(e), true) => format!("mise.{e}.local.lock"),
+        (Some(e), false) => format!("mise.{e}.lock"),
+        (None, true) => "mise.local.lock".to_owned(),
+        (None, false) => "mise.lock".to_owned(),
+    };
+    if lock_dir == "." {
+        lock_name
+    } else {
+        format!("{lock_dir}/{lock_name}")
+    }
+}
+
+/// Parse a mise lock file (TOML format) into a `MiseLockFile`.
+pub fn parse_mise_lock_file(content: &str) -> Option<MiseLockFile> {
+    let root = toml::from_str::<toml::Value>(content).ok()?;
+    let tools_table = root.get("tools")?.as_table()?;
+    let mut tools = std::collections::HashMap::new();
+    for (name, entries) in tools_table {
+        let versions: Vec<String> = entries
+            .as_array()?
+            .iter()
+            .filter_map(|e| e.get("version")?.as_str().map(str::to_owned))
+            .collect();
+        tools.insert(name.clone(), versions);
+    }
+    Some(MiseLockFile { tools })
+}
+
+/// Get the locked version for a dependency from the parsed lock file.
+/// Tries full depName first, then falls back to the short name after `:`.
+pub fn get_locked_version(lock_file: &MiseLockFile, dep_name: &str) -> Option<String> {
+    let tools = &lock_file.tools;
+    if let Some(versions) = tools.get(dep_name) {
+        return versions.first().cloned();
+    }
+    if let Some(idx) = dep_name.find(':') {
+        let short = &dep_name[idx + 1..];
+        if let Some(versions) = tools.get(short) {
+            return versions.first().cloned();
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // ── mise/lockfile.spec.ts tests ───────────────────────────────────────────
+
+    // Ported: "returns isLocal=$isLocal env=$env for $configPath" — manager/mise/lockfile.spec.ts line 10
+    #[test]
+    fn get_config_type_parses_all_variants() {
+        assert_eq!(get_config_type("mise.toml"), MiseConfigType { is_local: false, env: None });
+        assert_eq!(get_config_type(".mise.toml"), MiseConfigType { is_local: false, env: None });
+        assert_eq!(get_config_type("mise.local.toml"), MiseConfigType { is_local: true, env: None });
+        assert_eq!(get_config_type("mise.test.toml"), MiseConfigType { is_local: false, env: Some("test".into()) });
+        assert_eq!(get_config_type("mise.test.local.toml"), MiseConfigType { is_local: true, env: Some("test".into()) });
+        assert_eq!(get_config_type("config.toml"), MiseConfigType { is_local: false, env: None });
+    }
+
+    // Ported: "returns $expected for $configPath" — manager/mise/lockfile.spec.ts line 27
+    #[test]
+    fn get_lock_file_name_derives_correct_path() {
+        assert_eq!(get_lock_file_name("mise.toml"), "mise.lock");
+        assert_eq!(get_lock_file_name(".mise.toml"), "mise.lock");
+        assert_eq!(get_lock_file_name("config.toml"), "mise.lock");
+        assert_eq!(get_lock_file_name("mise.test.toml"), "mise.test.lock");
+        assert_eq!(get_lock_file_name("mise.staging.toml"), "mise.staging.lock");
+        assert_eq!(get_lock_file_name("mise.local.toml"), "mise.local.lock");
+        assert_eq!(get_lock_file_name("mise.test.local.toml"), "mise.test.local.lock");
+        assert_eq!(get_lock_file_name("subdir/mise.toml"), "subdir/mise.lock");
+        assert_eq!(get_lock_file_name("subdir/mise.prod.toml"), "subdir/mise.prod.lock");
+        assert_eq!(get_lock_file_name("conf.d/python.toml"), "mise.lock");
+        assert_eq!(get_lock_file_name("project/conf.d/node.toml"), "project/mise.lock");
+    }
+
+    fn make_lock_file() -> MiseLockFile {
+        let mut tools = std::collections::HashMap::new();
+        tools.insert("node".into(), vec!["20.11.0".into()]);
+        tools.insert("python".into(), vec!["3.10.17".into(), "3.11.12".into()]);
+        tools.insert("aqua:cli/cli".into(), vec!["2.64.0".into()]);
+        tools.insert("ubi:cargo-bins/cargo-binstall".into(), vec!["1.10.21".into()]);
+        MiseLockFile { tools }
+    }
+
+    // Ported: "returns $expected for $depName" — manager/mise/lockfile.spec.ts line 55
+    #[test]
+    fn get_locked_version_returns_correct_version() {
+        let lf = make_lock_file();
+        assert_eq!(get_locked_version(&lf, "node").as_deref(), Some("20.11.0"));
+        assert_eq!(get_locked_version(&lf, "core:node").as_deref(), Some("20.11.0"));
+        assert_eq!(get_locked_version(&lf, "asdf:node").as_deref(), Some("20.11.0"));
+        assert_eq!(get_locked_version(&lf, "python").as_deref(), Some("3.10.17"));
+        assert_eq!(get_locked_version(&lf, "core:python").as_deref(), Some("3.10.17"));
+        assert_eq!(get_locked_version(&lf, "aqua:cli/cli").as_deref(), Some("2.64.0"));
+        assert_eq!(get_locked_version(&lf, "ubi:cargo-bins/cargo-binstall").as_deref(), Some("1.10.21"));
+        assert_eq!(get_locked_version(&lf, "unknown"), None);
+        assert_eq!(get_locked_version(&lf, "core:unknown"), None);
+    }
+
+    // Ported: "returns first version when multiple versions exist" — manager/mise/lockfile.spec.ts line 70
+    #[test]
+    fn get_locked_version_returns_first_when_multiple() {
+        let lf = make_lock_file();
+        assert_eq!(get_locked_version(&lf, "python").as_deref(), Some("3.10.17"));
+    }
+
+    // Ported: "handles tools with bracket options in name" — manager/mise/lockfile.spec.ts line 74
+    #[test]
+    fn get_locked_version_handles_bracket_options_in_name() {
+        let lf = make_lock_file();
+        assert_eq!(get_locked_version(&lf, "ubi:cargo-bins/cargo-binstall").as_deref(), Some("1.10.21"));
+    }
+
+    // ── mise/utils.spec.ts tests ──────────────────────────────────────────────
 
     // Ported: "load and parse successfully" — manager/mise/utils.spec.ts line 9
     #[test]
