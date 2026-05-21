@@ -46,6 +46,8 @@ pub enum TerragruntSkipReason {
     Local,
     /// Source format not recognized.
     Unknown,
+    /// URL is structurally invalid.
+    InvalidUrl,
 }
 
 /// A single extracted terragrunt module dependency.
@@ -135,6 +137,20 @@ pub fn extract(content: &str) -> Vec<TerragruntDep> {
     deps
 }
 
+fn is_valid_url(url: &str) -> bool {
+    let Some((_, rest)) = url.split_once("://") else {
+        return false;
+    };
+    let host = rest.split('/').next().unwrap_or("");
+    if host.is_empty() {
+        return false;
+    }
+    if host.starts_with('[') && !host.contains(']') {
+        return false;
+    }
+    true
+}
+
 fn analyse_source(source: &str) -> TerragruntDep {
     // Local path
     if source.starts_with("../") || source.starts_with("./") || source.starts_with('/') {
@@ -160,6 +176,14 @@ fn analyse_source(source: &str) -> TerragruntDep {
     // Generic git:: ?ref= pattern
     if let Some(cap) = GIT_REF_RE.captures(source) {
         let url = cap["url"].to_owned();
+        if !is_valid_url(&url) {
+            return TerragruntDep {
+                dep_name: source.to_owned(),
+                current_value: String::new(),
+                source: None,
+                skip_reason: Some(TerragruntSkipReason::InvalidUrl),
+            };
+        }
         // Check if it's a GitHub URL under the git:: prefix
         if url.contains("github.com") {
             let repo = url
@@ -508,5 +532,18 @@ terraform {
             get_terragrunt_dependency_type("sdfsgdsfadfhfghfhgdfsdf"),
             "unknown"
         );
+    }
+
+    // Ported: "sets skipReason for invalid git tags URL" — terragrunt/modules.spec.ts line 89
+    #[test]
+    fn sets_skip_reason_for_invalid_git_tags_url() {
+        let content = r#"
+terraform {
+  source = "ssh://[/path?ref=v1.0.0"
+}
+"#;
+        let deps = extract(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].skip_reason, Some(TerragruntSkipReason::InvalidUrl));
     }
 }

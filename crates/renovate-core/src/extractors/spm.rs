@@ -227,17 +227,44 @@ struct ParsedUrl {
 }
 
 fn parse_url(url: &str) -> Option<ParsedUrl> {
-    let (scheme, rest) = if let Some(r) = url.strip_prefix("https://") {
-        ("https", r)
+    let (host, path_owned, scheme_str);
+
+    if let Some(rest) = url.strip_prefix("git@") {
+        // SCP-style: git@host:owner/repo.git
+        let (h, p) = rest.split_once(':')?;
+        host = h.to_owned();
+        path_owned = format!("/{p}");
+        scheme_str = "https".to_owned();
+    } else if let Some(rest) = url.strip_prefix("ssh://") {
+        // ssh://[user@]host/path
+        let after_at = rest.find('@').map_or(rest, |i| &rest[i + 1..]);
+        if after_at.is_empty() {
+            return None;
+        }
+        let slash = after_at.find('/')?;
+        let h = &after_at[..slash];
+        if h.is_empty() {
+            return None;
+        }
+        host = h.to_owned();
+        path_owned = after_at[slash..].to_owned();
+        scheme_str = "https".to_owned();
+    } else if let Some(r) = url.strip_prefix("https://") {
+        let slash = r.find('/')?;
+        host = r[..slash].to_owned();
+        path_owned = r[slash..].to_owned();
+        scheme_str = "https".to_owned();
     } else if let Some(r) = url.strip_prefix("http://") {
-        ("http", r)
+        let slash = r.find('/')?;
+        host = r[..slash].to_owned();
+        path_owned = r[slash..].to_owned();
+        scheme_str = "http".to_owned();
     } else {
         return None;
-    };
+    }
 
-    let slash = rest.find('/')?;
-    let host = &rest[..slash];
-    let path = &rest[slash..];
+    let path = &path_owned;
+    let scheme = scheme_str.as_str();
 
     let (platform, is_public) = if host == "github.com" {
         ("github", true)
@@ -1265,5 +1292,76 @@ let package = Package(
         assert!(!deps.is_empty());
         // All deps from SamplePackage.swift that have github.com URLs should be github-tags.
         assert!(deps.iter().all(|d| d.datasource == "github-tags"));
+    }
+
+    // Ported: "extracts GitHub dependencies from SCP-style SSH URL" — swift/extract.spec.ts line 116
+    #[test]
+    fn extracts_github_dependencies_from_scp_style_ssh_url() {
+        let content = r#"
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "git@github.com:example/repo.git", from: "1.0.0")
+          ]
+        )
+      "#;
+        let result = extract_package_file(content);
+        let deps = result.unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, "github-tags");
+        assert_eq!(deps[0].dep_name, "example/repo");
+        assert_eq!(deps[0].current_value, r#"from: "1.0.0""#);
+    }
+
+    // Ported: "extracts GitLab dependencies from SCP-style SSH URL" — swift/extract.spec.ts line 137
+    #[test]
+    fn extracts_gitlab_dependencies_from_scp_style_ssh_url() {
+        let content = r#"
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "git@gitlab.com:group/project.git", from: "2.0.0")
+          ]
+        )
+      "#;
+        let result = extract_package_file(content);
+        let deps = result.unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, "gitlab-tags");
+        assert_eq!(deps[0].dep_name, "group/project");
+        assert_eq!(deps[0].current_value, r#"from: "2.0.0""#);
+    }
+
+    // Ported: "extracts dependencies from ssh:// URL" — swift/extract.spec.ts line 158
+    #[test]
+    fn extracts_dependencies_from_ssh_url() {
+        let content = r#"
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "ssh://git@github.com/example/repo.git", from: "1.0.0")
+          ]
+        )
+      "#;
+        let result = extract_package_file(content);
+        let deps = result.unwrap();
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, "github-tags");
+        assert_eq!(deps[0].dep_name, "example/repo");
+        assert_eq!(deps[0].current_value, r#"from: "1.0.0""#);
+    }
+
+    // Ported: "returns null for unparseable SSH URL" — swift/extract.spec.ts line 179
+    #[test]
+    fn returns_null_for_unparseable_ssh_url() {
+        let content = r#"
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "ssh://", from: "1.0.0")
+          ]
+        )
+      "#;
+        assert!(extract_package_file(content).is_none());
     }
 }

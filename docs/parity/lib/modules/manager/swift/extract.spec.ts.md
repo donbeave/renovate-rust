@@ -5,7 +5,7 @@
 ## `lib/modules/manager/swift/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/swift/extract.spec.ts
-**Total tests:** 21 | **Ported:** 17 | **Actionable:** 21 | **Status:** partial
+**Total tests:** 21 | **Ported:** 21 | **Actionable:** 21 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -28,10 +28,10 @@
 | handles dependencies with name (deprecated args) | 275 | ported | `spm.rs` | `handles_dependencies_with_name_deprecated_args` | — |
 | extracts multiple dependencies with different datasources | 290 | ported | `spm.rs` | `extracts_multiple_dependencies_with_different_datasources` | — |
 | extracts multiple dependencies with traits arguments | 308 | ported | `spm.rs` | `extracts_multiple_dependencies_with_traits_arguments` | — |
-| extracts GitHub dependencies from SCP-style SSH URL | 116 | pending | — | — | — |
-| extracts GitLab dependencies from SCP-style SSH URL | 137 | pending | — | — | — |
-| extracts dependencies from ssh:// URL | 158 | pending | — | — | — |
-| returns null for unparseable SSH URL | 179 | pending | — | — | — |
+| extracts GitHub dependencies from SCP-style SSH URL | 116 | ported | `spm.rs` | `extracts_github_dependencies_from_scp_style_ssh_url` | — | — | — |
+| extracts GitLab dependencies from SCP-style SSH URL | 137 | ported | `spm.rs` | `extracts_gitlab_dependencies_from_scp_style_ssh_url` | — | — | — |
+| extracts dependencies from ssh:// URL | 158 | ported | `spm.rs` | `extracts_dependencies_from_ssh_url` | — | — | — |
+| returns null for unparseable SSH URL | 179 | ported | `spm.rs` | `returns_null_for_unparseable_ssh_url` | — | — | — |
 
 ---
 
