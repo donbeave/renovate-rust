@@ -914,6 +914,13 @@ pub fn get_controls() -> &'static str {
     "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
 }
 
+/// Return the composite key used by the package cache storage backend.
+///
+/// Mirrors `getCombinedKey` from `lib/util/cache/package/key.ts`.
+pub fn get_combined_key(namespace: &str, key: &str) -> String {
+    format!("datasource-mem:pkg-fetch:{namespace}:{key}")
+}
+
 /// Return the changelog section string, or empty if no release notes.
 ///
 /// Mirrors the early-return path of `getChangelogs` from
@@ -2291,6 +2298,15 @@ mod tests {
         assert_eq!(
             get_controls(),
             "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
+        );
+    }
+
+    // Ported: "works" — util/cache/package/key.spec.ts line 5
+    #[test]
+    fn get_combined_key_formats_correctly() {
+        assert_eq!(
+            get_combined_key("_test-namespace", "foo:bar"),
+            "datasource-mem:pkg-fetch:_test-namespace:foo:bar"
         );
     }
 
