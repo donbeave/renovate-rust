@@ -8,6 +8,7 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
+use serde::Deserialize;
 
 static TRAILING_API_PATH_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"api/v1/?$").unwrap());
 
@@ -71,6 +72,33 @@ pub fn validate_endpoint_url(endpoint: &str) -> Result<(), String> {
         Err("Configuration error: gitUrl endpoint is not a valid URL".to_owned())
     }
 }
+
+/// Content entry type returned by the Gitea/Forgejo contents API.
+///
+/// Mirrors `ContentsResponse` from:
+/// - `lib/modules/platform/forgejo/schema.ts`
+/// - `lib/modules/platform/gitea/schema.ts`
+#[derive(Debug, Deserialize)]
+pub struct ContentsResponse {
+    pub name: String,
+    pub path: String,
+    #[serde(rename = "type")]
+    pub content_type: ContentsType,
+    pub content: Option<String>,
+}
+
+/// File-system entry type within Gitea/Forgejo contents API responses.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ContentsType {
+    File,
+    Dir,
+}
+
+/// A list of content entries from the Gitea/Forgejo contents API.
+///
+/// Mirrors `ContentsListResponse` from forgejo/schema.ts and gitea/schema.ts.
+pub type ContentsListResponse = Vec<ContentsResponse>;
 
 #[cfg(test)]
 mod tests {
@@ -161,5 +189,13 @@ mod tests {
     #[test]
     fn usable_repo_returns_false_without_pull_requests() {
         assert!(!usable_repo(false, &full_permissions(), false));
+    }
+
+    // Ported: "ContentsResponseSchema" — modules/platform/forgejo/schema.spec.ts line 4
+    // (same test exists in modules/platform/gitea/schema.spec.ts line 4)
+    #[test]
+    fn contents_list_response_parses_empty_array() {
+        let result: ContentsListResponse = serde_json::from_str("[]").unwrap();
+        assert!(result.is_empty());
     }
 }

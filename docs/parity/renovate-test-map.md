@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2913 / 8590 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2915 / 8590 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -707,7 +707,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/forgejo/forgejo-helper.spec.ts` | Not done | [details](lib/modules/platform/forgejo/forgejo-helper.spec.ts.md) |
 | `lib/modules/platform/forgejo/index.spec.ts` | Not done | [details](lib/modules/platform/forgejo/index.spec.ts.md) |
 | `lib/modules/platform/forgejo/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/forgejo/pr-cache.spec.ts.md) |
-| `lib/modules/platform/forgejo/schema.spec.ts` | Not done | [details](lib/modules/platform/forgejo/schema.spec.ts.md) |
+| `lib/modules/platform/forgejo/schema.spec.ts` | Done | [details](lib/modules/platform/forgejo/schema.spec.ts.md) |
 | `lib/modules/platform/forgejo/utils.spec.ts` | Done | [details](lib/modules/platform/forgejo/utils.spec.ts.md) |
 | `lib/modules/platform/gerrit/client.spec.ts` | Not done | [details](lib/modules/platform/gerrit/client.spec.ts.md) |
 | `lib/modules/platform/gerrit/index.spec.ts` | Not done | [details](lib/modules/platform/gerrit/index.spec.ts.md) |
@@ -716,7 +716,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/gitea/gitea-helper.spec.ts` | Not done | [details](lib/modules/platform/gitea/gitea-helper.spec.ts.md) |
 | `lib/modules/platform/gitea/index.spec.ts` | Not done | [details](lib/modules/platform/gitea/index.spec.ts.md) |
 | `lib/modules/platform/gitea/pr-cache.spec.ts` | Not done | [details](lib/modules/platform/gitea/pr-cache.spec.ts.md) |
-| `lib/modules/platform/gitea/schema.spec.ts` | Not done | [details](lib/modules/platform/gitea/schema.spec.ts.md) |
+| `lib/modules/platform/gitea/schema.spec.ts` | Done | [details](lib/modules/platform/gitea/schema.spec.ts.md) |
 | `lib/modules/platform/gitea/utils.spec.ts` | Done | [details](lib/modules/platform/gitea/utils.spec.ts.md) |
 | `lib/modules/platform/github/api-cache.spec.ts` | Not done | [details](lib/modules/platform/github/api-cache.spec.ts.md) |
 | `lib/modules/platform/github/branch.spec.ts` | Not done | [details](lib/modules/platform/github/branch.spec.ts.md) |
