@@ -1784,6 +1784,7 @@ spec:
         );
     }
 
+    // Ported: "should return empty packagefiles is no content is provided" — lib/modules/manager/scalafmt/extract.spec.ts line 52
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());

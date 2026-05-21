@@ -274,6 +274,7 @@ mod tests {
         );
     }
 
+    // Ported: "returns null if index.yaml in response is empty" — lib/modules/datasource/helm/index.spec.ts line 107
     #[test]
     // Ported: "returns null if index.yaml in response is empty" — datasource/helm/index.spec.ts line 107
     fn parse_comment_only_index_returns_none() {
@@ -349,6 +350,7 @@ mod tests {
         assert_eq!(result.map(|(v, _)| v), Some("17.5.0".to_owned()));
     }
 
+    // Ported: "adds trailing slash to subdirectories" — lib/modules/datasource/helm/index.spec.ts line 184
     #[tokio::test]
     // Ported: "adds trailing slash to subdirectories" — datasource/helm/index.spec.ts line 184
     async fn fetch_latest_from_subdirectory_repository() {

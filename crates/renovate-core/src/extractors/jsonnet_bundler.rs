@@ -270,6 +270,7 @@ mod tests {
     // regardless of the optional `name` field on the dependency, so a
     // jsonnetfile that declares `name` produces the same depName as one
     // that does not.
+    // Ported: "extracts dependency with custom name" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 79
     #[test]
     fn extracts_dep_with_optional_name_field_uses_path_name() {
         let content = r#"{

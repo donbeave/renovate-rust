@@ -278,6 +278,7 @@ mod tests {
         assert_eq!(result, Some("13.0.3".to_owned()));
     }
 
+    // Ported: "returns null for 404" — lib/modules/datasource/pod/index.spec.ts line 60
     #[tokio::test]
     async fn fetch_latest_404_returns_none() {
         let server = MockServer::start().await;
@@ -294,6 +295,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
+    // Ported: "returns null for non 200 (v3)" — lib/modules/datasource/nuget/index.spec.ts line 494
     #[tokio::test]
     // Ported: "returns null for non 200 (v3)" — datasource/nuget/index.spec.ts line 494
     async fn fetch_latest_non_success_returns_none() {

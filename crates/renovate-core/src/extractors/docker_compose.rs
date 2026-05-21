@@ -565,6 +565,7 @@ services:
     // (`<<: *shared_settings`). The Rust extractor scans every `image:` key
     // regardless of nesting; the anchored declaration produces the dep once
     // and the merge-key reuses do not duplicate it.
+    // Ported: "extract images from fragments" — lib/modules/manager/docker-compose/extract.spec.ts line 198
     #[test]
     fn extracts_image_from_yaml_anchor_fragment() {
         let content = "---\nx-shared_setting: &shared_settings\n  image: debian:11\n  # Other shared properties here\n\nservices:\n  service-a:\n    <<: *shared_settings\n    environment:\n      - SERVICE=a\n  service-b:\n    <<: *shared_settings\n    environment:\n      - SERVICE=b\n";

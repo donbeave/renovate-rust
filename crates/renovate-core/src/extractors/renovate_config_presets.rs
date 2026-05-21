@@ -760,6 +760,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
+    // Ported: "returns null for empty" — lib/modules/manager/terraform/extract.spec.ts line 39
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("{}").is_empty());

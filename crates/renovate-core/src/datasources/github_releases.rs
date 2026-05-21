@@ -217,6 +217,7 @@ mod tests {
         assert_eq!(result.map(|(v, _)| v), Some("v1.9.0".to_owned()));
     }
 
+    // Ported: "returns null for 404" — lib/modules/datasource/pod/index.spec.ts line 60
     #[tokio::test]
     async fn fetch_latest_404_returns_none() {
         let server = MockServer::start().await;

@@ -352,6 +352,7 @@ mod tests {
         )
     }
 
+    // Ported: "should fetch package info from custom registry" — lib/modules/datasource/npm/index.spec.ts line 348
     #[tokio::test]
     // Ported: "should fetch package info from custom registry" — datasource/npm/index.spec.ts line 348
     async fn fetch_versions_returns_non_deprecated_sorted() {
@@ -393,6 +394,7 @@ mod tests {
         assert_eq!(entry.versions, vec!["20.0.0"]);
     }
 
+    // Ported: "handles missing dist-tags latest" — lib/modules/datasource/npm/get.spec.ts line 378
     #[tokio::test]
     // Ported: "handles missing dist-tags latest" — datasource/npm/get.spec.ts line 378
     async fn fetch_versions_allows_missing_latest_dist_tag() {
@@ -412,6 +414,7 @@ mod tests {
         assert_eq!(entry.latest_tag, None);
     }
 
+    // Ported: "should throw error for unparseable" — lib/modules/datasource/npm/index.spec.ts line 222
     #[tokio::test]
     // Ported: "should throw error for unparseable" — datasource/npm/index.spec.ts line 222
     async fn fetch_versions_unparseable_returns_parse_error() {

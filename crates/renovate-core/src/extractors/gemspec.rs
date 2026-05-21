@@ -181,6 +181,7 @@ end
         assert!(rake.current_value.is_empty());
     }
 
+    // Ported: "skips path dependencies" — lib/modules/manager/poetry/extract.spec.ts line 388
     #[test]
     fn path_source_skipped() {
         let deps = extract(SAMPLE);
@@ -188,6 +189,7 @@ end
         assert_eq!(mylib.skip_reason, Some(GemspecSkipReason::PathSource));
     }
 
+    // Ported: "skips git dependencies" — lib/modules/manager/poetry/extract.spec.ts line 363
     #[test]
     fn git_source_skipped() {
         let deps = extract(SAMPLE);
@@ -210,6 +212,7 @@ end
         assert_eq!(deps[0].current_value, "~> 1.15");
     }
 
+    // Ported: "returns null for empty" — lib/modules/manager/setup-cfg/extract.spec.ts line 6
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());

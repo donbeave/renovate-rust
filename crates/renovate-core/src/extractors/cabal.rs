@@ -390,6 +390,7 @@ executable my-exe
         assert!(base_count >= 2);
     }
 
+    // Ported: "returns null for empty" — lib/modules/manager/woodpecker/extract.spec.ts line 8
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());

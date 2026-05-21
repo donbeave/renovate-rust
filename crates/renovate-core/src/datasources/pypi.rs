@@ -331,6 +331,7 @@ mod tests {
         )
     }
 
+    // Ported: "supports custom datasource url" — lib/modules/datasource/pypi/index.spec.ts line 121
     #[tokio::test]
     // Ported: "supports custom datasource url" — datasource/pypi/index.spec.ts line 121
     async fn fetch_versions_returns_sorted() {
@@ -350,6 +351,7 @@ mod tests {
         assert_eq!(entry.versions, vec!["4.0.0", "4.2.5", "4.2.7"]);
     }
 
+    // Ported: "normalizes the package name according to PEP 503" — lib/modules/datasource/pypi/index.spec.ts line 329
     #[tokio::test]
     // Ported: "normalizes the package name according to PEP 503" — datasource/pypi/index.spec.ts line 329
     async fn fetch_versions_normalizes_name() {

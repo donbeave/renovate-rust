@@ -153,6 +153,7 @@ mod tests {
         );
     }
 
+    // Ported: "maintains spaces between hash and comment" — lib/modules/manager/github-actions/extract.spec.ts line 299
     #[test]
     fn inline_comment_stripped() {
         let content = "yonaskolb/XcodeGen@2.38.0 # pinned version\n";

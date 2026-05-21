@@ -1600,6 +1600,7 @@ unknowntool 9.9.9
         assert_eq!(node.unwrap().current_value, "20.9.0");
     }
 
+    // Ported: "returns null for empty" — lib/modules/manager/setup-cfg/extract.spec.ts line 6
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());

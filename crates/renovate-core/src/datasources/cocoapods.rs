@@ -217,6 +217,7 @@ mod tests {
         assert_eq!(result, Some("10.5.0".to_owned()));
     }
 
+    // Ported: "returns null for 404" — lib/modules/datasource/pod/index.spec.ts line 60
     #[tokio::test]
     // Ported: "returns null for 404" — datasource/pod/index.spec.ts line 60
     async fn fetch_latest_404_returns_none() {
@@ -234,6 +235,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
+    // Ported: "returns null for 401" — lib/modules/datasource/pod/index.spec.ts line 117
     #[tokio::test]
     // Ported: "returns null for 401" — datasource/pod/index.spec.ts line 117
     async fn fetch_latest_401_returns_none() {

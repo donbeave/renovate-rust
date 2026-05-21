@@ -2187,6 +2187,7 @@ chalk@^2.4.1:
         );
     }
 
+    // Ported: "extracts a file with only --index-url flags" — lib/modules/manager/pip_requirements/extract.spec.ts line 258
     #[test]
     fn url_install_is_skipped() {
         let json = r#"{ "dependencies": { "pkg": "https://example.com/pkg.tgz" } }"#;

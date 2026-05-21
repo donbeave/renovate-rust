@@ -506,6 +506,7 @@ mod tests {
         assert!(!s.update_available);
     }
 
+    // Ported: "findLatestStable works" — lib/modules/datasource/docker/common.spec.ts line 270
     #[test]
     // Ported: "findLatestStable works" — datasource/docker/common.spec.ts line 270
     fn empty_tag_list_produces_no_latest() {

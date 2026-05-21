@@ -539,6 +539,7 @@ mod tests {
     // additional registry URLs separately, but the actionable-deps result
     // matches: extract() returns no entries for an --extra-index-url-only
     // file.
+    // Ported: "extracts a file with only --extra-index-url flags" — lib/modules/manager/pip_requirements/extract.spec.ts line 266
     #[test]
     fn extra_index_url_only_file_returns_no_deps() {
         let deps = extract_ok("--extra-index-url https://example.com/pypi");

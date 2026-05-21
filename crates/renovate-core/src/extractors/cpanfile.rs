@@ -293,6 +293,7 @@ on 'test' => sub {
         }
     }
 
+    // Ported: "does not fail on package file without version" — lib/modules/manager/nuget/extract.spec.ts line 79
     #[test]
     fn no_version_skipped() {
         let content = "requires 'Foo::Bar';\n";

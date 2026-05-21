@@ -192,6 +192,7 @@ bar
         assert!(!deps.iter().any(|d| d.package_name == "Quux.Quux"));
     }
 
+    // Ported: "returns null for empty" — lib/modules/manager/woodpecker/extract.spec.ts line 8
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
