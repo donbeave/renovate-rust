@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2913 / 8595 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2913 / 8591 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -795,7 +795,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/github.spec.ts` | Not done | [details](lib/util/http/github.spec.ts.md) |
 | `lib/util/http/gitlab.spec.ts` | Not done | [details](lib/util/http/gitlab.spec.ts.md) |
 | `lib/util/http/got.spec.ts` | Not done | [details](lib/util/http/got.spec.ts.md) |
-| `lib/util/http/hooks.spec.ts` | Not done | [details](lib/util/http/hooks.spec.ts.md) |
+| `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
 | `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
 | `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
 | `lib/util/http/jira.spec.ts` | Not done | [details](lib/util/http/jira.spec.ts.md) |
@@ -923,7 +923,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/updates/generate.spec.ts` | Not done | [details](lib/workers/repository/updates/generate.spec.ts.md) |
 | `test/docs/documentation.spec.ts` | Not done | [details](test/docs/documentation.spec.ts.md) |
 | `test/other/sync-module-labels.spec.ts` | Not done | [details](test/other/sync-module-labels.spec.ts.md) |
-| `test/other/validate-config-files.spec.ts` | Not done | [details](test/other/validate-config-files.spec.ts.md) |
-| `test/other/validate-docker.spec.ts` | Not done | [details](test/other/validate-docker.spec.ts.md) |
-| `test/other/validate-schemas.spec.ts` | Not done | [details](test/other/validate-schemas.spec.ts.md) |
+| `test/other/validate-config-files.spec.ts` | Done | [details](test/other/validate-config-files.spec.ts.md) |
+| `test/other/validate-docker.spec.ts` | Done | [details](test/other/validate-docker.spec.ts.md) |
+| `test/other/validate-schemas.spec.ts` | Done | [details](test/other/validate-schemas.spec.ts.md) |
 | `tools/docs/test/utils.spec.ts` | Done | [details](tools/docs/test/utils.spec.ts.md) |
