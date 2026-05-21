@@ -657,6 +657,7 @@ mod tests {
 
     // ── [project].dependencies ────────────────────────────────────────────────
 
+    // Ported: "should return dependencies for valid content" — pep621/extract.spec.ts line 32
     #[test]
     fn extracts_project_dependencies() {
         let content = r#"
@@ -715,6 +716,7 @@ dependencies = ["cachecontrol[filecache]>=0.12.11"]
 
     // ── [project.optional-dependencies] ──────────────────────────────────────
 
+    // Ported: "should return dependencies for valid content" — pep621/extract.spec.ts line 32
     #[test]
     fn extracts_optional_dependencies() {
         let content = r#"
@@ -738,6 +740,7 @@ lint = ["ruff==0.1.0"]
 
     // ── [dependency-groups] ───────────────────────────────────────────────────
 
+    // Ported: "should return dependencies for valid content" — pep621/extract.spec.ts line 32
     #[test]
     fn extracts_dependency_groups_skips_include_tables() {
         let content = r#"
@@ -777,6 +780,7 @@ dependencies = ["mypkg @ https://example.com/mypkg.tar.gz"]
         assert_eq!(deps[0].skip_reason, Some(Pep621SkipReason::DirectReference));
     }
 
+    // Ported: "should skip dependencies with unsupported uv sources" — pep621/extract.spec.ts line 340
     #[test]
     fn uv_sources_classify_git_path_url_and_workspace_sources() {
         let content = r#"
