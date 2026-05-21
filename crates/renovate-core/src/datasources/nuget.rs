@@ -297,7 +297,6 @@ mod tests {
 
     // Ported: "returns null for non 200 (v3)" — lib/modules/datasource/nuget/index.spec.ts line 494
     #[tokio::test]
-    // Ported: "returns null for non 200 (v3)" — datasource/nuget/index.spec.ts line 494
     async fn fetch_latest_non_success_returns_none() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))

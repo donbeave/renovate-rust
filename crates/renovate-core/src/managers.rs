@@ -1122,9 +1122,9 @@ mod tests {
         }
     }
 
+    // Ported: "matchRegexOrGlobList("$path") === $expected" — manager/circleci/index.spec.ts line 6
     #[test]
     fn circleci_file_patterns_match_spec() {
-        // Ported: "file names match managerFilePatterns" from circleci/index.spec.ts
         let should_match = &[
             ".circleci/config.yml",
             ".circleci/config.yaml",

@@ -333,7 +333,6 @@ mod tests {
 
     // Ported: "supports custom datasource url" — lib/modules/datasource/pypi/index.spec.ts line 121
     #[tokio::test]
-    // Ported: "supports custom datasource url" — datasource/pypi/index.spec.ts line 121
     async fn fetch_versions_returns_sorted() {
         let server = MockServer::start().await;
         let body = pypi_response("django", "4.2.7", &["4.0.0", "4.2.7", "4.2.5"]);
@@ -353,7 +352,6 @@ mod tests {
 
     // Ported: "normalizes the package name according to PEP 503" — lib/modules/datasource/pypi/index.spec.ts line 329
     #[tokio::test]
-    // Ported: "normalizes the package name according to PEP 503" — datasource/pypi/index.spec.ts line 329
     async fn fetch_versions_normalizes_name() {
         let server = MockServer::start().await;
         let body = pypi_response("not-normalized-package", "1.0.0", &["1.0.0"]);

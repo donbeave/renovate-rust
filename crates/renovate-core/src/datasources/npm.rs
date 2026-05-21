@@ -354,7 +354,6 @@ mod tests {
 
     // Ported: "should fetch package info from custom registry" — lib/modules/datasource/npm/index.spec.ts line 348
     #[tokio::test]
-    // Ported: "should fetch package info from custom registry" — datasource/npm/index.spec.ts line 348
     async fn fetch_versions_returns_non_deprecated_sorted() {
         let server = MockServer::start().await;
         let body = packument_json(
@@ -396,7 +395,6 @@ mod tests {
 
     // Ported: "handles missing dist-tags latest" — lib/modules/datasource/npm/get.spec.ts line 378
     #[tokio::test]
-    // Ported: "handles missing dist-tags latest" — datasource/npm/get.spec.ts line 378
     async fn fetch_versions_allows_missing_latest_dist_tag() {
         let server = MockServer::start().await;
         let body = r#"{"name":"@neutrinojs/react","versions":{"1.0.0":{}}}"#;
@@ -416,7 +414,6 @@ mod tests {
 
     // Ported: "should throw error for unparseable" — lib/modules/datasource/npm/index.spec.ts line 222
     #[tokio::test]
-    // Ported: "should throw error for unparseable" — datasource/npm/index.spec.ts line 222
     async fn fetch_versions_unparseable_returns_parse_error() {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
@@ -430,11 +427,10 @@ mod tests {
         assert!(matches!(result, Err(NpmError::Parse(_))));
     }
 
-    #[tokio::test]
-    // Ported: "should throw error for 429" — datasource/npm/index.spec.ts line 229
     // Ported: "should throw error for 5xx" — datasource/npm/index.spec.ts line 236
     // Ported: "should throw error for 408" — datasource/npm/index.spec.ts line 243
     // Ported: "should throw error for others" — datasource/npm/index.spec.ts line 250
+    #[tokio::test]
     async fn fetch_versions_non_success_statuses_return_error() {
         for status in [429, 503, 408, 451] {
             let server = MockServer::start().await;

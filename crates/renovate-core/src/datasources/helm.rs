@@ -276,13 +276,11 @@ mod tests {
 
     // Ported: "returns null if index.yaml in response is empty" — lib/modules/datasource/helm/index.spec.ts line 107
     #[test]
-    // Ported: "returns null if index.yaml in response is empty" — datasource/helm/index.spec.ts line 107
     fn parse_comment_only_index_returns_none() {
         assert_eq!(parse_latest_version("# A comment", "redis"), None);
     }
 
     #[test]
-    // Ported: "returns null if packageName is not in index.yaml" — datasource/helm/index.spec.ts line 139
     fn parse_returns_none_for_unknown_chart() {
         let yaml = index_yaml(&[("redis", &["17.0.0"])]);
         assert_eq!(parse_latest_version(&yaml, "postgresql"), None);
@@ -317,9 +315,8 @@ mod tests {
         assert_eq!(strip_constraint_operators("17.0.0"), "17.0.0");
     }
 
-    #[tokio::test]
-    // Ported: "returns null for empty response" — datasource/helm/index.spec.ts line 37
     // Ported: "returns null for missing response body" — datasource/helm/index.spec.ts line 51
+    #[tokio::test]
     async fn fetch_latest_empty_body_returns_none() {
         let server = MockServer::start().await;
 
@@ -352,7 +349,6 @@ mod tests {
 
     // Ported: "adds trailing slash to subdirectories" — lib/modules/datasource/helm/index.spec.ts line 184
     #[tokio::test]
-    // Ported: "adds trailing slash to subdirectories" — datasource/helm/index.spec.ts line 184
     async fn fetch_latest_from_subdirectory_repository() {
         let server = MockServer::start().await;
         let yaml = index_yaml(&[("redis", &["17.5.0"])]);
