@@ -6,6 +6,28 @@ use serde_json::{Map, Value};
 
 const UPDATE_TYPES: &[&str] = &["major", "minor", "patch", "pin", "digest", "rollback"];
 
+/// Config fields that accept a bare string as a shorthand for a single-element array.
+///
+/// Mirrors the `allowString: true` option entries in `lib/config/options/index.ts`.
+const ALLOW_STRING_FIELDS: &[&str] = &[
+    "description",
+    "schedule",
+    "automergeSchedule",
+    "autodiscoverFilter",
+    "matchCategories",
+    "matchRepositories",
+    "matchBaseBranches",
+    "matchManagers",
+    "matchDatasources",
+    "matchDepTypes",
+    "matchPackageNames",
+    "matchDepNames",
+    "matchSourceUrls",
+    "matchRegistryUrls",
+    "managerFilePatterns",
+    "gitNoVerify",
+];
+
 /// Return a massaged Renovate config value.
 pub fn massage_config(config: &Value) -> Value {
     match config {
@@ -23,7 +45,7 @@ fn massage_object(map: &Map<String, Value>) -> Map<String, Value> {
     for (key, value) in map {
         let value = if key == "minimumReleaseAge" && is_zero_duration(value) {
             Value::Null
-        } else if key == "schedule" && value.is_string() {
+        } else if ALLOW_STRING_FIELDS.contains(&key.as_str()) && value.is_string() {
             Value::Array(vec![value.clone()])
         } else if let Value::Array(values) = value {
             Value::Array(
@@ -136,6 +158,11 @@ mod tests {
         assert_eq!(
             massage_config(&json!({"schedule": "before 5am"})),
             json!({"schedule": ["before 5am"]})
+        );
+        // description also has allowString: true
+        assert_eq!(
+            massage_config(&json!({"description": "some description"})),
+            json!({"description": ["some description"]})
         );
     }
 

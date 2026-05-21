@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2920 / 8582 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2921 / 8582 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -817,7 +817,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/global/config/parse/additional-config-file.spec.ts` | Not done | [details](lib/workers/global/config/parse/additional-config-file.spec.ts.md) |
 | `lib/workers/global/config/parse/host-rules-from-env.spec.ts` | Not done | [details](lib/workers/global/config/parse/host-rules-from-env.spec.ts.md) |
 | `lib/workers/global/config/parse/index.spec.ts` | Not done | [details](lib/workers/global/config/parse/index.spec.ts.md) |
-| `lib/workers/global/config/parse/util.spec.ts` | Not done | [details](lib/workers/global/config/parse/util.spec.ts.md) |
+| `lib/workers/global/config/parse/util.spec.ts` | Done | [details](lib/workers/global/config/parse/util.spec.ts.md) |
 | `lib/workers/global/index.spec.ts` | Not done | [details](lib/workers/global/index.spec.ts.md) |
 | `lib/workers/global/initialize.spec.ts` | Not done | [details](lib/workers/global/initialize.spec.ts.md) |
 | `lib/workers/global/limits.spec.ts` | Done | [details](lib/workers/global/limits.spec.ts.md) |

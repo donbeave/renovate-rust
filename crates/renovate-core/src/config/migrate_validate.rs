@@ -4429,6 +4429,26 @@ mod tests {
         );
     }
 
+    // Ported: "massages config" — workers/global/config/parse/util.spec.ts line 5
+    #[test]
+    fn migrate_and_validate_massages_description_string_to_array() {
+        let result = migrate_and_validate(
+            &json!({}),
+            &json!({
+                "packageRules": [{
+                    "description": "haha",
+                    "matchPackageNames": ["name"],
+                    "enabled": false
+                }]
+            }),
+        );
+        let desc = &result["packageRules"][0]["description"];
+        assert!(desc.is_array(), "description should be massaged to array");
+        assert_eq!(desc, &json!(["haha"]));
+        // No warnings expected (no migration needed)
+        assert_eq!(result["warnings"], json!([]));
+    }
+
     // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
     #[test]
     fn migrate_and_validate_handles_empty() {
