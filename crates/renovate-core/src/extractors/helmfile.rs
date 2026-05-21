@@ -57,7 +57,8 @@ pub fn extract_package_file_with_registry_aliases(
     let repo_map = collect_repositories(&content);
 
     // ── Pass 2: collect and resolve releases ──────────────────────────────────
-    let raw_releases = collect_releases(&content);
+    let mut raw_releases = collect_releases(&content);
+    raw_releases.extend(collect_templates(&content));
 
     let mut need_kustomize = false;
     let deps = raw_releases
@@ -282,6 +283,91 @@ fn flush_release(
         version.take();
     }
     *has_kustomize_keys = false;
+}
+
+fn collect_templates(content: &str) -> Vec<RawRelease> {
+    let mut out: Vec<RawRelease> = Vec::new();
+    let mut in_templates = false;
+    let mut template_indent: usize = 0;
+    let mut cur_name: Option<String> = None;
+    let mut cur_chart: Option<String> = None;
+    let mut cur_version: Option<String> = None;
+    let mut cur_has_kustomize_keys = false;
+
+    for raw in content.lines() {
+        let line = raw.split(" #").next().unwrap_or(raw).trim_end();
+        if line.trim().is_empty() {
+            continue;
+        }
+        let trimmed = line.trim_start();
+        let indent = leading_spaces(line);
+
+        // Top-level section boundary
+        if indent == 0 && !trimmed.starts_with('-') {
+            if in_templates {
+                flush_release(
+                    &mut out,
+                    &mut cur_name,
+                    &mut cur_chart,
+                    &mut cur_version,
+                    &mut cur_has_kustomize_keys,
+                );
+            }
+            in_templates = trimmed == "templates:";
+            template_indent = 0;
+            continue;
+        }
+
+        if !in_templates {
+            continue;
+        }
+
+        // First level of indentation under templates: is the map key
+        if template_indent == 0 && indent > 0 {
+            template_indent = indent;
+        }
+
+        if indent == template_indent && !trimmed.starts_with('-') {
+            // This is a template map key (e.g. "common:")
+            flush_release(
+                &mut out,
+                &mut cur_name,
+                &mut cur_chart,
+                &mut cur_version,
+                &mut cur_has_kustomize_keys,
+            );
+            // The map key itself is the default name
+            if let Some(key) = trimmed.strip_suffix(':') {
+                cur_name = Some(key.trim().trim_matches('"').trim_matches('\'').to_owned());
+            }
+            continue;
+        }
+
+        if indent > template_indent {
+            // Fields inside a template entry
+            if let Some(v) = strip_key(trimmed, "name") {
+                cur_name = Some(v.trim().trim_matches('"').trim_matches('\'').to_owned());
+            } else if let Some(v) = strip_key(trimmed, "chart") {
+                cur_chart = Some(v.trim().trim_matches('"').trim_matches('\'').to_owned());
+            } else if let Some(v) = strip_key(trimmed, "version") {
+                cur_version = Some(v.trim().trim_matches('"').trim_matches('\'').to_owned());
+            } else if is_kustomize_key(trimmed) {
+                cur_has_kustomize_keys = true;
+            }
+        }
+    }
+
+    if in_templates {
+        flush_release(
+            &mut out,
+            &mut cur_name,
+            &mut cur_chart,
+            &mut cur_version,
+            &mut cur_has_kustomize_keys,
+        );
+    }
+
+    out
 }
 
 // ── Resolution ────────────────────────────────────────────────────────────────
@@ -1112,5 +1198,40 @@ releases:
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
+    }
+
+    // Ported: "parses templates key alongside releases" — helmfile/extract.spec.ts line 576
+    #[test]
+    fn parses_templates_key_alongside_releases() {
+        let content = "
+repositories:
+  - name: kiwigrid
+    url: https://kiwigrid.github.io
+
+templates:
+  common:
+    name: common
+    version: 1.0.0
+    chart: kiwigrid/common
+  shared:
+    name: shared
+    version: 2.0.0
+    chart: kiwigrid/shared
+
+releases:
+  - name: my-release
+    version: 3.0.0
+    chart: kiwigrid/my-chart
+";
+        let result = extract_package_file(content);
+        let deps = result.deps;
+        // Should have 3 deps: my-release + common + shared
+        assert_eq!(deps.len(), 3);
+        let release = deps.iter().find(|d| d.name == "my-chart").unwrap();
+        assert_eq!(release.current_value, "3.0.0");
+        let common = deps.iter().find(|d| d.name == "common").unwrap();
+        assert_eq!(common.current_value, "1.0.0");
+        let shared = deps.iter().find(|d| d.name == "shared").unwrap();
+        assert_eq!(shared.current_value, "2.0.0");
     }
 }

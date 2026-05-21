@@ -175,7 +175,12 @@ pub fn extract(content: &str) -> Result<Vec<MavenExtractedDep>, MavenExtractErro
             let resolved = apply_props(&dep.current_value, &properties);
             if !resolved.contains("${") {
                 dep.current_value = resolved;
-                dep.skip_reason = None;
+                // Go template expressions ({{...}}) are unresolvable version placeholders.
+                if dep.current_value.contains("{{") {
+                    dep.skip_reason = Some(MavenSkipReason::PropertyRef);
+                } else {
+                    dep.skip_reason = None;
+                }
             }
             // Otherwise leave as PropertyRef — cross-file resolution is deferred.
         }
@@ -2152,6 +2157,55 @@ mod tests {
         // The version reference should be fully resolved.
         assert_eq!(deps[0].current_value, "1.2.3");
         assert!(deps[0].skip_reason.is_none());
+    }
+
+    // Ported: "should extract from pom.template.xml file" — maven/extract.spec.ts line 917
+    #[test]
+    fn extracts_from_pom_template_xml_file() {
+        let content = r#"<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>template-project</artifactId>
+  <version>1.0.0</version>
+  <properties>
+    <manifold.version>2021.1.12</manifold.version>
+    <scala.version>{{scala_version}}</scala.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+  </dependencies>
+</project>"#;
+        // pom.template.xml ends with .xml — extractor must process it
+        let packages = extract_all_package_files(&[("pom.template.xml", content)]);
+        assert!(!packages.is_empty(), "pom.template.xml should be processed");
+        let deps = &packages[0];
+        let spring = deps.iter().find(|d| d.dep_name.contains("spring-boot-starter-web"));
+        assert!(spring.is_some());
+        assert_eq!(spring.unwrap().current_value, "3.2.0");
+        assert!(spring.unwrap().skip_reason.is_none());
+        let junit = deps.iter().find(|d| d.dep_name.contains("junit-jupiter"));
+        assert!(junit.is_some());
+        assert_eq!(junit.unwrap().current_value, "5.10.1");
+        // scala-library version resolves to {{scala_version}} template placeholder — unresolvable
+        let scala = deps.iter().find(|d| d.dep_name.contains("scala-library"));
+        assert!(scala.is_some());
+        assert!(scala.unwrap().skip_reason.is_some());
     }
 
     // Ported: "should detect props infinitely recursing props" — maven/extract.spec.ts line 448

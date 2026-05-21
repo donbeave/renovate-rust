@@ -7,6 +7,114 @@ use serde_json::{Map, Value, json};
 
 use super::massage::massage_config;
 
+/// Valid package cache namespace names for `cacheTtlOverride`.
+/// Mirrors `lib/util/cache/package/namespaces.ts`.
+static PACKAGE_CACHE_NAMESPACES: &[&str] = &[
+    "_test-namespace",
+    "changelog-bitbucket-notes@v2",
+    "changelog-bitbucket-release",
+    "changelog-bitbucket-server-notes@v2",
+    "changelog-bitbucket-server-release",
+    "changelog-forgejo-notes@v2",
+    "changelog-forgejo-release",
+    "changelog-gitea-notes@v2",
+    "changelog-gitea-release",
+    "changelog-github-notes@v2",
+    "changelog-github-release",
+    "changelog-gitlab-notes@v2",
+    "changelog-gitlab-release",
+    "datasource-artifactory",
+    "datasource-aws-machine-image",
+    "datasource-aws-rds",
+    "datasource-aws-eks-addon",
+    "datasource-azure-bicep-resource",
+    "datasource-azure-pipelines-tasks",
+    "datasource-azure-tags",
+    "datasource-bazel",
+    "datasource-bitbucket-tags",
+    "datasource-bitbucket-server-tags",
+    "datasource-bitrise",
+    "datasource-buildpacks-registry",
+    "datasource-cdnjs",
+    "datasource-conan",
+    "datasource-conda",
+    "datasource-cpan",
+    "datasource-crate-metadata",
+    "datasource-crate",
+    "datasource-deb",
+    "datasource-deno",
+    "datasource-docker-architecture",
+    "datasource-docker-hub-cache",
+    "datasource-docker-digest",
+    "datasource-docker-hub-tags",
+    "datasource-docker-imageconfig",
+    "datasource-docker-labels",
+    "datasource-docker-releases-v2",
+    "datasource-docker-tags",
+    "datasource-dotnet-version",
+    "datasource-elm-package",
+    "datasource-endoflife-date",
+    "datasource-galaxy-collection",
+    "datasource-galaxy",
+    "datasource-git-refs",
+    "datasource-git-tags",
+    "datasource-git",
+    "datasource-forgejo-releases",
+    "datasource-forgejo-tags",
+    "datasource-gitea-releases",
+    "datasource-gitea-tags",
+    "datasource-github-digest",
+    "datasource-github-release-attachments",
+    "datasource-gitlab-packages",
+    "datasource-gitlab-releases",
+    "datasource-gitlab-tags",
+    "datasource-glasskube-packages",
+    "datasource-go-direct",
+    "datasource-go-proxy",
+    "datasource-go",
+    "datasource-golang-version",
+    "datasource-gradle-version",
+    "datasource-helm",
+    "datasource-hermit",
+    "datasource-hex",
+    "datasource-hexpm-bob",
+    "datasource-java-version",
+    "datasource-jenkins-plugins",
+    "datasource-jsr",
+    "datasource-maven:cache-provider",
+    "datasource-maven:metadata-not-found",
+    "datasource-maven:pom-cache-provider",
+    "datasource-maven:postprocess-reject",
+    "datasource-nextcloud",
+    "datasource-node-version",
+    "datasource-npm:cache-provider",
+    "datasource-nuget-v3",
+    "datasource-orb",
+    "datasource-packagist",
+    "datasource-pod",
+    "datasource-python-version",
+    "datasource-repology",
+    "datasource-rpm",
+    "datasource-ruby-version",
+    "datasource-rubygems",
+    "datasource-rust-version",
+    "datasource-sbt-package",
+    "datasource-terraform-module",
+    "datasource-terraform-provider",
+    "datasource-terraform",
+    "datasource-typst:cache-provider",
+    "datasource-typst:registry-releases",
+    "datasource-unity3d",
+    "datasource-unity3d-packages",
+    "github-branches-datasource-v1",
+    "github-releases-datasource-v2",
+    "github-tags-datasource-v2",
+    "merge-confidence",
+    "preset",
+    "terraform-provider-hash",
+    "url-sha256",
+];
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidationResult {
     pub errors: Vec<Value>,
@@ -1836,6 +1944,12 @@ fn validate_global_option_values(
                     "message": format!("Configuration option `cacheTtlOverride.{key}` should be an integer. Found: false (boolean).")
                 }));
             }
+            if !PACKAGE_CACHE_NAMESPACES.contains(&key.as_str()) {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": format!("cacheTtlOverride: namespace `{key}` does not exist")
+                }));
+            }
         }
     }
 
@@ -2563,6 +2677,72 @@ mod tests {
                 .unwrap()
                 .contains("Invalid JSONata expression")
         );
+    }
+
+    // Ported: "accepts templates referencing runtime-only fields" — config/validation.spec.ts line 165
+    #[test]
+    fn validate_config_accepts_templates_referencing_runtime_only_fields() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "packageRules": [{
+                    "matchPackageNames": ["rabbitmq"],
+                    "allowedVersions": "<{{add major 1}}"
+                }]
+            }),
+        );
+        assert_eq!(result.errors.len(), 0);
+    }
+
+    // Ported: "skips preset syntax validation for templates" — config/validation.spec.ts line 1472
+    #[test]
+    fn validate_config_skips_preset_syntax_validation_for_templates() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "extends": ["local>{{ env.PRESET_REPO }}:python-312"]
+            }),
+        );
+        assert_eq!(result.warnings.len(), 0);
+        assert_eq!(result.errors.len(), 0);
+    }
+
+    // Ported: "errors when using an invalid cache namespace" — config/validation.spec.ts line 2706
+    #[test]
+    fn validate_config_errors_for_invalid_cache_namespace() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "cacheTtlOverride": {
+                    "datasource-maven:metadata-xml": 123
+                }
+            }),
+        );
+        assert_eq!(result.warnings.len(), 0);
+        assert_eq!(result.errors.len(), 1);
+        assert!(result.errors[0]["message"]
+            .as_str()
+            .unwrap()
+            .contains("datasource-maven:metadata-xml"));
+        assert!(result.errors[0]["message"]
+            .as_str()
+            .unwrap()
+            .contains("does not exist"));
+    }
+
+    // Ported: "allows a valid cache namespace" — config/validation.spec.ts line 2729
+    #[test]
+    fn validate_config_allows_valid_cache_namespace() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "cacheTtlOverride": {
+                    "datasource-docker-hub-tags": 90
+                }
+            }),
+        );
+        assert_eq!(result.warnings.len(), 0);
+        assert_eq!(result.errors.len(), 0);
     }
 
     // Ported: "catches invalid allowedVersions regex" — config/validation.spec.ts line 179
