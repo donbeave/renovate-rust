@@ -5,7 +5,7 @@
 ## `lib/util/http/retry-after.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/http/retry-after.spec.ts
-**Total tests:** 13 | **Ported:** 7 | **Actionable:** 13 | **Status:** partial
+**Total tests:** 13 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `util/http/retry-after › wrapWithRetry`
 
@@ -15,7 +15,7 @@
 | throws | 34 | ported | `http.rs` | `does_not_retry_on_404` | — |
 | retries | 44 | ported | `http.rs` | `retries_on_429_then_succeeds` | — |
 | gives up after max retries | 59 | ported | `http.rs` | `stops_retrying_after_max_attempts` | — |
-| gives up when delay exceeds maxRetryAfter | 76 | pending | — | — | — |
+| gives up when delay exceeds maxRetryAfter | 76 | ported | `http.rs` | `gives_up_when_retry_after_exceeds_cap` | — |
 
 ### `util/http/retry-after › getRetryAfter`
 

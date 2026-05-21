@@ -531,6 +531,28 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
     }
 
+    // Ported: "gives up when delay exceeds maxRetryAfter" — util/http/retry-after.spec.ts line 76
+    #[tokio::test]
+    async fn gives_up_when_retry_after_exceeds_cap() {
+        let server = MockServer::start().await;
+
+        // Retry-After: 61 exceeds MAX_RETRY_AFTER_SECS (60) — client must not retry.
+        Mock::given(method("GET"))
+            .and(path("/rate-limited-long"))
+            .respond_with(ResponseTemplate::new(429).insert_header("Retry-After", "61"))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let resp = http
+            .get_retrying(&format!("{}/rate-limited-long", server.uri()))
+            .await
+            .unwrap();
+
+        assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
+    }
+
     #[tokio::test]
     async fn does_not_retry_on_404() {
         let server = MockServer::start().await;
