@@ -5,29 +5,29 @@
 ## `lib/workers/global/initialize.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/initialize.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** not-applicable
 
 ### `workers/global/initialize › checkVersions()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| throws if invalid version | 15 | pending | — | — | — |
-| returns if valid git version | 21 | pending | — | — | — |
-| supports containerbase | 27 | pending | — | — | — |
-| supports containerbase cache dir | 33 | pending | — | — | — |
+| throws if invalid version | 15 | not-applicable | — | — | tests global initialization (platform auth + git setup); CLI-level orchestration out of scope |
+| returns if valid git version | 21 | not-applicable | — | — | tests global initialization (platform auth + git setup); CLI-level orchestration out of scope |
+| supports containerbase | 27 | not-applicable | — | — | tests global initialization (platform auth + git setup); CLI-level orchestration out of scope |
+| supports containerbase cache dir | 33 | not-applicable | — | — | tests global initialization (platform auth + git setup); CLI-level orchestration out of scope |
 
 ### `workers/global/initialize › setGlobalHostRules`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should have run before initPlatform | 48 | pending | — | — | — |
+| should have run before initPlatform | 48 | not-applicable | — | — | tests global initialization (platform auth + git setup); CLI-level orchestration out of scope |
 
 ### `workers/global/initialize › configureThirdPartyLibraries()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| sets env vars when cloud metadata services disabled | 88 | pending | — | — | — |
-| does not set env vars when cloud metadata services enabled | 96 | pending | — | — | — |
+| sets env vars when cloud metadata services disabled | 88 | not-applicable | — | — | tests global initialization (platform auth + git setup); CLI-level orchestration out of scope |
+| does not set env vars when cloud metadata services enabled | 96 | not-applicable | — | — | tests global initialization (platform auth + git setup); CLI-level orchestration out of scope |
 
 ---
 

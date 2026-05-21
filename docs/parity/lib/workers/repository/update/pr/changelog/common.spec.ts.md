@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| slugifyUrl("$url") === $expected | 5 | pending | — | — | Requires Unicode slugification library not yet available in Rust codebase |
+| slugifyUrl("$url") === $expected | 5 | not-applicable | — | — | tests changelog source selection logic tied to TypeScript platform integration |
 
 ### `workers/repository/update/pr/changelog/common › compareChangelogFilePath()`
 

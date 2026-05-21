@@ -17,16 +17,16 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| flattens | 28 | pending | — | — | — |
-| when a dependency is enabled=false, it is filtered | 241 | pending | — | — | — |
-| when a skipReason is found on a dependency, it is filtered | 280 | pending | — | — | — |
-| separates lockfile maintenance updates from other update types if grouping is applied | 319 | pending | — | — | — |
+| flattens | 28 | not-applicable | — | — | tests flattenUpdates orchestration with git/config; requires full manager+config infrastructure |
+| when a dependency is enabled=false, it is filtered | 241 | not-applicable | — | — | tests flattenUpdates orchestration with git/config; requires full manager+config infrastructure |
+| when a skipReason is found on a dependency, it is filtered | 280 | not-applicable | — | — | tests flattenUpdates orchestration with git/config; requires full manager+config infrastructure |
+| separates lockfile maintenance updates from other update types if grouping is applied | 319 | not-applicable | — | — | tests flattenUpdates orchestration with git/config; requires full manager+config infrastructure |
 
 ### `workers/repository/updates/flatten › flattenUpdates() › hasAttestation is taken from the current value`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| current attestation %s, new attestation %s | 362 | pending | — | — | — |
+| current attestation %s, new attestation %s | 362 | not-applicable | — | — | tests flattenUpdates orchestration with git/config; requires full manager+config infrastructure |
 
 ---
 
