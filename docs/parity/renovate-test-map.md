@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2915 / 8590 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2915 / 8582 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -794,16 +794,16 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/gitea.spec.ts` | Not done | [details](lib/util/http/gitea.spec.ts.md) |
 | `lib/util/http/github.spec.ts` | Not done | [details](lib/util/http/github.spec.ts.md) |
 | `lib/util/http/gitlab.spec.ts` | Not done | [details](lib/util/http/gitlab.spec.ts.md) |
-| `lib/util/http/got.spec.ts` | Not done | [details](lib/util/http/got.spec.ts.md) |
+| `lib/util/http/got.spec.ts` | Done | [details](lib/util/http/got.spec.ts.md) |
 | `lib/util/http/hooks.spec.ts` | Done | [details](lib/util/http/hooks.spec.ts.md) |
 | `lib/util/http/host-rules.spec.ts` | Not done | [details](lib/util/http/host-rules.spec.ts.md) |
 | `lib/util/http/index.spec.ts` | Not done | [details](lib/util/http/index.spec.ts.md) |
-| `lib/util/http/jira.spec.ts` | Not done | [details](lib/util/http/jira.spec.ts.md) |
-| `lib/util/http/queue.spec.ts` | Not done | [details](lib/util/http/queue.spec.ts.md) |
+| `lib/util/http/jira.spec.ts` | Done | [details](lib/util/http/jira.spec.ts.md) |
+| `lib/util/http/queue.spec.ts` | Done | [details](lib/util/http/queue.spec.ts.md) |
 | `lib/util/http/rate-limit.spec.ts` | Not done | [details](lib/util/http/rate-limit.spec.ts.md) |
 | `lib/util/http/retry-after.spec.ts` | Done | [details](lib/util/http/retry-after.spec.ts.md) |
 | `lib/util/http/scm-manager.spec.ts` | Not done | [details](lib/util/http/scm-manager.spec.ts.md) |
-| `lib/util/http/throttle.spec.ts` | Not done | [details](lib/util/http/throttle.spec.ts.md) |
+| `lib/util/http/throttle.spec.ts` | Done | [details](lib/util/http/throttle.spec.ts.md) |
 | `lib/util/http/www-authenticate.spec.ts` | Done | [details](lib/util/http/www-authenticate.spec.ts.md) |
 | `lib/util/json-writer/editor-config.spec.ts` | Not done | [details](lib/util/json-writer/editor-config.spec.ts.md) |
 | `lib/util/json-writer/json-writer.spec.ts` | Done | [details](lib/util/json-writer/json-writer.spec.ts.md) |
