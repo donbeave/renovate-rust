@@ -5,7 +5,7 @@
 ## `lib/modules/manager/ant/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ant/extract.spec.ts
-**Total tests:** 44 | **Ported:** 44 | **Actionable:** 44 | **Status:** ported
+**Total tests:** 49 | **Ported:** 44 | **Actionable:** 49 | **Status:** partial
 
 ### `extractPackageFile`
 
@@ -65,6 +65,11 @@
 | logs debug when settingsFile cannot be read | 1127 | ported | `ant.rs` | `extract_all_package_files_ignores_missing_settings_file` | — |
 | does not pass registries to dependencies outside the block | 1155 | ported | `ant.rs` | `remote_repository_registry_is_scoped_to_dependency_block` | — |
 | handles chain referencing undefined property | 1191 | ported | `ant.rs` | `chain_referencing_undefined_property_is_skipped` | — |
+| skips property file references with unresolved placeholders in path | 1194 | pending | — | — | — |
+| skips property file references that resolve outside the repository | 1226 | pending | — | — | — |
+| skips import file references that resolve outside the repository | 1261 | pending | — | — | — |
+| skips settingsFile references that resolve outside the repository | 1296 | pending | — | — | — |
+| skips import file references with unresolved placeholders in path | 1330 | pending | — | — | — |
 
 ---
 
