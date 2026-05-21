@@ -1094,10 +1094,13 @@ pub struct CustomExtractedDep {
     pub datasource: String,
     /// Optional versioning scheme override.
     pub versioning: Option<String>,
-    /// Optional registry URL override.
+    /// Optional registry URL override (validated; `None` if the captured URL was invalid).
     pub registry_url: Option<String>,
     /// Optional extract version pattern.
     pub extract_version: Option<String>,
+    /// Whitespace indentation prefix (from `indentation` capture group).
+    /// `Some("")` when the captured value was non-whitespace; `None` when group absent.
+    pub indentation: Option<String>,
 }
 
 impl CustomManager {
@@ -1182,11 +1185,20 @@ impl CustomManager {
                 let registry_url = caps
                     .name("registryUrl")
                     .map(|m| m.as_str().to_owned())
-                    .or_else(|| self.registry_url_template.clone());
+                    .or_else(|| self.registry_url_template.clone())
+                    .and_then(|url| validate_registry_url(url));
                 let extract_version = caps
                     .name("extractVersion")
                     .map(|m| m.as_str().to_owned())
                     .or_else(|| self.extract_version_template.clone());
+                let indentation = caps.name("indentation").map(|m| {
+                    let v = m.as_str();
+                    if v.chars().all(char::is_whitespace) {
+                        v.to_owned()
+                    } else {
+                        String::new()
+                    }
+                });
                 deps.push(CustomExtractedDep {
                     dep_name,
                     package_name,
@@ -1195,6 +1207,7 @@ impl CustomManager {
                     versioning,
                     registry_url,
                     extract_version,
+                    indentation,
                 });
             }
         }
@@ -1260,10 +1273,14 @@ impl CustomManager {
             .or_else(|| self.versioning_template.clone());
         let registry_url = merged
             .remove("registryUrl")
-            .or_else(|| self.registry_url_template.clone());
+            .or_else(|| self.registry_url_template.clone())
+            .and_then(|url| validate_registry_url(url));
         let extract_version = merged
             .remove("extractVersion")
             .or_else(|| self.extract_version_template.clone());
+        let indentation = merged.remove("indentation").map(|v| {
+            if v.chars().all(char::is_whitespace) { v } else { String::new() }
+        });
 
         vec![CustomExtractedDep {
             dep_name,
@@ -1273,11 +1290,30 @@ impl CustomManager {
             versioning,
             registry_url,
             extract_version,
+            indentation,
         }]
     }
 }
 
 // ── Free helpers ─────────────────────────────────────────────────────────────
+
+/// Validate a `registryUrl` capture group value.
+/// Returns `Some(url)` if valid (has scheme + non-empty host), `None` if invalid.
+/// Mirrors TypeScript's `createDependency` which calls `parseUrl()` and skips invalid URLs.
+fn validate_registry_url(url: String) -> Option<String> {
+    let rest = if let Some(r) = url.strip_prefix("https://") {
+        r
+    } else if let Some(r) = url.strip_prefix("http://") {
+        r
+    } else {
+        return None;
+    };
+    let host = rest.split('/').next().unwrap_or("");
+    if host.is_empty() {
+        return None;
+    }
+    Some(url)
+}
 
 /// Expand compound presets (presets that themselves extend other presets)
 /// into their constituent presets.
@@ -14801,6 +14837,116 @@ mod rule_effects_tests {
         assert_eq!(deps[0].dep_name, "node");
         assert_eq!(deps[0].datasource, "node-version");
         assert_eq!(deps[0].current_value, "20.0.0");
+    }
+
+    // Ported: "sets registryUrls when registryUrl group is a valid URL" — custom/regex/utils.spec.ts line 27
+    #[test]
+    fn custom_manager_sets_registry_urls_when_valid_url() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            match_strings: vec![
+                r"(?P<depName>\S+) (?P<currentValue>\S+) (?P<registryUrl>https?://\S+)".to_owned(),
+            ],
+            match_strings_strategy: "any".to_owned(),
+            datasource_template: Some("npm".to_owned()),
+            ..Default::default()
+        };
+        let content = "my-pkg 1.0.0 https://registry.example.com/";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(
+            deps[0].registry_url.as_deref(),
+            Some("https://registry.example.com/")
+        );
+    }
+
+    // Ported: "warns and skips registryUrls when registryUrl group is an invalid URL" — custom/regex/utils.spec.ts line 39
+    #[test]
+    fn custom_manager_skips_registry_url_when_invalid() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            match_strings: vec![
+                r"(?P<depName>\S+) (?P<currentValue>\S+) (?P<registryUrl>not-a-valid-url)".to_owned(),
+            ],
+            match_strings_strategy: "any".to_owned(),
+            datasource_template: Some("npm".to_owned()),
+            ..Default::default()
+        };
+        let content = "my-pkg 1.0.0 not-a-valid-url";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert!(deps[0].registry_url.is_none());
+    }
+
+    // Ported: "sets datasource when datasource group is provided" — custom/regex/utils.spec.ts line 55
+    #[test]
+    fn custom_manager_sets_datasource_from_capture_group() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            match_strings: vec![
+                r"(?P<datasource>\S+) (?P<depName>\S+) (?P<currentValue>\S+)".to_owned(),
+            ],
+            match_strings_strategy: "any".to_owned(),
+            ..Default::default()
+        };
+        let content = "npm foo 1.0.0";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].datasource, "npm");
+    }
+
+    // Ported: "sets indentation when indentation group is whitespace" — custom/regex/utils.spec.ts line 67
+    #[test]
+    fn custom_manager_sets_indentation_from_whitespace_group() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            match_strings: vec![
+                r"(?P<indentation>  )(?P<datasource>\S+) (?P<depName>\S+) (?P<currentValue>\S+)"
+                    .to_owned(),
+            ],
+            match_strings_strategy: "any".to_owned(),
+            ..Default::default()
+        };
+        let content = "  npm foo 1.0.0";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].indentation.as_deref(), Some("  "));
+    }
+
+    // Ported: "sets empty indentation when indentation group is non-whitespace" — custom/regex/utils.spec.ts line 79
+    #[test]
+    fn custom_manager_sets_empty_indentation_for_non_whitespace_group() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            match_strings: vec![
+                r"(?P<indentation>abc)(?P<datasource>\S+) (?P<depName>\S+) (?P<currentValue>\S+)"
+                    .to_owned(),
+            ],
+            match_strings_strategy: "any".to_owned(),
+            ..Default::default()
+        };
+        let content = "abcnpm foo 1.0.0";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].indentation.as_deref(), Some(""));
+    }
+
+    // Ported: "sets depName via default branch" — custom/regex/utils.spec.ts line 91
+    #[test]
+    fn custom_manager_sets_dep_name_from_capture_group() {
+        let cm = CustomManager {
+            custom_type: "regex".to_owned(),
+            match_strings: vec![
+                r"(?P<depName>my-package) (?P<currentValue>\S+)".to_owned(),
+            ],
+            match_strings_strategy: "any".to_owned(),
+            datasource_template: Some("npm".to_owned()),
+            ..Default::default()
+        };
+        let content = "my-package 1.0.0";
+        let deps = cm.extract_deps(content);
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].dep_name, "my-package");
     }
 
     #[test]
