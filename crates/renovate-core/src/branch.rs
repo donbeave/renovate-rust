@@ -914,6 +914,28 @@ pub fn get_controls() -> &'static str {
     "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
 }
 
+/// Return the PR footer string, or empty string if none configured.
+///
+/// Mirrors `getPrFooter` from
+/// `lib/workers/repository/update/pr/body/footer.ts`.
+pub fn get_pr_footer(pr_footer: Option<&str>) -> String {
+    match pr_footer.filter(|s| !s.is_empty()) {
+        None => String::new(),
+        Some(footer) => format!("\n---\n\n{footer}"),
+    }
+}
+
+/// Return the PR header string, or empty string if none configured.
+///
+/// Mirrors `getPrHeader` from
+/// `lib/workers/repository/update/pr/body/header.ts`.
+pub fn get_pr_header(pr_header: Option<&str>) -> String {
+    match pr_header.filter(|s| !s.is_empty()) {
+        None => String::new(),
+        Some(header) => format!("{header}\n\n"),
+    }
+}
+
 fn numeric_locale_compare(a: &str, b: &str) -> std::cmp::Ordering {
     let mut ai = a.chars().peekable();
     let mut bi = b.chars().peekable();
@@ -2227,5 +2249,29 @@ mod tests {
             get_controls(),
             "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
         );
+    }
+
+    // Ported: "renders empty footer" — workers/repository/update/pr/body/footer.spec.ts line 8
+    #[test]
+    fn get_pr_footer_empty_when_none() {
+        assert_eq!(get_pr_footer(None), "");
+    }
+
+    // Ported: "renders prFooter" — workers/repository/update/pr/body/footer.spec.ts line 19
+    #[test]
+    fn get_pr_footer_renders_footer() {
+        assert_eq!(get_pr_footer(Some("FOOTER")), "\n---\n\nFOOTER");
+    }
+
+    // Ported: "renders empty header" — workers/repository/update/pr/body/header.spec.ts line 8
+    #[test]
+    fn get_pr_header_empty_when_none() {
+        assert_eq!(get_pr_header(None), "");
+    }
+
+    // Ported: "renders prHeader" — workers/repository/update/pr/body/header.spec.ts line 19
+    #[test]
+    fn get_pr_header_renders_header() {
+        assert_eq!(get_pr_header(Some("HEADER")), "HEADER\n\n");
     }
 }
