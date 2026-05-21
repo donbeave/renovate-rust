@@ -5,7 +5,7 @@
 ## `lib/modules/manager/mise/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/extract.spec.ts
-**Total tests:** 40 | **Ported:** 32 | **Actionable:** 40 | **Status:** partial
+**Total tests:** 40 | **Ported:** 40 | **Actionable:** 40 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -43,14 +43,14 @@
 | resolves tools from the mise registry data file via cargo backend | 1104 | ported | `mise.rs` | `resolves_mise_registry_cargo_backend_tool` | — |
 | resolves tools from the mise registry data file via github backend | 1122 | ported | `mise.rs` | `resolves_mise_registry_github_backend_tool` | — |
 | resolves a tool from the mise registry, prioritising the github backend over others | 1140 | ported | `mise.rs` | `resolves_mise_registry_prefers_github_backend_tool` | — |
-| extracts lockedVersion when lock file present | 1170 | pending | — | — | — |
-| sets lockFiles array when lock file present | 1195 | pending | — | — | — |
-| handles missing lock file gracefully | 1205 | pending | — | — | — |
-| handles malformed lock file gracefully | 1216 | pending | — | — | — |
-| works with environment-specific lock files | 1227 | pending | — | — | — |
-| extracts lockedVersion for tools with backend prefix | 1246 | pending | — | — | — |
-| skips lockedVersion when tool not in lock file | 1260 | pending | — | — | — |
-| extracts first lockedVersion when multiple versions exist | 1276 | pending | — | — | — |
+| extracts lockedVersion when lock file present | 1170 | ported | `mise.rs` | `extracts_locked_version_when_lock_file_present` | — |
+| sets lockFiles array when lock file present | 1195 | ported | `mise.rs` | `sets_lock_files_array_when_lock_file_present` | — |
+| handles missing lock file gracefully | 1205 | ported | `mise.rs` | `handles_missing_lock_file_gracefully` | — |
+| handles malformed lock file gracefully | 1216 | ported | `mise.rs` | `handles_malformed_lock_file_gracefully` | — |
+| works with environment-specific lock files | 1227 | ported | `mise.rs` | `works_with_environment_specific_lock_files` | — |
+| extracts lockedVersion for tools with backend prefix | 1246 | ported | `mise.rs` | `extracts_locked_version_for_tools_with_backend_prefix` | — |
+| skips lockedVersion when tool not in lock file | 1260 | ported | `mise.rs` | `skips_locked_version_when_tool_not_in_lock_file` | — |
+| extracts first lockedVersion when multiple versions exist | 1276 | ported | `mise.rs` | `extracts_first_locked_version_when_multiple_versions_exist` | — |
 
 ---
 

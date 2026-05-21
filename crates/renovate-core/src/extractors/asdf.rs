@@ -102,6 +102,8 @@ pub struct AsdfDep {
     pub extract_version: Option<&'static str>,
     /// Versioning scheme ID.
     pub versioning: Option<&'static str>,
+    /// Pinned version from the lock file, if any.
+    pub locked_version: Option<String>,
     pub skip_reason: Option<AsdfSkipReason>,
 }
 
@@ -205,6 +207,7 @@ fn parse_line(line: &str) -> Option<AsdfDep> {
                     package_name: def.package_name.map(str::to_owned),
                     extract_version: def.extract_version,
                     versioning: def.versioning,
+                    locked_version: None,
                     skip_reason: None,
                 },
                 None,
@@ -339,6 +342,7 @@ fn parse_scala(version: &str) -> AsdfDep {
                 package_name: def.package_name.map(str::to_owned),
                 extract_version: def.extract_version,
                 versioning: def.versioning,
+                locked_version: None,
                 skip_reason: None,
             }
         }
@@ -354,6 +358,7 @@ fn parse_scala(version: &str) -> AsdfDep {
             package_name: Some("lampepfl/dotty".to_owned()),
             extract_version: None,
             versioning: None,
+            locked_version: None,
             skip_reason: None,
         },
         _ => AsdfDep {
@@ -381,6 +386,7 @@ fn parse_hugo(version: &str) -> AsdfDep {
         package_name: Some("gohugoio/hugo".to_owned()),
         extract_version: Some("^v(?<version>\\S+)"),
         versioning: None,
+        locked_version: None,
         skip_reason: None,
     }
 }

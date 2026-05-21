@@ -935,6 +935,7 @@ fn make_dep_from_def(tool_name: &str, version: &str, def: &AsdfToolDef) -> AsdfD
         package_name: pkg.map(str::to_owned),
         extract_version: def.extract_version,
         versioning: def.versioning,
+        locked_version: None,
         skip_reason: None,
     }
 }
@@ -1409,6 +1410,48 @@ pub fn update_locked_dependency(
         }
     });
     result.unwrap_or(UpdateLockedStatus::UpdateFailed)
+}
+
+// ── mise extractPackageFile (with lock file support) ─────────────────────────
+
+/// Result of extracting a mise.toml file, including optional lock file information.
+pub struct MiseExtractResult {
+    pub deps: Vec<AsdfDep>,
+    /// Lock file paths when a lock file was found and parsed.
+    pub lock_files: Option<Vec<String>>,
+}
+
+/// Extract deps from a mise config file, optionally enriching with lock file data.
+///
+/// `config_path` is the path to the mise.toml file (e.g., "mise.toml").
+/// `lock_file_content` is `Some(content)` if the lock file was found and read, `None` otherwise.
+pub fn extract_package_file(
+    content: &str,
+    config_path: &str,
+    lock_file_content: Option<&str>,
+) -> MiseExtractResult {
+    let mut deps = extract(content);
+
+    if let Some(lock_content) = lock_file_content {
+        if let Some(lock_file) = parse_mise_lock_file(lock_content) {
+            let lock_file_name = get_lock_file_name(config_path);
+            for dep in &mut deps {
+                let tool_key = dep.dep_name.split('/').next().unwrap_or(&dep.dep_name);
+                let lookup_key = if let Some((_, after)) = tool_key.split_once(':') {
+                    after
+                } else {
+                    tool_key
+                };
+                dep.locked_version = get_locked_version(&lock_file, lookup_key);
+            }
+            return MiseExtractResult {
+                deps,
+                lock_files: Some(vec![lock_file_name]),
+            };
+        }
+    }
+
+    MiseExtractResult { deps, lock_files: None }
 }
 
 #[cfg(test)]
@@ -2854,5 +2897,106 @@ fake-tool = '1.6.2'
             r.extract_version.as_deref(),
             Some(r"^v?(?<version>\d+\.\d+\.)")
         );
+    }
+
+    // Ported: "extracts lockedVersion when lock file present" — mise/extract.spec.ts line 1170
+    #[test]
+    fn extracts_locked_version_when_lock_file_present() {
+        let lock_content = r#"
+[[tools.node]]
+version = "20.11.0"
+backend = "core:node"
+
+[[tools.python]]
+version = "3.10.17"
+"#;
+        let content = "[tools]\nnode = \"20\"\npython = \"3.10\"";
+        let result = extract_package_file(content, "mise.toml", Some(lock_content));
+        assert_eq!(result.lock_files, Some(vec!["mise.lock".to_owned()]));
+        let node = result.deps.iter().find(|d| d.dep_name == "node").unwrap();
+        assert_eq!(node.locked_version.as_deref(), Some("20.11.0"));
+        assert_eq!(node.current_value, "20");
+        let python = result.deps.iter().find(|d| d.dep_name == "python").unwrap();
+        assert_eq!(python.locked_version.as_deref(), Some("3.10.17"));
+    }
+
+    // Ported: "sets lockFiles array when lock file present" — mise/extract.spec.ts line 1195
+    #[test]
+    fn sets_lock_files_array_when_lock_file_present() {
+        let lock_content = "[[tools.node]]\nversion = \"20.11.0\"\n";
+        let content = "[tools]\nnode = \"20\"";
+        let result = extract_package_file(content, "mise.toml", Some(lock_content));
+        assert_eq!(result.lock_files, Some(vec!["mise.lock".to_owned()]));
+    }
+
+    // Ported: "handles missing lock file gracefully" — mise/extract.spec.ts line 1205
+    #[test]
+    fn handles_missing_lock_file_gracefully() {
+        let content = "[tools]\nnode = \"20\"";
+        let result = extract_package_file(content, "mise.toml", None);
+        assert!(result.lock_files.is_none());
+        assert!(result.deps[0].locked_version.is_none());
+    }
+
+    // Ported: "handles malformed lock file gracefully" — mise/extract.spec.ts line 1216
+    #[test]
+    fn handles_malformed_lock_file_gracefully() {
+        let content = "[tools]\nnode = \"20\"";
+        let result = extract_package_file(content, "mise.toml", Some("invalid toml {{{{"));
+        assert!(result.lock_files.is_none());
+        assert!(result.deps[0].locked_version.is_none());
+    }
+
+    // Ported: "works with environment-specific lock files" — mise/extract.spec.ts line 1227
+    #[test]
+    fn works_with_environment_specific_lock_files() {
+        let lock_content = "[[tools.node]]\nversion = \"18.19.0\"\n";
+        let content = "[tools]\nnode = \"18\"";
+        let result = extract_package_file(content, "mise.test.toml", Some(lock_content));
+        assert_eq!(result.lock_files, Some(vec!["mise.test.lock".to_owned()]));
+        assert_eq!(result.deps[0].locked_version.as_deref(), Some("18.19.0"));
+    }
+
+    // Ported: "extracts lockedVersion for tools with backend prefix" — mise/extract.spec.ts line 1246
+    #[test]
+    fn extracts_locked_version_for_tools_with_backend_prefix() {
+        let lock_content = r#"
+[[tools.node]]
+version = "20.11.0"
+backend = "core:node"
+"#;
+        let content = "[tools]\n\"core:node\" = \"20\"";
+        let result = extract_package_file(content, "mise.toml", Some(lock_content));
+        let dep = result.deps.iter().find(|d| d.dep_name.contains("node")).unwrap();
+        assert_eq!(dep.locked_version.as_deref(), Some("20.11.0"));
+    }
+
+    // Ported: "skips lockedVersion when tool not in lock file" — mise/extract.spec.ts line 1260
+    #[test]
+    fn skips_locked_version_when_tool_not_in_lock_file() {
+        let lock_content = "[[tools.node]]\nversion = \"20.11.0\"\n";
+        let content = "[tools]\nnode = \"20\"\nruby = \"3.3\"";
+        let result = extract_package_file(content, "mise.toml", Some(lock_content));
+        assert_eq!(result.lock_files, Some(vec!["mise.lock".to_owned()]));
+        let node = result.deps.iter().find(|d| d.dep_name == "node").unwrap();
+        assert_eq!(node.locked_version.as_deref(), Some("20.11.0"));
+        let ruby = result.deps.iter().find(|d| d.dep_name == "ruby").unwrap();
+        assert!(ruby.locked_version.is_none());
+    }
+
+    // Ported: "extracts first lockedVersion when multiple versions exist" — mise/extract.spec.ts line 1276
+    #[test]
+    fn extracts_first_locked_version_when_multiple_versions_exist() {
+        let lock_content = r#"
+[[tools.python]]
+version = "3.10.17"
+
+[[tools.python]]
+version = "3.11.12"
+"#;
+        let content = "[tools]\npython = [\"3.10\", \"3.11\"]";
+        let result = extract_package_file(content, "mise.toml", Some(lock_content));
+        let python = result.deps.iter().find(|d| d.dep_name == "python").unwrap();
+        assert_eq!(python.locked_version.as_deref(), Some("3.10.17"));
     }
 }
