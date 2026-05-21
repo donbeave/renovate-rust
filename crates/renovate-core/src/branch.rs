@@ -914,6 +914,49 @@ pub fn get_controls() -> &'static str {
     "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
 }
 
+/// Return the changelog section string, or empty if no release notes.
+///
+/// Mirrors the early-return path of `getChangelogs` from
+/// `lib/workers/repository/update/pr/body/changelogs.ts`.
+/// Full changelog rendering (Handlebars template) is not yet implemented.
+pub fn get_changelogs(has_release_notes: bool) -> String {
+    if !has_release_notes {
+        return String::new();
+    }
+    // Full implementation requires Handlebars template engine.
+    String::new()
+}
+
+/// Return the updates table string, or empty if no columns are configured.
+///
+/// Mirrors the early-return path of `getPrUpdatesTable` from
+/// `lib/workers/repository/update/pr/body/updates-table.ts`.
+pub fn get_pr_updates_table(pr_body_columns: Option<&[String]>) -> String {
+    if pr_body_columns.is_none() {
+        return String::new();
+    }
+    // Full implementation requires Handlebars template engine.
+    String::new()
+}
+
+/// Return extra PR notes for special upgrade scenarios.
+///
+/// Mirrors `getPrExtraNotes` from
+/// `lib/workers/repository/update/pr/body/notes.ts`.
+pub fn get_pr_extra_notes(has_git_ref: bool, update_type: &str, is_pin: bool) -> String {
+    let mut res = String::new();
+    if has_git_ref {
+        res += "If you wish to disable git hash updates, add `\":disableDigestUpdates\"` to the extends array in your config.\n\n";
+    }
+    if update_type == "lockFileMaintenance" {
+        res += "This Pull Request updates lock files to use the latest dependency versions.\n\n";
+    }
+    if is_pin {
+        res += "Add the preset `:preserveSemverRanges` to your config if you don't want to pin your dependencies.\n\n";
+    }
+    res
+}
+
 /// Return the PR footer string, or empty string if none configured.
 ///
 /// Mirrors `getPrFooter` from
@@ -2248,6 +2291,32 @@ mod tests {
         assert_eq!(
             get_controls(),
             "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
+        );
+    }
+
+    // Ported: "returns empty string when there is no release notes" — workers/repository/update/pr/body/changelogs.spec.ts line 9
+    #[test]
+    fn get_changelogs_returns_empty_when_no_release_notes() {
+        assert_eq!(get_changelogs(false), "");
+    }
+
+    // Ported: "checks a case where prBodyColumns are undefined" — workers/repository/update/pr/body/updates-table.spec.ts line 6
+    #[test]
+    fn get_pr_updates_table_returns_empty_without_columns() {
+        assert_eq!(get_pr_updates_table(None), "");
+    }
+
+    // Ported: "handles extra notes" — workers/repository/update/pr/body/notes.spec.ts line 44
+    #[test]
+    fn get_pr_extra_notes_returns_relevant_strings() {
+        let res = get_pr_extra_notes(true, "lockFileMaintenance", true);
+        assert!(
+            res.contains("If you wish to disable git hash updates"),
+            "should contain git hash note"
+        );
+        assert!(
+            res.contains("This Pull Request updates lock files"),
+            "should contain lock file maintenance note"
         );
     }
 
