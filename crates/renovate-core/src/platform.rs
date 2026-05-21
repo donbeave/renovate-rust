@@ -13,6 +13,7 @@
 pub mod azure_utils;
 pub mod gitea_forgejo_utils;
 pub mod github;
+pub mod github_api_cache;
 pub mod gitlab;
 pub mod local;
 pub mod pr_body;
