@@ -5,23 +5,23 @@
 ## `lib/modules/manager/gradle/parser/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/parser/common.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| storeVarToken | 41 | pending | — | — | — |
-| increaseNestingDepth | 46 | pending | — | — | — |
-| reduceNestingDepth | 55 | pending | — | — | — |
-| prependNestingDepth | 61 | pending | — | — | — |
-| storeInTokenMap | 73 | pending | — | — | — |
-| loadFromTokenMap | 79 | pending | — | — | — |
-| cleanupTempVars | 89 | pending | — | — | — |
-| stripReservedPrefixFromKeyTokens | 98 | pending | — | — | — |
-| coalesceVariable | 115 | pending | — | — | — |
-| findVariable | 125 | pending | — | — | — |
-| interpolateString | 151 | pending | — | — | — |
+| storeVarToken | 41 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| increaseNestingDepth | 46 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| reduceNestingDepth | 55 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| prependNestingDepth | 61 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| storeInTokenMap | 73 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| loadFromTokenMap | 79 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| cleanupTempVars | 89 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| stripReservedPrefixFromKeyTokens | 98 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| coalesceVariable | 115 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| findVariable | 125 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
+| interpolateString | 151 | not-applicable | — | — | tests TypeScript Gradle DSL AST token helpers from @renovatebot/good-enough-parser; Rust uses own parsing |
 
 ---
 

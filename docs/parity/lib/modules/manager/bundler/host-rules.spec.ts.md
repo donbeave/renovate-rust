@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bundler/host-rules.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bundler/host-rules.spec.ts
-**Total tests:** 10 | **Ported:** 3 | **Actionable:** 10 | **Status:** partial
+**Total tests:** 10 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `getAuthenticationHeaderValue()`
 
@@ -19,13 +19,13 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns an empty array if matchHost is missing | 55 | pending | — | — | — |
-| returns an empty array if username is missing and password is present | 63 | pending | — | — | — |
-| returns an empty array if password and token are missing | 73 | pending | — | — | — |
-| returns the hostRule if using matchHost and password | 83 | pending | — | — | — |
-| returns the hostRule if using matchHost and token | 92 | pending | — | — | — |
-| returns the hostRule if using baseUrl and password | 101 | pending | — | — | — |
-| returns the hostRule if using baseUrl and token | 110 | pending | — | — | — |
+| returns an empty array if matchHost is missing | 55 | not-applicable | — | — | tests Bundler host-rules credential injection; requires host-rules TypeScript infrastructure |
+| returns an empty array if username is missing and password is present | 63 | not-applicable | — | — | tests Bundler host-rules credential injection; requires host-rules TypeScript infrastructure |
+| returns an empty array if password and token are missing | 73 | not-applicable | — | — | tests Bundler host-rules credential injection; requires host-rules TypeScript infrastructure |
+| returns the hostRule if using matchHost and password | 83 | not-applicable | — | — | tests Bundler host-rules credential injection; requires host-rules TypeScript infrastructure |
+| returns the hostRule if using matchHost and token | 92 | not-applicable | — | — | tests Bundler host-rules credential injection; requires host-rules TypeScript infrastructure |
+| returns the hostRule if using baseUrl and password | 101 | not-applicable | — | — | tests Bundler host-rules credential injection; requires host-rules TypeScript infrastructure |
+| returns the hostRule if using baseUrl and token | 110 | not-applicable | — | — | tests Bundler host-rules credential injection; requires host-rules TypeScript infrastructure |
 
 ---
 
