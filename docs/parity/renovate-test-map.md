@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 3016 / 3026 actionable tests ported (99%) — updated 2026-05-21
+**Overall progress:** 3018 / 3026 actionable tests ported (99%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -732,7 +732,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/github/schema.spec.ts` | Done | [details](lib/modules/platform/github/schema.spec.ts.md) |
 | `lib/modules/platform/github/scm.spec.ts` | Done | [details](lib/modules/platform/github/scm.spec.ts.md) |
 | `lib/modules/platform/gitlab/code-owners.spec.ts` | Done | [details](lib/modules/platform/gitlab/code-owners.spec.ts.md) |
-| `lib/modules/platform/gitlab/utils.spec.ts` | Not done | [details](lib/modules/platform/gitlab/utils.spec.ts.md) |
+| `lib/modules/platform/gitlab/utils.spec.ts` | Done | [details](lib/modules/platform/gitlab/utils.spec.ts.md) |
 | `lib/modules/platform/gitlab/index.spec.ts` | Done | [details](lib/modules/platform/gitlab/index.spec.ts.md) |
 | `lib/modules/platform/gitlab/pr-cache.spec.ts` | Done | [details](lib/modules/platform/gitlab/pr-cache.spec.ts.md) |
 | `lib/modules/platform/local/index.spec.ts` | Done | [details](lib/modules/platform/local/index.spec.ts.md) |

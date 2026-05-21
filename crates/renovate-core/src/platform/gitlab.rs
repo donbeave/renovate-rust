@@ -26,6 +26,74 @@ use crate::platform::{CurrentUser, PlatformClient, PlatformError, RawFile};
 /// Default GitLab API base URL.
 pub const GITLAB_API_BASE: &str = "https://gitlab.com/api/v4";
 
+/// Error type for `get_repo_url`.
+#[derive(Debug, thiserror::Error)]
+pub enum GetRepoUrlError {
+    #[error("Invalid GitLab endpoint: {0}")]
+    InvalidEndpoint(String),
+    #[error("SSH URL unavailable")]
+    SshUrlUnavailable,
+}
+
+/// Construct the clone URL for a GitLab repository.
+///
+/// Mirrors `getRepoUrl()` in `lib/modules/platform/gitlab/utils.ts`.
+///
+/// - `git_url = Some("ssh")` → returns the ssh clone URL (returns error if unavailable).
+/// - `git_url = Some("endpoint")` or `http_url_to_repo = None` → builds URL from
+///   `endpoint`, returning `GetRepoUrlError::InvalidEndpoint` if the endpoint cannot
+///   be parsed as a URL.
+/// - Otherwise → returns `http_url_to_repo` with OAuth2 credentials injected.
+pub fn get_repo_url(
+    repository: &str,
+    git_url: Option<&str>,
+    ssh_url_to_repo: Option<&str>,
+    http_url_to_repo: Option<&str>,
+    endpoint: &str,
+    token: Option<&str>,
+) -> Result<String, GetRepoUrlError> {
+    if git_url == Some("ssh") {
+        return ssh_url_to_repo
+            .map(str::to_owned)
+            .ok_or(GetRepoUrlError::SshUrlUnavailable);
+    }
+
+    if git_url == Some("endpoint") || http_url_to_repo.is_none() {
+        let parsed = parse_url(endpoint)
+            .ok_or_else(|| GetRepoUrlError::InvalidEndpoint(endpoint.to_owned()))?;
+        let (scheme, host, path_prefix) = parsed;
+        let api_idx = path_prefix.find("/api").unwrap_or(path_prefix.len());
+        let new_path = &path_prefix[..api_idx];
+        let auth = token.map(|t| format!("oauth2:{t}")).unwrap_or_default();
+        let url = if auth.is_empty() {
+            format!("{scheme}://{host}{new_path}/{repository}.git")
+        } else {
+            format!("{scheme}://{auth}@{host}{new_path}/{repository}.git")
+        };
+        return Ok(url);
+    }
+
+    let http_url = http_url_to_repo.unwrap();
+    let auth_prefix = token.map(|t| format!("oauth2:{t}@")).unwrap_or_default();
+    if let Some(after_scheme) = http_url.find("://").map(|i| (&http_url[..i], &http_url[i + 3..])) {
+        Ok(format!("{}://{}{}", after_scheme.0, auth_prefix, after_scheme.1))
+    } else {
+        Ok(http_url.to_owned())
+    }
+}
+
+fn parse_url(u: &str) -> Option<(String, String, String)> {
+    let idx = u.find("://")?;
+    let scheme = &u[..idx];
+    if scheme.is_empty() { return None; }
+    let rest = &u[idx + 3..];
+    let slash_idx = rest.find('/').unwrap_or(rest.len());
+    let host = &rest[..slash_idx];
+    if host.is_empty() { return None; }
+    let path = &rest[slash_idx..];
+    Some((scheme.to_owned(), host.to_owned(), path.to_owned()))
+}
+
 /// GitLab platform client authenticated with a Personal Access Token.
 #[derive(Debug, Clone)]
 pub struct GitlabClient {
@@ -554,6 +622,32 @@ mod tests {
         assert_eq!(rules[0].pattern, "filename");
         assert_eq!(rules[0].usernames, vec!["@backend-team", "@backend-lead"]);
         assert_eq!(rules[0].score, 8);
+    }
+
+    // ── gitlab/utils.spec.ts tests ────────────────────────────────────────────
+
+    // Ported: "throws on invalid endpoint when gitUrl is endpoint" — modules/platform/gitlab/utils.spec.ts line 42
+    #[test]
+    fn get_repo_url_throws_on_invalid_endpoint_when_git_url_is_endpoint() {
+        let result = get_repo_url("group/repo", Some("endpoint"), None, None, "not-a-valid-url", None);
+        match result {
+            Err(GetRepoUrlError::InvalidEndpoint(msg)) => {
+                assert_eq!(msg, "not-a-valid-url");
+            }
+            _ => panic!("Expected InvalidEndpoint error"),
+        }
+    }
+
+    // Ported: "throws on invalid endpoint when http_url_to_repo is null" — modules/platform/gitlab/utils.spec.ts line 48
+    #[test]
+    fn get_repo_url_throws_on_invalid_endpoint_when_http_url_is_null() {
+        let result = get_repo_url("group/repo", None, None, None, "not-a-valid-url", None);
+        match result {
+            Err(GetRepoUrlError::InvalidEndpoint(msg)) => {
+                assert_eq!(msg, "not-a-valid-url");
+            }
+            _ => panic!("Expected InvalidEndpoint error"),
+        }
     }
 
     // Ported: "should extract an owner rule from a line after an optional section header with spaces" — modules/platform/gitlab/code-owners.spec.ts line 103
