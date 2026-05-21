@@ -19,6 +19,7 @@
 
 use chrono::{DateTime, Utc};
 use reqwest::{Client, RequestBuilder, Response, StatusCode};
+use serde_json::Value;
 use thiserror::Error;
 use tokio::time::Duration;
 
@@ -265,6 +266,48 @@ fn parse_retry_after(resp: &Response) -> Option<Duration> {
     let value = resp.headers().get("Retry-After")?.to_str().ok()?;
     let now = Utc::now();
     parse_retry_after_value(value, now).map(Duration::from_secs)
+}
+
+// ── cleanup_http_cache (mirrors lib/util/cache/repository/http-cache.ts) ──────
+
+/// Default HTTP cache TTL in days.
+const DEFAULT_HTTP_CACHE_TTL_DAYS: i64 = 90;
+
+/// Remove expired entries from the `httpCache` section of a repository cache.
+///
+/// - When `ttl_days` is `Some(0)`, removes the entire `httpCache` key.
+/// - When `ttl_days` is `None`, uses the default TTL of 90 days.
+/// - Entries whose `timestamp` field is older than the TTL are removed.
+/// - If `cache` is not an object or has no `httpCache` object, returns without change.
+///
+/// Mirrors `cleanupHttpCache` from `lib/util/cache/repository/http-cache.ts`.
+pub fn cleanup_http_cache(cache: &mut Value, ttl_days: Option<u32>) {
+    let Value::Object(cache_map) = cache else {
+        return;
+    };
+
+    let effective_ttl = ttl_days.map(|d| d as i64).unwrap_or(DEFAULT_HTTP_CACHE_TTL_DAYS);
+    if effective_ttl == 0 {
+        cache_map.remove("httpCache");
+        return;
+    }
+
+    let Some(Value::Object(http_cache)) = cache_map.get_mut("httpCache") else {
+        return;
+    };
+
+    let cutoff = Utc::now() - chrono::Duration::days(effective_ttl);
+    http_cache.retain(|_, entry| {
+        let Value::Object(entry_map) = entry else {
+            return false;
+        };
+        let Some(Value::String(ts)) = entry_map.get("timestamp") else {
+            return false;
+        };
+        DateTime::parse_from_rfc3339(ts)
+            .map(|t| t.with_timezone(&Utc) >= cutoff)
+            .unwrap_or(false)
+    });
 }
 
 // ── apply_authorization (mirrors lib/util/http/auth.ts) ───────────────────────
@@ -962,6 +1005,53 @@ mod www_auth_tests {
         };
         let result = apply_authorization(&opts);
         assert_eq!(result.authorization.as_deref(), Some("Bearer test"));
+    }
+
+    // ── cleanup_http_cache ────────────────────────────────────────────────────
+
+    // Ported: "should not throw if cache is not a valid HttpCache" — util/cache/repository/http-cache.spec.ts line 12
+    #[test]
+    fn cleanup_http_cache_noop_for_empty_object() {
+        let mut cache = serde_json::json!({});
+        cleanup_http_cache(&mut cache, None);
+        assert_eq!(cache, serde_json::json!({}));
+    }
+
+    // Ported: "should remove expired items from the cache" — util/cache/repository/http-cache.spec.ts line 16
+    #[test]
+    fn cleanup_http_cache_removes_expired_entries() {
+        // Expired: 91 days ago; fresh: now
+        let expired = (Utc::now() - chrono::Duration::days(91))
+            .to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+        let fresh = Utc::now()
+            .to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+
+        let mut cache = serde_json::json!({
+            "httpCache": {
+                "http://example.com/foo": { "timestamp": expired, "etag": "abc", "httpResponse": {} },
+                "http://example.com/bar": { "timestamp": fresh, "etag": "abc", "httpResponse": {} }
+            }
+        });
+        cleanup_http_cache(&mut cache, None);
+
+        let http_cache = &cache["httpCache"];
+        assert!(http_cache["http://example.com/foo"].is_null(), "expired entry should be removed");
+        assert!(!http_cache["http://example.com/bar"].is_null(), "fresh entry should remain");
+    }
+
+    // Ported: "should remove all items if ttlDays is not configured" — util/cache/repository/http-cache.spec.ts line 50
+    #[test]
+    fn cleanup_http_cache_removes_all_when_ttl_is_zero() {
+        let now = Utc::now()
+            .to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+        let mut cache = serde_json::json!({
+            "httpCache": {
+                "http://example.com/foo": { "timestamp": now, "etag": "abc", "httpResponse": {} },
+                "http://example.com/bar": { "timestamp": now, "etag": "abc", "httpResponse": {} }
+            }
+        });
+        cleanup_http_cache(&mut cache, Some(0));
+        assert!(cache.get("httpCache").is_none(), "httpCache should be removed entirely");
     }
 
     // ── parse_retry_after_value ───────────────────────────────────────────────

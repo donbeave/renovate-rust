@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2930 / 8576 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2933 / 8576 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -745,7 +745,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/cache/package/key.spec.ts` | Done | [details](lib/util/cache/package/key.spec.ts.md) |
 | `lib/util/cache/package/ttl.spec.ts` | Not done | [details](lib/util/cache/package/ttl.spec.ts.md) |
 | `lib/util/cache/package/with-cache.spec.ts` | Not done | [details](lib/util/cache/package/with-cache.spec.ts.md) |
-| `lib/util/cache/repository/http-cache.spec.ts` | Not done | [details](lib/util/cache/repository/http-cache.spec.ts.md) |
+| `lib/util/cache/repository/http-cache.spec.ts` | Done | [details](lib/util/cache/repository/http-cache.spec.ts.md) |
 | `lib/util/cache/repository/impl/local.spec.ts` | Not done | [details](lib/util/cache/repository/impl/local.spec.ts.md) |
 | `lib/util/cache/repository/impl/s3.spec.ts` | Not done | [details](lib/util/cache/repository/impl/s3.spec.ts.md) |
 | `lib/util/cache/repository/index.spec.ts` | Not done | [details](lib/util/cache/repository/index.spec.ts.md) |
