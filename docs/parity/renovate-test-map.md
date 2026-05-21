@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 3018 / 3026 actionable tests ported (99%) — updated 2026-05-21
+**Overall progress:** 3026 / 3026 actionable tests ported (100%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -79,7 +79,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/kotlin-script/extract.spec.ts` | Done | [details](lib/modules/manager/kotlin-script/extract.spec.ts.md) |
 | `lib/modules/manager/mise/index.spec.ts` | Done | [details](lib/modules/manager/mise/index.spec.ts.md) |
 | `lib/modules/manager/mise/utils.spec.ts` | Done | [details](lib/modules/manager/mise/utils.spec.ts.md) |
-| `lib/modules/manager/mise/artifacts.spec.ts` | Not done | [details](lib/modules/manager/mise/artifacts.spec.ts.md) |
+| `lib/modules/manager/mise/artifacts.spec.ts` | Done | [details](lib/modules/manager/mise/artifacts.spec.ts.md) |
 | `lib/modules/manager/mise/lockfile.spec.ts` | Done | [details](lib/modules/manager/mise/lockfile.spec.ts.md) |
 | `lib/modules/manager/mise/schema.spec.ts` | Done | [details](lib/modules/manager/mise/schema.spec.ts.md) |
 | `lib/modules/manager/maven-wrapper/extract.spec.ts` | Done | [details](lib/modules/manager/maven-wrapper/extract.spec.ts.md) |

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/mise/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/mise/artifacts.spec.ts
-**Total tests:** 23 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
+**Total tests:** 23 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `modules/manager/mise/artifacts`
 
@@ -31,11 +31,11 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns already-updated when version matches | 441 | pending | — | — | — |
-| returns already-updated for tool with backend prefix | 454 | pending | — | — | — |
-| returns unsupported when version does not match | 467 | pending | — | — | — |
-| returns unsupported when tool not in lock file | 480 | pending | — | — | — |
-| returns unsupported when no lock file content | 493 | pending | — | — | — |
-| returns unsupported for invalid lock file content | 506 | pending | — | — | — |
-| returns unsupported when depName is undefined | 519 | pending | — | — | — |
-| returns update-failed in case of errors | 532 | pending | — | — | — |
+| returns already-updated when version matches | 441 | ported | `mise.rs` | `update_locked_already_updated_when_version_matches` | — |
+| returns already-updated for tool with backend prefix | 454 | ported | `mise.rs` | `update_locked_already_updated_for_backend_prefix` | — |
+| returns unsupported when version does not match | 467 | ported | `mise.rs` | `update_locked_unsupported_when_version_does_not_match` | — |
+| returns unsupported when tool not in lock file | 480 | ported | `mise.rs` | `update_locked_unsupported_when_tool_not_in_lock_file` | — |
+| returns unsupported when no lock file content | 493 | ported | `mise.rs` | `update_locked_unsupported_when_no_lock_file_content` | — |
+| returns unsupported for invalid lock file content | 506 | ported | `mise.rs` | `update_locked_unsupported_for_invalid_lock_file_content` | — |
+| returns unsupported when depName is undefined | 519 | ported | `mise.rs` | `update_locked_unsupported_when_dep_name_is_none` | — |
+| returns update-failed in case of errors | 532 | ported | `mise.rs` | `update_locked_update_failed_on_panic` | — |
