@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2984 / 3026 actionable tests ported (99%) — updated 2026-05-21
+**Overall progress:** 2985 / 3026 actionable tests ported (99%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -242,7 +242,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/npm/schema.spec.ts` | Done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
 | `lib/modules/datasource/nuget/common.spec.ts` | Done | [details](lib/modules/datasource/nuget/common.spec.ts.md) |
 | `lib/modules/datasource/maven/cache.spec.ts` | Done | [details](lib/modules/datasource/maven/cache.spec.ts.md) |
-| `lib/modules/datasource/maven/common.spec.ts` | Not done | [details](lib/modules/datasource/maven/common.spec.ts.md) |
+| `lib/modules/datasource/maven/common.spec.ts` | Done | [details](lib/modules/datasource/maven/common.spec.ts.md) |
 | `lib/modules/datasource/docker/dockerhub-cache.spec.ts` | Done | [details](lib/modules/datasource/docker/dockerhub-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | Done | [details](lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) |
 | `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | Done | [details](lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) |

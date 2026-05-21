@@ -21,7 +21,26 @@ use tokio::task::JoinSet;
 use crate::http::HttpClient;
 
 pub const MAVEN_CENTRAL_BASE: &str = "https://repo.maven.apache.org/maven2";
+pub const MAVEN_CENTRAL_MIRROR: &str = "https://repo1.maven.org/maven2";
 pub const CLOJARS_BASE: &str = "https://clojars.org/repo";
+
+/// Returns `true` when `url` resolves to the Maven Central registry.
+///
+/// Uses host-based matching only (protocol, port, and path are ignored),
+/// covering both `repo.maven.apache.org` and `repo1.maven.org`.
+pub fn is_maven_central(url: &str) -> bool {
+    fn host_of(u: &str) -> Option<&str> {
+        let after_scheme = u.find("://").map(|i| &u[i + 3..]).unwrap_or(u);
+        let host_port = after_scheme.split('/').next()?;
+        let host = host_port.split(':').next()?;
+        if host.is_empty() { None } else { Some(host) }
+    }
+    let central_hosts = [
+        host_of(MAVEN_CENTRAL_BASE).unwrap_or(""),
+        host_of(MAVEN_CENTRAL_MIRROR).unwrap_or(""),
+    ];
+    host_of(url).map_or(false, |h| central_hosts.contains(&h))
+}
 
 const MAVEN_CENTRAL: &str = MAVEN_CENTRAL_BASE;
 
@@ -390,5 +409,18 @@ mod tests {
         // fetch_latest splits on ':'; no colon → None, checked via sync helper.
         let dep_name = "nodot";
         assert!(dep_name.split_once(':').is_none());
+    }
+
+    // Ported: "%s => %s" — modules/datasource/maven/common.spec.ts line 5
+    #[test]
+    fn is_maven_central_host_based_matching() {
+        assert!(is_maven_central("https://repo.maven.apache.org/maven2"));
+        assert!(is_maven_central("http://repo.maven.apache.org/maven2"));
+        assert!(is_maven_central("https://repo1.maven.org/maven2"));
+        assert!(is_maven_central("http://repo1.maven.org/maven2"));
+        assert!(is_maven_central("http://repo1.maven.org/maven200"));
+        assert!(is_maven_central("ftp://repo1.maven.org/maven2"));
+        assert!(!is_maven_central("http://repo55.maven.apache.org/maven2"));
+        assert!(!is_maven_central("https://some-artifactory.local/maven2"));
     }
 }
