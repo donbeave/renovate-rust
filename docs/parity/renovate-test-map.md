@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2941 / 7827 actionable tests ported (38%) — updated 2026-05-21
+**Overall progress:** 2947 / 7827 actionable tests ported (38%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -735,7 +735,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/platform/scm-manager/scm-manager-helper.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/scm-manager-helper.spec.ts.md) |
 | `lib/modules/platform/scm-manager/utils.spec.ts` | Not done | [details](lib/modules/platform/scm-manager/utils.spec.ts.md) |
 | `lib/modules/platform/utils/pr-body.spec.ts` | Done | [details](lib/modules/platform/utils/pr-body.spec.ts.md) |
-| `lib/modules/platform/utils/read-only-issue-body.spec.ts` | Not done | [details](lib/modules/platform/utils/read-only-issue-body.spec.ts.md) |
+| `lib/modules/platform/utils/read-only-issue-body.spec.ts` | Done | [details](lib/modules/platform/utils/read-only-issue-body.spec.ts.md) |
 | `lib/util/cache/memory/index.spec.ts` | Not done | [details](lib/util/cache/memory/index.spec.ts.md) |
 | `lib/util/cache/package/backend.spec.ts` | Not done | [details](lib/util/cache/package/backend.spec.ts.md) |
 | `lib/util/cache/package/impl/file.spec.ts` | Not done | [details](lib/util/cache/package/impl/file.spec.ts.md) |

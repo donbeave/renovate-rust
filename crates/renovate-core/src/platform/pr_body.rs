@@ -2,6 +2,33 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
+static RE_CHECKBOX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r" To.*?, click on a checkbox below\.").unwrap());
+static RE_BRANCH_CHECKBOX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\[ ] <!-- \w*-branch.*-->").unwrap());
+static RE_CONFIG_MIGRATION: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r" - \[ ] <!-- create-config-migration-pr -->.*").unwrap());
+static RE_APPROVE_ALL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r" - \[ ] <!-- approve-all-[\w-]*-prs -->.*").unwrap());
+static RE_CREATE_ALL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r" - \[ ] <!-- create-all-[\w-]*-prs -->.*").unwrap());
+static RE_REBASE_ALL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r" - \[ ] <!-- rebase-all-[\w-]*-prs -->.*").unwrap());
+
+/// Strips all interactive checkbox elements from an issue body for platforms
+/// that render it as read-only.
+///
+/// Mirrors `readOnlyIssueBody` from
+/// `lib/modules/platform/utils/read-only-issue-body.ts`.
+pub fn read_only_issue_body(body: &str) -> String {
+    let s = RE_CHECKBOX.replace_all(body, "");
+    let s = RE_BRANCH_CHECKBOX.replace_all(&s, "");
+    let s = RE_CONFIG_MIGRATION.replace_all(&s, "");
+    let s = RE_APPROVE_ALL.replace_all(&s, "");
+    let s = RE_CREATE_ALL.replace_all(&s, "");
+    RE_REBASE_ALL.replace_all(&s, "").into_owned()
+}
+
 const NOTE: &str =
     "> \u{2139}\u{FE0F} **Note**\n> \n> This PR body was truncated due to platform limits.\n\n";
 
@@ -77,6 +104,44 @@ mod tests {
     use super::*;
 
     const PR_BODY: &str = include_str!("../../tests/fixtures/platform/pr-body.txt");
+    const ISSUE_BODY: &str = include_str!("../../tests/fixtures/platform/issue-body.txt");
+
+    // Ported: "removes all checkbox formatting" — modules/platform/utils/read-only-issue-body.spec.ts line 8
+    #[test]
+    fn read_only_removes_checkbox_formatting() {
+        assert!(!read_only_issue_body(ISSUE_BODY).contains("[ ] <!--"));
+    }
+
+    // Ported: "removes all checkbox-related instructions" — modules/platform/utils/read-only-issue-body.spec.ts line 14
+    #[test]
+    fn read_only_removes_checkbox_instructions() {
+        let result = read_only_issue_body(ISSUE_BODY);
+        assert!(!result.to_lowercase().contains("click on a checkbox below"));
+    }
+
+    // Ported: "removes all approval-all-pending-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 20
+    #[test]
+    fn read_only_removes_approve_all_pending_prs() {
+        assert!(!read_only_issue_body(ISSUE_BODY).contains("Create all pending approval PRs at once"));
+    }
+
+    // Ported: "removes the create-all-rate-limited-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 26
+    #[test]
+    fn read_only_removes_create_all_rate_limited_prs() {
+        assert!(!read_only_issue_body(ISSUE_BODY).contains("Create all rate-limited PRs at once"));
+    }
+
+    // Ported: "removes create-config-migration-pr" — modules/platform/utils/read-only-issue-body.spec.ts line 33
+    #[test]
+    fn read_only_removes_create_config_migration_pr() {
+        assert!(!read_only_issue_body(ISSUE_BODY).contains("create an automated Config Migration PR"));
+    }
+
+    // Ported: "removes the create-all-awaiting-schedule-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 40
+    #[test]
+    fn read_only_removes_create_all_awaiting_schedule_prs() {
+        assert!(!read_only_issue_body(ISSUE_BODY).contains("Create all awaiting schedule PRs at once"));
+    }
 
     // Ported: "truncates to 1000" — modules/platform/utils/pr-body.spec.ts line 9
     #[test]
