@@ -921,8 +921,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/updates/branchify.spec.ts` | Done | [details](lib/workers/repository/updates/branchify.spec.ts.md) |
 | `lib/workers/repository/updates/flatten.spec.ts` | Done | [details](lib/workers/repository/updates/flatten.spec.ts.md) |
 | `lib/workers/repository/updates/generate.spec.ts` | Done | [details](lib/workers/repository/updates/generate.spec.ts.md) |
-| `test/docs/documentation.spec.ts` | Not done | [details](test/docs/documentation.spec.ts.md) |
-| `test/other/sync-module-labels.spec.ts` | Not done | [details](test/other/sync-module-labels.spec.ts.md) |
+| `test/docs/documentation.spec.ts` | Done | [details](test/docs/documentation.spec.ts.md) |
+| `test/other/sync-module-labels.spec.ts` | Done | [details](test/other/sync-module-labels.spec.ts.md) |
 | `test/other/validate-config-files.spec.ts` | Done | [details](test/other/validate-config-files.spec.ts.md) |
 | `test/other/validate-docker.spec.ts` | Done | [details](test/other/validate-docker.spec.ts.md) |
 | `test/other/validate-schemas.spec.ts` | Done | [details](test/other/validate-schemas.spec.ts.md) |
