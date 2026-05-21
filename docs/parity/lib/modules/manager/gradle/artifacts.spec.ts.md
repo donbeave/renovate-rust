@@ -5,49 +5,49 @@
 ## `lib/modules/manager/gradle/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gradle/artifacts.spec.ts
-**Total tests:** 27 | **Ported:** 0 | **Actionable:** 27 | **Status:** pending
+**Total tests:** 27 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `isGradleExecutionAllowed`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns false when allowedUnsafeExecutions is empty (as it not enabled by default option) | 90 | pending | — | — | — |
-| returns true when allowedUnsafeExecutions includes `gradleWrapper` | 101 | pending | — | — | — |
-| returns false when allowedUnsafeExecutions does not include `gradleWrapper` | 112 | pending | — | — | — |
-| logs when allowedUnsafeExecutions does not include `gradleWrapper` | 123 | pending | — | — | — |
+| returns false when allowedUnsafeExecutions is empty (as it not enabled by default option) | 90 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| returns true when allowedUnsafeExecutions includes `gradleWrapper` | 101 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| returns false when allowedUnsafeExecutions does not include `gradleWrapper` | 112 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| logs when allowedUnsafeExecutions does not include `gradleWrapper` | 123 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 
 ### `lockfile tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| aborts if no lockfile is found | 138 | pending | — | — | — |
-| aborts if lock file exists but no gradle wrapper | 157 | pending | — | — | — |
-| aborts if allowedUnsafeExecutions does not include `gradleWrapper` | 176 | pending | — | — | — |
-| uses custom JVM heap settings when toolSettings are configured | 202 | pending | — | — | — |
-| updates lock file | 247 | pending | — | — | — |
-| updates lock file in win32 | 288 | pending | — | — | — |
-| prefers packageName over depName if provided | 333 | pending | — | — | — |
-| aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project | 378 | pending | — | — | — |
-| performs lock file maintenance | 393 | pending | — | — | — |
-| performs lock file maintenance (docker) | 431 | pending | — | — | — |
-| performs lock file maintenance (install) | 495 | pending | — | — | — |
-| updates all included projects | 534 | pending | — | — | — |
-| does not update lockfile if content is unchanged | 578 | pending | — | — | — |
-| gradlew failed | 592 | pending | — | — | — |
-| rethrows temporary error | 621 | pending | — | — | — |
-| fallback to default Java version if Gradle version not extractable | 640 | pending | — | — | — |
+| aborts if no lockfile is found | 138 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| aborts if lock file exists but no gradle wrapper | 157 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| aborts if allowedUnsafeExecutions does not include `gradleWrapper` | 176 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| uses custom JVM heap settings when toolSettings are configured | 202 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| updates lock file | 247 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| updates lock file in win32 | 288 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| prefers packageName over depName if provided | 333 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project | 378 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| performs lock file maintenance | 393 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| performs lock file maintenance (docker) | 431 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| performs lock file maintenance (install) | 495 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| updates all included projects | 534 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| does not update lockfile if content is unchanged | 578 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| gradlew failed | 592 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| rethrows temporary error | 621 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| fallback to default Java version if Gradle version not extractable | 640 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 
 ### `dependency verification tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| updates verification metadata file | 684 | pending | — | — | — |
-| aborts verification metadata updates if allowedUnsafeExecutions does not include `gradleWrapper` | 731 | pending | — | — | — |
-| updates existing checksums also if verify-checksums is disabled | 765 | pending | — | — | — |
-| updates verification metadata and lock file | 820 | pending | — | — | — |
-| uses sha256 as default if only weak hash algorithms are found | 894 | pending | — | — | — |
-| uses pgp hashType if verify-signatures is enabled | 939 | pending | — | — | — |
-| does not write verification metadata, when no checksums exist and neither checksum nor signature verification is enabled | 983 | pending | — | — | — |
+| updates verification metadata file | 684 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| aborts verification metadata updates if allowedUnsafeExecutions does not include `gradleWrapper` | 731 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| updates existing checksums also if verify-checksums is disabled | 765 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| updates verification metadata and lock file | 820 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| uses sha256 as default if only weak hash algorithms are found | 894 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| uses pgp hashType if verify-signatures is enabled | 939 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| does not write verification metadata, when no checksums exist and neither checksum nor signature verification is enabled | 983 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 
 ---
 

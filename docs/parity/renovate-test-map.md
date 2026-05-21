@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2933 / 8570 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2933 / 7965 actionable tests ported (37%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -513,23 +513,23 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/presets/index.spec.ts` | Not done | [details](lib/config/presets/index.spec.ts.md) |
 | `lib/config/presets/internal/custom-managers.spec.ts` | Not done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
 | `lib/config/presets/parse.spec.ts` | Done | [details](lib/config/presets/parse.spec.ts.md) |
-| `lib/modules/manager/bazel/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bazel/artifacts.spec.ts.md) |
+| `lib/modules/manager/bazel/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazel/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazel/common.spec.ts` | Not done | [details](lib/modules/manager/bazel/common.spec.ts.md) |
 | `lib/modules/manager/bazel/parser.spec.ts` | Not done | [details](lib/modules/manager/bazel/parser.spec.ts.md) |
 | `lib/modules/manager/bazel/rules/index.spec.ts` | Not done | [details](lib/modules/manager/bazel/rules/index.spec.ts.md) |
-| `lib/modules/manager/bazel-module/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/artifacts.spec.ts.md) |
+| `lib/modules/manager/bazel-module/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazel-module/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/index.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/parser/index.spec.ts.md) |
 | `lib/modules/manager/bazel-module/parser/starlark.spec.ts` | Done | [details](lib/modules/manager/bazel-module/parser/starlark.spec.ts.md) |
 | `lib/modules/manager/bazel-module/rules-img.spec.ts` | Done | [details](lib/modules/manager/bazel-module/rules-img.spec.ts.md) |
 | `lib/modules/manager/bazel-module/rules.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/rules.spec.ts.md) |
-| `lib/modules/manager/bazelisk/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bazelisk/artifacts.spec.ts.md) |
+| `lib/modules/manager/bazelisk/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazelisk/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazelisk/extract.spec.ts` | Done | [details](lib/modules/manager/bazelisk/extract.spec.ts.md) |
 | `lib/modules/manager/bitrise/utils.spec.ts` | Done | [details](lib/modules/manager/bitrise/utils.spec.ts.md) |
-| `lib/modules/manager/bun/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bun/artifacts.spec.ts.md) |
+| `lib/modules/manager/bun/artifacts.spec.ts` | Done | [details](lib/modules/manager/bun/artifacts.spec.ts.md) |
 | `lib/modules/manager/bun/extract.spec.ts` | Not done | [details](lib/modules/manager/bun/extract.spec.ts.md) |
 | `lib/modules/manager/bun/utils.spec.ts` | Done | [details](lib/modules/manager/bun/utils.spec.ts.md) |
 | `lib/modules/manager/bun-version/index.spec.ts` | Done | [details](lib/modules/manager/bun-version/index.spec.ts.md) |
-| `lib/modules/manager/bundler/artifacts.spec.ts` | Not done | [details](lib/modules/manager/bundler/artifacts.spec.ts.md) |
+| `lib/modules/manager/bundler/artifacts.spec.ts` | Done | [details](lib/modules/manager/bundler/artifacts.spec.ts.md) |
 | `lib/modules/manager/bundler/common.spec.ts` | Not done | [details](lib/modules/manager/bundler/common.spec.ts.md) |
 | `lib/modules/manager/bundler/extract.spec.ts` | Not done | [details](lib/modules/manager/bundler/extract.spec.ts.md) |
 | `lib/modules/manager/bundler/gemfile.spec.ts` | Done | [details](lib/modules/manager/bundler/gemfile.spec.ts.md) |
@@ -537,7 +537,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bundler/locked-version.spec.ts` | Done | [details](lib/modules/manager/bundler/locked-version.spec.ts.md) |
 | `lib/modules/manager/bundler/update-locked.spec.ts` | Done | [details](lib/modules/manager/bundler/update-locked.spec.ts.md) |
 | `lib/modules/manager/cake/index.spec.ts` | Not done | [details](lib/modules/manager/cake/index.spec.ts.md) |
-| `lib/modules/manager/cargo/artifacts.spec.ts` | Not done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
+| `lib/modules/manager/cargo/artifacts.spec.ts` | Done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
 | `lib/modules/manager/cargo/locked-version.spec.ts` | Done | [details](lib/modules/manager/cargo/locked-version.spec.ts.md) |
 | `lib/modules/manager/cargo/range.spec.ts` | Done | [details](lib/modules/manager/cargo/range.spec.ts.md) |
 | `lib/modules/manager/cargo/update-locked.spec.ts` | Done | [details](lib/modules/manager/cargo/update-locked.spec.ts.md) |
@@ -545,75 +545,75 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/cdnurl/extract.spec.ts` | Done | [details](lib/modules/manager/cdnurl/extract.spec.ts.md) |
 | `lib/modules/manager/circleci/index.spec.ts` | Done | [details](lib/modules/manager/circleci/index.spec.ts.md) |
 | `lib/modules/manager/circleci/range.spec.ts` | Done | [details](lib/modules/manager/circleci/range.spec.ts.md) |
-| `lib/modules/manager/cocoapods/artifacts.spec.ts` | Not done | [details](lib/modules/manager/cocoapods/artifacts.spec.ts.md) |
-| `lib/modules/manager/composer/artifacts.spec.ts` | Not done | [details](lib/modules/manager/composer/artifacts.spec.ts.md) |
+| `lib/modules/manager/cocoapods/artifacts.spec.ts` | Done | [details](lib/modules/manager/cocoapods/artifacts.spec.ts.md) |
+| `lib/modules/manager/composer/artifacts.spec.ts` | Done | [details](lib/modules/manager/composer/artifacts.spec.ts.md) |
 | `lib/modules/manager/composer/range.spec.ts` | Done | [details](lib/modules/manager/composer/range.spec.ts.md) |
 | `lib/modules/manager/composer/schema.spec.ts` | Not done | [details](lib/modules/manager/composer/schema.spec.ts.md) |
 | `lib/modules/manager/composer/update-locked.spec.ts` | Done | [details](lib/modules/manager/composer/update-locked.spec.ts.md) |
 | `lib/modules/manager/composer/utils.spec.ts` | Not done | [details](lib/modules/manager/composer/utils.spec.ts.md) |
-| `lib/modules/manager/conan/artifacts.spec.ts` | Not done | [details](lib/modules/manager/conan/artifacts.spec.ts.md) |
+| `lib/modules/manager/conan/artifacts.spec.ts` | Done | [details](lib/modules/manager/conan/artifacts.spec.ts.md) |
 | `lib/modules/manager/conan/range.spec.ts` | Done | [details](lib/modules/manager/conan/range.spec.ts.md) |
-| `lib/modules/manager/copier/artifacts.spec.ts` | Not done | [details](lib/modules/manager/copier/artifacts.spec.ts.md) |
+| `lib/modules/manager/copier/artifacts.spec.ts` | Done | [details](lib/modules/manager/copier/artifacts.spec.ts.md) |
 | `lib/modules/manager/copier/update.spec.ts` | Done | [details](lib/modules/manager/copier/update.spec.ts.md) |
 | `lib/modules/manager/custom/index.spec.ts` | Done | [details](lib/modules/manager/custom/index.spec.ts.md) |
 | `lib/modules/manager/custom/jsonata/index.spec.ts` | Not done | [details](lib/modules/manager/custom/jsonata/index.spec.ts.md) |
 | `lib/modules/manager/custom/regex/index.spec.ts` | Not done | [details](lib/modules/manager/custom/regex/index.spec.ts.md) |
 | `lib/modules/manager/custom/regex/utils.spec.ts` | Done | [details](lib/modules/manager/custom/regex/utils.spec.ts.md) |
-| `lib/modules/manager/deno/artifacts.spec.ts` | Not done | [details](lib/modules/manager/deno/artifacts.spec.ts.md) |
+| `lib/modules/manager/deno/artifacts.spec.ts` | Done | [details](lib/modules/manager/deno/artifacts.spec.ts.md) |
 | `lib/modules/manager/deno/compat.spec.ts` | Not done | [details](lib/modules/manager/deno/compat.spec.ts.md) |
 | `lib/modules/manager/deno/extract.spec.ts` | Not done | [details](lib/modules/manager/deno/extract.spec.ts.md) |
 | `lib/modules/manager/deno/post.spec.ts` | Not done | [details](lib/modules/manager/deno/post.spec.ts.md) |
 | `lib/modules/manager/deno/schema.spec.ts` | Not done | [details](lib/modules/manager/deno/schema.spec.ts.md) |
 | `lib/modules/manager/deno/update.spec.ts` | Not done | [details](lib/modules/manager/deno/update.spec.ts.md) |
 | `lib/modules/manager/deps-edn/parser.spec.ts` | Not done | [details](lib/modules/manager/deps-edn/parser.spec.ts.md) |
-| `lib/modules/manager/devbox/artifacts.spec.ts` | Not done | [details](lib/modules/manager/devbox/artifacts.spec.ts.md) |
-| `lib/modules/manager/flux/artifacts.spec.ts` | Not done | [details](lib/modules/manager/flux/artifacts.spec.ts.md) |
+| `lib/modules/manager/devbox/artifacts.spec.ts` | Done | [details](lib/modules/manager/devbox/artifacts.spec.ts.md) |
+| `lib/modules/manager/flux/artifacts.spec.ts` | Done | [details](lib/modules/manager/flux/artifacts.spec.ts.md) |
 | `lib/modules/manager/git-submodules/update.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/update.spec.ts.md) |
 | `lib/modules/manager/gitlabci/utils.spec.ts` | Done | [details](lib/modules/manager/gitlabci/utils.spec.ts.md) |
-| `lib/modules/manager/gleam/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gleam/artifacts.spec.ts.md) |
+| `lib/modules/manager/gleam/artifacts.spec.ts` | Done | [details](lib/modules/manager/gleam/artifacts.spec.ts.md) |
 | `lib/modules/manager/gleam/locked-version.spec.ts` | Done | [details](lib/modules/manager/gleam/locked-version.spec.ts.md) |
 | `lib/modules/manager/gleam/range.spec.ts` | Done | [details](lib/modules/manager/gleam/range.spec.ts.md) |
 | `lib/modules/manager/gomod/artifacts-extra.spec.ts` | Done | [details](lib/modules/manager/gomod/artifacts-extra.spec.ts.md) |
-| `lib/modules/manager/gomod/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gomod/artifacts.spec.ts.md) |
+| `lib/modules/manager/gomod/artifacts.spec.ts` | Done | [details](lib/modules/manager/gomod/artifacts.spec.ts.md) |
 | `lib/modules/manager/gomod/integration.spec.ts` | Not done | [details](lib/modules/manager/gomod/integration.spec.ts.md) |
 | `lib/modules/manager/gomod/line-parser.spec.ts` | Done | [details](lib/modules/manager/gomod/line-parser.spec.ts.md) |
 | `lib/modules/manager/gomod/update.spec.ts` | Not done | [details](lib/modules/manager/gomod/update.spec.ts.md) |
-| `lib/modules/manager/gradle/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gradle/artifacts.spec.ts.md) |
+| `lib/modules/manager/gradle/artifacts.spec.ts` | Done | [details](lib/modules/manager/gradle/artifacts.spec.ts.md) |
 | `lib/modules/manager/gradle/extract/catalog.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract/catalog.spec.ts.md) |
 | `lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts` | Not done | [details](lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts.md) |
 | `lib/modules/manager/gradle/parser/common.spec.ts` | Not done | [details](lib/modules/manager/gradle/parser/common.spec.ts.md) |
 | `lib/modules/manager/gradle/parser.spec.ts` | Not done | [details](lib/modules/manager/gradle/parser.spec.ts.md) |
 | `lib/modules/manager/gradle/update.spec.ts` | Done | [details](lib/modules/manager/gradle/update.spec.ts.md) |
 | `lib/modules/manager/gradle/utils.spec.ts` | Done | [details](lib/modules/manager/gradle/utils.spec.ts.md) |
-| `lib/modules/manager/gradle-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gradle-wrapper/artifacts.spec.ts.md) |
+| `lib/modules/manager/gradle-wrapper/artifacts.spec.ts` | Done | [details](lib/modules/manager/gradle-wrapper/artifacts.spec.ts.md) |
 | `lib/modules/manager/gradle-wrapper/util.spec.ts` | Not done | [details](lib/modules/manager/gradle-wrapper/util.spec.ts.md) |
 | `lib/modules/manager/haskell-cabal/extract.spec.ts` | Done | [details](lib/modules/manager/haskell-cabal/extract.spec.ts.md) |
 | `lib/modules/manager/haskell-cabal/index.spec.ts` | Done | [details](lib/modules/manager/haskell-cabal/index.spec.ts.md) |
-| `lib/modules/manager/helmfile/artifacts.spec.ts` | Not done | [details](lib/modules/manager/helmfile/artifacts.spec.ts.md) |
-| `lib/modules/manager/helmv3/artifacts.spec.ts` | Not done | [details](lib/modules/manager/helmv3/artifacts.spec.ts.md) |
+| `lib/modules/manager/helmfile/artifacts.spec.ts` | Done | [details](lib/modules/manager/helmfile/artifacts.spec.ts.md) |
+| `lib/modules/manager/helmv3/artifacts.spec.ts` | Done | [details](lib/modules/manager/helmv3/artifacts.spec.ts.md) |
 | `lib/modules/manager/helmv3/extract.spec.ts` | Not done | [details](lib/modules/manager/helmv3/extract.spec.ts.md) |
 | `lib/modules/manager/helmv3/update.spec.ts` | Done | [details](lib/modules/manager/helmv3/update.spec.ts.md) |
 | `lib/modules/manager/helmv3/utils.spec.ts` | Done | [details](lib/modules/manager/helmv3/utils.spec.ts.md) |
-| `lib/modules/manager/hermit/artifacts.spec.ts` | Not done | [details](lib/modules/manager/hermit/artifacts.spec.ts.md) |
+| `lib/modules/manager/hermit/artifacts.spec.ts` | Done | [details](lib/modules/manager/hermit/artifacts.spec.ts.md) |
 | `lib/modules/manager/hermit/default-config.spec.ts` | Done | [details](lib/modules/manager/hermit/default-config.spec.ts.md) |
 | `lib/modules/manager/hermit/update.spec.ts` | Done | [details](lib/modules/manager/hermit/update.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/github.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/github.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/index.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/index.spec.ts.md) |
 | `lib/modules/manager/homebrew/handlers/npm.spec.ts` | Done | [details](lib/modules/manager/homebrew/handlers/npm.spec.ts.md) |
 | `lib/modules/manager/homebrew/update.spec.ts` | Not done | [details](lib/modules/manager/homebrew/update.spec.ts.md) |
-| `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts` | Not done | [details](lib/modules/manager/jsonnet-bundler/artifacts.spec.ts.md) |
-| `lib/modules/manager/kustomize/artifacts.spec.ts` | Not done | [details](lib/modules/manager/kustomize/artifacts.spec.ts.md) |
+| `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts` | Done | [details](lib/modules/manager/jsonnet-bundler/artifacts.spec.ts.md) |
+| `lib/modules/manager/kustomize/artifacts.spec.ts` | Done | [details](lib/modules/manager/kustomize/artifacts.spec.ts.md) |
 | `lib/modules/manager/kustomize/common.spec.ts` | Not done | [details](lib/modules/manager/kustomize/common.spec.ts.md) |
 | `lib/modules/manager/maven/index.spec.ts` | Not done | [details](lib/modules/manager/maven/index.spec.ts.md) |
 | `lib/modules/manager/maven/update.spec.ts` | Not done | [details](lib/modules/manager/maven/update.spec.ts.md) |
-| `lib/modules/manager/maven-wrapper/artifacts.spec.ts` | Not done | [details](lib/modules/manager/maven-wrapper/artifacts.spec.ts.md) |
+| `lib/modules/manager/maven-wrapper/artifacts.spec.ts` | Done | [details](lib/modules/manager/maven-wrapper/artifacts.spec.ts.md) |
 | `lib/modules/manager/mise/backends.spec.ts` | Done | [details](lib/modules/manager/mise/backends.spec.ts.md) |
-| `lib/modules/manager/mix/artifacts.spec.ts` | Not done | [details](lib/modules/manager/mix/artifacts.spec.ts.md) |
+| `lib/modules/manager/mix/artifacts.spec.ts` | Done | [details](lib/modules/manager/mix/artifacts.spec.ts.md) |
 | `lib/modules/manager/mix/range.spec.ts` | Done | [details](lib/modules/manager/mix/range.spec.ts.md) |
-| `lib/modules/manager/nix/artifacts.spec.ts` | Not done | [details](lib/modules/manager/nix/artifacts.spec.ts.md) |
+| `lib/modules/manager/nix/artifacts.spec.ts` | Done | [details](lib/modules/manager/nix/artifacts.spec.ts.md) |
 | `lib/modules/manager/nix/range.spec.ts` | Done | [details](lib/modules/manager/nix/range.spec.ts.md) |
 | `lib/modules/manager/nodenv/extract.spec.ts` | Done | [details](lib/modules/manager/nodenv/extract.spec.ts.md) |
-| `lib/modules/manager/npm/artifacts.spec.ts` | Not done | [details](lib/modules/manager/npm/artifacts.spec.ts.md) |
+| `lib/modules/manager/npm/artifacts.spec.ts` | Done | [details](lib/modules/manager/npm/artifacts.spec.ts.md) |
 | `lib/modules/manager/npm/detect.spec.ts` | Done | [details](lib/modules/manager/npm/detect.spec.ts.md) |
 | `lib/modules/manager/npm/extract/common/catalogs.spec.ts` | Done | [details](lib/modules/manager/npm/extract/common/catalogs.spec.ts.md) |
 | `lib/modules/manager/npm/extract/common/package-file.spec.ts` | Not done | [details](lib/modules/manager/npm/extract/common/package-file.spec.ts.md) |
@@ -640,7 +640,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts` | Done | [details](lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts.md) |
 | `lib/modules/manager/npm/update/package-version/index.spec.ts` | Done | [details](lib/modules/manager/npm/update/package-version/index.spec.ts.md) |
 | `lib/modules/manager/npm/utils.spec.ts` | Done | [details](lib/modules/manager/npm/utils.spec.ts.md) |
-| `lib/modules/manager/nuget/artifacts.spec.ts` | Not done | [details](lib/modules/manager/nuget/artifacts.spec.ts.md) |
+| `lib/modules/manager/nuget/artifacts.spec.ts` | Done | [details](lib/modules/manager/nuget/artifacts.spec.ts.md) |
 | `lib/modules/manager/nuget/config-formatter.spec.ts` | Not done | [details](lib/modules/manager/nuget/config-formatter.spec.ts.md) |
 | `lib/modules/manager/nuget/package-tree.spec.ts` | Not done | [details](lib/modules/manager/nuget/package-tree.spec.ts.md) |
 | `lib/modules/manager/nuget/update.spec.ts` | Done | [details](lib/modules/manager/nuget/update.spec.ts.md) |
@@ -652,20 +652,20 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/pep621/update.spec.ts` | Done | [details](lib/modules/manager/pep621/update.spec.ts.md) |
 | `lib/modules/manager/pep621/utils.spec.ts` | Done | [details](lib/modules/manager/pep621/utils.spec.ts.md) |
 | `lib/modules/manager/pep723/utils.spec.ts` | Done | [details](lib/modules/manager/pep723/utils.spec.ts.md) |
-| `lib/modules/manager/pip-compile/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pip-compile/artifacts.spec.ts.md) |
+| `lib/modules/manager/pip-compile/artifacts.spec.ts` | Done | [details](lib/modules/manager/pip-compile/artifacts.spec.ts.md) |
 | `lib/modules/manager/pip-compile/common.spec.ts` | Not done | [details](lib/modules/manager/pip-compile/common.spec.ts.md) |
 | `lib/modules/manager/pip-compile/utils.spec.ts` | Done | [details](lib/modules/manager/pip-compile/utils.spec.ts.md) |
-| `lib/modules/manager/pip_requirements/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pip_requirements/artifacts.spec.ts.md) |
+| `lib/modules/manager/pip_requirements/artifacts.spec.ts` | Done | [details](lib/modules/manager/pip_requirements/artifacts.spec.ts.md) |
 | `lib/modules/manager/pip_requirements/common.spec.ts` | Done | [details](lib/modules/manager/pip_requirements/common.spec.ts.md) |
 | `lib/modules/manager/pip_requirements/index.spec.ts` | Done | [details](lib/modules/manager/pip_requirements/index.spec.ts.md) |
-| `lib/modules/manager/pipenv/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pipenv/artifacts.spec.ts.md) |
-| `lib/modules/manager/pixi/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pixi/artifacts.spec.ts.md) |
-| `lib/modules/manager/poetry/artifacts.spec.ts` | Not done | [details](lib/modules/manager/poetry/artifacts.spec.ts.md) |
+| `lib/modules/manager/pipenv/artifacts.spec.ts` | Done | [details](lib/modules/manager/pipenv/artifacts.spec.ts.md) |
+| `lib/modules/manager/pixi/artifacts.spec.ts` | Done | [details](lib/modules/manager/pixi/artifacts.spec.ts.md) |
+| `lib/modules/manager/poetry/artifacts.spec.ts` | Done | [details](lib/modules/manager/poetry/artifacts.spec.ts.md) |
 | `lib/modules/manager/poetry/schema.spec.ts` | Not done | [details](lib/modules/manager/poetry/schema.spec.ts.md) |
 | `lib/modules/manager/poetry/update-locked.spec.ts` | Done | [details](lib/modules/manager/poetry/update-locked.spec.ts.md) |
 | `lib/modules/manager/proto/extract.spec.ts` | Done | [details](lib/modules/manager/proto/extract.spec.ts.md) |
 | `lib/modules/manager/proto/index.spec.ts` | Done | [details](lib/modules/manager/proto/index.spec.ts.md) |
-| `lib/modules/manager/pub/artifacts.spec.ts` | Not done | [details](lib/modules/manager/pub/artifacts.spec.ts.md) |
+| `lib/modules/manager/pub/artifacts.spec.ts` | Done | [details](lib/modules/manager/pub/artifacts.spec.ts.md) |
 | `lib/modules/manager/pub/extract.spec.ts` | Done | [details](lib/modules/manager/pub/extract.spec.ts.md) |
 | `lib/modules/manager/pub/utils.spec.ts` | Done | [details](lib/modules/manager/pub/utils.spec.ts.md) |
 | `lib/modules/manager/puppet/common.spec.ts` | Done | [details](lib/modules/manager/puppet/common.spec.ts.md) |
@@ -673,7 +673,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/renovate-config/extract.spec.ts` | Done | [details](lib/modules/manager/renovate-config/extract.spec.ts.md) |
 | `lib/modules/manager/sbt/update.spec.ts` | Done | [details](lib/modules/manager/sbt/update.spec.ts.md) |
 | `lib/modules/manager/sbt/util.spec.ts` | Done | [details](lib/modules/manager/sbt/util.spec.ts.md) |
-| `lib/modules/manager/swift/artifacts.spec.ts` | Not done | [details](lib/modules/manager/swift/artifacts.spec.ts.md) |
+| `lib/modules/manager/swift/artifacts.spec.ts` | Done | [details](lib/modules/manager/swift/artifacts.spec.ts.md) |
 | `lib/modules/manager/swift/extract.spec.ts` | Done | [details](lib/modules/manager/swift/extract.spec.ts.md) |
 | `lib/modules/manager/swift/index.spec.ts` | Done | [details](lib/modules/manager/swift/index.spec.ts.md) |
 | `lib/modules/manager/swift/range.spec.ts` | Done | [details](lib/modules/manager/swift/range.spec.ts.md) |
@@ -692,7 +692,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terragrunt/artifacts.spec.ts` | Done | [details](lib/modules/manager/terragrunt/artifacts.spec.ts.md) |
 | `lib/modules/manager/terragrunt/modules.spec.ts` | Done | [details](lib/modules/manager/terragrunt/modules.spec.ts.md) |
 | `lib/modules/manager/terragrunt/util.spec.ts` | Done | [details](lib/modules/manager/terragrunt/util.spec.ts.md) |
-| `lib/modules/manager/vendir/artifacts.spec.ts` | Not done | [details](lib/modules/manager/vendir/artifacts.spec.ts.md) |
+| `lib/modules/manager/vendir/artifacts.spec.ts` | Done | [details](lib/modules/manager/vendir/artifacts.spec.ts.md) |
 | `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) |
 | `lib/modules/platform/azure/azure-helper.spec.ts` | Not done | [details](lib/modules/platform/azure/azure-helper.spec.ts.md) |
 | `lib/modules/platform/azure/index.spec.ts` | Not done | [details](lib/modules/platform/azure/index.spec.ts.md) |
@@ -878,7 +878,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/reconfigure/utils.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/utils.spec.ts.md) |
 | `lib/workers/repository/reconfigure/validate.spec.ts` | Not done | [details](lib/workers/repository/reconfigure/validate.spec.ts.md) |
 | `lib/workers/repository/result.spec.ts` | Not done | [details](lib/workers/repository/result.spec.ts.md) |
-| `lib/workers/repository/update/branch/artifacts.spec.ts` | Not done | [details](lib/workers/repository/update/branch/artifacts.spec.ts.md) |
+| `lib/workers/repository/update/branch/artifacts.spec.ts` | Done | [details](lib/workers/repository/update/branch/artifacts.spec.ts.md) |
 | `lib/workers/repository/update/branch/auto-replace.spec.ts` | Not done | [details](lib/workers/repository/update/branch/auto-replace.spec.ts.md) |
 | `lib/workers/repository/update/branch/automerge.spec.ts` | Not done | [details](lib/workers/repository/update/branch/automerge.spec.ts.md) |
 | `lib/workers/repository/update/branch/bump-versions.spec.ts` | Not done | [details](lib/workers/repository/update/branch/bump-versions.spec.ts.md) |
