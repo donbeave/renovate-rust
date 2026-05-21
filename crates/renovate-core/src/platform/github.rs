@@ -186,6 +186,40 @@ pub fn get_api_base_url(registry_url: Option<&str>) -> String {
     format!("{source_base}api/v3/")
 }
 
+/// A transformed GitHub branch item from the GraphQL branches datasource.
+///
+/// Mirrors `GithubBranchItem` from `lib/util/github/graphql/types.ts`.
+#[derive(Debug, PartialEq, Eq)]
+pub struct GithubBranchItem {
+    pub version: String,
+    pub git_ref: String,
+    pub hash: String,
+    pub release_timestamp: String,
+}
+
+/// Transform a raw GitHub GraphQL branch node into a `GithubBranchItem`.
+///
+/// Returns `None` when the target type is not `Commit` (e.g. `Blob`, `Tag`).
+///
+/// Mirrors the `transform` function in
+/// `lib/util/github/graphql/query-adapters/branches-query-adapter.ts`.
+pub fn transform_github_branch(
+    version: &str,
+    target_type: &str,
+    oid: &str,
+    release_timestamp: &str,
+) -> Option<GithubBranchItem> {
+    if target_type != "Commit" {
+        return None;
+    }
+    Some(GithubBranchItem {
+        version: version.to_owned(),
+        git_ref: version.to_owned(),
+        hash: oid.to_owned(),
+        release_timestamp: release_timestamp.to_owned(),
+    })
+}
+
 /// Tells whether `duration` has elapsed since `initial_timestamp` (ISO 8601) as of `current_time`.
 ///
 /// Mirrors `isDateExpired` from `lib/util/github/graphql/util.ts`.
@@ -398,5 +432,30 @@ mod tests {
         // 2022-11-25 15:01 > expiry → true
         let t4: DateTime<Utc> = "2022-11-25T15:01:00Z".parse().unwrap();
         assert!(is_date_expired(t4, initial, one_day));
+    }
+
+    // ── branches-query-adapter ────────────────────────────────────────────────
+
+    // Ported: "transforms Commit type" — util/github/graphql/query-adapters/branches-query-adapter.spec.ts line 5
+    #[test]
+    fn transform_github_branch_commit_type_returns_item() {
+        let result = transform_github_branch("main", "Commit", "abc123", "2022-09-24");
+        assert_eq!(
+            result,
+            Some(GithubBranchItem {
+                version: "main".to_owned(),
+                git_ref: "main".to_owned(),
+                hash: "abc123".to_owned(),
+                release_timestamp: "2022-09-24".to_owned(),
+            })
+        );
+    }
+
+    // Ported: "returns null for invalid input" — util/github/graphql/query-adapters/branches-query-adapter.spec.ts line 23
+    #[test]
+    fn transform_github_branch_non_commit_type_returns_none() {
+        assert_eq!(transform_github_branch("main", "Blob", "abc123", ""), None);
+        assert_eq!(transform_github_branch("main", "Tag", "abc123", ""), None);
+        assert_eq!(transform_github_branch("main", "Tree", "abc123", ""), None);
     }
 }

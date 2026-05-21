@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2924 / 8582 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2926 / 8578 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -777,7 +777,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts` | Not done | [details](lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts.md) |
 | `lib/util/github/graphql/datasource-fetcher.spec.ts` | Not done | [details](lib/util/github/graphql/datasource-fetcher.spec.ts.md) |
 | `lib/util/github/graphql/index.spec.ts` | Not done | [details](lib/util/github/graphql/index.spec.ts.md) |
-| `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts.md) |
+| `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | Done | [details](lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | Not done | [details](lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts.md) |
 | `lib/util/github/graphql/util.spec.ts` | Done | [details](lib/util/github/graphql/util.spec.ts.md) |
@@ -786,7 +786,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/http/auth.spec.ts` | Done | [details](lib/util/http/auth.spec.ts.md) |
 | `lib/util/http/bitbucket-server.spec.ts` | Not done | [details](lib/util/http/bitbucket-server.spec.ts.md) |
 | `lib/util/http/bitbucket.spec.ts` | Not done | [details](lib/util/http/bitbucket.spec.ts.md) |
-| `lib/util/http/cache/memory-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/memory-http-cache-provider.spec.ts.md) |
+| `lib/util/http/cache/memory-http-cache-provider.spec.ts` | Done | [details](lib/util/http/cache/memory-http-cache-provider.spec.ts.md) |
 | `lib/util/http/cache/package-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/package-http-cache-provider.spec.ts.md) |
 | `lib/util/http/cache/repository-http-cache-provider.spec.ts` | Not done | [details](lib/util/http/cache/repository-http-cache-provider.spec.ts.md) |
 | `lib/util/http/forgejo.spec.ts` | Not done | [details](lib/util/http/forgejo.spec.ts.md) |
