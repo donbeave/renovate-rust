@@ -1315,6 +1315,33 @@ mod tests {
         assert!(parse_toml_file("[invalid]\nerlang = '23.3'\nnode = '16'\n").is_none());
     }
 
+    // ── mise/schema.spec.ts tests ─────────────────────────────────────────────
+
+    // Ported: "defaults tools to empty object when [tools] is absent" — manager/mise/schema.spec.ts line 6
+    // TypeScript MiseFile.parse() defaults tools to {}; Rust parse_toml_file() returns None (no deps).
+    #[test]
+    fn mise_file_no_tools_section_produces_no_deps() {
+        assert!(parse_toml_file("min_version = \"2024.11.1\"\n").is_none());
+        assert!(extract("min_version = \"2024.11.1\"\n").is_empty());
+    }
+
+    // Ported: "defaults tools to empty object for empty TOML" — manager/mise/schema.spec.ts line 13
+    // Also covered by empty_returns_empty; this confirms parse_toml_file layer.
+    #[test]
+    fn mise_file_empty_toml_produces_no_deps() {
+        assert!(parse_toml_file("").is_none());
+        assert!(extract("").is_empty());
+    }
+
+    // Ported: "parses [tools] when present" — manager/mise/schema.spec.ts line 17
+    #[test]
+    fn mise_file_with_tools_section_parses_correctly() {
+        let content = "[tools]\nnode = \"20\"\n";
+        let parsed = parse_toml_file(content).unwrap();
+        let tools = parsed.get("tools").and_then(toml::Value::as_table).unwrap();
+        assert_eq!(tools.get("node").and_then(toml::Value::as_str), Some("20"));
+    }
+
     // Ported: "extracts tools - mise core plugins" — mise/extract.spec.ts line 28
     #[test]
     fn extracts_node_version() {
