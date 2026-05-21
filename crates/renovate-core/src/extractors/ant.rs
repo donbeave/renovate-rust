@@ -1852,6 +1852,81 @@ mod tests {
         );
     }
 
+    // Ported: "skips property file references with unresolved placeholders in path" — ant/extract.spec.ts line 1194
+    #[test]
+    fn extract_all_package_files_skips_property_file_with_placeholder_in_path() {
+        let build_xml = r#"<project>
+  <property file="${included.basedir}/../${user.name}.properties"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let result = extract_all_package_files(&[("build.xml", Some(build_xml))]);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].deps.len(), 1);
+        assert_eq!(result[0].deps[0].dep_name, "junit:junit");
+        assert_eq!(result[0].deps[0].current_value, "4.13.2");
+    }
+
+    // Ported: "skips property file references that resolve outside the repository" — ant/extract.spec.ts line 1226
+    #[test]
+    fn extract_all_package_files_skips_property_file_outside_repository() {
+        let build_xml = r#"<project>
+  <property file="/../../../some.properties"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let result = extract_all_package_files(&[("build.xml", Some(build_xml))]);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].deps.len(), 1);
+        assert_eq!(result[0].deps[0].dep_name, "junit:junit");
+    }
+
+    // Ported: "skips import file references that resolve outside the repository" — ant/extract.spec.ts line 1261
+    #[test]
+    fn extract_all_package_files_skips_import_file_outside_repository() {
+        let build_xml = r#"<project>
+  <import file="../../../outside/build.xml"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let result = extract_all_package_files(&[("build.xml", Some(build_xml))]);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].deps.len(), 1);
+        assert_eq!(result[0].deps[0].dep_name, "junit:junit");
+    }
+
+    // Ported: "skips settingsFile references that resolve outside the repository" — ant/extract.spec.ts line 1296
+    #[test]
+    fn extract_all_package_files_skips_settings_file_outside_repository() {
+        let build_xml = r#"<project>
+  <artifact:dependencies settingsFile="/../../etc/settings.xml">
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let result = extract_all_package_files(&[("build.xml", Some(build_xml))]);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].deps.len(), 1);
+        assert_eq!(result[0].deps[0].dep_name, "junit:junit");
+    }
+
+    // Ported: "skips import file references with unresolved placeholders in path" — ant/extract.spec.ts line 1330
+    #[test]
+    fn extract_all_package_files_skips_import_file_with_placeholder_in_path() {
+        let build_xml = r#"<project>
+  <import file="${user.name}/build.xml"/>
+  <artifact:dependencies>
+    <dependency groupId="junit" artifactId="junit" version="4.13.2" />
+  </artifact:dependencies>
+</project>"#;
+        let result = extract_all_package_files(&[("build.xml", Some(build_xml))]);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].deps.len(), 1);
+        assert_eq!(result[0].deps[0].dep_name, "junit:junit");
+    }
+
     // Ported: "returns null when value at position does not match" — ant/update.spec.ts line 158
     #[test]
     fn update_returns_none_when_value_at_position_does_not_match() {

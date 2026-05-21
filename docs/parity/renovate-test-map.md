@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 3049 / 3068 actionable tests ported (99%) — updated 2026-05-21
+**Overall progress:** 3054 / 3068 actionable tests ported (99%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -99,7 +99,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/pixi/extract.spec.ts` | Done | [details](lib/modules/manager/pixi/extract.spec.ts.md) |
 | `lib/modules/manager/mise/extract.spec.ts` | Not done | [details](lib/modules/manager/mise/extract.spec.ts.md) |
 | `lib/modules/manager/nuget/extract.spec.ts` | Done | [details](lib/modules/manager/nuget/extract.spec.ts.md) |
-| `lib/modules/manager/ant/extract.spec.ts` | Not done | [details](lib/modules/manager/ant/extract.spec.ts.md) |
+| `lib/modules/manager/ant/extract.spec.ts` | Done | [details](lib/modules/manager/ant/extract.spec.ts.md) |
 | `lib/modules/manager/kustomize/extract.spec.ts` | Done | [details](lib/modules/manager/kustomize/extract.spec.ts.md) |
 | `lib/modules/manager/nix/extract.spec.ts` | Done | [details](lib/modules/manager/nix/extract.spec.ts.md) |
 | `lib/modules/manager/flux/extract.spec.ts` | Done | [details](lib/modules/manager/flux/extract.spec.ts.md) |
