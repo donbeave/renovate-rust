@@ -906,6 +906,14 @@ pub fn compare_changelog_file_path(a: &str, b: &str) -> std::cmp::Ordering {
     }
 }
 
+/// Return the PR body rebase-check control checkbox string.
+///
+/// Mirrors `getControls` from
+/// `lib/workers/repository/update/pr/body/controls.ts`.
+pub fn get_controls() -> &'static str {
+    "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
+}
+
 fn numeric_locale_compare(a: &str, b: &str) -> std::cmp::Ordering {
     let mut ai = a.chars().peekable();
     let mut bi = b.chars().peekable();
@@ -2210,5 +2218,14 @@ mod tests {
         assert_eq!(format_problem_level(40), "⚠️ WARN");
         assert_eq!(format_problem_level(50), "❌ ERROR");
         assert_eq!(format_problem_level(60), "💀 FATAL");
+    }
+
+    // Ported: "calls getControls" — workers/repository/update/pr/body/controls.spec.ts line 4
+    #[test]
+    fn get_controls_returns_rebase_checkbox() {
+        assert_eq!(
+            get_controls(),
+            "\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\n"
+        );
     }
 }

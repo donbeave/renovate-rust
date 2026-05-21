@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2915 / 8582 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2916 / 8582 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -894,7 +894,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/workers/repository/update/pr/automerge.spec.ts` | Not done | [details](lib/workers/repository/update/pr/automerge.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/changelogs.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/changelogs.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/config-description.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/config-description.spec.ts.md) |
-| `lib/workers/repository/update/pr/body/controls.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/controls.spec.ts.md) |
+| `lib/workers/repository/update/pr/body/controls.spec.ts` | Done | [details](lib/workers/repository/update/pr/body/controls.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/footer.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/footer.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/header.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/header.spec.ts.md) |
 | `lib/workers/repository/update/pr/body/index.spec.ts` | Not done | [details](lib/workers/repository/update/pr/body/index.spec.ts.md) |
