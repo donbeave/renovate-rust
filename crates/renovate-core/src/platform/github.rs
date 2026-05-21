@@ -4,12 +4,104 @@
 //!
 //! Renovate reference: `lib/modules/platform/github/index.ts`.
 
+use std::sync::LazyLock;
+
 use base64::Engine as _;
 use chrono::{DateTime, Utc};
+use regex::Regex;
 use serde::Deserialize;
 
 use crate::http::{HttpClient, HttpError};
 use crate::platform::{CurrentUser, PlatformClient, PlatformError, RawFile};
+
+// ── massage-markdown-links ────────────────────────────────────────────────────
+
+/// Matches GitHub PR/issue/discussion URLs (including bare and https:// forms).
+///
+/// Mirrors the `urlRegex` in `lib/modules/platform/github/massage-markdown-links.ts`.
+/// Note: Rust's regex crate doesn't support lookbehind, so api.github.com
+/// exclusion is handled in code.
+static GITHUB_ITEM_URL_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?i)(?:https?://)?(?:www\.)?(?:to)?github\.com/[-a-z0-9]+/[-_a-z0-9.]+/(?:discussions|issues|pull)/[0-9]+(?:#[-_a-z0-9]+)?").unwrap()
+});
+
+/// Matches an existing Markdown link `[text](url)`.
+static MD_LINK_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"\[([^\]]*)\]\(([^)]*)\)").unwrap()
+});
+
+/// Replace `github.com` (with optional www/to/redirect prefix) → `redirect.github.com`.
+///
+/// Mirrors `massageLink` in `lib/modules/platform/github/massage-markdown-links.ts`.
+fn massage_link(url: &str) -> String {
+    static GITHUB_HOST_RE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r"(?i)(?:redirect\.|www\.|to)?github\.com").unwrap()
+    });
+    GITHUB_HOST_RE.replace(url, "redirect.github.com").into_owned()
+}
+
+fn is_github_item_url(url: &str) -> bool {
+    // Exclude api.github.com (handles the lookbehind the regex crate can't express).
+    if url.contains("api.github.com") || url.contains("redirect.github.com") {
+        return false;
+    }
+    GITHUB_ITEM_URL_RE.is_match(url)
+}
+
+/// Rewrite GitHub PR/issue/discussion links to use `redirect.github.com`.
+///
+/// - Existing markdown links `[text](url)` have their URL rewritten.
+/// - Bare GitHub URLs in text are wrapped as `[url](redirect-url)`.
+///
+/// Mirrors `massageMarkdownLinks` from
+/// `lib/modules/platform/github/massage-markdown-links.ts`.
+pub fn massage_markdown_links(content: &str) -> String {
+    // Collect replacements as (start, end, replacement) in order of discovery.
+    // Apply in reverse so indices stay valid.
+    let mut replacements: Vec<(usize, usize, String)> = Vec::new();
+
+    // Pass 1: rewrite URL inside existing markdown links [text](url).
+    for cap in MD_LINK_RE.captures_iter(content) {
+        let url = cap.get(2).unwrap();
+        let url_str = url.as_str();
+        if is_github_item_url(url_str) {
+            replacements.push((url.start(), url.end(), massage_link(url_str)));
+        }
+    }
+
+    // Pass 2: wrap bare GitHub URLs in text (not already inside a link).
+    // We build a set of ranges covered by md links to skip those.
+    let link_ranges: Vec<(usize, usize)> = MD_LINK_RE
+        .find_iter(content)
+        .map(|m| (m.start(), m.end()))
+        .collect();
+
+    for mat in GITHUB_ITEM_URL_RE.find_iter(content) {
+        let start = mat.start();
+        let end = mat.end();
+        // Skip if this URL is already inside a markdown link.
+        if link_ranges.iter().any(|(ls, le)| start >= *ls && end <= *le) {
+            continue;
+        }
+        // Also skip api.github.com and redirect.github.com.
+        let url_str = mat.as_str();
+        if url_str.contains("api.github.com") || url_str.contains("redirect.github.com") {
+            continue;
+        }
+        let massaged = massage_link(url_str);
+        replacements.push((start, end, format!("[{url_str}]({massaged})")));
+    }
+
+    // Deduplicate and sort by start (desc) then apply in reverse order.
+    replacements.sort_by(|a, b| b.0.cmp(&a.0));
+    replacements.dedup_by(|a, b| a.0 == b.0 && a.1 == b.1);
+
+    let mut result = content.to_owned();
+    for (start, end, replacement) in replacements {
+        result.replace_range(start..end, &replacement);
+    }
+    result
+}
 
 /// Default GitHub API base URL.
 pub const GITHUB_API_BASE: &str = "https://api.github.com";
@@ -432,6 +524,88 @@ mod tests {
         // 2022-11-25 15:01 > expiry → true
         let t4: DateTime<Utc> = "2022-11-25T15:01:00Z".parse().unwrap();
         assert!(is_date_expired(t4, initial, one_day));
+    }
+
+    // ── massage-markdown-links ────────────────────────────────────────────────
+
+    // Ported: "performs multiple replacements" — modules/platform/github/massage-markdown-links.spec.ts line 4
+    #[test]
+    fn massage_markdown_links_performs_multiple_replacements() {
+        let input = "Link [foo/bar#1](https://github.com/foo/bar/pull/1) points to https://github.com/foo/bar/pull/1.";
+        let expected = "Link [foo/bar#1](https://redirect.github.com/foo/bar/pull/1) points to [https://github.com/foo/bar/pull/1](https://redirect.github.com/foo/bar/pull/1).";
+        assert_eq!(massage_markdown_links(input), expected);
+    }
+
+    // Ported: "Unchanged: $input" — modules/platform/github/massage-markdown-links.spec.ts line 18
+    #[test]
+    fn massage_markdown_links_unchanged_non_item_urls() {
+        let unchanged = [
+            "github.com",
+            "github.com/foo/bar",
+            "github.com/foo/bar/",
+            "github.com/foo/bar/discussions",
+            "github.com/foo/bar/issues",
+            "github.com/foo/bar/pull",
+            "https://github.com",
+            "https://github.com/foo/bar",
+            "https://github.com/foo/bar/",
+            "https://github.com/foo/bar/discussions",
+            "api.github.com",
+            "redirect.github.com",
+            "https://redirect.github.com/foo/bar/releases/tag/v0.20.3",
+        ];
+        for input in unchanged {
+            let text = format!("Foo {input}, bar.");
+            assert_eq!(
+                massage_markdown_links(&text),
+                text,
+                "Expected unchanged for bare text: {input}"
+            );
+            let link = format!("[foobar]({input})");
+            assert_eq!(
+                massage_markdown_links(&link),
+                link,
+                "Expected unchanged for link: {input}"
+            );
+        }
+    }
+
+    // Ported: "$input -> $output" — modules/platform/github/massage-markdown-links.spec.ts line 60
+    #[test]
+    fn massage_markdown_links_transforms_item_urls() {
+        let cases = [
+            (
+                "github.com/foo/bar/discussions/1",
+                "[github.com/foo/bar/discussions/1](redirect.github.com/foo/bar/discussions/1)",
+            ),
+            (
+                "github.com/foo/bar/issues/1",
+                "[github.com/foo/bar/issues/1](redirect.github.com/foo/bar/issues/1)",
+            ),
+            (
+                "github.com/foo/bar/pull/1",
+                "[github.com/foo/bar/pull/1](redirect.github.com/foo/bar/pull/1)",
+            ),
+            (
+                "https://github.com/foo/bar/pull/1",
+                "[https://github.com/foo/bar/pull/1](https://redirect.github.com/foo/bar/pull/1)",
+            ),
+            (
+                "[github.com/foo/bar/pull/1](github.com/foo/bar/pull/1)",
+                "[github.com/foo/bar/pull/1](redirect.github.com/foo/bar/pull/1)",
+            ),
+            (
+                "[https://github.com/foo/bar/pull/1](https://github.com/foo/bar/pull/1)",
+                "[https://github.com/foo/bar/pull/1](https://redirect.github.com/foo/bar/pull/1)",
+            ),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(
+                massage_markdown_links(input),
+                expected,
+                "Failed for input: {input}"
+            );
+        }
     }
 
     // ── branches-query-adapter ────────────────────────────────────────────────
