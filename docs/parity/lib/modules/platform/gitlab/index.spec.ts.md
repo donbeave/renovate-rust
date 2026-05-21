@@ -5,7 +5,7 @@
 ## `lib/modules/platform/gitlab/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitlab/index.spec.ts
-**Total tests:** 162 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 163 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `initPlatform()`
 
@@ -304,5 +304,6 @@
 | groups with no members expand into empty list | 4225 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 | includes email in final result | 4236 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 
+| should throw if endpoint is not a valid URL | 82 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 ---
 

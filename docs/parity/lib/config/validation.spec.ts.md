@@ -5,7 +5,7 @@
 ## `lib/config/validation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/validation.spec.ts
-**Total tests:** 127 | **Ported:** 127 | **Actionable:** 127 | **Status:** ported
+**Total tests:** 131 | **Ported:** 127 | **Actionable:** 131 | **Status:** partial
 
 ### `config/validation › validateConfig(config)`
 
@@ -174,6 +174,10 @@
 | rejects invalid postUpgradeTasks.installTools tool names | 2615 | ported | `migrate_validate.rs` | `validate_config_global_rejects_invalid_post_upgrade_install_tools` | — |
 | catches when * or ** is combined with others patterns in a regexOrGlob option | 2639 | ported | `migrate_validate.rs` | `validate_config_global_catches_match_all_combined_with_other_patterns` | — |
 
+| accepts templates referencing runtime-only fields | 165 | pending | — | — | — |
+| skips preset syntax validation for templates | 1472 | pending | — | — | — |
+| errors when using an invalid cache namespace | 2706 | pending | — | — | — |
+| allows a valid cache namespace | 2729 | pending | — | — | — |
 ---
 
 ## Config specs (`lib/config/`)

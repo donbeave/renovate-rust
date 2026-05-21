@@ -5,7 +5,7 @@
 ## `test/docs/documentation.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/test/docs/documentation.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 10 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `docs/documentation`
 
@@ -28,7 +28,6 @@
 |---|---|---|---|---|---|
 | has headers sorted alphabetically | 177 | not-applicable | — | — | tests documentation file links and template helper names; build/meta testing out of scope |
 | has headers for every required option | 185 | not-applicable | — | — | tests documentation file links and template helper names; build/meta testing out of scope |
-| has complete cache namespaces list | 220 | not-applicable | — | — | tests documentation file links and template helper names; build/meta testing out of scope |
 
 ### `docs/documentation › website-documentation › docs/usage/self-hosted-experimental.md`
 

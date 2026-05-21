@@ -5,7 +5,7 @@
 ## `lib/modules/manager/pip-compile/artifacts.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/artifacts.spec.ts
-**Total tests:** 31 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 34 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `tests`
 
@@ -48,5 +48,8 @@
 | add --upgrade-package to command if Upgrade[] passed | 721 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 | reports errors when a lock file is unchanged | 740 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 
+| does not add --no-emit-index-url when PIP_INDEX_URL has no credentials | 600 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| skips source file package registry extraction when source file is not pip_requirements | 750 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
+| skips source file when readLocalFile returns null | 778 | not-applicable | — | — | out of scope: artifact management; invokes external package managers not called by Rust CLI |
 ---
 

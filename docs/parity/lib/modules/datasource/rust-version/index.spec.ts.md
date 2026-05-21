@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/rust-version/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/rust-version/index.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `modules/datasource/rust-version/index`
 
@@ -16,5 +16,6 @@
 | ignores unexpected URLs | 69 | not-applicable | — | — | Rust toolchain version datasource lookup and channel manifest parsing are not implemented in Rust. |
 | throws for network error | 91 | not-applicable | — | — | Rust toolchain version datasource lookup and channel manifest parsing are not implemented in Rust. |
 
+| ignores blank lines silently (no spurious warning) | 92 | not-applicable | — | — | Rust toolchain version datasource lookup and channel manifest parsing are not implemented in Rust. |
 ---
 

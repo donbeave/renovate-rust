@@ -5,7 +5,7 @@
 ## `lib/modules/manager/github-actions/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/github-actions/extract.spec.ts
-**Total tests:** 27 | **Ported:** 20 | **Actionable:** 20 | **Status:** ported
+**Total tests:** 28 | **Ported:** 20 | **Actionable:** 20 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -39,5 +39,6 @@
 | logs unknown schema | 1023 | not-applicable | — | — | Tests log output; no Rust equivalent |
 | extract from $step.uses | 1033 | ported | `github_actions.rs` | `community_trivy_*`, `community_pnpm_*`, `community_bun_*`, `community_ruby_*`, `community_pyright_*`, `community_jaxxstorm_*`, `community_pixi_*`, `community_zizmor_*`, `community_docker_*`, `community_setup_uv_*` (14 tests) | — |
 
+| returns undefined registryUrls when endpoint is invalid URL | 153 | not-applicable | — | — | registryUrls not produced by Rust extractor |
 ---
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/maven/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/maven/extract.spec.ts
-**Total tests:** 29 | **Ported:** 29 | **Actionable:** 29 | **Status:** ported
+**Total tests:** 30 | **Ported:** 29 | **Actionable:** 30 | **Status:** partial
 
 ### `extractPackage`
 
@@ -66,5 +66,6 @@
 | should skip root pom.xml when it has an external parent | 964 | ported | `maven.rs` | `extract_all_package_files_keeps_external_root_parent` | — |
 | handles cross-referencing | 1006 | ported | `maven.rs` | `extract_all_package_files_handles_cross_referencing_modules` | — |
 
+| should extract from pom.template.xml file | 917 | pending | — | — | — |
 ---
 

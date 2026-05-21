@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/docker/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/docker/common.spec.ts
-**Total tests:** 14 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+**Total tests:** 15 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `modules/datasource/docker/common › getRegistryRepository`
 
@@ -36,5 +36,6 @@
 | findLatestStable works | 270 | ported | `docker_hub.rs` | `empty_tag_list_produces_no_latest` | Rust verifies the equivalent no-tags/no-latest update summary behavior. |
 | findHelmSourceUrl works | 274 | not-applicable | — | — | Renovate's Docker OCI Helm chart config source URL extraction is not implemented in Rust. |
 
+| returns raw registryHost and dockerRepository when fullUrl is invalid | 117 | not-applicable | — | — | Renovate's Docker registryUrl/repository resolver for arbitrary registries is not implemented in Rust; Rust Docker datasource currently supports Docker Hub image parsing only. |
 ---
 

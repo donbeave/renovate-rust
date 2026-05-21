@@ -5,7 +5,7 @@
 ## `lib/util/git/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/git/index.spec.ts
-**Total tests:** 105 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 108 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/git/index › gitRetry`
 
@@ -297,5 +297,8 @@
 | checkoutBranchFromRemote() - temporary error | 1745 | not-applicable | — | — | tests simple-git library operations on real git repos; Rust uses git2 with separate integration tests |
 | syncForkWithRemote() - returns if no upstream exists | 1753 | not-applicable | — | — | tests simple-git library operations on real git repos; Rust uses git2 with separate integration tests |
 
+| doesn | 209 | not-applicable | — | — | tests simple-git library operations on real git repos; Rust uses git2 with separate integration tests |
+| should allow customEnvVariables to override GIT_SSH_COMMAND | 1575 | not-applicable | — | — | tests simple-git library operations on real git repos; Rust uses git2 with separate integration tests |
+| should allow customEnvVariables to override GIT_SSH_COMMAND alongside other custom vars | 1596 | not-applicable | — | — | tests simple-git library operations on real git repos; Rust uses git2 with separate integration tests |
 ---
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/helmfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/helmfile/extract.spec.ts
-**Total tests:** 19 | **Ported:** 19 | **Actionable:** 19 | **Status:** ported
+**Total tests:** 20 | **Ported:** 19 | **Actionable:** 20 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -31,5 +31,6 @@
 | makes sure url joiner works correctly | 513 | ported | `helmfile.rs` | `oci_url_with_port_in_chart_ref` | — |
 | skips helm-git repos | 539 | ported | `helmfile.rs` | `helm_git_repo_releases_get_unknown_registry` | — |
 
+| parses templates key alongside releases | 576 | pending | — | — | — |
 ---
 

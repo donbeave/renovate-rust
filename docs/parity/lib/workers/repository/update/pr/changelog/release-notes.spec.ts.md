@@ -5,7 +5,7 @@
 ## `lib/workers/repository/update/pr/changelog/release-notes.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/update/pr/changelog/release-notes.spec.ts
-**Total tests:** 54 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 56 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `workers/repository/update/pr/changelog/release-notes › releaseNotesCacheMinutes`
 
@@ -101,4 +101,6 @@
 |---|---|---|---|---|---|
 | does not modify # inside codeblocks | 1682 | not-applicable | — | — | tests release note fetching via GitHub/GitLab/Gitea HTTP APIs; platform API calls out of scope |
 
+| (parametrized test at line 197) | 197 | not-applicable | — | — | tests release note fetching via GitHub/GitLab/Gitea HTTP APIs; platform API calls out of scope |
+| (parametrized test at line 209) | 209 | not-applicable | — | — | tests release note fetching via GitHub/GitLab/Gitea HTTP APIs; platform API calls out of scope |
 ---

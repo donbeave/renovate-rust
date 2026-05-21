@@ -5,14 +5,13 @@
 ## `lib/config/presets/local/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/presets/local/index.spec.ts
-**Total tests:** 19 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 18 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `config/presets/local/index › getPreset()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | throws for unsupported platform | 34 | not-applicable | — | — | Platform-dispatched local preset fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
-| throws for missing platform | 47 | not-applicable | — | — | Platform-dispatched local preset fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
 | forwards to azure | 59 | not-applicable | — | — | Azure local preset file fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
 | forwards to bitbucket | 77 | not-applicable | — | — | Bitbucket local preset file fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |
 | forwards to gerrit | 95 | not-applicable | — | — | Gerrit local preset file fetching is not implemented in Rust; Rust only expands built-in presets and tracks unresolved remote/local preset references. |

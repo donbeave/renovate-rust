@@ -5,7 +5,7 @@
 ## `lib/workers/repository/process/vulnerabilities.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/process/vulnerabilities.spec.ts
-**Total tests:** 38 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 41 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `workers/repository/process/vulnerabilities › create()`
 
@@ -75,4 +75,7 @@
 |---|---|---|---|---|---|
 | $input | 2194 | not-applicable | — | — | tests vulnerability data fetching via Osv API HTTP calls; external API calls out of scope |
 
+| creates vulnerability alert for go toolchain directive using stdlib | 1135 | not-applicable | — | — | tests vulnerability data fetching via Osv API HTTP calls; external API calls out of scope |
+| skips vulnerability lookup for go module directive | 1196 | not-applicable | — | — | tests vulnerability data fetching via Osv API HTTP calls; external API calls out of scope |
+| sets default datasource versioning to align with allowedVersions on packageRule | 1221 | not-applicable | — | — | tests vulnerability data fetching via Osv API HTTP calls; external API calls out of scope |
 ---

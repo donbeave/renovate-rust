@@ -5,7 +5,7 @@
 ## `lib/modules/datasource/crate/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/crate/index.spec.ts
-**Total tests:** 26 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+**Total tests:** 27 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
 
 ### `modules/datasource/crate/index › getIndexSuffix`
 
@@ -48,5 +48,6 @@
 | no-op for release with timestamp | 580 | not-applicable | — | — | Renovate's crates.io `postprocessRelease` hook and registry config memCache are not implemented in Rust. |
 | fetches releaseTimestamp | 597 | not-applicable | — | — | Renovate's crates.io single-release `postprocessRelease` timestamp hook is not implemented in Rust; Rust exposes a separate batch timestamp fetch helper. |
 
+| clones other private registry with explicit gitTimeout | 357 | not-applicable | — | — | Renovate's crates.io `getReleases` registry URL validation/null contract is not implemented in Rust; Rust callers pass a sparse index base directly. |
 ---
 

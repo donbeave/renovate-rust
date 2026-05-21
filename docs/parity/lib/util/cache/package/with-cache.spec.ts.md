@@ -5,7 +5,7 @@
 ## `lib/util/cache/package/with-cache.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/cache/package/with-cache.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 14 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/cache/package/with-cache`
 
@@ -28,5 +28,8 @@
 | drops stale value after hard TTL expires | 342 | not-applicable | — | — | tests package cache wrapper tied to TypeScript cache infrastructure |
 | does not use fallback when fallback=false | 393 | not-applicable | — | — | tests package cache wrapper tied to TypeScript cache infrastructure |
 
+| does not cache values rejected by cacheResult predicate | 140 | not-applicable | — | — | tests package cache wrapper tied to TypeScript cache infrastructure |
+| ignores cached values rejected by cacheResult predicate | 170 | not-applicable | — | — | tests package cache wrapper tied to TypeScript cache infrastructure |
+| does not return stale values rejected by cacheResult predicate | 414 | not-applicable | — | — | tests package cache wrapper tied to TypeScript cache infrastructure |
 ---
 

@@ -5,7 +5,7 @@
 ## `lib/util/exec/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/exec/index.spec.ts
-**Total tests:** 39 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 40 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `util/exec/index`
 
@@ -91,5 +91,6 @@
 |---|---|---|---|---|---|
 | takes the values given to it, and returns the JVM arguments | 1547 | not-applicable | — | — | out of scope: tests Node.js child-process/Docker exec infrastructure not used by Rust CLI |
 
+| (parametrized test at line 910) | 910 | not-applicable | — | — | out of scope: tests Node.js child-process/Docker exec infrastructure not used by Rust CLI |
 ---
 

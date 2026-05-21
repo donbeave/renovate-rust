@@ -5,7 +5,7 @@
 ## `lib/modules/platform/bitbucket-server/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/bitbucket-server/utils.spec.ts
-**Total tests:** 16 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 17 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
 
 ### `tests`
 
@@ -43,5 +43,6 @@
 | should not configure bearer token | 334 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 | should configure bearer token | 339 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 
+| throws on invalid endpoint URL | 333 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
 ---
 

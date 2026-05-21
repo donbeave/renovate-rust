@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 3038 / 3055 actionable tests ported (99%) — updated 2026-05-21
+**Overall progress:** 3038 / 3068 actionable tests ported (99%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -84,7 +84,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/mise/schema.spec.ts` | Done | [details](lib/modules/manager/mise/schema.spec.ts.md) |
 | `lib/modules/manager/maven-wrapper/extract.spec.ts` | Done | [details](lib/modules/manager/maven-wrapper/extract.spec.ts.md) |
 | `lib/modules/manager/pre-commit/extract.spec.ts` | Done | [details](lib/modules/manager/pre-commit/extract.spec.ts.md) |
-| `lib/modules/manager/helmfile/extract.spec.ts` | Done | [details](lib/modules/manager/helmfile/extract.spec.ts.md) |
+| `lib/modules/manager/helmfile/extract.spec.ts` | Not done | [details](lib/modules/manager/helmfile/extract.spec.ts.md) |
 | `lib/modules/manager/helm-requirements/extract.spec.ts` | Done | [details](lib/modules/manager/helm-requirements/extract.spec.ts.md) |
 | `lib/modules/manager/helmv3/common.spec.ts` | Done | [details](lib/modules/manager/helmv3/common.spec.ts.md) |
 | `lib/modules/manager/homebrew/extract.spec.ts` | Done | [details](lib/modules/manager/homebrew/extract.spec.ts.md) |
@@ -106,7 +106,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bazel-module/extract.spec.ts` | Done | [details](lib/modules/manager/bazel-module/extract.spec.ts.md) |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | Done | [details](lib/modules/manager/cpanfile/extract.spec.ts.md) |
 | `lib/modules/manager/pip-compile/extract.spec.ts` | Done | [details](lib/modules/manager/pip-compile/extract.spec.ts.md) |
-| `lib/modules/manager/maven/extract.spec.ts` | Done | [details](lib/modules/manager/maven/extract.spec.ts.md) |
+| `lib/modules/manager/maven/extract.spec.ts` | Not done | [details](lib/modules/manager/maven/extract.spec.ts.md) |
 | `lib/modules/manager/poetry/extract.spec.ts` | Done | [details](lib/modules/manager/poetry/extract.spec.ts.md) |
 | `lib/modules/manager/sbt/extract.spec.ts` | Done | [details](lib/modules/manager/sbt/extract.spec.ts.md) |
 | `lib/modules/manager/terraform/extract.spec.ts` | Done | [details](lib/modules/manager/terraform/extract.spec.ts.md) |
@@ -351,7 +351,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/validation-helpers/match-base-branches.spec.ts` | Done | [details](lib/config/validation-helpers/match-base-branches.spec.ts.md) |
 | `lib/config/validation-helpers/regex-glob-matchers.spec.ts` | Done | [details](lib/config/validation-helpers/regex-glob-matchers.spec.ts.md) |
 | `lib/config/validation-helpers/utils.spec.ts` | Done | [details](lib/config/validation-helpers/utils.spec.ts.md) |
-| `lib/config/validation.spec.ts` | Done | [details](lib/config/validation.spec.ts.md) |
+| `lib/config/validation.spec.ts` | Not done | [details](lib/config/validation.spec.ts.md) |
 | `lib/constants/platform.spec.ts` | Done | [details](lib/constants/platform.spec.ts.md) |
 | `lib/instrumentation/detectors.spec.ts` | Done | [details](lib/instrumentation/detectors.spec.ts.md) |
 | `lib/instrumentation/index.spec.ts` | Done | [details](lib/instrumentation/index.spec.ts.md) |
@@ -562,7 +562,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/custom/index.spec.ts` | Done | [details](lib/modules/manager/custom/index.spec.ts.md) |
 | `lib/modules/manager/custom/jsonata/index.spec.ts` | Done | [details](lib/modules/manager/custom/jsonata/index.spec.ts.md) |
 | `lib/modules/manager/custom/regex/index.spec.ts` | Done | [details](lib/modules/manager/custom/regex/index.spec.ts.md) |
-| `lib/modules/manager/custom/regex/utils.spec.ts` | Done | [details](lib/modules/manager/custom/regex/utils.spec.ts.md) |
+| `lib/modules/manager/custom/regex/utils.spec.ts` | Not done | [details](lib/modules/manager/custom/regex/utils.spec.ts.md) |
 | `lib/modules/manager/deno/artifacts.spec.ts` | Done | [details](lib/modules/manager/deno/artifacts.spec.ts.md) |
 | `lib/modules/manager/deno/compat.spec.ts` | Done | [details](lib/modules/manager/deno/compat.spec.ts.md) |
 | `lib/modules/manager/deno/extract.spec.ts` | Done | [details](lib/modules/manager/deno/extract.spec.ts.md) |
@@ -696,7 +696,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/terraform/lockfile/update-locked.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/update-locked.spec.ts.md) |
 | `lib/modules/manager/terraform/lockfile/util.spec.ts` | Done | [details](lib/modules/manager/terraform/lockfile/util.spec.ts.md) |
 | `lib/modules/manager/terragrunt/artifacts.spec.ts` | Done | [details](lib/modules/manager/terragrunt/artifacts.spec.ts.md) |
-| `lib/modules/manager/terragrunt/modules.spec.ts` | Done | [details](lib/modules/manager/terragrunt/modules.spec.ts.md) |
+| `lib/modules/manager/terragrunt/modules.spec.ts` | Not done | [details](lib/modules/manager/terragrunt/modules.spec.ts.md) |
 | `lib/modules/manager/terragrunt/util.spec.ts` | Done | [details](lib/modules/manager/terragrunt/util.spec.ts.md) |
 | `lib/modules/manager/vendir/artifacts.spec.ts` | Done | [details](lib/modules/manager/vendir/artifacts.spec.ts.md) |
 | `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | Done | [details](lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) |
