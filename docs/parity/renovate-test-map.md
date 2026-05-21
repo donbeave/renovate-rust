@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2993 / 3026 actionable tests ported (99%) — updated 2026-05-21
+**Overall progress:** 3016 / 3026 actionable tests ported (99%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -612,8 +612,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/maven/update.spec.ts` | Done | [details](lib/modules/manager/maven/update.spec.ts.md) |
 | `lib/modules/manager/maven-wrapper/artifacts.spec.ts` | Done | [details](lib/modules/manager/maven-wrapper/artifacts.spec.ts.md) |
 | `lib/modules/manager/mise/backends.spec.ts` | Done | [details](lib/modules/manager/mise/backends.spec.ts.md) |
-| `lib/modules/manager/rust-toolchain/extract.spec.ts` | Not done | [details](lib/modules/manager/rust-toolchain/extract.spec.ts.md) |
-| `lib/modules/manager/rust-toolchain/schema.spec.ts` | Not done | [details](lib/modules/manager/rust-toolchain/schema.spec.ts.md) |
+| `lib/modules/manager/rust-toolchain/extract.spec.ts` | Done | [details](lib/modules/manager/rust-toolchain/extract.spec.ts.md) |
+| `lib/modules/manager/rust-toolchain/schema.spec.ts` | Done | [details](lib/modules/manager/rust-toolchain/schema.spec.ts.md) |
 | `lib/modules/manager/mix/artifacts.spec.ts` | Done | [details](lib/modules/manager/mix/artifacts.spec.ts.md) |
 | `lib/modules/manager/mix/range.spec.ts` | Done | [details](lib/modules/manager/mix/range.spec.ts.md) |
 | `lib/modules/manager/nix/artifacts.spec.ts` | Done | [details](lib/modules/manager/nix/artifacts.spec.ts.md) |

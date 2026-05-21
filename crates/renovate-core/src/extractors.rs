@@ -93,6 +93,7 @@ pub mod pyenv;
 pub mod quadlet;
 pub mod renovate_config_presets;
 pub mod runtime_version;
+pub mod rust_toolchain;
 pub mod sbt;
 pub mod scalafmt;
 pub mod setup_cfg;
