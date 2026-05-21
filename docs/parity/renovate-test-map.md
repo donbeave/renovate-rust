@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2913 / 8591 actionable tests ported (34%) — updated 2026-05-21
+**Overall progress:** 2913 / 8590 actionable tests ported (34%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -770,7 +770,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/git/private-key.spec.ts` | Not done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
 | `lib/util/git/set-branch-commit.spec.ts` | Not done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
-| `lib/util/git/span-processor.spec.ts` | Not done | [details](lib/util/git/span-processor.spec.ts.md) |
+| `lib/util/git/span-processor.spec.ts` | Done | [details](lib/util/git/span-processor.spec.ts.md) |
 | `lib/util/git/update-date-cache.spec.ts` | Not done | [details](lib/util/git/update-date-cache.spec.ts.md) |
 | `lib/util/git/url.spec.ts` | Not done | [details](lib/util/git/url.spec.ts.md) |
 | `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | Not done | [details](lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts.md) |
