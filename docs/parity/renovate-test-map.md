@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Overall progress:** 2983 / 3666 actionable tests ported (81%) — updated 2026-05-21
+**Overall progress:** 2983 / 3216 actionable tests ported (93%) — updated 2026-05-21
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -199,7 +199,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/ruby-version/index.spec.ts` | Done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |
 | `lib/modules/datasource/rust-version/index.spec.ts` | Done | [details](lib/modules/datasource/rust-version/index.spec.ts.md) |
 | `lib/modules/datasource/rust-version/parse.spec.ts` | Done | [details](lib/modules/datasource/rust-version/parse.spec.ts.md) |
-| `lib/modules/datasource/custom/index.spec.ts` | Not done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
+| `lib/modules/datasource/custom/index.spec.ts` | Done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
 | `lib/modules/datasource/rpm/index.spec.ts` | Done | [details](lib/modules/datasource/rpm/index.spec.ts.md) |
 | `lib/modules/datasource/golang-version/index.spec.ts` | Done | [details](lib/modules/datasource/golang-version/index.spec.ts.md) |
 | `lib/modules/datasource/git-tags/index.spec.ts` | Done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
@@ -510,8 +510,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/npm/index.spec.ts` | Done | [details](lib/modules/versioning/npm/index.spec.ts.md) |
 | `lib/modules/versioning/ruby/index.spec.ts` | Done | [details](lib/modules/versioning/ruby/index.spec.ts.md) |
 | `lib/modules/versioning/git/index.spec.ts` | Done | [details](lib/modules/versioning/git/index.spec.ts.md) |
-| `lib/config/presets/index.spec.ts` | Not done | [details](lib/config/presets/index.spec.ts.md) |
-| `lib/config/presets/internal/custom-managers.spec.ts` | Not done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
+| `lib/config/presets/index.spec.ts` | Done | [details](lib/config/presets/index.spec.ts.md) |
+| `lib/config/presets/internal/custom-managers.spec.ts` | Done | [details](lib/config/presets/internal/custom-managers.spec.ts.md) |
 | `lib/config/presets/parse.spec.ts` | Done | [details](lib/config/presets/parse.spec.ts.md) |
 | `lib/modules/manager/bazel/artifacts.spec.ts` | Done | [details](lib/modules/manager/bazel/artifacts.spec.ts.md) |
 | `lib/modules/manager/bazel/common.spec.ts` | Not done | [details](lib/modules/manager/bazel/common.spec.ts.md) |
@@ -756,23 +756,23 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/exec/hermit.spec.ts` | Done | [details](lib/util/exec/hermit.spec.ts.md) |
 | `lib/util/exec/index.spec.ts` | Done | [details](lib/util/exec/index.spec.ts.md) |
 | `lib/util/exec/utils.spec.ts` | Done | [details](lib/util/exec/utils.spec.ts.md) |
-| `lib/util/fs/index.spec.ts` | Not done | [details](lib/util/fs/index.spec.ts.md) |
+| `lib/util/fs/index.spec.ts` | Done | [details](lib/util/fs/index.spec.ts.md) |
 | `lib/util/fs/util.spec.ts` | Not done | [details](lib/util/fs/util.spec.ts.md) |
-| `lib/util/git/auth.spec.ts` | Not done | [details](lib/util/git/auth.spec.ts.md) |
+| `lib/util/git/auth.spec.ts` | Done | [details](lib/util/git/auth.spec.ts.md) |
 | `lib/util/git/author.spec.ts` | Done | [details](lib/util/git/author.spec.ts.md) |
-| `lib/util/git/behind-base-branch-cache.spec.ts` | Not done | [details](lib/util/git/behind-base-branch-cache.spec.ts.md) |
+| `lib/util/git/behind-base-branch-cache.spec.ts` | Done | [details](lib/util/git/behind-base-branch-cache.spec.ts.md) |
 | `lib/util/git/config.spec.ts` | Done | [details](lib/util/git/config.spec.ts.md) |
-| `lib/util/git/conflicts-cache.spec.ts` | Not done | [details](lib/util/git/conflicts-cache.spec.ts.md) |
+| `lib/util/git/conflicts-cache.spec.ts` | Done | [details](lib/util/git/conflicts-cache.spec.ts.md) |
 | `lib/util/git/errors.spec.ts` | Done | [details](lib/util/git/errors.spec.ts.md) |
-| `lib/util/git/index.spec.ts` | Not done | [details](lib/util/git/index.spec.ts.md) |
-| `lib/util/git/modified-cache.spec.ts` | Not done | [details](lib/util/git/modified-cache.spec.ts.md) |
-| `lib/util/git/pristine.spec.ts` | Not done | [details](lib/util/git/pristine.spec.ts.md) |
-| `lib/util/git/private-key.spec.ts` | Not done | [details](lib/util/git/private-key.spec.ts.md) |
+| `lib/util/git/index.spec.ts` | Done | [details](lib/util/git/index.spec.ts.md) |
+| `lib/util/git/modified-cache.spec.ts` | Done | [details](lib/util/git/modified-cache.spec.ts.md) |
+| `lib/util/git/pristine.spec.ts` | Done | [details](lib/util/git/pristine.spec.ts.md) |
+| `lib/util/git/private-key.spec.ts` | Done | [details](lib/util/git/private-key.spec.ts.md) |
 | `lib/util/git/semantic.spec.ts` | Done | [details](lib/util/git/semantic.spec.ts.md) |
-| `lib/util/git/set-branch-commit.spec.ts` | Not done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
+| `lib/util/git/set-branch-commit.spec.ts` | Done | [details](lib/util/git/set-branch-commit.spec.ts.md) |
 | `lib/util/git/span-processor.spec.ts` | Done | [details](lib/util/git/span-processor.spec.ts.md) |
-| `lib/util/git/update-date-cache.spec.ts` | Not done | [details](lib/util/git/update-date-cache.spec.ts.md) |
-| `lib/util/git/url.spec.ts` | Not done | [details](lib/util/git/url.spec.ts.md) |
+| `lib/util/git/update-date-cache.spec.ts` | Done | [details](lib/util/git/update-date-cache.spec.ts.md) |
+| `lib/util/git/url.spec.ts` | Done | [details](lib/util/git/url.spec.ts.md) |
 | `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | Done | [details](lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts.md) |
 | `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts` | Done | [details](lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts.md) |
 | `lib/util/github/graphql/datasource-fetcher.spec.ts` | Done | [details](lib/util/github/graphql/datasource-fetcher.spec.ts.md) |
@@ -810,7 +810,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/util/merge-confidence/index.spec.ts` | Done | [details](lib/util/merge-confidence/index.spec.ts.md) |
 | `lib/util/schema-utils/index.spec.ts` | Done | [details](lib/util/schema-utils/index.spec.ts.md) |
 | `lib/util/schema-utils/v4.spec.ts` | Done | [details](lib/util/schema-utils/v4.spec.ts.md) |
-| `lib/util/template/index.spec.ts` | Not done | [details](lib/util/template/index.spec.ts.md) |
+| `lib/util/template/index.spec.ts` | Done | [details](lib/util/template/index.spec.ts.md) |
 | `lib/util/vulnerability/ecosystem.spec.ts` | Done | [details](lib/util/vulnerability/ecosystem.spec.ts.md) |
 | `lib/util/vulnerability/utils.spec.ts` | Done | [details](lib/util/vulnerability/utils.spec.ts.md) |
 | `lib/workers/global/autodiscover.spec.ts` | Done | [details](lib/workers/global/autodiscover.spec.ts.md) |
