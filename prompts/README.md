@@ -1,230 +1,150 @@
 # Prompts
 
-This directory contains reusable prompts for long-running agent work.
+This directory intentionally contains two reusable prompts:
 
-## Choosing `/goal` or `/loop`
+1. [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md) — implementation
+   parity: compare upstream Renovate with `renovate-rust`, decide what remains
+   to implement, and keep building a compatible Rust replacement.
+2. [claude-loop-test-parity.md](claude-loop-test-parity.md) — test parity:
+   compare upstream Renovate `.spec.ts` coverage with Rust tests, port the
+   runtime behavior that matters, and mark TypeScript-only tests as
+   `not-applicable` with reasons.
 
-Use `/goal` for finite work with a verifiable end state. This is the best fit
-for most substantial implementation or parity work because Claude Code keeps
-starting another turn until the goal evaluator says the condition is met.
+The prompt filenames keep the existing `claude-loop-*` names for continuity, but
+both prompts are agent-neutral. Use either prompt with Jack/Claude or Codex.
 
-Use `/loop` for recurring checks on a timer, such as polling CI, watching a PR,
-or doing periodic maintenance while a session stays open. A fixed interval like
-`/loop 15m ...` runs until you stop it or it expires. Omitting the interval lets
-Claude self-pace between iterations.
+## Command Notes
 
-Current Claude Code requirements:
+Claude Code:
 
-- `/loop` scheduled tasks require Claude Code v2.1.72 or later.
-- `/goal` requires Claude Code v2.1.139 or later.
+- `/goal` is the right fit when you want the agent to keep working until a
+  verifiable end state is reached.
+- `/loop` is the right fit for timed recurring work while a Claude Code session
+  stays open.
+- Current Claude Code docs describe custom slash prompts as Markdown files and
+  support passing text after the command as arguments. They also document
+  `/loop` for repeated scheduled prompts.
 
-Check with:
+Codex:
 
-```sh
-claude --version
-```
+- Use Codex goal mode when available in the interactive UI.
+- For non-interactive runs, pass the prompt as the initial instruction, for
+  example with `codex exec`.
+- Local reference checked during this review: `codex-cli 0.133.0`, whose CLI
+  exposes `codex [PROMPT]` and `codex exec [PROMPT]`.
 
-Good Claude Code goal for focused parity work:
-
-```text
-/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
-```
-
-Recommended Claude Code goal for the full Renovate Rust implementation:
-
-```text
-/goal Use @renovate-rust/prompts/codex-goal-renovate-rust.md as the active goal file for the full Renovate Rust implementation. Prepare the goal in Codex goal format from that file before doing implementation work: read its Objective, Definition Of Done, Operating Rules, and Progress Loop; inspect repository state, recent commits, parity docs, and the read-only Renovate reference checkout; then execute the Progress Loop until the Definition Of Done is actually satisfied. Use @renovate-rust/prompts/claude-loop-renovate-rust.md only as the implementation playbook for each iteration, not as the goal and not as the completion condition. The required outcome is a production-quality Rust `renovate` binary that works as a Renovate-compatible drop-in replacement for common self-hosted CLI workflows, including compatible CLI flags, environment variables, config discovery and semantics, exit codes, dependency extraction, datasource/versioning decisions, update planning, output modes, and parity tracking. Keep choosing the next highest-value compatibility gap, implementing a coherent slice, updating parity docs, committing it, pushing it to main, and immediately continuing with the next slice. Do not stop after one slice, partial parity progress, a clean worktree, a turn limit, or the loop file's iteration instructions. Do not run verification commands unless the operator explicitly asks.
-```
-
-Use a timed loop only when repetition is the point:
-
-```text
-/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small parity unit. Do not run verification commands unless the operator explicitly asks. Commit the completed unit, then report what changed.
-```
-
-For Codex goal mode, use [codex-goal-renovate-rust.md](codex-goal-renovate-rust.md)
-as the active objective file for implementation work. The file is written in
-Codex goal format: it states the objective, definition of done, operating rules,
-and repeatable progress loop. The agent must first read that file, prepare its
-working plan from the objective and definition of done, then keep executing
-coherent implementation slices until the full drop-in replacement goal is
-actually satisfied. A committed slice is only progress, not completion.
-
-The implementation goal must point at the Codex goal file, not directly at the
-loop prompt. The goal file is where the agent prepares goal state, decides
-whether the work is complete, and keeps the finish line stable across turns.
-
-Do not make [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md) the
-completion condition for a full implementation goal. That file is the
-implementation playbook: it tells the agent how to run each iteration, inspect
-Renovate, update parity files, commit, push, and respect verification policy.
-The Codex goal file defines the actual finish line.
-
-For full implementation work, do not create a `/goal` that points directly at
-`claude-loop-renovate-rust.md`, stops after one coherent implementation slice,
-uses a clean worktree as the finish line, or adds a turn limit such as "stop
-after 10 turns if blocked". That shape is a checkpoint goal: it can produce one
-useful slice, but it tells the goal evaluator to stop before `renovate-rust` is
-a drop-in replacement.
-
-Do not use the bounded parity wording for full implementation work. In
-particular, do not ask an implementation goal to stop when "one coherent
-implementation slice is committed" or when `git status --short` is clean. Those
-conditions are useful hygiene checks inside each iteration, but they do not prove
-that `renovate-rust` is a Renovate-compatible drop-in replacement.
-
-Example Codex objective when the slash command wrapper is not needed:
-
-```text
-Use prompts/codex-goal-renovate-rust.md as the active goal file for the full Renovate Rust implementation. Prepare the goal in Codex goal format from that file before doing implementation work: read its Objective, Definition Of Done, Operating Rules, and Progress Loop; inspect repository state, recent commits, parity docs, and the read-only Renovate reference checkout; then execute that file's Progress Loop until the Definition Of Done is actually satisfied. Use prompts/claude-loop-renovate-rust.md only as the implementation playbook for each iteration, not as the goal and not as the completion condition. The required outcome is a production-quality Rust `renovate` binary that works as a Renovate-compatible drop-in replacement for common self-hosted CLI workflows. Keep choosing the next highest-value compatibility gap, updating parity docs, committing each coherent slice, pushing every commit to main, and immediately continuing until the Definition Of Done in the goal file is satisfied. Do not treat the loop file, one slice, partial parity progress, `git status --short`, or a turn limit as the finish line. Do not run verification commands unless the operator explicitly asks.
-```
-
-For parity-only work, use the same condition text without the Claude Code slash
-command wrapper:
-
-```text
-Continue following prompts/claude-loop-test-parity.md until one coherent parity unit is committed, touched parity detail/root rows are consistent, and git status --short is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
-```
-
-Notes for reliable operation:
-
-- Start Claude Code from `~/Projects/renovate-rust-experiement` when using the
-  `@renovate-rust/...` references below. If already inside `renovate-rust/`,
-  use `@prompts/...` instead.
-- `/goal` conditions should name the real proof of completion. For bounded
-  parity work, that can be a committed unit and a clean `git status`. For the
-  full Renovate Rust implementation, the proof is the drop-in replacement
-  definition of done, not a single committed slice.
-- Use turn or time bounds for bounded parity units, maintenance loops, or
-  intentionally time-boxed sessions. Do not add a bound to the full
-  implementation goal unless the operator wants a checkpoint instead of ongoing
-  goal execution.
-- `/loop` tasks are session-scoped. They fire only while Claude Code is running
-  and idle, are restored on `--resume` or `--continue` only while unexpired, and
-  recurring tasks expire after seven days.
-- The prompt files here intentionally contain prompt bodies only. Keep command
-  examples and operator guidance in this README.
-
-## Renovate Rust Prompt
-
-Use [codex-goal-renovate-rust.md](codex-goal-renovate-rust.md) for the full
-implementation `/goal`. Use [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md)
-as the iteration playbook inside that goal, or as a timed `/loop` only for
-periodic maintenance/checkpoint work from the parent workdir that contains both
-checkouts.
-
-The prompt file intentionally contains only the prompt body. Keep usage notes,
-command examples, and operator documentation in this README.
-
-Start Claude Code in `~/Projects/renovate-rust-experiement`, then run the
-long-running implementation goal:
-
-```text
-/goal Use @renovate-rust/prompts/codex-goal-renovate-rust.md as the active goal file for the full Renovate Rust implementation. Prepare the goal in Codex goal format from that file before doing implementation work: read its Objective, Definition Of Done, Operating Rules, and Progress Loop; inspect repository state, recent commits, parity docs, and the read-only Renovate reference checkout; then execute the Progress Loop until the Definition Of Done is actually satisfied. Use @renovate-rust/prompts/claude-loop-renovate-rust.md only as the implementation playbook for each iteration, not as the goal and not as the completion condition. The required outcome is a production-quality Rust `renovate` binary that works as a Renovate-compatible drop-in replacement for common self-hosted CLI workflows, including compatible CLI flags, environment variables, config discovery and semantics, exit codes, dependency extraction, datasource/versioning decisions, update planning, output modes, and parity tracking. Keep choosing the next highest-value compatibility gap, implementing a coherent slice, updating parity docs, committing it, pushing it to main, and immediately continuing with the next slice. Do not stop after one slice, partial parity progress, a clean worktree, a turn limit, or the loop file's iteration instructions. Do not run verification commands unless the operator explicitly asks.
-```
-
-For periodic checkpoint work instead, schedule the implementation playbook every
-15 minutes. This is not the full implementation goal; it is useful only when the
-operator wants recurring one-iteration progress while Claude Code stays open:
-
-```text
-/loop 15m Follow @renovate-rust/prompts/claude-loop-renovate-rust.md for one implementation iteration: inspect the next Renovate compatibility gap, update parity docs, implement one coherent slice, commit it, push it to main, and stop the iteration. Do not run verification commands unless the operator explicitly asks.
-```
-
-The `@renovate-rust/prompts/claude-loop-renovate-rust.md` reference tells
-Claude Code to read the prompt file as part of the loop instruction. If you
-start Claude Code from inside `~/Projects/renovate-rust-experiement/renovate-rust`, use
-`@prompts/claude-loop-renovate-rust.md` instead. If file references are not
-available in your Claude Code build, open the prompt file and paste its prompt
-body after the `/goal` or `/loop 15m` instruction. For the full implementation
-goal, paste the Codex goal instruction first and include the loop file only as
-the implementation playbook.
-
-The prompt is operator-owned configuration. Agents running it must
-not edit [claude-loop-renovate-rust.md](claude-loop-renovate-rust.md). If an
-agent finds an improvement to the prompt, it should record the suggestion in
-project docs instead.
-
-If you edit a prompt file while a fixed `/loop` is running, cancel and recreate
-the loop for the most predictable behavior. A `/goal` reads the file through the
-conversation context for its active run, so restart the goal after prompt edits.
-
----
-
-## Test Parity Prompt
-
-Use [claude-loop-test-parity.md](claude-loop-test-parity.md) to rebuild and
-maintain the split test parity tracker.
-
-`docs/parity/renovate-test-map.md` is now a compact root index with one row per
-upstream `.spec.ts` file. The root row has only two statuses:
-
-- `Done`
-- `Not done`
-
-Per-test-case details live in one Markdown file per original Renovate spec path,
-for example:
-
-```text
-docs/parity/lib/modules/manager/ansible-galaxy/extract.spec.ts.md
-```
-
-The detail file tracks `ported`, `pending`, and `not-applicable` rows, Rust test
-links, counts, and reasons. Only update the root row to `Done` once the linked
-detail file has no remaining `pending` rows.
-
-The prompt uses a three-phase workflow:
-
-1. **Inventory** — parse each `.spec.ts` and write every `describe`/`it()` call
-   into the matching detail file with `pending` status, then add or update the
-   root index row.
-2. **Mapping** — grep the Rust codebase to find existing coverage and link each
-   ported test in the detail file.
-3. **Porting** — write any test that has no Rust equivalent yet, then mark it
-   `ported` in the detail file and update the root index row if the spec is now
-   complete.
-
-Start Claude Code in `~/Projects/renovate-rust-experiement`, then run a bounded
-goal for one parity unit:
-
-```text
-/goal Continue following @renovate-rust/prompts/claude-loop-test-parity.md until one coherent parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
-```
-
-For periodic maintenance instead, run:
-
-```text
-/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md
-```
-
-Or from inside `renovate-rust/`:
-
-```text
-/loop 15m Follow @prompts/claude-loop-test-parity.md
-```
-
-The loop prompt is operator-owned configuration. Agents must not edit
-[claude-loop-test-parity.md](claude-loop-test-parity.md). Record suggested
-improvements in project docs instead.
-
----
+If your local UI names the goal command `/go` rather than `/goal`, use the same
+prompt body. The important part is the prompt content and completion condition,
+not the slash-command spelling.
 
 ## Expected Local Layout
 
-Run the loop from this parent directory:
+Start agents from the parent workspace when possible:
 
 ```text
 ~/Projects/renovate-rust-experiement/
-  renovate/
-  renovate-rust/
+  renovate/       # upstream Renovate reference checkout, read-only
+  renovate-rust/  # Rust implementation
 ```
 
-The prompt expects the upstream Renovate reference repository to be available as
-a sibling checkout. This checkout is required, should already exist, and must be
-treated as read-only by agents:
+If you start from the parent workspace, reference prompt files as
+`@renovate-rust/prompts/...` in Claude Code. If you start from inside
+`renovate-rust/`, reference them as `@prompts/...`.
+
+## Prompt 1: Implementation Parity
+
+Use this when the agent should compare original Renovate to Renovate in Rust,
+identify what must still be implemented, plan the implementation, and then
+implement production-quality Rust slices until the Rust CLI is a compatible
+replacement for common self-hosted Renovate workflows.
+
+### Claude Goal
+
+From `~/Projects/renovate-rust-experiement`:
 
 ```text
-~/Projects/renovate-rust-experiement/
-  renovate/
-  renovate-rust/
+/goal Follow @renovate-rust/prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout in ./renovate with the Rust implementation in ./renovate-rust, keep the prompt's Definition Of Done as the completion condition, and continue implementing the next highest-value compatibility gaps until the Rust `renovate` binary is a production-quality drop-in replacement for common self-hosted Renovate CLI workflows. Keep parity docs current, commit each coherent slice, push committed changes, and do not treat one slice, partial parity progress, a clean worktree, or a turn limit as completion. Do not run verification commands unless the operator explicitly asks.
 ```
+
+From inside `renovate-rust/`:
+
+```text
+/goal Follow @prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout in ../renovate with this Rust implementation, keep the prompt's Definition Of Done as the completion condition, and continue implementing the next highest-value compatibility gaps until the Rust `renovate` binary is a production-quality drop-in replacement for common self-hosted Renovate CLI workflows. Keep parity docs current, commit each coherent slice, push committed changes, and do not treat one slice, partial parity progress, a clean worktree, or a turn limit as completion. Do not run verification commands unless the operator explicitly asks.
+```
+
+### Claude Timed Loop
+
+Use a timed loop only when you want periodic one-slice progress instead of a
+full goal:
+
+```text
+/loop 15m Follow @renovate-rust/prompts/claude-loop-renovate-rust.md for one implementation parity iteration: compare the next missing Renovate behavior, update parity docs, implement one coherent Rust slice, commit it, push it, and report what changed. Do not run verification commands unless the operator explicitly asks.
+```
+
+### Codex Goal Prompt
+
+Use this as the initial Codex prompt, or paste it after your local Codex goal
+command:
+
+```text
+Follow prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout at ../renovate with this Rust implementation, prepare a plan from the prompt's Objective, Definition Of Done, operating rules, and current repository state, then execute its progress loop until the Definition Of Done is actually satisfied. The required outcome is a production-quality Rust `renovate` binary that works as a Renovate-compatible drop-in replacement for common self-hosted CLI workflows, including compatible CLI flags, environment variables, config discovery and semantics, exit codes, dependency extraction, datasource/versioning decisions, update planning, output modes, and parity tracking. Keep choosing the next highest-value compatibility gap, updating parity docs, committing each coherent slice, pushing committed changes, and continuing until completion. Do not stop after one slice, partial parity progress, a clean worktree, or a turn limit. Do not run verification commands unless the operator explicitly asks.
+```
+
+For non-interactive Codex from inside `renovate-rust/`:
+
+```sh
+codex exec "$(cat prompts/claude-loop-renovate-rust.md)"
+```
+
+## Prompt 2: Test Parity
+
+Use this when the agent should compare upstream Renovate tests to Rust tests and
+ensure the Rust suite covers every Renovate runtime behavior that makes sense in
+Rust. Tests that only verify TypeScript, Node, Vitest/Jest, or hosted-only
+infrastructure should be marked `not-applicable` with a reason instead of being
+ported.
+
+### Claude Goal
+
+From `~/Projects/renovate-rust-experiement`:
+
+```text
+/goal Follow @renovate-rust/prompts/claude-loop-test-parity.md until one coherent test parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Compare upstream Renovate `.spec.ts` tests with Rust tests, port actionable runtime behavior, and mark TypeScript-only or out-of-scope cases as `not-applicable` with reasons. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+```
+
+From inside `renovate-rust/`:
+
+```text
+/goal Follow @prompts/claude-loop-test-parity.md until one coherent test parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Compare upstream Renovate `.spec.ts` tests in ../renovate with Rust tests, port actionable runtime behavior, and mark TypeScript-only or out-of-scope cases as `not-applicable` with reasons. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+```
+
+### Claude Timed Loop
+
+```text
+/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small test parity unit. Commit completed parity updates and Rust tests, then report what changed. Do not run verification commands unless the operator explicitly asks.
+```
+
+### Codex Goal Prompt
+
+Use this as the initial Codex prompt, or paste it after your local Codex goal
+command:
+
+```text
+Follow prompts/claude-loop-test-parity.md as the active test parity goal. Compare upstream Renovate `.spec.ts` files in ../renovate with the Rust test suite, maintain docs/parity/renovate-test-map.md plus per-spec detail files, and close one coherent parity unit at a time. Every actionable Renovate runtime behavior must either be covered by an equivalent Rust test with a `// Ported:` provenance comment or be explicitly marked `not-applicable` with a concrete reason when it only tests TypeScript, Node/Vitest/Jest mechanics, or out-of-scope hosted infrastructure. Continue until one coherent parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+```
+
+For non-interactive Codex from inside `renovate-rust/`:
+
+```sh
+codex exec "$(cat prompts/claude-loop-test-parity.md)"
+```
+
+## Maintenance Rules
+
+- Keep this directory to the two prompt bodies above plus this README.
+- Prompt bodies are operator-owned configuration. Agents running a prompt should
+  not edit that prompt unless the operator explicitly asks for prompt changes.
+- Record future prompt improvement suggestions in
+  `docs/parity/prompt-improvements.md`.
+- If a timed `/loop` is running and you edit a prompt file, cancel and recreate
+  the loop so the active instruction is unambiguous.

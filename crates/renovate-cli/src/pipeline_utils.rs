@@ -46,7 +46,7 @@ pub(crate) fn apply_update_blocking_to_report(
                     manager: Some(manager.as_str()),
                     file_path: Some(file_path.as_str()),
                     current_value: Some(current.as_str()),
-                    new_value: Some(latest.as_str()),
+                    new_value: Some(dep.new_value.as_deref().unwrap_or(latest.as_str())),
                     update_type,
                     current_version_timestamp: dep.current_version_timestamp.as_deref(),
                     dep_type: dep.dep_type.as_deref(),

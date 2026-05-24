@@ -1,4 +1,51 @@
-You are working on the renovate-rust repository. Your job is to steadily build a production-quality Rust replacement for renovatebot/renovate.
+# Renovate Rust Implementation Parity Prompt
+
+You are working on the renovate-rust repository. Your job is to compare the
+original Renovate implementation with the Rust implementation, identify what is
+missing, and steadily build a production-quality Rust replacement for
+renovatebot/renovate.
+
+## Objective
+
+Build `renovate-rust` into a production-quality Rust implementation of the
+Renovate CLI: a `renovate` binary that can be used as a drop-in replacement for
+common `renovatebot/renovate` CLI workflows.
+
+This prompt is both:
+
+- the Claude Code `/goal` or `/loop` body for Jack/Claude;
+- the Codex goal prompt body for Codex.
+
+When used as a long-running goal, do not stop after one coherent slice. Continue
+until the Definition Of Done below is actually satisfied, or until the operator
+explicitly stops the goal.
+
+## Definition Of Done
+
+The implementation goal is complete only when the Rust CLI preserves
+Renovate-compatible observable behavior for common self-hosted CLI usage,
+including:
+
+- CLI command names, flags, aliases, help behavior, and exit codes.
+- Environment variable names and parsing.
+- Config file discovery, precedence, parsing, migration, and validation.
+- Repository scanning and package manager detection.
+- Dependency extraction for supported managers.
+- Datasource lookup and versioning/range update decisions.
+- Manifest and lockfile update planning where in scope.
+- Dry-run behavior, logging levels, JSON/machine-readable output, and human
+  output.
+- Parity documentation in `docs/parity/renovate-source-map.md`,
+  `docs/parity/renovate-test-map.md`, and per-spec detail files.
+- Intentional divergences recorded in
+  `docs/parity/compatibility-decisions.md`.
+
+Do not consider the goal complete just because one coherent slice is committed.
+One slice is progress, not completion.
+
+Do not consider the goal complete just because `git status --short` is clean. A
+clean worktree after a commit is required iteration hygiene, not proof that the
+Rust CLI is a drop-in replacement.
 
 Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Never stop because of missing credentials, unavailable network, or an external service requirement. Document the blocker, skip that blocked slice, and continue with another local/offline slice that can move the project forward.
 
@@ -243,9 +290,25 @@ Parity workflow:
 10. After committing, verify that all parity tracking files reflect the new slice
     (source map status updated, test map rows added, ledger row added).
 
+Progress loop:
+1. Read this prompt and prepare the current turn's working plan from the
+   Objective, Definition Of Done, operating rules, and local repo state.
+2. Inspect current repo state, recent commits, and parity docs.
+3. Inspect Renovate reference docs/tests/source for the next missing behavior
+   slice.
+4. Update parity tracking before or during implementation.
+5. Implement the smallest coherent piece that materially advances the drop-in
+   replacement objective.
+6. Add or update tests when appropriate, with `// Ported:` comments for tests
+   that map to Renovate `.spec.ts` cases.
+7. Commit the coherent slice with the required agent co-author trailer.
+8. Push all committed local changes to the matching remote branch.
+9. Continue with the next highest-value slice until the Definition Of Done is
+   fully achieved.
+
 Iteration sizing:
-- Each 15 minute loop should leave the repository better than it started.
-- Each loop must build something concrete and add or update tests for that behavior when appropriate. Run formatting, Clippy, build, or test commands only when the operator explicitly asks for them.
+- Each turn or timed loop should leave the repository better than it started.
+- Each iteration must build something concrete and add or update tests for that behavior when appropriate. Run formatting, Clippy, build, or test commands only when the operator explicitly asks for them.
 - Prefer a complete vertical slice over broad partial scaffolding, except for the initial loop where creating the Rust workspace, formatting, Clippy, and nextest foundation is the highest-value slice.
 - Good slices include:
   - CLI flag or config compatibility

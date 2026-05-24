@@ -73,3 +73,34 @@ Format per entry:
 - **References**:
   - Renovate: `lib/workers/global/config/parse/cli.ts` (`.allowUnknownOption()` in `parseEarlyFlags`).
   - Rust: `crates/renovate-cli/src/main.rs`, `crates/renovate-cli/tests/cli.rs`.
+
+## CD-0004 - Cargo range updates use `bump` strategy for display; no lockfile-only updates
+
+- **Date**: 2026-05-24
+- **Renovate behavior**: Cargo's default `rangeStrategy` is `auto`, which
+  resolves to `update-lockfile` for most range constraints (no `<` in
+  value). For `update-lockfile`, Renovate updates `Cargo.lock` but leaves
+  `Cargo.toml` unchanged when the absolute latest version is still within
+  the current range. For out-of-range majors, a PR is created with
+  `newValue = currentValue` (Cargo.lock update only) or a bump to the new
+  major (rangeStrategy override needed).
+- **Rust behavior**: The Rust CLI does not support Cargo.lock updates — it
+  is a dry-run reporter. Instead:
+  1. Range constraints (`^`, `~`, `>=`) flag `update_available = true`
+     when the absolute latest non-prerelease version is **not satisfied**
+     by the current constraint (e.g., `^1.0.0` with `2.0.0` available).
+  2. `newValue` is computed with `RangeStrategy::Bump` for range
+     constraints, giving the most informative display (e.g., `^2.0.0`).
+  3. Bare exact versions (`1.0.100`) are treated as pinned and flagged
+     whenever the absolute latest exceeds the pinned value; `newValue` is
+     computed with `RangeStrategy::Replace`.
+- **Reason**: The tool has no lockfile write capability; reporting the
+  proposed Cargo.toml change is more actionable than "Cargo.lock would
+  change."
+- **Compatibility**: opt-in divergence for `update-lockfile` scenarios.
+  Hard divergence for bare-version treatment: Renovate treats `1.0.100`
+  as `^1.0.100` (range, lockfile-only); we treat it as a pinned version
+  and report a Cargo.toml bump when newer minor/patch releases exist.
+- **References**:
+  - Renovate: `lib/modules/manager/cargo/range.ts`, `lib/modules/versioning/cargo/index.ts`.
+  - Rust: `crates/renovate-core/src/versioning/cargo.rs`, `crates/renovate-cli/src/report_builders.rs`.

@@ -106,33 +106,45 @@ pub fn resolve_latest(constraint: &str, available_versions: &[String]) -> Option
 /// Detailed update summary for a single dependency.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UpdateSummary {
-    /// The current constraint string from Cargo.toml (e.g. `"1.0.100"`).
+    /// The current constraint string from Cargo.toml (e.g. `"^1.0.0"`).
     pub current_constraint: String,
-    /// The latest non-yanked version that satisfies the constraint, if any.
+    /// The latest non-yanked non-prerelease version that satisfies the constraint,
+    /// if any.  Used for the branch-name / PR-title template.
     pub latest_compatible: Option<String>,
-    /// `true` when the constraint is a fully-specified three-part version
-    /// (e.g. `"1.0.100"` or `"=1.0.100"`) and `latest_compatible` is newer.
-    /// Range constraints like `"^1"` or `"1.52"` never set this — they already
-    /// cover future compatible versions by design.
+    /// The absolute latest non-yanked non-prerelease version across all available
+    /// versions, ignoring the current constraint.  This mirrors Renovate's
+    /// datasource `newVersion` concept.
+    pub latest: Option<String>,
+    /// `true` when an actionable update exists.
+    ///
+    /// Two cases:
+    /// 1. Pinned exact version (`= 1.0.100` or bare `1.0.100`) where `latest` >
+    ///    the pinned version — the user should bump to the new exact version.
+    /// 2. Range constraint (`^1.0`, `~1.0`, `>=1.0`) where `latest` is NOT
+    ///    satisfied by the current constraint — the range needs widening/bumping
+    ///    to reach the new major (or other out-of-range) release.
     pub update_available: bool,
 }
 
 /// Produce a full update summary for a dependency constraint.
 ///
-/// This is the primary function for the update planner. It tells callers:
-/// - what the latest compatible version is
-/// - whether that version represents an actionable change (i.e. the user
-///   has a pinned exact version that could be bumped)
-///
-/// A "pinned" constraint is one where the raw string parses as a valid three-
-/// component `semver::Version` with no sigil (e.g. `"1.0.228"`), or an exact
-/// match with `=` prefix. Range constraints (`^`, `~`, `>=`, bare `1`, `1.52`)
-/// are NOT considered pinned — they automatically cover future compatible
-/// versions, so no update is suggested.
+/// Fires `update_available` for:
+/// - Pinned exact versions whose absolute latest is strictly greater.
+/// - Range constraints whose absolute latest falls outside the current range
+///   (e.g. `^1.0` when `2.0.0` is available).
 pub fn update_summary(constraint: &str, available_versions: &[String]) -> UpdateSummary {
-    let latest = resolve_latest(constraint, available_versions);
+    let latest_compatible = resolve_latest(constraint, available_versions);
 
-    // Determine whether the constraint is pinned (exact 3-component version).
+    // Absolute latest: highest non-prerelease version regardless of constraint.
+    let latest_overall: Option<Version> = available_versions
+        .iter()
+        .filter_map(|v| Version::parse(v).ok())
+        .filter(|v| v.pre.is_empty())
+        .max();
+    let latest = latest_overall.as_ref().map(|v| v.to_string());
+
+    // Determine whether the constraint is a pinned exact version:
+    //   `= 1.0.228` or bare `1.0.228` (no sigil / no range operator).
     let stripped = constraint.trim().trim_start_matches('=').trim();
     let is_pinned = Version::parse(stripped).is_ok()
         && !constraint.contains('^')
@@ -142,20 +154,24 @@ pub fn update_summary(constraint: &str, available_versions: &[String]) -> Update
         && !constraint.contains(',')
         && !constraint.contains('*');
 
-    // Use precedence comparison (ignoring build metadata) per SemVer spec.
-    // String comparison would incorrectly flag "1.1.2" vs "1.1.2+meta" as an update.
-    let update_available = is_pinned
-        && latest
-            .as_deref()
-            .map(|l| match (Version::parse(l), Version::parse(stripped)) {
-                (Ok(lv), Ok(sv)) => lv.cmp_precedence(&sv).is_gt(),
-                _ => l != stripped,
-            })
-            .unwrap_or(false);
+    let update_available = if is_pinned {
+        // Pinned: update when absolute latest strictly exceeds the pinned version.
+        latest_overall
+            .as_ref()
+            .and_then(|lv| Version::parse(stripped).ok().map(|sv| lv.cmp_precedence(&sv).is_gt()))
+            .unwrap_or(false)
+    } else {
+        // Range: update when the absolute latest is NOT satisfied by the current constraint.
+        match (parse_cargo_req(constraint), latest_overall.as_ref()) {
+            (Some(req), Some(lv)) => !req.matches(lv),
+            _ => false,
+        }
+    };
 
     UpdateSummary {
         current_constraint: constraint.to_owned(),
-        latest_compatible: latest,
+        latest_compatible,
+        latest,
         update_available,
     }
 }
@@ -824,15 +840,43 @@ mod update_summary_tests {
     }
 
     #[test]
-    fn range_constraint_is_never_flagged_as_update() {
+    fn range_constraint_not_flagged_when_latest_within_range() {
+        // All available versions satisfy the constraints — no out-of-range release.
         let avail = v(&["1.0.0", "1.0.228"]);
-        for constraint in &["1", "^1", "^1.0", "~1.0", ">=1.0", "1.0"] {
+        for constraint in &["1", "^1", "^1.0", ">=1.0", "1.0"] {
             let s = update_summary(constraint, &avail);
             assert!(
                 !s.update_available,
-                "expected no update for constraint {constraint:?}"
+                "expected no update for {constraint:?} when all versions are in-range"
             );
         }
+    }
+
+    #[test]
+    fn range_constraint_flagged_when_latest_outside_range() {
+        // 2.0.0 is outside ^1.0.0 — an update should be suggested.
+        let avail = v(&["1.0.0", "1.5.0", "2.0.0"]);
+        let s = update_summary("^1.0.0", &avail);
+        assert!(s.update_available, "^1.0.0 should flag 2.0.0 as update");
+        assert_eq!(s.latest.as_deref(), Some("2.0.0"));
+        assert_eq!(s.latest_compatible.as_deref(), Some("1.5.0"));
+    }
+
+    #[test]
+    fn tilde_range_flagged_when_minor_bump_outside_range() {
+        // ~1.0 covers 1.0.x; 1.1.0 is outside that range.
+        let avail = v(&["1.0.0", "1.0.5", "1.1.0"]);
+        let s = update_summary("~1.0.0", &avail);
+        assert!(s.update_available, "~1.0.0 should flag 1.1.0 as update");
+        assert_eq!(s.latest.as_deref(), Some("1.1.0"));
+    }
+
+    #[test]
+    fn caret_not_flagged_when_minor_within_range() {
+        // ^1.0 covers >=1.0, <2.0 — 1.9.9 is within range.
+        let avail = v(&["1.0.0", "1.9.9"]);
+        let s = update_summary("^1.0", &avail);
+        assert!(!s.update_available, "^1.0 with 1.9.9 should not flag update");
     }
 
     #[test]
@@ -847,6 +891,7 @@ mod update_summary_tests {
     fn build_metadata_same_precedence_is_not_update() {
         // "1.1.2" and "1.1.2+spec-1.1.0" have equal SemVer precedence.
         // The crates.io sparse index may list both; this must NOT show as update.
+        // Note: build-metadata versions are filtered out when computing `latest`.
         let avail = v(&["1.1.2", "1.1.2+spec-1.1.0"]);
         let s = update_summary("1.1.2", &avail);
         assert!(
@@ -863,6 +908,23 @@ mod update_summary_tests {
         let s = update_summary("1.1.2", &avail);
         assert!(s.update_available);
         assert_eq!(s.latest_compatible.as_deref(), Some("1.1.3"));
+    }
+
+    #[test]
+    fn prerelease_versions_excluded_from_latest() {
+        // A prerelease newer than stable should not trigger update for stable users.
+        let avail = v(&["1.0.0", "2.0.0-alpha.1"]);
+        let s = update_summary("^1.0.0", &avail);
+        assert!(!s.update_available, "prerelease should not trigger update");
+        assert_eq!(s.latest.as_deref(), Some("1.0.0"));
+    }
+
+    #[test]
+    fn latest_field_reflects_absolute_max() {
+        let avail = v(&["1.0.0", "1.5.0", "2.0.0"]);
+        let s = update_summary("^1.0.0", &avail);
+        assert_eq!(s.latest.as_deref(), Some("2.0.0"));
+        assert_eq!(s.latest_compatible.as_deref(), Some("1.5.0"));
     }
 }
 

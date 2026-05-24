@@ -56,11 +56,25 @@ pub(crate) fn build_dep_reports_cargo(
         let summary = update_map.get(&dep.dep_name).and_then(|r| r.as_ref().ok());
         let new_value = match update_map.get(&dep.dep_name) {
             Some(Ok(s)) if s.update_available => {
-                let new_ver = s.latest_compatible.as_deref().unwrap_or_default();
+                let new_ver = s.latest.as_deref().unwrap_or_default();
                 let current_ver = s.current_constraint.trim().trim_start_matches('=').trim();
+                // Use Bump for ranges (shows what would change in Cargo.toml),
+                // Replace for exact pins.
+                let stripped = s.current_constraint.trim();
+                let is_range = stripped.contains(['^', '~', '>', '<', ',', '*'])
+                    || (!stripped.starts_with('=')
+                        && stripped
+                            .split_once('.')
+                            .and_then(|(_, rest)| rest.split_once('.'))
+                            .is_none());
+                let strategy = if is_range {
+                    renovate_core::versioning::cargo::RangeStrategy::Bump
+                } else {
+                    renovate_core::versioning::cargo::RangeStrategy::Replace
+                };
                 renovate_core::versioning::cargo::get_new_value(
                     &s.current_constraint,
-                    renovate_core::versioning::cargo::RangeStrategy::Replace,
+                    strategy,
                     current_ver,
                     new_ver,
                 )
@@ -70,19 +84,19 @@ pub(crate) fn build_dep_reports_cargo(
         let status = match update_map.get(&dep.dep_name) {
             Some(Ok(s)) if s.update_available => output::DepStatus::UpdateAvailable {
                 current: s.current_constraint.clone(),
-                latest: s.latest_compatible.clone().unwrap_or_default(),
+                latest: s.latest.clone().unwrap_or_default(),
             },
             Some(Ok(s)) => output::DepStatus::UpToDate {
-                latest: s.latest_compatible.clone(),
+                latest: s.latest.clone(),
             },
             Some(Err(e)) => output::DepStatus::LookupError {
                 message: e.to_string(),
             },
             None => output::DepStatus::UpToDate { latest: None },
         };
-        // Release timestamp for the latest compatible version.
+        // Release timestamp for the absolute latest version.
         let release_timestamp = summary
-            .and_then(|s| s.latest_compatible.as_deref())
+            .and_then(|s| s.latest.as_deref())
             .and_then(|latest| timestamps.get(&dep.package_name)?.get(latest).cloned());
         // Current-version timestamp for exact pins (`= 1.2.3` syntax).
         // Cargo ranges (^, ~, bare version without =) don't reveal the

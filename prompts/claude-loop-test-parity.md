@@ -1,12 +1,21 @@
+# Renovate Rust Test Parity Prompt
+
 You are working on the renovate-rust repository.
 
 ## Mission
 
-The Rust implementation must have **at minimum the same test coverage as the
-original Renovate TypeScript repository**. Every `it()`, `test()`, `it.each()`,
-and `test.each()` call in every `.spec.ts` file is a porting requirement: it
-must either be ported to an equivalent Rust test or explicitly marked
-`not-applicable` with a documented reason.
+The Rust implementation must have **at minimum the same behavioral test coverage
+as the original Renovate TypeScript repository**. Every `it()`, `test()`,
+`it.each()`, and `test.each()` call in every `.spec.ts` file is an audit
+requirement: it must either be covered by an equivalent Rust test or explicitly
+marked `not-applicable` with a documented reason.
+
+The goal is functional equivalence, not a mechanical Node-to-Rust conversion.
+Tests that only verify TypeScript types, Node module behavior, Vitest/Jest
+mocking, or hosted-only infrastructure should not be ported just to mirror the
+original repository. Mark them `not-applicable` with a precise reason. Tests
+that verify Renovate runtime behavior must be covered in Rust, even if the Rust
+test structure, fixtures, names, and module boundaries differ.
 
 This is the minimum bar. The Rust test suite may go further — additional edge
 cases, Rust-specific invariants, performance assertions — but extras do not
