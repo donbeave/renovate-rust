@@ -71,11 +71,12 @@ pub fn resolve_latest_compatible(constraint: &str, available: &[String]) -> Opti
 /// `latest_tag` is the value of the npm `latest` dist-tag, used as the
 /// registry's "current stable" anchor independent of the user's constraint.
 ///
-/// For pinned exact versions an update is available when the registry's
-/// `latest` dist-tag (or newest available version) differs from the current
-/// pin — the user needs to bump the exact version string.  For range
-/// constraints (`^`, `~`, `>=`, etc.) no update is flagged because the range
-/// already covers future compatible versions.
+/// For exact pins an update is available when the registry's `latest` dist-tag
+/// differs from the pinned version.  For range constraints an update is
+/// available when the registry's `latest` version is **not satisfied** by the
+/// current range (e.g. `^18.0.0` with `latest=19.0.0` → update needed).
+/// Open-ended ranges like `>=18.0.0` never flag an update because every future
+/// version already satisfies them.
 pub fn npm_update_summary(
     constraint: &str,
     available: &[String],
@@ -89,13 +90,23 @@ pub fn npm_update_summary(
         .map(str::to_owned)
         .or_else(|| available.last().cloned());
 
-    // An exact pin is updatable when the registry's latest differs from it.
-    // Range constraints are never flagged — they already cover future versions.
-    let update_available = is_exact_pin(constraint)
-        && latest
+    let t = constraint.trim();
+    let update_available = if is_exact_pin(t) {
+        // Exact pin: update when registry's latest differs from the pinned version.
+        latest
             .as_deref()
-            .map(|l| l != constraint.trim())
-            .unwrap_or(false);
+            .map(|l| l != t.trim_start_matches('=').trim())
+            .unwrap_or(false)
+    } else {
+        // Range constraint: update when the registry's latest is NOT inside the range.
+        // This mirrors how Renovate generates a new constraint via getNewValue —
+        // if getNewValue would produce a different string, there is an update.
+        let req = VersionReq::parse(t).ok();
+        match (req, latest.as_deref().and_then(|v| Version::parse(v).ok())) {
+            (Some(req), Some(latest_v)) => !req.matches(&latest_v),
+            _ => false,
+        }
+    };
 
     NpmUpdateSummary {
         current_constraint: constraint.to_owned(),
@@ -393,15 +404,34 @@ mod tests {
     }
 
     #[test]
-    fn range_constraint_never_has_update() {
+    fn caret_range_not_flagged_when_latest_within_range() {
+        let versions = avail(&["18.0.0", "18.2.0"]);
+        let s = npm_update_summary("^18.0.0", &versions, Some("18.2.0"));
+        assert!(!s.update_available, "^18.0.0 with latest 18.2.0 is within range");
+    }
+
+    #[test]
+    fn caret_range_flagged_when_latest_outside_range() {
         let versions = avail(&["18.0.0", "18.2.0", "19.0.0"]);
-        for c in &["^18.0.0", ">=18", "~18.0.0"] {
-            let s = npm_update_summary(c, &versions, Some("19.0.0"));
-            assert!(
-                !s.update_available,
-                "range {c:?} should never flag an update"
-            );
-        }
+        let s = npm_update_summary("^18.0.0", &versions, Some("19.0.0"));
+        assert!(s.update_available, "^18.0.0 with latest 19.0.0 needs update");
+        assert_eq!(s.latest.as_deref(), Some("19.0.0"));
+    }
+
+    #[test]
+    fn tilde_range_flagged_when_outside_range() {
+        let versions = avail(&["18.0.0", "18.1.0"]);
+        let s = npm_update_summary("~18.0.0", &versions, Some("18.1.0"));
+        // ~18.0.0 means >=18.0.0 <18.1.0; 18.1.0 is outside → update
+        assert!(s.update_available, "~18.0.0 with latest 18.1.0 needs update");
+    }
+
+    #[test]
+    fn gte_range_not_flagged_because_open_ended() {
+        let versions = avail(&["18.0.0", "18.2.0", "19.0.0"]);
+        let s = npm_update_summary(">=18", &versions, Some("19.0.0"));
+        // >=18 is open-ended: every future version satisfies it
+        assert!(!s.update_available, ">=18 should not flag update for 19.0.0");
     }
 
     #[test]

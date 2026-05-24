@@ -104,3 +104,24 @@ Format per entry:
 - **References**:
   - Renovate: `lib/modules/manager/cargo/range.ts`, `lib/modules/versioning/cargo/index.ts`.
   - Rust: `crates/renovate-core/src/versioning/cargo.rs`, `crates/renovate-cli/src/report_builders.rs`.
+
+## CD-0005 - npm range updates: flag when latest is outside the constraint
+
+- **Date**: 2026-05-24
+- **Renovate behavior**: For npm range constraints (`^18.0.0`, `~18.0.0`, etc.),
+  Renovate calls `getNewValue(currentValue, rangeStrategy, currentVersion, newVersion)`
+  for each candidate version. If `newValue !== currentValue`, the dep is flagged for
+  update. For `^18.0.0` with `latest=19.0.0`, Renovate generates `newValue="^19.0.0"` ≠
+  current → creates a PR. Open-ended ranges like `>=18.0.0` are never flagged because
+  `getNewValue` returns the same value.
+- **Rust behavior**: `npm_update_summary` flags `update_available = true` when the
+  registry's `latest` tag is NOT satisfied by the current range constraint
+  (`!req.matches(latest_version)`). Open-ended ranges (`>=18.0.0`) match all future
+  versions so they are never flagged. `new_value` is computed via `get_new_value`
+  with strategy `"replace"`. Exact pins use the existing behavior (flag when `latest ≠ pin`).
+- **Reason**: Mirrors Renovate's update decision logic — a `^18.0.0` constraint does not
+  install `19.0.0` even though it is available; the constraint needs a PR bump.
+- **Compatibility**: matched.
+- **References**:
+  - Renovate: `lib/modules/versioning/npm/range.ts`, `lib/workers/repository/process/lookup/index.ts`.
+  - Rust: `crates/renovate-core/src/versioning/npm.rs`, `crates/renovate-cli/src/report_builders.rs`.
