@@ -274,6 +274,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: reason.into(),
@@ -324,6 +325,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: dep.name.clone(),
                         status,
                     });
@@ -353,6 +355,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: dep.name.clone(),
                         status: output::DepStatus::Skipped {
                             reason: "unsupported-datasource".into(),
@@ -488,6 +491,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: dep.name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -539,6 +543,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: dep.name.clone(),
                             status,
                         });
@@ -684,6 +689,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 dependency_dashboard_approval: None,
                                 replacement_name: None,
                                 replacement_version: None,
+                                new_value: None,
                                 name: d.name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{reason:?}").to_lowercase(),
@@ -730,6 +736,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: d.name.clone(),
                             status,
                         }
@@ -837,6 +844,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 dependency_dashboard_approval: None,
                                 replacement_name: None,
                                 replacement_version: None,
+                                new_value: None,
                                 name: dep.dep_name.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: match reason {
@@ -891,6 +899,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 dependency_dashboard_approval: None,
                                 replacement_name: None,
                                 replacement_version: None,
+                                new_value: None,
                                 name: dep.dep_name.clone(),
                                 status,
                             };
@@ -939,6 +948,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: dep.dep_name.clone(),
                             status,
                         }

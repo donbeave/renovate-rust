@@ -153,6 +153,16 @@ pub(crate) struct DepReport {
     /// Mirrors Renovate's `replacementVersion` field.
     #[serde(rename = "replacementVersion", skip_serializing_if = "Option::is_none")]
     pub replacement_version: Option<String>,
+    /// The proposed new constraint string that would be written to the manifest.
+    ///
+    /// For a dep with `current = "^4.17.21"` and `latest = "5.0.0"` this would
+    /// be `"^5.0.0"` — i.e. the range-aware value computed by the versioning
+    /// module.  When `None` the raw `latest` version is the best available
+    /// approximation.
+    ///
+    /// Mirrors Renovate's `newValue` field.
+    #[serde(rename = "newValue", skip_serializing_if = "Option::is_none")]
+    pub new_value: Option<String>,
     #[serde(flatten)]
     pub status: DepStatus,
 }
@@ -578,13 +588,14 @@ fn format_dep(dep: &DepReport, use_color: bool) -> String {
                 let label_str = dep.labels.join(",");
                 annotations.push_str(&format!("  {}", dim(&format!("[{label_str}]"), use_color)));
             }
+            let display_new = dep.new_value.as_deref().unwrap_or(latest);
             let mut line = format!(
                 "{} {}  {}  {} → {}{}",
                 yellow("↑", use_color),
                 bold(&dep.name, use_color),
                 dim(current, use_color),
                 dim("→", use_color),
-                green(latest, use_color),
+                green(display_new, use_color),
                 annotations,
             );
             if let Some(ref branch) = dep.branch_name {
@@ -707,6 +718,7 @@ mod tests {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: "lodash".into(),
                             status: DepStatus::UpdateAvailable {
                                 current: "4.17.21".into(),
@@ -735,6 +747,7 @@ mod tests {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: "express".into(),
                             status: DepStatus::UpToDate {
                                 latest: Some("4.18.2".into()),
@@ -762,6 +775,7 @@ mod tests {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: "local-lib".into(),
                             status: DepStatus::Skipped {
                                 reason: "local-path".into(),
@@ -794,6 +808,7 @@ mod tests {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: "serde".into(),
                         status: DepStatus::UpToDate {
                             latest: Some("1.0.228".into()),
@@ -878,6 +893,7 @@ mod tests {
                     dependency_dashboard_approval: None,
                     replacement_name: None,
                     replacement_version: None,
+                    new_value: None,
                     name: "tokio".into(),
                     status: DepStatus::UpToDate {
                         latest: Some("1.0.0".into()),
@@ -921,6 +937,7 @@ mod tests {
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
+            new_value: None,
             name: "lodash".into(),
             status: DepStatus::UpdateAvailable {
                 current: "4.17.21".into(),
@@ -932,6 +949,43 @@ mod tests {
         assert!(s.contains("4.17.21"));
         assert!(s.contains("4.18.0"));
         assert!(s.contains('↑'));
+    }
+
+    #[test]
+    fn format_dep_uses_new_value_when_set() {
+        let dep = DepReport {
+            branch_name: None,
+            group_name: None,
+            automerge: None,
+            labels: Vec::new(),
+            assignees: Vec::new(),
+            reviewers: Vec::new(),
+            update_type: None,
+            pr_priority: None,
+            pr_title: None,
+            release_timestamp: None,
+            current_version_timestamp: None,
+
+            dep_type: None,
+            package_name: None,
+            range_strategy: None,
+            follow_tag: None,
+            pin_digests: None,
+            versioning: None,
+            dependency_dashboard_approval: None,
+            replacement_name: None,
+            replacement_version: None,
+            new_value: Some("^5.0.0".into()),
+            name: "lodash".into(),
+            status: DepStatus::UpdateAvailable {
+                current: "^4.17.21".into(),
+                latest: "5.0.0".into(),
+            },
+        };
+        let s = format_dep(&dep, false);
+        // new_value should appear in the output instead of bare latest
+        assert!(s.contains("^5.0.0"), "new_value should appear: {s}");
+        assert!(s.contains("^4.17.21"), "current constraint should appear: {s}");
     }
 
     #[test]
@@ -958,6 +1012,7 @@ mod tests {
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
+            new_value: None,
             name: "express".into(),
             status: DepStatus::UpToDate {
                 latest: Some("4.18.2".into()),
@@ -993,6 +1048,7 @@ mod tests {
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
+            new_value: None,
             name: "my-lib".into(),
             status: DepStatus::Skipped {
                 reason: "workspace-protocol".into(),
@@ -1027,6 +1083,7 @@ mod tests {
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
+            new_value: None,
             name: "bad-pkg".into(),
             status: DepStatus::LookupError {
                 message: "404 Not Found".into(),
@@ -1090,6 +1147,7 @@ mod tests {
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
+                new_value: None,
                 name: "a".into(),
                 status: DepStatus::UpdateAvailable {
                     current: "1.0.0".into(),
@@ -1118,6 +1176,7 @@ mod tests {
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
+                new_value: None,
                 name: "b".into(),
                 status: DepStatus::UpToDate { latest: None },
             },
@@ -1143,6 +1202,7 @@ mod tests {
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
+                new_value: None,
                 name: "c".into(),
                 status: DepStatus::Skipped {
                     reason: "local".into(),
@@ -1170,6 +1230,7 @@ mod tests {
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
+                new_value: None,
                 name: "d".into(),
                 status: DepStatus::LookupError {
                     message: "404".into(),
@@ -1249,6 +1310,7 @@ mod tests {
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
+            new_value: None,
             status: DepStatus::UpdateAvailable {
                 current: "1.0.0".into(),
                 latest: "2.0.0".into(),
@@ -1280,6 +1342,7 @@ mod tests {
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
+            new_value: None,
             status: DepStatus::UpToDate { latest: None },
         }
     }

@@ -105,6 +105,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: renovate_core::extractors::batect_wrapper::BATECT_REPO.to_owned(),
                             status,
                         }],
@@ -184,6 +185,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: "Unity Editor".to_owned(),
                         status,
                     });

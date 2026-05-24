@@ -463,6 +463,7 @@ pub(crate) async fn docker_hub_reports(
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
+                new_value: None,
                 name: dep.image.clone(),
                 status: output::DepStatus::Skipped {
                     reason: format!("{reason:?}").to_lowercase(),
@@ -513,6 +514,7 @@ pub(crate) async fn docker_hub_reports(
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
+                new_value: None,
                 name: dep_name,
                 status,
             });
@@ -552,6 +554,7 @@ mod tests {
                 dependency_dashboard_approval: None,
                 replacement_name: None,
                 replacement_version: None,
+                new_value: None,
                 status,
             })
             .collect();

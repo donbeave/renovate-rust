@@ -105,6 +105,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 dependency_dashboard_approval: None,
                                 replacement_name: None,
                                 replacement_version: None,
+                                new_value: None,
                                 name: dep.image.clone(),
                                 status: output::DepStatus::Skipped {
                                     reason: format!("{:?}", dep.skip_reason.as_ref().unwrap())
@@ -159,6 +160,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 dependency_dashboard_approval: None,
                                 replacement_name: None,
                                 replacement_version: None,
+                                new_value: None,
                                 name: dep_name,
                                 status,
                             });
@@ -279,6 +281,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: vdep.tool.to_owned(),
                         status,
                     });

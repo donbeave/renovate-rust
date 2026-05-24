@@ -110,6 +110,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: dep.image.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: format!("{reason:?}").to_lowercase(),
@@ -162,6 +163,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: dep_name,
                             status,
                         });
@@ -210,6 +212,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: dep_name,
                         status,
                     });
@@ -299,6 +302,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: format!("node@{}", dep.version),
                             status,
                         }
@@ -414,6 +418,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                                 dependency_dashboard_approval: None,
                                 replacement_name: None,
                                 replacement_version: None,
+                                new_value: None,
                                 name: dep.project.clone(),
                                 status,
                             }
@@ -503,6 +508,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: orb.package_name.clone(),
                             status,
                         });
@@ -640,6 +646,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: dep.dep_name.clone(),
                         status,
                     });
@@ -743,6 +750,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: format!("{}@{}", t.name, t.version),
                             status,
                         });
@@ -919,6 +927,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                             dependency_dashboard_approval: None,
                             replacement_name: None,
                             replacement_version: None,
+                            new_value: None,
                             name: dep.dep_name.clone(),
                             status: output::DepStatus::Skipped {
                                 reason: match reason {
@@ -1014,6 +1023,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: dep.dep_name.clone(),
                         status,
                     });

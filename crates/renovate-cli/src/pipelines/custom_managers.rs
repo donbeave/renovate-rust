@@ -288,6 +288,7 @@ async fn lookup_custom_deps(
             dependency_dashboard_approval: None,
             replacement_name: None,
             replacement_version: None,
+            new_value: None,
             status,
         });
     }

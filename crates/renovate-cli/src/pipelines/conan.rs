@@ -84,6 +84,7 @@ pub(crate) async fn process(ctx: &mut RepoPipelineCtx<'_>) {
                         dependency_dashboard_approval: None,
                         replacement_name: None,
                         replacement_version: None,
+                        new_value: None,
                         name: dep.name.clone(),
                         status,
                     });
