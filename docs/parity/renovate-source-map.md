@@ -129,9 +129,9 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/bazelisk/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/bazelisk/artifacts.ts` | — | not-started | Not ported |
-| `lib/modules/manager/bazelisk/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/bazelisk/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `extract_bazelisk` ported; inlined into version_file module |
+| `lib/modules/manager/bazelisk/artifacts.ts` | — | not-started | Artifacts not ported |
+| `lib/modules/manager/bazelisk/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
 
 ### bicep
 
@@ -186,7 +186,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/bun-version/index.ts` | — | not-started | No Rust equivalent |
+| `lib/modules/manager/bun-version/index.ts` | `crates/renovate-core/src/extractors/bun_version.rs` | partial | Core `.bun-version` extraction ported |
 
 ### bundler
 
@@ -225,8 +225,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/cdnurl/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/cdnurl/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/cdnurl/extract.ts` | `crates/renovate-core/src/extractors/cdnurl.rs` | partial | Core CDN URL extraction ported |
+| `lib/modules/manager/cdnurl/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
 
 ### circleci
 
@@ -521,8 +521,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
 | `lib/modules/manager/helmv3/common.ts` | `crates/renovate-core/src/extractors/helm.rs` | partial | Basic-auth login command generation |
-| `lib/modules/manager/helmv3/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/helmv3/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/helmv3/extract.ts` | `crates/renovate-cli/src/pipelines/helm.rs` | partial | Chart dependency extraction handled via helmv3 pipeline using helm extractor |
+| `lib/modules/manager/helmv3/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
 
 ### hermit
 
@@ -674,8 +674,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/nvm/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/nvm/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/nvm/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `.nvmrc` extraction ported via version_file module |
+| `lib/modules/manager/nvm/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection pattern for `.nvmrc` ported |
 
 ### ocb
 
@@ -718,8 +718,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/pip-compile/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/pip-compile/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/pip-compile/extract.ts` | `crates/renovate-core/src/extractors/pip_compile.rs` | partial | Core input file extraction ported; lock-file resolver not ported |
+| `lib/modules/manager/pip-compile/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
 | `lib/modules/manager/pip-compile/artifacts.ts` | — | not-started | Not ported |
 
 ### pip_requirements
@@ -776,8 +776,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/proto/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/proto/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/proto/extract.ts` | `crates/renovate-core/src/extractors/proto.rs` | partial | Core `.prototools` extraction ported |
+| `lib/modules/manager/proto/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
 
 ### pub
 
@@ -800,8 +800,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/pyenv/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/pyenv/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/pyenv/extract.ts` | `crates/renovate-core/src/extractors/pyenv.rs` | partial | Core `.python-version` extraction ported |
+| `lib/modules/manager/pyenv/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection patterns ported |
 
 ### quadlet
 
@@ -885,8 +885,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/terraform-version/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/terraform-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/terraform-version/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `.terraform-version` extraction ported via version_file module |
+| `lib/modules/manager/terraform-version/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection pattern ported |
 
 ### terragrunt
 
@@ -900,8 +900,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/manager/terragrunt-version/extract.ts` | — | not-started | No Rust equivalent |
-| `lib/modules/manager/terragrunt-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/manager/terragrunt-version/extract.ts` | `crates/renovate-core/src/extractors/version_file.rs` | partial | `.terragrunt-version` extraction ported via version_file module |
+| `lib/modules/manager/terragrunt-version/index.ts` | `crates/renovate-core/src/managers.rs` | partial | Manager detection pattern ported |
 
 ### tflint-plugin
 
