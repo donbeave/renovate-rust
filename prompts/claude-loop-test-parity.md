@@ -30,13 +30,13 @@ Run autonomously. Do not ask questions. Make the best engineering decision from
 local evidence. Never stop because of a missing credential or external service —
 document the blocker, skip the entry, and continue.
 
-Never modify `prompts/claude-loop-test-parity.md` while executing this loop.
+Never modify `prompts/claude-loop-test-parity.md` while following this prompt.
 
 ---
 
 ## Workspace layout
 
-- Normal Claude Code working directory: `~/Projects/renovate-rust-experiement`
+- Normal working directory: `~/Projects/renovate-rust-experiement`
 - `renovate/` — upstream Renovate reference clone (read-only)
 - `renovate-rust/` — the Rust implementation repository
 - If already inside `renovate-rust/`, use `.` as the project root and
@@ -396,7 +396,7 @@ file:
    implementation needed for the behavior the test exercises — not a stub that
    hardcodes the return value, and not a broad reimplementation. Follow the
    patterns established in the existing Rust codebase and documented in the main
-   loop prompt.
+   implementation prompt.
 
 5. **Write the test to cover the actual behavior, not to satisfy the assertion.**
    The implementation must handle the input correctly, not just return the
@@ -429,7 +429,7 @@ file:
 
 9. **For large spec files (many pending rows):** port a batch per iteration,
    commit, and continue. Do not attempt to port an entire large file in one
-   loop.
+   iteration.
 
 ---
 
@@ -545,7 +545,7 @@ your changes, note it in the commit message or final progress notes.
 2. Read `docs/parity/renovate-test-map.md` to understand current state, then
    open the linked detail file for the spec you will work on.
 3. Recount the summary block and update it if stale.
-4. Work through the Iteration order until the loop budget runs out, committing
+4. Work through the Iteration order until the available work budget runs out, committing
    after each unit of work.
 
 At every commit:

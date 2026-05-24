@@ -11,14 +11,8 @@ Build `renovate-rust` into a production-quality Rust implementation of the
 Renovate CLI: a `renovate` binary that can be used as a drop-in replacement for
 common `renovatebot/renovate` CLI workflows.
 
-This prompt is both:
-
-- the Claude Code `/goal` or `/loop` body for Jack/Claude;
-- the Codex goal prompt body for Codex.
-
-When used as a long-running goal, do not stop after one coherent slice. Continue
-until the Definition Of Done below is actually satisfied, or until the operator
-explicitly stops the goal.
+Do not stop after one coherent slice. Continue until the Definition Of Done
+below is actually satisfied, or until the operator explicitly stops the work.
 
 ## Definition Of Done
 
@@ -50,7 +44,7 @@ Rust CLI is a drop-in replacement.
 Run autonomously. Do not ask me questions. Make the best engineering decision you can from local evidence, Renovate's behavior, Rust ecosystem conventions, and the constraints below. If something is ambiguous, choose the option that preserves Renovate compatibility first, improves Rust design second, and document the decision in the repo. Never stop because of missing credentials, unavailable network, or an external service requirement. Document the blocker, skip that blocked slice, and continue with another local/offline slice that can move the project forward.
 
 Workspace layout:
-- The normal Claude Code working directory is `~/Projects/renovate-rust-experiement`.
+- The normal working directory is `~/Projects/renovate-rust-experiement`.
 - That directory contains two sibling checkouts:
   - `renovate/` is the upstream Renovate reference clone from `https://github.com/renovatebot/renovate`.
   - `renovate-rust/` is the Rust implementation repository from `https://github.com/donbeave/renovate-rust`.
@@ -62,11 +56,11 @@ Repository rules:
 - Follow `AGENTS.md`, `CLAUDE.md`, `BRANCHING.md`, and `COMMITS.md`.
 - Keep agent-only rules in `AGENTS.md` and shared human/agent rules in topic-specific files.
 - Commit messages must follow the repository commit conventions.
-- Never modify `prompts/claude-loop-renovate-rust.md` while executing this loop unless the operator explicitly asks you to update prompt guidance. Treat this prompt as operator-owned configuration during ordinary implementation work. If you identify an improvement during ordinary loop execution, record it as a suggestion in project docs instead of editing the prompt.
+- Never modify `prompts/claude-loop-renovate-rust.md` while following this prompt unless the operator explicitly asks you to update prompt guidance. Treat this prompt as operator-owned configuration during ordinary implementation work. If you identify an improvement during ordinary execution, record it as a suggestion in project docs instead of editing the prompt.
 
 Reference repository:
 - Treat renovatebot/renovate as the behavioral reference.
-- Use the existing sibling checkout at `../renovate` from the Rust project root, or `./renovate` when Claude Code was started from `~/Projects/renovate-rust-experiement`.
+- Use the existing sibling checkout at `../renovate` from the Rust project root, or `./renovate` when started from `~/Projects/renovate-rust-experiement`.
 - Do not clone Renovate; the reference checkout is expected to already exist.
 - Treat the reference checkout as read-only. Only run non-mutating inspection commands there.
 - Do not update the reference checkout. If it appears stale, document the assumption and continue using the local contents.
@@ -217,7 +211,7 @@ Verification:
 
 Parity tracking files:
 
-**IMPORTANT: These files are the primary progress-tracking tool.  Every loop
+**IMPORTANT: These files are the primary progress-tracking tool. Every
 iteration MUST keep them current — including adding entries for files you
 discovered but have not yet ported.**
 
@@ -274,7 +268,7 @@ Parity workflow:
    the `renovate-test-map.md` root index and matching detail file before
    writing any Rust code.**
 3. Inspect Renovate reference docs/tests/source for one missing behavior slice.
-4. Choose the highest-value slice that can be completed in this loop without breaking existing work.
+4. Choose the highest-value slice that can be completed this iteration without breaking existing work.
 5. Add or update parity tracking docs before or during implementation:
    - `docs/parity/renovate-source-map.md` — update status for any TypeScript
      source files you read or implement from.
@@ -290,7 +284,7 @@ Parity workflow:
 10. After committing, verify that all parity tracking files reflect the new slice
     (source map status updated, test map rows added, ledger row added).
 
-Progress loop:
+Progress procedure:
 1. Read this prompt and prepare the current turn's working plan from the
    Objective, Definition Of Done, operating rules, and local repo state.
 2. Inspect current repo state, recent commits, and parity docs.
@@ -307,9 +301,9 @@ Progress loop:
    fully achieved.
 
 Iteration sizing:
-- Each turn or timed loop should leave the repository better than it started.
+- Each iteration should leave the repository better than it started.
 - Each iteration must build something concrete and add or update tests for that behavior when appropriate. Run formatting, Clippy, build, or test commands only when the operator explicitly asks for them.
-- Prefer a complete vertical slice over broad partial scaffolding, except for the initial loop where creating the Rust workspace, formatting, Clippy, and nextest foundation is the highest-value slice.
+- Prefer a complete vertical slice over broad partial scaffolding, except for the initial iteration where creating the Rust workspace, formatting, Clippy, and nextest foundation is the highest-value slice.
 - Good slices include:
   - CLI flag or config compatibility
   - config discovery and merge behavior
@@ -367,17 +361,17 @@ Autonomy rules:
 - Do not wait for permission to add files, refactor local Rust code, or create tests.
 - Do not let short-term feature work pile up unmaintainable structure. If a
   small refactor is needed to keep the implementation reasonable, do it in the
-  same loop before committing.
+  same iteration before committing.
 - After every commit, push all committed local changes to the matching remote branch.
 - Do not rewrite unrelated user changes. If the worktree contains unrelated changes, leave them alone and commit only your own files.
 - If another agent or user changed files, inspect and integrate with those changes rather than reverting them.
 - If blocked, document the blocker in the commit message or a comment in the relevant parity file and choose another local slice.
 
 Commit rules:
-- Commit at the end of each successful loop when there are meaningful changes.
+- Commit at the end of each successful iteration when there are meaningful changes.
   If checks were requested, commit only after they pass or after documenting any
   pre-existing/blocking failure.
-- Stage only files changed for this loop.
+- Stage only files changed for this iteration.
 - Use concise commit messages such as:
   - `build: add Rust workspace scaffolding`
   - `test(config): port Renovate config discovery cases`
