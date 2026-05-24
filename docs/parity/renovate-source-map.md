@@ -968,45 +968,45 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 
 | Renovate source file | Rust file | Status | Notes |
 |----------------------|-----------|--------|-------|
-| `lib/modules/datasource/azure-bicep-resource/index.ts` | `crates/renovate-core/src/datasources/azure_bicep.rs` | stub | Stub only |
-| `lib/modules/datasource/azure-pipelines-tasks/index.ts` | `crates/renovate-core/src/datasources/azure_pipelines_tasks.rs` | stub | Stub only |
-| `lib/modules/datasource/bazel/index.ts` | `crates/renovate-core/src/datasources/bazel.rs` | stub | Stub only |
-| `lib/modules/datasource/bitrise/index.ts` | `crates/renovate-core/src/datasources/bitrise.rs` | stub | Stub only |
-| `lib/modules/datasource/buildpacks-registry/index.ts` | `crates/renovate-core/src/datasources/buildpacks_registry.rs` | stub | Stub only |
-| `lib/modules/datasource/cdnjs/index.ts` | `crates/renovate-core/src/datasources/cdnjs.rs` | stub | Stub only |
-| `lib/modules/datasource/pod/index.ts` | `crates/renovate-core/src/datasources/cocoapods.rs` | stub | Stub only |
-| `lib/modules/datasource/conan/index.ts` | `crates/renovate-core/src/datasources/conan.rs` | stub | Stub only |
-| `lib/modules/datasource/conda/index.ts` | `crates/renovate-core/src/datasources/conda.rs` | stub | Stub only |
-| `lib/modules/datasource/cpan/index.ts` | `crates/renovate-core/src/datasources/cpan.rs` | stub | Stub only |
-| `lib/modules/datasource/crate/index.ts` | `crates/renovate-core/src/datasources/crates_io.rs` | stub | Stub only |
-| `lib/modules/datasource/devbox/index.ts` | `crates/renovate-core/src/datasources/devbox.rs` | stub | Stub only |
-| `lib/modules/datasource/docker/index.ts` | `crates/renovate-core/src/datasources/docker_hub.rs` | stub | Stub only |
-| `lib/modules/datasource/endoflife-date/index.ts` | `crates/renovate-core/src/datasources/endoflife.rs` | stub | Stub only |
-| `lib/modules/datasource/github-releases/index.ts` | `crates/renovate-core/src/datasources/github_releases.rs` | stub | Stub only |
-| `lib/modules/datasource/github-runners/index.ts` | `crates/renovate-core/src/datasources/github_runners.rs` | stub | Stub only |
-| `lib/modules/datasource/github-tags/index.ts` | `crates/renovate-core/src/datasources/github_tags.rs` | stub | Stub only |
-| `lib/modules/datasource/gitlab-tags/index.ts` | `crates/renovate-core/src/datasources/gitlab_tags.rs` | stub | Stub only |
-| `lib/modules/datasource/glasskube-packages/index.ts` | `crates/renovate-core/src/datasources/glasskube_packages.rs` | stub | Stub only |
-| `lib/modules/datasource/go/index.ts` | `crates/renovate-core/src/datasources/gomod.rs` | stub | Stub only |
-| `lib/modules/datasource/gradle-version/index.ts` | `crates/renovate-core/src/datasources/gradle_version.rs` | stub | Stub only |
-| `lib/modules/datasource/hackage/index.ts` | `crates/renovate-core/src/datasources/hackage.rs` | stub | Stub only |
-| `lib/modules/datasource/helm/index.ts` | `crates/renovate-core/src/datasources/helm.rs` | stub | Stub only |
-| `lib/modules/datasource/hermit/index.ts` | `crates/renovate-core/src/datasources/hermit.rs` | stub | Stub only |
-| `lib/modules/datasource/hex/index.ts` | `crates/renovate-core/src/datasources/hex.rs` | stub | Stub only |
-| `lib/modules/datasource/jenkins-plugins/index.ts` | `crates/renovate-core/src/datasources/jenkins_plugins.rs` | stub | Stub only |
-| `lib/modules/datasource/jsr/index.ts` | `crates/renovate-core/src/datasources/jsr.rs` | stub | Stub only |
-| `lib/modules/datasource/maven/index.ts` | `crates/renovate-core/src/datasources/maven.rs` | stub | Stub only |
-| `lib/modules/datasource/npm/index.ts` | `crates/renovate-core/src/datasources/npm.rs` | stub | Stub only |
-| `lib/modules/datasource/nuget/index.ts` | `crates/renovate-core/src/datasources/nuget.rs` | stub | Stub only |
-| `lib/modules/datasource/orb/index.ts` | `crates/renovate-core/src/datasources/orb.rs` | stub | Stub only |
-| `lib/modules/datasource/packagist/index.ts` | `crates/renovate-core/src/datasources/packagist.rs` | stub | Stub only |
-| `lib/modules/datasource/dart/index.ts` | `crates/renovate-core/src/datasources/pub_dev.rs` | stub | Stub only |
-| `lib/modules/datasource/puppet-forge/index.ts` | `crates/renovate-core/src/datasources/puppet_forge.rs` | stub | Stub only |
-| `lib/modules/datasource/pypi/index.ts` | `crates/renovate-core/src/datasources/pypi.rs` | stub | Stub only |
-| `lib/modules/datasource/rubygems/index.ts` | `crates/renovate-core/src/datasources/rubygems.rs` | stub | Stub only |
-| `lib/modules/datasource/terraform-provider/index.ts` | `crates/renovate-core/src/datasources/terraform.rs` | stub | Stub only |
-| `lib/modules/datasource/typst/index.ts` | `crates/renovate-core/src/datasources/typst.rs` | stub | Stub only |
-| `lib/modules/datasource/unity3d/index.ts` | `crates/renovate-core/src/datasources/unity3d.rs` | stub | Stub only |
+| `lib/modules/datasource/azure-bicep-resource/index.ts` | `crates/renovate-core/src/datasources/azure_bicep.rs` | partial | Core version fetch via Bicep types index API ported; package-cache not ported |
+| `lib/modules/datasource/azure-pipelines-tasks/index.ts` | `crates/renovate-core/src/datasources/azure_pipelines_tasks.rs` | partial | Core tasks version fetch via GitHub tags API ported; package-cache not ported |
+| `lib/modules/datasource/bazel/index.ts` | `crates/renovate-core/src/datasources/bazel.rs` | partial | Core version fetch via GitHub releases ported; package-cache not ported |
+| `lib/modules/datasource/bitrise/index.ts` | `crates/renovate-core/src/datasources/bitrise.rs` | partial | Steplib index fetch and version lookup ported; caching not ported |
+| `lib/modules/datasource/buildpacks-registry/index.ts` | `crates/renovate-core/src/datasources/buildpacks_registry.rs` | partial | Core version fetch via builder index API ported; package-cache not ported |
+| `lib/modules/datasource/cdnjs/index.ts` | `crates/renovate-core/src/datasources/cdnjs.rs` | partial | Core latest version fetch via cdnjs API ported; package-cache not ported |
+| `lib/modules/datasource/pod/index.ts` | `crates/renovate-core/src/datasources/cocoapods.rs` | partial | Core version fetch via CocoaPods CDN and GitHub ported; package-cache not ported |
+| `lib/modules/datasource/conan/index.ts` | `crates/renovate-core/src/datasources/conan.rs` | partial | Core version fetch via Conan Center API ported; custom registry support partial |
+| `lib/modules/datasource/conda/index.ts` | `crates/renovate-core/src/datasources/conda.rs` | partial | Core version fetch via Anaconda API ported; package-cache not ported |
+| `lib/modules/datasource/cpan/index.ts` | `crates/renovate-core/src/datasources/cpan.rs` | partial | Core version fetch via MetaCPAN API ported; package-cache not ported |
+| `lib/modules/datasource/crate/index.ts` | `crates/renovate-core/src/datasources/crates_io.rs` | partial | Sparse index fetch, version filtering, batch lookup, timestamps ported; git registry support, private crates.io not ported |
+| `lib/modules/datasource/devbox/index.ts` | `crates/renovate-core/src/datasources/devbox.rs` | partial | Core version fetch via Devbox search API ported; package-cache not ported |
+| `lib/modules/datasource/docker/index.ts` | `crates/renovate-core/src/datasources/docker_hub.rs` | partial | Docker Hub tag fetch and digest lookup ported; private registries, OCI auth, multi-arch manifests, and full registry API not ported |
+| `lib/modules/datasource/endoflife-date/index.ts` | `crates/renovate-core/src/datasources/endoflife.rs` | partial | Core version fetch via endoflife.date API ported; package-cache not ported |
+| `lib/modules/datasource/github-releases/index.ts` | `crates/renovate-core/src/datasources/github_releases.rs` | partial | Core releases fetch, stability filtering, timestamps ported; digest support and package-cache not ported |
+| `lib/modules/datasource/github-runners/index.ts` | `crates/renovate-core/src/datasources/github_runners.rs` | partial | Runner version lookup via GitHub runners API ported; package-cache not ported |
+| `lib/modules/datasource/github-tags/index.ts` | `crates/renovate-core/src/datasources/github_tags.rs` | partial | Core tags fetch, version-like filtering, batch lookup ported; digest support and package-cache not ported |
+| `lib/modules/datasource/gitlab-tags/index.ts` | `crates/renovate-core/src/datasources/gitlab_tags.rs` | partial | Core tags fetch via GitLab API ported; package-cache not ported |
+| `lib/modules/datasource/glasskube-packages/index.ts` | `crates/renovate-core/src/datasources/glasskube_packages.rs` | partial | Core version fetch via Glasskube packages index ported; package-cache not ported |
+| `lib/modules/datasource/go/index.ts` | `crates/renovate-core/src/datasources/gomod.rs` | partial | Core version fetch via Go module proxy ported; GOPROXY chain and private modules not ported |
+| `lib/modules/datasource/gradle-version/index.ts` | `crates/renovate-core/src/datasources/gradle_version.rs` | partial | Core version fetch via Gradle services API ported; package-cache not ported |
+| `lib/modules/datasource/hackage/index.ts` | `crates/renovate-core/src/datasources/hackage.rs` | partial | Core version fetch via Hackage API ported; package-cache not ported |
+| `lib/modules/datasource/helm/index.ts` | `crates/renovate-core/src/datasources/helm.rs` | partial | Core chart version fetch via Helm repo index.yaml ported; OCI registry support partial |
+| `lib/modules/datasource/hermit/index.ts` | `crates/renovate-core/src/datasources/hermit.rs` | partial | Core version fetch via Hermit manifest index ported; package-cache not ported |
+| `lib/modules/datasource/hex/index.ts` | `crates/renovate-core/src/datasources/hex.rs` | partial | Core version fetch via Hex.pm API ported; package-cache not ported |
+| `lib/modules/datasource/jenkins-plugins/index.ts` | `crates/renovate-core/src/datasources/jenkins_plugins.rs` | partial | Core version fetch via Jenkins Update Center ported; package-cache not ported |
+| `lib/modules/datasource/jsr/index.ts` | `crates/renovate-core/src/datasources/jsr.rs` | partial | Core version fetch via JSR API ported; package-cache not ported |
+| `lib/modules/datasource/maven/index.ts` | `crates/renovate-core/src/datasources/maven.rs` | partial | Core version fetch via Maven Central metadata ported; multi-repo search and package-cache not ported |
+| `lib/modules/datasource/npm/index.ts` | `crates/renovate-core/src/datasources/npm.rs` | partial | Core packument fetch, deprecated filtering, batch fetch, timestamps ported; npmrc registry auth and package-cache not ported |
+| `lib/modules/datasource/nuget/index.ts` | `crates/renovate-core/src/datasources/nuget.rs` | partial | Core version fetch via NuGet v3 API ported; package-cache not ported |
+| `lib/modules/datasource/orb/index.ts` | `crates/renovate-core/src/datasources/orb.rs` | partial | Core version fetch via CircleCI orb API ported; package-cache not ported |
+| `lib/modules/datasource/packagist/index.ts` | `crates/renovate-core/src/datasources/packagist.rs` | partial | Core version fetch via Packagist API ported; package-cache not ported |
+| `lib/modules/datasource/dart/index.ts` | `crates/renovate-core/src/datasources/pub_dev.rs` | partial | Core version fetch via pub.dev API ported; package-cache not ported |
+| `lib/modules/datasource/puppet-forge/index.ts` | `crates/renovate-core/src/datasources/puppet_forge.rs` | partial | Core version fetch via Puppet Forge API ported; package-cache not ported |
+| `lib/modules/datasource/pypi/index.ts` | `crates/renovate-core/src/datasources/pypi.rs` | partial | Core version fetch via PyPI JSON API ported; yanked filtering, timestamps ported; package-cache not ported |
+| `lib/modules/datasource/rubygems/index.ts` | `crates/renovate-core/src/datasources/rubygems.rs` | partial | Core version fetch via RubyGems API ported; package-cache not ported |
+| `lib/modules/datasource/terraform-provider/index.ts` | `crates/renovate-core/src/datasources/terraform.rs` | partial | Core version fetch via Terraform registry API ported; package-cache not ported |
+| `lib/modules/datasource/typst/index.ts` | `crates/renovate-core/src/datasources/typst.rs` | partial | Core version fetch via Typst Universe API ported; package-cache not ported |
+| `lib/modules/datasource/unity3d/index.ts` | `crates/renovate-core/src/datasources/unity3d.rs` | partial | Core version fetch via Unity hub JSON API ported; package-cache not ported |
 | `lib/modules/datasource/artifactory/index.ts` | `crates/renovate-core/src/datasources/artifactory.rs` | partial | HTML directory listing release extraction, registry merge behavior, empty/404/null handling, and non-404 external-host errors ported; package-cache integration not ported. |
 | `lib/modules/datasource/custom/index.ts` | — | not-started | Configurable custom datasource lookup, registry URL templating, HTTP/local file dispatch, transformation templates, schema validation, and format routing are not ported. |
 | `lib/modules/datasource/custom/formats/index.ts` | — | not-started | Format fetcher dispatch is not ported. |
@@ -1061,8 +1061,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/config/app-strings.ts` | `crates/renovate-core/src/repo_config.rs` | partial | Config filename expansion, user `configFileNames`, and platform filtering ported |
 | `lib/config/parse.ts` | `crates/renovate-core/src/config/file.rs` | partial | JSON/JSON5 parse result handling ported |
 | `lib/config/global.ts` | `crates/renovate-core/src/config.rs` | partial | Global option list and config types partially ported, including mode, printConfig, autodiscover filters, prCommitsPerRunLimit, gitPrivateKeyPassphrase, onboarding/config-file, fork-mode globals, optimizeForDisabled, gitUrl, object-valued, and scalar self-hosted global option retention |
-| `lib/config/validation.ts` | — | not-started | Not ported |
-| `lib/config/migration.ts` | — | not-started | Not ported |
+| `lib/config/validation.ts` | `crates/renovate-core/src/config/migrate_validate.rs` | partial | Config key validation, global-only option enforcement, template option checks, and known-key gating ported; full schema validation against all option types not ported |
+| `lib/config/migration.ts` | `crates/renovate-core/src/config/migrate_validate.rs` | partial | Core deprecated-key migration (automerge, semanticCommits, compatibility, depTypes, pinVersions, baseBranch, versionStrategy, packageRules matchers, extends presets, datasource aliases, schedule strings) ported via migrate_config; MigrationsService class pattern not ported |
 | `lib/config/migrate-validate.ts` | `crates/renovate-core/src/config/migrate_validate.rs` | partial | Runtime migrate/massage/validate flow ported, including selected global-only option warnings |
 | `lib/config/massage.ts` | `crates/renovate-core/src/config/massage.rs` | partial | Config massage helpers for scalar, packageRules, and update-type expansion ported |
 | `lib/config/secrets.ts` | `crates/renovate-core/src/config/secrets.rs` | partial | Secret/variable validation and interpolation ported |
