@@ -315,6 +315,11 @@ pub struct PrTitleConfig<'a> {
     /// Currently installed version — used for `{{currentVersion}}` template substitution
     /// in `commitMessageExtra` and `commitMessageTopic`.  `None` when not available.
     pub current_version: Option<&'a str>,
+    /// The proposed new constraint string for range-type deps (e.g. `"^2.0.0"` for a
+    /// `^1.x` range bumped to the next major).  When set and the update is non-major,
+    /// the range string is used verbatim in the commit-message extra segment instead of
+    /// the prettified bare version — mirroring Renovate's `{{{newValue}}}` template path.
+    pub new_value: Option<&'a str>,
 }
 
 impl<'a> PrTitleConfig<'a> {
@@ -339,17 +344,17 @@ impl<'a> PrTitleConfig<'a> {
 ///
 /// ```
 /// # use renovate_core::branch::{pr_title, PrTitleConfig};
-/// // Default plain title.
+/// // Default plain title — non-major patch update gets prettyNewVersion (v-prefixed).
 /// assert_eq!(
 ///     pr_title("express", "4.18.2", false, &PrTitleConfig::with_defaults()),
-///     "Update dependency express to 4.18.2",
+///     "Update dependency express to v4.18.2",
 /// );
 ///
 /// // Semantic commits enabled.
 /// let cfg = PrTitleConfig { semantic_commits: Some("enabled"), ..PrTitleConfig::with_defaults() };
 /// assert_eq!(
 ///     pr_title("express", "4.18.2", false, &cfg),
-///     "chore(deps): Update dependency express to 4.18.2",
+///     "chore(deps): Update dependency express to v4.18.2",
 /// );
 /// ```
 ///
@@ -377,7 +382,13 @@ pub fn pr_title(
         format!("dependency {dep_name}")
     };
 
-    // Build `extra` — either from the template or the default "to {version}".
+    // Build `extra` — either from the template or the default Renovate-compatible format.
+    //
+    // Renovate's default `commitMessageExtra` template resolves to:
+    //   - major update:       "to v{MAJOR}"   (prettyNewMajor, e.g. "to v5")
+    //   - non-major range:    "to {newValue}"  (range string, e.g. "to ~18.1.0")
+    //   - non-major exact:    "to v{VERSION}"  (prettyNewVersion, e.g. "to v4.18.2")
+    //   - non-numeric tag:    "to {version}"   (no v prefix, e.g. "to alpine")
     let extra = if let Some(tmpl) = cfg.commit_message_extra {
         if tmpl.is_empty() {
             String::new()
@@ -391,7 +402,19 @@ pub fn pr_title(
                 .replace("{{depName}}", dep_name)
         }
     } else {
-        format!("to {new_version}")
+        let starts_with_digit = new_version.chars().next().is_some_and(|c| c.is_ascii_digit());
+        if is_major && starts_with_digit {
+            let major = crate::versioning::semver_generic::parse_padded(new_version)
+                .map(|v| v.major)
+                .unwrap_or_default();
+            format!("to v{major}")
+        } else if let Some(nv) = cfg.new_value.filter(|_| !is_major) {
+            format!("to {nv}")
+        } else if starts_with_digit {
+            format!("to v{new_version}")
+        } else {
+            format!("to {new_version}")
+        }
     };
 
     let body = if extra.is_empty() {
@@ -454,6 +477,7 @@ pub fn pr_title_full(
             commit_message_extra: None,
             commit_message_suffix: None,
             current_version: None,
+            new_value: None,
         },
     )
 }
@@ -1368,7 +1392,7 @@ mod tests {
     fn pr_title_plain_minor() {
         assert_eq!(
             pr_title("express", "4.18.2", false, &PrTitleConfig::with_defaults()),
-            "Update dependency express to 4.18.2"
+            "Update dependency express to v4.18.2"
         );
     }
 
@@ -1376,7 +1400,7 @@ mod tests {
     fn pr_title_plain_major() {
         assert_eq!(
             pr_title("lodash", "5.0.0", true, &PrTitleConfig::with_defaults()),
-            "Update dependency lodash to 5.0.0"
+            "Update dependency lodash to v5"
         );
     }
 
@@ -1388,7 +1412,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("express", "4.18.2", false, &cfg),
-            "chore(deps): Update dependency express to 4.18.2"
+            "chore(deps): Update dependency express to v4.18.2"
         );
     }
 
@@ -1400,7 +1424,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("lodash", "5.0.0", true, &cfg),
-            "chore(deps)!: Update dependency lodash to 5.0.0"
+            "chore(deps)!: Update dependency lodash to v5"
         );
     }
 
@@ -1413,7 +1437,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("react", "18.0.0", true, &cfg),
-            "Update dependency react to 18.0.0"
+            "Update dependency react to v18"
         );
     }
 
@@ -1425,7 +1449,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("@angular/core", "17.1.0", false, &cfg),
-            "chore(deps): Update dependency @angular/core to 17.1.0"
+            "chore(deps): Update dependency @angular/core to v17.1.0"
         );
     }
 
@@ -1438,7 +1462,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("lodash", "4.17.21", false, &cfg),
-            "Bump dependency lodash to 4.17.21"
+            "Bump dependency lodash to v4.17.21"
         );
     }
 
@@ -1457,7 +1481,7 @@ mod tests {
                 "fix",
                 "security"
             ),
-            "fix(security): Update dependency express to 4.18.2"
+            "fix(security): Update dependency express to v4.18.2"
         );
     }
 
@@ -1476,7 +1500,7 @@ mod tests {
                 "chore",
                 ""
             ),
-            "chore!: Update dependency lodash to 5.0.0"
+            "chore!: Update dependency lodash to v5"
         );
     }
 
@@ -1490,7 +1514,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("express", "4.18.2", false, &cfg),
-            "fix(deps): Update dependency express to 4.18.2"
+            "fix(deps): Update dependency express to v4.18.2"
         );
     }
 
@@ -1504,7 +1528,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("react", "18.0.0", true, &cfg),
-            "build(deps): Pin dependency react to 18.0.0"
+            "build(deps): Pin dependency react to v18"
         );
     }
 
@@ -1518,7 +1542,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("nginx", "1.25", false, &cfg),
-            "Update Docker image nginx to 1.25"
+            "Update Docker image nginx to v1.25"
         );
     }
 
@@ -1530,7 +1554,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("nginx", "1.25", false, &cfg),
-            "Update Docker image nginx to 1.25"
+            "Update Docker image nginx to v1.25"
         );
     }
 
@@ -1542,7 +1566,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("nginx", "1.25", false, &cfg),
-            "Update Docker image nginx to 1.25"
+            "Update Docker image nginx to v1.25"
         );
     }
 
@@ -1551,7 +1575,7 @@ mod tests {
         // None → uses default "dependency {dep_name}"
         assert_eq!(
             pr_title("nginx", "1.25", false, &PrTitleConfig::with_defaults()),
-            "Update dependency nginx to 1.25"
+            "Update dependency nginx to v1.25"
         );
     }
 
@@ -1564,7 +1588,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("nginx", "1.25", true, &cfg),
-            "chore(deps)!: Update Helm chart nginx to 1.25"
+            "chore(deps)!: Update Helm chart nginx to v1"
         );
     }
 
@@ -1602,7 +1626,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("express", "4.18.2", false, &cfg),
-            "Update dependency express to 4.18.2 [skip ci]"
+            "Update dependency express to v4.18.2 [skip ci]"
         );
     }
 
@@ -1615,7 +1639,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("express", "4.18.2", false, &cfg),
-            "chore(deps): Update dependency express to 4.18.2 [skip ci]"
+            "chore(deps): Update dependency express to v4.18.2 [skip ci]"
         );
     }
 
@@ -1641,7 +1665,7 @@ mod tests {
         };
         assert_eq!(
             pr_title("express", "2.0.0", false, &cfg),
-            "Update express from 1.0.0 to 2.0.0"
+            "Update express from 1.0.0 to v2.0.0"
         );
     }
 
