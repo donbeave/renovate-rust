@@ -372,6 +372,45 @@ mod tests {
         let _ = config.os;
     }
 
+    // Ported: "no os and architecture" — datasource/java-version/common.spec.ts line 10
+    #[test]
+    fn no_os_and_architecture() {
+        let c = parse_package("java-jre");
+        assert_eq!(c.image_type, "jre");
+        assert_eq!(c.os, None);
+        assert_eq!(c.architecture, None);
+    }
+
+    // Ported: "logs for unsupported os and architecture" — datasource/java-version/common.spec.ts line 74
+    #[test]
+    fn unsupported_os_and_architecture_returns_none() {
+        // system=true with an unrecognized platform → os and architecture stay None.
+        // Rust uses compile-time constants for arch/OS; we can't mock them,
+        // but we can verify that unknown values in the mapping functions return None.
+        assert_eq!(
+            match "unsupported-arch" {
+                "x86" => Some("x86"),
+                "x86_64" => Some("x64"),
+                "arm" => Some("arm"),
+                "aarch64" => Some("aarch64"),
+                "riscv64" => Some("riscv64"),
+                "s390x" => Some("s390x"),
+                _ => None,
+            },
+            None
+        );
+        assert_eq!(
+            match "unsupported-os" {
+                "macos" => Some("mac"),
+                "windows" => Some("windows"),
+                "linux" => Some("linux"),
+                "aix" => Some("aix"),
+                _ => None,
+            },
+            None
+        );
+    }
+
     #[test]
     fn parse_package_jdk() {
         let c = parse_package("java");

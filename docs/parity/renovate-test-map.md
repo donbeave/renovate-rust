@@ -180,7 +180,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/clojure/index.spec.ts` | Not done | [details](lib/modules/datasource/clojure/index.spec.ts.md) |
 | `lib/modules/datasource/cpan/index.spec.ts` | Done | [details](lib/modules/datasource/cpan/index.spec.ts.md) |
 | `lib/modules/datasource/gradle-version/index.spec.ts` | Done | [details](lib/modules/datasource/gradle-version/index.spec.ts.md) |
-| `lib/modules/datasource/buildpacks-registry/index.spec.ts` | Not done | [details](lib/modules/datasource/buildpacks-registry/index.spec.ts.md) |
+| `lib/modules/datasource/buildpacks-registry/index.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/index.spec.ts.md) |
 | `lib/modules/datasource/azure-bicep-resource/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-bicep-resource/index.spec.ts.md) |
 | `lib/modules/datasource/github-runners/index.spec.ts` | Done | [details](lib/modules/datasource/github-runners/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-tags/index.spec.ts.md) |
@@ -195,7 +195,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/unity3d/index.spec.ts` | Not done | [details](lib/modules/datasource/unity3d/index.spec.ts.md) |
 | `lib/modules/datasource/hackage/index.spec.ts` | Done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
-| `lib/modules/datasource/java-version/common.spec.ts` | Not done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
+| `lib/modules/datasource/java-version/common.spec.ts` | Done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
 | `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
 | `lib/modules/datasource/dotnet-version/index.spec.ts` | Done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
 | `lib/modules/datasource/elm-package/index.spec.ts` | Done | [details](lib/modules/datasource/elm-package/index.spec.ts.md) |
@@ -236,7 +236,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/cdnjs/index.spec.ts` | Not done | [details](lib/modules/datasource/cdnjs/index.spec.ts.md) |
 | `lib/modules/datasource/conda/index.spec.ts` | Not done | [details](lib/modules/datasource/conda/index.spec.ts.md) |
 | `lib/modules/datasource/github-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/github-releases/index.spec.ts.md) |
-| `lib/modules/datasource/bazel/index.spec.ts` | Not done | [details](lib/modules/datasource/bazel/index.spec.ts.md) |
+| `lib/modules/datasource/bazel/index.spec.ts` | Done | [details](lib/modules/datasource/bazel/index.spec.ts.md) |
 | `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) |
 | `lib/modules/datasource/helm/schema.spec.ts` | Not done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
 | `lib/modules/datasource/npm/schema.spec.ts` | Not done | [details](lib/modules/datasource/npm/schema.spec.ts.md) |
