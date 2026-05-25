@@ -61,6 +61,7 @@ pub mod packagist;
 pub mod pub_dev;
 pub mod puppet_forge;
 pub mod pypi;
+pub mod python_version;
 pub mod repology;
 pub mod rubygems;
 pub mod ruby_version;

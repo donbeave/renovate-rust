@@ -65,6 +65,28 @@ struct Release {
     published_at: Option<String>,
 }
 
+/// Fetch all stable (non-prerelease, non-draft) release tag names for `owner/repo`.
+///
+/// Returns a `Vec` of `(tag_name, published_at)` for every stable release.
+/// Returns an empty `Vec` when the repo is not found or the request fails.
+pub async fn fetch_all_releases(
+    owner_repo: &str,
+    http: &HttpClient,
+    api_base: &str,
+) -> Result<Vec<(String, Option<String>)>, GithubReleasesError> {
+    let url = format!("{api_base}/repos/{owner_repo}/releases?per_page=100");
+    let resp = http.get_retrying(&url).await?;
+    if !resp.status().is_success() {
+        return Ok(Vec::new());
+    }
+    let releases: Vec<Release> = resp.json().await.map_err(GithubReleasesError::Json)?;
+    Ok(releases
+        .into_iter()
+        .filter(|r| !r.prerelease && !r.draft)
+        .map(|r| (r.tag_name, r.published_at))
+        .collect())
+}
+
 /// Fetch the latest stable (non-prerelease, non-draft) release tag for `owner/repo`.
 ///
 /// Returns `(tag_name, published_at)` for the latest stable release, or `None`

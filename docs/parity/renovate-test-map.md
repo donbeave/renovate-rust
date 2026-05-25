@@ -149,7 +149,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/github-digest/index.spec.ts` | Not done | [details](lib/modules/datasource/github-digest/index.spec.ts.md) |
 | `lib/modules/datasource/github-release-attachments/index.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/index.spec.ts.md) |
 | `lib/modules/datasource/github-release-attachments/digest.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/digest.spec.ts.md) |
-| `lib/modules/datasource/python-version/index.spec.ts` | Not done | [details](lib/modules/datasource/python-version/index.spec.ts.md) |
+| `lib/modules/datasource/python-version/index.spec.ts` | Done | [details](lib/modules/datasource/python-version/index.spec.ts.md) |
 | `lib/modules/datasource/deno/index.spec.ts` | Done | [details](lib/modules/datasource/deno/index.spec.ts.md) |
 | `lib/modules/datasource/flutter-version/index.spec.ts` | Done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-packages/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
