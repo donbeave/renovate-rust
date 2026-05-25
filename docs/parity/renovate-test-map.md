@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3097 / 11677 total tests ported (27%) · pending 8579 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3108 / 11677 total tests ported (27%) · pending 8568 · not-applicable 1 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -28,7 +28,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/fvm/extract.spec.ts` | Done | [details](lib/modules/manager/fvm/extract.spec.ts.md) |
 | `lib/modules/manager/glasskube/extract.spec.ts` | Not done | [details](lib/modules/manager/glasskube/extract.spec.ts.md) |
 | `lib/modules/manager/gleam/extract.spec.ts` | Not done | [details](lib/modules/manager/gleam/extract.spec.ts.md) |
-| `lib/modules/manager/git-submodules/extract.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/extract.spec.ts.md) |
+| `lib/modules/manager/git-submodules/extract.spec.ts` | Done | [details](lib/modules/manager/git-submodules/extract.spec.ts.md) |
 | `lib/modules/manager/git-submodules/artifact.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/artifact.spec.ts.md) |
 | `lib/modules/manager/github-actions/extract.spec.ts` | Not done | [details](lib/modules/manager/github-actions/extract.spec.ts.md) |
 | `lib/modules/manager/github-actions/integration.spec.ts` | Not done | [details](lib/modules/manager/github-actions/integration.spec.ts.md) |
@@ -95,7 +95,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/velaci/extract.spec.ts` | Done | [details](lib/modules/manager/velaci/extract.spec.ts.md) |
 | `lib/modules/manager/sveltos/extract.spec.ts` | Not done | [details](lib/modules/manager/sveltos/extract.spec.ts.md) |
 | `lib/modules/manager/kubernetes/extract.spec.ts` | Done | [details](lib/modules/manager/kubernetes/extract.spec.ts.md) |
-| `lib/modules/manager/azure-pipelines/extract.spec.ts` | Not done | [details](lib/modules/manager/azure-pipelines/extract.spec.ts.md) |
+| `lib/modules/manager/azure-pipelines/extract.spec.ts` | Done | [details](lib/modules/manager/azure-pipelines/extract.spec.ts.md) |
 | `lib/modules/manager/pixi/extract.spec.ts` | Done | [details](lib/modules/manager/pixi/extract.spec.ts.md) |
 | `lib/modules/manager/mise/extract.spec.ts` | Done | [details](lib/modules/manager/mise/extract.spec.ts.md) |
 | `lib/modules/manager/nuget/extract.spec.ts` | Done | [details](lib/modules/manager/nuget/extract.spec.ts.md) |
@@ -103,7 +103,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/kustomize/extract.spec.ts` | Not done | [details](lib/modules/manager/kustomize/extract.spec.ts.md) |
 | `lib/modules/manager/nix/extract.spec.ts` | Done | [details](lib/modules/manager/nix/extract.spec.ts.md) |
 | `lib/modules/manager/flux/extract.spec.ts` | Done | [details](lib/modules/manager/flux/extract.spec.ts.md) |
-| `lib/modules/manager/bazel-module/extract.spec.ts` | Not done | [details](lib/modules/manager/bazel-module/extract.spec.ts.md) |
+| `lib/modules/manager/bazel-module/extract.spec.ts` | Done | [details](lib/modules/manager/bazel-module/extract.spec.ts.md) |
 | `lib/modules/manager/cpanfile/extract.spec.ts` | Done | [details](lib/modules/manager/cpanfile/extract.spec.ts.md) |
 | `lib/modules/manager/pip-compile/extract.spec.ts` | Not done | [details](lib/modules/manager/pip-compile/extract.spec.ts.md) |
 | `lib/modules/manager/maven/extract.spec.ts` | Done | [details](lib/modules/manager/maven/extract.spec.ts.md) |
@@ -197,7 +197,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Not done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
 | `lib/modules/datasource/java-version/common.spec.ts` | Not done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
 | `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
-| `lib/modules/datasource/dotnet-version/index.spec.ts` | Not done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
+| `lib/modules/datasource/dotnet-version/index.spec.ts` | Done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
 | `lib/modules/datasource/elm-package/index.spec.ts` | Not done | [details](lib/modules/datasource/elm-package/index.spec.ts.md) |
 | `lib/modules/datasource/ruby-version/index.spec.ts` | Not done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |
 | `lib/modules/datasource/rust-version/index.spec.ts` | Done | [details](lib/modules/datasource/rust-version/index.spec.ts.md) |
@@ -542,7 +542,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/bundler/update-locked.spec.ts` | Done | [details](lib/modules/manager/bundler/update-locked.spec.ts.md) |
 | `lib/modules/manager/cake/index.spec.ts` | Not done | [details](lib/modules/manager/cake/index.spec.ts.md) |
 | `lib/modules/manager/cargo/artifacts.spec.ts` | Not done | [details](lib/modules/manager/cargo/artifacts.spec.ts.md) |
-| `lib/modules/manager/cargo/locked-version.spec.ts` | Not done | [details](lib/modules/manager/cargo/locked-version.spec.ts.md) |
+| `lib/modules/manager/cargo/locked-version.spec.ts` | Done | [details](lib/modules/manager/cargo/locked-version.spec.ts.md) |
 | `lib/modules/manager/cargo/range.spec.ts` | Done | [details](lib/modules/manager/cargo/range.spec.ts.md) |
 | `lib/modules/manager/cargo/update-locked.spec.ts` | Done | [details](lib/modules/manager/cargo/update-locked.spec.ts.md) |
 | `lib/modules/manager/cargo/update.spec.ts` | Done | [details](lib/modules/manager/cargo/update.spec.ts.md) |

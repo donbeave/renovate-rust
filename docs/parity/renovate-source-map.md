@@ -1027,7 +1027,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/dart-version/index.ts` | `crates/renovate-core/src/datasources/dart_version.rs` | partial | Core GCS-backed channel fetch ported; package-cache not ported |
 | `lib/modules/datasource/deb/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/deno/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/dotnet-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/dotnet-version/index.ts` | `crates/renovate-core/src/datasources/dotnet_version.rs` | partial | fetch_releases for dotnet-sdk and dotnet-runtime; full releases-index + per-channel parsing |
 | `lib/modules/datasource/elm-package/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/flutter-version/index.ts` | `crates/renovate-core/src/datasources/flutter_version.rs` | partial | Core GCS-backed release fetch and stable-pattern filtering ported; package-cache not ported |
 | `lib/modules/datasource/git-refs/index.ts` | — | not-started | Not ported |
