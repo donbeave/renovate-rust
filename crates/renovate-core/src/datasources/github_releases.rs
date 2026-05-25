@@ -56,6 +56,23 @@ pub struct GithubReleasesUpdateResult {
     pub summary: Result<GithubReleasesUpdateSummary, GithubReleasesError>,
 }
 
+/// A release entry returned by `fetch_releases_full`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GithubRelease {
+    pub version: String,
+    pub release_timestamp: Option<String>,
+    /// None = no explicit stability marker; Some(false) = prerelease.
+    pub is_stable: Option<bool>,
+}
+
+/// Full releases result matching the TypeScript `ReleaseResult` shape.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GithubReleasesFullResult {
+    pub releases: Vec<GithubRelease>,
+    pub source_url: String,
+    pub registry_url: String,
+}
+
 #[derive(Debug, Deserialize)]
 struct Release {
     tag_name: String,
@@ -63,6 +80,23 @@ struct Release {
     draft: bool,
     /// ISO 8601 publish timestamp from the GitHub Releases API.
     published_at: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ApiTag {
+    name: String,
+    commit: ApiTagCommit,
+}
+
+#[derive(Debug, Deserialize)]
+struct ApiTagCommit {
+    sha: String,
+}
+
+/// Returns true if `v` looks like a version string (contains at least one digit).
+/// Mirrors the TypeScript `versioning.isVersion()` filter in `filterValidVersions`.
+fn is_valid_version(v: &str) -> bool {
+    v.chars().any(|c| c.is_ascii_digit())
 }
 
 /// Fetch all stable (non-prerelease, non-draft) release tag names for `owner/repo`.
@@ -85,6 +119,59 @@ pub async fn fetch_all_releases(
         .filter(|r| !r.prerelease && !r.draft)
         .map(|r| (r.tag_name, r.published_at))
         .collect())
+}
+
+/// Fetch all releases for `owner/repo` with full metadata.
+///
+/// Mirrors `GithubReleasesDatasource.getReleases` + `getPkgReleases` filtering:
+/// - Skips draft releases.
+/// - Marks prerelease=true as `is_stable: Some(false)` (not filtered out).
+/// - Filters versions with no digits (matches `versioning.isVersion()` behaviour).
+pub async fn fetch_releases_full(
+    owner_repo: &str,
+    http: &HttpClient,
+    api_base: &str,
+) -> Result<Option<GithubReleasesFullResult>, GithubReleasesError> {
+    let url = format!("{api_base}/repos/{owner_repo}/releases?per_page=100");
+    let resp = http.get_retrying(&url).await?;
+    if !resp.status().is_success() {
+        return Ok(None);
+    }
+    let raw: Vec<Release> = resp.json().await.map_err(GithubReleasesError::Json)?;
+    let releases = raw
+        .into_iter()
+        .filter(|r| !r.draft)
+        .filter(|r| is_valid_version(&r.tag_name))
+        .map(|r| GithubRelease {
+            version: r.tag_name,
+            release_timestamp: r.published_at,
+            is_stable: if r.prerelease { Some(false) } else { None },
+        })
+        .collect();
+    Ok(Some(GithubReleasesFullResult {
+        releases,
+        source_url: format!("https://github.com/{owner_repo}"),
+        registry_url: "https://github.com".to_string(),
+    }))
+}
+
+/// Return the commit SHA for `new_value` tag in `owner/repo`, or `None` if not found.
+///
+/// Mirrors `findCommitOfTag` which uses GraphQL `queryTags`; this implementation
+/// uses the REST `/repos/{owner_repo}/tags` endpoint instead.
+pub async fn fetch_digest_by_tag(
+    owner_repo: &str,
+    new_value: &str,
+    http: &HttpClient,
+    api_base: &str,
+) -> Result<Option<String>, GithubReleasesError> {
+    let url = format!("{api_base}/repos/{owner_repo}/tags?per_page=100");
+    let resp = http.get_retrying(&url).await?;
+    if !resp.status().is_success() {
+        return Ok(None);
+    }
+    let tags: Vec<ApiTag> = resp.json().await.map_err(GithubReleasesError::Json)?;
+    Ok(tags.into_iter().find(|t| t.name == new_value).map(|t| t.commit.sha))
 }
 
 /// Fetch the latest stable (non-prerelease, non-draft) release tag for `owner/repo`.
@@ -254,5 +341,144 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(result, None);
+    }
+
+    fn full_releases_json(
+        items: &[(&str, bool, bool, Option<&str>)],
+    ) -> String {
+        let values: Vec<serde_json::Value> = items
+            .iter()
+            .map(|(tag, pre, draft, ts)| {
+                serde_json::json!({
+                    "tag_name": tag,
+                    "prerelease": pre,
+                    "draft": draft,
+                    "published_at": ts,
+                })
+            })
+            .collect();
+        serde_json::to_string(&values).unwrap()
+    }
+
+    fn tags_json_with_sha(tags: &[(&str, &str)]) -> String {
+        let values: Vec<serde_json::Value> = tags
+            .iter()
+            .map(|(name, sha)| serde_json::json!({"name": name, "commit": {"sha": sha}}))
+            .collect();
+        serde_json::to_string(&values).unwrap()
+    }
+
+    // Ported: "returns releases" — datasource/github-releases/index.spec.ts line 20
+    #[tokio::test]
+    async fn returns_releases() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/some/dep/releases"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(full_releases_json(&[
+                ("a", false, false, None),
+                ("v", false, false, None),
+                ("1.0.0", false, false, Some("2020-03-09T11:00:00.000Z")),
+                ("v1.1.0", false, false, Some("2020-03-09T10:00:00.000Z")),
+                ("2.0.0", true, false, Some("2020-04-09T10:00:00.000Z")),
+            ])))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let res = fetch_releases_full("some/dep", &http, &server.uri())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(res.registry_url, "https://github.com");
+        assert_eq!(res.source_url, "https://github.com/some/dep");
+        assert_eq!(res.releases.len(), 3);
+        assert_eq!(res.releases[0].version, "1.0.0");
+        assert_eq!(res.releases[0].release_timestamp.as_deref(), Some("2020-03-09T11:00:00.000Z"));
+        assert_eq!(res.releases[0].is_stable, None);
+        assert_eq!(res.releases[1].version, "v1.1.0");
+        assert_eq!(res.releases[1].release_timestamp.as_deref(), Some("2020-03-09T10:00:00.000Z"));
+        assert_eq!(res.releases[2].version, "2.0.0");
+        assert_eq!(res.releases[2].is_stable, Some(false));
+    }
+
+    // Ported: "should be independent of the current digest" — datasource/github-releases/index.spec.ts line 116
+    #[tokio::test]
+    async fn digest_independent_of_current_digest() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/some/dep/tags"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                ("v1.0.0", "sha-of-v1"),
+                ("v15.0.0", "sha-of-v15"),
+            ])))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let digest = fetch_digest_by_tag("some/dep", "v15.0.0", &http, &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(digest.as_deref(), Some("sha-of-v15"));
+    }
+
+    // Ported: "should be independent of the current value" — datasource/github-releases/index.spec.ts line 128
+    #[tokio::test]
+    async fn digest_independent_of_current_value() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/some/dep/tags"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                ("v1.0.0", "sha-of-v1"),
+                ("v15.0.0", "sha-of-v15"),
+            ])))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let digest = fetch_digest_by_tag("some/dep", "v15.0.0", &http, &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(digest.as_deref(), Some("sha-of-v15"));
+    }
+
+    // Ported: "returns updated digest in new release" — datasource/github-releases/index.spec.ts line 136
+    #[tokio::test]
+    async fn returns_updated_digest_in_new_release() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/some/dep/tags"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                ("v1.0.0", "sha-of-v1"),
+                ("v15.0.0", "sha-of-v15"),
+            ])))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let digest = fetch_digest_by_tag("some/dep", "v15.0.0", &http, &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(digest.as_deref(), Some("sha-of-v15"));
+    }
+
+    // Ported: "returns null if the new value/tag does not exist" — datasource/github-releases/index.spec.ts line 149
+    #[tokio::test]
+    async fn returns_null_for_unknown_tag() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/repos/some/dep/tags"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(tags_json_with_sha(&[
+                ("v1.0.0", "sha-of-v1"),
+                ("v15.0.0", "sha-of-v15"),
+            ])))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let digest = fetch_digest_by_tag("some/dep", "unknown-tag", &http, &server.uri())
+            .await
+            .unwrap();
+        assert_eq!(digest, None);
     }
 }

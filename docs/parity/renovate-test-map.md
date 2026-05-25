@@ -235,7 +235,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/go/releases-goproxy.spec.ts` | Not done | [details](lib/modules/datasource/go/releases-goproxy.spec.ts.md) |
 | `lib/modules/datasource/cdnjs/index.spec.ts` | Done | [details](lib/modules/datasource/cdnjs/index.spec.ts.md) |
 | `lib/modules/datasource/conda/index.spec.ts` | Done | [details](lib/modules/datasource/conda/index.spec.ts.md) |
-| `lib/modules/datasource/github-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/github-releases/index.spec.ts.md) |
+| `lib/modules/datasource/github-releases/index.spec.ts` | Done | [details](lib/modules/datasource/github-releases/index.spec.ts.md) |
 | `lib/modules/datasource/bazel/index.spec.ts` | Done | [details](lib/modules/datasource/bazel/index.spec.ts.md) |
 | `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | Done | [details](lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) |
 | `lib/modules/datasource/helm/schema.spec.ts` | Not done | [details](lib/modules/datasource/helm/schema.spec.ts.md) |
