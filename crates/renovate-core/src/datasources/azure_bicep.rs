@@ -48,6 +48,70 @@ pub enum BicepError {
     Parse(String),
 }
 
+/// One release entry from `fetch_releases`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct BicepRelease {
+    pub version: String,
+    pub changelog_url: String,
+}
+
+/// Result of `fetch_releases`.
+#[derive(Debug, Clone)]
+pub struct BicepReleasesResult {
+    pub releases: Vec<BicepRelease>,
+}
+
+fn changelog_base(package_name_lower: &str) -> String {
+    let slash = package_name_lower.find('/').unwrap_or(package_name_lower.len());
+    let namespace = &package_name_lower[..slash];
+    let type_ = &package_name_lower[slash + 1..];
+    format!(
+        "https://learn.microsoft.com/en-us/azure/templates/{}/change-log/{}",
+        namespace, type_
+    )
+}
+
+/// Fetch all API versions for `package_name` from the given index URL.
+///
+/// Returns `Ok(None)` when the package is not found in `resources`.
+pub async fn fetch_releases(
+    index_url: &str,
+    package_name: &str,
+    http: &HttpClient,
+) -> Result<Option<BicepReleasesResult>, BicepError> {
+    let body = http
+        .get_raw_with_accept(index_url, "application/json")
+        .await
+        .map_err(|e| BicepError::Http(e.to_string()))?;
+
+    let raw: BicepIndexRaw =
+        serde_json::from_str(&body).map_err(|e| BicepError::Parse(e.to_string()))?;
+
+    let pkg_lower = package_name.to_lowercase();
+    let mut versions: Vec<String> = raw
+        .resources
+        .keys()
+        .filter_map(|k| {
+            let lower = k.to_lowercase();
+            let (type_name, version) = lower.split_once('@')?;
+            if type_name == pkg_lower { Some(version.to_owned()) } else { None }
+        })
+        .collect();
+
+    if versions.is_empty() {
+        return Ok(None);
+    }
+    versions.sort();
+
+    let base = changelog_base(&pkg_lower);
+    let releases = versions
+        .into_iter()
+        .map(|v| BicepRelease { changelog_url: format!("{}#{}", base, v), version: v })
+        .collect();
+
+    Ok(Some(BicepReleasesResult { releases }))
+}
+
 /// Fetch the latest API version for `resource_type` from the Bicep index.
 ///
 /// `resource_type` is lowercase `namespace.provider/type`, e.g.
@@ -112,4 +176,101 @@ async fn get_or_fetch_index(
 
     let _ = VERSION_INDEX.set(index);
     Ok(VERSION_INDEX.get().unwrap())
+}
+
+#[cfg(test)]
+mod tests {
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    use super::*;
+
+    const INDEX_PATH: &str = "/Azure/bicep-types-az/main/generated/index.json";
+
+    async fn mock_index(server: &MockServer, body: &str) {
+        Mock::given(method("GET"))
+            .and(path(INDEX_PATH))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body.to_owned()))
+            .mount(server)
+            .await;
+    }
+
+    fn index_url(server: &MockServer) -> String {
+        format!("{}{}", server.uri(), INDEX_PATH)
+    }
+
+    // Ported: "should return null when no version is found" — datasource/azure-bicep-resource/index.spec.ts line 10
+    #[tokio::test]
+    async fn should_return_null_when_no_version_is_found() {
+        let server = MockServer::start().await;
+        mock_index(&server, r#"{"resources":{},"resourceFunctions":{}}"#).await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&index_url(&server), "unknown", &http).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "should return null when package is a function" — datasource/azure-bicep-resource/index.spec.ts line 32
+    #[tokio::test]
+    async fn should_return_null_when_package_is_a_function() {
+        let server = MockServer::start().await;
+        let body = r#"{"resources":{},"resourceFunctions":{"microsoft.billing/billingaccounts":{"2019-10-01-preview":[{"$ref":"billing/microsoft.billing/2019-10-01-preview/types.json#/304"}],"2020-05-01":[{"$ref":"billing/microsoft.billing/2020-05-01/types.json#/287"}]}}}"#;
+        mock_index(&server, body).await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&index_url(&server), "unknown", &http).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    // Ported: "should return versions when package is a resource" — datasource/azure-bicep-resource/index.spec.ts line 67
+    #[tokio::test]
+    async fn should_return_versions_when_package_is_a_resource() {
+        let server = MockServer::start().await;
+        let body = r#"{"resources":{"Microsoft.Storage/storageAccounts@2015-05-01-preview":{"$ref":"storage/microsoft.storage/2015-05-01-preview/types.json#/31"},"Microsoft.Storage/storageAccounts@2018-02-01":{"$ref":"storage/microsoft.storage/2018-02-01/types.json#/85"}},"resourceFunctions":{}}"#;
+        mock_index(&server, body).await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(
+            &index_url(&server),
+            "Microsoft.Storage/storageAccounts",
+            &http,
+        )
+        .await
+        .unwrap()
+        .unwrap();
+
+        assert_eq!(result.releases.len(), 2);
+        assert_eq!(result.releases[0], BicepRelease {
+            version: "2015-05-01-preview".to_owned(),
+            changelog_url: "https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts#2015-05-01-preview".to_owned(),
+        });
+        assert_eq!(result.releases[1], BicepRelease {
+            version: "2018-02-01".to_owned(),
+            changelog_url: "https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts#2018-02-01".to_owned(),
+        });
+    }
+
+    // Ported: "should return versions when package is a resource and a function" — datasource/azure-bicep-resource/index.spec.ts line 109
+    #[tokio::test]
+    async fn should_return_versions_when_package_is_a_resource_and_a_function() {
+        let server = MockServer::start().await;
+        let body = r#"{"resources":{"Microsoft.OperationalInsights/workspaces@2023-09-01":{"$ref":"operationalinsights/microsoft.operationalinsights/2023-09-01/types.json#/31"}},"resourceFunctions":{"microsoft.operationalinsights/workspaces":{"2015-03-20":[{"$ref":"operationalinsights/workspaces/2015-03-20/types.json#/304"}]}}}"#;
+        mock_index(&server, body).await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(
+            &index_url(&server),
+            "Microsoft.OperationalInsights/workspaces",
+            &http,
+        )
+        .await
+        .unwrap()
+        .unwrap();
+
+        assert_eq!(result.releases.len(), 1);
+        assert_eq!(result.releases[0], BicepRelease {
+            version: "2023-09-01".to_owned(),
+            changelog_url: "https://learn.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/change-log/workspaces#2023-09-01".to_owned(),
+        });
+    }
 }
