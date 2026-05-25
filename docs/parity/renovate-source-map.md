@@ -1030,10 +1030,12 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/dotnet-version/index.ts` | `crates/renovate-core/src/datasources/dotnet_version.rs` | partial | fetch_releases for dotnet-sdk and dotnet-runtime; full releases-index + per-channel parsing |
 | `lib/modules/datasource/elm-package/index.ts` | `crates/renovate-core/src/datasources/elm_package.rs` | partial | fetch_releases with version→timestamp JSON parsing, 4xx/5xx/429 error handling, source URL from package name |
 | `lib/modules/datasource/flutter-version/index.ts` | `crates/renovate-core/src/datasources/flutter_version.rs` | partial | Core GCS-backed release fetch and stable-pattern filtering ported; package-cache not ported |
+| `lib/modules/datasource/forgejo-releases/index.ts` | `crates/renovate-core/src/datasources/forgejo_releases.rs` | done | fetch_releases and get_digest ported; tag SHA and latest commit digest |
+| `lib/modules/datasource/forgejo-tags/index.ts` | `crates/renovate-core/src/datasources/forgejo_tags.rs` | done | fetch_releases and get_digest ported; maps name/commit.sha/commit.created |
 | `lib/modules/datasource/git-refs/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/git-tags/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/gitea-releases/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/gitea-tags/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/gitea-releases/index.ts` | `crates/renovate-core/src/datasources/gitea_releases.rs` | done | fetch_releases and get_digest ported; tag SHA and latest commit digest |
+| `lib/modules/datasource/gitea-tags/index.ts` | `crates/renovate-core/src/datasources/gitea_tags.rs` | done | fetch_releases and get_digest ported; maps name/commit.sha/commit.created |
 | `lib/modules/datasource/github-digest/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/github-release-attachments/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/gitlab-packages/index.ts` | `crates/renovate-core/src/datasources/gitlab_packages.rs` | partial | fetch_releases with project:package_name split, conan_package_name filtering, rfc3339→UTC conversion |

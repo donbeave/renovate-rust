@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3150 / 11677 total tests ported (27%) · pending 8526 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3154 / 11677 total tests ported (27%) · pending 8521 · not-applicable 2 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -159,8 +159,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/sbt-package/util.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |
 | `lib/modules/datasource/node-version/index.spec.ts` | Done | [details](lib/modules/datasource/node-version/index.spec.ts.md) |
 | `lib/modules/datasource/dart-version/index.spec.ts` | Done | [details](lib/modules/datasource/dart-version/index.spec.ts.md) |
-| `lib/modules/datasource/gitea-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/gitea-releases/index.spec.ts.md) |
-| `lib/modules/datasource/forgejo-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/forgejo-releases/index.spec.ts.md) |
+| `lib/modules/datasource/gitea-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-releases/index.spec.ts.md) |
+| `lib/modules/datasource/forgejo-releases/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-releases/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-releases/index.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-tags/index.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
@@ -208,8 +208,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/git-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/git-tags/index.spec.ts.md) |
 | `lib/modules/datasource/github-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/github-tags/index.spec.ts.md) |
 | `lib/modules/datasource/orb/index.spec.ts` | Not done | [details](lib/modules/datasource/orb/index.spec.ts.md) |
-| `lib/modules/datasource/gitea-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/gitea-tags/index.spec.ts.md) |
-| `lib/modules/datasource/forgejo-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/forgejo-tags/index.spec.ts.md) |
+| `lib/modules/datasource/gitea-tags/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-tags/index.spec.ts.md) |
+| `lib/modules/datasource/forgejo-tags/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-tags/index.spec.ts.md) |
 | `lib/modules/datasource/hex/v2/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/v2/index.spec.ts.md) |
 | `lib/modules/datasource/hex/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/index.spec.ts.md) |
 | `lib/modules/datasource/puppet-forge/index.spec.ts` | Not done | [details](lib/modules/datasource/puppet-forge/index.spec.ts.md) |
@@ -496,7 +496,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/nuget/parser.spec.ts` | Not done | [details](lib/modules/versioning/nuget/parser.spec.ts.md) |
 | `lib/modules/versioning/nuget/index.spec.ts` | Not done | [details](lib/modules/versioning/nuget/index.spec.ts.md) |
 | `lib/modules/versioning/conan/index.spec.ts` | Not done | [details](lib/modules/versioning/conan/index.spec.ts.md) |
-| `lib/modules/versioning/unity3d-packages/index.spec.ts` | Not done | [details](lib/modules/versioning/unity3d-packages/index.spec.ts.md) |
+| `lib/modules/versioning/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d-packages/index.spec.ts.md) |
 | `lib/modules/versioning/azure-rest-api/index.spec.ts` | Not done | [details](lib/modules/versioning/azure-rest-api/index.spec.ts.md) |
 | `lib/modules/versioning/unity3d/index.spec.ts` | Done | [details](lib/modules/versioning/unity3d/index.spec.ts.md) |
 | `lib/modules/versioning/exact/index.spec.ts` | Done | [details](lib/modules/versioning/exact/index.spec.ts.md) |
@@ -509,7 +509,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/rpm/index.spec.ts` | Done | [details](lib/modules/versioning/rpm/index.spec.ts.md) |
 | `lib/modules/versioning/semver-coerced/index.spec.ts` | Done | [details](lib/modules/versioning/semver-coerced/index.spec.ts.md) |
 | `lib/modules/versioning/ubuntu/index.spec.ts` | Done | [details](lib/modules/versioning/ubuntu/index.spec.ts.md) |
-| `lib/modules/versioning/github-actions/index.spec.ts` | Not done | [details](lib/modules/versioning/github-actions/index.spec.ts.md) |
+| `lib/modules/versioning/github-actions/index.spec.ts` | Done | [details](lib/modules/versioning/github-actions/index.spec.ts.md) |
 | `lib/modules/versioning/helm/index.spec.ts` | Done | [details](lib/modules/versioning/helm/index.spec.ts.md) |
 | `lib/modules/versioning/npm/index.spec.ts` | Done | [details](lib/modules/versioning/npm/index.spec.ts.md) |
 | `lib/modules/versioning/ruby/index.spec.ts` | Not done | [details](lib/modules/versioning/ruby/index.spec.ts.md) |
