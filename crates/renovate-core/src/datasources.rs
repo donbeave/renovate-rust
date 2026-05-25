@@ -27,6 +27,7 @@ pub mod endoflife;
 pub mod flutter_version;
 pub mod forgejo_releases;
 pub mod forgejo_tags;
+pub mod galaxy;
 pub mod galaxy_collection;
 pub mod github_releases;
 pub mod github_runners;
