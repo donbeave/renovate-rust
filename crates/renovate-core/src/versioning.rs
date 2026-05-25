@@ -25,6 +25,7 @@ pub mod perl;
 pub mod pvp;
 pub mod redhat;
 pub mod rpm;
+pub mod rust_release_channel;
 pub mod semver_coerced;
 pub mod semver_generic;
 pub mod semver_node;
