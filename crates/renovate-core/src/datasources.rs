@@ -43,6 +43,7 @@ pub mod helm;
 pub mod hermit;
 pub mod hex;
 pub mod jenkins_plugins;
+pub mod java_version;
 pub mod jsr;
 pub mod kubernetes_api;
 pub mod maven;
