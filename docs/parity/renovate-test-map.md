@@ -214,7 +214,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/hex/index.spec.ts` | Not done | [details](lib/modules/datasource/hex/index.spec.ts.md) |
 | `lib/modules/datasource/puppet-forge/index.spec.ts` | Not done | [details](lib/modules/datasource/puppet-forge/index.spec.ts.md) |
 | `lib/modules/datasource/helm/index.spec.ts` | Not done | [details](lib/modules/datasource/helm/index.spec.ts.md) |
-| `lib/modules/datasource/dart/index.spec.ts` | Not done | [details](lib/modules/datasource/dart/index.spec.ts.md) |
+| `lib/modules/datasource/dart/index.spec.ts` | Done | [details](lib/modules/datasource/dart/index.spec.ts.md) |
 | `lib/modules/datasource/nuget/index.spec.ts` | Not done | [details](lib/modules/datasource/nuget/index.spec.ts.md) |
 | `lib/modules/datasource/pod/index.spec.ts` | Not done | [details](lib/modules/datasource/pod/index.spec.ts.md) |
 | `lib/modules/datasource/go/common.spec.ts` | Not done | [details](lib/modules/datasource/go/common.spec.ts.md) |
