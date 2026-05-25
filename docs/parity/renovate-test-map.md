@@ -145,7 +145,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
 | `lib/modules/datasource/cpan/schema.spec.ts` | Not done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
 | `lib/modules/datasource/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/datasource/kubernetes-api/index.spec.ts.md) |
-| `lib/modules/datasource/nextcloud/index.spec.ts` | Not done | [details](lib/modules/datasource/nextcloud/index.spec.ts.md) |
+| `lib/modules/datasource/nextcloud/index.spec.ts` | Done | [details](lib/modules/datasource/nextcloud/index.spec.ts.md) |
 | `lib/modules/datasource/github-digest/index.spec.ts` | Not done | [details](lib/modules/datasource/github-digest/index.spec.ts.md) |
 | `lib/modules/datasource/github-release-attachments/index.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/index.spec.ts.md) |
 | `lib/modules/datasource/github-release-attachments/digest.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/digest.spec.ts.md) |
