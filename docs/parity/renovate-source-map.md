@@ -1036,8 +1036,8 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/gitea-tags/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/github-digest/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/github-release-attachments/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/gitlab-packages/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/gitlab-releases/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/gitlab-packages/index.ts` | `crates/renovate-core/src/datasources/gitlab_packages.rs` | partial | fetch_releases with project:package_name split, conan_package_name filtering, rfc3339→UTC conversion |
+| `lib/modules/datasource/gitlab-releases/index.ts` | `crates/renovate-core/src/datasources/gitlab_releases.rs` | partial | fetch_releases with tag_name/released_at parsing, URL-encoded project path, source URL |
 | `lib/modules/datasource/golang-version/index.ts` | `crates/renovate-core/src/datasources/golang_version.rs` | partial | Core Go-source-file parsing and release extraction ported; package-cache not ported |
 | `lib/modules/datasource/java-version/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/kubernetes-api/index.ts` | — | not-started | Not ported |

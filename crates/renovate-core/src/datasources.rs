@@ -26,6 +26,8 @@ pub mod flutter_version;
 pub mod github_releases;
 pub mod github_runners;
 pub mod github_tags;
+pub mod gitlab_packages;
+pub mod gitlab_releases;
 pub mod gitlab_tags;
 pub mod glasskube_packages;
 pub mod golang_version;

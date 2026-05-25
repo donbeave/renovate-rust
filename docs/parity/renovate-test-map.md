@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3118 / 11677 total tests ported (27%) · pending 8558 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3126 / 11677 total tests ported (27%) · pending 8550 · not-applicable 1 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -152,7 +152,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/python-version/index.spec.ts` | Not done | [details](lib/modules/datasource/python-version/index.spec.ts.md) |
 | `lib/modules/datasource/deno/index.spec.ts` | Not done | [details](lib/modules/datasource/deno/index.spec.ts.md) |
 | `lib/modules/datasource/flutter-version/index.spec.ts` | Done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
-| `lib/modules/datasource/gitlab-packages/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
+| `lib/modules/datasource/gitlab-packages/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
 | `lib/modules/datasource/hexpm-bob/index.spec.ts` | Not done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-plugin/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
@@ -161,7 +161,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/dart-version/index.spec.ts` | Done | [details](lib/modules/datasource/dart-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitea-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/gitea-releases/index.spec.ts.md) |
 | `lib/modules/datasource/forgejo-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/forgejo-releases/index.spec.ts.md) |
-| `lib/modules/datasource/gitlab-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-releases/index.spec.ts.md) |
+| `lib/modules/datasource/gitlab-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-releases/index.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-tags/index.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy-collection/index.spec.ts` | Not done | [details](lib/modules/datasource/galaxy-collection/index.spec.ts.md) |
