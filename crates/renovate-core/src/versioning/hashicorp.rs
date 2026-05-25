@@ -176,10 +176,14 @@ fn npm_split_op_ver(part: &str) -> (&str, &str) {
     ("", part)
 }
 
-/// Convert hashicorp constraint to npm range string. Returns `None` if empty or contains `!=`.
+/// Convert hashicorp constraint to npm range string.
+///
+/// Returns `None` on invalid hashicorp input (e.g. contains `!=` or an
+/// unrecognised operator like `^`) or on a version string that does not
+/// start with a digit.  Returns `Some("")` for an empty input.
 pub fn hashicorp2npm(input: &str) -> Option<String> {
     if input.is_empty() {
-        return None;
+        return Some(String::new());
     }
     let mut parts = Vec::new();
     for segment in input.split(',') {
@@ -204,7 +208,14 @@ pub fn hashicorp2npm(input: &str) -> Option<String> {
             return None;
         }
         let npm_part = match op {
-            "=" | "" => ver.to_owned(),
+            "=" | "" => {
+                // Bare version: must start with a digit (e.g. "4.2.0").
+                // Strings like "^4" or "4.x.x" are not valid hashicorp input.
+                if !ver.starts_with(|c: char| c.is_ascii_digit()) {
+                    return None;
+                }
+                ver.to_owned()
+            }
             "~>" => {
                 let n_dots = ver.chars().filter(|&c| c == '.').count();
                 match n_dots {
@@ -221,9 +232,12 @@ pub fn hashicorp2npm(input: &str) -> Option<String> {
 }
 
 /// Convert npm range string back to hashicorp constraint syntax.
+///
+/// Returns `None` for unsupported npm ranges (e.g. `"4.x.x"`).
+/// Returns `Some("")` for an empty input.
 pub fn npm2hashicorp(input: &str) -> Option<String> {
     if input.is_empty() {
-        return None;
+        return Some(String::new());
     }
     let parts: Vec<&str> = input.split_whitespace().collect();
     let mut result = Vec::new();
@@ -261,7 +275,14 @@ pub fn npm2hashicorp(input: &str) -> Option<String> {
                     format!("~> {ver}")
                 }
             }
-            "" => ver.to_owned(),
+            "" => {
+                // Bare version: strip leading `v`, reject wildcard ranges.
+                let v = ver.trim_start_matches('v');
+                if v.contains('x') || v.contains('X') || v.contains('*') {
+                    return None;
+                }
+                v.to_owned()
+            }
             ">=" | "<=" | ">" | "<" => format!("{op} {ver}"),
             _ => return None,
         };
@@ -760,5 +781,135 @@ mod tests {
                 "get_new_value({cv:?}, {strategy:?}, {cur:?}, {nv:?})"
             );
         }
+    }
+
+    // Ported: "hashicorp2npm(\"$hashicorp\") === $npm && npm2hashicorp(\"$npm\") === $hashicorp" — versioning/hashicorp/convertor.spec.ts line 4
+    #[test]
+    fn hashicorp2npm_and_npm2hashicorp_roundtrip_matches_renovate_hashicorp_convertor_spec() {
+        let cases: &[(&str, &str)] = &[
+            ("", ""),
+            ("4.2.0", "4.2.0"),
+            ("4.2.0-alpha", "4.2.0-alpha"),
+            ("~> 4.0", "^4.0"),
+            ("~> 4.1", "^4.1"),
+            ("~> 4.0.0", "~4.0.0"),
+            ("~> 4.0.1", "~4.0.1"),
+            ("~> 4.1.0", "~4.1.0"),
+            ("~> 4.1.1", "~4.1.1"),
+            ("~> 4.0.0-alpha", "~4.0.0-alpha"),
+            (">= 4.0", ">=4.0"),
+            ("<= 4.0", "<=4.0"),
+            ("> 4.0", ">4.0"),
+            ("< 4.0", "<4.0"),
+            ("> 4.0, < 5.0", ">4.0 <5.0"),
+            ("~> 2.3.4", "~2.3.4"),
+            ("0.1.0-beta.0", "0.1.0-beta.0"),
+        ];
+        for &(hashi, npm) in cases {
+            assert_eq!(
+                hashicorp2npm(hashi).as_deref(),
+                Some(npm),
+                "hashicorp2npm({hashi:?})"
+            );
+            assert_eq!(
+                npm2hashicorp(npm).as_deref(),
+                Some(hashi),
+                "npm2hashicorp({npm:?})"
+            );
+        }
+    }
+
+    // Ported: "hashicorp2npm(\"$version\") === $version && npm2hashicorp(\"$version\") === $version" — versioning/hashicorp/convertor.spec.ts line 32
+    #[test]
+    fn hashicorp2npm_and_npm2hashicorp_identity_matches_renovate_hashicorp_convertor_spec() {
+        let versions = [
+            "1.0.0-0",
+            "1.0.0-1",
+            "1.0.0-1.1",
+            "1.0.0-10.21.32",
+            "1.0.0-1.alpha.2",
+            "1.0.0-alpha.beta",
+            "1.0.0-alpha.beta.1",
+            "1.0.0-alpha0.valid",
+            "1.0.0-alpha.0valid",
+            "1.0.0-alpha1test",
+            "1.0.0-a.b",
+            "1.0.0-a-b",
+            "1.0.0-a1.-1-0-.09-9-",
+            "1.0.0-a--.b",
+        ];
+        for v in versions {
+            assert_eq!(
+                hashicorp2npm(v).as_deref(),
+                Some(v),
+                "hashicorp2npm({v:?})"
+            );
+            assert_eq!(
+                npm2hashicorp(v).as_deref(),
+                Some(v),
+                "npm2hashicorp({v:?})"
+            );
+        }
+    }
+
+    // Ported: "hashicorp2npm(\"$hashicorp\") === $npm" — versioning/hashicorp/convertor.spec.ts line 57
+    #[test]
+    fn hashicorp2npm_nonreflective_matches_renovate_hashicorp_convertor_spec() {
+        let cases: &[(&str, &str)] = &[
+            ("~> 4", ">=4"),
+            ("~> v4", ">=4"),
+            (">= v4.0", ">=4.0"),
+            (">=4.0", ">=4.0"),
+            ("<=4.0", "<=4.0"),
+            ("= 4.0", "4.0"),
+            ("> 4.0,< 5.0", ">4.0 <5.0"),
+        ];
+        for &(hashi, npm) in cases {
+            assert_eq!(
+                hashicorp2npm(hashi).as_deref(),
+                Some(npm),
+                "hashicorp2npm({hashi:?})"
+            );
+        }
+    }
+
+    // Ported: "npm2hashicorp(\"$npm\") === $hashicorp" — versioning/hashicorp/convertor.spec.ts line 71
+    #[test]
+    fn npm2hashicorp_nonreflective_matches_renovate_hashicorp_convertor_spec() {
+        let cases: &[(&str, &str)] = &[
+            ("^4", "~> 4.0"),
+            ("^4.0.0", "~> 4.0"),
+            ("^4.1.0", "~> 4.1"),
+            ("^4.1.1", "~> 4.1"),
+            ("~4", "~> 4.0"),
+            ("~4.0", "~> 4.0.0"),
+            ("~4.1", "~> 4.1.0"),
+            ("v4.1.0", "4.1.0"),
+        ];
+        for &(npm, hashi) in cases {
+            assert_eq!(
+                npm2hashicorp(npm).as_deref(),
+                Some(hashi),
+                "npm2hashicorp({npm:?})"
+            );
+        }
+    }
+
+    // Ported: "hashicorp2npm doesnt support !=" — versioning/hashicorp/convertor.spec.ts line 85
+    #[test]
+    fn hashicorp2npm_doesnt_support_neq_matches_renovate_hashicorp_convertor_spec() {
+        assert_eq!(hashicorp2npm("!= 4"), None);
+    }
+
+    // Ported: "hashicorp2npm throws on invalid" — versioning/hashicorp/convertor.spec.ts line 89
+    #[test]
+    fn hashicorp2npm_throws_on_invalid_matches_renovate_hashicorp_convertor_spec() {
+        assert_eq!(hashicorp2npm("^4"), None);
+    }
+
+    // Ported: "npm2hashicorp throws on unsupported" — versioning/hashicorp/convertor.spec.ts line 93
+    #[test]
+    fn npm2hashicorp_throws_on_unsupported_matches_renovate_hashicorp_convertor_spec() {
+        assert_eq!(npm2hashicorp("4.x.x"), None);
     }
 }

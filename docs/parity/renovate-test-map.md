@@ -156,7 +156,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/hexpm-bob/index.spec.ts` | Done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-plugin/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
-| `lib/modules/datasource/sbt-package/util.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |
+| `lib/modules/datasource/sbt-package/util.spec.ts` | Done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |
 | `lib/modules/datasource/node-version/index.spec.ts` | Done | [details](lib/modules/datasource/node-version/index.spec.ts.md) |
 | `lib/modules/datasource/dart-version/index.spec.ts` | Done | [details](lib/modules/datasource/dart-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitea-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-releases/index.spec.ts.md) |
