@@ -229,6 +229,45 @@ pub fn encode_module_path(path: &str) -> String {
     out
 }
 
+// ── get_source_url ────────────────────────────────────────────────────────────
+
+/// Map a Go datasource + package name to a source URL.
+///
+/// Mirrors `getSourceUrl` from `lib/modules/datasource/go/common.ts`.
+///
+/// `registry_url` is optional; each datasource falls back to its default host
+/// when not provided.
+pub fn get_source_url(
+    datasource: &str,
+    package_name: &str,
+    registry_url: Option<&str>,
+) -> Option<String> {
+    let url = match datasource {
+        "github-tags" => {
+            let base = registry_url.unwrap_or("https://github.com");
+            format!("{}/{package_name}", base.trim_end_matches('/'))
+        }
+        "gitlab-tags" => {
+            let base = registry_url.unwrap_or("https://gitlab.com");
+            format!("{}/{package_name}", base.trim_end_matches('/'))
+        }
+        "bitbucket-tags" => {
+            let base = registry_url.unwrap_or("https://bitbucket.org");
+            format!("{}/{package_name}", base.trim_end_matches('/'))
+        }
+        "gitea-tags" => {
+            let base = registry_url.unwrap_or("https://gitea.com");
+            format!("{}/{package_name}", base.trim_end_matches('/'))
+        }
+        "forgejo-tags" => {
+            let base = registry_url.unwrap_or("https://code.forgejo.org");
+            format!("{}/{package_name}", base.trim_end_matches('/'))
+        }
+        _ => return None,
+    };
+    Some(url)
+}
+
 #[cfg(test)]
 mod tests {
     use wiremock::matchers::{method, path};
@@ -294,5 +333,37 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(result, None);
+    }
+
+    // ── get_source_url ────────────────────────────────────────────────────────
+
+    // Ported: "($datasource, $packageName) => $expected" — datasource/go/common.spec.ts line 5
+    #[test]
+    fn get_source_url_maps_datasource_to_url() {
+        assert_eq!(
+            get_source_url("bitbucket-tags", "foo/bar", None),
+            Some("https://bitbucket.org/foo/bar".to_string())
+        );
+        assert_eq!(
+            get_source_url("forgejo-tags", "go-chi/cache", None),
+            Some("https://code.forgejo.org/go-chi/cache".to_string())
+        );
+        assert_eq!(
+            get_source_url("gitea-tags", "go-chi/cache", None),
+            Some("https://gitea.com/go-chi/cache".to_string())
+        );
+        assert_eq!(
+            get_source_url("github-tags", "go-foo/foo", None),
+            Some("https://github.com/go-foo/foo".to_string())
+        );
+        assert_eq!(
+            get_source_url("gitlab-tags", "foo/bar", None),
+            Some("https://gitlab.com/foo/bar".to_string())
+        );
+        // git-tags is not handled → None
+        assert_eq!(
+            get_source_url("git-tags", "https://dev.azure.com/foo/bar/_git/baz", None),
+            None
+        );
     }
 }
