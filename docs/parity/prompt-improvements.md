@@ -63,3 +63,42 @@ add:
 > handling, faster algorithms, more idiomatic Rust. The external contract
 > (observable behavior, CLI flags, output formats) must remain compatible; the
 > internal implementation is entirely under our control.
+
+---
+
+## Applied 2026-05-25 — close the parity-illusion loophole (operator-requested)
+
+**Context:** Audit found the test map reporting 100% (3068/3068 actionable) while
+the source map had only 3 `full` rows (354 `partial`, 138 `not-started`). Cause:
+8,609 of 11,677 detail rows (74%) were marked `not-applicable` under an
+extraction-only scope, and the headline metric was `ported / actionable`, so the
+denominator shrank as work was parked in NA. Operator confirmed the true scope is
+a **full drop-in replacement** and asked to make the prompts run until that is
+objectively achieved.
+
+**Changes applied to both prompts (operator-authorized prompt edits):**
+
+1. `claude-loop-renovate-rust.md` Definition Of Done replaced with a five-point
+   machine-checkable **terminal state** (source-map full · test-map zero pending
+   with budgeted NA · source↔test cross-check · differential harness green ·
+   quality gates pass). Explicit "what is NOT completion" list.
+2. Added an explicit **In scope** enumeration (datasources, version decisions,
+   lockfile/artifact updates, platform branch/PR ops) and a scope guard; `Out of
+   scope` narrowed to hosted/managed infrastructure only.
+3. Defined source-map `partial` rigorously (must carry a `Missing:` note) and
+   declared `partial`/`stub`/`not-started` all non-terminal.
+4. Added the **Differential parity harness** section + `differential-harness.md`
+   doc (run upstream Renovate and renovate-rust on shared offline fixtures, diff
+   observable output).
+5. `claude-loop-test-parity.md`: headline metric changed to `ported / total`
+   with NA surfaced + NA budget (<~25%); added **Phase 0.5** to re-audit and
+   reclassify mis-scoped `not-applicable` rows to `pending`; tightened the
+   allowed NA categories; added a Completion section tied to the shared terminal
+   state and the source↔test cross-check.
+6. `README.md`: removed the "stop after one unit / 10 turns" test-parity
+   invocations, added a "Running until truly done" section, aligned verification
+   guidance (gates + harness run at the completion check).
+
+**Follow-up work for the loop (not a prompt change):** execute Phase 0.5 to
+reclassify the existing 8,609 NA rows, then drive source rows to `full` and build
+out the differential harness fixtures.

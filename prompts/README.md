@@ -13,6 +13,32 @@ This directory intentionally contains two reusable prompts:
 The prompt filenames keep the existing `claude-loop-*` names for continuity, but
 both prompts are agent-neutral. Use either prompt with Jack/Claude or Codex.
 
+## Running until truly done
+
+Both prompts share one machine-checkable **terminal state** (defined in
+`claude-loop-renovate-rust.md` → Definition Of Done). The loop may stop only when
+all of these hold at once:
+
+1. Source map: zero `not-started`/`partial`/`stub` in-scope rows (all `full`).
+2. Test map: zero `pending` rows; `not-applicable` only for genuine TS/test
+   mechanics and within the NA budget (well under ~25% of total).
+3. Source ↔ test cross-check: no spec is `Done` while its source is unfinished.
+4. Differential harness green (upstream Renovate vs `renovate-rust`, empty diff
+   or documented divergence).
+5. `cargo build` / `fmt --check` / `clippy -D warnings` / `nextest run` pass.
+
+Until then, none of "one slice committed", "clean worktree", "turn limit",
+"feels done", or "100% of actionable tests" is completion. The `/goal` form is
+what runs to this terminal state; `/loop` does one iteration per tick while a
+session stays open. Scope is a **full drop-in replacement** — datasources,
+version decisions, lockfile/artifact updates, and platform branch/PR operations
+are in scope, not just dependency extraction.
+
+> Note on the current baseline: the test map historically reported ~100% by
+> marking ~74% of tests `not-applicable` under an extraction-only scope. Under
+> full-drop-in scope those are mostly mis-scoped. The test-parity prompt's
+> Phase 0.5 re-audit corrects this before the map can be considered closed.
+
 ## Command Notes
 
 Claude Code:
@@ -63,13 +89,13 @@ replacement for common self-hosted Renovate workflows.
 From `~/Projects/renovate-rust-experiement`:
 
 ```text
-/goal Follow @renovate-rust/prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout in ./renovate with the Rust implementation in ./renovate-rust, keep the prompt's Definition Of Done as the completion condition, and continue implementing the next highest-value compatibility gaps until the Rust `renovate` binary is a production-quality drop-in replacement for common self-hosted Renovate CLI workflows. Keep parity docs current, commit each coherent slice, push committed changes, and do not treat one slice, partial parity progress, a clean worktree, or a turn limit as completion. Do not run verification commands unless the operator explicitly asks.
+/goal Follow @renovate-rust/prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout in ./renovate with the Rust implementation in ./renovate-rust, keep the prompt's Definition Of Done as the completion condition, and continue implementing the next highest-value compatibility gaps until the Rust `renovate` binary is a production-quality drop-in replacement for common self-hosted Renovate CLI workflows. Keep parity docs current, commit each coherent slice, push committed changes, and do not treat one slice, partial parity progress, a clean worktree, or a turn limit as completion. Do not run verification commands every iteration unless the operator asks, but run the quality gates and the differential harness as part of the terminal-state completion check.
 ```
 
 From inside `renovate-rust/`:
 
 ```text
-/goal Follow @prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout in ../renovate with this Rust implementation, keep the prompt's Definition Of Done as the completion condition, and continue implementing the next highest-value compatibility gaps until the Rust `renovate` binary is a production-quality drop-in replacement for common self-hosted Renovate CLI workflows. Keep parity docs current, commit each coherent slice, push committed changes, and do not treat one slice, partial parity progress, a clean worktree, or a turn limit as completion. Do not run verification commands unless the operator explicitly asks.
+/goal Follow @prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout in ../renovate with this Rust implementation, keep the prompt's Definition Of Done as the completion condition, and continue implementing the next highest-value compatibility gaps until the Rust `renovate` binary is a production-quality drop-in replacement for common self-hosted Renovate CLI workflows. Keep parity docs current, commit each coherent slice, push committed changes, and do not treat one slice, partial parity progress, a clean worktree, or a turn limit as completion. Do not run verification commands every iteration unless the operator asks, but run the quality gates and the differential harness as part of the terminal-state completion check.
 ```
 
 ### Claude Timed Loop
@@ -78,7 +104,7 @@ Use a timed loop only when you want periodic one-slice progress instead of a
 full goal:
 
 ```text
-/loop 15m Follow @renovate-rust/prompts/claude-loop-renovate-rust.md for one implementation parity iteration: compare the next missing Renovate behavior, update parity docs, implement one coherent Rust slice, commit it, push it, and report what changed. Do not run verification commands unless the operator explicitly asks.
+/loop 15m Follow @renovate-rust/prompts/claude-loop-renovate-rust.md for one implementation parity iteration: compare the next missing Renovate behavior, update parity docs, implement one coherent Rust slice, commit it, push it, and report what changed. Do not run verification commands every iteration unless the operator asks, but run the quality gates and the differential harness as part of the terminal-state completion check.
 ```
 
 ### Codex Goal Prompt
@@ -87,7 +113,7 @@ Use this as the initial Codex prompt, or paste it after your local Codex goal
 command:
 
 ```text
-Follow prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout at ../renovate with this Rust implementation, prepare a plan from the prompt's Objective, Definition Of Done, operating rules, and current repository state, then execute its progress loop until the Definition Of Done is actually satisfied. The required outcome is a production-quality Rust `renovate` binary that works as a Renovate-compatible drop-in replacement for common self-hosted CLI workflows, including compatible CLI flags, environment variables, config discovery and semantics, exit codes, dependency extraction, datasource/versioning decisions, update planning, output modes, and parity tracking. Keep choosing the next highest-value compatibility gap, updating parity docs, committing each coherent slice, pushing committed changes, and continuing until completion. Do not stop after one slice, partial parity progress, a clean worktree, or a turn limit. Do not run verification commands unless the operator explicitly asks.
+Follow prompts/claude-loop-renovate-rust.md as the active implementation parity goal. Compare the original Renovate checkout at ../renovate with this Rust implementation, prepare a plan from the prompt's Objective, Definition Of Done, operating rules, and current repository state, then execute its progress loop until the Definition Of Done is actually satisfied. The required outcome is a production-quality Rust `renovate` binary that works as a Renovate-compatible drop-in replacement for common self-hosted CLI workflows, including compatible CLI flags, environment variables, config discovery and semantics, exit codes, dependency extraction, datasource/versioning decisions, update planning, output modes, and parity tracking. Keep choosing the next highest-value compatibility gap, updating parity docs, committing each coherent slice, pushing committed changes, and continuing until completion. Do not stop after one slice, partial parity progress, a clean worktree, or a turn limit. Do not run verification commands every iteration unless the operator asks, but run the quality gates and the differential harness as part of the terminal-state completion check.
 ```
 
 For non-interactive Codex from inside `renovate-rust/`:
@@ -109,19 +135,19 @@ ported.
 From `~/Projects/renovate-rust-experiement`:
 
 ```text
-/goal Follow @renovate-rust/prompts/claude-loop-test-parity.md until one coherent test parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Compare upstream Renovate `.spec.ts` tests with Rust tests, port actionable runtime behavior, and mark TypeScript-only or out-of-scope cases as `not-applicable` with reasons. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+/goal Follow @renovate-rust/prompts/claude-loop-test-parity.md as the active test parity goal. Compare upstream Renovate `.spec.ts` tests in ./renovate with Rust tests. First re-audit mis-scoped `not-applicable` rows (Phase 0.5) until the NA budget is met, then port actionable runtime behavior so every detail file reaches zero `pending` rows. Keep the source↔test cross-check consistent. Continue until the shared terminal state in claude-loop-renovate-rust.md holds for the test side; do not treat one unit, a clean worktree, a turn limit, or a high percentage as completion. Run the quality gates and the differential harness as part of the completion check.
 ```
 
 From inside `renovate-rust/`:
 
 ```text
-/goal Follow @prompts/claude-loop-test-parity.md until one coherent test parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Compare upstream Renovate `.spec.ts` tests in ../renovate with Rust tests, port actionable runtime behavior, and mark TypeScript-only or out-of-scope cases as `not-applicable` with reasons. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+/goal Follow @prompts/claude-loop-test-parity.md as the active test parity goal. Compare upstream Renovate `.spec.ts` tests in ../renovate with Rust tests. First re-audit mis-scoped `not-applicable` rows (Phase 0.5) until the NA budget is met, then port actionable runtime behavior so every detail file reaches zero `pending` rows. Keep the source↔test cross-check consistent. Continue until the shared terminal state in claude-loop-renovate-rust.md holds for the test side; do not treat one unit, a clean worktree, a turn limit, or a high percentage as completion. Run the quality gates and the differential harness as part of the completion check.
 ```
 
 ### Claude Timed Loop
 
 ```text
-/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small test parity unit. Commit completed parity updates and Rust tests, then report what changed. Do not run verification commands unless the operator explicitly asks.
+/loop 15m Follow @renovate-rust/prompts/claude-loop-test-parity.md for one small test parity unit. Commit completed parity updates and Rust tests, then report what changed. Do not run verification commands every iteration unless the operator asks, but run the quality gates and the differential harness as part of the terminal-state completion check.
 ```
 
 ### Codex Goal Prompt
@@ -130,7 +156,7 @@ Use this as the initial Codex prompt, or paste it after your local Codex goal
 command:
 
 ```text
-Follow prompts/claude-loop-test-parity.md as the active test parity goal. Compare upstream Renovate `.spec.ts` files in ../renovate with the Rust test suite, maintain docs/parity/renovate-test-map.md plus per-spec detail files, and close one coherent parity unit at a time. Every actionable Renovate runtime behavior must either be covered by an equivalent Rust test with a `// Ported:` provenance comment or be explicitly marked `not-applicable` with a concrete reason when it only tests TypeScript, Node/Vitest/Jest mechanics, or out-of-scope hosted infrastructure. Continue until one coherent parity unit is committed, touched parity detail/root rows are consistent, and `git status --short` is clean. Do not run verification commands unless the operator explicitly asks; stop after 10 turns if blocked.
+Follow prompts/claude-loop-test-parity.md as the active test parity goal. Compare upstream Renovate `.spec.ts` files in ../renovate with the Rust test suite, maintain docs/parity/renovate-test-map.md plus per-spec detail files. First run the Phase 0.5 re-audit: reclassify mis-scoped `not-applicable` rows (platform/datasource/artifact/git/PR/exec are in scope under full-drop-in) to `pending` until the NA budget holds. Then port actionable behavior, each ported Rust test carrying a `// Ported:` provenance comment, until every detail file has zero `pending` rows. Keep `not-applicable` only for genuine TypeScript/Node/Vitest/Jest mechanics or hosted-only infrastructure, each with a concrete reason. Keep the source↔test cross-check consistent. Continue until the shared terminal state in claude-loop-renovate-rust.md holds for the test side; do not treat one unit, a clean worktree, a turn limit, or a high percentage as completion. Run the quality gates and the differential harness as part of the completion check.
 ```
 
 For non-interactive Codex from inside `renovate-rust/`:
