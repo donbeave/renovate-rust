@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3126 / 11677 total tests ported (27%) · pending 8550 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3129 / 11677 total tests ported (27%) · pending 8547 · not-applicable 1 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -144,7 +144,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/schema.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
 | `lib/modules/datasource/cpan/schema.spec.ts` | Not done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
-| `lib/modules/datasource/kubernetes-api/index.spec.ts` | Not done | [details](lib/modules/datasource/kubernetes-api/index.spec.ts.md) |
+| `lib/modules/datasource/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/datasource/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/datasource/nextcloud/index.spec.ts` | Not done | [details](lib/modules/datasource/nextcloud/index.spec.ts.md) |
 | `lib/modules/datasource/github-digest/index.spec.ts` | Not done | [details](lib/modules/datasource/github-digest/index.spec.ts.md) |
 | `lib/modules/datasource/github-release-attachments/index.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/index.spec.ts.md) |

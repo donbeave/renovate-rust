@@ -1040,7 +1040,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/gitlab-releases/index.ts` | `crates/renovate-core/src/datasources/gitlab_releases.rs` | partial | fetch_releases with tag_name/released_at parsing, URL-encoded project path, source URL |
 | `lib/modules/datasource/golang-version/index.ts` | `crates/renovate-core/src/datasources/golang_version.rs` | partial | Core Go-source-file parsing and release extraction ported; package-cache not ported |
 | `lib/modules/datasource/java-version/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/kubernetes-api/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/kubernetes-api/index.ts` | `crates/renovate-core/src/datasources/kubernetes_api.rs` | partial | Static lookup from embedded kubernetes-api.json5 data file; case-sensitive resource name matching |
 | `lib/modules/datasource/node-version/index.ts` | `crates/renovate-core/src/datasources/node_version.rs` | partial | Core JSON fetch from nodejs.org/dist ported; LTS flag and timestamp handling ported; package-cache not ported |
 | `lib/modules/datasource/python-version/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/repology/index.ts` | — | not-started | Not ported |
