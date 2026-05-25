@@ -179,7 +179,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/unity3d-packages/index.spec.ts` | Not done | [details](lib/modules/datasource/unity3d-packages/index.spec.ts.md) |
 | `lib/modules/datasource/clojure/index.spec.ts` | Not done | [details](lib/modules/datasource/clojure/index.spec.ts.md) |
 | `lib/modules/datasource/cpan/index.spec.ts` | Not done | [details](lib/modules/datasource/cpan/index.spec.ts.md) |
-| `lib/modules/datasource/gradle-version/index.spec.ts` | Not done | [details](lib/modules/datasource/gradle-version/index.spec.ts.md) |
+| `lib/modules/datasource/gradle-version/index.spec.ts` | Done | [details](lib/modules/datasource/gradle-version/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/index.spec.ts` | Not done | [details](lib/modules/datasource/buildpacks-registry/index.spec.ts.md) |
 | `lib/modules/datasource/azure-bicep-resource/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-bicep-resource/index.spec.ts.md) |
 | `lib/modules/datasource/github-runners/index.spec.ts` | Done | [details](lib/modules/datasource/github-runners/index.spec.ts.md) |

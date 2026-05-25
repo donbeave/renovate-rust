@@ -989,7 +989,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/galaxy-collection/index.ts` | `crates/renovate-core/src/datasources/galaxy_collection.rs` | done | namespace.name parsing, URL construction (ansible/automation-hub/default), versions list + per-version details, deprecated flag |
 | `lib/modules/datasource/glasskube-packages/index.ts` | `crates/renovate-core/src/datasources/glasskube_packages.rs` | partial | Core version fetch via Glasskube packages index ported; package-cache not ported |
 | `lib/modules/datasource/go/index.ts` | `crates/renovate-core/src/datasources/gomod.rs` | partial | Core version fetch via Go module proxy ported; GOPROXY chain and private modules not ported |
-| `lib/modules/datasource/gradle-version/index.ts` | `crates/renovate-core/src/datasources/gradle_version.rs` | partial | Core version fetch via Gradle services API ported; package-cache not ported |
+| `lib/modules/datasource/gradle-version/index.ts` | `crates/renovate-core/src/datasources/gradle_version.rs` | done | Full fetch_releases with snapshot/nightly filter, git_ref calculation, buildTime parsing; 404→None, 429/5xx→Err |
 | `lib/modules/datasource/hackage/index.ts` | `crates/renovate-core/src/datasources/hackage.rs` | partial | Core version fetch via Hackage API ported; package-cache not ported |
 | `lib/modules/datasource/helm/index.ts` | `crates/renovate-core/src/datasources/helm.rs` | partial | Core chart version fetch via Helm repo index.yaml ported; OCI registry support partial |
 | `lib/modules/datasource/hermit/index.ts` | `crates/renovate-core/src/datasources/hermit.rs` | partial | Core version fetch via Hermit manifest index ported; package-cache not ported |
