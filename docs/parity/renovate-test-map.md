@@ -153,7 +153,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/deno/index.spec.ts` | Not done | [details](lib/modules/datasource/deno/index.spec.ts.md) |
 | `lib/modules/datasource/flutter-version/index.spec.ts` | Done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-packages/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
-| `lib/modules/datasource/hexpm-bob/index.spec.ts` | Not done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
+| `lib/modules/datasource/hexpm-bob/index.spec.ts` | Done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-plugin/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/util.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |

@@ -993,6 +993,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/helm/index.ts` | `crates/renovate-core/src/datasources/helm.rs` | partial | Core chart version fetch via Helm repo index.yaml ported; OCI registry support partial |
 | `lib/modules/datasource/hermit/index.ts` | `crates/renovate-core/src/datasources/hermit.rs` | partial | Core version fetch via Hermit manifest index ported; package-cache not ported |
 | `lib/modules/datasource/hex/index.ts` | `crates/renovate-core/src/datasources/hex.rs` | partial | Core version fetch via Hex.pm API ported; package-cache not ported |
+| `lib/modules/datasource/hexpm-bob/index.ts` | `crates/renovate-core/src/datasources/hexpm_bob.rs` | done | Parses builds.txt line-format; elixir and otp package types; version cleaning, stability detection, timestamp handling |
 | `lib/modules/datasource/jenkins-plugins/index.ts` | `crates/renovate-core/src/datasources/jenkins_plugins.rs` | partial | Core version fetch via Jenkins Update Center ported; package-cache not ported |
 | `lib/modules/datasource/jsr/index.ts` | `crates/renovate-core/src/datasources/jsr.rs` | partial | Core version fetch via JSR API ported; package-cache not ported |
 | `lib/modules/datasource/maven/index.ts` | `crates/renovate-core/src/datasources/maven.rs` | partial | Core version fetch via Maven Central metadata ported; multi-repo search and package-cache not ported |
