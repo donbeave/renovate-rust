@@ -196,7 +196,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/hackage/index.spec.ts` | Done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
 | `lib/modules/datasource/java-version/common.spec.ts` | Done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
-| `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
+| `lib/modules/datasource/git-refs/index.spec.ts` | Done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
 | `lib/modules/datasource/dotnet-version/index.spec.ts` | Done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
 | `lib/modules/datasource/elm-package/index.spec.ts` | Done | [details](lib/modules/datasource/elm-package/index.spec.ts.md) |
 | `lib/modules/datasource/ruby-version/index.spec.ts` | Done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |

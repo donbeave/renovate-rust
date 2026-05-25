@@ -30,6 +30,7 @@ pub mod forgejo_releases;
 pub mod forgejo_tags;
 pub mod galaxy;
 pub mod galaxy_collection;
+pub mod git_refs;
 pub mod github_releases;
 pub mod github_runners;
 pub mod github_tags;
