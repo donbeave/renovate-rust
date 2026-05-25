@@ -12,6 +12,8 @@ pub mod git;
 pub mod github_actions;
 pub mod glasskube;
 pub mod hashicorp;
+pub mod kubernetes_api;
+pub mod same_major;
 pub mod loose;
 pub mod helm;
 pub mod maven;

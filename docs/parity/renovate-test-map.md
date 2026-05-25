@@ -450,7 +450,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/versioning-metadata.spec.ts` | Done | [details](lib/modules/versioning/versioning-metadata.spec.ts.md) |
 | `lib/modules/versioning/generic.spec.ts` | Done | [details](lib/modules/versioning/generic.spec.ts.md) |
 | `lib/modules/versioning/distro.spec.ts` | Not done | [details](lib/modules/versioning/distro.spec.ts.md) |
-| `lib/modules/versioning/kubernetes-api/index.spec.ts` | Not done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |
+| `lib/modules/versioning/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/versioning/deno/index.spec.ts` | Done | [details](lib/modules/versioning/deno/index.spec.ts.md) |
 | `lib/modules/versioning/docker/index.spec.ts` | Not done | [details](lib/modules/versioning/docker/index.spec.ts.md) |
 | `lib/modules/versioning/rez/index.spec.ts` | Not done | [details](lib/modules/versioning/rez/index.spec.ts.md) |
@@ -458,7 +458,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/rust-release-channel/parse.spec.ts` | Not done | [details](lib/modules/versioning/rust-release-channel/parse.spec.ts.md) |
 | `lib/modules/versioning/apk/index.spec.ts` | Not done | [details](lib/modules/versioning/apk/index.spec.ts.md) |
 | `lib/modules/versioning/loose/index.spec.ts` | Done | [details](lib/modules/versioning/loose/index.spec.ts.md) |
-| `lib/modules/versioning/same-major/index.spec.ts` | Not done | [details](lib/modules/versioning/same-major/index.spec.ts.md) |
+| `lib/modules/versioning/same-major/index.spec.ts` | Done | [details](lib/modules/versioning/same-major/index.spec.ts.md) |
 | `lib/modules/versioning/hex/index.spec.ts` | Not done | [details](lib/modules/versioning/hex/index.spec.ts.md) |
 | `lib/modules/versioning/debian/index.spec.ts` | Not done | [details](lib/modules/versioning/debian/index.spec.ts.md) |
 | `lib/modules/versioning/debian/common.spec.ts` | Not done | [details](lib/modules/versioning/debian/common.spec.ts.md) |

@@ -48,6 +48,11 @@ fn satisfies_single(version: &Version, range: &str) -> bool {
         return false;
     }
 
+    // Compound range: ">=1.0.0 <2" — all parts must match
+    if range.contains(' ') {
+        return range.split_whitespace().all(|part| satisfies_single(version, part));
+    }
+
     if let Some(rest) = range.strip_prefix('^') {
         let Some(lower) = coerce(rest) else {
             return false;
@@ -70,11 +75,32 @@ fn satisfies_single(version: &Version, range: &str) -> bool {
         return version >= &lower && version < &upper && version.pre.is_empty();
     }
 
+    if let Some(rest) = range.strip_prefix(">=") {
+        let Some(lower) = coerce(rest) else {
+            return false;
+        };
+        return version >= &lower && version.pre.is_empty();
+    }
+
     if let Some(rest) = range.strip_prefix('>') {
         let Some(lower) = coerce(rest) else {
             return false;
         };
         return version > &lower && version.pre.is_empty();
+    }
+
+    if let Some(rest) = range.strip_prefix("<=") {
+        let Some(upper) = coerce(rest) else {
+            return false;
+        };
+        return version <= &upper && version.pre.is_empty();
+    }
+
+    if let Some(rest) = range.strip_prefix('<') {
+        let Some(upper) = coerce(rest) else {
+            return false;
+        };
+        return version < &upper && version.pre.is_empty();
     }
 
     let Some(exact) = coerce(range) else {
