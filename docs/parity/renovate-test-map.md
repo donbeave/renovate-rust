@@ -191,7 +191,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/glasskube-packages/index.spec.ts` | Done | [details](lib/modules/datasource/glasskube-packages/index.spec.ts.md) |
 | `lib/modules/datasource/hermit/index.spec.ts` | Not done | [details](lib/modules/datasource/hermit/index.spec.ts.md) |
 | `lib/modules/datasource/devbox/index.spec.ts` | Done | [details](lib/modules/datasource/devbox/index.spec.ts.md) |
-| `lib/modules/datasource/jenkins-plugins/index.spec.ts` | Not done | [details](lib/modules/datasource/jenkins-plugins/index.spec.ts.md) |
+| `lib/modules/datasource/jenkins-plugins/index.spec.ts` | Done | [details](lib/modules/datasource/jenkins-plugins/index.spec.ts.md) |
 | `lib/modules/datasource/unity3d/index.spec.ts` | Not done | [details](lib/modules/datasource/unity3d/index.spec.ts.md) |
 | `lib/modules/datasource/hackage/index.spec.ts` | Done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
