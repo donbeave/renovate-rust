@@ -186,14 +186,14 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/gitlab-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-tags/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-tags/util.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-tags/util.spec.ts.md) |
 | `lib/modules/datasource/typst/index.spec.ts` | Not done | [details](lib/modules/datasource/typst/index.spec.ts.md) |
-| `lib/modules/datasource/jsr/index.spec.ts` | Not done | [details](lib/modules/datasource/jsr/index.spec.ts.md) |
-| `lib/modules/datasource/jsr/util.spec.ts` | Not done | [details](lib/modules/datasource/jsr/util.spec.ts.md) |
-| `lib/modules/datasource/glasskube-packages/index.spec.ts` | Not done | [details](lib/modules/datasource/glasskube-packages/index.spec.ts.md) |
+| `lib/modules/datasource/jsr/index.spec.ts` | Done | [details](lib/modules/datasource/jsr/index.spec.ts.md) |
+| `lib/modules/datasource/jsr/util.spec.ts` | Done | [details](lib/modules/datasource/jsr/util.spec.ts.md) |
+| `lib/modules/datasource/glasskube-packages/index.spec.ts` | Done | [details](lib/modules/datasource/glasskube-packages/index.spec.ts.md) |
 | `lib/modules/datasource/hermit/index.spec.ts` | Not done | [details](lib/modules/datasource/hermit/index.spec.ts.md) |
 | `lib/modules/datasource/devbox/index.spec.ts` | Not done | [details](lib/modules/datasource/devbox/index.spec.ts.md) |
 | `lib/modules/datasource/jenkins-plugins/index.spec.ts` | Not done | [details](lib/modules/datasource/jenkins-plugins/index.spec.ts.md) |
 | `lib/modules/datasource/unity3d/index.spec.ts` | Not done | [details](lib/modules/datasource/unity3d/index.spec.ts.md) |
-| `lib/modules/datasource/hackage/index.spec.ts` | Not done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
+| `lib/modules/datasource/hackage/index.spec.ts` | Done | [details](lib/modules/datasource/hackage/index.spec.ts.md) |
 | `lib/modules/datasource/endoflife-date/index.spec.ts` | Not done | [details](lib/modules/datasource/endoflife-date/index.spec.ts.md) |
 | `lib/modules/datasource/java-version/common.spec.ts` | Not done | [details](lib/modules/datasource/java-version/common.spec.ts.md) |
 | `lib/modules/datasource/git-refs/index.spec.ts` | Not done | [details](lib/modules/datasource/git-refs/index.spec.ts.md) |
