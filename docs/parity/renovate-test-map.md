@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3129 / 11677 total tests ported (27%) · pending 8547 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3136 / 11677 total tests ported (27%) · pending 8540 · not-applicable 1 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -93,7 +93,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/tekton/extract.spec.ts` | Done | [details](lib/modules/manager/tekton/extract.spec.ts.md) |
 | `lib/modules/manager/vendir/extract.spec.ts` | Done | [details](lib/modules/manager/vendir/extract.spec.ts.md) |
 | `lib/modules/manager/velaci/extract.spec.ts` | Done | [details](lib/modules/manager/velaci/extract.spec.ts.md) |
-| `lib/modules/manager/sveltos/extract.spec.ts` | Not done | [details](lib/modules/manager/sveltos/extract.spec.ts.md) |
+| `lib/modules/manager/sveltos/extract.spec.ts` | Done | [details](lib/modules/manager/sveltos/extract.spec.ts.md) |
 | `lib/modules/manager/kubernetes/extract.spec.ts` | Done | [details](lib/modules/manager/kubernetes/extract.spec.ts.md) |
 | `lib/modules/manager/azure-pipelines/extract.spec.ts` | Done | [details](lib/modules/manager/azure-pipelines/extract.spec.ts.md) |
 | `lib/modules/manager/pixi/extract.spec.ts` | Done | [details](lib/modules/manager/pixi/extract.spec.ts.md) |
@@ -297,7 +297,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migrations/custom/schedule-migration.spec.ts` | Done | [details](lib/config/migrations/custom/schedule-migration.spec.ts.md) |
 | `lib/config/migrations/custom/semantic-commits-migration.spec.ts` | Done | [details](lib/config/migrations/custom/semantic-commits-migration.spec.ts.md) |
 | `lib/config/migrations/custom/semantic-prefix-migration.spec.ts` | Done | [details](lib/config/migrations/custom/semantic-prefix-migration.spec.ts.md) |
-| `lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts.md) |
+| `lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts` | Done | [details](lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts.md) |
 | `lib/config/migrations/custom/compatibility-migration.spec.ts` | Done | [details](lib/config/migrations/custom/compatibility-migration.spec.ts.md) |
 | `lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts` | Done | [details](lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts.md) |
 | `lib/config/migrations/custom/custom-managers-migration.spec.ts` | Done | [details](lib/config/migrations/custom/custom-managers-migration.spec.ts.md) |
@@ -333,7 +333,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migrations/custom/base-branch-migration.spec.ts` | Done | [details](lib/config/migrations/custom/base-branch-migration.spec.ts.md) |
 | `lib/config/migrations/custom/branch-name-migration.spec.ts` | Done | [details](lib/config/migrations/custom/branch-name-migration.spec.ts.md) |
 | `lib/config/migrations/custom/branch-prefix-migration.spec.ts` | Done | [details](lib/config/migrations/custom/branch-prefix-migration.spec.ts.md) |
-| `lib/config/migrations/custom/automerge-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-migration.spec.ts.md) |
+| `lib/config/migrations/custom/automerge-migration.spec.ts` | Done | [details](lib/config/migrations/custom/automerge-migration.spec.ts.md) |
 | `lib/config/migrations/custom/automerge-major-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-major-migration.spec.ts.md) |
 | `lib/config/migrations/custom/automerge-minor-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-minor-migration.spec.ts.md) |
 | `lib/config/migrations/custom/automerge-patch-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/automerge-patch-migration.spec.ts.md) |
@@ -488,7 +488,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/nixpkgs/index.spec.ts` | Not done | [details](lib/modules/versioning/nixpkgs/index.spec.ts.md) |
 | `lib/modules/versioning/poetry/index.spec.ts` | Not done | [details](lib/modules/versioning/poetry/index.spec.ts.md) |
 | `lib/modules/versioning/semver/index.spec.ts` | Not done | [details](lib/modules/versioning/semver/index.spec.ts.md) |
-| `lib/modules/versioning/semver/common.spec.ts` | Not done | [details](lib/modules/versioning/semver/common.spec.ts.md) |
+| `lib/modules/versioning/semver/common.spec.ts` | Done | [details](lib/modules/versioning/semver/common.spec.ts.md) |
 | `lib/modules/versioning/swift/index.spec.ts` | Not done | [details](lib/modules/versioning/swift/index.spec.ts.md) |
 | `lib/modules/versioning/go-mod-directive/index.spec.ts` | Not done | [details](lib/modules/versioning/go-mod-directive/index.spec.ts.md) |
 | `lib/modules/versioning/deb/index.spec.ts` | Not done | [details](lib/modules/versioning/deb/index.spec.ts.md) |
@@ -575,7 +575,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/manager/git-submodules/update.spec.ts` | Not done | [details](lib/modules/manager/git-submodules/update.spec.ts.md) |
 | `lib/modules/manager/gitlabci/utils.spec.ts` | Done | [details](lib/modules/manager/gitlabci/utils.spec.ts.md) |
 | `lib/modules/manager/gleam/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gleam/artifacts.spec.ts.md) |
-| `lib/modules/manager/gleam/locked-version.spec.ts` | Not done | [details](lib/modules/manager/gleam/locked-version.spec.ts.md) |
+| `lib/modules/manager/gleam/locked-version.spec.ts` | Done | [details](lib/modules/manager/gleam/locked-version.spec.ts.md) |
 | `lib/modules/manager/gleam/range.spec.ts` | Done | [details](lib/modules/manager/gleam/range.spec.ts.md) |
 | `lib/modules/manager/gomod/artifacts-extra.spec.ts` | Done | [details](lib/modules/manager/gomod/artifacts-extra.spec.ts.md) |
 | `lib/modules/manager/gomod/artifacts.spec.ts` | Not done | [details](lib/modules/manager/gomod/artifacts.spec.ts.md) |

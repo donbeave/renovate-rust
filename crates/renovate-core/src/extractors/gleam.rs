@@ -133,6 +133,14 @@ pub fn extract_gleam_lock_file_versions(content: &str) -> Option<HashMap<String,
     Some(map)
 }
 
+/// Wrapper accepting an optional content string; returns `None` when the file
+/// is absent (mirrors the missing-file branch of `extractLockFileVersions`).
+pub fn extract_gleam_lock_file_versions_opt(
+    content: Option<&str>,
+) -> Option<HashMap<String, Vec<String>>> {
+    extract_gleam_lock_file_versions(content?)
+}
+
 /// Determine the effective Gleam range strategy.
 ///
 /// Mirrors `lib/modules/manager/gleam/range.ts` `getRangeStrategy()`.
@@ -240,6 +248,12 @@ gleeunit = "~> 1.0"
 [requirements]
 foo = { version = ">= 1.0.0 and < 2.0.0" }
 "#;
+
+    // Ported: "returns null for missing lock file" — modules/manager/gleam/locked-version.spec.ts line 19
+    #[test]
+    fn extract_versions_missing_file_returns_none() {
+        assert!(extract_gleam_lock_file_versions_opt(None).is_none());
+    }
 
     // Ported: "returns null for invalid lock file" — modules/manager/gleam/locked-version.spec.ts line 26
     #[test]

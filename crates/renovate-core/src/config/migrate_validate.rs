@@ -230,8 +230,29 @@ pub fn migrate_and_validate(base_config: &Value, input: &Value) -> Value {
 fn migrate_config(input: &Value) -> Value {
     let mut migrated = input.clone();
     if let Value::Object(map) = &mut migrated {
-        if matches!(map.get("automerge"), Some(Value::String(value)) if value == "none") {
-            map.insert("automerge".to_owned(), Value::Bool(false));
+        match map.get("automerge").and_then(Value::as_str) {
+            Some("none") => {
+                map.insert("automerge".to_owned(), Value::Bool(false));
+            }
+            Some("patch") => {
+                map.remove("automerge");
+                for (key, am_val) in [("patch", true), ("minor", false), ("major", false)] {
+                    let block = map.entry(key.to_owned()).or_insert_with(|| json!({}));
+                    if let Value::Object(m) = block {
+                        m.insert("automerge".to_owned(), Value::Bool(am_val));
+                    }
+                }
+            }
+            Some("minor") => {
+                map.remove("automerge");
+                for (key, am_val) in [("minor", true), ("major", false)] {
+                    let block = map.entry(key.to_owned()).or_insert_with(|| json!({}));
+                    if let Value::Object(m) = block {
+                        m.insert("automerge".to_owned(), Value::Bool(am_val));
+                    }
+                }
+            }
+            _ => {}
         }
         if let Some(extends) = map.get_mut("extends") {
             let presets = match std::mem::take(extends) {
@@ -4684,6 +4705,25 @@ mod tests {
         );
     }
 
+    // Ported: "should migrate patch" — config/migrations/custom/automerge-migration.spec.ts line 16
+    #[test]
+    fn automerge_patch_sets_nested_update_type_configs() {
+        let result = migrate_config(&json!({"automerge": "patch"}));
+        assert_eq!(result.get("automerge"), None);
+        assert_eq!(result["patch"]["automerge"], json!(true));
+        assert_eq!(result["minor"]["automerge"], json!(false));
+        assert_eq!(result["major"]["automerge"], json!(false));
+    }
+
+    // Ported: "should migrate minor" — config/migrations/custom/automerge-migration.spec.ts line 34
+    #[test]
+    fn automerge_minor_sets_nested_update_type_configs() {
+        let result = migrate_config(&json!({"automerge": "minor"}));
+        assert_eq!(result.get("automerge"), None);
+        assert_eq!(result["minor"]["automerge"], json!(true));
+        assert_eq!(result["major"]["automerge"], json!(false));
+    }
+
     // Ported: "should migrate \"auto\" to \"global\"" — config/migrations/custom/binary-source-migration.spec.ts line 4
     #[test]
     fn binary_source_auto_migrates_to_global() {
@@ -4908,6 +4948,22 @@ mod tests {
             migrate_config(&json!({"azureAutoComplete": true, "platformAutomerge": false})),
             json!({"platformAutomerge": true})
         );
+    }
+
+    // Ported: "should just remove undefined gitLabAutomerge" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 14
+    #[test]
+    fn git_lab_automerge_null_removed_without_setting_platform_automerge() {
+        let result = migrate_config(&json!({"gitLabAutomerge": null}));
+        assert!(result.get("platformAutomerge").is_none());
+        assert!(result.get("gitLabAutomerge").is_none());
+    }
+
+    // Ported: "should just remove undefined azureAutoComplete" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 46
+    #[test]
+    fn azure_auto_complete_null_removed_without_setting_platform_automerge() {
+        let result = migrate_config(&json!({"azureAutoComplete": null}));
+        assert!(result.get("platformAutomerge").is_none());
+        assert!(result.get("azureAutoComplete").is_none());
     }
 
     // Ported: "should migrate object" — config/migrations/custom/compatibility-migration.spec.ts line 4

@@ -138,6 +138,13 @@ pub fn lower_bound(constraint: &str) -> &str {
     stripped.split(',').next().unwrap_or("").trim()
 }
 
+/// Return true when `range` is a SemVer X-range wildcard (`*`, `x`, `X`, or empty).
+///
+/// Mirrors `lib/modules/versioning/semver/common.ts` `isSemVerXRange()`.
+pub fn is_semver_x_range(range: &str) -> bool {
+    matches!(range, "*" | "x" | "X" | "")
+}
+
 /// Parse a version string, padding missing minor/patch components with 0.
 pub fn parse_padded(v: &str) -> Option<Version> {
     let v = v.trim().trim_start_matches('v');
@@ -154,6 +161,17 @@ pub fn parse_padded(v: &str) -> Option<Version> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Ported: "isSemVerXRange(\"range\") === $expected" — versioning/semver/common.spec.ts line 4
+    #[test]
+    fn is_semver_x_range_matches_renovate_spec() {
+        for r in ["*", "x", "X", ""] {
+            assert!(is_semver_x_range(r), "{r:?} should be X range");
+        }
+        for r in ["1", "1.2", "1.2.3"] {
+            assert!(!is_semver_x_range(r), "{r:?} should not be X range");
+        }
+    }
 
     #[test]
     fn same_version_no_update() {

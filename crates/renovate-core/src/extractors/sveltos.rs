@@ -366,6 +366,13 @@ spec:
         assert!(extract("apiVersion: v1\nkind: ConfigMap\n").is_empty());
     }
 
+    // Ported: "returns an empty array when parsing fails" — sveltos/extract.spec.ts line 234
+    #[test]
+    fn extract_definition_invalid_input_returns_empty() {
+        // TypeScript: extractDefinition({}) returns [] — empty/invalid doc has no deps
+        assert!(extract("{}").is_empty());
+    }
+
     // Ported: "returns null for empty" — sveltos/extract.spec.ts line 254
     #[test]
     fn empty_content_returns_empty() {
