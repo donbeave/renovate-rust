@@ -132,6 +132,10 @@ fn compare_qualifiers(lq: &str, lt: bool, rq: &str, rt: bool) -> Ordering {
 // ── Tokenizer ─────────────────────────────────────────────────────────────────
 
 fn tokenize(version: &str) -> Vec<Token> {
+    tokenize_preserving(version, false)
+}
+
+fn tokenize_preserving(version: &str, preserve_minor_zeroes: bool) -> Vec<Token> {
     let lower = version.to_lowercase();
     let chars: Vec<char> = lower.chars().collect();
     let n = chars.len();
@@ -214,7 +218,7 @@ fn tokenize(version: &str) -> Vec<Token> {
         if !token.is_null() {
             leading_zero = false;
             result.append(&mut buf);
-        } else if leading_zero {
+        } else if leading_zero || preserve_minor_zeroes {
             result.append(&mut buf);
         }
     }
@@ -290,6 +294,336 @@ pub fn maven_update_summary(current: &str, latest: Option<&str>) -> MavenUpdateS
         latest: latest.map(|s| s.to_owned()),
         update_available,
     }
+}
+
+// ── Token-to-string ───────────────────────────────────────────────────────────
+
+fn tokens_to_str(tokens: &[Token]) -> String {
+    let mut result = String::new();
+    for token in tokens {
+        match &token.prefix {
+            Prefix::Dot => result.push('.'),
+            Prefix::Hyphen => result.push('-'),
+            Prefix::Other(s) => result.push_str(s),
+        }
+        match &token.value {
+            TokenValue::Number(n) => result.push_str(&n.to_string()),
+            TokenValue::Qualifier(q) => result.push_str(q),
+        }
+    }
+    result
+}
+
+// ── Range helpers ─────────────────────────────────────────────────────────────
+
+fn is_version_str(s: &str) -> bool {
+    if s.is_empty() {
+        return false;
+    }
+    if !s.chars().all(|c| matches!(c, '-' | '.' | '_' | '+' | 'a'..='z' | 'A'..='Z' | '0'..='9')) {
+        return false;
+    }
+    let first = s.chars().next().unwrap();
+    if first == '.' || first == '-' {
+        return false;
+    }
+    let last = s.chars().last().unwrap();
+    if last == '.' || last == '-' {
+        return false;
+    }
+    let lower = s.to_lowercase();
+    if lower == "latest" || lower == "release" {
+        return false;
+    }
+    !tokenize(s).is_empty()
+}
+
+fn coerce_range_value(prev: &str, next: &str) -> String {
+    let prev_tokens = tokenize_preserving(prev, true);
+    let next_tokens = tokenize_preserving(next, true);
+    let take = prev_tokens.len().min(next_tokens.len());
+    let mut result_tokens: Vec<Token> = next_tokens.into_iter().take(take).collect();
+    let align = prev_tokens.len().saturating_sub(result_tokens.len());
+    if align > 0 {
+        let start = prev_tokens.len() - align;
+        result_tokens.extend_from_slice(&prev_tokens[start..]);
+    }
+    tokens_to_str(&result_tokens)
+}
+
+fn increment_range_value(value: &str) -> String {
+    let mut tokens = tokenize(value);
+    if tokens.is_empty() {
+        return value.to_owned();
+    }
+    let last = tokens.last_mut().unwrap();
+    if let TokenValue::Number(n) = &mut last.value {
+        *n += 1;
+        let intermediate = tokens_to_str(&tokens);
+        coerce_range_value(value, &intermediate)
+    } else {
+        value.to_owned()
+    }
+}
+
+// ── Range types ───────────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RangePointType {
+    Including,
+    Excluding,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RangeInterval {
+    pub left_type: RangePointType,
+    pub left_value: Option<String>,
+    pub left_bracket: String,
+    pub right_type: RangePointType,
+    pub right_value: Option<String>,
+    pub right_bracket: String,
+}
+
+struct IntervalBuilder {
+    left_type: Option<RangePointType>,
+    left_value: String,
+    left_bracket: String,
+    right_type: Option<RangePointType>,
+    right_value: String,
+    right_bracket: String,
+}
+
+impl IntervalBuilder {
+    fn empty() -> Self {
+        Self {
+            left_type: None,
+            left_value: String::new(),
+            left_bracket: String::new(),
+            right_type: None,
+            right_value: String::new(),
+            right_bracket: String::new(),
+        }
+    }
+    fn is_open(&self) -> bool {
+        self.left_type.is_some()
+    }
+}
+
+pub fn parse_range(range_str: &str) -> Option<Vec<RangeInterval>> {
+    let parts: Vec<&str> = range_str.split(',').map(|s| s.trim()).collect();
+    let mut raw_ranges: Vec<IntervalBuilder> = Vec::new();
+    let mut interval = IntervalBuilder::empty();
+    let mut failed = false;
+
+    for sub_str in &parts {
+        if failed {
+            break;
+        }
+        if !interval.is_open() {
+            if sub_str.starts_with('[') && sub_str.ends_with(']') {
+                let ver = &sub_str[1..sub_str.len() - 1];
+                raw_ranges.push(IntervalBuilder {
+                    left_type: Some(RangePointType::Including),
+                    left_value: ver.to_owned(),
+                    left_bracket: "[".to_owned(),
+                    right_type: Some(RangePointType::Including),
+                    right_value: ver.to_owned(),
+                    right_bracket: "]".to_owned(),
+                });
+            } else if sub_str.starts_with('[') {
+                interval.left_type = Some(RangePointType::Including);
+                interval.left_value = sub_str[1..].to_owned();
+                interval.left_bracket = "[".to_owned();
+            } else if sub_str.starts_with('(') || sub_str.starts_with(']') {
+                interval.left_type = Some(RangePointType::Excluding);
+                interval.left_value = sub_str[1..].to_owned();
+                interval.left_bracket = sub_str[..1].to_owned();
+            } else {
+                failed = true;
+            }
+        } else if sub_str.ends_with(']') {
+            interval.right_type = Some(RangePointType::Including);
+            interval.right_value = sub_str[..sub_str.len() - 1].to_owned();
+            interval.right_bracket = "]".to_owned();
+            raw_ranges.push(std::mem::replace(&mut interval, IntervalBuilder::empty()));
+        } else if sub_str.ends_with(')') || sub_str.ends_with('[') {
+            let bracket = if sub_str.ends_with(')') { ")" } else { "[" };
+            interval.right_type = Some(RangePointType::Excluding);
+            interval.right_value = sub_str[..sub_str.len() - 1].to_owned();
+            interval.right_bracket = bracket.to_owned();
+            raw_ranges.push(std::mem::replace(&mut interval, IntervalBuilder::empty()));
+        } else {
+            failed = true;
+        }
+    }
+
+    if failed || interval.is_open() || raw_ranges.is_empty() {
+        return None;
+    }
+
+    let last_idx = raw_ranges.len() - 1;
+    let mut prev_value: Option<String> = None;
+    let mut result: Vec<RangeInterval> = Vec::new();
+
+    for (idx, range) in raw_ranges.into_iter().enumerate() {
+        let left_type = range.left_type.unwrap();
+        let right_type = range.right_type.unwrap();
+        let lv = range.left_value.as_str();
+        let rv = range.right_value.as_str();
+
+        if idx == 0 && lv.is_empty() {
+            if left_type == RangePointType::Excluding && is_version_str(rv) {
+                prev_value = Some(rv.to_owned());
+                result.push(RangeInterval {
+                    left_type,
+                    left_value: None,
+                    left_bracket: range.left_bracket,
+                    right_type,
+                    right_value: Some(rv.to_owned()),
+                    right_bracket: range.right_bracket,
+                });
+                continue;
+            }
+            return None;
+        }
+        if idx == last_idx && rv.is_empty() {
+            if right_type == RangePointType::Excluding && is_version_str(lv) {
+                if let Some(ref pv) = prev_value {
+                    if compare(pv, lv) == Ordering::Greater {
+                        return None;
+                    }
+                }
+                result.push(RangeInterval {
+                    left_type,
+                    left_value: Some(lv.to_owned()),
+                    left_bracket: range.left_bracket,
+                    right_type,
+                    right_value: None,
+                    right_bracket: range.right_bracket,
+                });
+                continue;
+            }
+            return None;
+        }
+        if is_version_str(lv) && is_version_str(rv) {
+            if compare(lv, rv) == Ordering::Greater {
+                return None;
+            }
+            if let Some(ref pv) = prev_value {
+                if compare(pv, lv) == Ordering::Greater {
+                    return None;
+                }
+            }
+            prev_value = Some(rv.to_owned());
+            result.push(RangeInterval {
+                left_type,
+                left_value: Some(lv.to_owned()),
+                left_bracket: range.left_bracket,
+                right_type,
+                right_value: Some(rv.to_owned()),
+                right_bracket: range.right_bracket,
+            });
+            continue;
+        }
+        return None;
+    }
+    Some(result)
+}
+
+pub fn range_to_str(ranges: Option<&[RangeInterval]>) -> Option<String> {
+    let ranges = ranges?;
+    if ranges.len() == 1 {
+        let r = &ranges[0];
+        if r.left_value == r.right_value && r.left_bracket == "[" && r.right_bracket == "]" {
+            let val = r.left_value.as_deref().unwrap_or("");
+            return Some(format!("[{val}]"));
+        }
+    }
+    let intervals: Vec<String> = ranges
+        .iter()
+        .map(|r| {
+            let lv = r.left_value.as_deref().unwrap_or("");
+            let rv = r.right_value.as_deref().unwrap_or("");
+            format!("{}{},{}{}", r.left_bracket, lv, rv, r.right_bracket)
+        })
+        .collect();
+    Some(intervals.join(","))
+}
+
+pub fn auto_extend_maven_range(current: &str, new_version: &str) -> String {
+    let mut range = match parse_range(current) {
+        None => return current.to_owned(),
+        Some(r) => r,
+    };
+
+    let is_point = range.len() == 1 && {
+        let r = &range[0];
+        r.left_type == RangePointType::Including
+            && r.right_type == RangePointType::Including
+            && r.left_value == r.right_value
+    };
+    if is_point {
+        return format!("[{new_version}]");
+    }
+
+    let interval_idx = range.iter().rposition(|r| {
+        r.right_value.is_none()
+            || (r.right_type == RangePointType::Including
+                && compare(r.right_value.as_deref().unwrap(), new_version) == Ordering::Less)
+            || (r.right_type == RangePointType::Excluding
+                && compare(r.right_value.as_deref().unwrap(), new_version) != Ordering::Greater)
+    });
+
+    let Some(idx) = interval_idx else {
+        return current.to_owned();
+    };
+
+    let left_value = range[idx].left_value.clone();
+    let right_value = range[idx].right_value.clone();
+
+    if left_value.is_some()
+        && right_value.is_some()
+        && increment_range_value(left_value.as_deref().unwrap())
+            == *right_value.as_ref().unwrap()
+    {
+        if compare(new_version, left_value.as_deref().unwrap()) != Ordering::Less {
+            let new_left = coerce_range_value(left_value.as_deref().unwrap(), new_version);
+            let new_right = increment_range_value(&new_left);
+            range[idx].left_value = Some(new_left);
+            range[idx].right_value = Some(new_right);
+        }
+    } else if let Some(ref rv) = right_value {
+        if range[idx].right_type == RangePointType::Including {
+            let rv_tokens = tokenize(rv);
+            if let Some(last_tok) = rv_tokens.last() {
+                if let TokenValue::Number(_) = last_tok.value {
+                    range[idx].right_value = Some(coerce_range_value(rv, new_version));
+                } else {
+                    range[idx].right_value = Some(new_version.to_owned());
+                }
+            }
+        } else {
+            let coerced = coerce_range_value(rv, new_version);
+            range[idx].right_value = Some(increment_range_value(&coerced));
+        }
+    } else if let Some(ref lv) = left_value {
+        range[idx].left_value = Some(coerce_range_value(lv, new_version));
+    }
+
+    range_to_str(Some(&range)).unwrap_or_else(|| current.to_owned())
+}
+
+pub fn is_subversion(major_version: &str, minor_version: &str) -> bool {
+    let major_tokens = tokenize(major_version);
+    let minor_tokens = tokenize(minor_version);
+    for (i, major_tok) in major_tokens.iter().enumerate() {
+        let null_tok = Token::null_for(major_tok);
+        let minor_tok = minor_tokens.get(i).unwrap_or(&null_tok);
+        if compare_tokens(major_tok, minor_tok) != Ordering::Equal {
+            return false;
+        }
+    }
+    true
 }
 
 #[cfg(test)]
@@ -391,5 +725,265 @@ mod tests {
         let s = maven_update_summary("1.0", None);
         assert!(!s.update_available);
         assert!(s.latest.is_none());
+    }
+
+    // Ported: "$x == $y" — maven/compare.spec.ts line 15
+    #[test]
+    fn compare_equals_matches_renovate_maven_compare_spec() {
+        let cases: &[(&str, &str)] = &[
+            ("1", "1"), ("1", "1.0"), ("1", "1.0.0"), ("1.0", "1.0.0"),
+            ("1", "1-0"), ("1", "1.0-0"), ("1.0", "1.0-0"),
+            ("1a", "1-a"), ("1a", "1.0-a"), ("1a", "1.0.0-a"),
+            ("1.0a", "1-a"), ("1.0.0a", "1-a"),
+            ("1x", "1-x"), ("1x", "1.0-x"), ("1x", "1.0.0-x"),
+            ("1.0x", "1-x"), ("1.0.0x", "1-x"),
+            ("1ga", "1"), ("1release", "1"), ("1final", "1"),
+            ("1cr", "1rc"), ("1a1", "1-alpha-1"), ("1b2", "1-beta-2"),
+            ("1m3", "1-milestone-3"),
+            ("1X", "1x"), ("1A", "1a"), ("1B", "1b"), ("1M", "1m"),
+            ("1Ga", "1"), ("1GA", "1"), ("1RELEASE", "1"), ("1release", "1"),
+            ("1RELeaSE", "1"), ("1Final", "1"), ("1FinaL", "1"), ("1FINAL", "1"),
+            ("1Cr", "1Rc"), ("1cR", "1rC"),
+            ("1m3", "1Milestone3"), ("1m3", "1MileStone3"), ("1m3", "1MILESTONE3"),
+            ("2.0-0", "2.0"), ("1.0.0", "1"), ("1-a1", "1-alpha-1"),
+            ("1-b1", "1-beta-1"), ("1.0.0", "1.ga"), ("1-ga", "1.ga"),
+            ("1.final", "1.0"), ("1", "1.0"), ("1.", "1-"),
+            ("1.0.0-0.0.0", "1-final"),
+            ("1-1.foo-bar1baz-.1", "1-1.foo-bar-1-baz-0.1"),
+            ("1.0ALPHA1", "1.0-a1"), ("1.0Alpha1", "1.0-a1"), ("1.0AlphA1", "1.0-a1"),
+            ("1.0BETA1", "1.0-b1"), ("1.0MILESTONE1", "1.0-m1"),
+            ("1.0RC1", "1.0-cr1"), ("1.0GA", "1.0"), ("1.0FINAL", "1.0"),
+            ("1.0-SNAPSHOT", "1-snapshot"),
+            ("1.0alpha1", "1.0-a1"), ("1.0alpha-1", "1.0-a1"),
+            ("1.0beta1", "1.0-b1"), ("1.0beta-1", "1.0-b1"),
+            ("1.0milestone1", "1.0-m1"), ("1.0milestone-1", "1.0-m1"),
+            ("1.0rc1", "1.0-cr1"), ("1.0rc-1", "1.0-cr1"), ("1.0ga", "1.0"),
+            ("1-0.ga", "1.0"), ("1.0-final", "1.0"), ("1-0-ga", "1.0"),
+            ("1-0-final", "1-0"), ("1-0", "1.0"), ("0.0-1552", "0.0-1552"),
+            ("5.0.7", "5.0.7.RELEASE"), ("Hoxton.RELEASE", "hoxton"),
+            ("Hoxton.SR1", "hoxton.sr-1"), ("1_5ea", "1.0_5ea"),
+            ("1.foo", "1-foo"), ("1.x", "1-x"),
+        ];
+        for (x, y) in cases {
+            assert_eq!(compare(x, y), Ordering::Equal, "{x} == {y}");
+            assert_eq!(compare(y, x), Ordering::Equal, "{y} == {x}");
+        }
+    }
+
+    // Ported: "$x < $y" — maven/compare.spec.ts line 106
+    #[test]
+    fn compare_ordering_matches_renovate_maven_compare_spec() {
+        let cases: &[(&str, &str)] = &[
+            ("1", "2"), ("1.5", "2"), ("1", "2.5"), ("1.0", "1.1"), ("1.1", "1.2"),
+            ("1.0.0", "1.1"), ("1.0.1", "1.1"), ("1.1", "1.2.0"),
+            ("1.0-alpha-1", "1.0"), ("1.0-alpha-1", "1.0-alpha-2"),
+            ("1.0-alpha-1", "1.0-beta-1"), ("1.0-beta-1", "1.0-SNAPSHOT"),
+            ("1.0-SNAPSHOT", "1.0"), ("1.0-alpha-1-SNAPSHOT", "1.0-alpha-1"),
+            ("1.0", "1.0-1"), ("1.0-1", "1.0-2"), ("1.0.0", "1.0-1"),
+            ("2.0-1", "2.0.1"), ("2.0.1-klm", "2.0.1-lmn"),
+            ("2.0.1", "2.0.1-xyz"), ("2.0.1", "2.0.1-123"),
+            ("2.0.1-xyz", "2.0.1-123"),
+            ("1", "2"), ("1.5", "2"), ("1", "2.5"), ("1.0", "1.1"), ("1.1", "1.2"),
+            ("1.0.0", "1.1"), ("1.1", "1.2.0"),
+            ("1.1.2.alpha1", "1.1.2"), ("1.1.2.alpha1", "1.1.2.beta1"),
+            ("1.1.2.beta1", "1.2"),
+            ("1.0-alpha-1", "1.0"), ("1.0-alpha-1", "1.0-alpha-2"),
+            ("1.0-alpha-2", "1.0-alpha-15"), ("1.0-alpha-1", "1.0-beta-1"),
+            ("1.0-beta-1", "1.0-SNAPSHOT"), ("1.0-SNAPSHOT", "1.0"),
+            ("1.0-alpha-1-SNAPSHOT", "1.0-alpha-1"),
+            ("1.0", "1.0-1"), ("1.0-1", "1.0-2"),
+            ("2.0", "2.0-1"), ("2.0.0", "2.0-1"), ("2.0-1", "2.0.1"),
+            ("2.0.1-klm", "2.0.1-lmn"), ("2.0.1", "2.0.1-xyz"),
+            ("2.0.1-xyz-1", "2.0.1-1-xyz"),
+            ("2.0.1", "2.0.1-123"), ("2.0.1-xyz", "2.0.1-123"),
+            ("1.2.3-10000000000", "1.2.3-10000000001"),
+            ("1.2.3-1", "1.2.3-10000000001"),
+            ("2.3.0-v200706262000", "2.3.0-v200706262130"),
+            ("2.0.0.v200706041905-7C78EK9E_EkMNfNOd2d8qq", "2.0.0.v200706041906-7C78EK9E_EkMNfNOd2d8qq"),
+            ("1.0-RC1", "1.0-SNAPSHOT"), ("1.0-rc1", "1.0-SNAPSHOT"),
+            ("1.0-rc-1", "1.0-SNAPSHOT"),
+            ("1", "1.1"), ("1", "2"), ("1-snapshot", "1"),
+            ("1.2.3-snap1", "1.2.3-snap2"), ("1", "1-sp"),
+            ("1-foo2", "1-foo10"), ("1-m1", "1-milestone-2"),
+            ("1-foo", "1-1"), ("1-alpha.1", "1-beta.1"), ("1-1", "1.1"),
+            ("1-ga", "1-sp"), ("1-ga.1", "1-sp.1"), ("1-sp-1", "1-ga-1"),
+            ("1-cr1", "1"), ("0.0-1552", "1.10.520"), ("0.0.1", "999"),
+            ("1.3-RC1-groovy-2.5", "1.3-groovy-2.5"),
+            ("1-milestone", "1-snapshot"), ("1-abc", "1-xyz"),
+            ("Hoxton.RELEASE", "Hoxton.SR1"),
+            ("2.0", "2.0-PFD2"), ("2.0", "2.0.SP1"), ("2.0-PFD2", "2.0.SP1"),
+            ("1.3.9", "1.3.9.fix-log4j2"),
+            ("1-0.alpha", "1"), ("1-0.beta", "1"), ("1-0.alpha", "1-0.beta"),
+            ("1_5ea", "1_c3b"), ("1_c3b", "2"), ("17.0.5", "17.0.5+8"),
+        ];
+        for (x, y) in cases {
+            assert_eq!(compare(x, y), Ordering::Less, "{x} < {y}");
+            assert_eq!(compare(y, x), Ordering::Greater, "{y} > {x}");
+        }
+    }
+
+    // Ported: "$qualifier" — maven/compare.spec.ts line 203
+    #[test]
+    fn qualifier_mng7644_matches_renovate_maven_compare_spec() {
+        let qualifiers = ["abc", "alpha", "a", "beta", "b", "def", "milestone", "m", "RC"];
+        for q in qualifiers {
+            let dot1 = format!("1.0.0.{q}1");
+            let hyp2 = format!("1.0.0-{q}2");
+            assert_eq!(compare(&dot1, &hyp2), Ordering::Less, "{dot1} < {hyp2}");
+
+            let hyp = format!("2-{q}");
+            let dot = format!("2.0.{q}");
+            let dotdot = format!("2.0.0.{q}");
+            assert_eq!(compare(&hyp, &dot), Ordering::Equal, "2-{q} == 2.0.{q}");
+            assert_eq!(compare(&hyp, &dotdot), Ordering::Equal, "2-{q} == 2.0.0.{q}");
+            assert_eq!(compare(&dot, &dotdot), Ordering::Equal, "2.0.{q} == 2.0.0.{q}");
+        }
+    }
+
+    // Ported: "isSubversion("$majorVersion", "$minorVersion") === $expected" — maven/compare.spec.ts line 226
+    #[test]
+    fn is_subversion_matches_renovate_maven_compare_spec() {
+        assert!(is_subversion("1.2.3", "1.2.3"));
+        assert!(!is_subversion("1.2.3", "1.0.0"));
+        assert!(is_subversion("2.0.0", "2.0.1"));
+        assert!(is_subversion("3.1.0", "3.01.00"));
+        assert!(!is_subversion("4.0.0", ""));
+        assert!(!is_subversion("5.0.0", "4.5.2"));
+        assert!(is_subversion("6.0.0", "6.0.0-beta"));
+        assert!(!is_subversion("invalid.version", ""));
+        assert!(!is_subversion("", "1.2.3"));
+        assert!(is_subversion("v1.2.3", "1.2.3"));
+        assert!(is_subversion("v1.2.3", "v1.2.3"));
+    }
+
+    // Ported: "$x == $y" — maven/compare.spec.ts line 463
+    #[test]
+    fn compare_nonstandard_equals_matches_renovate_maven_compare_spec() {
+        let cases: &[(&str, &str)] = &[
+            ("1-ga-1", "1-1"),
+            ("1.0-SNAP", "1-snapshot"),
+            ("1.0rc", "1.0-preview"),
+            ("v1.2.3", "1.2.3"),
+            ("v0.0-1552", "0.0-1552"),
+            ("v0.0.1", "0.0.1"),
+        ];
+        for (x, y) in cases {
+            assert_eq!(compare(x, y), Ordering::Equal, "{x} == {y}");
+            assert_eq!(compare(y, x), Ordering::Equal, "{y} == {x}");
+        }
+    }
+
+    // Ported: "$x < $y" — maven/compare.spec.ts line 478
+    #[test]
+    fn compare_nonstandard_ordering_matches_renovate_maven_compare_spec() {
+        let cases: &[(&str, &str)] = &[
+            ("1-snap", "1"),
+            ("1-preview", "1-snapshot"),
+        ];
+        for (x, y) in cases {
+            assert_eq!(compare(x, y), Ordering::Less, "{x} < {y}");
+            assert_eq!(compare(y, x), Ordering::Greater, "{y} > {x}");
+        }
+    }
+
+    // Ported: "filters out incorrect range: $input" — maven/compare.spec.ts line 490
+    #[test]
+    fn parse_range_filters_invalid_matches_renovate_maven_compare_spec() {
+        let invalid = [
+            "1.2.3-SNAPSHOT", "[]", "[,]", "(", "[", ",", "[1.0", "1.0]",
+            "[1.0],", ",[1.0]", "(,1.1),(1.0,)", "(0,1.1),(1.0,2.0)",
+            "(0,1.1),(,2.0)", "(,1.0],,[1.2,)", "(,1.0],[1.2,),",
+            "[1.5,]", "[2.0,1.0)", "[1.2,1.3],1.4", "[1.2,,1.3]",
+            "[1.3,1.2]", "[1,[2,3],4]", "[,1.0]", "[,1.0],[,1.0]",
+        ];
+        for input in invalid {
+            let r = parse_range(input);
+            assert!(r.is_none(), "expected null for: {input}");
+            assert!(range_to_str(r.as_deref()).is_none());
+        }
+    }
+
+    // Ported: "parseRange("$input")" — maven/compare.spec.ts line 521
+    #[test]
+    fn parse_range_valid_matches_renovate_maven_compare_spec() {
+        use RangePointType::{Excluding, Including};
+        let cases: &[(&str, RangePointType, Option<&str>, &str, RangePointType, Option<&str>, &str)] = &[
+            ("[1.0]",     Including, Some("1.0"), "[", Including, Some("1.0"), "]"),
+            ("(,1.0]",   Excluding, None,         "(", Including, Some("1.0"), "]"),
+            ("(, 1.0]",  Excluding, None,         "(", Including, Some("1.0"), "]"),
+            ("[1.2,1.3]", Including, Some("1.2"), "[", Including, Some("1.3"), "]"),
+            ("[1.2, 1.3]",Including, Some("1.2"), "[", Including, Some("1.3"), "]"),
+            ("[1.0,2.0)", Including, Some("1.0"), "[", Excluding, Some("2.0"), ")"),
+            ("[1.5,)",    Including, Some("1.5"), "[", Excluding, None,         ")"),
+            ("[1.5, )",   Including, Some("1.5"), "[", Excluding, None,         ")"),
+        ];
+        for (input, lt, lv, lb, rt, rv, rb) in cases {
+            let result = parse_range(input).expect(input);
+            assert_eq!(result.len(), 1, "len for {input}");
+            let r = &result[0];
+            assert_eq!(r.left_type, *lt, "left_type for {input}");
+            assert_eq!(r.left_value.as_deref(), *lv, "left_value for {input}");
+            assert_eq!(r.left_bracket, *lb, "left_bracket for {input}");
+            assert_eq!(r.right_type, *rt, "right_type for {input}");
+            assert_eq!(r.right_value.as_deref(), *rv, "right_value for {input}");
+            assert_eq!(r.right_bracket, *rb, "right_bracket for {input}");
+            let expected_str = input.replace(' ', "");
+            assert_eq!(range_to_str(Some(&result)), Some(expected_str), "rangeToStr for {input}");
+        }
+    }
+
+    // Ported: "autoExtendMavenRange("$range", "$version") === $expected" — maven/compare.spec.ts line 560
+    #[test]
+    fn auto_extend_maven_range_matches_renovate_maven_compare_spec() {
+        let cases: &[(&str, &str, &str)] = &[
+            ("[1.2.3]",               "1.2.3",   "[1.2.3]"),
+            ("[1.2.3]",               "1.2.4",   "[1.2.4]"),
+            ("[1.0.0,1.2.3]",         "0.0.1",   "[1.0.0,1.2.3]"),
+            ("[1.0.0,1.2.3]",         "1.2.4",   "[1.0.0,1.2.4]"),
+            ("[1.0.0,1.2.23]",        "1.1.0",   "[1.0.0,1.2.23]"),
+            ("(,1.0]",                "2.0",     "(,2.0]"),
+            ("],1.0]",                "2.0",     "],2.0]"),
+            ("(,1.0)",                "2.0",     "(,3.0)"),
+            ("],1.0[",                "2.0",     "],3.0["),
+            ("[1.0,1.2.3],[1.3,1.5)", "1.2.4",   "[1.0,1.2.4],[1.3,1.5)"),
+            ("[1.0,1.2.3],[1.3,1.5[", "1.2.4",   "[1.0,1.2.4],[1.3,1.5["),
+            ("[1.2.3,)",              "1.2.4",   "[1.2.4,)"),
+            ("[1.2.3,[",              "1.2.4",   "[1.2.4,["),
+            ("[1.2.3,]",              "1.2.4",   "[1.2.3,]"),
+            ("[0.21,0.22)",           "0.20.21", "[0.21,0.22)"),
+            ("[0.21,0.22)",           "0.21.1",  "[0.21,0.22)"),
+            ("[0.21,0.22.0)",         "0.22.1",  "[0.21,0.22.2)"),
+            ("[0.21,0.22)",           "0.23",    "[0.23,0.24)"),
+            ("[1.8,1.9)",             "1.9.0.1", "[1.9,1.10)"),
+            ("[1.8a,1.9)",            "1.9.0.1", "[1.8a,1.10)"),
+            ("[1.8,1.9.0)",           "1.9.0.1", "[1.8,1.10.0)"),
+            ("[1.8,1.9.0.0)",         "1.9.0.1", "[1.8,1.9.0.2)"),
+            ("[1.8,1.9.0.0)",         "1.10.1",  "[1.8,1.10.2.0)"),
+            ("[1.8,1.9)",             "1.9.1",   "[1.9,1.10)"),
+            ("[1.8,1.9)",             "1.10.0",  "[1.10,1.11)"),
+            ("[1.8,1.9)",             "1.10.1",  "[1.10,1.11)"),
+            ("(,1.0.0]",              "2.0.0",   "(,2.0.0]"),
+            ("(,1.0]",                "2.0.0",   "(,2.0]"),
+            ("(,1]",                  "2.0.0",   "(,2]"),
+            ("(,1.0.0-foobar]",       "2.0.0",   "(,2.0.0]"),
+            ("[1,2]",                 "2",       "[1,2]"),
+            ("[1,2)",                 "2",       "[2,3)"),
+            ("[0,2)",                 "2",       "[0,3)"),
+            ("[1.2,1.3]",             "1.3",     "[1.2,1.3]"),
+            ("[1.2,1.3)",             "1.3",     "[1.3,1.4)"),
+            ("[1-2,1-3)",             "1-3",     "[1-3,1-4)"),
+            ("[1.1,1.3)",             "1.3",     "[1.1,1.4)"),
+            ("[1.2.3,1.2.4]",         "1.2.4",   "[1.2.3,1.2.4]"),
+            ("[1.2.3,1.2.4)",         "1.2.4",   "[1.2.4,1.2.5)"),
+            ("[1.2.1,1.2.4)",         "1.2.4",   "[1.2.1,1.2.5)"),
+            ("[1,1.2.3)",             "1.2.3",   "[1,1.2.4)"),
+            ("[v3,v4)",               "v4.3.2",  "[v4,v5)"),
+            ("],v1.0]",               "v2.0",    "],v2.0]"),
+            ("(,v1.0)",               "v2.0",    "(,v3.0)"),
+            ("[v1.2.3,]",             "v1.2.4",  "[v1.2.3,]"),
+        ];
+        for (range, version, expected) in cases {
+            assert_eq!(auto_extend_maven_range(range, version), *expected, "range={range} version={version}");
+        }
     }
 }

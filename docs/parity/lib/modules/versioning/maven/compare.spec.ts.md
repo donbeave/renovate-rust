@@ -5,22 +5,22 @@
 ## `lib/modules/versioning/maven/compare.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/maven/compare.spec.ts
-**Total tests:** 10 | **Ported:** 0 | **Actionable:** 10 | **Status:** pending
+**Total tests:** 10 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `modules/versioning/maven/compare`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| $x == $y | 15 | pending | — | — | — |
-| $x < $y | 106 | pending | — | — | — |
-| $qualifier | 203 | pending | — | — | — |
-| isSubversion("$majorVersion", "$minorVersion") === $expected | 226 | pending | — | — | — |
-| should tokenize | 454 | pending | — | — | — |
-| $x == $y | 463 | pending | — | — | — |
-| $x < $y | 478 | pending | — | — | — |
-| filters out incorrect range: $input | 490 | pending | — | — | — |
-| parseRange("$input") | 521 | pending | — | — | — |
-| autoExtendMavenRange("$range", "$version") === $expected | 560 | pending | — | — | — |
+| $x == $y | 15 | ported | crates/renovate-core/src/versioning/maven.rs | compare_equals_matches_renovate_maven_compare_spec | — |
+| $x < $y | 106 | ported | crates/renovate-core/src/versioning/maven.rs | compare_ordering_matches_renovate_maven_compare_spec | — |
+| $qualifier | 203 | ported | crates/renovate-core/src/versioning/maven.rs | qualifier_mng7644_matches_renovate_maven_compare_spec | — |
+| isSubversion("$majorVersion", "$minorVersion") === $expected | 226 | ported | crates/renovate-core/src/versioning/maven.rs | is_subversion_matches_renovate_maven_compare_spec | — |
+| should tokenize | 454 | not-applicable | — | — | Tests TypeScript-specific exported token representation (string constants PREFIX_DOT, TYPE_NUMBER); Rust tokenize is private and its behavior is covered by compare() tests |
+| $x == $y | 463 | ported | crates/renovate-core/src/versioning/maven.rs | compare_nonstandard_equals_matches_renovate_maven_compare_spec | — |
+| $x < $y | 478 | ported | crates/renovate-core/src/versioning/maven.rs | compare_nonstandard_ordering_matches_renovate_maven_compare_spec | — |
+| filters out incorrect range: $input | 490 | ported | crates/renovate-core/src/versioning/maven.rs | parse_range_filters_invalid_matches_renovate_maven_compare_spec | — |
+| parseRange("$input") | 521 | ported | crates/renovate-core/src/versioning/maven.rs | parse_range_valid_matches_renovate_maven_compare_spec | — |
+| autoExtendMavenRange("$range", "$version") === $expected | 560 | ported | crates/renovate-core/src/versioning/maven.rs | auto_extend_maven_range_matches_renovate_maven_compare_spec | — |
 
 ---
 
