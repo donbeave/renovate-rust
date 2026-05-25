@@ -11267,6 +11267,7 @@ mod schedule_preset_tests {
     }
 
     // Ported: "migrates presets" — config/migration.spec.ts line 655
+    // Ported: "migrates presets" — migrations/custom/extends-migration.spec.ts line 58
     #[test]
     fn migrate_presets_rewrites_extends_and_drops_empty_replacements() {
         let migrate_presets = std::collections::BTreeMap::from([

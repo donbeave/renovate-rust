@@ -1024,12 +1024,12 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/bitbucket-server-tags/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/bitbucket-tags/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/clojure/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/dart-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/dart-version/index.ts` | `crates/renovate-core/src/datasources/dart_version.rs` | partial | Core GCS-backed channel fetch ported; package-cache not ported |
 | `lib/modules/datasource/deb/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/deno/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/dotnet-version/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/elm-package/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/flutter-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/flutter-version/index.ts` | `crates/renovate-core/src/datasources/flutter_version.rs` | partial | Core GCS-backed release fetch and stable-pattern filtering ported; package-cache not ported |
 | `lib/modules/datasource/git-refs/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/git-tags/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/gitea-releases/index.ts` | — | not-started | Not ported |
@@ -1038,15 +1038,15 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/github-release-attachments/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/gitlab-packages/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/gitlab-releases/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/golang-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/golang-version/index.ts` | `crates/renovate-core/src/datasources/golang_version.rs` | partial | Core Go-source-file parsing and release extraction ported; package-cache not ported |
 | `lib/modules/datasource/java-version/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/kubernetes-api/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/node-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/node-version/index.ts` | `crates/renovate-core/src/datasources/node_version.rs` | partial | Core JSON fetch from nodejs.org/dist ported; LTS flag and timestamp handling ported; package-cache not ported |
 | `lib/modules/datasource/python-version/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/repology/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/rpm/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/ruby-version/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/rust-version/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/rust-version/index.ts` | `crates/renovate-core/src/datasources/rust_version.rs` | partial | Core manifests.txt parsing, version deduplication, nightly encoding ported; package-cache not ported |
 | `lib/modules/datasource/sbt-package/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/sbt-plugin/index.ts` | — | not-started | Not ported |
 

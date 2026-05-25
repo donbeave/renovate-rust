@@ -203,9 +203,12 @@ pub fn validate_config_for_source(source: &str, config: &Value) -> ValidationRes
 
 /// Migrate, massage, and validate a repository config value.
 pub fn migrate_and_validate(base_config: &Value, input: &Value) -> Value {
+    let mut pre_errors = validate_host_rules_pre_migration(input);
     let migrated = migrate_config(input);
     let massaged = massage_config(&migrated);
-    let errors = validate_config(&massaged);
+    let mut errors = validate_config(&massaged);
+    pre_errors.append(&mut errors);
+    let errors = pre_errors;
 
     let mut result = match massaged {
         Value::Object(map) => map,
@@ -795,25 +798,28 @@ fn migrate_package_rules(package_rules: &mut [Value]) {
     }
 }
 
+fn rename_package_rule_key(key: &str) -> &str {
+    match key {
+        "matchFiles" | "matchPaths" | "paths" => "matchFileNames",
+        "languages" | "matchLanguages" => "matchCategories",
+        "baseBranchList" => "matchBaseBranches",
+        "managers" => "matchManagers",
+        "datasources" => "matchDatasources",
+        "depTypeList" => "matchDepTypes",
+        "packageNames" => "matchPackageNames",
+        "packagePatterns" => "matchPackagePatterns",
+        "sourceUrlPrefixes" => "matchSourceUrlPrefixes",
+        "updateTypes" => "matchUpdateTypes",
+        _ => key,
+    }
+}
+
 fn migrate_package_rule(rule: &mut Map<String, Value>) {
-    for (old_key, new_key) in [
-        ("matchFiles", "matchFileNames"),
-        ("matchPaths", "matchFileNames"),
-        ("paths", "matchFileNames"),
-        ("languages", "matchCategories"),
-        ("matchLanguages", "matchCategories"),
-        ("baseBranchList", "matchBaseBranches"),
-        ("managers", "matchManagers"),
-        ("datasources", "matchDatasources"),
-        ("depTypeList", "matchDepTypes"),
-        ("packageNames", "matchPackageNames"),
-        ("packagePatterns", "matchPackagePatterns"),
-        ("sourceUrlPrefixes", "matchSourceUrlPrefixes"),
-        ("updateTypes", "matchUpdateTypes"),
-    ] {
-        if let Some(value) = rule.remove(old_key) {
-            set_safely(rule, new_key, value);
-        }
+    // Rebuild map in original key order, applying renames in place.
+    let original = std::mem::take(rule);
+    for (key, value) in original {
+        let new_key = rename_package_rule_key(&key);
+        rule.entry(new_key.to_owned()).or_insert(value);
     }
 
     merge_package_rule_matchers(rule, "matchDepPatterns", "matchDepNames", |value| {
@@ -964,6 +970,37 @@ fn parse_semantic_prefix(value: &str) -> (String, Option<String>) {
         .and_then(|scope| scope.split(')').next())
         .map(str::to_owned);
     (commit_type, scope)
+}
+
+fn validate_host_rules_pre_migration(config: &Value) -> Vec<Value> {
+    let Some(host_rules) = config
+        .as_object()
+        .and_then(|m| m.get("hostRules"))
+        .and_then(Value::as_array)
+    else {
+        return vec![];
+    };
+    let host_fields = ["matchHost", "hostName", "domainName", "baseUrl", "endpoint", "host"];
+    let mut errors = vec![];
+    for rule in host_rules {
+        let Some(rule_map) = rule.as_object() else {
+            continue;
+        };
+        let host_values: Vec<&str> = host_fields
+            .iter()
+            .filter_map(|&k| rule_map.get(k)?.as_str())
+            .collect();
+        if host_values.len() > 1 {
+            let distinct: std::collections::HashSet<&str> = host_values.iter().copied().collect();
+            if distinct.len() > 1 {
+                errors.push(json!({
+                    "topic": "Configuration Error",
+                    "message": "`hostRules` cannot contain more than one host-matching field - use `matchHost` only."
+                }));
+            }
+        }
+    }
+    errors
 }
 
 fn validate_config(config: &Value) -> Vec<Value> {
@@ -5199,6 +5236,39 @@ mod tests {
         );
     }
 
+    // Ported: "should preserve config order" — config/migrations/custom/package-rules-migration.spec.ts line 5
+    #[test]
+    fn package_rules_migration_preserves_key_order() {
+        let migrated = migrate_config(&json!({
+            "packageRules": [{
+                "paths": [],
+                "labels": ["linting"],
+                "baseBranchList": [],
+                "languages": [],
+                "managers": [],
+                "datasources": [],
+                "depTypeList": [],
+                "addLabels": [],
+                "packageNames": [],
+                "updateTypes": []
+            }]
+        }));
+        let rule = &migrated["packageRules"][0];
+        let keys: Vec<&str> = rule.as_object().unwrap().keys().map(String::as_str).collect();
+        assert_eq!(keys, vec![
+            "matchFileNames",
+            "labels",
+            "matchBaseBranches",
+            "matchCategories",
+            "matchManagers",
+            "matchDatasources",
+            "matchDepTypes",
+            "addLabels",
+            "matchPackageNames",
+            "matchUpdateTypes",
+        ]);
+    }
+
     // Ported: "should not migrate nested packageRules" — config/migrations/custom/package-rules-migration.spec.ts line 31
     #[test]
     fn package_rules_renames_top_level_paths_without_nested_package_rules() {
@@ -5646,6 +5716,31 @@ mod tests {
                     {"matchHost": "https://some.domain.com:8080", "token": "123test"}
                 ]
             })
+        );
+    }
+
+    // Ported: "throws when multiple hosts are present" — config/migrations/custom/host-rules-migration.spec.ts line 75
+    #[test]
+    fn host_rules_throws_when_multiple_hosts_have_different_values() {
+        let result = migrate_and_validate(
+            &json!({}),
+            &json!({
+                "hostRules": [
+                    {
+                        "matchHost": "https://some-diff.domain.com",
+                        "baseUrl": "https://some.domain.com",
+                        "token": "123test"
+                    }
+                ]
+            }),
+        );
+        let errors = result["errors"].as_array().expect("errors array");
+        assert!(
+            errors.iter().any(|e| e["message"]
+                .as_str()
+                .unwrap_or("")
+                .contains("more than one host-matching field")),
+            "expected validation error for conflicting host fields, got: {errors:?}"
         );
     }
 

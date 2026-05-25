@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3068 / 11677 total tests ported (26%) · pending 8608 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3071 / 11677 total tests ported (26%) · pending 8605 · not-applicable 1 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -293,7 +293,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migrations/migrations-service.spec.ts` | Not done | [details](lib/config/migrations/migrations-service.spec.ts.md) |
 | `lib/config/migrations/base/abstract-migration.spec.ts` | Not done | [details](lib/config/migrations/base/abstract-migration.spec.ts.md) |
 | `lib/config/migrations/custom/binary-source-migration.spec.ts` | Done | [details](lib/config/migrations/custom/binary-source-migration.spec.ts.md) |
-| `lib/config/migrations/custom/extends-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/extends-migration.spec.ts.md) |
+| `lib/config/migrations/custom/extends-migration.spec.ts` | Done | [details](lib/config/migrations/custom/extends-migration.spec.ts.md) |
 | `lib/config/migrations/custom/schedule-migration.spec.ts` | Done | [details](lib/config/migrations/custom/schedule-migration.spec.ts.md) |
 | `lib/config/migrations/custom/semantic-commits-migration.spec.ts` | Done | [details](lib/config/migrations/custom/semantic-commits-migration.spec.ts.md) |
 | `lib/config/migrations/custom/semantic-prefix-migration.spec.ts` | Done | [details](lib/config/migrations/custom/semantic-prefix-migration.spec.ts.md) |
@@ -311,7 +311,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migrations/custom/match-strings-migration.spec.ts` | Done | [details](lib/config/migrations/custom/match-strings-migration.spec.ts.md) |
 | `lib/config/migrations/custom/package-name-migration.spec.ts` | Done | [details](lib/config/migrations/custom/package-name-migration.spec.ts.md) |
 | `lib/config/migrations/custom/package-pattern-migration.spec.ts` | Done | [details](lib/config/migrations/custom/package-pattern-migration.spec.ts.md) |
-| `lib/config/migrations/custom/package-rules-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/package-rules-migration.spec.ts.md) |
+| `lib/config/migrations/custom/package-rules-migration.spec.ts` | Done | [details](lib/config/migrations/custom/package-rules-migration.spec.ts.md) |
 | `lib/config/migrations/custom/packages-migration.spec.ts` | Done | [details](lib/config/migrations/custom/packages-migration.spec.ts.md) |
 | `lib/config/migrations/custom/path-rules-migration.spec.ts` | Done | [details](lib/config/migrations/custom/path-rules-migration.spec.ts.md) |
 | `lib/config/migrations/custom/package-files-migration.spec.ts` | Done | [details](lib/config/migrations/custom/package-files-migration.spec.ts.md) |
@@ -319,7 +319,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/config/migrations/custom/separate-major-release-migration.spec.ts` | Done | [details](lib/config/migrations/custom/separate-major-release-migration.spec.ts.md) |
 | `lib/config/migrations/custom/separate-multiple-major-migration.spec.ts` | Done | [details](lib/config/migrations/custom/separate-multiple-major-migration.spec.ts.md) |
 | `lib/config/migrations/custom/stability-days-migration.spec.ts` | Done | [details](lib/config/migrations/custom/stability-days-migration.spec.ts.md) |
-| `lib/config/migrations/custom/host-rules-migration.spec.ts` | Not done | [details](lib/config/migrations/custom/host-rules-migration.spec.ts.md) |
+| `lib/config/migrations/custom/host-rules-migration.spec.ts` | Done | [details](lib/config/migrations/custom/host-rules-migration.spec.ts.md) |
 | `lib/config/migrations/custom/suppress-notifications-migration.spec.ts` | Done | [details](lib/config/migrations/custom/suppress-notifications-migration.spec.ts.md) |
 | `lib/config/migrations/custom/trust-level-migration.spec.ts` | Done | [details](lib/config/migrations/custom/trust-level-migration.spec.ts.md) |
 | `lib/config/migrations/custom/unpublish-safe-migration.spec.ts` | Done | [details](lib/config/migrations/custom/unpublish-safe-migration.spec.ts.md) |

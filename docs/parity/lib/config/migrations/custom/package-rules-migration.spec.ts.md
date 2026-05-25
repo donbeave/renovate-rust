@@ -5,13 +5,13 @@
 ## `lib/config/migrations/custom/package-rules-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/package-rules-migration.spec.ts
-**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `config/migrations/custom/package-rules-migration`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should preserve config order | 5 | pending | — | — | — |
+| should preserve config order | 5 | ported | `migrate_validate.rs` | `package_rules_migration_preserves_key_order` | — |
 | should not migrate nested packageRules | 31 | ported | `migrate_validate.rs` | `package_rules_renames_top_level_paths_without_nested_package_rules` | — |
 | should migrate languages to categories | 53 | ported | `migrate_validate.rs` | `package_rules_languages_migrate_to_categories` | — |
 | should migrate single match rule | 81 | ported | `migrate_validate.rs` | `package_rules_single_match_language_migrates_to_category` | — |
