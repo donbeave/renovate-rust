@@ -162,7 +162,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/gitea-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitea-releases/index.spec.ts.md) |
 | `lib/modules/datasource/forgejo-releases/index.spec.ts` | Done | [details](lib/modules/datasource/forgejo-releases/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-releases/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-releases/index.spec.ts.md) |
-| `lib/modules/datasource/bitbucket-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-tags/index.spec.ts.md) |
+| `lib/modules/datasource/bitbucket-tags/index.spec.ts` | Done | [details](lib/modules/datasource/bitbucket-tags/index.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy-collection/index.spec.ts` | Not done | [details](lib/modules/datasource/galaxy-collection/index.spec.ts.md) |
 | `lib/modules/datasource/galaxy/index.spec.ts` | Not done | [details](lib/modules/datasource/galaxy/index.spec.ts.md) |

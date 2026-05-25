@@ -1022,7 +1022,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/aws-rds/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/azure-tags/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/bitbucket-server-tags/index.ts` | — | not-started | Not ported |
-| `lib/modules/datasource/bitbucket-tags/index.ts` | — | not-started | Not ported |
+| `lib/modules/datasource/bitbucket-tags/index.ts` | `crates/renovate-core/src/datasources/bitbucket_tags.rs` | done | fetch_releases (tags list) and get_digest (latest commit or tag SHA) ported |
 | `lib/modules/datasource/clojure/index.ts` | — | not-started | Not ported |
 | `lib/modules/datasource/dart-version/index.ts` | `crates/renovate-core/src/datasources/dart_version.rs` | partial | Core GCS-backed channel fetch ported; package-cache not ported |
 | `lib/modules/datasource/deb/index.ts` | — | not-started | Not ported |

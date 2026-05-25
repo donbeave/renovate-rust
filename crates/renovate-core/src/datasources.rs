@@ -8,6 +8,7 @@ pub mod artifactory;
 pub mod azure_bicep;
 pub mod azure_pipelines_tasks;
 pub mod bazel;
+pub mod bitbucket_tags;
 pub mod bitrise;
 pub mod buildpacks_registry;
 pub mod cdnjs;
