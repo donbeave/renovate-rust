@@ -5,21 +5,21 @@
 ## `lib/util/coerce.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/coerce.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
 
 ### `util/coerce › coerceToNull`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return null | 5 | not-applicable | — | — | Renovate's TypeScript null/undefined coercion helper has no Rust API equivalent; Rust uses `Option<T>`. |
-| should return original value | 10 | not-applicable | — | — | Renovate's TypeScript null/undefined coercion helper has no Rust API equivalent; Rust uses `Option<T>`. |
+| should return null | 5 | pending | — | — | — |
+| should return original value | 10 | pending | — | — | — |
 
 ### `util/coerce › coerceToUndefined`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return undefined | 18 | not-applicable | — | — | TypeScript undefined coercion has no Rust value-level equivalent; Rust uses `Option<T>`. |
-| should return original value | 23 | not-applicable | — | — | TypeScript undefined coercion has no Rust value-level equivalent; Rust uses `Option<T>`. |
+| should return undefined | 18 | pending | — | — | — |
+| should return original value | 23 | pending | — | — | — |
 
 ---
 

@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gitlabci/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gitlabci/extract.spec.ts
-**Total tests:** 14 | **Ported:** 10 | **Actionable:** 10 | **Status:** ported
+**Total tests:** 14 | **Ported:** 10 | **Actionable:** 14 | **Status:** partial
 
 ### `extractAllPackageFile()`
 
@@ -17,14 +17,14 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for empty | 28 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| returns null for empty | 28 | pending | — | — | — |
 | extracts from multidoc yaml | 36 | ported | `gitlabci.rs` | `multidoc_yaml_extracts_from_all_docs` | — |
-| extracts multiple included image lines | 46 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| extracts multiple included image lines | 46 | pending | — | — | — |
 | extracts named services | 57 | ported | `gitlabci.rs` | `extracts_services` | — |
-| extracts multiple named services | 66 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| extracts multiple named services | 66 | pending | — | — | — |
 | extracts multiple image lines | 75 | ported | `gitlabci.rs` | `extracts_top_level_image` | — |
 | extracts multiple image lines with comments | 94 | ported | `gitlabci.rs` | `extracts_images_with_comment_lines` | — |
-| catches errors | 110 | not-applicable | — | — | Uses extractAllPackageFiles with mock filesystem; no Rust equivalent |
+| catches errors | 110 | pending | — | — | — |
 | skips images with variables | 118 | ported | `gitlabci.rs` | `variable_image_has_skip_reason` | — |
 | extract images from dependency proxy | 172 | ported | `gitlabci.rs` | `dependency_proxy_prefix_stripped` | — |
 | extract images via registry aliases | 229 | ported | `gitlabci.rs` | `extract_images_via_registry_aliases` | — |

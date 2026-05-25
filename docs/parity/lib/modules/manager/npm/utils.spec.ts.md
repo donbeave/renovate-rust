@@ -25,9 +25,9 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| loads and parses package.json correctly | 81 | not-applicable | — | — | Async filesystem operation with mock; no Rust equivalent |
-| returns empty object when package.json is missing | 100 | not-applicable | — | — | Async filesystem operation with mock; no Rust equivalent |
-| returns empty object when package.json is invalid | 105 | not-applicable | — | — | Async filesystem operation with mock; no Rust equivalent |
+| loads and parses package.json correctly | 81 | pending | — | — | — |
+| returns empty object when package.json is missing | 100 | pending | — | — | — |
+| returns empty object when package.json is invalid | 105 | pending | — | — | — |
 
 ---
 

@@ -11,8 +11,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns valid query for valid payload query | 10 | not-applicable | — | — | Requires a GraphQL parser; Rust has no equivalent |
-| returns invalid query for invalid payload query | 28 | not-applicable | — | — | Requires a GraphQL parser; Rust has no equivalent |
+| returns valid query for valid payload query | 10 | pending | — | — | — |
+| returns invalid query for invalid payload query | 28 | pending | — | — | — |
 | isDateExpired($currentTime, $initialTimestamp, $duration) === $expected | 35 | ported | `github.rs` | `is_date_expired_hourly_cases`, `is_date_expired_daily_cases` | — |
 
 ---

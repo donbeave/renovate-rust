@@ -5,7 +5,7 @@
 ## `lib/modules/manager/gomod/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/gomod/extract.spec.ts
-**Total tests:** 22 | **Ported:** 17 | **Actionable:** 17 | **Status:** ported
+**Total tests:** 22 | **Ported:** 17 | **Actionable:** 22 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -28,11 +28,11 @@
 | ignores directives unrelated to dependencies | 402 | ported | `gomod.rs` | `unrelated_directives_ignored` | — |
 | marks placeholder pseudo versions with skipReason invalid-version | 426 | ported | `gomod.rs` | `placeholder_pseudo_versions_have_skip_reason` | — |
 | parses go $version directive | 528 | ported | `gomod.rs` | `go_directive_extracted` | — |
-| the extracted version can be used as a SemVer constraint | 582 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
-| matches version 1.19, even though it is not valid SemVer | 586 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
-| matches the current SemVer minor | 590 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
-| does not match the next SemVer minor | 595 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
-| does not match the previous SemVer minor | 600 | not-applicable | — | — | Tests versioning API (isValid/matches), not the extractor |
+| the extracted version can be used as a SemVer constraint | 582 | pending | — | — | — |
+| matches version 1.19, even though it is not valid SemVer | 586 | pending | — | — | — |
+| matches the current SemVer minor | 590 | pending | — | — | — |
+| does not match the next SemVer minor | 595 | pending | — | — | — |
+| does not match the previous SemVer minor | 600 | pending | — | — | — |
 
 ---
 

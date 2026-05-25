@@ -5,7 +5,7 @@
 ## `lib/modules/platform/gitlab/code-owners.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/gitlab/code-owners.spec.ts
-**Total tests:** 9 | **Ported:** 0 | **Actionable:** 9 | **Status:** pending
+**Total tests:** 9 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
 
 ### `CodeOwnersParser`
 

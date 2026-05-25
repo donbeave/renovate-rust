@@ -5,52 +5,52 @@
 ## `lib/config/decrypt.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/decrypt.spec.ts
-**Total tests:** 15 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 15 | **Ported:** 0 | **Actionable:** 15 | **Status:** pending
 
 ### `config/decrypt › decryptConfig()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty with no privateKey | 23 | not-applicable | — | — | Encrypted config/private-key handling is a platform encryption feature; Rust config layer does not implement decryption |
-| warns if no privateKey found | 29 | not-applicable | — | — | Encrypted config/private-key handling is a platform encryption feature; Rust config layer does not implement decryption |
-| throws exception if encrypted found but no privateKey | 41 | not-applicable | — | — | Encrypted config/private-key handling is a platform encryption feature; Rust config layer does not implement decryption |
-| throws exception if encrypted found but no privateKey- Mend Hosted | 51 | not-applicable | — | — | Encrypted config/private-key handling is a platform encryption feature; Rust config layer does not implement decryption |
+| returns empty with no privateKey | 23 | pending | — | — | — |
+| warns if no privateKey found | 29 | pending | — | — | — |
+| throws exception if encrypted found but no privateKey | 41 | pending | — | — | — |
+| throws exception if encrypted found but no privateKey- Mend Hosted | 51 | pending | — | — | — |
 
 ### `config/decrypt › validateDecryptedValue() › platforms non azure`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| equals("$str", "$repo") === $expected | 68 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
+| equals("$str", "$repo") === $expected | 68 | pending | — | — | — |
 
 ### `config/decrypt › validateDecryptedValue() › azure only platform › general tests`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| equals("$str", "$repo") === $expected | 93 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
+| equals("$str", "$repo") === $expected | 93 | pending | — | — | — |
 
 ### `config/decrypt › validateDecryptedValue() › azure only platform › tests self hosted - ignore "tfs/" before collection name`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| equals("$str", "$repo") === $expected | 129 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
+| equals("$str", "$repo") === $expected | 129 | pending | — | — | — |
 
 ### `config/decrypt › validateDecryptedValue() › azure only platform`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| endpoint URL invalid | 164 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
-| endpoint URL without collection | 196 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
+| endpoint URL invalid | 164 | pending | — | — | — |
+| endpoint URL without collection | 196 | pending | — | — | — |
 
 ### `config/decrypt › getAzureCollection()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| no pathname and url ends with slash | 235 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
-| no pathname and no slash at end of URL | 243 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
-| pathname no slash at end | 251 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
-| pathname with slash at end | 259 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
-| pathname 2 levels no slash at end | 267 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
-| pathname 2 levels with slash at end | 275 | not-applicable | — | — | Encrypted config validation/azure collection scoping belongs to the out-of-scope platform encryption feature; no Rust equivalent |
+| no pathname and url ends with slash | 235 | pending | — | — | — |
+| no pathname and no slash at end of URL | 243 | pending | — | — | — |
+| pathname no slash at end | 251 | pending | — | — | — |
+| pathname with slash at end | 259 | pending | — | — | — |
+| pathname 2 levels no slash at end | 267 | pending | — | — | — |
+| pathname 2 levels with slash at end | 275 | pending | — | — | — |
 
 ---
 

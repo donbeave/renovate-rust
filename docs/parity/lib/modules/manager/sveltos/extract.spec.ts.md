@@ -5,13 +5,13 @@
 ## `lib/modules/manager/sveltos/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/sveltos/extract.spec.ts
-**Total tests:** 13 | **Ported:** 12 | **Actionable:** 12 | **Status:** ported
+**Total tests:** 13 | **Ported:** 12 | **Actionable:** 13 | **Status:** partial
 
 ### `extractDefinition()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns an empty array when parsing fails | 234 | not-applicable | — | — | Tests TypeScript-internal `extractDefinition` helper directly; no Rust equivalent (Rust extracts via the public `extract()` only) |
+| returns an empty array when parsing fails | 234 | pending | — | — | — |
 | returns null if extractDefinition returns an empty array | 240 | ported | `sveltos.rs` | `clusterprofile_with_no_helm_charts_returns_empty` | — |
 
 ### `extractPackageFile()`

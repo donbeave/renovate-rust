@@ -5,14 +5,14 @@
 ## `lib/workers/global/config/parse/cli.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/cli.spec.ts
-**Total tests:** 30 | **Ported:** 28 | **Actionable:** 28 | **Status:** ported
+**Total tests:** 30 | **Ported:** 28 | **Actionable:** 30 | **Status:** partial
 
 ### `workers/global/config/parse/cli › .getCliName(definition)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| generates CLI value | 15 | not-applicable | — | — | TypeScript option-definition helper; Rust CLI names are static `clap` attributes |
-| generates returns empty if CLI false | 22 | not-applicable | — | — | TypeScript option-definition helper; Rust has no runtime `cli: false` option metadata |
+| generates CLI value | 15 | pending | — | — | — |
+| generates returns empty if CLI false | 22 | pending | — | — | — |
 
 ### `workers/global/config/parse/cli › .getConfig(argv)`
 

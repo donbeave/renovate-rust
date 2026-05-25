@@ -5,19 +5,19 @@
 ## `lib/modules/datasource/endoflife-date/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/endoflife-date/index.spec.ts
-**Total tests:** 7 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 7 | **Ported:** 0 | **Actionable:** 7 | **Status:** pending
 
 ### `modules/datasource/endoflife-date/index › getReleases`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| processes real data | 22 | not-applicable | — | — | Renovate's endoflife-date `getReleases` release-list, timestamp, and date-sensitive deprecation mapping are not implemented in Rust; Rust exposes product cycle summaries. |
-| returns null without registryUrl | 83 | not-applicable | — | — | Renovate's endoflife-date `getReleases` release-list, timestamp, and date-sensitive deprecation mapping are not implemented in Rust; Rust exposes product cycle summaries. |
-| returns null for 404 | 92 | not-applicable | — | — | Renovate's endoflife-date `getReleases` release-list, timestamp, and date-sensitive deprecation mapping are not implemented in Rust; Rust exposes product cycle summaries. |
-| returns null for empty result | 102 | not-applicable | — | — | Renovate's endoflife-date `getReleases` release-list, timestamp, and date-sensitive deprecation mapping are not implemented in Rust; Rust exposes product cycle summaries. |
-| throws for 5xx | 112 | not-applicable | — | — | Renovate's endoflife-date `getReleases` release-list, timestamp, and date-sensitive deprecation mapping are not implemented in Rust; Rust exposes product cycle summaries. |
-| detects boolean discontinuation | 122 | not-applicable | — | — | Renovate's endoflife-date `getReleases` release-list, timestamp, and date-sensitive deprecation mapping are not implemented in Rust; Rust exposes product cycle summaries. |
-| detects date discontinuation | 158 | not-applicable | — | — | Renovate's endoflife-date `getReleases` release-list, timestamp, and date-sensitive deprecation mapping are not implemented in Rust; Rust exposes product cycle summaries. |
+| processes real data | 22 | pending | — | — | — |
+| returns null without registryUrl | 83 | pending | — | — | — |
+| returns null for 404 | 92 | pending | — | — | — |
+| returns null for empty result | 102 | pending | — | — | — |
+| throws for 5xx | 112 | pending | — | — | — |
+| detects boolean discontinuation | 122 | pending | — | — | — |
+| detects date discontinuation | 158 | pending | — | — | — |
 
 ---
 

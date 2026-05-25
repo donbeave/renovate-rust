@@ -5,7 +5,7 @@
 ## `lib/modules/platform/azure/util.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/platform/azure/util.spec.ts
-**Total tests:** 29 | **Ported:** 19 | **Actionable:** 19 | **Status:** ported
+**Total tests:** 29 | **Ported:** 20 | **Actionable:** 29 | **Status:** partial
 
 ### `getGitStatusContextCombinedName`
 
@@ -36,24 +36,24 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should be formated (closed) | 91 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
-| should be formated (closed v2) | 96 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
-| should be formated (not closed) | 101 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should be formated (closed) | 91 | pending | — | — | — |
+| should be formated (closed v2) | 96 | pending | — | — | — |
+| should be formated (not closed) | 101 | pending | — | — | — |
 
 ### `streamToString`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| converts Readable stream to string | 108 | not-applicable | — | — | Node.js Readable streams, no Rust equivalent |
-| handles error | 113 | not-applicable | — | — | Node.js Readable streams, no Rust equivalent |
+| converts Readable stream to string | 108 | pending | — | — | — |
+| handles error | 113 | pending | — | — | — |
 
 ### `getStorageExtraCloneOpts`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should configure basic auth | 122 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
-| should configure personal access token | 130 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
-| should configure bearer token | 137 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| should configure basic auth | 122 | pending | — | — | — |
+| should configure personal access token | 130 | pending | — | — | — |
+| should configure bearer token | 137 | pending | — | — | — |
 
 ### `max4000Chars`
 
@@ -79,7 +79,7 @@
 | finds repo | 163 | ported | `azure_utils.rs` | `get_repo_by_name_finds_first_match` | — |
 | supports shorthand names | 181 | ported | `azure_utils.rs` | `get_repo_by_name_shorthand` | — |
 | is case-independent | 189 | ported | `azure_utils.rs` | `get_repo_by_name_case_insensitive` | — |
-| throws when repo name is invalid | 200 | not-applicable | — | — | out of scope: tests platform HTTP API interactions via TypeScript httpMock; Rust extraction layer does not call platform APIs |
+| throws when repo name is invalid | 200 | pending | — | — | — |
 
 ---
 

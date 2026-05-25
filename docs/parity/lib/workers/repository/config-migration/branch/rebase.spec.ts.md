@@ -11,10 +11,10 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| does nothing if branch is up to date (%s) | 48 | not-applicable | — | — | tests config migration branch rebase via git; requires git2 layer |
-| rebases migration branch (%s) | 66 | not-applicable | — | — | tests config migration branch rebase via git; requires git2 layer |
-| applies prettier formatting when rebasing the migration branch (%s) | 83 | not-applicable | — | — | tests config migration branch rebase via git; requires git2 layer |
-| does not rebases migration branch when in dryRun is on (%s) | 118 | not-applicable | — | — | tests config migration branch rebase via git; requires git2 layer |
+| does nothing if branch is up to date (%s) | 48 | pending | — | — | — |
+| rebases migration branch (%s) | 66 | pending | — | — | — |
+| applies prettier formatting when rebasing the migration branch (%s) | 83 | pending | — | — | — |
+| does not rebases migration branch when in dryRun is on (%s) | 118 | pending | — | — | — |
 
 ### `workers/repository/config-migration/branch/rebase › jsonStripWhiteSpaces()`
 

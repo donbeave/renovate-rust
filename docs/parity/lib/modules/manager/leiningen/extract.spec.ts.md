@@ -5,16 +5,16 @@
 ## `lib/modules/manager/leiningen/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/leiningen/extract.spec.ts
-**Total tests:** 4 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+**Total tests:** 4 | **Ported:** 1 | **Actionable:** 4 | **Status:** partial
 
 ### `modules/manager/leiningen/extract`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| trimAtKey | 10 | not-applicable | — | — | TypeScript-internal helper; Rust extractor uses different parser structure |
-| extractFromVectors | 22 | not-applicable | — | — | TypeScript-internal helper; Rust extractor uses different parser structure |
+| trimAtKey | 10 | pending | — | — | — |
+| extractFromVectors | 22 | pending | — | — | — |
 | extractPackageFile | 74 | ported | `leiningen.rs` | `extracts_dependencies` (+ extracts_managed_dependencies, extracts_plugins, dev_profile_dependencies_also_extracted) | — |
-| extractVariables | 239 | not-applicable | — | — | TypeScript-internal helper; Rust handles variable expansion inline in extract() |
+| extractVariables | 239 | pending | — | — | — |
 
 ---
 

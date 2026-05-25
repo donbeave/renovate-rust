@@ -5,17 +5,17 @@
 ## `lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts
-**Total tests:** 6 | **Ported:** 4 | **Actionable:** 4 | **Status:** ported
+**Total tests:** 6 | **Ported:** 4 | **Actionable:** 6 | **Status:** partial
 
 ### `config/migrations/custom/azure-gitlab-automerge-migration`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | should migrate non undefined gitLabAutomerge | 4 | ported | `migrate_validate.rs` | `git_lab_automerge_migrates_to_platform_automerge` | — |
-| should just remove undefined gitLabAutomerge | 14 | not-applicable | — | — | Rust JSON config has no `undefined` value; absent keys already produce the migrated empty object behavior |
+| should just remove undefined gitLabAutomerge | 14 | pending | — | — | — |
 | should override platformAutomerge when gitLabAutomerge defined | 24 | ported | `migrate_validate.rs` | `git_lab_automerge_overrides_platform_automerge` | — |
 | should migrate non undefined azureAutoComplete | 36 | ported | `migrate_validate.rs` | `azure_auto_complete_migrates_to_platform_automerge` | — |
-| should just remove undefined azureAutoComplete | 46 | not-applicable | — | — | Rust JSON config has no `undefined` value; absent keys already produce the migrated empty object behavior |
+| should just remove undefined azureAutoComplete | 46 | pending | — | — | — |
 | should override platformAutomerge when azureAutoComplete defined | 56 | ported | `migrate_validate.rs` | `azure_auto_complete_overrides_platform_automerge` | — |
 
 ---

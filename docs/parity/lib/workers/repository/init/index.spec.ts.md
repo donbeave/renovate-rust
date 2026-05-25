@@ -5,14 +5,14 @@
 ## `lib/workers/repository/init/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/repository/init/index.spec.ts
-**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** not-applicable
+**Total tests:** 2 | **Ported:** 0 | **Actionable:** 2 | **Status:** pending
 
 ### `workers/repository/init/index › initRepo`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| runs | 40 | not-applicable | — | — | tests repository initialization orchestration; worker orchestration out of scope |
-| warns on unsupported options | 52 | not-applicable | — | — | tests repository initialization orchestration; worker orchestration out of scope |
+| runs | 40 | pending | — | — | — |
+| warns on unsupported options | 52 | pending | — | — | — |
 
 ---
 

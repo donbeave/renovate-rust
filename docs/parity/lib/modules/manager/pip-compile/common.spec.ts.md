@@ -5,26 +5,26 @@
 ## `lib/modules/manager/pip-compile/common.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/pip-compile/common.spec.ts
-**Total tests:** 27 | **Ported:** 7 | **Actionable:** 7 | **Status:** ported
+**Total tests:** 27 | **Ported:** 7 | **Actionable:** 27 | **Status:** partial
 
 ### `extractHeaderCommand()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| -v | 27 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| -v | 48 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| errors on malformed options with argument | 77 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| errors on unknown options | 89 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| always errors on not allowed options | 101 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| throws on duplicate options | 113 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| throws when no source files passed as arguments | 127 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| throws on malformed header | 136 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| throws on mutually exclusive options | 140 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| returned sourceFiles returns all source files | 151 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| returned sourceFiles must not contain options (pip-compile) | 169 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| returned sourceFiles must not contain options (uv) | 181 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| detects custom command | 193 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| infer exec directory (cwd) from output file path and header command | 202 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
+| -v | 27 | pending | — | — | — |
+| -v | 48 | pending | — | — | — |
+| errors on malformed options with argument | 77 | pending | — | — | — |
+| errors on unknown options | 89 | pending | — | — | — |
+| always errors on not allowed options | 101 | pending | — | — | — |
+| throws on duplicate options | 113 | pending | — | — | — |
+| throws when no source files passed as arguments | 127 | pending | — | — | — |
+| throws on malformed header | 136 | pending | — | — | — |
+| throws on mutually exclusive options | 140 | pending | — | — | — |
+| returned sourceFiles returns all source files | 151 | pending | — | — | — |
+| returned sourceFiles must not contain options (pip-compile) | 169 | pending | — | — | — |
+| returned sourceFiles must not contain options (uv) | 181 | pending | — | — | — |
+| detects custom command | 193 | pending | — | — | — |
+| infer exec directory (cwd) from output file path and header command | 202 | pending | — | — | — |
 
 ### `extractPythonVersion()`
 
@@ -37,12 +37,12 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles both registryUrls and additionalRegistryUrls | 232 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| handles multiple additionalRegistryUrls | 259 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| handles hosts with only a username | 288 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| handles hosts with only a password | 306 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| handles invalid URLs | 324 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
-| handles multiple package files | 339 | not-applicable | — | — | tests pip-compile command construction for artifact management; external tool invocation out of scope |
+| handles both registryUrls and additionalRegistryUrls | 232 | pending | — | — | — |
+| handles multiple additionalRegistryUrls | 259 | pending | — | — | — |
+| handles hosts with only a username | 288 | pending | — | — | — |
+| handles hosts with only a password | 306 | pending | — | — | — |
+| handles invalid URLs | 324 | pending | — | — | — |
+| handles multiple package files | 339 | pending | — | — | — |
 
 ### `matchManager()`
 

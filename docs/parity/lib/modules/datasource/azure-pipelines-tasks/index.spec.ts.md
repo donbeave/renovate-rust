@@ -5,21 +5,21 @@
 ## `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/azure-pipelines-tasks/index.spec.ts
-**Total tests:** 10 | **Ported:** 1 | **Actionable:** 1 | **Status:** ported
+**Total tests:** 10 | **Ported:** 1 | **Actionable:** 10 | **Status:** partial
 
 ### `modules/datasource/azure-pipelines-tasks/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for unknown task | 21 | not-applicable | — | — | Renovate's Azure Pipelines Tasks `getReleases` release-list/null contract and process-wide mocked fallback registries are not implemented in Rust; Rust exposes a latest-version summary over the fallback JSON files. |
-| supports built-in tasks | 36 | not-applicable | — | — | Renovate's Azure Pipelines Tasks `getReleases` release-list response shape is not implemented in Rust; Rust exposes a latest-version summary over the fallback JSON files. |
-| supports marketplace tasks | 49 | not-applicable | — | — | Renovate's Azure Pipelines Tasks `getReleases` release-list response shape is not implemented in Rust; Rust exposes a latest-version summary over the fallback JSON files. |
-| is case insensitive | 64 | not-applicable | — | — | Renovate's Azure Pipelines Tasks `getReleases` release-list response shape is not implemented in Rust; Rust exposes a latest-version summary over the fallback JSON files. |
-| returns organization task with single version | 77 | not-applicable | — | — | Azure DevOps organization task API lookup, hostRules authentication, changelog mapping, and deprecation metadata are not implemented in the Rust datasource. |
-| identifies task based on task id | 112 | not-applicable | — | — | Azure DevOps organization task API lookup and task identity matching are not implemented in the Rust datasource. |
-| identifies task based on contributionIdentifier and id | 134 | not-applicable | — | — | Azure DevOps organization task API lookup and contributionIdentifier matching are not implemented in the Rust datasource. |
-| identifies task based on contributionIdentifier and name | 157 | not-applicable | — | — | Azure DevOps organization task API lookup and contributionIdentifier matching are not implemented in the Rust datasource. |
-| returns organization task with multiple versions | 180 | not-applicable | — | — | Azure DevOps organization task API lookup, changelog mapping, and deprecation metadata are not implemented in the Rust datasource. |
+| returns null for unknown task | 21 | pending | — | — | — |
+| supports built-in tasks | 36 | pending | — | — | — |
+| supports marketplace tasks | 49 | pending | — | — | — |
+| is case insensitive | 64 | pending | — | — | — |
+| returns organization task with single version | 77 | pending | — | — | — |
+| identifies task based on task id | 112 | pending | — | — | — |
+| identifies task based on contributionIdentifier and id | 134 | pending | — | — | — |
+| identifies task based on contributionIdentifier and name | 157 | pending | — | — | — |
+| returns organization task with multiple versions | 180 | pending | — | — | — |
 
 ### `modules/datasource/azure-pipelines-tasks/index › compare semver`
 

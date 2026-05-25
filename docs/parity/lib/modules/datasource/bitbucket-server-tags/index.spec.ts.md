@@ -5,23 +5,23 @@
 ## `lib/modules/datasource/bitbucket-server-tags/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/bitbucket-server-tags/index.spec.ts
-**Total tests:** 11 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 11 | **Ported:** 0 | **Actionable:** 11 | **Status:** pending
 
 ### `modules/datasource/bitbucket-server-tags/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns tags | 12 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| returns null on empty result | 66 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| returns null on missing registryUrl | 80 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| handles not found | 88 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| returns commit hash of provided tag | 104 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| missing hash | 124 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| returns most recent commit hash | 146 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| no commits | 173 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| returns null on empty result | 195 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| returns null on missing registryUrl | 211 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
-| handles not found | 219 | not-applicable | — | — | Bitbucket Server tags datasource tag and commit lookup is not implemented in Rust. |
+| returns tags | 12 | pending | — | — | — |
+| returns null on empty result | 66 | pending | — | — | — |
+| returns null on missing registryUrl | 80 | pending | — | — | — |
+| handles not found | 88 | pending | — | — | — |
+| returns commit hash of provided tag | 104 | pending | — | — | — |
+| missing hash | 124 | pending | — | — | — |
+| returns most recent commit hash | 146 | pending | — | — | — |
+| no commits | 173 | pending | — | — | — |
+| returns null on empty result | 195 | pending | — | — | — |
+| returns null on missing registryUrl | 211 | pending | — | — | — |
+| handles not found | 219 | pending | — | — | — |
 
 ---
 

@@ -5,13 +5,13 @@
 ## `lib/modules/manager/cargo/locked-version.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/cargo/locked-version.spec.ts
-**Total tests:** 8 | **Ported:** 7 | **Actionable:** 7 | **Status:** partial
+**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
 
 ### `extractLockFileVersions()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns null for missing lock file | 19 | not-applicable | — | — | TypeScript reads from filesystem (async); Rust tests inline content |
+| returns null for missing lock file | 19 | pending | — | — | — |
 | returns null for invalid lock file | 23 | ported | `cargo.rs` | `extract_versions_invalid_content_returns_none` | — |
 | returns empty map for lock file without packages | 28 | ported | `cargo.rs` | `extract_versions_no_packages_returns_empty` | — |
 | returns a map of package versions | 33 | ported | `cargo.rs` | `extract_versions_returns_map_of_package_versions` | — |

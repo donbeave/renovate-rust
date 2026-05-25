@@ -5,7 +5,7 @@
 ## `lib/workers/global/limits.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/limits.spec.ts
-**Total tests:** 19 | **Ported:** 19 | **Actionable:** 0 | **Status:** complete
+**Total tests:** 19 | **Ported:** 19 | **Actionable:** 19 | **Status:** ported
 
 ### `workers/global/limits`
 

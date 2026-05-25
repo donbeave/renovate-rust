@@ -5,20 +5,20 @@
 ## `lib/modules/versioning/hex/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/hex/index.spec.ts
-**Total tests:** 8 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 8 | **Ported:** 0 | **Actionable:** 8 | **Status:** pending
 
 ### `modules/versioning/hex/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| matches("$version", "$range") === $expected | 4 | not-applicable | — | — | Renovate's Hex versioning scheme is not implemented as a Rust versioning API; Rust Hex support is datasource/extractor oriented. |
-| getSatisfyingVersion($versions, "$range") === $expected | 19 | not-applicable | — | — | Renovate's Hex range satisfying-version helper is not implemented as a Rust versioning API. |
-| isValid("$input") === $expected | 30 | not-applicable | — | — | Renovate's Hex versioning validation is not implemented as a Rust versioning API. |
-| isSingleVersion("$version") === $expected | 41 | not-applicable | — | — | Renovate's Hex single-version classifier is not implemented as a Rust versioning API. |
-| getPinnedValue returns == prefixed version | 52 | not-applicable | — | — | Renovate's Hex pinned-value helper is not implemented as a Rust versioning API. |
-| isLessThanRange($version, $range) === $expected | 56 | not-applicable | — | — | Renovate's Hex range comparison helper is not implemented as a Rust versioning API. |
-| minSatisfyingVersion($versions, "$range") === $expected | 69 | not-applicable | — | — | Renovate's Hex range satisfying-version helper is not implemented as a Rust versioning API. |
-| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 80 | not-applicable | — | — | Renovate's Hex update-value helper is not implemented as a Rust versioning API. |
+| matches("$version", "$range") === $expected | 4 | pending | — | — | — |
+| getSatisfyingVersion($versions, "$range") === $expected | 19 | pending | — | — | — |
+| isValid("$input") === $expected | 30 | pending | — | — | — |
+| isSingleVersion("$version") === $expected | 41 | pending | — | — | — |
+| getPinnedValue returns == prefixed version | 52 | pending | — | — | — |
+| isLessThanRange($version, $range) === $expected | 56 | pending | — | — | — |
+| minSatisfyingVersion($versions, "$range") === $expected | 69 | pending | — | — | — |
+| getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" | 80 | pending | — | — | — |
 
 ---
 

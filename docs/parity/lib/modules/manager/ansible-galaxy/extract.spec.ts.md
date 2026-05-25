@@ -5,7 +5,7 @@
 ## `lib/modules/manager/ansible-galaxy/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/ansible-galaxy/extract.spec.ts
-**Total tests:** 14 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+**Total tests:** 14 | **Ported:** 9 | **Actionable:** 14 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -20,16 +20,16 @@
 | check if a requirements file of other systems returns null | 61 | ported | `ansible_galaxy.rs` | `non_ansible_content_returns_empty` | — |
 | check collection style requirements file | 66 | ported | `ansible_galaxy.rs` | `collections1_extracts_fourteen_deps_all_galaxy_hosted` | — |
 | check collection style requirements file in reverse order and missing empty line | 73 | ported | `ansible_galaxy.rs` | `collections_before_roles_extracts_all_four` | — |
-| check galaxy definition file | 79 | not-applicable | — | — | galaxy.yml uses a metadata format parsed by a separate TS function; Rust extract() produces 0 deps for it |
+| check galaxy definition file | 79 | pending | — | — | — |
 
 ### `getSliceEndNumber()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| negative start number returns -1 | 87 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
-| a start number bigger then number of lines return -1 | 92 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
-| choose first block | 97 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
-| choose second block | 102 | not-applicable | — | — | TypeScript internal parsing utility; Rust uses a state machine with no equivalent function |
+| negative start number returns -1 | 87 | pending | — | — | — |
+| a start number bigger then number of lines return -1 | 92 | pending | — | — | — |
+| choose first block | 97 | pending | — | — | — |
+| choose second block | 102 | pending | — | — | — |
 
 ---
 

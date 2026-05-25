@@ -5,13 +5,13 @@
 ## `lib/modules/datasource/deb/utils.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/deb/utils.spec.ts
-**Total tests:** 1 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 1 | **Ported:** 0 | **Actionable:** 1 | **Status:** pending
 
 ### `modules/datasource/deb/utils`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should throw error for unsupported compression | 29 | not-applicable | — | — | Debian datasource package-index decompression utilities are not implemented in Rust. |
+| should throw error for unsupported compression | 29 | pending | — | — | — |
 
 ---
 

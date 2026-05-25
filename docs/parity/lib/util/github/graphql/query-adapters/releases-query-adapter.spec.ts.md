@@ -5,16 +5,16 @@
 ## `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
 
 ### `util/github/graphql/query-adapters/releases-query-adapter`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| transforms items | 17 | not-applicable | — | — | tests GraphQL releases query adapter; GitHub GraphQL infrastructure out of scope |
-| filters out drafts | 28 | not-applicable | — | — | tests GraphQL releases query adapter; GitHub GraphQL infrastructure out of scope |
-| handles invalid items | 32 | not-applicable | — | — | tests GraphQL releases query adapter; GitHub GraphQL infrastructure out of scope |
-| marks prereleases as unstable | 36 | not-applicable | — | — | tests GraphQL releases query adapter; GitHub GraphQL infrastructure out of scope |
+| transforms items | 17 | pending | — | — | — |
+| filters out drafts | 28 | pending | — | — | — |
+| handles invalid items | 32 | pending | — | — | — |
+| marks prereleases as unstable | 36 | pending | — | — | — |
 
 ---
 

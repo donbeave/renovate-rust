@@ -5,7 +5,7 @@
 ## `lib/modules/manager/bazel-module/bazelrc.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/bazelrc.spec.ts
-**Total tests:** 19 | **Ported:** 9 | **Actionable:** 9 | **Status:** ported
+**Total tests:** 19 | **Ported:** 9 | **Actionable:** 19 | **Status:** partial
 
 ### `modules/manager/bazel-module/bazelrc › BazelOption`
 
@@ -29,16 +29,16 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| when .bazelrc does not exist | 103 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust exposes static `.bazelrc` parser helpers only |
-| when .bazelrc has invalid lines | 110 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust exposes static `.bazelrc` parser helpers only |
-| when .bazelrc has no imports | 128 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust exposes static `.bazelrc` parser helpers only |
-| when .bazelrc has import and try-import, try-import exists | 148 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust exposes static `.bazelrc` parser helpers only |
-| when .bazelrc has import and try-import, try-import does not exist | 173 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust exposes static `.bazelrc` parser helpers only |
-| when .bazelrc multi-level import | 188 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust exposes static `.bazelrc` parser helpers only |
-| when bazlerc files recursively import each other | 213 | not-applicable | — | — | Requires async mock filesystem `read()` traversal and recursion error reporting; Rust exposes static `.bazelrc` parser helpers only |
-| when .bazelrc refers to a non-local file | 239 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust exposes static `.bazelrc` parser helpers only |
-| when bazelrc has %workspace% paths in options | 255 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust path expansion helper is covered directly |
-| when bazelrc has %workspace% paths in imported files | 274 | not-applicable | — | — | Requires async mock filesystem `read()` traversal; Rust path expansion helper is covered directly |
+| when .bazelrc does not exist | 103 | pending | — | — | — |
+| when .bazelrc has invalid lines | 110 | pending | — | — | — |
+| when .bazelrc has no imports | 128 | pending | — | — | — |
+| when .bazelrc has import and try-import, try-import exists | 148 | pending | — | — | — |
+| when .bazelrc has import and try-import, try-import does not exist | 173 | pending | — | — | — |
+| when .bazelrc multi-level import | 188 | pending | — | — | — |
+| when bazlerc files recursively import each other | 213 | pending | — | — | — |
+| when .bazelrc refers to a non-local file | 239 | pending | — | — | — |
+| when bazelrc has %workspace% paths in options | 255 | pending | — | — | — |
+| when bazelrc has %workspace% paths in imported files | 274 | pending | — | — | — |
 
 ### `modules/manager/bazel-module/bazelrc › expandWorkspacePath`
 

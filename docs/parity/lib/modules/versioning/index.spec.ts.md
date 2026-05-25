@@ -5,16 +5,16 @@
 ## `lib/modules/versioning/index.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/versioning/index.spec.ts
-**Total tests:** 4 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 4 | **Ported:** 0 | **Actionable:** 4 | **Status:** pending
 
 ### `modules/versioning/index`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return versioning list | 8 | not-applicable | — | — | Renovate's TypeScript versioning registry list API is not implemented as a Rust API. |
-| should fallback to semver-coerced | 12 | not-applicable | — | — | Renovate's TypeScript versioning registry fallback API is not implemented as a Rust API. |
-| should accept config | 18 | not-applicable | — | — | Renovate's TypeScript configurable versioning registry API is not implemented as a Rust API. |
-| matches the API contract | 22 | not-applicable | — | — | TypeScript dynamic module/API contract validation has no direct Rust API parity target. |
+| should return versioning list | 8 | pending | — | — | — |
+| should fallback to semver-coerced | 12 | pending | — | — | — |
+| should accept config | 18 | pending | — | — | — |
+| matches the API contract | 22 | pending | — | — | — |
 
 ---
 

@@ -5,13 +5,13 @@
 ## `lib/modules/manager/azure-pipelines/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/azure-pipelines/extract.spec.ts
-**Total tests:** 29 | **Ported:** 28 | **Actionable:** 28 | **Status:** ported
+**Total tests:** 29 | **Ported:** 28 | **Actionable:** 29 | **Status:** partial
 
 ### `extractRepository / extractContainer / extractAzurePipelinesTaskDependency` helpers
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should parse a valid azure-pipelines file | 25 | not-applicable | — | — | Tests TS-internal YAML parser helper directly; Rust extractor goes through full pipeline only |
+| should parse a valid azure-pipelines file | 25 | pending | — | — | — |
 | return null on an invalid file | 30 | ported | `azure_pipelines.rs` | `invalid_yaml_returns_empty` | — |
 | should extract repository information | 36 | ported | `azure_pipelines.rs` | `extracts_github_repository_information` | — |
 | should return null when repository type is not github | 52 | ported | `azure_pipelines.rs` | `non_github_repository_type_returns_none` | — |

@@ -11,7 +11,7 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| slugifyUrl("$url") === $expected | 5 | not-applicable | — | — | tests changelog source selection logic tied to TypeScript platform integration |
+| slugifyUrl("$url") === $expected | 5 | pending | — | — | — |
 
 ### `workers/repository/update/pr/changelog/common › compareChangelogFilePath()`
 

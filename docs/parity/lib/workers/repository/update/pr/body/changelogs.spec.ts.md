@@ -12,7 +12,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns empty string when there is no release notes | 9 | ported | `branch.rs` | `get_changelogs_returns_empty_when_no_release_notes` | — |
-| returns release notes | 22 | not-applicable | — | — | tests PR changelog section generation with Handlebars; needs template infrastructure |
+| returns release notes | 22 | pending | — | — | — |
 
 ---
 

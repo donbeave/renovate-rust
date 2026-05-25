@@ -5,22 +5,22 @@
 ## `lib/util/minimatch.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/util/minimatch.spec.ts
-**Total tests:** 5 | **Ported:** 0 | **Actionable:** 0 | **Status:** not-applicable
+**Total tests:** 5 | **Ported:** 0 | **Actionable:** 5 | **Status:** pending
 
 ### `util/minimatch › minimatch`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| caches minimatch | 5 | not-applicable | — | — | Renovate's JavaScript `minimatch()` cache wrapper is not implemented as a Rust API; Rust compiles glob matchers at call sites. |
-| does not cache minimatch | 12 | not-applicable | — | — | Renovate's JavaScript `minimatch()` cache wrapper is not implemented as a Rust API. |
-| matches | 20 | not-applicable | — | — | Renovate's JavaScript `minimatch()` wrapper is not implemented as a Rust API; Rust glob behavior is covered through config/string matching tests. |
+| caches minimatch | 5 | pending | — | — | — |
+| does not cache minimatch | 12 | pending | — | — | — |
+| matches | 20 | pending | — | — | — |
 
 ### `util/minimatch › minimatchFilter`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should return a function | 32 | not-applicable | — | — | Renovate's JavaScript `minimatchFilter()` function factory is not implemented as a Rust API. |
-| should correctly match filenames | 37 | not-applicable | — | — | Renovate's JavaScript `minimatchFilter()` function factory is not implemented as a Rust API. |
+| should return a function | 32 | pending | — | — | — |
+| should correctly match filenames | 37 | pending | — | — | — |
 
 ---
 

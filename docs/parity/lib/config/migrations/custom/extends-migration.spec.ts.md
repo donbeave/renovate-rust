@@ -5,7 +5,7 @@
 ## `lib/config/migrations/custom/extends-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/extends-migration.spec.ts
-**Total tests:** 6 | **Ported:** 5 | **Actionable:** 5 | **Status:** ported
+**Total tests:** 6 | **Ported:** 5 | **Actionable:** 6 | **Status:** partial
 
 ### `config/migrations/custom/extends-migration`
 
@@ -15,7 +15,7 @@
 | migrates presets array | 23 | ported | `migrate_validate.rs` | `extends_array_normalizes_presets_in_place` | — |
 | should remove non string values | 34 | ported | `migrate_validate.rs` | `extends_array_removes_non_string_values` | — |
 | should remove removed presets | 44 | ported | `migrate_validate.rs` | `extends_array_removes_deleted_presets` | — |
-| migrates presets | 54 | not-applicable | — | — | Rust config has no mutable GlobalConfig.migratePresets registry equivalent for per-test custom preset rewrite injection |
+| migrates presets | 54 | pending | — | — | — |
 | migrate merge confidence config preset to internal preset | 67 | ported | `migrate_validate.rs` | `extends_merge_confidence_preset_migrates_to_internal_preset` | — |
 
 ---

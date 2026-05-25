@@ -5,7 +5,7 @@
 ## `lib/modules/manager/dockerfile/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/dockerfile/extract.spec.ts
-**Total tests:** 76 | **Ported:** 67 | **Actionable:** 67 | **Status:** ported
+**Total tests:** 76 | **Ported:** 67 | **Actionable:** 76 | **Status:** partial
 
 ### `extractPackageFile()`
 
@@ -76,8 +76,8 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| rejects null | 1493 | not-applicable | — | — | TypeScript-only null guard; Rust Option handles this at type level |
-| rejects empty or whitespace | 1497 | not-applicable | — | — | TypeScript-only guard; no Rust equivalent needed |
+| rejects null | 1493 | pending | — | — | — |
+| rejects empty or whitespace | 1497 | pending | — | — | — |
 | handles default environment variable values | 1501 | ported | `dockerfile.rs` | `default_variable_value_extracted` | — |
 | skips tag containing a variable | 1563 | ported | `dockerfile.rs` | `tag_with_variable_is_skipped` | — |
 | skips depName containing a non default variable at start | 1574 | ported | `dockerfile.rs` | `arg_variable_is_skipped` | — |
@@ -90,13 +90,13 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| handles no variable | 1651 | not-applicable | — | — | TypeScript utility with no Rust equivalent; variable expansion is done inline |
-| handles simple variable | 1655 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
-| handles escaped variable | 1661 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
-| handles complex variable | 1667 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
-| handles complex variable with static default value | 1673 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
-| handles complex variable with other variable as default value | 1679 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
-| handles multiple variables | 1685 | not-applicable | — | — | TypeScript utility with no Rust equivalent |
+| handles no variable | 1651 | pending | — | — | — |
+| handles simple variable | 1655 | pending | — | — | — |
+| handles escaped variable | 1661 | pending | — | — | — |
+| handles complex variable | 1667 | pending | — | — | — |
+| handles complex variable with static default value | 1673 | pending | — | — | — |
+| handles complex variable with other variable as default value | 1679 | pending | — | — | — |
+| handles multiple variables | 1685 | pending | — | — | — |
 
 ---
 

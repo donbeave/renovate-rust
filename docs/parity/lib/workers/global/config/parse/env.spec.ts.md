@@ -5,7 +5,7 @@
 ## `lib/workers/global/config/parse/env.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/env.spec.ts
-**Total tests:** 45 | **Ported:** 40 | **Actionable:** 40 | **Status:** ported
+**Total tests:** 45 | **Ported:** 40 | **Actionable:** 45 | **Status:** partial
 
 ### `workers/global/config/parse/env › .getConfig(env)`
 
@@ -48,7 +48,7 @@
 |---|---|---|---|---|---|
 | crashes | 357 | ported | `config_env.rs` | `invalid_renovate_config_is_rejected` | — |
 | migrates RENOVATE_CONFIG | 367 | ported | `config_env.rs` | `renovate_config_automerge_any_is_migrated` | — |
-| warns if config in RENOVATE_CONFIG is invalid | 376 | not-applicable | — | — | Rust `RENOVATE_CONFIG` parsing uses strongly typed deserialization and returns parse errors instead of Renovate's warning collector flow |
+| warns if config in RENOVATE_CONFIG is invalid | 376 | pending | — | — | — |
 
 ### `workers/global/config/parse/env › .getConfig(env) › migrations`
 
@@ -60,15 +60,15 @@
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| has no duplicate env names across options | 396 | not-applicable | — | — | TypeScript option metadata registry; Rust env names are static `clap` attributes |
+| has no duplicate env names across options | 396 | pending | — | — | — |
 
 ### `workers/global/config/parse/env › .getEnvName(definition)`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| returns empty | 418 | not-applicable | — | — | TypeScript option-definition helper; Rust env names are static `clap` attributes |
-| returns existing env | 426 | not-applicable | — | — | TypeScript option-definition helper; Rust env names are static `clap` attributes |
-| generates RENOVATE_ env | 434 | not-applicable | — | — | TypeScript option-definition helper; Rust env names are static `clap` attributes |
+| returns empty | 418 | pending | — | — | — |
+| returns existing env | 426 | pending | — | — | — |
+| generates RENOVATE_ env | 434 | pending | — | — | — |
 | dryRun boolean true | 441 | ported | `config_env.rs` | `dry_run_true_maps_to_full` | — |
 | dryRun boolean false | 449 | ported | `config_env.rs` | `dry_run_false_disables_dry_run` | — |
 | dryRun null | 457 | ported | `config_env.rs` | `dry_run_null_disables_dry_run` | — |
