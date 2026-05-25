@@ -89,6 +89,47 @@ fn normalize_url(raw: &str) -> String {
     trimmed.to_owned()
 }
 
+/// Resolve a relative submodule URL against the parent repository's remote URL.
+///
+/// Given `base = "https://github.com/renovatebot/renovate.git"` and
+/// `relative = "../../PowerShell/PowerShell-Docs"`, returns
+/// `"https://github.com/PowerShell/PowerShell-Docs"`.
+fn resolve_relative_url(base: &str, relative: &str) -> String {
+    // Strip trailing .git and any trailing slash from the base.
+    let base = base.trim_end_matches(".git").trim_end_matches('/');
+    // Build a fake absolute URL by appending the relative path and using
+    // simple segment traversal.
+    let mut segments: Vec<&str> = base.split('/').collect();
+    for part in relative.split('/') {
+        match part {
+            ".." => {
+                segments.pop();
+            }
+            "." | "" => {}
+            p => segments.push(p),
+        }
+    }
+    segments.join("/")
+}
+
+/// Parse a `.gitmodules` file and return all submodule deps.
+///
+/// When `remote_url` is provided, relative submodule URLs are resolved
+/// against it (mirrors TypeScript `extractPackageFile` behaviour).
+///
+/// Returns an empty `Vec` when the content has no submodule sections.
+pub fn extract_with_remote(content: &str, remote_url: Option<&str>) -> Vec<GitSubmoduleDep> {
+    let mut deps = extract(content);
+    if let Some(remote) = remote_url {
+        for dep in &mut deps {
+            if !dep.url.starts_with("http") && !dep.url.starts_with("git@") {
+                dep.url = resolve_relative_url(remote, &dep.url);
+            }
+        }
+    }
+    deps
+}
+
 /// Parse a `.gitmodules` file and return all submodule deps.
 ///
 /// Returns an empty `Vec` when the content has no submodule sections.
@@ -281,6 +322,23 @@ mod tests {
 "#;
         let deps = extract(content);
         assert_eq!(deps[0].url, "../../PowerShell/PowerShell-Docs");
+    }
+
+    // Ported: "when using a relative path" — git-submodules/extract.spec.ts line 80
+    #[test]
+    fn relative_url_resolved_with_remote() {
+        let content = r#"
+[submodule "PowerShell-Docs"]
+	path = PowerShell-Docs
+	url = ../../PowerShell/PowerShell-Docs
+	branch = staging
+"#;
+        let deps = extract_with_remote(
+            content,
+            Some("https://github.com/renovatebot/renovate.git"),
+        );
+        assert_eq!(deps.len(), 1);
+        assert_eq!(deps[0].url, "https://github.com/PowerShell/PowerShell-Docs");
     }
 
     // Ported: "given semver version is extracted from branch and versioning is set to semver" — git-submodules/extract.spec.ts line 127

@@ -5,14 +5,14 @@
 ## `lib/modules/manager/bazel-module/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/bazel-module/extract.spec.ts
-**Total tests:** 35 | **Ported:** 34 | **Actionable:** 35 | **Status:** partial
+**Total tests:** 35 | **Ported:** 35 | **Actionable:** 35 | **Status:** ported
 
 ### `extractPackageFile()`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | returns null if fails to parse | 25 | ported | `bazel_module.rs` | `malformed_content_returns_empty` | — |
-| returns null if something throws an error | 33 | pending | — | — | — |
+| returns null if something throws an error | 33 | ported | `bazel_module.rs` | `unexpected_parser_input_returns_empty` | — |
 | returns null if file is empty | 41 | ported | `bazel_module.rs` | `empty_content_returns_empty` | — |
 | returns null if file has unrecognized declarations | 46 | ported | `bazel_module.rs` | `empty_file_returns_empty` (+ comment_lines_stripped) | — |
 | returns bazel_dep and git_override dependencies | 54 | ported | `bazel_module.rs` | `extracts_bazel_dep` (+ extracts_dev_dependency, extracts_multiline_dep, multiple_deps) | — |

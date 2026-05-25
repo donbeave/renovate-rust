@@ -691,6 +691,17 @@ pub fn parse_lock_file(content: &str) -> Option<CargoLock> {
     Some(CargoLock { package: packages })
 }
 
+/// Extract a map of `package_name → [versions]` from optional Cargo.lock content.
+///
+/// Mirrors `lib/modules/manager/cargo/locked-version.ts` `extractLockFileVersions()`.
+/// Returns `None` when `content` is `None` (file missing) or when the content
+/// is unparseable.
+pub fn extract_lock_file_versions(
+    content: Option<&str>,
+) -> Option<HashMap<String, Vec<String>>> {
+    extract_lock_file_content_versions(content?)
+}
+
 /// Extract a map of `package_name → [versions]` from Cargo.lock content.
 ///
 /// Mirrors `lib/modules/manager/cargo/locked-version.ts`
@@ -1433,6 +1444,12 @@ mod renovate_compat_tests {
     #[test]
     fn parse_lock_file_invalid() {
         assert!(parse_lock_file("foo").is_none());
+    }
+
+    // Ported: "returns null for missing lock file" — modules/manager/cargo/locked-version.spec.ts line 19
+    #[test]
+    fn extract_versions_missing_file_returns_none() {
+        assert!(extract_lock_file_versions(None).is_none());
     }
 
     // Ported: "returns null for invalid lock file" — modules/manager/cargo/locked-version.spec.ts line 23

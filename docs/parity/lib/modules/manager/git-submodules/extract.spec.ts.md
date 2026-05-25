@@ -5,7 +5,7 @@
 ## `lib/modules/manager/git-submodules/extract.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/modules/manager/git-submodules/extract.spec.ts
-**Total tests:** 8 | **Ported:** 7 | **Actionable:** 8 | **Status:** partial
+**Total tests:** 8 | **Ported:** 8 | **Actionable:** 8 | **Status:** ported
 
 ### `extractPackageFile()`
 
@@ -23,7 +23,7 @@
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
 | when using SSH clone URL | 73 | ported | `git_submodules.rs` | `ssh_clone_url_converted_to_https_for_source_url` | — |
-| when using a relative path | 80 | pending | — | — | — |
+| when using a relative path | 80 | ported | `git_submodules.rs` | `relative_url_resolved_with_remote` | — |
 
 ---
 

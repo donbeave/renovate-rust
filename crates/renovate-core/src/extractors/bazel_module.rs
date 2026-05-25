@@ -2853,6 +2853,14 @@ single_version_override(
         assert!(extract("blahhhhh:foo:@what\n").is_empty());
     }
 
+    // Ported: "returns null if something throws an error" — bazel-module/extract.spec.ts line 33
+    #[test]
+    fn unexpected_parser_input_returns_empty() {
+        // TS test mocks parser.parse to throw; Rust handles all errors via Result.
+        // Calling extract() with the same input ("content") must return empty, not panic.
+        assert!(extract("content").is_empty());
+    }
+
     // Ported: "returns null if file has unrecognized declarations" — bazel-module/extract.spec.ts line 46
     #[test]
     fn comment_lines_stripped() {
