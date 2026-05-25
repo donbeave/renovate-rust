@@ -452,7 +452,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/distro.spec.ts` | Not done | [details](lib/modules/versioning/distro.spec.ts.md) |
 | `lib/modules/versioning/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/versioning/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/versioning/deno/index.spec.ts` | Done | [details](lib/modules/versioning/deno/index.spec.ts.md) |
-| `lib/modules/versioning/docker/index.spec.ts` | Not done | [details](lib/modules/versioning/docker/index.spec.ts.md) |
+| `lib/modules/versioning/docker/index.spec.ts` | Done | [details](lib/modules/versioning/docker/index.spec.ts.md) |
 | `lib/modules/versioning/rez/index.spec.ts` | Not done | [details](lib/modules/versioning/rez/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/index.spec.ts` | Done | [details](lib/modules/versioning/rust-release-channel/index.spec.ts.md) |
 | `lib/modules/versioning/rust-release-channel/parse.spec.ts` | Done | [details](lib/modules/versioning/rust-release-channel/parse.spec.ts.md) |
@@ -490,7 +490,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/semver/index.spec.ts` | Done | [details](lib/modules/versioning/semver/index.spec.ts.md) |
 | `lib/modules/versioning/semver/common.spec.ts` | Done | [details](lib/modules/versioning/semver/common.spec.ts.md) |
 | `lib/modules/versioning/swift/index.spec.ts` | Not done | [details](lib/modules/versioning/swift/index.spec.ts.md) |
-| `lib/modules/versioning/go-mod-directive/index.spec.ts` | Not done | [details](lib/modules/versioning/go-mod-directive/index.spec.ts.md) |
+| `lib/modules/versioning/go-mod-directive/index.spec.ts` | Done | [details](lib/modules/versioning/go-mod-directive/index.spec.ts.md) |
 | `lib/modules/versioning/deb/index.spec.ts` | Not done | [details](lib/modules/versioning/deb/index.spec.ts.md) |
 | `lib/modules/versioning/nuget/version.spec.ts` | Done | [details](lib/modules/versioning/nuget/version.spec.ts.md) |
 | `lib/modules/versioning/nuget/parser.spec.ts` | Not done | [details](lib/modules/versioning/nuget/parser.spec.ts.md) |
