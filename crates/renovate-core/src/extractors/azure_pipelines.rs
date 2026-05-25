@@ -233,6 +233,28 @@ mod tests {
             .collect()
     }
 
+    // Ported: "should parse a valid azure-pipelines file" — azure-pipelines/extract.spec.ts line 25
+    #[test]
+    fn parses_valid_azure_pipelines_file() {
+        let content = r#"resources:
+  repositories:
+    - type: github
+      name: renovate/renovate
+      ref: refs/heads/master
+    - type: github
+      name: user/repo
+      ref: refs/tags/v0.5.1
+  containers:
+    - container: linux
+      image: ubuntu:16.04
+    - container: python
+      image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
+    - container: missingimage
+"#;
+        let deps = extract(content);
+        assert!(!deps.is_empty(), "should extract dependencies from valid file");
+    }
+
     // Ported: "should extract container information" — azure-pipelines/extract.spec.ts line 187
     #[test]
     fn extracts_container_image() {

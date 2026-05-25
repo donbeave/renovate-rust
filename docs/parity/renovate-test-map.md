@@ -1,6 +1,6 @@
 # Renovate Test Map
 
-**Progress:** 3071 / 11677 total tests ported (26%) · pending 8605 · not-applicable 1 (0% of total) — updated 2026-05-25
+**Progress:** 3097 / 11677 total tests ported (27%) · pending 8579 · not-applicable 1 (0% of total) — updated 2026-05-25
 
 This file is intentionally compact. It tracks one row per upstream Renovate `.spec.ts` file and uses only two root statuses:
 
@@ -151,14 +151,14 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/github-release-attachments/digest.spec.ts` | Not done | [details](lib/modules/datasource/github-release-attachments/digest.spec.ts.md) |
 | `lib/modules/datasource/python-version/index.spec.ts` | Not done | [details](lib/modules/datasource/python-version/index.spec.ts.md) |
 | `lib/modules/datasource/deno/index.spec.ts` | Not done | [details](lib/modules/datasource/deno/index.spec.ts.md) |
-| `lib/modules/datasource/flutter-version/index.spec.ts` | Not done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
+| `lib/modules/datasource/flutter-version/index.spec.ts` | Done | [details](lib/modules/datasource/flutter-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-packages/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-packages/index.spec.ts.md) |
 | `lib/modules/datasource/hexpm-bob/index.spec.ts` | Not done | [details](lib/modules/datasource/hexpm-bob/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-plugin/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-plugin/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/index.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/index.spec.ts.md) |
 | `lib/modules/datasource/sbt-package/util.spec.ts` | Not done | [details](lib/modules/datasource/sbt-package/util.spec.ts.md) |
-| `lib/modules/datasource/node-version/index.spec.ts` | Not done | [details](lib/modules/datasource/node-version/index.spec.ts.md) |
-| `lib/modules/datasource/dart-version/index.spec.ts` | Not done | [details](lib/modules/datasource/dart-version/index.spec.ts.md) |
+| `lib/modules/datasource/node-version/index.spec.ts` | Done | [details](lib/modules/datasource/node-version/index.spec.ts.md) |
+| `lib/modules/datasource/dart-version/index.spec.ts` | Done | [details](lib/modules/datasource/dart-version/index.spec.ts.md) |
 | `lib/modules/datasource/gitea-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/gitea-releases/index.spec.ts.md) |
 | `lib/modules/datasource/forgejo-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/forgejo-releases/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-releases/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-releases/index.spec.ts.md) |
@@ -200,8 +200,8 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/dotnet-version/index.spec.ts` | Not done | [details](lib/modules/datasource/dotnet-version/index.spec.ts.md) |
 | `lib/modules/datasource/elm-package/index.spec.ts` | Not done | [details](lib/modules/datasource/elm-package/index.spec.ts.md) |
 | `lib/modules/datasource/ruby-version/index.spec.ts` | Not done | [details](lib/modules/datasource/ruby-version/index.spec.ts.md) |
-| `lib/modules/datasource/rust-version/index.spec.ts` | Not done | [details](lib/modules/datasource/rust-version/index.spec.ts.md) |
-| `lib/modules/datasource/rust-version/parse.spec.ts` | Not done | [details](lib/modules/datasource/rust-version/parse.spec.ts.md) |
+| `lib/modules/datasource/rust-version/index.spec.ts` | Done | [details](lib/modules/datasource/rust-version/index.spec.ts.md) |
+| `lib/modules/datasource/rust-version/parse.spec.ts` | Done | [details](lib/modules/datasource/rust-version/parse.spec.ts.md) |
 | `lib/modules/datasource/custom/index.spec.ts` | Not done | [details](lib/modules/datasource/custom/index.spec.ts.md) |
 | `lib/modules/datasource/rpm/index.spec.ts` | Not done | [details](lib/modules/datasource/rpm/index.spec.ts.md) |
 | `lib/modules/datasource/golang-version/index.spec.ts` | Not done | [details](lib/modules/datasource/golang-version/index.spec.ts.md) |
