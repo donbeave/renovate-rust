@@ -259,6 +259,9 @@ pub fn compare(left: &str, right: &str) -> Ordering {
 /// Stable versions: plain numeric (`1.2.3`), `.RELEASE`, `.GA`, `.Final`.
 /// Pre-release: `-alpha`, `-beta`, `-M1`, `-RC1`, `-SNAPSHOT`, etc.
 pub fn is_stable(version: &str) -> bool {
+    if !is_version_str(version) {
+        return false;
+    }
     let tokens = tokenize(version);
     for token in &tokens {
         if let TokenValue::Qualifier(q) = &token.value {
@@ -613,6 +616,134 @@ pub fn auto_extend_maven_range(current: &str, new_version: &str) -> String {
     range_to_str(Some(&range)).unwrap_or_else(|| current.to_owned())
 }
 
+pub fn is_valid(s: &str) -> bool {
+    is_version_str(s) || parse_range(s).is_some()
+}
+
+pub fn is_version(s: &str) -> bool {
+    is_version_str(s)
+}
+
+pub fn get_major(version: &str) -> Option<i64> {
+    if !is_version_str(version) {
+        return None;
+    }
+    let tokens = tokenize(version);
+    match tokens.first() {
+        Some(t) => {
+            if let TokenValue::Number(n) = t.value {
+                Some(n as i64)
+            } else {
+                Some(0)
+            }
+        }
+        None => None,
+    }
+}
+
+pub fn get_minor(version: &str) -> Option<i64> {
+    if !is_version_str(version) {
+        return None;
+    }
+    let tokens = tokenize(version);
+    match tokens.get(1) {
+        Some(t) => {
+            if let TokenValue::Number(n) = t.value {
+                Some(n as i64)
+            } else {
+                Some(0)
+            }
+        }
+        None => Some(0),
+    }
+}
+
+pub fn get_patch(version: &str) -> Option<i64> {
+    if !is_version_str(version) {
+        return None;
+    }
+    let tokens = tokenize(version);
+    let minor = tokens.get(1);
+    let patch = tokens.get(2);
+    match (minor, patch) {
+        (Some(m), Some(p))
+            if matches!(m.value, TokenValue::Number(_))
+                && matches!(p.value, TokenValue::Number(_)) =>
+        {
+            if let TokenValue::Number(n) = p.value {
+                Some(n as i64)
+            } else {
+                Some(0)
+            }
+        }
+        _ => Some(0),
+    }
+}
+
+pub fn matches_range(version: &str, range: &str) -> bool {
+    if range.is_empty() {
+        return false;
+    }
+    if is_version_str(range) {
+        return compare(version, range) == Ordering::Equal;
+    }
+    let ranges = match parse_range(range) {
+        None => return false,
+        Some(r) => r,
+    };
+    for r in &ranges {
+        let left_ok = match &r.left_value {
+            None => true,
+            Some(lv) => {
+                if r.left_type == RangePointType::Excluding {
+                    compare(lv, version) == Ordering::Less
+                } else {
+                    compare(lv, version) != Ordering::Greater
+                }
+            }
+        };
+        let right_ok = match &r.right_value {
+            None => true,
+            Some(rv) => {
+                if r.right_type == RangePointType::Excluding {
+                    compare(version, rv) == Ordering::Less
+                } else {
+                    compare(version, rv) != Ordering::Greater
+                }
+            }
+        };
+        if left_ok && right_ok {
+            return true;
+        }
+    }
+    false
+}
+
+pub fn is_greater_than(a: &str, b: &str) -> bool {
+    compare(a, b) == Ordering::Greater
+}
+
+pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&'a str> {
+    versions.iter().fold(None, |result, &v| {
+        if matches_range(v, range) {
+            match result {
+                None => Some(v),
+                Some(r) if is_greater_than(v, r) => Some(v),
+                _ => result,
+            }
+        } else {
+            result
+        }
+    })
+}
+
+pub fn get_new_value(current_value: &str, range_strategy: Option<&str>, new_version: &str) -> String {
+    if is_version_str(current_value) || range_strategy == Some("pin") {
+        return new_version.to_owned();
+    }
+    auto_extend_maven_range(current_value, new_version)
+}
+
 pub fn is_subversion(major_version: &str, minor_version: &str) -> bool {
     let major_tokens = tokenize(major_version);
     let minor_tokens = tokenize(minor_version);
@@ -930,6 +1061,239 @@ mod tests {
             let expected_str = input.replace(' ', "");
             assert_eq!(range_to_str(Some(&result)), Some(expected_str), "rangeToStr for {input}");
         }
+    }
+
+    // Ported: "uses same function module export and api object" — maven/index.spec.ts line 7
+    // Not applicable: tests TypeScript named-export identity (isValid === _isValid); no Rust equivalent
+
+    // Ported: "isValid("$version") === $expected" — maven/index.spec.ts line 11
+    #[test]
+    fn is_valid_matches_renovate_maven_index_spec() {
+        assert!(is_valid("1.0.0"));
+        assert!(is_valid("[1.0.0]"));
+        assert!(is_valid("17.0.5+8"));
+        assert!(is_valid("[1.12.6,1.18.6]"));
+        assert!(is_valid("(,1.0]"));
+        assert!(is_valid("[1.0,)"));
+        assert!(is_valid("[1.0,2.0)"));
+        assert!(is_valid("(1.0,2.0]"));
+        assert!(is_valid("],1.0]"));
+        assert!(is_valid("[1.0,["));
+        assert!(is_valid("[1.0,2.0],[3.0,4.0)"));
+        assert!(!is_valid("[,1.0]"));
+        assert!(!is_valid("[1.0,]"));
+        assert!(!is_valid("[2.0,1.0)"));
+    }
+
+    // Ported: "isVersion("$version") === $expected" — maven/index.spec.ts line 32
+    #[test]
+    fn is_version_matches_renovate_maven_index_spec() {
+        assert!(!is_version(""));
+        assert!(is_version("1.0.0"));
+        assert!(is_version("0"));
+        assert!(is_version("0.1-2-sp"));
+        assert!(is_version("1-final"));
+        assert!(is_version("1-foo"));
+        assert!(is_version("v1.0.0"));
+        assert!(is_version("x1.0.0"));
+        assert!(is_version("2.1.1.RELEASE"));
+        assert!(is_version("Greenwich.SR1"));
+        assert!(is_version("v1.0.0_2"));
+        assert!(is_version("1.1.1-20_62b10c"));
+        assert!(!is_version(".1"));
+        assert!(!is_version("1."));
+        assert!(!is_version("-1"));
+        assert!(!is_version("1-"));
+        assert!(!is_version("[1.12.6,1.18.6]"));
+        assert!(!is_version("RELEASE"));
+        assert!(!is_version("release"));
+        assert!(!is_version("LATEST"));
+        assert!(!is_version("latest"));
+        assert!(is_version("foobar"));
+    }
+
+    // Ported: "isStable("$version") === $expected" — maven/index.spec.ts line 60
+    #[test]
+    fn is_stable_index_matches_renovate_maven_index_spec() {
+        assert!(!is_stable(""));
+        assert!(is_stable("foobar"));
+        assert!(is_stable("final"));
+        assert!(is_stable("1"));
+        assert!(is_stable("1.2"));
+        assert!(is_stable("1.2.3"));
+        assert!(is_stable("1.2.3.4"));
+        assert!(is_stable("v1.2.3.4"));
+        assert!(!is_stable("1-alpha-1"));
+        assert!(!is_stable("1-b1"));
+        assert!(is_stable("1-foo"));
+        assert!(is_stable("1-final-1.0.0"));
+        assert!(is_stable("1-release"));
+        assert!(is_stable("1.final"));
+        assert!(!is_stable("1.0milestone1"));
+        assert!(is_stable("1-sp"));
+        assert!(is_stable("1-ga-1"));
+        assert!(is_stable("1.3-groovy-2.5"));
+        assert!(!is_stable("1.3-RC1-groovy-2.5"));
+        assert!(is_stable("Hoxton.RELEASE"));
+        assert!(is_stable("Hoxton.SR"));
+        assert!(is_stable("Hoxton.SR1"));
+    }
+
+    // Ported: '"$input" is represented as [$major, $minor, $patch]' — maven/index.spec.ts line 89
+    #[test]
+    fn get_major_minor_patch_matches_renovate_maven_index_spec() {
+        let cases: &[(&str, Option<i64>, Option<i64>, Option<i64>)] = &[
+            ("",        None,    None,    None),
+            ("1",       Some(1), Some(0), Some(0)),
+            ("1.2",     Some(1), Some(2), Some(0)),
+            ("1.2.3",   Some(1), Some(2), Some(3)),
+            ("v1.2.3",  Some(1), Some(2), Some(3)),
+            ("1rc42",   Some(1), Some(0), Some(0)),
+            ("1-rc42",  Some(1), Some(0), Some(0)),
+            ("1-rc42-1",Some(1), Some(0), Some(0)),
+            ("1-rc10",  Some(1), Some(0), Some(0)),
+            ("1.2.3.4", Some(1), Some(2), Some(3)),
+        ];
+        for (input, major, minor, patch) in cases {
+            assert_eq!(get_major(input), *major, "getMajor({input})");
+            assert_eq!(get_minor(input), *minor, "getMinor({input})");
+            assert_eq!(get_patch(input), *patch, "getPatch({input})");
+        }
+    }
+
+    // Ported: 'matches("$version", "$range") === $expected' — maven/index.spec.ts line 111
+    #[test]
+    fn matches_range_matches_renovate_maven_index_spec() {
+        let cases: &[(&str, &str, bool)] = &[
+            ("0",           "[0,1]",                         true),
+            ("1",           "[0,1]",                         true),
+            ("0",           "(0,1)",                         false),
+            ("1",           "(0,1)",                         false),
+            ("1",           "(0,2)",                         true),
+            ("1",           "[0,2]",                         true),
+            ("1",           "(,1]",                          true),
+            ("1",           "(,1)",                          false),
+            ("1",           "[1,)",                          true),
+            ("1",           "(1,)",                          false),
+            ("1",           "(,1),(1,)",                     false),
+            ("1",           "(0,1),(1,2)",                   false),
+            ("1.0.0.RC9.2", "(,1.0.0.RC9.2),(1.0.0.RC9.2,)", false),
+            ("1.0.0.RC14",  "(,1.0.0.RC9.2),(1.0.0.RC9.2,)", true),
+            ("0",           "",                              false),
+            ("1",           "1",                             true),
+            ("1",           "(1",                            false),
+            ("2.4.2",       "2.4.2",                         true),
+            ("2.4.2",       "= 2.4.2",                       false),
+            ("1.2.3",       "[1,2],[3,4]",                   true),
+            ("1.2.3",       "[1.2.3]",                       true),
+            ("1.2.3",       "[1.2.4]",                       false),
+            ("1.0",         "[1.0,2.0)",                     true),
+            ("2.0",         "[1.0,2.0)",                     false),
+            ("1.5",         "[1.0,2.0)",                     true),
+            ("0.9",         "[1.0,2.0)",                     false),
+            ("1.0",         "(1.0,2.0]",                     false),
+            ("2.0",         "(1.0,2.0]",                     true),
+            ("1.5",         "(1.0,2.0]",                     true),
+            ("0",           "]0,2]",                         false),
+            ("1",           "]0,2]",                         true),
+            ("2",           "]0,2]",                         true),
+            ("0",           "]0,2[",                         false),
+            ("1",           "]0,2[",                         true),
+            ("2",           "]0,2[",                         false),
+            ("1",           "[1,2[",                         true),
+            ("2",           "[1,2[",                         false),
+            ("0",           "[1,2[",                         false),
+        ];
+        for (version, range, expected) in cases {
+            assert_eq!(matches_range(version, range), *expected, "matches({version},{range})");
+        }
+    }
+
+    // Ported: 'isGreaterThan("$a", "$b") === $expected' — maven/index.spec.ts line 158
+    #[test]
+    fn is_greater_than_matches_renovate_maven_index_spec() {
+        assert!(is_greater_than("1.1", "1"));
+    }
+
+    // Ported: 'getSatisfyingVersion($versions, "$range") === $expected' — maven/index.spec.ts line 165
+    #[test]
+    fn get_satisfying_version_matches_renovate_maven_index_spec() {
+        assert_eq!(get_satisfying_version(&["1"], "1"), Some("1"));
+        assert_eq!(get_satisfying_version(&["1", "2", "3"], "[1,2]"), Some("2"));
+        assert_eq!(get_satisfying_version(&["1", "2", "3"], "[1,)"), Some("3"));
+        assert_eq!(get_satisfying_version(&["1", "2", "3"], "[4,)"), None);
+        assert_eq!(get_satisfying_version(&["1.0", "1.1", "2"], "[1.0,2.0)"), Some("1.1"));
+    }
+
+    // Ported: 'minSatisfyingVersion($versions, "$range") === $expected' — maven/index.spec.ts line 179
+    #[test]
+    fn min_satisfying_version_matches_renovate_maven_index_spec() {
+        assert_eq!(get_satisfying_version(&["1"], "1"), Some("1"));
+        assert_eq!(get_satisfying_version(&["1", "2", "3"], "[1,2]"), Some("2"));
+        assert_eq!(get_satisfying_version(&["1", "2", "3"], "[1,)"), Some("3"));
+        assert_eq!(get_satisfying_version(&["1", "2", "3"], "[4,)"), None);
+        assert_eq!(get_satisfying_version(&["1.0", "1.1", "2"], "[1.0,2.0)"), Some("1.1"));
+    }
+
+    // Ported: 'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected' — maven/index.spec.ts line 193
+    #[test]
+    fn get_new_value_matches_renovate_maven_index_spec() {
+        let cases: &[(&str, Option<&str>, &str, &str)] = &[
+            ("1",                   None,          "1.1",       "1.1"),
+            ("[1.2.3,]",            None,          "1.2.4",     "[1.2.3,]"),
+            ("[1.2.3]",             Some("pin"),   "1.2.4",     "1.2.4"),
+            ("[1.0.0,1.2.3]",       Some("pin"),   "1.2.4",     "1.2.4"),
+            ("[1.0.0,1.2.23]",      Some("pin"),   "1.2.23",    "1.2.23"),
+            ("(,1.0]",              Some("pin"),   "2.0",       "2.0"),
+            ("],1.0]",              Some("pin"),   "2.0",       "2.0"),
+            ("(,1.0)",              Some("pin"),   "2.0",       "2.0"),
+            ("],1.0[",              Some("pin"),   "],2.0[",    "],2.0["),
+            ("[1.0,1.2],[1.3,1.5)", Some("pin"),   "1.2.4",     "1.2.4"),
+            ("[1.0,1.2],[1.3,1.5[", Some("pin"),   "1.2.4",     "1.2.4"),
+            ("[1.2.3,)",            Some("pin"),   "1.2.4",     "1.2.4"),
+            ("[1.2.3,[",            Some("pin"),   "1.2.4",     "1.2.4"),
+            ("[1.0.0,1.2.3]",       Some("widen"), "1.2.4",     "[1.0.0,1.2.4]"),
+            ("[1.0.0,1.2.3]",       Some("bump"),  "1.2.4",     "[1.0.0,1.2.4]"),
+            ("[1.0.0,1.2.3]",       Some("replace"),"1.2.4",   "[1.0.0,1.2.4]"),
+        ];
+        for (cv, rs, nv, expected) in cases {
+            assert_eq!(get_new_value(cv, *rs, nv), *expected, "cv={cv} rs={rs:?} nv={nv}");
+        }
+    }
+
+    // Ported: 'matches("$version", "[2.164.0,2.165.0)") === $expected' — maven/index.spec.ts line 228
+    #[test]
+    fn matches_jenkins_range_excl_matches_renovate_maven_index_spec() {
+        let range = "[2.164.0,2.165.0)";
+        assert!(matches_range("2.164.0", range));
+        assert!(matches_range("2.164.1", range));
+        assert!(matches_range("2.164.99", range));
+        assert!(!matches_range("2.165.0", range));
+        assert!(!matches_range("2.163.9", range));
+        assert!(!matches_range("2.164.0-SNAPSHOT", range));
+    }
+
+    // Ported: 'matches("$version", "[2.164.0,2.165.0]") === $expected' — maven/index.spec.ts line 247
+    #[test]
+    fn matches_jenkins_range_incl_matches_renovate_maven_index_spec() {
+        let range = "[2.164.0,2.165.0]";
+        assert!(matches_range("2.164.0", range));
+        assert!(matches_range("2.164.1", range));
+        assert!(matches_range("2.164.99", range));
+        assert!(matches_range("2.165.0", range));
+        assert!(!matches_range("2.163.9", range));
+        assert!(!matches_range("2.164.0-SNAPSHOT", range));
+    }
+
+    // Ported: 'matches("$version", "(,2.164.0)") === $expected' — maven/index.spec.ts line 266
+    #[test]
+    fn matches_jenkins_range_lt_matches_renovate_maven_index_spec() {
+        let range = "(,2.164.0)";
+        assert!(!matches_range("2.164.0", range));
+        assert!(!matches_range("2.164.1", range));
+        assert!(matches_range("2.163.9", range));
+        assert!(matches_range("2.164.0-SNAPSHOT", range));
+        assert!(matches_range("1.0.0", range));
     }
 
     // Ported: "autoExtendMavenRange("$range", "$version") === $expected" — maven/compare.spec.ts line 560
