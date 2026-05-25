@@ -5,15 +5,14 @@
 ## `lib/config/migrations/custom/automerge-minor-migration.spec.ts`
 
 **Reference:** https://github.com/renovatebot/renovate/blob/main/lib/config/migrations/custom/automerge-minor-migration.spec.ts
-**Total tests:** 3 | **Ported:** 0 | **Actionable:** 3 | **Status:** pending
+**Total tests:** 3 | **Ported:** 3 | **Actionable:** 3 | **Status:** ported
 
 ### `config/migrations/custom/automerge-minor-migration`
 
 | Original test name | Line | Status | Rust file | Rust test name | Reason |
 |---|---|---|---|---|---|
-| should migrate value to object | 4 | pending | — | — | — |
-| should migrate value to object and concat with existing minor object | 16 | pending | — | — | — |
-| should ignore non object minor value | 32 | pending | — | — | — |
+| should migrate value to object | 4 | ported | crates/renovate-core/src/config/migrate_validate.rs | automerge_minor_migrates_to_minor_object | — |
+| should migrate value to object and concat with existing minor object | 16 | ported | crates/renovate-core/src/config/migrate_validate.rs | automerge_minor_merges_with_existing_minor_object | — |
+| should ignore non object minor value | 32 | ported | crates/renovate-core/src/config/migrate_validate.rs | automerge_minor_replaces_null_minor_with_object | — |
 
 ---
-

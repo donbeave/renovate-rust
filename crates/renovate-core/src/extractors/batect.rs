@@ -114,6 +114,12 @@ tasks:
         assert!(extract("").is_empty());
     }
 
+    // Ported: "returns empty array for non-object configuration file" — batect/extract.spec.ts line 49
+    #[test]
+    fn non_object_yaml_returns_empty() {
+        assert!(extract("nothing here").is_empty());
+    }
+
     // Ported: "returns an a package file with no dependencies for configuration file without containers or includes" — batect/extract.spec.ts line 57
     #[test]
     fn no_containers_block_returns_empty() {

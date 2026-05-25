@@ -75,6 +75,37 @@ pub fn is_stable(version: &str) -> bool {
     parse(version).prerelease.is_none()
 }
 
+/// Return true when `version` is a syntactically valid NuGet version.
+///
+/// Mirrors `lib/modules/versioning/nuget/index.ts` `isValid()`/`isVersion()`.
+/// A valid NuGet version has 1–4 dot-separated numeric components, optionally
+/// followed by a pre-release label (`-anything`).
+pub fn is_valid(version: &str) -> bool {
+    let v = version.trim();
+    if v.is_empty() {
+        return false;
+    }
+    // Strip build metadata suffix.
+    let v = v.split_once('+').map_or(v, |(base, _)| base);
+    let (numeric, _) = v.split_once('-').unwrap_or((v, ""));
+    let parts: Vec<&str> = numeric.split('.').collect();
+    if parts.is_empty() || parts.len() > 4 {
+        return false;
+    }
+    parts.iter().all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
+}
+
+/// Sort comparator for NuGet version strings — mirrors
+/// `lib/modules/datasource/nuget/common.ts` `sortNugetVersions()`.
+pub fn sort_nuget_versions(a: &str, b: &str) -> std::cmp::Ordering {
+    match (is_valid(a), is_valid(b)) {
+        (true, true) => compare(a, b),
+        (true, false) => std::cmp::Ordering::Greater,
+        (false, true) => std::cmp::Ordering::Less,
+        (false, false) => std::cmp::Ordering::Equal,
+    }
+}
+
 // ── Internal ──────────────────────────────────────────────────────────────────
 
 struct ParsedVersion {
@@ -136,6 +167,17 @@ mod tests {
     use std::cmp::Ordering;
 
     use super::*;
+
+    // Ported: "sortNugetVersions(\"$version\", \"$other\") === $result" — datasource/nuget/common.spec.ts line 4
+    #[test]
+    fn sort_nuget_versions_matches_renovate_spec() {
+        assert_eq!(sort_nuget_versions("invalid1", "invalid2"), Ordering::Equal);
+        assert_eq!(sort_nuget_versions("invalid", "1.0.0"), Ordering::Less);
+        assert_eq!(sort_nuget_versions("1.0.0", "invalid"), Ordering::Greater);
+        assert_eq!(sort_nuget_versions("1.0.0-rc.1", "1.0.0"), Ordering::Less);
+        assert_eq!(sort_nuget_versions("1.0.0", "1.0.0-rc.1"), Ordering::Greater);
+        assert_eq!(sort_nuget_versions("1.0.0", "1.0.0"), Ordering::Equal);
+    }
 
     // ── compare ──────────────────────────────────────────────────────────────
 

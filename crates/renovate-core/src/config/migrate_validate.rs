@@ -254,6 +254,33 @@ fn migrate_config(input: &Value) -> Value {
             }
             _ => {}
         }
+        // AutomergeMajorMigration / AutomergeMinorMigration / AutomergePatchMigration
+        for (legacy_key, block_key) in [
+            ("automergeMajor", "major"),
+            ("automergeMinor", "minor"),
+            ("automergePatch", "patch"),
+        ] {
+            if let Some(val) = map.remove(legacy_key) {
+                let am = match &val {
+                    Value::Bool(b) => *b,
+                    Value::String(s) => !s.is_empty(),
+                    Value::Null => false,
+                    Value::Number(n) => n.as_f64().map_or(false, |f| f != 0.0),
+                    _ => true,
+                };
+                let block = map.entry(block_key.to_owned()).or_insert_with(|| json!({}));
+                if !block.is_object() {
+                    *block = json!({});
+                }
+                if let Value::Object(m) = block {
+                    m.insert("automerge".to_owned(), Value::Bool(am));
+                }
+            }
+        }
+        // AutomergeTypeMigration: 'branch-*' → 'branch'
+        if matches!(map.get("automergeType"), Some(Value::String(s)) if s.starts_with("branch-")) {
+            map.insert("automergeType".to_owned(), Value::String("branch".to_owned()));
+        }
         if let Some(extends) = map.get_mut("extends") {
             let presets = match std::mem::take(extends) {
                 Value::String(value) => vec![value],
@@ -4722,6 +4749,108 @@ mod tests {
         assert_eq!(result.get("automerge"), None);
         assert_eq!(result["minor"]["automerge"], json!(true));
         assert_eq!(result["major"]["automerge"], json!(false));
+    }
+
+    // Ported: "should migrate value to object" — config/migrations/custom/automerge-major-migration.spec.ts line 4
+    #[test]
+    fn automerge_major_migrates_to_major_object() {
+        let result = migrate_config(&json!({"automergeMajor": "some-value"}));
+        assert_eq!(result.get("automergeMajor"), None);
+        assert_eq!(result["major"]["automerge"], json!(true));
+    }
+
+    // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-major-migration.spec.ts line 16
+    #[test]
+    fn automerge_major_merges_with_existing_major_object() {
+        let result = migrate_config(&json!({"automergeMajor": "some-value", "major": {"matchFileNames": ["test"]}}));
+        assert_eq!(result.get("automergeMajor"), None);
+        assert_eq!(result["major"]["automerge"], json!(true));
+        assert_eq!(result["major"]["matchFileNames"], json!(["test"]));
+    }
+
+    // Ported: "should ignore non object minor value" — config/migrations/custom/automerge-major-migration.spec.ts line 32
+    #[test]
+    fn automerge_major_replaces_null_major_with_object() {
+        let result = migrate_config(&json!({"automergeMajor": "some-value", "major": null}));
+        assert_eq!(result.get("automergeMajor"), None);
+        assert_eq!(result["major"]["automerge"], json!(true));
+    }
+
+    // Ported: "should migrate value to object" — config/migrations/custom/automerge-minor-migration.spec.ts line 4
+    #[test]
+    fn automerge_minor_migrates_to_minor_object() {
+        let result = migrate_config(&json!({"automergeMinor": "some-value"}));
+        assert_eq!(result.get("automergeMinor"), None);
+        assert_eq!(result["minor"]["automerge"], json!(true));
+    }
+
+    // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-minor-migration.spec.ts line 16
+    #[test]
+    fn automerge_minor_merges_with_existing_minor_object() {
+        let result = migrate_config(&json!({"automergeMinor": "some-value", "minor": {"matchFileNames": ["test"]}}));
+        assert_eq!(result.get("automergeMinor"), None);
+        assert_eq!(result["minor"]["automerge"], json!(true));
+        assert_eq!(result["minor"]["matchFileNames"], json!(["test"]));
+    }
+
+    // Ported: "should ignore non object minor value" — config/migrations/custom/automerge-minor-migration.spec.ts line 32
+    #[test]
+    fn automerge_minor_replaces_null_minor_with_object() {
+        let result = migrate_config(&json!({"automergeMinor": "some-value", "minor": null}));
+        assert_eq!(result.get("automergeMinor"), None);
+        assert_eq!(result["minor"]["automerge"], json!(true));
+    }
+
+    // Ported: "should migrate value to object" — config/migrations/custom/automerge-patch-migration.spec.ts line 4
+    #[test]
+    fn automerge_patch_legacy_migrates_to_patch_object() {
+        let result = migrate_config(&json!({"automergePatch": "some-value"}));
+        assert_eq!(result.get("automergePatch"), None);
+        assert_eq!(result["patch"]["automerge"], json!(true));
+    }
+
+    // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-patch-migration.spec.ts line 16
+    #[test]
+    fn automerge_patch_merges_with_existing_patch_object() {
+        let result = migrate_config(&json!({"automergePatch": "some-value", "patch": {"matchFileNames": ["test"]}}));
+        assert_eq!(result.get("automergePatch"), None);
+        assert_eq!(result["patch"]["automerge"], json!(true));
+        assert_eq!(result["patch"]["matchFileNames"], json!(["test"]));
+    }
+
+    // Ported: "should ignore non object minor value" — config/migrations/custom/automerge-patch-migration.spec.ts line 32
+    #[test]
+    fn automerge_patch_replaces_null_patch_with_object() {
+        let result = migrate_config(&json!({"automergePatch": "some-value", "patch": null}));
+        assert_eq!(result.get("automergePatch"), None);
+        assert_eq!(result["patch"]["automerge"], json!(true));
+    }
+
+    // Ported: "should migrate string like \"branch-\" to \"branch\"" — config/migrations/custom/automerge-type-migration.spec.ts line 4
+    #[test]
+    fn automerge_type_branch_prefix_migrates_to_branch() {
+        assert_eq!(
+            migrate_config(&json!({"automergeType": "branch-test"})),
+            json!({"automergeType": "branch"})
+        );
+    }
+
+    // Ported: "should not migrate another string value" — config/migrations/custom/automerge-type-migration.spec.ts line 14
+    #[test]
+    fn automerge_type_non_branch_prefix_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"automergeType": "test"})),
+            json!({"automergeType": "test"})
+        );
+    }
+
+    // Ported: "should not migrate non string value" — config/migrations/custom/automerge-type-migration.spec.ts line 25
+    #[test]
+    fn automerge_type_non_string_unchanged() {
+        assert_eq!(
+            migrate_config(&json!({"automergeType": true})),
+            json!({"automergeType": true})
+        );
     }
 
     // Ported: "should migrate \"auto\" to \"global\"" — config/migrations/custom/binary-source-migration.spec.ts line 4
