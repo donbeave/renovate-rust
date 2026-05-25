@@ -183,7 +183,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/buildpacks-registry/index.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/index.spec.ts.md) |
 | `lib/modules/datasource/azure-bicep-resource/index.spec.ts` | Done | [details](lib/modules/datasource/azure-bicep-resource/index.spec.ts.md) |
 | `lib/modules/datasource/github-runners/index.spec.ts` | Done | [details](lib/modules/datasource/github-runners/index.spec.ts.md) |
-| `lib/modules/datasource/gitlab-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-tags/index.spec.ts.md) |
+| `lib/modules/datasource/gitlab-tags/index.spec.ts` | Done | [details](lib/modules/datasource/gitlab-tags/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-tags/util.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-tags/util.spec.ts.md) |
 | `lib/modules/datasource/typst/index.spec.ts` | Done | [details](lib/modules/datasource/typst/index.spec.ts.md) |
 | `lib/modules/datasource/jsr/index.spec.ts` | Done | [details](lib/modules/datasource/jsr/index.spec.ts.md) |
@@ -476,7 +476,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/versioning/aws-eks-addon/index.spec.ts` | Not done | [details](lib/modules/versioning/aws-eks-addon/index.spec.ts.md) |
 | `lib/modules/versioning/composer/index.spec.ts` | Not done | [details](lib/modules/versioning/composer/index.spec.ts.md) |
 | `lib/modules/versioning/perl/index.spec.ts` | Done | [details](lib/modules/versioning/perl/index.spec.ts.md) |
-| `lib/modules/versioning/hermit/index.spec.ts` | Not done | [details](lib/modules/versioning/hermit/index.spec.ts.md) |
+| `lib/modules/versioning/hermit/index.spec.ts` | Done | [details](lib/modules/versioning/hermit/index.spec.ts.md) |
 | `lib/modules/versioning/semver-partial/index.spec.ts` | Not done | [details](lib/modules/versioning/semver-partial/index.spec.ts.md) |
 | `lib/modules/versioning/elm/index.spec.ts` | Not done | [details](lib/modules/versioning/elm/index.spec.ts.md) |
 | `lib/modules/versioning/pep440/range.spec.ts` | Not done | [details](lib/modules/versioning/pep440/range.spec.ts.md) |
