@@ -85,7 +85,9 @@ fn to_ms_timestamp(s: &str) -> Option<String> {
 }
 
 fn parse_release(source: SourceEntry) -> Option<CpanRelease> {
-    let version = source.module?.into_iter().find_map(|m| m.version)?;
+    let version = source.module?.into_iter().find_map(|m| {
+        m.version.filter(|v| !v.is_empty())
+    })?;
     let distribution = source.distribution?;
     // status must be one of backpan/cpan/latest; missing or unknown → skip
     let status = source.status.as_deref()?;
@@ -205,6 +207,57 @@ mod tests {
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use super::*;
+
+    // ── Schema tests (ported from cpan/schema.spec.ts) ────────────────────────
+
+    // Ported: "filters out entries with empty module arrays" — datasource/cpan/schema.spec.ts line 5
+    #[test]
+    fn schema_filters_empty_module_array() {
+        let source = SourceEntry {
+            module: Some(vec![]),
+            distribution: Some("Test-Package".into()),
+            date: Some("2023-01-01T00:00:00".into()),
+            deprecated: Some(false),
+            maturity: Some("released".into()),
+            status: Some("latest".into()),
+        };
+        assert!(parse_release(source).is_none());
+    }
+
+    // Ported: "filters out entries where module has no version" — datasource/cpan/schema.spec.ts line 27
+    #[test]
+    fn schema_filters_empty_version() {
+        let source = SourceEntry {
+            module: Some(vec![ModuleEntry { version: Some("".into()) }]),
+            distribution: Some("Test-Package".into()),
+            date: Some("2023-01-01T00:00:00".into()),
+            deprecated: Some(false),
+            maturity: Some("released".into()),
+            status: Some("latest".into()),
+        };
+        assert!(parse_release(source).is_none());
+    }
+
+    // Ported: "includes valid entries" — datasource/cpan/schema.spec.ts line 49
+    #[test]
+    fn schema_includes_valid_entries() {
+        let source = SourceEntry {
+            module: Some(vec![ModuleEntry { version: Some("1.0".into()) }]),
+            distribution: Some("Test-Package".into()),
+            date: Some("2023-01-01T00:00:00".into()),
+            deprecated: Some(false),
+            maturity: Some("released".into()),
+            status: Some("latest".into()),
+        };
+        let release = parse_release(source).unwrap();
+        assert_eq!(release.version, "1.0");
+        assert_eq!(release.distribution, "Test-Package");
+        assert!(!release.is_deprecated);
+        assert!(release.is_stable);
+        assert!(release.is_latest);
+    }
+
+    // ── HTTP tests ────────────────────────────────────────────────────────────
 
     // Ported: "returns null for empty result" — datasource/cpan/index.spec.ts line 11
     #[tokio::test]

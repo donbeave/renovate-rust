@@ -143,7 +143,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/azure-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-tags/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | Done | [details](lib/modules/datasource/buildpacks-registry/schema.spec.ts.md) |
 | `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | Not done | [details](lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) |
-| `lib/modules/datasource/cpan/schema.spec.ts` | Not done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
+| `lib/modules/datasource/cpan/schema.spec.ts` | Done | [details](lib/modules/datasource/cpan/schema.spec.ts.md) |
 | `lib/modules/datasource/kubernetes-api/index.spec.ts` | Done | [details](lib/modules/datasource/kubernetes-api/index.spec.ts.md) |
 | `lib/modules/datasource/nextcloud/index.spec.ts` | Done | [details](lib/modules/datasource/nextcloud/index.spec.ts.md) |
 | `lib/modules/datasource/github-digest/index.spec.ts` | Not done | [details](lib/modules/datasource/github-digest/index.spec.ts.md) |
@@ -178,7 +178,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/java-version/index.spec.ts` | Done | [details](lib/modules/datasource/java-version/index.spec.ts.md) |
 | `lib/modules/datasource/unity3d-packages/index.spec.ts` | Done | [details](lib/modules/datasource/unity3d-packages/index.spec.ts.md) |
 | `lib/modules/datasource/clojure/index.spec.ts` | Not done | [details](lib/modules/datasource/clojure/index.spec.ts.md) |
-| `lib/modules/datasource/cpan/index.spec.ts` | Not done | [details](lib/modules/datasource/cpan/index.spec.ts.md) |
+| `lib/modules/datasource/cpan/index.spec.ts` | Done | [details](lib/modules/datasource/cpan/index.spec.ts.md) |
 | `lib/modules/datasource/gradle-version/index.spec.ts` | Done | [details](lib/modules/datasource/gradle-version/index.spec.ts.md) |
 | `lib/modules/datasource/buildpacks-registry/index.spec.ts` | Not done | [details](lib/modules/datasource/buildpacks-registry/index.spec.ts.md) |
 | `lib/modules/datasource/azure-bicep-resource/index.spec.ts` | Not done | [details](lib/modules/datasource/azure-bicep-resource/index.spec.ts.md) |
