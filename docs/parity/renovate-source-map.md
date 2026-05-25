@@ -986,6 +986,7 @@ This file tracks source-level port coverage. Only `.ts` source files appear here
 | `lib/modules/datasource/github-runners/index.ts` | `crates/renovate-core/src/datasources/github_runners.rs` | partial | Runner version lookup via GitHub runners API ported; package-cache not ported |
 | `lib/modules/datasource/github-tags/index.ts` | `crates/renovate-core/src/datasources/github_tags.rs` | partial | Core tags fetch, version-like filtering, batch lookup ported; digest support and package-cache not ported |
 | `lib/modules/datasource/gitlab-tags/index.ts` | `crates/renovate-core/src/datasources/gitlab_tags.rs` | partial | Core tags fetch via GitLab API ported; package-cache not ported |
+| `lib/modules/datasource/galaxy-collection/index.ts` | `crates/renovate-core/src/datasources/galaxy_collection.rs` | done | namespace.name parsing, URL construction (ansible/automation-hub/default), versions list + per-version details, deprecated flag |
 | `lib/modules/datasource/glasskube-packages/index.ts` | `crates/renovate-core/src/datasources/glasskube_packages.rs` | partial | Core version fetch via Glasskube packages index ported; package-cache not ported |
 | `lib/modules/datasource/go/index.ts` | `crates/renovate-core/src/datasources/gomod.rs` | partial | Core version fetch via Go module proxy ported; GOPROXY chain and private modules not ported |
 | `lib/modules/datasource/gradle-version/index.ts` | `crates/renovate-core/src/datasources/gradle_version.rs` | partial | Core version fetch via Gradle services API ported; package-cache not ported |
