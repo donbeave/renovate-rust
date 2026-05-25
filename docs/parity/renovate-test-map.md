@@ -185,7 +185,7 @@ Detailed parity rows live in one Markdown file per upstream spec path under `doc
 | `lib/modules/datasource/github-runners/index.spec.ts` | Done | [details](lib/modules/datasource/github-runners/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-tags/index.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-tags/index.spec.ts.md) |
 | `lib/modules/datasource/gitlab-tags/util.spec.ts` | Not done | [details](lib/modules/datasource/gitlab-tags/util.spec.ts.md) |
-| `lib/modules/datasource/typst/index.spec.ts` | Not done | [details](lib/modules/datasource/typst/index.spec.ts.md) |
+| `lib/modules/datasource/typst/index.spec.ts` | Done | [details](lib/modules/datasource/typst/index.spec.ts.md) |
 | `lib/modules/datasource/jsr/index.spec.ts` | Done | [details](lib/modules/datasource/jsr/index.spec.ts.md) |
 | `lib/modules/datasource/jsr/util.spec.ts` | Done | [details](lib/modules/datasource/jsr/util.spec.ts.md) |
 | `lib/modules/datasource/glasskube-packages/index.spec.ts` | Done | [details](lib/modules/datasource/glasskube-packages/index.spec.ts.md) |
